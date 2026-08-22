@@ -271,56 +271,106 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
 </script>
 
 <template>
-    <div class="p-3 space-y-4">
-        <div class="flex items-center">
-            <img :src="leveledMod.url" class="w-24 object-cover rounded bg-linear-15" :class="getRarityGradientClass(mod.品质)" />
-            <div class="space-y-2 flex-1">
-                <div class="flex items-center gap-3 p-3">
-                    <SRouterLink :to="`/db/mod/${mod.id}`" class="text-lg font-bold link link-primary">
-                        {{ $t(mod.系列) }}{{ $t(mod.名称) }}
-                    </SRouterLink>
-                    <CopyID :id="mod.id" />
-                    <div v-if="mod.极性 || mod.耐受" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
-                        {{ leveledMod.耐受 }}
-                        <Icon v-if="mod.极性" :icon="`po-${mod.极性}`" />
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 魔之楔档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
+                <img
+                    :src="leveledMod.url"
+                    alt="魔之楔图标"
+                    class="size-20 shrink-0 overflow-hidden rounded-xs bg-linear-15 object-cover sm:size-24"
+                    :class="getRarityGradientClass(mod.品质)"
+                />
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Mod File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/mod/${mod.id}`"
+                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
+                            {{ $t(mod.系列) }}{{ $t(mod.名称) }}
+                        </SRouterLink>
+                        <CopyID :id="mod.id" />
+                        <!-- 极性 / 耐受方章 -->
+                        <div
+                            v-if="mod.极性 || mod.耐受"
+                            class="ml-auto inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/15 bg-base-content/3 px-2 py-0.5 font-mono text-xs tabular-nums text-base-content/70"
+                        >
+                            {{ leveledMod.耐受 }}
+                            <Icon v-if="mod.极性" :icon="`po-${mod.极性}`" />
+                        </div>
+                    </div>
+
+                    <!-- 元信息行：类型 / 属性 / 限定 / 版本 -->
+                    <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
+                        <span>{{ $t(leveledMod.类型) }}</span>
+                        <template v-if="leveledMod.属性">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span>{{ $t(`${leveledMod.属性}属性`) }}</span>
+                        </template>
+                        <template v-if="leveledMod.限定">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span>{{ $t(leveledMod.限定) }}</span>
+                        </template>
+                        <template v-if="mod.版本">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span class="font-mono tabular-nums">v{{ mod.版本 }}</span>
+                        </template>
                     </div>
                 </div>
-                <div class="flex flex-wrap gap-3 text-sm opacity-70 p-3">
-                    <span>{{ $t(leveledMod.类型) }}</span>
-                    <span v-if="leveledMod.属性">{{ $t(`${leveledMod.属性}属性`) }}</span>
-                    <span v-if="leveledMod.限定">{{ $t(leveledMod.限定) }}</span>
-                    <span v-if="mod.版本">v{{ mod.版本 }}</span>
-                </div>
             </div>
-        </div>
+        </header>
 
         <!-- 等级调整 -->
-        <div class="mb-3 p-3">
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="LEVEL" />
             <LevelSlider v-model="currentLevel" :step="1" :min="0" :max="leveledMod.maxLevel" />
-        </div>
+        </section>
 
-        <div v-if="leveledMod.效果" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">效果</div>
-            <div class="text-sm">
+        <!-- 效果 -->
+        <section v-if="leveledMod.效果" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="EFFECT" title="效果" />
+            <div class="text-sm leading-relaxed text-base-content/85">
                 <span v-if="/(?:[DVOA])趋向/.test(leveledMod.效果)">
                     <template v-for="(part, index) in formatEffDesc(leveledMod.效果)" :key="index">
                         <span v-if="index !== 1">{{ part }}</span>
                         <span v-else>
-                            <Icon class="inline-block mx-1" :icon="`po-${part as 'A' | 'D' | 'V' | 'O'}`" />
+                            <Icon class="mx-1 inline-block" :icon="`po-${part as 'A' | 'D' | 'V' | 'O'}`" />
                             趋向
                         </span>
                     </template>
                 </span>
                 <span v-else>{{ leveledMod.效果 }}</span>
             </div>
-        </div>
+        </section>
 
-        <div v-if="leveledMod.buff" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">Buff</div>
+        <!-- Buff -->
+        <section v-if="leveledMod.buff" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="BUFF" title="Buff" />
             <div class="space-y-2">
-                <!-- 等级调整 -->
+                <!-- Buff 等级滑杆 / 启用开关 -->
                 <div v-if="leveledMod.buff.mx" class="flex items-center gap-4">
-                    <span class="text-sm min-w-12">Lv. {{ buffLv }}</span>
+                    <span class="min-w-12 shrink-0 font-mono text-[11px] tabular-nums text-base-content/55">Lv. {{ buffLv }}</span>
                     <input
                         v-model.number="buffLv"
                         type="range"
@@ -330,61 +380,75 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                         step="1"
                     />
                 </div>
-                <label v-else class="text-sm min-w-12">
+                <label v-else class="flex items-center gap-2 text-sm text-base-content/70">
                     <input v-model="buffLv" type="checkbox" class="toggle toggle-primary toggle-sm" />
                     启用
                 </label>
             </div>
-        </div>
+        </section>
 
-        <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">属性</div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <!-- 属性 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ATTRIBUTES" title="属性" />
+            <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
                 <div
                     v-for="[key, attr] in Object.entries(leveledMod.getProperties()).filter(([_, v]) => v)"
                     :key="key"
-                    class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-base-content/70">{{ $t(key) }}</span>
-                    <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t(key) }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        formatProp(key, attr)
+                    }}</span>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="leveledMod.生效" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">条件属性</div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <!-- 条件属性 -->
+        <section v-if="leveledMod.生效" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="CONDITIONAL" title="条件属性" />
+            <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
                 <div
                     v-for="[key, attr] in Object.entries(leveledMod.生效).filter(([k, v]) => k !== '条件' && v)"
                     :key="key"
-                    class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-base-content/70">{{ $t(key) }}</span>
-                    <span class="font-medium text-primary">{{ formatProp(key, attr) }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t(key) }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        formatProp(key, attr)
+                    }}</span>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="skillReplaceCompareGroups.length" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">技能替换</div>
-            <div class="space-y-4">
-                <div v-for="group in skillReplaceCompareGroups" :key="group.skillId" class="p-2 bg-base-300 rounded space-y-3">
-                    <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 items-center">
-                        <div class="p-2 bg-base-200 rounded">
-                            <div class="flex flex-wrap items-center gap-2 mb-2">
-                                <div class="font-medium">
+        <!-- 技能替换 -->
+        <section
+            v-if="skillReplaceCompareGroups.length"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="SKILL REPLACE" title="技能替换" />
+            <div class="space-y-3">
+                <div
+                    v-for="group in skillReplaceCompareGroups"
+                    :key="group.skillId"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
+                    <div class="grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center">
+                        <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                            <div class="mb-2 flex flex-wrap items-center gap-2">
+                                <div class="text-sm font-medium">
                                     {{ group.sourceSkill ? $t(group.sourceSkill.名称) : `ID: ${group.sourceSkillId}` }}
                                 </div>
                                 <CopyID :id="group.sourceSkillId" />
                             </div>
                             <SkillFields v-if="group.sourceSkill" :skill="group.sourceSkill" />
                         </div>
-                        <div class="flex justify-center items-center text-base-content/50">
-                            <Icon icon="ri:arrow-right-line" class="w-4 h-4 rotate-90 md:rotate-0" />
+                        <div class="flex items-center justify-center text-base-content/40">
+                            <Icon icon="ri:arrow-right-line" class="h-4 w-4 rotate-90 md:rotate-0" />
                         </div>
-                        <div class="p-2 bg-base-200 rounded">
-                            <div class="flex flex-wrap items-center gap-2 mb-2">
-                                <div class="font-medium">
+                        <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                            <div class="mb-2 flex flex-wrap items-center gap-2">
+                                <div class="text-sm font-medium">
                                     {{ $t(group.replaceSkill.名称) }}
                                 </div>
                                 <CopyID :id="group.replaceSkillId" />
@@ -394,28 +458,34 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- 转换概率 -->
-        <div v-if="modConvertRates.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">转换概率</div>
+        <section v-if="modConvertRates.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="CONVERT" title="转换概率" />
             <div class="space-y-2 text-sm">
-                <div v-for="rate in modConvertRates" :key="rate.key" class="p-2 bg-base-300 rounded space-y-1">
+                <div
+                    v-for="rate in modConvertRates"
+                    :key="rate.key"
+                    class="space-y-1 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
                     <div class="flex items-center justify-between gap-2">
                         <span class="font-medium">{{ rate.label }}</span>
-                        <span class="text-primary font-medium">{{ +(rate.probability * 100).toFixed(2) }}%</span>
+                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                            >{{ +(rate.probability * 100).toFixed(2) }}%</span
+                        >
                     </div>
-                    <div class="text-xs text-base-content/70 flex justify-between gap-2">
+                    <div class="flex justify-between gap-2 text-[11px] tabular-nums text-base-content/50">
                         <span>由3个同品质魔之楔转换</span>
                         <span>权重 {{ rate.weight }}/{{ rate.totalWeight }}</span>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- 升级消耗 -->
-        <div v-if="currentLevel > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">升级消耗</div>
+        <section v-if="currentLevel > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="COST" title="升级消耗" />
             <div class="space-y-2">
                 <!-- 深红凝珠 -->
                 <ResourceCostItem name="深红凝珠" :value="totalCrimsonPearlCost" />
@@ -424,23 +494,24 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                 <!-- 金色魔之楔消耗（仅金色魔之楔且等级大于5时） -->
                 <div
                     v-if="leveledMod.品质 === '金' && currentLevel > 5 && mod.消耗 && mod.消耗.length > 0"
-                    class="flex flex-wrap gap-2 items-center"
+                    class="flex flex-wrap items-center gap-2"
                 >
                     <template v-for="(modId, index) in mod.消耗" :key="modId">
                         <ResourceCostItem class="flex-1" :name="modId.toString()" :value="[totalModCost, modId, 'Mod']" />
-                        <span v-if="index < mod.消耗.length - 1" class="text-base-content/70">或</span>
+                        <span v-if="index < mod.消耗.length - 1" class="text-base-content/60">或</span>
                     </template>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- 设计稿信息 -->
-        <div v-if="modDraft" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">设计稿信息</div>
+        <section v-if="modDraft" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="BLUEPRINT" title="设计稿信息" />
             <DBDraftDetailItem :draft="modDraft" />
-        </div>
+        </section>
 
-        <div
+        <!-- 来源 -->
+        <section
             v-if="
                 modDungeonSources.length > 0 ||
                 modShopSources.length > 0 ||
@@ -448,9 +519,9 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                 modCharBreakthroughSources.length > 0 ||
                 modPackSources.length > 0
             "
-            class="p-3 bg-base-200 rounded"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <div class="text-xs text-base-content/70 mb-2">来源</div>
+            <SectionHeader no-animate compact kicker="SOURCE" title="来源" />
             <div class="space-y-3 text-sm">
                 <QuestSource :quest-sources="modQuestSources" :mod-id="mod.id" />
                 <ModCustomSource :custom-sources="modCharBreakthroughSources" />
@@ -458,6 +529,6 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                 <ShopSource :shop-sources="modShopSources" />
                 <PackSource :pack-sources="modPackSources" source-title="道具箱" />
             </div>
-        </div>
+        </section>
     </div>
 </template>

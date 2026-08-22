@@ -48,33 +48,41 @@ const forgeReward = computed(() => getRewardDetails(props.forge.ForgeLevelReward
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-center gap-3">
-            <div class="size-8 shrink-0 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold">
+    <!-- 外层区块卡：单个熔炼等级条目 -->
+    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <!-- 档案头：主色序号块 + 标题 -->
+        <header class="flex items-center gap-3 border-b-2 border-primary pb-3">
+            <span
+                class="inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-xs bg-primary px-2 font-orbitron text-sm font-semibold tracking-wide text-primary-content tabular-nums"
+            >
                 {{ forge.ForgeLevel }}
-            </div>
-            <div class="min-w-0 flex-1">
-                <div class="text-lg font-bold">熔炼等级 {{ forge.ForgeLevel }}</div>
-            </div>
-        </div>
+            </span>
+            <h2 class="min-w-0 truncate text-lg font-bold tracking-tight text-base-content">熔炼等级 {{ forge.ForgeLevel }}</h2>
+        </header>
 
-        <div class="p-3 rounded bg-base-200">
-            <div class="text-xs text-base-content/70 mb-2">等级奖励详情</div>
+        <!-- 等级奖励详情 -->
+        <div class="mt-3">
+            <SectionHeader no-animate compact kicker="REWARD" title="等级奖励详情" />
             <RewardItem v-if="forgeReward" :reward="forgeReward" />
             <div v-else class="text-sm text-base-content/60">未找到奖励详情</div>
         </div>
 
-        <div class="p-3 rounded bg-base-200">
-            <div class="text-xs text-base-content/70 mb-2">关联任务</div>
+        <!-- 关联任务 -->
+        <div class="mt-4">
+            <SectionHeader no-animate compact kicker="QUESTS" title="关联任务" />
             <div class="space-y-2">
-                <div v-for="row in forgeQuestRows" :key="row.id" class="p-3 rounded bg-base-100 border border-base-200">
+                <div
+                    v-for="row in forgeQuestRows"
+                    :key="row.id"
+                    class="space-y-1 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
                     <div v-if="row.detail" class="space-y-1">
                         <div class="flex items-center justify-between gap-2">
-                            <div class="font-medium">{{ row.detail.desc.replace(/<[H/]>/g, "") }}</div>
+                            <div class="min-w-0 font-medium">{{ row.detail.desc.replace(/<[H/]>/g, "") }}</div>
                             <CopyID :id="row.detail.id" />
                         </div>
                         <div class="mt-2">
-                            <div class="text-xs text-base-content/70 mb-1">任务奖励</div>
+                            <div class="mb-1 text-[11px] tracking-wide text-base-content/45">任务奖励</div>
                             <RewardItem v-if="row.detail.reward" :reward="row.detail.reward" />
                             <div v-else class="text-sm text-base-content/60">未找到任务奖励</div>
                         </div>
@@ -83,5 +91,5 @@ const forgeReward = computed(() => getRewardDetails(props.forge.ForgeLevelReward
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </template>

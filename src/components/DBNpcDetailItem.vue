@@ -94,47 +94,95 @@ function handleSelectOption(dialogueId: number, optionId: number) {
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-center gap-2">
-            <SRouterLink :to="`/db/npc/${npc.id}`" class="text-lg font-bold link link-primary">
-                {{ $t(formatStoryText(npc.name || `NPC ${npc.id}`)) }}
-            </SRouterLink>
-            <CopyID :id="npc.id" />
-        </div>
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- NPC 档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative">
+                <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                    <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                    NPC File
+                </p>
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <SRouterLink
+                        :to="`/db/npc/${npc.id}`"
+                        class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                    >
+                        {{ $t(formatStoryText(npc.name || `NPC ${npc.id}`)) }}
+                    </SRouterLink>
+                    <CopyID :id="npc.id" />
+                </div>
+            </div>
+        </header>
 
-        <div class="card bg-base-100 border border-base-200 rounded p-3">
-            <h3 class="font-bold mb-2">NPC 信息</h3>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">ID</span>
-                    <span>{{ npc.id }}</span>
+        <!-- 基本信息 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="PROFILE" title="NPC 信息" />
+            <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">ID</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ npc.id }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">名称</span>
-                    <span>{{ $t(formatStoryText(npc.name || "未知")) }}</span>
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">名称</span>
+                    <span class="truncate text-sm font-semibold text-base-content">{{ $t(formatStoryText(npc.name || "未知")) }}</span>
                 </div>
-                <div v-if="npc.camp" class="flex justify-between">
-                    <span class="text-base-content/70">阵营</span>
-                    <span>{{ npc.camp }}</span>
+                <div
+                    v-if="npc.camp"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">阵营</span>
+                    <span class="truncate text-sm text-base-content/85">{{ npc.camp }}</span>
                 </div>
-                <div v-if="npc.type" class="flex justify-between">
-                    <span class="text-base-content/70">类型</span>
-                    <span>{{ npc.type }}</span>
+                <div
+                    v-if="npc.type"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">类型</span>
+                    <span class="truncate text-sm text-base-content/85">{{ npc.type }}</span>
                 </div>
-                <div v-if="npc.charId" class="flex justify-between">
-                    <span class="text-base-content/70">角色 ID</span>
-                    <span>{{ npc.charId }}</span>
+                <div
+                    v-if="npc.charId"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">角色 ID</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ npc.charId }}</span>
                 </div>
-                <div v-if="npc.icon" class="flex justify-between">
-                    <span class="text-base-content/70">图标</span>
-                    <span>{{ npc.icon }}</span>
+                <div
+                    v-if="npc.icon"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">图标</span>
+                    <span class="truncate font-mono text-[11px] tracking-wide text-base-content/70">{{ npc.icon }}</span>
                 </div>
-                <div v-if="npc.srId" class="flex justify-between">
-                    <span class="text-base-content/70">子区域</span>
+                <div
+                    v-if="npc.srId"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">子区域</span>
                     <SubRegionLink :sub-region-id="npc.srId" />
                 </div>
-                <div v-if="npc.srId && npc.pos" class="flex justify-between">
-                    <span class="text-base-content/70">坐标</span>
+                <div
+                    v-if="npc.srId && npc.pos"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">坐标</span>
                     <MapPosLink
                         :sub-region-id="npc.srId"
                         :point="npc.pos"
@@ -143,10 +191,11 @@ function handleSelectOption(dialogueId: number, optionId: number) {
                     />
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="card bg-base-100 border border-base-200 rounded p-3" v-if="npc.talks?.length">
-            <h3 class="font-bold mb-2">分支对话 ({{ npc.talks.length }} 条)</h3>
+        <!-- 分支对话 -->
+        <section v-if="npc.talks?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DIALOGUE" :title="`分支对话 (${npc.talks.length} 条)`" />
 
             <TransitionGroup name="dialogue-list" tag="div" class="space-y-2">
                 <DBDialogueCard
@@ -163,8 +212,10 @@ function handleSelectOption(dialogueId: number, optionId: number) {
                     @select-option="payload => handleSelectOption(payload.dialogueId, payload.optionId)"
                 />
             </TransitionGroup>
-        </div>
+        </section>
 
-        <div v-else class="card bg-base-100 border border-base-200 rounded p-3 text-sm text-base-content/70">暂无可展示的对话链</div>
+        <section v-else class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 text-sm text-base-content/60 backdrop-blur-sm">
+            暂无可展示的对话链
+        </section>
     </div>
 </template>

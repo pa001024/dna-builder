@@ -121,85 +121,95 @@ const productDisplay = computed(() => {
 </script>
 
 <template>
-    <div class="space-y-3">
-        <div class="p-3 flex items-center gap-3">
-            <SRouterLink :to="`/db/draft/${draft.id}`" class="text-lg font-bold link link-primary"
-                >{{ $t("UI_FORGING_BLUEPRINT") }}{{ $t(draft.n) }}</SRouterLink
-            >
-            <CopyID :id="draft.id" />
-        </div>
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 设计稿档案头：纸面 + primary 强调线 -->
+        <header class="border-b-2 border-primary pb-4">
+            <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                Blueprint File
+            </p>
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <SRouterLink
+                    :to="`/db/draft/${draft.id}`"
+                    class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                    >{{ $t("UI_FORGING_BLUEPRINT") }}{{ $t(draft.n) }}</SRouterLink
+                >
+                <CopyID :id="draft.id" />
+            </div>
+        </header>
 
-        <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("draft-detail.basicInfo") }}</div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">{{ $t("draft-detail.rarity") }}</span>
-                    <span class="font-medium text-primary">
-                        <Icon v-for="i in draft.r" :key="i" class="inline-block mr-1" icon="ri:star-fill" />
+        <!-- 基本信息 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="INFO" :title="$t('draft-detail.basicInfo')" />
+            <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("draft-detail.rarity") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        <Icon v-for="i in draft.r" :key="i" class="mr-1 inline-block" icon="ri:star-fill" />
                     </span>
                 </div>
-                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">{{ $t("draft-detail.version") }}</span>
-                    <span class="font-medium text-primary">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("draft-detail.version") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
                         {{ draft.v }}
                     </span>
                 </div>
-                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">{{ $t("draft-detail.type") }}</span>
-                    <span class="font-medium text-primary">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("draft-detail.type") }}</span>
+                    <span class="shrink-0 text-[13px] font-semibold text-primary">
                         {{ $t(getRewardTypeText(draft.t)) }}
                     </span>
                 </div>
-                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">{{ $t("draft-detail.craftDuration") }}</span>
-                    <span class="font-medium text-primary">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("draft-detail.craftDuration") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
                         {{ formatDuration(draft.d) }}
                     </span>
                 </div>
-                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">{{ $t("draft-detail.batchCrafting") }}</span>
-                    <span class="font-medium text-primary">
-                        <Icon v-if="draft.b" class="inline-block mr-1" icon="ri:checkbox-circle-fill" />
-                        <Icon v-else class="inline-block mr-1" icon="ri:close-line" />
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("draft-detail.batchCrafting") }}</span>
+                    <span class="shrink-0 text-[13px] font-semibold text-primary">
+                        <Icon v-if="draft.b" class="mr-1 inline-block" icon="ri:checkbox-circle-fill" />
+                        <Icon v-else class="mr-1 inline-block" icon="ri:close-line" />
                     </span>
                 </div>
-                <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                    <span class="text-base-content/70">{{ $t("draft-detail.unlimitedCrafting") }}</span>
-                    <span class="font-medium text-primary">
-                        <Icon v-if="draft.i" class="inline-block mr-1" icon="ri:checkbox-circle-fill" />
-                        <Icon v-else class="inline-block mr-1" icon="ri:close-line" />
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("draft-detail.unlimitedCrafting") }}</span>
+                    <span class="shrink-0 text-[13px] font-semibold text-primary">
+                        <Icon v-if="draft.i" class="mr-1 inline-block" icon="ri:checkbox-circle-fill" />
+                        <Icon v-else class="mr-1 inline-block" icon="ri:close-line" />
                     </span>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- 产物信息 -->
-        <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("draft-detail.product") }}</div>
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="PRODUCT" :title="$t('draft-detail.product')" />
             <ResourceCostItem :name="productDisplay.name" :value="productDisplay.value" />
-        </div>
+        </section>
 
         <!-- 消耗资源 -->
-        <div v-if="draft.x && draft.x.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("draft-detail.materials") }}</div>
+        <section v-if="draft.x && draft.x.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="MATERIALS" :title="$t('draft-detail.materials')" />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem name="铜币" :value="draft.m" />
                 <template v-for="item in draft.x" :key="item.id">
                     <ResourceCostItem :name="item.n" :value="item.t === 'Resource' ? item.c : [item.c, item.id, item.t]" />
                 </template>
             </div>
-        </div>
+        </section>
 
         <!-- 获取途径 -->
-        <div v-if="draftShopSources.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("draft-detail.acquisition") }}</div>
+        <section v-if="draftShopSources.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ACQUISITION" :title="$t('draft-detail.acquisition')" />
             <ShopSource :shop-sources="draftShopSources" />
-        </div>
+        </section>
 
         <!-- 掉落来源 -->
-        <div v-if="draftDungeons.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("draft-detail.dropSources") }}</div>
+        <section v-if="draftDungeons.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DROP SOURCES" :title="$t('draft-detail.dropSources')" />
             <DungeonSource :dungeon-sources="draftDungeons" />
-        </div>
+        </section>
     </div>
 </template>

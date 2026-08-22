@@ -17,6 +17,11 @@ const fish = computed(() => {
 
 <template>
     <ScrollArea class="h-full">
-        <DBFishDetailItem :fish="fish" />
+        <!-- 居中容器：与首页一致的纸面排版宽度 -->
+        <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
+            <div>
+                <DBFishDetailItem :fish="fish" />
+            </div>
+        </div>
     </ScrollArea>
 </template>

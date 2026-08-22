@@ -26,7 +26,7 @@ export function getRarityValue(rarity: string): number {
 
 /**
  * 根据稀有度返回背景渐变色。
- * @param rarity 稀有度（1~5）
+ * @param rarity 稀有度（1~6 或中文名）
  * @returns Tailwind 渐变类名
  */
 export function getRarityGradientClass(rarity: number | string): string {
@@ -42,19 +42,22 @@ export function getRarityGradientClass(rarity: number | string): string {
 }
 
 /**
- * 根据稀有度返回徽章颜色。
- * @param rarity 稀有度（1~5）
- * @returns Tailwind 颜色类名
+ * 根据稀有度返回统一的稀有度徽章类名。
+ * 造型与 CopyID 方章一致：直角细边框 + 半透明底色 + 同色系文字；
+ * 返回值包含完整形状（内联弹性盒 / 内边距 / 字号），调用处无需再补形状类。
+ * @param rarity 稀有度（1~6 或中文名"白绿蓝紫金红"）
+ * @returns 完整徽章类名，可直接绑定到 :class
  */
-export function getRarityBadgeClass(rarity: number): string {
-    const rarityMap: Record<number, string> = {
-        1: "bg-gray-200 text-gray-800",
-        2: "bg-green-200 text-green-800",
-        3: "bg-blue-200 text-blue-800",
-        4: "bg-purple-200 text-purple-800",
-        5: "bg-yellow-200 text-yellow-800",
-        6: "bg-red-200 text-red-800",
+export function getRarityBadgeClass(rarity: number | string): string {
+    const colorMap: Record<number, string> = {
+        1: "border-gray-400/40 bg-gray-400/10 text-gray-300",
+        2: "border-green-500/40 bg-green-500/10 text-green-400",
+        3: "border-blue-500/40 bg-blue-500/10 text-blue-400",
+        4: "border-purple-500/40 bg-purple-500/10 text-purple-400",
+        5: "border-yellow-500/40 bg-yellow-500/10 text-yellow-400",
+        6: "border-red-500/40 bg-red-500/10 text-red-400",
     }
-
-    return rarityMap[rarity] || "bg-base-200 text-base-content"
+    const key = typeof rarity === "string" ? getRarityValue(rarity) : rarity
+    const color = colorMap[key] || "border-base-content/20 bg-base-content/[0.05] text-base-content/60"
+    return `inline-flex shrink-0 items-center rounded-xs border px-2 py-0.5 text-[11px] font-medium leading-none tracking-wide ${color}`
 }

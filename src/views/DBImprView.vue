@@ -325,6 +325,30 @@ function toggleValueFilter(enabled: boolean) {
 }
 
 /**
+ * 切换地区筛选行显示状态（方章开关）。
+ */
+function toggleRegionFilterRow() {
+    showRegionFilter.value = !showRegionFilter.value
+    toggleRegionFilter(showRegionFilter.value)
+}
+
+/**
+ * 切换来源筛选行显示状态（方章开关）。
+ */
+function toggleSourceFilterRow() {
+    showSourceFilter.value = !showSourceFilter.value
+    toggleSourceFilter(showSourceFilter.value)
+}
+
+/**
+ * 切换五维筛选行显示状态（方章开关）。
+ */
+function toggleValueFilterRow() {
+    showValueFilter.value = !showValueFilter.value
+    toggleValueFilter(showValueFilter.value)
+}
+
+/**
  * 判断是否满足筛选条件。
  * @param entry 印象条目
  * @returns 是否匹配
@@ -518,67 +542,98 @@ onBeforeUnmount(() => {
 })
 
 useInitialScrollToSelectedItem({
-    selectedSelector: '[data-selected="true"]',
+    selectedSelector: ".dbim-item-active",
 })
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedEntry }">
-                <div class="p-3 border-b border-base-200 space-y-3">
+            <!-- 左侧列表面板 -->
+            <div class="flex-1 flex flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedEntry }">
+                <!-- 检索带：下划线搜索 + OCR + 过滤器开关方章 -->
+                <div class="flex-none space-y-3 border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                    <!-- 下划线搜索框 + OCR -->
                     <div class="flex items-center gap-2">
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                            placeholder="搜索印象条目"
-                        />
+                        <div class="relative min-w-0 flex-1">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                                placeholder="搜索印象条目"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredEntries.length }}
+                            </span>
+                        </div>
                         <button class="btn btn-sm btn-primary" :disabled="ocrRunning" @click="runOcrSearch">OCR</button>
-                        <label class="flex items-center gap-1 cursor-pointer select-none whitespace-nowrap">
+                        <label class="flex cursor-pointer select-none items-center gap-1 whitespace-nowrap">
                             <input v-model="realtimeOcrEnabled" type="checkbox" class="toggle toggle-xs" />
-                            <span class="text-xs text-base-content/70">实时</span>
+                            <span class="text-xs text-base-content/60">实时</span>
                         </label>
                     </div>
 
-                    <div class="flex items-center gap-4 overflow-x-auto whitespace-nowrap text-xs text-base-content/80">
-                        <label class="flex items-center gap-2 cursor-pointer select-none">
-                            <input
-                                v-model="showRegionFilter"
-                                type="checkbox"
-                                class="checkbox checkbox-xs"
-                                @change="toggleRegionFilter(showRegionFilter)"
-                            />
-                            <span>地区</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer select-none">
-                            <input
-                                v-model="showSourceFilter"
-                                type="checkbox"
-                                class="checkbox checkbox-xs"
-                                @change="toggleSourceFilter(showSourceFilter)"
-                            />
-                            <span>来源</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer select-none">
-                            <input
-                                v-model="showValueFilter"
-                                type="checkbox"
-                                class="checkbox checkbox-xs"
-                                @change="toggleValueFilter(showValueFilter)"
-                            />
-                            <span>五维</span>
-                        </label>
+                    <!-- 过滤器开关方章 -->
+                    <div class="flex flex-wrap gap-1.5">
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showRegionFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleRegionFilterRow()"
+                        >
+                            地区
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showSourceFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleSourceFilterRow()"
+                        >
+                            来源
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showValueFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleValueFilterRow()"
+                        >
+                            五维
+                        </button>
                     </div>
 
-                    <div v-if="ocrResultText" class="rounded bg-base-200 px-3 py-2 text-xs wrap-break-word">
+                    <!-- OCR 识别结果 -->
+                    <div
+                        v-if="ocrResultText"
+                        class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-xs wrap-break-word text-base-content/70"
+                    >
                         {{ ocrResultText }}
                     </div>
 
-                    <div v-show="showSourceFilter" class="flex flex-wrap gap-1 pb-1">
+                    <!-- 来源筛选 -->
+                    <div v-show="showSourceFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">来源</span>
                         <button
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedSourceType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedSourceType === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectSourceType('')"
                         >
                             {{ $t("全部") }}
@@ -586,11 +641,11 @@ useInitialScrollToSelectedItem({
                         <button
                             v-for="option in sourceTypeOptions"
                             :key="option.value"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
                                 selectedSourceType === option.value
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectSourceType(option.value)"
                         >
@@ -598,10 +653,16 @@ useInitialScrollToSelectedItem({
                         </button>
                     </div>
 
-                    <div v-show="showRegionFilter" class="flex flex-wrap gap-1 pb-1">
+                    <!-- 地区筛选 -->
+                    <div v-show="showRegionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">地区</span>
                         <button
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedRegionId === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedRegionId === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectRegion('')"
                         >
                             {{ $t("全部") }}
@@ -609,11 +670,11 @@ useInitialScrollToSelectedItem({
                         <button
                             v-for="region in regionOptions"
                             :key="region.value"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
                                 selectedRegionId === region.value
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectRegion(region.value)"
                         >
@@ -621,11 +682,15 @@ useInitialScrollToSelectedItem({
                         </button>
                     </div>
 
-                    <div v-show="showRegionFilter && selectedRegionId" class="flex flex-wrap gap-1 pb-1">
+                    <!-- 子区域筛选 -->
+                    <div v-show="showRegionFilter && selectedRegionId" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">子区域</span>
                         <button
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
-                                selectedSubRegionId === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedSubRegionId === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectSubRegion('')"
                         >
@@ -634,11 +699,11 @@ useInitialScrollToSelectedItem({
                         <button
                             v-for="subRegion in subRegionOptions"
                             :key="subRegion.value"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
                                 selectedSubRegionId === subRegion.value
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectSubRegion(subRegion.value)"
                         >
@@ -646,10 +711,16 @@ useInitialScrollToSelectedItem({
                         </button>
                     </div>
 
-                    <div v-show="showValueFilter" class="flex flex-wrap gap-1 pb-1">
+                    <!-- 五维筛选 -->
+                    <div v-show="showValueFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">五维</span>
                         <button
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedValueType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedValueType === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectValueType('')"
                         >
                             {{ $t("全部") }}
@@ -657,9 +728,11 @@ useInitialScrollToSelectedItem({
                         <button
                             v-for="type in IMPRESSION_TYPES"
                             :key="type"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
-                                selectedValueType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedValueType === type
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectValueType(type)"
                         >
@@ -669,43 +742,60 @@ useInitialScrollToSelectedItem({
                 </div>
 
                 <ScrollArea class="flex-1">
-                    <div class="p-2 space-y-2">
-                        <div
-                            v-for="item in filteredEntries"
+                    <div class="space-y-2 p-3">
+                        <article
+                            v-for="(item, index) in filteredEntries"
                             :key="getImprEntryKey(item.entry)"
-                            :data-selected="isSelectedEntry(item.entry) ? 'true' : 'false'"
-                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': isSelectedEntry(item.entry) }"
+                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                            :class="
+                                isSelectedEntry(item.entry)
+                                    ? 'dbim-item-active border-primary/70 bg-primary/10'
+                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                            "
+                            :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
                             @click="selectEntry(item.entry)"
                         >
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-medium wrap-break-word">
-                                        <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
+                            <!-- 左侧主色强调条：选中时显现 -->
+                            <span
+                                class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                :class="isSelectedEntry(item.entry) ? 'opacity-100' : 'opacity-0'"
+                                aria-hidden="true"
+                            />
+                            <div class="flex items-start justify-between gap-3 p-3">
+                                <div class="min-w-0 flex-1">
+                                    <!-- 来源徽记 + 名称 + ID -->
+                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                        <span
+                                            class="shrink-0 rounded-xs border border-base-content/15 px-1.5 text-[10px] leading-4 tracking-wide text-base-content/55"
+                                        >
                                             {{ $t(`database.${item.entry.sourceType}`) }}
                                         </span>
-                                        {{ item.entry.sourceName }}
+                                        <span
+                                            class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                            :class="{ 'text-primary': isSelectedEntry(item.entry) }"
+                                        >
+                                            {{ item.entry.sourceName }}
+                                        </span>
                                         <CopyID :id="item.entry.sourceId" />
                                     </div>
-                                    <div class="text-xs opacity-70 mt-1 flex flex-wrap items-center gap-1.5">
-                                        <span>{{ item.entry.displayText }}</span>
+                                    <div class="mt-1.5 text-xs leading-relaxed wrap-break-word text-base-content/70">
+                                        {{ item.entry.displayText }}
                                     </div>
+                                    <!-- 搜索命中摘要 -->
                                     <div
                                         v-if="item.snippet && searchKeyword.trim() && showFullTextSearch"
-                                        class="mt-2 text-xs leading-relaxed opacity-85"
+                                        class="mt-2 text-xs leading-relaxed wrap-break-word text-base-content/55"
                                     >
-                                        <span class="opacity-65">匹配：</span>
+                                        <span>匹配：</span>
                                         <span v-if="item.snippet.prefixEllipsis">...</span>
                                         <template
-                                            v-for="(segment, index) in item.snippet.segments"
-                                            :key="`${item.entry.sourceId}-${index}`"
+                                            v-for="(segment, segIndex) in item.snippet.segments"
+                                            :key="`${item.entry.sourceId}-${segIndex}`"
                                         >
                                             <span
                                                 :class="
                                                     segment.highlighted
-                                                        ? isSelectedEntry(item.entry)
-                                                            ? 'bg-base-100/45 text-primary-content font-semibold px-0.5 rounded underline decoration-primary-content/80 decoration-2 underline-offset-2'
-                                                            : 'bg-primary/20 text-base-content font-semibold px-0.5 rounded underline decoration-primary/80 decoration-2 underline-offset-2'
+                                                        ? 'rounded-xs bg-primary/20 px-0.5 font-semibold text-primary underline decoration-primary/80 decoration-2 underline-offset-2'
                                                         : ''
                                                 "
                                             >
@@ -715,36 +805,47 @@ useInitialScrollToSelectedItem({
                                         <span v-if="item.snippet.suffixEllipsis">...</span>
                                     </div>
                                 </div>
-                                <div class="flex flex-col items-end gap-1">
-                                    <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
+                                <!-- 地区 + 五维数值 -->
+                                <div class="flex shrink-0 flex-col items-end gap-1">
+                                    <span
+                                        class="rounded-xs border border-base-content/15 px-1.5 text-[10px] leading-4 tracking-wide text-base-content/55"
+                                    >
                                         {{ item.entry.regionLabel }}
                                     </span>
-                                    <span class="text-xs opacity-70">
+                                    <span class="text-right text-[11px] leading-5 text-base-content/55">
                                         {{ $t(getImprType(item.entry.valueType)) }}
-                                        {{ item.entry.value > 0 ? `+${item.entry.value}` : item.entry.value }}
+                                        <b class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                            {{ item.entry.value > 0 ? `+${item.entry.value}` : item.entry.value }}
+                                        </b>
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     </div>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredEntries.length }} 条印象
+                <!-- 底部统计条 -->
+                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                    <p class="text-center text-[11px] tracking-wide text-base-content/50">
+                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredEntries.length }}</b> 条印象
+                    </p>
                 </div>
             </div>
 
-            <div
+            <!-- 收起详情手柄 -->
+            <button
                 v-if="selectedEntry"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                type="button"
+                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
+                title="收起详情"
                 @click="selectedEntry = null"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
+            </button>
 
             <div v-if="selectedEntry" class="flex-1 overflow-hidden">
                 <ScrollArea class="h-full">
-                    <DBImprDetailItem :entry="selectedEntry" />
+                    <DBImprDetailItem :key="selectedEntryKey" :entry="selectedEntry" />
                 </ScrollArea>
             </div>
         </div>

@@ -176,7 +176,7 @@ const joinLogic = computed<"AND" | "OR">(() => {
 </script>
 
 <template>
-    <div class="rounded-md bg-base-100 p-3 space-y-1.5">
+    <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-3 space-y-1.5">
         <div class="flex items-center">
             <div v-if="condition.remark" class="text-sm text-base-content/80">{{ condition.remark }}</div>
             <div class="flex-1"></div>
@@ -184,21 +184,24 @@ const joinLogic = computed<"AND" | "OR">(() => {
         </div>
         <div class="flex flex-wrap items-center gap-1">
             <template v-for="(clause, index) in clauses" :key="index">
-                <span v-if="index > 0" class="rounded bg-base-300/70 px-1.5 py-0.5 text-xs text-base-content/70">
+                <span
+                    v-if="index > 0"
+                    class="rounded-xs border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-primary"
+                >
                     {{ joinLogic }}
                 </span>
-                <span class="rounded bg-base-200 px-1.5 py-0.5 text-xs text-base-content/80">
+                <span class="rounded-xs border border-base-content/15 bg-base-content/4 px-1.5 py-0.5 text-xs text-base-content/80">
                     <template v-for="(segment, segIndex) in clause.segments" :key="segIndex">
-                        <span v-if="segment.type === 'term'" class="text-base-content/70">{{ $t(segment.text) }}</span>
+                        <span v-if="segment.type === 'term'" class="text-base-content/60">{{ $t(segment.text) }}</span>
                         <span
                             v-else-if="segment.type === 'op'"
-                            class="px-0.5 font-semibold"
+                            class="px-0.5 font-orbitron text-[11px] font-semibold"
                             :class="segment.text === '≠' || segment.text === '>' || segment.text === '<' ? 'text-error' : 'text-primary'"
                         >
                             {{ segment.text }}
                         </span>
                         <span v-else-if="segment.type === 'group'" class="text-secondary">{{ $t(segment.text) }}</span>
-                        <span v-else-if="segment.type === 'value'" class="font-medium">{{ segment.text }}</span>
+                        <span v-else-if="segment.type === 'value'" class="font-medium tabular-nums">{{ segment.text }}</span>
                         <span v-else>{{ segment.text }}</span>
                     </template>
                 </span>

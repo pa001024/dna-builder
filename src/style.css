@@ -235,6 +235,50 @@
     }
 }
 
+/**
+ * 交错入场容器：直接子元素依次上浮淡入。
+ * 必须用在使用 backdrop-filter 的区块卡片自身做动画的场景——
+ * 动画祖先（fill 模式保留 opacity/transform）会成为 backdrop root，
+ * 导致后代毛玻璃失效；让模糊元素自己动画则始终正常。
+ */
+.stagger-rise > * {
+    animation: ef-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stagger-rise > *:nth-child(2) {
+    animation-delay: 0.06s;
+}
+
+.stagger-rise > *:nth-child(3) {
+    animation-delay: 0.12s;
+}
+
+.stagger-rise > *:nth-child(4) {
+    animation-delay: 0.18s;
+}
+
+.stagger-rise > *:nth-child(5) {
+    animation-delay: 0.24s;
+}
+
+.stagger-rise > *:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+.stagger-rise > *:nth-child(7) {
+    animation-delay: 0.36s;
+}
+
+.stagger-rise > *:nth-child(n + 8) {
+    animation-delay: 0.42s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stagger-rise > * {
+        animation: none;
+    }
+}
+
 @keyframes fade-in-up {
     from {
         opacity: 0;
@@ -308,9 +352,11 @@ body {
     -moz-osx-font-smoothing: grayscale;
     font-size: calc(16px * var(--uiscale));
     transition: font-size 0.1s ease-in-out;
-    font-family:
+    /* 默认字体栈：设置页选择的自定义字体（--app-user-font）会被插入到该栈之前 */
+    --app-font-fallback:
         "Mona Sans", -apple-system, BlinkMacSystemFont, "SourceHanSansCN", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
         "Fira Sans", "Droid Sans", "Helvetica Neue";
+    font-family: var(--app-user-font, var(--app-font-fallback));
     /* 640px */
     @media (max-width: calc(40rem - 1px)) {
         font-size: calc(13px * var(--uiscale));
@@ -322,7 +368,8 @@ body {
 }
 
 :root.is-app-font {
-    font-family:
+    font-family: var(
+        --app-user-font,
         "HarmonyOS Sans SC",
         "Mona Sans",
         -apple-system,
@@ -335,11 +382,12 @@ body {
         "Cantarell",
         "Fira Sans",
         "Droid Sans",
-        "Helvetica Neue";
+        "Helvetica Neue"
+    );
 }
 
 :root.is-jiaojiao-font {
-    font-family: var(--font-wt);
+    font-family: var(--app-user-font, var(--font-wt));
 }
 
 #app {

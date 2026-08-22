@@ -2051,36 +2051,72 @@ onBeforeUnmount(() => {
 
 <template>
     <ScrollArea class="h-full">
-        <div class="mx-auto w-full max-w-7xl space-y-4 p-4">
-            <div class="rounded-xl border border-base-300 bg-base-200/50 p-4">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                        <h2 class="text-lg font-semibold">伤害公式</h2>
-                        <p class="text-sm text-base-content/70">按步骤查看每个乘区和中间值，支持手动覆盖并实时查看结果变化。</p>
+        <div class="stagger-rise mx-auto w-full max-w-7xl space-y-4 p-4">
+            <div class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <h2 class="text-lg font-semibold tracking-tight">伤害公式</h2>
+                        <p class="mt-0.5 text-xs text-base-content/55">按步骤查看每个乘区和中间值，支持手动覆盖并实时查看结果变化。</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button class="btn btn-sm btn-primary" @click="importFromCurrentCharBuild">从当前构筑导入</button>
-                        <button class="btn btn-sm btn-outline" @click="resetCurrentMode">重置当前模式</button>
+                    <div class="flex shrink-0 items-center gap-2">
+                        <button
+                            class="inline-flex h-8 cursor-pointer items-center rounded-xs border border-primary bg-primary px-3 text-xs font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:scale-[0.97]"
+                            @click="importFromCurrentCharBuild"
+                        >
+                            从当前构筑导入
+                        </button>
+                        <button
+                            class="inline-flex h-8 cursor-pointer items-center rounded-xs border border-base-content/20 px-3 text-xs text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                            @click="resetCurrentMode"
+                        >
+                            重置当前模式
+                        </button>
                     </div>
                 </div>
-                <div class="mt-4 tabs tabs-box gap-2 p-1">
-                    <button class="tab grow" :class="{ 'tab-active': mode === 'skill' }" @click="mode = 'skill'">技能伤害</button>
-                    <button class="tab grow" :class="{ 'tab-active': mode === 'weapon' }" @click="mode = 'weapon'">武器伤害</button>
+                <!-- 计算模式切换方章 -->
+                <div class="mt-3 grid grid-cols-2 gap-1.5">
+                    <button
+                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
+                        :class="
+                            mode === 'skill'
+                                ? 'border-primary bg-primary font-semibold text-primary-content'
+                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                        "
+                        @click="mode = 'skill'"
+                    >
+                        技能伤害
+                    </button>
+                    <button
+                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
+                        :class="
+                            mode === 'weapon'
+                                ? 'border-primary bg-primary font-semibold text-primary-content'
+                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                        "
+                        @click="mode = 'weapon'"
+                    >
+                        武器伤害
+                    </button>
                 </div>
             </div>
 
             <div class="grid gap-4 lg:grid-cols-2">
-                <div class="rounded-xl border border-base-300 bg-base-200/40 p-4">
-                    <div class="mb-3 flex items-center justify-between gap-2">
-                        <h3 class="text-base font-semibold">输入参数</h3>
-                        <label class="label cursor-pointer gap-2 p-0">
-                            <span class="label-text text-xs">百分比输入</span>
-                            <input v-model="usePercentInput" type="checkbox" class="toggle toggle-sm toggle-primary" />
-                        </label>
-                    </div>
+                <div class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="INPUT" title="输入参数">
+                        <template #trailing>
+                            <label class="label cursor-pointer gap-2 p-0">
+                                <span class="text-xs text-base-content/55">百分比输入</span>
+                                <input v-model="usePercentInput" type="checkbox" class="toggle toggle-sm toggle-primary" />
+                            </label>
+                        </template>
+                    </SectionHeader>
                     <div v-if="mode === 'weapon'" class="space-y-3">
-                        <div v-for="group in weaponNumberGroups" :key="group.title" class="rounded-lg bg-base-100 p-3">
-                            <h4 class="mb-2 text-sm font-semibold">{{ group.title }}</h4>
+                        <div
+                            v-for="group in weaponNumberGroups"
+                            :key="group.title"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                        >
+                            <h4 class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ group.title }}</h4>
                             <div v-if="group.fields.length > 0" class="grid grid-cols-1 gap-2 md:grid-cols-2">
                                 <label v-for="field in group.fields" :key="field.key" class="form-control">
                                     <div class="mb-1 text-xs text-base-content/70">{{ getWeaponFieldLabel(field.key, field.label) }}</div>
@@ -2108,25 +2144,27 @@ onBeforeUnmount(() => {
                                     <span class="label-text">{{ toggleField.label }}</span>
                                 </label>
                             </div>
-                            <div v-if="group.outputs && group.outputs.length > 0" class="mt-3 border-t border-base-300/60 pt-2">
+                            <div v-if="group.outputs && group.outputs.length > 0" class="mt-3 border-t border-base-content/15 pt-2">
                                 <div class="mb-1 text-xs text-base-content/60">块输出</div>
                                 <div class="space-y-1">
                                     <div
                                         v-for="output in group.outputs"
                                         :key="output.stepId"
-                                        class="flex cursor-grab items-center justify-between rounded-md bg-base-200/70 px-2 py-1 active:cursor-grabbing"
+                                        class="flex cursor-grab items-center justify-between rounded-xs bg-base-content/3 px-2 py-1 active:cursor-grabbing"
                                         :class="{ 'opacity-50': !canAddStepToMerge(output.stepId) }"
                                         @mousedown.prevent="startOutputMouseDrag(output, $event)"
                                     >
                                         <div class="min-w-0 flex-1">
                                             <button
-                                                class="text-left text-xs text-info hover:underline"
+                                                class="text-left text-xs text-base-content/60 transition-colors duration-150 hover:text-primary hover:underline"
                                                 @mousedown.stop
                                                 @click.stop="jumpToStep(output.stepId)"
                                             >
                                                 {{ output.label }}
                                             </button>
-                                            <div class="font-mono text-sm">{{ formatNumber(getGroupOutputValue(output.stepId)) }}</div>
+                                            <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                                {{ formatNumber(getGroupOutputValue(output.stepId)) }}
+                                            </div>
                                             <div class="mt-1 flex flex-wrap items-center gap-2" @mousedown.stop>
                                                 <label class="label cursor-pointer gap-1 p-0">
                                                     <span class="label-text text-[11px]">覆盖</span>
@@ -2167,7 +2205,7 @@ onBeforeUnmount(() => {
                                             </div>
                                         </div>
                                         <button
-                                            class="btn btn-xs btn-circle btn-ghost"
+                                            class="inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-sm leading-none text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
                                             :disabled="!canAddStepToMerge(output.stepId)"
                                             @mousedown.stop
                                             @click="addMergeItemByStepId(output.stepId)"
@@ -2188,8 +2226,12 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div v-else class="space-y-3">
-                        <div v-for="group in skillNumberGroups" :key="group.title" class="rounded-lg bg-base-100 p-3">
-                            <h4 class="mb-2 text-sm font-semibold">{{ group.title }}</h4>
+                        <div
+                            v-for="group in skillNumberGroups"
+                            :key="group.title"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                        >
+                            <h4 class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ group.title }}</h4>
                             <div v-if="group.fields.length > 0" class="grid grid-cols-1 gap-2 md:grid-cols-2">
                                 <label v-for="field in group.fields" :key="field.key" class="form-control">
                                     <div class="mb-1 text-xs text-base-content/70">{{ getSkillFieldLabel(field.key, field.label) }}</div>
@@ -2217,25 +2259,27 @@ onBeforeUnmount(() => {
                                     <span class="label-text">{{ toggleField.label }}</span>
                                 </label>
                             </div>
-                            <div v-if="group.outputs && group.outputs.length > 0" class="mt-3 border-t border-base-300/60 pt-2">
+                            <div v-if="group.outputs && group.outputs.length > 0" class="mt-3 border-t border-base-content/15 pt-2">
                                 <div class="mb-1 text-xs text-base-content/60">块输出</div>
                                 <div class="space-y-1">
                                     <div
                                         v-for="output in group.outputs"
                                         :key="output.stepId"
-                                        class="flex cursor-grab items-center justify-between rounded-md bg-base-200/70 px-2 py-1 active:cursor-grabbing"
+                                        class="flex cursor-grab items-center justify-between rounded-xs bg-base-content/3 px-2 py-1 active:cursor-grabbing"
                                         :class="{ 'opacity-50': !canAddStepToMerge(output.stepId) }"
                                         @mousedown.prevent="startOutputMouseDrag(output, $event)"
                                     >
                                         <div class="min-w-0 flex-1">
                                             <button
-                                                class="text-left text-xs text-info hover:underline"
+                                                class="text-left text-xs text-base-content/60 transition-colors duration-150 hover:text-primary hover:underline"
                                                 @mousedown.stop
                                                 @click.stop="jumpToStep(output.stepId)"
                                             >
                                                 {{ output.label }}
                                             </button>
-                                            <div class="font-mono text-sm">{{ formatNumber(getGroupOutputValue(output.stepId)) }}</div>
+                                            <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                                {{ formatNumber(getGroupOutputValue(output.stepId)) }}
+                                            </div>
                                             <div class="mt-1 flex flex-wrap items-center gap-2" @mousedown.stop>
                                                 <label class="label cursor-pointer gap-1 p-0">
                                                     <span class="label-text text-[11px]">覆盖</span>
@@ -2276,7 +2320,7 @@ onBeforeUnmount(() => {
                                             </div>
                                         </div>
                                         <button
-                                            class="btn btn-xs btn-circle btn-ghost"
+                                            class="inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-sm leading-none text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
                                             :disabled="!canAddStepToMerge(output.stepId)"
                                             @mousedown.stop
                                             @click="addMergeItemByStepId(output.stepId)"
@@ -2298,28 +2342,38 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="space-y-4">
-                    <div class="rounded-xl border border-base-300 bg-base-200/40 p-4">
-                        <h3 class="mb-3 text-base font-semibold">核心结果</h3>
+                    <div class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                        <SectionHeader no-animate compact kicker="RESULTS" title="核心结果" />
                         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                            <div v-for="item in summaryItems" :key="item.key" class="rounded-lg bg-base-100 p-3">
+                            <div
+                                v-for="item in summaryItems"
+                                :key="item.key"
+                                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                            >
                                 <div class="text-xs text-base-content/70">{{ item.label }}</div>
-                                <div class="font-mono text-base">{{ formatNumber(item.value) }}</div>
+                                <div class="font-orbitron text-base font-semibold tabular-nums text-primary">
+                                    {{ formatNumber(item.value) }}
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div
                         ref="mergeDropZoneRef"
-                        class="rounded-xl border border-base-300 bg-base-200/40 p-4 transition lg:sticky lg:top-4 lg:z-20"
+                        class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm transition lg:sticky lg:top-4 lg:z-20"
                         :class="{ 'ring-2 ring-primary/40': isMergeDropActive }"
                     >
-                        <div class="mb-3 flex items-center justify-between gap-2">
-                            <div>
-                                <h3 class="text-base font-semibold">多步骤合并运算</h3>
-                                <div class="text-xs text-base-content/60">支持从左侧块输出拖入或点击 + 快速添加</div>
-                            </div>
-                            <button class="btn btn-sm btn-outline" @click="addMergeItem">添加步骤</button>
-                        </div>
+                        <SectionHeader no-animate compact kicker="MERGE" title="多步骤合并运算">
+                            <template #trailing>
+                                <button
+                                    class="inline-flex h-8 cursor-pointer items-center rounded-xs border border-base-content/20 px-3 text-xs text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                    @click="addMergeItem"
+                                >
+                                    添加步骤
+                                </button>
+                            </template>
+                        </SectionHeader>
+                        <p class="-mt-0.5 mb-2 text-[11px] text-base-content/45">支持从左侧块输出拖入或点击 + 快速添加</p>
                         <div class="space-y-2">
                             <div v-for="(item, index) in currentMergeItems" :key="index" class="grid grid-cols-12 items-center gap-2">
                                 <select v-model="item.operator" class="select select-sm col-span-2" :disabled="index === 0">
@@ -2342,27 +2396,36 @@ onBeforeUnmount(() => {
                                 </button>
                             </div>
                         </div>
-                        <div class="mt-3 rounded-lg bg-base-100 p-3 text-sm">
+                        <div class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm">
                             <div class="text-xs text-base-content/70">公式展开</div>
-                            <div class="mt-1 break-all font-mono">{{ mergeResult.formulaText }}</div>
+                            <div class="mt-1 break-all">{{ mergeResult.formulaText }}</div>
                             <div class="mt-2 text-xs text-base-content/70">合并结果</div>
-                            <div class="font-mono text-base">{{ formatNumber(mergeResult.result) }}</div>
+                            <div class="font-orbitron text-base font-semibold tabular-nums text-primary">
+                                {{ formatNumber(mergeResult.result) }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="rounded-xl border border-base-300 bg-base-200/40 p-4">
-                <h3 class="mb-3 text-base font-semibold">步骤拆解</h3>
+            <div class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="STEPS" title="步骤拆解" />
                 <div class="space-y-2">
-                    <div v-for="step in evaluatedSteps" :id="`db-dmg-step-${step.id}`" :key="step.id" class="rounded-lg bg-base-100 p-3">
+                    <div
+                        v-for="step in evaluatedSteps"
+                        :id="`db-dmg-step-${step.id}`"
+                        :key="step.id"
+                        class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                    >
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
                                 <div class="font-semibold">{{ step.title }}</div>
                             </div>
                             <div class="text-right">
                                 <div class="text-xs text-base-content/60">最终值</div>
-                                <div class="font-mono">{{ formatNumber(step.finalValue) }}</div>
+                                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                    {{ formatNumber(step.finalValue) }}
+                                </div>
                             </div>
                         </div>
 
@@ -2380,11 +2443,11 @@ onBeforeUnmount(() => {
         </div>
         <div
             v-if="activeOutputDrag"
-            class="pointer-events-none fixed z-50 rounded-md border border-primary/30 bg-base-100/95 px-2 py-1 shadow-lg"
+            class="pointer-events-none fixed z-50 rounded-xs border border-primary/30 bg-base-100/95 px-2 py-1 shadow-lg"
             :style="{ left: `${activeOutputDrag.x + 12}px`, top: `${activeOutputDrag.y + 12}px` }"
         >
             <div class="text-xs text-base-content/70">{{ activeOutputDrag.label }}</div>
-            <div class="font-mono text-sm">{{ formatNumber(activeOutputDrag.value) }}</div>
+            <div class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ formatNumber(activeOutputDrag.value) }}</div>
         </div>
     </ScrollArea>
 </template>

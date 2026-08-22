@@ -13,6 +13,11 @@ if (!monster.value) {
 
 <template>
     <ScrollArea class="h-full">
-        <DBMonsterDetailItem :monster="monster!" />
+        <!-- 居中容器：与首页一致的纸面排版宽度 -->
+        <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
+            <div>
+                <DBMonsterDetailItem :monster="monster!" />
+            </div>
+        </div>
     </ScrollArea>
 </template>

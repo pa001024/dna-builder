@@ -689,6 +689,22 @@ const filteredQuests = computed<DynQuestSearchResult[]>(() => {
 })
 
 /**
+ * 切换区域筛选行显示状态；收起时清空区域与子区域筛选值，避免隐藏后筛选仍生效。
+ */
+function toggleRegionFilterRow() {
+    showRegionFilter.value = !showRegionFilter.value
+    toggleFilter("region", showRegionFilter.value)
+}
+
+/**
+ * 切换等级筛选行显示状态；收起时清空等级筛选值，避免隐藏后筛选仍生效。
+ */
+function toggleLevelFilterRow() {
+    showLevelFilter.value = !showLevelFilter.value
+    toggleFilter("level", showLevelFilter.value)
+}
+
+/**
  * 选中委托。
  * @param quest 委托数据
  */
@@ -705,59 +721,105 @@ function selectRegion(regionId: string) {
     selectedSubRegion.value = ""
 }
 
-useInitialScrollToSelectedItem()
+useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <!-- 左侧列表面板 -->
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedQuest }">
-                <!-- 搜索栏 -->
-                <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        :placeholder="showFullTextSearch ? '全文搜索委托/剧情内容（不支持拼音）...' : '搜索委托 ID/名称（支持拼音）...'"
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
-                </div>
-
-                <!-- 区域筛选 -->
-                <div class="p-2 border-b border-base-200">
-                    <div class="flex items-center gap-4 mb-2 overflow-x-auto whitespace-nowrap">
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input v-model="showFullTextSearch" type="checkbox" class="checkbox checkbox-xs" />
-                            <span class="text-xs text-base-content/70">剧情全文搜索</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input
-                                v-model="showRegionFilter"
-                                type="checkbox"
-                                class="checkbox checkbox-xs"
-                                @change="toggleFilter('region', showRegionFilter)"
-                            />
-                            <span class="text-xs text-base-content/70">区域筛选</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input
-                                v-model="showLevelFilter"
-                                type="checkbox"
-                                class="checkbox checkbox-xs"
-                                @change="toggleFilter('level', showLevelFilter)"
-                            />
-                            <span class="text-xs text-base-content/70">等级筛选</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input v-model="showImprIncreaseOnly" type="checkbox" class="checkbox checkbox-xs" />
-                            <span class="text-xs text-base-content/70">印象</span>
-                        </label>
+            <div
+                class="flex-1 flex flex-col overflow-hidden min-w-0"
+                :class="{ 'sm:border-r border-base-content/10': selectedQuest }"
+            >
+                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                <div
+                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                >
+                    <div class="relative">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input
+                            v-model="searchKeyword"
+                            type="text"
+                            :placeholder="showFullTextSearch ? '全文搜索委托/剧情内容（不支持拼音）...' : '搜索委托 ID/名称（支持拼音）...'"
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                        <span
+                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                        >
+                            {{ filteredQuests.length }}
+                        </span>
                     </div>
 
-                    <div v-show="showRegionFilter" class="flex flex-wrap gap-1 pb-1">
+                    <!-- 过滤器开关方章 -->
+                    <div class="mt-3 flex flex-wrap gap-1.5">
                         <button
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedRegion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showFullTextSearch
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="showFullTextSearch = !showFullTextSearch"
+                        >
+                            剧情全文搜索
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showRegionFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleRegionFilterRow()"
+                        >
+                            区域筛选
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showLevelFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleLevelFilterRow()"
+                        >
+                            等级筛选
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showImprIncreaseOnly
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="showImprIncreaseOnly = !showImprIncreaseOnly"
+                        >
+                            印象
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 筛选条件 -->
+                <div
+                    v-show="showRegionFilter || showLevelFilter"
+                    class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
+                    style="animation-delay: 0.05s"
+                >
+                    <!-- 区域筛选 -->
+                    <div v-show="showRegionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">REGION</span>
+                        <button
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedRegion === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectRegion('')"
                         >
                             {{ $t("全部") }}
@@ -765,9 +827,11 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="regionId in allRegions.map(r => String(r))"
                             :key="regionId"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
-                                selectedRegion === regionId ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedRegion === regionId
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectRegion(regionId)"
                         >
@@ -775,10 +839,16 @@ useInitialScrollToSelectedItem()
                         </button>
                     </div>
 
-                    <div v-show="showLevelFilter" class="flex flex-wrap gap-1 pb-1">
+                    <!-- 等级筛选 -->
+                    <div v-show="showLevelFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">LEVEL</span>
                         <button
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedLevel === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedLevel === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectedLevel = ''"
                         >
                             {{ $t("全部") }}
@@ -786,11 +856,11 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="levelRange in levelRanges"
                             :key="levelRange.key"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
                             :class="
                                 selectedLevel === levelRange.key
-                                    ? 'bg-primary text-white'
-                                    : 'bg-base-200 text-base-content hover:bg-base-300'
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectedLevel = levelRange.key"
                         >
@@ -801,111 +871,141 @@ useInitialScrollToSelectedItem()
 
                 <!-- 委托列表 -->
                 <ScrollArea class="flex-1">
-                    <div class="p-2 space-y-2">
-                        <div
-                            v-for="questResult in filteredQuests"
-                            :key="questResult.quest.id"
-                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedQuestId === questResult.quest.id }"
-                            @click="selectQuest(questResult.quest)"
-                        >
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-start gap-3">
-                                        <ImageFallback
-                                            :src="getDynQuestIconUrl(questResult.quest)"
-                                            :alt="questResult.quest.name"
-                                            class="size-14 shrink-0 rounded"
-                                            :class="`bg-linear-15 ${getRarityGradientClass(questResult.quest.rarity + 1)}`"
-                                        >
-                                            <img
-                                                src="/imgs/webp/T_Head_Empty.webp"
-                                                :alt="questResult.quest.name"
-                                                class="size-14 shrink-0 rounded"
-                                            />
-                                        </ImageFallback>
+                    <div class="p-3">
+                        <div class="space-y-2">
+                            <article
+                                v-for="(questResult, index) in filteredQuests"
+                                :key="questResult.quest.id"
+                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                :class="
+                                    selectedQuestId === questResult.quest.id
+                                        ? 'dbdq-item-active border-primary/70 bg-primary/10'
+                                        : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                                "
+                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                @click="selectQuest(questResult.quest)"
+                            >
+                                <!-- 左侧主色强调条：选中时显现 -->
+                                <span
+                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                    :class="selectedQuestId === questResult.quest.id ? 'opacity-100' : 'opacity-0'"
+                                    aria-hidden="true"
+                                />
+                                <div class="p-3">
+                                    <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0 flex-1">
-                                            <div class="font-medium wrap-break-word">
-                                                {{ questResult.quest.name }}
-                                                <span class="text-xs opacity-70">ID: {{ questResult.quest.id }}</span>
-                                            </div>
-                                            <div class="text-xs opacity-70 mt-1 flex flex-wrap items-center gap-1.5">
-                                                <span>{{ getDynQuestTypeLabel(questResult.quest.type) }}</span>
-                                                <span
-                                                    v-if="hasDynQuestImprIncrease(questResult.quest.id)"
-                                                    class="text-xs px-2 py-0.5 rounded bg-success text-white"
+                                            <div class="flex items-start gap-3">
+                                                <ImageFallback
+                                                    :src="getDynQuestIconUrl(questResult.quest)"
+                                                    :alt="questResult.quest.name"
+                                                    class="size-14 shrink-0 rounded-xs object-cover"
+                                                    :class="`bg-linear-15 ${getRarityGradientClass(questResult.quest.rarity + 1)}`"
                                                 >
-                                                    印象增加
+                                                    <img
+                                                        src="/imgs/webp/T_Head_Empty.webp"
+                                                        :alt="questResult.quest.name"
+                                                        class="size-14 shrink-0 rounded-xs"
+                                                    />
+                                                </ImageFallback>
+                                                <div class="min-w-0 flex-1">
+                                                    <!-- 名称行：名称 + 幽灵 ID -->
+                                                    <div class="flex items-baseline gap-2">
+                                                        <h3
+                                                            class="wrap-break-word text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                            :class="{ 'text-primary': selectedQuestId === questResult.quest.id }"
+                                                        >
+                                                            {{ questResult.quest.name }}
+                                                        </h3>
+                                                        <CopyID :id="questResult.quest.id" class="ml-auto shrink-0" />
+                                                    </div>
+                                                    <!-- 元信息行：类型 / 印象 / 冷却 / 人数 / 权重 -->
+                                                    <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
+                                                        <span>{{ getDynQuestTypeLabel(questResult.quest.type) }}</span>
+                                                        <span
+                                                            v-if="hasDynQuestImprIncrease(questResult.quest.id)"
+                                                            class="rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 tracking-wide text-success"
+                                                        >
+                                                            印象增加
+                                                        </span>
+                                                        <span>冷却 <span class="font-mono tabular-nums">{{ questResult.quest.cd }}</span>m</span>
+                                                        <span>人数 <span class="font-mono tabular-nums">{{ questResult.quest.person }}</span></span>
+                                                        <span>权重 <span class="font-mono tabular-nums">{{ questResult.quest.weight }}</span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- 等级档位小签 -->
+                                            <div class="mt-2 flex flex-wrap gap-1">
+                                                <span
+                                                    v-for="level in questResult.levelGroups"
+                                                    :key="`${questResult.quest.id}-${level.key}`"
+                                                    class="rounded-xs border border-base-content/15 px-1 font-mono text-[10px] leading-4 tracking-wide text-base-content/55 tabular-nums"
+                                                >
+                                                    {{ level.label }}
                                                 </span>
-                                                <span>冷却 {{ questResult.quest.cd }}m</span>
-                                                <span>人数 {{ questResult.quest.person }}</span>
-                                                <span>权重 {{ questResult.quest.weight }}</span>
                                             </div>
                                         </div>
+                                        <!-- 区域角标 -->
+                                        <div class="flex shrink-0 flex-col items-end gap-1">
+                                            <span class="rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary">
+                                                {{ getRegionName(questResult.quest.regionId) }}·
+                                                <span>{{ $t(getSubRegionName(questResult.quest.subRegionId)) }}</span>
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div class="mt-2 flex flex-wrap gap-1">
-                                        <span
-                                            v-for="level in questResult.levelGroups"
-                                            :key="`${questResult.quest.id}-${level.key}`"
-                                            class="px-1.5 py-0.5 text-[11px] rounded bg-base-300/80"
-                                        >
-                                            {{ level.label }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-end gap-1">
-                                    <span class="text-xs px-2 py-0.5 rounded bg-primary text-white">
-                                        {{ getRegionName(questResult.quest.regionId) }}·
-                                        <span>{{ $t(getSubRegionName(questResult.quest.subRegionId)) }}</span>
-                                    </span>
-                                    <span class="text-xs opacity-70">ID: {{ questResult.quest.id }}</span>
-                                </div>
-                            </div>
 
-                            <div
-                                v-if="showFullTextSearch && searchKeyword.trim() && questResult.snippet"
-                                class="mt-2 text-xs leading-relaxed opacity-85"
-                            >
-                                <span class="opacity-65">匹配：</span>
-                                <span v-if="questResult.snippet.prefixEllipsis">...</span>
-                                <template
-                                    v-for="(segment, index) in questResult.snippet.segments"
-                                    :key="`${questResult.quest.id}-${index}`"
-                                >
-                                    <span
-                                        :class="
-                                            segment.highlighted
-                                                ? selectedQuestId === questResult.quest.id
-                                                    ? 'bg-base-100/45 text-primary-content font-semibold px-0.5 rounded underline decoration-primary-content/80 decoration-2 underline-offset-2'
-                                                    : 'bg-primary/20 text-base-content font-semibold px-0.5 rounded underline decoration-primary/80 decoration-2 underline-offset-2'
-                                                : ''
-                                        "
+                                    <!-- 全文搜索命中摘要 -->
+                                    <div
+                                        v-if="showFullTextSearch && searchKeyword.trim() && questResult.snippet"
+                                        class="mt-2 text-xs leading-relaxed text-base-content/70"
                                     >
-                                        {{ segment.text }}
-                                    </span>
-                                </template>
-                                <span v-if="questResult.snippet.suffixEllipsis">...</span>
-                            </div>
+                                        <span class="text-base-content/45">匹配：</span>
+                                        <span v-if="questResult.snippet.prefixEllipsis">...</span>
+                                        <template
+                                            v-for="(segment, index) in questResult.snippet.segments"
+                                            :key="`${questResult.quest.id}-${index}`"
+                                        >
+                                            <span
+                                                :class="
+                                                    segment.highlighted
+                                                        ? selectedQuestId === questResult.quest.id
+                                                            ? 'rounded-xs bg-base-100/45 px-0.5 font-semibold text-primary-content underline decoration-primary-content/80 decoration-2 underline-offset-2'
+                                                            : 'rounded-xs bg-primary/20 px-0.5 font-semibold text-base-content underline decoration-primary/80 decoration-2 underline-offset-2'
+                                                        : ''
+                                                "
+                                            >
+                                                {{ segment.text }}
+                                            </span>
+                                        </template>
+                                        <span v-if="questResult.snippet.suffixEllipsis">...</span>
+                                    </div>
+                                </div>
+                            </article>
                         </div>
                     </div>
                 </ScrollArea>
 
-                <!-- 底部统计 -->
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredQuests.length }} 个委托
+                <!-- 底部统计条 -->
+                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                    <p class="text-[11px] tracking-wide text-base-content/50">
+                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredQuests.length }}</b> 个委托
+                    </p>
                 </div>
             </div>
-            <div
+
+            <!-- 收起详情手柄 -->
+            <button
                 v-if="selectedQuest"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                type="button"
+                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
+                title="收起详情"
                 @click="selectQuest(null)"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
+            </button>
 
             <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedQuest" class="flex-2">
-                <DBDynQuestDetailItem :quest="selectedQuest" />
+            <ScrollArea v-if="selectedQuest" class="min-w-0 flex-2">
+                <DBDynQuestDetailItem :key="selectedQuestId" :quest="selectedQuest" />
             </ScrollArea>
         </div>
     </div>

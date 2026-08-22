@@ -317,95 +317,135 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
 </script>
 
 <template>
-    <div class="p-3 space-y-4">
-        <div class="flex items-center">
-            <div class="size-24 shrink-0 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(pet.品质)">
-                <ImageFallback :src="leveledPet.url" :alt="pet.名称" class="w-full h-full object-cover">
-                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="pet.名称" class="w-full h-full object-cover" />
-                </ImageFallback>
-            </div>
-            <div class="space-y-2 flex-1">
-                <div class="flex items-center gap-3 px-3 py-2">
-                    <SRouterLink :to="`/db/pet/${pet.id}`" class="text-lg font-bold link link-primary">
-                        {{ $t(pet.名称) }}
-                    </SRouterLink>
-                    <CopyID :id="pet.id" />
-                    <div class="ml-auto text-sm text-base-content/70 flex items-center gap-2">
-                        <span class="px-1.5 py-0.5 rounded bg-base-300">{{ $t(getTypeName(pet.类型)) }}</span>
-                    </div>
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 详情头部：纸面 + primary 强调线 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <div class="flex items-start gap-3.5">
+                <div class="size-20 shrink-0 overflow-hidden rounded-xs bg-linear-15 sm:size-24" :class="getRarityGradientClass(pet.品质)">
+                    <ImageFallback :src="leveledPet.url" :alt="pet.名称" class="h-full w-full object-cover">
+                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="pet.名称" class="h-full w-full object-cover" />
+                    </ImageFallback>
                 </div>
-                <div class="flex flex-col gap-2 justify-end text-xs text-base-content/80 px-3 py-2 h-14">
-                    <div class="flex flex-wrap gap-2 items-center">
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Pet File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/pet/${pet.id}`"
+                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
+                            {{ $t(pet.名称) }}
+                        </SRouterLink>
+                        <CopyID :id="pet.id" />
+                        <span
+                            class="ml-auto shrink-0 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
+                        >
+                            {{ $t(getTypeName(pet.类型)) }}
+                        </span>
+                    </div>
+                    <!-- 元信息行：最大等级 / 捕获经验 / 当前经验 -->
+                    <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
                         <span>{{ $t("pet_detail.max_level") }}: {{ pet.最大等级 }}</span>
+                        <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
                         <span>{{ $t("pet_detail.capture_exp") }}: {{ pet.捕获经验 }}</span>
-                        <span>{{ $t("pet_detail.exp") }}: {{ displayedExperience }}</span>
+                        <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                        <span>
+                            {{ $t("pet_detail.exp") }}:
+                            <b class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ displayedExperience }}</b>
+                        </span>
                     </div>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <div v-if="pet.描述" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.description") }}</div>
-            <div class="text-sm">
-                <span>{{ pet.描述 }}</span>
+        <!-- 描述 -->
+        <section v-if="pet.描述" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="PROFILE" :title="$t('pet_detail.description')" />
+            <div
+                class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed whitespace-pre-line text-base-content/85"
+            >
+                {{ pet.描述 }}
             </div>
-        </div>
+        </section>
 
-        <div v-if="pet.异化 && pet.异化 !== pet.id" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.alternative_form") }}</div>
-            <div class="flex items-center gap-2 text-sm">
-                <img :src="getPrmIconUrl(pet.异化)" :alt="getPrmName(pet.异化)" class="w-6 h-6 rounded object-cover bg-base-300" />
-                <SRouterLink :to="`/db/pet/${pet.异化}`" class="hover:underline">
+        <!-- 异化形态 -->
+        <section
+            v-if="pet.异化 && pet.异化 !== pet.id"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="VARIANT" :title="$t('pet_detail.alternative_form')" />
+            <div class="mt-2 flex items-center gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                <img
+                    :src="getPrmIconUrl(pet.异化)"
+                    :alt="getPrmName(pet.异化)"
+                    class="size-10 shrink-0 rounded-xs object-cover bg-base-content/3"
+                />
+                <SRouterLink
+                    :to="`/db/pet/${pet.异化}`"
+                    class="truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
+                >
                     {{ $t(getPrmName(pet.异化)) }}
                 </SRouterLink>
             </div>
-        </div>
+        </section>
 
-        <div v-if="pet.最大等级 > 1">
+        <!-- 等级调整 -->
+        <section v-if="pet.最大等级 > 1" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="LEVEL" />
             <LevelSlider v-model="currentLevel" :max="5" :step="1" />
-        </div>
+        </section>
 
-        <div v-if="leveledPet.主动" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">
-                {{ $t("pet_detail.active_skill") }}
-                <span class="text-xs text-base-content/70">CD: {{ leveledPet.主动.cd }}</span>
-            </div>
-            <div class="text-sm whitespace-pre-wrap">
+        <!-- 主动技能 -->
+        <section v-if="leveledPet.主动" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ACTIVE" :title="$t('pet_detail.active_skill')">
+                <template #trailing>
+                    <span class="font-mono text-[11px] tabular-nums text-base-content/45">CD: {{ leveledPet.主动.cd }}</span>
+                </template>
+            </SectionHeader>
+            <div
+                class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed whitespace-pre-wrap text-base-content/85"
+            >
                 {{ leveledPet.主动.描述 }}
             </div>
-        </div>
+        </section>
 
-        <div v-if="leveledPet.被动" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.passive_skill") }}</div>
-            <div class="text-sm whitespace-pre-wrap">
+        <!-- 被动技能 -->
+        <section v-if="leveledPet.被动" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="PASSIVE" :title="$t('pet_detail.passive_skill')" />
+            <div
+                class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed whitespace-pre-wrap text-base-content/85"
+            >
                 {{ leveledPet.被动.描述 }}
             </div>
-        </div>
+        </section>
 
-        <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.spawn_area") }}</div>
-            <div v-if="petSpawnLocations.length" class="grid grid-cols-[repeat(auto-fill,minmax(500px,1fr))] gap-2">
+        <!-- 出现区域 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="SPAWN" :title="$t('pet_detail.spawn_area')" />
+            <div v-if="petSpawnLocations.length" class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(500px,1fr))] gap-2">
                 <div
                     v-for="location in petSpawnLocations"
                     :key="location.subRegionId"
-                    class="p-2 rounded bg-base-100 border border-base-300/60"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                 >
-                    <div class="flex items-center justify-between gap-2">
+                    <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
                         <SubRegionLink :sub-region-id="location.subRegionId" />
-                        <div class="text-xs text-base-content/60">
+                        <div class="text-[11px] text-base-content/55">
                             <span>{{ location.regionName }}</span>
                         </div>
                         <div class="flex-1"></div>
-                        <span class="text-xs text-base-content/70">
+                        <span class="text-[11px] tabular-nums text-base-content/50">
                             {{ $t("pet_detail.spot_count") }}: {{ location.spotCount }} | {{ $t("pet_detail.refresh_count") }}:
                             {{ location.refreshCount }}
                         </span>
                     </div>
-                    <div class="flex flex-wrap gap-1 mt-2">
+                    <div class="mt-2 flex flex-wrap gap-1">
                         <SRouterLink
                             v-for="rcWeight in location.rcWeights"
                             :key="`${location.subRegionId}-${rcWeight.rcId}-${rcWeight.rcIndex}`"
-                            class="px-1.5 py-0.5 rounded bg-base-300 text-xs hover:bg-primary/20 transition-colors duration-200"
+                            class="cursor-pointer rounded-xs border border-base-content/15 px-1.5 py-0.5 font-mono text-[11px] tabular-nums text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                             :to="{
                                 name: 'map-local',
                                 query: {
@@ -423,61 +463,72 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                     </div>
                 </div>
             </div>
-            <div v-else class="text-sm text-base-content/70">{{ $t("pet_detail.no_spawn") }}</div>
-        </div>
+            <div v-else class="mt-2 text-sm text-base-content/70">{{ $t("pet_detail.no_spawn") }}</div>
+        </section>
 
-        <div v-if="petShopSources.length > 0" class="space-y-2">
-            <div class="text-xs text-base-content/60">{{ $t("pet_detail.shop_purchase") }}</div>
-            <div
-                v-for="source in petShopSources"
-                :key="source.key"
-                class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
-            >
-                <div class="flex justify-between items-center gap-2 mb-2">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <SRouterLink :to="`/db/shop/${source.shopId}/${source.subTabId}`" class="hover:underline min-w-0 truncate">
-                            {{ source.mainTabName }} / {{ source.subTabName }}
-                        </SRouterLink>
-                        <span class="text-xs text-base-content/70">({{ source.shopName }})</span>
+        <!-- 商店购买 -->
+        <section v-if="petShopSources.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="SHOP" :title="$t('pet_detail.shop_purchase')" />
+            <div class="mt-2 space-y-2">
+                <div
+                    v-for="source in petShopSources"
+                    :key="source.key"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40 hover:bg-base-content/5"
+                >
+                    <div class="mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                        <div class="flex min-w-0 items-center gap-2">
+                            <SRouterLink
+                                :to="`/db/shop/${source.shopId}/${source.subTabId}`"
+                                class="min-w-0 truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
+                            >
+                                {{ source.mainTabName }} / {{ source.subTabName }}
+                            </SRouterLink>
+                            <span class="shrink-0 text-[11px] text-base-content/55">({{ source.shopName }})</span>
+                        </div>
+                        <div class="flex shrink-0 items-center gap-1">
+                            <img :src="getPriceIcon(source.priceName)" class="size-4 rounded-xs object-cover" :alt="source.priceName" />
+                            <span class="text-[11px] text-base-content/55">{{ source.priceName }}</span>
+                            <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ source.price }}</span>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <img :src="getPriceIcon(source.priceName)" class="w-4 h-4 object-cover rounded" :alt="source.priceName" />
-                        <span class="text-xs text-base-content/70">{{ source.priceName }}</span>
-                        <span class="text-sm font-medium">{{ source.price }}</span>
+                    <div v-if="source.timeStart" class="text-[11px] tabular-nums text-base-content/50">
+                        {{ formatTimeRange(source.timeStart, source.timeEnd) }}
                     </div>
-                </div>
-                <div v-if="source.timeStart" class="text-xs text-base-content/70">
-                    {{ formatTimeRange(source.timeStart, source.timeEnd) }}
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="pet.类型 === 2" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">{{ $t("pet_detail.pet_entry") }}</div>
-            <div v-if="petToEnteySources.length" class="space-y-2">
+        <!-- 魔灵潜质来源 -->
+        <section v-if="pet.类型 === 2" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ENTRY" :title="$t('pet_detail.pet_entry')" />
+            <div v-if="petToEnteySources.length" class="mt-2 space-y-2">
                 <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs text-base-content/60">{{ $t("pet_detail.group_by_weight") }}</span>
+                    <span class="text-[11px] tracking-wide text-base-content/55">{{ $t("pet_detail.group_by_weight") }}</span>
                     <input v-model="groupPetSourcesByWeight" type="checkbox" class="toggle toggle-primary toggle-sm" />
                 </div>
 
                 <template v-if="groupPetSourcesByWeight">
                     <div v-for="group in groupedPetToEnteySources" :key="group.weight" class="space-y-1">
-                        <div class="text-xs text-base-content/60 px-1">
+                        <div class="px-1 text-[11px] tabular-nums text-base-content/45">
                             {{ formatWeight(group.weight) }} · {{ group.sources.length }} {{ $t("pet_detail.count_suffix") }}
                         </div>
-                        <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-1">
+                        <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-1.5">
                             <div
                                 v-for="source in group.sources"
                                 :key="source.entryId"
-                                class="p-2 rounded bg-base-100 border border-base-300/60"
+                                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2"
                             >
                                 <div class="flex items-center justify-between gap-2">
-                                    <div class="flex items-center gap-2 min-w-0">
+                                    <div class="flex min-w-0 items-center gap-2">
                                         <img
                                             :src="`/imgs/webp/T_Armory_Pet_Attr_${source.entryIcon}.webp`"
-                                            class="w-6 h-6 rounded object-cover bg-base-300"
+                                            class="size-6 shrink-0 rounded-xs object-cover bg-base-content/3"
+                                            alt=""
                                         />
-                                        <SRouterLink :to="`/db/pet/${source.entryId}`" class="font-medium hover:underline truncate">
+                                        <SRouterLink
+                                            :to="`/db/pet/${source.entryId}`"
+                                            class="truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
+                                        >
                                             {{ $t(source.entryName) }}
                                         </SRouterLink>
                                     </div>
@@ -490,28 +541,34 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                     <div
                         v-for="source in petToEnteySources"
                         :key="source.entryId"
-                        class="p-2 rounded bg-base-100 border border-base-300/60"
+                        class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                     >
                         <div class="flex items-center justify-between gap-2">
-                            <div class="flex items-center gap-2 min-w-0">
+                            <div class="flex min-w-0 items-center gap-2">
                                 <img
                                     :src="`/imgs/webp/T_Armory_Pet_Attr_${source.entryIcon}.webp`"
-                                    class="w-6 h-6 rounded object-cover bg-base-300"
+                                    class="size-6 shrink-0 rounded-xs object-cover bg-base-content/3"
+                                    alt=""
                                 />
-                                <SRouterLink :to="`/db/pet/${source.entryId}`" class="font-medium hover:underline truncate">
+                                <SRouterLink
+                                    :to="`/db/pet/${source.entryId}`"
+                                    class="truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
+                                >
                                     {{ $t(source.entryName) }}
                                 </SRouterLink>
                             </div>
-                            <span class="text-xs text-base-content/70">{{ formatWeight(source.weight) }}</span>
+                            <span class="shrink-0 font-mono text-[11px] tabular-nums text-base-content/55">{{
+                                formatWeight(source.weight)
+                            }}</span>
                         </div>
-                        <div class="text-xs text-base-content/60 mt-1 flex flex-wrap gap-2">
+                        <div class="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-base-content/55">
                             <span>ID: {{ source.entryId }}</span>
                             <span class="truncate">{{ source.entryDesc }}</span>
                         </div>
                     </div>
                 </template>
             </div>
-            <div v-else class="text-sm text-base-content/70">{{ $t("pet_detail.no_pet_entry_sources") }}</div>
-        </div>
+            <div v-else class="mt-2 text-sm text-base-content/70">{{ $t("pet_detail.no_pet_entry_sources") }}</div>
+        </section>
     </div>
 </template>

@@ -38,12 +38,15 @@ const partyTopic = computed(() => {
 
 <template>
     <ScrollArea class="h-full">
-        <template v-if="partyTopic">
-            <DBPartyTopicDetailItem :party-topic="partyTopic" class="flex-1" />
-        </template>
+        <!-- 居中容器：与首页一致的纸面排版宽度 -->
+        <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
+            <template v-if="partyTopic">
+                <div>
+                    <DBPartyTopicDetailItem :party-topic="partyTopic" />
+                </div>
+            </template>
 
-        <div v-else class="p-4">
-            <div class="text-base-content/70">未找到光阴集</div>
+            <div v-else class="text-sm text-base-content/60">未找到光阴集</div>
         </div>
     </ScrollArea>
 </template>

@@ -300,7 +300,7 @@ function getPriceIcon(name: string) {
     <div class="space-y-3">
         <!-- 商品项内容 -->
         <div
-            class="group flex w-full items-center gap-2.5 border border-base-content/15 bg-base-100 p-2 transition-colors duration-200 hover:border-primary/60"
+            class="group flex w-full items-center gap-2.5 border border-base-content/15 bg-base-content/3 p-2 transition-colors duration-200 hover:border-primary/60"
         >
             <div class="relative size-11 shrink-0 overflow-hidden rounded bg-base-200/40">
                 <img
@@ -321,7 +321,12 @@ function getPriceIcon(name: string) {
                     <h4
                         class="min-w-0 flex-1 truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
                     >
-                        <SRouterLink v-if="itemDetail?.link" :to="itemDetail?.link" class="hover:underline">
+                        <SRouterLink
+                            v-if="itemDetail?.link"
+                            :to="itemDetail?.link"
+                            class="hover:underline"
+                            :title="itemDetail?.name || item.typeName"
+                        >
                             {{ itemDetail?.name || item.typeName }}
                         </SRouterLink>
                         <span v-else>{{ itemDetail?.name || item.typeName }}</span>
@@ -419,7 +424,7 @@ function getPriceIcon(name: string) {
         <!-- 递归渲染子项（同层子卡 grid autofill 并排） -->
         <div
             v-if="item.children && item.children.length"
-            class="ml-6 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-2 border-l border-base-content/10 pl-3"
+            class="ml-6 grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-2 border-l border-base-content/10 pl-3"
         >
             <ShopItem v-for="child in item.children" :key="child.id" :item="child" />
         </div>

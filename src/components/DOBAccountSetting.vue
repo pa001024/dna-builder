@@ -362,17 +362,17 @@ async function startNameEdit() {
 </script>
 
 <template>
-    <div class="flex flex-col gap-4">
-        <!-- 账号信息卡片 -->
-        <div class="bg-base-100 p-4 rounded-lg">
+    <div class="flex flex-col gap-3">
+        <!-- 账号信息 -->
+        <div>
             <div v-if="user.jwtToken" class="flex flex-col gap-3">
                 <!-- 已登录状态 -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="flex-none">
-                            <QQAvatar v-if="user.qq" :qq="user.qq" :name="user.name!" class="size-12 shadow-lg rounded-full" />
+                            <QQAvatar v-if="user.qq" :qq="user.qq" :name="user.name!" class="size-12 rounded-xs" />
                         </div>
-                        <h1 class="text-2xl font-bold flex gap-2 items-center">
+                        <h1 class="text-lg font-semibold flex gap-2 items-center">
                             <div>
                                 <div class="font-semibold text-base-content">
                                     <input
@@ -380,7 +380,7 @@ async function startNameEdit() {
                                         ref="nameInput"
                                         v-model="nameEdit.name"
                                         type="text"
-                                        class="input input-ghost input-sm px-1 py-0 h-auto min-h-0 w-auto max-w-64 font-semibold outline rounded-sm"
+                                        class="input input-ghost input-sm px-1 py-0 h-auto min-h-0 w-auto max-w-64 font-semibold outline rounded-xs"
                                     />
                                     <span v-else>
                                         {{ user.name || "用户" }}
@@ -402,11 +402,14 @@ async function startNameEdit() {
                     </div>
                 </div>
                 <!-- 用户详细信息 -->
-                <div class="text-sm space-y-1 pt-2 border-t border-base-300">
+                <div class="text-sm space-y-1 pt-2 border-t border-base-content/10">
                     <div class="mb-2">
                         <div class="flex items-center justify-between text-sm">
                             <span class="font-medium inline-flex items-center gap-1.5">
-                                <span>等级 Lv.{{ user.level }}</span>
+                                <span
+                                    >等级
+                                    <b class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">Lv.{{ user.level }}</b></span
+                                >
                                 <FullTooltip side="bottom">
                                     <button type="button" class="inline-flex text-base-content/50 hover:text-base-content/80">
                                         <Icon icon="ri:question-line" class="size-4" />
@@ -428,7 +431,7 @@ async function startNameEdit() {
                                                     :value="dailyExperienceStatus.todayAwardedExp"
                                                     :max="dailyExperienceStatus.totalAvailableExp"
                                                 />
-                                                <div class="border-t border-base-300/70 pt-2 space-y-2">
+                                                <div class="border-t border-base-content/10 pt-2 space-y-2">
                                                     <div class="space-y-1">
                                                         <div class="flex items-center justify-between gap-3">
                                                             <span>打开软件 +2</span>
@@ -523,7 +526,7 @@ async function startNameEdit() {
                                                 </div>
                                             </div>
                                             <div v-else class="text-base-content/60">今日进度暂不可用</div>
-                                            <div class="border-t border-base-300/70 pt-2 space-y-2">
+                                            <div class="border-t border-base-content/10 pt-2 space-y-2">
                                                 <div class="flex items-center justify-between gap-3">
                                                     <span>本赛季深渊上传 +50</span>
                                                     <span class="tabular-nums">
@@ -540,7 +543,9 @@ async function startNameEdit() {
                                     </template>
                                 </FullTooltip>
                             </span>
-                            <span class="text-base-content/60">{{ user.experience }} 总经验</span>
+                            <span class="text-base-content/60"
+                                ><b class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ user.experience }}</b> 总经验</span
+                            >
                         </div>
                         <progress
                             class="progress progress-primary w-full mt-2"
@@ -556,27 +561,34 @@ async function startNameEdit() {
                         <span class="text-base-content/60">QQ:</span>
                         <span>{{ user.qq }}</span>
                     </div>
-                    <div v-if="user.roles && user.roles.length" class="flex justify-between">
+                    <div v-if="user.roles && user.roles.length" class="flex justify-between items-center">
                         <span class="text-base-content/60">角色:</span>
-                        <span v-for="role in user.roles" :key="role" class="badge badge-primary">{{ role }}</span>
+                        <span class="flex flex-wrap justify-end gap-1">
+                            <span
+                                v-for="role in user.roles"
+                                :key="role"
+                                class="rounded-xs border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary"
+                                >{{ role }}</span
+                            >
+                        </span>
                     </div>
                 </div>
 
                 <!-- 积分/装扮摘要 -->
-                <div class="pt-3 border-t border-base-300">
+                <div class="pt-3 border-t border-base-content/10">
                     <div class="flex items-center justify-between">
                         <div class="text-sm font-medium">积分与装扮</div>
                         <span v-if="loadingShopSummary" class="loading loading-spinner loading-xs" />
                     </div>
                     <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="rounded-lg bg-base-200/60 border border-base-300 p-3">
+                        <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-3">
                             <div class="text-xs text-base-content/60">积分余额</div>
-                            <div class="text-2xl font-extrabold leading-tight">
+                            <div class="font-orbitron text-2xl font-semibold leading-tight tabular-nums text-primary">
                                 {{ shopSummary?.points ?? "--" }}
                             </div>
                             <div class="text-xs text-base-content/50 mt-1">用于兑换称号、名字特效等装扮</div>
                         </div>
-                        <div class="rounded-lg bg-base-200/60 border border-base-300 p-3">
+                        <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-3">
                             <div class="text-xs text-base-content/60">当前装扮</div>
                             <div class="mt-1 text-sm space-y-1">
                                 <div class="flex justify-between gap-2">
@@ -598,26 +610,26 @@ async function startNameEdit() {
                 </div>
             </div>
             <!-- 未登录状态 -->
-            <div v-else class="text-center py-4">
-                <div class="text-base-content/60 mb-2">未登录 DNA Builder 账号</div>
+            <div v-else class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-5 text-center">
+                <div class="text-base-content/60 mb-3">未登录 DNA Builder 账号</div>
                 <button class="btn btn-primary px-12 mx-2" @click="openLoginModal">登录</button>
                 <button class="btn btn-primary px-12 mx-2" @click="openRegisterModal">注册</button>
             </div>
         </div>
 
         <!-- 功能说明 -->
-        <div class="text-xs text-base-content/50 p-4">
+        <div class="border-t border-base-content/10 pt-2.5 text-xs text-base-content/45">
             <p>DNA Builder 账号用于访问社区功能、分享构建方案等</p>
         </div>
 
         <!-- 登录模态框 -->
         <div class="modal" :class="{ 'modal-open': loginForm.open }">
-            <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-96">
+            <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
                 <div class="p-6">
                     <!-- 登录表单 -->
                     <form class="space-y-4" @submit.prevent="handleLogin">
                         <div class="text-center mb-6">
-                            <div class="w-16 h-16 bg-base-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
                                 <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
                             </div>
                             <span class="text-lg font-bold">用户登录</span>
@@ -631,16 +643,9 @@ async function startNameEdit() {
                             <input v-model="loginForm.password" type="password" class="grow" placeholder="密码" />
                         </label>
                         <!-- 登录按钮 -->
-                        <button
-                            type="submit"
-                            class="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
-                            :disabled="loading"
-                        >
-                            <div v-if="loading" class="flex items-center justify-center gap-2">
-                                <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                <span>登录中...</span>
-                            </div>
-                            <span v-else>登录</span>
+                        <button type="submit" class="btn btn-primary w-full" :disabled="loading">
+                            <span v-if="loading" class="loading loading-spinner loading-xs" />
+                            <span>{{ loading ? "登录中..." : "登录" }}</span>
                         </button>
                         <!-- 忘记密码链接 -->
                         <div class="text-center">
@@ -665,12 +670,12 @@ async function startNameEdit() {
         </div>
         <!-- 注册模态框 -->
         <div class="modal" :class="{ 'modal-open': registerForm.open }">
-            <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-96">
+            <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
                 <div class="p-6">
                     <!-- 注册表单 -->
                     <form class="space-y-4" @submit.prevent="handleRegister">
                         <div class="text-center mb-6">
-                            <div class="w-16 h-16 bg-base-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
                                 <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
                             </div>
                             <span class="text-lg font-bold">用户注册</span>
@@ -700,16 +705,9 @@ async function startNameEdit() {
                             "
                         />
                         <!-- 登录按钮 -->
-                        <button
-                            type="submit"
-                            class="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
-                            :disabled="loading"
-                        >
-                            <div v-if="loading" class="flex items-center justify-center gap-2">
-                                <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                <span>注册中...</span>
-                            </div>
-                            <span v-else>注册</span>
+                        <button type="submit" class="btn btn-primary w-full" :disabled="loading">
+                            <span v-if="loading" class="loading loading-spinner loading-xs" />
+                            <span>{{ loading ? "注册中..." : "注册" }}</span>
                         </button>
                     </form>
                     <!-- 额外信息 -->
@@ -727,12 +725,12 @@ async function startNameEdit() {
 
         <!-- 密码重置模态框 -->
         <div class="modal" :class="{ 'modal-open': resetPasswordForm.open }">
-            <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-96">
+            <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
                 <div class="p-6">
                     <!-- 密码重置表单 -->
                     <div class="space-y-4">
                         <div class="text-center mb-6">
-                            <div class="w-16 h-16 bg-base-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
                                 <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
                             </div>
                             <span class="text-lg font-bold">密码重置</span>
@@ -752,15 +750,12 @@ async function startNameEdit() {
                                 <div class="flex gap-2">
                                     <button
                                         type="button"
-                                        class="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                                        class="btn btn-primary w-full"
                                         :disabled="loading"
                                         @click="sendResetCode"
                                     >
-                                        <div v-if="loading" class="flex items-center justify-center gap-2">
-                                            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                            <span>发送中...</span>
-                                        </div>
-                                        <span v-else>发送验证码</span>
+                                        <span v-if="loading" class="loading loading-spinner loading-xs" />
+                                        <span>{{ loading ? "发送中..." : "发送验证码" }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -794,22 +789,19 @@ async function startNameEdit() {
                                 <div class="flex gap-2">
                                     <button
                                         type="button"
-                                        class="w-1/3 bg-base-100 text-base-content py-2.5 px-4 rounded-lg hover:bg-base-300 transition-all duration-200 shadow-md hover:shadow-lg"
+                                        class="btn w-1/3"
                                         @click="resetPasswordForm.step = 1"
                                     >
                                         上一步
                                     </button>
                                     <button
                                         type="button"
-                                        class="flex-1 bg-linear-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                                        class="btn btn-primary flex-1"
                                         :disabled="loading"
                                         @click="handleResetPassword"
                                     >
-                                        <div v-if="loading" class="flex items-center justify-center gap-2">
-                                            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                            <span>重置中...</span>
-                                        </div>
-                                        <span v-else>重置密码</span>
+                                        <span v-if="loading" class="loading loading-spinner loading-xs" />
+                                        <span>{{ loading ? "重置中..." : "重置密码" }}</span>
                                     </button>
                                 </div>
                             </div>

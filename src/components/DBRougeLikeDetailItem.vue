@@ -186,56 +186,83 @@ const roomConditions = computed(() => {
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-center gap-3">
-            <div class="h-14 min-w-14 w-fit shrink-0 overflow-hidden rounded bg-base-200">
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 条目档案头：纸面名片 + primary 标题 -->
+        <header class="flex items-center gap-3">
+            <div class="h-14 min-w-14 w-fit shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3">
                 <ImageFallback :src="iconUrl" :alt="displayName" class="h-14 w-auto object-contain">
                     <img src="/imgs/webp/T_Head_Empty.webp" :alt="displayName" class="h-14 w-auto object-contain" />
                 </ImageFallback>
             </div>
             <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
-                    <SRouterLink :to="`/db/rouge/like/${kind}/${item.id}`" class="text-lg font-bold link link-primary line-clamp-1">
+                    <SRouterLink
+                        :to="`/db/rouge/like/${kind}/${item.id}`"
+                        class="line-clamp-1 font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
+                    >
                         {{ displayName }}
                     </SRouterLink>
                     <CopyID :id="item.id" />
                 </div>
-                <div class="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-base-content/70">
-                    <span v-if="'rarity' in item" class="rounded px-1.5 py-0.5" :class="getRarityBadgeClass(item.rarity + 2)">
+                <div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-base-content/55">
+                    <span
+                        v-if="'rarity' in item"
+                        class="rounded-xs px-1.5 py-0.5 font-semibold"
+                        :class="getRarityBadgeClass(item.rarity + 2)"
+                    >
                         {{ getRarityName(item.rarity + 2) }}
                     </span>
-                    <span v-if="groupName" class="rounded px-1.5 py-0.5 bg-base-300/70">{{ $t(groupName) }}</span>
-                    <span v-if="treasureGroupName" class="rounded px-1.5 py-0.5 bg-base-300/70">{{ $t(treasureGroupName) }}</span>
-                    <span v-if="talentBranch" class="rounded px-1.5 py-0.5 bg-base-300/70">{{ $t(talentBranch.name) }}</span>
-                    <span v-if="'type' in item && typeof item.type === 'number'">{{
-                        $t(talentTypeNames[item.type] || `类型 ${item.type}`)
+                    <span v-if="groupName" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{ $t(groupName) }}</span>
+                    <span v-if="treasureGroupName" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{
+                        $t(treasureGroupName)
                     }}</span>
-                    <span v-if="'roomType' in item">{{ getRougeRoomTypeInfo(item.roomType)?.name || `房间类型 ${item.roomType}` }}</span>
-                    <span v-if="'heatValue' in item">{{ $t("深潜深度") }} {{ item.heatValue }}</span>
-                    <span v-if="'moment' in item">{{ item.type }}</span>
+                    <span v-if="talentBranch" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{
+                        $t(talentBranch.name)
+                    }}</span>
+                    <span
+                        v-if="'type' in item && typeof item.type === 'number'"
+                        class="rounded-xs border border-base-content/15 px-1.5 py-0.5"
+                    >
+                        {{ $t(talentTypeNames[item.type] || `类型 ${item.type}`) }}
+                    </span>
+                    <span v-if="'roomType' in item" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">
+                        {{ getRougeRoomTypeInfo(item.roomType)?.name || `房间类型 ${item.roomType}` }}
+                    </span>
+                    <span v-if="'heatValue' in item" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">
+                        {{ $t("深潜深度") }} {{ item.heatValue }}
+                    </span>
+                    <span v-if="'moment' in item" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{ item.type }}</span>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <div v-if="showContractLevelSelector" class="flex items-center gap-3 rounded-md bg-base-200 p-3">
-            <span class="text-xs text-base-content/70 shrink-0">等级</span>
-            <div class="flex flex-wrap gap-1.5">
-                <button
-                    v-for="level in (item as RougeLikeContract).maxLevel"
-                    :key="level"
-                    type="button"
-                    class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
-                    :class="currentContractLevel === level ? 'bg-primary text-white' : 'bg-base-100 text-base-content hover:bg-base-300'"
-                    @click="contractLevel = level"
-                >
-                    {{ level }}
-                </button>
-            </div>
-        </div>
+        <!-- 深潜等级选择方章 -->
+        <section v-if="showContractLevelSelector" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="LEVEL" title="等级">
+                <template #trailing>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button
+                            v-for="level in (item as RougeLikeContract).maxLevel"
+                            :key="level"
+                            type="button"
+                            class="cursor-pointer rounded-xs border px-2 py-0.5 font-orbitron text-[11px] font-semibold tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                currentContractLevel === level
+                                    ? 'border-primary bg-primary text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="contractLevel = level"
+                        >
+                            {{ level }}
+                        </button>
+                    </div>
+                </template>
+            </SectionHeader>
+        </section>
 
-        <div v-if="contractDescAtLevel" class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">描述</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap break-all">
+        <section v-if="contractDescAtLevel" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DESCRIPTION" title="描述" />
+            <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-6 whitespace-pre-wrap break-all">
                 <template v-for="(segment, index) in parseRichText(contractDescAtLevel)" :key="`desc-${index}-${segment.tone}`">
                     <span
                         :class="{
@@ -248,11 +275,14 @@ const roomConditions = computed(() => {
                     </span>
                 </template>
             </div>
-        </div>
+        </section>
 
-        <div v-if="simpleDesc && simpleDesc !== desc" class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">简述</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap break-all">
+        <section
+            v-if="simpleDesc && simpleDesc !== desc"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="SUMMARY" title="简述" />
+            <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-6 whitespace-pre-wrap break-all">
                 <template v-for="(segment, index) in parseRichText(simpleDesc)" :key="`simple-${index}-${segment.tone}`">
                     <span
                         :class="{
@@ -265,16 +295,24 @@ const roomConditions = computed(() => {
                     </span>
                 </template>
             </div>
-        </div>
+        </section>
 
-        <div v-if="'ipDesc' in item && item.ipDesc" class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">背景</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap break-all">{{ item.ipDesc }}</div>
-        </div>
+        <section
+            v-if="'ipDesc' in item && item.ipDesc"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="LORE" title="背景" />
+            <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-6 whitespace-pre-wrap break-all">
+                {{ item.ipDesc }}
+            </div>
+        </section>
 
-        <div v-if="'groupEffectDesc' in item && item.groupEffectDesc" class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">套装效果</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap break-all">
+        <section
+            v-if="'groupEffectDesc' in item && item.groupEffectDesc"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="SET BONUS" title="套装效果" />
+            <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-6 whitespace-pre-wrap break-all">
                 <template v-for="(segment, index) in parseRichText(item.groupEffectDesc)" :key="`group-${index}-${segment.tone}`">
                     <span
                         :class="{
@@ -287,24 +325,33 @@ const roomConditions = computed(() => {
                     </span>
                 </template>
             </div>
-        </div>
+        </section>
 
-        <div v-if="'activateNeed' in item && item.activateNeed.length" class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">激活需求</div>
+        <section
+            v-if="'activateNeed' in item && item.activateNeed.length"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="ACTIVATION" title="激活需求" :count="item.activateNeed.length" />
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <DBRougeTreasureItem v-for="treasureId in item.activateNeed" :key="treasureId" :id="treasureId" />
             </div>
-        </div>
+        </section>
 
-        <div
+        <section
             v-if="treasureGroup && (treasureGroup.groupEffectDesc || treasureGroup.activateNeed?.length)"
-            class="rounded-md bg-base-200 p-3"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <div class="text-xs text-base-content/70 mb-2">套装：{{ $t(treasureGroup.name) }}</div>
-            <div v-if="treasureGroup.activateNeed?.length" class="text-sm text-base-content/80 mb-1">
-                套装效果：收集 {{ treasureGroup.activateNeed.length }} 件
-            </div>
-            <div v-if="treasureGroup.groupEffectDesc" class="text-sm leading-6 whitespace-pre-wrap break-all">
+            <SectionHeader no-animate compact kicker="SET" :title="$t(treasureGroup.name)">
+                <template #trailing>
+                    <span v-if="treasureGroup.activateNeed?.length" class="text-[11px] tracking-wide text-base-content/50">
+                        收集 {{ treasureGroup.activateNeed.length }} 件
+                    </span>
+                </template>
+            </SectionHeader>
+            <div
+                v-if="treasureGroup.groupEffectDesc"
+                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-6 whitespace-pre-wrap break-all"
+            >
                 <template v-for="(segment, index) in parseRichText(treasureGroup.groupEffectDesc)" :key="`group-${index}-${segment.tone}`">
                     <span
                         :class="{
@@ -317,104 +364,191 @@ const roomConditions = computed(() => {
                     </span>
                 </template>
             </div>
-        </div>
+        </section>
 
-        <div v-if="'eventStoryline' in item && (item.eventStoryline as RougeStoryNode[]).length" class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">剧情</div>
+        <section
+            v-if="'eventStoryline' in item && (item.eventStoryline as RougeStoryNode[]).length"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="STORY" title="剧情" />
             <DBRougeStorylineItem :nodes="item.eventStoryline as RougeStoryNode[]" :event-name="String(item.id)" />
-        </div>
+        </section>
 
-        <div v-if="roomConditions.length" class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">房间条件</div>
+        <section v-if="roomConditions.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="CONDITIONS" title="房间条件" :count="roomConditions.length" />
             <div class="space-y-2">
                 <ConditionItem v-for="condition in roomConditions" :key="condition.id" :condition="condition" />
             </div>
-        </div>
+        </section>
 
-        <div v-if="kind !== 'treasureGroup'" class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">基础信息</div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
-                <div v-if="'maxLevel' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">最大等级</span>
-                    <span>{{ item.maxLevel }}</span>
+        <section v-if="kind !== 'treasureGroup'" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="BASIC INFO" title="基础信息" />
+            <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                <div
+                    v-if="'maxLevel' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">最大等级</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.maxLevel }}</span>
                 </div>
-                <div v-if="kind === 'room' && 'weight' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">房间权重</span>
-                    <span>{{ item.weight }}</span>
+                <div
+                    v-if="kind === 'room' && 'weight' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">房间权重</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.weight }}</span>
                 </div>
-                <div v-if="kind !== 'room' && 'weight' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">权重</span>
-                    <span>{{ item.weight }}</span>
+                <div
+                    v-if="kind !== 'room' && 'weight' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">权重</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.weight }}</span>
                 </div>
-                <div v-if="'shopPrices' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">商店价格</span>
-                    <span>{{ item.shopPrices }}</span>
+                <div
+                    v-if="'shopPrices' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">商店价格</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        item.shopPrices
+                    }}</span>
                 </div>
-                <div v-if="'endPoints' in item && (item.endPoints as number[]).length" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">积分</span>
-                    <span>{{ (item.endPoints as number[]).join(" / ") }}</span>
+                <div
+                    v-if="'endPoints' in item && (item.endPoints as number[]).length"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">积分</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        (item.endPoints as number[]).join(" / ")
+                    }}</span>
                 </div>
-                <div v-if="'point' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">升级花费</span>
-                    <span>{{ item.point }}</span>
+                <div
+                    v-if="'point' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">升级花费</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.point }}</span>
                 </div>
-                <div v-if="'modEquip' in item && item.modEquip" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">适用部位</span>
-                    <span>{{ item.modEquip }}</span>
+                <div
+                    v-if="'modEquip' in item && item.modEquip"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">适用部位</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        item.modEquip
+                    }}</span>
                 </div>
-                <div v-if="'mod' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">{{ $t("提灯") }}/{{ $t("遗物") }} Mod</span>
-                    <span>{{ item.mod }}</span>
+                <div
+                    v-if="'mod' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ $t("提灯") }}/{{ $t("遗物") }} Mod</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.mod }}</span>
                 </div>
-                <div v-if="'globalPassiveId' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">全局被动</span>
-                    <span>{{ item.globalPassiveId }}</span>
+                <div
+                    v-if="'globalPassiveId' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">全局被动</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        item.globalPassiveId
+                    }}</span>
                 </div>
-                <div v-if="'rlArchiveId' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">图鉴 ID</span>
-                    <span>{{ item.rlArchiveId }}</span>
+                <div
+                    v-if="'rlArchiveId' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">图鉴 ID</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.rlArchiveId }}</span>
                 </div>
-                <div v-if="'canSell' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">可出售</span>
-                    <span>{{ item.canSell ? "是" : "否" }}</span>
+                <div
+                    v-if="'canSell' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">可出售</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        item.canSell ? "是" : "否"
+                    }}</span>
                 </div>
-                <div v-if="'blessingAward' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">祝福奖励</span>
-                    <span>{{ item.blessingAward }}</span>
+                <div
+                    v-if="'blessingAward' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">祝福奖励</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        item.blessingAward
+                    }}</span>
                 </div>
-                <div v-if="'tokenAward' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">代币奖励</span>
-                    <span>{{ item.tokenAward }}</span>
+                <div
+                    v-if="'tokenAward' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">代币奖励</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        item.tokenAward
+                    }}</span>
                 </div>
-                <div v-if="'endPointsBase' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">基础积分</span>
-                    <span>{{ item.endPointsBase }}</span>
+                <div
+                    v-if="'endPointsBase' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">基础积分</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.endPointsBase }}</span>
                 </div>
-                <div v-if="'endPointsExtras' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">额外积分</span>
-                    <span>{{ item.endPointsExtras }}</span>
+                <div
+                    v-if="'endPointsExtras' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">额外积分</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        item.endPointsExtras
+                    }}</span>
                 </div>
-                <div v-if="'unlock' in item && (item.unlock as number[]).length" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">解锁依赖</span>
-                    <span>{{ (item.unlock as number[]).join(", ") }}</span>
+                <div
+                    v-if="'unlock' in item && (item.unlock as number[]).length"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">解锁依赖</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        (item.unlock as number[]).join(", ")
+                    }}</span>
                 </div>
-                <div v-if="'moment' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">事件阶段</span>
-                    <span>{{ item.moment }}</span>
+                <div
+                    v-if="'moment' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">事件阶段</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        item.moment
+                    }}</span>
                 </div>
-                <div v-if="'minRoom' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">最小房间</span>
-                    <span>{{ item.minRoom }}</span>
+                <div
+                    v-if="'minRoom' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">最小房间</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.minRoom }}</span>
                 </div>
-                <div v-if="'probability' in item && item.probability.length" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">事件概率</span>
-                    <span>{{ item.probability.join(" / ") }}</span>
+                <div
+                    v-if="'probability' in item && item.probability.length"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">事件概率</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        item.probability.join(" / ")
+                    }}</span>
                 </div>
-                <div v-if="'cutOffEvent' in item" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">截断事件</span>
-                    <span>{{ item.cutOffEvent ? "是" : "否" }}</span>
+                <div
+                    v-if="'cutOffEvent' in item"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">截断事件</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        item.cutOffEvent ? "是" : "否"
+                    }}</span>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </template>

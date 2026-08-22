@@ -8753,6 +8753,13 @@ export const hairData: HairItem[] = [
         charId: 2101,
     },
     {
+        id: 210292,
+        name: "逐光追雪",
+        icon: "T_Fashion_Eve_01",
+        rarity: 5,
+        charId: 2102,
+    },
+    {
         id: 240192,
         name: "素浪濯心",
         icon: "T_Fashion_Baiheng_01",

@@ -10,10 +10,15 @@ const walnut = computed(() => walnutData.find(w => w.id === walnutId.value))
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-300">
+    <div class="h-full flex flex-col">
         <ScrollArea v-if="walnut" class="flex-1">
-            <!-- 使用 DBWalnutDetailItem 组件显示密函详情 -->
-            <DBWalnutDetailItem :walnut="walnut" />
+            <!-- 居中容器：与首页一致的纸面排版宽度 -->
+            <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
+                <div>
+                    <!-- 使用 DBWalnutDetailItem 组件显示密函详情 -->
+                    <DBWalnutDetailItem :walnut="walnut" />
+                </div>
+            </div>
         </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">

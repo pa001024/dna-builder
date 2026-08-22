@@ -1,12 +1,30 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI } from "dna-api"
 import { defineStore } from "pinia"
+import {
+    applyMaterial,
+    isLaunchAtStartupEnabled,
+    listSystemFonts,
+    setLaunchAtStartupEnabled,
+    startHeartbeat,
+    stopHeartbeat,
+    tauriFetch,
+} from "@/api/app"
+import { executeSignFlow } from "@/api/dna-sign"
+import { env } from "@/env"
+import { applyLanguageFontClass, changeLanguage } from "@/i18n"
 import { sleep } from "@/util"
-import { applyMaterial, isLaunchAtStartupEnabled, setLaunchAtStartupEnabled, startHeartbeat, stopHeartbeat, tauriFetch } from "../api/app"
-import { executeSignFlow } from "../api/dna-sign"
-import { applyLanguageFontClass, changeLanguage } from "../i18n"
-import type { CustomTheme } from "../utils/customTheme"
-import { DEFAULT_CUSTOM_THEME } from "../utils/customTheme"
+import type { CustomTheme } from "@/utils/customTheme"
+import { DEFAULT_CUSTOM_THEME } from "@/utils/customTheme"
+import type { CustomFontMeta } from "@/utils/font-storage"
+import {
+    customFontCssFamily,
+    listCustomFonts,
+    registerCustomFontFace,
+    removeCustomFont as removeCustomFontFromOpfs,
+    saveCustomFont,
+} from "@/utils/font-storage"
+import { readCustomWallpaper, removeCustomWallpaper, writeCustomWallpaper } from "@/utils/wallpaper-storage"
 import { db } from "./db"
 
 let apiCache: DNAAPI | null = null
@@ -47,10 +65,19 @@ export const useSettingStore = defineStore("setting", {
             protagonistGender2: useLocalStorage<"male" | "female">("story_protagonist_gender_2", "female"),
             safeMode: useLocalStorage("setting_safe_mode", true),
             lastHeartbeatTime: 0,
+            // 自定义底图（图片 data URL；空字符串表示未设置），持久化在 OPFS 中，启动时通过 initCustomWallpaper 加载
+            customWallpaper: "",
             // 自定义主题（设置页主题设计器），缺失字段时用默认值合并兜底
             customTheme: useLocalStorage<CustomTheme>("setting_custom_theme", structuredClone(DEFAULT_CUSTOM_THEME), {
                 mergeDefaults: true,
             }),
+            // 自定义外观字体（CSS font-family 值，带引号的字体名；空字符串表示使用默认字体栈）
+            appFontFamily: useLocalStorage("setting_app_font_family", ""),
+            // 已上传的自定义字体（运行时从 OPFS 枚举）
+            customFonts: [] as CustomFontMeta[],
+            // 系统已安装字体列表（懒加载缓存）
+            systemFonts: [] as string[],
+            systemFontsLoading: false,
         }
     },
     getters: {},
@@ -69,6 +96,130 @@ export const useSettingStore = defineStore("setting", {
          */
         setCustomTheme(theme: CustomTheme) {
             this.customTheme = theme
+        },
+        /**
+         * 启动时从 OPFS 加载自定义底图到内存状态。
+         * @returns 当前底图 data URL（未设置为空字符串）
+         */
+        async initCustomWallpaper() {
+            this.customWallpaper = await readCustomWallpaper()
+            return this.customWallpaper
+        },
+        /**
+         * 更新自定义底图并持久化到 OPFS。
+         * @param dataUrl 底图 data URL；空字符串等价于清除
+         */
+        async setCustomWallpaper(dataUrl: string) {
+            if (!dataUrl) {
+                await this.clearCustomWallpaper()
+                return
+            }
+            await writeCustomWallpaper(dataUrl)
+            this.customWallpaper = dataUrl
+        },
+        /**
+         * 清除自定义底图：删除 OPFS 中的文件并重置内存状态。
+         */
+        async clearCustomWallpaper() {
+            await removeCustomWallpaper()
+            this.customWallpaper = ""
+        },
+        /**
+         * 将所选外观字体写入根元素 CSS 变量（置于默认字体栈之前，缺失字形时逐级回退）。
+         */
+        applyAppFont() {
+            if (typeof document === "undefined") {
+                return
+            }
+            const style = document.documentElement.style
+            if (!this.appFontFamily) {
+                style.removeProperty("--app-user-font")
+                return
+            }
+            style.setProperty("--app-user-font", `${this.appFontFamily}, var(--app-font-fallback)`)
+        },
+        /**
+         * 设置外观字体并立即应用。
+         * @param family 带引号的 CSS 字体族名；空字符串表示恢复默认
+         */
+        setAppFontFamily(family: string) {
+            this.appFontFamily = family
+            this.applyAppFont()
+        },
+        /**
+         * 启动时初始化自定义字体：从 OPFS 枚举并注册 FontFace，再应用已保存的选择。
+         */
+        async initAppFont() {
+            try {
+                this.customFonts = await listCustomFonts()
+                for (const meta of this.customFonts) {
+                    await registerCustomFontFace(meta)
+                }
+            } catch (error) {
+                console.error("加载自定义字体失败", error)
+            }
+            this.applyAppFont()
+        },
+        /**
+         * 上传字体文件到 OPFS，注册成功后自动启用。
+         * @param file 字体文件（ttf/otf/woff/woff2）
+         */
+        async uploadCustomFont(file: File) {
+            const meta = await saveCustomFont(file)
+            const registered = await registerCustomFontFace(meta)
+            if (!registered) {
+                // 解析失败时清理已落盘的文件
+                await removeCustomFontFromOpfs(meta.fileName)
+                throw new Error("无法解析该字体文件")
+            }
+            await this.refreshCustomFonts()
+            this.setAppFontFamily(customFontCssFamily(meta))
+        },
+        /**
+         * 删除已上传的自定义字体；若正在使用则回退默认字体。
+         * @param fileName 存储文件名
+         */
+        async deleteCustomFont(fileName: string) {
+            const removed = this.customFonts.find(meta => meta.fileName === fileName)
+            await removeCustomFontFromOpfs(fileName)
+            if (removed && this.appFontFamily === customFontCssFamily(removed)) {
+                this.setAppFontFamily("")
+            }
+            await this.refreshCustomFonts()
+        },
+        /**
+         * 重新从 OPFS 枚举自定义字体列表。
+         */
+        async refreshCustomFonts() {
+            this.customFonts = await listCustomFonts()
+        },
+        /**
+         * 加载系统字体列表：桌面端走 Tauri 注册表枚举；
+         * Web 端尝试 Local Font Access API（需要用户手势与浏览器权限）。
+         * @param force 是否强制刷新缓存
+         */
+        async loadSystemFonts(force = false) {
+            if (this.systemFontsLoading || (!force && this.systemFonts.length)) {
+                return
+            }
+            this.systemFontsLoading = true
+            try {
+                if (env.isApp) {
+                    this.systemFonts = await listSystemFonts()
+                } else if ("queryLocalFonts" in window) {
+                    const fonts = await (window as any).queryLocalFonts()
+                    this.systemFonts = [...new Set<string>(fonts.map((font: { family: string }) => font.family))].sort((a, b) =>
+                        a.localeCompare(b, "zh-CN")
+                    )
+                } else {
+                    this.systemFonts = []
+                }
+            } catch (error) {
+                console.warn("获取系统字体列表失败", error)
+                this.systemFonts = []
+            } finally {
+                this.systemFontsLoading = false
+            }
         },
         /**
          * 同步桌面端开机启动状态，避免本地缓存与系统真实状态不一致。

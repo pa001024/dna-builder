@@ -216,7 +216,7 @@ type SearchScopeOption = {
 
 const globalSearchService = new GlobalSearchService()
 
-const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/db/map-local", "/db/questchain", "/db/dungeon"]
+const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/db/map-local", "/db/questchain", "/db/dungeon", "/db/resource"]
 
 const databaseSectionConfigs: DatabaseSectionConfig[] = [
     {
@@ -468,7 +468,7 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                         </div>
                     </div>
 
-                    <p class="font-mono text-xs tracking-wide text-base-content/45">{{ searchStatusText }}</p>
+                    <p class="text-xs tracking-wide text-base-content/45">{{ searchStatusText }}</p>
                 </div>
             </section>
 
@@ -527,8 +527,8 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
                         <div class="min-w-0">
                             <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
                                 <h2 class="text-xl font-bold tracking-tight text-base-content md:text-2xl">{{ section.title }}</h2>
-                                <span class="font-mono text-xs tabular-nums text-base-content/40">
-                                    {{ section.items.length }} {{ $t("view.databaseEntryCount") }}
+                                <span class="text-xs tabular-nums text-base-content/40">
+                                    <span class="font-mono">{{ section.items.length }}</span> {{ $t("view.databaseEntryCount") }}
                                 </span>
                             </div>
 
@@ -568,8 +568,9 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
 
 <style scoped>
 /* 页面级一次性入场动画：轻量上浮淡入，仅播放一次，不做循环装饰 */
+/* backwards：结束后不保留动画值，避免后代 backdrop-filter 失效 */
 .db-rise {
-    animation: db-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: db-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @keyframes db-rise {

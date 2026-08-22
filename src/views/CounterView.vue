@@ -138,81 +138,111 @@ onUnmounted(() => {
 <template>
     <ScrollArea class="h-full">
         <div class="flex flex-col gap-4 p-4">
-            <div class="flex items-center gap-3">
-                <button class="btn btn-primary btn-sm" @click="createCounter">{{ $t("counter.create") }}</button>
-                <button class="btn btn-ghost btn-sm" @click="counterStore.resetAllCounters">{{ $t("counter.resetAll") }}</button>
+            <!-- 工具条：外层区块卡；新建为主操作（主色实底），全部重置为次操作（描边） -->
+            <div
+                class="flex flex-wrap items-center gap-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm animate-ef-rise motion-reduce:animate-none"
+            >
+                <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">COUNTERS</span>
+                <div class="ml-auto flex items-center gap-2">
+                    <button
+                        class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-sm font-semibold text-primary-content transition-all duration-150 hover:bg-primary/90 active:scale-[0.97]"
+                        @click="createCounter"
+                    >
+                        {{ $t("counter.create") }}
+                    </button>
+                    <button
+                        class="cursor-pointer rounded-xs border border-base-content/20 px-3 py-1.5 text-sm text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                        @click="counterStore.resetAllCounters"
+                    >
+                        {{ $t("counter.resetAll") }}
+                    </button>
+                </div>
             </div>
 
-            <div class="grid gap-4 xl:grid-cols-2">
+            <div class="stagger-rise grid gap-4 lg:grid-cols-2">
                 <section
                     v-for="counter in counters"
                     :key="counter.id"
-                    class="overflow-hidden rounded-lg border border-base-300 bg-base-100 shadow-sm"
+                    class="rounded-xs border p-3 backdrop-blur-sm transition-colors duration-200"
                     :data-counter-id="counter.id"
-                    :class="dragOverCounterId === counter.id ? 'border-primary' : ''"
+                    :class="
+                        dragOverCounterId === counter.id
+                            ? 'border-primary bg-primary/10'
+                            : 'border-base-content/10 bg-base-100/60'
+                    "
                 >
-                    <div class="border-b border-base-300 px-4 py-3">
-                        <div class="flex items-center justify-between gap-3">
-                            <div class="min-w-0 flex-1">
-                                <input
-                                    v-model="counter.name"
-                                    class="w-full border-0 bg-transparent p-0 text-base font-medium outline-none"
-                                    @change="counterStore.updateCounter(counter.id, { name: counter.name })"
+                    <div class="flex items-center justify-between gap-3 border-b border-base-content/10 pb-2.5">
+                        <div class="min-w-0 flex-1">
+                            <input
+                                v-model="counter.name"
+                                class="w-full border-0 bg-transparent p-0 text-base font-medium outline-none"
+                                @change="counterStore.updateCounter(counter.id, { name: counter.name })"
+                            />
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button
+                                type="button"
+                                class="inline-flex size-8 cursor-pointer items-center justify-center rounded-xs text-base-content/60 transition-colors duration-150 hover:bg-base-content/10 hover:text-primary"
+                                :aria-expanded="isCounterPanelOpen(counter.id)"
+                                :aria-label="$t('counter.expandSettings')"
+                                @click="toggleCounterPanel(counter.id)"
+                            >
+                                <Icon
+                                    :icon="isCounterPanelOpen(counter.id) ? 'ri:arrow-up-s-line' : 'ri:arrow-down-s-line'"
+                                    class="h-5 w-5"
                                 />
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <button
-                                    type="button"
-                                    class="inline-flex size-8 items-center justify-center rounded-full text-base-content/60 transition-colors hover:bg-base-200 hover:text-base-content"
-                                    :aria-expanded="isCounterPanelOpen(counter.id)"
-                                    :aria-label="$t('counter.expandSettings')"
-                                    @click="toggleCounterPanel(counter.id)"
-                                >
-                                    <Icon
-                                        :icon="isCounterPanelOpen(counter.id) ? 'ri:arrow-up-s-line' : 'ri:arrow-down-s-line'"
-                                        class="h-5 w-5"
-                                    />
-                                </button>
-                                <button
-                                    type="button"
-                                    class="inline-flex size-8 items-center justify-center rounded-full text-base-content/60 transition-colors hover:bg-base-200 hover:text-base-content"
-                                    :aria-label="$t('counter.resetCounter')"
-                                    @click="counterStore.resetCounter(counter.id)"
-                                >
-                                    <Icon icon="ri:refresh-line" class="h-5 w-5" />
-                                </button>
-                                <button
-                                    type="button"
-                                    class="inline-flex size-8 items-center justify-center rounded-full text-base-content/60 transition-colors hover:bg-base-200 hover:text-error"
-                                    :aria-label="$t('counter.deleteCounter')"
-                                    @click="counterStore.removeCounter(counter.id)"
-                                >
-                                    <Icon icon="ri:delete-bin-line" class="h-5 w-5" />
-                                </button>
-                            </div>
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex size-8 cursor-pointer items-center justify-center rounded-xs text-base-content/60 transition-colors duration-150 hover:bg-base-content/10 hover:text-primary"
+                                :aria-label="$t('counter.resetCounter')"
+                                @click="counterStore.resetCounter(counter.id)"
+                            >
+                                <Icon icon="ri:refresh-line" class="h-5 w-5" />
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex size-8 cursor-pointer items-center justify-center rounded-xs text-base-content/60 transition-colors duration-150 hover:bg-error/10 hover:text-error"
+                                :aria-label="$t('counter.deleteCounter')"
+                                @click="counterStore.removeCounter(counter.id)"
+                            >
+                                <Icon icon="ri:delete-bin-line" class="h-5 w-5" />
+                            </button>
                         </div>
                     </div>
 
-                    <div class="px-4 py-4">
+                    <div class="pt-3">
                         <div class="flex min-h-44 flex-col justify-between">
                             <div class="flex flex-1 items-center justify-center">
                                 <input
                                     :value="counter.value"
                                     type="number"
                                     min="0"
-                                    class="w-full border-0 bg-transparent text-center text-7xl font-semibold outline-none"
+                                    class="w-full border-0 bg-transparent text-center font-orbitron text-7xl font-semibold tabular-nums text-primary outline-none"
                                     @change="counterStore.setCounterValue(counter.id, Number(($event.target as HTMLInputElement).value))"
                                 />
                             </div>
 
+                            <!-- 加减控件：功能与布局不变，仅归一视觉（- 描边次操作 / + 主色实底主操作） -->
                             <div class="mt-4 flex items-center justify-between gap-4">
-                                <button class="btn flex-1" @click="counterStore.incrementBy(counter.id, -1)">-</button>
-                                <button class="btn flex-1" @click="counterStore.incrementCounter(counter.id)">+</button>
+                                <button
+                                    class="flex-1 cursor-pointer rounded-xs border border-base-content/20 py-2.5 text-lg font-semibold leading-none text-base-content/70 transition-all duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.98]"
+                                    @click="counterStore.incrementBy(counter.id, -1)"
+                                >
+                                    -
+                                </button>
+                                <button
+                                    class="flex-1 cursor-pointer rounded-xs border border-primary bg-primary py-2.5 text-lg font-semibold leading-none text-primary-content transition-all duration-150 hover:bg-primary/90 active:scale-[0.98]"
+                                    @click="counterStore.incrementCounter(counter.id)"
+                                >
+                                    +
+                                </button>
                             </div>
                         </div>
 
                         <div v-if="isCounterPanelOpen(counter.id)" class="mt-4">
-                            <div class="grid gap-4">
+                            <!-- 设置面板：内层小卡（父级已 blur，不叠加 backdrop） -->
+                            <div class="grid gap-4 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                                 <label class="grid gap-2 text-sm">
                                     <span class="font-medium">{{ $t("counter.maxValue") }}</span>
                                     <input
@@ -238,21 +268,26 @@ onUnmounted(() => {
                         </div>
 
                         <div class="mt-4 flex items-center justify-between gap-2">
-                            <div class="text-sm font-medium">{{ $t("counter.triggers") }}</div>
-                            <button class="btn btn-ghost btn-xs" @click="counterStore.addTrigger(counter.id)">{{ $t("counter.addTrigger") }}</button>
+                            <div class="text-sm font-medium tracking-wide">{{ $t("counter.triggers") }}</div>
+                            <button
+                                class="shrink-0 cursor-pointer rounded-xs border border-base-content/20 px-2 py-0.5 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                @click="counterStore.addTrigger(counter.id)"
+                            >
+                                {{ $t("counter.addTrigger") }}
+                            </button>
                         </div>
 
                         <div class="mt-3 space-y-2">
                             <div
                                 v-for="trigger in counter.triggers"
                                 :key="trigger.id"
-                                class="rounded-xl border border-base-300 bg-base-200/50 p-3"
+                                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                             >
                                 <div class="flex">
                                     <div class="mr-2">
                                         <button
                                             type="button"
-                                            class="inline-flex size-7 items-center justify-center rounded-full text-base-content/50 transition-colors hover:bg-base-300 hover:text-base-content"
+                                            class="inline-flex size-7 cursor-grab items-center justify-center rounded-xs text-base-content/50 transition-colors duration-150 hover:bg-base-content/10 hover:text-primary active:cursor-grabbing"
                                             :aria-label="$t('counter.dragTrigger')"
                                             @pointerdown="startTriggerMove(counter.id, trigger, $event)"
                                         >
@@ -260,7 +295,7 @@ onUnmounted(() => {
                                         </button>
                                         <button
                                             type="button"
-                                            class="inline-flex size-8 items-center justify-center rounded-full text-base-content/60 transition-colors hover:bg-base-200 hover:text-error"
+                                            class="inline-flex size-8 cursor-pointer items-center justify-center rounded-xs text-base-content/60 transition-colors duration-150 hover:bg-error/10 hover:text-error"
                                             :aria-label="$t('counter.deleteCounter')"
                                             @click="counterStore.removeTrigger(counter.id, trigger.id)"
                                         >
@@ -300,7 +335,7 @@ onUnmounted(() => {
         </div>
         <div
             v-if="draggedTrigger"
-            class="pointer-events-none fixed z-50 rounded-full border border-primary/40 bg-base-100 px-3 py-1 text-xs shadow-lg"
+            class="pointer-events-none fixed z-50 rounded-xs border border-primary/50 bg-base-100/85 px-2.5 py-1 text-xs shadow-lg backdrop-blur-md"
             :style="{ left: `${dragPreview.x + 12}px`, top: `${dragPreview.y + 12}px` }"
         >
             {{ $t("counter.moving") }}

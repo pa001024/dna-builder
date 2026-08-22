@@ -58,6 +58,7 @@ const TILE_SIZES: Record<string, POCardSize> = {
     levelup: "wide",
     "mod-manager": "wide",
     "map-tool": "wide",
+    "skin-gacha": "wide",
 }
 
 /** 兜底基础色：入口未配置主题时使用（与 POCard 默认渐变同源）。 */

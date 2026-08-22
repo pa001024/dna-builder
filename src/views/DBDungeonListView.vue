@@ -103,54 +103,111 @@ function toggleFilter(filterName: "type" | "level", show: boolean) {
     selectedLevel.value = ""
 }
 
-useInitialScrollToSelectedItem()
+/**
+ * 切换类型筛选行的显示状态，收起时清空对应筛选值。
+ */
+function toggleTypeFilterRow() {
+    showTypeFilter.value = !showTypeFilter.value
+    toggleFilter("type", showTypeFilter.value)
+}
+
+/**
+ * 切换等级筛选行的显示状态，收起时清空对应筛选值。
+ */
+function toggleLevelFilterRow() {
+    showLevelFilter.value = !showLevelFilter.value
+    toggleFilter("level", showLevelFilter.value)
+}
+
+useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <!-- 左侧列表面板 -->
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedDungeon }">
-                <!-- 搜索栏 -->
-                <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索副本ID/名称/描述/等级/奖励（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
+            <div
+                class="flex-1 flex flex-col overflow-hidden min-w-0"
+                :class="{ 'sm:border-r border-base-content/10': selectedDungeon }"
+            >
+                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                <div
+                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                >
+                    <div class="relative">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input
+                            v-model="searchKeyword"
+                            type="text"
+                            placeholder="搜索副本ID/名称/描述/等级/奖励（支持拼音）..."
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                        <span
+                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                        >
+                            {{ filteredDungeons.length }}
+                        </span>
+                    </div>
+
+                    <!-- 过滤器开关方章 -->
+                    <div class="mt-3 flex flex-wrap gap-1.5">
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                onlyNightHandbook
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="onlyNightHandbook = !onlyNightHandbook"
+                        >
+                            夜航手册
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showTypeFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleTypeFilterRow()"
+                        >
+                            类型
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showLevelFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleLevelFilterRow()"
+                        >
+                            等级
+                        </button>
+                    </div>
                 </div>
 
-                <!-- 类型筛选Tab -->
-                <div class="p-2 border-b border-base-200">
-                    <div class="flex flex-wrap gap-2 mb-2">
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input v-model="onlyNightHandbook" type="checkbox" class="checkbox checkbox-xs" />
-                            <span class="text-xs text-base-content/70">夜航手册</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input
-                                v-model="showTypeFilter"
-                                type="checkbox"
-                                class="checkbox checkbox-xs"
-                                @change="toggleFilter('type', showTypeFilter)"
-                            />
-                            <span class="text-xs text-base-content/70">类型</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input
-                                v-model="showLevelFilter"
-                                type="checkbox"
-                                class="checkbox checkbox-xs"
-                                @change="toggleFilter('level', showLevelFilter)"
-                            />
-                            <span class="text-xs text-base-content/70">等级</span>
-                        </label>
-                    </div>
-                    <div v-show="showTypeFilter" class="flex flex-wrap gap-1 mb-2">
+                <!-- 筛选条件 -->
+                <div
+                    v-show="showTypeFilter || showLevelFilter"
+                    class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
+                    style="animation-delay: 0.05s"
+                >
+                    <!-- 类型筛选 -->
+                    <div v-show="showTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
+                            类型
+                        </span>
                         <button
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedType === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectedType = ''"
                         >
                             {{ $t("全部") }}
@@ -158,19 +215,28 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="type in allTypes.map(t => getDungeonType(t))"
                             :key="type.t"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs px-2 py-0.5 text-[11px] transition-all duration-200 active:scale-[0.97]"
                             :class="
-                                selectedType === type.t ? type.color + ' text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedType === type.t ? type.color + ' font-semibold text-white' : 'border border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectedType = type.t"
                         >
                             {{ type.label }}
                         </button>
                     </div>
-                    <div v-show="showLevelFilter" class="flex flex-wrap gap-1">
+
+                    <!-- 等级筛选 -->
+                    <div v-show="showLevelFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
+                            等级
+                        </span>
                         <button
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedLevel === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedLevel === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectedLevel = ''"
                         >
                             {{ $t("全部") }}
@@ -178,9 +244,11 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="level in allLevels"
                             :key="level"
-                            class="px-2 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
                             :class="
-                                selectedLevel === `${level}` ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedLevel === `${level}`
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectedLevel = `${level}`"
                         >
@@ -191,63 +259,97 @@ useInitialScrollToSelectedItem()
 
                 <!-- 副本列表 -->
                 <ScrollArea class="flex-1">
-                    <div class="p-2 space-y-2">
-                        <div
-                            v-for="dungeon in filteredDungeons"
-                            :key="dungeon.id"
-                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedDungeonId === dungeon.id }"
-                            @click="selectDungeon(dungeon)"
-                        >
-                            <div class="flex items-start justify-between">
-                                <div>
-                                    <div class="font-medium flex gap-2 items-center">
-                                        <img
-                                            v-if="dungeon.e"
-                                            :src="LeveledChar.elementUrl(dungeon.e)"
-                                            class="h-8 w-4 object-cover inline-block rounded"
-                                        />
-                                        {{ getDungeonName(dungeon) }}
-                                    </div>
-                                    <div class="text-xs opacity-70 mt-1">
-                                        {{ dungeon.desc }}
+                    <div class="p-3">
+                        <!-- 空状态 -->
+                        <div v-if="filteredDungeons.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
+                            <p class="text-sm">未找到匹配的副本</p>
+                        </div>
+
+                        <div v-else class="space-y-2">
+                            <article
+                                v-for="(dungeon, index) in filteredDungeons"
+                                :key="dungeon.id"
+                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                :class="
+                                    selectedDungeonId === dungeon.id
+                                        ? 'dbdu-item-active border-primary/70 bg-primary/10'
+                                        : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                                "
+                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                @click="selectDungeon(dungeon)"
+                            >
+                                <!-- 左侧主色强调条：选中时显现 -->
+                                <span
+                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                    :class="selectedDungeonId === dungeon.id ? 'opacity-100' : 'opacity-0'"
+                                    aria-hidden="true"
+                                />
+                                <div class="flex items-start gap-3 p-3">
+                                    <img
+                                        v-if="dungeon.e"
+                                        :src="LeveledChar.elementUrl(dungeon.e)"
+                                        alt=""
+                                        class="h-9 w-4 shrink-0 self-start object-cover rounded-xs"
+                                    />
+                                    <div class="min-w-0 flex-1">
+                                        <!-- 名称行：元素 + 名称 + 类型徽记 -->
+                                        <div class="flex items-baseline gap-2">
+                                            <h3
+                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                :class="{ 'text-primary': selectedDungeonId === dungeon.id }"
+                                            >
+                                                {{ getDungeonName(dungeon) }}
+                                            </h3>
+                                            <CopyID :id="dungeon.id" class="ml-auto shrink-0" />
+                                        </div>
+                                        <div v-if="dungeon.desc" class="mt-0.5 truncate text-[11px] text-base-content/45">
+                                            {{ dungeon.desc }}
+                                        </div>
+                                        <!-- 元信息行：类型 / 等级 / 怪物统计 -->
+                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
+                                            <span
+                                                class="rounded-xs px-1.5 py-0.5 text-[10px] leading-4 tracking-wide"
+                                                :class="getDungeonType(dungeon.t).color + ' text-white'"
+                                            >
+                                                {{ getDungeonType(dungeon.t).label }}
+                                            </span>
+                                            <span class="font-mono tabular-nums">Lv.{{ dungeon.lv }}</span>
+                                            <span>怪物 {{ (dungeon.m || []).length }} 种</span>
+                                            <span v-if="(dungeon.sm || []).length">特殊 {{ (dungeon.sm || []).length }} 个</span>
+                                            <span v-if="dungeon.r?.length" class="truncate">奖励: {{ getDungeonRewardNames(dungeon) }}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="flex flex-col items-end gap-1">
-                                    <span class="text-xs px-2 py-0.5 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">
-                                        {{ getDungeonType(dungeon.t).label }}
-                                    </span>
-                                    <span class="text-xs opacity-70">Lv.{{ dungeon.lv }}</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 mt-2 text-xs opacity-70">
-                                <span>怪物: {{ (dungeon.m || []).length }}种</span>
-                                <span v-if="(dungeon.sm || []).length">特殊: {{ (dungeon.sm || []).length }}个</span>
-                                <span v-if="dungeon.r?.length"> 奖励: {{ getDungeonRewardNames(dungeon) }} </span>
-                                <span class="ml-auto">
+                                <div class="absolute top-2 right-2">
                                     <CopyID :id="dungeon.id" />
-                                </span>
-                            </div>
+                                </div>
+                            </article>
                         </div>
                     </div>
                 </ScrollArea>
 
-                <!-- 底部统计 -->
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredDungeons.length }} 个副本
+                <!-- 底部统计条 -->
+                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                    <p class="text-[11px] tracking-wide text-base-content/50">
+                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredDungeons.length }}</b> 个副本
+                    </p>
                 </div>
             </div>
-            <div
+
+            <!-- 收起详情手柄 -->
+            <button
                 v-if="selectedDungeon"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                type="button"
+                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
+                title="收起详情"
                 @click="selectDungeon(null)"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
+            </button>
 
             <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedDungeon" class="flex-1">
-                <DBDungeonDetailItem :dungeon="selectedDungeon" />
+            <ScrollArea v-if="selectedDungeon" class="min-w-0 flex-1">
+                <DBDungeonDetailItem :key="selectedDungeonId" :dungeon="selectedDungeon" />
             </ScrollArea>
         </div>
     </div>

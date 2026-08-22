@@ -84,7 +84,7 @@ const imageBgClass = computed(() => {
     if (props.entry.kind === "mod") {
         return rarityBgClasses[props.entry.item.品质] || ""
     }
-    return "bg-base-200/40"
+    return "bg-base-content/[0.04]"
 })
 
 /** 副信息：角色为“属性 · 精通”，武器为“类型 · 伤害类型”，魔之楔为“系列 · 类型” */
@@ -122,9 +122,10 @@ const targetPath = computed(() => {
 </script>
 
 <template>
+    <!-- 外层卡片语言：直角细边框 + 半透明毛玻璃底，hover 主色描边轻浮起 -->
     <button
         type="button"
-        class="group flex w-full cursor-pointer flex-col overflow-hidden border border-base-content/15 bg-base-100 text-left transition-colors duration-200 hover:border-primary/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
+        class="group flex w-full cursor-pointer flex-col overflow-hidden rounded-xs border border-base-content/10 bg-base-100/60 text-left backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
         @click="router.push(targetPath)"
     >
         <div class="relative aspect-4/3 w-full overflow-hidden" :class="imageBgClass">
@@ -142,7 +143,7 @@ const targetPath = computed(() => {
 
             <span
                 v-if="version"
-                class="absolute right-2 top-2 border border-base-content/25 bg-base-100/60 px-1.5 py-0.5 font-mono text-[9px] tracking-[0.12em] text-base-content/70"
+                class="absolute right-2 top-2 border border-base-content/25 bg-base-100/60 px-1.5 py-0.5 font-mono text-[9px] tracking-[0.12em] text-base-content/70 backdrop-blur-sm"
             >
                 {{ version }}
             </span>

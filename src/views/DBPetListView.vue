@@ -141,147 +141,206 @@ function getPetIconGradientClass(item: Pet | PetEntry): string {
     return getRarityGradientClass(item.r)
 }
 
-useInitialScrollToSelectedItem()
+useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedPet }">
-                <div class="p-2">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索魔灵名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
+            <div
+                class="flex-1 flex flex-col overflow-hidden min-w-0"
+                :class="{ 'sm:border-r border-base-content/10': selectedPet || selectedPetEntry }"
+            >
+                <!-- 检索带：下划线搜索 + 计数 -->
+                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                    <div class="relative">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input
+                            v-model="searchKeyword"
+                            type="text"
+                            placeholder="搜索魔灵名称（支持拼音）..."
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                        <span
+                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                        >
+                            {{ filteredPets.length }}
+                        </span>
+                    </div>
                 </div>
 
-                <div class="p-2 space-y-2">
-                    <div>
-                        <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                                :class="selectedType === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = 0"
-                            >
-                                {{ $t("全部") }}
-                            </button>
-                            <button
-                                v-for="type in types"
-                                :key="type"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
-                                :class="selectedType === type ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedType = type"
-                            >
-                                {{ $t(getTypeName(type)) }}
-                            </button>
-                        </div>
+                <!-- 筛选条件 -->
+                <div class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise" style="animation-delay: 0.05s">
+                    <!-- 类型筛选 -->
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">类型</span>
+                        <button
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedType === 0
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="selectedType = 0"
+                        >
+                            {{ $t("全部") }}
+                        </button>
+                        <button
+                            v-for="type in types"
+                            :key="type"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedType === type
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="selectedType = type"
+                        >
+                            {{ $t(getTypeName(type)) }}
+                        </button>
                     </div>
 
-                    <div>
-                        <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                                :class="selectedQuality === 0 ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
-                                @click="selectedQuality = 0"
-                            >
-                                {{ $t("全部") }}
-                            </button>
-                            <button
-                                v-for="quality in qualities"
-                                :key="quality"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
-                                :class="
-                                    selectedQuality === quality
-                                        ? 'bg-primary text-white'
-                                        : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedQuality = quality"
-                            >
-                                {{ $t(getQualityName(quality)) }}
-                            </button>
-                        </div>
+                    <!-- 品质筛选 -->
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">品质</span>
+                        <button
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedQuality === 0
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="selectedQuality = 0"
+                        >
+                            {{ $t("全部") }}
+                        </button>
+                        <button
+                            v-for="quality in qualities"
+                            :key="quality"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedQuality === quality
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="selectedQuality = quality"
+                        >
+                            {{ $t(getQualityName(quality)) }}
+                        </button>
                     </div>
                 </div>
 
                 <ScrollArea class="flex-1">
-                    <div class="p-2 space-y-2">
-                        <div
-                            v-for="item in filteredPets"
-                            :key="item.id"
-                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedPetId === item.id }"
-                            @click="selectedPetId = (item as Pet | PetEntry).id"
-                        >
-                            <div class="flex items-start gap-2">
-                                <div
-                                    class="w-12 h-12 overflow-hidden rounded bg-linear-15"
-                                    :class="getPetIconGradientClass(item as Pet | PetEntry)"
-                                >
-                                    <!-- 显示潜质图标 -->
-                                    <template v-if="selectedType === 999 && 'icon' in item">
-                                        <img :src="`/imgs/webp/T_Armory_Pet_Attr_${item.icon}.webp`" class="w-full h-full object-cover" />
-                                    </template>
-                                    <!-- 显示普通魔灵图标 -->
-                                    <template v-else-if="'icon' in item && '名称' in item">
-                                        <img :src="LeveledPet.url(item.icon)" class="w-full h-full object-cover" />
-                                    </template>
+                    <div class="p-3">
+                        <!-- 空状态 -->
+                        <div v-if="filteredPets.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
+                            <p class="text-sm">未找到匹配的魔灵</p>
+                        </div>
+
+                        <div v-else class="space-y-2">
+                            <article
+                                v-for="(item, index) in filteredPets"
+                                :key="item.id"
+                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                :class="
+                                    selectedPetId === item.id
+                                        ? 'dbp-item-active border-primary/70 bg-primary/10'
+                                        : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                                "
+                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                @click="selectedPetId = (item as Pet | PetEntry).id"
+                            >
+                                <!-- 左侧主色强调条：选中时显现 -->
+                                <span
+                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                    :class="selectedPetId === item.id ? 'opacity-100' : 'opacity-0'"
+                                    aria-hidden="true"
+                                />
+                                <div class="flex items-start gap-3 p-3">
+                                    <!-- 图标（稀有度渐变底） -->
+                                    <div
+                                        class="size-12 shrink-0 overflow-hidden rounded-xs bg-linear-15"
+                                        :class="getPetIconGradientClass(item as Pet | PetEntry)"
+                                    >
+                                        <!-- 显示潜质图标 -->
+                                        <template v-if="selectedType === 999 && 'icon' in item">
+                                            <img :src="`/imgs/webp/T_Armory_Pet_Attr_${item.icon}.webp`" class="h-full w-full object-cover" />
+                                        </template>
+                                        <!-- 显示普通魔灵图标 -->
+                                        <template v-else-if="'icon' in item && '名称' in item">
+                                            <img :src="LeveledPet.url(item.icon)" class="h-full w-full object-cover" />
+                                        </template>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <!-- 潜质信息显示 -->
+                                        <template v-if="selectedType === 999 && 'name' in item">
+                                            <h3
+                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                :class="{ 'text-primary': selectedPetId === item.id }"
+                                            >
+                                                {{ $t(item.name) }}
+                                            </h3>
+                                            <div class="mt-0.5 truncate text-[11px] text-base-content/45">
+                                                {{ item.desc }}
+                                            </div>
+                                        </template>
+                                        <!-- 普通魔灵信息显示 -->
+                                        <template v-else-if="'名称' in item">
+                                            <h3
+                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                :class="{ 'text-primary': selectedPetId === item.id }"
+                                            >
+                                                {{ $t(item.名称) }}
+                                            </h3>
+                                            <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
+                                                <span>{{ $t(getTypeName(item.类型)) }}</span>
+                                                <span>最大等级: {{ item.最大等级 }}</span>
+                                                <span>捕获经验: {{ item.捕获经验 }}</span>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
-                                <div>
-                                    <!-- 潜质信息显示 -->
-                                    <template v-if="selectedType === 999 && 'name' in item">
-                                        <div class="font-medium flex gap-2 items-center">
-                                            {{ $t(item.name) }}
-                                        </div>
-                                        <div class="text-xs opacity-70 mt-1">
-                                            <span>{{ item.desc }}</span>
-                                        </div>
-                                    </template>
-                                    <!-- 普通魔灵信息显示 -->
-                                    <template v-else-if="'名称' in item">
-                                        <div class="font-medium flex gap-2 items-center">
-                                            {{ $t(item.名称) }}
-                                        </div>
-                                        <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                            <span>{{ $t(getTypeName(item.类型)) }}</span>
-                                            <span>最大等级: {{ item.最大等级 }}</span>
-                                            <span>捕获经验: {{ item.捕获经验 }}</span>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                            <!-- 普通魔灵技能显示 -->
-                            <template v-if="selectedType !== 999 && '主动' in item">
-                                <div v-if="item.主动" class="mt-2 text-xs opacity-70">
-                                    <div>主动: {{ formatSkillDescription(item, "主动") }}</div>
-                                </div>
-                                <div v-if="item.被动" class="mt-1 text-xs opacity-70">
-                                    <div>被动: {{ formatSkillDescription(item, "被动") }}</div>
-                                </div>
-                            </template>
+                                <!-- 普通魔灵技能显示 -->
+                                <template v-if="selectedType !== 999 && '主动' in item">
+                                    <div v-if="item.主动" class="mt-2 px-3 pb-3 text-[11px] leading-relaxed text-base-content/55">
+                                        <div>主动: {{ formatSkillDescription(item, "主动") }}</div>
+                                    </div>
+                                    <div v-if="item.被动" class="-mt-1.5 px-3 pb-3 text-[11px] leading-relaxed text-base-content/55">
+                                        <div>被动: {{ formatSkillDescription(item, "被动") }}</div>
+                                    </div>
+                                </template>
+                            </article>
                         </div>
                     </div>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredPets.length }} {{ selectedType === 999 ? "个潜质" : "个魔灵" }}
+                <!-- 底部统计条 -->
+                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                    <p class="text-[11px] tracking-wide text-base-content/50">
+                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredPets.length }}</b>
+                        {{ selectedType === 999 ? "个潜质" : "个魔灵" }}
+                    </p>
                 </div>
             </div>
-            <div
+
+            <!-- 收起详情手柄 -->
+            <button
                 v-if="selectedPet || selectedPetEntry"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                type="button"
+                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
+                title="收起详情"
                 @click="selectedPetId = 0"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
+            </button>
 
-            <ScrollArea v-if="selectedPet" class="flex-1">
-                <DBPetDetailItem :pet="selectedPet" />
+            <!-- 右侧详情面板 -->
+            <ScrollArea v-if="selectedPet" class="min-w-0 flex-1">
+                <DBPetDetailItem :key="selectedPetId" :pet="selectedPet" />
             </ScrollArea>
 
-            <ScrollArea v-else-if="selectedPetEntry" class="flex-1">
-                <DBPetEntryDetailItem :entry="selectedPetEntry" />
+            <ScrollArea v-else-if="selectedPetEntry" class="min-w-0 flex-1">
+                <DBPetEntryDetailItem :key="selectedPetEntry?.id" :entry="selectedPetEntry" />
             </ScrollArea>
         </div>
     </div>

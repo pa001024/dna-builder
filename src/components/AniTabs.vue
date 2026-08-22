@@ -77,15 +77,15 @@ onBeforeUnmount(() => {
                 :key="tab.value"
                 :ref="el => setTabRef(tab.value, el as HTMLButtonElement | null)"
                 type="button"
-                class="min-w-20 px-3 py-2 text-base-content/70 transition-colors duration-300 rounded-t cursor-pointer hover:bg-base-300/50 backdrop-blur-md"
-                :class="{ 'text-base-content! font-medium': model === tab.value }"
+                class="min-w-20 cursor-pointer px-3 py-2 text-base-content/55 transition-colors duration-300 hover:text-primary"
+                :class="{ 'font-medium text-base-content!': model === tab.value }"
                 @click="model = tab.value"
             >
                 <slot name="label" :tab="tab">{{ tab.label }}</slot>
             </button>
-            <span class="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-base-content/50" />
+            <span class="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-base-content/15" />
             <span
-                class="pointer-events-none absolute bottom-0 h-0.5 rounded-full bg-primary transition-[transform,width,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                class="pointer-events-none absolute bottom-0 h-0.5 bg-primary transition-[transform,width,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
                 :class="indicatorReady ? 'opacity-100' : 'opacity-0'"
                 :style="{
                     width: `${indicatorWidth}px`,

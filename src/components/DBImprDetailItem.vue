@@ -36,64 +36,86 @@ function getImprRoute(): string {
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-center gap-2">
-            <SRouterLink :to="getImprRoute()" class="text-lg font-bold link link-primary wrap-break-word">
-                {{ props.entry.sourceName }}
-            </SRouterLink>
-            <CopyID :id="props.entry.sourceId" />
-        </div>
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 印象档案头：纸面 + primary 强调线 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-primary">
+                <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                Impression File
+            </p>
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <SRouterLink
+                    :to="getImprRoute()"
+                    class="wrap-break-word font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                >
+                    {{ props.entry.sourceName }}
+                </SRouterLink>
+                <CopyID :id="props.entry.sourceId" />
+            </div>
+        </header>
 
-        <div class="card bg-base-100 border border-base-200 rounded p-3">
-            <h3 class="font-bold mb-2">印象信息</h3>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-                <div class="flex justify-between gap-2">
-                    <span class="text-base-content/70">来源</span>
-                    <span> {{ $t(`database.${props.entry.sourceType}`) }}</span>
+        <!-- 印象信息 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="IMPRESSION" title="印象信息" />
+            <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="shrink-0 text-xs text-base-content/60">来源</span>
+                    <span class="text-right text-xs font-medium">{{ $t(`database.${props.entry.sourceType}`) }}</span>
                 </div>
-                <div class="flex justify-between gap-2">
-                    <span class="text-base-content/70">地区</span>
-                    <span>{{ props.entry.regionLabel }}</span>
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="shrink-0 text-xs text-base-content/60">地区</span>
+                    <span class="text-right text-xs font-medium">{{ props.entry.regionLabel }}</span>
                 </div>
-                <div v-if="props.entry.sourceSubRegionId" class="flex justify-between gap-2">
-                    <span class="text-base-content/70">子区域</span>
+                <div
+                    v-if="props.entry.sourceSubRegionId"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="shrink-0 text-xs text-base-content/60">子区域</span>
                     <SubRegionLink :sub-region-id="props.entry.sourceSubRegionId" />
                 </div>
-                <div class="flex justify-between gap-2">
-                    <span class="text-base-content/70">印象</span>
-                    <span
-                        >{{ $t(getImprType(props.entry.valueType)) }}
-                        {{ props.entry.value > 0 ? `+${props.entry.value}` : props.entry.value }}</span
-                    >
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="shrink-0 text-xs text-base-content/60">印象</span>
+                    <span class="text-right text-xs font-medium">
+                        {{ $t(getImprType(props.entry.valueType)) }}
+                        <b class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            {{ props.entry.value > 0 ? `+${props.entry.value}` : props.entry.value }}
+                        </b>
+                    </span>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="props.entry.sourceOptions?.length" class="card bg-base-100 border border-base-200 rounded p-3">
-            <h3 class="font-bold mb-2">选项</h3>
+        <!-- 选项 -->
+        <section
+            v-if="props.entry.sourceOptions?.length"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="OPTIONS" title="选项" />
             <div class="space-y-2">
                 <div
                     v-for="(option, optionIndex) in props.entry.sourceOptions"
                     :key="option.id"
-                    class="group w-full rounded px-2.5 py-1.5 text-left text-xs transition-all duration-200"
+                    class="rounded-xs border px-2.5 py-1.5 transition-colors duration-200"
                     :class="
-                        optionIndex === props.entry.sourceOptionIndex ? 'bg-primary/80 shadow-sm' : 'bg-base-100/60 hover:bg-base-100/80'
+                        optionIndex === props.entry.sourceOptionIndex
+                            ? 'border-primary/70 bg-primary/10'
+                            : 'border-base-content/10 bg-base-content/3'
                     "
                 >
                     <div class="flex items-start gap-2">
                         <span
-                            class="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[9px] font-semibold"
+                            class="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-xs border text-[9px] font-semibold tabular-nums"
                             :class="
                                 optionIndex === props.entry.sourceOptionIndex
                                     ? 'border-primary bg-primary text-primary-content'
-                                    : 'border-base-300 text-base-content/70'
+                                    : 'border-base-content/25 text-base-content/60'
                             "
                         >
                             {{ optionIndex + 1 }}
                         </span>
 
-                        <div class="min-w-0 flex-1 flex items-center gap-1.5 flex-wrap">
-                            <span class="leading-4 text-base-content/90 whitespace-normal">
+                        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+                            <span class="leading-4 whitespace-normal text-base-content/90">
                                 {{ option.content }}
                             </span>
 
@@ -102,7 +124,7 @@ function getImprRoute(): string {
                                     ? [{ regionId: option.impr[0], typeLabel: $t(getImprType(option.impr[1])), value: option.impr[2] }]
                                     : []"
                                 :key="`${option.id}-${impression.regionId}-${impression.typeLabel}-impr`"
-                                class="rounded border px-1.5 py-0.5 text-xs leading-none"
+                                class="rounded-xs border px-1.5 py-0.5 text-xs leading-none tabular-nums"
                                 :class="
                                     impression.value > 0
                                         ? 'border-success/40 bg-success/10 text-success'
@@ -116,15 +138,17 @@ function getImprRoute(): string {
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="card bg-base-100 border border-base-200 rounded p-3">
-            <h3 class="font-bold mb-2">来源链接</h3>
-            <div>
-                <SRouterLink :to="getSourceRoute()" class="link link-primary break-all">
-                    {{ props.entry.sourceName }}
-                </SRouterLink>
-            </div>
-        </div>
+        <!-- 来源链接 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="SOURCE" title="来源链接" />
+            <SRouterLink
+                :to="getSourceRoute()"
+                class="break-all text-sm font-medium text-primary transition-colors duration-150 hover:text-primary/80"
+            >
+                {{ props.entry.sourceName }}
+            </SRouterLink>
+        </section>
     </div>
 </template>

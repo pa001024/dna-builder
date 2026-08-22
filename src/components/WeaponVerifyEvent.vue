@@ -117,7 +117,7 @@ function getRewardDetailsById(id: number) {
                 </dl>
                 <div v-if="selectedLevel.levelType === 2 && selectedLevel.dungeonMonsters.length" class="mt-3">
                     <div class="mb-2 text-xs text-base-content/60">目标敌人</div>
-                    <div class="grid gap-2">
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
                         <DBMonsterCompactCard
                             v-for="monsterId in selectedLevel.dungeonMonsters"
                             :key="monsterId"

@@ -220,26 +220,47 @@ function isItemSelected(item: SoloTreasureListItem): boolean {
     return selectedType.value === item.kind && selectedBagId.value === item.id
 }
 
-useInitialScrollToSelectedItem()
+// 首次渲染时滚动到当前选中条目（使用显式选择器定位选中态卡片）
+useInitialScrollToSelectedItem({ selectedSelector: ".dbst-item-active" })
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedDetailKind }">
-                <div class="p-3 border-b border-base-200 space-y-2">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索ID/名称/描述..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
-                    <div class="flex flex-wrap gap-2">
+            <div
+                class="flex-1 flex flex-col overflow-hidden min-w-0"
+                :class="{ 'sm:border-r border-base-content/10': selectedDetailKind }"
+            >
+                <!-- 检索带：下划线搜索 + 计数 + 类型方章 -->
+                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                    <div class="relative">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input
+                            v-model="searchKeyword"
+                            type="text"
+                            placeholder="搜索ID/名称/描述..."
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                        <span
+                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                        >
+                            {{ filteredSoloTreasure.length }}
+                        </span>
+                    </div>
+
+                    <!-- 类型筛选方章 -->
+                    <div class="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">TYPE</span>
                         <button
                             v-for="tab in typeTabs"
                             :key="tab.key"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedType === tab.key ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            type="button"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedType === tab.key
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectedType = tab.key"
                         >
                             {{ tab.label }}
@@ -248,48 +269,88 @@ useInitialScrollToSelectedItem()
                 </div>
 
                 <ScrollArea class="flex-1">
+                    <!-- 宝物网格列表 -->
                     <template v-if="selectedType === 'treasure'">
-                        <div class="p-2 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
-                            <div
-                                v-for="item in filteredTreasureItems"
+                        <div class="p-3 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
+                            <article
+                                v-for="(item, index) in filteredTreasureItems"
                                 :key="`${item.kind}-${item.id}`"
-                                class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                                :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': isItemSelected(item) }"
+                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                :class="
+                                    isItemSelected(item)
+                                        ? 'dbst-item-active border-primary/70 bg-primary/10'
+                                        : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                                "
+                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
                                 @click="selectTreasure(item.id)"
                             >
-                                <div class="flex flex-col items-center gap-2 text-center">
+                                <!-- 左侧主色强调条：选中时显现 -->
+                                <span
+                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                    :class="isItemSelected(item) ? 'opacity-100' : 'opacity-0'"
+                                    aria-hidden="true"
+                                />
+                                <div class="flex flex-col items-center gap-2 p-3 text-center">
                                     <ImageFallback
                                         v-if="item.kind === 'treasure'"
                                         :src="`/imgs/res/${item.treasure.icon}.webp`"
                                         :alt="item.title"
-                                        class="w-14 h-14 rounded shrink-0 bg-linear-15"
+                                        class="w-14 h-14 rounded-xs shrink-0 bg-linear-15"
                                         :class="getRarityGradientClass(soloTreasureRarityData[item.treasure.rarity].show)"
                                     >
-                                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="item.title" class="w-14 h-14 rounded shrink-0" />
+                                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="item.title" class="w-14 h-14 rounded-xs shrink-0" />
                                     </ImageFallback>
-                                    <div class="w-full">
-                                        <div class="font-medium truncate">{{ item.title }}</div>
+                                    <div class="w-full min-w-0">
+                                        <div
+                                            class="truncate text-sm font-medium transition-colors duration-200 group-hover:text-primary"
+                                            :class="{ 'text-primary': isItemSelected(item) }"
+                                        >
+                                            {{ item.title }}
+                                        </div>
                                         <CopyID :id="item.id" />
                                     </div>
                                 </div>
-                            </div>
+                            </article>
                         </div>
                     </template>
+                    <!-- 副本 / 百宝囊列表 -->
                     <template v-else>
-                        <div class="p-2 grid gap-2">
+                        <div class="space-y-2 p-3">
                             <div
-                                v-for="item in filteredSoloTreasure"
+                                v-for="(item, index) in filteredSoloTreasure"
                                 :key="`${item.kind}-${item.id}`"
-                                class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                                :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': isItemSelected(item) }"
+                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                :class="
+                                    isItemSelected(item)
+                                        ? 'dbst-item-active border-primary/70 bg-primary/10'
+                                        : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                                "
+                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
                                 @click="item.kind === 'story' || item.kind === 'repeat' ? selectDungeon(item.id) : selectBag(item.id)"
                             >
-                                <div class="flex flex-col gap-2">
-                                    <div class="w-full">
-                                        <div class="font-medium truncate">{{ item.title }}</div>
-                                        <div class="text-xs opacity-70 mt-1">
-                                            <CopyID :id="item.id" />
+                                <!-- 左侧主色强调条：选中时显现 -->
+                                <span
+                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                    :class="isItemSelected(item) ? 'opacity-100' : 'opacity-0'"
+                                    aria-hidden="true"
+                                />
+                                <div class="flex items-center gap-3 p-3">
+                                    <div class="min-w-0 flex-1">
+                                        <div
+                                            class="truncate text-sm font-medium transition-colors duration-200 group-hover:text-primary"
+                                            :class="{ 'text-primary': isItemSelected(item) }"
+                                        >
+                                            {{ item.title }}
                                         </div>
+                                        <div
+                                            v-if="'meta' in item"
+                                            class="mt-0.5 truncate text-[10px] tracking-wide text-base-content/40"
+                                        >
+                                            {{ item.meta }}
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0 text-[11px] text-base-content/45">
+                                        <CopyID :id="item.id" />
                                     </div>
                                 </div>
                             </div>
@@ -297,21 +358,27 @@ useInitialScrollToSelectedItem()
                     </template>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredSoloTreasure.length }} 个条目
+                <!-- 底部统计条 -->
+                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                    <p class="text-[11px] tracking-wide text-base-content/50">
+                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredSoloTreasure.length }}</b> 个条目
+                    </p>
                 </div>
             </div>
 
-            <div
+            <!-- 收起详情手柄 -->
+            <button
                 v-if="selectedDetailKind"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                type="button"
+                class="flex-none flex w-full cursor-pointer items-center justify-center overflow-hidden border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
+                title="收起详情"
                 @click="clearSelectedDetail"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
+            </button>
 
-            <ScrollArea v-if="selectedDetailKind" class="flex-1">
-                <div class="p-4 space-y-4">
+            <ScrollArea v-if="selectedDetailKind" class="min-w-0 flex-1">
+                <div class="space-y-3 p-3 sm:p-4">
                     <DBSoloTreasureDungeonItem v-if="selectedStoryDungeon" :dungeon="selectedStoryDungeon" />
                     <DBSoloTreasureDungeonItem v-else-if="selectedRepeatDungeon" :dungeon="selectedRepeatDungeon" />
                     <DBSoloTreasureEntryItem v-else-if="selectedTreasure" :treasure="selectedTreasure" />

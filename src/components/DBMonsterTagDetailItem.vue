@@ -142,60 +142,111 @@ function formatBonusValue(value: number): string {
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-center gap-3">
-            <SRouterLink :to="`/db/monstertag/${monsterTag.id}`" class="text-lg font-bold link link-primary">
-                {{ monsterTag.name }}
-            </SRouterLink>
-            <CopyID :id="monsterTag.id" />
-        </div>
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 号令者档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative">
+                <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                    <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                    Commander Tag
+                </p>
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <SRouterLink
+                        :to="`/db/monstertag/${monsterTag.id}`"
+                        class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                    >
+                        {{ monsterTag.name }}
+                    </SRouterLink>
+                    <CopyID :id="monsterTag.id" />
+                </div>
+            </div>
+        </header>
 
-        <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-tag-detail.description") }}</div>
-            <div class="text-sm whitespace-pre-line">
+        <!-- 描述 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('monster-tag-detail.description')" />
+            <div class="text-sm leading-relaxed whitespace-pre-line text-base-content/85">
                 {{ monsterTag.desc }}
             </div>
-        </div>
+        </section>
 
-        <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("monster-tag-detail.params") }}</div>
-            <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 text-sm">
-                <div v-for="[key, value] in baseVars" :key="key" class="p-2 rounded bg-base-100">
-                    <div class="text-xs text-base-content/70 mb-1">{{ $t(key) }}</div>
-                    <div class="font-medium break-all">{{ formatVarValue(key, value) }}</div>
+        <!-- 基础参数 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="PARAMS" :title="$t('monster-tag-detail.params')" />
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1.5">
+                <div
+                    v-for="[key, value] in baseVars"
+                    :key="key"
+                    class="flex items-start justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="shrink-0 pt-0.5 text-xs text-base-content/60">{{ $t(key) }}</span>
+                    <span class="break-all text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        formatVarValue(key, value)
+                    }}</span>
                 </div>
             </div>
 
             <div v-if="bonusVars.length > 0" class="mt-3">
-                <div class="text-xs text-base-content/70 mb-2">{{ $t("monster-tag-detail.bonus") }}</div>
-                <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2 text-sm">
-                    <div v-for="[name, value] in bonusVars" :key="name" class="p-2 rounded bg-base-100">
-                        <div class="text-xs text-base-content/70 mb-1">{{ $t(name) }}</div>
-                        <div class="font-medium text-success">{{ formatBonusValue(value) }}</div>
+                <div class="mb-2 text-[10px] text-base-content/40">
+                    {{ $t("monster-tag-detail.bonus") }}
+                </div>
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-1.5">
+                    <div
+                        v-for="[name, value] in bonusVars"
+                        :key="name"
+                        class="flex items-start justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="shrink-0 pt-0.5 text-xs text-base-content/60">{{ $t(name) }}</span>
+                        <span class="break-all text-right font-orbitron text-[13px] font-semibold tabular-nums text-success">{{
+                            formatBonusValue(value)
+                        }}</span>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="currentTags.length > 1" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("monster-tag-detail.sameTags") }}</div>
-            <div class="flex flex-wrap gap-2">
+        <!-- 同组词条 -->
+        <section v-if="currentTags.length > 1" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="SIBLINGS" :title="$t('monster-tag-detail.sameTags')" />
+            <div class="flex flex-wrap gap-1.5">
                 <SRouterLink
                     v-for="tag in currentTags"
                     :key="tag.id"
                     :to="`/db/monstertag/${tag.id}`"
-                    class="text-xs px-2 py-1 rounded bg-base-300 hover:bg-base-100 transition-colors duration-200"
-                    :class="{ 'bg-primary text-primary-content hover:bg-primary': tag.id === monsterTag.id }"
+                    class="inline-flex cursor-pointer items-center whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        tag.id === monsterTag.id
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
                 >
                     {{ tag.id }}
                 </SRouterLink>
             </div>
-        </div>
+        </section>
 
-        <div v-if="relatedMonsters.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("monster-tag-detail.relatedMonsters") }}</div>
+        <!-- 关联怪物 -->
+        <section v-if="relatedMonsters.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="RELATED" :title="$t('monster-tag-detail.relatedMonsters')" />
             <div class="mb-3 flex items-center gap-4">
-                <span class="text-sm min-w-12">Lv. {{ relatedMonsterLevel }}</span>
+                <span class="w-12 shrink-0 font-mono text-[11px] tabular-nums text-base-content/60">Lv. {{ relatedMonsterLevel }}</span>
                 <input
                     v-model.number="relatedMonsterLevel"
                     type="range"
@@ -205,7 +256,7 @@ function formatBonusValue(value: number): string {
                     step="1"
                 />
             </div>
-            <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
                 <DBMonsterCompactCard
                     v-for="monster in relatedMonsters"
                     :key="monster.id"
@@ -213,6 +264,6 @@ function formatBonusValue(value: number): string {
                     :level="relatedMonsterLevel"
                 />
             </div>
-        </div>
+        </section>
     </div>
 </template>

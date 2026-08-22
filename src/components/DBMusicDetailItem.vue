@@ -14,40 +14,54 @@ const musicAudioUrl = computed(() => buildMusicAudioUrl(props.music.music))
 </script>
 
 <template>
-    <div class="p-3 space-y-4">
-        <div class="flex items-start gap-3">
-            <img
-                v-if="score"
-                :src="`/imgs/music/${score.icon}.webp`"
-                :alt="score.name"
-                class="h-16 shrink-0 rounded bg-base-200 object-cover"
-            />
-            <div class="min-w-0">
-                <SRouterLink :to="`/db/music/${music.id}`" class="text-lg font-bold link link-primary wrap-break-word">
-                    {{ $t(music.name) }}
-                </SRouterLink>
-                <div class="mt-1 text-sm text-base-content/70"><CopyID :id="music.id" /></div>
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 乐谱档案头：纸面 + primary 强调线 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <div class="flex items-center gap-3.5">
+                <div v-if="score" class="h-16 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3">
+                    <img :src="`/imgs/music/${score.icon}.webp`" :alt="score.name" class="h-full w-full object-cover" />
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-primary">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Music File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/music/${music.id}`"
+                            class="wrap-break-word font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
+                            {{ $t(music.name) }}
+                        </SRouterLink>
+                        <CopyID :id="music.id" />
+                    </div>
+                </div>
             </div>
-        </div>
+        </header>
 
-        <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.description") }}</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap">{{ $t(music.desc) }}</div>
-        </div>
-        <div class="p-3 bg-base-200 rounded">
-            <div v-if="score" class="flex gap-2 items-center pb-2">
-                <img :src="`/imgs/music/${score.icon}.webp`" :alt="score.name" class="h-8 shrink-0 rounded object-cover" />
-                <span class="min-w-0 flex-1 wrap-break-word">{{ $t(score.name) }}</span>
+        <!-- 描述 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('resource.description')" />
+            <div class="text-sm leading-relaxed whitespace-pre-wrap text-base-content/85">{{ $t(music.desc) }}</div>
+        </section>
+
+        <!-- 专辑与播放 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ALBUM" />
+            <div v-if="score" class="flex items-center gap-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                <img :src="`/imgs/music/${score.icon}.webp`" :alt="score.name" class="h-8 shrink-0 rounded-xs object-cover" />
+                <span class="min-w-0 flex-1 wrap-break-word text-sm font-medium">{{ $t(score.name) }}</span>
                 <CopyID :id="score.id" />
             </div>
-            <div class="p-2">
+            <div class="mt-2">
                 <MusicPlayer :src="musicAudioUrl" />
             </div>
-        </div>
+        </section>
 
-        <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.title") }}</div>
+        <!-- 曲目资源 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="TRACK" :title="$t('resource.title')" />
             <ResourceCostItem name="" :value="[1, music.rId, 'Resource']" />
-        </div>
+        </section>
     </div>
 </template>

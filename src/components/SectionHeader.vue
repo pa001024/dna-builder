@@ -24,15 +24,17 @@ defineProps<{
     >
         <span
             v-if="number"
-            class="inline-flex h-9 min-w-9 items-center justify-center rounded-xs bg-primary px-2 font-orbitron text-sm font-semibold tracking-wide text-primary-content tabular-nums"
+            class="inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-xs bg-primary px-2 font-orbitron text-sm font-semibold tracking-wide text-primary-content tabular-nums"
         >
             {{ number }}
         </span>
-        <span v-if="kicker" class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">{{ kicker }}</span>
-        <h2 v-if="title" class="text-[17px] font-semibold text-base-content">{{ title }}</h2>
+        <span v-if="kicker" class="shrink-0 whitespace-nowrap text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">
+            {{ kicker }}
+        </span>
+        <h2 v-if="title" class="shrink-0 text-[17px] font-semibold text-base-content">{{ title }}</h2>
         <slot name="title" />
         <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
-        <span v-if="count !== undefined && count !== ''" class="text-[11px] font-medium text-base-content/50 tabular-nums">
+        <span v-if="count !== undefined && count !== ''" class="shrink-0 text-[11px] font-medium text-base-content/50 tabular-nums">
             {{ count }}
         </span>
         <slot name="trailing" />

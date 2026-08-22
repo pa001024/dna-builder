@@ -82,15 +82,15 @@ function getCoinIconUrl(): string {
 
 <template>
     <div v-if="props.draftSources.length > 0" class="space-y-2">
-        <div class="text-xs text-base-content/60">{{ $t("database.draft") }}</div>
+        <div class="text-[11px] tracking-wide text-base-content/55">{{ $t("database.draft") }}</div>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
             <div
                 v-for="source in props.draftSources"
                 :key="source.key"
-                class="group flex w-full items-start gap-2.5 border border-base-content/15 bg-base-100 p-2 transition-colors duration-200 hover:border-primary/60"
+                class="group flex w-full items-start gap-2.5 rounded-xs border border-base-content/15 bg-base-content/[0.04] p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/[0.06]"
             >
                 <div
-                    class="relative size-11 shrink-0 overflow-hidden rounded bg-linear-to-b"
+                    class="relative size-11 shrink-0 overflow-hidden rounded-xs bg-linear-to-b"
                     :class="getRarityGradientClass(source.draft.r)"
                 >
                     <img
@@ -119,14 +119,14 @@ function getCoinIconUrl(): string {
                         </span>
                     </div>
                     <div class="mt-0.5 flex items-center gap-1.5 text-[10px] text-base-content/45">
-                        <span class="shrink-0 bg-amber-500 px-1 py-px font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-white">
+                        <span class="shrink-0 rounded-xs bg-amber-500/15 px-1 py-px font-mono text-[8px] font-semibold tracking-[0.15em] uppercase text-amber-400">
                             DRAFT
                         </span>
                         <span class="truncate">{{ source.draft.v ? `v${source.draft.v}` : "" }} · 产物 x{{ source.draft.c }}</span>
                     </div>
                     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 border-t border-base-content/10 pt-1 text-[10px]">
                         <span class="flex items-center gap-1 text-base-content/70">
-                            <img :src="getCoinIconUrl()" alt="铜币" class="size-3.5 shrink-0 rounded-sm object-cover" />
+                            <img :src="getCoinIconUrl()" alt="铜币" class="size-3.5 shrink-0 rounded-xs object-cover" />
                             铜币 x{{ source.draft.m }}
                         </span>
                         <span
@@ -134,7 +134,7 @@ function getCoinIconUrl(): string {
                             :key="`${source.draft.id}:${material.t}:${material.id}`"
                             class="flex min-w-0 items-center gap-1 text-base-content/70"
                         >
-                            <img :src="getMaterialIconUrl(material)" :alt="material.n" class="size-3.5 shrink-0 rounded-sm object-cover" />
+                            <img :src="getMaterialIconUrl(material)" :alt="material.n" class="size-3.5 shrink-0 rounded-xs object-cover" />
                             <span class="truncate">{{ $t(material.n) }}</span>
                             <span class="shrink-0 font-semibold text-base-content/80">x{{ material.c }}</span>
                         </span>

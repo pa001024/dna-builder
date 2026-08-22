@@ -47,14 +47,14 @@ const sourceIconUrl = computed(() => {
 
 <template>
     <div v-if="displayQuestSources.length > 0" class="space-y-2">
-        <div class="text-xs text-base-content/60">{{ $t("database.questchain") }}</div>
+        <div class="text-[11px] tracking-wide text-base-content/55">{{ $t("database.questchain") }}</div>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
             <div
                 v-for="source in displayQuestSources"
                 :key="source.key"
-                class="group flex w-full items-center gap-2.5 border border-base-content/15 bg-base-100 p-2 transition-colors duration-200 hover:border-primary/60"
+                class="group flex w-full items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/[0.04] p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/[0.06]"
             >
-                <div class="relative size-11 shrink-0 overflow-hidden rounded bg-linear-to-b from-blue-500/25 to-blue-100/10">
+                <div class="relative size-11 shrink-0 overflow-hidden rounded-xs bg-linear-to-b from-blue-500/25 to-blue-100/10">
                     <img
                         :src="sourceIconUrl"
                         :alt="sourceName"
@@ -77,9 +77,7 @@ const sourceIconUrl = computed(() => {
                         </span>
                     </div>
                     <div class="mt-0.5 flex items-center gap-1.5 text-[10px] text-base-content/45">
-                        <span
-                            class="shrink-0 bg-blue-500 px-1 py-px font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-white"
-                        >
+                        <span class="shrink-0 rounded-xs bg-blue-500/15 px-1 py-px font-mono text-[8px] font-semibold tracking-[0.15em] uppercase text-blue-400">
                             QUEST
                         </span>
                         <span class="truncate"
@@ -95,9 +93,9 @@ const sourceIconUrl = computed(() => {
         <div class="flex items-center justify-end gap-3">
             <div class="text-xs text-base-content/60">合计</div>
             <div class="flex items-center gap-1 shrink-0">
-                <img :src="sourceIconUrl" class="w-4 h-4 object-cover rounded" :alt="sourceName" />
+                <img :src="sourceIconUrl" class="h-4 w-4 rounded-xs object-cover" :alt="sourceName" />
                 <span class="text-xs text-base-content/70">{{ sourceName }}</span>
-                <span class="text-sm text-base-content/70">{{ totalQuestSourceNum }}</span>
+                <span class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ totalQuestSourceNum }}</span>
             </div>
         </div>
     </div>

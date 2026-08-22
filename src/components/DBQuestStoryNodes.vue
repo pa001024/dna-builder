@@ -860,6 +860,14 @@ function handleAutoPlaySwitchChange(): void {
 }
 
 /**
+ * 切换自动播放开关状态，并交由原有处理函数启动或停止自动播放。
+ */
+function toggleAutoPlay(): void {
+    autoPlayEnabled.value = !autoPlayEnabled.value
+    handleAutoPlaySwitchChange()
+}
+
+/**
  * 停止当前对话语音播放并重置状态。
  */
 function stopDialogueVoicePlayback(): void {
@@ -1057,26 +1065,29 @@ watch(flattenedDialogueChain, () => {
 
 <template>
     <div class="text-sm space-y-2">
+        <!-- 自动播放开关方章 -->
         <div v-if="hasPlayableDialogue" class="flex items-center justify-end">
-            <label class="flex items-center gap-2 text-xs text-base-content/80 select-none">
-                <span>自动播放</span>
-                <input
-                    v-model="autoPlayEnabled"
-                    type="checkbox"
-                    class="toggle toggle-primary toggle-sm"
-                    @change="handleAutoPlaySwitchChange"
-                />
-            </label>
+            <button
+                type="button"
+                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                :class="
+                    autoPlayEnabled
+                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                "
+                @click="toggleAutoPlay()"
+            >
+                自动播放
+            </button>
         </div>
 
+        <!-- 剧情节点卡 -->
         <div
             v-for="node in questNodeChains"
             :key="node.id"
             :ref="element => setQuestNodeElement(getQuestNodeScopeKey(questId, node.id), element)"
-            class="bg-base-100 rounded space-y-2 transition-all duration-300"
-            :class="{
-                'quest-node-highlight': highlightedQuestNodeMap[getQuestNodeScopeKey(questId, node.id)],
-            }"
+            class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-all duration-300"
+            :class="{ 'border-primary ring-4 ring-primary/10': highlightedQuestNodeMap[getQuestNodeScopeKey(questId, node.id)] }"
         >
             <div class="text-xs text-base-content/70 space-y-1">
                 <div v-if="node.srId || node.pos" class="flex flex-wrap items-center gap-2">
@@ -1095,7 +1106,16 @@ watch(flattenedDialogueChain, () => {
                 </div>
             </div>
 
-            <TransitionGroup name="dialogue-list" tag="div" v-if="node.chain.length" class="space-y-2">
+            <TransitionGroup
+                v-if="node.chain.length"
+                tag="div"
+                class="space-y-2"
+                enter-active-class="transition-all duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                enter-from-class="opacity-0 translate-y-3.5 scale-[0.98] blur-[4px]"
+                leave-active-class="transition-all duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                leave-to-class="opacity-0 translate-y-3.5 scale-[0.98] blur-[4px]"
+                move-class="transition-transform duration-[260ms]"
+            >
                 <DBDialogueCard
                     v-for="item in node.chain"
                     :key="getQuestDialogueKey(node.id, item.dialogue)"
@@ -1115,13 +1135,14 @@ watch(flattenedDialogueChain, () => {
                 />
             </TransitionGroup>
 
-            <div v-if="node.questions?.length" class="rounded bg-base-200/60 p-2 space-y-2">
-                <div class="text-sm font-semibold text-accent">侦探问答</div>
+            <!-- 侦探问答 -->
+            <div v-if="node.questions?.length" class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                <div class="text-[11px] font-semibold tracking-wide text-accent">侦探问答</div>
 
                 <div
                     v-for="question in node.questions"
                     :key="question.id"
-                    class="rounded border border-base-300 bg-base-100/70 p-2 space-y-1.5"
+                    class="space-y-1.5 rounded-xs border border-base-content/10 bg-base-100/60 p-2"
                 >
                     <div class="text-sm font-medium">Q{{ question.id }} · {{ question.name }}</div>
                     <div v-if="question.tips" class="text-xs text-base-content/70">提示：{{ question.tips }}</div>
@@ -1130,14 +1151,14 @@ watch(flattenedDialogueChain, () => {
                         <div
                             v-for="answer in getQuestionAnswers(node, question)"
                             :key="answer.id"
-                            class="rounded border border-base-300/80 bg-base-100 px-2 py-1"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1"
                         >
                             <div class="flex items-start gap-2">
                                 <img
                                     v-if="answer.icon"
                                     :src="`/imgs/webp/T_DetectiveMinigame_${answer.icon}.webp`"
                                     :alt="answer.name"
-                                    class="size-8 rounded object-cover border border-base-300/80 bg-base-200"
+                                    class="size-8 rounded-xs border border-base-content/10 bg-base-content/3 object-cover"
                                     loading="lazy"
                                 />
 
@@ -1151,13 +1172,14 @@ watch(flattenedDialogueChain, () => {
                 </div>
             </div>
 
+            <!-- 节点跳转 -->
             <div v-if="node.next?.length" class="flex flex-wrap items-center gap-1.5 text-xs">
                 <span class="text-base-content/60">节点跳转</span>
                 <template v-for="nextId in node.next" :key="`${node.id}-next-${nextId}`">
                     <span class="text-primary">→</span>
                     <button
                         type="button"
-                        class="cursor-pointer rounded border border-primary/30 bg-primary/5 px-1.5 py-0.5 text-primary/80 hover:bg-primary/10 hover:border-primary/50 transition-colors duration-200"
+                        class="cursor-pointer rounded-xs border border-primary/30 bg-primary/5 px-1.5 py-0.5 text-primary/80 transition-colors duration-200 hover:border-primary/50 hover:bg-primary/10"
                         @click="jumpToQuestNode(nextId)"
                     >
                         {{ getNodeLabel(nextId) }}
@@ -1178,41 +1200,3 @@ watch(flattenedDialogueChain, () => {
         />
     </div>
 </template>
-
-<style scoped>
-.dialogue-list-enter-active,
-.dialogue-list-leave-active {
-    transition: all 320ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.dialogue-list-enter-from,
-.dialogue-list-leave-to {
-    opacity: 0;
-    transform: translateY(14px) scale(0.98);
-    filter: blur(4px);
-}
-
-.dialogue-list-move {
-    transition: transform 260ms ease;
-}
-
-.quest-node-highlight {
-    border-color: color-mix(in srgb, var(--color-primary) 70%, transparent);
-    box-shadow:
-        0 0 0 1px color-mix(in srgb, var(--color-primary) 35%, transparent),
-        0 0 0 8px color-mix(in srgb, var(--color-primary) 12%, transparent);
-    animation: quest-node-pulse 1.05s ease;
-}
-
-@keyframes quest-node-pulse {
-    0% {
-        transform: translateY(0) scale(1);
-    }
-    30% {
-        transform: translateY(-1px) scale(1.01);
-    }
-    100% {
-        transform: translateY(0) scale(1);
-    }
-}
-</style>

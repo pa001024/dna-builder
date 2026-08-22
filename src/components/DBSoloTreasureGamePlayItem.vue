@@ -84,48 +84,56 @@ function getSoloTreasureRewards(monster: NonNullable<(typeof spawnMonsters.value
 
 <template>
     <div class="space-y-3">
+        <!-- 玩法头部：名称 + 类型 + ID -->
         <div class="flex items-start justify-between gap-3">
-            <div>
-                <div class="font-medium">{{ gamePlay.name || `玩法 ${gamePlay.id}` }}</div>
-                <div class="text-xs text-base-content/70">类型: {{ gamePlay.type }}</div>
+            <div class="min-w-0">
+                <div class="truncate text-sm font-medium">{{ gamePlay.name || `玩法 ${gamePlay.id}` }}</div>
+                <div class="mt-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-base-content/45">TYPE: {{ gamePlay.type }}</div>
             </div>
             <CopyID :id="gamePlay.id" />
         </div>
 
-        <div class="grid grid-cols-2 gap-2 text-sm">
-            <div v-if="gamePlay.cd !== undefined" class="flex items-center justify-between rounded bg-base-200 p-2">
-                <span>CD</span>
-                <span class="text-primary">{{ gamePlay.cd }}</span>
+        <!-- 基础数值 -->
+        <div class="grid grid-cols-2 gap-1.5">
+            <div
+                v-if="gamePlay.cd !== undefined"
+                class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+            >
+                <span class="text-xs text-base-content/60">CD</span>
+                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ gamePlay.cd }}</span>
             </div>
-            <div v-if="gamePlay.gain !== undefined" class="flex items-center justify-between rounded bg-base-200 p-2">
-                <span>收益</span>
-                <span class="text-primary">{{ gamePlay.gain }}</span>
+            <div
+                v-if="gamePlay.gain !== undefined"
+                class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+            >
+                <span class="text-xs text-base-content/60">收益</span>
+                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ gamePlay.gain }}</span>
             </div>
         </div>
 
-        <div v-if="gamePlay.spawn" class="rounded bg-base-200/60 p-3 space-y-2">
-            <div class="text-xs text-base-content/70">刷怪</div>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-                <div class="flex items-center justify-between rounded bg-base-200 p-2">
-                    <span>生成器ID</span>
-                    <span class="text-primary">{{ gamePlay.spawn.id }}</span>
-                </div>
-                <div class="flex items-center justify-between rounded bg-base-200 p-2">
-                    <span>时间</span>
-                    <span class="text-primary">{{ gamePlay.spawn.time }}</span>
-                </div>
-                <div class="flex items-center justify-between rounded bg-base-200 p-2">
-                    <span>间隔</span>
-                    <span class="text-primary">{{ gamePlay.spawn.th }}</span>
-                </div>
-                <div class="flex items-center justify-between rounded bg-base-200 p-2">
-                    <span>范围</span>
-                    <span class="text-primary">{{ gamePlay.spawn.radius.join(" / ") }}</span>
+        <!-- 刷怪 -->
+        <div v-if="gamePlay.spawn" class="space-y-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+            <div class="text-[11px] tracking-wide text-base-content/55">刷怪</div>
+            <div class="grid grid-cols-2 gap-1.5">
+                <div
+                    v-for="spawnAttr in [
+                        { label: '生成器ID', value: String(gamePlay.spawn.id) },
+                        { label: '时间', value: String(gamePlay.spawn.time) },
+                        { label: '间隔', value: String(gamePlay.spawn.th) },
+                        { label: '范围', value: gamePlay.spawn.radius.join(' / ') },
+                    ]"
+                    :key="spawnAttr.label"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ spawnAttr.label }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ spawnAttr.value }}</span>
                 </div>
             </div>
+
+            <!-- 普通怪物 -->
             <div v-if="spawnMonsters.length" class="space-y-2">
-                <div class="text-xs text-base-content/70">普通怪物 ({{ spawnMonsters.length }}种)</div>
-                <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                <div class="text-[11px] tracking-wide text-base-content/55">普通怪物 ({{ spawnMonsters.length }}种)</div>
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
                     <DBMonsterCompactCard
                         v-for="monster in spawnMonsters"
                         :key="monster.config.id"
@@ -137,23 +145,25 @@ function getSoloTreasureRewards(monster: NonNullable<(typeof spawnMonsters.value
                 </div>
             </div>
 
+            <!-- 目标值 -->
             <div v-if="gamePlay.type === 2 && typeTwoTargetIds.length" class="space-y-2">
-                <div class="text-xs text-base-content/70">目标值</div>
-                <div class="grid grid-cols-2 gap-2 text-sm">
+                <div class="text-[11px] tracking-wide text-base-content/55">目标值</div>
+                <div class="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
                     <div
                         v-for="(value, index) in typeTwoTargetIds"
                         :key="`type2-target-${index}`"
-                        class="flex items-center justify-between rounded bg-base-200 p-2"
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
-                        <span>G{{ index + 1 }}</span>
-                        <span class="text-primary">{{ value }}</span>
+                        <span class="font-mono text-xs uppercase tracking-wider text-base-content/60">G{{ index + 1 }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ value }}</span>
                     </div>
                 </div>
             </div>
 
+            <!-- 怪物 -->
             <div v-if="gamePlay.type === 2 && typeTwoMonsters.length" class="space-y-2">
-                <div class="text-xs text-base-content/70">怪物</div>
-                <div class="space-y-2">
+                <div class="text-[11px] tracking-wide text-base-content/55">怪物</div>
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
                     <DBMonsterCompactCard
                         v-for="monster in typeTwoMonsters"
                         :key="monster.id"
@@ -174,40 +184,46 @@ function getSoloTreasureRewards(monster: NonNullable<(typeof spawnMonsters.value
             </div>
         </div>
 
-        <div v-if="gamePlay.dom.length" class="rounded bg-base-200/60 p-3 space-y-2">
-            <div class="text-xs text-base-content/70">机关</div>
+        <!-- 机关 -->
+        <div v-if="gamePlay.dom.length" class="space-y-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+            <div class="text-[11px] tracking-wide text-base-content/55">机关</div>
             <div class="space-y-2">
                 <div v-for="item in mechanisms" :key="item.id" class="space-y-2">
                     <DBSoloTreasureMechanismItem v-if="item.mechanism" :mechanism="item.mechanism" />
-                    <div v-if="item.mechanism" class="text-xs text-base-content/70">UID: {{ item.uid }} · {{ item.pos.join(", ") }}</div>
-                    <div v-if="item.guard" class="rounded bg-base-200 px-2 py-1 text-sm">
+                    <div v-if="item.mechanism" class="font-mono text-[10px] tabular-nums text-base-content/40">
+                        UID: {{ item.uid }} · {{ item.pos.join(", ") }}
+                    </div>
+                    <div v-if="item.guard" class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-sm">
                         <div class="flex items-center justify-between gap-2">
                             <span>{{ item.guard.MechanismName }}</span>
                             <CopyID :id="item.guard.MechanismID" />
                         </div>
-                        <div class="text-xs text-base-content/70 mt-1">
-                            机关盒: {{ item.guard.MechanismItemBox }} · 修复速度: {{ item.guard.RepairSpeed }}
+                        <div class="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-base-content/60">
+                            <span>机关盒: {{ item.guard.MechanismItemBox }}</span>
+                            <span>修复速度: {{ item.guard.RepairSpeed }}</span>
+                            <span>{{ item.pos.join(", ") }}</span>
                         </div>
-                        <div class="text-xs text-base-content/70 mt-1">{{ item.pos.join(", ") }}</div>
                     </div>
-                    <div v-else class="rounded bg-base-200 px-2 py-1 text-sm">
+                    <div v-else class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-sm">
                         <div class="flex items-center justify-between gap-2">
                             <span>{{ item.type }}</span>
                             <CopyID :id="item.id" />
                         </div>
-                        <div class="text-xs text-base-content/70 mt-1">{{ item.pos.join(", ") }}</div>
+                        <div class="mt-1 font-mono text-[10px] tabular-nums text-base-content/40">{{ item.pos.join(", ") }}</div>
                     </div>
                 </div>
                 <div
                     v-for="item in gamePlay.dom.filter(dom => dom.type !== 'Mechanism')"
                     :key="item.id"
-                    class="rounded bg-base-200 px-2 py-1 text-sm"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-sm"
                 >
                     <div class="flex items-center justify-between gap-2">
                         <span>{{ item.type }}</span>
                         <CopyID :id="item.id" />
                     </div>
-                    <div class="text-xs text-base-content/70 mt-1">UID: {{ item.uid }} · {{ item.pos.join(", ") }}</div>
+                    <div class="mt-1 font-mono text-[10px] tabular-nums text-base-content/40">
+                        UID: {{ item.uid }} · {{ item.pos.join(", ") }}
+                    </div>
                 </div>
             </div>
         </div>

@@ -24,7 +24,7 @@ defineProps<{
             v-for="(item, index) in items"
             :key="item.path"
             :to="item.path"
-            class="group relative flex aspect-square flex-col items-center justify-center rounded-xs border border-base-content/10 bg-base-100 px-2 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/60 md:aspect-video md:items-stretch @container-size motion-reduce:animate-none motion-reduce:transition-none animate-ef-rise"
+            class="group relative flex aspect-square flex-col items-center justify-center rounded-xs border border-base-content/10 bg-base-100/60 px-2 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/60 md:aspect-video md:items-stretch @container-size motion-reduce:animate-none motion-reduce:transition-none animate-ef-rise"
             :style="{ animationDelay: `calc(0.1s + ${index} * 40ms)` }"
         >
             <!-- 图标 + 文字：宽屏时内容左对齐、左边距固定，保证各卡片图标纵向对齐；窄屏保持居中 -->

@@ -1170,6 +1170,96 @@ fn get_game_install() -> String {
     return "".to_string();
 }
 
+/// 常见字体样式后缀（小写）。注册表中每个样式变体会单独登记，
+/// 枚举时过滤掉这些条目，只保留基础字体族名。
+const FONT_STYLE_SUFFIXES: &[&str] = &[
+    "bold",
+    "italic",
+    "bold italic",
+    "oblique",
+    "light",
+    "semi light",
+    "semilight",
+    "medium",
+    "thin",
+    "black",
+    "heavy",
+    "regular",
+    "semibold",
+    "semi bold",
+    "demibold",
+    "demi bold",
+    "extrabold",
+    "extra bold",
+    "extralight",
+    "extra light",
+    "bolditalic",
+];
+
+/// 判断字体名是否以常见样式后缀结尾（用于过滤样式变体条目）。
+fn is_font_style_variant(name: &str) -> bool {
+    let lower = name.to_lowercase();
+    FONT_STYLE_SUFFIXES
+        .iter()
+        .any(|suffix| lower.ends_with(suffix))
+}
+
+/// 从注册表字体值名解析可直接用于 CSS font-family 的字体族名列表。
+///
+/// 注册表值名形如 `Microsoft YaHei & 微软雅黑 (TrueType)`：
+/// 1. 去掉末尾括号中的文件类型描述；
+/// 2. 按 `&` 拆分中英双名，逐个返回。
+fn parse_font_family_names(registry_value_name: &str) -> Vec<String> {
+    // 去掉末尾的 "(TrueType)" 等类型描述
+    let base = match registry_value_name.trim_end().strip_suffix(')') {
+        Some(inner) => match inner.rfind('(') {
+            Some(pos) => inner[..pos].trim(),
+            None => inner.trim(),
+        },
+        None => registry_value_name.trim(),
+    };
+    if base.is_empty() {
+        return Vec::new();
+    }
+
+    base.split('&')
+        .map(|part| part.trim())
+        .filter(|name| !name.is_empty() && !is_font_style_variant(name))
+        .map(|name| name.to_string())
+        .collect()
+}
+
+/// 枚举系统已安装字体（读取注册表中的字体登记项）。
+///
+/// 同时读取 HKLM（全机安装）与 HKCU（Windows 10 1809+ 支持的按用户安装），
+/// 返回去重排序后的字体族名，可直接用于前端 CSS font-family。
+#[tauri::command]
+fn list_system_fonts() -> Result<Vec<String>, String> {
+    #[cfg(target_os = "windows")]
+    {
+        use winreg::{RegKey, enums::*};
+
+        let mut names: Vec<String> = Vec::new();
+        for hive in [HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER] {
+            let key_path = "Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts";
+            let Ok(fonts_key) = RegKey::predef(hive).open_subkey(key_path) else {
+                continue;
+            };
+            for value_name in fonts_key.enum_values().flatten().map(|(name, _)| name) {
+                names.extend(parse_font_family_names(&value_name));
+            }
+        }
+
+        names.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        names.dedup_by(|a, b| a.eq_ignore_ascii_case(b));
+        Ok(names)
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(Vec::new())
+    }
+}
+
 #[tauri::command]
 async fn is_game_running(is_run: bool) -> String {
     #[cfg(target_os = "windows")]
@@ -1534,6 +1624,74 @@ async fn export_pak_files(
             );
         },
     )
+}
+
+/// 将目录打包为 pak 文件（递归打包所有子目录文件）。
+#[tauri::command]
+async fn pack_pak_folder(
+    app: tauri::AppHandle,
+    source_dir: String,
+    aes_key: Option<String>,
+    output_path: String,
+) -> Result<repak_tools::PakPackResult, String> {
+    let total = repak_tools::count_packable_files(Path::new(&source_dir))?;
+    let output_for_progress = output_path.clone();
+    let _ = app.emit(
+        "pak_pack_progress",
+        serde_json::json!({
+            "current": 0,
+            "total": total,
+            "outputPath": output_for_progress,
+        }),
+    );
+    let mut last_percent = 0;
+    repak_tools::pack_directory(
+        Path::new(&source_dir),
+        aes_key.as_deref(),
+        Path::new(&output_path),
+        |current| {
+            let percent = if total > 0 {
+                current.saturating_mul(100) / total
+            } else {
+                0
+            };
+            // 百分比未变化时不重复发送事件，避免大量小文件导致 IPC 拥堵
+            if percent == last_percent && current < total {
+                return;
+            }
+            last_percent = percent;
+            let _ = app.emit(
+                "pak_pack_progress",
+                serde_json::json!({
+                    "current": current,
+                    "total": total,
+                    "outputPath": output_for_progress,
+                }),
+            );
+        },
+    )
+}
+
+/// 移动/重命名文件（跨盘时回退为复制后删除源文件）。
+#[tauri::command]
+async fn move_file(source_path: String, target_path: String) -> Result<(), String> {
+    let source = Path::new(&source_path);
+    let target = Path::new(&target_path);
+    if !source.exists() {
+        return Err(format!("源文件不存在: {}", source.display()));
+    }
+    if let Some(parent) = target.parent() {
+        std::fs::create_dir_all(parent).map_err(|error| format!("创建目标目录失败: {}", error))?;
+    }
+    // 同盘直接改名；跨盘 rename 失败时回退为复制 + 删除
+    match fs::rename(source, target) {
+        Ok(()) => Ok(()),
+        Err(_) => {
+            fs::copy(source, target).map_err(|error| format!("复制文件失败: {}", error))?;
+            fs::remove_file(source).map_err(|error| format!("清理临时文件失败: {}", error))?;
+            Ok(())
+        }
+    }
 }
 
 /// 使用 unluac 反编译 Lua 字节码文件。
@@ -3584,9 +3742,11 @@ pub fn run() {
         list_script_files,
         read_text_file,
         write_text_file,
-        enumerate_pak_files,
-        list_pak_files,
-        export_pak_files,
+    enumerate_pak_files,
+    list_pak_files,
+    export_pak_files,
+    pack_pak_folder,
+    move_file,
         decompile_lua_bytecode_files,
         export_binary_file,
         start_heartbeat,
@@ -3640,7 +3800,8 @@ pub fn run() {
         watch_file,
         unwatch_file,
         list_files,
-        list_directories
+        list_directories,
+        list_system_fonts
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

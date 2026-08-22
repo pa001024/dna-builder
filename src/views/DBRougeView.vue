@@ -476,35 +476,46 @@ function closeSelected(): void {
     selectedId.value = 0
 }
 
-useInitialScrollToSelectedItem()
+useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedItem }">
-                <div class="p-3 border-b border-base-200 space-y-2">
+            <div
+                class="flex-1 flex flex-col overflow-hidden min-w-0"
+                :class="{ 'sm:border-r border-base-content/10': selectedItem }"
+            >
+                <div class="flex-none space-y-2 border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                    <!-- 模式切换（分段方章） -->
                     <div class="flex gap-2">
                         <button
                             v-for="tab in modeTabs"
                             :key="tab.key"
                             type="button"
-                            class="flex-1 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all duration-200"
+                            class="flex-1 cursor-pointer rounded-xs border px-3 py-1.5 text-sm font-semibold transition-colors duration-150 active:scale-[0.99]"
                             :class="
-                                mode === tab.key ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                mode === tab.key
+                                    ? 'border-primary bg-primary text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="switchMode(tab.key)"
                         >
                             {{ $t(tab.label) }}
                         </button>
                     </div>
+                    <!-- 子分类方章 -->
                     <div class="flex flex-wrap gap-1.5">
                         <button
                             v-for="tab in activeTabs"
                             :key="tab.key"
                             type="button"
-                            class="px-3 py-1 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="kind === tab.key ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                kind === tab.key
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="switchKind(tab.key)"
                         >
                             {{ $t(tab.label) }}
@@ -520,11 +531,15 @@ useInitialScrollToSelectedItem()
                         "
                         class="space-y-1.5"
                     >
-                        <div v-if="groupFilterOptions.length" class="flex flex-wrap gap-1">
+                        <div v-if="groupFilterOptions.length" class="flex flex-wrap gap-1.5">
                             <button
                                 type="button"
-                                class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
-                                :class="filterGroup === 0 ? 'bg-primary text-white' : 'bg-base-100 text-base-content hover:bg-base-300'"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    filterGroup === 0
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
                                 @click="filterGroup = 0"
                             >
                                 全部
@@ -533,20 +548,26 @@ useInitialScrollToSelectedItem()
                                 v-for="option in groupFilterOptions"
                                 :key="option.id"
                                 type="button"
-                                class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
-                                    filterGroup === option.id ? 'bg-primary text-white' : 'bg-base-100 text-base-content hover:bg-base-300'
+                                    filterGroup === option.id
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
                                 @click="filterGroup = option.id"
                             >
                                 {{ $t(option.name) }}
                             </button>
                         </div>
-                        <div v-if="branchFilterOptions.length" class="flex flex-wrap gap-1">
+                        <div v-if="branchFilterOptions.length" class="flex flex-wrap gap-1.5">
                             <button
                                 type="button"
-                                class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
-                                :class="filterBranch === 0 ? 'bg-primary text-white' : 'bg-base-100 text-base-content hover:bg-base-300'"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    filterBranch === 0
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
                                 @click="filterBranch = 0"
                             >
                                 全部
@@ -555,20 +576,26 @@ useInitialScrollToSelectedItem()
                                 v-for="branch in branchFilterOptions"
                                 :key="branch.id"
                                 type="button"
-                                class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
-                                    filterBranch === branch.id ? 'bg-primary text-white' : 'bg-base-100 text-base-content hover:bg-base-300'
+                                    filterBranch === branch.id
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
                                 @click="filterBranch = branch.id"
                             >
                                 {{ $t(branch.name) }}
                             </button>
                         </div>
-                        <div v-if="roomTypeFilterOptions.length" class="flex flex-wrap gap-1">
+                        <div v-if="roomTypeFilterOptions.length" class="flex flex-wrap gap-1.5">
                             <button
                                 type="button"
-                                class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
-                                :class="filterRoomType === '' ? 'bg-primary text-white' : 'bg-base-100 text-base-content hover:bg-base-300'"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    filterRoomType === ''
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
                                 @click="filterRoomType = ''"
                             >
                                 全部
@@ -577,22 +604,26 @@ useInitialScrollToSelectedItem()
                                 v-for="option in roomTypeFilterOptions"
                                 :key="option.name"
                                 type="button"
-                                class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
                                     filterRoomType === option.name
-                                        ? 'bg-primary text-white'
-                                        : 'bg-base-100 text-base-content hover:bg-base-300'
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
                                 @click="filterRoomType = option.name"
                             >
                                 {{ $t(option.name) }}
                             </button>
                         </div>
-                        <div v-if="showRarityFilter" class="flex flex-wrap gap-1">
+                        <div v-if="showRarityFilter" class="flex flex-wrap gap-1.5">
                             <button
                                 type="button"
-                                class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
-                                :class="filterRarity === 0 ? 'bg-primary text-white' : 'bg-base-100 text-base-content hover:bg-base-300'"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    filterRarity === 0
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
                                 @click="filterRarity = 0"
                             >
                                 全部
@@ -601,21 +632,25 @@ useInitialScrollToSelectedItem()
                                 v-for="rarity in [1, 2, 3]"
                                 :key="rarity"
                                 type="button"
-                                class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
-                                    filterRarity === rarity ? 'bg-primary text-white' : 'bg-base-100 text-base-content hover:bg-base-300'
+                                    filterRarity === rarity
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
                                 @click="filterRarity = rarity"
                             >
                                 {{ getRarityName(rarity + 2) }}
                             </button>
                         </div>
-                        <div v-if="showUpgradableFilter" class="flex flex-wrap gap-1">
+                        <div v-if="showUpgradableFilter" class="flex flex-wrap gap-1.5">
                             <button
                                 type="button"
-                                class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
-                                    filterUpgradable === 0 ? 'bg-primary text-white' : 'bg-base-100 text-base-content hover:bg-base-300'
+                                    filterUpgradable === 0
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
                                 @click="filterUpgradable = 0"
                             >
@@ -623,9 +658,11 @@ useInitialScrollToSelectedItem()
                             </button>
                             <button
                                 type="button"
-                                class="px-2 py-0.5 text-xs rounded-full transition-all duration-200"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
-                                    filterUpgradable === 1 ? 'bg-primary text-white' : 'bg-base-100 text-base-content hover:bg-base-300'
+                                    filterUpgradable === 1
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
                                 @click="filterUpgradable = 1"
                             >
@@ -633,68 +670,105 @@ useInitialScrollToSelectedItem()
                             </button>
                         </div>
                     </div>
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索 ID/名称/描述..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
+                    <!-- 下划线搜索 + 计数 -->
+                    <div class="relative">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input
+                            v-model="searchKeyword"
+                            type="text"
+                            placeholder="搜索 ID/名称/描述..."
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                        <span
+                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                        >
+                            {{ filteredItems.length }}
+                        </span>
+                    </div>
                 </div>
 
+                <!-- 条目列表 -->
                 <ScrollArea class="flex-1">
-                    <div class="p-2 grid gap-2">
-                        <div
-                            v-for="item in filteredItems"
+                    <div class="grid gap-2 p-3">
+                        <article
+                            v-for="(item, index) in filteredItems"
                             :key="`${mode}-${item.kind}-${item.id}`"
-                            class="flex items-start gap-2 p-2.5 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedId === item.id }"
+                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                            :class="
+                                selectedId === item.id
+                                    ? 'dbrg-item-active border-primary/70 bg-primary/10'
+                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                            "
+                            :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
                             @click="selectItem(item)"
                         >
-                            <div
-                                v-if="getItemIcon(item)"
-                                class="h-11 min-w-11 w-fit shrink-0 overflow-hidden rounded bg-linear-15"
-                                :class="[getItemRarity(item) ? getRarityGradientClass(getItemRarity(item) + 2) : '']"
-                            >
-                                <ImageFallback
-                                    :src="`/imgs/webp/${getItemIcon(item)}.webp`"
-                                    :alt="getItemTitle(item)"
-                                    class="h-11 w-auto object-contain"
+                            <!-- 左侧主色强调条：选中时显现 -->
+                            <span
+                                class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                :class="selectedId === item.id ? 'opacity-100' : 'opacity-0'"
+                                aria-hidden="true"
+                            />
+                            <div class="flex items-start gap-2 p-2.5">
+                                <div
+                                    v-if="getItemIcon(item)"
+                                    class="h-11 min-w-11 w-fit shrink-0 overflow-hidden rounded-xs bg-linear-15"
+                                    :class="[getItemRarity(item) ? getRarityGradientClass(getItemRarity(item) + 2) : '']"
                                 >
-                                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="getItemTitle(item)" class="h-11 w-auto object-contain" />
-                                </ImageFallback>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center gap-2">
-                                    <div class="font-medium truncate">{{ getItemTitle(item) }}</div>
-                                    <span v-if="getItemMeta(item)" class="shrink-0 text-xs opacity-70">{{ getItemMeta(item) }}</span>
-                                    <div class="flex-1"></div>
-                                    <CopyID :id="item.id" />
+                                    <ImageFallback
+                                        :src="`/imgs/webp/${getItemIcon(item)}.webp`"
+                                        :alt="getItemTitle(item)"
+                                        class="h-11 w-auto object-contain"
+                                    >
+                                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="getItemTitle(item)" class="h-11 w-auto object-contain" />
+                                    </ImageFallback>
                                 </div>
-                                <div v-if="getItemDesc(item)" class="mt-1 line-clamp-2 text-xs opacity-70">
-                                    {{ getItemDesc(item) }}
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                            :class="{ 'text-primary': selectedId === item.id }"
+                                        >
+                                            {{ getItemTitle(item) }}
+                                        </div>
+                                        <span v-if="getItemMeta(item)" class="shrink-0 truncate text-[11px] text-base-content/45">
+                                            {{ getItemMeta(item) }}
+                                        </span>
+                                        <div class="flex-1"></div>
+                                        <CopyID :id="item.id" />
+                                    </div>
+                                    <div v-if="getItemDesc(item)" class="mt-1 line-clamp-2 text-xs leading-relaxed text-base-content/55">
+                                        {{ getItemDesc(item) }}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                         <div v-if="!filteredItems.length" class="p-6 text-center text-sm text-base-content/50">无匹配条目</div>
                     </div>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredItems.length }} 个条目
+                <!-- 底部统计条 -->
+                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                    <p class="text-center text-[11px] tracking-wide text-base-content/50">
+                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredItems.length }}</b> 个条目
+                    </p>
                 </div>
             </div>
 
-            <div
+            <!-- 收起详情手柄 -->
+            <button
                 v-if="selectedItem"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                type="button"
+                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
+                title="收起详情"
                 @click="closeSelected"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
+            </button>
 
-            <ScrollArea v-if="selectedItem" class="flex-1">
-                <DBRougeLikeDetailItem v-if="selectedLikeItem" :item="selectedLikeItem" :kind="kind" class="flex-1" />
-                <DBRougeProDetailItem v-else-if="selectedProItem" :item="selectedProItem" :kind="kind" class="flex-1" />
+            <!-- 右侧详情面板 -->
+            <ScrollArea v-if="selectedItem" class="min-w-0 flex-1">
+                <DBRougeLikeDetailItem :key="selectedId" v-if="selectedLikeItem" :item="selectedLikeItem" :kind="kind" />
+                <DBRougeProDetailItem :key="selectedId" v-else-if="selectedProItem" :item="selectedProItem" :kind="kind" />
             </ScrollArea>
         </div>
     </div>

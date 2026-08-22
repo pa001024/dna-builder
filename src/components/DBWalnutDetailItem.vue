@@ -392,67 +392,74 @@ function getRewardTypeColor(index: number): string {
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <!-- 密函基本信息 -->
-        <div class="flex items-center gap-3 mb-3">
-            <span class="text-lg font-bold">
-                {{ walnut.名称 }}
-            </span>
-            <CopyID :id="walnut.id" />
-            <div class="text-sm text-base-content/70 flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded bg-base-200"> {{ walnut.稀有度 }}星 </span>
-                <div class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
-                    {{ $t(walnut.类型 === 1 ? "角色" : walnut.类型 === 2 ? "武器" : "魔之楔") }}
-                </div>
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 密函档案头：纸面 + primary 强调线 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-primary">
+                <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                Walnut File
+            </p>
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span class="font-orbitron text-xl font-bold leading-none tracking-tight sm:text-2xl">{{ walnut.名称 }}</span>
+                <CopyID :id="walnut.id" />
             </div>
-        </div>
-
-        <div class="flex flex-wrap gap-2 text-sm opacity-70 mb-3">
-            <span>{{ walnut.模式 }}</span>
-        </div>
+            <!-- 元信息行：稀有度 / 类型 / 模式 -->
+            <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
+                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ walnut.稀有度 }}星</span>
+                <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                <span>{{ $t(walnut.类型 === 1 ? "角色" : walnut.类型 === 2 ? "武器" : "魔之楔") }}</span>
+                <template v-if="walnut.模式">
+                    <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                    <span>{{ walnut.模式 }}</span>
+                </template>
+            </div>
+        </header>
 
         <!-- 获取途径 -->
-        <div class="p-3 bg-base-200 rounded mb-3">
-            <div class="text-xs text-base-content/70 mb-1">获取途径</div>
-            <div class="flex flex-wrap gap-2">
-                <span v-for="way in walnut.获取途径" :key="way" class="bg-base-300 px-2 py-0.5 rounded-full text-xs">
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="SOURCE" title="获取途径" />
+            <div class="flex flex-wrap gap-1.5">
+                <span
+                    v-for="way in walnut.获取途径"
+                    :key="way"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-0.5 text-xs text-base-content/75"
+                >
                     {{ way }}
                 </span>
             </div>
-        </div>
+        </section>
 
         <!-- 奖励列表 -->
-        <div class="p-3 bg-base-200 rounded mb-3">
-            <div class="flex items-center justify-between mb-3">
-                <div class="text-xs text-base-content/70">奖励列表</div>
-            </div>
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="REWARDS" title="奖励列表" />
             <div class="overflow-x-auto">
                 <table class="w-full min-w-100">
                     <thead>
                         <tr class="border-b border-base-content/20">
-                            <th class="text-left py-2 px-3 text-xs">ID</th>
-                            <th class="text-left py-2 px-3 text-xs">名称</th>
-                            <th class="text-left py-2 px-3 text-xs">数量</th>
-                            <th class="text-left py-2 px-3 text-xs">池随机范围*</th>
+                            <th class="px-3 py-2 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">ID</th>
+                            <th class="px-3 py-2 text-left text-[10px] text-base-content/40">名称</th>
+                            <th class="px-3 py-2 text-left text-[10px] text-base-content/40">数量</th>
+                            <th class="px-3 py-2 text-left text-[10px] text-base-content/40">
+                                池随机范围*
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr
                             v-for="(item, index) in rewardLinkItems"
                             :key="index"
-                            class="border-b border-base-content/10 hover:bg-base-300/50 transition-colors duration-200"
+                            class="border-b border-base-content/10 transition-colors duration-200 hover:bg-base-content/4"
                         >
-                            <td class="py-2 px-3 text-sm">{{ item.reward.id }}</td>
-                            <td class="py-2 px-3 text-sm">
+                            <td class="px-3 py-2 font-mono text-xs tabular-nums text-base-content/45">{{ item.reward.id }}</td>
+                            <td class="px-3 py-2 text-sm">
                                 <div class="flex items-center gap-2">
-                                    <img
-                                        :src="item.icon"
-                                        :alt="item.reward.name"
-                                        class="size-6 shrink-0 rounded bg-base-300 object-cover"
-                                    />
+                                    <img :src="item.icon" :alt="item.reward.name" class="size-6 shrink-0 rounded-xs object-cover" />
                                     <template v-if="item.links.length > 0">
                                         <span v-for="(link, linkIndex) in item.links" :key="link.to" class="inline-flex items-center gap-1">
-                                            <SRouterLink :to="link.to" class="link link-primary hover:underline">
+                                            <SRouterLink
+                                                :to="link.to"
+                                                class="text-primary underline-offset-2 transition-colors duration-150 hover:underline"
+                                            >
                                                 {{ link.text }}
                                             </SRouterLink>
                                             <span v-if="linkIndex < item.links.length - 1" class="mx-1 text-base-content/50">/</span>
@@ -461,46 +468,52 @@ function getRewardTypeColor(index: number): string {
                                     <span v-else>{{ item.reward.d ? `设计稿: ${item.reward.name}` : $t(item.reward.name) }}</span>
                                 </div>
                             </td>
-                            <td class="py-2 px-3 text-sm">{{ item.reward.count }}</td>
-                            <td class="py-2 px-3 text-sm">{{ index > 0 ? `0~${props.walnut.参数[index]}` : 1 }}</td>
+                            <td class="px-3 py-2">
+                                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                    item.reward.count
+                                }}</span>
+                            </td>
+                            <td class="px-3 py-2 font-mono text-xs tabular-nums text-base-content/55">
+                                {{ index > 0 ? `0~${props.walnut.参数[index]}` : 1 }}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <p class="text-xs text-base-content/70 mt-4">
+            <p class="mt-4 text-xs leading-relaxed text-base-content/55">
                 * 机制: 从每个奖励的随机范围抽取n个该种奖励后加入到奖励序列, 打乱后在序列结尾放置金奖励, 重复抽取直到抽出金后重置序列
             </p>
-        </div>
+        </section>
 
-        <div v-if="draft" class="bg-base-200 rounded mb-3">
-            <!-- 设计稿 -->
+        <!-- 设计稿 -->
+        <div v-if="draft" class="overflow-hidden rounded-xs border border-base-content/10 bg-base-100/60 backdrop-blur-sm">
             <DBDraftDetailItem :draft="draft" />
         </div>
 
         <!-- 模拟开函 -->
-        <div class="p-3 bg-base-200 rounded mb-3">
-            <div class="flex items-center justify-between mb-3">
-                <div class="text-xs text-base-content/70">模拟开函</div>
-            </div>
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="SIMULATOR" title="模拟开函" />
 
             <!-- 统计信息 -->
-            <div class="grid grid-cols-3 gap-2 mb-3">
-                <div class="bg-base-300 rounded p-2">
-                    <div class="text-xs text-base-content/60 mb-0.5">总开函次数</div>
-                    <div class="text-lg font-bold">{{ totalOpens }}</div>
+            <div class="mb-3 grid grid-cols-3 gap-1.5">
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <div class="mb-0.5 text-[11px] text-base-content/55">总开函次数</div>
+                    <div class="font-orbitron text-lg font-semibold tabular-nums text-primary">{{ totalOpens }}</div>
                 </div>
-                <div class="bg-base-300 rounded p-2">
-                    <div class="text-xs text-base-content/60 mb-0.5">出金次数</div>
-                    <div class="text-lg font-bold text-yellow-500">{{ goldCount }}</div>
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <div class="mb-0.5 text-[11px] text-base-content/55">出金次数</div>
+                    <div class="font-orbitron text-lg font-semibold tabular-nums text-yellow-500">{{ goldCount }}</div>
                 </div>
-                <div class="bg-base-300 rounded p-2">
-                    <div class="text-xs text-base-content/60 mb-0.5">出金率</div>
-                    <div class="text-lg font-bold">{{ totalOpens > 0 ? ((goldCount / totalOpens) * 100).toFixed(2) : 0 }}%</div>
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <div class="mb-0.5 text-[11px] text-base-content/55">出金率</div>
+                    <div class="font-orbitron text-lg font-semibold tabular-nums text-primary">
+                        {{ totalOpens > 0 ? ((goldCount / totalOpens) * 100).toFixed(2) : 0 }}%
+                    </div>
                 </div>
             </div>
 
             <!-- 操作按钮 -->
-            <div class="flex flex-wrap gap-2 justify-center mb-3">
+            <div class="mb-3 flex flex-wrap justify-center gap-2">
                 <button class="btn btn-primary btn-sm" :disabled="isAutoOpening" @click="openOnce">开1次</button>
                 <button class="btn btn-primary btn-sm" :disabled="isAutoOpening" @click="openWalnut(65)">开65次</button>
                 <button class="btn btn-secondary btn-sm" @click="isAutoOpening ? stopAutoOpen() : startAutoOpen()">
@@ -511,26 +524,29 @@ function getRewardTypeColor(index: number): string {
 
             <!-- 开函结果 -->
             <div class="mb-3">
-                <div class="text-xs text-base-content/70 mb-2">开函结果（最近200次）</div>
-                <div class="bg-base-300 rounded p-2 max-h-48 overflow-y-auto">
-                    <div v-if="openResults.length === 0" class="text-center text-base-content/60 py-4">暂无开函记录</div>
+                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">开函结果（最近200次）</div>
+                <div class="max-h-48 overflow-y-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                    <div v-if="openResults.length === 0" class="py-4 text-center text-base-content/55">暂无开函记录</div>
                     <div v-else class="grid grid-cols-1 gap-1">
                         <div
                             v-for="(result, index) in openResults"
                             :key="index"
-                            class="flex items-center gap-2 p-1 bg-base-100/50 rounded text-xs"
+                            class="flex items-center gap-2 rounded-xs p-1 text-xs transition-colors duration-150 hover:bg-base-content/4"
                         >
-                            <span class="text-base-content/60 w-8">{{ totalOpens - index }}</span>
-                            <div class="flex-1 flex gap-0.5">
+                            <span class="w-8 shrink-0 font-mono tabular-nums text-base-content/40">{{ totalOpens - index }}</span>
+                            <div class="flex flex-1 gap-0.5">
                                 <span
                                     v-for="(reward, rIndex) in result.map(v => getRewardInfo(v))"
                                     :key="rIndex"
-                                    class="px-1.5 py-0.5 rounded text-xs font-medium"
+                                    class="rounded-xs px-1.5 py-0.5 text-xs font-medium"
                                     :class="[getRewardTypeColor(reward.index), rIndex === 0 ? 'underline' : '']"
                                 >
                                     <template v-if="reward.links.length > 0">
                                         <span v-for="(link, linkIndex) in reward.links" :key="link.to" class="inline-flex items-center">
-                                            <SRouterLink :to="link.to" class="hover:text-primary hover:underline">
+                                            <SRouterLink
+                                                :to="link.to"
+                                                class="transition-colors duration-150 hover:text-primary hover:underline"
+                                            >
                                                 {{ link.text }}
                                             </SRouterLink>
                                             <span v-if="linkIndex < reward.links.length - 1" class="mx-1 text-base-content/50">/</span>
@@ -540,7 +556,7 @@ function getRewardTypeColor(index: number): string {
                                     {{ reward.count > 1 ? `*${reward.count}` : "" }}
                                 </span>
                             </div>
-                            <span v-if="result.includes(0)" class="text-xs text-yellow-500 font-bold"> ✨ </span>
+                            <span v-if="result.includes(0)" class="text-xs font-bold text-yellow-500"> ✨ </span>
                         </div>
                     </div>
                 </div>
@@ -548,46 +564,56 @@ function getRewardTypeColor(index: number): string {
 
             <!-- 奖励数量统计 -->
             <div class="mb-3">
-                <div class="text-xs text-base-content/70 mb-2">奖励数量统计</div>
-                <div class="bg-base-300 rounded p-2 max-h-40 overflow-y-auto">
-                    <div v-if="Object.keys(rewardCounts).length === 0" class="text-center text-base-content/60 py-4">暂无统计数据</div>
+                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">奖励数量统计</div>
+                <div class="max-h-40 overflow-y-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                    <div v-if="Object.keys(rewardCounts).length === 0" class="py-4 text-center text-base-content/55">暂无统计数据</div>
                     <div v-else class="grid grid-cols-2 gap-2">
                         <div
                             v-for="reward in sortedRewardCounts"
                             :key="reward.name"
-                            class="flex items-center justify-between p-2 bg-base-100/50 rounded text-xs"
+                            class="flex items-center justify-between rounded-xs p-2 text-xs transition-colors duration-150 hover:bg-base-content/4"
                         >
                             <div>
                                 <span :class="getRewardColor(reward.rarity)">
                                     <span>{{ $t(reward.name) }}</span></span
                                 >
                             </div>
-                            <span class="font-medium text-primary">*{{ reward.count }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                >*{{ reward.count }}</span
+                            >
                         </div>
                     </div>
                 </div>
             </div>
 
             <div>
-                <div class="text-xs text-base-content/70 mb-2">出金概率期望</div>
-                <div class="bg-base-300 rounded p-2 overflow-x-auto">
+                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">出金概率期望</div>
+                <div class="overflow-x-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                     <table class="w-full min-w-100">
                         <thead>
                             <tr class="border-b border-base-content/20">
-                                <th class="text-left py-2 px-3 text-xs">开函次数(n)</th>
-                                <th class="text-left py-2 px-3 text-xs">至少一次出金概率</th>
-                                <th class="text-left py-2 px-3 text-xs">刚好在这次开出金概率</th>
+                                <th class="px-3 py-2 text-left text-[10px] text-base-content/40">
+                                    开函次数(n)
+                                </th>
+                                <th class="px-3 py-2 text-left text-[10px] text-base-content/40">
+                                    至少一次出金概率
+                                </th>
+                                <th class="px-3 py-2 text-left text-[10px] text-base-content/40">
+                                    刚好在这次开出金概率
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr
                                 v-for="(item, index) in probabilityData"
                                 :key="item.n"
-                                class="border-b border-base-content/10 hover:bg-base-100/50 transition-colors duration-200"
+                                class="border-b border-base-content/10 transition-colors duration-200 hover:bg-base-content/4"
                             >
-                                <td class="py-1.5 px-3 text-xs">{{ item.n }}</td>
-                                <td class="py-1.5 px-3 text-xs">{{ (item.probability * 100).toFixed(2) }}%</td>
-                                <td class="py-1.5 px-3 text-xs">
+                                <td class="px-3 py-1.5 font-mono text-xs tabular-nums text-base-content/45">{{ item.n }}</td>
+                                <td class="px-3 py-1.5 font-mono text-xs tabular-nums text-base-content/70">
+                                    {{ (item.probability * 100).toFixed(2) }}%
+                                </td>
+                                <td class="px-3 py-1.5 font-mono text-xs tabular-nums text-base-content/70">
                                     {{
                                         +(
                                             (index === 0 ? item.probability : item.probability - probabilityData[index - 1].probability) *
@@ -600,6 +626,6 @@ function getRewardTypeColor(index: number): string {
                     </table>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </template>

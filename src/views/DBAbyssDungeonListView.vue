@@ -117,29 +117,46 @@ function isVersionAllowed(version: string): boolean {
 }
 
 useInitialScrollToSelectedItem({
-    selectedSelector: '[data-selected="true"]',
+    selectedSelector: ".dbab-item-active",
 })
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedDungeon }">
-                <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索副本ID或角色名称..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
+            <div
+                class="flex-1 flex flex-col overflow-hidden min-w-0"
+                :class="{ 'sm:border-r border-base-content/10': selectedDungeon }"
+            >
+                <!-- 检索带：下划线搜索 + 计数 -->
+                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                    <div class="relative">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input
+                            v-model="searchKeyword"
+                            type="text"
+                            placeholder="搜索副本ID或角色名称..."
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                        <span
+                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                        >
+                            {{ filteredDungeons.length }}
+                        </span>
+                    </div>
                 </div>
 
-                <div class="p-2 border-b border-base-200">
-                    <div class="flex flex-wrap gap-1 pb-1">
+                <!-- 筛选条件 -->
+                <div class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise" style="animation-delay: 0.05s">
+                    <!-- 赛季分组筛选 -->
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">赛季</span>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
-                                selectedDungeonGroup === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedDungeonGroup === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectedDungeonGroup = ''"
                         >
@@ -148,9 +165,11 @@ useInitialScrollToSelectedItem({
                         <button
                             v-for="group in allDungeonGroups"
                             :key="group"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
-                                selectedDungeonGroup === group ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedDungeonGroup === group
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectedDungeonGroup = group"
                         >
@@ -158,10 +177,16 @@ useInitialScrollToSelectedItem({
                         </button>
                     </div>
 
-                    <div class="flex flex-wrap gap-1">
+                    <!-- 版本筛选 -->
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">版本</span>
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
-                            :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedVersion === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectedVersion = ''"
                         >
                             全部
@@ -169,9 +194,11 @@ useInitialScrollToSelectedItem({
                         <button
                             v-for="version in versions"
                             :key="version"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
                             :class="
-                                selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedVersion === version
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectedVersion = version"
                         >
@@ -181,110 +208,136 @@ useInitialScrollToSelectedItem({
                 </div>
 
                 <ScrollArea class="flex-1">
-                    <div class="p-2 space-y-2">
-                        <div
-                            v-for="group in groupedDungeons"
-                            :key="group.key"
-                            class="rounded border border-base-200 bg-base-200/60 overflow-hidden"
-                            :data-selected="getDefaultDungeonInGroup(group)?.id === selectedDungeon?.id ? 'true' : 'false'"
-                        >
-                            <button
-                                type="button"
-                                class="w-full p-3 text-left transition-colors duration-200 hover:bg-base-300"
-                                :class="{
-                                    'bg-primary/90 text-primary-content hover:bg-primary':
-                                        getDefaultDungeonInGroup(group)?.id === selectedDungeon?.id,
-                                }"
+                    <div class="p-3">
+                        <!-- 空状态 -->
+                        <div v-if="filteredDungeons.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
+                            <p class="text-sm">未找到匹配的深渊副本</p>
+                        </div>
+
+                        <div v-else class="space-y-2">
+                            <article
+                                v-for="(group, index) in groupedDungeons"
+                                :key="group.key"
+                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                :class="
+                                    getDefaultDungeonInGroup(group)?.id === selectedDungeon?.id
+                                        ? 'dbab-item-active border-primary/70 bg-primary/10'
+                                        : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                                "
+                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
                                 @click="selectDungeon(getDefaultDungeonInGroup(group))"
                             >
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="min-w-0">
-                                        <div class="font-medium flex gap-2 min-w-0">
-                                            <span v-if="group.sn" class="truncate">{{ group.sn }}</span>
-                                            <span v-if="group.cid" class="truncate">{{ $t(getCharName(group.cid)) }}</span>
-                                            <span class="text-xs px-2 py-0.5 rounded bg-warning text-white whitespace-nowrap">
-                                                {{ $t(getAbyssDungeonGroup(group.dungeons[0])) }}
-                                            </span>
-                                        </div>
-                                        <div
-                                            v-if="group.dungeons[0]?.st && group.dungeons[0]?.et"
-                                            class="mt-1 text-xs text-base-content/70"
-                                        >
-                                            {{ new Date(group.dungeons[0].st! * 1000).toLocaleDateString() }} -
-                                            {{ new Date(group.dungeons[0].et! * 1000).toLocaleDateString() }}
-                                            <span v-if="getVersionByTime(group.dungeons[0].st)" class="ml-2"
-                                                >v{{ getVersionByTime(group.dungeons[0].st) }}</span
+                                <!-- 左侧主色强调条：选中时显现 -->
+                                <span
+                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                    :class="getDefaultDungeonInGroup(group)?.id === selectedDungeon?.id ? 'opacity-100' : 'opacity-0'"
+                                    aria-hidden="true"
+                                />
+                                <div class="p-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <div class="flex items-baseline gap-2">
+                                                <h3
+                                                    class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                    :class="{ 'text-primary': getDefaultDungeonInGroup(group)?.id === selectedDungeon?.id }"
+                                                >
+                                                    <span v-if="group.sn">{{ group.sn }}</span>
+                                                    <span v-if="group.cid">{{ $t(getCharName(group.cid)) }}</span>
+                                                </h3>
+                                                <span class="shrink-0 rounded-xs bg-warning px-1.5 py-0.5 text-[10px] leading-4 tracking-wide text-warning-content whitespace-nowrap">
+                                                    {{ $t(getAbyssDungeonGroup(group.dungeons[0])) }}
+                                                </span>
+                                            </div>
+                                            <div
+                                                v-if="group.dungeons[0]?.st && group.dungeons[0]?.et"
+                                                class="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-base-content/55"
                                             >
+                                                <span class="font-mono tabular-nums">
+                                                    {{ new Date(group.dungeons[0].st! * 1000).toLocaleDateString() }} -
+                                                    {{ new Date(group.dungeons[0].et! * 1000).toLocaleDateString() }}
+                                                </span>
+                                                <span v-if="getVersionByTime(group.dungeons[0].st)" class="font-mono tabular-nums">
+                                                    v{{ getVersionByTime(group.dungeons[0].st) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="shrink-0 text-[11px] tabular-nums text-base-content/50">
+                                            共 <span class="font-mono">{{ group.dungeons.length }}</span> 项
                                         </div>
                                     </div>
-                                    <div class="flex flex-col items-end gap-1 shrink-0">
-                                        <div class="text-xs opacity-70">共 {{ group.dungeons.length }} 项</div>
+                                </div>
+
+                                <div class="border-t border-base-content/10 px-3 py-2">
+                                    <div class="flex flex-wrap gap-1">
+                                        <button
+                                            v-for="dungeon in group.dungeons"
+                                            :key="dungeon.id"
+                                            type="button"
+                                            class="cursor-pointer rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                            :class="
+                                                selectedDungeon?.id === dungeon.id
+                                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                            "
+                                            @click.stop="selectDungeon(dungeon)"
+                                        >
+                                            #{{ getAbyssDungeonLevel(dungeon) }}
+                                        </button>
+                                    </div>
+                                    <div
+                                        v-if="group.dungeons.some(dungeon => dungeon.mb || dungeon.buff?.length)"
+                                        class="mt-2 flex items-center justify-between gap-2"
+                                    >
+                                        <span v-if="group.dungeons[0]?.buff?.length" class="flex flex-wrap items-center gap-1">
+                                            <span
+                                                v-for="buff in group.dungeons[0].buff.slice(0, 3)"
+                                                :key="buff.id"
+                                                class="rounded-xs border border-base-content/15 px-1 text-[10px] leading-4 tracking-wide text-base-content/55"
+                                            >
+                                                {{ buff.n }}
+                                            </span>
+                                            <span v-if="group.dungeons[0].buff.length > 3" class="font-mono text-[10px] tabular-nums text-base-content/40"
+                                                >+{{ group.dungeons[0].buff.length - 3 }}</span
+                                            >
+                                        </span>
+                                        <span v-if="group.dungeons[0]?.mb" class="ml-auto flex items-center gap-2">
+                                            <img
+                                                v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter(k => group.dungeons[0].mb![k] > 0)"
+                                                :key="key"
+                                                :src="LeveledChar.elementUrl(key)"
+                                                alt=""
+                                                class="h-8 w-4 inline-block rounded-xs object-cover"
+                                            />
+                                        </span>
                                     </div>
                                 </div>
-                            </button>
-
-                            <div class="border-t border-base-300 px-3 py-2">
-                                <div class="flex flex-wrap gap-1">
-                                    <button
-                                        v-for="dungeon in group.dungeons"
-                                        :key="dungeon.id"
-                                        type="button"
-                                        class="rounded px-2 py-1 text-xs transition-colors duration-200"
-                                        :class="
-                                            selectedDungeon?.id === dungeon.id
-                                                ? 'bg-primary text-primary-content'
-                                                : 'bg-base-100 text-base-content hover:bg-base-300'
-                                        "
-                                        @click="selectDungeon(dungeon)"
-                                    >
-                                        #{{ getAbyssDungeonLevel(dungeon) }}
-                                    </button>
-                                </div>
-                                <div
-                                    v-if="group.dungeons.some(dungeon => dungeon.mb || dungeon.buff?.length)"
-                                    class="mt-2 flex items-center justify-between gap-2"
-                                >
-                                    <span v-if="group.dungeons[0]?.buff?.length" class="flex flex-wrap items-center gap-1">
-                                        <span
-                                            v-for="buff in group.dungeons[0].buff.slice(0, 3)"
-                                            :key="buff.id"
-                                            class="text-xs bg-base-300/20 px-1.5 py-0.5 rounded"
-                                        >
-                                            {{ buff.n }}
-                                        </span>
-                                        <span v-if="group.dungeons[0].buff.length > 3" class="text-xs opacity-70"
-                                            >+{{ group.dungeons[0].buff.length - 3 }}</span
-                                        >
-                                    </span>
-                                    <span v-if="group.dungeons[0]?.mb" class="ml-auto flex items-center gap-2">
-                                        <img
-                                            v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter(k => group.dungeons[0].mb![k] > 0)"
-                                            :key="key"
-                                            :src="LeveledChar.elementUrl(key)"
-                                            alt=""
-                                            class="h-8 inline-block"
-                                        />
-                                    </span>
-                                </div>
-                            </div>
+                            </article>
                         </div>
                     </div>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredDungeons.length }} 个深渊
+                <!-- 底部统计条 -->
+                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                    <p class="text-[11px] tracking-wide text-base-content/50">
+                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredDungeons.length }}</b> 个深渊
+                    </p>
                 </div>
             </div>
-            <div
+
+            <!-- 收起详情手柄 -->
+            <button
                 v-if="selectedDungeon"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                type="button"
+                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
+                title="收起详情"
                 @click="selectDungeon(null)"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
+            </button>
 
-            <ScrollArea v-if="selectedDungeon" class="flex-1">
-                <DBAbyssDungeonDetailItem :dungeon="selectedDungeon" />
+            <!-- 右侧详情面板 -->
+            <ScrollArea v-if="selectedDungeon" class="min-w-0 flex-1">
+                <DBAbyssDungeonDetailItem :key="selectedDungeonId" :dungeon="selectedDungeon" />
             </ScrollArea>
         </div>
     </div>

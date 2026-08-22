@@ -136,138 +136,154 @@ onMounted(async () => {
 </script>
 
 <template>
-    <ScrollArea
-        class="h-full overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_top_right,rgba(168,85,247,0.12),transparent_26%),linear-gradient(180deg,rgba(5,10,20,0.98)_0%,rgba(11,16,29,0.94)_45%,rgba(6,10,18,0.98)_100%)] text-slate-100 sm:px-6 lg:px-8"
-    >
-        <div class="p-5">
-            <div
-                class="pointer-events-none absolute inset-0 opacity-45 bg-[linear-gradient(rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.07)_1px,transparent_1px)] bg-size-[72px_72px]"
-            ></div>
-            <div class="relative mx-auto flex max-w-7xl flex-col gap-6">
-                <section
-                    class="overflow-hidden rounded-lg border border-white/10 bg-white/6 p-5 shadow-[0_24px_80px_rgba(2,6,23,0.36)] backdrop-blur-xl sm:p-6"
-                >
-                    <div class="flex flex-col gap-5">
+    <ScrollArea class="h-full">
+        <div class="mx-auto flex max-w-7xl flex-col gap-4 p-4 sm:p-5">
+            <div class="stagger-rise flex flex-col gap-4">
+                <!-- 榜单信息卡：外层区块卡 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
+                    <div class="flex flex-col gap-4">
                         <div class="flex flex-wrap items-center justify-between gap-3">
                             <div class="min-w-0">
-                                <h1 class="truncate text-2xl font-semibold tracking-tight text-white">榜单 - {{ ranking?.name }}</h1>
-                                <div class="mt-2 flex flex-wrap gap-3 text-xs text-slate-400">
+                                <p
+                                    class="mb-1.5 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase"
+                                >
+                                    <span class="h-px w-5 bg-primary" aria-hidden="true" />
+                                    Ranking
+                                </p>
+                                <h1
+                                    class="truncate font-orbitron text-xl leading-none font-bold tracking-tight text-base-content sm:text-2xl"
+                                >
+                                    {{ ranking?.name }}
+                                </h1>
+                                <div class="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-base-content/55">
                                     <span v-if="ranking?.desc">{{ ranking?.desc }}</span>
                                     <span>条目 {{ rankedItems.length }}</span>
-                                    <span>更新时间 {{ ranking ? formatDateTime(ranking.updateAt) : "-" }}</span>
+                                    <span class="tabular-nums">更新时间 {{ ranking ? formatDateTime(ranking.updateAt) : "-" }}</span>
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-2">
-                                <div class="rounded-full border border-white/10 bg-white/6 px-3 py-2 text-xs text-slate-300">
-                                    {{ loading ? "计算中" : switching ? "切换中" : "就绪" }}
-                                </div>
-                            </div>
+                            <!-- 状态方章 -->
+                            <span
+                                class="inline-flex h-6 shrink-0 items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    loading || switching
+                                        ? 'border-primary/40 bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/15 text-base-content/50'
+                                "
+                            >
+                                {{ loading ? "计算中" : switching ? "切换中" : "就绪" }}
+                            </span>
                         </div>
 
+                        <!-- 榜单切换方章 -->
                         <ScrollArea :vertical="false" horizontal>
-                            <div class="flex gap-2 pb-1 items-center">
+                            <div class="flex items-center gap-1.5 pb-1">
                                 <button
                                     v-for="item in rankingOptions"
                                     :key="item.id"
-                                    class="flex shrink-0 items-center gap-3 rounded-full border px-3 py-2 text-left transition-all duration-300"
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
                                     :class="
                                         rankingId === item.id
-                                            ? 'border-cyan-300/30 bg-cyan-300/10 text-white text-sm '
-                                            : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10 text-sm'
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                     "
                                     @click="switchRanking(item.id)"
                                 >
-                                    <span class="max-w-40 truncate font-medium">{{ item.name }}</span>
+                                    {{ item.name }}
                                 </button>
                             </div>
                         </ScrollArea>
                     </div>
                 </section>
 
-                <section
-                    class="flex-1 rounded-lg border border-white/10 bg-slate-950/40 p-4 shadow-[0_24px_80px_rgba(2,6,23,0.28)] backdrop-blur-xl sm:p-6"
-                >
-                    <div v-if="loading && rankedItems.length === 0" class="grid gap-4">
-                        <div v-for="index in 5" :key="index" class="h-28 animate-pulse rounded-2xl border border-white/10 bg-white/5"></div>
+                <!-- 榜单条目：外层区块卡 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
+                    <!-- 加载骨架 -->
+                    <div v-if="loading && rankedItems.length === 0" class="grid gap-2.5">
+                        <div
+                            v-for="index in 5"
+                            :key="index"
+                            class="h-24 animate-pulse rounded-xs border border-base-content/10 bg-base-content/3"
+                        ></div>
                     </div>
 
+                    <!-- 空状态 -->
                     <div
                         v-else-if="rankedItems.length === 0"
-                        class="flex min-h-96 items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/4 px-6 py-12 text-center"
+                        class="flex min-h-96 flex-col items-center justify-center rounded-xs border border-dashed border-base-content/15 px-6 py-12 text-center text-sm text-base-content/45"
                     >
-                        <div class="text-slate-400">暂无条目</div>
+                        <Icon icon="ri:trophy-line" class="mb-4 h-12 w-12 opacity-40" />
+                        暂无条目
                     </div>
 
-                    <div v-else class="grid gap-4">
+                    <!-- 条目列表 -->
+                    <div v-else class="grid gap-2.5">
                         <article
                             v-for="(item, index) in rankedItems"
                             :key="item.id"
-                            class="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/6 p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-white/10 hover:shadow-[0_20px_60px_rgba(8,145,178,0.14)]"
+                            class="group relative overflow-hidden rounded-xs border bg-base-content/3 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50"
+                            :class="index < 3 ? 'border-primary/40' : 'border-base-content/12'"
                         >
-                            <div
-                                class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.16),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(168,85,247,0.1),transparent_30%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                            ></div>
+                            <!-- 前三名左侧主色强调条 -->
+                            <span
+                                class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                :class="index < 3 ? 'opacity-100' : 'opacity-0'"
+                                aria-hidden="true"
+                            />
 
-                            <div class="relative flex gap-4 items-center">
-                                <div class="flex items-center gap-4">
-                                    <div
-                                        class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-slate-950/50"
-                                    >
-                                        <ImageFallback
-                                            :src="item.charIcon"
+                            <div class="relative flex items-center gap-4">
+                                <!-- 角色头像 -->
+                                <div class="size-14 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/5">
+                                    <ImageFallback :src="item.charIcon" :alt="item.charName" class="h-full w-full object-cover object-top">
+                                        <img
+                                            src="/imgs/webp/T_Head_Empty.webp"
                                             :alt="item.charName"
                                             class="h-full w-full object-cover object-top"
-                                        >
-                                            <img
-                                                src="/imgs/webp/T_Head_Empty.webp"
-                                                :alt="item.charName"
-                                                class="h-full w-full object-cover object-top"
-                                            />
-                                        </ImageFallback>
-                                    </div>
+                                        />
+                                    </ImageFallback>
                                 </div>
 
-                                <div class="flex-1">
-                                    <div class="flex flex-wrap items-center gap-3">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-2.5">
+                                        <!-- 角色名方章 -->
                                         <span
-                                            class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold tracking-[0.2em] text-slate-300"
+                                            class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary"
                                         >
                                             {{ $t(item.charName) }}
                                         </span>
                                         <SRouterLink
                                             :to="`/char/${item.charId}/${item.buildId}`"
-                                            class="truncate text-xl font-semibold text-white hover:text-cyan-200 hover:underline"
+                                            class="truncate text-base font-semibold text-base-content transition-colors duration-150 hover:text-primary"
                                         >
                                             {{ item.title }}
                                         </SRouterLink>
                                     </div>
-                                    <div class="mt-3 flex flex-wrap items-center gap-4 text-sm text-slate-400">
+                                    <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-base-content/55">
                                         <div class="flex items-center gap-2">
-                                            <div
-                                                class="bg-neutral text-neutral-content rounded-full w-6 h-6 inline-flex justify-center items-center text-xs"
-                                            >
-                                                <QQAvatar :qq="item.authorQq" :name="item.authorName" />
-                                            </div>
-                                            <span class="text-slate-300">{{ item.authorName }}</span>
+                                            <QQAvatar class="size-6" :qq="item.authorQq" :name="item.authorName" />
+                                            <span>{{ item.authorName }}</span>
                                         </div>
-                                        <span>{{ formatDateTime(item.updateAt) }}</span>
+                                        <span class="tabular-nums">{{ formatDateTime(item.updateAt) }}</span>
                                     </div>
                                 </div>
 
-                                <div class="flex gap-3">
-                                    <div class="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3">
+                                <!-- DPS / 排名属性格 -->
+                                <div class="flex shrink-0 gap-2">
+                                    <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2">
                                         <div
-                                            class="text-[11px] uppercase tracking-[0.22em] text-slate-400 max-w-40 truncate"
+                                            class="max-w-40 truncate text-[11px] text-base-content/55"
                                             :title="`${item.baseName} - ${item.targetFunction}`"
                                         >
                                             {{ item.targetFunction }}
                                         </div>
-                                        <div class="mt-1 text-2xl font-black text-white">{{ Math.round(item.dps).toLocaleString() }}</div>
+                                        <div class="mt-1 font-orbitron text-xl font-bold tabular-nums text-primary">
+                                            {{ Math.round(item.dps).toLocaleString() }}
+                                        </div>
                                     </div>
-                                    <div class="rounded-2xl border border-white/10 bg-cyan-300/10 px-4 py-3 w-30">
-                                        <div class="text-[11px] uppercase tracking-[0.22em] text-cyan-100/70">排名</div>
-                                        <div class="mt-1 text-2xl font-black text-white">#{{ index + 1 }}</div>
+                                    <div class="w-28 rounded-xs border border-primary/30 bg-primary/10 px-3 py-2">
+                                        <div class="text-[11px] text-base-content/55">排名</div>
+                                        <div class="mt-1 font-orbitron text-xl font-bold tabular-nums text-primary">#{{ index + 1 }}</div>
                                     </div>
                                 </div>
                             </div>

@@ -479,95 +479,108 @@ function getHardbossIcon(boss: HardBoss): string {
 </script>
 
 <template>
-    <div v-if="bossDetail" class="p-3 space-y-4">
-        <!-- 详情头部 -->
-        <div class="relative overflow-hidden rounded-xl border border-base-200 bg-base-100">
+    <div v-if="bossDetail" class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 详情头部：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
             <div
-                class="pointer-events-none absolute inset-0 bg-linear-to-br from-primary/10 via-transparent to-transparent"
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
                 aria-hidden="true"
-            ></div>
-            <div class="relative flex items-start gap-3 p-4">
-                <div class="relative size-16 shrink-0">
-                    <div
-                        class="absolute -inset-1 rounded-xl bg-linear-to-br from-primary/25 to-transparent blur-sm"
-                        aria-hidden="true"
-                    ></div>
-                    <img
-                        :src="getHardbossIcon(boss)"
-                        :alt="boss.name"
-                        class="relative size-16 rounded-lg border border-base-200 object-cover"
-                    />
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
+                <div class="size-16 shrink-0 overflow-hidden rounded-xs border border-base-content/10 sm:size-20">
+                    <img :src="getHardbossIcon(boss)" :alt="boss.name" class="h-full w-full object-cover" />
                 </div>
-                <div class="flex min-w-0 flex-col gap-1.5">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <SRouterLink :to="`/db/hardboss/${boss.id}`" class="text-lg font-bold link link-primary min-w-0 truncate">
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Nightmare Echo
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/hardboss/${boss.id}`"
+                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
                             {{ $t(boss.name) }}
                         </SRouterLink>
                         <CopyID :id="boss.id" />
                     </div>
-                    <div class="text-sm leading-relaxed text-base-content/70">
-                        {{ boss.desc }}
-                    </div>
+                    <p class="mt-2 text-sm leading-relaxed text-base-content/70">{{ boss.desc }}</p>
                 </div>
             </div>
-        </div>
+        </header>
 
         <!-- 怪物信息 -->
-        <section v-if="monsters.length" class="rounded-xl border border-base-200 bg-base-100 p-4">
-            <header class="mb-3 flex items-center justify-between gap-2">
-                <h3 class="flex items-center gap-2 text-base font-bold">
-                    <span class="inline-block size-3.5 rounded-sm bg-linear-to-br from-primary to-primary/50" aria-hidden="true"></span>
-                    怪物信息
-                </h3>
-                <label class="flex items-center gap-1.5 text-xs text-base-content/60">
-                    等级
-                    <select v-if="monsterLevels.length" v-model.number="selectedMonsterLevel" class="select select-bordered select-sm w-24">
-                        <option v-for="level in monsterLevels" :key="level" :value="level">Lv.{{ level }}</option>
-                    </select>
-                </label>
-            </header>
+        <section v-if="monsters.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="MONSTERS" title="怪物信息">
+                <template #trailing>
+                    <label class="flex items-center gap-1.5 text-xs text-base-content/60">
+                        等级
+                        <select
+                            v-if="monsterLevels.length"
+                            v-model.number="selectedMonsterLevel"
+                            class="select select-bordered select-sm w-24"
+                        >
+                            <option v-for="level in monsterLevels" :key="level" :value="level">Lv.{{ level }}</option>
+                        </select>
+                    </label>
+                </template>
+            </SectionHeader>
             <div class="grid gap-2">
                 <MonsterItem v-for="monster in monsters" :key="monster.id" :monster="monster" :level="selectedMonsterLevel" />
             </div>
         </section>
 
         <!-- 时间轴 -->
-        <section v-if="hardbossTimePoints.length > 0" class="rounded-xl border border-base-200 bg-base-100 p-4 space-y-4">
-            <header class="flex flex-wrap items-center justify-between gap-2">
-                <h3 class="flex items-center gap-2 text-base font-bold">
-                    <span class="inline-block size-3.5 rounded-sm bg-linear-to-br from-info to-info/50" aria-hidden="true"></span>
-                    奖励时间轴
-                    <span class="badge badge-ghost badge-sm">{{ hardbossTimePoints.length }} 个时间点</span>
-                </h3>
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <label class="label cursor-pointer gap-2 p-0">
-                        <input v-model="timeFilterEnabled" type="checkbox" class="toggle toggle-primary toggle-sm" />
-                        <span class="text-sm">仅显示当前</span>
-                    </label>
-                    <label class="label cursor-pointer gap-2 p-0">
-                        <input
-                            v-model="diffOnlyEnabled"
-                            type="checkbox"
-                            class="toggle toggle-success toggle-sm"
-                            :disabled="!timeFilterEnabled"
-                        />
-                        <span class="text-sm" :class="{ 'text-base-content/40': !timeFilterEnabled }">仅显示差异</span>
-                    </label>
-                </div>
-            </header>
+        <section
+            v-if="hardbossTimePoints.length > 0"
+            class="space-y-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="TIMELINE" title="奖励时间轴" :count="`${hardbossTimePoints.length} 个时间点`">
+                <template #trailing>
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <label class="label cursor-pointer gap-1.5 p-0">
+                            <input v-model="timeFilterEnabled" type="checkbox" class="toggle toggle-primary toggle-sm" />
+                            <span class="text-xs">仅显示当前</span>
+                        </label>
+                        <label class="label cursor-pointer gap-1.5 p-0">
+                            <input
+                                v-model="diffOnlyEnabled"
+                                type="checkbox"
+                                class="toggle toggle-success toggle-sm"
+                                :disabled="!timeFilterEnabled"
+                            />
+                            <span class="text-xs" :class="{ 'text-base-content/40': !timeFilterEnabled }">仅显示差异</span>
+                        </label>
+                    </div>
+                </template>
+            </SectionHeader>
 
             <!-- 时间点轨道 -->
             <div v-if="timeFilterEnabled" class="space-y-2">
-                <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+                <!-- p-1 -m-1：为"当前"光点的负偏移预留溢出空间，避免被 overflow-x-auto 裁剪 -->
+                <div class="-m-1 flex items-center gap-1.5 overflow-x-auto p-1 pb-1.5">
                     <button
                         v-for="(point, index) in hardbossTimePoints"
                         :key="point.timestamp"
                         type="button"
-                        class="relative shrink-0 rounded-lg border px-2.5 py-1.5 text-center transition-all duration-200"
+                        class="relative shrink-0 rounded-xs border px-2.5 py-1.5 text-center transition-all duration-200 active:scale-[0.97]"
                         :class="
                             index === selectedTimePointIndex
-                                ? 'border-primary bg-primary/10 text-primary shadow-sm'
-                                : 'border-base-300 bg-base-200/40 text-base-content/60 hover:border-primary/40 hover:bg-base-200'
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-base-content/15 text-base-content/60 hover:border-primary/50 hover:text-primary'
                         "
                         :title="point.label"
                         @click="selectedTimePointIndex = index"
@@ -603,11 +616,17 @@ function getHardbossIcon(boss: HardBoss): string {
             <!-- 当前时间点状态栏 -->
             <div
                 v-if="selectedTimePoint"
-                class="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg px-3 py-2 text-xs"
-                :class="selectedTimePoint.isCurrent ? 'bg-primary/10 text-primary' : 'bg-base-200/60 text-base-content/70'"
+                class="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-xs border px-3 py-2 text-xs"
+                :class="
+                    selectedTimePoint.isCurrent
+                        ? 'border-primary/40 bg-primary/10 text-primary'
+                        : 'border-base-content/10 bg-base-content/3 text-base-content/70'
+                "
             >
                 <span class="font-medium">{{ selectedTimePoint.label }}</span>
-                <span v-if="selectedTimePoint.isCurrent" class="badge badge-primary badge-xs">当前</span>
+                <span v-if="selectedTimePoint.isCurrent" class="rounded-xs bg-primary px-1.5 py-0.5 font-semibold text-primary-content"
+                    >当前</span
+                >
                 <span class="opacity-60">·</span>
                 <span>生效奖励 {{ selectedTimePoint.activeRewardCount }} 组</span>
                 <template v-if="effectiveDiffOnlyEnabled && previousSelectedTimePoint">
@@ -618,60 +637,67 @@ function getHardbossIcon(boss: HardBoss): string {
         </section>
 
         <!-- 密函预览 -->
-        <section v-if="hardbossWalnutRewardCosts.length" class="rounded-xl border border-base-200 bg-base-100 p-4">
-            <header class="mb-3 flex items-center gap-2">
-                <h3 class="flex items-center gap-2 text-base font-bold">
-                    <span class="inline-block size-3.5 rounded-sm bg-linear-to-br from-secondary to-secondary/50" aria-hidden="true"></span>
-                    {{ $t("game-launcher.preview") }}
-                </h3>
-                <span class="badge badge-ghost badge-sm">{{ hardbossWalnutRewardCosts.length }}</span>
-            </header>
+        <section
+            v-if="hardbossWalnutRewardCosts.length"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader
+                no-animate
+                compact
+                kicker="WALNUT"
+                :title="$t('game-launcher.preview')"
+                :count="hardbossWalnutRewardCosts.length"
+            />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
                 <div v-for="cost in hardbossWalnutRewardCosts" :key="cost.key" class="relative">
                     <span
                         v-if="effectiveDiffOnlyEnabled && cost.diffState"
-                        class="absolute left-1 top-1 z-10 inline-flex size-4 items-center justify-center rounded text-xs font-bold"
+                        class="absolute left-1 top-1 z-10 inline-flex size-4 items-center justify-center rounded-xs text-xs font-bold"
                         :class="cost.diffState === 'added' ? 'bg-success text-success-content' : 'bg-error text-error-content'"
                     >
                         {{ cost.diffState === "added" ? "+" : "-" }}
                     </span>
-                    <ResourceCostItem :name="cost.name" :value="cost.value" class="bg-base-200" />
+                    <ResourceCostItem :name="cost.name" :value="cost.value" />
                 </div>
             </div>
         </section>
 
         <!-- 等级奖励列表 -->
-        <section v-for="diff in filteredDiffs" :key="diff.id" class="overflow-hidden rounded-xl border border-base-200 bg-base-100">
-            <header
-                class="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-base-200 bg-linear-to-r from-base-200/60 to-transparent px-4 py-2.5"
-            >
-                <span class="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-xs font-semibold leading-none text-primary">
+        <section
+            v-for="diff in filteredDiffs"
+            :key="diff.id"
+            class="overflow-hidden rounded-xs border border-base-content/10 bg-base-100/60 backdrop-blur-sm"
+        >
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-base-content/10 px-3 py-2.5">
+                <span
+                    class="rounded-xs bg-primary/10 px-1.5 py-0.5 font-orbitron text-xs font-semibold leading-none tabular-nums text-primary"
+                >
                     Lv.{{ diff.lv }}
                 </span>
-                <h3 class="text-base font-bold">等级奖励</h3>
-                <span v-if="timeFilterEnabled" class="badge badge-ghost badge-sm ml-auto">
+                <h3 class="text-sm font-semibold">等级奖励</h3>
+                <span v-if="timeFilterEnabled" class="ml-auto text-[11px] tracking-wide text-base-content/50">
                     <template v-if="effectiveDiffOnlyEnabled">{{ diff.changedRewardCount }} 组变化奖励</template>
                     <template v-else>{{ diff.activeRewardCount }} 组当前奖励</template>
                 </span>
-            </header>
-            <div class="p-4">
+            </div>
+            <div class="p-3">
                 <div v-if="!timeFilterEnabled || diff.activeRewardCount > 0" class="space-y-3">
                     <div
                         v-for="dr in diff.rewards"
                         :key="`${dr.DynamicRewardId}-${dr.Index}`"
-                        class="rounded-lg border bg-base-200/50 p-3 transition-colors duration-200"
+                        class="rounded-xs border p-2.5 transition-colors duration-200"
                         :class="
                             dr.diffState === 'added'
                                 ? 'border-success/50 bg-success/5'
                                 : dr.diffState === 'removed'
-                                  ? 'border-error/40 opacity-70'
-                                  : 'border-transparent hover:border-base-300 hover:bg-base-200'
+                                  ? 'border-error/40 bg-base-content/3 opacity-70'
+                                  : 'border-base-content/10 bg-base-content/3 hover:border-primary/40'
                         "
                     >
                         <div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-base-content/60">
                             <span
                                 v-if="dr.diffState"
-                                class="inline-flex h-5 min-w-5 items-center justify-center rounded text-xs font-bold"
+                                class="inline-flex h-5 min-w-5 items-center justify-center rounded-xs text-xs font-bold"
                                 :class="dr.diffState === 'added' ? 'bg-success text-success-content' : 'bg-error text-error-content'"
                             >
                                 {{ dr.diffState === "added" ? "+" : "-" }}
@@ -700,7 +726,10 @@ function getHardbossIcon(boss: HardBoss): string {
                         </div>
                     </div>
                 </div>
-                <div v-else class="rounded-lg border border-dashed border-base-300 px-3 py-6 text-center text-sm text-base-content/60">
+                <div
+                    v-else
+                    class="rounded-xs border border-dashed border-base-content/20 px-3 py-6 text-center text-sm text-base-content/60"
+                >
                     {{ effectiveDiffOnlyEnabled ? "与上一时间点相比没有变化奖励" : "当前时间点下没有生效奖励" }}
                 </div>
             </div>

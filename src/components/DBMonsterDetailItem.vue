@@ -426,145 +426,248 @@ function getFactionName(faction: number | undefined): string {
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-center gap-3">
-            <SRouterLink :to="`/db/monster/${monster.id}`" class="text-lg font-bold link link-primary">
-                {{ $t(monster.n) }}
-            </SRouterLink>
-            <CopyID :id="monster.id" />
-            <div class="text-sm text-base-content/70 flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded bg-base-200 text-xs">
-                    {{ $t(getFactionName(monster.f)) }}
-                </span>
-            </div>
-            <label class="ml-auto flex items-center gap-1 text-xs">
-                <input v-model="showRougeStats" type="checkbox" class="toggle toggle-sm toggle-primary" />
-                <span>{{ $t("monster-detail.badgeTitle") }}</span>
-            </label>
-            <label class="flex items-center gap-1 text-xs">
-                <input v-model="useEightHpMultiplier" type="checkbox" class="checkbox checkbox-xs checkbox-primary" />
-                <span>{{ $t("monster-detail.showEightHp") }}</span>
-            </label>
-        </div>
-
-        <div v-if="leveledMonster" class="flex justify-center items-center">
-            <img :src="leveledMonster.url" class="w-24 object-cover rounded" />
-        </div>
-        <LevelSlider v-model="currentLevel" :max="MaxMonsterLevelLimit" />
-
-        <div v-if="leveledMonster" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
-            <div class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.attack") }}</div>
-                <div class="font-bold text-primary">
-                    {{ formatBigNumber(leveledMonster.atk) }}
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 魔物档案头：纸面直角 + 引导网格 + 斜切楔形 + primary 强调线 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
+                <div v-if="leveledMonster" class="size-20 shrink-0 overflow-hidden rounded-xs sm:size-24">
+                    <img :src="leveledMonster.url" :alt="$t(monster.n)" class="h-full w-full object-cover object-top" />
                 </div>
-            </div>
-            <div class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.defense") }}</div>
-                <div class="font-bold text-success">
-                    {{ formatBigNumber(leveledMonster.def) }}
-                </div>
-            </div>
-            <div class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.hp") }}</div>
-                <div class="font-bold text-error">
-                    {{ formatBigNumber(leveledMonster.hp) }}
-                </div>
-            </div>
-            <div v-if="leveledMonster.es !== undefined" class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.shield") }}</div>
-                <div class="font-bold text-info">
-                    {{ formatBigNumber(leveledMonster.es) }}
-                </div>
-            </div>
-            <div v-if="leveledMonster.tn !== undefined" class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.stance") }}</div>
-                <div class="font-bold text-secondary">
-                    {{ formatBigNumber(leveledMonster.tn) }}
-                </div>
-            </div>
-            <div class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.defenseDamageReductionRate") }}</div>
-                <div class="font-bold text-warning">
-                    {{ format100(defenseDamageReductionRate, 2) }}
-                </div>
-            </div>
-            <div class="bg-base-200 rounded p-2 text-center" v-if="levelDamageReductionRate > 0">
-                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.levelDamageReductionRate") }}</div>
-                <div class="font-bold text-warning">
-                    {{ format100(levelDamageReductionRate, 2) }}
-                </div>
-            </div>
-            <div class="bg-base-200 rounded p-2 text-center">
-                <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.effectiveHealth") }}</div>
-                <div class="font-bold text-accent">
-                    {{ formatBigNumber(effectiveHealth) }}
-                </div>
-            </div>
-        </div>
-
-        <div v-if="monsterTagGroups.length">
-            <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.monsterTagInfo") }}</div>
-            <div v-for="monsterTagGroup in monsterTagGroups" :key="monsterTagGroup.primaryTag.id" class="rounded bg-base-200 p-3 space-y-2">
-                <div class="flex items-center justify-between gap-2">
-                    <div class="text-sm font-medium">{{ monsterTagGroup.name }}</div>
-                    <SRouterLink :to="`/db/monstertag/${monsterTagGroup.primaryTag.id}`" class="text-xs link link-primary">
-                        {{ $t("monster-detail.showDetail") }}
-                    </SRouterLink>
-                </div>
-                <div class="text-sm whitespace-pre-line">
-                    {{ monsterTagGroup.primaryTag.desc }}
-                </div>
-                <div v-if="monsterTagGroup.tags.length > 1" class="flex flex-wrap gap-2">
-                    <SRouterLink
-                        v-for="tag in monsterTagGroup.tags"
-                        :key="tag.id"
-                        :to="`/db/monstertag/${tag.id}`"
-                        class="text-xs px-2 py-1 rounded bg-base-200 hover:bg-base-300 transition-colors duration-200"
-                    >
-                        {{ tag.id }}
-                    </SRouterLink>
-                </div>
-            </div>
-        </div>
-
-        <div v-if="leveledMonster">
-            <div class="text-xs text-base-content/70 mb-1">{{ $t("monster-detail.growthPreview") }}</div>
-            <div ref="levelTrendChartRef" class="w-full h-72 rounded bg-base-200/40" />
-        </div>
-
-        <div v-if="soloTreasureDropEntries.length" class="space-y-3">
-            <h3 class="font-bold mb-2">{{ $t("monster-detail.drop") }}</h3>
-            <div v-for="entry in soloTreasureDropEntries" :key="entry.MonsterTag" class="rounded bg-base-200 p-3 space-y-2">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="font-medium">{{ getSoloTreasureDropTitle(entry) }}</div>
-                    <CopyID :id="entry.MonsterTag" />
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-sm">
-                    <div>{{ $t("monster-detail.dropMonsterTag") }}: {{ entry.MonsterTag }}</div>
-                    <div v-if="entry.DropMechanismId !== undefined">
-                        {{ $t("monster-detail.dropMechanismId") }}: {{ entry.DropMechanismId }}
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Monster File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/monster/${monster.id}`"
+                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
+                            {{ $t(monster.n) }}
+                        </SRouterLink>
+                        <CopyID :id="monster.id" />
                     </div>
-                    <div v-if="entry.BoxDropRate !== undefined">{{ $t("monster-detail.dropRate") }}: {{ entry.BoxDropRate }}</div>
-                    <div v-if="entry.KillScore !== undefined">{{ $t("monster-detail.killScore") }}: {{ entry.KillScore }}</div>
+                    <!-- 元信息行：阵营方章 -->
+                    <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
+                        <span class="inline-flex items-center rounded-xs border border-base-content/15 px-2 py-0.5">
+                            {{ $t(getFactionName(monster.f)) }}
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <div v-if="dungeons.length > 0">
-            <h3 class="font-bold mb-2">{{ $t("monster-detail.appearingDungeon") }}</h3>
+        <!-- 等级调整 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="LEVEL" :title="$t('等级调整')">
+                <template #trailing>
+                    <!-- 统计口径开关（肉鸽徽记 / 八倍生命），绑定保持不变 -->
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-base-content/60">
+                        <label class="flex items-center gap-1">
+                            <input v-model="showRougeStats" type="checkbox" class="toggle toggle-sm toggle-primary" />
+                            <span>{{ $t("monster-detail.badgeTitle") }}</span>
+                        </label>
+                        <label class="flex items-center gap-1">
+                            <input v-model="useEightHpMultiplier" type="checkbox" class="checkbox checkbox-xs checkbox-primary" />
+                            <span>{{ $t("monster-detail.showEightHp") }}</span>
+                        </label>
+                    </div>
+                </template>
+            </SectionHeader>
+            <LevelSlider v-model="currentLevel" :max="MaxMonsterLevelLimit" />
+        </section>
 
-            <!-- 副本名称Tab筛选 -->
+        <!-- 基础属性 -->
+        <section v-if="leveledMonster" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ATTRIBUTES" :title="$t('基础属性')" />
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-1.5 text-sm">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.attack") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        {{ formatBigNumber(leveledMonster.atk) }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.defense") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        {{ formatBigNumber(leveledMonster.def) }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.hp") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        {{ formatBigNumber(leveledMonster.hp) }}
+                    </span>
+                </div>
+                <div
+                    v-if="leveledMonster.es !== undefined"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.shield") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        {{ formatBigNumber(leveledMonster.es) }}
+                    </span>
+                </div>
+                <div
+                    v-if="leveledMonster.tn !== undefined"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.stance") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        {{ formatBigNumber(leveledMonster.tn) }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.defenseDamageReductionRate") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        {{ format100(defenseDamageReductionRate, 2) }}
+                    </span>
+                </div>
+                <div
+                    v-if="levelDamageReductionRate > 0"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.levelDamageReductionRate") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        {{ format100(levelDamageReductionRate, 2) }}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.effectiveHealth") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        {{ formatBigNumber(effectiveHealth) }}
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 标签信息 -->
+        <section v-if="monsterTagGroups.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="TAGS" :title="$t('monster-detail.monsterTagInfo')" />
+            <div class="space-y-2">
+                <div
+                    v-for="monsterTagGroup in monsterTagGroups"
+                    :key="monsterTagGroup.primaryTag.id"
+                    class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="text-sm font-medium">{{ monsterTagGroup.name }}</div>
+                        <SRouterLink
+                            :to="`/db/monstertag/${monsterTagGroup.primaryTag.id}`"
+                            class="shrink-0 text-xs text-base-content/50 transition-colors duration-150 hover:text-primary"
+                        >
+                            {{ $t("monster-detail.showDetail") }}
+                        </SRouterLink>
+                    </div>
+                    <div class="text-sm leading-relaxed whitespace-pre-line text-base-content/85">
+                        {{ monsterTagGroup.primaryTag.desc }}
+                    </div>
+                    <div v-if="monsterTagGroup.tags.length > 1" class="flex flex-wrap gap-2">
+                        <SRouterLink
+                            v-for="tag in monsterTagGroup.tags"
+                            :key="tag.id"
+                            :to="`/db/monstertag/${tag.id}`"
+                            class="rounded-xs border border-base-content/15 px-2 py-0.5 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        >
+                            {{ tag.id }}
+                        </SRouterLink>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 成长预览 -->
+        <section v-if="leveledMonster" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="GROWTH" :title="$t('monster-detail.growthPreview')" />
+            <div ref="levelTrendChartRef" class="h-72 w-full" />
+        </section>
+
+        <!-- 掉落信息 -->
+        <section v-if="soloTreasureDropEntries.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DROP" :title="$t('monster-detail.drop')" />
+            <div class="space-y-2">
+                <div
+                    v-for="entry in soloTreasureDropEntries"
+                    :key="entry.MonsterTag"
+                    class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="text-sm font-medium">{{ getSoloTreasureDropTitle(entry) }}</div>
+                        <CopyID :id="entry.MonsterTag" />
+                    </div>
+                    <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("monster-detail.dropMonsterTag") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                entry.MonsterTag
+                            }}</span>
+                        </div>
+                        <div
+                            v-if="entry.DropMechanismId !== undefined"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("monster-detail.dropMechanismId") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                entry.DropMechanismId
+                            }}</span>
+                        </div>
+                        <div
+                            v-if="entry.BoxDropRate !== undefined"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("monster-detail.dropRate") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                entry.BoxDropRate
+                            }}</span>
+                        </div>
+                        <div
+                            v-if="entry.KillScore !== undefined"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t("monster-detail.killScore") }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                entry.KillScore
+                            }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 出现副本 -->
+        <section v-if="dungeons.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DUNGEONS" :title="$t('monster-detail.appearingDungeon')" />
+
+            <!-- 副本名称Tab筛选（方章） -->
             <div class="mb-3 overflow-x-auto">
-                <div class="flex space-x-2 pb-2">
+                <div class="flex gap-2 pb-2">
                     <button
                         v-for="dungeonName in allDungeonNames"
                         :key="dungeonName"
-                        class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
+                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                         :class="
                             selectedDungeonName === dungeonName
-                                ? 'bg-primary text-white'
-                                : 'bg-base-200 text-base-content hover:bg-base-300'
+                                ? 'border-primary bg-primary font-semibold text-primary-content'
+                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                         "
                         @click="selectedDungeonName = dungeonName"
                     >
@@ -578,44 +681,48 @@ function getFactionName(faction: number | undefined): string {
                 <div
                     v-for="dungeon in selectedDungeons"
                     :key="dungeon.id"
-                    class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors duration-200"
+                    class="cursor-pointer rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-150 hover:border-primary/50"
                     @click="$router.push(`/db/dungeon/${dungeon.id}`)"
                 >
-                    <div class="flex items-center justify-between">
-                        <span class="font-medium">{{ $t(dungeon.n) }}</span>
-                        <div class="flex flex-col items-end">
-                            <span class="text-xs text-base-content/70">Lv.{{ dungeon.lv }}</span>
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="truncate text-sm font-medium">{{ $t(dungeon.n) }}</span>
+                        <div class="flex shrink-0 flex-col items-end">
+                            <span class="font-mono text-[11px] tabular-nums text-base-content/55">Lv.{{ dungeon.lv }}</span>
                             <CopyID :id="dungeon.id" />
                         </div>
                     </div>
-                    <div class="text-xs text-base-content/70 mt-1">
+                    <div class="mt-1 text-xs leading-relaxed text-base-content/55">
                         {{ dungeon.desc }}
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="abyssDungeonsFiltered.length > 0">
-            <h3 class="font-bold mb-2">{{ $t("monster-detail.appearingAbyss") }}</h3>
+        <!-- 出现深渊 -->
+        <section
+            v-if="abyssDungeonsFiltered.length > 0"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="ABYSS" :title="$t('monster-detail.appearingAbyss')" />
 
             <!-- 深渊列表 -->
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2">
                 <div
                     v-for="dungeon in abyssDungeonsFiltered"
                     :key="dungeon.id"
-                    class="p-2 bg-base-200 rounded cursor-pointer hover:bg-base-300 transition-colors duration-200"
+                    class="cursor-pointer rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-150 hover:border-primary/50"
                     @click="$router.push(`/db/abyss/${dungeon.id}`)"
                 >
-                    <div class="flex items-center justify-between">
-                        <span class="font-medium">
-                            {{ dungeon.cname }} {{ $t(getAbyssDungeonGroup(dungeon)) }} #{{ getAbyssDungeonLevel(dungeon) }}</span
-                        >
-                        <div class="flex flex-col items-end">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="truncate text-sm font-medium">
+                            {{ dungeon.cname }} {{ $t(getAbyssDungeonGroup(dungeon)) }} #{{ getAbyssDungeonLevel(dungeon) }}
+                        </span>
+                        <div class="flex shrink-0 flex-col items-end">
                             <CopyID :id="dungeon.id" />
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </template>

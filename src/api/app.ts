@@ -291,6 +291,45 @@ export async function decompileLuaBytecodeFiles(
 }
 
 /**
+ * 将目录打包为 pak 文件
+ * @param sourceDir 源目录
+ * @param aesKey AES key
+ * @param outputPath 输出 pak 路径
+ * @param onProgress 进度回调
+ * @returns 打包结果
+ */
+export async function packPakFolder(
+    sourceDir: string,
+    aesKey: string | null | undefined,
+    outputPath: string,
+    onProgress?: (current: number, total: number) => void
+): Promise<{ outputPath: string; packedFiles: number }> {
+    let unlistenFn: UnlistenFn | undefined
+
+    try {
+        if (onProgress) {
+            unlistenFn = await listen<{ current: number; total: number; outputPath: string }>("pak_pack_progress", event => {
+                if (event.payload.outputPath === outputPath) {
+                    onProgress(event.payload.current, event.payload.total)
+                }
+            })
+        }
+        return await invoke("pack_pak_folder", { sourceDir, aesKey, outputPath })
+    } finally {
+        unlistenFn?.()
+    }
+}
+
+/**
+ * 移动/重命名文件（跨盘时后端回退为复制后删除）
+ * @param sourcePath 源文件路径
+ * @param targetPath 目标文件路径
+ */
+export async function moveFile(sourcePath: string, targetPath: string) {
+    return await invoke("move_file", { sourcePath, targetPath })
+}
+
+/**
  * 提取游戏资产
  * @param zipPath 压缩包路径
  * @param targetDir 目标目录
@@ -602,6 +641,14 @@ export async function clearScriptInputRecorderActions() {
  */
 export async function getDocumentsDir() {
     return await invoke<string>("get_documents_dir")
+}
+
+/**
+ * 枚举系统已安装字体（桌面端读取注册表，返回去重排序后的字体族名）。
+ * @returns 字体族名列表
+ */
+export async function listSystemFonts() {
+    return await invoke<string[]>("list_system_fonts")
 }
 
 /**

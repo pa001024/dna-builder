@@ -220,19 +220,35 @@ const nodeChains = computed<Array<{ node: RougeStoryNode; chain: DialogueChainIt
 
 <template>
     <div class="space-y-3">
-        <div v-for="{ node, chain } in nodeChains" :key="node.id" class="bg-base-100 rounded space-y-2">
+        <div
+            v-for="{ node, chain } in nodeChains"
+            :key="node.id"
+            class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+        >
             <div v-if="node.name && node.name !== '对话节点'" class="px-1 text-xs font-medium text-base-content/60">
                 {{ formatStoryText(node.name) }}
             </div>
 
-            <TransitionGroup name="dialogue-list" tag="div" v-if="chain.length" class="space-y-2">
+            <!-- 过渡类名以 Tailwind 工具类内联表达，替代原 scoped CSS -->
+            <TransitionGroup
+                v-if="chain.length"
+                tag="div"
+                class="space-y-2"
+                enter-active-class="transition-all duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                enter-from-class="opacity-0 translate-y-3.5 scale-[0.98] blur-[4px]"
+                leave-active-class="transition-all duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                leave-to-class="opacity-0 translate-y-3.5 scale-[0.98] blur-[4px]"
+                move-class="transition-transform duration-[260ms] ease-[ease]"
+            >
                 <DBDialogueCard
                     v-for="item in chain"
                     :key="`${node.id}-${item.dialogue.id}`"
                     :dialogue="item.dialogue"
                     :selected-option="item.selectedOption"
                     :trigger-key="`${props.eventName}-${node.id}-${item.dialogue.id}`"
-                    :speaker-name="item.dialogue.npc !== undefined || item.dialogue.speakerName ? `${$t(getSpeakerName(item.dialogue))}:` : undefined"
+                    :speaker-name="
+                        item.dialogue.npc !== undefined || item.dialogue.speakerName ? `${$t(getSpeakerName(item.dialogue))}:` : undefined
+                    "
                     :show-voice-button="!!item.dialogue.voice"
                     @select-option="payload => selectOption(getNodeScopeKey(node.id), payload.dialogueId, payload.optionId)"
                 />
@@ -244,21 +260,3 @@ const nodeChains = computed<Array<{ node: RougeStoryNode; chain: DialogueChainIt
         <div v-if="!nodeChains.length" class="text-sm text-base-content/70">暂无剧情对话</div>
     </div>
 </template>
-
-<style scoped>
-.dialogue-list-enter-active,
-.dialogue-list-leave-active {
-    transition: all 320ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.dialogue-list-enter-from,
-.dialogue-list-leave-to {
-    opacity: 0;
-    transform: translateY(14px) scale(0.98);
-    filter: blur(4px);
-}
-
-.dialogue-list-move {
-    transition: transform 260ms ease;
-}
-</style>

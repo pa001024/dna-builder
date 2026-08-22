@@ -18,12 +18,10 @@ import {
 } from "@/data/d/skingacha.data"
 import { useUIStore } from "@/store/ui"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { DEFAULT_GOLD_PITY, getGoldPityConfig, getGoldRate, PURPLE_PITY } from "@/utils/skin-gacha-probability"
 import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments, type StoryTextSegment } from "@/utils/story-text"
 
-/** 紫色品质保底次数（固定 10 抽必出紫） */
-const PURPLE_PITY = 10
-/** 默认金色品质保底次数 */
-const DEFAULT_GOLD_PITY = 90
+/** 保底常量（紫色 10 抽 / 金色默认 90 抽）与金色软保底概率模型见 src/utils/skin-gacha-probability */
 /** 月石晶胚资源 id（充值货币，可 1:1 兑换月石） */
 const RES_MOON_STONE = 99
 /** 月石资源 id（通货，部分物资类项目的计价货币） */
@@ -370,20 +368,22 @@ const warningSegments = computed<StoryTextSegment[]>(() => {
 
 /**
  * 决定单次抽卡的星级（90 金保底 / 10 紫保底，两个保底独立计数，提前出即重置对应保底）。
+ * 金色采用原神式软保底：基础概率 0.3%，自第 75 抽起出金概率随抽数线性递增，
+ * 至第 90 抽必定出金，综合概率（含保底）≈ 1.42%，与官方概率说明一致。
  * @param gacha 卡池
  * @param pity 保底计数（原地修改）
  * @returns 星级
  */
 function rollStar(gacha: SkinGacha, pity: PityState): 3 | 4 | 5 {
     const prob = gachaProbabilities[String(gacha.probabilityId)]
-    const goldPity = prob?.ShowGetStar5Times ?? DEFAULT_GOLD_PITY
-    const goldRate = (prob?.ProbabilityGold ?? 0) / 10000
+    const config = getGoldPityConfig(prob)
     const purpleRate = (prob?.ProbabilityPurple ?? 0) / 10000
 
     pity.gold += 1
     pity.purple += 1
 
-    if (pity.gold >= goldPity) {
+    // 硬保底：达到保底抽数必定出金（默认 90 抽）
+    if (pity.gold >= config.hardPity) {
         pity.gold = 0
         return 5
     }
@@ -391,6 +391,8 @@ function rollStar(gacha: SkinGacha, pity: PityState): 3 | 4 | 5 {
         pity.purple = 0
         return 4
     }
+    // 软保底：当前抽数对应的实时出金概率（软保底前为基础概率，软保底后每抽递增）
+    const goldRate = getGoldRate(pity.gold, config)
     const roll = Math.random()
     if (roll < goldRate) {
         pity.gold = 0

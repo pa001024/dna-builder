@@ -327,60 +327,91 @@ function getDungeonName(dungeonId: number) {
 function getSeasonName(str: number) {
     return `${~~(str / 1000)}.${~~(str % 1000)}`
 }
+
+/**
+ * 判断名次条目是否属于前三档（用于主色强调）。
+ * @param index 名次条目索引
+ * @returns 是否属于前三档
+ */
+function isTopThreeRank(index: number): boolean {
+    return index < 3
+}
 </script>
 <template>
-    <ScrollArea class="p-4 flex h-full min-h-0">
-        <div class="mb-4 space-y-3">
-            <div class="join join-horizontal w-full overflow-x-auto rounded-xl bg-base-200/60 p-1">
-                <button
-                    v-for="season in seasonTabs"
-                    :key="season.RaidSeason"
-                    type="button"
-                    class="btn btn-sm join-item flex-1 min-w-0"
-                    :class="selectedSeason === season.RaidSeason ? 'btn-primary shadow-lg' : 'btn-ghost hover:bg-base-100'"
-                    @click="handleSeasonChange(season.RaidSeason)"
-                >
-                    {{ getSeasonName(season.RaidSeason) }}
-                </button>
-            </div>
-            <div class="join join-horizontal w-full overflow-x-auto rounded-xl bg-base-200/60 p-1">
-                <button
-                    v-for="dungeon in dungeonTabs"
-                    :key="dungeon.DungeonId"
-                    type="button"
-                    class="btn btn-sm join-item flex-1 min-w-0"
-                    :class="selectedDungeon === dungeon.DungeonId ? 'btn-primary shadow-lg' : 'btn-ghost hover:bg-base-100'"
-                    @click="selectedDungeon = dungeon.DungeonId"
-                >
-                    {{ getDungeonName(dungeon.DungeonId) }} (难度{{ dungeon.DifficultyLevel }})
-                </button>
-            </div>
-        </div>
+    <ScrollArea class="h-full min-h-0">
+        <div class="stagger-rise space-y-4 p-4">
+            <!-- 赛季 / 副本筛选：方章 chip -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <div class="space-y-3">
+                    <!-- 赛季筛选 -->
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">SEASON</span>
+                        <button
+                            v-for="season in seasonTabs"
+                            :key="season.RaidSeason"
+                            type="button"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedSeason === season.RaidSeason
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="handleSeasonChange(season.RaidSeason)"
+                        >
+                            {{ getSeasonName(season.RaidSeason) }}
+                        </button>
+                    </div>
+                    <!-- 副本筛选 -->
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">DUNGEON</span>
+                        <button
+                            v-for="dungeon in dungeonTabs"
+                            :key="dungeon.DungeonId"
+                            type="button"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedDungeon === dungeon.DungeonId
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="selectedDungeon = dungeon.DungeonId"
+                        >
+                            {{ getDungeonName(dungeon.DungeonId) }} (难度{{ dungeon.DifficultyLevel }})
+                        </button>
+                    </div>
+                </div>
+            </section>
 
-        <div class="mb-4 flex items-center gap-2">
-            <p class="text-sm mb-2">
+            <!-- 词缀说明 -->
+            <p class="flex flex-wrap items-center gap-x-2 text-sm leading-relaxed text-base-content/70">
+                <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">BUFF</span>
                 {{ RaidDungeon[selectedDungeon]?.RaidBuffID.map(id => RaidBuff[id].RaidBuffDes).join("、") }}
             </p>
-        </div>
 
-        <div class="tabs tabs-border gap-2 mb-4">
-            <div class="tab" :class="{ 'tab-active': activeInfoTab === 'score' }" @click="activeInfoTab = 'score'">分数计算</div>
-            <div class="tab" :class="{ 'tab-active': activeInfoTab === 'dungeon' }" @click="activeInfoTab = 'dungeon'">副本信息</div>
-            <div class="tab" :class="{ 'tab-active': activeInfoTab === 'rank' }" @click="activeInfoTab = 'rank'">排名信息</div>
-        </div>
+            <!-- 信息分页 -->
+            <AniTabs
+                v-model="activeInfoTab"
+                :tabs="[
+                    { label: '分数计算', value: 'score' },
+                    { label: '副本信息', value: 'dungeon' },
+                    { label: '排名信息', value: 'rank' },
+                ]"
+            />
 
-        <!-- 计算说明 -->
-        <div v-if="activeInfoTab === 'score'">
-            <div class="mb-4 flex items-center gap-2">
-                <span class="font-medium">分数:</span>
-                <span class="text-xl font-bold">{{ currentScore }}</span>
-            </div>
-            <!-- 剩余时间输入 -->
-            <div class="mb-4 grid grid-cols-2">
-                <label class="block text-sm font-medium mb-1">
-                    分数:
-                    <div class="flex gap-2 items-end">
-                        <div class="w-full max-w-xs">
+            <!-- 计算说明 -->
+            <div v-if="activeInfoTab === 'score'" class="space-y-3">
+                <!-- 分数计算器 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="CALCULATOR" title="分数计算" />
+                    <!-- 当前分数 -->
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-sm text-base-content/60">分数:</span>
+                        <span class="font-orbitron text-2xl font-bold tabular-nums text-primary">{{ currentScore }}</span>
+                    </div>
+                    <!-- 分数 / 剩余时间输入 -->
+                    <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
+                        <label class="block">
+                            <span class="mb-1 block text-sm font-medium text-base-content/80">分数:</span>
                             <input
                                 :value="scoreInput"
                                 @input="handleScoreInput"
@@ -388,17 +419,13 @@ function getSeasonName(str: number) {
                                 type="number"
                                 :min="minScore"
                                 :max="maxScore"
-                                class="input input-sm w-full"
                                 placeholder="输入分数"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 placeholder:text-base-content/35 placeholder:font-sans focus:border-primary"
                             />
-                            <p class="text-xs text-gray-500 mt-1">最高分数: {{ maxScore }}</p>
-                        </div>
-                    </div>
-                </label>
-                <label class="block text-sm font-medium mb-1">
-                    剩余时间(秒):
-                    <div class="flex gap-2 items-end">
-                        <div class="w-full max-w-xs">
+                            <span class="mt-1 block text-[11px] tabular-nums text-base-content/45">最高分数: {{ maxScore }}</span>
+                        </label>
+                        <label class="block">
+                            <span class="mb-1 block text-sm font-medium text-base-content/80">剩余时间(秒):</span>
                             <input
                                 :value="remainingTime"
                                 @input="handleRemainingTimeInput"
@@ -406,106 +433,129 @@ function getSeasonName(str: number) {
                                 min="0"
                                 :max="maxAllowedTime"
                                 step="0.1"
-                                class="input input-sm w-full"
                                 placeholder="输入剩余时间"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 placeholder:text-base-content/35 placeholder:font-sans focus:border-primary"
                             />
-                            <p class="text-xs text-gray-500 mt-1">
+                            <span class="mt-1 block text-[11px] tabular-nums text-base-content/45">
                                 最大允许时间: {{ maxAllowedTime }}秒 用时: {{ +(maxAllowedTime - remainingTime).toFixed(2) }}秒
-                            </p>
-                        </div>
-                    </div>
-                </label>
-                <div class="col-span-2">
-                    <input
-                        type="range"
-                        :value="remainingTime"
-                        @input="handleRemainingTimeInput"
-                        :max="maxAllowedTime"
-                        step="0.1"
-                        class="range range-primary range-xs w-full"
-                    />
-                </div>
-            </div>
-            <div class="mb-4 p-4 bg-base-100 rounded-md">
-                <h3 class="font-medium mb-2">分数计算说明:</h3>
-                <p class="text-sm">
-                    最终分数 = BaseRaidPoint + (1 + 时间区间1×速率1 + 时间区间2×速率2 + 时间区间3×速率3)
-                    <span class="opacity-80 text-xs">依次取区间值直到剩余时间用完</span>
-                </p>
-                <p class="text-sm mt-2">
-                    当前副本: {{ RaidDungeon[selectedDungeon]?.DungeonId }} | BaseRaidPoint:
-                    {{ RaidDungeon[selectedDungeon]?.BaseRaidPoint }} | 公式ID: {{ RaidDungeon[selectedDungeon]?.FomulaId }} | 时间区间:
-                    {{ currentFormula?.RaidTimeZone }} | 速率:
-                    {{ currentFormula?.RaidTimeRate }}
-                </p>
-            </div>
-            <!-- 奖励数量展示 -->
-            <div class="mb-4 p-3 bg-base-100 rounded-md">
-                <h4 class="font-medium mb-2">分数奖励计算:</h4>
-                <p class="text-sm">
-                    每1000分可获得 <span class="font-bold">1</span> 次奖励 | 最大奖励次数:
-                    <span class="font-bold">{{ RaidSeason[selectedSeason]?.RaidPointToRewradMaxTime }}</span>
-                    次
-                </p>
-                <div class="mt-3">
-                    <p class="text-sm font-medium">当前获得奖励次数:</p>
-                    <div class="flex items-center mt-1">
-                        <span class="text-lg font-bold">{{ currentRewardCount }}</span>
-                        <span class="text-sm opacity-80">次</span>
-                    </div>
-
-                    <!-- 使用RewardItem组件显示奖励 -->
-                    <div class="mt-3 p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm font-medium">奖励组 {{ rewardId }}</span>
-                            <span
-                                class="text-xs px-1.5 py-0.5 rounded"
-                                :class="
-                                    getDropModeText(currentReward?.m || '') === '独立'
-                                        ? 'bg-success text-success-content'
-                                        : 'bg-warning text-warning-content'
-                                "
-                            >
-                                {{ getDropModeText(currentReward?.m || "") }}
                             </span>
+                        </label>
+                        <div class="col-span-2">
+                            <input
+                                type="range"
+                                :value="remainingTime"
+                                @input="handleRemainingTimeInput"
+                                :max="maxAllowedTime"
+                                step="0.1"
+                                class="range range-primary range-xs w-full"
+                            />
                         </div>
-                        <RewardItem :reward="currentReward!" />
                     </div>
-                </div>
+                </section>
+
+                <!-- 公式说明 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="FORMULA" title="分数计算说明:" />
+                    <p class="text-sm leading-relaxed text-base-content/90">
+                        最终分数 = BaseRaidPoint + (1 + 时间区间1×速率1 + 时间区间2×速率2 + 时间区间3×速率3)
+                        <span class="ml-1 text-xs opacity-80">依次取区间值直到剩余时间用完</span>
+                    </p>
+                    <p class="mt-2 text-[11px] leading-relaxed tabular-nums text-base-content/55">
+                        当前副本: {{ RaidDungeon[selectedDungeon]?.DungeonId }} | BaseRaidPoint:
+                        {{ RaidDungeon[selectedDungeon]?.BaseRaidPoint }} | 公式ID: {{ RaidDungeon[selectedDungeon]?.FomulaId }} | 时间区间:
+                        {{ currentFormula?.RaidTimeZone }} | 速率:
+                        {{ currentFormula?.RaidTimeRate }}
+                    </p>
+                </section>
+
+                <!-- 奖励数量展示 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="REWARD" title="分数奖励计算:" />
+                    <p class="text-sm leading-relaxed text-base-content/90">
+                        每1000分可获得 <b class="font-orbitron tabular-nums text-primary">1</b> 次奖励 | 最大奖励次数:
+                        <b class="font-orbitron tabular-nums text-primary">{{ RaidSeason[selectedSeason]?.RaidPointToRewradMaxTime }}</b>
+                        次
+                    </p>
+                    <div class="mt-3">
+                        <p class="text-sm font-medium text-base-content/80">当前获得奖励次数:</p>
+                        <div class="mt-1 flex items-baseline gap-1">
+                            <span class="font-orbitron text-lg font-bold tabular-nums text-primary">{{ currentRewardCount }}</span>
+                            <span class="text-sm text-base-content/55">次</span>
+                        </div>
+
+                        <!-- 奖励组（内层小卡） -->
+                        <div class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                            <div class="mb-1 flex items-center justify-between gap-2">
+                                <span class="text-sm font-medium text-base-content/85">奖励组 {{ rewardId }}</span>
+                                <span
+                                    class="rounded-xs px-1.5 py-0.5 text-[10px] leading-4"
+                                    :class="
+                                        getDropModeText(currentReward?.m || '') === '独立'
+                                            ? 'bg-success text-success-content'
+                                            : 'bg-warning text-warning-content'
+                                    "
+                                >
+                                    {{ getDropModeText(currentReward?.m || "") }}
+                                </span>
+                            </div>
+                            <RewardItem :reward="currentReward!" />
+                        </div>
+                    </div>
+                </section>
+                <!-- 副本展示 -->
             </div>
-            <!-- 副本展示 -->
-        </div>
-        <div class="mb-4 bg-base-100 rounded-md" v-if="activeInfoTab === 'dungeon' && currentDungeon">
-            <DBDungeonDetailItem :dungeon="currentDungeon" />
-        </div>
-        <div class="flex-1 grid grid-cols-1 gap-4" v-if="activeInfoTab === 'rank'">
-            <div v-for="item in rankData" :key="item.rank" class="bg-base-100 p-4 rounded-md">
-                <div class="flex items-center gap-2 mb-2">
-                    <img class="h-12" :src="`/imgs/rank/T_Activity_GuildWar_Rank_${item.rank}.webp`" :alt="item.rank" />
-                    <div>
-                        <p class="text-lg font-bold">
-                            {{ item.rank }}
-                        </p>
-                        <p class="text-sm opacity-80">排名前{{ item.percent }}%的玩家获得</p>
+
+            <!-- 副本信息 -->
+            <div
+                v-if="activeInfoTab === 'dungeon' && currentDungeon"
+                class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+            >
+                <DBDungeonDetailItem :dungeon="currentDungeon" />
+            </div>
+
+            <!-- 排名信息：榜单行（前三档主色强调） -->
+            <div v-if="activeInfoTab === 'rank'" class="grid grid-cols-1 gap-3 xl:grid-cols-2">
+                <article
+                    v-for="(item, index) in rankData"
+                    :key="item.rank"
+                    class="relative overflow-hidden rounded-xs border p-3 backdrop-blur-sm animate-ef-rise motion-reduce:animate-none"
+                    :class="isTopThreeRank(index) ? 'border-primary/40 bg-primary/6' : 'border-base-content/10 bg-base-100/60'"
+                    :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                >
+                    <!-- 左侧主色强调条：前三档显现 -->
+                    <span
+                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                        :class="isTopThreeRank(index) ? 'opacity-100' : 'opacity-0'"
+                        aria-hidden="true"
+                    />
+                    <div class="flex items-center gap-3">
+                        <img class="h-12 shrink-0" :src="`/imgs/rank/T_Activity_GuildWar_Rank_${item.rank}.webp`" :alt="item.rank" />
+                        <div class="min-w-0">
+                            <p class="font-orbitron text-lg font-bold tabular-nums" :class="isTopThreeRank(index) ? 'text-primary' : ''">
+                                {{ item.rank }}
+                            </p>
+                            <p class="mt-0.5 text-[11px] text-base-content/50">排名前{{ item.percent }}%的玩家获得</p>
+                        </div>
                     </div>
-                </div>
-                <div class="inline-flex relative">
-                    <TitleFrameRender
-                        v-if="getTitleFrameId(item.reward)"
-                        class="w-48 h-12 max-w-full shrink-0"
-                        :title-frame-id="getTitleFrameId(item.reward)"
-                    >
-                        <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
-                    </TitleFrameRender>
-                    <img v-else class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
-                    <div v-if="!getTitleFrameId(item.reward)" class="absolute inset-0 flex items-center justify-center">
-                        <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
+                    <div class="relative mt-3 inline-flex">
+                        <TitleFrameRender
+                            v-if="getTitleFrameId(item.reward)"
+                            class="h-12 w-48 max-w-full shrink-0"
+                            :title-frame-id="getTitleFrameId(item.reward)"
+                        >
+                            <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
+                        </TitleFrameRender>
+                        <img v-else class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
+                        <div v-if="!getTitleFrameId(item.reward)" class="absolute inset-0 flex items-center justify-center">
+                            <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
+                        </div>
                     </div>
-                </div>
-                <div :key="item.reward.id" class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200">
-                    <!-- 使用 RewardItem 组件显示奖励 -->
-                    <RewardItem :reward="item.reward" header />
-                </div>
+                    <!-- 奖励明细（内层小卡） -->
+                    <div :key="item.reward.id" class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                        <!-- 使用 RewardItem 组件显示奖励 -->
+                        <RewardItem :reward="item.reward" header />
+                    </div>
+                </article>
             </div>
         </div>
     </ScrollArea>

@@ -403,138 +403,178 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
 </script>
 
 <template>
-    <div class="space-y-3">
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 搜索命中导航浮窗 -->
         <div
             v-if="matchedQuestTargets.length"
-            class="fixed bottom-6 right-6 z-1200 flex items-center gap-2 rounded-box border border-base-300 bg-base-100/95 p-2 shadow-lg backdrop-blur"
+            class="fixed bottom-6 right-6 z-1200 flex items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/95 p-2 shadow-lg backdrop-blur-sm"
         >
-            <button
-                type="button"
-                class="btn btn-ghost btn-xs"
-                @click="jumpToMatchedQuest(activeMatchIndex - 1)"
-            >
+            <button type="button" class="btn btn-ghost btn-xs" @click="jumpToMatchedQuest(activeMatchIndex - 1)">
                 <Icon icon="ri:arrow-up-s-line" />
             </button>
-            <span class="min-w-12 text-center text-xs text-base-content/70">{{ activeMatchIndex + 1 }}/{{ matchedQuestTargets.length }}</span>
-            <button
-                type="button"
-                class="btn btn-ghost btn-xs"
-                @click="jumpToMatchedQuest(activeMatchIndex + 1)"
+            <span class="min-w-12 text-center font-mono text-[11px] tabular-nums text-base-content/60"
+                >{{ activeMatchIndex + 1 }}/{{ matchedQuestTargets.length }}</span
             >
+            <button type="button" class="btn btn-ghost btn-xs" @click="jumpToMatchedQuest(activeMatchIndex + 1)">
                 <Icon icon="ri:arrow-down-s-line" />
             </button>
         </div>
-        <div class="flex items-center justify-between p-3">
-            <div class="flex items-center gap-3">
+
+        <!-- 任务链档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
                 <div
                     v-if="questChain.icon"
-                    class="size-10 bg-base-content"
+                    class="size-20 shrink-0 bg-base-content"
                     :style="{ mask: `url(/imgs/webp/${questChain.icon}.webp) no-repeat center/contain` }"
                     :alt="questChain.name"
                 />
 
-                <div>
-                    <div class="flex items-center gap-2">
-                        <img
-                            :src="`/imgs/tp/${questChainTypeDisplay.icon}.webp`"
-                            :alt="questChainTypeDisplay.name"
-                            class="size-10 -m-2 shrink-0"
-                            loading="lazy"
-                        />
-                        <SRouterLink :to="`/db/questchain/${questChain.id}`" class="text-lg font-bold link link-primary">
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Quest Chain
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/questchain/${questChain.id}`"
+                            class="wrap-break-word font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
                             {{ $t(questChain.name) }}
                         </SRouterLink>
                         <CopyID :id="questChain.id" />
                     </div>
-                    <div class="text-sm text-base-content/70 flex flex-wrap items-center gap-2">
-                        <span v-if="questChainVersion">v{{ questChainVersion }}</span>
+
+                    <!-- 元信息行：类型 / 版本 / 集数 / 章节 -->
+                    <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
+                        <img
+                            :src="`/imgs/tp/${questChainTypeDisplay.icon}.webp`"
+                            :alt="questChainTypeDisplay.name"
+                            class="h-5 w-5 shrink-0 object-contain"
+                            loading="lazy"
+                        />
                         <span>{{ questChainTypeDisplay.name }}</span>
+                        <template v-if="questChainVersion">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span class="font-mono tabular-nums">v{{ questChainVersion }}</span>
+                        </template>
+                        <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
                         <span>{{ $t(questChain.episode) }}</span>
+                        <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
                         <span>{{ $t(questChain.chapterName) }} {{ $t(questChain.chapterNumber || "") }}</span>
-                        <div v-if="questChain.startTime" class="flex justify-between">
-                            <span class="text-base-content/70">开始时间</span>
-                            <span>{{ new Date(questChain.startTime * 1000).toLocaleString() }}</span>
-                        </div>
-                        <div v-if="questChain.endTime" class="flex justify-between">
-                            <span class="text-base-content/70">结束时间</span>
-                            <span>{{ new Date(questChain.endTime * 1000).toLocaleString() }}</span>
+                    </div>
+
+                    <!-- 时间行：开始 / 结束 -->
+                    <div
+                        v-if="questChain.startTime || questChain.endTime"
+                        class="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-base-content/50"
+                    >
+                        <template v-if="questChain.startTime">
+                            <span>开始时间</span>
+                            <span class="font-mono tabular-nums">{{ new Date(questChain.startTime * 1000).toLocaleString() }}</span>
+                        </template>
+                        <template v-if="questChain.endTime">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span>结束时间</span>
+                            <span class="font-mono tabular-nums">{{ new Date(questChain.endTime * 1000).toLocaleString() }}</span>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- 剧情语音设置 -->
+                <div ref="voiceSettingsRef" class="relative shrink-0">
+                    <button
+                        type="button"
+                        class="btn btn-ghost btn-sm btn-square"
+                        title="剧情语音设置"
+                        :class="{ 'bg-base-content/10': isVoiceSettingsOpen }"
+                        @click="toggleVoiceSettingsPanel"
+                    >
+                        <Icon icon="ri:settings-3-line" />
+                    </button>
+                    <div
+                        v-if="isVoiceSettingsOpen"
+                        class="absolute right-0 top-full z-1000 mt-2 w-56 rounded-xs border border-base-content/15 bg-base-100/85 p-3 shadow-lg backdrop-blur-md"
+                    >
+                        <div class="space-y-2">
+                            <div class="text-xs font-medium text-base-content/70">语音语言</div>
+                            <Select
+                                v-model="selectedVoiceLocale"
+                                class="w-full rounded-xs border border-base-content/20 bg-base-content/[0.05] px-3 py-2 text-sm"
+                                content-class="z-[10010]"
+                                :content-props="{ 'data-quest-voice-select-content': 'true' }"
+                            >
+                                <SelectItem v-for="option in voiceLocaleOptions" :key="option.key" :value="option.key">
+                                    {{ option.label }}
+                                </SelectItem>
+                            </Select>
                         </div>
                     </div>
                 </div>
             </div>
+        </header>
 
-            <div ref="voiceSettingsRef" class="relative">
-                <button
-                    type="button"
-                    class="btn btn-ghost btn-sm btn-square"
-                    title="剧情语音设置"
-                    :class="{ 'bg-base-200': isVoiceSettingsOpen }"
-                    @click="toggleVoiceSettingsPanel"
-                >
-                    <Icon icon="ri:settings-3-line" />
-                </button>
-                <div
-                    v-if="isVoiceSettingsOpen"
-                    class="absolute right-0 top-full z-1000 mt-2 w-56 rounded-box border border-base-300 bg-base-100 p-3 shadow-lg"
-                >
-                    <div class="space-y-2">
-                        <div class="text-xs font-medium text-base-content/70">语音语言</div>
-                        <Select
-                            v-model="selectedVoiceLocale"
-                            class="w-full rounded-btn border border-base-300 bg-base-100 px-3 py-2 text-sm"
-                            content-class="z-[10010]"
-                            :content-props="{ 'data-quest-voice-select-content': 'true' }"
-                        >
-                            <SelectItem v-for="option in voiceLocaleOptions" :key="option.key" :value="option.key">
-                                {{ option.label }}
-                            </SelectItem>
-                        </Select>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div v-if="questChain.reward?.length" class="bg-base-100 rounded p-3">
-            <h3 class="font-bold mb-2">奖励信息</h3>
+        <!-- 奖励信息 -->
+        <section v-if="questChain.reward?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="REWARD" title="奖励信息" />
             <div class="space-y-3">
                 <div
                     v-for="reward in questChain.reward
                         .map(id => getRewardDetails(id))
                         .filter((rewardItem): rewardItem is RewardItemType => !!rewardItem)"
                     :key="reward.id"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40"
                 >
                     <RewardItem :reward="reward" header />
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="bg-base-100 rounded p-3">
-            <h3 class="font-bold mb-2">任务列表 ({{ questChain.quests.length }}个)</h3>
+        <!-- 任务列表 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="QUESTS" title="任务列表" :count="questChain.quests.length" />
             <div class="space-y-3">
                 <div
                     v-for="quest in questDetails"
                     :key="quest.id"
                     :data-quest-id="quest.id"
                     :ref="element => setQuestElement(quest.id, element)"
-                    :class="{ 'quest-node-highlight': highlightedQuestMap[quest.id] }"
+                    class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-all duration-300"
+                    :class="{ 'border-primary ring-4 ring-primary/10': highlightedQuestMap[quest.id] }"
                 >
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="font-medium"
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-sm font-medium"
                             >任务: <HighlightText :text="formatStoryText(quest.details?.name || '?')" :keyword="normalizedSearchKeyword" />
                             <CopyID :id="quest.id" />
-                            <span v-if="quest.sr" class="text-sm text-base-content/70 ml-2 inline-flex items-center gap-1">
+                            <span v-if="quest.sr" class="ml-2 inline-flex items-center gap-1 text-xs text-base-content/70">
                                 <span>子区域:</span>
                                 <SubRegionLink :sub-region-id="quest.sr" />
                             </span>
                         </span>
                     </div>
 
-                    <div v-if="quest.details?.desc" class="text-sm text-base-content/70 mb-2">
+                    <div v-if="quest.details?.desc" class="text-sm leading-relaxed text-base-content/70">
                         <HighlightText :text="formatStoryText(quest.details.desc)" :keyword="normalizedSearchKeyword" />
                     </div>
 
-                    <div v-if="shouldShowQuestNextOptions(quest)" class="mb-2 flex flex-wrap items-center gap-1.5 text-xs">
+                    <div v-if="shouldShowQuestNextOptions(quest)" class="flex flex-wrap items-center gap-1.5 text-xs">
                         <span class="text-base-content/60">任务跳转</span>
                         <template
                             v-for="nextOption in quest.nextOptions"
@@ -543,7 +583,7 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
                             <span class="text-primary">→</span>
                             <button
                                 type="button"
-                                class="cursor-pointer rounded border border-primary/30 bg-primary/5 px-1.5 py-0.5 text-primary/80 hover:bg-primary/10 hover:border-primary/50 transition-colors duration-200"
+                                class="cursor-pointer rounded-xs border border-primary/30 bg-primary/5 px-1.5 py-0.5 text-primary/80 transition-colors duration-200 hover:border-primary/50 hover:bg-primary/10"
                                 @click="jumpToQuest(nextOption.targetId)"
                             >
                                 <span v-if="quest.hasBranchNext" class="mr-1 text-base-content/70">{{ nextOption.condition }}:</span>
@@ -565,34 +605,13 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
                         :search-target-request="activeSearchQuestId === quest.id ? searchNavigationId : undefined"
                     />
 
-                    <div v-if="quest.reward" class="mt-2 pl-2">
-                        <div class="text-sm font-medium mb-1">任务奖励:</div>
+                    <!-- 任务奖励 -->
+                    <div v-if="quest.reward" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                        <div class="mb-1 text-[11px] tracking-wide text-base-content/55">任务奖励:</div>
                         <RewardItem :reward="quest.reward as RewardItemType" />
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </template>
-
-<style scoped>
-.quest-node-highlight {
-    border-color: hsl(var(--p));
-    box-shadow:
-        0 0 0 1px hsl(var(--p) / 0.35),
-        0 0 0 8px hsl(var(--p) / 0.12);
-    animation: quest-node-pulse 1.05s ease;
-}
-
-@keyframes quest-node-pulse {
-    0% {
-        transform: translateY(0) scale(1);
-    }
-    30% {
-        transform: translateY(-1px) scale(1.01);
-    }
-    100% {
-        transform: translateY(0) scale(1);
-    }
-}
-</style>

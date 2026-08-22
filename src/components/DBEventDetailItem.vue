@@ -19,22 +19,50 @@ function parseEventText(text?: string): StoryTextSegment[] {
 </script>
 
 <template>
-    <div class="p-4 space-y-4">
-        <div class="rounded-md bg-base-200 p-3">
-            <div class="flex items-start justify-between gap-3">
-                <SRouterLink :to="`/db/event/${event.id}`" class="text-lg font-bold link link-primary">
-                    {{ $t(event.name) }}
-                </SRouterLink>
-                <CopyID :id="event.id" />
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 活动档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative">
+                <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                    <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                    Event File
+                </p>
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <SRouterLink
+                        :to="`/db/event/${event.id}`"
+                        class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                    >
+                        {{ $t(event.name) }}
+                    </SRouterLink>
+                    <CopyID :id="event.id" />
+                </div>
+                <div class="mt-2 text-[11px] tabular-nums text-base-content/55">
+                    {{ formatTimeRange(event.startTime, event.endTime) }}
+                </div>
             </div>
-            <div class="mt-1 text-xs text-base-content/70">
-                {{ formatTimeRange(event.startTime, event.endTime) }}
-            </div>
-        </div>
+        </header>
 
-        <div class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.description") }}</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap break-all">
+        <!-- 描述 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('resource.description')" />
+            <div class="text-sm leading-relaxed whitespace-pre-wrap break-all text-base-content/85">
                 <template v-for="(segment, index) in parseEventText(event.desc)" :key="`desc-${index}-${segment.tone}`">
                     <span
                         :class="{
@@ -47,11 +75,12 @@ function parseEventText(text?: string): StoryTextSegment[] {
                     </span>
                 </template>
             </div>
-        </div>
+        </section>
 
-        <div v-if="event.rule" class="rounded-md bg-base-200 p-3">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("event.rule") }}</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap break-all">
+        <!-- 规则 -->
+        <section v-if="event.rule" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="RULES" :title="$t('event.rule')" />
+            <div class="text-sm leading-relaxed whitespace-pre-wrap break-all text-base-content/85">
                 <template v-for="(segment, index) in parseEventText(event.rule)" :key="`rule-${index}-${segment.tone}`">
                     <span
                         :class="{
@@ -64,7 +93,7 @@ function parseEventText(text?: string): StoryTextSegment[] {
                     </span>
                 </template>
             </div>
-        </div>
+        </section>
 
         <BackpackPuzzle v-if="event.id === 103015" :event-id="event.id" />
 
@@ -72,7 +101,7 @@ function parseEventText(text?: string): StoryTextSegment[] {
 
         <WeaponVerifyEvent v-if="event.id === 103026" />
 
-        <div v-if="event.boxDrop" class="rounded-md bg-base-200 p-3">
+        <div v-if="event.boxDrop" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <BoxDropItem :box-drop="event.boxDrop" />
         </div>
     </div>

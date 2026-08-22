@@ -12,7 +12,7 @@ defineProps<{
     <button
         v-if="compact"
         type="button"
-        class="flex h-5 max-w-8 cursor-pointer items-center gap-0.5 overflow-hidden whitespace-nowrap rounded bg-base-300/80 px-1.5 text-[10px] leading-none text-base-content/60 opacity-60 transition-all duration-200 hover:bg-primary/20 hover:text-primary hover:opacity-100 group-hover:max-w-24 group-hover:opacity-100"
+        class="flex h-5 max-w-8 cursor-pointer items-center gap-0.5 overflow-hidden whitespace-nowrap rounded-xs border border-base-content/15 bg-base-content/4 px-1 font-mono text-[10px] leading-none tabular-nums text-base-content/45 opacity-80 transition-all duration-200 hover:border-primary/50 hover:text-primary hover:opacity-100 group-hover:max-w-24 group-hover:border-primary/40 group-hover:opacity-100"
         title="点击复制ID"
         @click.stop="copyText(`${id}`)"
     >
@@ -21,7 +21,7 @@ defineProps<{
     <button
         v-else
         type="button"
-        class="px-1.5 py-0.5 cursor-pointer rounded bg-base-200/50 text-xs hover:bg-primary/20 transition-colors duration-200 whitespace-nowrap"
+        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
         :title="`点击复制${name ?? 'ID'}`"
         @click.stop="copyText(`${id}`)"
     >

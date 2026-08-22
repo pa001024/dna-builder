@@ -499,25 +499,34 @@ function formatShopTimeShort(timestamp: number): string {
 </script>
 
 <template>
-    <div class="p-3 space-y-4">
-        <!-- 商店头部 -->
-        <div class="flex items-center justify-between">
-            <span>
-                <SRouterLink :to="`/db/shop/${shop.id}`" class="link link-primary">
-                    <h2 class="text-lg font-bold">{{ shop.name }}</h2>
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 商店档案头：纸面 + primary 强调线 -->
+        <header class="border-b-2 border-primary pb-3">
+            <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                Shop File
+            </p>
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <SRouterLink
+                    :to="`/db/shop/${shop.id}`"
+                    class="truncate text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
+                >
+                    {{ shop.name }}
                 </SRouterLink>
-            </span>
-            <CopyID :id="shop.id" />
-        </div>
+                <CopyID :id="shop.id" />
+            </div>
+        </header>
 
         <AniTabs v-model="selectedShop" :tabs="shopTabs" />
 
-        <div v-if="shopTimePoints.length > 0" class="border border-base-content/15 bg-base-100 p-3 space-y-3">
+        <!-- 时间过滤 -->
+        <section
+            v-if="shopTimePoints.length > 0"
+            class="space-y-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="FILTER" title="时间过滤" />
             <div class="flex flex-wrap items-start justify-between gap-3">
-                <div class="space-y-1">
-                    <div class="font-medium">时间过滤</div>
-                    <div class="text-xs text-base-content/70">按离散时间点查看可购买商品，也可只看相对上一时间点的变化。</div>
-                </div>
+                <div class="text-xs leading-relaxed text-base-content/55">按离散时间点查看可购买商品，也可只看相对上一时间点的变化。</div>
                 <div class="flex flex-wrap items-center gap-4">
                     <button type="button" class="btn btn-xs btn-ghost" @click="resetToCurrentTimePoint">重置到当前</button>
                     <label class="label cursor-pointer gap-2 p-0">
@@ -536,23 +545,23 @@ function formatShopTimeShort(timestamp: number): string {
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/70">
-                <span class="border border-base-content/25 bg-base-100/60 px-1.5 py-0.5 text-xs text-base-content/70">
+            <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60">
+                <span class="rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-0.5 tabular-nums">
                     {{ shopTimePoints.length }} 个时间点
                 </span>
-                <span v-if="selectedTimePoint">当前时间点：{{ selectedTimePoint.label }}</span>
-                <span v-if="selectedTimePoint">可购买 {{ selectedTimePoint.activeItemCount }} 件</span>
+                <span v-if="selectedTimePoint" class="tabular-nums">当前时间点：{{ selectedTimePoint.label }}</span>
+                <span v-if="selectedTimePoint" class="tabular-nums">可购买 {{ selectedTimePoint.activeItemCount }} 件</span>
                 <span v-if="diffOnlyEnabled && previousSelectedTimePoint">对比上一时间点：{{ previousSelectedTimePoint.label }}</span>
                 <span
                     v-if="selectedTimePoint?.isCurrent"
-                    class="bg-base-content px-1.5 py-0.5 text-xs font-semibold uppercase text-base-100"
+                    class="rounded-xs bg-base-content px-1.5 py-0.5 text-[10px] font-semibold text-base-100"
                 >
                     当前
                 </span>
             </div>
 
             <div v-if="timeFilterEnabled && shopTimePoints.length > 1" class="flex items-center gap-3">
-                <span class="w-12 shrink-0 text-[11px] text-base-content/60">{{ shopTimePoints[0]?.shortLabel }}</span>
+                <span class="w-12 shrink-0 text-[11px] tabular-nums text-base-content/55">{{ shopTimePoints[0]?.shortLabel }}</span>
                 <input
                     v-model.number="selectedTimePointIndex"
                     type="range"
@@ -561,32 +570,32 @@ function formatShopTimeShort(timestamp: number): string {
                     :max="Math.max(shopTimePoints.length - 1, 0)"
                     step="1"
                 />
-                <span class="w-12 shrink-0 text-right text-[11px] text-base-content/60">{{ shopTimePoints.at(-1)?.shortLabel }}</span>
+                <span class="w-12 shrink-0 text-right text-[11px] tabular-nums text-base-content/55">{{
+                    shopTimePoints.at(-1)?.shortLabel
+                }}</span>
             </div>
-        </div>
+        </section>
 
         <!-- 商店主标签 -->
-        <div v-for="mainTab in filteredMainTabs.filter(t => t.name === selectedShop)" :key="mainTab.id" class="card">
+        <div v-for="mainTab in filteredMainTabs.filter(t => t.name === selectedShop)" :key="mainTab.id" class="space-y-3">
             <!-- 商店子标签 -->
-            <div
+            <section
                 v-for="subTab in mainTab.subTabs"
                 :key="subTab.id"
-                class="mb-4 bg-base-100 border p-2.5"
-                :class="isRouteSubTab(subTab.id) ? 'border-primary ring-1 ring-primary/30' : 'border-base-content/15'"
+                class="rounded-xs border p-3 backdrop-blur-sm"
+                :class="isRouteSubTab(subTab.id) ? 'border-primary/70 bg-primary/6' : 'border-base-content/10 bg-base-100/60'"
             >
                 <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
                     <h4 class="truncate text-sm font-semibold">{{ $t(subTab.name) }}</h4>
                     <span
                         v-if="timeFilterEnabled"
-                        class="shrink-0 border border-base-content/25 bg-base-100/60 px-1.5 py-0.5 text-xs text-base-content/70"
+                        class="shrink-0 rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-0.5 text-[11px] tabular-nums text-base-content/60"
                     >
                         <template v-if="diffOnlyEnabled">
                             {{ subTab.changedItemCount }} 件变化 +{{ subTab.visibleItems.length - subTab.changedItemCount }} 依赖
                         </template>
                         <template v-else>
-                            {{ subTab.activeVisibleItemCount }} 件可购 +{{
-                                subTab.visibleItems.length - subTab.activeVisibleItemCount
-                            }}
+                            {{ subTab.activeVisibleItemCount }} 件可购 +{{ subTab.visibleItems.length - subTab.activeVisibleItemCount }}
                             依赖
                         </template>
                     </span>
@@ -595,15 +604,18 @@ function formatShopTimeShort(timestamp: number): string {
                 <!-- 商品列表 - 树形结构（同层商品卡 grid autofill 并排） -->
                 <div
                     v-if="diffOnlyEnabled ? subTab.changedItemCount > 0 : subTab.activeVisibleItemCount > 0"
-                    class="grid grid-cols-[repeat(auto-fill,minmax(360px,1fr))] gap-2"
+                    class="grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-2"
                 >
                     <!-- 使用 ShopItem 组件递归渲染商品树 -->
                     <ShopItem v-for="item in buildItemTree(subTab.visibleItems)" :key="item.id" :item="item" />
                 </div>
-                <div v-else class="rounded bg-base-200 px-3 py-6 text-center text-sm text-base-content/60">
+                <div
+                    v-else
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-6 text-center text-sm text-base-content/45"
+                >
                     {{ diffOnlyEnabled ? "与上一时间点相比没有变化商品" : "当前时间点下没有可购买商品" }}
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 </template>

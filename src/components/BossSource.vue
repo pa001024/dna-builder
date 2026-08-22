@@ -19,14 +19,14 @@ function getHardbossIcon(hardbossId?: number) {
 
 <template>
     <div v-if="props.bossSources.length > 0" class="space-y-2">
-        <div class="text-xs text-base-content/60">{{ $t("database.hardboss") }}</div>
+        <div class="text-[11px] tracking-wide text-base-content/55">{{ $t("database.hardboss") }}</div>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
             <div
                 v-for="source in props.bossSources"
                 :key="source.key"
-                class="group flex w-full items-center gap-2.5 border border-base-content/15 bg-base-100 p-2 transition-colors duration-200 hover:border-primary/60"
+                class="group flex w-full items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/[0.04] p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/[0.06]"
             >
-                <div class="relative size-11 shrink-0 overflow-hidden rounded bg-linear-to-b from-gray-600/25 to-gray-200/10">
+                <div class="relative size-11 shrink-0 overflow-hidden rounded-xs bg-linear-to-b from-gray-600/25 to-gray-200/10">
                     <img
                         :src="getHardbossIcon(source.hardbossId)"
                         :alt="source.hardbossName"
@@ -51,9 +51,7 @@ function getHardbossIcon(hardbossId?: number) {
                         </span>
                     </div>
                     <div class="mt-0.5 flex items-center gap-1.5 text-[10px] text-base-content/45">
-                        <span
-                            class="shrink-0 bg-red-500 px-1 py-px font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-white"
-                        >
+                        <span class="shrink-0 rounded-xs bg-red-500/15 px-1 py-px font-mono text-[8px] font-semibold tracking-[0.15em] uppercase text-red-400">
                             BOSS
                         </span>
                         <span class="truncate">{{ formatWeaponSourceTimeRange(source, $t("database.until_now")) }}</span>

@@ -146,39 +146,53 @@ watch(
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="p-2 space-y-2">
-            <div class="flex items-center gap-3">
-                <div class="flex gap-2">
-                    <div class="text-lg font-bold">
-                        {{ dungeon.name }}
+    <div class="stagger-rise space-y-3">
+        <!-- 副本档案头：纸面 + primary 强调线 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
+                <div class="min-w-0">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Dungeon File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <h2 class="truncate text-xl font-bold leading-tight tracking-tight">{{ dungeon.name }}</h2>
+                        <CopyID :id="dungeon.id" />
                     </div>
-                    <CopyID :id="dungeon.id" />
                 </div>
-                <div class="flex-1"></div>
-                <span class="text-xs px-2 py-1 rounded bg-base-300 text-base-content">
+                <span
+                    class="shrink-0 rounded-xs border px-2 py-0.5 text-[10px] text-base-content/55"
+                    :class="isStoryDungeon ? 'border-primary/40 text-primary' : 'border-base-content/20'"
+                >
                     {{ isStoryDungeon ? "剧情副本" : "常驻副本" }}
                 </span>
             </div>
-            <div class="text-sm text-base-content/70">
-                {{ dungeon.desc }}
-            </div>
-        </div>
+            <p class="mt-2 text-sm leading-relaxed text-base-content/70">{{ dungeon.desc }}</p>
+        </header>
 
-        <div v-if="!isStoryDungeon" class="card bg-base-200 rounded p-3">
-            <div class="flex items-center justify-between">
-                <div class="text-xs text-base-content/70">模式</div>
+        <!-- 模式切换 -->
+        <section v-if="!isStoryDungeon" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="MODE" title="模式" />
+            <div class="flex items-center justify-end">
                 <label class="label cursor-pointer gap-2 p-0">
                     <span class="text-xs text-base-content/70">普通模式</span>
                     <input v-model="hardModeEnabled" :disabled="!canToggleMode" type="checkbox" class="toggle toggle-primary toggle-sm" />
                     <span class="text-xs text-base-content/70">挑战模式</span>
                 </label>
             </div>
-            <div class="mt-2 text-xs text-base-content/70">禁用协战: {{ banPhantomEnabled ? "是" : "否" }}</div>
-        </div>
+            <div
+                class="mt-2 flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+            >
+                <span class="text-xs text-base-content/60">禁用协战</span>
+                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    {{ banPhantomEnabled ? "是" : "否" }}
+                </span>
+            </div>
+        </section>
 
-        <div class="card bg-base-200 rounded p-3">
-            <div class="mb-2 text-xs text-base-content/70">报名费用</div>
+        <!-- 报名费用 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="FEE" title="报名费用" />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem
                     v-if="hardModeEnabled && 'hardModeFee' in dungeon"
@@ -196,43 +210,48 @@ watch(
                     :value="getResourceValue(dungeon.fee, 'feeResource' in dungeon && dungeon.feeResource ? dungeon.feeResource : 6000004)"
                 />
             </div>
-        </div>
+        </section>
 
-        <div class="card bg-base-200 rounded-lg p-3">
-            <div class="text-xs text-base-content/70 mb-2">提取玩法</div>
-            <div v-if="soloTreasure" class="grid grid-cols-2 gap-2 text-sm">
-                <div class="flex items-center justify-between rounded bg-base-200 p-2">
-                    <span>撤离时间</span>
-                    <span class="text-primary">{{ soloTreasure.etime }}s</span>
-                </div>
-                <div class="flex items-center justify-between rounded bg-base-200 p-2">
-                    <span>总时间</span>
-                    <span class="text-primary">{{ soloTreasure.gtime }}s</span>
-                </div>
-                <div class="flex items-center justify-between rounded bg-base-200 p-2">
-                    <span>下雨时间</span>
-                    <span class="text-primary">{{ soloTreasure.rtime }}s</span>
-                </div>
-                <div class="flex items-center justify-between rounded bg-base-200 p-2">
-                    <span>警告时间</span>
-                    <span class="text-primary">{{ soloTreasure.wtime }}s</span>
+        <!-- 提取玩法 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="GAMEPLAY" title="提取玩法" />
+            <div v-if="soloTreasure" class="grid grid-cols-2 gap-1.5 lg:grid-cols-4">
+                <div
+                    v-for="stat in [
+                        { label: '撤离时间', value: soloTreasure.etime },
+                        { label: '总时间', value: soloTreasure.gtime },
+                        { label: '下雨时间', value: soloTreasure.rtime },
+                        { label: '警告时间', value: soloTreasure.wtime },
+                    ]"
+                    :key="stat.label"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ stat.label }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ stat.value }}s</span>
                 </div>
             </div>
             <div v-else class="text-sm text-base-content/70">暂无提取玩法数据</div>
-            <div v-if="gamePlayList.length" class="mt-3">
-                <div class="tabs tabs-box bg-base-200/60 p-1 overflow-x-auto">
+
+            <div v-if="gamePlayList.length" class="mt-3 space-y-2">
+                <!-- 玩法切换方章 -->
+                <div class="flex flex-wrap gap-1.5">
                     <button
                         v-for="gamePlay in gamePlayList"
                         :key="gamePlay.id"
                         type="button"
-                        class="tab whitespace-nowrap"
-                        :class="{ 'tab-active': gamePlayTab === gamePlay.id }"
+                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                        :class="
+                            gamePlayTab === gamePlay.id
+                                ? 'border-primary bg-primary font-semibold text-primary-content'
+                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                        "
                         @click="gamePlayTab = gamePlay.id"
                     >
                         {{ gamePlay.name || `玩法 ${gamePlay.id}` }}
                     </button>
                 </div>
-                <div class="mt-3 p-3 bg-base-100 rounded">
+                <!-- 内层小卡：当前玩法详情 -->
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                     <DBSoloTreasureGamePlayItem
                         v-for="gamePlay in gamePlayList"
                         v-show="gamePlayTab === gamePlay.id"
@@ -241,10 +260,11 @@ watch(
                     />
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="card bg-base-200 rounded p-3" v-if="limitCharacterRuleIds.length">
-            <div class="text-xs text-base-content/70 mb-2">限定角色</div>
+        <!-- 限定角色 -->
+        <section v-if="limitCharacterRuleIds.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="LIMITED" title="限定角色" />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem
                     v-for="ruleId in limitCharacterRuleIds"
@@ -253,10 +273,11 @@ watch(
                     :value="[1, getCharId(ruleId) || ruleId, 'Char']"
                 />
             </div>
-        </div>
+        </section>
 
-        <div class="card bg-base-200 rounded p-3">
-            <div class="text-xs text-base-content/70 mb-2">试用角色</div>
+        <!-- 试用角色 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="TRIAL CHAR" title="试用角色" />
             <div v-if="trialCharacterRuleIds.length" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem
                     v-for="ruleId in trialCharacterRuleIds"
@@ -265,10 +286,12 @@ watch(
                     :value="[1, getCharId(ruleId) || ruleId, 'Char']"
                 />
             </div>
-        </div>
+            <div v-else class="text-sm text-base-content/70">暂无试用角色</div>
+        </section>
 
-        <div class="card bg-base-200 rounded p-3">
-            <div class="text-xs text-base-content/70 mb-2">试用武器</div>
+        <!-- 试用武器 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="TRIAL WEAPON" title="试用武器" />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem
                     v-for="ruleId in trialWeaponRuleIds"
@@ -277,6 +300,6 @@ watch(
                     :value="[1, getWeaponId(ruleId) || ruleId, 'Weapon']"
                 />
             </div>
-        </div>
+        </section>
     </div>
 </template>

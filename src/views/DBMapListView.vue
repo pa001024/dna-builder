@@ -118,59 +118,89 @@ onMounted(() => {
     void loadMapList()
 })
 
-useInitialScrollToSelectedItem()
+useInitialScrollToSelectedItem({ selectedSelector: ".dbma-item-active" })
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div v-show="showLeftPanel" class="flex flex-col overflow-hidden" :class="selectedMap ? 'flex-1' : 'w-full'">
-                <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索地图ID/名称/描述..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
+            <!-- 左侧列表面板 -->
+            <div v-show="showLeftPanel" class="flex min-w-0 flex-col overflow-hidden" :class="selectedMap ? 'flex-1' : 'w-full'">
+                <!-- 检索带：下划线搜索 + 计数 -->
+                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                    <div class="relative">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input
+                            v-model="searchKeyword"
+                            type="text"
+                            placeholder="搜索地图ID/名称/描述..."
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                        <span
+                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                        >
+                            {{ filteredMaps.length }}
+                        </span>
+                    </div>
                 </div>
 
+                <!-- 地图列表 -->
                 <ScrollArea class="flex-1">
-                    <div class="p-2 space-y-2">
-                        <div
-                            v-for="map in filteredMaps"
+                    <div class="p-3 space-y-2">
+                        <article
+                            v-for="(map, index) in filteredMaps"
                             :key="map.id"
-                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedMap?.id === map.id }"
+                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                            :class="
+                                selectedMap?.id === map.id
+                                    ? 'dbma-item-active border-primary/70 bg-primary/10'
+                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                            "
+                            :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
                             @click="selectMap(map)"
                         >
-                            <div class="flex items-start justify-between">
-                                <div>
-                                    <div class="font-medium">
+                            <!-- 左侧主色强调条：选中时显现 -->
+                            <span
+                                class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                :class="selectedMap?.id === map.id ? 'opacity-100' : 'opacity-0'"
+                                aria-hidden="true"
+                            />
+                            <div class="flex items-start justify-between gap-3 p-3">
+                                <div class="min-w-0">
+                                    <h3
+                                        class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                        :class="{ 'text-primary': selectedMap?.id === map.id }"
+                                    >
                                         {{ $t(map.n) }}
-                                    </div>
-                                    <div class="text-xs opacity-70 mt-1">
+                                    </h3>
+                                    <div class="mt-1.5 truncate text-[11px] text-base-content/55">
                                         {{ map.desc }}
                                     </div>
                                 </div>
-                                <div class="flex flex-col items-end gap-1">
-                                    <span class="text-xs opacity-70">ID: {{ map.id }}</span>
-                                </div>
+                                <CopyID :id="map.id" class="ml-auto shrink-0" />
                             </div>
-                        </div>
+                        </article>
                     </div>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">共 {{ filteredMaps.length }} 个地图</div>
+                <!-- 底部统计条 -->
+                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                    <p class="text-[11px] tracking-wide text-base-content/50">
+                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredMaps.length }}</b> 个地图
+                    </p>
+                </div>
             </div>
 
-            <div v-show="selectedMap" class="relative flex-1 overflow-hidden">
+            <!-- 右侧地图画布（地图本体逻辑不动） -->
+            <div v-show="selectedMap" class="relative min-w-0 flex-1 overflow-hidden">
                 <button
                     v-if="!showLeftPanel"
-                    class="absolute left-4 top-4 z-30 btn btn-circle btn-sm"
+                    type="button"
+                    class="absolute left-4 top-4 z-30 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xs border border-base-content/15 bg-base-100/80 text-base-content/60 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                     title="显示地图列表"
                     @click="showLeftPanel = true"
                 >
-                    <Icon icon="tabler:arrow-bar-to-right" />
+                    <Icon icon="tabler:arrow-bar-to-right" class="h-5 w-5" />
                 </button>
                 <div v-if="selectedMap && selectedMap.mapUrl" class="h-full">
                     <MapRenderer

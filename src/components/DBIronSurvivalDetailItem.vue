@@ -1,13 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
-import {
-    dungeonMap,
-    ironSurvivalData,
-    ironSurvivalDungeonData,
-    LeveledChar,
-    MonsterLevelUpperLimit,
-    monsterLevelDropData,
-} from "@/data"
+import { dungeonMap, ironSurvivalData, ironSurvivalDungeonData, LeveledChar, MonsterLevelUpperLimit, monsterLevelDropData } from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
 import { getDungeonType } from "@/utils/dungeon-utils"
 import type { CumulativeRewardBucket, IronSurvivalRewardRow } from "@/utils/iron-survival-reward-utils"
@@ -66,9 +59,7 @@ const monsterLevelLimit = computed(() => {
 const ironSurvivalStartMonsterLevel = computed(() => Math.min(monsterLevelLimit.value, selectedStartLevel.value))
 
 /** 结束等级前一级（区间实际覆盖的最后一档）的怪物等级 */
-const ironSurvivalEndMonsterLevel = computed(() =>
-    Math.min(monsterLevelLimit.value, selectedEndLevel.value - IRON_SURVIVAL_LEVEL_STEP)
-)
+const ironSurvivalEndMonsterLevel = computed(() => Math.min(monsterLevelLimit.value, selectedEndLevel.value - IRON_SURVIVAL_LEVEL_STEP))
 
 const monsterLevelDropRows = computed<MonsterLevelDropRow[]>(() => {
     return (dungeonDetail.value?.MonsterLevelDrop || [])
@@ -135,10 +126,7 @@ function getRewardRowLevelCount(threshold: number): number {
  * @param excludeIronTicket 是否排除罗盘项（基础收益未排除；复利路径下罗盘同样保留展示）
  * @returns 排序后的展示列表
  */
-function toCumulativeDisplayItems(
-    buckets: Map<string, CumulativeRewardBucket>,
-    excludeIronTicket = false
-): CumulativeRewardDisplayItem[] {
+function toCumulativeDisplayItems(buckets: Map<string, CumulativeRewardBucket>, excludeIronTicket = false): CumulativeRewardDisplayItem[] {
     return Array.from(buckets.values())
         .filter(bucket => formatRewardAmount(bucket.amount) !== 0)
         .filter(bucket => !(excludeIronTicket && bucket.t === "IronTicket"))
@@ -230,88 +218,92 @@ const rewardRowDetails = computed(() => {
 
 <template>
     <div class="space-y-3">
-        <div class="p-2 space-y-2" v-if="dungeonBase && !hideTitle">
+        <div class="space-y-2" v-if="dungeonBase && !hideTitle">
             <div class="flex items-center gap-2 min-w-0">
                 <img v-if="dungeonBase.e" :src="LeveledChar.elementUrl(dungeonBase.e)" alt="" class="h-8 inline-block" />
-                <SRouterLink :to="`/db/dungeon/${dungeonBase.id}`" class="text-lg font-bold link link-primary">
+                <SRouterLink
+                    :to="`/db/dungeon/${dungeonBase.id}`"
+                    class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
+                >
                     {{ $t(dungeonBase.n) }}
                 </SRouterLink>
                 <CopyID :id="dungeonBase.id" />
                 <div class="flex-1"></div>
-                <span class="text-xs px-2 py-1 rounded" :class="getDungeonType(dungeonBase.t).color + ' text-white'">
+                <span
+                    class="shrink-0 rounded-xs px-2 py-1 text-xs font-semibold"
+                    :class="getDungeonType(dungeonBase.t).color + ' text-primary-content'"
+                >
                     Lv.{{ dungeonBase.lv }} {{ dungeonBase.t }}
                 </span>
             </div>
-            <div class="text-sm text-base-content/70">
+            <p class="text-sm leading-relaxed text-base-content/70">
                 {{ dungeonBase.desc }}
-            </div>
+            </p>
         </div>
 
-        <div class="p-3 rounded bg-base-200">
-            <div class="mb-2 flex items-center justify-between gap-2">
-                <div class="text-xs text-base-content/70">累计奖励</div>
-                <div class="flex items-center gap-2">
-                    <span v-if="useCompoundReward" class="text-xs text-base-content/70">（含复利）</span>
-                    <label class="label cursor-pointer gap-1 p-0">
-                        <span class="text-xs text-base-content/70">复利</span>
-                        <input v-model="useCompoundReward" type="checkbox" class="checkbox checkbox-xs" />
-                    </label>
-                    <span class="text-xs text-base-content/70">Lv.{{ ironSurvivalStartMonsterLevel }} ~ Lv.{{ ironSurvivalEndMonsterLevel }}</span>
-                </div>
-            </div>
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="CUMULATIVE" title="累计奖励">
+                <template #trailing>
+                    <div class="flex items-center gap-2">
+                        <span v-if="useCompoundReward" class="text-xs text-base-content/70">（含复利）</span>
+                        <label class="label cursor-pointer gap-1 p-0">
+                            <span class="text-xs text-base-content/70">复利</span>
+                            <input v-model="useCompoundReward" type="checkbox" class="checkbox checkbox-xs" />
+                        </label>
+                        <span class="font-mono text-[11px] tabular-nums text-base-content/55">
+                            Lv.{{ ironSurvivalStartMonsterLevel }} ~ Lv.{{ ironSurvivalEndMonsterLevel }}
+                        </span>
+                    </div>
+                </template>
+            </SectionHeader>
             <div v-if="displayedCumulativeRewards.length" class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-                <ResourceCostItem
-                    v-for="item in displayedCumulativeRewards"
-                    :key="item.key"
-                    :name="item.name"
-                    :value="item.value"
-                    class="bg-base-200"
-                />
+                <ResourceCostItem v-for="item in displayedCumulativeRewards" :key="item.key" :name="item.name" :value="item.value" />
             </div>
             <div v-else class="text-sm text-base-content/60">当前暂无可累计奖励</div>
-        </div>
+        </section>
 
-        <div class="p-3 rounded bg-base-200">
-            <div class="text-xs text-base-content/70 mb-2">等级奖励表</div>
-            <div class="text-xs text-base-content/60 mb-2">可获取小于等于当前等级的所有奖励</div>
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="REWARD TABLE" title="等级奖励表" />
+            <p class="mb-2 text-[11px] tracking-wide text-base-content/55">可获取小于等于当前等级的所有奖励</p>
             <div class="space-y-2">
                 <div
                     v-for="row in rewardRowDetails"
                     :key="row.threshold"
-                    class="p-3 rounded bg-base-100 border border-base-200 flex items-start justify-between gap-3"
+                    class="flex items-start justify-between gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                 >
-                    <div class="shrink-0">
-                        <div class="text-sm">
-                            Lv. {{ row.threshold }}
+                    <div class="min-w-0 shrink-0">
+                        <div class="flex items-baseline gap-1 text-sm">
+                            <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">Lv. {{ row.threshold }}</span>
                             <CopyID :id="row.rewardId" />
                         </div>
                         <RewardItem v-if="row.reward" :reward="row.reward" />
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="monsterLevelDropRewards.length" class="p-3 rounded bg-base-200">
-            <div class="mb-2 flex items-center justify-between gap-2">
-                <div class="text-xs text-base-content/70">强敌掉落表</div>
-                <div class="text-xs text-base-content/70">{{ strongKillCount }}击杀/强敌</div>
-            </div>
+        <section v-if="monsterLevelDropRewards.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="STRONG DROP" title="强敌掉落表" :count="`${strongKillCount}击杀/强敌`" />
             <div class="space-y-2">
                 <div
                     v-for="dropRow in monsterLevelDropRewards"
                     :key="`${dropRow.level}-${dropRow.rewardId}`"
-                    class="rounded border border-base-200 bg-base-100 p-3"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                 >
                     <div class="mb-2 flex flex-wrap items-center gap-2 text-sm">
-                        <span class="font-medium">Lv. {{ dropRow.level }}</span>
-                        <span class="text-xs px-2 py-0.5 rounded bg-base-200">概率 {{ dropRow.probability / 100 }}%</span>
-                        <span class="text-xs px-2 py-0.5 rounded bg-base-200">概率提升 {{ dropRow.probabilityUp / 100 }}%</span>
+                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">Lv. {{ dropRow.level }}</span>
+                        <span class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[11px] text-base-content/55">
+                            概率 {{ dropRow.probability / 100 }}%
+                        </span>
+                        <span class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[11px] text-base-content/55">
+                            概率提升 {{ dropRow.probabilityUp / 100 }}%
+                        </span>
                         <CopyID :id="dropRow.rewardId" />
                     </div>
                     <RewardItem v-if="dropRow.reward" :reward="dropRow.reward" />
                 </div>
             </div>
-        </div>
+        </section>
 
         <DBIronSurvivalSpawn
             v-if="dungeon && !hideTitle"

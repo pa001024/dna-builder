@@ -12,7 +12,7 @@ import { useSettingStore } from "@/store/setting"
 import { formatProp } from "@/util"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRewardTypeText } from "@/utils/i18n-utils"
-import { getRarityGradientClass } from "@/utils/rarity-utils"
+import { getRarityBadgeClass, getRarityGradientClass, getRarityName } from "@/utils/rarity-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
 const props = defineProps<{
@@ -114,6 +114,38 @@ const leveledWeapons = computed(() => {
         ? props.char.同律武器.map(weapon => new LeveledSkillWeapon(weapon, currentSkillLevel.value, currentLevel.value))
         : null
 })
+
+/**
+ * 构建专武基础属性行数据。
+ */
+const exclusiveWeaponAttrs = computed<{ name: string; value: string }[]>(() => {
+    if (!exclusiveWeapon.value || !leveledExclusiveWeapon.value) {
+        return []
+    }
+    return [
+        { name: "攻击", value: String(+leveledExclusiveWeapon.value.基础攻击.toFixed(2)) },
+        { name: "暴击", value: formatProp("基础暴击", exclusiveWeapon.value.暴击) },
+        { name: "暴伤", value: formatProp("基础暴伤", exclusiveWeapon.value.暴伤) },
+        { name: "触发", value: formatProp("基础触发", exclusiveWeapon.value.触发) },
+    ]
+})
+
+/**
+ * 构建同律武器基础属性行数据（继承型同律武器无独立基础属性）。
+ * @param leveledWeapon 同律武器实例
+ * @returns 属性行数组；继承型返回空数组
+ */
+function getSkillWeaponAttrs(leveledWeapon: LeveledSkillWeapon): { name: string; value: string }[] {
+    if (leveledWeapon.inherit) {
+        return []
+    }
+    return [
+        { name: "攻击", value: String(+leveledWeapon.基础攻击.toFixed(2)) },
+        { name: "暴击", value: formatProp("基础暴击", leveledWeapon._originalWeaponData.暴击) },
+        { name: "暴伤", value: formatProp("基础暴伤", leveledWeapon._originalWeaponData.暴伤) },
+        { name: "触发", value: formatProp("基础触发", leveledWeapon._originalWeaponData.触发) },
+    ]
+}
 
 /**
  * 判断同律武器是否存在可直接展示的真实图标。
@@ -218,32 +250,6 @@ function resolveVoiceLocaleBySetting(language: string): VoiceLocale {
 function resolveVoiceDatasetLanguage(locale: VoiceLocale): string {
     if (locale === "zh") return "ch"
     return locale
-}
-
-/**
- * 获取皮肤稀有度文本。
- * @param rarity 稀有度
- * @returns 稀有度文本
- */
-function getSkinRarityText(rarity: number): string {
-    return ["白", "绿", "蓝", "紫", "金"][rarity - 1] || "白"
-}
-
-/**
- * 获取皮肤稀有度颜色类名。
- * @param rarity 稀有度
- * @returns 颜色类名
- */
-function getSkinRarityClass(rarity: number): string {
-    const rarityMap: Record<number, string> = {
-        1: "bg-gray-500 text-white",
-        2: "bg-green-600 text-white",
-        3: "bg-blue-600 text-white",
-        4: "bg-purple-600 text-white",
-        5: "bg-yellow-500 text-black",
-    }
-
-    return rarityMap[rarity] || rarityMap[1]
 }
 
 /**
@@ -541,92 +547,150 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="p-3 space-y-4">
-        <div class="flex items-center">
-            <div class="size-24 shrink-0 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(5)">
-                <ImageFallback :src="leveledChar.url" :alt="char.名称" class="w-full h-full object-cover object-top">
-                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="char.名称" class="w-full h-full object-cover object-top" />
-                </ImageFallback>
-            </div>
-            <div class="space-y-2 flex-1">
-                <div class="flex items-center gap-3 px-3 py-2">
-                    <SRouterLink :to="`/db/char/${char.id}`" class="text-lg font-bold link link-primary">
-                        {{ $t(char.名称) }}
-                    </SRouterLink>
-                    <CopyID :id="char.id" />
-                    <div class="ml-auto text-sm text-base-content/70 flex items-center gap-2">
-                        <img class="size-8" :src="LeveledChar.elementUrl(char.属性)" :alt="$t(`${char.属性}属性`)" />
-                        <div v-if="char.阵营" class="text-xs text-base-content/70">
-                            {{ $t(char.阵营) }}
-                        </div>
-                    </div>
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 角色档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
+                <div class="size-20 shrink-0 overflow-hidden rounded-xs bg-linear-15 sm:size-24" :class="getRarityGradientClass(5)">
+                    <ImageFallback :src="leveledChar.url" :alt="char.名称" class="w-full h-full object-cover object-top">
+                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="char.名称" class="w-full h-full object-cover object-top" />
+                    </ImageFallback>
                 </div>
-                <div class="flex flex-col gap-2 justify-end text-xs text-base-content/80 px-3 py-2 h-14">
-                    <div class="flex flex-wrap gap-2 items-center">
-                        <span v-if="char.别名">{{ $t(char.别名) }}</span>
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Character File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/char/${char.id}`"
+                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
+                            {{ $t(char.名称) }}
+                        </SRouterLink>
+                        <CopyID :id="char.id" />
                     </div>
-                    <div class="flex flex-wrap gap-2 items-center">
-                        <span v-if="char.版本">v{{ char.版本 }}</span>
+                    <p v-if="char.别名" class="mt-1.5 text-sm text-base-content/55">{{ $t(char.别名) }}</p>
+
+                    <!-- 元信息行：元素 / 阵营 / 版本 -->
+                    <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
+                        <span class="inline-flex items-center gap-1.5">
+                            <img class="h-5 w-2.5 object-cover" :src="LeveledChar.elementUrl(char.属性)" :alt="$t(`${char.属性}属性`)" />
+                            {{ $t(`${char.属性}属性`) }}
+                        </span>
+                        <template v-if="char.阵营">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span>{{ $t(char.阵营) }}</span>
+                        </template>
+                        <template v-if="char.版本">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span class="font-mono tabular-nums">v{{ char.版本 }}</span>
+                        </template>
+                    </div>
+                    <!-- 档案行：精通 / 出生地 / 势力 / 生日 -->
+                    <div class="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-base-content/50">
                         <span>{{ char.精通.map(m => $t(m)).join("、") }}</span>
-                        <span v-if="char.出生地">{{ $t("出生地") }}：{{ $t(char.出生地) }}</span>
-                        <span v-if="char.势力">{{ $t("势力") }}：{{ $t(char.势力) }}</span>
-                        <span v-if="char.生日">{{ $t("生日") }}：{{ char.生日 }}</span>
+                        <template v-if="char.出生地">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span>{{ $t("出生地") }}：{{ $t(char.出生地) }}</span>
+                        </template>
+                        <template v-if="char.势力">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span>{{ $t("势力") }}：{{ $t(char.势力) }}</span>
+                        </template>
+                        <template v-if="char.生日">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span>{{ $t("生日") }}：{{ char.生日 }}</span>
+                        </template>
                     </div>
                 </div>
             </div>
-        </div>
+        </header>
 
         <!-- 等级调整 -->
-        <div class="mb-3 p-3">
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="LEVEL" />
             <LevelSlider v-model="currentLevel" />
-        </div>
+        </section>
 
         <!-- 基础属性 -->
-        <div class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("char-build.base_attr") }}</div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ATTRIBUTES" :title="$t('char-build.base_attr')" />
+            <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
                 <div
                     v-for="attr in baseAttributes"
                     :key="attr.name"
-                    class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-base-content/70">{{ $t(attr.name) }}</span>
-                    <span class="font-medium text-primary">{{ attr.value }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t(attr.name) }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ attr.value }}</span>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- 加成属性 -->
-        <div v-if="bonusAttributes.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("char-build.bonus_attr") }}</div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <section v-if="bonusAttributes.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="BONUS" :title="$t('char-build.bonus_attr')" />
+            <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
                 <div
                     v-for="attr in bonusAttributes"
                     :key="attr.name"
-                    class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-base-content/70">{{ $t(attr.name) }}</span>
-                    <span class="font-medium text-primary">{{ formatProp(attr.name, attr.value) }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t(attr.name) }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        formatProp(attr.name, attr.value)
+                    }}</span>
                 </div>
             </div>
-        </div>
+        </section>
 
         <CharSkillShow :char="leveledChar" v-model="currentSkillLevel" />
 
         <!-- 溯源信息 -->
-        <div v-if="char.溯源 && char.溯源.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("溯源") }}</div>
+        <section
+            v-if="char.溯源 && char.溯源.length > 0"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="TRACE" :title="$t('溯源')" />
             <div class="space-y-3">
-                <div v-for="(trace, index) in char.溯源" :key="index" class="text-sm">
-                    <div class="mb-1">{{ $t("第" + getTraceOrdinal(index) + "根源") }}</div>
-                    <div class="text-base-content/90">{{ $t(trace) }}</div>
+                <div v-for="(trace, index) in char.溯源" :key="index" class="flex items-start gap-2.5">
+                    <span
+                        class="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-xs bg-primary/10 px-1.5 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                        >{{ String(index + 1).padStart(2, "0") }}</span
+                    >
+                    <div class="min-w-0 pt-0.5">
+                        <div class="text-[11px] tracking-wide text-base-content/45">{{ $t("第" + getTraceOrdinal(index) + "根源") }}</div>
+                        <div class="mt-0.5 text-sm leading-relaxed text-base-content/90">{{ $t(trace) }}</div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="char.第七溯源消耗 && char.第七溯源消耗.length > 0" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("溯源突破") }}</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <!-- 溯源突破消耗 -->
+        <section
+            v-if="char.第七溯源消耗 && char.第七溯源消耗.length > 0"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="UNLOCK" :title="$t('溯源突破')" />
+            <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                 <ResourceCostItem
                     v-for="cost in char.第七溯源消耗"
                     :key="cost[0]"
@@ -634,114 +698,132 @@ onBeforeUnmount(() => {
                     :value="cost[1]"
                 />
             </div>
-        </div>
+        </section>
 
         <!-- 专武 -->
-        <div v-if="exclusiveWeapon && leveledExclusiveWeapon" class="p-1 bg-base-200 rounded">
-            <div class="p-2 rounded">
-                <div class="text-xs text-base-content/70 mb-2">{{ $t("专武") }}</div>
-                <div class="flex items-center gap-3 mb-1">
-                    <ImageFallback
-                        :src="leveledExclusiveWeapon.url"
-                        :alt="exclusiveWeapon.名称"
-                        class="size-12 rounded object-cover shrink-0"
-                    />
-                    <SRouterLink :to="`/db/weapon/${exclusiveWeapon.id}`" class="font-medium link link-primary">
+        <section
+            v-if="exclusiveWeapon && leveledExclusiveWeapon"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="SIGNATURE" :title="$t('专武')">
+                <template #trailing>
+                    <SRouterLink
+                        :to="`/db/weapon/${exclusiveWeapon.id}`"
+                        class="group inline-flex items-center gap-1 text-xs text-base-content/50 transition-colors duration-150 hover:text-primary"
+                    >
+                        {{ $t("查看详情") }}
+                        <Icon
+                            icon="ri:arrow-right-up-line"
+                            class="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                        />
+                    </SRouterLink>
+                </template>
+            </SectionHeader>
+
+            <!-- 武器名片 -->
+            <div class="mb-2 flex items-center gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                <ImageFallback
+                    :src="leveledExclusiveWeapon.url"
+                    :alt="exclusiveWeapon.名称"
+                    class="size-12 shrink-0 rounded-xs object-cover"
+                />
+                <div class="min-w-0">
+                    <SRouterLink
+                        :to="`/db/weapon/${exclusiveWeapon.id}`"
+                        class="block truncate text-sm font-semibold transition-colors duration-150 hover:text-primary"
+                    >
                         {{ $t(exclusiveWeapon.名称) }}
                     </SRouterLink>
-                </div>
-                <div class="text-xs text-base-content/70 mb-4">
-                    {{ exclusiveWeapon.类型.map(type => $t(type)).join("、") }}
-                    ·
-                    {{ $t(exclusiveWeapon.伤害类型) }}
-                </div>
-
-                <div class="text-xs text-base-content/70 mb-2">{{ $t("char-build.base_attr") }}</div>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("攻击") }}</span>
-                        <span class="font-medium text-primary">{{ +leveledExclusiveWeapon.基础攻击.toFixed(2) }}</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("暴击") }}</span>
-                        <span class="font-medium text-primary">{{ formatProp("基础暴击", exclusiveWeapon.暴击) }}</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("暴伤") }}</span>
-                        <span class="font-medium text-primary">{{ formatProp("基础暴伤", exclusiveWeapon.暴伤) }}</span>
-                    </div>
-                    <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                        <span class="text-base-content/70">{{ $t("触发") }}</span>
-                        <span class="font-medium text-primary">{{ formatProp("基础触发", exclusiveWeapon.触发) }}</span>
-                    </div>
-                </div>
-
-                <div v-if="exclusiveWeapon.熔炼 && exclusiveWeapon.熔炼.length > 0" class="mt-3">
-                    <div class="text-xs text-base-content/70 mb-2">{{ $t("属性") }}</div>
-                    <div class="p-2 bg-base-300 rounded text-sm text-base-content/90">
-                        {{ exclusiveWeapon.熔炼[5] }}
+                    <div class="mt-1 truncate text-[10px] text-base-content/45">
+                        {{ exclusiveWeapon.类型.map(type => $t(type)).join(" / ") }}
+                        ·
+                        {{ $t(exclusiveWeapon.伤害类型) }}
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- 基础属性 -->
+            <div class="grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                <div
+                    v-for="attr in exclusiveWeaponAttrs"
+                    :key="attr.name"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ $t(attr.name) }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ attr.value }}</span>
+                </div>
+            </div>
+
+            <!-- 熔炼效果 -->
+            <div v-if="exclusiveWeapon.熔炼 && exclusiveWeapon.熔炼.length > 0" class="mt-2.5">
+                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ $t("属性") }}</div>
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed text-base-content/85">
+                    {{ exclusiveWeapon.熔炼[5] }}
+                </div>
+            </div>
+        </section>
 
         <!-- 同律武器 -->
-        <div v-if="char.同律武器 && char.同律武器.length > 0" class="p-1 bg-base-200 rounded">
+        <section
+            v-if="char.同律武器 && char.同律武器.length > 0"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="CO-LAW" :title="$t('同律武器')" />
             <div class="space-y-3">
-                <div v-for="leveledWeapon in leveledWeapons" :key="leveledWeapon.id" class="p-2 rounded">
-                    <div class="text-xs text-base-content/70 mb-2">{{ $t("同律武器") }}</div>
-                    <div class="flex items-center gap-3 mb-1">
+                <div
+                    v-for="leveledWeapon in leveledWeapons"
+                    :key="leveledWeapon.id"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
+                    <div class="flex items-center gap-3">
                         <ImageFallback
                             v-if="hasRealSkillWeaponIcon(leveledWeapon)"
                             :src="leveledWeapon.url"
                             :alt="leveledWeapon.名称"
-                            class="size-12 rounded object-cover shrink-0"
+                            class="size-12 shrink-0 rounded-xs object-cover"
                         />
-                        <div v-else class="size-12 rounded shrink-0">
+                        <div v-else class="size-12 shrink-0 rounded-xs">
                             <div
                                 class="flex h-full w-full items-center justify-center bg-base-content"
                                 :style="{ mask: `url(${getSkillWeaponMaskUrl(leveledWeapon)}) no-repeat center/68%` }"
                             />
                         </div>
-                        <div class="font-medium">{{ $t(leveledWeapon.名称) }}</div>
-                    </div>
-                    <div class="text-xs text-base-content/70 mb-4">
-                        {{ leveledWeapon._originalWeaponData.类型.map(type => $t(type === "同律" ? "同律武器" : type)).join("、") }}
+                        <div class="min-w-0">
+                            <div class="truncate text-sm font-semibold">{{ $t(leveledWeapon.名称) }}</div>
+                            <div class="mt-1 truncate text-[10px] text-base-content/45">
+                                {{
+                                    leveledWeapon._originalWeaponData.类型.map(type => $t(type === "同律" ? "同律武器" : type)).join(" / ")
+                                }}
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="text-xs text-base-content/70 mb-2">{{ $t("char-build.base_attr") }}</div>
-                    <div v-if="leveledWeapon.inherit" class="p-2 bg-base-300 rounded text-sm text-base-content/90">
+                    <!-- 基础属性 / 继承说明 -->
+                    <div
+                        v-if="leveledWeapon.inherit"
+                        class="mt-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm text-base-content/85"
+                    >
                         {{ getSkillWeaponInheritDescription(leveledWeapon) }}
                     </div>
-                    <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                            <span class="text-base-content/70">{{ $t("攻击") }}</span>
-                            <span class="font-medium text-primary">{{ +leveledWeapon.基础攻击.toFixed(2) }}</span>
+                    <template v-else>
+                        <div class="mt-2.5 grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                            <div
+                                v-for="attr in getSkillWeaponAttrs(leveledWeapon)"
+                                :key="attr.name"
+                                class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                            >
+                                <span class="text-xs text-base-content/60">{{ $t(attr.name) }}</span>
+                                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                    attr.value
+                                }}</span>
+                            </div>
                         </div>
-                        <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                            <span class="text-base-content/70">{{ $t("暴击") }}</span>
-                            <span class="font-medium text-primary">{{
-                                formatProp("基础暴击", leveledWeapon._originalWeaponData.暴击)
-                            }}</span>
-                        </div>
-                        <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                            <span class="text-base-content/70">{{ $t("暴伤") }}</span>
-                            <span class="font-medium text-primary">{{
-                                formatProp("基础暴伤", leveledWeapon._originalWeaponData.暴伤)
-                            }}</span>
-                        </div>
-                        <div class="flex justify-between items-center p-2 bg-base-300 rounded text-sm">
-                            <span class="text-base-content/70">{{ $t("触发") }}</span>
-                            <span class="font-medium text-primary">{{
-                                formatProp("基础触发", leveledWeapon._originalWeaponData.触发)
-                            }}</span>
-                        </div>
-                    </div>
+                    </template>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="p-3 bg-base-200 rounded space-y-3">
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <AniTabs
                 v-model="activeBottomTab"
                 :tabs="[
@@ -751,41 +833,49 @@ onBeforeUnmount(() => {
                 ]"
             />
 
-            <div v-if="activeBottomTab === 'profile'" class="space-y-3">
-                <div v-if="charExtList.length === 0" class="text-sm text-base-content/70">暂无角色档案数据</div>
-                <div v-for="item in charExtList" :key="item.id" class="p-3 rounded bg-base-300/70 space-y-2">
+            <div v-if="activeBottomTab === 'profile'" class="mt-2 space-y-2">
+                <div v-if="charExtList.length === 0" class="text-sm text-base-content/60">暂无角色档案数据</div>
+                <div
+                    v-for="item in charExtList"
+                    :key="item.id"
+                    class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-3"
+                >
                     <div class="flex items-center justify-between gap-2">
                         <div class="font-medium">{{ item.name }}</div>
-                        <div class="text-xs text-base-content/70 shrink-0">{{ formatStoryText(item.unlock) }}</div>
+                        <div class="shrink-0 text-xs text-base-content/45">{{ formatStoryText(item.unlock) }}</div>
                     </div>
-                    <div class="text-sm whitespace-pre-line text-base-content/90">{{ formatStoryText(item.text) }}</div>
+                    <div class="text-sm leading-relaxed whitespace-pre-line text-base-content/85">{{ formatStoryText(item.text) }}</div>
                 </div>
             </div>
 
-            <div v-else-if="activeBottomTab === 'skin'" class="space-y-3">
-                <div v-if="charSkinList.length === 0" class="text-sm text-base-content/70">暂无皮肤数据</div>
-                <div v-else class="space-y-3">
-                    <div v-for="skin in charSkinList" :key="skin.id" class="p-3 rounded bg-base-300/70 space-y-3">
+            <div v-else-if="activeBottomTab === 'skin'" class="mt-2 space-y-2">
+                <div v-if="charSkinList.length === 0" class="text-sm text-base-content/60">暂无皮肤数据</div>
+                <div v-else class="space-y-2">
+                    <div
+                        v-for="skin in charSkinList"
+                        :key="skin.id"
+                        class="space-y-3 rounded-xs border border-base-content/10 bg-base-content/3 p-3"
+                    >
                         <div class="flex items-start gap-3">
-                            <img :src="getSkinIconUrl(skin.icon)" :alt="skin.name" class="size-16 rounded object-cover" />
+                            <img :src="getSkinIconUrl(skin.icon)" :alt="skin.name" class="size-16 shrink-0 rounded-xs object-cover" />
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-start justify-between gap-2">
                                     <div class="min-w-0">
-                                        <div class="font-medium text-sm">{{ $t(skin.name) }}</div>
-                                        <div class="text-xs text-base-content/70 mt-1">
+                                        <div class="text-sm font-medium">{{ $t(skin.name) }}</div>
+                                        <div class="mt-1 text-[10px] text-base-content/45">
                                             {{ skin.release ? `v${skin.release}` : "未标注版本" }}
                                         </div>
                                     </div>
-                                    <span class="text-xs px-2 py-1 rounded shrink-0" :class="getSkinRarityClass(skin.rarity)">
-                                        {{ getSkinRarityText(skin.rarity) }}
+                                    <span :class="getRarityBadgeClass(skin.rarity)">
+                                        {{ getRarityName(skin.rarity) }}
                                     </span>
                                 </div>
-                                <div class="text-sm whitespace-pre-line text-base-content/90 mt-2">{{ $t(skin.desc) }}</div>
+                                <div class="mt-2 text-sm leading-relaxed whitespace-pre-line text-base-content/85">{{ $t(skin.desc) }}</div>
                             </div>
                         </div>
 
                         <div v-if="skin.icon.startsWith('T_Head_') && skin.icon !== 'T_Head_Nvzhu'" class="space-y-2">
-                            <div class="text-xs text-base-content/70">立绘</div>
+                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">立绘</div>
                             <ImagePreview
                                 :thumb-url="`/imgs/bust/${skin.icon.replace('_Head', '_Bust')}.webp`"
                                 :full-url="`https://cdn.dna-builder.cn/img/res/${skin.icon.replace('_Head', '_Bust')}.webp`"
@@ -793,11 +883,11 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div v-if="skin.defaultItem && Object.keys(skin.defaultItem).length > 0" class="space-y-2">
-                            <div class="text-xs text-base-content/70">默认奖励</div>
+                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">默认奖励</div>
                             <div class="space-y-2">
                                 <div v-for="groupName in Object.keys(skin.defaultItem)" :key="`${skin.id}-${groupName}`" class="space-y-1">
-                                    <div class="text-xs text-base-content/70">{{ $t(getRewardTypeText(groupName)) }}</div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <div class="text-xs text-base-content/55">{{ $t(getRewardTypeText(groupName)) }}</div>
+                                    <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                                         <ResourceCostItem
                                             v-for="entry in skinDefaultCostItems.filter(
                                                 entry => entry.skinId === skin.id && entry.groupName === groupName
@@ -812,14 +902,14 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div v-if="skin.upgrade && skin.upgrade.length > 0" class="space-y-2">
-                            <div class="text-xs text-base-content/70">升级消耗</div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">升级消耗</div>
+                            <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                                 <div
                                     v-for="entry in skinUpgradeCostItems.filter(entry => entry.skinId === skin.id)"
                                     :key="`${entry.skinId}-${entry.step.step}`"
                                     class="space-y-1"
                                 >
-                                    <div class="text-xs text-base-content/70">Lv.{{ entry.step.step }}</div>
+                                    <div class="font-mono text-[11px] tabular-nums text-base-content/55">Lv.{{ entry.step.step }}</div>
                                     <ResourceCostItem :name="entry.step.currency" :value="getSkinUpgradeValue(entry.step)" />
                                 </div>
                             </div>
@@ -828,28 +918,39 @@ onBeforeUnmount(() => {
                 </div>
             </div>
 
-            <div v-else class="space-y-3">
-                <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
+            <div v-else class="mt-2 space-y-3">
+                <!-- 语音语言选择方章 -->
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-1.5">
                     <button
                         v-for="option in voiceLocaleOptions"
                         :key="option.key"
                         type="button"
-                        class="px-2 py-1 text-left rounded cursor-pointer transition-colors duration-200 hover:bg-base-300"
-                        :class="selectedVoiceLocale === option.key ? 'bg-primary text-white hover:bg-primary' : 'bg-base-300/70'"
+                        class="cursor-pointer rounded-xs border px-2.5 py-1.5 text-left transition-colors duration-150"
+                        :class="
+                            selectedVoiceLocale === option.key
+                                ? 'border-primary bg-primary/10'
+                                : 'border-base-content/15 hover:border-primary/40'
+                        "
                         @click="selectedVoiceLocale = option.key"
                     >
-                        <div class="text-sm font-medium">{{ option.label }}</div>
-                        <div class="text-[11px] opacity-80">CV：{{ getCvNameByLocale(option.key) }}</div>
+                        <div class="text-sm font-medium" :class="selectedVoiceLocale === option.key ? 'text-primary' : ''">
+                            {{ option.label }}
+                        </div>
+                        <div class="mt-0.5 text-[11px] text-base-content/50">CV：{{ getCvNameByLocale(option.key) }}</div>
                     </button>
                 </div>
-                <div v-if="charVoiceList.length === 0" class="text-sm text-base-content/70">暂无角色语音数据</div>
+                <div v-if="charVoiceList.length === 0" class="text-sm text-base-content/60">暂无角色语音数据</div>
                 <div v-else-if="!char.icon" class="text-sm text-warning">当前角色缺少 icon，无法拼接语音资源地址</div>
                 <div v-else class="space-y-2">
-                    <div v-for="voice in charVoiceList" :key="voice.id" class="p-3 rounded bg-base-300/70">
+                    <div
+                        v-for="voice in charVoiceList"
+                        :key="voice.id"
+                        class="rounded-xs border border-base-content/10 bg-base-content/3 p-3"
+                    >
                         <div class="flex items-start gap-3">
                             <div class="min-w-0 grow">
-                                <div class="flex items-center justify-between gap-2 mb-1">
-                                    <div class="font-medium text-sm truncate">{{ formatStoryText(voice.name) }}</div>
+                                <div class="mb-1 flex items-center justify-between gap-2">
+                                    <div class="truncate text-sm font-medium">{{ formatStoryText(voice.name) }}</div>
                                     <button type="button" class="btn btn-ghost btn-xs shrink-0" @click="toggleVoicePlayback(voice)">
                                         <Icon
                                             :icon="
@@ -860,7 +961,9 @@ onBeforeUnmount(() => {
                                         />
                                     </button>
                                 </div>
-                                <div class="text-sm whitespace-pre-line text-base-content/90">{{ formatStoryText(voice.text) }}</div>
+                                <div class="text-sm leading-relaxed whitespace-pre-line text-base-content/85">
+                                    {{ formatStoryText(voice.text) }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -874,6 +977,6 @@ onBeforeUnmount(() => {
                 @pause="handleVoicePause"
                 @play="handleVoicePlay"
             />
-        </div>
+        </section>
     </div>
 </template>

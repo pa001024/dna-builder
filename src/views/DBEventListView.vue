@@ -1187,7 +1187,7 @@ watch(
     { immediate: true }
 )
 
-useInitialScrollToSelectedItem()
+useInitialScrollToSelectedItem({ selectedSelector: ".dbe-item-active" })
 
 onMounted(() => {
     currentTimeTimer = window.setInterval(() => {
@@ -1208,42 +1208,92 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedEvent }">
-                <div class="p-3 border-b border-base-200 space-y-3">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        :placeholder="
-                            showFullTextSearch ? '全文搜索活动名称/描述/规则（不支持拼音）...' : '搜索活动ID/名称/描述（支持拼音）...'
-                        "
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
-
-                    <div class="flex flex-wrap gap-2">
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input v-model="showVersionFilter" type="checkbox" class="checkbox checkbox-xs" />
-                            <span class="text-xs text-base-content/70">版本</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input v-model="showTimeFilter" type="checkbox" class="checkbox checkbox-xs" />
-                            <span class="text-xs text-base-content/70">时间点</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input v-model="showFullTextSearch" type="checkbox" class="checkbox checkbox-xs" />
-                            <span class="text-xs text-base-content/70">全文搜索</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input v-model="showTimeLine" type="checkbox" class="checkbox checkbox-xs" />
-                            <span class="text-xs text-base-content/70">时间表</span>
-                        </label>
+            <div class="flex-1 flex flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedEvent }">
+                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                <div
+                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                >
+                    <div class="relative">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input
+                            v-model="searchKeyword"
+                            type="text"
+                            :placeholder="
+                                showFullTextSearch ? '全文搜索活动名称/描述/规则（不支持拼音）...' : '搜索活动ID/名称/描述（支持拼音）...'
+                            "
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                        <span
+                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                        >
+                            {{ filteredEvents.length }}
+                        </span>
                     </div>
 
-                    <div v-show="showVersionFilter" class="flex flex-wrap gap-1">
+                    <!-- 过滤器开关方章 -->
+                    <div class="mt-3 flex flex-wrap gap-1.5">
                         <button
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showVersionFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="showVersionFilter = !showVersionFilter"
+                        >
+                            版本
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showTimeFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="showTimeFilter = !showTimeFilter"
+                        >
+                            时间点
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showFullTextSearch
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="showFullTextSearch = !showFullTextSearch"
+                        >
+                            全文搜索
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showTimeLine
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="showTimeLine = !showTimeLine"
+                        >
+                            时间表
+                        </button>
+                    </div>
+
+                    <!-- 版本筛选方章 -->
+                    <div v-show="showVersionFilter" class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">版本</span>
+                        <button
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedVersion === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectedVersion = ''"
                         >
                             全部
@@ -1251,9 +1301,11 @@ onUnmounted(() => {
                         <button
                             v-for="version in eventVersions"
                             :key="version"
-                            class="px-3 py-1 text-sm rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
                             :class="
-                                selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedVersion === version
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectedVersion = version"
                         >
@@ -1261,17 +1313,36 @@ onUnmounted(() => {
                         </button>
                     </div>
 
-                    <div v-if="hasTimePoints" v-show="showTimeFilter" class="rounded-lg border border-base-200 bg-base-100 p-3 space-y-3">
+                    <!-- 时间点筛选面板（外层区块卡） -->
+                    <div
+                        v-if="hasTimePoints"
+                        v-show="showTimeFilter"
+                        class="mt-3 space-y-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    >
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <button type="button" class="btn btn-xs btn-ghost" @click="resetToCurrentTimePoint">重置到当前</button>
-                            <label class="label cursor-pointer gap-2 p-0">
-                                <span class="text-sm">仅显示差异</span>
-                                <input v-model="diffOnlyEnabled" type="checkbox" class="checkbox checkbox-success checkbox-sm" />
-                            </label>
+                            <button
+                                type="button"
+                                class="cursor-pointer text-[11px] text-base-content/50 transition-colors duration-150 hover:text-primary"
+                                @click="resetToCurrentTimePoint"
+                            >
+                                重置到当前
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    diffOnlyEnabled
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="diffOnlyEnabled = !diffOnlyEnabled"
+                            >
+                                仅显示差异
+                            </button>
                         </div>
 
                         <div class="flex items-center gap-3">
-                            <span class="w-12 shrink-0 text-[11px] text-base-content/60">{{
+                            <span class="w-24 shrink-0 font-mono text-[11px] tabular-nums text-base-content/60">{{
                                 formatEventTimePoint(eventTimePoints[0] ?? null)
                             }}</span>
                             <input
@@ -1282,18 +1353,27 @@ onUnmounted(() => {
                                 :max="Math.max(eventTimePoints.length - 1, 0)"
                                 step="1"
                             />
-                            <span class="w-12 shrink-0 text-right text-[11px] text-base-content/60">{{
+                            <span class="w-24 shrink-0 text-right font-mono text-[11px] tabular-nums text-base-content/60">{{
                                 formatEventTimePoint(eventTimePoints.at(-1) ?? null)
                             }}</span>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/70">
-                            <span>当前时间点：{{ formatEventTimePoint(eventTimePoints[currentTimePointIndex] ?? null) }}</span>
-                            <span v-if="selectedTimePoint">选中时间点：{{ formatEventTimePoint(selectedTimePoint) }}</span>
-                            <span v-if="diffOnlyEnabled && previousSelectedTimePoint"
-                                >对比上一时间点：{{ formatEventTimePoint(previousSelectedTimePoint) }}</span
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] tabular-nums text-base-content/55">
+                            <span
+                                >当前时间点：<span class="font-mono">{{ formatEventTimePoint(eventTimePoints[currentTimePointIndex] ?? null) }}</span></span
                             >
-                            <span class="badge badge-ghost badge-sm">{{ eventTimePoints.length }} 个时间点</span>
-                            <span class="badge badge-primary badge-sm">{{ visibleEventCount }} 个活动</span>
+                            <span v-if="selectedTimePoint"
+                                >选中时间点：<span class="font-mono">{{ formatEventTimePoint(selectedTimePoint) }}</span></span
+                            >
+                            <span v-if="diffOnlyEnabled && previousSelectedTimePoint"
+                                >对比上一时间点：<span class="font-mono">{{ formatEventTimePoint(previousSelectedTimePoint) }}</span></span
+                            >
+                            <span
+                                class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
+                                >{{ eventTimePoints.length }} 个时间点</span
+                            >
+                            <span class="rounded-xs border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
+                                >{{ visibleEventCount }} 个活动</span
+                            >
                         </div>
                     </div>
                 </div>
@@ -1306,76 +1386,103 @@ onUnmounted(() => {
                 </template>
                 <template v-else>
                     <ScrollArea class="flex-1">
-                        <div class="p-2 space-y-2">
-                            <div v-if="filteredEvents.length === 0" class="p-4 text-center text-sm text-base-content/60">
-                                {{ diffOnlyEnabled ? "与上一时间点相比没有变化活动" : "当前时间点没有符合条件的活动" }}
+                        <div class="space-y-2 p-3">
+                            <!-- 空状态 -->
+                            <div v-if="filteredEvents.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
+                                <Icon icon="ri:calendar-event-line" class="mb-4 h-12 w-12 opacity-40" />
+                                <p class="text-sm">{{ diffOnlyEnabled ? "与上一时间点相比没有变化活动" : "当前时间点没有符合条件的活动" }}</p>
                             </div>
-                            <div
-                                v-for="item in filteredEvents"
+                            <article
+                                v-for="(item, index) in filteredEvents"
                                 :key="item.id"
-                                class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                                :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedEventId === item.id }"
+                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                :class="
+                                    selectedEventId === item.id
+                                        ? 'dbe-item-active border-primary/70 bg-primary/10'
+                                        : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                                "
+                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
                                 @click="selectEvent(item.id)"
                             >
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="min-w-0">
-                                        <div class="font-medium truncate">{{ $t(item.name) }}</div>
-                                        <div class="text-xs opacity-70 mt-1">
-                                            {{ formatTimeRange(item.startTime, item.endTime) }}
-                                            <span v-if="getVersionByTime(item.startTime)" class="ml-2"
-                                                >v{{ getVersionByTime(item.startTime) }}</span
+                                <!-- 左侧主色强调条：选中时显现 -->
+                                <span
+                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                    :class="selectedEventId === item.id ? 'opacity-100' : 'opacity-0'"
+                                    aria-hidden="true"
+                                />
+                                <div class="p-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <div
+                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                :class="{ 'text-primary': selectedEventId === item.id }"
                                             >
+                                                {{ $t(item.name) }}
+                                            </div>
+                                            <div class="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-base-content/55">
+                                                {{ formatTimeRange(item.startTime, item.endTime) }}
+                                                <span v-if="getVersionByTime(item.startTime)" class="font-mono tabular-nums"
+                                                    >v{{ getVersionByTime(item.startTime) }}</span
+                                                >
+                                            </div>
                                         </div>
+                                        <CopyID :id="item.id" />
                                     </div>
-                                    <CopyID :id="item.id" />
-                                </div>
-                                <div class="text-xs opacity-70 mt-2 line-clamp-2 whitespace-pre-wrap break-all">
-                                    {{ item.desc }}
-                                </div>
-                                <div
-                                    v-if="showFullTextSearch && searchKeyword.trim() && getEventSnippet(item)?.segments?.length"
-                                    class="mt-2 text-xs leading-relaxed opacity-85"
-                                >
-                                    <span class="opacity-65">匹配：</span>
-                                    <span v-if="getEventSnippet(item)?.prefixEllipsis">...</span>
-                                    <template
-                                        v-for="(segment, index) in getEventSnippet(item)?.segments || []"
-                                        :key="`${item.id}-${index}`"
+                                    <div class="mt-2 line-clamp-2 whitespace-pre-wrap break-all text-xs leading-relaxed text-base-content/60">
+                                        {{ item.desc }}
+                                    </div>
+                                    <div
+                                        v-if="showFullTextSearch && searchKeyword.trim() && getEventSnippet(item)?.segments?.length"
+                                        class="mt-2 text-xs leading-relaxed text-base-content/70"
                                     >
-                                        <span
-                                            :class="
-                                                segment.highlighted
-                                                    ? selectedEventId === item.id
-                                                        ? 'bg-base-100/45 text-primary-content font-semibold px-0.5 rounded underline decoration-primary-content/80 decoration-2 underline-offset-2'
-                                                        : 'bg-primary/20 text-base-content font-semibold px-0.5 rounded underline decoration-primary/80 decoration-2 underline-offset-2'
-                                                    : ''
-                                            "
+                                        <span class="text-base-content/45">匹配：</span>
+                                        <span v-if="getEventSnippet(item)?.prefixEllipsis">...</span>
+                                        <template
+                                            v-for="(segment, index) in getEventSnippet(item)?.segments || []"
+                                            :key="`${item.id}-${index}`"
                                         >
-                                            {{ segment.text }}
-                                        </span>
-                                    </template>
-                                    <span v-if="getEventSnippet(item)?.suffixEllipsis">...</span>
+                                            <span
+                                                :class="
+                                                    segment.highlighted
+                                                        ? selectedEventId === item.id
+                                                            ? 'rounded-xs bg-base-100/45 px-0.5 font-semibold text-primary-content underline decoration-primary-content/80 decoration-2 underline-offset-2'
+                                                            : 'rounded-xs bg-primary/20 px-0.5 font-semibold text-base-content underline decoration-primary/80 decoration-2 underline-offset-2'
+                                                        : ''
+                                                "
+                                            >
+                                                {{ segment.text }}
+                                            </span>
+                                        </template>
+                                        <span v-if="getEventSnippet(item)?.suffixEllipsis">...</span>
+                                    </div>
                                 </div>
-                            </div>
+                            </article>
                         </div>
                     </ScrollArea>
 
-                    <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                        共 {{ filteredEvents.length }} 个活动
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-center text-[11px] tracking-wide text-base-content/50">
+                            共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredEvents.length }}</b> 个活动
+                        </p>
                     </div>
                 </template>
             </div>
 
-            <div
+            <!-- 收起详情手柄 -->
+            <button
                 v-if="selectedEvent"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                type="button"
+                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
+                title="收起详情"
                 @click="closeSelectedEvent"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
+            </button>
 
-            <ScrollArea v-if="selectedEvent" class="flex-2">
-                <DBEventDetailItem :event="selectedEvent" class="flex-1" />
+            <!-- 右侧详情面板 -->
+            <ScrollArea v-if="selectedEvent" class="min-w-0 flex-2">
+                <DBEventDetailItem :key="selectedEventId" :event="selectedEvent" />
             </ScrollArea>
         </div>
     </div>

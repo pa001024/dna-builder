@@ -464,7 +464,7 @@ function handleCardClick() {
             :class="
                 mini
                     ? 'flex items-center transition-colors duration-200'
-                    : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+                    : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
             "
             @click="handleCardClick"
         >
@@ -472,14 +472,14 @@ function handleCardClick() {
                 <img
                     :src="mod.url"
                     :alt="mod.名称"
-                    class="size-8 inline-block mr-2 bg-linear-45 rounded"
+                    class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
                     :class="getRarityGradientClass(mod.品质)"
                 />
                 <SRouterLink v-if="!mini" :to="`/db/mod/${mod.id}`" stop class="hover:underline">
                     {{ value[2] === "Mod" ? $t(mod.名称) : `${$t("UI_FORGING_BLUEPRINT")}${mod.名称}` }}
                 </SRouterLink>
             </span>
-            <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
         </div>
     </ShowProps>
     <ShowProps
@@ -497,7 +497,7 @@ function handleCardClick() {
             :class="
                 mini
                     ? 'flex items-center transition-colors duration-200'
-                    : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+                    : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
             "
             @click="handleCardClick"
         >
@@ -505,14 +505,14 @@ function handleCardClick() {
                 <img
                     :src="weapon.url"
                     :alt="weapon.名称"
-                    class="size-8 inline-block mr-2 bg-linear-45 rounded"
+                    class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
                     :class="getRarityGradientClass(5)"
                 />
                 <SRouterLink v-if="!mini" :to="`/db/weapon/${weapon.id}`" stop class="hover:underline">
                     {{ $t(weapon.名称) }}
                 </SRouterLink>
             </span>
-            <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
         </div>
     </ShowProps>
     <ShowProps
@@ -528,7 +528,7 @@ function handleCardClick() {
             :class="
                 mini
                     ? 'flex items-center transition-colors duration-200'
-                    : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+                    : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
             "
             @click="handleCardClick"
         >
@@ -536,14 +536,14 @@ function handleCardClick() {
                 <img
                     :src="char.url"
                     :alt="char.名称"
-                    class="size-8 inline-block mr-2 bg-linear-45 rounded"
+                    class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
                     :class="getRarityGradientClass(5)"
                 />
                 <SRouterLink v-if="!mini" :to="`/db/char/${char.id}`" stop class="hover:underline">
                     {{ $t(char.名称) }}
                 </SRouterLink>
             </span>
-            <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+            <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
         </div>
     </ShowProps>
     <div
@@ -551,7 +551,7 @@ function handleCardClick() {
         :class="
             mini
                 ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
         "
         v-bind="$attrs"
         @click="$emit('click')"
@@ -560,21 +560,21 @@ function handleCardClick() {
             <img
                 :src="getDraftIcon(value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 bg-linear-45 rounded"
+                class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
                 :class="getDraftBackgroundColor(value[1])"
             />
             <SRouterLink v-if="!mini" :to="`/db/draft/${getDraftByIdOrProductId(value[1])!.id}`" stop class="hover:underline">
                 {{ `设计稿: ${Array.isArray(name) ? name.join(" / ") : getDraftByIdOrProductId(value[1])!.n}` }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && value[2] === 'Walnut' && getWalnutReward(value[1]).walnut"
         :class="
             mini
                 ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
         "
         v-bind="$attrs"
         @click="$emit('click')"
@@ -583,21 +583,21 @@ function handleCardClick() {
             <img
                 :src="getWalnutIcon(value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 bg-linear-45 rounded"
+                class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
                 :class="getWalnutBackgroundColor(value[1])"
             />
             <SRouterLink v-if="!mini" :to="`/db/walnut/${Number(value[1])}`" stop class="hover:underline">
                 {{ getWalnutReward(value[1]).walnut?.名称 || value[1] }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && value[2] === 'Resource' && getResourceById(value[1])"
         :class="
             mini
                 ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
         "
         v-bind="$attrs"
         @click="$emit('click')"
@@ -606,14 +606,14 @@ function handleCardClick() {
             <img
                 :src="getResourceIconById(value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 bg-linear-15 rounded"
+                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
                 :class="getResourceBackgroundById(value[1])"
             />
             <SRouterLink v-if="!mini" :to="`/db/resource/${getResourceById(value[1])!.id}`" stop class="hover:underline">
                 {{ getResourceById(value[1])!.name }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="
@@ -624,7 +624,7 @@ function handleCardClick() {
         :class="
             mini
                 ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
         "
         v-bind="$attrs"
         @click="$emit('click')"
@@ -633,21 +633,21 @@ function handleCardClick() {
             <img
                 :src="getIronTicketIcon(value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 bg-linear-15 rounded"
+                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
                 :class="getIronTicketBackgroundById(value[1])"
             />
             <SRouterLink v-if="!mini" :to="`/db/iron-ticket/${value[1]}`" stop class="hover:underline">
                 {{ iconticketMap.get(Number(value[1]))?.name || name }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && isFashionCostType(value[2])"
         :class="
             mini
                 ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
         "
         v-bind="$attrs"
         @click="$emit('click')"
@@ -656,7 +656,7 @@ function handleCardClick() {
             <img
                 :src="getFashionIcon(value[2], value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 bg-linear-15 rounded"
+                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
             <SRouterLink
@@ -669,14 +669,14 @@ function handleCardClick() {
             </SRouterLink>
             <span v-else-if="!mini">{{ name }}</span>
         </span>
-        <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else-if="Array.isArray(value) && isAccessoryCostType(value[2]) && getAccessoryByType(value[2], value[1])"
         :class="
             mini
                 ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
         "
         v-bind="$attrs"
         @click="$emit('click')"
@@ -685,7 +685,7 @@ function handleCardClick() {
             <img
                 :src="getFashionIcon(value[2], value[1])"
                 alt=""
-                class="size-8 inline-block mr-2 bg-linear-15 rounded"
+                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
             <SRouterLink
@@ -697,7 +697,7 @@ function handleCardClick() {
                 {{ getAccessoryByType(value[2], value[1])?.name || name }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value[0] }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
     </div>
     <div
         v-else
@@ -705,7 +705,7 @@ function handleCardClick() {
         :class="
             mini
                 ? 'flex items-center transition-colors duration-200'
-                : 'flex items-center p-3 rounded bg-base-300 transition-colors duration-200'
+                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
         "
         @click="$emit('click')"
     >
@@ -713,13 +713,13 @@ function handleCardClick() {
             <img
                 :src="getIcon(nameString)"
                 alt=""
-                class="size-8 inline-block mr-2 bg-linear-15 rounded"
+                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
                 :class="getRarityColor(nameString)"
             />
             <SRouterLink v-if="!mini" :to="`/db/resource/${resourceMap.get(nameString)?.id}`" stop class="hover:underline">
                 {{ $t(nameString) }}
             </SRouterLink>
         </span>
-        <span v-if="!mini" class="font-bold text-primary ml-auto">{{ value }}</span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value }}</span>
     </div>
 </template>

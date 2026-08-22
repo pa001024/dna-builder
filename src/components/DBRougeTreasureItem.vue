@@ -36,9 +36,9 @@ const iconUrl = computed(() => {
 <template>
     <SRouterLink
         :to="`/db/rouge/${mode}/treasure/${id}`"
-        class="flex min-w-0 items-center gap-2 rounded bg-base-100 p-2 transition-colors hover:bg-base-300"
+        class="flex min-w-0 items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2 transition-colors duration-200 hover:border-primary/40"
     >
-        <div class="size-10 shrink-0 overflow-hidden rounded bg-linear-15">
+        <div class="size-10 shrink-0 overflow-hidden rounded-xs bg-linear-15">
             <ImageFallback :src="iconUrl" :alt="treasure?.name || `ID ${id}`" class="size-10 object-contain">
                 <img src="/imgs/webp/T_Head_Empty.webp" :alt="treasure?.name || `ID ${id}`" class="size-10 object-contain" />
             </ImageFallback>
@@ -46,9 +46,9 @@ const iconUrl = computed(() => {
         <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
                 <span class="truncate text-sm font-medium">{{ treasure?.name || `未知遗物 ${id}` }}</span>
-                <span class="shrink-0 text-xs text-base-content/50">ID {{ id }}</span>
+                <span class="ml-auto shrink-0 font-mono text-[10px] tabular-nums text-base-content/35">ID {{ id }}</span>
             </div>
-            <div v-if="treasure?.simpleDesc" class="mt-0.5 line-clamp-2 text-xs text-base-content/70">
+            <div v-if="treasure?.simpleDesc" class="mt-0.5 line-clamp-2 text-xs leading-relaxed text-base-content/55">
                 {{ treasure.simpleDesc }}
             </div>
         </div>

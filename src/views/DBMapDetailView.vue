@@ -100,7 +100,7 @@ onMounted(async () => {
         </template>
 
         <div v-else class="flex-1 flex items-center justify-center">
-            <div class="text-base-content/70">{{ $t("map-detail.notFound") }}</div>
+            <div class="text-xs text-base-content/45">{{ $t("map-detail.notFound") }}</div>
         </div>
     </div>
 </template>

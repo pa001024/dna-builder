@@ -152,10 +152,12 @@ export default defineConfig(async () => ({
             "js-ini",
             "@tauri-apps/plugin-updater",
             "@tauri-apps/plugin-process",
+            "@tauri-apps/api/path",
             "@langchain/core/messages",
             "@langchain/openai",
             "langchain",
             "zod",
+            "@chenglou/pretext",
         ],
     },
     build: {

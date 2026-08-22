@@ -7,6 +7,7 @@ import draftData, { type Draft } from "@/data/d/draft.data"
 import shopData from "@/data/d/shop.data"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import type { ResourceDraftSourceInfo } from "@/utils/draft-source"
+import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
 
 type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head"
@@ -140,32 +141,6 @@ function getHeadFrameIcon(icon: string): string {
  */
 function getHeadIcon(icon: string): string {
     return icon ? `/imgs/webp/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 根据稀有度返回徽章颜色。
- * @param rarity 稀有度（1~5）
- * @returns Tailwind 颜色类名
- */
-function getRarityBadgeClass(rarity: number): string {
-    const rarityMap: Record<number, string> = {
-        1: "bg-gray-500 text-white",
-        2: "bg-green-600 text-white",
-        3: "bg-blue-600 text-white",
-        4: "bg-purple-600 text-white",
-        5: "bg-yellow-500 text-black",
-    }
-
-    return rarityMap[rarity] || rarityMap[1]
-}
-
-/**
- * 根据稀有度返回文本标签。
- * @param rarity 稀有度（1~5）
- * @returns 稀有度文本
- */
-function getRarityText(rarity: number): string {
-    return ["白", "绿", "蓝", "紫", "金"][rarity - 1] || "白"
 }
 
 /**
@@ -447,71 +422,109 @@ const accessoryUnlock = computed(() => {
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-start justify-between gap-3">
-            <div class="flex items-start gap-3 min-w-0">
-                <img :src="accessoryIcon" :alt="accessoryName" class="size-12 rounded-lg bg-base-200 object-cover" />
-                <div class="min-w-0">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <SRouterLink v-if="accessoryDetailLink" :to="accessoryDetailLink" class="text-lg font-bold link link-primary">
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 饰品档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
+                <img :src="accessoryIcon" :alt="accessoryName" class="size-14 shrink-0 rounded-xs bg-base-content/6 object-cover" />
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Accessory File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            v-if="accessoryDetailLink"
+                            :to="accessoryDetailLink"
+                            class="truncate font-orbitron text-xl leading-none font-bold tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
                             {{ $t(accessoryName) }}
                         </SRouterLink>
-                        <div v-else class="text-lg font-bold">
+                        <div
+                            v-else
+                            class="truncate font-orbitron text-xl leading-none font-bold tracking-tight text-base-content sm:text-2xl"
+                        >
                             {{ $t(accessoryName) }}
                         </div>
-                        <span v-if="accessoryVersionText" class="text-xs px-2 py-0.5 rounded bg-base-200">
+                        <span
+                            v-if="accessoryVersionText"
+                            class="shrink-0 rounded-xs border border-base-content/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-base-content/50"
+                        >
                             {{ accessoryVersionText }}
                         </span>
+                        <span
+                            v-if="!isHeadFrameAccessory(accessory) && !isHeadAccessory(accessory)"
+                            :class="getRarityBadgeClass(accessoryRarityValue)"
+                        >
+                            {{ getRarityName(accessoryRarityValue) }}
+                        </span>
                     </div>
-                    <CopyID :id="accessory.id" />
+                    <div class="mt-2">
+                        <CopyID :id="accessory.id" />
+                    </div>
                 </div>
             </div>
-            <span
-                v-if="!isHeadFrameAccessory(accessory) && !isHeadAccessory(accessory)"
-                class="text-xs px-2 py-1 rounded"
-                :class="getRarityBadgeClass(accessoryRarityValue)"
-            >
-                {{ getRarityText(accessoryRarityValue) }}
-            </span>
-        </div>
+        </header>
 
-        <div class="card bg-base-100 border border-base-200 rounded-lg p-3 space-y-2">
-            <h3 class="font-bold">{{ $t("accessory.info") }}</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                <div class="flex justify-between gap-2">
-                    <span class="text-base-content/70">{{ $t("accessory.type") }}</span>
-                    <span>{{ $t(getAccessoryTypeLabelKey(accessory.accessoryType)) }}</span>
+        <!-- 基本信息 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="INFO" :title="$t('accessory.info')" />
+            <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t("accessory.type") }}</span>
+                    <span class="truncate text-sm text-base-content/85">{{ $t(getAccessoryTypeLabelKey(accessory.accessoryType)) }}</span>
                 </div>
-                <div class="flex justify-between gap-2">
-                    <span class="text-base-content/70">{{ isSkinAccessory(accessory) ? $t("角色") : $t("accessory.category") }}</span>
-                    <span>{{ accessoryCategoryText }}</span>
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="shrink-0 text-xs text-base-content/60">{{
+                        isSkinAccessory(accessory) ? $t("角色") : $t("accessory.category")
+                    }}</span>
+                    <span class="truncate text-sm text-base-content/85">{{ accessoryCategoryText }}</span>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="card bg-base-100 border border-base-200 rounded-lg p-3 space-y-2">
-            <h3 class="font-bold">{{ $t("accessory.description") }}</h3>
-            <div class="text-sm text-base-content/80 wrap-break-word">
+        <!-- 描述 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('accessory.description')" />
+            <div class="wrap-break-word text-sm text-base-content/90">
                 {{ $t(accessoryDesc) }}
             </div>
-        </div>
+        </section>
 
-        <div class="card bg-base-100 border border-base-200 rounded-lg p-3 space-y-2">
-            <h3 class="font-bold">{{ $t("accessory.unlock") }}</h3>
-            <div class="text-sm text-base-content/80 wrap-break-word">
+        <!-- 获取方式 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="UNLOCK" :title="$t('accessory.unlock')" />
+            <div class="wrap-break-word text-sm text-base-content/90">
                 {{ accessoryUnlock }}
             </div>
 
-            <div v-if="relatedDraftSources.length" class="pt-1 border-t border-base-200/70">
+            <div v-if="relatedDraftSources.length" class="mt-2.5 border-t border-base-content/10 pt-2.5">
                 <DraftSource :draft-sources="relatedDraftSources" />
             </div>
 
-            <div class="pt-1 border-t border-base-200/70">
+            <div class="mt-2.5 border-t border-base-content/10 pt-2.5">
                 <div v-if="displayShopSources.length" class="space-y-2">
                     <ShopSource :shop-sources="displayShopSources" />
                 </div>
                 <div v-else class="text-sm text-base-content/60">{{ $t("accessory.shopSourcesEmpty") }}</div>
             </div>
-        </div>
+        </section>
     </div>
 </template>

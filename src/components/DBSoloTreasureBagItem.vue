@@ -141,20 +141,20 @@ function buildLayout(shape: number[][]): BagLayout {
             <CopyID :id="bag.id" />
         </div>
         <div class="grid grid-cols-2 gap-2 text-sm">
-            <div class="flex items-center justify-between rounded bg-base-200 p-2">
+            <div class="flex items-center justify-between rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                 <span>价格</span>
-                <span class="text-primary">{{ bag.price }}</span>
+                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ bag.price }}</span>
             </div>
-            <div class="flex items-center justify-between rounded bg-base-200 p-2">
+            <div class="flex items-center justify-between rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                 <span>容量</span>
-                <span class="text-primary">{{ +bag.desc }}</span>
+                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ +bag.desc }}</span>
             </div>
             <div class="text-xs text-base-content/70">形状: {{ bag.shape.map(shape => shape.join("x")).join(" / ") }}</div>
         </div>
         <div class="flex justify-center">
             <div
                 v-if="layout.width > 0 && layout.height > 0"
-                class="relative overflow-hidden rounded bg-base-200"
+                class="relative overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3"
                 :style="{
                     width: `${layout.width}px`,
                     height: `${layout.height}px`,

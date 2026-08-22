@@ -105,14 +105,18 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
 </script>
 
 <template>
-    <div class="dialogue-card p-2 rounded bg-base-200/80 space-y-1" :class="{ 'dialogue-card-playing': playing }">
+    <!-- 内层小卡：hover 轻浮起；播放中切换 primary 强调态 -->
+    <div
+        class="space-y-1 rounded-xs border bg-base-content/3 p-2.5 transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-px hover:shadow-[0_0_6px_color-mix(in_srgb,var(--color-base-content)_8%,transparent)]"
+        :class="playing ? 'border-primary/60 bg-primary/8 shadow-lg shadow-primary/20' : 'border-base-content/10'"
+    >
         <div class="space-y-1 text-sm">
             <div class="flex items-center gap-2">
                 <img
                     v-if="speakerAvatar"
                     :src="speakerAvatar"
                     :alt="speakerName || ''"
-                    class="size-8 rounded object-cover bg-base-100"
+                    class="size-8 rounded-xs object-cover bg-base-content/6"
                     loading="lazy"
                 />
 
@@ -137,7 +141,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                 <span
                     v-for="impression in getImpressionEntries(dialogue)"
                     :key="`${dialogue.id}-${impression.regionId}-${impression.typeLabel}-dialogue-impr`"
-                    class="rounded border px-1.5 py-0.5 text-xs leading-none"
+                    class="rounded-xs border px-1.5 py-0.5 text-xs leading-none tabular-nums"
                     :class="
                         impression.value > 0 ? 'border-success/40 bg-success/10 text-success' : 'border-error/40 bg-error/10 text-error'
                     "
@@ -154,17 +158,21 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                 :key="option.id"
                 type="button"
                 :data-dialogue-option-id="option.id"
-                class="group w-full rounded px-2.5 py-1.5 text-left text-xs transition-all duration-200"
-                :class="selectedOption?.id === option.id ? 'bg-primary/80 shadow-sm' : 'bg-base-100/60 hover:bg-base-100/80'"
+                class="group w-full cursor-pointer rounded-xs border px-2.5 py-1.5 text-left text-xs transition-all duration-200 active:scale-[0.99]"
+                :class="
+                    selectedOption?.id === option.id
+                        ? 'border-primary/70 bg-primary/10'
+                        : 'border-transparent bg-base-content/4 hover:border-primary/40 hover:bg-base-content/[0.07]'
+                "
                 @click="emit('select-option', { dialogueId: dialogue.id, optionId: option.id })"
             >
                 <div class="flex items-start gap-2">
                     <span
-                        class="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[9px] font-semibold"
+                        class="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-xs border font-orbitron text-[9px] font-semibold tabular-nums"
                         :class="
                             selectedOption?.id === option.id
                                 ? 'border-primary bg-primary text-primary-content'
-                                : 'border-base-300 text-base-content/70'
+                                : 'border-base-content/25 text-base-content/60'
                         "
                     >
                         {{ optionIndex + 1 }}
@@ -184,7 +192,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                         <span
                             v-for="impression in getImpressionEntries(option)"
                             :key="`${option.id}-${impression.regionId}-${impression.typeLabel}-impr`"
-                            class="rounded border px-1.5 py-0.5 text-xs leading-none"
+                            class="rounded-xs border px-1.5 py-0.5 text-xs leading-none tabular-nums"
                             :class="
                                 impression.value > 0
                                     ? 'border-success/40 bg-success/10 text-success'
@@ -198,7 +206,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                         <span
                             v-for="impressionCheck in getImpressionCheckEntries(option)"
                             :key="`${option.id}-${impressionCheck.regionId}-${impressionCheck.typeLabel}-impr-check`"
-                            class="rounded border border-info/40 bg-info/10 px-1.5 py-0.5 text-xs leading-none text-info"
+                            class="rounded-xs border border-info/40 bg-info/10 px-1.5 py-0.5 text-xs leading-none tabular-nums text-info"
                         >
                             印象检定 {{ $t(getRegionType(impressionCheck.regionId)) }}·{{ impressionCheck.typeLabel }}
                             ≥
@@ -210,26 +218,3 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
         </div>
     </div>
 </template>
-
-<style scoped>
-.dialogue-card {
-    transition:
-        transform 220ms ease,
-        opacity 220ms ease,
-        box-shadow 220ms ease;
-    box-shadow: 0 0 0 transparent;
-}
-
-.dialogue-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 6px color-mix(in srgb, var(--color-base-content) 8%, transparent);
-}
-
-.dialogue-card-playing {
-    border: 1px solid color-mix(in srgb, var(--color-primary) 60%, transparent);
-    background: color-mix(in srgb, var(--color-primary) 8%, var(--color-base-100));
-    box-shadow:
-        0 0 0 1px color-mix(in srgb, var(--color-primary) 24%, transparent),
-        0 10px 24px color-mix(in srgb, var(--color-primary) 18%, transparent);
-}
-</style>

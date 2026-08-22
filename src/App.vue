@@ -337,6 +337,9 @@ if (env.isApp) {
 }
 
 onMounted(async () => {
+    // 从 OPFS 加载自定义底图与自定义字体，不阻塞启动流程
+    void setting.initCustomWallpaper()
+    void setting.initAppFont()
     ui.setLoginState(setting.dnaUserId !== 0)
     ui.startTimer()
     reportVisitorCount()
@@ -355,6 +358,12 @@ onBeforeUnmount(() => {
 
 <template>
     <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
+    <!-- 自定义底图：铺满视口的用户上传背景，位于窗口内容之下（窗口本体为半透明，可透出底图） -->
+    <div
+        v-if="setting.customWallpaper"
+        class="pointer-events-none fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        :style="{ backgroundImage: `url(${setting.customWallpaper})` }"
+    />
     <StartupModal />
     <ScriptRuntimeFloatingBar v-if="isMainWindow" />
     <ResizeableWindow

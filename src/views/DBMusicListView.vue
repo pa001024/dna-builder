@@ -58,47 +58,77 @@ function closeSelectedSheet(): void {
     selectedSheetId.value = 0
 }
 
-useInitialScrollToSelectedItem()
+useInitialScrollToSelectedItem({ selectedSelector: ".dbmu-item-active" })
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedSheet }">
-                <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索乐谱或专辑"
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
+            <!-- 左侧列表面板 -->
+            <div
+                class="flex-1 flex flex-col overflow-hidden min-w-0"
+                :class="{ 'sm:border-r border-base-content/10': selectedSheet }"
+            >
+                <!-- 检索带：下划线搜索 -->
+                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                    <div class="relative">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input
+                            v-model="searchKeyword"
+                            type="text"
+                            placeholder="搜索乐谱或专辑"
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                    </div>
                 </div>
 
+                <!-- 乐谱列表（按专辑分组） -->
                 <ScrollArea class="flex-1">
                     <div class="space-y-4 p-3">
-                        <section v-for="group in filteredScoreGroups" :key="group.score.id" class="space-y-2">
-                            <div class="flex items-center gap-3">
+                        <section
+                            v-for="group in filteredScoreGroups"
+                            :key="group.score.id"
+                            class="stagger-rise space-y-2"
+                        >
+                            <!-- 专辑头 -->
+                            <div class="flex items-center gap-3 border-b border-base-content/10 pb-2">
                                 <img
                                     :src="`/imgs/music/${group.score.icon}.webp`"
                                     :alt="group.score.name"
-                                    class="h-12 shrink-0 rounded bg-base-200 object-cover"
+                                    class="h-12 shrink-0 rounded-xs border border-base-content/10 object-cover"
                                 />
                                 <div class="min-w-0">
-                                    <div class="font-semibold wrap-break-word">{{ $t(group.score.name) }}</div>
+                                    <div class="text-sm font-semibold wrap-break-word">{{ $t(group.score.name) }}</div>
                                     <CopyID :id="group.score.id" />
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2">
                                 <button
-                                    v-for="sheet in group.music"
+                                    v-for="(sheet, index) in group.music"
                                     :key="sheet.id"
                                     type="button"
-                                    class="p-3 rounded text-left cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                                    :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedSheetId === sheet.id }"
+                                    class="relative cursor-pointer overflow-hidden rounded-xs border p-3 text-left backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                    :class="
+                                        selectedSheetId === sheet.id
+                                            ? 'dbmu-item-active border-primary/70 bg-primary/10'
+                                            : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                                    "
+                                    :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
                                     @click="selectedSheetId = sheet.id"
                                 >
-                                    <div class="font-medium wrap-break-word">{{ $t(sheet.name) }}</div>
+                                    <!-- 左侧主色强调条：选中时显现 -->
+                                    <span
+                                        class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                        :class="selectedSheetId === sheet.id ? 'opacity-100' : 'opacity-0'"
+                                        aria-hidden="true"
+                                    />
+                                    <span
+                                        class="block text-sm font-medium wrap-break-word transition-colors duration-200"
+                                        :class="{ 'text-primary': selectedSheetId === sheet.id }"
+                                    >
+                                        {{ $t(sheet.name) }}
+                                    </span>
                                 </button>
                             </div>
                         </section>
@@ -106,18 +136,20 @@ useInitialScrollToSelectedItem()
                 </ScrollArea>
             </div>
 
+            <!-- 收起详情手柄 -->
             <button
                 v-if="selectedSheet"
                 type="button"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
                 aria-label="关闭乐谱详情"
                 @click="closeSelectedSheet"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
             </button>
 
-            <ScrollArea v-if="selectedSheet" class="flex-1">
-                <DBMusicDetailItem :music="selectedSheet" class="flex-1" />
+            <!-- 右侧详情面板 -->
+            <ScrollArea v-if="selectedSheet" class="min-w-0 flex-1">
+                <DBMusicDetailItem :key="selectedSheetId" :music="selectedSheet" class="flex-1" />
             </ScrollArea>
         </div>
     </div>

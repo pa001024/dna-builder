@@ -317,54 +317,87 @@ const showExpCalculator = ref(false)
 <template>
     <div class="relative h-full">
         <ScrollArea class="h-full">
-            <div class="flex h-full flex-col p-4">
-                <div class="flex justify-end gap-2 mb-4">
-                    <div class="btn btn-sm btn-primary" @click="showExpCalculator = true">经验计算</div>
-                    <div class="btn btn-sm btn-primary" @click="syncInventory">
+            <div class="stagger-rise mx-auto flex max-w-6xl flex-col gap-4 p-4">
+                <!-- 工具栏 -->
+                <div class="flex justify-end gap-2">
+                    <button
+                        type="button"
+                        class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        @click="showExpCalculator = true"
+                    >
+                        经验计算
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-primary transition-colors duration-150 hover:bg-primary/20"
+                        @click="syncInventory"
+                    >
                         <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
                         <span>{{ syncing ? "同步中" : "同步游戏" }}</span>
-                    </div>
-                    <div class="btn btn-sm btn-primary" @click="handleImport">导入JSON</div>
-                    <div class="btn btn-sm btn-primary" @click="handleExport">复制JSON</div>
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        @click="handleImport"
+                    >
+                        导入JSON
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        @click="handleExport"
+                    >
+                        复制JSON
+                    </button>
                 </div>
-                <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
-                    <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
-                        <SectionMarker />
-                        <h3 class="text-lg font-semibold">拥有武器</h3>
-                        <div class="ml-auto flex items-center gap-4">
-                            <label class="w-40 input input-sm">
-                                <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                    <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
-                                        <circle cx="11" cy="11" r="8" />
-                                        <path d="m21 21-4.3-4.3" />
-                                    </g>
-                                </svg>
-                                <input v-model="weaponSearchQuery" type="search" class="grow" placeholder="搜索（支持拼音）..." />
-                            </label>
-                            <div
-                                class="btn btn-sm btn-secondary"
-                                :class="{ 'btn-disabled': !filteredWeapons.length }"
-                                @click="handleSelectAllWeapons"
-                            >
-                                {{
-                                    filteredWeapons.length && Object.keys(inv.weapons).length === filteredWeapons.length
-                                        ? `取消全选`
-                                        : `全选`
-                                }}
-                            </div>
-                            <div class="label text-xs">
-                                近战 <input v-model="inv.enableWeapons.近战" type="checkbox" class="toggle toggle-secondary" />
-                            </div>
-                            <div class="label text-xs">
-                                远程 <input v-model="inv.enableWeapons.远程" type="checkbox" class="toggle toggle-secondary" />
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="min-h-80 w-full pb-4">
+                <!-- 拥有武器 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="WEAPONS" title="拥有武器">
+                        <template #trailing>
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+                                <div class="relative w-52">
+                                    <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                                    <input
+                                        v-model="weaponSearchQuery"
+                                        type="search"
+                                        placeholder="搜索（支持拼音）..."
+                                        class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1 pl-7 pr-3 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40"
+                                    :class="
+                                        filteredWeapons.length && Object.keys(inv.weapons).length === filteredWeapons.length
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    :disabled="!filteredWeapons.length"
+                                    @click="handleSelectAllWeapons"
+                                >
+                                    {{
+                                        filteredWeapons.length && Object.keys(inv.weapons).length === filteredWeapons.length
+                                            ? "取消全选"
+                                            : "全选"
+                                    }}
+                                </button>
+                                <label class="flex cursor-pointer items-center gap-1.5 text-xs text-base-content/60">
+                                    近战
+                                    <input v-model="inv.enableWeapons.近战" type="checkbox" class="toggle toggle-secondary toggle-sm" />
+                                </label>
+                                <label class="flex cursor-pointer items-center gap-1.5 text-xs text-base-content/60">
+                                    远程
+                                    <input v-model="inv.enableWeapons.远程" type="checkbox" class="toggle toggle-secondary toggle-sm" />
+                                </label>
+                            </div>
+                        </template>
+                    </SectionHeader>
+
+                    <div class="min-h-80 w-full pt-2">
                         <div
                             v-if="inv.enableWeapons.近战 || inv.enableWeapons.远程"
-                            class="p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4"
+                            class="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3"
                         >
                             <WeaponItem
                                 v-for="(weapon, index) in filteredWeapons"
@@ -378,47 +411,60 @@ const showExpCalculator = ref(false)
                                 @refine-change="inv.setWeaponRefineLv(weapon.id, $event)"
                             />
                         </div>
-                        <div v-else class="p-4 flex w-full h-72 justify-center items-center text-gray-500">
+                        <div v-else class="flex h-72 w-full items-center justify-center text-sm text-base-content/40">
                             已选择所有, 更改筛选选择自己的库存
                         </div>
                     </div>
-                </div>
-                <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
-                    <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
-                        <SectionMarker />
-                        <h3 class="text-lg font-semibold">拥有MOD</h3>
-                        <div class="ml-auto flex flex-wrap items-center gap-4">
-                            <label class="w-40 input input-sm">
-                                <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                    <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
-                                        <circle cx="11" cy="11" r="8" />
-                                        <path d="m21 21-4.3-4.3" />
-                                    </g>
-                                </svg>
-                                <input v-model="modSearchQuery" type="search" class="grow" placeholder="搜索（支持拼音）..." />
-                            </label>
-                            <div
-                                class="btn btn-sm btn-secondary"
-                                :class="{ 'btn-disabled': !filteredMods.length }"
-                                @click="handleSelectAllMods"
-                            >
-                                {{ filteredMods.length && filteredSelectedMods.length === filteredMods.length ? `取消全选` : `全选` }}
+                </section>
+
+                <!-- 拥有MOD -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="MODS" title="拥有MOD">
+                        <template #trailing>
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+                                <div class="relative w-52">
+                                    <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                                    <input
+                                        v-model="modSearchQuery"
+                                        type="search"
+                                        placeholder="搜索（支持拼音）..."
+                                        class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1 pl-7 pr-3 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40"
+                                    :class="
+                                        filteredMods.length && filteredSelectedMods.length === filteredMods.length
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    :disabled="!filteredMods.length"
+                                    @click="handleSelectAllMods"
+                                >
+                                    {{ filteredMods.length && filteredSelectedMods.length === filteredMods.length ? "取消全选" : "全选" }}
+                                </button>
+                                <label
+                                    v-for="color in ['金', '紫', '蓝', '绿', '白'] as const"
+                                    :key="color"
+                                    class="flex cursor-pointer items-center gap-1.5 text-xs text-base-content/60"
+                                >
+                                    {{ color }}
+                                    <input
+                                        :checked="inv.enableMods[color]"
+                                        type="checkbox"
+                                        class="toggle toggle-secondary toggle-sm"
+                                        @change="inv.enableMods[color] = ($event.target! as any).checked"
+                                    />
+                                </label>
                             </div>
-                            <div v-for="color in ['金', '紫', '蓝', '绿', '白'] as const" :key="color" class="label text-xs">
-                                {{ color }}
-                                <input
-                                    :checked="inv.enableMods[color]"
-                                    type="checkbox"
-                                    class="toggle toggle-secondary"
-                                    @change="inv.enableMods[color] = ($event.target! as any).checked"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="min-h-80 w-full pb-4">
+                        </template>
+                    </SectionHeader>
+
+                    <div class="min-h-80 w-full pt-2">
                         <div
                             v-if="(['金', '紫', '蓝', '绿', '白'] as const).some(color => inv.enableMods[color])"
-                            class="p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4"
+                            class="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3"
                         >
                             <ModItem
                                 v-for="(mod, index) in filteredMods"
@@ -434,29 +480,35 @@ const showExpCalculator = ref(false)
                                 @count-change="inv.mods[mod.id] = [inv.mods[mod.id][0], $event]"
                             />
                         </div>
-                        <div v-else class="p-4 flex w-full h-72 justify-center items-center text-gray-500">
+                        <div v-else class="flex h-72 w-full items-center justify-center text-sm text-base-content/40">
                             已选择所有, 更改筛选选择自己的库存
                         </div>
                     </div>
-                </div>
+                </section>
+
                 <!-- 特效编辑 -->
-                <div class="flex-1 bg-base-300 rounded-xl shadow-lg mb-6">
-                    <div class="p-4 pb-0 flex flex-wrap items-center gap-2 mb-3">
-                        <SectionMarker />
-                        <h3 class="text-lg font-semibold">特效编辑</h3>
-                        <div class="ml-auto flex flex-wrap items-center gap-4">
-                            <div
-                                class="btn btn-sm btn-primary"
-                                @click="buffOptions.forEach(buff => setBuffLv(buff.value, buff.value.mx || 1))"
-                            >
-                                全部最大
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="BUFFS" title="特效编辑">
+                        <template #trailing>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button
+                                    type="button"
+                                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border border-primary/40 bg-primary/10 px-2 text-[11px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/20"
+                                    @click="buffOptions.forEach(buff => setBuffLv(buff.value, buff.value.mx || 1))"
+                                >
+                                    全部最大
+                                </button>
+                                <button
+                                    type="button"
+                                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-error/50 hover:text-error"
+                                    @click="buffOptions.forEach(buff => setBuffLv(buff.value, 0))"
+                                >
+                                    全部关闭
+                                </button>
                             </div>
-                            <div class="btn btn-sm btn-primary" @click="buffOptions.forEach(buff => setBuffLv(buff.value, 0))">
-                                全部关闭
-                            </div>
-                        </div>
-                    </div>
-                    <div class="min-h-80 w-full p-4">
+                        </template>
+                    </SectionHeader>
+                    <div class="min-h-80 w-full pt-2">
                         <BuffEditer
                             class="h-120"
                             :buff-options="buffOptions"
@@ -465,28 +517,55 @@ const showExpCalculator = ref(false)
                             @set-buff-lv="setBuffLv"
                         />
                     </div>
-                </div>
+                </section>
             </div>
         </ScrollArea>
-        <div v-if="showExpCalculator" class="absolute inset-0 bg-base-100 z-20">
-            <div class="absolute flex justify-center items-center p-2 z-10">
-                <div
-                    class="flex items-center gap-1 text-xs bg-base-200 hover:bg-base-300 cursor-pointer p-1 rounded"
+
+        <!-- 经验计算器（半透明全屏覆盖层） -->
+        <div v-if="showExpCalculator" class="absolute inset-0 z-20 bg-base-100/85 backdrop-blur-md">
+            <div class="absolute z-10 flex items-center p-2">
+                <button
+                    type="button"
+                    class="cursor-pointer rounded-xs border border-base-content/20 bg-base-100/80 p-1.5 text-base-content/60 backdrop-blur transition-colors duration-150 hover:border-error/50 hover:text-error"
+                    title="关闭"
                     @click="showExpCalculator = false"
                 >
-                    <Icon icon="ri:close-line" class="text-2xl text-red-500" />
-                </div>
+                    <Icon icon="ri:close-line" class="block size-4" />
+                </button>
             </div>
             <ScrollArea class="h-full">
-                <div class="flex h-full flex-col p-4">
-                    <div class="flex justify-end gap-2 mb-4">
-                        <div class="btn btn-sm btn-primary" @click="showExpCalculator = false">退出全屏</div>
-                        <div class="btn btn-sm btn-primary" :class="{ loading: syncing }" @click="syncInventory">
+                <div class="mx-auto flex max-w-6xl flex-col gap-4 p-4">
+                    <div class="flex justify-end gap-2">
+                        <button
+                            type="button"
+                            class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                            @click="showExpCalculator = false"
+                        >
+                            退出全屏
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-primary transition-colors duration-150 hover:bg-primary/20"
+                            :class="{ loading: syncing }"
+                            @click="syncInventory"
+                        >
                             <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
                             <span>{{ syncing ? "同步中" : "同步游戏" }}</span>
-                        </div>
-                        <div class="btn btn-sm btn-primary" @click="handleImport">导入JSON</div>
-                        <div class="btn btn-sm btn-primary" @click="handleExport">复制JSON</div>
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                            @click="handleImport"
+                        >
+                            导入JSON
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                            @click="handleExport"
+                        >
+                            复制JSON
+                        </button>
                     </div>
                     <PlayerExpCalculator />
                 </div>

@@ -311,207 +311,286 @@ function clearHistory() {
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <!-- 左侧：池子信息 + 鱼列表 -->
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedFish }">
+            <div class="flex-1 flex flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedFish }">
                 <ScrollArea class="flex-1">
-                    <div class="p-3 space-y-4">
+                    <div class="stagger-rise space-y-3 p-3 sm:p-4">
                         <!-- 池子信息 -->
-                        <div class="p-3 bg-base-200 rounded space-y-2">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-12 h-12 overflow-hidden rounded-full">
-                                    <img :src="spotIcon" class="w-full h-full object-cover" />
+                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                            <SectionHeader no-animate compact kicker="SPOT INFO" />
+                            <!-- 池子名片 -->
+                            <div class="mb-2.5 flex items-center gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                                <div class="size-12 shrink-0 overflow-hidden rounded-xs">
+                                    <img :src="spotIcon" class="h-full w-full object-cover" />
                                 </div>
-                                <div>
-                                    <SRouterLink :to="`/db/fishspot/${spot.id}`" class="font-medium text-lg link link-primary">{{
-                                        spot.name
-                                    }}</SRouterLink>
-                                    <CopyID :id="spot.id" />
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                        <SRouterLink
+                                            :to="`/db/fishspot/${spot.id}`"
+                                            class="truncate text-lg font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
+                                        >
+                                            {{ spot.name }}
+                                        </SRouterLink>
+                                        <CopyID :id="spot.id" />
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="space-y-2">
-                                <div v-if="extraRewardDetail" class="p-2 bg-base-100 rounded">
-                                    <div class="text-xs text-base-content/70 mb-1">
+                                <!-- 额外奖励 -->
+                                <div v-if="extraRewardDetail" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                                    <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">
                                         额外奖励 (概率:
                                         {{ spot.extraRewardProb !== undefined ? `${(spot.extraRewardProb * 100).toFixed(2)}%` : "-" }})
                                         每周30次
                                     </div>
                                     <RewardItem :reward="extraRewardDetail" />
 
-                                    <div v-if="spotPet" class="mt-2 bg-base-100 rounded">
-                                        <div class="text-xs text-base-content/70 mb-1">
+                                    <!-- 魔灵奖励 -->
+                                    <div v-if="spotPet" class="mt-2">
+                                        <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">
                                             魔灵奖励 (概率:
                                             {{ spot.petProb !== undefined ? `${(spot.petProb * 100).toFixed(2)}%` : "-" }}) 触发额外奖励时
                                         </div>
                                         <RewardItem :reward="spotPetReward" />
                                     </div>
                                 </div>
-                                <div v-else-if="spot.extraReward !== undefined" class="p-2 bg-base-100 rounded text-xs text-warning">
+                                <div
+                                    v-else-if="spot.extraReward !== undefined"
+                                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-xs text-warning"
+                                >
                                     额外奖励数据不存在
                                 </div>
 
-                                <div v-else-if="spot.petId !== undefined" class="p-2 bg-base-100 rounded text-xs text-warning">
+                                <div
+                                    v-else-if="spot.petId !== undefined"
+                                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-xs text-warning"
+                                >
                                     魔灵数据不存在
                                 </div>
                             </div>
-                            <div class="p-3 bg-base-100 rounded">
-                                <div class="text-xs text-base-content/70 mb-1">
-                                    100条鱼平均期望(下方可调选项 当前设置: {{ getLureName(lure) }} |
-                                    {{ s2bCompare ? "放弃低价值授渔以鱼" : "无脑授渔以鱼" }})
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                    <div
-                                        v-for="timeExpected in expectedValueByTime"
-                                        :key="timeExpected.time"
-                                        class="p-2 bg-base-200 rounded"
-                                    >
-                                        <div class="text-xs text-base-content/70">{{ getAppearName(timeExpected.time) }}</div>
-                                        <div class="text-lg font-bold text-primary">{{ (timeExpected.value * 100).toFixed(2) }}</div>
-                                        <div class="text-xs text-base-content/70">单条期望: {{ timeExpected.value.toFixed(2) }}</div>
+                        </section>
+
+                        <!-- 期望值 -->
+                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                            <SectionHeader no-animate compact kicker="EXPECTED" />
+                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">
+                                100条鱼平均期望(下方可调选项 当前设置: {{ getLureName(lure) }} |
+                                {{ s2bCompare ? "放弃低价值授渔以鱼" : "无脑授渔以鱼" }})
+                            </div>
+                            <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+                                <div
+                                    v-for="timeExpected in expectedValueByTime"
+                                    :key="timeExpected.time"
+                                    class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <div class="text-xs text-base-content/60">{{ getAppearName(timeExpected.time) }}</div>
+                                    <div class="font-orbitron text-lg font-bold tabular-nums text-primary">
+                                        {{ (timeExpected.value * 100).toFixed(2) }}
+                                    </div>
+                                    <div class="text-[11px] tabular-nums text-base-content/50">
+                                        单条期望: {{ timeExpected.value.toFixed(2) }}
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
                         <!-- 鱼列表 -->
-                        <div class="p-3 bg-base-200 rounded">
-                            <div class="text-xs text-base-content/70 mb-2">鱼种列表 (共 {{ spotFish.length }} 种)</div>
+                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                            <SectionHeader no-animate compact kicker="SPECIES" title="鱼种列表" :count="spotFish.length" />
                             <div class="space-y-2">
                                 <div
                                     v-for="(fish, index) in spotFish"
                                     :key="fish.id"
-                                    class="flex items-center gap-2 p-2 bg-base-100 rounded cursor-pointer hover:bg-base-300"
+                                    class="group cursor-pointer rounded-xs border p-2.5 transition-all duration-200 hover:-translate-y-0.5"
+                                    :class="
+                                        selectedFish?.id === fish.id
+                                            ? 'dbfs-item-active border-primary/70 bg-primary/10'
+                                            : 'border-base-content/10 bg-base-content/3 hover:border-primary/40'
+                                    "
                                     @click="selectedFish = fish"
                                 >
-                                    <img :src="getFishIcon(fish)" class="w-8 h-8 object-cover rounded" />
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-medium">{{ $t(fish.name) }}</span>
-                                            <CopyID :id="fish.id" />
-                                            <span class="px-1.5 py-0.5 rounded text-xs" :class="getRarityBadgeClass(fish.rarity)">
-                                                {{ getRarityName(fish.rarity) }}
-                                            </span>
-                                        </div>
-                                        <div class="text-xs text-base-content/70 flex flex-wrap gap-2">
-                                            <div class="badge badge-sm">Lv.{{ fish.level }}</div>
+                                    <div class="flex items-center gap-2.5">
+                                        <img :src="getFishIcon(fish)" class="size-8 shrink-0 rounded-xs object-cover" />
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                <span
+                                                    class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                    :class="{ 'text-primary': selectedFish?.id === fish.id }"
+                                                >
+                                                    {{ $t(fish.name) }}
+                                                </span>
+                                                <CopyID :id="fish.id" />
+                                                <span
+                                                    class="shrink-0 rounded-xs px-1.5 py-0.5 text-[10px] leading-4"
+                                                    :class="getRarityBadgeClass(fish.rarity)"
+                                                >
+                                                    {{ getRarityName(fish.rarity) }}
+                                                </span>
+                                            </div>
+                                            <!-- 属性行 -->
                                             <div
-                                                v-if="calculateFishPrice(fish, 1).length !== calculateFishPrice(fish, 10000).length"
-                                                class="badge badge-sm"
+                                                class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] leading-4 text-base-content/55"
                                             >
-                                                长度: {{ calculateFishPrice(fish, 1).length }}~{{ calculateFishPrice(fish, 10000).length }}
-                                            </div>
-                                            <div v-else class="badge badge-sm">长度: {{ calculateFishPrice(fish, 10000).length }}</div>
-                                            <div
-                                                v-if="calculateFishPrice(fish, 1).price !== calculateFishPrice(fish, 10000).price"
-                                                class="badge badge-sm"
-                                            >
-                                                价格: {{ calculateFishPrice(fish, 1).price }}~{{ calculateFishPrice(fish, 10000).price }}
-                                            </div>
-                                            <div v-else class="badge badge-sm">价格: {{ calculateFishPrice(fish, 10000).price }}</div>
-                                            <div v-if="spot.weights[index]" class="badge badge-sm">权重: {{ spot.weights[index] }}</div>
-                                            <div class="badge badge-sm">出现时间: {{ getAppearNames(fish.appear) }}</div>
-                                            <div v-if="fish.varProb" class="badge badge-sm">
-                                                异种: {{ +(fish.varProb * 100).toFixed(2) }}%
-                                            </div>
-                                            <div v-if="fish.s2b" class="badge badge-sm">
-                                                授渔以鱼: {{ $t(fishMap.get(fish.s2b)!.name) }}({{
-                                                    calculateFishPrice(fishMap.get(fish.s2b)!, 10000).price
-                                                }})
+                                                <span class="rounded-xs border border-base-content/15 px-1 tabular-nums"
+                                                    >Lv.{{ fish.level }}</span
+                                                >
+                                                <span
+                                                    v-if="calculateFishPrice(fish, 1).length !== calculateFishPrice(fish, 10000).length"
+                                                    class="rounded-xs border border-base-content/15 px-1 tabular-nums"
+                                                >
+                                                    长度: {{ calculateFishPrice(fish, 1).length }}~{{
+                                                        calculateFishPrice(fish, 10000).length
+                                                    }}
+                                                </span>
+                                                <span v-else class="rounded-xs border border-base-content/15 px-1 tabular-nums">
+                                                    长度: {{ calculateFishPrice(fish, 10000).length }}
+                                                </span>
+                                                <span
+                                                    v-if="calculateFishPrice(fish, 1).price !== calculateFishPrice(fish, 10000).price"
+                                                    class="rounded-xs border border-base-content/15 px-1 tabular-nums"
+                                                >
+                                                    价格: {{ calculateFishPrice(fish, 1).price }}~{{
+                                                        calculateFishPrice(fish, 10000).price
+                                                    }}
+                                                </span>
+                                                <span v-else class="rounded-xs border border-base-content/15 px-1 tabular-nums">
+                                                    价格: {{ calculateFishPrice(fish, 10000).price }}
+                                                </span>
+                                                <span
+                                                    v-if="spot.weights[index]"
+                                                    class="rounded-xs border border-base-content/15 px-1 tabular-nums"
+                                                >
+                                                    权重: {{ spot.weights[index] }}
+                                                </span>
+                                                <span class="rounded-xs border border-base-content/15 px-1"
+                                                    >出现时间: {{ getAppearNames(fish.appear) }}</span
+                                                >
+                                                <span
+                                                    v-if="fish.varProb"
+                                                    class="rounded-xs border border-base-content/15 px-1 tabular-nums"
+                                                >
+                                                    异种: {{ +(fish.varProb * 100).toFixed(2) }}%
+                                                </span>
+                                                <span v-if="fish.s2b" class="rounded-xs border border-base-content/15 px-1">
+                                                    授渔以鱼: {{ $t(fishMap.get(fish.s2b)!.name) }}({{
+                                                        calculateFishPrice(fishMap.get(fish.s2b)!, 10000).price
+                                                    }})
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
                         <!-- 钓鱼模拟 -->
-                        <div class="p-3 bg-base-200 rounded space-y-2">
-                            <div class="text-xs text-base-content/70">钓鱼模拟</div>
-                            <div class="grid grid-cols-1 items-center">
-                                <div class="flex-1 flex gap-2 items-center p-2">
-                                    <span class="text-xs text-base-content/70 w-16">钓鱼时间</span>
-                                    <label v-for="time in [1, 2, 3]" :key="time" class="text-xs text-base-content/70">
+                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                            <SectionHeader no-animate compact kicker="SIMULATOR" title="钓鱼模拟" />
+                            <div class="space-y-1">
+                                <div
+                                    class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="w-16 shrink-0 text-xs text-base-content/55">钓鱼时间</span>
+                                    <label v-for="time in [1, 2, 3]" :key="time" class="cursor-pointer text-xs text-base-content/70">
                                         <input v-model="selectTime" type="radio" :value="time" class="radio radio-sm" />
                                         {{ getAppearName(time) }}
                                     </label>
                                 </div>
-                                <div class="flex-1 flex gap-2 items-center p-2">
-                                    <span class="text-xs text-base-content/70 w-16">其他</span>
-                                    <label class="text-xs text-base-content/70">
+                                <div
+                                    class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="w-16 shrink-0 text-xs text-base-content/55">其他</span>
+                                    <label class="cursor-pointer text-xs text-base-content/70">
                                         <input v-model="s2bCompare" type="checkbox" class="toggle toggle-sm" />
                                         放弃低价值授渔以鱼
                                     </label>
                                 </div>
-                                <div class="flex-1 flex gap-2 items-center p-2">
-                                    <span class="text-xs text-base-content/70 w-16">鱼饵类型</span>
-                                    <label v-for="lureType in [0, 1, 2]" :key="lureType" class="text-xs text-base-content/70">
+                                <div
+                                    class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="w-16 shrink-0 text-xs text-base-content/55">鱼饵类型</span>
+                                    <label
+                                        v-for="lureType in [0, 1, 2]"
+                                        :key="lureType"
+                                        class="cursor-pointer text-xs text-base-content/70"
+                                    >
                                         <input v-model="lure" type="radio" :value="lureType" class="radio radio-sm" />
                                         {{ getLureName(lureType) }}
                                     </label>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-3 gap-2 col-span-3">
-                                <button class="btn btn-primary btn-sm" @click="fishOnce">钓一次</button>
-                                <button class="btn btn-secondary btn-sm" @click="fishMultiple(100)">钓100次</button>
-                                <button class="btn btn-ghost btn-sm" @click="clearHistory">清空记录</button>
+                            <div class="mt-2 grid grid-cols-3 gap-2">
+                                <button type="button" class="btn btn-primary btn-sm" @click="fishOnce">钓一次</button>
+                                <button type="button" class="btn btn-secondary btn-sm" @click="fishMultiple(100)">钓100次</button>
+                                <button type="button" class="btn btn-ghost btn-sm" @click="clearHistory">清空记录</button>
                             </div>
-                        </div>
+                        </section>
 
                         <!-- 钓鱼记录 -->
-                        <div class="p-3 bg-base-200 rounded">
-                            <div class="text-xs text-base-content/70 mb-2">钓鱼记录 (共 {{ catchCount }} 次)</div>
-                            <div class="text-xs text-base-content/70 mb-2">
-                                总价值:{{ +reducedCatchHistory.reduce((acc, cur) => acc + cur.price * cur.count, 0).toFixed(2) }}
+                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                            <SectionHeader no-animate compact kicker="RECORDS" title="钓鱼记录" :count="catchCount" />
+                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">
+                                总价值:
+                                <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{
+                                    +reducedCatchHistory.reduce((acc, cur) => acc + cur.price * cur.count, 0).toFixed(2)
+                                }}</b>
                             </div>
                             <div class="space-y-2">
                                 <div
                                     v-for="(record, index) in reducedCatchHistory"
                                     :key="index"
-                                    class="flex items-center gap-2 p-2 bg-base-100 rounded"
+                                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40"
                                 >
-                                    <img :src="getFishIcon(record.finalFish)" class="w-8 h-8 object-cover rounded" />
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-medium">{{ $t(record.finalFish.name) }}</span>
-                                            <span class="px-1.5 py-0.5 rounded" :class="getRarityBadgeClass(record.finalFish.rarity)">
-                                                {{ getRarityName(record.finalFish.rarity) }}
-                                            </span>
-                                            <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 text-gray-800">
-                                                x{{ record.count }}
-                                            </span>
-                                        </div>
-                                        <div class="text-xs text-base-content/70">
-                                            价格: {{ record.originPrice ? `${record.originPrice} -> ${record.price}` : record.price }}
-                                            <span v-if="record.mutated" class="text-green-600 ml-1">变异</span>
-                                            <span v-if="record.originFish" class="text-blue-600 ml-1"
-                                                >授渔以鱼 ({{ $t(record.originFish.name) }})</span
-                                            >
-                                            <span class="ml-1">{{ +record.length.toFixed(2) }}cm</span>
+                                    <div class="flex items-center gap-2.5">
+                                        <img :src="getFishIcon(record.finalFish)" class="size-8 shrink-0 rounded-xs object-cover" />
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                <span class="truncate text-sm font-semibold">{{ $t(record.finalFish.name) }}</span>
+                                                <span :class="getRarityBadgeClass(record.finalFish.rarity)">
+                                                    {{ getRarityName(record.finalFish.rarity) }}
+                                                </span>
+                                                <span
+                                                    class="shrink-0 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] leading-4 tabular-nums text-base-content/60"
+                                                >
+                                                    x{{ record.count }}
+                                                </span>
+                                            </div>
+                                            <div class="mt-1 text-[11px] tabular-nums text-base-content/55">
+                                                价格: {{ record.originPrice ? `${record.originPrice} -> ${record.price}` : record.price }}
+                                                <span v-if="record.mutated" class="ml-1 text-green-600">变异</span>
+                                                <span v-if="record.originFish" class="ml-1 text-blue-600"
+                                                    >授渔以鱼 ({{ $t(record.originFish.name) }})</span
+                                                >
+                                                <span class="ml-1">{{ +record.length.toFixed(2) }}cm</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div v-if="reducedCatchHistory.length === 0" class="text-center text-sm text-base-content/50 py-4">
+                                <div v-if="reducedCatchHistory.length === 0" class="py-6 text-center text-sm text-base-content/45">
                                     暂无钓鱼记录
                                 </div>
                             </div>
-                        </div>
+                        </section>
                     </div>
                 </ScrollArea>
             </div>
 
-            <!-- 右侧关闭按钮 -->
-            <div
+            <!-- 收起详情手柄 -->
+            <button
                 v-if="selectedFish"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                type="button"
+                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
+                title="收起详情"
                 @click="selectedFish = null"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
+            </button>
 
             <!-- 右侧：鱼详情 -->
-            <ScrollArea v-if="selectedFish" class="flex-1">
+            <ScrollArea v-if="selectedFish" class="min-w-0 flex-1">
                 <DBFishDetailItem :fish="selectedFish" />
             </ScrollArea>
         </div>

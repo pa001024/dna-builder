@@ -473,13 +473,13 @@ const MAPPINGS: Mapping[] = [
             }
             return [
                 {
-                    targetVar: "rougeConditions",
+                    targetVar: "conditionsMap",
                     text: formatTsValue(record, 0),
                 },
             ]
         },
         targetStem: "condition",
-        targetVar: "rougeConditions",
+        targetVar: "conditionsMap",
     },
     {
         source: async () => {

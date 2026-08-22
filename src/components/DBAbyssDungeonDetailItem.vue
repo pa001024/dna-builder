@@ -137,10 +137,18 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
 </script>
 
 <template>
-    <div class="p-3 space-y-4">
-        <div class="flex items-center justify-between">
-            <div>
-                <SRouterLink :to="`/db/abyss/${dungeon.id}`" class="text-lg font-bold link link-primary">
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 详情头部：纸面 + primary 强调线 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                Abyss File
+            </p>
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <SRouterLink
+                    :to="`/db/abyss/${dungeon.id}`"
+                    class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                >
                     <span v-if="dungeon.sn">{{ dungeon.sn }}</span
                     >&nbsp;
                     <span v-if="dungeon.cid">{{ $t(getCharName(dungeon.cid)) }}</span>
@@ -148,129 +156,180 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                 </SRouterLink>
                 <CopyID :id="dungeon.id" />
             </div>
-        </div>
+        </header>
 
-        <div class="card bg-base-100 border border-base-200 rounded-lg p-3">
-            <h3 class="font-bold mb-2">副本信息</h3>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">深渊ID</span>
-                    <span>{{ dungeon.id }}</span>
+        <!-- 副本信息 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="INFO" title="副本信息" />
+            <div class="mt-2 grid grid-cols-2 gap-1.5 text-sm md:grid-cols-3">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">深渊ID</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ dungeon.id }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">副本ID</span>
-                    <span>{{ dungeon.did }}</span>
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">副本ID</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ dungeon.did }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">类型</span>
-                    <span>{{ $t(getAbyssDungeonGroup(dungeon)) }}</span>
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">类型</span>
+                    <span class="shrink-0 text-xs text-base-content/85">{{ $t(getAbyssDungeonGroup(dungeon)) }}</span>
                 </div>
-                <div v-if="dungeon.sid" class="flex justify-between">
-                    <span class="text-base-content/70">赛季ID</span>
-                    <span>{{ dungeon.sid }}</span>
+                <div
+                    v-if="dungeon.sid"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">赛季ID</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ dungeon.sid }}</span>
                 </div>
-                <div v-if="dungeon.st" class="flex justify-between">
-                    <span class="text-base-content/70">开始时间</span>
-                    <span>{{ new Date(dungeon.st * 1000).toLocaleString() }}</span>
+                <div
+                    v-if="dungeon.st"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">开始时间</span>
+                    <span class="shrink-0 font-mono text-[11px] tabular-nums text-primary">{{
+                        new Date(dungeon.st * 1000).toLocaleString()
+                    }}</span>
                 </div>
-                <div v-if="dungeon.et" class="flex justify-between">
-                    <span class="text-base-content/70">结束时间</span>
-                    <span>{{ new Date(dungeon.et * 1000).toLocaleString() }}</span>
+                <div
+                    v-if="dungeon.et"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">结束时间</span>
+                    <span class="shrink-0 font-mono text-[11px] tabular-nums text-primary">{{
+                        new Date(dungeon.et * 1000).toLocaleString()
+                    }}</span>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="dungeon.cid" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-            <h3 class="font-bold mb-2">关联角色</h3>
-            <div v-for="char in [getChar(dungeon.cid)!]" :key="dungeon.cid" class="space-y-2">
-                <div class="flex items-center gap-2">
-                    <img :src="LeveledChar.url(char.icon)" alt="角色头像" class="w-8 h-8 rounded-full" />
-                    <SRouterLink :to="`/char/${char.id}`" class="font-medium link link-primary">
-                        {{ $t(char.名称) }}
-                    </SRouterLink>
-                    <CopyID :id="char.id" />
+        <!-- 关联角色 -->
+        <section v-if="dungeon.cid" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="CHARACTER" title="关联角色" />
+            <div v-for="char in [getChar(dungeon.cid)!]" :key="dungeon.cid" class="mt-2 space-y-2">
+                <!-- 角色名片 -->
+                <div class="flex items-center gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                    <img :src="LeveledChar.url(char.icon)" alt="角色头像" class="size-10 shrink-0 rounded-xs object-cover object-top" />
+                    <div class="min-w-0">
+                        <SRouterLink
+                            :to="`/char/${char.id}`"
+                            class="block truncate text-sm font-semibold transition-colors duration-150 hover:text-primary"
+                        >
+                            {{ $t(char.名称) }}
+                        </SRouterLink>
+                        <CopyID :id="char.id" />
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-base-content/70">元素属性</span>
-                        <span>{{ $t(`${char.属性}属性`) }}</span>
+                <div class="grid grid-cols-2 gap-1.5 text-sm md:grid-cols-3">
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">元素属性</span>
+                        <span class="shrink-0 text-xs text-base-content/85">{{ $t(`${char.属性}属性`) }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-base-content/70">精通</span>
-                        <span>{{ char.精通?.map(item => $t(item)).join("/") }}</span>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">精通</span>
+                        <span class="truncate text-xs text-base-content/85">{{ char.精通?.map(item => $t(item)).join("/") }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-base-content/70">标签</span>
-                        <span>{{ char.标签?.map(item => $t(`tag.${item}`, $t(item))).join("/") }}</span>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">标签</span>
+                        <span class="truncate text-xs text-base-content/85">{{
+                            char.标签?.map(item => $t(`tag.${item}`, $t(item))).join("/")
+                        }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-base-content/70">版本</span>
-                        <span>{{ char.版本 }}</span>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">版本</span>
+                        <span class="shrink-0 font-mono text-[11px] tabular-nums text-primary">{{ char.版本 }}</span>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="dungeon.mb" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-            <h3 class="font-bold mb-2">怪物属性克制</h3>
-            <div class="grid grid-cols-3 gap-2 text-sm">
-                <div v-for="key in ABYSS_DUNGEON_ELEMENT_KEYS" :key="key" class="flex justify-between">
-                    <span class="text-base-content/70">{{ $t(`${key}属性`) }}</span>
-                    <span>{{ formatAbyssDungeonMbValue(dungeon, key) }}</span>
+        <!-- 怪物属性克制 -->
+        <section v-if="dungeon.mb" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="COUNTER" title="怪物属性克制" />
+            <div class="mt-2 grid grid-cols-3 gap-1.5 text-sm">
+                <div
+                    v-for="key in ABYSS_DUNGEON_ELEMENT_KEYS"
+                    :key="key"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ $t(`${key}属性`) }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        formatAbyssDungeonMbValue(dungeon, key)
+                    }}</span>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="dungeon.buff?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-            <h3 class="font-bold mb-2">BUFF列表 ({{ dungeon.buff.length }}个)</h3>
-            <div class="space-y-2">
+        <!-- BUFF列表 -->
+        <section v-if="dungeon.buff?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="BUFF" title="BUFF列表">
+                <template #trailing>
+                    <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.buff.length }} 个</span>
+                </template>
+            </SectionHeader>
+            <div class="mt-2 space-y-2">
                 <div
                     v-for="buff in dungeon.buff"
                     :key="buff.id"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40 hover:bg-base-content/5"
                 >
-                    <div class="flex items-start gap-2">
-                        <img :src="`/imgs/webp/T_Abyss_Buff_${buff.icon}.webp`" class="h-10 inline-block rounded" />
-                        <div class="flex-1">
-                            <div class="font-medium text-sm">
+                    <div class="flex items-start gap-2.5">
+                        <img :src="`/imgs/webp/T_Abyss_Buff_${buff.icon}.webp`" class="h-10 shrink-0 rounded-xs" alt="" />
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1 text-sm font-medium">
                                 {{ buff.n }}
                                 <CopyID :id="buff.id" />
                             </div>
-                            <div class="text-xs text-base-content/70 mt-1">
+                            <div class="mt-1 text-xs leading-relaxed text-base-content/70">
                                 {{ buff.d }}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="dungeon.art || dungeon.arl?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-            <h3 class="font-bold mb-2">奖励信息</h3>
-            <div v-if="dungeon.art && !dungeon.arl?.length" class="space-y-2 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-base-content/70">奖励标题</span>
-                    <span>{{ dungeon.art }}</span>
+        <!-- 奖励信息 -->
+        <section
+            v-if="dungeon.art || dungeon.arl?.length"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="REWARDS" title="奖励信息" />
+            <div v-if="dungeon.art && !dungeon.arl?.length" class="mt-2 space-y-2 text-sm">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">奖励标题</span>
+                    <span class="shrink-0 text-xs text-base-content/85">{{ dungeon.art }}</span>
                 </div>
             </div>
-            <div v-if="dungeon.arl?.length" class="space-y-3">
-                <div v-if="dungeon.art" class="text-sm font-medium mb-2">
+            <div v-if="dungeon.arl?.length" class="mt-2 space-y-3">
+                <div v-if="dungeon.art" class="text-[11px] tracking-wide text-base-content/55">
                     {{ dungeon.art }}
                 </div>
                 <div
                     v-for="item in dungeon.arl"
                     :key="item.lv"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40 hover:bg-base-content/5"
                 >
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium">
-                            <img src="/imgs/res/T_Abyss_Star02.webp" alt="图标" class="w-6 h-6 inline-block align-middle mr-1" />
+                    <div class="mb-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                        <span class="flex items-center gap-1.5 text-sm font-medium">
+                            <img src="/imgs/res/T_Abyss_Star02.webp" alt="图标" class="h-5 w-5 inline-block align-middle" />
                             {{ item.lv }}</span
                         >
                         <div class="flex gap-1">
-                            <span v-if="item.w" class="text-xs px-1.5 py-0.5 rounded bg-secondary text-secondary-content">密函奖励</span>
                             <span
-                                class="text-xs px-1.5 py-0.5 rounded"
+                                v-if="item.w"
+                                class="rounded-xs bg-secondary px-1.5 py-0.5 text-[10px] leading-4 tracking-wide text-secondary-content"
+                                >密函奖励</span
+                            >
+                            <span
+                                class="rounded-xs px-1.5 py-0.5 text-[10px] leading-4 tracking-wide"
                                 :class="
                                     getDropModeText(getRewardDetails(item.r)?.m || '') === '独立'
                                         ? 'bg-success text-success-content'
@@ -285,40 +344,58 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     <RewardItem v-if="item.a" :reward="getRewardDetails(item.a)" :type-filter="['Drop']" />
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div v-if="isImmortalPlay && dungeon.arl?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-            <h3 class="font-bold mb-2">累计奖励</h3>
-            <div class="mb-3 flex items-center gap-2 text-sm">
+        <!-- 累计奖励 -->
+        <section
+            v-if="isImmortalPlay && dungeon.arl?.length"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="CUMULATIVE" title="累计奖励" />
+            <div class="mt-2 mb-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm">
                 <button
                     type="button"
-                    class="rounded px-3 py-1 transition-colors duration-200"
-                    :class="currentActMode === '12' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        currentActMode === '12'
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
                     @click="setActMode('12')"
                 >
                     12
                 </button>
                 <button
                     type="button"
-                    class="rounded px-3 py-1 transition-colors duration-200"
-                    :class="currentActMode === '36' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        currentActMode === '36'
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
                     @click="setActMode('36')"
                 >
                     36
                 </button>
                 <button
                     type="button"
-                    class="rounded px-3 py-1 transition-colors duration-200"
-                    :class="currentActMode === '50' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        currentActMode === '50'
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
                     @click="setActMode('50')"
                 >
                     50
                 </button>
                 <button
                     type="button"
-                    class="rounded px-3 py-1 transition-colors duration-200"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                     :class="
-                        currentActMode === 'custom' ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content hover:bg-base-300'
+                        currentActMode === 'custom'
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                     "
                     @click="setActMode('custom')"
                 >
@@ -330,9 +407,9 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     type="number"
                     min="1"
                     step="1"
-                    class="w-20 rounded bg-base-200 px-2 py-1 text-center outline-none ring-0"
+                    class="w-20 rounded-none border-b border-base-content/25 bg-transparent px-1 py-1 text-center font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 focus:border-primary"
                 />
-                <span class="flex items-center gap-1 text-base-content/70">
+                <span class="flex items-center gap-1 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
                     <img src="/imgs/res/T_Abyss_Star02.webp" alt="图标" class="h-5 w-5" />
                     {{ currentStarCount }}
                 </span>
@@ -346,31 +423,36 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                 />
             </div>
             <div v-else class="text-sm text-base-content/70">当前幕数暂无累计奖励</div>
-        </div>
+        </section>
 
         <!-- 怪物列表 -->
-        <div v-if="dungeon.m?.length" class="card bg-base-100 border border-base-200 rounded-lg p-3">
-            <h3 class="font-bold mb-2">怪物列表 ({{ dungeon.m.length }}种)</h3>
+        <section v-if="dungeon.m?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="MONSTERS" title="怪物列表">
+                <template #trailing>
+                    <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.m.length }} 种</span>
+                </template>
+            </SectionHeader>
             <!-- 等级控制 -->
-            <div class="flex items-center gap-4 mb-3">
+            <div class="mt-2 flex flex-wrap items-center gap-4 mb-3">
                 <template v-if="isImmortalPlay">
-                    <span class="min-w-12">幕数</span>
+                    <span class="text-xs text-base-content/60">幕数</span>
                     <input
                         v-model.number="currentActCount"
                         type="number"
                         min="1"
                         step="1"
-                        class="w-20 rounded bg-base-200 px-2 py-1 text-center outline-none"
+                        class="w-20 rounded-none border-b border-base-content/25 bg-transparent px-1 py-1 text-center font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 focus:border-primary"
                     />
-                    Lv.
-                    <span class="text-md">
+                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        Lv.
                         {{ monsterDisplayLevel }}
-
-                        <span class="text-xs text-base-content/80">/ {{ AbyssMonsterLevelLimit }}</span>
+                        <span class="font-mono text-[11px] font-normal text-base-content/55">/ {{ AbyssMonsterLevelLimit }}</span>
                     </span>
                 </template>
                 <template v-else>
-                    <span class="text-sm min-w-12">Lv. {{ currentMonsterLevel }}</span>
+                    <span class="min-w-12 shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                        >Lv. {{ currentMonsterLevel }}</span
+                    >
                     <input
                         v-model.number="currentMonsterLevel"
                         type="range"
@@ -381,13 +463,13 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     />
                 </template>
             </div>
-            <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
                 <DBMonsterCompactCard
                     v-for="monsterId in dungeon.m"
                     :key="monsterId"
                     :monster="LeveledMonsterHelper.fromId(monsterId, monsterDisplayLevel, false)"
                 />
             </div>
-        </div>
+        </section>
     </div>
 </template>

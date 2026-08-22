@@ -164,63 +164,89 @@ const bookTabItems = computed(() =>
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <div class="flex items-start gap-3">
-            <img
-                :src="getBookIcon(book.icon)"
-                :alt="book.name"
-                class="size-14 rounded-lg bg-base-200 object-cover shrink-0"
-                loading="lazy"
-            />
-            <div class="min-w-0">
-                <SRouterLink :to="`/db/book/${book.id}`" class="text-lg font-bold link link-primary wrap-break-word">
-                    {{ $t(book.name) }}
-                </SRouterLink>
-                <div class="text-sm text-base-content/70 mt-1">
-                    <CopyID :id="book.id" /> {{ $t("book-detail.countSuffix", { count: book.res.length }) }}
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 读物档案头：纸面 + primary 强调线 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <div class="flex items-center gap-3.5">
+                <div class="size-14 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3">
+                    <img :src="getBookIcon(book.icon)" :alt="book.name" class="h-full w-full object-cover" loading="lazy" />
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-primary">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Book File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/book/${book.id}`"
+                            class="wrap-break-word font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
+                            {{ $t(book.name) }}
+                        </SRouterLink>
+                        <CopyID :id="book.id" />
+                    </div>
+                    <p class="mt-2 text-xs text-base-content/55">{{ $t("book-detail.countSuffix", { count: book.res.length }) }}</p>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <div class="card bg-base-100 border border-base-200 rounded p-3">
-            <div class="text-xs text-base-content/70 mb-1">{{ $t("book-detail.summary") }}</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap wrap-break-word">{{ book.desc }}</div>
-        </div>
+        <!-- 简介 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="SUMMARY" :title="$t('book-detail.summary')" />
+            <div class="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word text-base-content/85">{{ book.desc }}</div>
+        </section>
 
-        <div class="card bg-base-100 border border-base-200 rounded p-3 space-y-3">
+        <!-- 条目阅读 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ENTRIES" />
             <AniTabs v-model="selectedResourceId" :tabs="bookTabItems" />
 
-            <div v-if="selectedResource" class="space-y-3">
+            <div v-if="selectedResource" class="mt-2 space-y-3">
                 <div class="flex items-start justify-between gap-2">
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <div class="text-base font-semibold wrap-break-word">{{ $t(getResourceDisplayName(selectedResource)) }}</div>
                         <CopyID :id="selectedResource.id" />
                     </div>
-                    <span class="text-xs px-2 py-0.5 rounded bg-primary text-primary-content shrink-0">
+                    <span
+                        class="shrink-0 rounded-xs border border-base-content/20 px-1.5 py-0.5 text-[11px] tracking-wide text-base-content/60"
+                    >
                         {{ getResourceTypeLabel(selectedResource.type) }}
                     </span>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mt-2">
-                    <div v-if="selectedResourceLocation && selectedResource.srId" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">{{ $t("book-detail.subRegion") }}</span>
-                        <div class="text-right">
-                            <SubRegionLink :sub-region-id="selectedResource.srId" />
-                        </div>
+                <!-- 位置属性格 -->
+                <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+                    <div
+                        v-if="selectedResourceLocation && selectedResource.srId"
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="shrink-0 text-xs text-base-content/60">{{ $t("book-detail.subRegion") }}</span>
+                        <SubRegionLink :sub-region-id="selectedResource.srId" />
                     </div>
 
-                    <div v-if="selectedResourceLocation" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">{{ $t("book-detail.region") }}</span>
-                        <span class="text-right wrap-break-word">{{ selectedResourceLocation.regionName }}</span>
+                    <div
+                        v-if="selectedResourceLocation"
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="shrink-0 text-xs text-base-content/60">{{ $t("book-detail.region") }}</span>
+                        <span class="text-right text-xs wrap-break-word">{{ selectedResourceLocation.regionName }}</span>
                     </div>
 
-                    <div v-if="selectedResource.mId" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">{{ $t("book-detail.mechanismId") }}</span>
-                        <span>{{ selectedResource.mId }}</span>
+                    <div
+                        v-if="selectedResource.mId"
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t("book-detail.mechanismId") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            selectedResource.mId
+                        }}</span>
                     </div>
 
-                    <div v-if="selectedResource.srId && selectedResource.pos" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">{{ $t("book-detail.point") }}</span>
+                    <div
+                        v-if="selectedResource.srId && selectedResource.pos"
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="shrink-0 text-xs text-base-content/60">{{ $t("book-detail.point") }}</span>
                         <MapPosLink
                             :sub-region-id="selectedResource.srId"
                             :point="selectedResource.pos"
@@ -229,8 +255,11 @@ const bookTabItems = computed(() =>
                         />
                     </div>
 
-                    <div v-if="selectedResource.srId && selectedResource.treasurePos" class="flex items-start justify-between gap-2">
-                        <span class="text-base-content/70">{{ $t("book-detail.treasurePoint") }}</span>
+                    <div
+                        v-if="selectedResource.srId && selectedResource.treasurePos"
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="shrink-0 text-xs text-base-content/60">{{ $t("book-detail.treasurePoint") }}</span>
                         <MapPosLink
                             :sub-region-id="selectedResource.srId"
                             :point="selectedResource.treasurePos"
@@ -240,7 +269,10 @@ const bookTabItems = computed(() =>
                     </div>
                 </div>
 
-                <div class="mt-3 rounded-lg bg-base-200 p-3 text-sm leading-7 whitespace-pre-wrap wrap-break-word">
+                <!-- 正文 -->
+                <div
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-7 whitespace-pre-wrap wrap-break-word text-base-content/85"
+                >
                     <template
                         v-for="(segment, index) in selectedResourceTextSegments"
                         :key="`${selectedResource.id}-${index}-${segment.tone}`"
@@ -256,6 +288,6 @@ const bookTabItems = computed(() =>
                     </template>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 </template>

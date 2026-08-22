@@ -1,7 +1,7 @@
 use std::{
     collections::BTreeMap,
     fs::{self, File},
-    io::BufReader,
+    io::{BufReader, BufWriter},
     path::{Component, Path, PathBuf},
     process::Command,
     sync::{
@@ -143,6 +143,108 @@ pub fn export_pak_files(
     }
 
     Ok(results)
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PakPackResult {
+    pub output_path: String,
+    pub packed_files: usize,
+}
+
+/// 统计目录下待打包的文件总数。
+pub fn count_packable_files(source_dir: &Path) -> Result<usize, String> {
+    if !source_dir.is_dir() {
+        return Err(format!("不是目录: {}", source_dir.display()));
+    }
+    let mut files = Vec::new();
+    collect_pack_files(source_dir, source_dir, &mut files)?;
+    Ok(files.len())
+}
+
+/// 将目录打包为 pak 文件（递归收集目录下所有文件，按相对路径写入 pak）。
+/// 索引版本固定为 V11（UE5 主流版本），挂载点为 "."（条目即相对路径本身）。
+pub fn pack_directory(
+    source_dir: &Path,
+    aes_key: Option<&str>,
+    output_path: &Path,
+    mut on_progress: impl FnMut(usize),
+) -> Result<PakPackResult, String> {
+    if !source_dir.exists() {
+        return Err(format!("源目录不存在: {}", source_dir.display()));
+    }
+    if !source_dir.is_dir() {
+        return Err(format!("不是目录: {}", source_dir.display()));
+    }
+
+    let mut files: Vec<(String, PathBuf)> = Vec::new();
+    collect_pack_files(source_dir, source_dir, &mut files)?;
+    files.sort_by(|left, right| left.0.cmp(&right.0));
+
+    if files.is_empty() {
+        return Err("源目录中没有可打包的文件".to_string());
+    }
+
+    let key = parse_aes_key(aes_key)?;
+    let total = files.len();
+
+    if let Some(parent) = output_path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|error| format!("创建输出目录失败: {}: {}", parent.display(), error))?;
+    }
+
+    // 提前创建输出文件：目标被占用时第一时间报错，避免打包完成后才发现无法写入
+    let out_file =
+        File::create(output_path).map_err(|error| format!("创建输出文件失败: {}: {}", output_path.display(), error))?;
+
+    let mut builder = repak::PakBuilder::new();
+    if let Some(key) = key {
+        builder = builder.key(key);
+    }
+    let mut writer =
+        builder.writer(BufWriter::new(out_file), repak::Version::V11, String::from("."), None);
+
+    for (index, (relative_name, absolute_path)) in files.iter().enumerate() {
+        let data = fs::read(absolute_path)
+            .map_err(|error| format!("读取文件失败: {}: {}", absolute_path.display(), error))?;
+        writer
+            .write_file(relative_name.as_str(), true, data)
+            .map_err(|error| format!("写入 pak 条目失败: {}: {}", relative_name, error))?;
+
+        on_progress(index + 1);
+    }
+
+    writer
+        .write_index()
+        .map_err(|error| format!("写入 pak 索引失败: {}", error))?;
+
+    Ok(PakPackResult {
+        output_path: output_path.to_string_lossy().to_string(),
+        packed_files: total,
+    })
+}
+
+/// 递归收集目录下所有文件，输出（相对路径, 绝对路径）对；相对路径使用 `/` 分隔。
+fn collect_pack_files(dir: &Path, root: &Path, output: &mut Vec<(String, PathBuf)>) -> Result<(), String> {
+    let entries =
+        fs::read_dir(dir).map_err(|error| format!("读取目录失败: {}: {}", dir.display(), error))?;
+    for entry in entries {
+        let entry =
+            entry.map_err(|error| format!("读取目录项失败: {}: {}", dir.display(), error))?;
+        let path = entry.path();
+        if path.is_dir() {
+            collect_pack_files(&path, root, output)?;
+            continue;
+        }
+        if path.is_file() {
+            let relative = path
+                .strip_prefix(root)
+                .map(normalize_display_path)
+                .unwrap_or_else(|_| normalize_display_path(&path));
+            output.push((relative, path));
+        }
+    }
+    Ok(())
 }
 
 /// 使用 unluac 将 Lua 字节码反编译到指定目录。

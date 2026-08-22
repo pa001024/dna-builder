@@ -73,11 +73,11 @@ const getAnimationDelay = (index: number) => {
 </script>
 
 <template>
-    <div class="flex h-full flex-col overflow-hidden bg-base-300">
+    <div class="flex h-full flex-col overflow-hidden">
         <ScrollArea class="flex-1">
             <div class="mx-auto flex min-h-full w-full max-w-7xl flex-col px-4 md:px-6 lg:px-8">
                 <!-- 检索带：下划线搜索 + 计数状态 + 分类方章 -->
-                <section class="cl-rise border-b border-base-content/15 py-7" style="animation-delay: 0.06s">
+                <section class="animate-ef-rise border-b border-base-content/15 py-7" style="animation-delay: 0.06s">
                     <div class="flex flex-col gap-5">
                         <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-10">
                             <div class="relative w-full flex-1">
@@ -86,10 +86,10 @@ const getAnimationDelay = (index: number) => {
                                     v-model="searchQuery"
                                     type="text"
                                     :placeholder="$t('char-list.searchPlaceholder')"
-                                    class="cl-search-input w-full py-2 pl-8 pr-4 text-sm"
+                                    class="w-full rounded-none border-0 border-b border-base-content/25 bg-transparent py-2 pl-8 pr-4 text-sm shadow-none outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                                 />
                             </div>
-                            <p class="shrink-0 font-mono text-xs tracking-wide text-base-content/45">
+                            <p class="shrink-0 text-xs tracking-wide text-base-content/45">
                                 {{ $t(`tag.${activeTab}`, $t(activeTab)) }} · {{ filteredChars.length }}
                                 {{ $t("char-list.totalSuffix") }}
                             </p>
@@ -102,8 +102,12 @@ const getAnimationDelay = (index: number) => {
                                     v-for="tab in tabs"
                                     :key="tab"
                                     type="button"
-                                    class="cl-tab"
-                                    :class="{ 'cl-tab-active': activeTab === tab }"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap border px-3.5 py-1.5 text-xs transition-colors duration-200 active:scale-[0.97]"
+                                    :class="
+                                        activeTab === tab
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
                                     @click="activeTab = tab"
                                 >
                                     {{ $t(`tag.${tab}`, $t(tab)) }}
@@ -117,7 +121,7 @@ const getAnimationDelay = (index: number) => {
                 <main class="flex-1 py-8 md:py-10">
                     <div
                         v-if="filteredChars.length === 0"
-                        class="cl-rise flex flex-col items-center justify-center py-24 text-base-content/50"
+                        class="flex flex-col items-center justify-center py-24 text-base-content/50 animate-ef-rise motion-reduce:animate-none"
                         style="animation-delay: 0.12s"
                     >
                         <Icon icon="ri:emotion-sad-line" class="mb-5 h-14 w-14 opacity-40" />
@@ -131,7 +135,7 @@ const getAnimationDelay = (index: number) => {
                         <div
                             v-for="(char, index) in filteredChars"
                             :key="`${char.id}-${activeTab}`"
-                            class="cl-card cl-rise group"
+                            class="animate-ef-rise group relative flex cursor-pointer flex-col overflow-hidden border border-base-content/15 bg-base-100/50 backdrop-blur-sm [transition:transform_0.3s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.3s_ease,border-color_0.2s_ease] hover:-translate-y-1 hover:[box-shadow:0_16px_40px_-16px_color-mix(in_srgb,var(--color-base-content)_22%,transparent)] active:scale-[0.985]"
                             :class="elementHoverBorders[char.属性]"
                             :style="{ animationDelay: `${getAnimationDelay(index)}ms` }"
                             @click="$router.push(`/char/${char.id}`)"
@@ -154,8 +158,17 @@ const getAnimationDelay = (index: number) => {
                                 </ImageFallback>
 
                                 <!-- 幽灵序号 + 元素徽记 -->
-                                <span class="cl-card-index">{{ String(index + 1).padStart(2, "0") }}</span>
-                                <span v-if="elementNames[char.属性]" class="cl-badge">{{ elementNames[char.属性] }}</span>
+                                <span
+                                    class="absolute left-2 top-2 z-10 bg-base-100/55 px-[0.35rem] py-[0.15rem] text-2xl font-black leading-none tracking-[-0.02em] tabular-nums text-base-content/60 backdrop-blur-[2px] transition-colors duration-200 group-hover:text-primary/75"
+                                >
+                                    {{ String(index + 1).padStart(2, "0") }}
+                                </span>
+                                <span
+                                    v-if="elementNames[char.属性]"
+                                    class="absolute right-2 top-2 z-10 bg-base-100/55 px-[0.45rem] py-[0.2rem] font-mono text-[9px] uppercase tracking-[0.25em] text-base-content/55 backdrop-blur-[2px] transition-colors duration-200 group-hover:text-primary"
+                                >
+                                    {{ elementNames[char.属性] }}
+                                </span>
 
                                 <!-- 悬停遮罩 -->
                                 <div class="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/20" />
@@ -171,13 +184,13 @@ const getAnimationDelay = (index: number) => {
                                     <span class="truncate">{{ $t(char.名称) }}</span>
                                 </h3>
 
-                                <!-- 阵营 + 版本：等宽行 -->
+                                <!-- 阵营 + 版本：元信息行 -->
                                 <p
                                     v-if="char.阵营 || char.版本"
-                                    class="flex items-center justify-between gap-2 font-mono text-[0.625rem] uppercase tracking-[0.12em] text-base-content/40"
+                                    class="flex items-center justify-between gap-2 text-[0.625rem] tracking-wide text-base-content/40"
                                 >
                                     <span v-if="char.阵营" class="truncate">{{ $t(char.阵营) }}</span>
-                                    <span v-if="char.版本" class="shrink-0">v{{ char.版本 }}</span>
+                                    <span v-if="char.版本" class="shrink-0 tabular-nums">v{{ char.版本 }}</span>
                                 </p>
 
                                 <!-- 标签 -->
@@ -185,7 +198,7 @@ const getAnimationDelay = (index: number) => {
                                     <span
                                         v-for="tag in (char.标签 || []).slice(0, 2)"
                                         :key="tag"
-                                        class="cl-tag opacity-70 transition-opacity duration-200 group-hover:opacity-100"
+                                        class="border border-base-content/15 px-[0.4rem] py-[0.1rem] text-[10px] tracking-[0.08em] text-base-content/55 opacity-70 transition-opacity duration-200 group-hover:opacity-100"
                                     >
                                         {{ $t(`tag.${tag}`, $t(tag)) }}
                                     </span>
@@ -219,18 +232,25 @@ const getAnimationDelay = (index: number) => {
 
                 <!-- 统计页脚：幽灵大数字 + 等宽小字 -->
                 <footer
-                    class="cl-rise flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-t border-base-content/15 py-8"
+                    class="animate-ef-rise flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-t border-base-content/15 py-8"
                     style="animation-delay: 0.3s"
                 >
                     <div class="flex items-baseline gap-3">
-                        <span class="cl-numeral">{{ filteredChars.length }}</span>
-                        <span class="font-mono text-xs uppercase tracking-[0.3em] text-base-content/45">{{
-                            $t("char-list.totalSuffix")
-                        }}</span>
+                        <span
+                            class="text-[clamp(2.25rem,4vw,3rem)] font-black leading-[0.95] tracking-[-0.03em] tabular-nums text-base-content/18"
+                        >
+                            {{ filteredChars.length }}
+                        </span>
+                        <span class="text-xs text-base-content/45">{{ $t("char-list.totalSuffix") }}</span>
                     </div>
                     <div class="flex flex-col items-end gap-1.5">
-                        <span v-if="activeTab !== '全部'" class="cl-tab-mini">{{ $t(activeTab) }}</span>
-                        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">
+                        <span
+                            v-if="activeTab !== '全部'"
+                            class="border border-primary/60 px-2 py-[0.15rem] text-[10px] tracking-[0.2em] text-primary"
+                        >
+                            {{ $t(activeTab) }}
+                        </span>
+                        <p class="text-[10px] tracking-wide text-base-content/40">
                             {{ $t("char-list.unreleasedHint") }}
                         </p>
                     </div>
@@ -239,169 +259,3 @@ const getAnimationDelay = (index: number) => {
         </ScrollArea>
     </div>
 </template>
-
-<style scoped>
-/* 页面级一次性入场动画：轻量上浮淡入，仅播放一次，不做循环装饰 */
-.cl-rise {
-    animation: cl-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes cl-rise {
-    from {
-        opacity: 0;
-        transform: translateY(14px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* 幽灵大数字：低对比粗体，用作统计主锚点 */
-.cl-numeral {
-    font-size: clamp(2.25rem, 4vw, 3rem);
-    line-height: 0.95;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--color-base-content) 18%, transparent);
-}
-
-/* 卡片幽灵序号：头像左上角低对比粗体数字，悬停时转主题色 */
-.cl-card-index {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    z-index: 10;
-    padding: 0.15rem 0.35rem;
-    font-size: 1.5rem;
-    line-height: 1;
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--color-base-content) 60%, transparent);
-    background: color-mix(in srgb, var(--color-base-100) 55%, transparent);
-    backdrop-filter: blur(2px);
-    transition: color 0.2s ease;
-}
-
-.cl-card:hover .cl-card-index {
-    color: color-mix(in srgb, var(--color-primary) 75%, transparent);
-}
-
-/* 等宽徽记：头像右上角小号字距大写 */
-.cl-badge {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    z-index: 10;
-    padding: 0.2rem 0.45rem;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    font-size: 0.5625rem;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-base-content) 55%, transparent);
-    background: color-mix(in srgb, var(--color-base-100) 55%, transparent);
-    backdrop-filter: blur(2px);
-    transition: color 0.2s ease;
-}
-
-.cl-card:hover .cl-badge {
-    color: var(--color-primary);
-}
-
-/* 下划线式搜索输入：聚焦时以主题色强调 */
-.cl-search-input {
-    border: 0 !important;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-base-content) 25%, transparent) !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    outline: none !important;
-    transition: border-color 0.2s ease;
-}
-
-.cl-search-input:focus {
-    border-bottom-color: var(--color-primary) !important;
-}
-
-/* 分类方章：直角细边框按钮，选中时主题色填充 */
-.cl-tab {
-    flex-shrink: 0;
-    cursor: pointer;
-    border: 1px solid color-mix(in srgb, var(--color-base-content) 20%, transparent);
-    padding: 0.375rem 0.875rem;
-    font-size: 0.75rem;
-    color: color-mix(in srgb, var(--color-base-content) 60%, transparent);
-    transition:
-        color 0.2s ease,
-        border-color 0.2s ease,
-        background-color 0.2s ease;
-}
-
-.cl-tab:hover {
-    border-color: color-mix(in srgb, var(--color-primary) 60%, transparent);
-    color: var(--color-primary);
-}
-
-.cl-tab:active {
-    transform: scale(0.97);
-}
-
-.cl-tab-active,
-.cl-tab-active:hover {
-    border-color: var(--color-primary);
-    background: var(--color-primary);
-    color: var(--color-primary-content);
-    font-weight: 600;
-}
-
-/* 角色卡片：直角平面卡，悬停时元素色边框 + 上浮 + 克制阴影 */
-.cl-card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    cursor: pointer;
-    border: 1px solid color-mix(in srgb, var(--color-base-content) 15%, transparent);
-    background: var(--color-base-100);
-    transition:
-        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow 0.3s ease,
-        border-color 0.2s ease;
-}
-
-.cl-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px -16px color-mix(in srgb, var(--color-base-content) 22%, transparent);
-}
-
-.cl-card:active {
-    transform: scale(0.985);
-}
-
-/* 信息标签：直角细边小字 */
-.cl-tag {
-    padding: 0.1rem 0.4rem;
-    font-size: 0.625rem;
-    letter-spacing: 0.08em;
-    border: 1px solid color-mix(in srgb, var(--color-base-content) 16%, transparent);
-    color: color-mix(in srgb, var(--color-base-content) 55%, transparent);
-}
-
-/* 页脚当前分类方章 */
-.cl-tab-mini {
-    border: 1px solid color-mix(in srgb, var(--color-primary) 60%, transparent);
-    padding: 0.15rem 0.5rem;
-    font-size: 0.625rem;
-    letter-spacing: 0.2em;
-    color: var(--color-primary);
-}
-
-/* 减少动态偏好：关闭入场动画 */
-@media (prefers-reduced-motion: reduce) {
-    .cl-rise {
-        animation: none;
-    }
-}
-</style>

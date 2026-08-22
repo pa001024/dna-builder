@@ -89,11 +89,12 @@ const detailText = computed<string>(() => {
 </script>
 
 <template>
-    <div class="rounded-md bg-base-200 p-3">
+    <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-3">
         <div class="flex items-center gap-1.5">
-            <span v-if="name" class="rounded px-1.5 py-0.5 bg-base-300/70 text-xs">{{ $t(name) }}</span>
-            <span class="text-xs text-base-content/40">{{ effect.name }}</span>
-            <span class="text-xs text-base-content/40">#{{ effect.id }}</span>
+            <span v-if="name" class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[11px] text-base-content/60">
+                {{ $t(name) }}
+            </span>
+            <span class="text-xs text-base-content/55">{{ effect.name }}</span>
             <div class="flex-1"></div>
             <CopyID :id="effect.id" />
         </div>

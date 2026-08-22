@@ -256,11 +256,7 @@ function collectExpandablePaths(nodes: FileTreeNode[], output: Set<string>) {
  * @param expanded 当前展开路径
  * @returns 可见行
  */
-function buildVisibleRows(
-    nodes: FileTreeNode[],
-    expanded: Set<string>,
-    selectionByPath: Map<string, SelectionState>
-): VisibleTreeRow[] {
+function buildVisibleRows(nodes: FileTreeNode[], expanded: Set<string>, selectionByPath: Map<string, SelectionState>): VisibleTreeRow[] {
     const rows: VisibleTreeRow[] = []
     const stack: Array<{ node: FileTreeNode; depth: number }> = []
 
@@ -424,18 +420,18 @@ function getRowStyle(depth: number) {
             <div :style="{ transform: `translateY(${topPadding}px)` }" class="absolute left-0 top-0 w-full">
                 <div v-for="row in visibleRows" :key="row.node.path" class="h-8">
                     <div
-                        class="group flex h-8 cursor-pointer items-center gap-2 rounded px-3 text-sm transition hover:bg-base-200"
-                        :class="{ 'bg-base-200': row.selection.allSelected }"
+                        class="group flex h-8 cursor-pointer items-center gap-2 rounded-xs px-3 text-sm transition-colors duration-150 hover:bg-base-content/5"
+                        :class="{ 'bg-base-100/3': row.selection.allSelected }"
                         :style="getRowStyle(row.depth)"
                         @click="row.node.isFile ? toggleNode(row.node) : toggleExpanded(row.node)"
                     >
                         <button
                             v-if="!row.node.isFile"
                             type="button"
-                            class="flex h-4 w-4 shrink-0 items-center justify-center"
+                            class="flex h-4 w-4 shrink-0 cursor-pointer items-center justify-center rounded-xs text-xs leading-none text-base-content/55 transition-colors duration-150 hover:bg-base-content/10 hover:text-primary"
                             @click.stop="toggleExpanded(row.node)"
                         >
-                            <span class="text-xs leading-none">{{ isExpanded(row.node) ? "−" : "+" }}</span>
+                            <span class="leading-none">{{ isExpanded(row.node) ? "−" : "+" }}</span>
                         </button>
                         <span v-else class="w-4 shrink-0" />
                         <input
@@ -443,9 +439,11 @@ function getRowStyle(depth: number) {
                             class="checkbox checkbox-sm"
                             :checked="row.selection.allSelected"
                             @click.stop
-                            :ref="el => {
-                                if (el) (el as HTMLInputElement).indeterminate = row.selection.indeterminate
-                            }"
+                            :ref="
+                                el => {
+                                    if (el) (el as HTMLInputElement).indeterminate = row.selection.indeterminate
+                                }
+                            "
                             @change="toggleNode(row.node)"
                         />
                         <span class="min-w-0 flex-1 truncate" :class="{ 'font-medium': !row.node.isFile }" :title="row.node.path">
@@ -456,6 +454,6 @@ function getRowStyle(depth: number) {
             </div>
             <div :style="{ height: `${bottomPadding}px` }" />
         </div>
-        <div v-else class="px-2 py-3 text-sm opacity-70">无文件</div>
+        <div v-else class="px-2 py-3 text-sm text-base-content/45">无文件</div>
     </ScrollArea>
 </template>

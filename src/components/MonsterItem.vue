@@ -79,60 +79,90 @@ const effectiveHealth = computed(() => {
 </script>
 
 <template>
-    <div
-        class="group rounded-lg border border-base-300 bg-base-200/70 p-2.5 transition-all duration-200 hover:border-primary/40 hover:bg-base-200"
-    >
+    <div class="group rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-all duration-200 hover:border-primary/40">
         <div class="flex items-center gap-2.5">
-            <img :src="monsterIcon" :alt="displayMonster.n" class="size-11 shrink-0 rounded-lg object-cover ring-1 ring-base-300" />
+            <img :src="monsterIcon" :alt="displayMonster.n" class="size-11 shrink-0 rounded-xs object-cover" />
 
             <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-1.5 min-w-0">
                     <SRouterLink
                         :to="monsterLink"
-                        class="min-w-0 truncate text-sm font-semibold text-base-content hover:text-primary"
+                        class="min-w-0 truncate text-sm font-semibold text-base-content transition-colors duration-150 hover:text-primary"
                         :title="`${displayMonster.n} ${displayMonster.id}`"
                     >
                         {{ $t(displayMonster.n) }}
                     </SRouterLink>
-                    <CopyID :id="displayMonster.id" compact class="ml-auto shrink-0" />
+                    <CopyID :id="displayMonster.id" class="ml-auto shrink-0" />
                 </div>
 
                 <div class="mt-1 flex flex-wrap items-center gap-1">
-                    <span class="rounded px-1.5 py-0.5 text-[10px] font-medium text-white" :class="getMonsterType(displayMonster.t).color">
+                    <span
+                        class="rounded-xs px-1.5 py-0.5 text-[10px] font-medium text-primary-content"
+                        :class="getMonsterType(displayMonster.t).color"
+                    >
                         {{ getMonsterType(displayMonster.t).label }}
                     </span>
-                    <span class="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-medium text-primary">Lv.{{ level }}</span>
-                    <span class="rounded bg-base-300 px-1.5 py-0.5 text-[10px] text-base-content/70">{{
+                    <span
+                        class="rounded-xs border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-medium tabular-nums text-primary"
+                        >Lv.{{ level }}</span
+                    >
+                    <span class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] text-base-content/60">{{
                         $t(getFactionName(displayMonster.f))
                     }}</span>
                 </div>
             </div>
         </div>
 
-        <div class="mt-2 grid grid-cols-3 gap-1.5 text-[11px] sm:grid-cols-6">
-            <div class="rounded bg-base-300/80 px-1.5 py-1" :title="$t('攻击')">
-                <div class="text-[10px] text-base-content/60">{{ $t("攻击") }}</div>
-                <div class="font-semibold text-warning">{{ formatBigNumber(displayMonster.atk) }}</div>
+        <div class="mt-2 grid grid-cols-3 gap-1.5 sm:grid-cols-6">
+            <div
+                class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
+                :title="$t('攻击')"
+            >
+                <div class="text-[10px] text-base-content/55">{{ $t("攻击") }}</div>
+                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-warning">
+                    {{ formatBigNumber(displayMonster.atk) }}
+                </div>
             </div>
-            <div class="rounded bg-base-300/80 px-1.5 py-1" :title="$t('生命')">
-                <div class="text-[10px] text-base-content/60">{{ $t("生命") }}</div>
-                <div class="font-semibold text-error">{{ formatBigNumber(displayMonster.hp) }}</div>
+            <div
+                class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
+                :title="$t('生命')"
+            >
+                <div class="text-[10px] text-base-content/55">{{ $t("生命") }}</div>
+                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-error">{{ formatBigNumber(displayMonster.hp) }}</div>
             </div>
-            <div class="rounded bg-base-300/80 px-1.5 py-1" :title="$t('护盾')">
-                <div class="text-[10px] text-base-content/60">{{ $t("护盾") }}</div>
-                <div class="font-semibold text-info">{{ formatBigNumber(displayMonster.es || 0) }}</div>
+            <div
+                class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
+                :title="$t('护盾')"
+            >
+                <div class="text-[10px] text-base-content/55">{{ $t("护盾") }}</div>
+                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-info">
+                    {{ formatBigNumber(displayMonster.es || 0) }}
+                </div>
             </div>
-            <div class="rounded bg-base-300/80 px-1.5 py-1" :title="$t('防御')">
-                <div class="text-[10px] text-base-content/60">{{ $t("防御") }}</div>
-                <div class="font-semibold text-success">{{ formatBigNumber(displayMonster.def) }}</div>
+            <div
+                class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
+                :title="$t('防御')"
+            >
+                <div class="text-[10px] text-base-content/55">{{ $t("防御") }}</div>
+                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-success">
+                    {{ formatBigNumber(displayMonster.def) }}
+                </div>
             </div>
-            <div class="rounded bg-base-300/80 px-1.5 py-1" :title="$t('战姿')">
-                <div class="text-[10px] text-base-content/60">{{ $t("战姿") }}</div>
-                <div class="font-semibold text-secondary">{{ formatBigNumber(displayMonster.tn || 0) }}</div>
+            <div
+                class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
+                :title="$t('战姿')"
+            >
+                <div class="text-[10px] text-base-content/55">{{ $t("战姿") }}</div>
+                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-secondary">
+                    {{ formatBigNumber(displayMonster.tn || 0) }}
+                </div>
             </div>
-            <div class="rounded bg-base-300/80 px-1.5 py-1" :title="$t('有效生命')">
-                <div class="text-[10px] text-base-content/60">{{ $t("有效生命") }}</div>
-                <div class="font-semibold text-accent">{{ formatBigNumber(effectiveHealth) }}</div>
+            <div
+                class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
+                :title="$t('有效生命')"
+            >
+                <div class="text-[10px] text-base-content/55">{{ $t("有效生命") }}</div>
+                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-accent">{{ formatBigNumber(effectiveHealth) }}</div>
             </div>
         </div>
     </div>

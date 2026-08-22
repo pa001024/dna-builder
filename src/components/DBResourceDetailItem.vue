@@ -147,112 +147,170 @@ function getResourceIconUrl(icon: string): string {
 </script>
 
 <template>
-    <div class="p-3 space-y-4">
-        <div class="flex items-center">
-            <div class="size-24 shrink-0 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(resource.rarity)">
-                <ImageFallback :src="getResourceIconUrl(resource.icon)" :alt="resource.name" class="w-full h-full object-cover">
-                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="resource.name" class="w-full h-full object-cover" />
-                </ImageFallback>
-            </div>
-            <div class="space-y-2 flex-1">
-                <div class="flex items-center gap-3 p-3">
-                    <SRouterLink :to="`/db/resource/${resource.id}`" class="text-lg font-bold link link-primary">
-                        {{ $t(resource.name) }}
-                    </SRouterLink>
-                    <CopyID :id="resource.id" />
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 资源档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
+                <div
+                    class="size-20 shrink-0 overflow-hidden rounded-xs bg-linear-15 sm:size-24"
+                    :class="getRarityGradientClass(resource.rarity)"
+                >
+                    <ImageFallback :src="getResourceIconUrl(resource.icon)" :alt="resource.name" class="w-full h-full object-cover">
+                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="resource.name" class="w-full h-full object-cover" />
+                    </ImageFallback>
                 </div>
-                <div class="flex flex-wrap gap-3 text-sm opacity-70 p-3 h-12">
-                    <span v-if="sourceCounts">
-                        {{ $t("resource.source") }} <span class="text-primary">{{ sourceCounts }}</span>
-                    </span>
-                    <span v-if="resource.source?.length">
-                        {{ $t("resource.mapPoints") }} <span class="text-primary">{{ resource.source.length }}</span>
-                    </span>
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Resource File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/resource/${resource.id}`"
+                            class="truncate font-orbitron text-xl leading-none font-bold tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
+                            {{ $t(resource.name) }}
+                        </SRouterLink>
+                        <CopyID :id="resource.id" />
+                    </div>
+                    <!-- 计数行：获取途径 / 地图点位 -->
+                    <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
+                        <span v-if="sourceCounts" class="inline-flex items-center gap-1.5">
+                            {{ $t("resource.source") }}
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                sourceCounts
+                            }}</span>
+                        </span>
+                        <template v-if="resource.source?.length">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span class="inline-flex items-center gap-1.5">
+                                {{ $t("resource.mapPoints") }}
+                                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                    resource.source.length
+                                }}</span>
+                            </span>
+                        </template>
+                    </div>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <div v-if="resource.desc" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.description") }}</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap">{{ resource.desc }}</div>
-        </div>
+        <!-- 资源描述 -->
+        <section v-if="resource.desc" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('resource.description')" />
+            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/90">{{ resource.desc }}</div>
+        </section>
 
-        <div v-if="resource.desc2" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.background") }}</div>
-            <div class="text-sm leading-6 whitespace-pre-wrap">{{ resource.desc2 }}</div>
-        </div>
+        <!-- 背景故事 -->
+        <section v-if="resource.desc2" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="LORE" :title="$t('resource.background')" />
+            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/90">{{ resource.desc2 }}</div>
+        </section>
 
-        <div v-if="packReward" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.packReward") }}</div>
+        <!-- 礼包奖励 -->
+        <section v-if="packReward" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="PACK" :title="$t('resource.packReward')" />
             <RewardItem :reward="packReward" header />
-        </div>
+        </section>
 
-        <div v-if="optReward" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.selectReward") }}</div>
+        <!-- 自选奖励 -->
+        <section v-if="optReward" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="SELECT" :title="$t('resource.selectReward')" />
             <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-base-content/70">
                 <span>{{ $t("resource.optionGroup") }} {{ optReward.id }}</span>
-                <span class="px-1.5 py-0.5 rounded bg-warning text-warning-content">{{ $t("resource.selectRewardTag") }}</span>
+                <span class="rounded-xs bg-warning px-1.5 py-0.5 text-warning-content">{{ $t("resource.selectRewardTag") }}</span>
             </div>
             <RewardItem v-if="optRewardRoot" :reward="optRewardRoot" />
-        </div>
+        </section>
 
-        <div v-if="bookLink && bookTarget" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.book") }}</div>
+        <!-- 关联书籍 -->
+        <section v-if="bookLink && bookTarget" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="BOOK" :title="$t('resource.book')" />
             <div class="flex items-center gap-2">
-                <SRouterLink :to="bookLink" class="link link-primary wrap-break-word">
+                <SRouterLink :to="bookLink" class="wrap-break-word text-sm font-semibold transition-colors duration-150 hover:text-primary">
                     {{ $t(bookTarget.name) }}
                 </SRouterLink>
                 <CopyID :id="bookTarget.id" />
             </div>
-        </div>
+        </section>
 
-        <div v-if="fishLink && fishTarget" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.fish") }}</div>
+        <!-- 关联鱼类 -->
+        <section v-if="fishLink && fishTarget" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="FISHING" :title="$t('resource.fish')" />
             <div class="flex items-center gap-2">
-                <SRouterLink :to="fishLink" class="link link-primary wrap-break-word">
+                <SRouterLink :to="fishLink" class="wrap-break-word text-sm font-semibold transition-colors duration-150 hover:text-primary">
                     {{ $t(fishTarget.name) }}
                 </SRouterLink>
                 <CopyID :id="fishTarget.id" />
             </div>
-        </div>
+        </section>
 
-        <div v-if="musicTarget && musicLink" class="p-3 bg-base-200 rounded">
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.music") }}</div>
+        <!-- 关联乐谱 -->
+        <section v-if="musicTarget && musicLink" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="MUSIC" :title="$t('resource.music')" />
             <div class="flex items-center gap-3">
                 <img
                     v-if="musicAlbum"
                     :src="`/imgs/music/${musicAlbum.icon}.webp`"
                     :alt="musicAlbum.name"
-                    class="size-12 shrink-0 rounded bg-base-100 object-cover"
+                    class="size-12 shrink-0 rounded-xs bg-base-content/6 object-cover"
                 />
                 <div class="min-w-0 flex-1 space-y-1">
-                    <div class="flex items-center gap-2 min-w-0">
+                    <div class="flex min-w-0 items-center gap-2">
                         <span class="shrink-0 text-xs text-base-content/50">{{ $t("resource.musicAlbum") }}</span>
                         <SRouterLink
                             v-if="musicAlbum"
                             :to="musicAlbumLink"
-                            class="link link-primary wrap-break-word truncate"
+                            class="wrap-break-word truncate text-sm font-semibold transition-colors duration-150 hover:text-primary"
                         >
                             {{ $t(musicAlbum.name) }}
                         </SRouterLink>
                         <CopyID v-if="musicAlbum" :id="musicAlbum.id" />
                     </div>
-                    <div class="flex items-center gap-2 min-w-0">
+                    <div class="flex min-w-0 items-center gap-2">
                         <span class="shrink-0 text-xs text-base-content/50">{{ $t("resource.musicScore") }}</span>
-                        <SRouterLink :to="musicLink" class="link link-primary wrap-break-word truncate">
+                        <SRouterLink
+                            :to="musicLink"
+                            class="wrap-break-word truncate text-sm font-semibold transition-colors duration-150 hover:text-primary"
+                        >
                             {{ $t(musicTarget.name) }}
                         </SRouterLink>
                         <CopyID :id="musicTarget.id" />
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div
-            class="p-3 bg-base-200 rounded"
-            v-if="draftSources.length || dungeonSources.length || hardbossSources.length || questSources.length || shopSources.length || resource.source?.length"
+        <!-- 获取途径 -->
+        <section
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+            v-if="
+                draftSources.length ||
+                dungeonSources.length ||
+                hardbossSources.length ||
+                questSources.length ||
+                shopSources.length ||
+                resource.source?.length
+            "
         >
-            <div class="text-xs text-base-content/70 mb-2">{{ $t("resource.source") }}</div>
+            <SectionHeader no-animate compact kicker="SOURCE" :title="$t('resource.source')" />
             <div class="space-y-3">
                 <DraftSource :draft-sources="draftSources" />
                 <DungeonSource :dungeon-sources="dungeonSources" />
@@ -261,6 +319,6 @@ function getResourceIconUrl(icon: string): string {
                 <ShopSource :shop-sources="shopSources" />
                 <MapSource :resource="resource" />
             </div>
-        </div>
+        </section>
     </div>
 </template>

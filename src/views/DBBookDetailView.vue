@@ -27,9 +27,14 @@ const book = computed(() => booksData.find(item => item.id === bookId.value))
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-300">
+    <div class="h-full flex flex-col">
         <ScrollArea v-if="book" class="flex-1">
-            <DBBookDetailItem :book="book" :initial-resource-id="resourceId" />
+            <!-- 居中容器：与首页一致的纸面排版宽度 -->
+            <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
+                <div>
+                    <DBBookDetailItem :book="book" :initial-resource-id="resourceId" />
+                </div>
+            </div>
         </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">

@@ -11,6 +11,7 @@ import { useDataPackStore } from "@/store/dataPack"
 import { db } from "@/store/db"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
+import { cssQuoteFamily, customFontCssFamily } from "@/utils/font-storage"
 
 const setting = useSettingStore()
 const ui = useUIStore()
@@ -89,6 +90,37 @@ const dataPackVersions = computed(() => {
     const versions = dataPack.status?.versions || []
     return [...versions].sort((a, b) => b.version.localeCompare(a.version, "zh-CN", { numeric: true }))
 })
+
+// 数据包版本列表分页：每页最多展示的版本数
+const DATA_PACK_PAGE_SIZE = 6
+// 数据包版本列表当前页码（从 1 开始）
+const dataPackPage = ref(1)
+
+/**
+ * 数据包版本列表总页数（至少为 1）。
+ */
+const dataPackTotalPages = computed(() => Math.max(1, Math.ceil(dataPackVersions.value.length / DATA_PACK_PAGE_SIZE)))
+
+/**
+ * 收敛后的当前页码：列表刷新导致页码越界时自动回落到最后一页。
+ */
+const currentDataPackPage = computed(() => Math.min(dataPackPage.value, dataPackTotalPages.value))
+
+/**
+ * 当前页展示的数据包版本切片。
+ */
+const pagedDataPackVersions = computed(() => {
+    const start = (currentDataPackPage.value - 1) * DATA_PACK_PAGE_SIZE
+    return dataPackVersions.value.slice(start, start + DATA_PACK_PAGE_SIZE)
+})
+
+/**
+ * 切换数据包版本列表页码。
+ * @param page 目标页码（1 起）
+ */
+function gotoDataPackPage(page: number) {
+    dataPackPage.value = Math.min(Math.max(1, page), dataPackTotalPages.value)
+}
 
 const installedDataPackVersions = computed(() => {
     return new Set(dataPack.installedVersions)
@@ -174,6 +206,154 @@ watch(
 
 function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+// 自定义底图文件选择器引用
+const wallpaperFileInput = ref<HTMLInputElement | null>(null)
+
+/**
+ * 打开自定义底图的文件选择器。
+ */
+function pickWallpaper() {
+    wallpaperFileInput.value?.click()
+}
+
+/**
+ * 清除自定义底图。
+ */
+async function clearWallpaper() {
+    try {
+        await setting.clearCustomWallpaper()
+    } catch (error) {
+        console.error("清除自定义底图失败", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    }
+}
+
+/**
+ * 处理底图文件选择：压缩后写入 OPFS，失败时提示错误。
+ * @param event 文件输入变更事件
+ */
+async function onWallpaperFileChange(event: Event) {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ""
+    if (!file) {
+        return
+    }
+    if (!file.type.startsWith("image/")) {
+        ui.showErrorMessage("请选择图片文件")
+        return
+    }
+
+    try {
+        const dataUrl = await compressImageToDataUrl(file)
+        await setting.setCustomWallpaper(dataUrl)
+        ui.showSuccessMessage("自定义底图已更新")
+    } catch (error) {
+        console.error("解析自定义底图失败", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    }
+}
+
+/**
+ * 将图片文件压缩为适合本地存储的 JPEG 数据 URL。
+ * 最长边不超过 1920px，透明区域填充白色（JPEG 不支持透明）。
+ * @param file 图片文件
+ * @returns 压缩后的数据 URL
+ */
+function compressImageToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onerror = () => reject(new Error("读取图片失败"))
+        reader.onload = () => {
+            const img = new Image()
+            img.onerror = () => reject(new Error("解析图片失败"))
+            img.onload = () => {
+                // 限制最长边，控制底图体积
+                const MAX_EDGE = 1920
+                const scale = Math.min(1, MAX_EDGE / Math.max(img.width, img.height))
+                const canvas = document.createElement("canvas")
+                canvas.width = Math.max(1, Math.round(img.width * scale))
+                canvas.height = Math.max(1, Math.round(img.height * scale))
+                const ctx = canvas.getContext("2d")
+                if (!ctx) {
+                    reject(new Error("无法创建画布上下文"))
+                    return
+                }
+                ctx.fillStyle = "#ffffff"
+                ctx.fillRect(0, 0, canvas.width, canvas.height)
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                resolve(canvas.toDataURL("image/jpeg", 0.85))
+            }
+            img.src = String(reader.result)
+        }
+        reader.readAsDataURL(file)
+    })
+}
+
+// 自定义字体：Select 中表示“默认字体”的哨兵值（空字符串值在部分组件中不可用）
+const FONT_DEFAULT_VALUE = "__default__"
+// 自定义字体：系统字体列表为空/加载中时的占位条目值
+const FONT_SYSTEMS_EMPTY_VALUE = "__empty__"
+// 自定义字体文件选择器引用
+const fontFileInput = ref<HTMLInputElement | null>(null)
+// Select 双向绑定：空字符串与哨兵值互转
+const selectedFontFamily = computed({
+    get: () => setting.appFontFamily || FONT_DEFAULT_VALUE,
+    set: (value: string) => setting.setAppFontFamily(value === FONT_DEFAULT_VALUE ? "" : value),
+})
+// 当前选择是否为上传的自定义字体（决定显示“删除”还是“清除”按钮）
+const isCustomFontSelected = computed(() => setting.customFonts.some(meta => customFontCssFamily(meta) === setting.appFontFamily))
+
+/**
+ * 打开自定义字体的文件选择器。
+ */
+function pickFontFile() {
+    fontFileInput.value?.click()
+}
+
+/**
+ * 处理字体文件选择：写入 OPFS 并注册后自动启用。
+ * @param event 文件输入变更事件
+ */
+async function onFontFileChange(event: Event) {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ""
+    if (!file) {
+        return
+    }
+    if (!/\.(ttf|otf|woff2?)$/i.test(file.name)) {
+        ui.showErrorMessage("请选择 .ttf / .otf / .woff / .woff2 字体文件")
+        return
+    }
+
+    try {
+        await setting.uploadCustomFont(file)
+        ui.showSuccessMessage("自定义字体已更新")
+    } catch (error) {
+        console.error("上传自定义字体失败", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    }
+}
+
+/**
+ * 删除当前选中的已上传字体，并回退默认字体。
+ */
+async function deleteSelectedCustomFont() {
+    const meta = setting.customFonts.find(item => customFontCssFamily(item) === setting.appFontFamily)
+    if (!meta) {
+        return
+    }
+
+    try {
+        await setting.deleteCustomFont(meta.fileName)
+        ui.showSuccessMessage("字体文件已删除")
+    } catch (error) {
+        console.error("删除自定义字体失败", error)
+        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
+    }
 }
 
 function applySafeMode(enabled: boolean) {
@@ -435,122 +615,235 @@ onMounted(() => {
     if (!dataPack.status) {
         void dataPack.bootstrap()
     }
+    // 懒加载系统字体列表（桌面端读注册表；Web 端需要用户手势授权，失败时可手动刷新重试）
+    void setting.loadSystemFonts()
 })
 </script>
 
 <template>
     <div class="w-full h-full overflow-y-auto">
-        <div class="p-4 flex flex-col gap-4 max-w-xl m-auto">
+        <div class="p-4 flex flex-col gap-4 max-w-2xl m-auto">
             <article>
-                <h2 class="text-sm font-bold m-2">{{ $t("setting.appearance") }}</h2>
-                <div class="bg-base-100 p-2 rounded-lg">
-                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
-                        <span class="label-text">{{ $t("setting.theme") }}</span>
-                        <Select v-model="setting.theme" class="input input-bordered input-sm w-40">
-                            <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.lightTheme") }}</SelectLabel>
-                            <SelectGroup>
-                                <SelectItem v-for="th in lightThemes" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
-                            </SelectGroup>
-                            <SelectSeparator />
-                            <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.darkTheme") }}</SelectLabel>
-                            <SelectGroup>
-                                <SelectItem v-for="th in darkThemes" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
-                            </SelectGroup>
-                            <SelectSeparator />
-                            <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.customTheme") }}</SelectLabel>
-                            <SelectGroup>
-                                <SelectItem value="custom">{{ $t("setting.customThemeOption") }}</SelectItem>
-                            </SelectGroup>
-                        </Select>
-                    </div>
-                    <CustomThemeDesigner v-if="env.isApp && setting.theme === 'custom'" class="p-2" />
-                    <div v-if="env.isApp" class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.windowTrasnparent") }}
-                            <div class="text-xs text-base-content/50">{{ $t("setting.windowTrasnparentTip") }}</div>
-                        </span>
-                        <input v-model="setting.windowTrasnparent" type="checkbox" class="toggle toggle-secondary" />
-                    </div>
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.launchAtStartup") }}
-                            <div class="text-xs text-base-content/50">{{ $t("setting.launchAtStartupTip") }}</div>
-                        </span>
-                        <input
-                            :checked="setting.launchAtStartup"
-                            :disabled="isUpdatingLaunchAtStartup"
-                            type="checkbox"
-                            class="toggle toggle-secondary"
-                            @change="updateLaunchAtStartup(($event.target as HTMLInputElement).checked)"
-                        />
-                    </div>
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">{{ $t("setting.winMaterial") }}</span>
-                        <Select
-                            v-model="setting.winMaterial"
-                            class="input input-bordered input-sm w-40"
-                            :placeholder="$t('setting.winMaterial')"
+                <SectionHeader no-animate compact kicker="APPEARANCE" :title="$t('setting.appearance')" />
+                <div
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                >
+                    <div class="flex flex-col gap-2">
+                        <div
+                            v-if="env.isApp"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
-                            <SelectItem v-for="th in MATERIALS" :key="th" :value="th">{{ th }}</SelectItem>
-                        </Select>
-                    </div>
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">{{ $t("setting.lang") }}</span>
-                        <Select
-                            v-model="setting.lang"
-                            class="input input-bordered input-sm w-40"
-                            :placeholder="$t('setting.lang')"
-                            @update:model-value="setting.setLang($event)"
+                            <span class="label-text">{{ $t("setting.theme") }}</span>
+                            <Select v-model="setting.theme" class="input input-bordered input-sm w-40">
+                                <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.lightTheme") }}</SelectLabel>
+                                <SelectGroup>
+                                    <SelectItem v-for="th in lightThemes" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
+                                </SelectGroup>
+                                <SelectSeparator />
+                                <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.darkTheme") }}</SelectLabel>
+                                <SelectGroup>
+                                    <SelectItem v-for="th in darkThemes" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
+                                </SelectGroup>
+                                <SelectSeparator />
+                                <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.customTheme") }}</SelectLabel>
+                                <SelectGroup>
+                                    <SelectItem value="custom">{{ $t("setting.customThemeOption") }}</SelectItem>
+                                </SelectGroup>
+                            </Select>
+                        </div>
+                        <CustomThemeDesigner v-if="env.isApp && setting.theme === 'custom'" class="p-2" />
+                        <div
+                            v-if="env.isApp"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
-                            <SelectItem v-for="lang in i18nLanguages" :key="lang.code" :value="lang.code">{{ lang.name }}</SelectItem>
-                        </Select>
-                    </div>
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">{{ $t("setting.uiScale") }}</span>
-                        <div class="min-w-56">
-                            <input
-                                :value="setting.uiScale"
-                                type="range"
-                                class="range range-secondary"
-                                min="0.8"
-                                max="1.5"
-                                step="0.1"
-                                @input="setting.uiScale = +($event.target as HTMLInputElement)!.value"
-                            />
-                            <div class="w-full flex justify-between text-xs px-1">
-                                <span
-                                    v-for="i in 8"
-                                    :key="i"
-                                    :class="{ 'text-secondary': setting.uiScale.toFixed(1) === (0.7 + i / 10).toFixed(1) }"
-                                    >{{ (0.7 + i / 10).toFixed(1) }}</span
-                                >
+                            <span class="label-text">
+                                {{ $t("setting.windowTrasnparent") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.windowTrasnparentTip") }}</div>
+                            </span>
+                            <input v-model="setting.windowTrasnparent" type="checkbox" class="toggle toggle-secondary" />
+                        </div>
+                        <!-- 自定义底图：上传图片作为全局背景 -->
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                自定义底图
+                                <div class="text-xs text-base-content/50">上传一张图片作为全局背景，可配合窗口透明使用</div>
+                            </span>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <img
+                                    v-if="setting.customWallpaper"
+                                    :src="setting.customWallpaper"
+                                    alt="自定义底图预览"
+                                    class="h-9 w-16 rounded-xs border border-base-content/15 object-cover"
+                                />
+                                <button class="btn btn-sm" @click="pickWallpaper">
+                                    {{ setting.customWallpaper ? "更换" : "上传" }}
+                                </button>
+                                <button v-if="setting.customWallpaper" class="btn btn-sm btn-error" @click="clearWallpaper">清除</button>
                             </div>
                         </div>
-                    </div>
-                    <div class="flex justify-between items-center p-2">
-                        <span class="label-text">
-                            {{ $t("setting.safeMode") }}
-                            <div class="text-xs text-base-content/50">{{ $t("setting.safeModeHint") }}</div>
-                        </span>
-                        <input
-                            :checked="setting.safeMode"
-                            type="checkbox"
-                            class="toggle toggle-secondary"
-                            @click.prevent="handleSafeModeToggle(!setting.safeMode)"
-                        />
-                    </div>
-                    <div v-if="!setting.safeMode" class="flex justify-between items-center p-2">
-                        <span class="label-text"> {{ $t("setting.initScriptHotkeysAtStartup") }} </span>
-                        <input v-model="setting.initScriptHotkeysAtStartup" type="checkbox" class="toggle toggle-secondary" />
+                        <input ref="wallpaperFileInput" type="file" accept="image/*" class="hidden" @change="onWallpaperFileChange" />
+                        <!-- 自定义字体：选择系统字体或上传字体文件（OPFS），空值恢复默认 -->
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                自定义字体
+                                <div class="text-xs text-base-content/50">选择系统字体或上传字体文件，留空恢复默认</div>
+                            </span>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <Select v-model="selectedFontFamily" class="input input-bordered input-sm w-44" :placeholder="'默认字体'">
+                                    <SelectItem :value="FONT_DEFAULT_VALUE">默认字体</SelectItem>
+                                    <SelectSeparator />
+                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">系统字体</SelectLabel>
+                                    <SelectGroup>
+                                        <template v-if="setting.systemFonts.length">
+                                            <SelectItem
+                                                v-for="font in setting.systemFonts"
+                                                :key="`sys-${font}`"
+                                                :value="cssQuoteFamily(font)"
+                                                :style="{ fontFamily: cssQuoteFamily(font) }"
+                                            >
+                                                {{ font }}
+                                            </SelectItem>
+                                        </template>
+                                        <SelectItem v-else :value="FONT_SYSTEMS_EMPTY_VALUE" disabled>
+                                            {{ setting.systemFontsLoading ? "加载中…" : "暂无，可点右侧刷新" }}
+                                        </SelectItem>
+                                    </SelectGroup>
+                                    <template v-if="setting.customFonts.length">
+                                        <SelectSeparator />
+                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">上传的字体</SelectLabel>
+                                        <SelectGroup>
+                                            <SelectItem
+                                                v-for="meta in setting.customFonts"
+                                                :key="`custom-${meta.fileName}`"
+                                                :value="customFontCssFamily(meta)"
+                                                :style="{ fontFamily: customFontCssFamily(meta) }"
+                                            >
+                                                {{ meta.displayName }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </template>
+                                </Select>
+                                <button class="btn btn-sm btn-square" title="刷新系统字体" @click="setting.loadSystemFonts(true)">
+                                    <span v-if="setting.systemFontsLoading" class="loading loading-spinner loading-xs" />
+                                    <Icon v-else icon="ri:refresh-line" class="size-4" />
+                                </button>
+                                <button class="btn btn-sm" @click="pickFontFile">上传</button>
+                                <button v-if="isCustomFontSelected" class="btn btn-sm btn-error" @click="deleteSelectedCustomFont">
+                                    删除
+                                </button>
+                                <button
+                                    v-else-if="setting.appFontFamily"
+                                    class="btn btn-sm"
+                                    @click="selectedFontFamily = FONT_DEFAULT_VALUE"
+                                >
+                                    清除
+                                </button>
+                            </div>
+                        </div>
+                        <input ref="fontFileInput" type="file" accept=".ttf,.otf,.woff,.woff2" class="hidden" @change="onFontFileChange" />
+                        <div
+                            v-if="env.isApp"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                {{ $t("setting.launchAtStartup") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.launchAtStartupTip") }}</div>
+                            </span>
+                            <input
+                                :checked="setting.launchAtStartup"
+                                :disabled="isUpdatingLaunchAtStartup"
+                                type="checkbox"
+                                class="toggle toggle-secondary"
+                                @change="updateLaunchAtStartup(($event.target as HTMLInputElement).checked)"
+                            />
+                        </div>
+                        <div
+                            v-if="env.isApp"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">{{ $t("setting.winMaterial") }}</span>
+                            <Select
+                                v-model="setting.winMaterial"
+                                class="input input-bordered input-sm w-40"
+                                :placeholder="$t('setting.winMaterial')"
+                            >
+                                <SelectItem v-for="th in MATERIALS" :key="th" :value="th">{{ th }}</SelectItem>
+                            </Select>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">{{ $t("setting.lang") }}</span>
+                            <Select
+                                v-model="setting.lang"
+                                class="input input-bordered input-sm w-40"
+                                :placeholder="$t('setting.lang')"
+                                @update:model-value="setting.setLang($event)"
+                            >
+                                <SelectItem v-for="lang in i18nLanguages" :key="lang.code" :value="lang.code">{{ lang.name }}</SelectItem>
+                            </Select>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">{{ $t("setting.uiScale") }}</span>
+                            <div class="min-w-56">
+                                <input
+                                    :value="setting.uiScale"
+                                    type="range"
+                                    class="range range-secondary"
+                                    min="0.8"
+                                    max="1.5"
+                                    step="0.1"
+                                    @input="setting.uiScale = +($event.target as HTMLInputElement)!.value"
+                                />
+                                <div class="w-full flex justify-between text-xs px-1">
+                                    <span
+                                        v-for="i in 8"
+                                        :key="i"
+                                        :class="{ 'text-secondary': setting.uiScale.toFixed(1) === (0.7 + i / 10).toFixed(1) }"
+                                        >{{ (0.7 + i / 10).toFixed(1) }}</span
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                {{ $t("setting.safeMode") }}
+                                <div class="text-xs text-base-content/50">{{ $t("setting.safeModeHint") }}</div>
+                            </span>
+                            <input
+                                :checked="setting.safeMode"
+                                type="checkbox"
+                                class="toggle toggle-secondary"
+                                @click.prevent="handleSafeModeToggle(!setting.safeMode)"
+                            />
+                        </div>
+                        <div
+                            v-if="!setting.safeMode"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text"> {{ $t("setting.initScriptHotkeysAtStartup") }} </span>
+                            <input v-model="setting.initScriptHotkeysAtStartup" type="checkbox" class="toggle toggle-secondary" />
+                        </div>
                     </div>
                 </div>
             </article>
 
             <article>
-                <h2 class="text-sm font-bold m-2">{{ $t("setting.dataPackManagement") }}</h2>
-                <div class="bg-base-100 p-2 rounded-lg">
-                    <div class="p-2 flex flex-col gap-2">
-                        <div class="flex items-center gap-2">
+                <SectionHeader no-animate compact kicker="DATA PACK" :title="$t('setting.dataPackManagement')" />
+                <div
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    :style="{ animationDelay: '0.05s' }"
+                >
+                    <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                        <div class="flex flex-wrap items-center gap-2">
                             <Select
                                 v-model="dataPackSourceKind"
                                 class="input input-bordered input-sm w-40"
@@ -563,7 +856,7 @@ onMounted(() => {
                                 v-model="dataPackSourceBaseUrl"
                                 :disabled="dataPackSourceKind === 'official'"
                                 type="text"
-                                class="input input-bordered input-sm flex-1"
+                                class="input input-bordered input-sm min-w-40 flex-1"
                                 :placeholder="
                                     dataPackSourceKind === 'official' ? CDN_DATA_PACK_BASE_URL : $t('setting.dataPackSourceAddress')
                                 "
@@ -576,18 +869,20 @@ onMounted(() => {
                         </div>
                     </div>
 
-                    <div class="px-2 pb-2 flex items-center justify-between gap-2">
+                    <div class="mt-3 mb-2 flex items-center justify-between gap-2">
                         <div class="text-xs text-base-content/60">{{ $t("setting.versionList") }}</div>
                         <button class="btn btn-ghost btn-xs" :disabled="dataPack.isBootstrapping" @click="refreshDataPackVersions">
                             {{ $t("setting.refresh") }}
                         </button>
                     </div>
 
-                    <div v-if="imgsDownloadState.active || imgsDownloadState.total > 0" class="px-2 pb-2">
-                        <div class="rounded-md border border-base-300 bg-base-100/60 px-3 py-3">
+                    <div v-if="imgsDownloadState.active || imgsDownloadState.total > 0" class="mb-2">
+                        <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-3">
                             <div class="flex items-center justify-between gap-2 text-xs text-base-content/70">
                                 <span>{{ imgsDownloadProgressLabel }}</span>
-                                <span> {{ imgsDownloadProgressValue }}% </span>
+                                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                    {{ imgsDownloadProgressValue }}%
+                                </span>
                             </div>
                             <div
                                 v-if="imgsDownloadState.stage === 'pack-current' && imgsDownloadState.packTotal > 1"
@@ -612,22 +907,22 @@ onMounted(() => {
                         </div>
                     </div>
 
-                    <div class="px-2 pb-2">
+                    <div>
                         <div
                             v-if="dataPackVersions.length === 0"
-                            class="rounded-md border border-base-300 px-3 py-6 text-sm text-base-content/60 text-center"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-6 text-sm text-base-content/60 text-center"
                         >
                             {{ $t("setting.noAvailableVersions") }}
                         </div>
                         <div v-else class="flex flex-col gap-2">
                             <div
-                                v-for="version in dataPackVersions"
+                                v-for="version in pagedDataPackVersions"
                                 :key="version.version"
-                                class="rounded-md border border-base-300 bg-base-100/60 px-3 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-                                :class="{
-                                    'border-primary': isCurrentDataPackVersion(version.version),
-                                    'opacity-80': isDownloadedVersion(version.version),
-                                }"
+                                class="rounded-xs border bg-base-content/3 px-3 py-3 flex flex-col gap-3 transition-colors duration-200 sm:flex-row sm:items-center sm:justify-between"
+                                :class="[
+                                    isCurrentDataPackVersion(version.version) ? 'border-primary/70' : 'border-base-content/10',
+                                    { 'opacity-80': isDownloadedVersion(version.version) },
+                                ]"
                                 :draggable="isDownloadedVersion(version.version)"
                                 @dragstart="onVersionDragStart($event, version.version)"
                                 @dragend="onVersionDragEnd(version.version)"
@@ -637,12 +932,12 @@ onMounted(() => {
                                         <div class="font-medium break-all">{{ getVersionLabel(version.version) }}</div>
                                         <span
                                             v-if="isCurrentDataPackVersion(version.version)"
-                                            class="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary"
+                                            class="rounded-xs border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary"
                                             >{{ $t("setting.current") }}</span
                                         >
                                         <span
                                             v-else-if="isDownloadedVersion(version.version)"
-                                            class="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-medium text-success"
+                                            class="rounded-xs border border-success/30 bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success"
                                             >{{ $t("setting.downloaded") }}</span
                                         >
                                     </div>
@@ -662,7 +957,7 @@ onMounted(() => {
                                             :value="Math.round(dataPack.downloadProgress * 100)"
                                             max="100"
                                         />
-                                        <div class="text-[11px] text-base-content/60 text-right">
+                                        <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary text-right">
                                             {{ Math.round(dataPack.downloadProgress * 100) }}%
                                         </div>
                                     </div>
@@ -689,50 +984,119 @@ onMounted(() => {
                                 </div>
                             </div>
                         </div>
+                        <!-- 分页条：超过一页时展示 -->
+                        <div v-if="dataPackTotalPages > 1" class="mt-3 flex items-center justify-center gap-1.5">
+                            <button
+                                type="button"
+                                class="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-xs border transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    currentDataPackPage === 1
+                                        ? 'pointer-events-none border-base-content/10 text-base-content/30'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                :aria-label="'上一页'"
+                                @click="gotoDataPackPage(currentDataPackPage - 1)"
+                            >
+                                <Icon icon="ri:arrow-left-line" class="size-3.5" />
+                            </button>
+                            <button
+                                v-for="n in dataPackTotalPages"
+                                :key="n"
+                                type="button"
+                                class="inline-flex h-6 min-w-6 cursor-pointer items-center justify-center rounded-xs border px-1.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    currentDataPackPage === n
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="gotoDataPackPage(n)"
+                            >
+                                {{ n }}
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-xs border transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    currentDataPackPage === dataPackTotalPages
+                                        ? 'pointer-events-none border-base-content/10 text-base-content/30'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                :aria-label="'下一页'"
+                                @click="gotoDataPackPage(currentDataPackPage + 1)"
+                            >
+                                <Icon icon="ri:arrow-right-line" class="size-3.5" />
+                            </button>
+                        </div>
+                    </div>
+                    <div v-if="dataPackVersions.length > 0" class="mt-2 text-center text-[11px] text-base-content/45">
+                        共
+                        <b class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ dataPackVersions.length }}</b>
+                        个版本 · 第 {{ currentDataPackPage }}/{{ dataPackTotalPages }} 页
                     </div>
                     <input ref="dataPackFileInput" type="file" accept=".zip" class="hidden" @change="onImportFileChange" />
                 </div>
             </article>
 
             <article>
-                <h2 class="text-sm font-bold m-2">{{ $t("setting.account") }}</h2>
-                <div class="bg-base-100 p-2 rounded-lg">
+                <SectionHeader no-animate compact kicker="ACCOUNT" :title="$t('setting.account')" />
+                <div
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    :style="{ animationDelay: '0.1s' }"
+                >
                     <DOBAccountSetting />
                 </div>
             </article>
 
             <article>
-                <h2 class="text-sm font-bold m-2">{{ $t("setting.storyText") }}</h2>
-                <div class="bg-base-100 p-2 rounded-lg">
-                    <div class="flex justify-between items-center p-2 gap-4">
-                        <span class="label-text">{{ $t("setting.protagonistName1") }}</span>
-                        <input v-model="setting.protagonistName1" type="text" class="input input-bordered input-sm w-64" />
-                    </div>
-                    <div class="flex justify-between items-center p-2 gap-4">
-                        <span class="label-text">{{ $t("setting.protagonistGender1") }}</span>
-                        <Select v-model="setting.protagonistGender" class="input input-bordered input-sm w-64">
-                            <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
-                            <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
-                        </Select>
-                    </div>
-                    <div class="flex justify-between items-center p-2 gap-4">
-                        <span class="label-text">{{ $t("setting.protagonistName2") }}</span>
-                        <input v-model="setting.protagonistName2" type="text" class="input input-bordered input-sm w-64" />
-                    </div>
-                    <div class="flex justify-between items-center p-2 gap-4">
-                        <span class="label-text">{{ $t("setting.protagonistGender2") }}</span>
-                        <Select v-model="setting.protagonistGender2" class="input input-bordered input-sm w-64">
-                            <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
-                            <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
-                        </Select>
+                <SectionHeader no-animate compact kicker="STORY" :title="$t('setting.storyText')" />
+                <div
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    :style="{ animationDelay: '0.15s' }"
+                >
+                    <div class="flex flex-col gap-2">
+                        <div
+                            class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">{{ $t("setting.protagonistName1") }}</span>
+                            <input v-model="setting.protagonistName1" type="text" class="input input-bordered input-sm w-64" />
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">{{ $t("setting.protagonistGender1") }}</span>
+                            <Select v-model="setting.protagonistGender" class="input input-bordered input-sm w-64">
+                                <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
+                                <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
+                            </Select>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">{{ $t("setting.protagonistName2") }}</span>
+                            <input v-model="setting.protagonistName2" type="text" class="input input-bordered input-sm w-64" />
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">{{ $t("setting.protagonistGender2") }}</span>
+                            <Select v-model="setting.protagonistGender2" class="input input-bordered input-sm w-64">
+                                <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
+                                <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
+                            </Select>
+                        </div>
                     </div>
                 </div>
             </article>
 
             <article>
-                <h2 class="text-sm font-bold m-2">{{ $t("setting.other") }}</h2>
-                <div class="bg-base-100 p-2 rounded-lg">
-                    <div class="flex justify-between items-center p-2">
+                <SectionHeader no-animate compact kicker="OTHER" :title="$t('setting.other')" />
+                <div
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    :style="{ animationDelay: '0.2s' }"
+                >
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
                         <span class="label-text">
                             {{ $t("setting.reset") }}
                             <div class="text-xs text-base-content/50">{{ $t("setting.resetTip") }}</div>

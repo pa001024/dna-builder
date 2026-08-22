@@ -574,45 +574,73 @@ watch(
 </script>
 
 <template>
-    <div class="p-3 space-y-3">
-        <!-- 详情头部 -->
-        <div class="p-2 space-y-2">
-            <div class="flex items-center gap-3">
-                <img v-if="dungeon.e" :src="LeveledChar.elementUrl(dungeon.e)" alt="" class="h-8 inline-block" />
-                <SRouterLink :to="`/db/dungeon/${dungeon.id}`" class="text-lg font-bold link link-primary">
-                    {{ $t(dungeon.n) }}
-                </SRouterLink>
-                <CopyID :id="dungeon.id" />
-                <div class="flex-1"></div>
-                <span v-if="dungeon.mod != null" class="text-xs px-2 py-1 rounded bg-base-200 text-base-content">
-                    历练等级 {{ dungeon.mod }}
-                </span>
-                <span class="text-xs px-2 py-1 rounded" :class="getDungeonType(dungeon.t).color + ' text-white'">
-                    Lv.{{ dungeon.lv }} {{ dungeon.t }}
-                </span>
+    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+        <!-- 详情头部：纸面 + primary 强调线 -->
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <div class="flex items-start gap-3.5">
+                <img
+                    v-if="dungeon.e"
+                    :src="LeveledChar.elementUrl(dungeon.e)"
+                    alt=""
+                    class="h-12 w-6 shrink-0 self-start rounded-xs object-cover"
+                />
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Dungeon File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/dungeon/${dungeon.id}`"
+                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
+                            {{ $t(dungeon.n) }}
+                        </SRouterLink>
+                        <CopyID :id="dungeon.id" />
+                    </div>
+                    <div class="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs text-base-content/60">
+                        <span
+                            v-if="dungeon.mod != null"
+                            class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
+                        >
+                            历练等级 {{ dungeon.mod }}
+                        </span>
+                        <span
+                            class="rounded-xs px-1.5 py-0.5 text-[10px] tracking-wide"
+                            :class="getDungeonType(dungeon.t).color + ' text-white'"
+                        >
+                            Lv.{{ dungeon.lv }} {{ dungeon.t }}
+                        </span>
+                    </div>
+                    <div class="mt-2 text-sm leading-relaxed text-base-content/70">
+                        {{ dungeon.desc }}
+                    </div>
+                </div>
             </div>
-            <div class="text-sm text-base-content/70">
-                {{ dungeon.desc }}
-            </div>
-        </div>
+        </header>
 
-        <div class="tabs tabs-box bg-base-200/60 p-1">
-            <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'reward' }" @click="activeTab = 'reward'">
-                奖励 ({{ (dungeon.ac?.length || dungeon.r?.length || 0) + (dungeon.sr?.length || 0) }})
-            </button>
-            <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'monster' }" @click="activeTab = 'monster'">
-                怪物 ({{ (dungeon.m?.length || 0) + (dungeon.sm?.length || 0) }})
-            </button>
-            <button type="button" class="tab flex-1" :class="{ 'tab-active': activeTab === 'wave' }" @click="activeTab = 'wave'">
-                波次 ({{ dungeon.t === "IronSurvival" ? getDungeonType(dungeon.t).label : dungeon.spawn?.length || 0 }})
-            </button>
-        </div>
+        <!-- 页签切换 -->
+        <AniTabs
+            v-model="activeTab"
+            :tabs="[
+                { label: `奖励 (${(dungeon.ac?.length || dungeon.r?.length || 0) + (dungeon.sr?.length || 0)})`, value: 'reward' },
+                { label: `怪物 (${(dungeon.m?.length || 0) + (dungeon.sm?.length || 0)})`, value: 'monster' },
+                {
+                    label: `波次 (${dungeon.t === 'IronSurvival' ? getDungeonType(dungeon.t).label : dungeon.spawn?.length || 0})`,
+                    value: 'wave',
+                },
+            ]"
+        />
 
-        <div v-if="isEndlessDungeon" class="card bg-base-200 rounded-lg p-3">
+        <!-- 无尽副本区间调整 -->
+        <section v-if="isEndlessDungeon" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ENDLESS" title="无尽副本设置" />
             <template v-if="isIronSurvivalDungeon">
-                <div class="mb-1 flex items-center justify-between text-sm">
+                <div class="mb-1 mt-2 flex items-center justify-between text-sm">
                     <span>怪物等级区间</span>
-                    <span>Lv.{{ selectedIronStartLevel }} ~ Lv.{{ selectedIronEndLevel }} / Lv.{{ maxMonsterLevel }}</span>
+                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        Lv.{{ selectedIronStartLevel }} ~ Lv.{{ selectedIronEndLevel }} / Lv.{{ maxMonsterLevel }}
+                    </span>
                 </div>
                 <DualRangeSlider
                     v-model:start="ironStartLevel"
@@ -629,9 +657,11 @@ watch(
                 </div>
             </template>
             <template v-else>
-                <div class="mb-1 flex items-center justify-between text-sm">
+                <div class="mb-1 mt-2 flex items-center justify-between text-sm">
                     <span>无尽波次</span>
-                    <span>第 {{ selectedEndlessStartWave }} ~ {{ selectedEndlessWave - 1 }} 波 / {{ endlessMaxWave - 1 }}</span>
+                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        第 {{ selectedEndlessStartWave }} ~ {{ selectedEndlessWave - 1 }} 波 / {{ endlessMaxWave - 1 }}
+                    </span>
                 </div>
                 <DualRangeSlider
                     v-model:start="endlessStartWave"
@@ -650,14 +680,21 @@ watch(
                     ~ Lv.{{ endlessLevelBase }}（每波 +{{ ENDLESS_LEVEL_STEP }}，最高 {{ maxMonsterLevel }}）
                 </div>
             </template>
-        </div>
+        </section>
 
         <template v-if="activeTab === 'monster'">
             <!-- 普通怪物 -->
-            <div v-if="dungeon.m?.length" class="card bg-base-200 rounded-lg p-3">
+            <section v-if="dungeon.m?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="MONSTERS" title="普通怪物">
+                    <template #trailing>
+                        <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.m.length }} 种</span>
+                    </template>
+                </SectionHeader>
                 <!-- 等级控制 -->
-                <div class="flex items-center gap-4 mb-3">
-                    <span class="text-sm min-w-12">Lv. {{ monsterTabLevel }}</span>
+                <div class="mt-2 flex items-center gap-4 mb-3">
+                    <span class="min-w-12 shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                        >Lv. {{ monsterTabLevel }}</span
+                    >
                     <input
                         v-if="!isEndlessDungeon"
                         v-model.number="currentLevel"
@@ -669,29 +706,35 @@ watch(
                     />
                     <span v-else class="text-xs text-base-content/70">无尽副本等级由上方波次滑块控制</span>
                 </div>
-                <h3 class="text-xs text-base-content/70 mb-2">普通怪物 ({{ dungeon.m.length }}种)</h3>
-                <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
                     <DBMonsterCompactCard
                         v-for="monsterId in dungeon.m"
                         :key="monsterId"
                         :monster="LeveledMonsterHelper.fromId(monsterId, monsterTabLevel, false, getDungeonMonsterHpMultiplier())"
                     />
                 </div>
-            </div>
+            </section>
 
             <!-- 特殊怪物 -->
-            <div v-if="dungeon.sm?.length" class="card bg-base-200 rounded-lg p-3">
-                <h3 class="text-xs text-base-content/70 mb-2">特殊怪物 ({{ dungeon.sm.length }}种)</h3>
-                <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+            <section v-if="dungeon.sm?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="ELITE" title="特殊怪物">
+                    <template #trailing>
+                        <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.sm.length }} 种</span>
+                    </template>
+                </SectionHeader>
+                <div class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
                     <DBMonsterCompactCard
                         v-for="monsterId in dungeon.sm"
                         :key="monsterId"
                         :monster="LeveledMonsterHelper.fromId(monsterId, monsterTabLevel, false, getDungeonMonsterHpMultiplier())"
                     />
                 </div>
-            </div>
+            </section>
 
-            <div v-if="!dungeon.m?.length && !dungeon.sm?.length" class="card bg-base-200 rounded-lg p-3 text-sm text-base-content/70">
+            <div
+                v-if="!dungeon.m?.length && !dungeon.sm?.length"
+                class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm text-sm text-base-content/70"
+            >
                 暂无怪物数据
             </div>
         </template>
@@ -704,8 +747,9 @@ watch(
                 :wave="displayEndWave"
             />
             <template v-else>
-                <div class="card bg-base-200 rounded-lg p-3">
-                    <div class="flex items-center justify-between">
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="SPAWN" title="刷新范围显示" />
+                    <div class="mt-2 flex items-center justify-between">
                         <span class="text-sm">刷新范围显示</span>
                         <label class="label cursor-pointer gap-2 p-0">
                             <span class="text-xs text-base-content/70">移动端</span>
@@ -713,52 +757,72 @@ watch(
                         </label>
                     </div>
                     <div class="mt-1 text-xs text-base-content/70">当前平台：{{ getSpawnRadiusPlatformText() }}（默认 PC）</div>
-                </div>
+                </section>
 
                 <!-- 怪物波次 -->
-                <div v-if="dungeon.spawn?.length" class="card bg-base-200 rounded-lg p-3">
-                    <h3 class="text-xs text-base-content/70 mb-2">怪物波次 ({{ dungeon.spawn.length }}波)</h3>
-                    <div class="space-y-3">
+                <section v-if="dungeon.spawn?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="WAVES" title="怪物波次">
+                        <template #trailing>
+                            <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.spawn.length }} 波</span>
+                        </template>
+                    </SectionHeader>
+                    <div class="mt-2 space-y-3">
                         <div
                             v-for="(wave, waveIndex) in dungeon.spawn"
                             :key="`${dungeon.id}-wave-${waveIndex}`"
-                            class="rounded-lg border border-base-300 bg-base-200/60 p-2"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                         >
-                            <div class="mb-2 flex items-center justify-between">
+                            <div class="mb-2 flex items-center justify-between gap-2">
                                 <span class="text-sm font-medium">第 {{ waveIndex + 1 }} 波</span>
-                                <span class="text-xs text-base-content/70">{{ getSpawnWaveSummaryText(wave) }}</span>
+                                <span class="text-[11px] tabular-nums text-base-content/55">{{ getSpawnWaveSummaryText(wave) }}</span>
                             </div>
 
                             <div class="space-y-3">
                                 <div
                                     v-for="(spawnGenerator, spawnIndex) in wave"
                                     :key="`${waveIndex}-${spawnGenerator.id}-${spawnIndex}`"
-                                    class="rounded border border-base-300 bg-base-200/80 p-2"
+                                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                                 >
                                     <div class="mb-2 grid gap-1 text-xs text-base-content/70 md:grid-cols-2">
-                                        <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
+                                        <div
+                                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                        >
                                             <span>生成器ID</span>
-                                            <span>{{ spawnGenerator.id }}</span>
+                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary">{{
+                                                spawnGenerator.id
+                                            }}</span>
                                         </div>
-                                        <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
+                                        <div
+                                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                        >
                                             <span>检查时间</span>
-                                            <span>{{ spawnGenerator.time ? `${spawnGenerator.time}s` : "-" }}</span>
+                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary">{{
+                                                spawnGenerator.time ? `${spawnGenerator.time}s` : "-"
+                                            }}</span>
                                         </div>
-                                        <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
+                                        <div
+                                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                        >
                                             <span>刷新间隔</span>
-                                            <span>{{ spawnGenerator.th ? `${spawnGenerator.th}s` : "-" }}</span>
+                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary">{{
+                                                spawnGenerator.th ? `${spawnGenerator.th}s` : "-"
+                                            }}</span>
                                         </div>
-                                        <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
+                                        <div
+                                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                        >
                                             <span>刷新范围 ({{ getSpawnRadiusPlatformText() }})</span>
-                                            <span>{{ formatSpawnRadius(spawnGenerator.radius) }}</span>
+                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary">{{
+                                                formatSpawnRadius(spawnGenerator.radius)
+                                            }}</span>
                                         </div>
                                     </div>
 
                                     <div v-if="getSpawnGeneratorMonsters(spawnGenerator).length" class="mb-2">
-                                        <div class="text-xs text-base-content/70 mb-2">
+                                        <div class="text-xs text-base-content/55 mb-2">
                                             普通怪物 ({{ getSpawnGeneratorMonsters(spawnGenerator).length }}种)
                                         </div>
-                                        <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                                        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
                                             <div
                                                 v-for="(spawnMonster, monsterIndex) in getSpawnGeneratorMonsters(spawnGenerator)"
                                                 :key="`${spawnGenerator.id}-m-${spawnMonster.id}-${monsterIndex}`"
@@ -774,80 +838,135 @@ watch(
                                                         )
                                                     "
                                                 />
-                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1 text-xs">
-                                                    <span class="text-base-content/70">数量</span>
-                                                    <span class="font-medium">x{{ getSpawnMonsterCountText(spawnMonster) }}</span>
+                                                <div
+                                                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs"
+                                                >
+                                                    <span>数量</span>
+                                                    <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                        >x{{ getSpawnMonsterCountText(spawnMonster) }}</span
+                                                    >
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div v-if="getSpawnGeneratorGroups(spawnGenerator).length" class="mb-2">
-                                        <div class="text-xs text-base-content/70 mb-2">
+                                        <div class="text-xs text-base-content/55 mb-2">
                                             组刷怪 ({{ getSpawnGeneratorGroups(spawnGenerator).length }}组)
                                         </div>
                                         <div class="space-y-2">
                                             <div
                                                 v-for="(spawnGroup, groupIndex) in getSpawnGeneratorGroups(spawnGenerator)"
                                                 :key="`${spawnGenerator.id}-mg-${spawnGroup.id}-${groupIndex}`"
-                                                class="rounded border border-base-300 bg-base-200/60 p-2"
+                                                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                                             >
                                                 <div class="mb-2 grid gap-1 text-xs text-base-content/70 md:grid-cols-3">
-                                                    <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
+                                                    <div
+                                                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                                    >
                                                         <span>组ID</span>
-                                                        <span>{{ spawnGroup.id }}</span>
-                                                    </div>
-                                                    <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
-                                                        <span>数量</span>
-                                                        <span>{{ getSpawnGroupCountText(spawnGroup) }}</span>
-                                                    </div>
-                                                    <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
-                                                        <span>权重</span>
-                                                        <span>{{ getSpawnGroupWeightText(spawnGroup) }}</span>
-                                                    </div>
-                                                    <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
-                                                        <span>检测时间</span>
-                                                        <span>{{ spawnGroup.gt ? `${spawnGroup.gt}s` : "-" }}</span>
-                                                    </div>
-                                                    <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
-                                                        <span>检测延迟</span>
-                                                        <span>{{ spawnGroup.gdt ? `${spawnGroup.gdt}s` : "-" }}</span>
-                                                    </div>
-                                                    <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
-                                                        <span>补怪间隔</span>
-                                                        <span>{{ spawnGroup.gri ? `${spawnGroup.gri}s` : "-" }}</span>
-                                                    </div>
-                                                    <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
-                                                        <span>阈值</span>
-                                                        <span>{{ spawnGroup.gth || "-" }}</span>
-                                                    </div>
-                                                    <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
-                                                        <span>组上限</span>
-                                                        <span>{{ spawnGroup.gl || "-" }}</span>
-                                                    </div>
-                                                    <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1">
-                                                        <span>组半径 / Z</span>
-                                                        <span>{{ spawnGroup.gar || "-" }} / {{ spawnGroup.gz || "-" }}</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ spawnGroup.id }}</span
+                                                        >
                                                     </div>
                                                     <div
-                                                        class="flex items-center justify-between rounded bg-base-200 px-2 py-1 md:col-span-3"
+                                                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                                    >
+                                                        <span>数量</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ getSpawnGroupCountText(spawnGroup) }}</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                                    >
+                                                        <span>权重</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ getSpawnGroupWeightText(spawnGroup) }}</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                                    >
+                                                        <span>检测时间</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ spawnGroup.gt ? `${spawnGroup.gt}s` : "-" }}</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                                    >
+                                                        <span>检测延迟</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ spawnGroup.gdt ? `${spawnGroup.gdt}s` : "-" }}</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                                    >
+                                                        <span>补怪间隔</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ spawnGroup.gri ? `${spawnGroup.gri}s` : "-" }}</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                                    >
+                                                        <span>阈值</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ spawnGroup.gth || "-" }}</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                                    >
+                                                        <span>组上限</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ spawnGroup.gl || "-" }}</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
+                                                    >
+                                                        <span>组半径 / Z</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ spawnGroup.gar || "-" }} / {{ spawnGroup.gz || "-" }}</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="col-span-full flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 md:col-span-3"
                                                     >
                                                         <span>初始中心范围</span>
-                                                        <span>{{ formatSpawnRadius(spawnGroup.gir) }}</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ formatSpawnRadius(spawnGroup.gir) }}</span
+                                                        >
                                                     </div>
                                                     <div
-                                                        class="flex items-center justify-between rounded bg-base-200 px-2 py-1 md:col-span-3"
+                                                        class="col-span-full flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 md:col-span-3"
                                                     >
                                                         <span>刷新中心范围</span>
-                                                        <span>{{ formatSpawnRadius(spawnGroup.gr) }}</span>
+                                                        <span
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            >{{ formatSpawnRadius(spawnGroup.gr) }}</span
+                                                        >
                                                     </div>
                                                 </div>
 
                                                 <div v-if="getSpawnGroupMembers(spawnGroup).length">
-                                                    <div class="text-xs text-base-content/70 mb-2">
+                                                    <div class="text-xs text-base-content/55 mb-2">
                                                         组成员 ({{ getSpawnGroupMembers(spawnGroup).length }}种)
                                                     </div>
-                                                    <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                                                    <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
                                                         <div
                                                             v-for="(groupMonster, memberIndex) in getSpawnGroupMembers(spawnGroup)"
                                                             :key="`${spawnGroup.id}-gm-${groupMonster.id}-${memberIndex}`"
@@ -864,10 +983,12 @@ watch(
                                                                 "
                                                             />
                                                             <div
-                                                                class="flex items-center justify-between rounded bg-base-200 px-2 py-1 text-xs"
+                                                                class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs"
                                                             >
-                                                                <span class="text-base-content/70">概率</span>
-                                                                <span class="font-medium">
+                                                                <span>概率</span>
+                                                                <span
+                                                                    class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                                >
                                                                     {{ groupMonster.p ? `${Math.round(groupMonster.p * 100)}%` : "100%" }}
                                                                 </span>
                                                             </div>
@@ -879,11 +1000,15 @@ watch(
                                     </div>
 
                                     <div v-if="spawnGenerator.sm?.length">
-                                        <div class="mb-1 flex items-center justify-between text-xs font-medium text-base-content/70">
+                                        <div
+                                            class="mb-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-medium text-base-content/70"
+                                        >
                                             <span>号令者 ({{ spawnGenerator.sm.length }}种)</span>
-                                            <span>单次刷新数量池: {{ formatSpawnCommanderNumText(spawnGenerator.smnum) }}</span>
+                                            <span class="font-normal tabular-nums text-base-content/55"
+                                                >单次刷新数量池: {{ formatSpawnCommanderNumText(spawnGenerator.smnum) }}</span
+                                            >
                                         </div>
-                                        <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                                        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
                                             <div
                                                 v-for="(spawnTagMonster, tagIndex) in spawnGenerator.sm"
                                                 :key="`${spawnGenerator.id}-sm-${spawnTagMonster.id}-${tagIndex}`"
@@ -899,9 +1024,13 @@ watch(
                                                         )
                                                     "
                                                 />
-                                                <div class="flex items-center justify-between rounded bg-base-200 px-2 py-1 text-xs">
-                                                    <span class="text-base-content/70">权重</span>
-                                                    <span class="font-medium">
+                                                <div
+                                                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs"
+                                                >
+                                                    <span>权重</span>
+                                                    <span
+                                                        class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                    >
                                                         {{ spawnTagMonster.w }} ({{
                                                             getSpawnTagMonsterWeightPercentText(spawnGenerator, spawnTagMonster)
                                                         }}%)
@@ -914,41 +1043,42 @@ watch(
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div v-else class="card bg-base-200 rounded-lg p-3 text-sm text-base-content/70">暂无波次数据</div>
+                <div
+                    v-else
+                    class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm text-sm text-base-content/70"
+                >
+                    暂无波次数据
+                </div>
             </template>
         </template>
 
         <template v-else>
-            <template v-if="dungeon.ac?.length">
-                <div class="card bg-base-200 rounded-lg p-3">
-                    <div class="text-xs text-base-content/70 mb-2">{{ $t("奖励选择") }}</div>
-                    <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-                        <ResourceCostItem v-for="item in dungeon.ac" :key="item.id" name="" :value="[item.c, item.id, 'Resource']" />
-                    </div>
+            <section v-if="dungeon.ac?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="SELECT" :title="$t('奖励选择')" />
+                <div class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                    <ResourceCostItem v-for="item in dungeon.ac" :key="item.id" name="" :value="[item.c, item.id, 'Resource']" />
                 </div>
-            </template>
+            </section>
             <template v-else>
-                <div v-if="isEndlessDungeon && dungeon.r?.length" class="card bg-base-200 rounded-lg p-3">
-                    <div class="mb-2 flex items-center justify-between">
-                        <h3 class="font-bold">波数累计奖励 ({{ displayStartWave }}~{{ displayEndWave }}波)</h3>
-                        <label class="label cursor-pointer gap-2 text-xs">
-                            <span>你好箱</span>
-                            <input v-model="useNihaoBoxBonus" type="checkbox" class="checkbox checkbox-xs" />
-                        </label>
+                <section
+                    v-if="isEndlessDungeon && dungeon.r?.length"
+                    class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                >
+                    <SectionHeader no-animate compact kicker="CUMULATIVE" :title="`波数累计奖励 (${displayStartWave}~${displayEndWave}波)`">
+                        <template #trailing>
+                            <label class="label cursor-pointer gap-2 p-0 text-xs">
+                                <span>你好箱</span>
+                                <input v-model="useNihaoBoxBonus" type="checkbox" class="checkbox checkbox-xs" />
+                            </label>
+                        </template>
+                    </SectionHeader>
+                    <div v-if="cumulativeWaveRewards.length" class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                        <ResourceCostItem v-for="item in cumulativeWaveRewards" :key="item.key" :name="item.name" :value="item.value" />
                     </div>
-                    <div v-if="cumulativeWaveRewards.length" class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-                        <ResourceCostItem
-                            v-for="item in cumulativeWaveRewards"
-                            :key="item.key"
-                            :name="item.name"
-                            :value="item.value"
-                            class="bg-base-200"
-                        />
-                    </div>
-                    <div v-else class="text-sm text-base-content/70">当前波次暂无可累计奖励</div>
-                </div>
+                    <div v-else class="mt-2 text-sm text-base-content/70">当前波次暂无可累计奖励</div>
+                </section>
                 <!-- 深境探险奖励表 -->
                 <DBIronSurvivalDetailItem
                     v-if="ironSurvivalDungeonData[dungeon.id]"
@@ -958,36 +1088,43 @@ watch(
                     :end-level="selectedIronEndLevel"
                 />
                 <!-- 奖励列表 -->
-                <div v-if="dungeon.r?.length" class="card bg-base-200 rounded-lg p-3">
-                    <div class="text-xs text-base-content/70 mb-2">{{ $t("奖励列表") }}</div>
-                    <div class="space-y-3">
+                <section v-if="dungeon.r?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="REWARDS" :title="$t('奖励列表')" />
+                    <div class="mt-2 space-y-3">
                         <div
                             v-for="item in mergedDungeonRewards"
                             :key="`${item.reward.id}-${item.indices.join('-')}`"
-                            class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2 transition-colors duration-200 hover:border-primary/40 hover:bg-base-content/5"
                         >
                             <!-- 使用 RewardItem 组件显示奖励 -->
                             <RewardItem :reward="item.reward" :header="`${formatRewardIndexRanges(item.indices)} 奖励组`" />
                         </div>
                     </div>
-                </div>
+                </section>
 
                 <!-- 特殊奖励 -->
-                <div v-if="dungeon.sr?.length" class="card bg-base-200 rounded-lg p-3">
-                    <h3 class="text-xs text-base-content/70 mb-2">特殊奖励 ({{ dungeon.sr.length }}组)</h3>
-                    <div class="space-y-3">
+                <section v-if="dungeon.sr?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                    <SectionHeader no-animate compact kicker="SPECIAL" title="特殊奖励">
+                        <template #trailing>
+                            <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.sr.length }} 组</span>
+                        </template>
+                    </SectionHeader>
+                    <div class="mt-2 space-y-3">
                         <div
                             v-for="reward in dungeon.sr.map(id => getRewardDetails(id)).filter((r): r is RewardItemType => !!r)"
                             :key="reward.id"
-                            class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2 transition-colors duration-200 hover:border-primary/40 hover:bg-base-content/5"
                         >
                             <!-- 使用 RewardItem 组件显示奖励 -->
                             <RewardItem :reward="reward" header="特殊奖励组" />
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div v-if="!dungeon.r?.length && !dungeon.sr?.length" class="card bg-base-200 rounded-lg p-3 text-sm text-base-content/70">
+                <div
+                    v-if="!dungeon.r?.length && !dungeon.sr?.length"
+                    class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm text-sm text-base-content/70"
+                >
                     暂无奖励数据
                 </div>
             </template>

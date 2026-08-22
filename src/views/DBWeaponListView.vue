@@ -115,111 +115,179 @@ function toggleVersionFilter(show: boolean) {
     }
 }
 
-useInitialScrollToSelectedItem()
+/**
+ * 过滤器名称。
+ */
+type FilterName = "category" | "damageType" | "version"
+
+/**
+ * 切换过滤行显示状态；收起时清空对应筛选值，避免隐藏后筛选仍生效。
+ * @param name 过滤器名称
+ */
+function toggleFilterRow(name: FilterName) {
+    switch (name) {
+        case "category":
+            showCategoryFilter.value = !showCategoryFilter.value
+            toggleCategoryFilter(showCategoryFilter.value)
+            break
+        case "damageType":
+            showDamageTypeFilter.value = !showDamageTypeFilter.value
+            toggleDamageTypeFilter(showDamageTypeFilter.value)
+            break
+        case "version":
+            showVersionFilter.value = !showVersionFilter.value
+            toggleVersionFilter(showVersionFilter.value)
+            break
+    }
+}
+
+useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-100">
+    <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden" :class="{ 'border-r border-base-200': selectedWeapon }">
-                <div class="p-3 border-b border-base-200">
-                    <input
-                        v-model="searchKeyword"
-                        type="text"
-                        placeholder="搜索武器名称（支持拼音）..."
-                        class="w-full px-3 py-1.5 rounded bg-base-200 text-base-content placeholder-base-content/70 outline-none focus:ring-1 focus:ring-primary transition-all duration-200"
-                    />
+            <!-- 左侧列表面板 -->
+            <div
+                class="flex-1 flex flex-col overflow-hidden min-w-0"
+                :class="{ 'sm:border-r border-base-content/10': selectedWeapon }"
+            >
+                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                <div
+                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                >
+                    <div class="relative">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input
+                            v-model="searchKeyword"
+                            type="text"
+                            placeholder="搜索武器名称（支持拼音）..."
+                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                        <span
+                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                        >
+                            {{ filteredWeapons.length }}
+                        </span>
+                    </div>
+
+                    <!-- 过滤器开关方章 -->
+                    <div class="mt-3 flex flex-wrap gap-1.5">
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showCategoryFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleFilterRow('category')"
+                        >
+                            武器分类
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showDamageTypeFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleFilterRow('damageType')"
+                        >
+                            伤害类型
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                            :class="
+                                showVersionFilter
+                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleFilterRow('version')"
+                        >
+                            {{ $t("char-build.version") }}
+                        </button>
+                    </div>
                 </div>
 
-                <div class="p-2 border-b border-base-200 space-y-2">
-                    <div class="flex flex-wrap gap-2">
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="showCategoryFilter"
-                                @change="toggleCategoryFilter(showCategoryFilter)"
-                                class="checkbox checkbox-xs"
-                            />
-                            <span class="text-xs text-base-content/70">武器分类</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="showDamageTypeFilter"
-                                @change="toggleDamageTypeFilter(showDamageTypeFilter)"
-                                class="checkbox checkbox-xs"
-                            />
-                            <span class="text-xs text-base-content/70">伤害类型</span>
-                        </label>
-                        <label class="flex items-center gap-1 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="showVersionFilter"
-                                @change="toggleVersionFilter(showVersionFilter)"
-                                class="checkbox checkbox-xs"
-                            />
-                            <span class="text-xs text-base-content/70">{{ $t("char-build.version") }}</span>
-                        </label>
-                    </div>
-
-                    <div v-show="showCategoryFilter">
-                        <div class="text-xs text-base-content/70 mb-1">武器分类</div>
-                        <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                                :class="
-                                    selectedCategory === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedCategory = ''"
-                            >
-                                {{ $t("全部") }}
-                            </button>
-                            <button
-                                v-for="cat in categories"
-                                :key="cat"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
-                                :class="
-                                    selectedCategory === cat ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedCategory = cat"
-                            >
-                                {{ $t(cat) }}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div v-show="showDamageTypeFilter">
-                        <div class="text-xs text-base-content/70 mb-1">伤害类型</div>
-                        <div class="flex flex-wrap gap-1 pb-1">
-                            <button
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                                :class="
-                                    selectedDamageType === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedDamageType = ''"
-                            >
-                                {{ $t("全部") }}
-                            </button>
-                            <button
-                                v-for="type in damageTypes"
-                                :key="type"
-                                class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
-                                :class="
-                                    selectedDamageType === type
-                                        ? 'bg-primary text-white'
-                                        : 'bg-base-200 text-base-content hover:bg-base-300'
-                                "
-                                @click="selectedDamageType = type"
-                            >
-                                {{ $t(type) }}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div v-show="showVersionFilter" class="flex flex-wrap gap-1 pb-1">
+                <!-- 筛选条件 -->
+                <div
+                    v-show="showCategoryFilter || showDamageTypeFilter || showVersionFilter"
+                    class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
+                    style="animation-delay: 0.05s"
+                >
+                    <!-- 武器分类筛选 -->
+                    <div v-show="showCategoryFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">武器分类</span>
                         <button
-                            class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200"
-                            :class="selectedVersion === '' ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedCategory === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="selectedCategory = ''"
+                        >
+                            {{ $t("全部") }}
+                        </button>
+                        <button
+                            v-for="cat in categories"
+                            :key="cat"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedCategory === cat
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="selectedCategory = cat"
+                        >
+                            {{ $t(cat) }}
+                        </button>
+                    </div>
+
+                    <!-- 伤害类型筛选 -->
+                    <div v-show="showDamageTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">伤害类型</span>
+                        <button
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedDamageType === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="selectedDamageType = ''"
+                        >
+                            {{ $t("全部") }}
+                        </button>
+                        <button
+                            v-for="type in damageTypes"
+                            :key="type"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedDamageType === type
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            @click="selectedDamageType = type"
+                        >
+                            {{ $t(type) }}
+                        </button>
+                    </div>
+
+                    <!-- 版本筛选 -->
+                    <div v-show="showVersionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{
+                            $t("char-build.version")
+                        }}</span>
+                        <button
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                selectedVersion === ''
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectedVersion = ''"
                         >
                             {{ $t("全部") }}
@@ -227,9 +295,11 @@ useInitialScrollToSelectedItem()
                         <button
                             v-for="version in versionOptions"
                             :key="version"
-                            class="px-3 py-0.5 text-xs rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
                             :class="
-                                selectedVersion === version ? 'bg-primary text-white' : 'bg-base-200 text-base-content hover:bg-base-300'
+                                selectedVersion === version
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectedVersion = version"
                         >
@@ -238,76 +308,97 @@ useInitialScrollToSelectedItem()
                     </div>
                 </div>
 
+                <!-- 武器列表 -->
                 <ScrollArea class="flex-1">
-                    <div class="p-2 space-y-2">
-                        <div
-                            v-for="weapon in filteredWeapons"
-                            :key="weapon.id"
-                            class="p-3 rounded cursor-pointer transition-colors duration-200 bg-base-200 hover:bg-base-300"
-                            :class="{ 'bg-primary/90 text-primary-content hover:bg-primary': selectedWeaponId === weapon.id }"
-                            @click="selectedWeaponId = weapon.id"
-                        >
-                            <div class="flex items-start justify-between">
-                                <div class="flex">
-                                    <div class="flex items-center gap-2">
-                                        <div class="size-12 overflow-hidden rounded bg-linear-15" :class="getRarityGradientClass(5)">
-                                            <img
-                                                :src="LeveledWeapon.url(weapon.icon)"
-                                                alt="武器图标"
-                                                class="w-full h-full object-cover rounded"
-                                            />
-                                        </div>
-                                        <div>
-                                            <div class="font-medium">
+                    <div class="p-3">
+                        <div class="space-y-2">
+                            <article
+                                v-for="(weapon, index) in filteredWeapons"
+                                :key="weapon.id"
+                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
+                                :class="
+                                    selectedWeaponId === weapon.id
+                                        ? 'dbw-item-active border-primary/70 bg-primary/10'
+                                        : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                                "
+                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                @click="selectedWeaponId = weapon.id"
+                            >
+                                <!-- 左侧主色强调条：选中时显现 -->
+                                <span
+                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                    :class="selectedWeaponId === weapon.id ? 'opacity-100' : 'opacity-0'"
+                                    aria-hidden="true"
+                                />
+                                <div class="flex items-start gap-3 p-3">
+                                    <!-- 武器图标（稀有度渐变底） -->
+                                    <div class="size-12 shrink-0 overflow-hidden rounded-xs bg-linear-15" :class="getRarityGradientClass(5)">
+                                        <img :src="LeveledWeapon.url(weapon.icon)" alt="武器图标" class="h-full w-full object-cover" />
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <!-- 名称行：名称 + 幽灵 ID -->
+                                        <div class="flex items-baseline gap-2">
+                                            <h3
+                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                :class="{ 'text-primary': selectedWeaponId === weapon.id }"
+                                            >
                                                 {{ $t(weapon.名称) }}
-                                            </div>
-                                            <div class="text-xs opacity-70 mt-1 flex gap-2">
-                                                <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
-                                                <span>{{ $t(weapon.伤害类型) }}</span>
-                                            </div>
+                                            </h3>
+                                            <span class="ml-auto shrink-0"><CopyID :id="weapon.id" /></span>
+                                        </div>
+                                        <!-- 元信息行：分类 / 伤害类型 -->
+                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
+                                            <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
+                                            <span>{{ $t(weapon.伤害类型) }}</span>
+                                        </div>
+                                        <!-- 数值行：攻击 / 暴击 / 暴伤 / 触发 -->
+                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-base-content/55">
+                                            <span class="inline-flex items-center gap-1">
+                                                {{ $t("攻击") }}
+                                                <span class="font-medium tabular-nums">{{ formatProp("基础攻击", weapon.攻击) }}</span>
+                                            </span>
+                                            <span class="inline-flex items-center gap-1">
+                                                {{ $t("暴击") }}
+                                                <span class="font-medium tabular-nums">{{ formatProp("基础暴击", weapon.暴击) }}</span>
+                                            </span>
+                                            <span class="inline-flex items-center gap-1">
+                                                {{ $t("暴伤") }}
+                                                <span class="font-medium tabular-nums">{{ formatProp("基础暴伤", weapon.暴伤) }}</span>
+                                            </span>
+                                            <span class="inline-flex items-center gap-1">
+                                                {{ $t("触发") }}
+                                                <span class="font-medium tabular-nums">{{ formatProp("基础触发", weapon.触发) }}</span>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <CopyID :id="weapon.id" />
-                                </div>
-                            </div>
-                            <div class="flex flex-wrap gap-2 mt-2 text-xs opacity-70">
-                                <div class="flex items-center gap-1">
-                                    <span>{{ $t("攻击") }}</span>
-                                    <span class="font-medium">{{ formatProp("基础攻击", weapon.攻击) }}</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span>{{ $t("暴击") }}</span>
-                                    <span class="font-medium">{{ formatProp("基础暴击", weapon.暴击) }}</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span>{{ $t("暴伤") }}</span>
-                                    <span class="font-medium">{{ formatProp("基础暴伤", weapon.暴伤) }}</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <span>{{ $t("触发") }}</span>
-                                    <span class="font-medium">{{ formatProp("基础触发", weapon.触发) }}</span>
-                                </div>
-                            </div>
+                            </article>
                         </div>
                     </div>
                 </ScrollArea>
 
-                <div class="p-2 border-t border-base-200 text-center text-sm text-base-content/70">
-                    共 {{ filteredWeapons.length }} 个武器
+                <!-- 底部统计条 -->
+                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                    <p class="text-[11px] tracking-wide text-base-content/50">
+                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredWeapons.length }}</b> 个武器
+                    </p>
                 </div>
             </div>
-            <div
+
+            <!-- 收起详情手柄 -->
+            <button
                 v-if="selectedWeapon"
-                class="flex-none flex justify-center items-center overflow-hidden cursor-pointer hover:bg-base-300"
+                type="button"
+                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
+                title="收起详情"
                 @click="selectedWeaponId = 0"
             >
-                <Icon icon="tabler:arrow-bar-to-right" class="rotate-90 sm:rotate-0" />
-            </div>
+                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
+            </button>
 
-            <ScrollArea v-if="selectedWeapon" class="flex-1 overflow-hidden">
-                <DBWeaponDetailItem :weapon="selectedWeapon" />
+            <!-- 右侧详情面板 -->
+            <ScrollArea v-if="selectedWeapon" class="min-w-0 flex-1">
+                <DBWeaponDetailItem :key="selectedWeaponId" :weapon="selectedWeapon" />
             </ScrollArea>
         </div>
     </div>

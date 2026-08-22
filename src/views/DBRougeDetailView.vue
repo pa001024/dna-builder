@@ -134,9 +134,12 @@ const proItem = computed(() => (item.value && mode.value === "pro" ? (item.value
 
 <template>
     <ScrollArea class="h-full">
-        <div v-if="item" class="flex-1">
-            <DBRougeLikeDetailItem v-if="likeItem" :item="likeItem" :kind="kind" />
-            <DBRougeProDetailItem v-else-if="proItem" :item="proItem" :kind="kind" />
+        <!-- 居中容器：与首页一致的纸面排版宽度 -->
+        <div v-if="item" class="mx-auto max-w-6xl px-4 py-4 md:px-5">
+            <div>
+                <DBRougeLikeDetailItem v-if="likeItem" :item="likeItem" :kind="kind" />
+                <DBRougeProDetailItem v-else-if="proItem" :item="proItem" :kind="kind" />
+            </div>
         </div>
         <div v-else class="p-4">
             <div class="text-base-content/70">未找到迷津条目</div>

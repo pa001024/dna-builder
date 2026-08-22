@@ -847,48 +847,63 @@ onMounted(async () => {
 
 <template>
     <ScrollArea class="h-full">
-        <div class="mx-auto max-w-7xl p-4 space-y-4">
-            <div class="rounded-2xl bg-base-100 shadow-md">
-                <div class="p-5 md:p-6 space-y-4">
+        <div class="mx-auto flex max-w-7xl flex-col gap-4 p-4 sm:p-5">
+            <div class="stagger-rise flex flex-col gap-4">
+                <!-- 赛季信息卡：外层区块卡 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
                     <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                        <div class="space-y-2">
-                            <div class="flex flex-wrap items-center gap-2 text-sm opacity-70">
-                                <RouterLink :to="seasonDungeonLink" class="link link-hover">
+                        <div class="min-w-0 space-y-2">
+                            <p
+                                class="inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase"
+                            >
+                                <span class="h-px w-5 bg-primary" aria-hidden="true" />
+                                Abyss Usage
+                            </p>
+                            <h1
+                                class="flex flex-wrap items-center gap-2 font-orbitron text-xl leading-none font-bold tracking-tight sm:text-2xl"
+                            >
+                                <span>沉浸式戏剧</span>
+                                <span class="inline-flex items-center gap-1">
+                                    <img
+                                        v-for="key in seasonDungeonElementKeys"
+                                        :key="key"
+                                        :src="LeveledChar.elementUrl(key)"
+                                        alt=""
+                                        class="h-6 inline-block"
+                                    />
+                                </span>
+                            </h1>
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/55">
+                                <RouterLink :to="seasonDungeonLink" class="transition-colors duration-150 hover:text-primary">
                                     {{ seasonVersionText }}
                                 </RouterLink>
-                                <RouterLink :to="seasonCharLink" class="inline-flex items-center gap-2 link link-hover">
-                                    <img v-if="seasonRoleIcon" :src="seasonRoleIcon" :alt="seasonRoleName" class="size-5 rounded-full" />
+                                <RouterLink
+                                    :to="seasonCharLink"
+                                    class="inline-flex items-center gap-1.5 transition-colors duration-150 hover:text-primary"
+                                >
+                                    <img
+                                        v-if="seasonRoleIcon"
+                                        :src="seasonRoleIcon"
+                                        :alt="seasonRoleName"
+                                        class="size-5 rounded-xs object-cover"
+                                    />
                                     <span>{{ seasonRoleName }}</span>
                                 </RouterLink>
                                 <span>{{ seasonRangeText }}</span>
                             </div>
-                            <div class="space-y-1">
-                                <h1 class="flex items-center gap-2 text-3xl font-black tracking-tight">
-                                    <span>沉浸式戏剧</span>
-                                    <span class="inline-flex items-center gap-1">
-                                        <img
-                                            v-for="key in seasonDungeonElementKeys"
-                                            :key="key"
-                                            :src="LeveledChar.elementUrl(key)"
-                                            alt=""
-                                            class="h-8 inline-block"
-                                        />
-                                    </span>
-                                </h1>
-                            </div>
                         </div>
-                        <div class="flex items-center gap-2 self-start md:self-auto">
+                        <div class="flex flex-wrap items-center gap-2 self-start md:self-auto">
                             <RangeSelector
                                 v-model:from="levelRangeFrom"
                                 v-model:to="levelRangeTo"
                                 :min="1"
                                 :max="65"
-                                class="btn btn-sm btn-outline min-w-28"
+                                class="btn btn-outline btn-sm min-w-28 rounded-xs"
                                 @change="handleLevelRangeChange"
                             />
                             <button
                                 v-if="user.isAdmin"
-                                class="btn btn-sm btn-outline"
+                                class="btn btn-outline btn-sm rounded-xs"
                                 :disabled="exporting"
                                 @click="exportAbyssSubmissions"
                             >
@@ -896,34 +911,29 @@ onMounted(async () => {
                                 <Icon v-else icon="ri:file-excel-2-line" />
                                 导出
                             </button>
-                            <button class="btn btn-sm btn-primary" :disabled="abyssUploading" @click="uploadAbyssUsage">
+                            <button class="btn btn-primary btn-sm rounded-xs" :disabled="abyssUploading" @click="uploadAbyssUsage">
                                 <span v-if="abyssUploading" class="loading loading-spinner loading-xs"></span>
                                 <Icon v-else icon="ri:upload-2-line" />
                                 上传
                             </button>
-                            <button class="btn btn-ghost btn-sm" :disabled="loading" @click="loadStats">
+                            <button class="btn btn-ghost btn-sm rounded-xs" :disabled="loading" @click="loadStats">
                                 <Icon icon="ri:refresh-line" class="size-4" />
                                 <span>刷新</span>
                             </button>
                         </div>
                     </div>
 
-                    <div v-if="loading" class="mt-4">
+                    <div v-if="loading" class="mt-3">
                         <span class="loading loading-spinner loading-sm"></span>
                     </div>
-                </div>
-            </div>
+                </section>
 
-            <div class="rounded-2xl bg-base-100 shadow-md">
-                <div class="p-5">
-                    <div class="mb-4 flex items-end justify-between gap-3">
-                        <div>
-                            <h2 class="text-2xl font-bold">角色使用率</h2>
-                            <p class="text-sm opacity-70">
-                                本页面全部数据分析自 {{ lineupTotal }} 名玩家。使用率=上场该角色玩家数÷持有该角色玩家数
-                            </p>
-                        </div>
-                    </div>
+                <!-- 角色使用率：外层区块卡 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
+                    <SectionHeader kicker="ROLE USAGE" title="角色使用率" :count="lineupTotal" />
+                    <p class="mb-3 text-xs leading-relaxed text-base-content/50">
+                        本页面全部数据分析自 {{ lineupTotal }} 名玩家。使用率=上场该角色玩家数÷持有该角色玩家数
+                    </p>
                     <div class="space-y-3">
                         <div
                             v-for="row in groupedRoleRankRows"
@@ -933,57 +943,50 @@ onMounted(async () => {
                             <div
                                 v-for="group in row.groups"
                                 :key="group.label"
-                                class="space-y-2 p-3 hover:bg-base-200 rounded transition-all duration-300"
+                                class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5 transition-colors duration-200 hover:border-primary/40"
                             >
-                                <div class="text-xs font-medium opacity-60">{{ group.label }}</div>
+                                <div class="text-[11px] font-medium text-base-content/50">{{ group.label }}</div>
                                 <div class="flex flex-wrap justify-center gap-2">
-                                    <div
+                                    <RouterLink
                                         v-for="item in group.items"
                                         :key="item.charId"
-                                        class="group card w-16 shrink-0 transition-all duration-300"
+                                        :to="getCharLink(item.charId)"
+                                        class="group relative block w-16 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/[0.03] transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50"
+                                        :title="getCharName(item.charId)"
                                     >
-                                        <RouterLink
-                                            :to="getCharLink(item.charId)"
-                                            class="card-body bg-linear-30 from-indigo-300/50 to-indigo-600/50 rounded-2xl relative p-2 overflow-hidden"
-                                        >
-                                            <img
-                                                class="absolute inset-0 h-full object-cover pointer-events-none mask-b-from-60%"
-                                                :src="getCharIcon(item.charId)"
-                                                :alt="getCharName(item.charId)"
-                                            />
-                                            <div class="flex flex-col items-center z-1 text-white text-shadow-md text-shadow-black/30">
-                                                <div class="avatar mb-2">
-                                                    <div class="h-16 rounded-full"></div>
-                                                </div>
-                                                <div class="font-medium text-center text-sm leading-tight">
-                                                    {{ formatUsageRate(item.submissionCount || 0, item.ownedCount || 0) }}
-                                                </div>
-                                            </div>
-                                        </RouterLink>
-                                    </div>
+                                        <img
+                                            class="pointer-events-none h-16 w-full object-cover object-top mask-b-from-55%"
+                                            :src="getCharIcon(item.charId)"
+                                            :alt="getCharName(item.charId)"
+                                        />
+                                        <div class="py-1.5 text-center">
+                                            <span
+                                                class="font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                            >
+                                                {{ formatUsageRate(item.submissionCount || 0, item.ownedCount || 0) }}
+                                            </span>
+                                        </div>
+                                    </RouterLink>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </section>
 
-            <div class="grid gap-4 lg:grid-cols-2">
-                <div class="rounded-2xl bg-base-100 shadow-md">
-                    <div class="p-5">
-                        <div class="mb-4">
-                            <h2 class="text-2xl font-bold text-center">最常用阵容</h2>
-                            <p class="mt-2 text-center text-sm opacity-60">出战数最高的阵容</p>
-                        </div>
+                <div class="grid gap-4 lg:grid-cols-2">
+                    <!-- 最常用阵容：外层区块卡 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
+                        <SectionHeader kicker="TOP LINEUPS" title="最常用阵容" />
+                        <p class="mb-3 text-xs text-base-content/50">出战数最高的阵容</p>
                         <div class="space-y-3">
                             <div
                                 v-for="item in lineupStats.slice(0, 6)"
                                 :key="`${item.charId}-${item.meleeId}-${item.rangedId}-${item.support1}-${item.support2}-${item.supportWeapon1}-${item.supportWeapon2}-${item.petId ?? 0}`"
-                                class="rounded-2xl bg-base-200 p-3"
+                                class="rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5"
                             >
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="flex items-center gap-2 overflow-hidden">
-                                        <div class="flex flex-wrap gap-1 shrink-0">
+                                        <div class="flex shrink-0 flex-wrap gap-1">
                                             <RouterLink
                                                 v-for="slot in getLineupSlots(item)"
                                                 :key="`${item.charId}-${slot.kind}-${slot.id}`"
@@ -993,67 +996,60 @@ onMounted(async () => {
                                             >
                                                 <img
                                                     :src="slot.icon"
-                                                    class="size-9 rounded-full ring-2 ring-base-200 object-cover transition-transform duration-200 group-hover:scale-105"
+                                                    class="size-9 rounded-xs object-cover transition-transform duration-200 group-hover:scale-105"
                                                 />
                                             </RouterLink>
                                         </div>
                                         <div class="min-w-0">
                                             <div class="truncate text-sm font-medium">{{ getCharName(item.charId) }}</div>
-                                            <div class="truncate text-xs opacity-60">
+                                            <div class="truncate text-xs text-base-content/55">
                                                 {{ getWeaponName(item.meleeId) }} / {{ getWeaponName(item.rangedId) }} /
                                                 {{ getPetName(item.petId) }}
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="text-right">
-                                        <div class="text-lg font-bold">
-                                            {{ formatSharePercent(item.submissionCount || 0, lineupTotal) }}
-                                        </div>
-                                    </div>
+                                    <span class="font-orbitron text-lg font-semibold tabular-nums text-primary">
+                                        {{ formatSharePercent(item.submissionCount || 0, lineupTotal) }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </section>
 
-                <div class="rounded-2xl bg-base-100 shadow-md">
-                    <div class="p-5">
-                        <div class="mb-4">
-                            <h2 class="text-2xl font-bold text-center">配队助手</h2>
-                            <p class="mt-2 text-center text-sm opacity-60">查询角色常用阵容</p>
-                        </div>
-                        <div class="mb-3">
-                            <div class="flex items-center gap-2">
-                                <select
-                                    class="select select-bordered flex-1"
-                                    :value="selectedAssistantCharId ?? ''"
-                                    @change="handleAssistantCharChange"
-                                >
-                                    <option disabled value="">请选择角色</option>
-                                    <option v-for="item in lineupCharOptions" :key="item.charId" :value="item.charId">
-                                        {{ item.name }}
-                                    </option>
-                                </select>
-                                <label class="label cursor-pointer gap-2 px-3 py-2">
-                                    <span class="label-text whitespace-nowrap text-sm">仅主控</span>
-                                    <input
-                                        type="checkbox"
-                                        class="toggle toggle-primary toggle-sm"
-                                        :checked="assistantMainOnly"
-                                        @change="handleAssistantMainOnlyChange"
-                                    />
-                                </label>
-                            </div>
+                    <!-- 配队助手：外层区块卡 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
+                        <SectionHeader kicker="TEAM ASSISTANT" title="配队助手" />
+                        <p class="mb-3 text-xs text-base-content/50">查询角色常用阵容</p>
+                        <div class="mb-3 flex items-center gap-2">
+                            <select
+                                class="select select-bordered flex-1 rounded-xs"
+                                :value="selectedAssistantCharId ?? ''"
+                                @change="handleAssistantCharChange"
+                            >
+                                <option disabled value="">请选择角色</option>
+                                <option v-for="item in lineupCharOptions" :key="item.charId" :value="item.charId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <label class="label cursor-pointer gap-2 rounded-xs px-3 py-2">
+                                <span class="whitespace-nowrap text-sm">仅主控</span>
+                                <input
+                                    type="checkbox"
+                                    class="toggle toggle-primary toggle-sm"
+                                    :checked="assistantMainOnly"
+                                    @change="handleAssistantMainOnlyChange"
+                                />
+                            </label>
                         </div>
                         <div v-if="assistantLineupStats.length" class="space-y-3">
                             <div
                                 v-for="item in assistantLineupStats"
                                 :key="`${item.charId}-${item.meleeId}-${item.rangedId}-${item.support1}-${item.support2}-${item.supportWeapon1}-${item.supportWeapon2}-${item.petId ?? 0}`"
-                                class="rounded-2xl bg-base-200 p-3"
+                                class="rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5"
                             >
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="flex items-center gap-2 overflow-hidden">
-                                        <div class="flex flex-wrap gap-1 shrink-0">
+                                        <div class="flex shrink-0 flex-wrap gap-1">
                                             <RouterLink
                                                 v-for="slot in getLineupSlots(item)"
                                                 :key="`${item.charId}-${slot.kind}-${slot.id}`"
@@ -1063,110 +1059,128 @@ onMounted(async () => {
                                             >
                                                 <img
                                                     :src="slot.icon"
-                                                    class="size-9 rounded-full ring-2 ring-base-200 object-cover transition-transform duration-200 group-hover:scale-105"
+                                                    class="size-9 rounded-xs object-cover transition-transform duration-200 group-hover:scale-105"
                                                 />
                                             </RouterLink>
                                         </div>
                                         <div class="min-w-0">
                                             <div class="truncate text-sm font-medium">{{ getCharName(item.charId) }}</div>
-                                            <div class="truncate text-xs opacity-60">
+                                            <div class="truncate text-xs text-base-content/55">
                                                 {{ getWeaponName(item.meleeId) }} / {{ getWeaponName(item.rangedId) }} /
                                                 {{ getPetName(item.petId) }}
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="text-right">
-                                        <div class="text-lg font-bold">
-                                            {{ formatSharePercent(item.submissionCount || 0, lineupTotal) }}
-                                        </div>
-                                    </div>
+                                    <span class="font-orbitron text-lg font-semibold tabular-nums text-primary">
+                                        {{ formatSharePercent(item.submissionCount || 0, lineupTotal) }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="py-6 text-center text-sm opacity-60">暂无结果</div>
-                    </div>
+                        <div v-else class="rounded-xs border border-dashed border-base-content/15 py-6 text-center text-sm text-base-content/45">
+                            暂无结果
+                        </div>
+                    </section>
                 </div>
-            </div>
 
-            <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
-                <div v-for="section in slotStatSections" :key="section.key" class="rounded-2xl bg-base-100 shadow-md">
-                    <div class="p-5">
-                        <h2 class="mb-4 text-xl font-bold">{{ section.label }}</h2>
+                <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+                    <!-- 槽位统计：外层区块卡 -->
+                    <section
+                        v-for="section in slotStatSections"
+                        :key="section.key"
+                        class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4"
+                    >
+                        <SectionHeader
+                            no-animate
+                            compact
+                            :kicker="{ support: 'SUPPORT', meleeWeapon: 'MELEE', rangedWeapon: 'RANGED', pet: 'PET' }[section.key]"
+                            :title="section.label"
+                        />
                         <div class="space-y-2">
                             <div
                                 v-for="item in section.items.slice(0, 6)"
                                 :key="`${section.key}-${item.id}`"
-                                class="rounded-xl bg-base-200 p-3"
+                                class="rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5"
                             >
                                 <div class="flex items-center gap-2">
                                     <RouterLink :to="getSlotStatLink(section.key, item.id)">
-                                        <img :src="getSlotStatIcon(section.key, item.id)" class="size-9 rounded-full object-cover" />
+                                        <img :src="getSlotStatIcon(section.key, item.id)" class="size-9 rounded-xs object-cover" />
                                     </RouterLink>
                                     <div class="min-w-0 flex-1">
                                         <RouterLink
                                             :to="getSlotStatLink(section.key, item.id)"
-                                            class="truncate text-sm font-medium link link-hover"
+                                            class="block truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
                                         >
                                             {{ getSlotStatName(section.key, item.id) }}
                                         </RouterLink>
-                                        <div class="text-xs opacity-60">{{ item.submissionCount }} 次</div>
+                                        <div class="text-[11px] text-base-content/45 tabular-nums">{{ item.submissionCount }} 次</div>
                                     </div>
-                                    <div class="text-sm font-medium opacity-70">
+                                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
                                         {{ formatSharePercent(item.submissionCount, section.total) }}
-                                    </div>
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
-            </div>
 
-            <div class="rounded-2xl bg-base-100 shadow-md">
-                <div class="p-5">
-                    <div class="mb-4 flex items-end justify-between gap-3">
-                        <div>
-                            <h2 class="text-xl font-bold">历练等级分布</h2>
-                        </div>
-                        <div class="text-sm opacity-60">{{ levelRangeLabel }} · {{ abyssSubmissionsCount }} 次提交</div>
-                    </div>
-                    <div v-if="levelStatItems.length" class="space-y-3">
+                <!-- 历练等级分布：外层区块卡 -->
+                <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
+                    <SectionHeader kicker="LEVEL DIST" title="历练等级分布">
+                        <template #trailing>
+                            <span class="shrink-0 text-[11px] text-base-content/50 tabular-nums">
+                                {{ levelRangeLabel }} · {{ abyssSubmissionsCount }} 次提交
+                            </span>
+                        </template>
+                    </SectionHeader>
+                    <div v-if="levelStatItems.length" class="space-y-2.5">
                         <div
                             v-for="item in levelStatItems"
                             :key="item.level"
-                            class="grid gap-3 rounded-xl bg-base-200 p-3 md:grid-cols-[4rem_minmax(0,1fr)_5rem] md:items-center"
+                            class="grid gap-3 rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5 md:grid-cols-[4rem_minmax(0,1fr)_5rem] md:items-center"
                         >
-                            <div class="text-sm font-semibold">Lv.{{ item.level }}</div>
-                            <div class="space-y-2">
-                                <div class="h-2 overflow-hidden rounded-full bg-base-300">
+                            <div class="font-orbitron text-sm font-semibold tabular-nums">Lv.{{ item.level }}</div>
+                            <div class="space-y-1.5">
+                                <div class="h-1.5 overflow-hidden rounded-xs bg-base-content/10">
                                     <div
-                                        class="h-full rounded-full bg-primary transition-[width] duration-500"
+                                        class="h-full bg-primary transition-[width] duration-500"
                                         :style="{ width: item.percent }"
                                     ></div>
                                 </div>
-                                <div class="text-xs opacity-60">{{ item.submissionCount }} 次</div>
+                                <div class="text-[11px] text-base-content/45 tabular-nums">{{ item.submissionCount }} 次</div>
                             </div>
-                            <div class="text-right text-sm font-medium opacity-70">{{ item.percent }}</div>
+                            <span class="text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                {{ item.percent }}
+                            </span>
                         </div>
                     </div>
-                    <div v-else class="py-6 text-center text-sm opacity-60">暂无结果</div>
-                </div>
-            </div>
+                    <div v-else class="rounded-xs border border-dashed border-base-content/15 py-6 text-center text-sm text-base-content/45">
+                        暂无结果
+                    </div>
+                </section>
 
-            <div class="grid gap-4 lg:grid-cols-2">
-                <div class="rounded-2xl bg-base-100 shadow-md">
-                    <div class="p-5">
-                        <h2 class="mb-4 text-xl font-bold">角色溯源分布</h2>
+                <div class="grid gap-4 lg:grid-cols-2">
+                    <!-- 角色溯源分布：外层区块卡 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
+                        <SectionHeader kicker="TRACE DIST" title="角色溯源分布" />
                         <div class="space-y-2">
-                            <div v-for="item in roleStats" :key="item.charId" class="rounded-xl bg-base-200 p-3">
+                            <div
+                                v-for="item in roleStats"
+                                :key="item.charId"
+                                class="rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5"
+                            >
                                 <div class="flex items-center gap-2">
                                     <RouterLink :to="getCharLink(item.charId)">
-                                        <img :src="getCharIcon(item.charId)" class="size-9 rounded-full object-cover" />
+                                        <img :src="getCharIcon(item.charId)" class="size-9 rounded-xs object-cover" />
                                     </RouterLink>
                                     <div class="min-w-0 flex-1">
-                                        <RouterLink :to="getCharLink(item.charId)" class="truncate text-sm font-medium link link-hover">{{
-                                            getCharName(item.charId)
-                                        }}</RouterLink>
-                                        <div class="text-xs opacity-60">{{ item.submissionCount }} 次</div>
+                                        <RouterLink
+                                            :to="getCharLink(item.charId)"
+                                            class="block truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
+                                        >
+                                            {{ getCharName(item.charId) }}
+                                        </RouterLink>
+                                        <div class="text-[11px] text-base-content/45 tabular-nums">{{ item.submissionCount }} 次</div>
                                     </div>
                                 </div>
                                 <div class="mt-2 flex flex-wrap gap-1">
@@ -1176,7 +1190,7 @@ onMounted(async () => {
                                     >
                                         <span
                                             v-if="!shouldShowDistributionTooltip('support', item.charId, distribution.level)"
-                                            class="badge badge-primary badge-sm transition-colors duration-200 hover:badge-secondary"
+                                            class="inline-flex items-center rounded-xs border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary tabular-nums"
                                         >
                                             {{ distribution.label }} {{ distribution.percent }}
                                         </span>
@@ -1186,7 +1200,9 @@ onMounted(async () => {
                                                     {{ getDistributionTooltip("support", item.charId, distribution.level) }}
                                                 </div>
                                             </template>
-                                            <span class="badge badge-primary badge-sm transition-colors duration-200 hover:badge-secondary">
+                                            <span
+                                                class="inline-flex cursor-help items-center rounded-xs border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary tabular-nums"
+                                            >
                                                 {{ distribution.label }} {{ distribution.percent }}
                                             </span>
                                         </FullTooltip>
@@ -1194,25 +1210,29 @@ onMounted(async () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </section>
 
-                <div class="rounded-2xl bg-base-100 shadow-md">
-                    <div class="p-5">
-                        <h2 class="mb-4 text-xl font-bold">武器熔铸分布</h2>
+                    <!-- 武器熔铸分布：外层区块卡 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
+                        <SectionHeader kicker="REFORGE DIST" title="武器熔铸分布" />
                         <div class="space-y-2">
-                            <div v-for="item in weaponStats" :key="item.weaponId" class="rounded-xl bg-base-200 p-3">
+                            <div
+                                v-for="item in weaponStats"
+                                :key="item.weaponId"
+                                class="rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5"
+                            >
                                 <div class="flex items-center gap-2">
                                     <RouterLink :to="getWeaponLink(item.weaponId)">
-                                        <img :src="getWeaponIcon(item.weaponId)" class="size-9 rounded object-cover" />
+                                        <img :src="getWeaponIcon(item.weaponId)" class="size-9 rounded-xs object-cover" />
                                     </RouterLink>
                                     <div class="min-w-0 flex-1">
                                         <RouterLink
                                             :to="getWeaponLink(item.weaponId)"
-                                            class="truncate text-sm font-medium link link-hover"
-                                            >{{ getWeaponName(item.weaponId) }}</RouterLink
+                                            class="block truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
                                         >
-                                        <div class="text-xs opacity-60">{{ item.submissionCount }} 次</div>
+                                            {{ getWeaponName(item.weaponId) }}
+                                        </RouterLink>
+                                        <div class="text-[11px] text-base-content/45 tabular-nums">{{ item.submissionCount }} 次</div>
                                     </div>
                                 </div>
                                 <div class="mt-2 flex flex-wrap gap-1">
@@ -1222,7 +1242,7 @@ onMounted(async () => {
                                     >
                                         <span
                                             v-if="!shouldShowDistributionTooltip('meleeWeapon', item.weaponId, distribution.level)"
-                                            class="badge badge-primary badge-sm transition-colors duration-200 hover:badge-secondary"
+                                            class="inline-flex items-center rounded-xs border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary tabular-nums"
                                         >
                                             {{ distribution.label }} {{ distribution.percent }}
                                         </span>
@@ -1232,7 +1252,9 @@ onMounted(async () => {
                                                     {{ getDistributionTooltip("meleeWeapon", item.weaponId, distribution.level) }}
                                                 </div>
                                             </template>
-                                            <span class="badge badge-primary badge-sm transition-colors duration-200 hover:badge-secondary">
+                                            <span
+                                                class="inline-flex cursor-help items-center rounded-xs border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary tabular-nums"
+                                            >
                                                 {{ distribution.label }} {{ distribution.percent }}
                                             </span>
                                         </FullTooltip>
@@ -1240,7 +1262,7 @@ onMounted(async () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
         </div>

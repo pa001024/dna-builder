@@ -10,9 +10,14 @@ const dungeon = computed(() => dungeonData.find(d => d.id === dungeonId.value))
 </script>
 
 <template>
-    <div class="h-full flex flex-col bg-base-300">
+    <div class="h-full flex flex-col">
         <ScrollArea v-if="dungeon" class="flex-1">
-            <DBDungeonDetailItem :dungeon="dungeon" />
+            <!-- 居中容器：与首页一致的纸面排版宽度 -->
+            <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
+                <div>
+                    <DBDungeonDetailItem :dungeon="dungeon" />
+                </div>
+            </div>
         </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">

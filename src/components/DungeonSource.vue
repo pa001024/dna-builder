@@ -9,6 +9,11 @@ type DungeonSourceItem = ResourceDungeonSourceInfo & {
     dungeon?: Dungeon
 }
 
+/** 补全副本数据后的来源条目。 */
+type DisplayDungeonSource = ResourceDungeonSourceInfo & {
+    dungeon: Dungeon
+}
+
 const props = defineProps<{
     dungeonSources: DungeonSourceItem[]
 }>()
@@ -23,15 +28,20 @@ const elementBgClasses: Record<string, string> = {
     风: "bg-linear-to-b from-emerald-500/25 to-emerald-100/10",
 }
 
-const expandedDungeonId = ref<number | null>(null)
+/** 当前在弹窗中查看的副本来源。 */
+const selectedSource = ref<DisplayDungeonSource | null>(null)
 
 /**
- * 切换副本详情展开状态。
- * @param dungeonId 副本 ID
+ * 详情弹窗显示状态：选中来源即打开，关闭时清空选中。
  */
-function toggleDungeonExpand(dungeonId: number) {
-    expandedDungeonId.value = expandedDungeonId.value === dungeonId ? null : dungeonId
-}
+const showDetailDialog = computed({
+    get: () => selectedSource.value !== null,
+    set: (value: boolean) => {
+        if (!value) {
+            selectedSource.value = null
+        }
+    },
+})
 
 const displayDungeonSources = computed(() => {
     return props.dungeonSources
@@ -39,31 +49,23 @@ const displayDungeonSources = computed(() => {
             ...source,
             dungeon: source.dungeon ?? dungeonMap.get(source.dungeonId),
         }))
-        .filter((source): source is ResourceDungeonSourceInfo & { dungeon: Dungeon } => Boolean(source.dungeon))
-})
-
-/** 当前展开的副本来源（卡片点击后展示其完整详情）。 */
-const expandedDungeonSource = computed(() => {
-    if (expandedDungeonId.value === null) {
-        return null
-    }
-    return displayDungeonSources.value.find(source => source.dungeonId === expandedDungeonId.value) || null
+        .filter((source): source is DisplayDungeonSource => Boolean(source.dungeon))
 })
 </script>
 
 <template>
     <div v-if="displayDungeonSources.length > 0" class="space-y-2">
-        <div class="text-xs text-base-content/60">{{ $t("database.dungeon") }}</div>
+        <div class="text-[11px] tracking-wide text-base-content/55">{{ $t("database.dungeon") }}</div>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2 text-sm">
             <div
                 v-for="source in displayDungeonSources"
                 :key="source.key"
-                class="group flex w-full cursor-pointer items-center gap-2.5 border border-base-content/15 bg-base-100 p-2 text-left transition-colors duration-200 hover:border-primary/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                @click="toggleDungeonExpand(source.dungeonId)"
+                class="group flex w-full cursor-pointer items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/[0.04] p-2 text-left transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                @click="selectedSource = source"
             >
                 <div
-                    class="relative size-11 shrink-0 overflow-hidden rounded"
-                    :class="source.dungeon.e ? elementBgClasses[source.dungeon.e] || 'bg-base-200/40' : 'bg-base-200/40'"
+                    class="relative size-11 shrink-0 overflow-hidden rounded-xs"
+                    :class="source.dungeon.e ? elementBgClasses[source.dungeon.e] || 'bg-base-content/[0.06]' : 'bg-base-content/[0.06]'"
                 >
                     <img
                         v-if="source.dungeon.e"
@@ -90,7 +92,7 @@ const expandedDungeonSource = computed(() => {
                     </div>
                     <div class="mt-0.5 flex items-center gap-1.5 text-[10px] text-base-content/45">
                         <span
-                            class="shrink-0 rounded-sm px-1 py-px font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-white"
+                            class="shrink-0 rounded-xs px-1 py-px text-[8px] font-semibold text-white"
                             :class="getDungeonType(source.dungeon.t).color"
                         >
                             {{ getDungeonType(source.dungeon.t).label }}
@@ -100,15 +102,17 @@ const expandedDungeonSource = computed(() => {
                             >期望 {{ +source.times.toFixed(2) }}次</span
                         >
                         <Icon
-                            :icon="expandedDungeonId === source.dungeonId ? 'radix-icons:chevron-up' : 'radix-icons:chevron-down'"
-                            class="ml-auto shrink-0 text-xs"
+                            icon="ri:arrow-right-up-line"
+                            class="ml-auto h-3 w-3 shrink-0 text-base-content/35 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
                         />
                     </div>
                 </div>
             </div>
-            <div v-if="expandedDungeonSource" class="col-span-full p-2.5 bg-base-200 rounded overflow-hidden">
-                <DBDungeonDetailItem :dungeon="expandedDungeonSource.dungeon" />
-            </div>
         </div>
+
+        <!-- 副本详情弹窗（标题由 DBDungeonDetailItem 档案头承担） -->
+        <SourceDetailDialog v-model="showDetailDialog">
+            <DBDungeonDetailItem v-if="selectedSource" :dungeon="selectedSource.dungeon" />
+        </SourceDetailDialog>
     </div>
 </template>

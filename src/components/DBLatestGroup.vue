@@ -10,7 +10,7 @@ const props = defineProps<{
 
 /** 视口宽度断点 → 每行列数（卡片等比例缩小，列数较常规翻倍） */
 const COLS_BREAKPOINTS: { minWidth: number; cols: number }[] = [
-    { minWidth: 1280, cols: 12 },
+    { minWidth: 1280, cols: 10 },
     { minWidth: 1024, cols: 8 },
     { minWidth: 640, cols: 6 },
     { minWidth: 0, cols: 4 },
@@ -465,17 +465,22 @@ onBeforeUnmount(() => {
 
 <template>
     <div ref="groupEl" class="relative" @mouseenter="onGroupMouseEnter" @mouseleave="onGroupMouseLeave" @mousemove="onGroupMouseMove">
-        <!-- 分组标题行 -->
-        <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+        <!-- 分组标题行：kicker 徽记 + 元信息 + hairline -->
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
             <div class="flex items-baseline gap-3">
-                <span class="font-mono text-[10px] font-semibold uppercase tracking-[0.3em] text-base-content/60">{{ label }}</span>
+                <p class="inline-flex items-center gap-2 text-[10px] font-semibold text-base-content/60">
+                    <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                    {{ label }}
+                </p>
                 <span class="font-mono text-xs tabular-nums text-base-content/40">v{{ version }} · {{ entries.length }}</span>
             </div>
+
+            <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
 
             <button
                 v-if="!canHover && hasStack"
                 type="button"
-                class="cursor-pointer border border-base-content/25 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/60 transition-colors duration-200 hover:border-primary/60 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97]"
+                class="cursor-pointer rounded-xs border border-base-content/25 px-3 py-1 text-[10px] text-base-content/60 transition-colors duration-200 hover:border-primary/60 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97]"
                 @click="toggle"
             >
                 {{ isExpanded ? $t("view.collapse") : `${$t("view.expand")} +${stackedEntries.length}` }}
@@ -483,7 +488,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 卡片网格（收起态仅第一行；列数翻倍，卡片等比例缩小） -->
-        <ul ref="gridEl" class="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-12">
+        <ul ref="gridEl" class="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
             <li
                 v-for="(entry, index) in gridEntries"
                 :key="entryKey(entry)"
