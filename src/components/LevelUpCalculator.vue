@@ -678,7 +678,9 @@ const planTabAddActions: Partial<Record<PlanTab, () => void>> = {
 
 // 页签计数方章样式：仅当前页签使用主色，其余弱化
 const planTabBadgeClass = (tab: PlanTab) =>
-    activePlanTab.value === tab ? "border-primary bg-primary font-semibold text-primary-content" : "border-base-content/20 text-base-content/55"
+    activePlanTab.value === tab
+        ? "border-primary bg-primary font-semibold text-primary-content"
+        : "border-base-content/20 text-base-content/55"
 
 // 页签徽标计数；估算配置页签无计数
 const planTabCount = (tab: PlanTab): number | null => {
@@ -858,7 +860,7 @@ const dungeonTimeFields = [
                                             :key="skillIndex"
                                             class="flex items-center gap-2"
                                         >
-                                            <Tooltip :tooltip="skill.名称">
+                                            <Tooltip :tooltip="skill.名称 ?? '?'">
                                                 <div class="shrink-0 overflow-hidden rounded-xs">
                                                     <div
                                                         alt="技能图标"
@@ -1362,7 +1364,9 @@ const dungeonTimeFields = [
                         v-for="char in filteredChars"
                         :key="char.id"
                         class="cursor-pointer rounded-xs border transition-colors duration-150 hover:border-primary/40"
-                        :class="selectedCharsForBatch.has(char.id) ? 'border-primary bg-primary/10' : 'border-base-content/15 bg-base-content/3'"
+                        :class="
+                            selectedCharsForBatch.has(char.id) ? 'border-primary bg-primary/10' : 'border-base-content/15 bg-base-content/3'
+                        "
                         @click="toggleSelectCharForBatch(char.id)"
                     >
                         <div class="flex flex-row items-center gap-3 p-3">
@@ -1435,7 +1439,9 @@ const dungeonTimeFields = [
                         :key="weapon.id"
                         class="cursor-pointer rounded-xs border transition-colors duration-150 hover:border-primary/40"
                         :class="
-                            selectedWeaponsForBatch.has(weapon.id) ? 'border-primary bg-primary/10' : 'border-base-content/15 bg-base-content/3'
+                            selectedWeaponsForBatch.has(weapon.id)
+                                ? 'border-primary bg-primary/10'
+                                : 'border-base-content/15 bg-base-content/3'
                         "
                         @click="toggleSelectWeaponForBatch(weapon.id)"
                     >
@@ -1519,11 +1525,7 @@ const dungeonTimeFields = [
                     v-if="(['金', '紫', '蓝', '绿', '白'] as const).some(color => enableMods[color])"
                     class="p-4 grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2"
                 >
-                    <div
-                        v-for="(mod, index) in filteredMods"
-                        :key="index"
-                        class="relative cursor-pointer"
-                    >
+                    <div v-for="(mod, index) in filteredMods" :key="index" class="relative cursor-pointer">
                         <ModItem
                             :mod="mod"
                             :selected="selectedModsForBatch.has(mod.id)"
@@ -1537,7 +1539,9 @@ const dungeonTimeFields = [
                         />
                     </div>
                 </div>
-                <div v-else class="flex h-72 w-full items-center justify-center p-4 text-sm text-base-content/50">请选择要显示的魔之楔品质</div>
+                <div v-else class="flex h-72 w-full items-center justify-center p-4 text-sm text-base-content/50">
+                    请选择要显示的魔之楔品质
+                </div>
             </div>
         </div>
 

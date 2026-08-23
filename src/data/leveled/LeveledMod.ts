@@ -385,6 +385,7 @@ export class LeveledMod implements Mod {
             召唤物伤害: 0,
             减伤: 0,
             有效生命: 0,
+            充盈威力: 0,
         }
         Object.keys(this.getProperties()).forEach(prop => {
             if (prop in attrs) attrs[prop as keyof CharAttr] += this[prop]

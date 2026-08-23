@@ -171,7 +171,7 @@ export interface ForgeSkill {
 
 export interface Skill {
     id?: number
-    名称: string
+    名称?: string
     类型: string
     武器?: string
     升级?: Record<string, number>[]
@@ -186,6 +186,7 @@ export interface Skill {
     b?: SkillBuff[]
     p?: SkillPassive[]
     子技能?: SubSkill[]
+    行为?: string
 }
 
 export interface SubSkill {
@@ -204,6 +205,7 @@ export interface SubSkill {
     e?: SkillEffect[]
     b?: SkillBuff[]
     p?: SkillPassive[]
+    行为?: string
 }
 
 export interface SkillPassive {

@@ -45,7 +45,7 @@ export class LeveledSkill {
     ) {
         // 设置基础属性
         this.id = skillData.id || 0
-        this.名称 = skillData.名称
+        this.名称 = skillData.名称 ?? `SKILL${skillData.id}`
         this.类型 = skillData.类型
         this.描述 = skillData.描述
         if (skillData.武器) this.武器 = skillData.武器

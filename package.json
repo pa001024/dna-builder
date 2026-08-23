@@ -6,7 +6,7 @@
     "packageManager": "pnpm@10.28.1+sha512.7d7dbbca9e99447b7c3bf7a73286afaaf6be99251eb9498baefa7d406892f67b879adb3a1d7e687fc4ccc1a388c7175fbaae567a26ab44d1067b54fcb0d6a316",
     "scripts": {
         "dev": "vite",
-        "lint": "biome lint --fix && vue-tsc --noEmit",
+        "lint": "biome lint --fix && cross-env NODE_OPTIONS='--max-old-space-size=8192' vue-tsc --noEmit",
         "dp": "bun tools/data-pack.ts build",
         "ip": "bun tools/imgs-pack.ts build",
         "build": "node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build",

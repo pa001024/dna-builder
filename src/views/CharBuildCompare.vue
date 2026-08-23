@@ -447,7 +447,7 @@ function formatCharAttribute(configIndex: number, colKey: string): string {
     const attr = attributesList.value[configIndex]
     if (!(colKey in attr)) return "-"
 
-    const value = attr[colKey as keyof CharAttr]
+    const value = attr[colKey as keyof CharAttr] ?? 0
     const isBaseStat = ["攻击", "生命", "护盾", "防御", "神智"].includes(colKey)
     return isBaseStat ? `${+value.toFixed(2)}` : `${+(value * 100).toFixed(2)}%`
 }

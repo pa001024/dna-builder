@@ -5,6 +5,8 @@ import { LeveledSkill } from "@/data/leveled/LeveledSkill"
 
 const detailTab = ref("溯源")
 const selectedSkill = ref<LeveledSkill | null>(null)
+/** 技能行为（skill.行为）的展开状态，按技能名记录，切换技能时独立保留 */
+const expandedBehavior = ref<Record<string, boolean>>({})
 const selectedSkillLevel = defineModel<number>({
     default: 12,
 })
@@ -77,6 +79,35 @@ watchEffect(() => {
 
             <!-- 技能描述 -->
             <p class="mt-2.5 leading-relaxed text-base-content/85">{{ $t(selectedSkill.描述 || "") }}</p>
+
+            <!-- 技能行为（可展开显示 skill.行为 字段） -->
+            <div v-if="selectedSkill.skillData.行为" class="mt-2.5">
+                <button
+                    type="button"
+                    class="flex flex-col w-full cursor-pointer gap-1.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs font-medium text-base-content/70 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.99]"
+                    :aria-expanded="Boolean(expandedBehavior[selectedSkill.safeName])"
+                    @click="expandedBehavior[selectedSkill.safeName] = !expandedBehavior[selectedSkill.safeName]"
+                >
+                    <div class="flex gap-1.5 items-center">
+                        <span
+                            class="flex-none text-base-content/50 transition-transform duration-200"
+                            :class="{ 'rotate-180': expandedBehavior[selectedSkill.safeName] }"
+                        >
+                            <Icon icon="ri:arrow-down-s-line" class="size-3.5" />
+                        </span>
+                        <span>{{ $t("行为") }}</span>
+                    </div>
+                    <div v-if="expandedBehavior[selectedSkill.safeName]" class="mt-1.5 text-left space-y-1">
+                        <div
+                            class="whitespace-pre-wrap text-base-content/70"
+                            v-for="(line, i) in selectedSkill.skillData.行为.split(';')"
+                            :key="i"
+                        >
+                            {{ $t(line) }}
+                        </div>
+                    </div>
+                </button>
+            </div>
 
             <!-- 术语解释 -->
             <div v-if="selectedSkill.术语解释" class="mt-3 space-y-2">

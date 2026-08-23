@@ -152,6 +152,7 @@ describe("DynamicBuff", () => {
             技能倍率赋值: 0,
             技能倍率乘数: 1,
             有效生命: 1,
+            充盈威力: 0,
         }
         attrs = buff.applyDynamicAttr(char, attrs, [])
         expect(attrs.技能威力).toBe(2)
@@ -196,6 +197,7 @@ describe("DynamicBuff", () => {
             技能倍率赋值: 0,
             技能倍率乘数: 1,
             有效生命: 1,
+            充盈威力: 0,
         }
 
         attrs = buff.applyDynamicAttr(char, attrs, [], undefined, enemy)
@@ -247,6 +249,7 @@ describe("DynamicBuff", () => {
             技能倍率赋值: 0,
             技能倍率乘数: 1,
             有效生命: 1,
+            充盈威力: 0,
         }
 
         attrs = buff.applyDynamicAttr(char, attrs, [], undefined, undefined, modAttrs)
