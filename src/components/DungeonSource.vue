@@ -60,12 +60,12 @@ const displayDungeonSources = computed(() => {
             <div
                 v-for="source in displayDungeonSources"
                 :key="source.key"
-                class="group flex w-full cursor-pointer items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/[0.04] p-2 text-left transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                class="group flex w-full cursor-pointer items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/4 p-2 text-left transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 @click="selectedSource = source"
             >
                 <div
                     class="relative size-11 shrink-0 overflow-hidden rounded-xs"
-                    :class="source.dungeon.e ? elementBgClasses[source.dungeon.e] || 'bg-base-content/[0.06]' : 'bg-base-content/[0.06]'"
+                    :class="source.dungeon.e ? elementBgClasses[source.dungeon.e] || 'bg-base-content/6' : 'bg-base-content/6'"
                 >
                     <img
                         v-if="source.dungeon.e"

@@ -517,7 +517,7 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
                             <div class="text-xs font-medium text-base-content/70">语音语言</div>
                             <Select
                                 v-model="selectedVoiceLocale"
-                                class="w-full rounded-xs border border-base-content/20 bg-base-content/[0.05] px-3 py-2 text-sm"
+                                class="w-full rounded-xs border border-base-content/20 bg-base-content/5 px-3 py-2 text-sm"
                                 content-class="z-[10010]"
                                 :content-props="{ 'data-quest-voice-select-content': 'true' }"
                             >
@@ -559,14 +559,13 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
                     class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-all duration-300"
                     :class="{ 'border-primary ring-4 ring-primary/10': highlightedQuestMap[quest.id] }"
                 >
-                    <div class="flex items-center justify-between gap-2">
-                        <span class="text-sm font-medium"
-                            >任务: <HighlightText :text="formatStoryText(quest.details?.name || '?')" :keyword="normalizedSearchKeyword" />
-                            <CopyID :id="quest.id" />
-                            <span v-if="quest.sr" class="ml-2 inline-flex items-center gap-1 text-xs text-base-content/70">
-                                <span>子区域:</span>
-                                <SubRegionLink :sub-region-id="quest.sr" />
-                            </span>
+                    <div class="flex items-center gap-2 text-sm">
+                        任务: <HighlightText :text="formatStoryText(quest.details?.name || '?')" :keyword="normalizedSearchKeyword" />
+                        <CopyID :id="quest.id" />
+                        <div class="flex-1"></div>
+                        <span v-if="quest.sr" class="ml-2 inline-flex items-center gap-1 text-xs text-base-content/70">
+                            <span>子区域:</span>
+                            <SubRegionLink :sub-region-id="quest.sr" />
                         </span>
                     </div>
 

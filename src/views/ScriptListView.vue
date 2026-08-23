@@ -3535,7 +3535,7 @@ onUnmounted(async () => {
 <template>
     <div class="h-full flex flex-col overflow-hidden">
         <div class="flex-1 flex overflow-hidden min-h-0">
-            <div class="w-64 border-r border-base-200 flex flex-col bg-base-100 min-h-0">
+            <div class="w-64 border-r border-base-200 flex flex-col bg-base-100/20 backdrop-blur-sm min-h-0">
                 <div class="px-4 py-1 border-b border-base-200 flex justify-center">
                     <div class="flex gap-2 items-center">
                         <button
@@ -3829,7 +3829,7 @@ onUnmounted(async () => {
             <div class="flex-1 flex min-w-0">
                 <div class="flex-1 flex flex-col min-w-0">
                     <!-- TABS -->
-                    <div class="h-10 bg-base-100 border-b border-base-300 flex items-center justify-between">
+                    <div class="h-10 bg-base-100/20 backdrop-blur-sm border-b border-base-300 flex items-center justify-between">
                         <!-- files -->
                         <ScrollArea horizontal :vertical="false" class="flex items-center flex-1 h-full">
                             <div class="flex">

@@ -49,6 +49,13 @@ export interface CharAttr {
     召唤物伤害: number
     减伤: number
     有效生命: number
+    // 转xx 系列属性：转物理类型按对应类型触发规则结算；转属克/转属逆按比例改变结算时的敌人抗性（总比例钳制到 100% 内）
+    转切割?: number
+    转贯穿?: number
+    转震荡?: number
+    转灾厄?: number
+    转属克?: number
+    转属逆?: number
 }
 
 export interface WeaponAttr {
@@ -130,6 +137,12 @@ const characterBonusAttributes = [
     "召唤物范围",
     "召唤物伤害",
     "技能倍率赋值",
+    "转切割",
+    "转贯穿",
+    "转震荡",
+    "转灾厄",
+    "转属克",
+    "转属逆",
 ] as const
 
 const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((attribute, index) => [attribute, index])) as Record<
@@ -614,6 +627,14 @@ export class CharBuild {
         const skillMultiplierSet = bonuses[characterBonusIndex.技能倍率赋值]
         const skillMultiplier = this.getTotalBonusMul("技能倍率乘数")
 
+        // 转xx 系列属性（0 开始，累加）
+        const convertCut = bonuses[characterBonusIndex.转切割]
+        const convertPierce = bonuses[characterBonusIndex.转贯穿]
+        const convertImpact = bonuses[characterBonusIndex.转震荡]
+        const convertCalamity = bonuses[characterBonusIndex.转灾厄]
+        const convertRestraint = bonuses[characterBonusIndex.转属克]
+        const convertReverse = bonuses[characterBonusIndex.转属逆]
+
         // 应用MOD属性加成
         const modAttributeBonus = this.getTotalBonus(`${this.char.属性}MOD属性`)
         if (modAttributeBonus > 0) {
@@ -698,6 +719,13 @@ export class CharBuild {
             减伤: damageReduce,
             技能倍率赋值: skillMultiplierSet,
             有效生命: (health / (1 - defense / (300 + defense)) + shield) / (1 - damageReduce),
+            // 转xx 系列属性
+            转切割: convertCut,
+            转贯穿: convertPierce,
+            转震荡: convertImpact,
+            转灾厄: convertCalamity,
+            转属克: convertRestraint,
+            转属逆: convertReverse,
         }
         // 应用MOD条件 如果有变化就再计算一次
         const condMods = this.charModsWithAura.filter(mod => mod.生效?.条件)
@@ -1325,14 +1353,38 @@ export class CharBuild {
         return Math.max(0, Math.min(1, defenseMultiplier))
     }
 
+    /**
+     * 计算转属克/转属逆后的有效敌人抗性因子（即原计算中的 max(0, 1 - 敌人抗性)）。
+     * 两种属性方向相反、各自独立生效（总比例各自钳制到 [0,1]）：
+     * - 转属逆：只把负抗（弱抗，如 -4）翻转为正抗 0.5；敌人抗性为 0 或正抗时不做处理。
+     * - 转属克：只把正抗（强抗，如 0.5）翻转为负抗 -4；敌人抗性为 0 或负抗时不做处理。
+     * - 敌人 0 抗始终不做处理（视为 0 抗）。
+     * 生效的转换按比例混合：转换比例 c 的部分按翻转后的抗性结算，其余部分按原抗性结算。
+     * @param attrs 属性（含可选的 转属克/转属逆）
+     * @returns 混合后的抗性因子（恒 >= 0）
+     */
+    private getResistanceFactor(attrs: CharAttr): number {
+        const factor = (r: number) => Math.max(0, 1 - r)
+        const r = this.enemyResistance
+        if (r === 0) return factor(0)
+        if (r < 0) {
+            // 负抗：只有转属逆生效（负抗 → 等效正抗 0.5）
+            const convert = Math.max(0, Math.min(1, attrs.转属逆 || 0))
+            return (1 - convert) * factor(r) + convert * factor(0.5)
+        }
+        // 正抗：只有转属克生效（正抗 → 等效负抗 -4）
+        const convert = Math.max(0, Math.min(1, attrs.转属克 || 0))
+        return (1 - convert) * factor(r) + convert * factor(-4)
+    }
+
     // 计算技能伤害
     public calculateSkillDamage(
         attrs: ReturnType<typeof this.calculateAttributes>,
         baseName = this.baseName,
         fieldName?: string
     ): DamageResult {
-        // 计算各种乘区
-        const resistancePenetration = Math.max(0, (1 - this.enemyResistance) * (1 + attrs.属性穿透))
+        // 计算各种乘区（转属克/转属逆经 getResistanceFactor 改变敌人抗性因子，属性穿透整体相乘）
+        const resistancePenetration = Math.max(0, this.getResistanceFactor(attrs) * (1 + attrs.属性穿透))
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
         // 召唤物伤害应按字段名判断（如「[召唤物·战车]技能伤害」），而不是技能名
@@ -1379,28 +1431,29 @@ export class CharBuild {
               ? 1
               : (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
 
-        // 计算触发伤害期望
-        const triggerDamageMultiplier =
-            damageType === "灾厄"
-                ? this.enemyResistance !== 0
-                    ? 1 + this.getTotalBonus("触发倍率")
-                    : 0
-                : damageType === this.hpTypeDMG[this.enemy.currentHPType]
-                  ? this.hpTypeCoefficients[this.enemy.currentHPType] + this.getTotalBonus("触发倍率")
-                  : 0
-        const triggerRate = weaponAttrs.触发
-        const triggerDamageAdd = triggerDamageMultiplier
-        const triggerExpectedDamageAdd = triggerDamageAdd * triggerRate
+        // 触发倍率：物理伤害类型按敌方当前血量类型结算，灾厄类型需敌方存在抗性才可触发。
+        const getTriggerMultiplier = (type: string): number => {
+            if (type === "灾厄") {
+                return this.enemyResistance !== 0 ? 1 + this.getTotalBonus("触发倍率") : 0
+            }
+            return type === this.hpTypeDMG[this.enemy.currentHPType]
+                ? this.hpTypeCoefficients[this.enemy.currentHPType] + this.getTotalBonus("触发倍率")
+                : 0
+        }
+        // 触发率、暴击率为概率值，临时属性/表达式加成可能将其推到合法区间之外（如 [近战]{触发:-9}），
+        // 负值会让触发/暴击期望溢出为负，最终导致伤害输出归零，这里在结算前统一钳制到 [0,1]。
+        const triggerRate = Math.max(0, Math.min(1, weaponAttrs.触发))
 
         // 计算暴击伤害期望
-        const critRate = weaponAttrs.暴击
-        const critDamage = weaponAttrs.暴伤
+        // 暴击率钳制到 [0,1]，暴伤下限为 1（至少 100%），避免概率/倍率类属性溢出为负。
+        const critRate = Math.max(0, Math.min(1, weaponAttrs.暴击))
+        const critDamage = Math.max(1, weaponAttrs.暴伤)
         const lowerCritDamage = (weaponAttrs.暴伤 - 1) * Math.floor(weaponAttrs.暴击) + 1
         const higherCritDamage = (weaponAttrs.暴伤 - 1) * Math.ceil(weaponAttrs.暴击) + 1
         const critExpectedDamage = 1 + critRate * (critDamage - 1)
 
-        // 计算各种乘区
-        const resistance = Math.max(0, 1 - this.enemyResistance)
+        // 计算各种乘区（转属克/转属逆经 getResistanceFactor 改变元素分量的抗性因子；物理分量不受抗性影响）
+        const resistance = this.getResistanceFactor(attrs)
         const resistancePenetration = Math.max(0, 1 + attrs.属性穿透)
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
@@ -1412,19 +1465,52 @@ export class CharBuild {
         const otherMore = damageIncrease * independentDamageIncrease * additionalDamage * imbalanceDamageMultiplier * resistancePenetration
         const commonMore = hpMore * otherMore
 
-        // 计算最终伤害
+        // 计算最终伤害（支持 转xx 系列属性：按比例将伤害从任意类型转为对应物理类型）
+        // 物理转换（切割/贯穿/震荡/灾厄）走对应类型的触发规则；转属克/转属逆不参与类型转换，
+        // 而是按比例改变结算时的敌人抗性（见 getResistanceFactor）。总转换比例钳制到 100% 内。
+        const convertTargets = {
+            转切割: "physical",
+            转贯穿: "physical",
+            转震荡: "physical",
+            转灾厄: "physical",
+        } as const
+        type ConvertKey = keyof typeof convertTargets
+        const convertKeys = Object.keys(convertTargets) as ConvertKey[]
+        const conversionRatios = convertKeys.map(key => ({ key, ratio: Math.max(0, attrs[key] || 0) }))
+        const totalConvert = conversionRatios.reduce((sum, c) => sum + c.ratio, 0)
+        const convertScale = totalConvert > 1 ? 1 / totalConvert : 1
+        const unconverted = Math.max(0, 1 - Math.min(1, totalConvert))
+
         const elementalPart = weaponDamageElemental * resistance
-        const triggerablePart = inheritAllSkillWeapon ? elementalPart : weaponDamagePhysical
-        const nonTriggerPart = inheritAllSkillWeapon ? 0 : elementalPart
-        const allPart = triggerablePart + nonTriggerPart
+        // 原始（未转换）部分：保持原物理分量与元素分量的触发行为。
+        const parts: { ratio: number; triggerAdd: number }[] = []
+        if (inheritAllSkillWeapon) {
+            parts.push({ ratio: elementalPart * unconverted, triggerAdd: getTriggerMultiplier(damageType) })
+        } else {
+            parts.push({ ratio: weaponDamagePhysical * unconverted, triggerAdd: getTriggerMultiplier(damageType) })
+            parts.push({ ratio: elementalPart * unconverted, triggerAdd: 0 })
+        }
+        // 转换部分：从物理分量与元素分量中按比例剥离并转为目标类型。
+        for (const c of conversionRatios) {
+            const ratio = c.ratio * convertScale
+            if (ratio <= 0) continue
+            const triggerAdd = convertTargets[c.key] === "physical" ? getTriggerMultiplier(c.key.slice(1)) : 0
+            if (inheritAllSkillWeapon) {
+                parts.push({ ratio: elementalPart * ratio, triggerAdd })
+            } else {
+                parts.push({ ratio: weaponDamagePhysical * ratio, triggerAdd })
+                parts.push({ ratio: elementalPart * ratio, triggerAdd })
+            }
+        }
+        const allPart = parts.reduce((sum, p) => sum + p.ratio, 0)
+        const triggerAllPart = parts.reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd), 0)
+        const expectedTriggerAllPart = parts.reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate), 0)
         const lowerCritNoTriggerBase = lowerCritDamage * commonMore
         const higherCritNoTriggerBase = higherCritDamage * commonMore
         const expectedCritNoTriggerBase = critExpectedDamage * commonMore
         const lowerCritNoTrigger = allPart * lowerCritNoTriggerBase
         const higherCritNoTrigger = allPart * higherCritNoTriggerBase
         const expectedCritNoTrigger = allPart * expectedCritNoTriggerBase
-        const triggerAllPart = triggerablePart * (1 + triggerDamageAdd) + nonTriggerPart
-        const expectedTriggerAllPart = triggerablePart * (1 + triggerExpectedDamageAdd) + nonTriggerPart
         const lowerCritTrigger = triggerAllPart * lowerCritNoTriggerBase
         const higherCritTrigger = triggerAllPart * higherCritNoTriggerBase
         const lowerCritExpectedTrigger = expectedTriggerAllPart * lowerCritNoTriggerBase
@@ -1558,6 +1644,10 @@ export class CharBuild {
             skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
             skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
             skillAttrs.set("P", skillAttrs.get(this.skills[2].safeName)!)
+            // 大小写别名：玩家常输入小写 e::/q::/p::
+            skillAttrs.set("e", skillAttrs.get(this.skills[0].safeName)!)
+            skillAttrs.set("q", skillAttrs.get(this.skills[1].safeName)!)
+            skillAttrs.set("p", skillAttrs.get(this.skills[2].safeName)!)
             const customVariableNames = new Set(this.getValidCustomVariables().map(([key]) => key))
             const getWeaponAttr = (fieldName: string, base?: string) =>
                 weaponAttrs?.get(base || this.baseName)?.[fieldName as keyof WeaponAttr] || 0
@@ -1753,6 +1843,10 @@ export class CharBuild {
         skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
         skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
         skillAttrs.set("P", skillAttrs.get(this.skills[2].safeName)!)
+        // 大小写别名：玩家常输入小写 e::/q::/p::
+        skillAttrs.set("e", skillAttrs.get(this.skills[0].safeName)!)
+        skillAttrs.set("q", skillAttrs.get(this.skills[1].safeName)!)
+        skillAttrs.set("p", skillAttrs.get(this.skills[2].safeName)!)
         const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
         const getSkillAttr = (fieldName: string, base?: string) =>
             skillAttrs?.get(base || this.baseName)?.find(v => v.safeName.includes(fieldName))
@@ -2076,7 +2170,7 @@ export class CharBuild {
         }
         function evaluateAttr(fieldName: string, ns?: string, temporaryAttributes?: TemporaryAttributes) {
             const currentAttrs = temporaryAttributes ? getSummonAttrs(ns, temporaryAttributes, fieldName) : attrs
-            return fieldName in currentAttrs ? currentAttrs[fieldName as keyof CharAttr] : 0
+            return fieldName in currentAttrs ? (currentAttrs[fieldName as keyof CharAttr] ?? 0) : 0
         }
         function evaluateWeaponAttr(fieldName: string, ns?: string) {
             if (fieldName === "武器攻击") fieldName = "攻击"

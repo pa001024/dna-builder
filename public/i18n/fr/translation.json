@@ -5874,6 +5874,17 @@
         "apply": "Appliquer l’expression",
         "astPlaceholder": "Affiche l’arborescence AST après la saisie d’une expression",
         "astTitle": "Arborescence AST",
+        "attrContextAppend": "Ajoutera {…} après le champ",
+        "attrContextMerge": "Fusionnera dans le {…} existant",
+        "attrContextPlain": "Insérera {…} à la position du curseur",
+        "attrGroups": {
+            "basic": "Stats de base",
+            "convert": "Conversion de dégâts",
+            "damage": "Dégâts et pénétration",
+            "weapon": "Stats d'arme"
+        },
+        "attrTitle": "Modification d'attributs",
+        "attrValueLabel": "Valeur",
         "clear": "Effacer",
         "examples": {
             "baseStats": "Statistiques de base",
@@ -5897,8 +5908,18 @@
             "power": "Puissance"
         },
         "functionsTitle": "Référence des fonctions",
-        "inputLabel": "Saisie de l’expression",
+        "inputLabel": "Saisie de l'expression",
         "inputPlaceholder": "Saisissez une expression, par exemple : Attaque + Défense",
+        "insertHint": "Cliquez sur un élément pour l'insérer au curseur",
+        "keywords": {
+            "attack": "Attaque du personnage ; fixée à 100 %, insensible à la puissance",
+            "colaw": "Attaque de l'arme co-loi, équivalente à 同律::[攻击]",
+            "defense": "Défense du personnage ; fixée à 100 %, insensible à la puissance",
+            "hp": "PV du personnage ; fixés à 100 %, insensibles à la puissance",
+            "melee": "Attaque de l'arme de mêlée, équivalente à 近战::[攻击]",
+            "ranged": "Attaque de l'arme à distance, équivalente à 远程::[攻击]"
+        },
+        "keywordsTitle": "Mots-clés",
         "macrosTitle": "Macros intégrées",
         "members": {
             "crit": "Dégâts critiques",

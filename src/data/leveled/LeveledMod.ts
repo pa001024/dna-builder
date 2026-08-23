@@ -393,7 +393,7 @@ export class LeveledMod implements Mod {
             if (attr === "*id") {
                 return value >= 1
             }
-            const attrValue = attrs[attr as keyof CharAttr]
+            const attrValue = attrs[attr as keyof CharAttr] ?? 0
             if (op === "*") return true
             if (op === "=") return attrValue === value
             if (op === ">") return attrValue > value

@@ -130,7 +130,7 @@ const getAnimationDelay = (index: number) => {
 
                     <div
                         v-else
-                        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,170px),1fr))] gap-4 md:grid-cols-[repeat(auto-fill,minmax(min(100%,190px),1fr))]"
+                        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,140px),1fr))] gap-4 md:grid-cols-[repeat(auto-fill,minmax(min(100%,190px),1fr))]"
                     >
                         <div
                             v-for="(char, index) in filteredChars"

@@ -399,9 +399,6 @@ onBeforeUnmount(() => {
                 </div>
             </transition>
         </RouterView>
-        <template v-if="!$route.meta.noSidebar" #sidebar>
-            <Sidebar />
-        </template>
     </ResizeableWindow>
     <div
         v-if="dataPackBootstrapLoading && !isDataPackHydrated()"

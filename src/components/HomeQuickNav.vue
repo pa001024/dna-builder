@@ -19,7 +19,7 @@ defineProps<{
 
 <template>
     <!-- 快捷导航网格：默认固定 2/4 列（首页）；autofill 时用 auto-fill 自适应列数（More 页） -->
-    <div class="grid gap-2" :class="autofill ? 'grid-cols-[repeat(auto-fill,minmax(220px,1fr))]' : 'grid-cols-2 md:grid-cols-4'">
+    <div class="grid gap-2" :class="autofill ? 'grid-cols-[repeat(auto-fill,minmax(220px,1fr))]' : 'grid-cols-2 xs:grid-cols-4'">
         <RouterLink
             v-for="(item, index) in items"
             :key="item.path"
@@ -36,7 +36,7 @@ defineProps<{
                 >
                     <Icon :icon="item.icon" class="h-[55%] w-[55%]" />
                 </span>
-                <span class="text-[16cqh] font-medium leading-snug text-base-content">{{ $t(item.titleKey) }}</span>
+                <span class="text-[12cqh] md:text-[16cqh] font-medium leading-snug text-base-content">{{ $t(item.titleKey) }}</span>
             </span>
             <span
                 class="absolute right-2 hidden h-[26cqh] w-[26cqh] translate-x-1 items-center justify-center rounded-xs bg-primary text-primary-content opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 md:flex"

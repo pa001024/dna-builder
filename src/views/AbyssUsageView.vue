@@ -853,9 +853,7 @@ onMounted(async () => {
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
                     <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                         <div class="min-w-0 space-y-2">
-                            <p
-                                class="inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase"
-                            >
+                            <p class="inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                                 <span class="h-px w-5 bg-primary" aria-hidden="true" />
                                 Abyss Usage
                             </p>
@@ -943,7 +941,7 @@ onMounted(async () => {
                             <div
                                 v-for="group in row.groups"
                                 :key="group.label"
-                                class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5 transition-colors duration-200 hover:border-primary/40"
+                                class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40"
                             >
                                 <div class="text-[11px] font-medium text-base-content/50">{{ group.label }}</div>
                                 <div class="flex flex-wrap justify-center gap-2">
@@ -951,7 +949,7 @@ onMounted(async () => {
                                         v-for="item in group.items"
                                         :key="item.charId"
                                         :to="getCharLink(item.charId)"
-                                        class="group relative block w-16 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/[0.03] transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50"
+                                        class="group relative block w-16 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50"
                                         :title="getCharName(item.charId)"
                                     >
                                         <img
@@ -960,9 +958,7 @@ onMounted(async () => {
                                             :alt="getCharName(item.charId)"
                                         />
                                         <div class="py-1.5 text-center">
-                                            <span
-                                                class="font-orbitron text-[11px] font-semibold tabular-nums text-primary"
-                                            >
+                                            <span class="font-orbitron text-[11px] font-semibold tabular-nums text-primary">
                                                 {{ formatUsageRate(item.submissionCount || 0, item.ownedCount || 0) }}
                                             </span>
                                         </div>
@@ -982,7 +978,7 @@ onMounted(async () => {
                             <div
                                 v-for="item in lineupStats.slice(0, 6)"
                                 :key="`${item.charId}-${item.meleeId}-${item.rangedId}-${item.support1}-${item.support2}-${item.supportWeapon1}-${item.supportWeapon2}-${item.petId ?? 0}`"
-                                class="rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5"
+                                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                             >
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="flex items-center gap-2 overflow-hidden">
@@ -1045,7 +1041,7 @@ onMounted(async () => {
                             <div
                                 v-for="item in assistantLineupStats"
                                 :key="`${item.charId}-${item.meleeId}-${item.rangedId}-${item.support1}-${item.support2}-${item.supportWeapon1}-${item.supportWeapon2}-${item.petId ?? 0}`"
-                                class="rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5"
+                                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                             >
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="flex items-center gap-2 overflow-hidden">
@@ -1077,7 +1073,10 @@ onMounted(async () => {
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="rounded-xs border border-dashed border-base-content/15 py-6 text-center text-sm text-base-content/45">
+                        <div
+                            v-else
+                            class="rounded-xs border border-dashed border-base-content/15 py-6 text-center text-sm text-base-content/45"
+                        >
                             暂无结果
                         </div>
                     </section>
@@ -1100,7 +1099,7 @@ onMounted(async () => {
                             <div
                                 v-for="item in section.items.slice(0, 6)"
                                 :key="`${section.key}-${item.id}`"
-                                class="rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5"
+                                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                             >
                                 <div class="flex items-center gap-2">
                                     <RouterLink :to="getSlotStatLink(section.key, item.id)">
@@ -1137,15 +1136,12 @@ onMounted(async () => {
                         <div
                             v-for="item in levelStatItems"
                             :key="item.level"
-                            class="grid gap-3 rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5 md:grid-cols-[4rem_minmax(0,1fr)_5rem] md:items-center"
+                            class="grid gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 md:grid-cols-[4rem_minmax(0,1fr)_5rem] md:items-center"
                         >
                             <div class="font-orbitron text-sm font-semibold tabular-nums">Lv.{{ item.level }}</div>
                             <div class="space-y-1.5">
                                 <div class="h-1.5 overflow-hidden rounded-xs bg-base-content/10">
-                                    <div
-                                        class="h-full bg-primary transition-[width] duration-500"
-                                        :style="{ width: item.percent }"
-                                    ></div>
+                                    <div class="h-full bg-primary transition-[width] duration-500" :style="{ width: item.percent }"></div>
                                 </div>
                                 <div class="text-[11px] text-base-content/45 tabular-nums">{{ item.submissionCount }} 次</div>
                             </div>
@@ -1154,7 +1150,10 @@ onMounted(async () => {
                             </span>
                         </div>
                     </div>
-                    <div v-else class="rounded-xs border border-dashed border-base-content/15 py-6 text-center text-sm text-base-content/45">
+                    <div
+                        v-else
+                        class="rounded-xs border border-dashed border-base-content/15 py-6 text-center text-sm text-base-content/45"
+                    >
                         暂无结果
                     </div>
                 </section>
@@ -1167,7 +1166,7 @@ onMounted(async () => {
                             <div
                                 v-for="item in roleStats"
                                 :key="item.charId"
-                                class="rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5"
+                                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                             >
                                 <div class="flex items-center gap-2">
                                     <RouterLink :to="getCharLink(item.charId)">
@@ -1219,7 +1218,7 @@ onMounted(async () => {
                             <div
                                 v-for="item in weaponStats"
                                 :key="item.weaponId"
-                                class="rounded-xs border border-base-content/10 bg-base-content/[0.03] p-2.5"
+                                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                             >
                                 <div class="flex items-center gap-2">
                                     <RouterLink :to="getWeaponLink(item.weaponId)">

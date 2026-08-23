@@ -5874,6 +5874,17 @@
         "apply": "Apply expression",
         "astPlaceholder": "Display the AST tree structure after entering an expression",
         "astTitle": "AST Tree Structure",
+        "attrContextAppend": "Will append {…} after the field",
+        "attrContextMerge": "Will merge into the existing {…}",
+        "attrContextPlain": "Will insert {…} at the cursor",
+        "attrGroups": {
+            "basic": "Base Stats",
+            "convert": "Damage Conversion",
+            "damage": "Damage & Penetration",
+            "weapon": "Weapon Stats"
+        },
+        "attrTitle": "Attribute Edit",
+        "attrValueLabel": "Value",
         "clear": "Clear",
         "examples": {
             "baseStats": "Base Stats",
@@ -5899,6 +5910,16 @@
         "functionsTitle": "Function Reference",
         "inputLabel": "Expression Input",
         "inputPlaceholder": "Enter an expression, e.g.: Attack + Defense",
+        "insertHint": "Click any entry to insert it at the cursor",
+        "keywords": {
+            "attack": "Character Attack; fixed at 100%, unaffected by power",
+            "colaw": "Co-law weapon attack, equivalent to Co-law::[Attack]",
+            "defense": "Character Defense; fixed at 100%, unaffected by power",
+            "hp": "Character HP; fixed at 100%, unaffected by power",
+            "melee": "Melee weapon attack, equivalent to Melee::[Attack]",
+            "ranged": "Ranged weapon attack, equivalent to Ranged::[Attack]"
+        },
+        "keywordsTitle": "Keywords",
         "macrosTitle": "Built-in Macros",
         "members": {
             "crit": "Critical Damage",

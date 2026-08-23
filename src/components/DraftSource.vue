@@ -87,7 +87,7 @@ function getCoinIconUrl(): string {
             <div
                 v-for="source in props.draftSources"
                 :key="source.key"
-                class="group flex w-full items-start gap-2.5 rounded-xs border border-base-content/15 bg-base-content/[0.04] p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/[0.06]"
+                class="group flex w-full items-start gap-2.5 rounded-xs border border-base-content/15 bg-base-content/4 p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/6"
             >
                 <div
                     class="relative size-11 shrink-0 overflow-hidden rounded-xs bg-linear-to-b"
@@ -107,7 +107,9 @@ function getCoinIconUrl(): string {
                 </div>
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-1.5">
-                        <h4 class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary">
+                        <h4
+                            class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
+                        >
                             <SRouterLink :to="`/db/draft/${source.draft.id}`" class="hover:underline">
                                 {{ getDraftLabel(source.draft) }}
                             </SRouterLink>
@@ -119,7 +121,9 @@ function getCoinIconUrl(): string {
                         </span>
                     </div>
                     <div class="mt-0.5 flex items-center gap-1.5 text-[10px] text-base-content/45">
-                        <span class="shrink-0 rounded-xs bg-amber-500/15 px-1 py-px font-mono text-[8px] font-semibold tracking-[0.15em] uppercase text-amber-400">
+                        <span
+                            class="shrink-0 rounded-xs bg-amber-500/15 px-1 py-px font-mono text-[8px] font-semibold tracking-[0.15em] uppercase text-amber-400"
+                        >
                             DRAFT
                         </span>
                         <span class="truncate">{{ source.draft.v ? `v${source.draft.v}` : "" }} · 产物 x{{ source.draft.c }}</span>

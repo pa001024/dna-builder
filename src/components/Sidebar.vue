@@ -19,13 +19,18 @@ watchEffect(() => {
 function closeMobileDrawer() {
     mobileDrawerOpen.value = false
 }
+function openMobileDrawer() {
+    mobileDrawerOpen.value = true
+}
+
+defineExpose({ closeMobileDrawer, openMobileDrawer })
 </script>
 <template>
     <!-- 桌面端侧边栏 -->
     <div class="h-full hidden sm:flex">
         <div ref="target" class="flex flex-col space-y-1 py-2 px-2 h-full">
             <button
-                class="w-full btn btn-ghost border-none justify-start min-h-fit h-auto flex-nowrap whitespace-nowrap px-0 gap-1 overflow-hidden"
+                class="w-full btn btn-ghost hover:bg-base-100/30 border-none justify-start min-h-fit h-auto flex-nowrap whitespace-nowrap px-0 gap-1 overflow-hidden"
                 @click="setExpand(!expand)"
             >
                 <span
@@ -62,9 +67,12 @@ function closeMobileDrawer() {
         <div class="drawer-side z-50">
             <!-- 抽屉头部 -->
             <label for="my-drawer-1" aria-label="close sidebar" class="drawer-overlay" />
-            <ul class="menu bg-base-100 min-h-full w-72 p-4">
+            <ul class="menu bg-base-100/50 backdrop-blur-sm min-h-full w-72 p-4">
                 <li>
-                    <h2 class="menu-title text-lg font-bold pb-2">DNA Builder</h2>
+                    <h2 class="menu-title text-lg font-bold pb-2 font-orbitron">
+                        DNA
+                        <span class="text-primary">Builder</span>
+                    </h2>
                 </li>
                 <li><div class="divider my-2" /></li>
                 <!-- 导航菜单 -->
@@ -104,10 +112,5 @@ function closeMobileDrawer() {
                 </li>
             </ul>
         </div>
-
-        <!-- 移动端菜单按钮 -->
-        <label for="my-drawer-1" class="fixed bottom-4 left-4 z-50 btn btn-circle btn-primary shadow-lg drawer-button">
-            <Icon icon="ri:settings-3-line" class="w-6 h-6" />
-        </label>
     </div>
 </template>

@@ -37,7 +37,7 @@ const sourceTitle = computed(() => props.sourceTitle || "道具箱")
             <div
                 v-for="source in displayPackSources"
                 :key="source.key"
-                class="group flex w-full items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/[0.04] p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/[0.06]"
+                class="group flex w-full items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/4 p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/6"
             >
                 <div
                     class="relative size-11 shrink-0 overflow-hidden rounded-xs bg-linear-to-b"
@@ -72,7 +72,9 @@ const sourceTitle = computed(() => props.sourceTitle || "道具箱")
                         </span>
                     </div>
                     <div class="mt-0.5 flex items-center gap-1.5 text-[10px] text-base-content/45">
-                        <span class="shrink-0 rounded-xs bg-purple-500/15 px-1 py-px font-mono text-[8px] font-semibold tracking-[0.15em] uppercase text-purple-400">
+                        <span
+                            class="shrink-0 rounded-xs bg-purple-500/15 px-1 py-px font-mono text-[8px] font-semibold tracking-[0.15em] uppercase text-purple-400"
+                        >
                             PACK
                         </span>
                         <span class="truncate">

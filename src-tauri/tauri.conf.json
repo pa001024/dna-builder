@@ -1,7 +1,7 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
     "productName": "DNA Builder",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "identifier": "com.pa.dna-builder",
     "build": {
         "beforeDevCommand": "pnpm dev",
@@ -23,6 +23,7 @@
                 "minWidth": 330,
                 "minHeight": 430,
                 "dragDropEnabled": false,
+                "devtools": true,
                 "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36 EdgA/150.0.0.0"
             }
         ],

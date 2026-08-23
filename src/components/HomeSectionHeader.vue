@@ -35,7 +35,7 @@ const emit = defineEmits<{
             {{ String(num).padStart(2, "0") }}
         </span>
         <span class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">{{ label }}</span>
-        <span class="text-[17px] font-semibold text-base-content">{{ $t(titleKey) }}</span>
+        <span class="text-[17px] font-semibold text-base-content truncate">{{ $t(titleKey) }}</span>
         <span class="h-px min-w-8 flex-1 bg-base-content/10" aria-hidden="true" />
 
         <!-- 编辑模式：上移 / 下移 / 隐藏 -->
@@ -75,7 +75,7 @@ const emit = defineEmits<{
         <button
             v-else-if="actionLabel"
             type="button"
-            class="inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 px-2.5 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+            class="inline-flex h-7 whitespace-nowrap cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 px-2.5 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
             @click="emit('action')"
         >
             <Icon icon="ri:settings-3-line" class="h-3.5 w-3.5" />

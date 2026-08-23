@@ -84,7 +84,7 @@ const imageBgClass = computed(() => {
     if (props.entry.kind === "mod") {
         return rarityBgClasses[props.entry.item.品质] || ""
     }
-    return "bg-base-content/[0.04]"
+    return "bg-base-content/4"
 })
 
 /** 副信息：角色为“属性 · 精通”，武器为“类型 · 伤害类型”，魔之楔为“系列 · 类型” */

@@ -268,7 +268,7 @@ async function checkUpdate() {
     <div class="h-full flex flex-col">
         <ScrollArea class="h-full">
             <!-- 主视觉面板：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
-            <header class="relative overflow-hidden border-b-2 border-primary bg-base-100">
+            <header class="relative overflow-hidden border-b-2 border-primary bg-base-100/50">
                 <!-- 引导线网格（装饰性，随主题明暗） -->
                 <div
                     class="pointer-events-none absolute inset-0"
@@ -483,11 +483,7 @@ async function checkUpdate() {
                                             : 'border-base-content/30'
                                     "
                                 >
-                                    <Icon
-                                        v-if="quickNavPaths.includes(item.path)"
-                                        icon="ri:check-line"
-                                        class="h-3.5 w-3.5"
-                                    />
+                                    <Icon v-if="quickNavPaths.includes(item.path)" icon="ri:check-line" class="h-3.5 w-3.5" />
                                 </span>
                                 <!-- 功能图标 -->
                                 <span
@@ -537,10 +533,7 @@ async function checkUpdate() {
                         </div>
                     </div>
 
-                    <DialogClose
-                        class="btn btn-square btn-sm btn-ghost absolute top-2.5 right-2.5 text-lg"
-                        aria-label="close"
-                    >
+                    <DialogClose class="btn btn-square btn-sm btn-ghost absolute top-2.5 right-2.5 text-lg" aria-label="close">
                         <Icon icon="radix-icons:cross2" />
                     </DialogClose>
                 </DialogContent>

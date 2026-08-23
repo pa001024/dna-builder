@@ -5792,6 +5792,17 @@
         "apply": "式を適用",
         "astPlaceholder": "式を入力すると AST ツリー構造を表示します",
         "astTitle": "AST ツリー構造",
+        "attrContextAppend": "フィールドの後に {…} を追加します",
+        "attrContextMerge": "既存の {…} にマージします",
+        "attrContextPlain": "カーソル位置に {…} を挿入します",
+        "attrGroups": {
+            "basic": "基礎ステータス",
+            "convert": "属性変換",
+            "damage": "ダメージ増加と貫通",
+            "weapon": "武器ステータス"
+        },
+        "attrTitle": "属性編集",
+        "attrValueLabel": "数値",
         "clear": "クリア",
         "examples": {
             "baseStats": "基礎ステータス",
@@ -5817,6 +5828,16 @@
         "functionsTitle": "関数リファレンス",
         "inputLabel": "式を入力",
         "inputPlaceholder": "式を入力してください。例: Attack + Defense",
+        "insertHint": "任意の項目をクリックしてカーソル位置に挿入",
+        "keywords": {
+            "attack": "キャラクターの攻撃力。倍率は100%固定で、威力の影響を受けません",
+            "colaw": "同律武器の攻撃。同律::[攻击] と同等",
+            "defense": "キャラクターの防御力。倍率は100%固定で、威力の影響を受けません",
+            "hp": "キャラクターのHP。倍率は100%固定で、威力の影響を受けません",
+            "melee": "近接武器の攻撃。近战::[攻击] と同等",
+            "ranged": "遠隔武器の攻撃。远程::[攻击] と同等"
+        },
+        "keywordsTitle": "キーワード",
         "macrosTitle": "内蔵マクロ",
         "members": {
             "crit": "会心ダメージ",

@@ -26,7 +26,7 @@ const UI = useUIStore()
     <router-link v-else v-slot="{ isActive, href, navigate }" v-bind="$props" :to="props.to" custom>
         <button
             class="w-full btn border-none justify-start min-h-fit h-fit flex-nowrap whitespace-nowrap px-0 gap-1"
-            :class="isActive ? 'btn-secondary' : 'btn-ghost'"
+            :class="isActive ? 'btn-secondary' : 'btn-ghost hover:bg-base-100/30'"
             v-bind="$attrs"
             :href="href"
             @click="navigate"

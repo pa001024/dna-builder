@@ -29,10 +29,9 @@ const ui = useUIStore()
 const setting = useSettingStore()
 const alwaysOnTop = ref(false)
 const maximized = ref(false)
+const sidebarRef = ref<typeof import("@/components/Sidebar.vue").default>()
 // 自定义主题按 colorScheme 决定初始明暗图标状态
-const isDark = ref(
-    setting.theme === "dark" || (setting.theme === "custom" && setting.customTheme.colorScheme === "dark")
-)
+const isDark = ref(setting.theme === "dark" || (setting.theme === "custom" && setting.customTheme.colorScheme === "dark"))
 const langDialogOpen = ref(false)
 const langDialogRef = ref<HTMLDialogElement | null>(null)
 
@@ -138,14 +137,17 @@ watchEffect(() => {
     <!-- Root -->
     <div class="relative w-full h-full flex overflow-hidden bg-base-100/30 rounded-lg">
         <!-- SideBar -->
-        <slot v-if="route" name="sidebar" />
+        <Sidebar v-if="route && !route.meta.noSidebar" ref="sidebarRef" />
         <!-- Header -->
         <div className="relative flex flex-col overflow-hidden w-full h-full">
             <!-- ActionBar -->
             <div class="relative w-full h-10 pb-1 mt-1 flex items-center space-x-1 sm:space-x-2 pl-2 pr-1">
                 <div :data-tauri-drag-region="draggable" className="w-full h-full font-semibold text-2xl flex items-center space-x-2">
-                    <button class="btn btn-sm btn-circle btn-ghost" @click="$router.back()">
+                    <button class="btn btn-sm btn-square btn-ghost hover:bg-base-100/30" @click="$router.back()">
                         <Icon icon="ri:arrow-left-line" />
+                    </button>
+                    <button class="sm:hidden btn btn-sm btn-square btn-ghost hover:bg-base-100/30" @click="sidebarRef?.openMobileDrawer()">
+                        <Icon icon="ri:menu-line" />
                     </button>
                     <span className="max-[370px]:hidden text-sm min-w-20">{{ title }}</span>
                     <ResizeableWindowTimers />
@@ -228,7 +230,7 @@ watchEffect(() => {
                                 <Icon v-if="!maximized" bold icon="codicon:chrome-maximize" />
                                 <Icon v-else bold icon="codicon:chrome-restore" />
                             </button>
-                            <button class="btn btn-ghost btn-sm btn-square" @click="handleClose">
+                            <button class="btn btn-ghost btn-sm btn-square hover:btn-error" @click="handleClose">
                                 <Icon bold icon="codicon:chrome-close" />
                             </button>
                         </template>

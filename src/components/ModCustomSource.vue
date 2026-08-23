@@ -30,7 +30,7 @@ const sourceTitle = computed(() => props.sourceTitle || "角色突破")
             <div
                 v-for="source in displayCustomSources"
                 :key="source.key"
-                class="group flex w-full items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/[0.04] p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/[0.06]"
+                class="group flex w-full items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/4 p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/6"
             >
                 <div class="relative size-11 shrink-0 overflow-hidden rounded-xs bg-linear-to-b from-violet-500/25 to-violet-100/10">
                     <img

@@ -58,6 +58,6 @@ export function getRarityBadgeClass(rarity: number | string): string {
         6: "border-red-500/40 bg-red-500/10 text-red-400",
     }
     const key = typeof rarity === "string" ? getRarityValue(rarity) : rarity
-    const color = colorMap[key] || "border-base-content/20 bg-base-content/[0.05] text-base-content/60"
+    const color = colorMap[key] || "border-base-content/20 bg-base-content/5 text-base-content/60"
     return `inline-flex shrink-0 items-center rounded-xs border px-2 py-0.5 text-[11px] font-medium leading-none tracking-wide ${color}`
 }

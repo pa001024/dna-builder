@@ -162,7 +162,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                 :class="
                     selectedOption?.id === option.id
                         ? 'border-primary/70 bg-primary/10'
-                        : 'border-transparent bg-base-content/4 hover:border-primary/40 hover:bg-base-content/[0.07]'
+                        : 'border-transparent bg-base-content/4 hover:border-primary/40 hover:bg-base-content/7'
                 "
                 @click="emit('select-option', { dialogueId: dialogue.id, optionId: option.id })"
             >

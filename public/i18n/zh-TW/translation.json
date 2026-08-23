@@ -5014,6 +5014,17 @@
         "apply": "套用表達式",
         "astPlaceholder": "輸入表達式後顯示 AST 樹結構",
         "astTitle": "AST 樹結構",
+        "attrContextAppend": "將在欄位後追加 {…}",
+        "attrContextMerge": "將合併進現有 {…}",
+        "attrContextPlain": "將在游標處插入 {…}",
+        "attrGroups": {
+            "basic": "基礎屬性",
+            "convert": "屬性轉換",
+            "damage": "增傷與穿透",
+            "weapon": "武器屬性"
+        },
+        "attrTitle": "屬性修改",
+        "attrValueLabel": "數值",
         "clear": "清空",
         "examples": {
             "baseStats": "基礎屬性",
@@ -5039,6 +5050,16 @@
         "functionsTitle": "函數說明",
         "inputLabel": "表達式輸入",
         "inputPlaceholder": "輸入表達式，例如：攻擊 + 防禦",
+        "insertHint": "點擊任意條目，在游標處插入表達式片段",
+        "keywords": {
+            "attack": "角色攻擊力；倍率固定為100%，不受威力影響",
+            "colaw": "同律武器攻擊，等價於 同律::[攻擊]",
+            "defense": "角色防禦力；倍率固定為100%，不受威力影響",
+            "hp": "角色生命值；倍率固定為100%，不受威力影響",
+            "melee": "近戰武器攻擊，等價於 近戰::[攻擊]",
+            "ranged": "遠程武器攻擊，等價於 遠程::[攻擊]"
+        },
+        "keywordsTitle": "關鍵字",
         "macrosTitle": "內建宏",
         "members": {
             "crit": "暴擊傷害",

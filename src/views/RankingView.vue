@@ -232,7 +232,7 @@ onMounted(async () => {
                                 aria-hidden="true"
                             />
 
-                            <div class="relative flex items-center gap-4">
+                            <div class="relative flex items-center gap-4 flex-wrap">
                                 <!-- 角色头像 -->
                                 <div class="size-14 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/5">
                                     <ImageFallback :src="item.charIcon" :alt="item.charName" class="h-full w-full object-cover object-top">
@@ -245,7 +245,7 @@ onMounted(async () => {
                                 </div>
 
                                 <div class="min-w-0 flex-1">
-                                    <div class="flex flex-wrap items-center gap-2.5">
+                                    <div class="flex items-center gap-2.5 min-w-24">
                                         <!-- 角色名方章 -->
                                         <span
                                             class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary"
@@ -262,7 +262,7 @@ onMounted(async () => {
                                     <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-base-content/55">
                                         <div class="flex items-center gap-2">
                                             <QQAvatar class="size-6" :qq="item.authorQq" :name="item.authorName" />
-                                            <span>{{ item.authorName }}</span>
+                                            <span class="whitespace-nowrap">{{ item.authorName }}</span>
                                         </div>
                                         <span class="tabular-nums">{{ formatDateTime(item.updateAt) }}</span>
                                     </div>

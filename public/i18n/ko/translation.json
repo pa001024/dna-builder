@@ -5874,6 +5874,17 @@
         "apply": "식 적용",
         "astPlaceholder": "식을 입력하면 AST 트리 구조를 표시합니다",
         "astTitle": "AST 트리 구조",
+        "attrContextAppend": "필드 뒤에 {…} 를 추가합니다",
+        "attrContextMerge": "기존 {…} 에 병합합니다",
+        "attrContextPlain": "커서 위치에 {…} 를 삽입합니다",
+        "attrGroups": {
+            "basic": "기본 능력치",
+            "convert": "속성 변환",
+            "damage": "피해 증가 및 관통",
+            "weapon": "무기 능력치"
+        },
+        "attrTitle": "속성 수정",
+        "attrValueLabel": "수치",
         "clear": "지우기",
         "examples": {
             "baseStats": "기본 능력치",
@@ -5899,6 +5910,16 @@
         "functionsTitle": "함수 설명",
         "inputLabel": "식 입력",
         "inputPlaceholder": "식을 입력하세요. 예: 공격 + 방어",
+        "insertHint": "항목을 클릭하여 커서 위치에 삽입합니다",
+        "keywords": {
+            "attack": "캐릭터 공격력. 배율은 100% 고정이며 위력의 영향을 받지 않습니다",
+            "colaw": "동률 무기 공격. 同律::[攻击] 와 동일",
+            "defense": "캐릭터 방어력. 배율은 100% 고정이며 위력의 영향을 받지 않습니다",
+            "hp": "캐릭터 체력. 배율은 100% 고정이며 위력의 영향을 받지 않습니다",
+            "melee": "근접 무기 공격. 近战::[攻击] 와 동일",
+            "ranged": "원거리 무기 공격. 远程::[攻击] 와 동일"
+        },
+        "keywordsTitle": "키워드",
         "macrosTitle": "내장 매크로",
         "members": {
             "crit": "치명타 피해",

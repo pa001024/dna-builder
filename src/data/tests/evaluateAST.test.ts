@@ -159,6 +159,34 @@ describe("evaluateAST函数测试", () => {
             expect(result).not.toBeCloseTo(directAddedResult, 6)
         })
 
+        it("临时属性将概率/倍率类武器属性加成到负值时不应导致伤害输出归零", () => {
+            // 灾厄武器的触发倍率为 1（敌方抗性非 0），触发率被临时属性推成负值后
+            // 触发期望会溢出为负，最终 calculate 输出归零
+            const calamityBuild = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10299), // "无止无休" 灾厄武器
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[近战]{触发:-9}",
+            })
+            const attrs = calamityBuild.calculateWeaponAttributes()
+
+            // 触发率被 -9 倍基础值加成后为负，应按 0（不触发）处理
+            const negativeTrigger = calamityBuild.evaluateAST("[近战]{触发:-9}", attrs)
+            const zeroTrigger = calamityBuild.evaluateAST("[近战]{触发:-1}", attrs)
+            expect(negativeTrigger).toBeGreaterThan(0)
+            expect(negativeTrigger).toBeCloseTo(zeroTrigger, 6)
+            expect(calamityBuild.calculate()).toBeGreaterThan(0)
+            // 暴击率/暴伤同理不应溢出为负
+            expect(calamityBuild.evaluateAST("[近战]{暴击:-9}", attrs)).toBeGreaterThan(0)
+            expect(calamityBuild.evaluateAST("[近战]{暴伤:-9}", attrs)).toBeGreaterThan(0)
+        })
+
         it("同律关键词应该使用角色装备的同律武器面板", () => {
             const skillWeaponBuild = new CharBuild({
                 char: new LeveledChar("煜明"),
@@ -751,6 +779,138 @@ describe("evaluateAST函数测试", () => {
                     4.1, // 暴伤盛怒
                 0
             )
+        })
+    })
+
+    describe("转xx 属性转换测试", () => {
+        // 护盾木桩（enemyId 0）：血量类型为护盾，只有切割类型伤害可以触发
+        function shieldBuild(targetFunction: string) {
+            return new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601), // 贯穿 + 触发 0.2，在护盾木桩下不触发
+                baseName: "快速出击",
+                enemyId: 0, // 护盾木桩
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction,
+            })
+        }
+
+        it("转成非触发类型（转贯穿）同样不参与触发", () => {
+            const build = shieldBuild("[远程]")
+            const attrs = build.calculateWeaponAttributes()
+            const base = build.evaluateAST("[远程]", attrs)
+            const converted = build.evaluateAST("[远程]{转贯穿:1}", attrs)
+
+            expect(converted).toBeCloseTo(base, 6)
+        })
+
+        it("转切割在护盾木桩下按触发率加权触发（100% 转换）", () => {
+            const build = shieldBuild("[远程]")
+            const attrs = build.calculateWeaponAttributes()
+            const weaponAttrs = build.calculateWeaponAttributes(build.rangedWeapon, true, true).weapon!
+            const triggerRate = Math.max(0, Math.min(1, weaponAttrs.触发))
+            const base = build.evaluateAST("[远程]", attrs)
+            const converted = build.evaluateAST("[远程]{转切割:1}", attrs)
+
+            // 护盾木桩切割触发倍率 = 护盾系数 1 + 触发倍率 0 = 1，全量转换 → 按触发率加权为 1 + triggerRate 倍
+            expect(triggerRate).toBeGreaterThan(0)
+            expect(converted).toBeCloseTo(base * (1 + triggerRate), 6)
+        })
+
+        it("部分转换按比例提升：转切割 0.5 → 1 + 0.5×触发率", () => {
+            const build = shieldBuild("[远程]")
+            const attrs = build.calculateWeaponAttributes()
+            const weaponAttrs = build.calculateWeaponAttributes(build.rangedWeapon, true, true).weapon!
+            const triggerRate = Math.max(0, Math.min(1, weaponAttrs.触发))
+            const base = build.evaluateAST("[远程]", attrs)
+            const half = build.evaluateAST("[远程]{转切割:0.5}", attrs)
+
+            expect(half).toBeCloseTo(base * (1 + 0.5 * triggerRate), 6)
+        })
+
+        it("总转换比例钳制到 100%，转贯穿1+转切割1 与 转切割0.5 伤害相同", () => {
+            const build = shieldBuild("[远程]")
+            const attrs = build.calculateWeaponAttributes()
+            const base = build.evaluateAST("[远程]", attrs)
+            const half = build.evaluateAST("[远程]{转切割:0.5}", attrs)
+            const mixed = build.evaluateAST("[远程]{转贯穿:1,转切割:1}", attrs)
+
+            // 总比例 2 > 1 → 归一化各占 50%：贯穿在护盾木桩不触发 + 切割按率触发，与 0.5 转换一致
+            expect(mixed).toBeCloseTo(half, 6)
+            expect(mixed).toBeGreaterThan(base)
+        })
+
+        it("转xx 临时属性应通过表达式校验", () => {
+            const build = shieldBuild("[远程]")
+            expect(build.validateAST("[远程]{转切割:1}")).toBeUndefined()
+            expect(build.validateAST("[远程]{转属克:1}")).toBeUndefined()
+            expect(build.validateAST("[远程]{转属逆:1}")).toBeUndefined()
+            expect(build.validateAST("[攻击]{转灾厄:1}")).toBeUndefined()
+        })
+
+        // 夫人(1502)：E::伤害 为技能伤害，天然与武器面板解耦，适合验证抗性因子翻转。
+        function ladyBuild(enemyResistance: number) {
+            return new CharBuild({
+                char: new LeveledChar(1502),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "月猎",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance,
+                targetFunction: "伤害",
+            })
+        }
+
+        it("转属逆：敌人 0 抗不处理，-4 弱抗等效 0.5（夫人 E::伤害 2 倍 / 5.5 倍）", () => {
+            const attrs = ladyBuild(0).calculateAttributes()
+            // 0 抗基准（也是小写命名空间别名的校验）
+            const base = ladyBuild(0).evaluateAST("e::伤害", attrs)
+            expect(ladyBuild(0).evaluateAST("E::伤害", attrs)).toBeCloseTo(base, 6)
+            // 敌人 0 抗：转属逆不处理 → 未转换 + 转换部分均按原抗性 → 2 倍
+            const zeroResist = ladyBuild(0).evaluateAST("E::伤害+E::伤害{转属逆:1}", attrs)
+            expect(zeroResist).toBeCloseTo(base * 2, 6)
+            // 敌人 -4：未转换部分按原抗性（5 倍），转属逆部分等效抗性 0.5（0.5 倍）→ 合计 5.5 倍
+            expect(ladyBuild(-4).evaluateAST("E::伤害", attrs)).toBeCloseTo(base * 5, 6)
+            const negFourConvert = ladyBuild(-4).evaluateAST("E::伤害+E::伤害{转属逆:1}", attrs)
+            expect(negFourConvert).toBeCloseTo(base * 5.5, 6)
+        })
+
+        it("转属克：敌人 0.5 强抗等效 -4（夫人 E::伤害 5.5 倍）", () => {
+            const attrs = ladyBuild(0).calculateAttributes()
+            const base = ladyBuild(0).evaluateAST("E::伤害", attrs)
+            // 敌人 0.5：未转换部分按原抗性（0.5 倍）
+            expect(ladyBuild(0.5).evaluateAST("E::伤害", attrs)).toBeCloseTo(base * 0.5, 6)
+            // 转属克部分等效 -4（5 倍）→ 合计 0.5 + 5 = 5.5 倍
+            const exploit = ladyBuild(0.5).evaluateAST("E::伤害+E::伤害{转属克:1}", attrs)
+            expect(exploit).toBeCloseTo(base * 5.5, 6)
+        })
+
+        it("转属克/转属逆方向相反：克不处理负抗、逆不处理正抗、0 抗均不处理", () => {
+            const attrs = ladyBuild(0).calculateAttributes()
+            const base = ladyBuild(0).evaluateAST("E::伤害", attrs)
+            // 敌人 -4（负抗）：转属克不处理 → 仍 5 倍；转属逆翻转 → 0.5 倍
+            expect(ladyBuild(-4).evaluateAST("E::伤害{转属克:1}", attrs)).toBeCloseTo(base * 5, 6)
+            expect(ladyBuild(-4).evaluateAST("E::伤害{转属逆:1}", attrs)).toBeCloseTo(base * 0.5, 6)
+            // 敌人 0.5（正抗）：转属逆不处理 → 仍 0.5 倍；转属克翻转 → 5 倍
+            expect(ladyBuild(0.5).evaluateAST("E::伤害{转属逆:1}", attrs)).toBeCloseTo(base * 0.5, 6)
+            expect(ladyBuild(0.5).evaluateAST("E::伤害{转属克:1}", attrs)).toBeCloseTo(base * 5, 6)
+            // 敌人 0 抗：两者都不处理 → 均保持 1 倍
+            expect(ladyBuild(0).evaluateAST("E::伤害{转属克:1}", attrs)).toBeCloseTo(base, 6)
+            expect(ladyBuild(0).evaluateAST("E::伤害{转属逆:1}", attrs)).toBeCloseTo(base, 6)
+        })
+
+        it("转属逆按比例混合：负抗 -4 时 转属逆 0.5 → 2.75 倍", () => {
+            const attrs = ladyBuild(0).calculateAttributes()
+            const base = ladyBuild(0).evaluateAST("E::伤害", attrs)
+            // 50% 按原抗性（5 倍）+ 50% 等效 0.5（0.5 倍）→ 2.75 倍
+            expect(ladyBuild(-4).evaluateAST("E::伤害{转属逆:0.5}", attrs)).toBeCloseTo(base * 2.75, 6)
         })
     })
 
