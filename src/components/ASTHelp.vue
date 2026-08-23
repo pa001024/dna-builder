@@ -37,6 +37,7 @@ const examples = [
     { label: t("ast-help.examples.temporaryAttrs"), expr: "[攻击]{增伤:0.1}.暴击" },
     { label: t("ast-help.examples.functions"), expr: "max(攻击, 防御) * 2" },
     { label: t("ast-help.examples.namespace"), expr: "伊卡洛斯::伤害" },
+    { label: t("ast-help.examples.forceAttr"), expr: "攻击!" },
     { label: t("ast-help.examples.complex"), expr: "(" + skillName + ") / max(Q::神智消耗, 20)" },
 ]
 
@@ -49,6 +50,7 @@ const operators = {
     "/": t("ast-help.operators.div"),
     "%": t("ast-help.operators.mod"),
     "//": t("ast-help.operators.floordiv"),
+    "!": t("ast-help.operators.forceAttr"),
 }
 
 const functions = {
@@ -455,7 +457,12 @@ function renderNodeVNode(node: ASTNode, depth = 0): VNode {
             return h("span", { class: color }, indent + `数字: ${node.value}`)
         case "property": {
             const ns = (node as any).namespace
-            return h("span", { class: color }, [indent + (ns ? `${ns}::` : ""), h("span", { class: "font-semibold" }, node.name)])
+            const forceAttr = (node as any).forceAttr
+            return h("span", { class: color }, [
+                indent + (ns ? `${ns}::` : ""),
+                h("span", { class: "font-semibold" }, node.name),
+                forceAttr ? h("span", { class: "font-bold text-rose-400" }, "!") : null,
+            ])
         }
         case "binary":
             return h("span", { class: color }, [
@@ -524,6 +531,7 @@ const syntaxDotColors: Record<string, string> = {
     function: "bg-rose-400",
     member: "bg-sky-400",
     temporary: "bg-pink-400",
+    force: "bg-rose-500",
 }
 
 // 参考分组中条目文字的颜色。
@@ -581,6 +589,7 @@ const badgeColors: Record<string, string> = {
                                 'function',
                                 'member',
                                 'temporary',
+                                'force',
                             ]"
                             :key="itemKey"
                             class="flex items-start gap-2"

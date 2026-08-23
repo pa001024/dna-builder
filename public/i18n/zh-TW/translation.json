@@ -5031,6 +5031,7 @@
             "complex": "複雜表達式",
             "critDamage": "暴擊傷害",
             "expectedDamage": "期望傷害",
+            "forceAttr": "強制屬性",
             "functions": "函數使用",
             "namespace": "命名空間",
             "specialValue": "特殊值",
@@ -5078,6 +5079,7 @@
             "add": "加法",
             "div": "除法",
             "floordiv": "整除",
+            "forceAttr": "強制按屬性解析(略過技能欄位)",
             "mod": "取模",
             "mul": "乘法",
             "sub": "減法"
@@ -5086,6 +5088,10 @@
         "parseError": "表達式解析錯誤",
         "syntaxDesc": "表達式用於計算傷害、屬性值等，支援以下語法：",
         "syntaxItems": {
+            "force": {
+                "desc": "在屬性名後加 ! 強制按屬性解析，略過技能欄位，例如 e::攻擊! 返回攻擊屬性而非比對到的技能欄位",
+                "label": "強制屬性"
+            },
             "function": {
                 "desc": "min(), max(), floor(), ceil(), or(), log(), power()",
                 "label": "函數"

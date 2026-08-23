@@ -21,6 +21,7 @@ export interface ASTProperty extends ASTNodeBase {
     type: "property"
     name: string
     namespace?: string // 命名空间 (从 xxx::yyy 中提取的 xxx)
+    forceAttr?: boolean // ! 后缀: 强制按属性值解析，跳过技能字段匹配
 }
 
 export interface ASTFunction extends ASTNodeBase {
@@ -61,6 +62,7 @@ export enum TokenType {
     COLON, // :
     LBRACE, // {
     RBRACE, // }
+    BANG, // ! (强制属性运算符，后缀)
     EOF,
 }
 
@@ -183,6 +185,11 @@ class Tokenizer {
         if (char === "}") {
             this.position++
             return { type: TokenType.RBRACE, value: "}", position: this.position - 1 }
+        }
+        // 强制属性运算符: ! 后缀 (标记属性名强制按属性值解析)
+        if (char === "!") {
+            this.position++
+            return { type: TokenType.BANG, value: "!", position: this.position - 1 }
         }
 
         throw new Error(`未知字符 '${char}' 位于位置 ${this.position}`)
@@ -322,12 +329,12 @@ class Parser {
                         args,
                     }
                 } else {
-                    // 属性
-                    node = {
+                    // 属性 (支持 ! 后缀强制按属性解析)
+                    node = this.applyForceAttrSuffix({
                         type: "property",
                         name: actualName,
                         namespace,
-                    }
+                    })
                 }
             } else {
                 // 检查是否为函数调用
@@ -345,11 +352,11 @@ class Parser {
                         args,
                     }
                 } else {
-                    // 属性
-                    node = {
+                    // 属性 (支持 ! 后缀强制按属性解析)
+                    node = this.applyForceAttrSuffix({
                         type: "property",
                         name,
-                    }
+                    })
                 }
             }
         } else if (this.match(TokenType.LPAREN)) {
@@ -400,6 +407,15 @@ class Parser {
     }
 
     // 辅助方法
+    // 处理属性后的 ! 后缀: 标记 forceAttr 使求值/校验阶段强制按属性值解析
+    private applyForceAttrSuffix(node: ASTNode): ASTNode {
+        if (node.type !== "property") return node
+        if (this.match(TokenType.BANG)) {
+            return { ...node, forceAttr: true }
+        }
+        return node
+    }
+
     private match(type: TokenType, value?: string): boolean {
         if (this.check(type, value)) {
             this.advance()

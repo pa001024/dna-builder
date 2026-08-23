@@ -312,6 +312,7 @@
             "complex": "复杂表达式",
             "critDamage": "暴击伤害",
             "expectedDamage": "期望伤害",
+            "forceAttr": "强制属性",
             "functions": "函数使用",
             "namespace": "命名空间",
             "specialValue": "特殊值",
@@ -359,6 +360,7 @@
             "add": "加法",
             "div": "除法",
             "floordiv": "整除",
+            "forceAttr": "强制按属性解析(跳过技能字段)",
             "mod": "取模",
             "mul": "乘法",
             "sub": "减法"
@@ -367,6 +369,10 @@
         "parseError": "表达式解析错误",
         "syntaxDesc": "表达式用于计算伤害、属性值等，支持以下语法：",
         "syntaxItems": {
+            "force": {
+                "desc": "在属性名后加 ! 强制按属性解析，跳过技能字段，如 e::攻击! 返回攻击属性而非匹配到的技能字段",
+                "label": "强制属性"
+            },
             "function": {
                 "desc": "min(), max(), floor(), ceil(), or(), log(), power()",
                 "label": "函数"

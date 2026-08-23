@@ -30,6 +30,8 @@ export function createAstLanguage(options: AstLanguageOptions = {}) {
             // 运算符（含 //）
             if (stream.match(/^\/\//)) return "operator"
             if (stream.match(/^[+\-*/%]/)) return "operator"
+            // 强制属性运算符：! 后缀，强制按属性值解析
+            if (stream.match(/^!/)) return "operator"
             // 命名空间分隔符 ::
             if (stream.match(/^::/)) {
                 state.lastWasDot = false
@@ -71,7 +73,7 @@ export function createAstLanguage(options: AstLanguageOptions = {}) {
                 return "punctuation"
             }
             // 标识符：[Tag]Name / 属性 / 函数 / 命名空间 / 成员 / 宏
-            if (stream.match(/^[a-zA-Z_\u4e00-\u9fa5·\[\]][a-zA-Z0-9_\u4e00-\u9fa5·\[\]]*/)) {
+            if (stream.match(/^[a-zA-Z_\u4e00-\u9fa5·[\]][a-zA-Z0-9_\u4e00-\u9fa5·[\]]*/)) {
                 const value = stream.current()
                 const afterDot = state.lastWasDot
                 const expectAttr = state.expectAttrName

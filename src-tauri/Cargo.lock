@@ -1330,7 +1330,7 @@ dependencies = [
 
 [[package]]
 name = "dna-builder"
-version = "1.2.5"
+version = "1.2.6"
 dependencies = [
  "aes",
  "arboard",

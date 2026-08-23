@@ -159,7 +159,7 @@ describe("evaluateAST函数测试", () => {
             expect(result).not.toBeCloseTo(directAddedResult, 6)
         })
 
-        it("临时属性将概率/倍率类武器属性加成到负值时不应导致伤害输出归零", () => {
+        it("临时属性将触发率加成到负值时不应导致伤害输出归零", () => {
             // 灾厄武器的触发倍率为 1（敌方抗性非 0），触发率被临时属性推成负值后
             // 触发期望会溢出为负，最终 calculate 输出归零
             const calamityBuild = new CharBuild({
@@ -182,9 +182,318 @@ describe("evaluateAST函数测试", () => {
             expect(negativeTrigger).toBeGreaterThan(0)
             expect(negativeTrigger).toBeCloseTo(zeroTrigger, 6)
             expect(calamityBuild.calculate()).toBeGreaterThan(0)
-            // 暴击率/暴伤同理不应溢出为负
-            expect(calamityBuild.evaluateAST("[近战]{暴击:-9}", attrs)).toBeGreaterThan(0)
-            expect(calamityBuild.evaluateAST("[近战]{暴伤:-9}", attrs)).toBeGreaterThan(0)
+        })
+
+        it("暴击率超过 100% 时应保留溢出暴击档位，不被钳制到 100%", () => {
+            // 临时属性把暴击率加成到 100% 以上时，应继续按 floor/ceil 溢出档位计算
+            const calamityBuild = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10299), // "无止无休" 灾厄武器
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[近战]",
+            })
+            const attrs = calamityBuild.calculateWeaponAttributes()
+
+            // 暴击:9 → 暴击率 10*基础暴击=2.0，暴击:4 → 5*基础暴击=1.0
+            // 若被钳制到 100%，两者结果应相同；保留溢出档位时 暴击:9 应更高
+            const critNine = calamityBuild.evaluateAST("[近战]{暴击:9}", attrs)
+            const critFour = calamityBuild.evaluateAST("[近战]{暴击:4}", attrs)
+            expect(critNine).toBeGreaterThan(critFour)
+        })
+
+        it("触发率允许数值溢出，但触发效果按 100% 封顶", () => {
+            // 角色型 MOD 提供 +300% 触发加成，使武器触发率超过 100%
+            const fullnessMod = new LeveledMod({
+                id: 999901,
+                icon: "Test01",
+                名称: "测试·充盈",
+                版本: "1.0",
+                系列: "测试",
+                品质: "金",
+                极性: "A",
+                耐受: 15,
+                类型: "角色",
+                触发: 3,
+                充盈威力转化: 1,
+                效果: "触发概率超过100%的部分按100.0%比例转化为角色的充盈威力。",
+            })
+            const build = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [fullnessMod],
+                melee: new LeveledWeapon(10102), // 孤子的缚锁 贯穿 基础触发 0.3
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[近战]",
+            })
+            const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
+
+            // 触发率数值允许超过 100%（不钳制上限）
+            expect(attrs.weapon!.触发).toBeGreaterThan(1)
+
+            // 触发效果按 100% 封顶：把触发率用临时属性精确压到 100%，与溢出触发伤害一致
+            const offset = -(attrs.weapon!.触发 - 1) / build.meleeWeapon.基础触发
+            const full = build.evaluateAST("[近战]", attrs)
+            const capped = build.evaluateAST(`[近战]{触发:${offset}}`, attrs)
+            expect(full).toBeCloseTo(capped, 4)
+        })
+
+        it("充盈威力转化=∑MOD充盈威力转化，充盈威力=溢出触发×转化率", () => {
+            const fullnessMod = new LeveledMod({
+                id: 999901,
+                icon: "Test01",
+                名称: "测试·充盈",
+                版本: "1.0",
+                系列: "测试",
+                品质: "金",
+                极性: "A",
+                耐受: 15,
+                类型: "角色",
+                触发: 3,
+                充盈威力转化: 1,
+                效果: "触发概率超过100%的部分按100.0%比例转化为角色的充盈威力。",
+            })
+            const build = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [fullnessMod],
+                melee: new LeveledWeapon(10102),
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[近战]",
+            })
+            const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
+
+            // 充盈威力转化（武器属性）= ∑ 该武器作用域 MOD 充盈威力转化
+            expect(attrs.weapon!.充盈威力转化).toBe(1)
+            // 充盈威力（角色属性）= 溢出触发 × 充盈威力转化（仅近战溢出）
+            const overflow = Math.max(0, attrs.weapon!.触发 - 1)
+            expect(attrs.充盈威力).toBeCloseTo(overflow * 1, 6)
+            // 作为角色属性可被 AST 表达式引用
+            expect(build.evaluateAST("充盈威力", attrs)).toBeCloseTo(attrs.充盈威力, 6)
+        })
+
+        it("多个充盈威力转化 MOD 的转化率应累加", () => {
+            const mkMod = (id: number, 充盈转化: number, 触发: number) =>
+                new LeveledMod({
+                    id,
+                    icon: "Test01",
+                    名称: "测试·充盈",
+                    版本: "1.0",
+                    系列: "测试",
+                    品质: "金",
+                    极性: "A",
+                    耐受: 15,
+                    类型: "角色",
+                    触发,
+                    充盈威力转化: 充盈转化,
+                    效果: "测试用充盈威力转化MOD",
+                })
+            const build = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [mkMod(999901, 1, 3), mkMod(999902, 0.5, 0)],
+                melee: new LeveledWeapon(10102),
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[近战]",
+            })
+            const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
+            expect(attrs.weapon!.充盈威力转化).toBe(1.5)
+            const overflow = Math.max(0, attrs.weapon!.触发 - 1)
+            expect(attrs.充盈威力).toBeCloseTo(overflow * 1.5, 6)
+        })
+
+        it("充盈威力转化为武器属性（各自作用域），充盈威力为角色汇总属性", () => {
+            const mkMod = (id: number, 类型: string, 触发: number, 充盈转化: number) =>
+                new LeveledMod({
+                    id,
+                    icon: "Test01",
+                    名称: "测试·充盈",
+                    版本: "1.0",
+                    系列: "测试",
+                    品质: "金",
+                    极性: "A",
+                    耐受: 15,
+                    类型,
+                    触发,
+                    充盈威力转化: 充盈转化,
+                    效果: "测试用充盈威力转化MOD",
+                })
+            // 近战与远程武器都触发溢出，各武器槽 MOD 的充盈威力转化各自计入
+            const build = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                meleeMods: [mkMod(999903, "近战", 4, 1)],
+                rangedMods: [mkMod(999904, "远程", 5, 1)],
+                melee: new LeveledWeapon(10102),
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[近战]",
+            })
+            const aMelee = build.calculateWeaponAttributes(build.meleeWeapon)
+            const aRanged = build.calculateWeaponAttributes(build.rangedWeapon)
+            const meleeOverflow = Math.max(0, aMelee.weapon!.触发 - 1)
+            const rangedOverflow = Math.max(0, aRanged.weapon!.触发 - 1)
+            expect(meleeOverflow).toBeGreaterThan(0)
+            expect(rangedOverflow).toBeGreaterThan(0)
+
+            // 充盈威力转化（武器属性）：近战/远程 MOD 的转化只作用于各自武器
+            expect(aMelee.weapon!.充盈威力转化).toBe(1)
+            expect(aRanged.weapon!.充盈威力转化).toBe(1)
+            // 充盈威力（角色属性）= Σ 各武器溢出触发 × 该武器充盈威力转化，与武器上下文无关
+            const expected = (meleeOverflow + rangedOverflow) * 1
+            expect(aMelee.充盈威力).toBeCloseTo(expected, 6)
+            expect(aRanged.充盈威力).toBeCloseTo(expected, 6)
+        })
+
+        it("武器槽 MOD 的充盈威力转化只计入该武器自身", () => {
+            const mkMod = (id: number, 类型: string, 触发: number, 充盈转化: number) =>
+                new LeveledMod({
+                    id,
+                    icon: "Test01",
+                    名称: "测试·充盈",
+                    版本: "1.0",
+                    系列: "测试",
+                    品质: "金",
+                    极性: "A",
+                    耐受: 15,
+                    类型,
+                    触发,
+                    充盈威力转化: 充盈转化,
+                    效果: "测试用充盈威力转化MOD",
+                })
+            // 仅近战 MOD 带充盈威力转化词条：近战武器转化 = 1，远程武器转化 = 0
+            const build = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                meleeMods: [mkMod(999903, "近战", 4, 1)],
+                melee: new LeveledWeapon(10102),
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[近战]",
+            })
+            const aMelee = build.calculateWeaponAttributes(build.meleeWeapon)
+            const aRanged = build.calculateWeaponAttributes(build.rangedWeapon)
+            expect(aMelee.weapon!.充盈威力转化).toBe(1)
+            expect(aRanged.weapon!.充盈威力转化).toBe(0)
+            // 充盈威力为角色汇总属性：近战溢出已计入，与武器上下文无关
+            const expected = Math.max(0, aMelee.weapon!.触发 - 1) * 1
+            expect(expected).toBeGreaterThan(0)
+            expect(aMelee.充盈威力).toBeCloseTo(expected, 6)
+            expect(aRanged.充盈威力).toBeCloseTo(expected, 6)
+        })
+
+        it("同律武器按自身作用域计算充盈威力转化", () => {
+            const mkMod = (id: number, 类型: string, 触发: number, 充盈转化: number) =>
+                new LeveledMod({
+                    id,
+                    icon: "Test01",
+                    名称: "测试·充盈",
+                    版本: "1.0",
+                    系列: "测试",
+                    品质: "金",
+                    极性: "A",
+                    耐受: 15,
+                    类型,
+                    触发,
+                    充盈威力转化: 充盈转化,
+                    效果: "测试用充盈威力转化MOD",
+                })
+            // 贝蕾妮卡：非继承同律武器 伊弥尔（同律近战 基础触发 0.5），同律近战 MOD 带充盈威力转化词条
+            const build = new CharBuild({
+                char: new LeveledChar("贝蕾妮卡"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                skillMods: [mkMod(999905, "同律近战", 4, 1)],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "伊弥尔",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[同律]",
+            })
+            expect(build.skillWeapon).toBeDefined()
+            const aSkill = build.calculateWeaponAttributes(build.skillWeapon!)
+            const skillOverflow = Math.max(0, aSkill.weapon!.触发 - 1)
+            expect(skillOverflow).toBeGreaterThan(0)
+            expect(aSkill.weapon!.充盈威力转化).toBe(1)
+            expect(aSkill.充盈威力).toBeCloseTo(skillOverflow * 1, 6)
+            // 同律 MOD 不作用于近战武器：近战武器转化 = 0，但角色充盈威力汇总已含同律溢出
+            const aMelee = build.calculateWeaponAttributes(build.meleeWeapon)
+            expect(aMelee.weapon!.充盈威力转化).toBe(0)
+            expect(aMelee.充盈威力).toBeCloseTo(aSkill.充盈威力, 6)
+        })
+
+        it("角色MOD的充盈威力加成与武器转化的充盈威力正常累加", () => {
+            const mkMod = (id: number, 类型: string, 触发: number, 充盈转化: number) =>
+                new LeveledMod({
+                    id,
+                    icon: "Test01",
+                    名称: "测试·充盈",
+                    版本: "1.0",
+                    系列: "测试",
+                    品质: "金",
+                    极性: "A",
+                    耐受: 15,
+                    类型,
+                    触发,
+                    充盈威力转化: 充盈转化,
+                    效果: "测试用充盈威力转化MOD",
+                })
+            // 携带角色 MOD 56201（充盈·巧击，充盈威力 +1）+ 近战转化 MOD 使近战武器触发溢出
+            const build = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                charMods: [new LeveledMod(56201)],
+                meleeMods: [mkMod(999903, "近战", 4, 1)],
+                melee: new LeveledWeapon(10102),
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[近战]",
+            })
+            const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
+
+            // 角色 MOD 56201 提供充盈威力 +1（角色属性，经公共加成向量汇总）
+            expect(build.calculateAttributes(true).充盈威力).toBe(1)
+            // 武器转化 = 溢出触发 × 该武器充盈威力转化
+            const weaponConverted = Math.max(0, attrs.weapon!.触发 - 1) * attrs.weapon!.充盈威力转化
+            expect(weaponConverted).toBeGreaterThan(0)
+            // 角色充盈威力 = 角色 MOD 加成 + 武器转化，正常累加
+            expect(attrs.充盈威力).toBeCloseTo(1 + weaponConverted, 6)
+            // AST 引用同样返回累加值
+            expect(build.evaluateAST("充盈威力", attrs)).toBeCloseTo(attrs.充盈威力, 6)
         })
 
         it("同律关键词应该使用角色装备的同律武器面板", () => {
@@ -374,8 +683,8 @@ describe("evaluateAST函数测试", () => {
             expect(getPrefix("下落攻击", "下落攻击二段伤害")).toBe("下落")
             // "骑乘攻击一段伤害" 属于骑乘攻击而非普攻
             expect(getPrefix("饱饱工作", "骑乘攻击一段伤害")).toBeUndefined()
-            // "一段剑气伤害" 不属于普攻连段
-            expect(getPrefix("伊弥尔", "一段剑气伤害")).toBeUndefined()
+            // "一段剑气伤害" 属于普攻连段
+            expect(getPrefix("伊弥尔", "一段剑气伤害")).toBe("普攻")
         })
 
         it("循环引用的自定义变量应按0处理", () => {
@@ -1141,6 +1450,76 @@ describe("evaluateAST函数测试", () => {
                 expect(propNode.namespace).toBe("[配置]")
                 expect(propNode.name).toBe("值")
             })
+        })
+    })
+
+    describe("强制属性运算符 ! 测试", () => {
+        it("应该解析命名空间属性的 ! 后缀", () => {
+            const ast = parseAST("e::攻击!")
+            expect(ast.type).toBe("property")
+            const propNode = ast as ASTProperty
+            expect(propNode.name).toBe("攻击")
+            expect(propNode.namespace).toBe("e")
+            expect(propNode.forceAttr).toBe(true)
+        })
+
+        it("应该解析无命名空间属性的 ! 后缀", () => {
+            const ast = parseAST("攻击!") as ASTProperty
+            expect(ast.type).toBe("property")
+            expect(ast.name).toBe("攻击")
+            expect(ast.namespace).toBeUndefined()
+            expect(ast.forceAttr).toBe(true)
+        })
+
+        it("不带 ! 的属性 forceAttr 应为空", () => {
+            const ast = parseAST("攻击") as ASTProperty
+            expect(ast.forceAttr).toBeUndefined()
+        })
+
+        it("! 后缀应该与运算符组合解析", () => {
+            const ast = parseAST("攻击! * 2") as ASTBinary
+            expect(ast.type).toBe("binary")
+            const left = ast.left as ASTProperty
+            expect(left.name).toBe("攻击")
+            expect(left.forceAttr).toBe(true)
+        })
+
+        function forceBuild() {
+            // 贝蕾妮卡的 Q 技能「冥焰」字段含「蓄力攻击伤害」，会挤占 q::攻击 的属性查询
+            return new CharBuild({
+                char: new LeveledChar("贝蕾妮卡"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "冥焰",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "攻击",
+            })
+        }
+
+        it("! 后缀强制返回攻击属性而非匹配到的技能字段", () => {
+            const build = forceBuild()
+            const attrs = build.calculateWeaponAttributes()
+
+            // 未加 ! 时 q::攻击 命中「蓄力攻击伤害」技能字段
+            expect(build.evaluateAST("q::攻击", attrs)).not.toBeCloseTo(attrs.攻击, 0)
+            // 加 ! 后强制返回攻击属性值
+            expect(build.evaluateAST("q::攻击!", attrs)).toBeCloseTo(attrs.攻击, 6)
+            // 无命名空间时同理：冥焰 字段含「攻击」，! 强制返回攻击属性
+            expect(build.evaluateAST("攻击", attrs)).not.toBeCloseTo(attrs.攻击, 0)
+            expect(build.evaluateAST("攻击!", attrs)).toBeCloseTo(attrs.攻击, 6)
+        })
+
+        it("! 后缀应通过表达式校验且不影响普通属性校验", () => {
+            const build = forceBuild()
+            expect(build.validateAST("q::攻击!")).toBeUndefined()
+            expect(build.validateAST("攻击!")).toBeUndefined()
+            expect(build.validateAST("攻击! * 2")).toBeUndefined()
+            expect(build.validateAST("q::不存在!")).toContain("找不到标识符")
         })
     })
 })

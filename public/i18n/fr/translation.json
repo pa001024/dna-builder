@@ -1227,6 +1227,7 @@
     "炽灼·权能": "Ardeur · Pouvoir",
     "炽灼·永恒": "Ardeur · Éternité",
     "炽灼·羽翼": "Ardeur · Ailes",
+    "充盈威力": "Puissance de Surabondance",
     "憧憬的孩童": "Enfant émerveillé",
     "抽茧成梦": "Rêve de Chrysalide",
     "抽陀螺": "Toupie infernale",
@@ -5891,6 +5892,7 @@
             "complex": "Expression complexe",
             "critDamage": "Dégâts critiques",
             "expectedDamage": "Dégâts attendus",
+            "forceAttr": "Attribut forcé",
             "functions": "Utilisation des fonctions",
             "namespace": "Espace de noms",
             "specialValue": "Valeurs spéciales",
@@ -5938,6 +5940,7 @@
             "add": "Addition",
             "div": "Division",
             "floordiv": "Division entière",
+            "forceAttr": "Forcer la résolution en attribut (ignorer les champs de compétence)",
             "mod": "Modulo",
             "mul": "Multiplication",
             "sub": "Soustraction"
@@ -5946,6 +5949,10 @@
         "parseError": "Erreur d’analyse de l’expression",
         "syntaxDesc": "Les expressions servent à calculer les dégâts, les valeurs de statistiques, etc. La syntaxe suivante est prise en charge :",
         "syntaxItems": {
+            "force": {
+                "desc": "Ajoutez ! après un nom de propriété pour forcer la résolution en attribut, en ignorant les champs de compétence. Par exemple, e::攻击! renvoie l'attribut d'attaque plutôt qu'un champ de compétence correspondant.",
+                "label": "Attribut forcé"
+            },
             "function": {
                 "desc": "min(), max(), floor(), ceil(), or(), log(), power()",
                 "label": "Fonctions"
@@ -7880,7 +7887,7 @@
         "top_actions": "Utilisez les boutons en haut pour partager la configuration, construire automatiquement, sauvegarder le projet, etc.",
         "weapon_select": "Cliquez ici pour changer d'arme/définir le raffinement"
     },
-    "UI_FORGING_BLUEPRINT": "Plan de fabrication :",
+    "UI_FORGING_BLUEPRINT": "Plan de fabrication : ",
     "unpack": {
         "desc": "Lire et exporter les fichiers pak",
         "title": "Dépaqueter"

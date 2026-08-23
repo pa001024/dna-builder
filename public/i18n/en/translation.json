@@ -1227,6 +1227,7 @@
     "炽灼·权能": "Blaze·Spectrum",
     "炽灼·永恒": "Blaze·Eternity",
     "炽灼·羽翼": "Blaze·Wings",
+    "充盈威力": "Overflow Intensity",
     "憧憬的孩童": "Starry-Eyed Child",
     "抽茧成梦": "Chrysalis Dreamweave",
     "抽陀螺": "Helix Spin",
@@ -3880,8 +3881,8 @@
     "失望的青年": "Disillusioned Young Man",
     "失乡的獠牙": "Exiled Fangs",
     "失乡的獠牙的握柄": "Exiled Fangs: Grip",
-    "失乡的獠牙的右刀刃": "Exiled Fangs: Right Blade",
-    "失乡的獠牙的左刀刃": "Exiled Fangs: Left Blade",
+    "失乡的獠牙的右刀刃": "Exiled Fangs: Blade (Right)",
+    "失乡的獠牙的左刀刃": "Exiled Fangs: Blade (Left)",
     "失序的应天侍": "Frenzied Guard of Yingtian",
     "失忆的少女": "Amnesiac Girl",
     "诗歌段落": "Verse",
@@ -5891,6 +5892,7 @@
             "complex": "Complex Expression",
             "critDamage": "Critical Damage",
             "expectedDamage": "Expected Damage",
+            "forceAttr": "Force Attribute",
             "functions": "Function Usage",
             "namespace": "Namespace",
             "specialValue": "Special Values",
@@ -5938,6 +5940,7 @@
             "add": "Addition",
             "div": "Division",
             "floordiv": "Integer Division",
+            "forceAttr": "Force attribute resolution (skip skill fields)",
             "mod": "Modulo",
             "mul": "Multiplication",
             "sub": "Subtraction"
@@ -5946,6 +5949,10 @@
         "parseError": "Expression parsing error",
         "syntaxDesc": "Expressions are used to calculate damage, stat values, and more. The following syntax is supported:",
         "syntaxItems": {
+            "force": {
+                "desc": "Append ! after a property name to force attribute resolution, skipping skill fields. For example, e::攻击! returns the Attack stat instead of a matching skill field.",
+                "label": "Force Attribute"
+            },
             "function": {
                 "desc": "min(), max(), floor(), ceil(), or(), log(), power()",
                 "label": "Functions"

@@ -56,6 +56,8 @@ export interface CharAttr {
     转灾厄?: number
     转属克?: number
     转属逆?: number
+    // 充盈威力（角色属性）：Σ 各武器触发率溢出 100% 的部分 × 该武器充盈威力转化（由 calculateWeaponAttributes 汇总）
+    充盈威力: number
 }
 
 export interface WeaponAttr {
@@ -85,6 +87,8 @@ export interface WeaponAttr {
     追加伤害: number
     /** 武器倍率 0开始 */
     武器倍率: number
+    /** 充盈威力转化（武器属性）：触发率溢出 100% 的部分按该比例转化为角色充盈威力，0 开始 */
+    充盈威力转化: number
 }
 
 const weaponAttackTypeMap = [
@@ -143,6 +147,7 @@ const characterBonusAttributes = [
     "转灾厄",
     "转属克",
     "转属逆",
+    "充盈威力",
 ] as const
 
 const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((attribute, index) => [attribute, index])) as Record<
@@ -634,6 +639,8 @@ export class CharBuild {
         const convertCalamity = bonuses[characterBonusIndex.转灾厄]
         const convertRestraint = bonuses[characterBonusIndex.转属克]
         const convertReverse = bonuses[characterBonusIndex.转属逆]
+        // 角色 MOD 的充盈威力词条加成（如 56201 充盈·巧击），经公共加成向量汇总
+        const fullnessBonus = bonuses[characterBonusIndex.充盈威力]
 
         // 应用MOD属性加成
         const modAttributeBonus = this.getTotalBonus(`${this.char.属性}MOD属性`)
@@ -726,6 +733,8 @@ export class CharBuild {
             转灾厄: convertCalamity,
             转属克: convertRestraint,
             转属逆: convertReverse,
+            // 充盈威力为角色属性：角色 MOD 充盈威力加成（向量汇总），武器转化部分由 calculateWeaponAttributes 累加
+            充盈威力: fullnessBonus,
         }
         // 应用MOD条件 如果有变化就再计算一次
         const condMods = this.charModsWithAura.filter(mod => mod.生效?.条件)
@@ -817,6 +826,40 @@ export class CharBuild {
         return conditionValues
     }
 
+    /**
+     * 获取参与充盈威力汇总的武器集合（近战/远程/同律非继承）。
+     * 同律武器继承近战/远程时复用被继承武器面板，不重复计入。
+     * @returns 武器集合
+     */
+    private getAllFullnessWeapons(): (LeveledWeapon | LeveledSkillWeapon)[] {
+        const weapons: (LeveledWeapon | LeveledSkillWeapon)[] = [this.meleeWeapon, this.rangedWeapon]
+        if (this.skillWeapon && !this.skillWeapon.inherit) {
+            weapons.push(this.skillWeapon)
+        }
+        return weapons
+    }
+
+    /**
+     * 计算单个武器的触发率与充盈威力转化。
+     * 触发率数值允许溢出（不钳制 100% 上限），加成逻辑与 calculateWeaponAttributes 保持一致。
+     * @param weapon 武器
+     * @returns 触发率与充盈威力转化
+     */
+    private getWeaponFullness(weapon: LeveledWeapon | LeveledSkillWeapon) {
+        if (weapon.inherit) {
+            weapon = weapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
+        }
+        const prefix = weapon.类型
+        let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)
+        if (prefix.startsWith("同律")) {
+            const lowerPrefix = prefix.substring(2)
+            triggerRateBonus += this.getTotalBonus(`${lowerPrefix}触发`, lowerPrefix)
+        }
+        const triggerRate = Math.round(weapon.基础触发 * (1 + triggerRateBonus) * 100) / 100
+        const conversionRate = this.getTotalBonus("充盈威力转化", prefix)
+        return { triggerRate, conversionRate }
+    }
+
     // 计算武器属性
     public calculateWeaponAttributes(
         weapon = this.selectedWeapon || (this.selectedSkill?.召唤物 && this.meleeWeapon),
@@ -898,9 +941,8 @@ export class CharBuild {
             // 应用武器物理加成
             attack *= 1 + physicalBonus
 
-            // 应用属性上限
-            triggerRate = Math.min(triggerRate, 1) // 100%
-
+            // 触发率数值允许溢出（可超过 100%）：溢出部分由 calculateWeaponDamage 封顶触发效果，
+            // 并在下方按该武器作用域的充盈威力转化转为角色的充盈威力，因此此处不设上限。
             // 取整
             attack = Math.round(attack * 100) / 100
             critRate = Math.round(critRate * 100) / 100
@@ -924,9 +966,19 @@ export class CharBuild {
                 弹匣: magazine,
                 弹药: ammo,
                 武器倍率: weaponDamageMul,
+                // 充盈威力转化（武器属性）：该武器作用域（角色槽 + 该武器槽）MOD 充盈威力转化词条之和
+                充盈威力转化: this.getTotalBonus("充盈威力转化", prefix),
             }
             attrs.weapon = weaponAttrs
         }
+        // 充盈威力（角色属性）= 角色 MOD 充盈威力加成 + Σ 所有武器（近战/远程/同律非继承）溢出触发 × 该武器充盈威力转化。
+        // 各武器的转化率只作用于该武器自身溢出的触发率，不跨武器累加转化率。
+        let totalFullness = 0
+        for (const w of this.getAllFullnessWeapons()) {
+            const { triggerRate, conversionRate } = this.getWeaponFullness(w)
+            totalFullness += Math.max(0, triggerRate - 1) * conversionRate
+        }
+        attrs.充盈威力 = (attrs.充盈威力 || 0) + totalFullness
         if (nocode) return attrs
 
         if (this.dynamicBuffs.length > 0) {
@@ -1048,7 +1100,7 @@ export class CharBuild {
         if (fieldPrefix) return fieldPrefix
         // 普攻连段字段（如"一段伤害"、"[萨麦尔]三段伤害"）不携带攻击类型关键字，
         // 通过"段伤害"后缀归入普攻；但排除已含其他攻击类型关键字的字段（如"下落攻击二段伤害"、"骑乘攻击一段伤害"）。
-        if (fieldName && /段伤害$/.test(fieldName) && !/(蓄力|下落|滑行|射击|骑乘)攻击/.test(fieldName)) {
+        if (fieldName && /段(?:剑气)?伤害$/.test(fieldName) && !/(蓄力|下落|滑行|射击|骑乘)攻击/.test(fieldName)) {
             return "普攻"
         }
         const basePrefix = weaponAttackTypeMap.find(({ patterns }) => patterns.some(pattern => baseName === pattern))?.prefix
@@ -1122,7 +1174,7 @@ export class CharBuild {
         // 添加MOD加成
         this.mods.forEach(mod => {
             if (
-                ["暴击", "暴伤", "触发", "攻速"].includes(attribute)
+                ["暴击", "暴伤", "触发", "攻速", "充盈威力转化"].includes(attribute)
                     ? mod.attrType !== "角色" && mod.attrType !== prefixScope
                     : prefixScope && mod.attrType !== prefixScope
             )
@@ -1440,14 +1492,15 @@ export class CharBuild {
                 ? this.hpTypeCoefficients[this.enemy.currentHPType] + this.getTotalBonus("触发倍率")
                 : 0
         }
-        // 触发率、暴击率为概率值，临时属性/表达式加成可能将其推到合法区间之外（如 [近战]{触发:-9}），
-        // 负值会让触发/暴击期望溢出为负，最终导致伤害输出归零，这里在结算前统一钳制到 [0,1]。
-        const triggerRate = Math.max(0, Math.min(1, weaponAttrs.触发))
+        // 触发效果按 100% 封顶：触发率数值允许溢出（>100%），但溢出部分不重复计入触发期望，
+        // 而是由 calculateWeaponAttributes 按该武器作用域的充盈威力转化转为角色的充盈威力；负值同样钳制为 0，
+        // 避免触发期望溢出为负导致伤害输出归零（如 [近战]{触发:-9}）。
+        const triggerRate = Math.min(1, Math.max(0, weaponAttrs.触发))
 
         // 计算暴击伤害期望
-        // 暴击率钳制到 [0,1]，暴伤下限为 1（至少 100%），避免概率/倍率类属性溢出为负。
-        const critRate = Math.max(0, Math.min(1, weaponAttrs.暴击))
-        const critDamage = Math.max(1, weaponAttrs.暴伤)
+        // 暴击率允许超过 100% 溢出为更高暴击档位（见下方 floor/ceil 逻辑），因此不做上限钳制。
+        const critRate = weaponAttrs.暴击
+        const critDamage = weaponAttrs.暴伤
         const lowerCritDamage = (weaponAttrs.暴伤 - 1) * Math.floor(weaponAttrs.暴击) + 1
         const higherCritDamage = (weaponAttrs.暴伤 - 1) * Math.ceil(weaponAttrs.暴击) + 1
         const critExpectedDamage = 1 + critRate * (critDamage - 1)
@@ -1688,9 +1741,9 @@ export class CharBuild {
                     case "property": {
                         const fieldName = node.name
                         if (["[攻击]", "[防御]", "[生命]", "[近战]", "[远程]", "[同律]"].includes(fieldName)) break
-                        if (!node.namespace && customVariableNames.has(fieldName)) break
-                        // 检查是否是技能字段、属性或武器属性
-                        const isSkillField = getSkillAttr(fieldName, node.namespace)
+                        if (!node.namespace && !node.forceAttr && customVariableNames.has(fieldName)) break
+                        // ! 后缀强制按属性解析：技能字段不参与匹配
+                        const isSkillField = node.forceAttr ? undefined : getSkillAttr(fieldName, node.namespace)
                         const isAttr = fieldName in attrs
                         const isWeaponAttr = getWeaponAttr(fieldName, node.namespace || "ranged")
 
@@ -2078,21 +2131,30 @@ export class CharBuild {
             return safeValue
         }
 
-        const evaluateIdentity = (fieldName: string, ns?: string, temporaryAttributes?: TemporaryAttributes) => {
-            if (!ns) {
+        /**
+         * 解析标识符值。! 后缀（forceAttr）强制按属性解析：跳过技能字段与自定义变量的匹配，
+         * 只从武器属性/角色属性中取值，解决含特定字符的技能字段挤占属性查询的问题。
+         * @param fieldName 字段名
+         * @param ns 命名空间
+         * @param temporaryAttributes 临时属性
+         * @param forceAttr 是否强制按属性值解析
+         * @returns 解析结果
+         */
+        const evaluateIdentity = (fieldName: string, ns?: string, temporaryAttributes?: TemporaryAttributes, forceAttr = false) => {
+            if (!forceAttr && !ns) {
                 const customValue = evaluateCustomVariable(fieldName)
                 if (customValue !== undefined) return customValue
             }
             if (ns)
                 return (
-                    evaluateSkill(fieldName, ns, temporaryAttributes) ||
+                    (forceAttr ? 0 : evaluateSkill(fieldName, ns, temporaryAttributes)) ||
                     evaluateWeaponAttr(fieldName, ns) ||
                     evaluateAttr(fieldName, ns, temporaryAttributes) ||
                     0
                 )
             else
                 return (
-                    evaluateSkill(fieldName, ns, temporaryAttributes) ||
+                    (forceAttr ? 0 : evaluateSkill(fieldName, ns, temporaryAttributes)) ||
                     evaluateAttr(fieldName, ns, temporaryAttributes) ||
                     evaluateWeaponAttr(fieldName, ns) ||
                     0
@@ -2246,12 +2308,14 @@ export class CharBuild {
                 }
 
                 case "property": {
-                    const value = evaluateIdentity(node.name, node.namespace, temporaryAttributes)
-                    if (!node.namespace && customVariableExpressions.has(node.name)) return value
-                    // 只有真正的伤害字段才需要乘以默认的伤害系数
-                    const skillValue = evaluateSkill(node.name, node.namespace, temporaryAttributes)
-                    if (skillValue && isDamageSkillField(node.name, node.namespace)) {
-                        return value * evaluateMember(undefined, node.namespace, node.name, temporaryAttributes)
+                    const value = evaluateIdentity(node.name, node.namespace, temporaryAttributes, node.forceAttr)
+                    if (!node.forceAttr) {
+                        if (!node.namespace && customVariableExpressions.has(node.name)) return value
+                        // 只有真正的伤害字段才需要乘以默认的伤害系数
+                        const skillValue = evaluateSkill(node.name, node.namespace, temporaryAttributes)
+                        if (skillValue && isDamageSkillField(node.name, node.namespace)) {
+                            return value * evaluateMember(undefined, node.namespace, node.name, temporaryAttributes)
+                        }
                     }
                     return value
                 }
@@ -2292,14 +2356,19 @@ export class CharBuild {
                         objectValue = evaluateIdentity(
                             propertyContext.property.name,
                             propertyContext.property.namespace,
-                            propertyContext.temporaryAttributes
+                            propertyContext.temporaryAttributes,
+                            propertyContext.property.forceAttr
                         )
                     } else {
                         objectValue = evaluate(objectNode, temporaryAttributes)
                     }
 
                     const memberName = node.property
-                    if (propertyContext && !isDamageSkillField(propertyContext.property.name, propertyContext.property.namespace)) {
+                    if (
+                        propertyContext &&
+                        (propertyContext.property.forceAttr ||
+                            !isDamageSkillField(propertyContext.property.name, propertyContext.property.namespace))
+                    ) {
                         return objectValue
                     }
                     // 成员访问用于修改伤害计算方式
