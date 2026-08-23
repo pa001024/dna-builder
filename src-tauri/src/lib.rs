@@ -669,6 +669,50 @@ async fn get_local_qq(port: u32) -> String {
     return "[]".to_string();
 }
 
+/// MOD 导入时允许保留的归档类扩展名（不区分大小写）。
+/// 其余文件（mod.json 清单、说明文档、预览图等）一律跳过，避免污染游戏 MOD 目录。
+const MOD_ARCHIVE_EXTENSIONS: &[&str] = &["pak", "paks", "utoc", "ucas"];
+
+/// 将 MOD 文件名转换为「禁用态」扩展名（.pak→.kap、.paks→.kaps）。
+/// UE 引擎只会挂载 .pak/.utoc 等后缀的文件，改成 .kap 后放在 Paks 目录内也不会被游戏加载。
+/// 非 pak 类文件名原样返回。
+fn to_disabled_file_name(name: &str) -> String {
+    let lower = name.to_lowercase();
+    if lower.ends_with(".pak") {
+        format!("{}.kap", &name[..name.len() - 4])
+    } else if lower.ends_with(".paks") {
+        format!("{}.kaps", &name[..name.len() - 5])
+    } else {
+        name.to_string()
+    }
+}
+
+/// 将「禁用态」文件名还原为「启用态」（.kap→.pak、.kaps→.paks），其余原样返回。
+fn to_enabled_file_name(name: &str) -> String {
+    let lower = name.to_lowercase();
+    if lower.ends_with(".kap") {
+        format!("{}.pak", &name[..name.len() - 4])
+    } else if lower.ends_with(".kaps") {
+        format!("{}.paks", &name[..name.len() - 5])
+    } else {
+        name.to_string()
+    }
+}
+
+/// 判断文件名是否属于允许的扩展名列表（不区分大小写）。
+/// `allowed` 为 None 时表示不过滤，全部放行。
+fn is_allowed_ext(name: &str, allowed: Option<&[&str]>) -> bool {
+    match allowed {
+        None => true,
+        Some(list) => {
+            let lower = name.to_lowercase();
+            list.iter().any(|ext| {
+                lower.rsplit_once('.').is_some_and(|(_, actual)| actual == *ext)
+            })
+        }
+    }
+}
+
 fn is_zip_file(path: &Path) -> io::Result<bool> {
     let meta = fs::metadata(path)?;
     if meta.is_dir() {
@@ -696,6 +740,7 @@ fn extract_zip_into(
     target_dir: &Path,
     output: &mut Vec<(String, u64)>,
     app_handle: Option<&tauri::AppHandle>,
+    allowed_extensions: Option<&[&str]>,
 ) -> io::Result<()> {
     let file = File::open(archive_path)?;
 
@@ -718,7 +763,7 @@ fn extract_zip_into(
         let mut total_size = 0;
         for i in 0..total_files {
             if let Ok(entry) = archive.by_index(i) {
-                if !entry.is_dir() {
+                if !entry.is_dir() && is_allowed_ext(entry.name(), allowed_extensions) {
                     total_size += entry.size();
                 }
             }
@@ -751,6 +796,11 @@ fn extract_zip_into(
                 .by_index(entry_index)
                 .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))?;
             if entry.is_dir() {
+                continue;
+            }
+
+            // 按扩展名过滤：MOD 导入只保留 pak 类归档文件，跳过 mod.json 等无关文件
+            if !is_allowed_ext(entry.name(), allowed_extensions) {
                 continue;
             }
 
@@ -811,8 +861,8 @@ fn extract_zip_into(
             archive_path,
             target_dir,
             |entry: &ArchiveEntry, _reader: &mut dyn Read, _path: &PathBuf| {
-                // 只统计文件，跳过目录
-                if !entry.is_directory() {
+                // 只统计文件，跳过目录；按扩展名过滤无关文件
+                if !entry.is_directory() && is_allowed_ext(entry.name(), allowed_extensions) {
                     total_files += 1;
                     total_size += entry.size();
                 }
@@ -850,6 +900,11 @@ fn extract_zip_into(
             move |entry: &ArchiveEntry, reader: &mut dyn Read, path: &PathBuf| {
                 // 跳过目录
                 if entry.is_directory() {
+                    return Ok(true);
+                }
+
+                // 按扩展名过滤：MOD 导入只保留 pak 类归档文件，跳过 mod.json 等无关文件
+                if !is_allowed_ext(entry.name(), allowed_extensions) {
                     return Ok(true);
                 }
 
@@ -978,6 +1033,7 @@ fn copy_regular_file(
     file_path: &Path,
     target_dir: &Path,
     output: &mut Vec<(String, u64)>,
+    allowed_extensions: Option<&[&str]>,
 ) -> io::Result<()> {
     if !file_path.is_file() {
         return Ok(());
@@ -985,6 +1041,10 @@ fn copy_regular_file(
     let Some(file_name) = file_path.file_name() else {
         return Ok(());
     };
+    // 按扩展名过滤：MOD 导入只保留 pak 类归档文件，跳过 mod.json 等无关文件
+    if !is_allowed_ext(&file_name.to_string_lossy(), allowed_extensions) {
+        return Ok(());
+    }
     let dest = target_dir.join(file_name);
     if let Some(parent) = dest.parent() {
         fs::create_dir_all(parent)?;
@@ -1012,17 +1072,38 @@ fn import_mod(gamebase: String, paths: Vec<String>) -> String {
         }
         match is_zip_file(&src) {
             Ok(true) => {
-                if let Err(err) = extract_zip_into(&src, &base_path, &mut output, None) {
+                if let Err(err) =
+                    extract_zip_into(&src, &base_path, &mut output, None, Some(MOD_ARCHIVE_EXTENSIONS))
+                {
                     eprintln!("Failed to extract {:?}: {err}", src);
                 }
             }
             Ok(false) => {
-                if let Err(err) = copy_regular_file(&src, &base_path, &mut output) {
+                if let Err(err) = copy_regular_file(&src, &base_path, &mut output, Some(MOD_ARCHIVE_EXTENSIONS)) {
                     eprintln!("Failed to copy {:?}: {err}", src);
                 }
             }
             Err(err) => eprintln!("Failed to inspect {:?}: {err}", src),
         }
+    }
+
+    // 导入的 MOD 默认为禁用态：把 pak 类文件就地改为游戏不加载的 .kap 后缀，
+    // 返回给前端的路径同步使用改后的实际文件名（启用时再还原为 .pak）。
+    for entry in output.iter_mut() {
+        let path = PathBuf::from(&entry.0);
+        let Some(file_name) = path.file_name().map(|name| name.to_string_lossy().to_string()) else {
+            continue;
+        };
+        let disabled_name = to_disabled_file_name(&file_name);
+        if disabled_name == file_name {
+            continue;
+        }
+        let dest = path.with_file_name(&disabled_name);
+        if let Err(err) = fs::rename(&path, &dest) {
+            eprintln!("Failed to disable imported mod file {:?}: {err}", path);
+            continue;
+        }
+        entry.0 = dest.to_string_lossy().to_string();
     }
 
     serde_json::to_string(&output).unwrap_or_else(|_| "[]".to_string())
@@ -1067,7 +1148,13 @@ fn import_mod_files(gamebase: String, files: Vec<ModImportFile>) -> Result<Strin
             } else {
                 safe_name
             };
-            let path = temp_dir.join(format!("{index:04}-{file_name}"));
+            // 每个文件放进独立子目录，既避免同名冲突，又不会像「0000-名字」前缀那样
+            // 污染最终导入的文件名（导入流程按 basename 复制进 MOD 目录）。
+            let path = temp_dir.join(format!("{index}")).join(&file_name);
+            if let Some(parent) = path.parent() {
+                fs::create_dir_all(parent)
+                    .map_err(|error| format!("创建 MOD 临时目录失败: {error}"))?;
+            }
             fs::write(&path, &file.data)
                 .map_err(|error| format!("写入 MOD 临时文件失败: {error}"))?;
             paths.push(path.to_string_lossy().to_string());
@@ -1081,20 +1168,52 @@ fn import_mod_files(gamebase: String, files: Vec<ModImportFile>) -> Result<Strin
     result
 }
 
+/// 在游戏 MOD 目录内就地启用或禁用 MOD 文件。
+/// 禁用（mode = "disable"）：把 .pak 改名为 .kap —— UE 只挂载 .pak 后缀，
+/// 改名后即使文件仍留在 Paks 目录内也不会被游戏加载；
+/// 启用（mode = "enable"）：把 .kap 还原为 .pak。
+/// 缺失的源文件会被跳过并记录日志，避免历史脏数据导致整个操作失败。
 #[tauri::command]
-fn enable_mod(srcdir: String, dstdir: String, files: Vec<String>) -> String {
-    let base_path = PathBuf::from(dstdir.clone());
+fn enable_mod(basedir: String, files: Vec<String>, mode: String) -> String {
+    let base_path = PathBuf::from(&basedir);
     if let Err(err) = fs::create_dir_all(&base_path) {
         eprintln!("Failed to prepare moddir: {err}");
-        return "[]".to_string();
+        return format!("Failed to prepare moddir: {err}");
     }
-    // 将srcdir下的files移动到dstdir
+    let disable_mode = mode != "enable";
     for file in files {
-        let src = srcdir.clone() + "\\" + file.as_str();
-        let dest = dstdir.clone() + "\\" + file.as_str();
-        if let Err(err) = fs::rename(&src, &dest) {
-            eprintln!("Failed to move {:?} -> {:?}: {err}", src, dest);
-            return format!("Failed to move {:?} -> {:?}: {err}", src, dest);
+        // 源文件候选：优先按「另一种形态」的扩展名查找，再兜底调用方传入的原名
+        let src_candidates: Vec<String> = if disable_mode {
+            vec![to_enabled_file_name(&file), file.clone()]
+        } else {
+            vec![to_disabled_file_name(&file), file.clone()]
+        };
+        let mut handled = false;
+        for candidate in src_candidates {
+            let src = base_path.join(&candidate);
+            if !src.exists() {
+                continue;
+            }
+            let dst_name = if disable_mode {
+                to_disabled_file_name(&candidate)
+            } else {
+                to_enabled_file_name(&candidate)
+            };
+            // 名字已是目标形态（如非 pak 类文件），无需改名，视为成功
+            if candidate == dst_name {
+                handled = true;
+                break;
+            }
+            let dst = base_path.join(&dst_name);
+            if let Err(err) = fs::rename(&src, &dst) {
+                eprintln!("Failed to rename {:?} -> {:?}: {err}", src, dst);
+                return format!("Failed to rename {:?} -> {:?}: {err}", src, dst);
+            }
+            handled = true;
+            break;
+        }
+        if !handled {
+            eprintln!("Skip missing mod file: {file}");
         }
     }
     "".to_string()
@@ -2578,6 +2697,7 @@ async fn extract_game_assets(
         &target_directory,
         &mut extracted_files,
         Some(&app_handle),
+        None,
     ) {
         return Err(format!("Failed to extract zip file: {}", err));
     }

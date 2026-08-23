@@ -4,6 +4,7 @@ import { useObservable } from "@vueuse/rxjs"
 import { liveQuery } from "dexie"
 import { defineStore } from "pinia"
 import {
+    deleteFile,
     getGameInstall,
     importModFiles as importModData,
     importMod as importModPathsData,
@@ -21,6 +22,27 @@ import { type CustomEntity, db, type Mod, STANDALONE_ENTITY, type UCustomEntity,
 
 const GAME_RUNNING_POLL_MS = 1000
 const GAME_LIVE_PERSIST_MS = 1000
+
+/**
+ * 把 MOD 文件名转换为「禁用态」扩展名（.pak→.kap、.paks→.kaps），与后端规则保持一致。
+ * UE 只挂载 .pak 后缀的文件，改名后留在 ~mods 目录也不会被游戏加载。
+ */
+function toDisabledFileName(name: string) {
+    const lower = name.toLowerCase()
+    if (lower.endsWith(".pak")) return `${name.slice(0, -4)}.kap`
+    if (lower.endsWith(".paks")) return `${name.slice(0, -5)}.kaps`
+    return name
+}
+
+/**
+ * 把「禁用态」文件名还原为「启用态」（.kap→.pak、.kaps→.paks），与后端规则保持一致。
+ */
+function toEnabledFileName(name: string) {
+    const lower = name.toLowerCase()
+    if (lower.endsWith(".kap")) return `${name.slice(0, -4)}.pak`
+    if (lower.endsWith(".kaps")) return `${name.slice(0, -5)}.paks`
+    return name
+}
 
 if (env.isApp && getCurrentWindow().label === "main") {
     setTimeout(async () => {
@@ -147,7 +169,6 @@ export const useGameStore = defineStore("game", {
         gameDir: state => state.path.replace(/EM\.exe$/, ""),
         gameExeExists: state => state.installed,
         modsDir: state => state.path.replace(/EM\.exe$/, "EM\\Content\\Paks\\~mods"),
-        modsLib: state => state.path.replace(/EM\.exe$/, "EM\\Content\\Paks\\lib"),
     },
     actions: {
         /**
@@ -215,13 +236,34 @@ export const useGameStore = defineStore("game", {
             await db.mods.add(mod)
         },
         /**
-         * 删除 MOD，并在删除前撤销其启用状态（含独立分类的多选启用记录）。
+         * 删除 MOD：先撤销启用状态（就地改名回 .kap），再删除磁盘上的物理文件，
+         * 最后清理数据库记录（含独立分类的多选启用关系）。
          * @param mod 待删除的 MOD
          */
         async removeMod(mod: Mod) {
+            // 先撤销启用状态：已启用的 .pak 就地改回 .kap，失败不阻断删除流程
+            await this.disableMod(mod.id)
+
+            // 删除磁盘上的物理文件：文件可能是禁用态原名或另一种扩展名形态，都尝试一遍
+            const candidates = new Set<string>()
+            for (const file of mod.files) {
+                candidates.add(`${this.modsDir}\\${file}`)
+                candidates.add(`${this.modsDir}\\${toEnabledFileName(file)}`)
+                candidates.add(`${this.modsDir}\\${toDisabledFileName(file)}`)
+            }
+            for (const filePath of candidates) {
+                try {
+                    if (await pathExists(filePath)) {
+                        await deleteFile(filePath, true)
+                    }
+                } catch (error) {
+                    console.error(`删除 MOD 文件失败: ${filePath}`, error)
+                }
+            }
+
+            // 清理数据库：单选启用关系、独立分类多选启用关系、MOD 记录本身
             const rel = await db.entityMods.get({ entity: mod.entity })
             if (rel && rel.modid === mod.id) {
-                await this.disableMod(rel.modid)
                 await db.entityMods.delete(rel.id)
             }
             if (mod.entity === STANDALONE_ENTITY) {
@@ -269,7 +311,7 @@ export const useGameStore = defineStore("game", {
             return rel ? await db.mods.get(rel.modid) : undefined
         },
         /**
-         * 将 MOD 文件从资源库移动到游戏 MOD 目录。
+         * 在游戏 MOD 目录内启用 MOD 文件（.kap 还原为 .pak）。
          * @param modid MOD ID
          * @returns 是否成功
          */
@@ -279,7 +321,7 @@ export const useGameStore = defineStore("game", {
                 console.error("mod not found")
                 return false
             }
-            const error = await moveModFiles(this.modsLib, this.modsDir, mod.files)
+            const error = await moveModFiles(this.modsDir, mod.files, "enable")
             if (error) {
                 console.error(error)
                 return false
@@ -287,7 +329,7 @@ export const useGameStore = defineStore("game", {
             return true
         },
         /**
-         * 将 MOD 文件从游戏 MOD 目录移回资源库。
+         * 在游戏 MOD 目录内禁用 MOD 文件（.pak 改名为 .kap，游戏不再加载）。
          * @param modid MOD ID
          * @returns 是否成功
          */
@@ -297,7 +339,7 @@ export const useGameStore = defineStore("game", {
                 console.error("mod not found")
                 return false
             }
-            const error = await moveModFiles(this.modsDir, this.modsLib, mod.files)
+            const error = await moveModFiles(this.modsDir, mod.files, "disable")
             if (error) {
                 console.error(error)
                 return false
@@ -347,6 +389,7 @@ export const useGameStore = defineStore("game", {
         /**
          * 将 MOD 文件导入到指定实体，并可选覆盖名称与预览图。
          * 供本地拖拽导入与「分享 MOD 一键下载安装」复用。
+         * 文件直接写入游戏 MOD 目录（~mods），pak 类文件默认为 .kap 禁用态。
          * @param files 待导入的文件
          * @param entity 目标实体名称
          * @param meta 可选的名称与预览图信息
@@ -361,7 +404,7 @@ export const useGameStore = defineStore("game", {
                     data: new Uint8Array(await file.arrayBuffer()),
                 }))
             )
-            const results = await importModData(this.modsLib, importedFiles)
+            const results = await importModData(this.modsDir, importedFiles)
             if (!results.length) return false
 
             let totalSize = 0
@@ -388,7 +431,7 @@ export const useGameStore = defineStore("game", {
         },
         /**
          * 通过本地文件路径直接导入 MOD（zip 或 .pak 文件，路径模式，不同于字节流导入）。
-         * 供「手动添加 MOD」按钮使用：文件选择框由 Tauri 原生对话框返回路径，后端直接解压/复制进 modsLib。
+         * 供「手动添加 MOD」按钮使用：文件选择框由 Tauri 原生对话框返回路径，后端直接解压/复制进游戏 MOD 目录。
          * @param paths 本地文件路径列表。
          * @param entity 目标实体名称。
          * @param meta 可选的名称与预览图信息。
@@ -397,7 +440,7 @@ export const useGameStore = defineStore("game", {
         async importModPaths(paths: string[], entity: string, meta?: { name?: string; pic?: string }) {
             if (!entity || !paths.length) return false
 
-            const results = await importModPathsData(this.modsLib, paths)
+            const results = await importModPathsData(this.modsDir, paths)
             if (!results.length) return false
 
             let totalSize = 0

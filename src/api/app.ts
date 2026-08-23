@@ -93,8 +93,16 @@ export async function importModFiles(gamebase: string, files: ModImportFile[]) {
     return JSON.parse(data) as [string, number][]
 }
 
-export async function enableMod(srcdir: string, dstdir: string, files: string[]) {
-    return await invoke<string>("enable_mod", { srcdir, dstdir, files })
+/**
+ * 在游戏 MOD 目录内就地启用或禁用 MOD 文件。
+ * 禁用时 .pak 会被改名为 .kap（UE 只挂载 .pak 后缀，改名后不再被游戏加载），启用时还原。
+ * @param basedir 游戏 MOD 目录（~mods）
+ * @param files MOD 文件名列表
+ * @param mode "enable" 启用 / "disable" 禁用
+ * @returns 成功返回空字符串，失败返回错误信息
+ */
+export async function enableMod(basedir: string, files: string[], mode: "enable" | "disable") {
+    return await invoke<string>("enable_mod", { basedir, files, mode })
 }
 
 export async function importPic(path: string) {
