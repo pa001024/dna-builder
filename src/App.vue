@@ -361,8 +361,13 @@ onBeforeUnmount(() => {
     <!-- 自定义底图：铺满视口的用户上传背景，位于窗口内容之下（窗口本体为半透明，可透出底图） -->
     <div
         v-if="setting.customWallpaper"
-        class="pointer-events-none fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        :style="{ backgroundImage: `url(${setting.customWallpaper})` }"
+        class="pointer-events-none fixed z-0 bg-cover bg-center bg-no-repeat"
+        :class="[setting.customWallpaperBlur ? '-inset-6' : 'inset-0']"
+        :style="{
+            backgroundImage: `url(${setting.customWallpaper})`,
+            opacity: setting.customWallpaperOpacity,
+            filter: setting.customWallpaperBlur ? `blur(${setting.customWallpaperBlur}px)` : undefined,
+        }"
     />
     <StartupModal />
     <ScriptRuntimeFloatingBar v-if="isMainWindow" />

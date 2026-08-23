@@ -671,19 +671,78 @@ onMounted(() => {
                                 <div class="text-xs text-base-content/50">上传一张图片作为全局背景，可配合窗口透明使用</div>
                             </span>
                             <div class="flex shrink-0 items-center gap-2">
-                                <img
+                                <!-- 预览图：hover 显示「更换」覆盖层，点击触发文件选择，替代独立更换按钮 -->
+                                <button
                                     v-if="setting.customWallpaper"
-                                    :src="setting.customWallpaper"
-                                    alt="自定义底图预览"
-                                    class="h-9 w-16 rounded-xs border border-base-content/15 object-cover"
-                                />
-                                <button class="btn btn-sm" @click="pickWallpaper">
-                                    {{ setting.customWallpaper ? "更换" : "上传" }}
+                                    type="button"
+                                    class="group relative h-9 w-16 cursor-pointer overflow-hidden rounded-xs border border-base-content/15"
+                                    @click="pickWallpaper"
+                                >
+                                    <img
+                                        :src="setting.customWallpaper"
+                                        alt="自定义底图预览"
+                                        class="h-full w-full object-cover"
+                                    />
+                                    <span
+                                        class="absolute inset-0 flex items-center justify-center bg-base-content/55 text-[11px] font-medium text-base-100 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                                        >更换</span
+                                    >
                                 </button>
+                                <button v-else class="btn btn-sm" @click="pickWallpaper">上传</button>
                                 <button v-if="setting.customWallpaper" class="btn btn-sm btn-error" @click="clearWallpaper">清除</button>
                             </div>
                         </div>
                         <input ref="wallpaperFileInput" type="file" accept="image/*" class="hidden" @change="onWallpaperFileChange" />
+                        <!-- 底图透明度：仅设置了底图后展示 -->
+                        <div
+                            v-if="setting.customWallpaper"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                底图透明度
+                                <div class="text-xs text-base-content/50">数值越小越透明，用于弱化背景干扰</div>
+                            </span>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <input
+                                    :value="setting.customWallpaperOpacity"
+                                    type="range"
+                                    class="range range-secondary w-32"
+                                    min="0"
+                                    max="1"
+                                    step="0.05"
+                                    @input="setting.customWallpaperOpacity = +($event.target as HTMLInputElement)!.value"
+                                />
+                                <span
+                                    class="w-10 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                    >{{ Math.round(setting.customWallpaperOpacity * 100) }}%</span
+                                >
+                            </div>
+                        </div>
+                        <!-- 底图模糊度：仅设置了底图后展示 -->
+                        <div
+                            v-if="setting.customWallpaper"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                底图模糊度
+                                <div class="text-xs text-base-content/50">对底图做高斯模糊，营造景深效果</div>
+                            </span>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <input
+                                    :value="setting.customWallpaperBlur"
+                                    type="range"
+                                    class="range range-secondary w-32"
+                                    min="0"
+                                    max="20"
+                                    step="1"
+                                    @input="setting.customWallpaperBlur = +($event.target as HTMLInputElement)!.value"
+                                />
+                                <span
+                                    class="w-12 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                    >{{ setting.customWallpaperBlur }}px</span
+                                >
+                            </div>
+                        </div>
                         <!-- 自定义字体：选择系统字体或上传字体文件（OPFS），空值恢复默认 -->
                         <div
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"

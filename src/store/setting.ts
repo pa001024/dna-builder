@@ -67,6 +67,10 @@ export const useSettingStore = defineStore("setting", {
             lastHeartbeatTime: 0,
             // 自定义底图（图片 data URL；空字符串表示未设置），持久化在 OPFS 中，启动时通过 initCustomWallpaper 加载
             customWallpaper: "",
+            // 自定义底图透明度（0~1，1 为完全不透明），与窗口透明叠加使用，弱化为背景
+            customWallpaperOpacity: useLocalStorage("setting_custom_wallpaper_opacity", 1),
+            // 自定义底图模糊度（像素，0 为不模糊），对底图做高斯模糊营造景深
+            customWallpaperBlur: useLocalStorage("setting_custom_wallpaper_blur", 0),
             // 自定义主题（设置页主题设计器），缺失字段时用默认值合并兜底
             customTheme: useLocalStorage<CustomTheme>("setting_custom_theme", structuredClone(DEFAULT_CUSTOM_THEME), {
                 mergeDefaults: true,
