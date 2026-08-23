@@ -144,169 +144,218 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="w-full h-full bg-base-100 p-4 flex flex-col relative">
-        <div v-if="!env.isApp" class="flex flex-col gap-8 absolute inset-0 items-center justify-center bg-base-200/50 z-10">
-            <div class="flex items-center">
-                <Icon icon="ri:error-warning-line" class="size-12 text-warning mr-2" />
-                网页端不可用
+    <div class="relative flex h-full w-full flex-col">
+        <!-- 网页端不可用遮罩 -->
+        <div
+            v-if="!env.isApp"
+            class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-6 bg-base-100/85 backdrop-blur-md"
+        >
+            <div class="flex items-center gap-2.5 text-warning">
+                <Icon icon="ri:error-warning-line" class="size-8" />
+                <span class="text-sm font-semibold tracking-wide">网页端不可用</span>
             </div>
-            <a href="/api/download" class="btn btn-primary px-8">
-                <Icon icon="ri:download-2-line" />
-                下载APP</a
+            <a
+                href="/api/download"
+                class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xs border border-primary bg-primary px-5 text-[13px] font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:scale-[0.97]"
             >
-        </div>
-        <!-- 顶部操作栏 -->
-        <div class="flex justify-between items-center mb-4">
-            <h1 class="text-xl font-semibold text-base-content">皎皎角账号管理</h1>
-            <div class="join">
-                <button class="join-item btn btn-primary" @click="isAddIframeOpen = true">
-                    <Icon icon="ri:add-line" class="size-5 mr-1" />
-                    <span> 添加账号 </span>
-                </button>
-                <Tooltip tooltip="通过JSON添加皎皎角账号(登录后可复制)" side="bottom">
-                    <button class="join-item btn btn-primary btn-square" @click="((isAddByTokenOpen = true), (jsonInput = ''))">
-                        <Icon icon="ri:more-line" class="size-5" />
-                    </button>
-                </Tooltip>
-            </div>
+                <Icon icon="ri:download-2-line" class="size-4" />
+                下载APP
+            </a>
         </div>
 
-        <!-- 用户列表卡片 -->
-        <div class="flex-1 flex card bg-base-200 shadow-lg rounded-xl overflow-hidden">
-            <!-- 卡片内容 -->
-            <ScrollArea class="card-body p-0 h-full flex">
-                <!-- 表格 -->
-                <table class="table w-full">
-                    <!-- 表头 -->
-                    <thead class="sticky top-0 z-10">
-                        <tr class="bg-base-100">
-                            <th class="text-left text-base-content font-medium">名称</th>
-                            <th class="text-left text-base-content font-medium">UID</th>
-                            <th class="text-left text-base-content font-medium">服务器</th>
-                            <th class="text-left text-base-content font-medium">状态</th>
-                            <th class="text-right text-base-content font-medium">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            v-for="user in users"
-                            :key="user.id"
-                            class="border-b border-base-300 transition-colors duration-200 hover:bg-base-100/50"
-                            :class="{ 'bg-primary/10 hover:bg-primary/20': user.id === setting.dnaUserId }"
+        <!-- 页面标题行：kicker + hairline（子页面不做大标题 header） -->
+        <div class="flex-none border-b border-base-content/15 px-4 pt-3 pb-3 stagger-rise">
+            <SectionHeader no-animate compact kicker="ACCOUNTS" title="皎皎角账号管理">
+                <template #trailing>
+                    <div class="flex items-center gap-1.5">
+                        <!-- 添加账号按钮 -->
+                        <button
+                            type="button"
+                            class="inline-flex h-7 cursor-pointer items-center gap-1 rounded-xs border border-primary bg-primary px-2.5 text-[12px] font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:scale-[0.97]"
+                            @click="isAddIframeOpen = true"
                         >
-                            <!-- 名称 -->
-                            <td class="py-3 px-4">
-                                <div class="flex items-center">
-                                    <!-- 皎皎角账号头像 -->
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold mr-2"
-                                    >
-                                        <img :src="user.pic" alt="皎皎角账号头像" class="w-full h-full rounded-full" />
-                                    </div>
-                                    <span class="text-base-content">{{ user.name }}</span>
+                            <Icon icon="ri:add-line" class="size-3.5" />
+                            添加账号
+                        </button>
+                        <!-- 通过JSON添加账号 -->
+                        <Tooltip tooltip="通过JSON添加皎皎角账号(登录后可复制)" side="bottom">
+                            <button
+                                type="button"
+                                class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary active:scale-[0.97]"
+                                @click="((isAddByTokenOpen = true), (jsonInput = ''))"
+                            >
+                                <Icon icon="ri:more-line" class="size-4" />
+                            </button>
+                        </Tooltip>
+                    </div>
+                </template>
+            </SectionHeader>
+        </div>
+
+        <!-- 账号列表区块卡 -->
+        <div
+            class="mx-3 mb-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xs border border-base-content/10 bg-base-100/60 backdrop-blur-sm"
+        >
+            <ScrollArea class="flex-1">
+                <div class="p-2.5">
+                    <!-- 空状态 -->
+                    <div
+                        v-if="users.length === 0"
+                        class="flex flex-col items-center justify-center px-4 py-16 text-center text-base-content/45"
+                    >
+                        <Icon icon="ri:user-line" class="mb-3 h-10 w-10 opacity-40" />
+                        <p class="text-sm tracking-wide">暂无皎皎角账号，请添加新账号</p>
+                    </div>
+
+                    <!-- 账号列表 -->
+                    <div v-else class="space-y-1.5">
+                        <article
+                            v-for="(user, index) in users"
+                            :key="user.id"
+                            class="group relative overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 animate-ef-rise motion-reduce:animate-none"
+                            :class="
+                                user.id === setting.dnaUserId
+                                    ? 'usm-item-active border-primary/70 bg-primary/10'
+                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
+                            "
+                            :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                        >
+                            <!-- 左侧主色强调条：当前账号时显现 -->
+                            <span
+                                class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                :class="user.id === setting.dnaUserId ? 'opacity-100' : 'opacity-0'"
+                                aria-hidden="true"
+                            />
+                            <div class="flex items-center gap-3 p-3">
+                                <!-- 头像 -->
+                                <div class="size-10 shrink-0 overflow-hidden rounded-xs bg-primary/15">
+                                    <img :src="user.pic" :alt="user.name" class="h-full w-full object-cover" />
                                 </div>
-                            </td>
 
-                            <!-- 皎皎角账号ID -->
-                            <td class="py-3 px-4">
-                                <span class="text-base-content/80 truncate max-w-37.5">{{ user.uid }}</span>
-                            </td>
+                                <!-- 名称 + 元信息 -->
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                            :class="{ 'text-primary': user.id === setting.dnaUserId }"
+                                        >
+                                            {{ user.name }}
+                                        </span>
+                                    </div>
+                                    <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
+                                        <!-- UID -->
+                                        <CopyID :id="user.uid" name="UID" />
+                                        <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                                        <!-- 服务器 -->
+                                        <span
+                                            class="rounded-xs border border-base-content/15 px-1.5 py-px text-[10px] tracking-wide text-base-content/55"
+                                        >
+                                            {{ user.server === "global" ? "国际服" : "国服" }}
+                                        </span>
+                                        <!-- 绑定状态 -->
+                                        <span
+                                            class="rounded-xs border px-1.5 py-px text-[10px] tracking-wide"
+                                            :class="
+                                                user.isComplete
+                                                    ? 'border-primary/40 bg-primary/10 font-medium text-primary'
+                                                    : 'border-base-content/20 text-base-content/50'
+                                            "
+                                        >
+                                            {{ user.isComplete ? "已绑定" : "未绑定" }}
+                                        </span>
+                                        <!-- 官方标记 -->
+                                        <span
+                                            v-if="user.isOfficial"
+                                            class="rounded-xs border border-base-content/20 px-1.5 py-px text-[10px] tracking-wide text-base-content/55"
+                                        >
+                                            官方
+                                        </span>
+                                    </div>
+                                </div>
 
-                            <!-- 服务器 -->
-                            <td class="py-3 px-4">
-                                <span class="badge badge-primary badge-sm">{{ user.server === "global" ? "国际服" : "国服" }}</span>
-                            </td>
-
-                            <!-- 状态 -->
-                            <td class="py-3 px-4">
-                                <span class="badge badge-primary badge-sm">{{ user.isComplete ? "已绑定" : "未绑定" }}</span>
-                                <span v-if="user.isOfficial" class="badge badge-primary badge-sm">官方</span>
-                            </td>
-
-                            <!-- 操作按钮 -->
-                            <td class="py-3 px-4 text-right">
-                                <div class="flex justify-end gap-2">
-                                    <!-- 使用按钮 -->
+                                <!-- 操作按钮 -->
+                                <div class="flex shrink-0 items-center gap-1.5">
+                                    <!-- 使用/当前 -->
                                     <button
-                                        class="btn btn-sm btn-primary"
+                                        type="button"
+                                        class="inline-flex h-7 cursor-pointer items-center rounded-xs border px-2.5 text-[12px] font-semibold transition-colors duration-150 active:scale-[0.97] disabled:cursor-default disabled:active:scale-100"
                                         :disabled="user.id === setting.dnaUserId"
+                                        :class="
+                                            user.id === setting.dnaUserId
+                                                ? 'border-primary/30 bg-primary/10 text-primary/60'
+                                                : 'border-primary bg-primary text-primary-content hover:bg-primary/90'
+                                        "
                                         @click="switchUser(user.id)"
                                     >
                                         {{ user.id === setting.dnaUserId ? "当前" : "使用" }}
                                     </button>
                                     <!-- 复制按钮 -->
                                     <Tooltip tooltip="复制账号JSON" side="bottom">
-                                        <button class="btn btn-sm btn-square" @click="copyUser(user.id)">
-                                            <Icon icon="ri:clipboard-line" class="size-4" />
+                                        <button
+                                            type="button"
+                                            class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary active:scale-[0.97]"
+                                            @click="copyUser(user.id)"
+                                        >
+                                            <Icon icon="ri:clipboard-line" class="size-3.5" />
                                         </button>
                                     </Tooltip>
                                     <!-- 删除按钮 -->
-                                    <button class="btn btn-sm btn-square btn-error" @click="deleteUser(user.id)">
-                                        <Icon icon="ri:delete-bin-line" class="size-4" />
+                                    <button
+                                        type="button"
+                                        class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-error/40 text-error/80 transition-colors duration-150 hover:bg-error/10 hover:text-error active:scale-[0.97]"
+                                        @click="deleteUser(user.id)"
+                                    >
+                                        <Icon icon="ri:delete-bin-line" class="size-3.5" />
                                     </button>
                                 </div>
-                            </td>
-                        </tr>
-
-                        <!-- 空状态 -->
-                        <tr v-if="users.length === 0">
-                            <td colspan="4" class="py-8 text-center">
-                                <div class="text-center py-6">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-10 w-10 mx-auto mb-2 opacity-50 text-base-content"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="1.5"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                        />
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="1.5"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                        />
-                                    </svg>
-                                    <p class="text-base-content/60">暂无皎皎角账号，请添加新账号</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                            </div>
+                        </article>
+                    </div>
+                </div>
             </ScrollArea>
+
+            <!-- 底部统计条 -->
+            <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                <p class="text-[11px] tracking-wide text-base-content/50">
+                    共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ users.length }}</b> 个账号
+                </p>
+            </div>
         </div>
 
-        <!-- 添加皎皎角账号iframe模态框 -->
+        <!-- 添加皎皎角账号 iframe 模态框 -->
         <div class="modal" :class="{ 'modal-open': isAddIframeOpen }">
-            <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-114 h-130">
-                <iframe ref="iframeRef" src="/login_jjj.html" class="w-full h-full border-0 rounded-lg" @load="applyIframeUiScale" />
+            <div class="modal-box w-114 h-110 rounded-xs border border-base-content/15 bg-base-100/85 p-0 shadow-lg backdrop-blur-md">
+                <iframe ref="iframeRef" src="/login_jjj.html" class="h-full w-full rounded-xs border-0" @load="applyIframeUiScale" />
             </div>
 
             <!-- 模态框背景 -->
             <div class="modal-backdrop" @click="isAddIframeOpen = false" />
         </div>
-        <!-- 通过JSON添加皎皎角账号模态框 -->
+
+        <!-- 通过 JSON 添加皎皎角账号模态框 -->
         <div class="modal" :class="{ 'modal-open': isAddByTokenOpen }">
-            <div class="modal-box bg-base-200 shadow-2xl rounded-xl p-0 w-114 h-116">
-                <div class="w-full h-full card bg-base-200 shadow-xl overflow-hidden">
-                    <form class="card-body p-6 gap-4" @submit.prevent="addUserByToken">
-                        <!-- 手机号输入 -->
-                        <fieldset class="fieldset">
-                            <legend class="fieldset-legend">JSON</legend>
-                            <textarea v-model="jsonInput" required :placeholder="jsonPlaceholder" class="input w-full p-2 h-68 text-md" />
-                        </fieldset>
-                        <!-- 登录按钮 -->
-                        <button type="submit" class="btn btn-primary btn-block" :disabled="!jsonInput.length">添加账号</button>
+            <div class="modal-box w-114 rounded-xs border border-base-content/15 bg-base-100/85 p-0 shadow-lg backdrop-blur-md">
+                <div class="p-4">
+                    <SectionHeader no-animate compact kicker="IMPORT" title="通过 JSON 导入账号" />
+                    <form class="mt-1 space-y-3" @submit.prevent="addUserByToken">
+                        <!-- JSON 输入 -->
+                        <textarea
+                            v-model="jsonInput"
+                            required
+                            :placeholder="jsonPlaceholder"
+                            class="h-56 w-full rounded-xs border border-base-content/15 bg-base-content/3 p-2.5 text-xs leading-relaxed text-base-content/80 outline-none transition-colors duration-150 placeholder:text-base-content/35 focus:border-primary"
+                        />
+                        <!-- 添加按钮 -->
+                        <button
+                            type="submit"
+                            class="inline-flex h-8 w-full cursor-pointer items-center justify-center rounded-xs border border-primary bg-primary text-[13px] font-semibold text-primary-content transition-opacity duration-150 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+                            :disabled="!jsonInput.length"
+                        >
+                            添加账号
+                        </button>
 
                         <!-- 辅助信息 -->
-                        <div class="text-center text-sm text-base-content/70">
-                            <p>导入皎皎角账号JSON数据</p>
-                        </div>
+                        <p class="text-center text-xs text-base-content/50">导入皎皎角账号JSON数据</p>
                     </form>
                 </div>
             </div>
