@@ -815,13 +815,17 @@ defineExpose({
 </script>
 
 <template>
-    <div class="space-y-6">
+    <div class="space-y-3">
         <!-- 刷新按钮 -->
         <div v-if="!nobtn" class="flex justify-between items-center">
-            <span class="text-xs text-gray-500">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
+            <span class="text-xs tracking-wide text-base-content/50">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
             <Tooltip tooltip="刷新" side="bottom">
-                <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
-                    <Icon icon="ri:refresh-line" />
+                <button
+                    type="button"
+                    class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                    @click="loadData(true)"
+                >
+                    <Icon icon="ri:refresh-line" class="size-4" />
                 </button>
             </Tooltip>
         </div>
@@ -830,169 +834,188 @@ defineExpose({
             <span class="loading loading-spinner loading-lg" />
         </div>
 
-        <div class="space-y-6">
+        <div class="space-y-3">
             <!-- 查询表单 -->
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title text-xl font-bold">
-                        道具流水查询
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="QUERY" :title="$t('道具流水查询')">
+                    <template #trailing>
+                        <button
+                            type="button"
+                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary transition-colors duration-150 hover:border-primary/60 hover:bg-primary/15 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="loading"
+                            @click="exportToExcel"
+                        >
+                            <Icon icon="ri:file-excel-2-line" class="size-3.5" />
+                            导出EXCEL
+                        </button>
+                    </template>
+                </SectionHeader>
 
-                        <button class="btn btn-primary btn-sm ml-auto" @click="exportToExcel" :disabled="loading">导出EXCEL</button>
-                    </h3>
-
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-                        <!-- 角色 -->
-                        <div>
-                            <label class="label">
-                                <span class="label-text font-medium">角色</span>
-                            </label>
-                            <div class="relative">
-                                <Select v-model="selectedRole" class="input w-full">
-                                    <SelectItem v-for="role in roles" :key="role.role_id" :value="role.role_id">
-                                        {{ role.role_name }}
-                                        <span v-if="role.is_verified === 1" class="text-green-500">(已验证)</span>
-                                        <span v-else class="text-red-500">(未验证)</span>
-                                    </SelectItem>
-                                </Select>
-                                <button
-                                    v-if="selectedVerifyRole?.is_verified === 0"
-                                    class="btn btn-sm btn-primary absolute right-1 top-1"
-                                    @click="openVerifyModal()"
-                                >
-                                    验证
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- 查询日期 -->
-                        <div>
-                            <label class="label">
-                                <span class="label-text font-medium">查询日期</span>
-                            </label>
-                            <input v-model="queryDate" type="date" class="input input-bordered w-full" />
-                        </div>
-
-                        <!-- 时间范围 -->
-                        <div>
-                            <label class="label">
-                                <span class="label-text font-medium">时间范围</span>
-                            </label>
-                            <Select v-model="selectedTimeRange" class="input w-full">
-                                <SelectItem v-for="option in timeRangeOptions" :key="option.value" :value="option.value">
-                                    {{ option.label }}
+                <div class="mt-2 grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <!-- 角色 -->
+                    <div>
+                        <label class="label">
+                            <span class="label-text text-xs font-medium">角色</span>
+                        </label>
+                        <div class="relative">
+                            <Select v-model="selectedRole" class="input w-full">
+                                <SelectItem v-for="role in roles" :key="role.role_id" :value="role.role_id">
+                                    {{ role.role_name }}
+                                    <span v-if="role.is_verified === 1" class="text-success">(已验证)</span>
+                                    <span v-else class="text-error">(未验证)</span>
                                 </SelectItem>
                             </Select>
-                        </div>
-
-                        <!-- 查询按钮 -->
-                        <div class="flex items-end">
                             <button
-                                class="btn btn-primary w-full"
-                                :disabled="loading || queryColdDown > 0 || isBatchQuerying"
-                                @click="queryPropFlow()"
+                                v-if="selectedVerifyRole?.is_verified === 0"
+                                type="button"
+                                class="absolute top-1 right-1 cursor-pointer rounded-xs border border-primary bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                                @click="openVerifyModal()"
                             >
-                                <span v-if="loading">加载中...</span>
-                                <span v-else-if="queryColdDown > 0"> 冷却中 {{ ~~(queryColdDown / 1000) | 0 }} 秒 </span>
-                                <span v-else> 查询流水 </span>
+                                验证
                             </button>
                         </div>
+                    </div>
 
-                        <!-- 道具分类 -->
-                        <div>
-                            <label class="label">
-                                <span class="label-text font-medium">道具分类</span>
-                            </label>
-                            <Select v-model="selectedPropCategory" class="input w-full">
-                                <SelectItem v-for="category in propCategories" :key="category.id" :value="category.id">
-                                    {{ category.name }}
-                                </SelectItem>
-                            </Select>
-                        </div>
+                    <!-- 查询日期 -->
+                    <div>
+                        <label class="label">
+                            <span class="label-text text-xs font-medium">查询日期</span>
+                        </label>
+                        <input v-model="queryDate" type="date" class="input input-bordered w-full" />
+                    </div>
 
-                        <!-- 道具名称 -->
-                        <div>
-                            <label class="label">
-                                <span class="label-text font-medium">道具名称</span>
-                            </label>
-                            <Combobox
-                                v-model="propName"
-                                placeholder="可选，留空查询所有道具"
-                                class="input-md! input-bordered w-full"
-                                :options="['时之纺线', '皎皎之民的信物', '委托密函线索'].map(v => ({ label: v, value: v }))"
-                            />
-                        </div>
-                        <!-- 批量查询按钮 -->
-                        <div class="flex items-end">
-                            <button
-                                class="btn w-full"
-                                :class="isBatchQuerying ? 'btn-error' : 'btn-primary'"
-                                @click="isBatchQuerying ? stopBatchQuery() : batchQueryPropFlow()"
-                            >
-                                {{ isBatchQuerying ? "停止批量查询" : "开始批量查询" }}
-                            </button>
-                        </div>
+                    <!-- 时间范围 -->
+                    <div>
+                        <label class="label">
+                            <span class="label-text text-xs font-medium">时间范围</span>
+                        </label>
+                        <Select v-model="selectedTimeRange" class="input w-full">
+                            <SelectItem v-for="option in timeRangeOptions" :key="option.value" :value="option.value">
+                                {{ option.label }}
+                            </SelectItem>
+                        </Select>
+                    </div>
 
-                        <!-- 批量查询进度 -->
-                        <div v-if="isBatchQuerying">
-                            <label class="label">
-                                <span class="label-text font-medium">进度显示</span>
-                            </label>
-                            <div class="flex items-center h-full">
-                                已查询 {{ batchQueryProgress.currentDate }} 日 共 {{ batchQueryProgress.totalRecords }} 条记录
-                            </div>
+                    <!-- 查询按钮 -->
+                    <div class="flex items-end">
+                        <button
+                            type="button"
+                            class="inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xs border border-primary bg-primary px-3 py-2 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="loading || queryColdDown > 0 || isBatchQuerying"
+                            @click="queryPropFlow()"
+                        >
+                            <Icon v-if="loading" icon="ri:refresh-line" class="size-3.5 animate-spin" />
+                            <Icon v-else icon="ri:search-line" class="size-3.5" />
+                            <span v-if="loading">加载中...</span>
+                            <span v-else-if="queryColdDown > 0"> 冷却中 {{ ~~(queryColdDown / 1000) | 0 }} 秒 </span>
+                            <span v-else> 查询流水 </span>
+                        </button>
+                    </div>
+
+                    <!-- 道具分类 -->
+                    <div>
+                        <label class="label">
+                            <span class="label-text text-xs font-medium">道具分类</span>
+                        </label>
+                        <Select v-model="selectedPropCategory" class="input w-full">
+                            <SelectItem v-for="category in propCategories" :key="category.id" :value="category.id">
+                                {{ category.name }}
+                            </SelectItem>
+                        </Select>
+                    </div>
+
+                    <!-- 道具名称 -->
+                    <div>
+                        <label class="label">
+                            <span class="label-text text-xs font-medium">道具名称</span>
+                        </label>
+                        <Combobox
+                            v-model="propName"
+                            placeholder="可选，留空查询所有道具"
+                            class="input-md! input-bordered w-full"
+                            :options="['时之纺线', '皎皎之民的信物', '委托密函线索'].map(v => ({ label: v, value: v }))"
+                        />
+                    </div>
+                    <!-- 批量查询按钮 -->
+                    <div class="flex items-end">
+                        <button
+                            type="button"
+                            class="inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xs border px-3 py-2 text-xs font-semibold transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                isBatchQuerying
+                                    ? 'border-error bg-error/10 text-error'
+                                    : 'border-primary bg-primary text-primary-content'
+                            "
+                            @click="isBatchQuerying ? stopBatchQuery() : batchQueryPropFlow()"
+                        >
+                            <Icon v-if="isBatchQuerying" icon="ri:stop-circle-line" class="size-3.5" />
+                            <Icon v-else icon="ri:list-check-2" class="size-3.5" />
+                            {{ isBatchQuerying ? "停止批量查询" : "开始批量查询" }}
+                        </button>
+                    </div>
+
+                    <!-- 批量查询进度 -->
+                    <div v-if="isBatchQuerying">
+                        <label class="label">
+                            <span class="label-text text-xs font-medium">进度显示</span>
+                        </label>
+                        <div class="flex items-center h-full text-xs text-base-content/70">
+                            已查询 <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary mx-1">{{ batchQueryProgress.currentDate }}</span> 日 共
+                            <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary mx-1">{{ batchQueryProgress.totalRecords }}</span> 条记录
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- 统计图表 -->
-            <div v-show="propFlowList.length > 0" class="card bg-base-100 shadow-xl py-4">
-                <div ref="chartRef" class="w-full h-100"></div>
-            </div>
+            <section v-show="propFlowList.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <div ref="chartRef" class="h-100 w-full"></div>
+            </section>
 
             <!-- 流水列表 -->
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title text-lg font-semibold mb-4">流水记录明细</h3>
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="RECORDS" :title="$t('流水记录明细')" />
 
-                    <div v-if="propFlowList.length === 0" class="text-center py-12">
-                        <div class="text-gray-400 mb-2 flex justify-center items-center">
-                            <Icon icon="ri:database-2-line" class="w-16 h-16" />
-                        </div>
-                        <p class="text-lg text-gray-500">暂无流水记录</p>
-                        <p class="text-sm text-gray-400 mt-2">请先查询道具流水</p>
+                <div v-if="propFlowList.length === 0" class="flex flex-col items-center justify-center py-10">
+                    <div class="mb-2 flex justify-center items-center text-base-content/30">
+                        <Icon icon="ri:database-2-line" class="h-12 w-12" />
                     </div>
-
-                    <div v-else class="overflow-x-auto">
-                        <table class="table table-compact w-full table-hover">
-                            <thead>
-                                <tr>
-                                    <th class="text-left">时间</th>
-                                    <th class="text-left">道具名称</th>
-                                    <th class="text-left">分类</th>
-                                    <th class="text-left">数量变化</th>
-                                    <th class="text-left">备注</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr
-                                    v-for="(item, index) in propFlowList"
-                                    :key="index"
-                                    class="transition-colors duration-200 hover:bg-base-300"
-                                >
-                                    <td>{{ new Date(item.time * 1000).toLocaleString() }}</td>
-                                    <td class="font-medium">{{ item.prop_name }}</td>
-                                    <td>{{ item.category_name }}</td>
-                                    <td :class="item.change > 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'">
-                                        {{ item.change > 0 ? "+" : "" }}{{ item.change }}
-                                    </td>
-                                    <td class="text-sm text-gray-600">{{ item.remark }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <p class="text-sm text-base-content/50">暂无流水记录</p>
+                    <p class="mt-1 text-xs text-base-content/40">请先查询道具流水</p>
                 </div>
-            </div>
+
+                <div v-else class="mt-2 overflow-x-auto">
+                    <table class="table table-compact table-hover w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left text-[11px] font-semibold tracking-wide text-base-content/55">时间</th>
+                                <th class="text-left text-[11px] font-semibold tracking-wide text-base-content/55">道具名称</th>
+                                <th class="text-left text-[11px] font-semibold tracking-wide text-base-content/55">分类</th>
+                                <th class="text-left text-[11px] font-semibold tracking-wide text-base-content/55">数量变化</th>
+                                <th class="text-left text-[11px] font-semibold tracking-wide text-base-content/55">备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="(item, index) in propFlowList"
+                                :key="index"
+                                class="transition-colors duration-200 hover:bg-base-content/5"
+                            >
+                                <td class="tabular-nums text-base-content/70">{{ new Date(item.time * 1000).toLocaleString() }}</td>
+                                <td class="font-medium text-base-content/90">{{ item.prop_name }}</td>
+                                <td class="text-base-content/70">{{ item.category_name }}</td>
+                                <td
+                                    class="font-medium tabular-nums"
+                                    :class="item.change > 0 ? 'text-success' : 'text-error'"
+                                >
+                                    {{ item.change > 0 ? "+" : "" }}{{ item.change }}
+                                </td>
+                                <td class="text-sm text-base-content/50">{{ item.remark }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     </div>
 

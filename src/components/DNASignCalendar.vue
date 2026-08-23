@@ -149,12 +149,16 @@ const isSignFinished = computed(() => {
 })
 </script>
 <template>
-    <div class="space-y-6">
+    <div class="space-y-3">
         <div v-if="!nobtn" class="flex justify-between items-center">
-            <span class="text-xs text-gray-500">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
+            <span class="text-xs tracking-wide text-base-content/50">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
             <Tooltip tooltip="刷新" side="bottom">
-                <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
-                    <Icon icon="ri:refresh-line" />
+                <button
+                    type="button"
+                    class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                    @click="loadData(true)"
+                >
+                    <Icon icon="ri:refresh-line" class="size-4" />
                 </button>
             </Tooltip>
         </div>
@@ -163,145 +167,152 @@ const isSignFinished = computed(() => {
         </div>
 
         <div v-else-if="errorMessage" class="flex flex-col items-center justify-center h-64">
-            <p class="text-lg mb-4 text-error">
+            <p class="text-sm mb-4 text-error">
                 {{ errorMessage }}
             </p>
-            <button class="btn btn-primary" @click="loadData(true)">重试</button>
+            <button
+                type="button"
+                class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                @click="loadData(true)"
+            >
+                重试
+            </button>
         </div>
 
-        <div v-else class="space-y-6">
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">签到日历</h3>
-                    <div v-if="calendarData?.period" class="flex items-center justify-between">
-                        <div class="text-sm">
-                            <span class="text-base-content/70">周期:</span>
-                            <span class="font-bold ml-2">{{ calendarData.period.name }}</span>
+        <div v-else class="space-y-3">
+            <!-- 签到日历 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="SIGN-IN" :title="$t('签到日历')" />
+                <div v-if="calendarData?.period" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                    <div class="flex items-center gap-2 text-xs text-base-content/55">
+                        <span>周期:</span>
+                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ calendarData.period.name }}</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-base-content/55">
+                        <span>已签到:</span>
+                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ signedDaysCount }} 天</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <!-- 自动签到开关 -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-base-content/60">自动签到</span>
+                            <input
+                                type="checkbox"
+                                class="toggle toggle-primary toggle-sm"
+                                :checked="setting.autoSign"
+                                @change="setting.setAutoSign(($event.target as HTMLInputElement)!.checked)"
+                            />
                         </div>
-                        <div class="text-sm">
-                            <span class="text-base-content/70">已签到:</span>
-                            <span class="font-bold ml-2">{{ signedDaysCount }} 天</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <!-- 自动签到开关 -->
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm">自动签到</span>
-                                <input
-                                    type="checkbox"
-                                    class="toggle toggle-primary"
-                                    :checked="setting.autoSign"
-                                    @change="setting.setAutoSign(($event.target as HTMLInputElement)!.checked)"
-                                />
-                            </div>
 
-                            <button
-                                v-if="!isSignFinished"
-                                class="btn btn-primary"
-                                :class="{ loading: signing }"
-                                :disabled="signing"
-                                @click="handleSign()"
-                            >
-                                <Icon icon="ri:checkbox-circle-fill" />
-                                签到
-                            </button>
-                            <div v-else-if="calendarData.todaySignin" class="badge badge-success">今日已签到</div>
+                        <button
+                            v-if="!isSignFinished"
+                            type="button"
+                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="signing"
+                            @click="handleSign()"
+                        >
+                            <Icon v-if="signing" icon="ri:refresh-line" class="size-4 animate-spin" />
+                            <Icon v-else icon="ri:checkbox-circle-fill" class="size-4" />
+                            签到
+                        </button>
+                        <span
+                            v-else-if="calendarData.todaySignin"
+                            class="rounded-xs border border-primary/40 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary"
+                            >今日已签到</span
+                        >
+                    </div>
+                </div>
+
+                <div v-if="calendarData?.period" class="mt-3 space-y-3">
+                    <!-- 角色信息行 -->
+                    <div class="flex items-center justify-between gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                        <div class="flex items-center gap-2.5">
+                            <img :src="calendarData.roleInfo.headUrl" alt="角色头像" class="h-10 w-10 rounded-full border border-base-content/15 object-cover" />
+                            <div>
+                                <div class="text-sm font-semibold">
+                                    {{ calendarData.roleInfo.roleName }}
+                                </div>
+                                <div class="text-xs text-base-content/55">Lv. {{ calendarData.roleInfo.level }}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-base-content/55">金币</div>
+                            <div class="font-orbitron text-lg font-semibold tabular-nums text-primary">
+                                {{ calendarData.userGoldNum }}
+                            </div>
                         </div>
                     </div>
 
-                    <div v-if="calendarData?.period" class="space-y-4">
-                        <div class="flex items-center justify-between p-4 bg-base-200 rounded-lg">
-                            <div class="flex items-center gap-4">
-                                <img :src="calendarData.roleInfo.headUrl" alt="角色头像" class="w-12 h-12 rounded-full" />
-                                <div>
-                                    <div class="font-bold">
-                                        {{ calendarData.roleInfo.roleName }}
-                                    </div>
-                                    <div class="text-sm text-base-content/70">Lv. {{ calendarData.roleInfo.level }}</div>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-sm text-base-content/70">金币</div>
-                                <div class="font-bold text-xl">
-                                    {{ calendarData.userGoldNum }}
-                                </div>
-                            </div>
-                        </div>
+                    <div class="h-px bg-base-content/10" />
 
-                        <div class="divider mx-2" />
-
-                        <div class="grid grid-cols-7 gap-2">
-                            <div
-                                v-for="dayInfo in calendarDays"
-                                :key="dayInfo.day"
-                                class="aspect-square flex flex-col items-center justify-center rounded-lg p-2 transition-colors duration-200"
-                                :class="{
-                                    'bg-primary/50 text-primary-content': dayInfo.isSigned,
-                                    'bg-base-300 opacity-70': dayInfo.isMissed,
-                                    'ring-2 ring-primary': dayInfo.isNextToSign,
-                                    'bg-base-200': !dayInfo.isSigned,
-                                }"
-                            >
-                                <div class="text-sm font-bold">
-                                    {{ dayInfo.day }}
-                                </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <img
-                                        v-if="dayInfo.iconUrl"
-                                        :src="dayInfo.iconUrl"
-                                        :alt="dayInfo.awardName"
-                                        class="size-12 object-contain"
-                                    />
-                                    <div class="text-xs">
-                                        {{ dayInfo.awardNum }}
-                                    </div>
+                    <!-- 签到日历网格 -->
+                    <div class="grid grid-cols-7 gap-1.5">
+                        <div
+                            v-for="dayInfo in calendarDays"
+                            :key="dayInfo.day"
+                            class="flex aspect-square flex-col items-center justify-center gap-0.5 rounded-xs border p-1 transition-colors duration-200"
+                            :class="{
+                                'border-primary/70 bg-primary/10 text-primary': dayInfo.isSigned,
+                                'border-base-content/10 bg-base-content/5 text-base-content/35': dayInfo.isMissed,
+                                'border-primary/60 ring-1 ring-primary': dayInfo.isNextToSign,
+                                'border-base-content/10 bg-base-content/3 text-base-content/75': !dayInfo.isSigned,
+                            }"
+                        >
+                            <div class="font-orbitron text-sm font-semibold tabular-nums">
+                                {{ dayInfo.day }}
+                            </div>
+                            <div class="flex flex-col items-center gap-0.5">
+                                <img v-if="dayInfo.iconUrl" :src="dayInfo.iconUrl" :alt="dayInfo.awardName" class="size-8 object-contain" />
+                                <div class="text-[10px] tabular-nums">
+                                    {{ dayInfo.awardNum }}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">任务进度</h3>
+            <!-- 任务进度 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="TASKS" :title="$t('任务进度')" />
 
-                    <div v-if="taskProcess && taskProcess.dailyTask.length > 0" class="space-y-4">
-                        <div v-for="(task, index) in taskProcess.dailyTask" :key="index" class="bg-base-200 p-4 rounded-lg">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="font-medium">
-                                    {{ task.remark }}
-                                </div>
-                                <div class="text-sm">
-                                    <span class="text-base-content/70">进度:</span>
-                                    <span class="font-bold ml-1">{{ task.completeTimes }}/{{ task.times }}</span>
-                                </div>
+                <div v-if="taskProcess && taskProcess.dailyTask.length > 0" class="mt-2 space-y-2">
+                    <div v-for="(task, index) in taskProcess.dailyTask" :key="index" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="truncate text-sm font-medium">
+                                {{ task.remark }}
                             </div>
-
-                            <progress class="progress progress-primary w-full" :value="task.completeTimes" :max="task.times" />
-
-                            <div class="flex items-center justify-between mt-2 text-sm">
-                                <div class="text-base-content/70">
-                                    <span class="mr-4">经验: +{{ task.gainExp }}</span>
-                                    <span>金币: +{{ task.gainGold }}</span>
-                                </div>
-                                <div
-                                    class="badge"
-                                    :class="{
-                                        'badge-success': task.completeTimes >= task.times,
-                                        'badge-warning': task.completeTimes < task.times,
-                                    }"
-                                >
-                                    {{ task.completeTimes >= task.times ? "已完成" : "进行中" }}
-                                </div>
+                            <div class="shrink-0 text-xs text-base-content/55">
+                                <span>进度:</span>
+                                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ task.completeTimes }}/{{ task.times }}</span>
                             </div>
                         </div>
-                    </div>
 
-                    <div v-else class="flex flex-col items-center justify-center py-8">
-                        <p class="text-base-content/70">暂无任务数据</p>
+                        <progress class="progress progress-primary mt-2 h-1.5 w-full" :value="task.completeTimes" :max="task.times" />
+
+                        <div class="mt-2 flex items-center justify-between gap-2 text-xs">
+                            <div class="text-base-content/55">
+                                <span class="mr-4 tabular-nums">经验: +{{ task.gainExp }}</span>
+                                <span class="tabular-nums">金币: +{{ task.gainGold }}</span>
+                            </div>
+                            <span
+                                class="shrink-0 rounded-xs border px-2 py-0.5 text-[11px] font-medium"
+                                :class="
+                                    task.completeTimes >= task.times
+                                        ? 'border-success/40 bg-success/10 text-success'
+                                        : 'border-warning/40 bg-warning/10 text-warning'
+                                "
+                            >
+                                {{ task.completeTimes >= task.times ? "已完成" : "进行中" }}
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <div v-else class="flex flex-col items-center justify-center py-8">
+                    <p class="text-base-content/55">暂无任务数据</p>
+                </div>
+            </section>
         </div>
     </div>
 </template>

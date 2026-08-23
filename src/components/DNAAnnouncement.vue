@@ -118,24 +118,28 @@ defineExpose({
 </script>
 <template>
     <div class="w-full h-full flex flex-col">
-        <div v-if="!nobtn" class="flex justify-between items-center flex-none">
-            <span class="text-xs text-gray-500"
+        <div v-if="!nobtn" class="flex justify-between items-center flex-none px-4 pt-3 pb-2">
+            <span class="text-xs tracking-wide text-base-content/50"
                 >{{ $t("dna-announcement.last_updated") }}: {{ ui.timeDistancePassed(lastUpdateTime) }}</span
             >
             <Tooltip :tooltip="$t('dna-announcement.refresh')" side="bottom">
-                <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
-                    <Icon icon="ri:refresh-line" />
+                <button
+                    type="button"
+                    class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                    @click="loadData(true)"
+                >
+                    <Icon icon="ri:refresh-line" class="size-4" />
                 </button>
             </Tooltip>
         </div>
-        <ScrollArea class="flex-1 p-4" @loadref="r => (scrollContainer = r)">
-            <div v-if="annPosts.length > 0" class="space-y-4">
+        <ScrollArea class="flex-1 p-3 sm:p-4" @loadref="r => (scrollContainer = r)">
+            <div v-if="annPosts.length > 0" class="space-y-2">
                 <DNAPostListItem v-for="post in annPosts" :key="post.postId" :post="post" />
             </div>
 
             <div v-else-if="!loading" class="flex justify-center items-center h-full">
                 <div class="text-center">
-                    <p class="text-lg mb-4">{{ $t("dna-announcement.empty") }}</p>
+                    <p class="text-sm text-base-content/50">{{ $t("dna-announcement.empty") }}</p>
                 </div>
             </div>
 

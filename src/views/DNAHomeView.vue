@@ -94,39 +94,95 @@ function handleRefreshAll() {
 </script>
 <template>
     <div class="w-full h-full flex flex-col">
-        <div class="flex-none flex justify-between items-center p-4 bg-base-100 border-b border-base-200">
-            <div class="tabs tabs-border gap-2">
-                <div
-                    class="tab"
-                    :class="{ 'tab-active': activeTab === HOME_TABS.announcement }"
+        <!-- 顶部标签栏：方章切换 + 用户信息 + 刷新（半透明、hairline 分隔，无实底页头） -->
+        <div
+            class="flex-none flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-base-content/15 px-4 py-2.5 stagger-rise"
+        >
+            <div class="flex flex-wrap items-center gap-1.5">
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1 text-xs transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        activeTab === HOME_TABS.announcement
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
                     @click="activeTab = HOME_TABS.announcement"
                 >
                     {{ $t("dna-home.tabs.announcement") }}
-                </div>
-                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.gameInfo }" @click="activeTab = HOME_TABS.gameInfo">
+                </button>
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1 text-xs transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        activeTab === HOME_TABS.gameInfo
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
+                    @click="activeTab = HOME_TABS.gameInfo"
+                >
                     {{ $t("dna-home.tabs.gameInfo") }}
-                </div>
-                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.forum }" @click="activeTab = HOME_TABS.forum">
+                </button>
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1 text-xs transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        activeTab === HOME_TABS.forum
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
+                    @click="activeTab = HOME_TABS.forum"
+                >
                     {{ $t("dna-home.tabs.forum") }}
-                </div>
-                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.signIn }" @click="activeTab = HOME_TABS.signIn">
+                </button>
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1 text-xs transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        activeTab === HOME_TABS.signIn
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
+                    @click="activeTab = HOME_TABS.signIn"
+                >
                     {{ $t("dna-home.tabs.signIn") }}
-                </div>
-                <div class="tab" :class="{ 'tab-active': activeTab === HOME_TABS.flowQuery }" @click="activeTab = HOME_TABS.flowQuery">
+                </button>
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1 text-xs transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        activeTab === HOME_TABS.flowQuery
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
+                    @click="activeTab = HOME_TABS.flowQuery"
+                >
                     {{ $t("dna-home.tabs.flowQuery") }}
-                </div>
+                </button>
             </div>
-            <SRouterLink to="/dna/mine" class="flex items-center">
-                <img :src="mine?.headUrl" alt="User Head" class="w-8 h-8 rounded-full mr-2" />
-                <span>
-                    {{ mine?.userName || "?" }}
+            <div class="flex items-center gap-3">
+                <SRouterLink
+                    to="/dna/mine"
+                    class="group flex items-center gap-2 text-sm text-base-content/80 transition-colors duration-150 hover:text-primary"
+                >
+                    <img
+                        :src="mine?.headUrl"
+                        alt="User Head"
+                        class="size-7 rounded-full border border-base-content/15 object-cover transition-colors duration-150 group-hover:border-primary/50"
+                    />
+                    <span class="max-w-24 truncate">{{ mine?.userName || "?" }}</span>
+                </SRouterLink>
+                <span class="h-4 w-px bg-base-content/15" aria-hidden="true" />
+                <span class="text-xs tracking-wide text-base-content/50">
+                    {{ $t("dna-home.lastUpdate") }}: {{ ui.timeDistancePassed(lastUpdateTime) }}
                 </span>
-            </SRouterLink>
-            <div class="flex items-center gap-4">
-                <span class="text-xs text-gray-500"> {{ $t("dna-home.lastUpdate") }}: {{ ui.timeDistancePassed(lastUpdateTime) }} </span>
                 <Tooltip :tooltip="$t('dna-home.refreshCurrentPage')" side="bottom">
-                    <button class="btn btn-primary btn-square btn-sm ml-2" @click="handleRefreshAll">
-                        <Icon icon="ri:refresh-line" />
+                    <button
+                        type="button"
+                        class="inline-flex size-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                        @click="handleRefreshAll"
+                    >
+                        <Icon icon="ri:refresh-line" class="size-4" />
                     </button>
                 </Tooltip>
             </div>
@@ -134,7 +190,7 @@ function handleRefreshAll() {
         <div v-if="activeTab === HOME_TABS.announcement" class="flex-1 overflow-hidden">
             <DNAAnnouncement ref="announcementRef" nobtn />
         </div>
-        <ScrollArea v-else class="flex-1 p-4">
+        <ScrollArea v-else class="flex-1 p-3 sm:p-4">
             <DNAGameInfo v-if="activeTab === HOME_TABS.gameInfo" ref="gameInfoRef" nobtn />
             <DNAForum v-if="activeTab === HOME_TABS.forum" ref="forumRef" nobtn />
             <DNASignCalendar v-if="activeTab === HOME_TABS.signIn" ref="signCalendarRef" nobtn />

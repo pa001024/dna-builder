@@ -34,7 +34,7 @@ const getAuraClass = (element: string) => {
         :class="{ 'opacity-60': !char.unLocked, 'cursor-pointer hover-3d': char.unLocked }"
         @click="char.unLocked ? $router.push(`/dna/char/${char.charId}/${char.charEid}`) : ui.showErrorMessage('角色未解锁')"
     >
-        <div class="card-body bg-linear-30 from-indigo-300/50 to-indigo-600/50 rounded-2xl relative p-2">
+        <div class="card-body bg-linear-30 from-indigo-300/50 to-indigo-600/50 rounded-xs relative p-2">
             <img
                 class="absolute inset-0 h-full object-cover pointer-events-none mask-b-from-60%"
                 :src="LeveledCharHelper.idToUrl(char.charId)"
@@ -43,7 +43,7 @@ const getAuraClass = (element: string) => {
                 <span class="aura-pulse-aura"></span>
                 <img :src="char.elementIcon" alt="icon" class="z-2 w-full h-full object-contain" />
             </div>
-            <div v-if="char.unLocked" class="absolute p-1 px-2 rounded-lg right-1" :class="[getAuraClass(char.elementIcon)]">
+            <div v-if="char.unLocked" class="absolute p-1 px-2 rounded-xs right-1" :class="[getAuraClass(char.elementIcon)]">
                 <span class="aura-pulse-aura"></span>
                 <span class="font-bold text-lg text-white aura-pulse-text">
                     {{ ["{}", "I", "II", "III", "IV", "V", "VI"][char.gradeLevel] }}</span
@@ -51,7 +51,7 @@ const getAuraClass = (element: string) => {
             </div>
             <div class="flex flex-col items-center z-1 text-white text-shadow-md text-shadow-black/30">
                 <div class="avatar mb-2">
-                    <div class="h-32"></div>
+                    <div class="h-32 rounded-xs"></div>
                 </div>
                 <h4 class="font-medium text-center">
                     {{ char.name }}

@@ -15,7 +15,9 @@ defineProps<{
             <div class="loading loading-spinner loading-sm"></div>
         </div>
         <div v-for="(item, missionId) in missions" :key="missionId" class="flex flex-col justify-start items-center">
-            <div class="bg-base-100 rounded-xl p-2 py-4 w-full h-64 flex flex-col justify-start items-center gap-2">
+            <div
+                class="flex h-64 w-full flex-col items-center justify-start gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2 py-4"
+            >
                 <div class="flex flex-col justify-center items-center gap-2">
                     <img
                         class="size-12"
@@ -31,7 +33,7 @@ defineProps<{
                         {{ $t(MIHAN_TYPES[missionId]) }}
                     </div>
                 </div>
-                <div class="divider mx-2 my-1" />
+                <div class="mx-2 my-1 h-px w-full bg-base-content/10" />
                 <div
                     v-for="(mission, index) in item"
                     :key="index"
@@ -43,7 +45,7 @@ defineProps<{
             </div>
         </div>
     </div>
-    <div class="flex justify-center bg-base-300 p-3 rounded-md text-sm text-base-content/80">
-        {{ $t("resizeableWindow.nextRefresh") }}: {{ timeStr(mihan) }}
+    <div class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-center text-xs text-base-content/80">
+        {{ $t("resizeableWindow.nextRefresh") }}: <span class="font-orbitron tabular-nums text-primary">{{ timeStr(mihan) }}</span>
     </div>
 </template>

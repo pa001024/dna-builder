@@ -399,13 +399,17 @@ async function generateScreenshot() {
 }
 </script>
 <template>
-    <div class="space-y-6">
+    <div class="space-y-3">
         <div v-if="!nobtn" class="flex justify-between items-center">
-            <span class="text-xs text-gray-500">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
+            <span class="text-xs tracking-wide text-base-content/50">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
             <div class="flex gap-2">
                 <Tooltip tooltip="刷新" side="bottom">
-                    <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
-                        <Icon icon="ri:refresh-line" />
+                    <button
+                        type="button"
+                        class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                        @click="loadData(true)"
+                    >
+                        <Icon icon="ri:refresh-line" class="size-4" />
                     </button>
                 </Tooltip>
             </div>
@@ -413,465 +417,530 @@ async function generateScreenshot() {
         <div v-if="loading" class="flex justify-center items-center h-full py-8">
             <span class="loading loading-spinner loading-lg" />
         </div>
-        <div v-if="roleInfo && roleInfo.roleInfo?.roleShow" class="space-y-6" id="screenshot-container">
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <div class="flex flex-col md:flex-row items-center gap-4">
-                        <div class="avatar">
-                            <div class="w-24 h-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                                <img
-                                    :src="imgRemoteToLocal(roleInfo.roleInfo.roleShow.headUrl)"
-                                    :alt="roleInfo.roleInfo.roleShow.roleName"
-                                />
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <h2 class="text-2xl font-bold">
-                                {{ roleInfo.roleInfo.roleShow.roleName }}
-                            </h2>
-                            <div class="text-sm text-base-content/70 mt-1">UID: {{ roleInfo.roleInfo.roleShow.roleId }}</div>
-                            <div class="text-sm text-base-content/70 mt-1">Lv. {{ roleInfo.roleInfo.roleShow.level }}</div>
-                        </div>
-                        <div class="ml-auto space-x-2 print:hidden">
-                            <button class="btn btn-primary" @click="generateScreenshot" :class="{ 'btn-disabled': isScreenshotLoading }">
-                                <span v-if="isScreenshotLoading" class="loading loading-spinner loading-sm"></span>
-                                <Icon v-else icon="ri:screenshot-line" />
-                                生成截图
-                            </button>
-                            <button class="btn btn-primary" @click="syncInventory">
-                                <Icon icon="ri:refresh-line" />
-                                同步库存
-                            </button>
+        <div v-if="roleInfo && roleInfo.roleInfo?.roleShow" class="space-y-3" id="screenshot-container">
+            <!-- 角色档案卡 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <div class="flex flex-col items-center gap-4 md:flex-row">
+                    <div class="size-20 shrink-0 overflow-hidden rounded-full border border-primary/50 bg-base-content/5 sm:size-24">
+                        <img
+                            :src="imgRemoteToLocal(roleInfo.roleInfo.roleShow.headUrl)"
+                            :alt="roleInfo.roleInfo.roleShow.roleName"
+                            class="h-full w-full object-cover object-top"
+                        />
+                    </div>
+                    <div class="min-w-0 flex-1 text-center md:text-left">
+                        <h2 class="truncate font-orbitron text-xl font-bold tracking-tight text-base-content">
+                            {{ roleInfo.roleInfo.roleShow.roleName }}
+                        </h2>
+                        <div
+                            class="mt-1.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-base-content/60 md:justify-start"
+                        >
+                            <span
+                                >UID: <span class="font-mono tabular-nums">{{ roleInfo.roleInfo.roleShow.roleId }}</span></span
+                            >
+                            <span class="h-3 w-px bg-base-content/15" aria-hidden="true" />
+                            <span
+                                >Lv. <span class="font-orbitron tabular-nums">{{ roleInfo.roleInfo.roleShow.level }}</span></span
+                            >
                         </div>
                     </div>
+                    <div class="flex shrink-0 items-center gap-2 print:hidden">
+                        <button
+                            type="button"
+                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="isScreenshotLoading"
+                            @click="generateScreenshot"
+                        >
+                            <Icon v-if="isScreenshotLoading" icon="ri:refresh-line" class="size-3.5 animate-spin" />
+                            <Icon v-else icon="ri:screenshot-line" class="size-3.5" />
+                            生成截图
+                        </button>
+                        <button
+                            type="button"
+                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors duration-150 hover:border-primary/60 hover:bg-primary/15 active:scale-[0.97]"
+                            @click="syncInventory"
+                        >
+                            <Icon icon="ri:refresh-line" class="size-3.5" />
+                            同步库存
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <div v-if="roleInfo.instanceInfo.length > 0" class="card bg-base-100 shadow-xl print:hidden">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">
-                        <span>委托密函</span>
-                        <div class="ml-auto btn btn-ghost" @click="ui.mihanVisible = true">
-                            <Icon icon="ri:settings-3-line" />
+            <!-- 委托密函 -->
+            <section
+                v-if="roleInfo.instanceInfo.length > 0"
+                class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm print:hidden"
+            >
+                <SectionHeader no-animate compact kicker="MISSIONS" :title="$t('委托密函')">
+                    <template #trailing>
+                        <button
+                            type="button"
+                            class="inline-flex cursor-pointer items-center gap-1 rounded-xs border border-base-content/20 px-2 py-1 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary active:scale-[0.97]"
+                            @click="ui.mihanVisible = true"
+                        >
+                            <Icon icon="ri:settings-3-line" class="size-3.5" />
                             推送设置
-                        </div>
-                    </h3>
-                    <div class="flex justify-center">
-                        <div class="space-y-4 max-w-4xl grow">
-                            <DNAMihanItem :missions="roleInfo.instanceInfo.map(item => item.instances.map(v => v.name)) || []" />
-                        </div>
+                        </button>
+                    </template>
+                </SectionHeader>
+                <div class="flex justify-center">
+                    <div class="w-full max-w-4xl space-y-4">
+                        <DNAMihanItem :missions="roleInfo.instanceInfo.map(item => item.instances.map(v => v.name)) || []" />
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <div class="flex items-center gap-3 mb-4">
-                        <h3 class="card-title m-0">道具获取周报</h3>
-                        <div class="join ml-auto">
+            <!-- 道具获取周报 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="WEEKLY REPORT" :title="$t('道具获取周报')">
+                    <template #trailing>
+                        <div class="flex items-center gap-1.5">
                             <button
-                                class="btn btn-sm join-item"
-                                :class="weeklyReportType === 2 ? 'btn-ghost' : 'btn-primary'"
+                                type="button"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    weeklyReportType === 1
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
                                 @click="switchWeeklyReport(1)"
                             >
                                 本周
                             </button>
                             <button
-                                class="btn btn-sm join-item"
-                                :class="weeklyReportType === 2 ? 'btn-primary' : 'btn-ghost'"
+                                type="button"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    weeklyReportType === 2
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
                                 @click="switchWeeklyReport(2)"
                             >
                                 上周
                             </button>
                         </div>
-                    </div>
+                    </template>
+                </SectionHeader>
 
-                    <div v-if="weeklyReportLoading" class="flex justify-center items-center py-8">
-                        <span class="loading loading-spinner loading-lg" />
+                <div v-if="weeklyReportLoading" class="flex justify-center items-center py-8">
+                    <span class="loading loading-spinner loading-lg" />
+                </div>
+                <div v-else-if="weeklyReportError" class="py-8 text-center text-base-content/60">
+                    {{ weeklyReportError }}
+                </div>
+                <div v-else-if="weeklyReport" class="mt-2 space-y-3">
+                    <div
+                        v-for="category in weeklyReport.categories"
+                        :key="`${category.type}-${category.categoryName}`"
+                        class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                    >
+                        <div class="mb-2 text-[11px] font-semibold tracking-wide text-base-content/60">
+                            {{ category.categoryName }}
+                        </div>
+                        <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-1.5">
+                            <ResourceCostItem
+                                v-for="item in category.items"
+                                :key="item.itemId"
+                                class="flex-1 min-w-0"
+                                :name="item.itemName"
+                                :value="[Number(item.totalNum), item.itemId, 'Resource']"
+                            />
+                        </div>
                     </div>
-                    <div v-else-if="weeklyReportError" class="py-8 text-center text-base-content/70">
-                        {{ weeklyReportError }}
+                </div>
+            </section>
+
+            <!-- 基本信息 -->
+            <section v-if="shortNoteInfo" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="BASIC INFO" :title="$t('基本信息')" />
+                <div class="mt-2 grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">
+                            每日任务
+                            <span
+                                v-if="shortNoteInfo.currentTaskProgress >= shortNoteInfo.maxDailyTaskProgress"
+                                class="ml-1 text-[10px] text-base-content/45"
+                                >已完成</span
+                            >
+                        </span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            {{ shortNoteInfo.currentTaskProgress }} / {{ shortNoteInfo.maxDailyTaskProgress }}
+                        </span>
                     </div>
-                    <div v-else-if="weeklyReport" class="space-y-4">
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">
+                            迷津奖励
+                            <span
+                                v-if="shortNoteInfo.rougeLikeRewardCount >= shortNoteInfo.rougeLikeRewardTotal"
+                                class="ml-1 text-[10px] text-base-content/45"
+                                >已完成</span
+                            >
+                        </span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            {{ shortNoteInfo.rougeLikeRewardCount }} / {{ shortNoteInfo.rougeLikeRewardTotal }}
+                        </span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">
+                            竞逐奖励
+                            <span v-if="shortNoteInfo.dungeonReward == 0" class="ml-1 text-[10px] text-base-content/45">已完成</span>
+                        </span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            {{ shortNoteInfo.dungeonRewardTotal - shortNoteInfo.dungeonReward }} /
+                            {{ shortNoteInfo.dungeonRewardTotal }}
+                        </span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">
+                            周本奖励
+                            <span v-if="shortNoteInfo.hardBossRewardCount == 0" class="ml-1 text-[10px] text-base-content/45">已完成</span>
+                        </span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            {{ shortNoteInfo.hardBossRewardTotal - shortNoteInfo.hardBossRewardCount }} /
+                            {{ shortNoteInfo.hardBossRewardTotal }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 锻造信息 -->
+                <div v-if="shortNoteInfo.draftInfo" class="mt-3 border-t border-base-content/10 pt-3 print:hidden">
+                    <div class="space-y-2">
+                        <div class="mb-1 text-[11px] font-semibold tracking-wide text-base-content/55">
+                            锻造 (<span class="font-orbitron tabular-nums text-primary">{{ shortNoteInfo.draftInfo.draftDoingNum }}</span
+                            >)
+                        </div>
                         <div
-                            v-for="category in weeklyReport.categories"
-                            :key="`${category.type}-${category.categoryName}`"
-                            class="rounded overflow-hidden"
+                            v-if="shortNoteInfo.draftInfo.draftDoingInfo && shortNoteInfo.draftInfo.draftDoingInfo.length > 0"
+                            class="space-y-2"
                         >
-                            <div class="text-sm font-bold p-2">
-                                {{ category.categoryName }}
-                            </div>
-                            <div class="p-2">
-                                <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
-                                    <ResourceCostItem
-                                        v-for="item in category.items"
-                                        :key="item.itemId"
-                                        class="flex-1 min-w-0"
-                                        :name="item.itemName"
-                                        :value="[Number(item.totalNum), item.itemId, 'Resource']"
+                            <div
+                                v-for="(draft, index) in shortNoteInfo.draftInfo.draftDoingInfo"
+                                :key="index"
+                                class="flex items-start gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                            >
+                                <!-- 产物图片 -->
+                                <div class="shrink-0">
+                                    <img
+                                        :src="getProductImageUrl(getDraftInfo(draft.productId))"
+                                        :alt="draft.productName"
+                                        class="h-14 w-14 rounded-xs border border-base-content/10 object-cover"
                                     />
                                 </div>
+
+                                <!-- 锻造信息 -->
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <h4 class="truncate text-sm font-semibold">{{ draft.productName }}</h4>
+                                        <span
+                                            class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-medium tabular-nums text-primary"
+                                        >
+                                            {{ calculateCompletedNum(draft, getDraftInfo(draft.productId)) }} /
+                                            {{ draft.draftCompleteNum + draft.draftDoingNum }}
+                                        </span>
+                                    </div>
+
+                                    <!-- 进度条 -->
+                                    <div class="mt-2">
+                                        <div class="h-1.5 w-full overflow-hidden rounded-xs bg-base-content/10">
+                                            <div
+                                                class="h-full rounded-xs bg-primary transition-all duration-500 ease-out"
+                                                :style="{
+                                                    width: `${Math.min(100, calculateProgress(draft, getDraftInfo(draft.productId)))}%`,
+                                                }"
+                                            ></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 时间信息 -->
+                                    <div class="mt-1.5 flex items-center justify-between gap-2 text-xs">
+                                        <span class="text-base-content/55">剩余时间:</span>
+                                        <span class="font-medium text-primary">
+                                            {{
+                                                calculateRealEndTime(
+                                                    draft.startTime,
+                                                    draft.draftDoingNum + draft.draftCompleteNum,
+                                                    getDraftInfo(draft.productId)
+                                                )
+                                            }}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                        <div
+                            v-else
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-center text-sm text-base-content/55"
+                        >
+                            暂无进行中的锻造
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- 铸造信息 -->
-            <div v-if="shortNoteInfo" class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">基本信息</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">
-                                每日任务
-                                <span
-                                    v-if="shortNoteInfo.currentTaskProgress >= shortNoteInfo.maxDailyTaskProgress"
-                                    class="text-xs text-base-content/70"
-                                    >已完成
-                                </span>
-                            </div>
-                            <div class="text-xl font-bold">
-                                {{ shortNoteInfo.currentTaskProgress }} / {{ shortNoteInfo.maxDailyTaskProgress }}
-                            </div>
-                        </div>
-                        <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">
-                                迷津奖励
-                                <span
-                                    v-if="shortNoteInfo.rougeLikeRewardCount >= shortNoteInfo.rougeLikeRewardTotal"
-                                    class="text-xs text-base-content/70"
-                                    >已完成</span
-                                >
-                            </div>
-                            <div class="text-xl font-bold">
-                                {{ shortNoteInfo.rougeLikeRewardCount }} / {{ shortNoteInfo.rougeLikeRewardTotal }}
-                            </div>
-                        </div>
-                        <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">
-                                竞逐奖励 <span v-if="shortNoteInfo.dungeonReward == 0" class="text-xs text-base-content/70">已完成</span>
-                            </div>
-                            <div class="text-xl font-bold">
-                                {{ shortNoteInfo.dungeonRewardTotal - shortNoteInfo.dungeonReward }} /
-                                {{ shortNoteInfo.dungeonRewardTotal }}
-                            </div>
-                        </div>
-                        <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">
-                                周本奖励
-                                <span v-if="shortNoteInfo.hardBossRewardCount == 0" class="text-xs text-base-content/70">已完成</span>
-                            </div>
-                            <div class="text-xl font-bold">
-                                {{ shortNoteInfo.hardBossRewardTotal - shortNoteInfo.hardBossRewardCount }} /
-                                {{ shortNoteInfo.hardBossRewardTotal }}
-                            </div>
+            <!-- 角色数据 / 成就 -->
+            <section
+                v-if="roleInfo.roleInfo.roleShow.params.length > 0"
+                class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+            >
+                <SectionHeader no-animate compact kicker="PARAMS" :title="$t('角色数据')" />
+                <div class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-1.5">
+                    <div
+                        v-for="(p, index) in roleInfo.roleInfo.roleShow.params"
+                        :key="index"
+                        class="flex flex-col gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <div class="text-xs text-base-content/55">{{ p.paramKey }}</div>
+                        <div class="font-orbitron text-[15px] font-semibold tabular-nums text-primary">
+                            {{ p.paramValue }}
                         </div>
                     </div>
+                </div>
+                <div class="mt-1.5 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-1.5">
+                    <div class="flex flex-col gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <div class="text-xs text-base-content/55">成就达成</div>
+                        <div class="font-orbitron text-[15px] font-semibold tabular-nums text-primary">
+                            {{ roleInfo.roleInfo.roleShow.roleAchv?.total }}
+                        </div>
+                    </div>
+                    <div
+                        v-if="roleInfo.roleInfo.roleShow.roleAchv"
+                        v-for="[k, p] in ['gold', 'silver', 'bronze'].map(v => [
+                            v,
+                            roleInfo.roleInfo.roleShow.roleAchv[v as keyof typeof roleInfo.roleInfo.roleShow.roleAchv],
+                        ])"
+                        :key="k"
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <img
+                            :src="`/imgs/webp/Icon_Achievement_${{ bronze: 'Copper', silver: 'Silver', gold: 'Gold' }[k]}.webp`"
+                            alt="品质"
+                            class="size-7"
+                        />
+                        <span class="font-orbitron text-[15px] font-semibold tabular-nums text-primary">{{ p }}</span>
+                    </div>
+                </div>
+            </section>
 
-                    <!-- 锻造信息 -->
-                    <div v-if="shortNoteInfo.draftInfo" class="mt-6 print:hidden">
-                        <!-- 锻造列表 -->
-                        <div class="space-y-3">
-                            <div class="text-lg font-semibold mb-3">锻造 ({{ shortNoteInfo.draftInfo.draftDoingNum }})</div>
-                            <div
-                                v-if="shortNoteInfo.draftInfo.draftDoingInfo && shortNoteInfo.draftInfo.draftDoingInfo.length > 0"
-                                class="space-y-4"
+            <!-- 角色列表 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="CHARS" :title="$t('角色')">
+                    <template #trailing>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            {{ roleInfo.roleInfo.roleShow.roleChars.filter(v => v.unLocked).length }}/{{
+                                roleInfo.roleInfo.roleShow.roleChars.length
+                            }}
+                        </span>
+                    </template>
+                </SectionHeader>
+                <div class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-1.5">
+                    <DNACharItem v-for="char in roleInfo.roleInfo.roleShow.roleChars" :key="char.charId" :char="char" />
+                </div>
+            </section>
+
+            <!-- 远程武器 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="RANGED" :title="$t('远程武器')">
+                    <template #trailing>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.langRangeWeapons)
+                        }}</span>
+                    </template>
+                </SectionHeader>
+                <div class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-1.5">
+                    <DNAWeaponItem
+                        v-for="weapon in roleInfo.roleInfo.roleShow.langRangeWeapons"
+                        :key="`${weapon.weaponId}-${weapon.weaponEid}`"
+                        :weapon="weapon"
+                    />
+                </div>
+            </section>
+
+            <!-- 近战武器 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="MELEE" :title="$t('近战武器')">
+                    <template #trailing>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.closeWeapons)
+                        }}</span>
+                    </template>
+                </SectionHeader>
+                <div class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-1.5">
+                    <DNAWeaponItem
+                        v-for="weapon in roleInfo.roleInfo.roleShow.closeWeapons"
+                        :key="`${weapon.weaponId}-${weapon.weaponEid}`"
+                        :weapon="weapon"
+                    />
+                </div>
+            </section>
+
+            <!-- 迷津 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="MAZE" :title="$t('迷津')" />
+                <div class="mt-2 grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/55">进度</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            {{ ["0", "I", "II", "III", "IV", "V", "VI"][roleInfo.roleInfo.roleShow.rougeLikeInfo.maxPassed >> 4] }}
+                        </span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/55">本周行迹</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            {{ roleInfo.roleInfo.roleShow.rougeLikeInfo.rewardCount }}
+                        </span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/55">重置时间</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            {{ ui.timeDistanceFuture(+roleInfo.roleInfo.roleShow.rougeLikeInfo.resetTime * 1000) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-1.5 grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                    <div
+                        v-for="(talent, index) in roleInfo.roleInfo.roleShow.rougeLikeInfo.talentInfo"
+                        :key="index"
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/55">{{ ["技能", "适应", "近战", "远程"][index] }}强化</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ talent.cur }}</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 深渊 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="ABYSS" :title="roleInfo.roleInfo.abyssInfo.operaName">
+                    <template #trailing>
+                        <div class="flex items-center gap-2">
+                            <button
+                                type="button"
+                                class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs border border-primary bg-primary px-2.5 py-1 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+                                :disabled="!canUploadAbyss || abyssUploading"
+                                @click="uploadAbyssUsage"
                             >
-                                <div
-                                    v-for="(draft, index) in shortNoteInfo.draftInfo.draftDoingInfo"
-                                    :key="index"
-                                    class="bg-base-200 p-4 rounded-lg flex gap-4 items-start shadow-sm"
-                                >
-                                    <!-- 产物图片 -->
-                                    <div class="shrink-0">
-                                        <img
-                                            :src="getProductImageUrl(getDraftInfo(draft.productId))"
-                                            :alt="draft.productName"
-                                            class="w-16 h-16 object-cover rounded-lg border border-base-300 shadow-md"
-                                        />
-                                    </div>
-
-                                    <!-- 锻造信息 -->
-                                    <div class="flex-1">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <h4 class="text-lg font-bold">{{ draft.productName }}</h4>
-                                            <span class="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                                                {{ calculateCompletedNum(draft, getDraftInfo(draft.productId)) }} /
-                                                {{ draft.draftCompleteNum + draft.draftDoingNum }}
-                                            </span>
-                                        </div>
-
-                                        <!-- 进度条 -->
-                                        <div class="mb-2">
-                                            <div class="w-full bg-base-300 rounded-full h-3 overflow-hidden">
-                                                <div
-                                                    class="bg-primary h-full rounded-full transition-all duration-500 ease-out"
-                                                    :style="{
-                                                        width: `${Math.min(100, calculateProgress(draft, getDraftInfo(draft.productId)))}%`,
-                                                    }"
-                                                ></div>
-                                            </div>
-                                        </div>
-
-                                        <!-- 时间信息 -->
-                                        <div class="flex justify-between items-center text-sm">
-                                            <span class="text-base-content/70">剩余时间:</span>
-                                            <span class="font-medium text-primary">
-                                                {{
-                                                    calculateRealEndTime(
-                                                        draft.startTime,
-                                                        draft.draftDoingNum + draft.draftCompleteNum,
-                                                        getDraftInfo(draft.productId)
-                                                    )
-                                                }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div v-else class="bg-base-200 p-4 rounded-lg text-center text-base-content/70">暂无进行中的锻造</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div v-if="roleInfo.roleInfo.roleShow.params.length > 0" class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
-                        <div v-for="(p, index) in roleInfo.roleInfo.roleShow.params" :key="index" class="card hover-3d">
-                            <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
-                                <div class="text-sm font-medium">{{ p.paramKey }}</div>
-                                <div class="text-xl font-bold">
-                                    {{ p.paramValue }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center mt-2">
-                        <div class="card hover-3d">
-                            <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
-                                <div class="text-sm font-medium">成就达成</div>
-                                <div class="text-xl font-bold">
-                                    {{ roleInfo.roleInfo.roleShow.roleAchv?.total }}
-                                </div>
-                            </div>
-                        </div>
-                        <div
-                            v-if="roleInfo.roleInfo.roleShow.roleAchv"
-                            v-for="[k, p] in ['gold', 'silver', 'bronze'].map(v => [
-                                v,
-                                roleInfo.roleInfo.roleShow.roleAchv[v as keyof typeof roleInfo.roleInfo.roleShow.roleAchv],
-                            ])"
-                            :key="k"
-                            class="card hover-3d"
-                        >
-                            <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
-                                <div class="text-xl font-bold flex flex-col justify-center h-full">
-                                    <div class="flex items-end gap-4">
-                                        <img
-                                            :src="`/imgs/webp/Icon_Achievement_${{ bronze: 'Copper', silver: 'Silver', gold: 'Gold' }[k]}.webp`"
-                                            alt="品质"
-                                            class="size-10"
-                                        />
-                                        {{ p }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">
-                        角色 ({{ roleInfo.roleInfo.roleShow.roleChars.filter(v => v.unLocked).length }}/{{
-                            roleInfo.roleInfo.roleShow.roleChars.length
-                        }})
-                    </h3>
-                    <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
-                        <DNACharItem v-for="char in roleInfo.roleInfo.roleShow.roleChars" :key="char.charId" :char="char" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">远程武器 ({{ getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.langRangeWeapons) }})</h3>
-                    <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
-                        <DNAWeaponItem
-                            v-for="weapon in roleInfo.roleInfo.roleShow.langRangeWeapons"
-                            :key="`${weapon.weaponId}-${weapon.weaponEid}`"
-                            :weapon="weapon"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">近战武器 ({{ getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.closeWeapons) }})</h3>
-                    <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center">
-                        <DNAWeaponItem
-                            v-for="weapon in roleInfo.roleInfo.roleShow.closeWeapons"
-                            :key="`${weapon.weaponId}-${weapon.weaponEid}`"
-                            :weapon="weapon"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">迷津</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">进度</div>
-                            <div class="text-xl font-bold">
-                                {{ ["0", "I", "II", "III", "IV", "V", "VI"][roleInfo.roleInfo.roleShow.rougeLikeInfo.maxPassed >> 4] }}
-                            </div>
-                            <div class="text-sm text-base-content/70">
-                                Lv.{{ (roleInfo.roleInfo.roleShow.rougeLikeInfo.maxPassed & 8) * 10 }}
-                            </div>
-                        </div>
-                        <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">本周行迹</div>
-                            <div class="text-xl font-bold">
-                                {{ roleInfo.roleInfo.roleShow.rougeLikeInfo.rewardCount }}
-                            </div>
-                            <div class="text-sm text-base-content/70">/ {{ roleInfo.roleInfo.roleShow.rougeLikeInfo.rewardTotal }}</div>
-                        </div>
-                        <div class="bg-base-200 p-3 rounded-lg">
-                            <div class="text-sm font-medium">重置时间</div>
-                            <div class="text-xl font-bold">
-                                {{ ui.timeDistanceFuture(+roleInfo.roleInfo.roleShow.rougeLikeInfo.resetTime * 1000) }}
-                            </div>
-                            <div class="text-sm text-base-content/70">
-                                {{ new Date(+roleInfo.roleInfo.roleShow.rougeLikeInfo.resetTime * 1000).toLocaleDateString() }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div
-                            v-for="(talent, index) in roleInfo.roleInfo.roleShow.rougeLikeInfo.talentInfo"
-                            :key="index"
-                            class="bg-base-200 p-3 rounded-lg"
-                        >
-                            <div class="text-sm font-medium">{{ ["技能", "适应", "近战", "远程"][index] }}强化</div>
-                            <div class="text-xl font-bold">
-                                {{ talent.cur }}
-                            </div>
-                            <div class="text-sm text-base-content/70">/ {{ talent.max }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">
-                        {{ roleInfo.roleInfo.abyssInfo.operaName }}
-                        <div class="ml-auto flex items-center gap-2">
-                            <button class="btn btn-sm btn-primary" :disabled="!canUploadAbyss || abyssUploading" @click="uploadAbyssUsage">
-                                <span v-if="abyssUploading" class="loading loading-spinner loading-xs"></span>
-                                <Icon v-else icon="ri:upload-2-line" />
+                                <Icon v-if="abyssUploading" icon="ri:refresh-line" class="size-3.5 animate-spin" />
+                                <Icon v-else icon="ri:upload-2-line" class="size-3.5" />
                                 上传
                             </button>
-                            <button class="btn btn-sm btn-ghost" @click="openAbyssUsagePage">
-                                <Icon icon="ri:bar-chart-line" />
+                            <button
+                                type="button"
+                                class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/20 px-2.5 py-1 text-xs text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary active:scale-[0.97]"
+                                @click="openAbyssUsagePage"
+                            >
+                                <Icon icon="ri:bar-chart-line" class="size-3.5" />
                                 统计
                             </button>
-                            <span class="text-base-content/70 text-sm"
+                            <span class="hidden text-xs text-base-content/55 tabular-nums sm:inline"
                                 >{{ new Date(+roleInfo.roleInfo.abyssInfo.startTime * 1000).toLocaleDateString() }} -
                                 {{ new Date(+roleInfo.roleInfo.abyssInfo.endTime * 1000).toLocaleDateString() }}</span
                             >
                         </div>
-                    </h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-base-content/70">{{ roleInfo.roleInfo.abyssInfo.progressName }}</span>
-                            <span class="font-semibold badge badge-primary">
-                                <Icon icon="ri:star-line" class="size-4 inline-block" />
-                                {{ roleInfo.roleInfo.abyssInfo.stars }}
-                            </span>
-                        </div>
+                    </template>
+                </SectionHeader>
+                <div class="mt-2 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-base-content/60">{{
+                            roleInfo.roleInfo.abyssInfo.progressName.replace(/null\s+/g, "")
+                        }}</span>
+                        <span
+                            class="inline-flex items-center gap-1 rounded-xs border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-primary"
+                        >
+                            <Icon icon="ri:star-line" class="size-3.5" />
+                            {{ roleInfo.roleInfo.abyssInfo.stars }}
+                        </span>
+                    </div>
 
-                        <div class="flex justify-center" style="--spacing: max(0.25rem, calc(1vw / 2))">
-                            <div v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1" class="flex gap-2">
+                    <div class="flex justify-center" style="--spacing: max(0.25rem, calc(1vw / 2))">
+                        <div v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1" class="flex gap-2">
+                            <img
+                                v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.charIcon"
+                                :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.charIcon)"
+                                alt="角色"
+                                class="size-40 object-cover rounded-xs border border-base-content/15 bg-base-content/5"
+                            />
+                            <div v-else class="size-12 rounded-xs border border-base-content/15 bg-base-content/5" />
+                            <div class="flex flex-col items-center gap-2">
                                 <img
-                                    v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.charIcon"
-                                    :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.charIcon)"
-                                    alt="角色"
-                                    class="size-40 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
+                                    v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
+                                    :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon)"
+                                    alt="近战武器"
+                                    class="size-12 object-cover rounded-xs border border-base-content/15 bg-base-content/5"
                                 />
-                                <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                <div class="flex flex-col items-center gap-2">
-                                    <img
-                                        v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
-                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon)"
-                                        alt="近战武器"
-                                        class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                    />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                    <img
-                                        v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
-                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon)"
-                                        alt="远程武器"
-                                        class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                    />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                    <img
-                                        v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.petIcon"
-                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.petIcon)"
-                                        alt="魔灵"
-                                        class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                    />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                </div>
-                                <div class="flex flex-col gap-2">
-                                    <img
-                                        v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1"
-                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1)"
-                                        alt="协战角色1"
-                                        class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                    />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                    <img
-                                        v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
-                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2)"
-                                        alt="协战角色2"
-                                        class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                    />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                </div>
-                                <div class="flex flex-col gap-2">
-                                    <img
-                                        v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1"
-                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1)"
-                                        alt="协战武器1"
-                                        class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                    />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                    <img
-                                        v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
-                                        :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2)"
-                                        alt="协战武器2"
-                                        class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
-                                    />
-                                    <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
-                                </div>
+                                <div v-else class="size-12 rounded-xs border border-base-content/15 bg-base-content/5" />
+                                <img
+                                    v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
+                                    :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon)"
+                                    alt="远程武器"
+                                    class="size-12 object-cover rounded-xs border border-base-content/15 bg-base-content/5"
+                                />
+                                <div v-else class="size-12 rounded-xs border border-base-content/15 bg-base-content/5" />
+                                <img
+                                    v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.petIcon"
+                                    :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.petIcon)"
+                                    alt="魔灵"
+                                    class="size-12 object-cover rounded-xs border border-base-content/15 bg-base-content/5"
+                                />
+                                <div v-else class="size-12 rounded-xs border border-base-content/15 bg-base-content/5" />
                             </div>
-                            <span v-else>暂无数据</span>
+                            <div class="flex flex-col gap-2">
+                                <img
+                                    v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1"
+                                    :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1)"
+                                    alt="协战角色1"
+                                    class="size-19 object-cover rounded-xs border border-base-content/15 bg-base-content/5"
+                                />
+                                <div v-else class="size-12 rounded-xs border border-base-content/15 bg-base-content/5" />
+                                <img
+                                    v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
+                                    :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2)"
+                                    alt="协战角色2"
+                                    class="size-19 object-cover rounded-xs border border-base-content/15 bg-base-content/5"
+                                />
+                                <div v-else class="size-12 rounded-xs border border-base-content/15 bg-base-content/5" />
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <img
+                                    v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1"
+                                    :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1)"
+                                    alt="协战武器1"
+                                    class="size-19 object-cover rounded-xs border border-base-content/15 bg-base-content/5"
+                                />
+                                <div v-else class="size-12 rounded-xs border border-base-content/15 bg-base-content/5" />
+                                <img
+                                    v-if="roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
+                                    :src="imgRemoteToLocal(roleInfo.roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2)"
+                                    alt="协战武器2"
+                                    class="size-19 object-cover rounded-xs border border-base-content/15 bg-base-content/5"
+                                />
+                                <div v-else class="size-12 rounded-xs border border-base-content/15 bg-base-content/5" />
+                            </div>
                         </div>
+                        <span v-else class="text-sm text-base-content/50">暂无数据</span>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
         <div v-else-if="!loading" class="flex justify-center items-center h-full">
             <div class="text-center">
-                <p class="text-lg mb-4">暂无游戏信息数据</p>
+                <p class="text-sm text-base-content/60 mb-4">暂无游戏信息数据</p>
             </div>
         </div>
     </div>

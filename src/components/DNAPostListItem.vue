@@ -15,84 +15,91 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div
-        class="card bg-base-100 shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-200"
+    <article
+        class="group relative cursor-pointer overflow-hidden rounded-xs border border-base-content/15 bg-base-100/60 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
         v-bind="$attrs"
         @click="$router.push(`/dna/posts/${post.gameForumId}/${post.postId}`)"
     >
-        <div class="card-body p-4">
+        <div class="p-3">
             <!-- 帖子头部：用户信息 -->
-            <div class="flex items-center gap-3 mb-3">
+            <div class="flex items-center gap-3">
                 <img
                     v-if="post.userHeadUrl"
                     :src="post.userHeadUrl"
                     alt="用户头像"
-                    class="w-10 h-10 rounded-full object-cover border border-base-200"
+                    class="h-9 w-9 shrink-0 rounded-full border border-base-content/15 object-cover"
                 />
-                <div v-else class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center">
-                    <span class="text-base-content/60">{{ post.userName?.[0] || "?" }}</span>
+                <div
+                    v-else
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-base-content/15 bg-base-content/5"
+                >
+                    <span class="text-sm text-base-content/60">{{ post.userName?.[0] || "?" }}</span>
                 </div>
-                <div class="flex-1">
+                <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2">
-                        <span class="font-medium text-base-content">{{ post.userName }}</span>
-                        <span v-if="post.isOfficial === 1" class="badge badge-primary text-xs">官方</span>
-                        <span v-if="post.isElite === 1" class="badge badge-secondary text-xs">精华</span>
+                        <span class="truncate text-sm font-medium text-base-content">{{ post.userName }}</span>
+                        <span v-if="post.isOfficial === 1" class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                            官方
+                        </span>
+                        <span v-if="post.isElite === 1" class="shrink-0 rounded-xs border border-secondary/40 bg-secondary/10 px-1.5 py-0.5 text-[10px] font-medium text-secondary">
+                            精华
+                        </span>
                     </div>
-                    <div class="text-xs text-base-content/50 mt-1">
+                    <div class="mt-0.5 text-xs text-base-content/50">
                         {{ post.showTime }}
                     </div>
                 </div>
             </div>
 
             <!-- 帖子标题 -->
-            <EmojiContent class="card-title text-base-content text-lg mb-2" :content="post.postTitle" />
+            <EmojiContent class="text-base font-semibold text-base-content mt-2.5" :content="post.postTitle" />
 
             <!-- 帖子内容预览 -->
-            <EmojiContent class="text-sm text-base-content/70 mb-3 line-clamp-2" :content="post.postContent" />
+            <EmojiContent class="text-sm text-base-content/70 mt-1 line-clamp-2" :content="post.postContent" />
 
             <!-- 帖子图片预览 -->
-            <div v-if="post.imgCount > 0" class="flex gap-2 mb-3">
+            <div v-if="post.imgCount > 0" class="flex gap-2 mt-2.5">
                 <img
                     v-for="(img, index) in post.imgContent.slice(0, 3)"
                     :key="index"
                     :src="img.url"
                     alt="帖子图片"
-                    class="w-16 h-16 object-cover rounded-md cursor-pointer transition-transform duration-200 hover:scale-105"
+                    class="h-14 w-14 rounded-xs border border-base-content/10 object-cover cursor-pointer transition-transform duration-200 hover:scale-105"
                     @mouseenter="ui.startImagePreview(img.url, $event)"
                     @mouseleave="ui.stopImagePreview()"
                 />
                 <div
                     v-if="post.imgCount > 3"
-                    class="w-16 h-16 bg-base-200 rounded-md flex items-center justify-center text-xs text-base-content/50"
+                    class="flex h-14 w-14 items-center justify-center rounded-xs border border-base-content/10 bg-base-content/5 text-xs text-base-content/50"
                 >
                     +{{ post.imgCount - 3 }}
                 </div>
             </div>
 
             <!-- 帖子统计信息 -->
-            <div class="flex items-center gap-4 text-xs text-base-content/60">
+            <div class="mt-2.5 flex items-center gap-4 text-xs text-base-content/60">
                 <!-- 话题标签 -->
-                <div v-if="post.topics && post.topics.length > 0" class="flex flex-wrap gap-2">
-                    <span v-for="topic in post.topics" :key="topic.topicId" class="badge badge-outline text-xs">
-                        <Icon icon="ri:hashtag" class="text-base-content/60" />
+                <div v-if="post.topics && post.topics.length > 0" class="flex flex-wrap gap-1.5">
+                    <span v-for="topic in post.topics" :key="topic.topicId" class="inline-flex items-center gap-0.5 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] text-base-content/60">
+                        <Icon icon="ri:hashtag" class="size-3 text-base-content/60" />
                         {{ topic.topicName }}
                     </span>
                 </div>
-                <div class="flex ml-auto gap-4">
-                    <div class="flex items-center gap-1">
+                <div class="ml-auto flex items-center gap-4">
+                    <span class="inline-flex items-center gap-1 tabular-nums">
                         <Icon icon="ri:eye-line" class="text-base-content/60" />
-                        <span>{{ post.browseCount }}</span>
-                    </div>
-                    <div class="flex items-center gap-1">
+                        {{ post.browseCount }}
+                    </span>
+                    <span class="inline-flex items-center gap-1 tabular-nums">
                         <Icon icon="ri:message-2-line" class="text-base-content/60" />
-                        <span>{{ post.commentCount }}</span>
-                    </div>
-                    <div class="flex items-center gap-1">
+                        {{ post.commentCount }}
+                    </span>
+                    <span class="inline-flex items-center gap-1 tabular-nums">
                         <Icon icon="ri:heart-line" class="text-base-content/60" />
-                        <span>{{ post.likeCount }}</span>
-                    </div>
+                        {{ post.likeCount }}
+                    </span>
                 </div>
             </div>
         </div>
-    </div>
+    </article>
 </template>

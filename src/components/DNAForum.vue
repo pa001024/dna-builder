@@ -55,58 +55,70 @@ defineExpose({
 })
 </script>
 <template>
-    <div class="space-y-6">
+    <div class="space-y-3">
         <div v-if="!nobtn" class="flex justify-between items-center">
-            <span class="text-xs text-gray-500">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
+            <span class="text-xs tracking-wide text-base-content/50">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
             <Tooltip tooltip="刷新" side="bottom">
-                <button class="btn btn-primary btn-square btn-sm" @click="loadData(true)">
-                    <Icon icon="ri:refresh-line" />
+                <button
+                    type="button"
+                    class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                    @click="loadData(true)"
+                >
+                    <Icon icon="ri:refresh-line" class="size-4" />
                 </button>
             </Tooltip>
         </div>
-        <div v-if="loading" class="flex justify-center items-center h-full">
+        <div v-if="loading" class="flex justify-center items-center h-full py-8">
             <span class="loading loading-spinner loading-lg" />
         </div>
-        <div v-if="gameConfig" class="space-y-6">
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title">游戏板块</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4">
-                        <SRouterLink
-                            v-for="forum in gameConfig.gameAllForumList"
-                            :key="forum.id"
-                            :to="`/dna/posts/${forum.id}`"
-                            class="bg-base-200 p-3 rounded-lg cursor-pointer hover:bg-base-300 transition-colors duration-200 flex items-center"
-                        >
-                            <img :src="forum.iconUrl" alt="Forum Icon" class="w-6 h-6 mr-2" />
-                            <span>{{ forum.name }}</span>
-                        </SRouterLink>
-                    </div>
+        <div v-if="gameConfig" class="space-y-3">
+            <!-- 游戏板块 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="FORUMS" :title="$t('游戏板块')" />
+                <div class="mt-2 grid grid-cols-2 gap-1.5 md:grid-cols-3">
+                    <SRouterLink
+                        v-for="forum in gameConfig.gameAllForumList"
+                        :key="forum.id"
+                        :to="`/dna/posts/${forum.id}`"
+                        class="flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-150 hover:border-primary/40"
+                    >
+                        <img :src="forum.iconUrl" alt="Forum Icon" class="h-5 w-5 shrink-0 object-contain" />
+                        <span class="truncate text-sm text-base-content/80 transition-colors duration-150 hover:text-primary">{{
+                            forum.name
+                        }}</span>
+                    </SRouterLink>
                 </div>
-            </div>
+            </section>
 
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title">话题列表</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4">
-                        <SRouterLink
-                            v-for="topic in gameConfig.topicList"
-                            :key="topic.topicId"
-                            :to="`/dna/topic/${topic.topicId}`"
-                            class="bg-base-200 p-3 rounded-lg cursor-pointer hover:bg-base-300 transition-colors duration-200 flex items-center"
-                        >
-                            <img :src="topic.topicIconUrl" alt="Wiki Icon" class="w-6 h-6 mr-2" />
-                            <span>{{ topic.topicName }}</span>
-                        </SRouterLink>
-                    </div>
+            <!-- 话题列表 -->
+            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                <SectionHeader no-animate compact kicker="TOPICS" :title="$t('话题列表')" />
+                <div class="mt-2 grid grid-cols-2 gap-1.5 md:grid-cols-3">
+                    <SRouterLink
+                        v-for="topic in gameConfig.topicList"
+                        :key="topic.topicId"
+                        :to="`/dna/topic/${topic.topicId}`"
+                        class="flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-150 hover:border-primary/40"
+                    >
+                        <img :src="topic.topicIconUrl" alt="Wiki Icon" class="h-5 w-5 shrink-0 object-contain" />
+                        <span class="truncate text-sm text-base-content/80 transition-colors duration-150 hover:text-primary">{{
+                            topic.topicName
+                        }}</span>
+                    </SRouterLink>
                 </div>
-            </div>
+            </section>
         </div>
 
-        <div v-else class="flex justify-center items-center h-full">
+        <div v-else class="flex justify-center items-center h-full py-12">
             <div class="text-center">
-                <p class="text-lg mb-4">无法获取游戏配置</p>
-                <button class="btn btn-secondary" @click="loadData(true)">重试</button>
+                <p class="text-sm text-base-content/60 mb-4">无法获取游戏配置</p>
+                <button
+                    type="button"
+                    class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                    @click="loadData(true)"
+                >
+                    重试
+                </button>
             </div>
         </div>
     </div>
