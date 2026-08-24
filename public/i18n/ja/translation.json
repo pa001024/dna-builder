@@ -5809,10 +5809,12 @@
             "baseStats": "基礎ステータス",
             "complex": "複雑な式",
             "critDamage": "会心ダメージ",
+            "elementDamage": "元素ダメージ成分",
             "expectedDamage": "期待ダメージ",
             "forceAttr": "属性強制",
             "functions": "関数の使い方",
             "namespace": "名前空間",
+            "physicalDamage": "物理ダメージ成分",
             "specialValue": "特殊値",
             "temporaryAttrs": "一時属性"
         },
@@ -5844,11 +5846,13 @@
         "members": {
             "crit": "会心ダメージ",
             "critTrigger": "会心と発動",
+            "element": "元素ダメージ成分",
             "n": "HP ベースの効果倍率を計算しない",
             "noCrit": "非会心ダメージ",
             "noCritNoTrigger": "非会心かつ未発動",
             "noTrigger": "未発動ダメージ",
             "noTriggerCrit": "会心かつ未発動",
+            "physical": "物理ダメージ成分",
             "trigger": "発動ダメージ",
             "triggerNoCrit": "非会心かつ発動"
         },

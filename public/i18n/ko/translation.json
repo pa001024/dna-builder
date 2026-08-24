@@ -5891,10 +5891,12 @@
             "baseStats": "기본 능력치",
             "complex": "복합 식",
             "critDamage": "치명타 피해",
+            "elementDamage": "원소 피해 성분",
             "expectedDamage": "기대 피해",
             "forceAttr": "속성 강제",
             "functions": "함수 사용",
             "namespace": "네임스페이스",
+            "physicalDamage": "물리 피해 성분",
             "specialValue": "특수 값",
             "temporaryAttrs": "임시 속성"
         },
@@ -5926,11 +5928,13 @@
         "members": {
             "crit": "치명타 피해",
             "critTrigger": "치명타 및 발동",
+            "element": "원소 피해 성분",
             "n": "체력 비율 기반 효과 배율을 계산하지 않음",
             "noCrit": "비치명타 피해",
             "noCritNoTrigger": "비치명타 및 미발동",
             "noTrigger": "미발동 피해",
             "noTriggerCrit": "치명타 및 미발동",
+            "physical": "물리 피해 성분",
             "trigger": "발동 피해",
             "triggerNoCrit": "비치명타 및 발동"
         },

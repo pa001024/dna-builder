@@ -1877,4 +1877,126 @@ describe("CharBuild类测试", () => {
             expect(result).toBeGreaterThan(0)
         })
     })
+
+    // 转属克/转属逆 应把物理+元素一并转为属克/属逆元素并按翻转抗性结算；物理/元素 访问器按结算类型拆分期望伤害
+    describe("转属克/转属逆 物理分量转换 与 物理/元素 访问器", () => {
+        function buildFlora(enemyResistance = 0.5) {
+            return new CharBuild({
+                char: new LeveledChar("芙罗拉"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "圆舞",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance,
+                targetFunction: "[圆舞]路径伤害",
+            })
+        }
+
+        it("芙罗拉 圆舞 转属克:1 在 0.5抗 与 0抗 时应成 5 倍关系", () => {
+            const cb = buildFlora(0.5)
+            const d05 = cb.evaluateAST("[圆舞]路径伤害{转属克:1,触发:-9}")
+            cb.enemyResistance = 0
+            const d0 = cb.evaluateAST("[圆舞]路径伤害{转属克:1,触发:-9}")
+            // 转属克:1 把 100% 物理+元素 转为属克元素：0.5抗翻转为负抗-4(因子5)，0抗始终按原抗(因子1)，故 5 倍
+            expect(d05 / d0).toBeCloseTo(5, 3)
+        })
+
+        it("转属克:1 应把物理分量转为属克元素（物理≈0，元素=合计）", () => {
+            const cb = buildFlora(0.5)
+            const phys = cb.evaluateAST("[圆舞]路径伤害{转属克:1}.物理")
+            const elem = cb.evaluateAST("[圆舞]路径伤害{转属克:1}.元素")
+            const total = cb.evaluateAST("[圆舞]路径伤害{转属克:1}")
+            // 物理分量已全部转为元素，故物理访问器≈0；元素访问器等于合计
+            expect(phys).toBeCloseTo(0, 3)
+            expect(elem).toBeCloseTo(total, 3)
+        })
+
+        it("无转属克 时 物理/元素 访问器之和等于合计伤害", () => {
+            const cb = buildFlora(0.5)
+            const phys = cb.evaluateAST("[圆舞]路径伤害.物理")
+            const elem = cb.evaluateAST("[圆舞]路径伤害.元素")
+            const total = cb.evaluateAST("[圆舞]路径伤害")
+            // 圆舞 为暗属性伤害（含角色攻击带来的物理分量），物理分量应 > 0
+            expect(phys).toBeGreaterThan(0)
+            expect(phys + elem).toBeCloseTo(total, 3)
+        })
+
+        // 转切割/转贯穿/转震荡/转灾厄：把「物理+元素」100% 转为对应物理子类，
+        // 全部按物理类型结算（settlesElement:false），故物理访问器=合计、元素访问器≈0
+        for (const key of ["转切割", "转贯穿", "转震荡", "转灾厄"] as const) {
+            it(`${key}:1 应把物理+元素100%转为对应物理（物理=合计，元素≈0）`, () => {
+                const cb = buildFlora(0.5)
+                const expr = `[圆舞]路径伤害{${key}:1}`
+                const phys = cb.evaluateAST(`${expr}.物理`)
+                const elem = cb.evaluateAST(`${expr}.元素`)
+                const total = cb.evaluateAST(expr)
+                // 物理+元素 已全部转为对应物理类型，元素访问器≈0，物理访问器=合计
+                expect(elem).toBeCloseTo(0, 3)
+                expect(phys).toBeCloseTo(total, 3)
+            })
+        }
+
+        // 叠加多种转物理属性时，总转换比例钳制到 100%（convertScale），物理访问器仍=合计
+        it("转切割:0.6 + 转贯穿:0.6 叠加时物理访问器仍=合计（转换比例钳制到100%）", () => {
+            const cb = buildFlora(0.5)
+            const expr = "[圆舞]路径伤害{转切割:0.6,转贯穿:0.6}"
+            const phys = cb.evaluateAST(`${expr}.物理`)
+            const elem = cb.evaluateAST(`${expr}.元素`)
+            const total = cb.evaluateAST(expr)
+            expect(elem).toBeCloseTo(0, 3)
+            expect(phys).toBeCloseTo(total, 3)
+        })
+
+        // 转属克 与 转物理 共存：合计转换比例共享同一转换池，超过 100% 时等比重压缩
+        it("转灾厄:1 + 转属克:1 等价于 转灾厄:0.5 + 转属克:0.5（合计>1 等比重压缩）", () => {
+            const cb = buildFlora(0.5) // 0.5抗 → 转属克生效
+            const exprA = "[圆舞]路径伤害{转灾厄:1,转属克:1,触发:-9}"
+            const exprB = "[圆舞]路径伤害{转灾厄:0.5,转属克:0.5,触发:-9}"
+            for (const member of ["", ".物理", ".元素"] as const) {
+                const a = cb.evaluateAST(`${exprA}${member}`)
+                const b = cb.evaluateAST(`${exprB}${member}`)
+                // 合计/物理/元素 三类访问器在压缩前后完全一致
+                expect(a / b).toBeCloseTo(1, 5)
+            }
+        })
+
+        it("转灾厄:0.7 + 转属克:0.7 仍等价于 转灾厄:0.5 + 转属克:0.5（合计>1 压缩到同一比例）", () => {
+            const cb = buildFlora(0.5)
+            const a = cb.evaluateAST("[圆舞]路径伤害{转灾厄:0.7,转属克:0.7,触发:-9}")
+            const b = cb.evaluateAST("[圆舞]路径伤害{转灾厄:0.5,转属克:0.5,触发:-9}")
+            expect(a / b).toBeCloseTo(1, 5)
+        })
+
+        // 合计转换比例不足 100% 时，剩余部分按原始物理/元素比例结算
+        it("转灾厄:0.5 + 转属克:0.2 时剩余 30% 按原始物理/元素比例结算（合计=物理+元素）", () => {
+            const cb = buildFlora(0.5)
+            const expr = "[圆舞]路径伤害{转灾厄:0.5,转属克:0.2,触发:-9}"
+            const phys = cb.evaluateAST(`${expr}.物理`)
+            const elem = cb.evaluateAST(`${expr}.元素`)
+            const total = cb.evaluateAST(expr)
+            // 合计 = 物理 + 元素（结构性成立）
+            expect(phys + elem).toBeCloseTo(total, 0)
+            // 转属克 将 20% 物理+元素 转为属克元素 → 元素访问器 > 0；剩余分量仍按物理结算 → 物理访问器 < 合计
+            expect(elem).toBeGreaterThan(0)
+            expect(phys).toBeLessThan(total)
+            // 剩余 30% 按原始比例分量：以无转换基线校验精确拆分（由转换比例推导）
+            const phys0 = cb.evaluateAST("[圆舞]路径伤害{触发:-9}.物理")
+            const elem0 = cb.evaluateAST("[圆舞]路径伤害{触发:-9}.元素")
+            // 物理访问器 = 0.8*phys0 + 1.4*elem0；元素访问器 = phys0 + 1.4*elem0
+            expect(phys / (0.8 * phys0 + 1.4 * elem0)).toBeCloseTo(1, 4)
+            expect(elem / (phys0 + 1.4 * elem0)).toBeCloseTo(1, 4)
+        })
+
+        // 负抗时由 转属逆 接管元素转换，同样满足压缩等价
+        it("负抗时 转灾厄:1 + 转属逆:1 等价于 转灾厄:0.5 + 转属逆:0.5", () => {
+            const cb = buildFlora(-4) // 负抗 → 转属逆生效
+            const exprA = "[圆舞]路径伤害{转灾厄:1,转属逆:1,触发:-9}"
+            const exprB = "[圆舞]路径伤害{转灾厄:0.5,转属逆:0.5,触发:-9}"
+            expect(cb.evaluateAST(exprA) / cb.evaluateAST(exprB)).toBeCloseTo(1, 5)
+        })
+    })
 })

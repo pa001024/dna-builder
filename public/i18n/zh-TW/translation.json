@@ -5030,10 +5030,12 @@
             "baseStats": "基礎屬性",
             "complex": "複雜表達式",
             "critDamage": "暴擊傷害",
+            "elementDamage": "元素傷害分量",
             "expectedDamage": "期望傷害",
             "forceAttr": "強制屬性",
             "functions": "函數使用",
             "namespace": "命名空間",
+            "physicalDamage": "物理傷害分量",
             "specialValue": "特殊值",
             "temporaryAttrs": "臨時屬性"
         },
@@ -5065,11 +5067,13 @@
         "members": {
             "crit": "暴擊傷害",
             "critTrigger": "暴擊且觸發",
+            "element": "元素傷害分量",
             "n": "不計算背水昂揚乘區",
             "noCrit": "未暴擊傷害",
             "noCritNoTrigger": "未暴擊且未觸發",
             "noTrigger": "未觸發傷害",
             "noTriggerCrit": "暴擊且未觸發",
+            "physical": "物理傷害分量",
             "trigger": "觸發傷害",
             "triggerNoCrit": "未暴擊且觸發"
         },

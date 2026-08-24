@@ -5891,10 +5891,12 @@
             "baseStats": "Statistiques de base",
             "complex": "Expression complexe",
             "critDamage": "Dégâts critiques",
+            "elementDamage": "Dégâts élémentaires (composante)",
             "expectedDamage": "Dégâts attendus",
             "forceAttr": "Attribut forcé",
             "functions": "Utilisation des fonctions",
             "namespace": "Espace de noms",
+            "physicalDamage": "Dégâts physiques (composante)",
             "specialValue": "Valeurs spéciales",
             "temporaryAttrs": "Attributs temporaires"
         },
@@ -5926,11 +5928,13 @@
         "members": {
             "crit": "Dégâts critiques",
             "critTrigger": "Critique et déclenché",
+            "element": "Composante élémentaire",
             "n": "Ne pas calculer le multiplicateur d’effet basé sur les PV",
             "noCrit": "Dégâts non critiques",
             "noCritNoTrigger": "Non critique et non déclenché",
             "noTrigger": "Dégâts non déclenchés",
             "noTriggerCrit": "Critique et non déclenché",
+            "physical": "Composante physique",
             "trigger": "Dégâts déclenchés",
             "triggerNoCrit": "Non critique et déclenché"
         },

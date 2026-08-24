@@ -5891,10 +5891,12 @@
             "baseStats": "Base Stats",
             "complex": "Complex Expression",
             "critDamage": "Critical Damage",
+            "elementDamage": "Elemental Damage Component",
             "expectedDamage": "Expected Damage",
             "forceAttr": "Force Attribute",
             "functions": "Function Usage",
             "namespace": "Namespace",
+            "physicalDamage": "Physical Damage Component",
             "specialValue": "Special Values",
             "temporaryAttrs": "Temporary Attributes"
         },
@@ -5926,11 +5928,13 @@
         "members": {
             "crit": "Critical Damage",
             "critTrigger": "Crit and Triggered",
+            "element": "Elemental Damage Component",
             "n": "Do not calculate the HP-based effect multiplier",
             "noCrit": "Non-Critical Damage",
             "noCritNoTrigger": "Non-Critical and Not Triggered",
             "noTrigger": "Non-Triggered Damage",
             "noTriggerCrit": "Crit and Not Triggered",
+            "physical": "Physical Damage Component",
             "trigger": "Triggered Damage",
             "triggerNoCrit": "Not Critical and Triggered"
         },

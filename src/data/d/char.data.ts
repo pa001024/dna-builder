@@ -12639,6 +12639,7 @@ function patchCWeapon() {
                             skill: [0, 1, 2],
                             类型: ["同律", "近战", "单手剑"],
                             inherit: "melee",
+                            atk: "all",
                         },
                     ],
                 },

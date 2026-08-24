@@ -49,7 +49,8 @@ export interface CharAttr {
     召唤物伤害: number
     减伤: number
     有效生命: number
-    // 转xx 系列属性：转物理类型按对应类型触发规则结算；转属克/转属逆按比例改变结算时的敌人抗性（总比例钳制到 100% 内）
+    // 转xx 系列属性：转物理类型（切割/贯穿/震荡/灾厄）按对应类型触发规则结算；
+    // 转属克/转属逆 把物理+元素按比例转为属克/属逆元素，并按翻转抗性结算敌人抗性（总比例钳制到 100% 内）
     转切割?: number
     转贯穿?: number
     转震荡?: number
@@ -1456,6 +1457,9 @@ export class CharBuild {
         return {
             expectedDamage: finalDamage * hpMore,
             noHpDamage: finalDamage,
+            // 技能伤害视为纯元素结算，无物理分量
+            physicalDamage: 0,
+            elementDamage: finalDamage * hpMore,
         }
     }
 
@@ -1505,8 +1509,12 @@ export class CharBuild {
         const higherCritDamage = (weaponAttrs.暴伤 - 1) * Math.ceil(weaponAttrs.暴击) + 1
         const critExpectedDamage = 1 + critRate * (critDamage - 1)
 
-        // 计算各种乘区（转属克/转属逆经 getResistanceFactor 改变元素分量的抗性因子；物理分量不受抗性影响）
-        const resistance = this.getResistanceFactor(attrs)
+        // 计算各种乘区（转属克/转属逆 按压缩后的有效比例经下方 resistance 翻转元素分量的抗性因子；
+        // 物理分量原本不受抗性影响，但 转属克/转属逆 会按比例将物理分量转为属克/属逆元素，同样享受翻转抗性）
+        const enemyResistance = this.enemyResistance
+        // 翻转抗性因子：转属克/转属逆 将物理分量转为属克/属逆元素时按翻转后的抗性结算（元素分量本身已由下方 resistance 翻转）
+        const flippedResistance = enemyResistance > 0 ? -4 : 0.5
+        const flippedFactor = Math.max(0, 1 - flippedResistance)
         const resistancePenetration = Math.max(0, 1 + attrs.属性穿透)
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
@@ -1518,46 +1526,77 @@ export class CharBuild {
         const otherMore = damageIncrease * independentDamageIncrease * additionalDamage * imbalanceDamageMultiplier * resistancePenetration
         const commonMore = hpMore * otherMore
 
-        // 计算最终伤害（支持 转xx 系列属性：按比例将伤害从任意类型转为对应物理类型）
-        // 物理转换（切割/贯穿/震荡/灾厄）走对应类型的触发规则；转属克/转属逆不参与类型转换，
-        // 而是按比例改变结算时的敌人抗性（见 getResistanceFactor）。总转换比例钳制到 100% 内。
-        const convertTargets = {
-            转切割: "physical",
-            转贯穿: "physical",
-            转震荡: "physical",
-            转灾厄: "physical",
-        } as const
-        type ConvertKey = keyof typeof convertTargets
-        const convertKeys = Object.keys(convertTargets) as ConvertKey[]
-        const conversionRatios = convertKeys.map(key => ({ key, ratio: Math.max(0, attrs[key] || 0) }))
-        const totalConvert = conversionRatios.reduce((sum, c) => sum + c.ratio, 0)
-        const convertScale = totalConvert > 1 ? 1 / totalConvert : 1
-        const unconverted = Math.max(0, 1 - Math.min(1, totalConvert))
+        // 计算最终伤害（支持 转xx 系列属性）
+        // 转属克/转属逆（按敌人抗性方向取其一）与 转切割/转贯穿/转震荡/转灾厄 共享同一转换比例池：
+        // 转属克/转属逆 把物理+元素按比例转为属克/属逆元素（翻转抗性）；转物理类型把物理+元素按比例转为对应物理子类（按触发规则结算）。
+        // 合计转换比例超过 100% 时等比重压缩（convertScale），不足 100% 时剩余 (1 - total) 按原始物理/元素比例结算。
+        const activeElementKey: "转属克" | "转属逆" | undefined =
+            enemyResistance > 0 ? "转属克" : enemyResistance < 0 ? "转属逆" : undefined
+        const rawElementConvert = activeElementKey ? Math.max(0, attrs[activeElementKey] || 0) : 0
+        const rawPhysicalConvert = ["转切割", "转贯穿", "转震荡", "转灾厄"].reduce((sum, k) => sum + Math.max(0, attrs[k] || 0), 0)
+        const poolTotal = rawElementConvert + rawPhysicalConvert
+        const convertScale = poolTotal > 1 ? 1 / poolTotal : 1
+        const unconverted = Math.max(0, 1 - Math.min(1, poolTotal))
+        // 元素转换的有效比例（经统一池压缩后）决定属克/属逆元素的抗性翻转程度，保证压缩前后抗性一致
+        const elementConvertRatio = Math.min(1, rawElementConvert) * convertScale
+        const resistance = (() => {
+            const f = (r: number) => Math.max(0, 1 - r)
+            const r = enemyResistance
+            if (r === 0) return f(0)
+            if (r < 0) return (1 - elementConvertRatio) * f(r) + elementConvertRatio * f(0.5)
+            return (1 - elementConvertRatio) * f(r) + elementConvertRatio * f(-4)
+        })()
+
+        type ConvertEntry = { key: string; ratio: number; kind: "element" | "physical" }
+        const conversionEntries: ConvertEntry[] = []
+        if (activeElementKey) conversionEntries.push({ key: activeElementKey, ratio: rawElementConvert, kind: "element" })
+        for (const key of ["转切割", "转贯穿", "转震荡", "转灾厄"] as const) {
+            conversionEntries.push({ key, ratio: Math.max(0, attrs[key] || 0), kind: "physical" })
+        }
 
         const elementalPart = weaponDamageElemental * resistance
-        // 原始（未转换）部分：保持原物理分量与元素分量的触发行为。
-        const parts: { ratio: number; triggerAdd: number }[] = []
+        const physicalBase = weaponDamagePhysical
+        // parts 记录每个伤害分量：ratio 为结算前系数，triggerAdd 为触发加成，settlesElement 标记最终结算类型
+        const parts: { ratio: number; triggerAdd: number; settlesElement: boolean }[] = []
         if (inheritAllSkillWeapon) {
-            parts.push({ ratio: elementalPart * unconverted, triggerAdd: getTriggerMultiplier(damageType) })
+            // 同律 inherit+atk=all：纯元素，转属克/转属逆 经 getResistanceFactor 已计入元素抗性因子
+            if (unconverted > 0)
+                parts.push({ ratio: elementalPart * unconverted, triggerAdd: getTriggerMultiplier(damageType), settlesElement: true })
         } else {
-            parts.push({ ratio: weaponDamagePhysical * unconverted, triggerAdd: getTriggerMultiplier(damageType) })
-            parts.push({ ratio: elementalPart * unconverted, triggerAdd: 0 })
+            // 未转换的物理部分（原物理类型，按原始伤害类型触发）；未转换的元素部分（原元素类型，无触发）
+            if (physicalBase > 0 && unconverted > 0)
+                parts.push({ ratio: physicalBase * unconverted, triggerAdd: getTriggerMultiplier(damageType), settlesElement: false })
+            if (unconverted > 0) parts.push({ ratio: elementalPart * unconverted, triggerAdd: 0, settlesElement: true })
         }
-        // 转换部分：从物理分量与元素分量中按比例剥离并转为目标类型。
-        for (const c of conversionRatios) {
-            const ratio = c.ratio * convertScale
+        // 转换部分：遍历统一转换池，按 convertScale 压缩后的比例把对应比例的物理+元素分量转为目标类型
+        for (const e of conversionEntries) {
+            const ratio = e.ratio * convertScale
             if (ratio <= 0) continue
-            const triggerAdd = convertTargets[c.key] === "physical" ? getTriggerMultiplier(c.key.slice(1)) : 0
-            if (inheritAllSkillWeapon) {
-                parts.push({ ratio: elementalPart * ratio, triggerAdd })
+            if (e.kind === "element") {
+                // 转属克/转属逆：物理→属克/属逆元素（翻转抗性结算、无触发）；元素分量已实现翻转（见 getResistanceFactor），直接计入元素
+                if (physicalBase > 0) parts.push({ ratio: physicalBase * ratio * flippedFactor, triggerAdd: 0, settlesElement: true })
+                parts.push({ ratio: elementalPart * ratio, triggerAdd: 0, settlesElement: true })
             } else {
-                parts.push({ ratio: weaponDamagePhysical * ratio, triggerAdd })
-                parts.push({ ratio: elementalPart * ratio, triggerAdd })
+                // 转切割/转贯穿/转震荡/转灾厄：物理+元素一并转为对应物理子类，按物理类型触发规则结算（settlesElement: false）
+                const triggerAdd = getTriggerMultiplier(e.key.slice(1))
+                if (inheritAllSkillWeapon) {
+                    parts.push({ ratio: elementalPart * ratio, triggerAdd, settlesElement: false })
+                } else {
+                    if (physicalBase > 0) parts.push({ ratio: physicalBase * ratio, triggerAdd, settlesElement: false })
+                    parts.push({ ratio: elementalPart * ratio, triggerAdd, settlesElement: false })
+                }
             }
         }
         const allPart = parts.reduce((sum, p) => sum + p.ratio, 0)
         const triggerAllPart = parts.reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd), 0)
         const expectedTriggerAllPart = parts.reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate), 0)
+        // 按结算类型拆分期望伤害（物理/元素），用于 物理/元素 属性访问器
+        const physicalExpectedTriggerAllPart = parts
+            .filter(p => !p.settlesElement)
+            .reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate), 0)
+        const elementExpectedTriggerAllPart = parts
+            .filter(p => p.settlesElement)
+            .reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate), 0)
         const lowerCritNoTriggerBase = lowerCritDamage * commonMore
         const higherCritNoTriggerBase = higherCritDamage * commonMore
         const expectedCritNoTriggerBase = critExpectedDamage * commonMore
@@ -1582,6 +1621,9 @@ export class CharBuild {
             expectedCritNoTrigger,
             expectedDamage,
             noHpDamage,
+            // 物理/元素 分量期望伤害（按结算类型拆分；转属克/转属逆 转换到元素的部分计入元素）
+            physicalDamage: physicalExpectedTriggerAllPart * expectedCritNoTriggerBase,
+            elementDamage: elementExpectedTriggerAllPart * expectedCritNoTriggerBase,
         }
     }
 
@@ -2164,6 +2206,8 @@ export class CharBuild {
         function evaluateMember(memberName?: string, ns?: string, fieldName?: string, temporaryAttributes?: TemporaryAttributes) {
             const damage = getDamage(ns, fieldName, temporaryAttributes)
             if (memberName === "N") return damage.noHpDamage
+            if (memberName === "物理") return damage.physicalDamage ?? 0
+            if (memberName === "元素") return damage.elementDamage ?? damage.expectedDamage
             if (memberName === "暴击") return damage.higherCritExpectedTrigger || damage.expectedDamage
             if (memberName === "未暴击") return damage.lowerCritExpectedTrigger || damage.expectedDamage
             if (memberName === "触发") return damage.expectedCritTrigger || damage.expectedDamage
@@ -3499,6 +3543,10 @@ export interface DamageResult {
     expectedDamage: number
     /** 无血量因数伤害 */
     noHpDamage: number
+    /** 物理分量伤害（期望，按结算类型拆分，转属克/转属逆 转换到元素的部分不计入物理） */
+    physicalDamage?: number
+    /** 元素分量伤害（期望，按结算类型拆分，含转属克/转属逆 转换到属克/属逆元素的部分） */
+    elementDamage?: number
 }
 
 export interface BuildOption {

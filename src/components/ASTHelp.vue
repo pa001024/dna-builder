@@ -34,6 +34,8 @@ const examples = [
     { label: t("ast-help.examples.specialValue"), expr: "[攻击]" },
     { label: t("ast-help.examples.expectedDamage"), expr: skillName },
     { label: t("ast-help.examples.critDamage"), expr: skillName + ".暴击" },
+    { label: t("ast-help.examples.physicalDamage"), expr: skillName + ".物理" },
+    { label: t("ast-help.examples.elementDamage"), expr: skillName + ".元素" },
     { label: t("ast-help.examples.temporaryAttrs"), expr: "[攻击]{增伤:0.1}.暴击" },
     { label: t("ast-help.examples.functions"), expr: "max(攻击, 防御) * 2" },
     { label: t("ast-help.examples.namespace"), expr: "伊卡洛斯::伤害" },
@@ -74,6 +76,9 @@ const members = {
     未触发暴击: t("ast-help.members.noTriggerCrit"),
     触发未暴击: t("ast-help.members.triggerNoCrit"),
     未暴击未触发: t("ast-help.members.noCritNoTrigger"),
+    // 物理/元素：按最终结算类型拆分的伤害分量访问器（受 转属克/转属逆/转物理 系列属性影响）
+    物理: t("ast-help.members.physical"),
+    元素: t("ast-help.members.element"),
 }
 
 // 关键字说明：方括号特殊字段，倍率固定为 100%（不受威力影响），可直接用作自定义伤害字段。
@@ -639,7 +644,7 @@ const badgeColors: Record<string, string> = {
                             v-model="attrValue"
                             type="number"
                             step="0.01"
-                            class="input input-sm input-bordered w-24 rounded-xs font-mono tabular-nums"
+                            class="input input-xs input-bordered w-24 rounded-xs font-mono tabular-nums"
                         />
                         <span class="ml-auto truncate text-xs text-base-content/45">{{ attrContextHint }}</span>
                     </div>
