@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite"
 import vue from "@vitejs/plugin-vue"
 import vueJsx from "@vitejs/plugin-vue-jsx"
 import RekaResolver from "reka-ui/resolver"
+// @ts-expect-error
 import graphqlTag from "rollup-plugin-graphql-tag"
 import Component from "unplugin-vue-components/vite"
 import { defineConfig } from "vite"
@@ -46,7 +47,7 @@ export default defineConfig(async () => ({
     resolve: {
         alias: {
             "@": resolve(__dirname, "src"),
-            "dna-api": resolve(__dirname, "externals/dna-api/src/index.ts"),
+            // "dna-api": resolve(__dirname, "externals/dna-api/src/index.ts"),
             "node:async_hooks": resolve(__dirname, "src/polyfills/async_hooks.ts"),
             async_hooks: resolve(__dirname, "src/polyfills/async_hooks.ts"),
         },
