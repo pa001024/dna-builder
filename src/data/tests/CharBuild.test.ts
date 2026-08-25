@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
 import { createBuffFromSettings, createCharBuildFromSettings } from "../CharBuildHelper"
+import { createBuildFromSnapshot, createWorkerSnapshot } from "../CharBuildSnapshot"
 import { weaponData } from "../index"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
@@ -295,6 +296,74 @@ describe("CharBuild类测试", () => {
         expect(baseDamage).toBeGreaterThan(0)
         expect(buffedDamage).toBeGreaterThan(baseDamage)
         expect(buffedDamage / baseDamage).toBeCloseTo(1.075, 5)
+    })
+
+    it("艾达4溯应作为复合BUFF同时生效普通属性与code，提升[召唤物·战车]技能伤害", () => {
+        const createBuild = (buffs: LeveledBuff[]) =>
+            new CharBuild({
+                char: new LeveledChar("艾达（？？）"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                buffs,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "乐园构想",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[召唤物·战车]技能伤害",
+            })
+        const baseBuild = createBuild([])
+        const buffedBuild = createBuild([new LeveledBuff("艾达4溯")])
+
+        // 复合BUFF：普通属性部分进入属性链（buffs），code部分进入dynamicBuffs
+        expect(buffedBuild.buffs.map(b => b.名称)).toContain("艾达4溯")
+        expect(buffedBuild.dynamicBuffs.map(b => b.名称)).toContain("艾达4溯")
+
+        // 普通属性部分先进入attr链：召唤物攻击速度 = 0.3
+        const attrs = buffedBuild.calculateAttributes()
+        expect(attrs.召唤物攻击速度).toBeCloseTo(0.3, 6)
+        // code部分在attr链之后计算：召唤物独立增伤 = 1 × (1 + 0.3) = 1.3
+        expect(attrs.召唤物独立增伤).toBeCloseTo(1.3, 6)
+        expect(baseBuild.calculateAttributes().召唤物独立增伤).toBeCloseTo(1, 6)
+
+        // 目标test：使 [召唤物·战车]技能伤害 伤害增加（独立乘区 ×1.3）
+        const baseDamage = baseBuild.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")
+        const buffedDamage = buffedBuild.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")
+
+        expect(baseDamage).toBeGreaterThan(0)
+        expect(buffedDamage).toBeGreaterThan(baseDamage)
+        expect(buffedDamage / baseDamage).toBeCloseTo(1.3, 5)
+    })
+
+    it("艾达4溯克隆与快照往返不应重复生效", () => {
+        const createBuild = () =>
+            new CharBuild({
+                char: new LeveledChar("艾达（？？）"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                buffs: [new LeveledBuff("艾达4溯")],
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "乐园构想",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[召唤物·战车]技能伤害",
+            })
+        const build = createBuild()
+        const originalDamage = build.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")
+        expect(originalDamage).toBeGreaterThan(0)
+
+        // clone：复合BUFF按引用去重后克隆，不重复生效
+        const clonedDamage = build.clone().calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")
+        expect(clonedDamage).toBeCloseTo(originalDamage, 6)
+
+        // 快照往返：同样按引用去重，恢复后结果一致
+        const restored = createBuildFromSnapshot(createWorkerSnapshot(build))
+        expect(restored.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")).toBeCloseTo(originalDamage, 6)
     })
 
     it("[降灵]召唤物属性应按比例缩放召唤物伤害", () => {

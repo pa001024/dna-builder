@@ -383,6 +383,7 @@ export class LeveledMod implements Mod {
             召唤物攻击速度: 0,
             召唤物范围: 0,
             召唤物伤害: 0,
+            召唤物独立增伤: 1,
             减伤: 0,
             有效生命: 0,
             充盈威力: 0,

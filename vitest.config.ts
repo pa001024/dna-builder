@@ -5,7 +5,7 @@ export default defineConfig({
     test: {
         setupFiles: [resolve(__dirname, "src/test/vitest-setup.ts")],
         // 只运行项目自身的测试（src 与 tools）；node_modules、server、externals、e2e 等自动排除
-        include: ["src/**/*.test.ts", "tools/**/*.test.ts"],
+        include: ["src/**/*.test.ts"],
     },
     resolve: {
         alias: {

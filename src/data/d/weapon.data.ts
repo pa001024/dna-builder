@@ -9442,6 +9442,26 @@ patch(
                 ],
             }),
         },
+        {
+            id: 10299,
+            data: weapon => ({
+                技能: [
+                    ...(weapon.技能 || []),
+                    {
+                        id: 1029903,
+                        名称: "送行挽歌",
+                        类型: "武器伤害",
+                        字段: [
+                            {
+                                名称: "[送行挽歌]伤害",
+                                伤害类型: "灾厄",
+                                值: 10,
+                            },
+                        ],
+                    },
+                ],
+            }),
+        },
     ],
     (weapon, patch) => {
         const data = typeof patch.data === "function" ? patch.data(weapon) : patch.data

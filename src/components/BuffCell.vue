@@ -31,7 +31,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                         <div v-if="selected" class="text-primary">
                             <Icon icon="ri:checkbox-circle-fill" />
                         </div>
-                        {{ buff.名称 }}
+                        {{ $t(buff.名称) }}
                     </div>
                     <div v-if="buff.mx" class="text-xs text-base-content/60 font-orbitron tabular-nums">
                         Lv.
@@ -47,7 +47,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                     </div>
                 </div>
                 <div class="text-xs text-base-content/60 mb-2">
-                    {{ buff.描述 }}
+                    {{ $t(buff.描述) }}
                 </div>
                 <div class="text-xs text-base-content/40" v-if="income">
                     {{ $t("char-build.income") }}:

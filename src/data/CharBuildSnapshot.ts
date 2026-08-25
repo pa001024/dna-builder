@@ -96,7 +96,8 @@ export function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnaps
         meleeMods: charBuild.meleeMods.map(createModSnapshot),
         rangedMods: charBuild.rangedMods.map(createModSnapshot),
         skillMods: charBuild.skillMods.map(createModSnapshot),
-        buffs: [...charBuild.buffs, ...charBuild.dynamicBuffs].map(buff => ({
+        // 复合BUFF（code+普通属性）同一实例同时位于普通槽位与code槽位，按引用去重避免快照重复
+        buffs: [...new Set([...charBuild.buffs, ...charBuild.dynamicBuffs])].map(buff => ({
             data: buff._originalBuffData,
             level: buff.等级,
         })),

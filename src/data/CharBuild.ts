@@ -47,6 +47,7 @@ export interface CharAttr {
     召唤物攻击速度: number
     召唤物范围: number
     召唤物伤害: number
+    召唤物独立增伤: number
     减伤: number
     有效生命: number
     // 转xx 系列属性：转物理类型（切割/贯穿/震荡/灾厄）按对应类型触发规则结算；
@@ -141,6 +142,7 @@ const characterBonusAttributes = [
     "召唤物攻击速度",
     "召唤物范围",
     "召唤物伤害",
+    "召唤物独立增伤",
     "技能倍率赋值",
     "转切割",
     "转贯穿",
@@ -474,7 +476,9 @@ export class CharBuild {
         this.meleeMods = options.meleeMods || []
         this.rangedMods = options.rangedMods || []
         this.skillMods = options.skillMods || []
-        this.buffs = options.buffs?.filter(v => !v.code) || []
+        // 复合BUFF（同时含普通属性与code，如「艾达4溯」）需同时进入普通槽位与code槽位：
+        // 普通属性部分先进属性链汇总，code部分在其后基于完整属性计算（普通buff优先于code）
+        this.buffs = options.buffs?.filter(v => !v.code || v.properties.length > 0) || []
         this.dynamicBuffs = options.buffs?.filter(v => v.code) || []
         this.imbalance = options.imbalance || false
         this.meleeWeapon = options.melee
@@ -626,6 +630,8 @@ export class CharBuild {
         let summonAttackSpeed = bonuses[characterBonusIndex.召唤物攻击速度]
         let summonRange = bonuses[characterBonusIndex.召唤物范围]
         let summonDamage = bonuses[characterBonusIndex.召唤物伤害]
+        // 召唤物独立增伤乘区：1起始的倍率（0起始的加成累加），供「艾达4溯」等BUFF的code做乘法转化
+        let summonIndependentDamage = 1 + bonuses[characterBonusIndex.召唤物独立增伤]
         const ignoreDefense = this.getTotalBonusMul("无视防御")
         const skillIgnoreDefense = this.getTotalBonusMul("技能无视防御")
         const independentDamageIncrease = this.getTotalBonusMul("独立增伤")
@@ -671,6 +677,7 @@ export class CharBuild {
             summonAttackSpeed += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物攻击速度")
             summonRange += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物范围")
             summonDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物伤害")
+            summonIndependentDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "召唤物独立增伤")
         }
 
         // 计算基础属性
@@ -724,6 +731,7 @@ export class CharBuild {
             召唤物攻击速度: summonAttackSpeed,
             召唤物范围: summonRange,
             召唤物伤害: summonDamage,
+            召唤物独立增伤: summonIndependentDamage,
             减伤: damageReduce,
             技能倍率赋值: skillMultiplierSet,
             有效生命: (health / (1 - defense / (300 + defense)) + shield) / (1 - damageReduce),
@@ -1448,11 +1456,18 @@ export class CharBuild {
         const isSummonDamage = resolvedFieldName ? resolvedFieldName.includes("召唤物") : !!skill?.召唤物
         const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (isSummonDamage ? attrs.召唤物伤害 : 0)
         const independentDamageIncrease = 1 + attrs.独立增伤
+        // 召唤物独立增伤乘区（1起始的倍率，仅召唤物伤害结算）：如「艾达4溯」将召唤物攻击速度超额部分按比例转化为该乘区
+        const summonIndependentDamageMultiplier = isSummonDamage ? attrs.召唤物独立增伤 : 1
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
         const hpMore = boostMultiplier * desperateMultiplier
         // 计算最终伤害
-        const finalDamage = resistancePenetration * damageIncrease * independentDamageIncrease * imbalanceDamageMultiplier
+        const finalDamage =
+            resistancePenetration *
+            damageIncrease *
+            independentDamageIncrease *
+            summonIndependentDamageMultiplier *
+            imbalanceDamageMultiplier
 
         return {
             expectedDamage: finalDamage * hpMore,
@@ -2863,7 +2878,29 @@ export class CharBuild {
         if (!buffs.length) return this
         const names = new Set(typeof buffs[0] === "string" ? (buffs as string[]) : (buffs as LeveledBuff[]).map(b => b.名称))
         this.buffs = this.buffs.filter(b => !names.has(b.名称))
+        // 复合BUFF（如「艾达4溯」）同一实例同时位于code槽位，需一并移除
+        this.dynamicBuffs = this.dynamicBuffs.filter(b => !names.has(b.名称))
         return this
+    }
+
+    /**
+     * 将BUFF加入对应生效槽位：复合BUFF（同时含code与普通属性）同时进入普通槽位与code槽位。
+     * @param buff 目标BUFF
+     */
+    public pushBuffToSlots(buff: LeveledBuff) {
+        if (buff.code) this.dynamicBuffs.push(buff)
+        if (!buff.code || buff.properties.length > 0) this.buffs.push(buff)
+    }
+
+    /**
+     * 按实例引用从对应生效槽位移除BUFF（复合BUFF同一实例可能同时位于两个槽位）。
+     * @param buff 目标BUFF
+     */
+    public removeBuffFromSlots(buff: LeveledBuff) {
+        const dynamicIndex = this.dynamicBuffs.indexOf(buff)
+        if (dynamicIndex !== -1) this.dynamicBuffs.splice(dynamicIndex, 1)
+        const normalIndex = this.buffs.indexOf(buff)
+        if (normalIndex !== -1) this.buffs.splice(normalIndex, 1)
     }
     /** 收益计算用的临时槽位 平时不应该有任何值 */
     tempMod: LeveledMod | null = null
@@ -2880,12 +2917,11 @@ export class CharBuild {
             let mval = 0
             if (props instanceof LeveledBuff) {
                 if (props.code) {
-                    const index = this.dynamicBuffs.findIndex(b => b.名称 === props.名称)
-                    if (index !== -1) {
-                        this.dynamicBuffs.splice(index, 1)
-                    }
+                    // 复合BUFF需同时从普通槽位与code槽位移除（如「艾达4溯」的召唤物攻击速度+code部分）
+                    this.buffs = this.buffs.filter(b => b.名称 !== props.名称)
+                    this.dynamicBuffs = this.dynamicBuffs.filter(b => b.名称 !== props.名称)
                     mval = this.calculate()
-                    this.dynamicBuffs.push(props)
+                    this.pushBuffToSlots(props)
                 } else if (props.attr) {
                     return this.calcEquippedBuffIncome(props)
                 } else {
@@ -2925,9 +2961,10 @@ export class CharBuild {
                 this.syncWeaponForgeEffective()
             } else if (props instanceof LeveledBuff) {
                 if (props.code) {
-                    this.dynamicBuffs.push(props)
+                    // 复合BUFF需同时进入普通槽位与code槽位
+                    this.pushBuffToSlots(props)
                     mval = this.calculate()
-                    this.dynamicBuffs.pop()
+                    this.removeBuffFromSlots(props)
                 } else {
                     this.buffs.push(props)
                     mval = this.calculate()
@@ -3013,7 +3050,8 @@ export class CharBuild {
             meleeMods: this.meleeMods.map(m => (m ? m.clone() : null)),
             rangedMods: this.rangedMods.map(m => (m ? m.clone() : null)),
             skillMods: this.skillMods.map(m => (m ? m.clone() : null)),
-            buffs: [...this.buffs, ...this.dynamicBuffs].map(b => b.clone()),
+            // 复合BUFF同一实例同时位于普通槽位与code槽位，按引用去重后再克隆，避免重复生效
+            buffs: [...new Set([...this.buffs, ...this.dynamicBuffs])].map(b => b.clone()),
             melee: this.meleeWeapon.clone(),
             ranged: this.rangedWeapon.clone(),
             baseName: this.baseName,
