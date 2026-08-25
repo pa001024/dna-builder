@@ -1896,6 +1896,32 @@ describe("CharBuild类测试", () => {
             })
         }
 
+        it("atk=all 的纯元素字段不吃触发加成：[圆舞]路径伤害 应等于 {触发:-9}（护盾型敌人下切割触发倍率非0）", () => {
+            // 护盾木桩(currentHPType=护盾)会给出非 0 的切割触发倍率：
+            // 若纯元素字段错误吃到触发加成，plain 会被触发率放大，与 {触发:-9} 不等
+            const cb = new CharBuild({
+                char: new LeveledChar("芙罗拉"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10302), // 切割，基础触发 0.3
+                ranged: new LeveledWeapon(20601),
+                baseName: "圆舞",
+                enemyId: 0, // 护盾木桩 → currentHPType=护盾 → 切割触发倍率>0
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[圆舞]路径伤害",
+            })
+            expect(cb.skillWeapon?.inherit).toBe("melee")
+            expect(cb.skillWeapon?.atk).toBe("all")
+            const plain = cb.evaluateAST("[圆舞]路径伤害")
+            const noTrigger = cb.evaluateAST("[圆舞]路径伤害{触发:-9}")
+            expect(plain / noTrigger).toBeCloseTo(1, 6)
+            // 纯元素：物理访问器≈0，元素访问器=合计
+            expect(cb.evaluateAST("[圆舞]路径伤害.物理")).toBeCloseTo(0, 6)
+            expect(cb.evaluateAST("[圆舞]路径伤害.元素") / plain).toBeCloseTo(1, 6)
+        })
+
         it("芙罗拉 圆舞 转属克:1 在 0.5抗 与 0抗 时应成 5 倍关系", () => {
             const cb = buildFlora(0.5)
             const d05 = cb.evaluateAST("[圆舞]路径伤害{转属克:1,触发:-9}")

@@ -1560,9 +1560,8 @@ export class CharBuild {
         // parts 记录每个伤害分量：ratio 为结算前系数，triggerAdd 为触发加成，settlesElement 标记最终结算类型
         const parts: { ratio: number; triggerAdd: number; settlesElement: boolean }[] = []
         if (inheritAllSkillWeapon) {
-            // 同律 inherit+atk=all：纯元素，转属克/转属逆 经 getResistanceFactor 已计入元素抗性因子
-            if (unconverted > 0)
-                parts.push({ ratio: elementalPart * unconverted, triggerAdd: getTriggerMultiplier(damageType), settlesElement: true })
+            // 同律 inherit+atk=all：纯元素伤害，无物理分量、不吃触发加成（触发倍率仅按物理伤害类型结算）
+            if (unconverted > 0) parts.push({ ratio: elementalPart * unconverted, triggerAdd: 0, settlesElement: true })
         } else {
             // 未转换的物理部分（原物理类型，按原始伤害类型触发）；未转换的元素部分（原元素类型，无触发）
             if (physicalBase > 0 && unconverted > 0)
