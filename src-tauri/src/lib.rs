@@ -707,7 +707,9 @@ fn is_allowed_ext(name: &str, allowed: Option<&[&str]>) -> bool {
         Some(list) => {
             let lower = name.to_lowercase();
             list.iter().any(|ext| {
-                lower.rsplit_once('.').is_some_and(|(_, actual)| actual == *ext)
+                lower
+                    .rsplit_once('.')
+                    .is_some_and(|(_, actual)| actual == *ext)
             })
         }
     }
@@ -1072,14 +1074,20 @@ fn import_mod(gamebase: String, paths: Vec<String>) -> String {
         }
         match is_zip_file(&src) {
             Ok(true) => {
-                if let Err(err) =
-                    extract_zip_into(&src, &base_path, &mut output, None, Some(MOD_ARCHIVE_EXTENSIONS))
-                {
+                if let Err(err) = extract_zip_into(
+                    &src,
+                    &base_path,
+                    &mut output,
+                    None,
+                    Some(MOD_ARCHIVE_EXTENSIONS),
+                ) {
                     eprintln!("Failed to extract {:?}: {err}", src);
                 }
             }
             Ok(false) => {
-                if let Err(err) = copy_regular_file(&src, &base_path, &mut output, Some(MOD_ARCHIVE_EXTENSIONS)) {
+                if let Err(err) =
+                    copy_regular_file(&src, &base_path, &mut output, Some(MOD_ARCHIVE_EXTENSIONS))
+                {
                     eprintln!("Failed to copy {:?}: {err}", src);
                 }
             }
@@ -1091,7 +1099,10 @@ fn import_mod(gamebase: String, paths: Vec<String>) -> String {
     // 返回给前端的路径同步使用改后的实际文件名（启用时再还原为 .pak）。
     for entry in output.iter_mut() {
         let path = PathBuf::from(&entry.0);
-        let Some(file_name) = path.file_name().map(|name| name.to_string_lossy().to_string()) else {
+        let Some(file_name) = path
+            .file_name()
+            .map(|name| name.to_string_lossy().to_string())
+        else {
             continue;
         };
         let disabled_name = to_disabled_file_name(&file_name);
@@ -1835,11 +1846,14 @@ fn create_desktop_shortcut(path: String) -> Result<String, String> {
     #[cfg(target_os = "windows")]
     {
         use widestring::{U16CStr, U16CString};
-        use windows::core::{Interface, PCWSTR};
         use windows::Win32::System::Com::{
-            CoCreateInstance, CoInitializeEx, CoTaskMemFree, IPersistFile, CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED,
+            CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED, CoCreateInstance, CoInitializeEx,
+            CoTaskMemFree, IPersistFile,
         };
-        use windows::Win32::UI::Shell::{FOLDERID_Desktop, IShellLinkW, KNOWN_FOLDER_FLAG, SHGetKnownFolderPath, ShellLink};
+        use windows::Win32::UI::Shell::{
+            FOLDERID_Desktop, IShellLinkW, KNOWN_FOLDER_FLAG, SHGetKnownFolderPath, ShellLink,
+        };
+        use windows::core::{Interface, PCWSTR};
 
         const SHORTCUT_NAME: &str = "二重螺旋";
 
@@ -1857,14 +1871,18 @@ fn create_desktop_shortcut(path: String) -> Result<String, String> {
 
             let shortcut_path = format!("{desktop}\\{SHORTCUT_NAME}.lnk");
             let game_dir = path.strip_suffix("EM.exe").unwrap_or(&path);
-            let target = U16CString::from_str(&path).map_err(|error| format!("路径编码失败: {error}"))?;
-            let work_dir = U16CString::from_str(game_dir).map_err(|error| format!("路径编码失败: {error}"))?;
-            let save_path = U16CString::from_str(&shortcut_path).map_err(|error| format!("路径编码失败: {error}"))?;
-            let description = U16CString::from_str(SHORTCUT_NAME).map_err(|error| format!("名称编码失败: {error}"))?;
+            let target =
+                U16CString::from_str(&path).map_err(|error| format!("路径编码失败: {error}"))?;
+            let work_dir =
+                U16CString::from_str(game_dir).map_err(|error| format!("路径编码失败: {error}"))?;
+            let save_path = U16CString::from_str(&shortcut_path)
+                .map_err(|error| format!("路径编码失败: {error}"))?;
+            let description = U16CString::from_str(SHORTCUT_NAME)
+                .map_err(|error| format!("名称编码失败: {error}"))?;
 
             // 创建快捷方式对象并设置目标、工作目录与描述
-            let link: IShellLinkW =
-                CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER).map_err(|error| format!("创建快捷方式实例失败: {error}"))?;
+            let link: IShellLinkW = CoCreateInstance(&ShellLink, None, CLSCTX_INPROC_SERVER)
+                .map_err(|error| format!("创建快捷方式实例失败: {error}"))?;
             link.SetPath(PCWSTR(target.as_ptr()))
                 .map_err(|error| format!("设置快捷方式目标失败: {error}"))?;
             link.SetWorkingDirectory(PCWSTR(work_dir.as_ptr()))
@@ -1873,7 +1891,9 @@ fn create_desktop_shortcut(path: String) -> Result<String, String> {
                 .map_err(|error| format!("设置描述失败: {error}"))?;
 
             // 保存为 .lnk 文件
-            let persist: IPersistFile = link.cast().map_err(|error| format!("转换接口失败: {error}"))?;
+            let persist: IPersistFile = link
+                .cast()
+                .map_err(|error| format!("转换接口失败: {error}"))?;
             persist
                 .Save(PCWSTR(save_path.as_ptr()), true)
                 .map_err(|error| format!("保存快捷方式失败: {error}"))?;
@@ -3862,11 +3882,11 @@ pub fn run() {
         list_script_files,
         read_text_file,
         write_text_file,
-    enumerate_pak_files,
-    list_pak_files,
-    export_pak_files,
-    pack_pak_folder,
-    move_file,
+        enumerate_pak_files,
+        list_pak_files,
+        export_pak_files,
+        pack_pak_folder,
+        move_file,
         decompile_lua_bytecode_files,
         export_binary_file,
         start_heartbeat,

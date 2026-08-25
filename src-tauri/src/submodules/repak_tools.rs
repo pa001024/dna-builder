@@ -194,15 +194,19 @@ pub fn pack_directory(
     }
 
     // 提前创建输出文件：目标被占用时第一时间报错，避免打包完成后才发现无法写入
-    let out_file =
-        File::create(output_path).map_err(|error| format!("创建输出文件失败: {}: {}", output_path.display(), error))?;
+    let out_file = File::create(output_path)
+        .map_err(|error| format!("创建输出文件失败: {}: {}", output_path.display(), error))?;
 
     let mut builder = repak::PakBuilder::new();
     if let Some(key) = key {
         builder = builder.key(key);
     }
-    let mut writer =
-        builder.writer(BufWriter::new(out_file), repak::Version::V11, String::from("."), None);
+    let mut writer = builder.writer(
+        BufWriter::new(out_file),
+        repak::Version::V11,
+        String::from("."),
+        None,
+    );
 
     for (index, (relative_name, absolute_path)) in files.iter().enumerate() {
         let data = fs::read(absolute_path)
@@ -225,7 +229,11 @@ pub fn pack_directory(
 }
 
 /// 递归收集目录下所有文件，输出（相对路径, 绝对路径）对；相对路径使用 `/` 分隔。
-fn collect_pack_files(dir: &Path, root: &Path, output: &mut Vec<(String, PathBuf)>) -> Result<(), String> {
+fn collect_pack_files(
+    dir: &Path,
+    root: &Path,
+    output: &mut Vec<(String, PathBuf)>,
+) -> Result<(), String> {
     let entries =
         fs::read_dir(dir).map_err(|error| format!("读取目录失败: {}: {}", dir.display(), error))?;
     for entry in entries {

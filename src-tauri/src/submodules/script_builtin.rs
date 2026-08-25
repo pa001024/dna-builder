@@ -432,9 +432,7 @@ fn _resolve_script_resource_path(path: &str) -> Cow<'_, str> {
         return Cow::Borrowed(trimmed);
     }
     match _current_script_dir() {
-        Some(script_dir) => {
-            Cow::Owned(script_dir.join(raw_path).to_string_lossy().into_owned())
-        }
+        Some(script_dir) => Cow::Owned(script_dir.join(raw_path).to_string_lossy().into_owned()),
         None => Cow::Borrowed(trimmed),
     }
 }
@@ -2790,8 +2788,8 @@ fn _imread_url(
 
     // 如果 local_path 不为空，先尝试从本地加载
     if !local_path.is_empty() {
-            if let Ok(mat) =
-                opencv::imgcodecs::imread(&*resolved_local_path, opencv::imgcodecs::IMREAD_COLOR)
+        if let Ok(mat) =
+            opencv::imgcodecs::imread(&*resolved_local_path, opencv::imgcodecs::IMREAD_COLOR)
         {
             let js_mat = Box::new(mat).into_js(ctx)?;
             return Ok(js_mat);
@@ -2856,8 +2854,8 @@ fn _imread_url_rgba(
 
     // 如果 local_path 不为空，先尝试从本地加载
     if !local_path.is_empty() {
-            if let Ok(mat) =
-                opencv::imgcodecs::imread(&*resolved_local_path, opencv::imgcodecs::IMREAD_UNCHANGED)
+        if let Ok(mat) =
+            opencv::imgcodecs::imread(&*resolved_local_path, opencv::imgcodecs::IMREAD_UNCHANGED)
         {
             let js_mat = Box::new(mat).into_js(ctx)?;
             return Ok(js_mat);

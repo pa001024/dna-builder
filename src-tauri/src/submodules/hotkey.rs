@@ -1199,6 +1199,57 @@ fn _trigger_hotkey_scripts(vk: u32, is_key_down: bool, pressed: &HashSet<u32>) {
         return;
     };
 
+    // 处理“按住循环”热键的弹起事件：按键释放时若脚本仍在运行，则发送停止命令。
+    // 脚本热键不支持 trigger_on_key_up，因此按键弹起不会进入下方 matched 触发逻辑，
+    // 此处单独拦截并立即停止仍在运行中的脚本。
+    if !is_key_down {
+        for binding in bindings.iter() {
+            if !binding.hold_to_loop {
+                continue;
+            }
+            // 仅当按键/修饰键组合仍与绑定匹配时，才视为该热键的释放动作。
+            if !_is_binding_held(&binding.parsed, pressed) || !_binding_condition_matches(binding) {
+                continue;
+            }
+
+            // 标记循环停止，避免当前实例结束后再次启动新的一轮循环。
+            if let Ok(guard) = _hotkey_state().hold_loop_flags.lock() {
+                if let Some(flag) = guard.get(&binding.script_path) {
+                    flag.store(false, Ordering::Release);
+                }
+            }
+
+            // 若脚本仍在运行，则发送停止命令中断当前执行中的脚本。
+            if is_script_path_running(&binding.script_path) {
+                let script_path = binding.script_path.clone();
+                let hotkey_text = binding.hotkey.clone();
+                let (level, message) = match stop_script_by_path(script_path.clone()) {
+                    Ok(()) => (
+                        "info",
+                        format!(
+                            "热键弹起停止按住循环脚本: {} ({})",
+                            script_path, hotkey_text
+                        ),
+                    ),
+                    Err(error) => (
+                        "error",
+                        format!("热键弹起停止脚本失败: {}，错误: {}", script_path, error),
+                    ),
+                };
+                let _ = app_handle.emit(
+                    "script-console",
+                    serde_json::json!({
+                        "scope": script_path,
+                        "level": level,
+                        "message": message,
+                    }),
+                );
+            }
+        }
+        // 弹起事件仅用于“按住循环”的停止处理，无需继续后续触发逻辑。
+        return;
+    }
+
     let matched = bindings
         .into_iter()
         .filter(|binding| {

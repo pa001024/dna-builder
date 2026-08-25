@@ -3829,7 +3829,7 @@ onUnmounted(async () => {
             <div class="flex-1 flex min-w-0">
                 <div class="flex-1 flex flex-col min-w-0">
                     <!-- TABS -->
-                    <div class="h-10 bg-base-100/20 backdrop-blur-sm border-b border-base-300 flex items-center justify-between">
+                    <div class="h-10 bg-base-100/20 border-b border-base-300 flex items-center justify-between relative">
                         <!-- files -->
                         <ScrollArea horizontal :vertical="false" class="flex items-center flex-1 h-full">
                             <div class="flex">
