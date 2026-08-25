@@ -1,3 +1,10 @@
+# 检查当前是否所有变更均已暂存（用于格式化后重新暂存，防止反复提交）
+if [ -z "$(git diff --name-only)" ] && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+    ALL_STAGED=true
+else
+    ALL_STAGED=false
+fi
+
 # 更新版本号
 node .husky/update-version.js
 
@@ -17,8 +24,10 @@ git add src-tauri/tauri.conf.json
 git add src-tauri/Cargo.lock
 git add src-tauri/Cargo.toml
 
-# 全添加(别搞错了)
-# git add .
+# 如果格式化前所有文件均已暂存，则格式化结束后重新暂存全部文件，防止反复提交
+if [ "$ALL_STAGED" = "true" ]; then
+    git add .
+fi
 
 # 运行测试（如果需要可以注释掉）
 # npm run lint

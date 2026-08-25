@@ -6982,6 +6982,13 @@
     },
     "inventory": {
         "desc": "Personnalisez votre équipement Wedge et arme",
+        "sync_all_mods_confirm": "La synchronisation des Wedges analysera tous les Wedges équipés par vos personnages et armes et peut prendre du temps. Continuer ?",
+        "sync_mode_title": "Choisir le mode de synchronisation",
+        "sync_mode_weapons_and_all_mods": "Armes et Wedges personnages/armes",
+        "sync_mode_weapons_and_mods": "Armes et Wedges de personnages",
+        "sync_mode_weapons_only": "Armes uniquement",
+        "sync_mods_confirm": "La synchronisation des Wedges analysera tous les Wedges équipés par vos personnages et peut prendre du temps. Continuer ?",
+        "sync_mods_confirm_title": "Synchroniser les Wedges",
         "title": "Gestion d'inventaire"
     },
     "iron-ticket": {

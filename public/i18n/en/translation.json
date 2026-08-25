@@ -6946,6 +6946,13 @@
     },
     "inventory": {
         "desc": "Customize your Wedge and weapon loadout",
+        "sync_all_mods_confirm": "Syncing Wedges will scan all Wedges equipped by your characters and weapons, which may take a while. Continue?",
+        "sync_mode_title": "Select sync mode",
+        "sync_mode_weapons_and_all_mods": "Weapons and character/weapon Wedges",
+        "sync_mode_weapons_and_mods": "Weapons and character Wedges",
+        "sync_mode_weapons_only": "Weapons only",
+        "sync_mods_confirm": "Syncing Wedges will scan all Wedges equipped by your characters, which may take a while. Continue?",
+        "sync_mods_confirm_title": "Sync Wedges",
         "title": "Inventory Management"
     },
     "iron-ticket": {

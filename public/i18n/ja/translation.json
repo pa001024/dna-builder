@@ -6866,6 +6866,13 @@
     },
     "inventory": {
         "desc": "ウェッジと武器の装備をカスタマイズする",
+        "sync_all_mods_confirm": "ウェッジの同期では、すべてのキャラクターと武器が装備しているウェッジをスキャンします。時間がかかる場合がありますが、同期しますか？",
+        "sync_mode_title": "同期モードを選択",
+        "sync_mode_weapons_and_all_mods": "武器とキャラクター/武器ウェッジ",
+        "sync_mode_weapons_and_mods": "武器とキャラクターウェッジ",
+        "sync_mode_weapons_only": "武器のみ",
+        "sync_mods_confirm": "ウェッジの同期では、すべてのキャラクターが装備しているウェッジをスキャンします。時間がかかる場合がありますが、同期しますか？",
+        "sync_mods_confirm_title": "ウェッジを同期",
         "title": "在庫管理"
     },
     "iron-ticket": {

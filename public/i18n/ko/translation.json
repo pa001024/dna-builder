@@ -6948,6 +6948,13 @@
     },
     "inventory": {
         "desc": "웨지와 무기 장비 사용자 지정",
+        "sync_all_mods_confirm": "웨지 동기화는 모든 캐릭터와 무기가 장착한 웨지를 스캔합니다. 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?",
+        "sync_mode_title": "동기화 모드 선택",
+        "sync_mode_weapons_and_all_mods": "무기와 캐릭터/무기 웨지",
+        "sync_mode_weapons_and_mods": "무기와 캐릭터 웨지",
+        "sync_mode_weapons_only": "무기만",
+        "sync_mods_confirm": "웨지 동기화는 모든 캐릭터가 장착한 웨지를 스캔합니다. 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?",
+        "sync_mods_confirm_title": "웨지 동기화",
         "title": "재고 관리"
     },
     "iron-ticket": {

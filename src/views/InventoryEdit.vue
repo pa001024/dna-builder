@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { DNAAPI, DNAModesBean, DNARoleShowBean } from "dna-api"
+import { useTranslation } from "i18next-vue"
 // 引入必要的依赖
 import { computed, ref } from "vue"
 import { LeveledMod, LeveledModHelper, LeveledWeapon, LeveledWeaponHelper, modData, weaponData } from "@/data"
@@ -10,7 +12,10 @@ import { matchPinyin } from "@/utils/pinyin-utils"
 
 const inv = useInvStore()
 const ui = useUIStore()
+const { t } = useTranslation()
 const syncing = ref(false)
+// 同步模式选择弹窗是否可见
+const showSyncModeDialog = ref(false)
 // 武器
 const allWeapons = weaponData.filter(v => !v.类型[0].startsWith("同律"))
 const weaponSearchQuery = ref("")
@@ -195,7 +200,106 @@ async function handleImport() {
     }
 }
 
-async function syncInventory() {
+/**
+ * 同步模式: 仅武器 / 武器和角色魔之楔 / 武器和角色武器魔之楔
+ */
+type SyncMode = "weapons" | "weapons_and_mods" | "weapons_and_all_mods"
+
+/**
+ * 打开同步模式选择弹窗
+ */
+function openSyncDialog() {
+    if (syncing.value) return
+    showSyncModeDialog.value = true
+}
+
+/**
+ * 根据选中的同步模式开始同步, 同步魔之楔前先弹出确认提示
+ * @param mode 同步模式
+ */
+async function startSync(mode: SyncMode) {
+    showSyncModeDialog.value = false
+    // 同步魔之楔需要扫描所有角色(及武器)已装备的魔之楔, 耗时较长, 先确认
+    if (mode === "weapons_and_mods" || mode === "weapons_and_all_mods") {
+        const message =
+            mode === "weapons_and_mods" ? t("inventory.sync_mods_confirm") : t("inventory.sync_all_mods_confirm")
+        const confirmed = await ui.showDialog(t("inventory.sync_mods_confirm_title"), message)
+        if (!confirmed) return
+    }
+    await syncInventory(mode)
+}
+
+/**
+ * 统计单个实体(角色或武器)装备的魔之楔数量与最大等级
+ * @param modes 角色或武器详情的魔之楔数组
+ * @returns 魔之楔统计 {魔之楔ID: [数量, 等级]}
+ */
+function statsFromModes(modes: DNAModesBean[]) {
+    const stats = new Map<number, [number, number]>()
+    for (const mode of modes) {
+        // 空槽位的魔之楔ID为 -1, 跳过
+        if (!mode || +mode.id === -1) continue
+        try {
+            const mod = LeveledModHelper.fromId(+mode.id, mode.level)
+            const id = +mode.id
+            const stat = stats.get(id) ?? [0, 0]
+            stats.set(id, [stat[0] + 1, Math.max(stat[1], mod.等级)])
+        } catch {
+            // 静态表中不存在的魔之楔直接忽略
+        }
+    }
+    return stats
+}
+
+/**
+ * 将单个实体(角色或武器)的魔之楔统计合并进全局结果
+ * @param target 全局结果映射 {魔之楔ID: [等级, 数量]}
+ * @param stats 单个实体的魔之楔统计 {魔之楔ID: [数量, 等级]}
+ */
+function mergeModStats(target: Record<number, [number, number]>, stats: Map<number, [number, number]>) {
+    for (const [id, [count, level]] of stats) {
+        const prev = target[id]
+        // 数量取单个实体装备数量的最大值(上限8), 等级取最大值
+        target[id] = [Math.max(prev?.[0] ?? 0, level), Math.max(prev?.[1] ?? 0, Math.min(8, count))]
+    }
+}
+
+/**
+ * 扫描所有角色已装备的魔之楔, 汇总为库存映射
+ * @param api DNA API 实例
+ * @param roleShow 角色展示信息
+ * @param includeWeaponMods 是否额外同步武器上装备的魔之楔
+ * @returns 魔之楔库存映射 {魔之楔ID: [等级, 数量]}
+ */
+async function collectEquippedMods(api: DNAAPI, roleShow: DNARoleShowBean, includeWeaponMods = false) {
+    const mods: Record<number, [number, number]> = {}
+    const chars = roleShow.roleChars || []
+    for (const char of chars) {
+        if (!char.unLocked) continue
+        const res = await api.getRoleDetail(char.charId, char.charEid)
+        if (!res.is_success || !res.data?.charDetail?.modes) continue
+        mergeModStats(mods, statsFromModes(res.data.charDetail.modes))
+    }
+    // 额外同步所有武器已装备的魔之楔
+    if (includeWeaponMods) {
+        const seenWeapons = new Set<number>()
+        const weapons = [...(roleShow.closeWeapons || []), ...(roleShow.langRangeWeapons || [])]
+        for (const weapon of weapons) {
+            if (!weapon.unLocked || seenWeapons.has(weapon.weaponId)) continue
+            seenWeapons.add(weapon.weaponId)
+            const res = await api.getWeaponDetail(weapon.weaponId, weapon.weaponEid)
+            if (!res.is_success || !res.data?.weaponDetail?.modes) continue
+            mergeModStats(mods, statsFromModes(res.data.weaponDetail.modes))
+        }
+    }
+    return mods
+}
+
+/**
+ * 同步游戏库存到本地
+ * @param mode 同步模式, 默认仅同步武器
+ */
+async function syncInventory(mode: SyncMode = "weapons") {
     const setting = useSettingStore()
     if (syncing.value) {
         return
@@ -232,6 +336,10 @@ async function syncInventory() {
             },
             {} as Record<string, number>
         )
+        // 同步魔之楔: 扫描所有角色已装备的魔之楔, "武器和角色武器魔之楔"模式额外同步武器上装备的魔之楔
+        if (mode === "weapons_and_mods" || mode === "weapons_and_all_mods") {
+            inv.mods = await collectEquippedMods(api, roleInfo.roleInfo.roleShow, mode === "weapons_and_all_mods")
+        }
         ui.showSuccessMessage("库存同步成功")
     } catch (e) {
         ui.showErrorMessage("库存同步失败:", e instanceof Error ? e.message : String(e))
@@ -330,7 +438,7 @@ const showExpCalculator = ref(false)
                     <button
                         type="button"
                         class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-primary transition-colors duration-150 hover:bg-primary/20"
-                        @click="syncInventory"
+                        @click="openSyncDialog"
                     >
                         <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
                         <span>{{ syncing ? "同步中" : "同步游戏" }}</span>
@@ -357,7 +465,10 @@ const showExpCalculator = ref(false)
                         <template #trailing>
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
                                 <div class="relative w-52">
-                                    <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                                    <Icon
+                                        icon="ri:search-line"
+                                        class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35"
+                                    />
                                     <input
                                         v-model="weaponSearchQuery"
                                         type="search"
@@ -419,11 +530,14 @@ const showExpCalculator = ref(false)
 
                 <!-- 拥有MOD -->
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                    <SectionHeader no-animate compact kicker="MODS" title="拥有MOD">
+                    <SectionHeader no-animate compact kicker="MODS" title="拥有魔之楔">
                         <template #trailing>
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
                                 <div class="relative w-52">
-                                    <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                                    <Icon
+                                        icon="ri:search-line"
+                                        class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35"
+                                    />
                                     <input
                                         v-model="modSearchQuery"
                                         type="search"
@@ -547,7 +661,7 @@ const showExpCalculator = ref(false)
                             type="button"
                             class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-primary/40 bg-primary/10 px-4 text-sm font-semibold text-primary transition-colors duration-150 hover:bg-primary/20"
                             :class="{ loading: syncing }"
-                            @click="syncInventory"
+                            @click="openSyncDialog"
                         >
                             <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
                             <span>{{ syncing ? "同步中" : "同步游戏" }}</span>
@@ -571,5 +685,48 @@ const showExpCalculator = ref(false)
                 </div>
             </ScrollArea>
         </div>
+
+        <!-- 同步模式选择弹窗 -->
+        <dialog class="modal" :class="{ 'modal-open': showSyncModeDialog }">
+            <div class="modal-box bg-base-300 w-11/12 max-w-sm">
+                <h3 class="text-lg font-bold">{{ $t("inventory.sync_mode_title") }}</h3>
+                <div class="mt-4 flex flex-col gap-2">
+                    <button
+                        type="button"
+                        class="flex cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 py-3 text-sm font-medium text-base-content/80 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        @click="startSync('weapons')"
+                    >
+                        <Icon icon="ri:sword-line" class="size-4" />
+                        {{ $t("inventory.sync_mode_weapons_only") }}
+                    </button>
+                    <button
+                        type="button"
+                        class="flex cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 py-3 text-sm font-medium text-base-content/80 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        @click="startSync('weapons_and_mods')"
+                    >
+                        <Icon icon="ri:puzzle-line" class="size-4" />
+                        {{ $t("inventory.sync_mode_weapons_and_mods") }}
+                    </button>
+                    <button
+                        type="button"
+                        class="flex cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 py-3 text-sm font-medium text-base-content/80 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        @click="startSync('weapons_and_all_mods')"
+                    >
+                        <Icon icon="ri:box-3-line" class="size-4" />
+                        {{ $t("inventory.sync_mode_weapons_and_all_mods") }}
+                    </button>
+                </div>
+                <div class="modal-action">
+                    <form method="dialog">
+                        <button class="btn" @click="showSyncModeDialog = false">
+                            {{ $t("setting.cancel") }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button @click="showSyncModeDialog = false">close</button>
+            </form>
+        </dialog>
     </div>
 </template>

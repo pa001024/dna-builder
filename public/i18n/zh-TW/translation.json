@@ -6086,6 +6086,13 @@
     },
     "inventory": {
         "desc": "自定義你的魔之楔和武器配置",
+        "sync_all_mods_confirm": "同步魔之楔將掃描所有角色和武器已裝備的魔之楔，將耗費較長時間，確認同步嗎？",
+        "sync_mode_title": "選擇同步模式",
+        "sync_mode_weapons_and_all_mods": "武器和角色武器魔之楔",
+        "sync_mode_weapons_and_mods": "武器和角色魔之楔",
+        "sync_mode_weapons_only": "僅武器",
+        "sync_mods_confirm": "同步魔之楔將掃描所有角色已裝備的魔之楔，將耗費較長時間，確認同步嗎？",
+        "sync_mods_confirm_title": "同步魔之楔",
         "title": "庫存管理"
     },
     "iron-ticket": {

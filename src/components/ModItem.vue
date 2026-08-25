@@ -221,7 +221,7 @@ function handleMouseUp(event: MouseEvent) {
                             "
                         >
                             <span class="truncate">
-                                {{ control && selected !== undefined && !nolv ? $t("未拥有") : `Lv.${mod.等级}` }}
+                                {{ control && selected === false && !nolv ? $t("未拥有") : `Lv.${mod.等级}` }}
                             </span>
                             <span v-if="income" class="shrink-0">{{ format100r(income, 1) }}</span>
                             <span v-if="count" class="shrink-0">×{{ count }}</span>
