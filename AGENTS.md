@@ -169,6 +169,8 @@ Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
 
 ## Important Rules
 
+<system_rules>
+
 1. **DO NOT RUN `pnpm dev` or `pnpm build`** — view http://localhost:1420/ directly in browser
 2. **CHINESE COMMENTS**: Required for every function and complex logic block (JSDoc format)
 3. **JSDoc**: Use for function documentation including params, return values, exceptions
@@ -179,3 +181,6 @@ Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
 8. **Prefer native APIs** over adding new library dependencies
 9. **Use `bun -e "code"`** for inline code execution
 10. Sensitive operations, such as generating migrations via `bun run gen`, must be confirmed by the user.
+11. put all temporary files in `.tmp` directory
+
+</system_rules>

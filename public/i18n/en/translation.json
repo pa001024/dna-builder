@@ -5887,6 +5887,7 @@
         "attrTitle": "Attribute Edit",
         "attrValueLabel": "Value",
         "clear": "Clear",
+        "customFunctionsTitle": "Custom Functions",
         "examples": {
             "baseStats": "Base Stats",
             "complex": "Complex Expression",
@@ -5998,6 +5999,7 @@
         "title": "Expression Help"
     },
     "autobuild": {
+        "calculating": "Calculating...",
         "charMods": "Character MOD",
         "desc": "Automatically build the optimal MOD setup based on the current MOD configuration",
         "includeMelee": "Auto-replace melee",
@@ -7492,13 +7494,14 @@
         "high_risk_title": "High-risk operation warning",
         "hold_to_loop": "Hold to loop (run the script repeatedly while holding the hotkey)",
         "hotif_condition": "Condition (#HotIf WinActive)",
-        "hotif_example": "Example: Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe (empty = global)",
+        "hotif_example": "Example: Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe (empty = global); separate multiple conditions with ||",
+        "hotkey_auto_bound": "Hotkey auto-bound: {{hotkey}}",
         "hotkey_bound": "Hotkey bound: {{name}} -> {{hotkey}}",
         "hotkey_cleared": "Hotkey cleared: {{name}}",
         "hotkey_disabled": "Hotkey disabled: {{name}}",
         "hotkey_enabled": "Hotkey enabled: {{name}}",
         "hotkey_example": "Example: ^c / CapsLock & c / RButton / RButton & XButton1",
-        "hotkey_help": "Supports prefixes `^ ! + # *`, combo keys like `A & B`, `Up` key-up triggers, and mouse buttons `LButton/RButton/MButton/XButton1/XButton2`; WinActive supports window title and `ahk_exe/ahk_class/ahk_pid`, for example: ahk_exe EM-Win64-Shipping.exe",
+        "hotkey_help": "Supports prefixes `^ ! + # *`, combo keys like `A & B`, `Up` key-up triggers, and mouse buttons `LButton/RButton/MButton/XButton1/XButton2`; WinActive supports window title and `ahk_exe/ahk_class/ahk_pid`, for example: ahk_exe EM-Win64-Shipping.exe; separate multiple conditions with `||` (any one matching is enough), e.g. `ahk_exe A || ahk_exe B`",
         "hotkey_required": "Please enter a hotkey, for example: ^c, CapsLock & c, RButton & XButton1",
         "latest": "Up to date",
         "load_more": "Load more",

@@ -5026,6 +5026,7 @@
         "attrTitle": "屬性修改",
         "attrValueLabel": "數值",
         "clear": "清空",
+        "customFunctionsTitle": "自訂函數",
         "examples": {
             "baseStats": "基礎屬性",
             "complex": "複雜表達式",
@@ -5137,6 +5138,7 @@
         "title": "表達式幫助"
     },
     "autobuild": {
+        "calculating": "計算中...",
         "charMods": "角色MOD",
         "desc": "根據目前 MOD 配置自動構建最佳 MOD 組合",
         "includeMelee": "自動更換近戰",
@@ -6632,13 +6634,14 @@
         "high_risk_title": "高風險操作警告",
         "hold_to_loop": "按住循環（按住熱鍵時循環執行腳本）",
         "hotif_condition": "生效條件（#HotIf WinActive）",
-        "hotif_example": "示例：Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe（留空=全域）",
+        "hotif_example": "示例：Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe（留空=全域）；多個條件用 || 分隔",
+        "hotkey_auto_bound": "已自動綁定熱鍵: {{hotkey}}",
         "hotkey_bound": "已綁定熱鍵: {{name}} -> {{hotkey}}",
         "hotkey_cleared": "已清除熱鍵: {{name}}",
         "hotkey_disabled": "已停用熱鍵: {{name}}",
         "hotkey_enabled": "已啟用熱鍵: {{name}}",
         "hotkey_example": "例如：^c / CapsLock & c / RButton / RButton & XButton1",
-        "hotkey_help": "支援：`^ ! + # *` 前綴、`A & B` 組合鍵、`Up` 抬起觸發，以及滑鼠鍵 `LButton/RButton/MButton/XButton1/XButton2`；WinActive 條件按視窗標題，支援 `ahk_exe/ahk_class/ahk_pid`，示例: ahk_exe EM-Win64-Shipping.exe",
+        "hotkey_help": "支援：`^ ! + # *` 前綴、`A & B` 組合鍵、`Up` 抬起觸發，以及滑鼠鍵 `LButton/RButton/MButton/XButton1/XButton2`；WinActive 條件按視窗標題，支援 `ahk_exe/ahk_class/ahk_pid`，示例: ahk_exe EM-Win64-Shipping.exe；多個條件用 `||` 分隔（任一滿足即可），如 `ahk_exe A || ahk_exe B`",
         "hotkey_required": "請輸入熱鍵，例如：^c、CapsLock & c、RButton & XButton1",
         "latest": "已最新",
         "load_more": "載入更多",

@@ -1522,4 +1522,143 @@ describe("evaluateAST函数测试", () => {
             expect(build.validateAST("q::不存在!")).toContain("找不到标识符")
         })
     })
+
+    describe("自定义函数测试", () => {
+        it("应该支持 fn(x)=x*2 并在目标函数中调用 fn(2)", () => {
+            charBuild.customVariables = [["fn(x)", "x*2"]]
+            const result = charBuild.evaluateAST("fn(2)", testAttrs)
+
+            expect(result).toBe(4)
+        })
+
+        it("应该支持多参数函数", () => {
+            charBuild.customVariables = [["g(a, b)", "a + b * 10"]]
+            const result = charBuild.evaluateAST("g(1, 2)", testAttrs)
+
+            expect(result).toBe(21)
+        })
+
+        it("函数体应该能引用角色属性", () => {
+            charBuild.customVariables = [["f(x)", "x * 攻击"]]
+            const baseAttack = charBuild.evaluateAST("攻击", testAttrs)
+            const result = charBuild.evaluateAST("f(2)", testAttrs)
+
+            expect(result).toBeCloseTo(2 * baseAttack, 6)
+        })
+
+        it("函数体应该能引用其他自定义函数", () => {
+            charBuild.customVariables = [
+                ["double(x)", "x*2"],
+                ["quad(x)", "double(double(x))"],
+            ]
+            const result = charBuild.evaluateAST("quad(3)", testAttrs)
+
+            expect(result).toBe(12)
+        })
+
+        it("函数体应该能引用自定义变量", () => {
+            charBuild.customVariables = [
+                ["加成", "2"],
+                ["fn(x)", "x + 加成"],
+            ]
+            const result = charBuild.evaluateAST("fn(3)", testAttrs)
+
+            expect(result).toBe(5)
+        })
+
+        it("自定义函数应该能被普通变量表达式引用", () => {
+            charBuild.customVariables = [
+                ["fn(x)", "x*2"],
+                ["total", "fn(5)"],
+            ]
+            const result = charBuild.evaluateAST("total", testAttrs)
+
+            expect(result).toBe(10)
+        })
+
+        it("函数结果应该能参与算术运算", () => {
+            charBuild.customVariables = [["fn(x)", "x*2"]]
+            const result = charBuild.evaluateAST("fn(3) + fn(4)", testAttrs)
+
+            expect(result).toBe(14)
+        })
+
+        it("函数参数同名时应优先于属性解析", () => {
+            // 攻击 既是角色属性又是函数参数，函数体内应以参数绑定值为准
+            charBuild.customVariables = [["fn(攻击)", "攻击*2"]]
+            const result = charBuild.evaluateAST("fn(7)", testAttrs)
+
+            expect(result).toBe(14)
+        })
+
+        it("递归定义应安全返回 0 而不死循环", () => {
+            charBuild.customVariables = [["fn(x)", "fn(x)"]]
+            const result = charBuild.evaluateAST("fn(1)", testAttrs)
+
+            expect(result).toBe(0)
+        })
+
+        it("参数数量不匹配时应抛错", () => {
+            charBuild.customVariables = [["fn(x, y)", "x+y"]]
+            expect(() => charBuild.evaluateAST("fn(1)", testAttrs)).toThrow("参数")
+        })
+
+        it("未知函数应抛错", () => {
+            charBuild.customVariables = []
+            expect(() => charBuild.evaluateAST("unknownFn(1)", testAttrs)).toThrow("未知的函数")
+        })
+
+        it("validateAST 应允许自定义函数调用", () => {
+            charBuild.customVariables = [["fn(x)", "x*2"]]
+            expect(charBuild.validateAST("fn(2)")).toBeUndefined()
+            expect(charBuild.validateAST("fn(2) * 伤害")).toBeUndefined()
+        })
+
+        it("validateAST 应拒绝未知函数", () => {
+            charBuild.customVariables = [["fn(x)", "x*2"]]
+            expect(charBuild.validateAST("unknownFn(2)")).toContain("未知函数")
+        })
+
+        it("validateAST 应拒绝自定义函数参数数量不匹配", () => {
+            charBuild.customVariables = [["fn(x, y)", "x+y"]]
+            expect(charBuild.validateAST("fn(1)")).toContain("参数数量不符")
+        })
+
+        it("validateAST 应校验自定义函数体合法性", () => {
+            charBuild.customVariables = [["fn(x)", "x*不存在"]]
+            expect(charBuild.validateAST("fn(2)")).toContain('函数 "fn" 定义错误')
+        })
+
+        it("validateCustomVariable 应接受函数定义", () => {
+            charBuild.customVariables = []
+            expect(charBuild.validateCustomVariable("fn(x)", "x*2")).toBeUndefined()
+        })
+
+        it("validateCustomVariable 应拒绝重复参数", () => {
+            charBuild.customVariables = []
+            expect(charBuild.validateCustomVariable("fn(x, x)", "x*2")).toContain("参数重复")
+        })
+
+        it("validateCustomVariable 应拒绝非法参数名", () => {
+            charBuild.customVariables = []
+            expect(charBuild.validateCustomVariable("fn(x y)", "x*2")).toContain("不合法")
+        })
+
+        it("evaluateCustomVariableDefinition 应以示例参数预览函数结果", () => {
+            charBuild.customVariables = []
+            const result = charBuild.evaluateCustomVariableDefinition("fn(x)", "x*2")
+
+            expect(result).toBe(2) // 示例参数 x=1
+        })
+
+        it("getValidCustomVariables 应排除函数定义", () => {
+            charBuild.customVariables = [
+                ["a", "1"],
+                ["fn(x)", "x*2"],
+            ]
+            // 通过 evaluateAST 验证：普通变量 a 可解析，函数定义名 fn 不作为普通变量使用
+            expect(charBuild.evaluateAST("a", testAttrs)).toBe(1)
+            expect(charBuild.validateAST("fn")).toContain("找不到标识符")
+        })
+    })
 })

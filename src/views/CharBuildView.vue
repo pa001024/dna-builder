@@ -8,7 +8,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
 import FullTooltip from "@/components/FullTooltip.vue"
-import { CharSettings, createDefaultCharSettings, normalizeCharSettings, useCharSettings } from "@/composables/useCharSettings"
+import { CharSettings, createDefaultCharSettings, normalizeCharSettings, type SignatureWeapon, useCharSettings } from "@/composables/useCharSettings"
 import {
     buffData,
     CharBuild,
@@ -93,7 +93,23 @@ const selectedChar = computed(() => {
     dataPackTick.value
     return charMap.get(+route.params.charId)?.名称 || ""
 })
-const charSettings = useCharSettings(selectedChar)
+
+/**
+ * 解析角色专武（签名武器）信息。
+ * @param charName 角色名称
+ * @returns 专武 id 与所在槽位类型（近战/远程）；角色无专武或数据缺失时返回 null
+ */
+function getSignatureWeapon(charName: string): SignatureWeapon | null {
+    const char = charMap.get(charName)
+    if (!char?.专武) return null
+    const weapon = weaponData.find(item => item.id === char.专武)
+    if (!weapon) return null
+    const type = weapon.类型[0]
+    if (type !== "近战" && type !== "远程") return null
+    return { id: char.专武, type }
+}
+
+const charSettings = useCharSettings(selectedChar, getSignatureWeapon)
 const charProjectKey = computed(() => `project.${selectedChar.value}`)
 const charProject = useLocalStorage(charProjectKey, {
     selected: "",
@@ -672,11 +688,11 @@ const applyLoadedSettings = (loadedSettings: CharSettings) => {
 }
 
 /**
- * 重置当前角色配置为默认值。
+ * 重置当前角色配置为默认值（默认值会直接装备角色专武）。
  * @returns void
  */
 const resetConfig = () => {
-    Object.assign(charSettings.value, createDefaultCharSettings())
+    Object.assign(charSettings.value, createDefaultCharSettings(getSignatureWeapon(selectedChar.value)))
 }
 //#endregion
 
@@ -802,16 +818,20 @@ watch(
 const attributes = computed(() => charBuild.value.calculateAttributes())
 
 /**
- * 计算自定义变量表达式的当前结果。
+ * 计算自定义变量表达式的当前结果（函数定义以示例参数 1,2,3... 代入预览）。
  * @param variable 自定义变量配置
  * @returns 格式化后的计算结果
  */
 function getCustomVariableResult(variable: [string, string]) {
     if (!variable[0] || !variable[1] || charBuild.value.validateCustomVariable(variable[0], variable[1])) return "-"
 
-    const value = charBuild.value.evaluateAST(variable[1])
+    const value = charBuild.value.evaluateCustomVariableDefinition(variable[0], variable[1])
     if (!Number.isFinite(value)) return "0"
-    return `${+value.toFixed(4)}`
+    const formatted = `${+value.toFixed(4)}`
+    const definition = charBuild.value.parseCustomFunctionDefinition(variable[0])
+    if (!definition) return formatted
+    const sampleArgs = definition.params.map((_, index) => index + 1)
+    return `${definition.name}(${sampleArgs.join(", ")}) = ${formatted}`
 }
 
 //#region Tour
@@ -1239,7 +1259,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
     />
 
     <dialog class="modal" :class="{ 'modal-open': simulator_model_show }">
-        <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
+        <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
             <GameSimulator v-if="simulator_model_show" :char-build="charBuild" />
         </div>
         <div class="modal-backdrop" @click="simulator_model_show = false" />
@@ -1261,7 +1281,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         <div class="modal-backdrop" @click="autobuild_model_show = false" />
     </dialog>
     <dialog class="modal" :class="{ 'modal-open': ast_help_model_show }">
-        <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
+        <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
             <ASTHelp
                 v-if="ast_help_model_show"
                 v-model="ast_help_model_show"
@@ -1273,7 +1293,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         <div class="modal-backdrop" @click="ast_help_model_show = false" />
     </dialog>
     <dialog class="modal" :class="{ 'modal-open': weapon_select_model_show }">
-        <div class="modal-box bg-base-300 w-11/12 max-w-6xl">
+        <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
             <WeaponListView
                 v-if="weapon_select_model_show"
                 :char-build="charBuild"
@@ -1643,9 +1663,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     <FullTooltip side="top">
                                         <template #tooltip>
                                             <div class="space-y-1">
-                                                <div class="text-xs text-base-content/80 max-w-60">
-                                                    {{ variable[1] }}
-                                                    <span class="text-primary"> = </span>
+                                                <div class="text-xs text-base-content/80 max-w-60 break-all">
+                                                    {{ variable[0] }} = {{ variable[1] }}
                                                 </div>
                                                 <div class="font-mono">{{ getCustomVariableResult(variable) }}</div>
                                             </div>
@@ -1757,8 +1776,10 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         lazy
                         @toggle="toggleSection('detail')"
                     >
-                        <CharIntronShow :char="charBuild.char" />
-                        <CharSkillShow :char="charBuild.char" />
+                        <div class="space-y-2">
+                            <CharTraceShow :char="charBuild.char" />
+                            <CharSkillShow :char="charBuild.char" />
+                        </div>
                     </CollapsibleSection>
                     <!-- 基本设置卡片 -->
                     <CollapsibleSection

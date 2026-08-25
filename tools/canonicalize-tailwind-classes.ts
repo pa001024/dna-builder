@@ -6,7 +6,8 @@ import { glob } from "glob"
 
 const ROOT = process.cwd()
 const STATIC_CLASS_ATTRIBUTE_PATTERN = /(?<![:\w-])(class(?:Name)?\s*=\s*)(["'])([\s\S]*?)\2/g
-const DEFAULT_FILE_PATTERNS = ["**/*.vue", "**/*.html", "**/*.js", "**/*.jsx", "**/*.mjs", "**/*.cjs", "**/*.ts", "**/*.tsx"]
+// 只处理 Vue 单文件组件，避免误改测试文件、配置与其他 .ts 源码
+const DEFAULT_FILE_PATTERNS = ["**/*.vue", "**/*.tsx", "**/*.html"]
 const DEFAULT_IGNORE_PATTERNS = [
     "**/node_modules/**",
     "**/dist/**",
@@ -14,19 +15,37 @@ const DEFAULT_IGNORE_PATTERNS = [
     "**/.git/**",
     "**/.turbo/**",
     "**/.next/**",
+    "**/.tmp/**",
     "**/target/**",
     "**/src-tauri/target/**",
     "**/mcp_server/target/**",
 ]
 const ROOT_FONT_SIZE_PX = 16
+const STYLE_CSS_PATH = path.join(ROOT, "src", "style.css")
+const MINIMAL_CSS_SOURCE = '@import "tailwindcss";'
+
+let designSystemPromise: Promise<any> | null = null
 
 /**
- * 加载 Tailwind 设计系统，用于复用其 canonical class 规则。
+ * 加载项目真实设计系统（含 daisyUI 插件与自定义主题），
+ * 使 `border-base-content` 等 daisyUI 类也能参与 canonical class 解析。
+ *
+ * 优先读取 `src/style.css` 作为设计系统上下文；读取失败时退回最小 Tailwind 上下文。
  *
  * @returns {Promise<any>}
  */
 async function loadDesignSystem(): Promise<any> {
-    return __unstable__loadDesignSystem('@import "tailwindcss";', { base: ROOT })
+    designSystemPromise ??= (async () => {
+        try {
+            const styleCss = await readFile(STYLE_CSS_PATH, "utf8")
+            return await __unstable__loadDesignSystem(styleCss, { base: ROOT })
+        } catch (error) {
+            console.warn("failed to load src/style.css, fallback to minimal tailwind context", error)
+            return __unstable__loadDesignSystem(MINIMAL_CSS_SOURCE, { base: ROOT })
+        }
+    })()
+
+    return designSystemPromise
 }
 
 /**
@@ -104,16 +123,27 @@ function formatScaleValue(value: number): string {
 }
 
 /**
- * 将 Tailwind 生成的 CSS 归一化，便于比较 spacing calc 与像素值的语义等价性。
+ * 将 Tailwind 生成的 CSS 归一化，便于比较 spacing calc / rem / px 值的语义等价性。
+ *
+ * 先剥离类选择器只保留声明块（`.p-\[8px\]` 与 `.p-2` 的声明才能直接比较），
+ * 再把 `calc(var(--spacing) * N)` 与 `Nrem` 换算为像素，使
+ * `p-[0.5rem]`（0.5rem）与 `p-2`（calc(var(--spacing) * 2)）能判定为等价。
  *
  * @param {string} css Tailwind 生成的 CSS 片段
  * @param {number} spacingStepPx spacing 基准像素值
  * @returns {string}
  */
 function normalizeGeneratedCss(css: string, spacingStepPx: number): string {
-    return css
+    const declarationBlocks = css.match(/\{([\s\S]*?)\}/g)
+    const body = declarationBlocks?.map(block => block.slice(1, -1)).join(" ") ?? css
+
+    return body
         .replace(/calc\(var\(--spacing\)\s*\*\s*(-?\d+(?:\.\d+)?)\)/g, (_, rawScale: string) => {
             const pxValue = Number.parseFloat(rawScale) * spacingStepPx
+            return `${formatScaleValue(pxValue)}px`
+        })
+        .replace(/(-?\d+(?:\.\d+)?)rem\b/gi, (_, rawRem: string) => {
+            const pxValue = Number.parseFloat(rawRem) * ROOT_FONT_SIZE_PX
             return `${formatScaleValue(pxValue)}px`
         })
         .replace(/\s+/g, " ")
@@ -121,7 +151,7 @@ function normalizeGeneratedCss(css: string, spacingStepPx: number): string {
 }
 
 /**
- * 在官方 canonicalizer 未覆盖时，尝试把 `[Npx]` 改写为 spacing scale。
+ * 在官方 canonicalizer 未覆盖时，尝试把 `[Npx]` / `[Nrem]` 改写为 spacing scale。
  *
  * 改写前会比较候选 class 生成的 CSS，只有语义完全一致才落盘。
  *
@@ -143,19 +173,20 @@ function fallbackCanonicalizeCandidate(designSystem: any, candidate: string): st
         return candidate
     }
 
-    const match = utility.match(/^(!?)(-?)([a-z0-9]+(?:-[a-z0-9]+)*)-\[(-?\d+(?:\.\d+)?)px\]$/i)
+    const match = utility.match(/^(!?)(-?)([a-z0-9]+(?:-[a-z0-9]+)*)-\[(-?\d+(?:\.\d+)?)(px|rem)\]$/i)
 
     if (!match) {
         return candidate
     }
 
-    const [, important, negative, utilityName, rawPxValue] = match
-    const pxValue = Number.parseFloat(rawPxValue)
+    const [, important, negative, utilityName, rawLengthValue, unit] = match
+    const lengthValue = Number.parseFloat(rawLengthValue)
 
-    if (!Number.isFinite(pxValue)) {
+    if (!Number.isFinite(lengthValue)) {
         return candidate
     }
 
+    const pxValue = unit.toLowerCase() === "rem" ? lengthValue * ROOT_FONT_SIZE_PX : lengthValue
     const scaleValue = pxValue / spacingStepPx
 
     if (!Number.isFinite(scaleValue)) {
@@ -182,6 +213,27 @@ function fallbackCanonicalizeCandidate(designSystem: any, candidate: string): st
     }
 
     return nextCandidate
+}
+
+/**
+ * 将单个 Tailwind candidate 规范化为 canonical 形式（逐 token 调用，保证 1:1 对齐）。
+ *
+ * 官方 canonicalizeCandidates 会按 canonical 形式去重，返回结果与输入并非一一对应，
+ * 因此这里逐个 token 单独调用，确保映射关系确定；随后再用 fallback 兜底单位换算。
+ *
+ * @param {any} designSystem Tailwind 设计系统
+ * @param {string} candidate Tailwind candidate
+ * @returns {string}
+ */
+function canonicalizeCandidate(designSystem: any, candidate: string): string {
+    const canonical =
+        designSystem.canonicalizeCandidates([candidate], {
+            collapse: false,
+            logicalToPhysical: false,
+            rem: ROOT_FONT_SIZE_PX,
+        })[0] ?? candidate
+
+    return fallbackCanonicalizeCandidate(designSystem, canonical)
 }
 
 /**
@@ -215,6 +267,8 @@ function shouldCanonicalize(rawValue: string) {
 /**
  * 使用 Tailwind 内部 canonicalization 规则改写 class tokens。
  *
+ * 逐个 token 规范化，并对规范化后等价的类去重（保留首次出现的顺序）。
+ *
  * @param {any} designSystem Tailwind 设计系统
  * @param {string} rawValue class 属性原始值
  * @returns {string}
@@ -230,13 +284,15 @@ function canonicalizeClassValue(designSystem: any, rawValue: string): string {
         return rawValue
     }
 
-    const canonicalTokens = designSystem
-        .canonicalizeCandidates(tokens, {
-            collapse: false,
-            logicalToPhysical: false,
-            rem: ROOT_FONT_SIZE_PX,
-        })
-        .map((token: string) => fallbackCanonicalizeCandidate(designSystem, token))
+    const canonicalTokens: string[] = []
+
+    for (const token of tokens) {
+        const next = canonicalizeCandidate(designSystem, token)
+
+        if (!canonicalTokens.includes(next)) {
+            canonicalTokens.push(next)
+        }
+    }
 
     return `${leading}${canonicalTokens.join(" ")}${trailing}`
 }
@@ -307,4 +363,9 @@ async function main(): Promise<void> {
     console.log(`canonicalized tailwind classes in ${changedFileCount} file(s)`)
 }
 
-await main()
+// 仅在作为 CLI 直接运行时执行，便于被测试文件导入
+if (import.meta.main) {
+    await main()
+}
+
+export { canonicalizeClassValue, canonicalizeSource, fallbackCanonicalizeCandidate, loadDesignSystem }

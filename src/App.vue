@@ -380,7 +380,10 @@ onBeforeUnmount(() => {
         pinable
         :class="{ 'is-app': env.isApp }"
     >
-        <RouterView v-slot="{ Component, route }" v-if="isDataPackHydrated() || !dataPackBootstrapLoading">
+        <RouterView
+            v-slot="{ Component, route }"
+            v-if="route.meta.requireData === false || isDataPackHydrated() || !dataPackBootstrapLoading"
+        >
             <transition name="slide-right">
                 <KeepAlive v-if="route.meta.keepAlive">
                     <Suspense>
@@ -401,7 +404,7 @@ onBeforeUnmount(() => {
         </RouterView>
     </ResizeableWindow>
     <div
-        v-if="dataPackBootstrapLoading && !isDataPackHydrated()"
+        v-if="dataPackBootstrapLoading && !isDataPackHydrated() && $route.meta.requireData !== false"
         class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-base-100/80 backdrop-blur-sm gap-2"
     >
         <span>{{ $t("ai.loading") }}</span>

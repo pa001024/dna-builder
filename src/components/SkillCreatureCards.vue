@@ -60,19 +60,29 @@ const creatureCards = computed(() =>
 </script>
 
 <template>
-    <div class="grid grid-cols-1 gap-3">
-        <div v-for="(card, index) in creatureCards" :key="index" class="rounded">
-            <div class="text-xs text-base-content/70 mb-2">
-                {{ titlePrefix ? `${titlePrefix}实体#${card.creature.id}` : `实体#${card.creature.id}` }}
+    <!-- 实体卡：内层小卡 + 属性格（db-style 二级分层） -->
+    <div class="grid grid-cols-1 gap-2">
+        <div
+            v-for="(card, index) in creatureCards"
+            :key="index"
+            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+        >
+            <!-- 实体头：前缀名称 + 序号 -->
+            <div class="mb-2 flex items-center gap-1.5 text-[11px] tracking-wide text-base-content/55">
+                <Icon icon="ri:box-1-line" class="h-3.5 w-3.5 shrink-0 text-primary/70" />
+                <span class="truncate">{{ titlePrefix ? `${titlePrefix}实体` : "实体" }}</span>
+                <span class="shrink-0 font-mono text-[10px] tabular-nums text-base-content/40">#{{ card.creature.id }}</span>
             </div>
+
+            <!-- 属性格：键值对小格 -->
             <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 text-xs">
                 <div
                     v-for="field in card.fields"
                     :key="field.key"
-                    class="flex justify-between items-center p-2 bg-base-300 rounded text-sm"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-base-content/60">{{ $t(field.key) }}</span>
-                    <span class="font-medium text-primary">{{ field.value }}</span>
+                    <span class="truncate text-base-content/60">{{ $t(field.key) }}</span>
+                    <span class="shrink-0 font-semibold tabular-nums text-primary">{{ field.value }}</span>
                 </div>
             </div>
         </div>

@@ -5887,6 +5887,7 @@
         "attrTitle": "속성 수정",
         "attrValueLabel": "수치",
         "clear": "지우기",
+        "customFunctionsTitle": "사용자 정의 함수",
         "examples": {
             "baseStats": "기본 능력치",
             "complex": "복합 식",
@@ -5998,6 +5999,7 @@
         "title": "표현식 도움말"
     },
     "autobuild": {
+        "calculating": "계산 중...",
         "charMods": "캐릭터 MOD",
         "desc": "현재 MOD 구성에 따라 최적의 MOD 조합을 자동으로 구성합니다",
         "includeMelee": "근접 자동 교체",
@@ -7494,13 +7496,14 @@
         "high_risk_title": "고위험 작업 경고",
         "hold_to_loop": "누르고 있는 동안 반복 실행(단축키를 누르는 동안 스크립트를 반복 실행)",
         "hotif_condition": "조건 (#HotIf WinActive)",
-        "hotif_example": "예: Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe (비우면 전역)",
+        "hotif_example": "예: Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe (비우면 전역); 여러 조건은 ||로 구분",
+        "hotkey_auto_bound": "단축키가 자동으로 바인딩되었습니다: {{hotkey}}",
         "hotkey_bound": "단축키가 바인딩되었습니다: {{name}} -> {{hotkey}}",
         "hotkey_cleared": "단축키를 지웠습니다: {{name}}",
         "hotkey_disabled": "단축키를 비활성화했습니다: {{name}}",
         "hotkey_enabled": "단축키를 활성화했습니다: {{name}}",
         "hotkey_example": "예: ^c / CapsLock & c / RButton / RButton & XButton1",
-        "hotkey_help": "접두사 `^ ! + # *`, `A & B` 조합키, `Up` 키업 트리거, 마우스 버튼 `LButton/RButton/MButton/XButton1/XButton2`를 지원합니다. WinActive는 창 제목과 `ahk_exe/ahk_class/ahk_pid`를 지원합니다. 예: ahk_exe EM-Win64-Shipping.exe",
+        "hotkey_help": "접두사 `^ ! + # *`, `A & B` 조합키, `Up` 키업 트리거, 마우스 버튼 `LButton/RButton/MButton/XButton1/XButton2`를 지원합니다. WinActive는 창 제목과 `ahk_exe/ahk_class/ahk_pid`를 지원합니다. 예: ahk_exe EM-Win64-Shipping.exe. 여러 조건은 `||`로 구분합니다(하나만 일치하면 적용), 예: `ahk_exe A || ahk_exe B`",
         "hotkey_required": "단축키를 입력해 주세요. 예: ^c, CapsLock & c, RButton & XButton1",
         "latest": "최신",
         "load_more": "더 불러오기",

@@ -3,7 +3,7 @@ import { t } from "i18next"
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
 import { LeveledMod, LeveledModHelper } from "@/data"
 import { CharBuild } from "@/data/CharBuild"
-import type { CharBuildWorkerSnapshot } from "@/data/CharBuild.worker"
+import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 import { useInvStore } from "@/store/inv"
 import { copyText, pasteText } from "@/util"
 
@@ -194,67 +194,6 @@ const visibleModOptions = computed(() =>
 const workerModOptions = computed(() =>
     filteredModOptions.value.filter(option => selectedQuality.value === "全部" || option.quality === selectedQuality.value)
 )
-
-/**
- * 将当前构筑转换为 worker 可结构化克隆的快照。
- * @param charBuild 当前构筑
- * @returns worker 构筑快照
- */
-function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnapshot {
-    const createModSnapshot = (mod: CharBuild["charMods"][number]) =>
-        mod
-            ? {
-                  data: mod.originalModData,
-                  level: mod.等级,
-                  buffLv: mod.buffLv,
-                  effect: mod.buff?._originalBuffData,
-              }
-            : null
-    const createWeaponSnapshot = (weapon: CharBuild["meleeWeapon"]) => ({
-        data: weapon._originalWeaponData,
-        refine: weapon.精炼,
-        level: weapon.等级,
-        effectLv: weapon.effectLv,
-        effect: weapon.buff?._originalBuffData,
-        forgeEffective: weapon.forgeEffective,
-    })
-
-    return {
-        char: {
-            data: charBuild.char._originalCharData,
-            level: charBuild.char.等级,
-        },
-        skillLevel: charBuild.skillLevel,
-        hpPercent: charBuild.hpPercent,
-        resonanceGain: charBuild.resonanceGain,
-        auraMod: createModSnapshot(charBuild.auraMod || null),
-        charMods: charBuild.charMods.map(createModSnapshot),
-        meleeMods: charBuild.meleeMods.map(createModSnapshot),
-        rangedMods: charBuild.rangedMods.map(createModSnapshot),
-        skillMods: charBuild.skillMods.map(createModSnapshot),
-        buffs: [...charBuild.buffs, ...charBuild.dynamicBuffs].map(buff => ({
-            data: buff._originalBuffData,
-            level: buff.等级,
-        })),
-        melee: createWeaponSnapshot(charBuild.meleeWeapon),
-        ranged: createWeaponSnapshot(charBuild.rangedWeapon),
-        baseName: charBuild.baseName,
-        imbalance: charBuild.imbalance,
-        enemy: {
-            data: charBuild.enemy._baseData,
-            level: charBuild.enemy.等级,
-            isRouge: charBuild.enemy.isRouge,
-            hpMultiplier: charBuild.enemy.hpMultiplier,
-        },
-        enemyId: charBuild.enemyId,
-        enemyLevel: charBuild.enemyLevel,
-        enemyResistance: charBuild.enemyResistance,
-        targetFunction: charBuild.targetFunction,
-        customVariables: charBuild.customVariables,
-        timelineDPS: charBuild.timelineDPS,
-        teamWeaponCategories: charBuild.teamWeaponCategories,
-    }
-}
 
 /**
  * 将 Vue proxy 与类实例快照转为 worker 可克隆的普通 JSON 数据。

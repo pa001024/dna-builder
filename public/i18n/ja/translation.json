@@ -5805,6 +5805,7 @@
         "attrTitle": "属性編集",
         "attrValueLabel": "数値",
         "clear": "クリア",
+        "customFunctionsTitle": "カスタム関数",
         "examples": {
             "baseStats": "基礎ステータス",
             "complex": "複雑な式",
@@ -5916,6 +5917,7 @@
         "title": "式のヘルプ"
     },
     "autobuild": {
+        "calculating": "計算中...",
         "charMods": "キャラクターMOD",
         "desc": "現在の MOD 構成に基づいて最適な MOD 組み合わせを自動構築します",
         "includeMelee": "近接を自動で差し替える",
@@ -7412,13 +7414,14 @@
         "high_risk_title": "高リスク操作の警告",
         "hold_to_loop": "押下中ループ（ホットキーを押している間、スクリプトを繰り返し実行）",
         "hotif_condition": "有効条件（#HotIf WinActive）",
-        "hotif_example": "例: Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe（空欄 = グローバル）",
+        "hotif_example": "例: Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe（空欄 = グローバル）；複数の条件は || で区切る",
+        "hotkey_auto_bound": "ホットキーを自動設定しました: {{hotkey}}",
         "hotkey_bound": "ホットキーを設定しました: {{name}} -> {{hotkey}}",
         "hotkey_cleared": "ホットキーを解除しました: {{name}}",
         "hotkey_disabled": "ホットキーを無効にしました: {{name}}",
         "hotkey_enabled": "ホットキーを有効にしました: {{name}}",
         "hotkey_example": "例: ^c / CapsLock & c / RButton / RButton & XButton1",
-        "hotkey_help": "接頭辞 `^ ! + # *`、`A & B` の組み合わせキー、`Up` のキーアップ発火、マウスボタン `LButton/RButton/MButton/XButton1/XButton2` に対応。WinActive はウィンドウタイトルと `ahk_exe/ahk_class/ahk_pid` をサポート。例: ahk_exe EM-Win64-Shipping.exe",
+        "hotkey_help": "接頭辞 `^ ! + # *`、`A & B` の組み合わせキー、`Up` のキーアップ発火、マウスボタン `LButton/RButton/MButton/XButton1/XButton2` に対応。WinActive はウィンドウタイトルと `ahk_exe/ahk_class/ahk_pid` をサポート。例: ahk_exe EM-Win64-Shipping.exe。複数の条件は `||` で区切る（いずれかが一致すれば有効）、例: `ahk_exe A || ahk_exe B`",
         "hotkey_required": "ホットキーを入力してください。例: ^c、CapsLock & c、RButton & XButton1",
         "latest": "最新",
         "load_more": "さらに読み込む",

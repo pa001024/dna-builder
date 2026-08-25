@@ -18,10 +18,18 @@ const props = defineProps<{
 }>()
 
 const inv = useInvStore()
+
+/**
+ * 获取武器效果等级：无配装上下文时取全局背包配置，否则取角色配装配置。
+ * @param weaponId 武器 ID
+ * @param elm 元素属性
+ * @returns 效果等级
+ */
 const getWBuffLv = (weaponId: number, elm: string) =>
     props.useGlobal || !props.charSettings
         ? inv.getWBuffLv(weaponId, elm)
         : getWBuffLvFromSetting(props.charSettings.effectConfig, weaponId, elm)
+
 const tabs = ["全部", "近战", "远程", "单手剑", "长柄", "重剑", "双刀", "鞭刃", "太刀", "手枪", "双枪", "榴炮", "霰弹枪", "突击枪", "弓"]
 const activeTab = ref(props.defaultTab || tabs[0])
 const searchQuery = ref("")
@@ -29,19 +37,27 @@ const selectedMelee = ref(props.melee || 0)
 const selectedRanged = ref(props.ranged || 0)
 const sortByIncome = ref(true)
 
-// 元素颜色映射
+// 武器大类颜色映射（悬停渐变）
 const elementColors: Record<string, string> = {
     近战: "from-yellow-400 to-yellow-600",
     远程: "from-blue-400 to-blue-600",
 }
 
-// 元素边框颜色
-const elementBorderColors: Record<string, string> = {
-    近战: "border-yellow-500",
-    远程: "border-blue-500",
+// 武器大类悬停边框颜色（卡片悬停时以类别色强调）
+const elementHoverBorders: Record<string, string> = {
+    近战: "hover:border-yellow-500/70",
+    远程: "hover:border-blue-500/70",
 }
 
-// 过滤后的武器列表
+// 武器大类英文徽记（纯装饰，配合等宽大写徽记的造型语言）
+const weaponTypeNames: Record<string, string> = {
+    近战: "Melee",
+    远程: "Ranged",
+}
+
+/**
+ * 过滤后的武器列表：先按分类方章过滤，再按关键词（中文/拼音）过滤。
+ */
 const filteredWeapons = computed(() => {
     let filtered = weaponData.filter(w => activeTab.value === "全部" || w.类型.includes(activeTab.value))
 
@@ -64,6 +80,9 @@ const filteredWeapons = computed(() => {
     return filtered
 })
 
+/**
+ * 按收益排序后的展示列表；无配装上下文或未开启收益排序时保持原顺序。
+ */
 const displayedWeapons = computed(() => {
     const charBuild = props.charBuild
     if (!charBuild || !sortByIncome.value) {
@@ -80,15 +99,32 @@ const displayedWeapons = computed(() => {
         .map(item => item.weapon)
 })
 
-// 卡片进入动画延迟
+/**
+ * 计算卡片入场动画的延迟时间，按序错开浮现。
+ * @param index 武器下标
+ * @returns 延迟毫秒数（封顶 500ms）
+ */
 const getAnimationDelay = (index: number) => {
-    return Math.min(index * 50, 500) // 最多延迟500ms
+    return Math.min(index * 50, 500)
+}
+
+/**
+ * 判断武器是否处于选中状态（近战/远程分别对照对应武器槽位）。
+ * @param weapon 武器数据
+ * @returns 是否已选中
+ */
+function isSelected(weapon: Weapon) {
+    return weapon.类型[0] === "近战" ? selectedMelee.value === weapon.id : selectedRanged.value === weapon.id
 }
 
 const emits = defineEmits<{
     change: [melee: number, ranged: number]
 }>()
 
+/**
+ * 选中武器：按大类写入对应槽位并回传。
+ * @param weapon 被点击的武器
+ */
 function selectWeapon(weapon: Weapon) {
     if (weapon.类型[0] === "近战") {
         selectedMelee.value = weapon.id
@@ -100,198 +136,229 @@ function selectWeapon(weapon: Weapon) {
 </script>
 
 <template>
-    <div class="flex flex-col h-full overflow-hidden bg-base-300">
-        <!-- 顶部搜索和筛选区 -->
-        <div class="flex-none bg-base-100 border-b border-base-200 shadow-sm p-4 space-y-3">
-            <div class="flex items-center gap-2">
-                <!-- 搜索框 -->
-                <div class="relative flex-1 min-w-0">
-                    <input
-                        v-model="searchQuery"
-                        type="text"
-                        :placeholder="$t('weapon-list.searchPlaceholder')"
-                        class="input input-bordered input-sm w-full pl-10 pr-4 focus:input-primary transition-all duration-200"
-                    />
-                    <Icon icon="ri:search-line" class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 w-4 h-4" />
-                </div>
-
-                <button
-                    class="btn btn-sm whitespace-nowrap"
-                    :class="sortByIncome ? 'btn-secondary' : 'btn-outline'"
-                    @click="sortByIncome = !sortByIncome"
+    <div class="flex h-full flex-col overflow-hidden">
+        <ScrollArea class="flex-1">
+            <div class="mx-auto flex min-h-full w-full max-w-7xl flex-col px-4 md:px-6 lg:px-8">
+                <!-- 检索带：下划线搜索 + 计数 + 排序开关 + 分类方章 -->
+                <section
+                    class="animate-ef-rise border-b border-base-content/15 py-6 motion-reduce:animate-none"
+                    style="animation-delay: 0.06s"
                 >
-                    {{ sortByIncome ? $t("weapon-list.sortByIncome") : $t("weapon-list.defaultOrder") }}
-                </button>
-            </div>
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- 下划线搜索框 -->
+                            <div class="relative min-w-0 flex-1">
+                                <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                                <input
+                                    v-model="searchQuery"
+                                    type="text"
+                                    :placeholder="$t('weapon-list.searchPlaceholder')"
+                                    class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                                />
+                                <span
+                                    class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                                >
+                                    {{ filteredWeapons.length }}
+                                </span>
+                            </div>
 
-            <!-- 分类标签 -->
-            <ScrollArea :vertical="false" horizontal>
-                <div class="flex gap-2 pb-2">
-                    <button
-                        v-for="tab in tabs"
-                        :key="tab"
-                        class="btn btn-sm whitespace-nowrap transition-all duration-200"
-                        :class="activeTab === tab ? 'btn-primary shadow-lg scale-105' : 'btn-ghost hover:bg-base-200'"
-                        @click="activeTab = tab"
-                    >
-                        {{ $t(tab) }}
-                    </button>
-                </div>
-            </ScrollArea>
-        </div>
+                            <!-- 收益排序开关方章 -->
+                            <button
+                                type="button"
+                                class="inline-flex h-6 shrink-0 cursor-pointer items-center gap-1.5 rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    sortByIncome
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="sortByIncome = !sortByIncome"
+                            >
+                                <Icon icon="ri:sort-number-asc" class="h-3.5 w-3.5" />
+                                {{ sortByIncome ? $t("weapon-list.sortByIncome") : $t("weapon-list.defaultOrder") }}
+                            </button>
+                        </div>
 
-        <!-- 武器列表 -->
-        <ScrollArea class="h-[60vh]">
-            <div v-if="filteredWeapons.length === 0" class="flex flex-col items-center justify-center h-full text-base-content/50 py-20">
-                <Icon icon="ri:emotion-sad-line" class="w-16 h-16 mb-4" />
-                <p class="text-lg">
-                    {{ $t("weapon-list.noResults") }}
-                </p>
-            </div>
+                        <!-- 分类方章 -->
+                        <ScrollArea :vertical="false" horizontal>
+                            <div class="flex gap-2 pb-1">
+                                <button
+                                    v-for="tab in tabs"
+                                    :key="tab"
+                                    type="button"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap border px-3.5 py-1.5 text-xs transition-colors duration-200 active:scale-[0.97]"
+                                    :class="
+                                        activeTab === tab
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    @click="activeTab = tab"
+                                >
+                                    {{ $t(tab) }}
+                                </button>
+                            </div>
+                        </ScrollArea>
+                    </div>
+                </section>
 
-            <div
-                class="grid gap-4 p-4 grid-cols-[repeat(auto-fill,minmax(min(100%,120px),1fr))] sm:grid-cols-[repeat(auto-fill,minmax(min(100%,140px),1fr))] md:grid-cols-[repeat(auto-fill,minmax(min(100%,160px),1fr))]"
-            >
-                <div
-                    v-for="(weapon, index) in displayedWeapons"
-                    :key="weapon.id"
-                    class="group relative bg-base-100 rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2"
-                    :class="[
-                        elementBorderColors[weapon.类型[0]] || 'border-base-300',
-                        (weapon.类型[0] === '近战' ? selectedMelee == weapon.id : selectedRanged == weapon.id)
-                            ? '-translate-y-1 border-green-500!'
-                            : '',
-                    ]"
-                    :style="{ animation: `fade-in-up 0.5s ease-out ${getAnimationDelay(index)}ms both` }"
-                    @click="selectWeapon(weapon as Weapon)"
-                >
-                    <!-- 属性背景渐变 -->
+                <!-- 武器索引 -->
+                <main class="flex-1 py-6 md:py-8">
                     <div
-                        class="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 bg-linear-to-br"
-                        :class="elementColors[weapon.类型[0]] || 'from-gray-400 to-gray-600'"
-                    />
-
-                    <!-- 顶部属性标签 -->
-                    <div
-                        class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs font-bold text-white shadow-lg"
-                        :class="`bg-linear-to-r ${elementColors[weapon.类型[0]] || 'from-gray-400 to-gray-600'}`"
+                        v-if="displayedWeapons.length === 0"
+                        class="flex flex-col items-center justify-center py-24 text-base-content/50 animate-ef-rise motion-reduce:animate-none"
+                        style="animation-delay: 0.12s"
                     >
-                        {{ weapon.类型[1] }}
+                        <Icon icon="ri:emotion-sad-line" class="mb-5 h-14 w-14 opacity-40" />
+                        <p class="text-base">{{ $t("weapon-list.noResults") }}</p>
                     </div>
 
-                    <!-- 武器头像 -->
-                    <div class="relative h-24 overflow-hidden bg-base-200">
-                        <ImageFallback
-                            :src="LeveledWeapon.url(weapon.icon)"
-                            :alt="weapon.名称"
-                            class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
-                            loading="lazy"
+                    <div
+                        v-else
+                        class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,140px),1fr))] gap-4 md:grid-cols-[repeat(auto-fill,minmax(min(100%,170px),1fr))]"
+                    >
+                        <div
+                            v-for="(weapon, index) in displayedWeapons"
+                            :key="weapon.id"
+                            class="animate-ef-rise group relative flex cursor-pointer flex-col overflow-hidden border backdrop-blur-sm [transition:transform_0.3s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.3s_ease,border-color_0.2s_ease] hover:-translate-y-1 hover:[box-shadow:0_16px_40px_-16px_color-mix(in_srgb,var(--color-base-content)_22%,transparent)] active:scale-[0.985] motion-reduce:animate-none"
+                            :class="[
+                                isSelected(weapon) ? 'border-primary/70 bg-primary/10' : 'border-base-content/15 bg-base-100/50',
+                                isSelected(weapon) ? '' : elementHoverBorders[weapon.类型[0]] || '',
+                            ]"
+                            :style="{ animationDelay: `${getAnimationDelay(index)}ms` }"
+                            @click="selectWeapon(weapon as Weapon)"
                         >
-                            <Icon icon="ri:question-line" class="w-full h-full opacity-50" />
-                        </ImageFallback>
-
-                        <!-- 悬停时的遮罩 -->
-                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
-                    </div>
-
-                    <!-- 武器信息 -->
-                    <div class="p-3 space-y-2">
-                        <!-- 名称 -->
-                        <h3
-                            class="inline-flex items-center gap-2 font-bold text-base truncate group-hover:text-primary transition-colors duration-200"
-                        >
-                            <img
-                                :src="LeveledWeapon.typeUrl(weapon.类型[1])"
-                                :alt="weapon.类型[1]"
-                                class="h-8 w-4 object-cover pointer-events-none"
+                            <!-- 武器类型色条：悬停时显现 -->
+                            <div
+                                class="absolute inset-x-0 top-0 z-10 h-0.5 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                :class="elementColors[weapon.类型[0]] || 'from-gray-400 to-gray-600'"
                             />
-                            {{ $t(weapon.名称) }}
-                        </h3>
 
-                        <p v-if="weapon.熔炼" class="text-xs text-base-content/60 truncate">
-                            {{ $t(weapon.熔炼[5]) }}
-                        </p>
+                            <!-- 武器立绘 -->
+                            <div class="relative aspect-square overflow-hidden bg-base-200">
+                                <ImageFallback
+                                    :src="LeveledWeapon.url(weapon.icon)"
+                                    :alt="weapon.名称"
+                                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    loading="lazy"
+                                >
+                                    <Icon icon="ri:sword-line" class="h-full w-full opacity-50" />
+                                </ImageFallback>
 
-                        <p class="text-xs truncate space-x-2">
-                            <span>
-                                {{ $t(weapon.伤害类型) }}
-                            </span>
-                            <span v-if="charBuild" class="text-primary">
-                                {{ $t("weapon-list.income") }}:
-                                {{
-                                    format100r(
-                                        charBuild.calcIncome(
-                                            new LeveledWeapon(weapon, undefined, undefined, getWBuffLv(weapon.id, charBuild.char.属性))
-                                        )
-                                    )
-                                }}
-                            </span>
-                        </p>
+                                <!-- 幽灵序号 + 类型徽记 -->
+                                <span
+                                    class="absolute left-2 top-2 z-10 bg-base-100/55 px-[0.35rem] py-[0.15rem] text-2xl font-black leading-none tracking-[-0.02em] tabular-nums text-base-content/60 backdrop-blur-[2px] transition-colors duration-200 group-hover:text-primary/75"
+                                >
+                                    {{ String(index + 1).padStart(2, "0") }}
+                                </span>
+                                <span
+                                    v-if="weaponTypeNames[weapon.类型[0]]"
+                                    class="absolute right-2 top-2 z-10 bg-base-100/55 px-[0.45rem] py-[0.2rem] font-mono text-[9px] uppercase tracking-[0.25em] text-base-content/55 backdrop-blur-[2px] transition-colors duration-200 group-hover:text-primary"
+                                >
+                                    {{ weaponTypeNames[weapon.类型[0]] }}
+                                </span>
 
-                        <!-- 底部属性条 -->
-                        <div class="grid grid-cols-3 gap-1 pt-2 border-t border-base-200">
-                            <div
-                                class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-warning transition-colors duration-200"
-                            >
-                                <svg
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 15 15"
-                                    width="1em"
-                                    height="1em"
-                                    class="fill-current flex-none"
-                                >
-                                    <path
-                                        fill="currentColor"
-                                        d="M7.755 1.651l1.643 1.643 1.928-1.926L11.3.25a.228.228 0 01.228-.22h2.2a.228.228 0 01.228.229c-.121 2.66.556 2.457-1.337 2.4l-1.933 1.925L12.33 6.23a.228.228 0 010 .322c-1.167 1.208-.775.907-1.892-.106l-7.151 7.147a.457.457 0 01-.313.137 21.32 21.32 0 01-2.954.238 21.172 21.172 0 01.238-2.953.451.451 0 01.134-.319l7.146-7.153-.838-.839a.229.229 0 010-.323l.732-.73a.228.228 0 01.322 0z"
-                                    />
-                                </svg>
-                                <span>{{ format100(weapon.暴击) }}</span>
+                                <!-- 悬停遮罩 -->
+                                <div class="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/20" />
                             </div>
-                            <div
-                                class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-success transition-colors duration-200"
-                            >
-                                <svg
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 15 15"
-                                    width="1em"
-                                    height="1em"
-                                    class="fill-current flex-none"
+
+                            <!-- 武器信息 -->
+                            <div class="flex flex-1 flex-col gap-2 p-3.5">
+                                <!-- 名称 -->
+                                <h3
+                                    class="flex items-center gap-2 text-base font-bold transition-colors duration-200 group-hover:text-primary"
                                 >
-                                    <path
-                                        d="M14 0L7.256 3.5 1.973 1.465 3.5 6.236 0 14l7.256-3.5 4.771 1.527L10.5 7.256zm-3.24 3.24L8.88 7.136 9.701 9.7l-2.564-.82-3.898 1.88 1.88-4.17-.82-2.565L7.137 5.12z"
-                                        fill="currentColor"
+                                    <img
+                                        :src="LeveledWeapon.typeUrl(weapon.类型[1])"
+                                        :alt="weapon.类型[1]"
+                                        class="h-8 w-4 shrink-0 object-cover pointer-events-none"
                                     />
-                                </svg>
-                                <span>{{ format100(weapon.暴伤) }}</span>
-                            </div>
-                            <div
-                                class="flex items-center gap-1 text-xs text-base-content/70 group-hover:text-primary transition-colors duration-200"
-                            >
-                                <svg
-                                    aria-hidden="true"
-                                    width="1em"
-                                    height="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 15 15"
-                                    class="fill-current flex-none"
+                                    <span class="truncate">{{ $t(weapon.名称) }}</span>
+                                </h3>
+
+                                <!-- 伤害类型 + 熔炼：元信息行 -->
+                                <p
+                                    class="flex min-h-5 items-center justify-between gap-2 text-[0.625rem] tracking-wide text-base-content/40"
                                 >
-                                    <path
-                                        fill="currentColor"
-                                        d="M8.076 8.152l-.017-.05A4.335 4.335 0 007.3 6.796a4.431 4.431 0 00-.325-.346A2.113 2.113 0 107 2.223a2.144 2.144 0 00-1.838 3.18 4.374 4.374 0 00-1.2-.168 4.42 4.42 0 00-.755.066l-.038.007C1.836-.24 10.7-1.672 10.962 4.342a3.985 3.985 0 01-2.886 3.81zm3.662-2.137a3.949 3.949 0 00-.626-.235 4.473 4.473 0 01-1.105 1.7h.031a2.113 2.113 0 11-2.113 2.113 4.09 4.09 0 00-.025-.445 3.968 3.968 0 00-1.863-2.931l-.19-.11a3.963 3.963 0 10.645 6.535c.082-.068.16-.14.236-.214L6.7 12.39a4.367 4.367 0 01-.891-1.765 2.112 2.112 0 11-.883-2.914q.1.05.189.11a2.111 2.111 0 01.942 1.49 2.159 2.159 0 01.018.28 3.963 3.963 0 105.663-3.577z"
-                                    />
-                                </svg>
-                                <span>{{ format100(weapon.触发) }}</span>
+                                    <span v-if="weapon.伤害类型" class="truncate">{{ $t(weapon.伤害类型) }}</span>
+                                    <span v-if="weapon.熔炼" class="shrink-0 truncate">{{ $t(weapon.熔炼[5]) }}</span>
+                                </p>
+
+                                <!-- 配装收益 -->
+                                <div v-if="charBuild" class="flex items-center gap-1.5 text-xs">
+                                    <Icon icon="ri:bar-chart-line" class="h-3.5 w-3.5 shrink-0 text-primary/80" />
+                                    <span class="text-base-content/50">{{ $t("weapon-list.income") }}:</span>
+                                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                        {{
+                                            format100r(
+                                                charBuild.calcIncome(
+                                                    new LeveledWeapon(
+                                                        weapon,
+                                                        undefined,
+                                                        undefined,
+                                                        getWBuffLv(weapon.id, charBuild.char.属性)
+                                                    )
+                                                )
+                                            )
+                                        }}
+                                    </span>
+                                </div>
+
+                                <!-- 底部属性条 -->
+                                <div class="mt-auto grid grid-cols-3 gap-1 border-t border-base-content/10 pt-2">
+                                    <div
+                                        class="flex min-w-0 items-center gap-1.5 text-xs text-base-content/70 transition-colors duration-200 group-hover:text-warning"
+                                    >
+                                        <Icon icon="ri:crosshair-line" class="h-3.5 w-3.5 shrink-0" />
+                                        <span class="truncate tabular-nums">{{ format100(weapon.暴击) }}</span>
+                                    </div>
+                                    <div
+                                        class="flex min-w-0 items-center gap-1.5 text-xs text-base-content/70 transition-colors duration-200 group-hover:text-success"
+                                    >
+                                        <Icon icon="ri:flashlight-line" class="h-3.5 w-3.5 shrink-0" />
+                                        <span class="truncate tabular-nums">{{ format100(weapon.暴伤) }}</span>
+                                    </div>
+                                    <div
+                                        class="flex min-w-0 items-center gap-1.5 text-xs text-base-content/70 transition-colors duration-200 group-hover:text-primary"
+                                    >
+                                        <Icon icon="ri:fire-line" class="h-3.5 w-3.5 shrink-0" />
+                                        <span class="truncate tabular-nums">{{ format100(weapon.触发) }}</span>
+                                    </div>
+                                </div>
                             </div>
+
+                            <!-- 选中主色竖条 -->
+                            <div
+                                class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                :class="isSelected(weapon) ? 'opacity-100' : 'opacity-0'"
+                            />
                         </div>
                     </div>
+                </main>
 
-                    <!-- 悬停时的发光效果 -->
-                    <div
-                        class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 ring-2 ring-primary/50"
-                    />
-                </div>
+                <!-- 统计页脚：幽灵大数字 + 分类徽记 -->
+                <footer
+                    class="animate-ef-rise flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-t border-base-content/15 py-5 motion-reduce:animate-none"
+                    style="animation-delay: 0.3s"
+                >
+                    <div class="flex items-baseline gap-3">
+                        <span
+                            class="text-[clamp(2rem,4vw,2.75rem)] font-black leading-[0.95] tracking-[-0.03em] tabular-nums text-base-content/18"
+                        >
+                            {{ displayedWeapons.length }}
+                        </span>
+                        <span class="text-xs text-base-content/45">{{ $t("weapon-list.title") }}</span>
+                    </div>
+                    <div class="flex flex-col items-end gap-1.5">
+                        <span
+                            v-if="activeTab !== '全部'"
+                            class="border border-primary/60 px-2 py-[0.15rem] text-[10px] tracking-[0.2em] text-primary"
+                        >
+                            {{ $t(activeTab) }}
+                        </span>
+                        <p v-if="charBuild" class="text-[10px] tracking-wide text-base-content/40">
+                            {{ sortByIncome ? $t("weapon-list.sortByIncome") : $t("weapon-list.defaultOrder") }}
+                        </p>
+                    </div>
+                </footer>
             </div>
         </ScrollArea>
     </div>

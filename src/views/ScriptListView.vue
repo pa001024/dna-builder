@@ -32,7 +32,14 @@ import AutoScript from "@/components/AutoScript.vue"
 import ContextMenu, { ContextMenuItem } from "@/components/contextmenu"
 import { env } from "@/env"
 import { useCloudGameStore } from "@/store/cloudgame"
-import { type ScriptRuntimeSidePanelTab, useScriptRuntimeStore } from "@/store/scriptRuntime"
+import {
+    normalizeScriptRuntimeTimeoutSeconds,
+    SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_DESC,
+    SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME,
+    SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS,
+    type ScriptRuntimeSidePanelTab,
+    useScriptRuntimeStore,
+} from "@/store/scriptRuntime"
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import { parseScriptHeader, replaceScriptHeader } from "@/utils/script-header"
@@ -338,9 +345,6 @@ const schedulerDraftStepOptions = computed(() =>
         label: `${index + 1}. ${step.scriptName || "未选择脚本"}`,
     }))
 )
-const SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS = 30
-const SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME = "运行超时"
-const SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_DESC = "运行超时秒数，脚本运行中长时间未检测到事件时自动重启，0 表示关闭。"
 const scriptConfigStore = computed({
     get: () => scriptRuntime.scriptConfigStore as Record<string, Record<string, ScriptConfigItem>>,
     set: value => {
@@ -353,9 +357,6 @@ const editingHotkeyValue = ref("")
 const editingHotkeyWinActive = ref("")
 const editingHotkeyHoldToLoop = ref(false)
 const editingHotkeyToggleToLoop = ref(false)
-let scriptRuntimeWatchdogTimer: ReturnType<typeof setInterval> | null = null
-let lastScriptEventAt = 0
-let scriptRuntimeRestartingByTimeout = false
 const activeConfigScope = computed({
     get: () => scriptRuntime.activeConfigScope,
     set: value => {
@@ -795,12 +796,23 @@ async function runLocalScriptByName(
     await openLocalScript(fileName, { preferConfigPanel: false })
     const filePath = `${scriptsDir.value}\\${fileName}`
     scriptRuntime.markRunningScript(fileName, { keepSchedulerMode: options.keepSchedulerMode })
-    touchScriptRuntimeEvent()
+    scriptRuntime.touchScriptEvent()
     addConsoleLog("info", t("script-list.start_run_named", { name: fileName }))
     const result = await runScript(filePath)
     const normalizedResult = normalizeSchedulerResult(result)
     addConsoleLog("info", t("script-list.run_completed_named", { name: fileName, result: normalizedResult || "(empty)" }))
     return normalizedResult
+}
+
+/**
+ * 后台启动本地脚本（超时看门狗自动重启时使用，运行态回收由 scriptRuntime 看门狗负责）。
+ * @param scriptName 本地脚本文件名
+ */
+function launchLocalScriptInBackground(scriptName: string) {
+    void runLocalScriptByName(scriptName).catch(error => {
+        console.error("脚本自动重启后再次运行失败", error)
+        addConsoleLog("error", `脚本自动重启后运行失败: ${error}`)
+    })
 }
 
 /**
@@ -1014,26 +1026,6 @@ async function runScheduler() {
 }
 
 /**
- * 规范化脚本运行超时秒数（0 表示关闭自动重启）。
- * @param value 原始值
- * @returns 非负整数秒
- */
-function normalizeScriptRuntimeTimeoutSeconds(value: unknown): number {
-    const numeric = Number(value)
-    if (!Number.isFinite(numeric)) {
-        return SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS
-    }
-    return Math.max(0, Math.floor(numeric))
-}
-
-/**
- * 更新最近一次脚本事件时间戳。
- */
-function touchScriptRuntimeEvent() {
-    lastScriptEventAt = Date.now()
-}
-
-/**
  * 打开脚本热键编辑弹窗。
  * @param scriptName 脚本名称
  */
@@ -1139,125 +1131,6 @@ async function clearScriptHotkeyBinding(scriptName: string, silent = false) {
         console.error("清除脚本热键失败", error)
         ui.showErrorMessage(t("script-list.clear_hotkey_failed"), error)
     }
-}
-
-/**
- * 获取脚本 scope 对应的超时重启秒数（未配置时使用默认值）。
- * @param scope 脚本配置作用域
- * @returns 超时秒数（0 表示关闭）
- */
-function getRuntimeTimeoutSecondsByScope(scope: string): number {
-    const resolvedScope = resolveStoredScriptConfigScope(scope)
-    if (!resolvedScope) return SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS
-    const timeoutItem = scriptConfigStore.value[resolvedScope]?.[SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME]
-    if (!timeoutItem) return SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS
-    return normalizeScriptRuntimeTimeoutSeconds(timeoutItem.value)
-}
-
-/**
- * 解析当前运行脚本对应的配置作用域。
- * @returns 脚本配置作用域；无法确定时返回空字符串
- */
-function resolveRuntimeWatchdogScope(): string {
-    const runningPathScope = resolveStoredScriptConfigScope(runningScriptPaths.value[0] ?? "")
-    if (runningPathScope) return runningPathScope
-    return resolveStoredScriptConfigScope(runningScriptName.value)
-}
-
-/**
- * 解析当前可用于自动重启的脚本文件名。
- * @returns 本地脚本文件名；不可重启时返回空字符串
- */
-function resolveRuntimeWatchdogScriptName(): string {
-    if (!isRunning.value || runningMode.value !== "single") return ""
-    if (runningScriptCount.value > 1 || runningScriptPaths.value.length > 1) return ""
-    const pathFileName = getScriptFileNameFromPath(runningScriptPaths.value[0] ?? "")
-    const fallbackName = String(runningScriptName.value ?? "").trim()
-    return pathFileName || fallbackName
-}
-
-/**
- * 后台启动本地脚本，并在脚本结束后回收运行态。
- * @param scriptName 本地脚本文件名
- */
-function launchLocalScriptInBackground(scriptName: string) {
-    void runLocalScriptByName(scriptName)
-        .catch(error => {
-            console.error("脚本自动重启后再次运行失败", error)
-            addConsoleLog("error", `脚本自动重启后运行失败: ${error}`)
-        })
-        .finally(() => {
-            void syncRunningStateFromBackend(false)
-        })
-}
-
-/**
- * 在脚本超时未上报事件时自动重启当前脚本。
- * @param timeoutSeconds 超时阈值（秒）
- */
-async function restartRunningScriptByTimeout(timeoutSeconds: number) {
-    if (scriptRuntimeRestartingByTimeout) return
-    const scriptName = resolveRuntimeWatchdogScriptName()
-    if (!scriptName) return
-    scriptRuntimeRestartingByTimeout = true
-
-    try {
-        addConsoleLog("warn", `超过 ${timeoutSeconds} 秒未检测到脚本事件，正在自动重启: ${scriptName}`)
-        const runningPath = runningScriptPaths.value[0]
-        const scriptPath = runningPath || (scriptsDir.value ? `${scriptsDir.value}\\${scriptName}` : "")
-        if (!scriptPath) {
-            addConsoleLog("warn", `自动重启已跳过：无法解析脚本路径 (${scriptName})`)
-            return
-        }
-        await scriptRuntime.stopScriptByFilePath(scriptPath)
-        touchScriptRuntimeEvent()
-        launchLocalScriptInBackground(scriptName)
-        addConsoleLog("info", `脚本自动重启已触发: ${scriptName}`)
-    } catch (error) {
-        console.error("脚本超时自动重启失败", error)
-        addConsoleLog("error", `脚本超时自动重启失败: ${error}`)
-    } finally {
-        scriptRuntimeRestartingByTimeout = false
-        touchScriptRuntimeEvent()
-        await syncRunningStateFromBackend(false)
-    }
-}
-
-/**
- * 检查脚本事件是否超时，若超时则自动重启。
- */
-async function checkScriptRuntimeWatchdog() {
-    const scope = resolveRuntimeWatchdogScope()
-    if (!scope) return
-    const timeoutSeconds = getRuntimeTimeoutSecondsByScope(scope)
-    if (timeoutSeconds <= 0) return
-    if (scriptRuntimeRestartingByTimeout) return
-    if (!resolveRuntimeWatchdogScriptName()) return
-    if (!lastScriptEventAt) {
-        touchScriptRuntimeEvent()
-        return
-    }
-    if (Date.now() - lastScriptEventAt < timeoutSeconds * 1000) return
-    await restartRunningScriptByTimeout(timeoutSeconds)
-}
-
-/**
- * 启动脚本运行超时看门狗。
- */
-function startScriptRuntimeWatchdog() {
-    if (scriptRuntimeWatchdogTimer) return
-    scriptRuntimeWatchdogTimer = setInterval(() => {
-        void checkScriptRuntimeWatchdog()
-    }, 1000)
-}
-
-/**
- * 停止脚本运行超时看门狗。
- */
-function stopScriptRuntimeWatchdog() {
-    if (!scriptRuntimeWatchdogTimer) return
-    clearInterval(scriptRuntimeWatchdogTimer)
-    scriptRuntimeWatchdogTimer = null
 }
 
 /**
@@ -1932,6 +1805,10 @@ function updateScriptConfigValue(name: string, value: unknown) {
     item.value = normalizeScriptConfigValue(item.kind, value, item.defaultValue, item.options)
     item.updatedAt = Date.now()
     persistScriptConfigItems()
+    // 修改运行超时配置后同步看门狗启停（0 表示禁用）。
+    if (normalizedName === SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME) {
+        scriptRuntime.syncScriptRuntimeWatchdog()
+    }
 }
 
 /**
@@ -2183,7 +2060,7 @@ async function syncRunningStateFromBackend(appendDetectedLog = true) {
         const wasRunning = scriptRuntime.isRunning
         await scriptRuntime.syncRunningStateFromBackend()
         if (scriptRuntime.isRunning) {
-            touchScriptRuntimeEvent()
+            scriptRuntime.touchScriptEvent()
             showConsole.value = true
         }
         if (!appendDetectedLog || wasRunning || !scriptRuntime.isRunning) {
@@ -2238,7 +2115,36 @@ async function downloadScript(script: Script) {
                       summary.skippedCount > 0 ? t("script-list.preparse_skipped", { skipped: summary.skippedCount }) : ""
                   }`
                 : t("script-list.preparse_none")
-        ui.showSuccessMessage(`${actionText}: ${fileName}${parseText}`)
+        // 自动应用脚本 header 中声明的热键（@hotkey / @hotif 可选字段）
+        let hotkeyNote = ""
+        const parsedHeader = parseScriptHeader(result.content)
+        const headerHotkey = String(parsedHeader.hotkey ?? "").trim()
+        if (headerHotkey) {
+            try {
+                const existing = scriptRuntime.scriptHotkeyStore[fileName]
+                // 新下载的文件可能尚未出现在 localScripts 中，需并入列表确保同步到后端。
+                const syncScripts = [...localScripts.value]
+                if (!syncScripts.includes(fileName)) {
+                    syncScripts.push(fileName)
+                }
+                await scriptRuntime.saveScriptHotkeyBinding(
+                    fileName,
+                    {
+                        hotkey: headerHotkey,
+                        hotIfWinActive: String(parsedHeader.hotif ?? "").trim(),
+                        holdToLoop: existing?.holdToLoop ?? false,
+                        toggleToLoop: existing?.toggleToLoop ?? false,
+                        enabled: existing?.enabled ?? true,
+                    },
+                    syncScripts,
+                    scriptsDir.value
+                )
+                hotkeyNote = `，${t("script-list.hotkey_auto_bound", { hotkey: headerHotkey })}`
+            } catch (error) {
+                console.error("自动应用脚本热键失败", error)
+            }
+        }
+        ui.showSuccessMessage(`${actionText}: ${fileName}${parseText}${hotkeyNote}`)
         await fetchLocalScripts()
         await openLocalScript(fileName)
     } catch (error) {
@@ -3444,23 +3350,6 @@ watch(
     { immediate: true }
 )
 
-watch(isRunning, running => {
-    if (running) {
-        touchScriptRuntimeEvent()
-        return
-    }
-    lastScriptEventAt = 0
-    scriptRuntimeRestartingByTimeout = false
-})
-
-watch(
-    () => scriptRuntime.lastEventAt,
-    timestamp => {
-        if (!timestamp) return
-        lastScriptEventAt = timestamp
-    }
-)
-
 watch(showConsole, async visible => {
     if (!visible) {
         return
@@ -3482,19 +3371,27 @@ watch(
 )
 
 onMounted(async () => {
-    if (!env.isApp) {
-        startScriptRuntimeWatchdog()
+    // 注册脚本超时自动重启执行器（看门狗运行在 scriptRuntime 生命周期内，重启动作由本页提供）。
+    scriptRuntime.setScriptRestartRunner(async scriptName => {
+        const runningPath = scriptRuntime.runningScriptPaths[0]
+        const scriptPath = runningPath || (scriptsDir.value ? `${scriptsDir.value}\\${scriptName}` : "")
+        if (!scriptPath) {
+            addConsoleLog("warn", `自动重启已跳过：无法解析脚本路径 (${scriptName})`)
+            return
+        }
+        await scriptRuntime.stopScriptByFilePath(scriptPath)
+        scriptRuntime.touchScriptEvent()
+        launchLocalScriptInBackground(scriptName)
+    })
 
+    if (!env.isApp) {
         try {
             await scriptRuntime.initRuntimeTracking()
         } catch (error) {
             console.error("初始化脚本运行态监听失败", error)
         }
     }
-
-    await fetchScriptCategories()
-    await initScriptsDir()
-    await initEngineDts()
+    await Promise.all([fetchScriptCategories(), initScriptsDir(), initEngineDts()])
     loadSchedulerConfig()
     loadScriptMcpPortConfig()
     loadScriptConfigItems()
@@ -3510,9 +3407,8 @@ onMounted(async () => {
 })
 
 onUnmounted(async () => {
-    stopScriptRuntimeWatchdog()
-    lastScriptEventAt = 0
-    scriptRuntimeRestartingByTimeout = false
+    // 注销看门狗重启执行器（看门狗计时随 scriptRuntime 生命周期自行停止）。
+    scriptRuntime.setScriptRestartRunner(null)
     if (startEditScriptTimer) {
         clearTimeout(startEditScriptTimer)
         startEditScriptTimer = null

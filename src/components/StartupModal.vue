@@ -2,7 +2,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
 import { computed, onMounted, ref, watch } from "vue"
-import { useRouter } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import { checkUpdate, downloadAndInstallUpdate } from "@/api/update"
 import { dataPackBootstrapLoading } from "@/data/data-pack-bridge"
 import { env } from "@/env"
@@ -11,11 +11,16 @@ import { useUIStore } from "@/store/ui"
 import pg from "../../package.json"
 
 const router = useRouter()
+const route = useRoute()
 const ui = useUIStore()
 const dataPack = useDataPackStore()
 
 const searchParams = new URLSearchParams(window.location.search)
 const hideUpdateInfo = searchParams.get("hideUpdateInfo") === "1"
+
+// 当前页面是否需要数据包：路由 meta.requireData === false 时（如脚本页面）不依赖数据包，
+// 跳过数据包更新/安装弹窗，默认值为 true（需要数据包）。
+const dataRequired = computed(() => route.meta.requireData !== false)
 
 // ---------- 应用更新 ----------
 const updateProgress = ref(0)
@@ -229,6 +234,13 @@ async function checkDataPack(): Promise<void> {
 }
 
 async function runPackFlow(): Promise<void> {
+    // 页面不依赖数据包（如脚本页面）时跳过数据包检查/更新/安装弹窗
+    if (!dataRequired.value) {
+        dataPackChecked.value = true
+        await runChangelogFlow()
+        return
+    }
+
     if (dataPackChecked.value) {
         await runChangelogFlow()
         return
@@ -307,8 +319,9 @@ onMounted(async () => {
 })
 
 // 数据包启动加载完成后，若应用更新流程已结束，则继续数据包流程。
+// requireData = false 的页面（如脚本页面）不检查数据包。
 watch(dataPackBootstrapLoading, loading => {
-    if (loading || !appUpdateChecked.value || dataPackChecked.value) {
+    if (loading || !appUpdateChecked.value || dataPackChecked.value || !dataRequired.value) {
         return
     }
     void checkDataPack()

@@ -3,6 +3,9 @@ import { computed, type Ref } from "vue"
 
 const LEGACY_CUSTOM_BUFF_STORAGE_KEY = "customBuff"
 
+/** 专武信息：武器 id 与所在槽位类型 */
+export type SignatureWeapon = { id: number; type: "近战" | "远程" }
+
 export interface NormalActions {
     /** 表达式 */
     s: string
@@ -41,9 +44,11 @@ export interface InlineActions {
 
 /**
  * 创建一份新的角色配置默认值，避免数组和对象在多个角色之间共享引用。
+ * 传入角色专武时，默认武器直接装备该专武（无专武则回退通用默认武器）。
+ * @param signatureWeapon 角色专武（可选）
  * @returns 新的默认角色配置
  */
-export function createDefaultCharSettings() {
+export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | null) {
     return {
         charLevel: 80,
         baseName: "",
@@ -56,10 +61,10 @@ export function createDefaultCharSettings() {
         targetFunction: "",
         customVariables: [] as [string, string][],
         charSkillLevel: 10,
-        meleeWeapon: 10206, //"枯朽",
+        meleeWeapon: signatureWeapon?.type === "近战" ? signatureWeapon.id : 10206, //"枯朽",
         meleeWeaponLevel: 80,
         meleeWeaponRefine: 5,
-        rangedWeapon: 20102, //"剥离",
+        rangedWeapon: signatureWeapon?.type === "远程" ? signatureWeapon.id : 20102, //"剥离",
         rangedWeaponLevel: 80,
         rangedWeaponRefine: 5,
         auraMod: 31524, // 警惕
@@ -165,9 +170,17 @@ function readLegacyCustomBuff(): [string, number][] {
     }
 }
 
-export const useCharSettings = (charNameRef?: Ref<string>) => {
-    const charSettingsKey = computed(() => `build.${(charNameRef || useLocalStorage("selectedChar", "赛琪")).value}`)
-    const charSettings = useLocalStorage(charSettingsKey, createDefaultCharSettings())
+/**
+ * 创建角色配置本地存储引用。
+ * 可选传入专武解析回调：首次创建默认值时由调用方解析角色专武并写入默认武器，避免在 composable 中静态依赖数据包。
+ * @param charNameRef 角色名称引用
+ * @param getSignatureWeapon 专武解析回调（可选）
+ * @returns 角色配置引用
+ */
+export const useCharSettings = (charNameRef?: Ref<string>, getSignatureWeapon?: (charName: string) => SignatureWeapon | null) => {
+    const charName = charNameRef ?? useLocalStorage("selectedChar", "赛琪")
+    const charSettingsKey = computed(() => `build.${charName.value}`)
+    const charSettings = useLocalStorage(charSettingsKey, createDefaultCharSettings(getSignatureWeapon?.(charName.value)))
     charSettings.value = normalizeCharSettings(charSettings.value)
 
     if (charSettings.value.customBuff.length === 0) {

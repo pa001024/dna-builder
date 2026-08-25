@@ -1917,10 +1917,10 @@ describe("CharBuild类测试", () => {
 
         it("无转属克 时 物理/元素 访问器之和等于合计伤害", () => {
             const cb = buildFlora(0.5)
-            const phys = cb.evaluateAST("[圆舞]路径伤害.物理")
-            const elem = cb.evaluateAST("[圆舞]路径伤害.元素")
-            const total = cb.evaluateAST("[圆舞]路径伤害")
-            // 圆舞 为暗属性伤害（含角色攻击带来的物理分量），物理分量应 > 0
+            const phys = cb.evaluateAST("普通攻击::一段.物理")
+            const elem = cb.evaluateAST("普通攻击::一段.元素")
+            const total = cb.evaluateAST("普通攻击::一段")
+            // 物理分量应 > 0
             expect(phys).toBeGreaterThan(0)
             expect(phys + elem).toBeCloseTo(total, 3)
         })

@@ -8,8 +8,13 @@ export function createScriptHeader(options: {
     version?: string
     category?: string
     date?: number
+    hotkey?: string
+    hotif?: string
 }) {
     const date = options.date != null ? formatDateTime(options.date) : formatDateTime(Date.now())
+    // 可选的 @hotkey / @hotif 字段，仅当存在时才写入，保持 header 简洁。
+    const hotkeyLine = options.hotkey ? `\n// @hotkey ${options.hotkey}` : ""
+    const hotifLine = options.hotif ? `\n// @hotif ${options.hotif}` : ""
     return `// ==UserScript==
 // @id ${options.id || "-"}
 // @name ${options.name}
@@ -17,7 +22,7 @@ export function createScriptHeader(options: {
 // @author ${options.author || "anonymous"}
 // @version ${options.version || "1.0.0"}
 // @category ${options.category || "其他"}
-// @date ${date}
+// @date ${date}${hotkeyLine}${hotifLine}
 // ==/UserScript==
 
 `
@@ -30,7 +35,9 @@ export function parseScriptHeader(header: string) {
     const version = header.match(/^\/\/ *@version\s+(.*)/m)?.[1] || undefined
     const category = header.match(/^\/\/ *@category\s+(.*)/m)?.[1] || undefined
     const date = header.match(/^\/\/ *@date\s+(.*)/m)?.[1] || undefined
-    return { id, name, desc, author, version, category, date }
+    const hotkey = header.match(/^\/\/ *@hotkey\s+(.*)/m)?.[1] || undefined
+    const hotif = header.match(/^\/\/ *@hotif\s+(.*)/m)?.[1] || undefined
+    return { id, name, desc, author, version, category, date, hotkey, hotif }
 }
 
 function parseScriptHeaderDate(dateHeader?: string): number | undefined {
@@ -45,7 +52,17 @@ function parseScriptHeaderDate(dateHeader?: string): number | undefined {
 
 export function replaceScriptHeader(
     script: string,
-    options: { id?: string; name: string; desc?: string; author?: string; version?: string; category?: string; date?: number }
+    options: {
+        id?: string
+        name: string
+        desc?: string
+        author?: string
+        version?: string
+        category?: string
+        date?: number
+        hotkey?: string
+        hotif?: string
+    }
 ) {
     // 匹配 UserScript header 的正则表达式，从 // ==UserScript== 到 // ==/UserScript==
     const headerRegex = /\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/
@@ -70,6 +87,8 @@ export function replaceScriptHeader(
         version: options.version ?? existingHeader.version,
         category: options.category ?? existingHeader.category,
         date: options.date ?? parseScriptHeaderDate(existingHeader.date),
+        hotkey: options.hotkey ?? existingHeader.hotkey,
+        hotif: options.hotif ?? existingHeader.hotif,
     }
 
     // 创建新的 header

@@ -94,10 +94,25 @@ const keywords: Record<string, string> = {
 
 const namespaces = computed(() => ["E", "Q", "P", "近战", "远程", "同律", ...(props.charBuild?.allSkills.map(v => v.名称) || [])])
 
+// 当前构筑的自定义函数列表（如 "fn(x, y)" → 函数体表达式），仅展示合法且非空的自定义函数定义。
+const customFunctions = computed<Record<string, string>>(() => {
+    const result: Record<string, string> = {}
+    const charBuild = props.charBuild
+    if (!charBuild) return result
+    for (const [key, value] of charBuild.customVariables) {
+        const definition = charBuild.parseCustomFunctionDefinition(key)
+        if (!definition) continue
+        if (charBuild.validateCustomVariable(key, value)) continue
+        result[`${definition.name}(${definition.params.join(", ")})`] = value.trim()
+    }
+    return result
+})
+
 // 各参考分组的英文小标（纯英文，可配等宽/大字距）。
 const groupKickers: Record<string, string> = {
     operators: "OPERATORS",
     functions: "FUNCTIONS",
+    customFunctions: "CUSTOM FUNCTIONS",
     keywords: "KEYWORDS",
     members: "MEMBERS",
     namespaces: "NAMESPACES",
@@ -108,14 +123,20 @@ const referenceGroups = computed(() => {
     const groups: { key: string; title: string; items: Record<string, string> }[] = [
         { key: "operators", title: t("ast-help.operatorsTitle"), items: operators },
         { key: "functions", title: t("ast-help.functionsTitle"), items: functions },
+    ]
+    // 当前上下文的自定义函数（如 "fn(x, y) = x*2"）紧跟内置函数之后展示
+    if (Object.keys(customFunctions.value).length) {
+        groups.push({ key: "customFunctions", title: t("ast-help.customFunctionsTitle"), items: customFunctions.value })
+    }
+    groups.push(
         { key: "keywords", title: t("ast-help.keywordsTitle"), items: keywords },
         { key: "members", title: t("ast-help.membersTitle"), items: members },
         {
             key: "namespaces",
             title: t("ast-help.namespacesTitle"),
             items: Object.fromEntries(namespaces.value.map(ns => [ns + "::", ""])),
-        },
-    ]
+        }
+    )
     return groups
 })
 
@@ -223,6 +244,12 @@ function insertReference(groupKey: string, name: string) {
     }
     if (groupKey === "functions") {
         insertAtCursor(functionInserts[name] ?? name)
+        return
+    }
+    if (groupKey === "customFunctions") {
+        // 自定义函数：插入函数名 + 左括号，参数由用户自行填写
+        const parenIndex = name.indexOf("(")
+        insertAtCursor(parenIndex >= 0 ? `${name.slice(0, parenIndex)}(` : name)
         return
     }
     insertAtCursor(name)
@@ -543,6 +570,7 @@ const syntaxDotColors: Record<string, string> = {
 const badgeColors: Record<string, string> = {
     operators: "text-amber-400",
     functions: "text-violet-300",
+    customFunctions: "text-fuchsia-300",
     keywords: "text-teal-300",
     members: "text-sky-300",
     namespaces: "text-base-content/70",

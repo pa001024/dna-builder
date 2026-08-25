@@ -30,7 +30,7 @@ let setMinSize = async (_w: number, _h: number) => {}
 // NOTE: every router must have i18n key like xx.title it will be used by ResizeableWindow.vue by default
 const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(360, 430) },
-    { name: "counter", path: "/counter", component: CounterView, beforeEnter: () => setMinSize(360, 430) },
+    { name: "counter", path: "/counter", component: CounterView, beforeEnter: () => setMinSize(360, 430), meta: { requireData: false } },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(360, 430) },
     {
         name: "points-mall",
@@ -694,27 +694,37 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "guide-edit", path: "/guides/:id/edit", component: GuideEditView, beforeEnter: () => setMinSize(360, 430) },
 
     // 脚本 routes
+    // 脚本页面不依赖游戏数据包，通过 meta.requireData = false 跳过数据包更新/安装提示与数据包水合等待
     {
         name: "script-list",
         path: "/scripts",
         component: () => import("./views/ScriptListView.vue"),
         beforeEnter: () => setMinSize(360, 430),
+        meta: { requireData: false },
     },
     {
         name: "script-color-tool",
         path: "/scripts/color-tool",
         component: () => import("./views/ScriptColorToolView.vue"),
         beforeEnter: () => setMinSize(360, 430),
+        meta: { requireData: false },
     },
     {
         name: "script-record-tool",
         path: "/scripts/record-tool",
         component: () => import("./views/ScriptRecordToolView.vue"),
         beforeEnter: () => setMinSize(360, 430),
+        meta: { requireData: false },
     },
 
     // 404 页面 - 必须放在最后作为捕获所有未匹配路由
-    { path: "/:pathMatch(.*)*", name: "notfound", component: NotFound, beforeEnter: () => setMinSize(360, 430) },
+    {
+        path: "/:pathMatch(.*)*",
+        name: "notfound",
+        component: NotFound,
+        beforeEnter: () => setMinSize(360, 430),
+        meta: { requireData: false },
+    },
 ]
 
 export const router = createRouter({

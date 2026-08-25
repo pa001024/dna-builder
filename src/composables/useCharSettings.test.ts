@@ -19,4 +19,28 @@ describe("useCharSettings helpers", () => {
         expect(settings.customBuff).toEqual([])
         expect(settings.customVariables).toEqual([])
     })
+
+    it("传入近战专武时默认装备该武器", () => {
+        const settings = createDefaultCharSettings({ id: 10104, type: "近战" })
+
+        expect(settings.meleeWeapon).toBe(10104)
+        expect(settings.rangedWeapon).toBe(20102)
+    })
+
+    it("传入远程专武时默认装备该武器", () => {
+        const settings = createDefaultCharSettings({ id: 20405, type: "远程" })
+
+        expect(settings.rangedWeapon).toBe(20405)
+        expect(settings.meleeWeapon).toBe(10206)
+    })
+
+    it("未传入专武时保留通用默认武器", () => {
+        const noSignature = createDefaultCharSettings()
+        const nullSignature = createDefaultCharSettings(null)
+
+        expect(noSignature.meleeWeapon).toBe(10206)
+        expect(noSignature.rangedWeapon).toBe(20102)
+        expect(nullSignature.meleeWeapon).toBe(10206)
+        expect(nullSignature.rangedWeapon).toBe(20102)
+    })
 })

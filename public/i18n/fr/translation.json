@@ -5887,6 +5887,7 @@
         "attrTitle": "Modification d'attributs",
         "attrValueLabel": "Valeur",
         "clear": "Effacer",
+        "customFunctionsTitle": "Fonctions personnalisées",
         "examples": {
             "baseStats": "Statistiques de base",
             "complex": "Expression complexe",
@@ -5998,6 +5999,7 @@
         "title": "Aide sur l’expression"
     },
     "autobuild": {
+        "calculating": "Calcul en cours...",
         "charMods": "MOD de personnage",
         "desc": "Construit automatiquement la configuration MOD optimale selon la configuration MOD actuelle",
         "includeMelee": "Remplacer automatiquement le corps-à-corps",
@@ -7527,13 +7529,14 @@
         "high_risk_title": "Avertissement d'operation a haut risque",
         "hold_to_loop": "Maintenir pour boucler (executer le script en boucle tant que le raccourci est maintenu)",
         "hotif_condition": "Condition (#HotIf WinActive)",
-        "hotif_example": "Exemple : Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe (vide = global)",
+        "hotif_example": "Exemple : Moonlight / ahk_exe EM-Win64-Shipping.exe / Moonlight ahk_exe EM-Win64-Shipping.exe (vide = global) ; separez plusieurs conditions par ||",
+        "hotkey_auto_bound": "Raccourci associe automatiquement : {{hotkey}}",
         "hotkey_bound": "Raccourci associe : {{name}} -> {{hotkey}}",
         "hotkey_cleared": "Raccourci supprime : {{name}}",
         "hotkey_disabled": "Raccourci desactive : {{name}}",
         "hotkey_enabled": "Raccourci active : {{name}}",
         "hotkey_example": "Exemple : ^c / CapsLock & c / RButton / RButton & XButton1",
-        "hotkey_help": "Prend en charge les prefixes `^ ! + # *`, les combinaisons `A & B`, le declenchement au relachement `Up`, et les boutons souris `LButton/RButton/MButton/XButton1/XButton2` ; WinActive prend en charge le titre de fenetre et `ahk_exe/ahk_class/ahk_pid`, par exemple : ahk_exe EM-Win64-Shipping.exe",
+        "hotkey_help": "Prend en charge les prefixes `^ ! + # *`, les combinaisons `A & B`, le declenchement au relachement `Up`, et les boutons souris `LButton/RButton/MButton/XButton1/XButton2` ; WinActive prend en charge le titre de fenetre et `ahk_exe/ahk_class/ahk_pid`, par exemple : ahk_exe EM-Win64-Shipping.exe ; separez plusieurs conditions par `||` (une seule suffit), par exemple : `ahk_exe A || ahk_exe B`",
         "hotkey_required": "Veuillez saisir un raccourci, par exemple : ^c, CapsLock & c, RButton & XButton1",
         "latest": "A jour",
         "load_more": "Charger plus",

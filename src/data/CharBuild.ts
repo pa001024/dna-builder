@@ -1532,8 +1532,9 @@ export class CharBuild {
         // 合计转换比例超过 100% 时等比重压缩（convertScale），不足 100% 时剩余 (1 - total) 按原始物理/元素比例结算。
         const activeElementKey: "转属克" | "转属逆" | undefined =
             enemyResistance > 0 ? "转属克" : enemyResistance < 0 ? "转属逆" : undefined
+        const physicalConvertKeywords = ["转切割", "转贯穿", "转震荡", "转灾厄"] as const
         const rawElementConvert = activeElementKey ? Math.max(0, attrs[activeElementKey] || 0) : 0
-        const rawPhysicalConvert = ["转切割", "转贯穿", "转震荡", "转灾厄"].reduce((sum, k) => sum + Math.max(0, attrs[k] || 0), 0)
+        const rawPhysicalConvert = physicalConvertKeywords.reduce((sum, k) => sum + Math.max(0, attrs[k] || 0), 0)
         const poolTotal = rawElementConvert + rawPhysicalConvert
         const convertScale = poolTotal > 1 ? 1 / poolTotal : 1
         const unconverted = Math.max(0, 1 - Math.min(1, poolTotal))
@@ -1550,7 +1551,7 @@ export class CharBuild {
         type ConvertEntry = { key: string; ratio: number; kind: "element" | "physical" }
         const conversionEntries: ConvertEntry[] = []
         if (activeElementKey) conversionEntries.push({ key: activeElementKey, ratio: rawElementConvert, kind: "element" })
-        for (const key of ["转切割", "转贯穿", "转震荡", "转灾厄"] as const) {
+        for (const key of physicalConvertKeywords) {
             conversionEntries.push({ key, ratio: Math.max(0, attrs[key] || 0), kind: "physical" })
         }
 
@@ -1725,8 +1726,10 @@ export class CharBuild {
     }
     /**
      * 验证AST表达式是否合法
+     * @param astInput AST表达式字符串
+     * @param knownIdentifiers 额外已知的标识符（如自定义函数的参数名）
      */
-    validateAST(astInput: string): string | undefined {
+    validateAST(astInput: string, knownIdentifiers?: Set<string>): string | undefined {
         if (!astInput) return ""
         try {
             const ast = parseAST(astInput, CharBuild.macros)
@@ -1744,6 +1747,9 @@ export class CharBuild {
             skillAttrs.set("q", skillAttrs.get(this.skills[1].safeName)!)
             skillAttrs.set("p", skillAttrs.get(this.skills[2].safeName)!)
             const customVariableNames = new Set(this.getValidCustomVariables().map(([key]) => key))
+            const customFunctions = this.getValidCustomFunctions()
+            // 已校验过函数体的自定义函数，避免递归定义导致死循环
+            const validatedCustomFunctionBodies = new Set<string>()
             const getWeaponAttr = (fieldName: string, base?: string) =>
                 weaponAttrs?.get(base || this.baseName)?.[fieldName as keyof WeaponAttr] || 0
             const getSkillAttr = (fieldName: string, base?: string) =>
@@ -1782,6 +1788,7 @@ export class CharBuild {
                 switch (node.type) {
                     case "property": {
                         const fieldName = node.name
+                        if (knownIdentifiers?.has(fieldName)) break
                         if (["[攻击]", "[防御]", "[生命]", "[近战]", "[远程]", "[同律]"].includes(fieldName)) break
                         if (!node.namespace && !node.forceAttr && customVariableNames.has(fieldName)) break
                         // ! 后缀强制按属性解析：技能字段不参与匹配
@@ -1807,14 +1814,25 @@ export class CharBuild {
                         if (unaryError) return unaryError
                         break
                     }
-                    case "function":
-                        if (!["min", "max", "floor", "ceil", "or", "log", "power", "hp"].includes(node.name))
-                            return `未知函数: "${node.name}"`
+                    case "function": {
+                        const isBuiltin = ["min", "max", "floor", "ceil", "or", "log", "power", "hp"].includes(node.name)
+                        const customFunction = customFunctions.get(node.name)
+                        if (!isBuiltin && !customFunction) return `未知函数: "${node.name}"`
+                        if (customFunction && customFunction.params.length !== node.args.length)
+                            return `函数 "${node.name}" 参数数量不符: 需要 ${customFunction.params.length} 个,实际传入 ${node.args.length} 个`
+                        // 校验自定义函数体（参数视为已知标识符），递归定义只校验一次
+                        if (customFunction && !validatedCustomFunctionBodies.has(node.name)) {
+                            validatedCustomFunctionBodies.add(node.name)
+                            const bodyError = this.validateAST(customFunction.expression, new Set(customFunction.params))
+                            validatedCustomFunctionBodies.delete(node.name)
+                            if (bodyError) return `函数 "${node.name}" 定义错误: ${bodyError}`
+                        }
                         for (const arg of node.args) {
                             const argError = validateNode(arg)
                             if (argError) return argError
                         }
                         break
+                    }
                     case "member_access": {
                         const memberError = validateNode(node.object)
                         if (memberError) return memberError
@@ -1853,7 +1871,23 @@ export class CharBuild {
     }
 
     /**
-     * 验证自定义变量名称是否符合表达式标识符规则。
+     * 解析自定义函数定义键，如 "fn(x)" 或 "fn(x, y)"。
+     * @param key 定义键
+     * @returns 函数名与参数列表；非函数定义返回 undefined
+     */
+    parseCustomFunctionDefinition(key: string): { name: string; params: string[] } | undefined {
+        const trimmedKey = key.trim()
+        const match = /^([a-zA-Z_\u4e00-\u9fa5·[][a-zA-Z0-9_\u4e00-\u9fa5·\]]*)\s*\(([^()]*)\)\s*$/.exec(trimmedKey)
+        if (!match) return undefined
+        const params = match[2]
+            .split(",")
+            .map(param => param.trim())
+            .filter(Boolean)
+        return { name: match[1], params }
+    }
+
+    /**
+     * 验证自定义变量名称是否符合表达式标识符规则，支持函数定义（如 "fn(x, y)"）。
      * @param key 自定义变量名称
      * @returns 错误信息；合法时返回 undefined
      */
@@ -1861,6 +1895,20 @@ export class CharBuild {
         const trimmedKey = key.trim()
         if (!trimmedKey) return "变量名不能为空"
         if (trimmedKey.includes("::") || trimmedKey.includes(".")) return `变量名不支持命名空间或成员访问: "${trimmedKey}"`
+
+        // 函数定义: fn(x, y)，函数名与参数名需合法且参数不重复
+        const functionMatch = this.parseCustomFunctionDefinition(trimmedKey)
+        if (functionMatch) {
+            if (!/^[a-zA-Z_\u4e00-\u9fa5·[][a-zA-Z0-9_\u4e00-\u9fa5·\]]*$/.test(functionMatch.name)) return `变量名不合法: "${trimmedKey}"`
+            const paramSet = new Set<string>()
+            for (const param of functionMatch.params) {
+                if (!/^[a-zA-Z_\u4e00-\u9fa5·][a-zA-Z0-9_\u4e00-\u9fa5·[\]]*$/.test(param)) return `函数参数不合法: "${param}"`
+                if (paramSet.has(param)) return `函数参数重复: "${param}"`
+                paramSet.add(param)
+            }
+            return undefined
+        }
+
         if (!/^[a-zA-Z_\u4e00-\u9fa5·[][\]a-zA-Z0-9_\u4e00-\u9fa5·]*$/.test(trimmedKey)) return `变量名不合法: "${trimmedKey}"`
 
         try {
@@ -1873,7 +1921,7 @@ export class CharBuild {
     }
 
     /**
-     * 验证单个自定义变量配置。
+     * 验证单个自定义变量配置（函数定义额外校验函数体，参数视为已知标识符）。
      * @param key 自定义变量名称
      * @param value 自定义变量表达式
      * @returns 错误信息；合法时返回 undefined
@@ -1882,17 +1930,55 @@ export class CharBuild {
         const keyError = this.validateCustomVariableKey(key)
         if (keyError) return keyError
         if (!value.trim()) return `变量 "${key.trim()}" 的表达式不能为空`
+        const functionDefinition = this.parseCustomFunctionDefinition(key)
+        if (functionDefinition) {
+            return this.validateAST(value, new Set(functionDefinition.params))
+        }
         return this.validateAST(value)
     }
 
     /**
-     * 获取合法且非空的自定义变量配置。
+     * 获取合法且非空的自定义变量配置（仅普通变量，函数定义排除在外）。
      * @returns 自定义变量键值对
      */
     private getValidCustomVariables() {
         return this.customVariables
             .map(([key, value]) => [key.trim(), value.trim()] as [string, string])
-            .filter(([key, value]) => key && value && !this.validateCustomVariableKey(key))
+            .filter(([key, value]) => key && value && !this.validateCustomVariableKey(key) && !this.parseCustomFunctionDefinition(key))
+    }
+
+    /**
+     * 获取合法且非空的自定义函数定义（如 "fn(x) = x*2"）。
+     * @returns 函数名到定义的映射
+     */
+    private getValidCustomFunctions(): Map<string, { params: string[]; expression: string }> {
+        const functions = new Map<string, { params: string[]; expression: string }>()
+        for (const [key, value] of this.customVariables) {
+            const trimmedKey = key.trim()
+            const trimmedValue = value.trim()
+            if (!trimmedKey || !trimmedValue) continue
+            if (this.validateCustomVariableKey(trimmedKey)) continue
+            const definition = this.parseCustomFunctionDefinition(trimmedKey)
+            if (!definition) continue
+            functions.set(definition.name, { params: definition.params, expression: trimmedValue })
+        }
+        return functions
+    }
+
+    /**
+     * 计算自定义变量或自定义函数定义的示例结果。
+     * 函数定义以参数示例值 (1, 2, 3...) 代入求值，用于界面预览。
+     * @param key 定义键（函数定义形如 "fn(x, y)"）
+     * @param value 定义表达式
+     * @returns 计算结果；无法计算时返回 0
+     */
+    evaluateCustomVariableDefinition(key: string, value: string): number {
+        const definition = this.parseCustomFunctionDefinition(key)
+        if (!definition) return this.evaluateAST(value)
+        const attrs = this.calculateWeaponAttributes()
+        const scope = new Map<string, number>()
+        definition.params.forEach((param, index) => scope.set(param, index + 1))
+        return this.evaluateAST(value, attrs, undefined, undefined, scope)
     }
 
     /**
@@ -1900,13 +1986,15 @@ export class CharBuild {
      * @param astInput AST表达式字符串
      * @param damage 伤害结果对象
      * @param attrs 武器属性对象
+     * @param scope 函数调用时的参数作用域（参数名到值的映射）
      * @returns 计算结果
      */
     evaluateAST(
         astInput: string,
         inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>,
         resolvingVariables = new Set<string>(),
-        customVariableValueCache = new Map<string, number>()
+        customVariableValueCache = new Map<string, number>(),
+        scope = new Map<string, number>()
     ) {
         if (!astInput) return 0
         let ast = this.astCache.get(astInput)
@@ -2173,6 +2261,38 @@ export class CharBuild {
             return safeValue
         }
 
+        const customFunctionDefinitions = this.getValidCustomFunctions()
+        const functionBodyAstCache = new Map<string, ASTNode>()
+        const resolvingFunctions = new Set<string>()
+        /**
+         * 求值自定义函数调用：将实参绑定到形参后求值函数体。
+         * @param name 函数名
+         * @param args 已求值的实参
+         * @param currentScope 调用处的参数作用域
+         * @returns 计算结果；未找到定义时返回 undefined
+         */
+        const evaluateCustomFunction = (name: string, args: number[], currentScope: Map<string, number>): number | undefined => {
+            const definition = customFunctionDefinitions.get(name)
+            if (!definition) return undefined
+            if (definition.params.length !== args.length) {
+                throw new Error(`函数 "${name}" 需要 ${definition.params.length} 个参数,实际传入 ${args.length} 个`)
+            }
+            if (resolvingFunctions.has(name)) return 0 // 检测到递归调用，返回 0 避免死循环
+            let bodyAst = functionBodyAstCache.get(definition.expression)
+            if (!bodyAst) {
+                bodyAst = parseAST(definition.expression, CharBuild.macros)
+                functionBodyAstCache.set(definition.expression, bodyAst)
+            }
+            const nextScope = new Map(currentScope)
+            definition.params.forEach((param, index) => nextScope.set(param, args[index]))
+            resolvingFunctions.add(name)
+            try {
+                return evaluate(bodyAst, undefined, nextScope)
+            } finally {
+                resolvingFunctions.delete(name)
+            }
+        }
+
         /**
          * 解析标识符值。! 后缀（forceAttr）强制按属性解析：跳过技能字段与自定义变量的匹配，
          * 只从武器属性/角色属性中取值，解决含特定字符的技能字段挤占属性查询的问题。
@@ -2180,9 +2300,17 @@ export class CharBuild {
          * @param ns 命名空间
          * @param temporaryAttributes 临时属性
          * @param forceAttr 是否强制按属性值解析
+         * @param currentScope 函数参数作用域
          * @returns 解析结果
          */
-        const evaluateIdentity = (fieldName: string, ns?: string, temporaryAttributes?: TemporaryAttributes, forceAttr = false) => {
+        const evaluateIdentity = (
+            fieldName: string,
+            ns?: string,
+            temporaryAttributes?: TemporaryAttributes,
+            forceAttr = false,
+            currentScope?: Map<string, number>
+        ) => {
+            if (!ns && !forceAttr && currentScope?.has(fieldName)) return currentScope.get(fieldName)!
             if (!forceAttr && !ns) {
                 const customValue = evaluateCustomVariable(fieldName)
                 if (customValue !== undefined) return customValue
@@ -2290,11 +2418,13 @@ export class CharBuild {
          */
         const mergeTemporaryAttributes = (
             attributes: Extract<ASTNode, { type: "temporary_attributes" }>["attributes"],
-            inheritedAttributes?: TemporaryAttributes
+            inheritedAttributes?: TemporaryAttributes,
+            currentScope?: Map<string, number>
         ) => {
             const mergedAttributes = { ...inheritedAttributes }
             for (const attribute of attributes) {
-                mergedAttributes[attribute.name] = (mergedAttributes[attribute.name] || 0) + evaluate(attribute.value, inheritedAttributes)
+                mergedAttributes[attribute.name] =
+                    (mergedAttributes[attribute.name] || 0) + evaluate(attribute.value, inheritedAttributes, currentScope)
             }
             return mergedAttributes
         }
@@ -2302,25 +2432,31 @@ export class CharBuild {
          * 从成员访问对象中提取原始字段及其临时属性。
          * @param node 成员访问的对象节点
          * @param temporaryAttributes 外层已经生效的临时属性
+         * @param currentScope 函数参数作用域
          * @returns 字段节点与合并后的临时属性；非字段对象返回 undefined
          */
         const getPropertyContext = (
             node: ASTNode,
-            temporaryAttributes?: TemporaryAttributes
+            temporaryAttributes?: TemporaryAttributes,
+            currentScope?: Map<string, number>
         ): { property: Extract<ASTNode, { type: "property" }>; temporaryAttributes?: TemporaryAttributes } | undefined => {
             if (node.type === "property") return { property: node, temporaryAttributes }
             if (node.type !== "temporary_attributes") return undefined
-            return getPropertyContext(node.target, mergeTemporaryAttributes(node.attributes, temporaryAttributes))
+            return getPropertyContext(
+                node.target,
+                mergeTemporaryAttributes(node.attributes, temporaryAttributes, currentScope),
+                currentScope
+            )
         }
         // AST求值函数
-        const evaluate = (node: ASTNode, temporaryAttributes?: TemporaryAttributes): number => {
+        const evaluate = (node: ASTNode, temporaryAttributes?: TemporaryAttributes, currentScope?: Map<string, number>): number => {
             switch (node.type) {
                 case "number":
                     return node.value
 
                 case "binary": {
-                    const left = evaluate(node.left, temporaryAttributes)
-                    const right = evaluate(node.right, temporaryAttributes)
+                    const left = evaluate(node.left, temporaryAttributes, currentScope)
+                    const right = evaluate(node.right, temporaryAttributes, currentScope)
                     switch (node.operator) {
                         case "+":
                             return left + right
@@ -2340,7 +2476,7 @@ export class CharBuild {
                 }
 
                 case "unary": {
-                    const argument = evaluate(node.argument, temporaryAttributes)
+                    const argument = evaluate(node.argument, temporaryAttributes, currentScope)
                     switch (node.operator) {
                         case "+":
                             return +argument
@@ -2352,7 +2488,9 @@ export class CharBuild {
                 }
 
                 case "property": {
-                    const value = evaluateIdentity(node.name, node.namespace, temporaryAttributes, node.forceAttr)
+                    // 函数参数：直接返回绑定值，不参与伤害乘区
+                    if (!node.namespace && !node.forceAttr && currentScope?.has(node.name)) return currentScope.get(node.name)!
+                    const value = evaluateIdentity(node.name, node.namespace, temporaryAttributes, node.forceAttr, currentScope)
                     if (!node.forceAttr) {
                         if (!node.namespace && customVariableExpressions.has(node.name)) return value
                         // 只有真正的伤害字段才需要乘以默认的伤害系数
@@ -2365,7 +2503,7 @@ export class CharBuild {
                 }
 
                 case "function": {
-                    const args = node.args.map(arg => evaluate(arg, temporaryAttributes))
+                    const args = node.args.map(arg => evaluate(arg, temporaryAttributes, currentScope))
                     switch (node.name) {
                         case "min":
                             return Math.min(...args)
@@ -2384,15 +2522,18 @@ export class CharBuild {
                         case "hp":
                             return this.calculateDesperateMultiplier(attrs, args[0]) * this.calculateBoostMultiplier(attrs, args[0])
                         default:
-                            throw new Error(`未知的函数: ${node.name}`)
+                            break
                     }
+                    const customFunctionValue = evaluateCustomFunction(node.name, args, currentScope || new Map())
+                    if (customFunctionValue !== undefined) return customFunctionValue
+                    throw new Error(`未知的函数: ${node.name}`)
                 }
 
                 case "member_access": {
                     // 对于成员访问，object部分不应该乘以默认伤害系数
                     // 所以我们需要重新计算object，但跳过默认伤害系数的乘法
                     const objectNode = node.object
-                    const propertyContext = getPropertyContext(objectNode, temporaryAttributes)
+                    const propertyContext = getPropertyContext(objectNode, temporaryAttributes, currentScope)
 
                     // 如果object是property节点，直接调用evaluateIdentity而不乘以evaluateMember()
                     let objectValue: number
@@ -2401,10 +2542,11 @@ export class CharBuild {
                             propertyContext.property.name,
                             propertyContext.property.namespace,
                             propertyContext.temporaryAttributes,
-                            propertyContext.property.forceAttr
+                            propertyContext.property.forceAttr,
+                            currentScope
                         )
                     } else {
-                        objectValue = evaluate(objectNode, temporaryAttributes)
+                        objectValue = evaluate(objectNode, temporaryAttributes, currentScope)
                     }
 
                     const memberName = node.property
@@ -2428,14 +2570,14 @@ export class CharBuild {
                 }
 
                 case "temporary_attributes":
-                    return evaluate(node.target, mergeTemporaryAttributes(node.attributes, temporaryAttributes))
+                    return evaluate(node.target, mergeTemporaryAttributes(node.attributes, temporaryAttributes, currentScope), currentScope)
 
                 default:
                     throw new Error(`未知的AST节点类型: ${(node as ASTNode).type}`)
             }
         }
 
-        return evaluate(ast)
+        return evaluate(ast, undefined, scope)
     }
 
     get selectedWeapon() {
@@ -3033,6 +3175,7 @@ export class CharBuild {
         meleeOptions = [],
         rangedOptions = [],
         enableLog = true,
+        onLog,
     }: BuildOption) {
         const initBuild = this.clone()
         includeTypes.forEach(key =>
@@ -3063,6 +3206,8 @@ export class CharBuild {
         let logString = ""
         function log(msg: string) {
             if (enableLog) logString += `${msg}\n`
+            // 实时日志回调：每行日志即时转发，用于进度展示（与 enableLog 相互独立）
+            onLog?.(msg)
         }
         log(`开始自动构筑`)
         /**
@@ -3566,4 +3711,6 @@ export interface BuildOption {
     rangedOptions?: LeveledWeapon[]
     /** 是否启用日志 */
     enableLog?: boolean
+    /** 日志实时回调：每生成一行构筑日志时调用（与 enableLog 相互独立） */
+    onLog?: (msg: string) => void
 }

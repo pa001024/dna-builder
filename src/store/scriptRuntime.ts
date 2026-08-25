@@ -9,6 +9,7 @@ import {
     stopScript,
     stopScriptByPath,
 } from "@/api/app"
+import { env } from "@/env"
 
 type ScriptRunningMode = "single" | "scheduler" | null
 type ScriptConfigKind = "number" | "string" | "select" | "multi-select" | "boolean"
@@ -89,6 +90,32 @@ let statusListenerReady = false
 let readConfigListenerReady = false
 let setConfigListenerReady = false
 let runtimeTrackingInitPromise: Promise<void> | null = null
+
+/** 脚本运行超时默认阈值（秒），0 表示默认禁用看门狗（需手动配置 >0 才启用）。 */
+export const SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS = 0
+/** 脚本“运行超时”配置项名称（复用既有脚本配置 UI）。 */
+export const SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME = "运行超时"
+/** 脚本“运行超时”配置项描述。 */
+export const SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_DESC = "运行超时秒数，脚本运行中长时间未检测到事件时自动重启，0 表示关闭。"
+
+// 脚本运行超时看门狗状态（随 scriptRuntime 生命周期启停，见 initRuntimeTracking / disposeRuntimeTracking）
+let scriptRuntimeWatchdogTimer: ReturnType<typeof setInterval> | null = null
+let scriptRuntimeRestartingByTimeout = false
+// 由页面注入的“自动重启脚本”执行器（负责停止旧实例并重新启动脚本）。
+let scriptRuntimeRestartRunner: ((scriptName: string) => Promise<void>) | null = null
+
+/**
+ * 规范化脚本运行超时秒数（0 表示关闭自动重启）。
+ * @param value 原始值
+ * @returns 非负整数秒
+ */
+export function normalizeScriptRuntimeTimeoutSeconds(value: unknown): number {
+    const numeric = Number(value)
+    if (!Number.isFinite(numeric)) {
+        return SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS
+    }
+    return Math.max(0, Math.floor(numeric))
+}
 
 /**
  * 从脚本路径中提取文件名。
@@ -547,6 +574,134 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
         },
 
         /**
+         * 注册脚本自动重启执行器（由页面在挂载时注入，负责停止旧实例并重新启动脚本）。
+         * @param runner 执行器，接收脚本文件名并负责重启；传入 null 表示注销
+         */
+        setScriptRestartRunner(runner: ((scriptName: string) => Promise<void>) | null) {
+            scriptRuntimeRestartRunner = runner
+        },
+
+        /**
+         * 解析当前运行脚本对应的配置作用域。
+         * @returns 脚本配置作用域；无法确定时返回空字符串
+         */
+        resolveRuntimeWatchdogScope(): string {
+            const runningPathScope = this.resolveStoredScriptConfigScope(this.runningScriptPaths[0] ?? "")
+            if (runningPathScope) return runningPathScope
+            return this.resolveStoredScriptConfigScope(this.runningScriptName)
+        },
+
+        /**
+         * 解析当前可用于自动重启的脚本文件名。
+         * @returns 本地脚本文件名；不可重启时返回空字符串
+         */
+        resolveRuntimeWatchdogScriptName(): string {
+            if (!this.isRunning || this.runningMode !== "single") return ""
+            if (this.runningScriptCount > 1 || this.runningScriptPaths.length > 1) return ""
+            const pathFileName = getScriptFileNameFromPath(this.runningScriptPaths[0] ?? "")
+            const fallbackName = String(this.runningScriptName ?? "").trim()
+            return pathFileName || fallbackName
+        },
+
+        /**
+         * 获取指定配置作用域的脚本运行超时秒数。
+         * @param scope 脚本配置作用域
+         * @returns 超时秒数（0 表示关闭自动重启）
+         */
+        getRuntimeTimeoutSecondsByScope(scope: string): number {
+            const resolvedScope = scope ? this.resolveStoredScriptConfigScope(scope) : ""
+            if (!resolvedScope) return SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS
+            const timeoutItem = this.scriptConfigStore[resolvedScope]?.[SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME]
+            if (!timeoutItem) return SCRIPT_RUNTIME_TIMEOUT_DEFAULT_SECONDS
+            return normalizeScriptRuntimeTimeoutSeconds(timeoutItem.value)
+        },
+
+        /**
+         * 检查脚本事件是否超时，若超时则自动重启。
+         */
+        async checkScriptRuntimeWatchdog() {
+            const scope = this.resolveRuntimeWatchdogScope()
+            if (!scope) return
+            const timeoutSeconds = this.getRuntimeTimeoutSecondsByScope(scope)
+            // 超时设为 0 表示禁用看门狗：停止计时并跳过本次检查（配置变更后由 syncScriptRuntimeWatchdog 重新启停）。
+            if (timeoutSeconds <= 0) {
+                this.stopScriptRuntimeWatchdog()
+                return
+            }
+            if (scriptRuntimeRestartingByTimeout) return
+            if (!this.resolveRuntimeWatchdogScriptName()) return
+            if (!this.lastEventAt) {
+                this.touchScriptEvent()
+                return
+            }
+            if (Date.now() - this.lastEventAt < timeoutSeconds * 1000) return
+            await this.restartRunningScriptByTimeout(timeoutSeconds)
+        },
+
+        /**
+         * 在脚本超时未上报事件时自动重启当前脚本。
+         * @param timeoutSeconds 超时阈值（秒）
+         */
+        async restartRunningScriptByTimeout(timeoutSeconds: number) {
+            if (scriptRuntimeRestartingByTimeout) return
+            const scriptName = this.resolveRuntimeWatchdogScriptName()
+            if (!scriptName) return
+            scriptRuntimeRestartingByTimeout = true
+
+            try {
+                this.appendConsoleLog("warn", `超过 ${timeoutSeconds} 秒未检测到脚本事件，正在自动重启: ${scriptName}`)
+                if (!scriptRuntimeRestartRunner) {
+                    this.appendConsoleLog("warn", `自动重启已跳过：未注册脚本重启执行器 (${scriptName})`)
+                    return
+                }
+                await scriptRuntimeRestartRunner(scriptName)
+                this.appendConsoleLog("info", `脚本自动重启已触发: ${scriptName}`)
+            } catch (error) {
+                console.error("脚本超时自动重启失败", error)
+                this.appendConsoleLog("error", `脚本超时自动重启失败: ${error}`)
+            } finally {
+                scriptRuntimeRestartingByTimeout = false
+                this.touchScriptEvent()
+                await this.syncRunningStateFromBackend()
+            }
+        },
+
+        /**
+         * 启动脚本运行超时看门狗（桌面端脚本由本机运行态托管，仅 Web 运行环境启用）。
+         */
+        startScriptRuntimeWatchdog() {
+            if (env.isApp) return
+            if (scriptRuntimeWatchdogTimer) return
+            scriptRuntimeWatchdogTimer = setInterval(() => {
+                void this.checkScriptRuntimeWatchdog()
+            }, 1000)
+        },
+
+        /**
+         * 停止脚本运行超时看门狗。
+         */
+        stopScriptRuntimeWatchdog() {
+            if (!scriptRuntimeWatchdogTimer) return
+            clearInterval(scriptRuntimeWatchdogTimer)
+            scriptRuntimeWatchdogTimer = null
+        },
+
+        /**
+         * 根据当前运行脚本的超时配置同步看门狗启停：仅在单脚本运行且超时 > 0 时启用，否则禁用。
+         * 在脚本开始/结束运行、运行态同步及超时配置变更后调用。
+         */
+        syncScriptRuntimeWatchdog() {
+            if (env.isApp) return
+            const scope = this.resolveRuntimeWatchdogScope()
+            const timeoutSeconds = scope ? this.getRuntimeTimeoutSecondsByScope(scope) : 0
+            if (this.isRunning && this.runningMode === "single" && timeoutSeconds > 0) {
+                this.startScriptRuntimeWatchdog()
+            } else {
+                this.stopScriptRuntimeWatchdog()
+            }
+        },
+
+        /**
          * 标记脚本开始运行。
          * @param scriptName 脚本名称
          * @param options 附加选项
@@ -567,6 +722,8 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             }
             this.runningScriptName = String(scriptName ?? "").trim()
             this.runningScriptCount = Math.max(1, Number(options.count ?? 1))
+            // 脚本开始运行后按超时配置决定是否启用看门狗。
+            this.syncScriptRuntimeWatchdog()
         },
 
         /**
@@ -579,6 +736,8 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             this.isRunning = true
             this.runningMode = "scheduler"
             this.runningScriptCount = Math.max(1, this.runningScriptCount || 1)
+            // 调度器模式不看门狗（仅单脚本运行自动重启），同步为禁用。
+            this.syncScriptRuntimeWatchdog()
         },
 
         /**
@@ -892,6 +1051,10 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             item.updatedAt = Date.now()
             this.activeConfigScope = scope
             this.persistScriptConfigItems()
+            // 若更新的是运行超时配置，同步看门狗启停（0 表示禁用）。
+            if (matchedName === SCRIPT_RUNTIME_TIMEOUT_CONFIG_ITEM_NAME) {
+                this.syncScriptRuntimeWatchdog()
+            }
             return true
         },
 
@@ -931,6 +1094,10 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             this.runningScriptCount = 0
             this.runningScriptPaths = []
             this.runningStartedAt = 0
+            // 运行结束后重置看门狗事件基准与重启中标记，并禁用看门狗。
+            this.lastEventAt = 0
+            scriptRuntimeRestartingByTimeout = false
+            this.syncScriptRuntimeWatchdog()
         },
 
         /**
@@ -955,6 +1122,8 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
                 }
                 this.runningScriptCount = normalizedCount
                 this.runningScriptName = getScriptFileNameFromPath(normalizedPaths[0] ?? "")
+                // 后端恢复运行态后按超时配置同步看门狗启停。
+                this.syncScriptRuntimeWatchdog()
                 return
             }
 
@@ -1046,6 +1215,10 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
                     })
                     setConfigListenerReady = true
                 }
+
+                // 看门狗随运行时跟踪一并启动，独立于任何页面的挂载/卸载；
+                // 初始无脚本运行时按默认（超时 0）保持禁用，待脚本开始运行后再按配置启用。
+                this.syncScriptRuntimeWatchdog()
             })()
 
             try {
@@ -1074,6 +1247,9 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          * 释放全局监听（仅用于测试或热重载场景）。
          */
         disposeRuntimeTracking() {
+            // 看门狗随运行时跟踪一并停止，重置重启中标记。
+            this.stopScriptRuntimeWatchdog()
+            scriptRuntimeRestartingByTimeout = false
             if (runtimeUnlistenFn) {
                 runtimeUnlistenFn()
                 runtimeUnlistenFn = null
