@@ -68,6 +68,16 @@ const isBusy = computed(() => step.value.kind === "app-update" || step.value.kin
 
 const appNewVersion = computed(() => (step.value.kind === "app-new-version" ? step.value.version : ""))
 const appNewBody = computed(() => (step.value.kind === "app-new-version" ? step.value.body : ""))
+
+/**
+ * 应用更新说明条目：将 release body 按逗号/换行切分为列表项（与更新日志版本说明展示一致）。
+ */
+const appNewNotes = computed(() =>
+    appNewBody.value
+        .split(/[，,]+|\n+/)
+        .map(part => part.trim())
+        .filter(Boolean)
+)
 const packStepVersion = computed(() =>
     step.value.kind === "pack-install" ? step.value.version : step.value.kind === "pack-update" ? step.value.to : ""
 )
@@ -345,15 +355,15 @@ declare global {
 <template>
     <Teleport to="body">
         <dialog v-if="dialogOpen && step.kind !== 'idle'" class="modal modal-open" @click="handleDismiss">
-            <div class="modal-box w-[calc(100vw-2rem)] max-w-160 overflow-hidden p-0 shadow-2xl" @click.stop>
-                <!-- 顶部渐变横幅 -->
-                <div class="relative h-28 overflow-hidden">
-                    <div class="absolute inset-0 bg-linear-to-br from-primary/30 via-base-100 to-secondary/25" />
-                    <div class="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-primary/30 blur-3xl" />
-                    <div class="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-secondary/25 blur-3xl" />
-                    <div class="relative flex h-full items-center gap-4 px-6 sm:px-8">
+            <div
+                class="modal-box w-[calc(100vw-2rem)] max-w-160 overflow-hidden rounded-xs border border-base-content/15 bg-base-100/85 p-0 shadow-2xl backdrop-blur-md"
+                @click.stop
+            >
+                <!-- 顶部横幅：纸面直角风格（hairline 分隔 + 主色克制强调） -->
+                <div class="relative flex-none border-b border-base-content/10 px-6 py-5 sm:px-8">
+                    <div class="flex items-center gap-3.5">
                         <div
-                            class="flex h-12 w-12 flex-none items-center justify-center rounded-2xl border border-primary/20 bg-base-100/70 text-2xl text-primary shadow-lg backdrop-blur"
+                            class="flex h-10 w-10 flex-none items-center justify-center rounded-xs border border-primary/25 bg-primary/10 text-lg text-primary"
                         >
                             <Icon
                                 :icon="
@@ -369,25 +379,48 @@ declare global {
                                 "
                             />
                         </div>
-                        <div>
-                            <div class="flex items-center gap-2 text-xs font-medium text-primary">
-                                <span class="h-1.5 w-1.5 rounded-full bg-primary" />
+                        <div class="min-w-0 flex-1">
+                            <p class="flex items-center gap-2 text-[11px] font-semibold tracking-[0.3em] text-primary uppercase">
+                                <span class="h-px w-5 bg-primary" aria-hidden="true" />
                                 DNA Builder
-                            </div>
-                            <h3 class="mt-1 text-xl font-semibold tracking-tight text-base-content sm:text-2xl">
-                                {{ dialogTitle }}
-                            </h3>
+                            </p>
+                            <h3 class="mt-1 truncate text-lg font-semibold text-base-content sm:text-xl">{{ dialogTitle }}</h3>
                         </div>
+                        <!-- 关闭按钮：忙碌步骤禁用，行为与遮罩点击一致 -->
+                        <button
+                            type="button"
+                            class="flex-none cursor-pointer rounded-xs border border-base-content/20 bg-base-100/80 p-1.5 text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                            title="关闭"
+                            :disabled="isBusy"
+                            @click="handleDismiss"
+                        >
+                            <Icon icon="radix-icons:cross2" class="block size-4" />
+                        </button>
                     </div>
                 </div>
 
                 <!-- 主体内容 -->
                 <div class="px-6 py-5 sm:px-8 sm:py-6">
-                    <!-- 应用更新 -->
+                    <!-- 应用更新：版本+内容块（与更新日志一致） -->
                     <template v-if="step.kind === 'app-new-version'">
-                        <p class="whitespace-pre-line text-sm leading-6 text-base-content/70">
-                            {{ $t("updater.newVersionMessage", { version: appNewVersion, body: appNewBody }) }}
+                        <p class="text-sm leading-6 text-base-content/70">
+                            {{ $t("updater.newVersionFound", { version: appNewVersion }) }}
                         </p>
+                        <div class="mt-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
+                            <div class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">
+                                {{ appNewVersion }}
+                            </div>
+                            <ul v-if="appNewNotes.length" class="mt-1.5 space-y-1">
+                                <li
+                                    v-for="item in appNewNotes"
+                                    :key="item"
+                                    class="flex items-start gap-1.5 text-xs text-base-content/65"
+                                >
+                                    <span class="mt-1.25 h-1 w-1 shrink-0 rounded-full bg-primary/60" aria-hidden="true" />
+                                    <span class="min-w-0">{{ item }}</span>
+                                </li>
+                            </ul>
+                        </div>
                         <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
                             <button class="btn btn-ghost w-full min-w-28 sm:w-auto" @click="skipAppUpdate">稍后</button>
                             <button class="btn btn-primary w-full min-w-36 sm:w-auto" @click="applyUpdate">
@@ -400,11 +433,8 @@ declare global {
                     <!-- 应用更新进度 -->
                     <div v-else-if="step.kind === 'app-update'" class="py-2">
                         <p class="text-sm leading-6 text-base-content/70">{{ $t("updater.updating") }}</p>
-                        <div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-base-200">
-                            <div
-                                class="h-full rounded-full bg-primary transition-all duration-200"
-                                :style="{ width: `${updateProgress}%` }"
-                            />
+                        <div class="mt-4 h-1.5 w-full overflow-hidden rounded-xs bg-base-content/10">
+                            <div class="h-full bg-primary transition-[width] duration-200" :style="{ width: `${updateProgress}%` }" />
                         </div>
                         <p class="mt-2 text-xs tabular-nums text-base-content/50">{{ updateProgress.toFixed(0) }}%</p>
                     </div>
@@ -418,22 +448,24 @@ declare global {
                             <template v-else>尚未安装数据包，安装后才能正常加载全部内容数据。</template>
                         </p>
 
-                        <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                            <div class="rounded-2xl border border-base-content/10 bg-base-100/70 p-4">
-                                <div class="text-xs text-base-content/50">当前版本</div>
-                                <div class="mt-2 break-all text-sm font-semibold text-base-content">
+                        <div class="mt-6 grid gap-2.5 sm:grid-cols-2">
+                            <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2.5">
+                                <div class="text-[11px] tracking-wide text-base-content/50">当前版本</div>
+                                <div class="mt-1 break-all text-sm font-semibold text-base-content tabular-nums">
                                     {{ currentPackVersion || "未激活" }}
                                 </div>
                             </div>
-                            <div class="rounded-2xl border border-base-content/10 bg-base-100/70 p-4">
-                                <div class="text-xs text-base-content/50">最新版本</div>
-                                <div class="mt-2 break-all text-sm font-semibold text-base-content">
+                            <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2.5">
+                                <div class="text-[11px] tracking-wide text-base-content/50">最新版本</div>
+                                <div class="mt-1 break-all text-sm font-semibold text-base-content tabular-nums">
                                     {{ packStepVersion || "暂无" }}
                                 </div>
                             </div>
-                            <div v-if="packStepNotes" class="rounded-2xl border border-base-content/10 bg-base-100/70 p-4 sm:col-span-2">
-                                <div class="text-xs text-base-content/50">更新说明</div>
-                                <div class="mt-2 whitespace-pre-wrap wrap-break-word text-sm text-base-content/80">{{ packStepNotes }}</div>
+                            <div v-if="packStepNotes" class="rounded-xs border border-base-content/10 bg-base-content/3 p-3 sm:col-span-2">
+                                <div class="text-[11px] tracking-wide text-base-content/50">更新说明</div>
+                                <div class="mt-1.5 whitespace-pre-wrap wrap-break-word text-[13px] leading-6 text-base-content/75">
+                                    {{ packStepNotes }}
+                                </div>
                             </div>
                         </div>
 
@@ -455,45 +487,71 @@ declare global {
                     <!-- 数据包下载进度 -->
                     <div v-else-if="step.kind === 'pack-progress'" class="py-2">
                         <p class="text-sm leading-6 text-base-content/70">正在下载数据包，请稍候…</p>
-                        <div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-base-200">
+                        <div class="mt-4 h-1.5 w-full overflow-hidden rounded-xs bg-base-content/10">
                             <div
-                                class="h-full rounded-full bg-primary transition-all duration-200"
+                                class="h-full bg-primary transition-[width] duration-200"
                                 :style="{ width: `${Math.round(dataPack.downloadProgress * 100)}%` }"
                             />
                         </div>
                         <p class="mt-2 text-xs tabular-nums text-base-content/50">{{ Math.round(dataPack.downloadProgress * 100) }}%</p>
                     </div>
 
-                    <!-- 更新日志 -->
+                    <!-- 更新日志：版本+内容块（与首页 Changelog.vue 一致） -->
                     <div v-else-if="step.kind === 'changelog'" class="flex flex-col">
-                        <p class="text-sm leading-6 text-base-content/70">{{ $t("home.welcome") }} {{ currentVersion }}</p>
-                        <div class="mt-4 max-h-72 space-y-2 overflow-y-auto">
+                        <p class="text-sm leading-6 text-base-content/70">
+                            {{ $t("home.welcome") }}
+                            <span class="font-orbitron font-semibold text-primary tabular-nums">{{ currentVersion }}</span>
+                        </p>
+                        <div class="mt-4 max-h-72 space-y-1.5 overflow-y-auto pr-1">
                             <template v-if="versions.length > 0">
                                 <div
                                     v-for="version in newVersions()"
                                     :key="version.version"
-                                    class="rounded-lg bg-base-200 p-4 hover:bg-base-300 transition-colors duration-300"
+                                    class="rounded-xs border border-base-content/10 bg-base-100/60 p-3"
                                 >
-                                    <div class="font-semibold text-primary">{{ version.version }}</div>
-                                    <ul class="mt-1 list-inside list-disc text-sm leading-relaxed text-base-content/80">
-                                        <li v-for="item in version.msg.split(', ')" :key="item">{{ item }}</li>
+                                    <div class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">
+                                        {{ version.version }}
+                                    </div>
+                                    <ul class="mt-1.5 space-y-1">
+                                        <li
+                                            v-for="item in version.msg.split(', ')"
+                                            :key="item"
+                                            class="flex items-start gap-1.5 text-xs text-base-content/65"
+                                        >
+                                            <span class="mt-1.25 h-1 w-1 shrink-0 rounded-full bg-primary/60" aria-hidden="true" />
+                                            <span class="min-w-0">{{ item }}</span>
+                                        </li>
                                     </ul>
                                 </div>
                             </template>
-                            <div v-else class="text-center text-sm text-base-content/50">{{ $t("home.noupdate") }}</div>
+                            <div
+                                v-else
+                                class="rounded-xs border border-dashed border-base-content/15 py-8 text-center text-sm text-base-content/50"
+                            >
+                                {{ $t("home.noupdate") }}
+                            </div>
                         </div>
-                        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div class="flex flex-col gap-1 text-xs text-base-content/60">
+                        <!-- 支持信息 + 确认 -->
+                        <div
+                            class="mt-5 flex flex-col gap-3 border-t border-base-content/10 pt-4 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                            <div class="flex flex-col gap-1 text-[11px] leading-5 text-base-content/55">
                                 <span>{{ $t("updater.supportIntro") }}</span>
-                                <span>
+                                <span class="flex flex-wrap items-center gap-x-1">
                                     {{ $t("updater.supportDonate") }}：
-                                    <a class="link link-primary" href="https://ifdian.net/a/pa001024" target="_blank"
+                                    <a
+                                        class="text-primary underline decoration-primary/40 underline-offset-[3px] hover:decoration-primary"
+                                        href="https://ifdian.net/a/pa001024"
+                                        target="_blank"
                                         >https://ifdian.net/a/pa001024</a
                                     >
                                 </span>
-                                <span>
+                                <span class="flex flex-wrap items-center gap-x-1">
                                     {{ $t("updater.supportBuyApp") }}：
-                                    <a class="link link-primary" href="https://apps.microsoft.com/detail/9nk8zw43shb1" target="_blank"
+                                    <a
+                                        class="text-primary underline decoration-primary/40 underline-offset-[3px] hover:decoration-primary"
+                                        href="https://apps.microsoft.com/detail/9nk8zw43shb1"
+                                        target="_blank"
                                         >https://apps.microsoft.com/detail/9nk8zw43shb1</a
                                     >
                                 </span>
