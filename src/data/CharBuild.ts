@@ -164,6 +164,11 @@ const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((att
     number
 >
 
+/** 魔之楔极性类型（趋向） */
+type PolarityType = "A" | "D" | "V" | "O"
+/** 极性遍历顺序（用于极化方案的确定性） */
+const POLARITY_TYPES: PolarityType[] = ["V", "D", "A", "O"]
+
 export class CharBuildTimeline {
     totalTime: number = 0
     hp: [number, number][] = []
@@ -2386,6 +2391,9 @@ export class CharBuild {
 
         function evaluateMember(memberName?: string, ns?: string, fieldName?: string, temporaryAttributes?: TemporaryAttributes) {
             const damage = getDamage(ns, fieldName, temporaryAttributes)
+            // 无成员访问（裸伤害字段）：返回完整期望伤害乘区（默认伤害系数）
+            if (!memberName) return damage.expectedDamage
+            memberName = memberName?.replace(/非|低/g, "未")
             if (memberName === "N") return damage.noHpDamage
             if (memberName === "物理") return damage.physicalDamage ?? 0
             if (memberName === "元素") return damage.elementDamage ?? damage.expectedDamage
@@ -2397,7 +2405,7 @@ export class CharBuild {
             if (memberName === "未触发暴击" || memberName === "暴击未触发") return damage.higherCritNoTrigger || damage.expectedDamage
             if (memberName === "触发未暴击" || memberName === "未暴击触发") return damage.lowerCritTrigger || damage.expectedDamage
             if (memberName === "未暴击未触发" || memberName === "未触发未暴击") return damage.lowerCritNoTrigger || damage.expectedDamage
-            return damage.expectedDamage // 找不到成员默认期望伤害
+            return 0 // 找不到成员默认0
         }
 
         /**
@@ -3122,29 +3130,73 @@ export class CharBuild {
         }
         return []
     }
-    getModCost(charTab: string) {
-        if (charTab === "同律" && this.skillWeapon?.inherit) {
-            charTab = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
-        }
-        return this.getMods(charTab).reduce((acc, cur) => acc + (cur?.耐受 || 0), 0)
-    }
-    getModCostMax(charTab: string) {
-        if (charTab === "同律" && this.skillWeapon?.inherit) {
-            charTab = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
-        }
-        const max = this.getModCap(charTab)
-        let now = this.getModCost(charTab)
-        const costs = this.getMods(charTab)
-            .map((m, i) => ({ m, i }))
+    /**
+     * 计算给定MOD集合在指定上限下需要极化的槽位索引（半价削减耐受）。
+     * 按耐受从高到低半价直至不超过上限；0耐受/空槽位不参与。
+     * @param mods MOD集合（角色类型末尾可为光环MOD（undefined/null），可被极化）
+     * @param cap 耐受上限
+     * @returns 需要极化的槽位索引（0 起）
+     */
+    private calcPolarizationPlan(mods: (LeveledMod | null | undefined)[], cap: number) {
+        const need = new Set<number>()
+        let now = mods.reduce((acc, cur) => acc + (cur?.耐受 || 0), 0)
+        mods.map((m, i) => ({ m, i }))
+            .filter(cost => (cost.m?.耐受 || 0) > 0)
             .sort((a, b) => (b.m?.耐受 || 0) - (a.m?.耐受 || 0))
-        for (const cost of costs) {
-            if (now > max) {
+            .forEach(cost => {
+                if (now <= cap) return
                 now -= (cost.m?.耐受 || 0) - Math.ceil((cost.m?.耐受 || 0) / 2)
-            } else {
-                break
-            }
+                need.add(cost.i)
+            })
+        return [...need]
+    }
+
+    /**
+     * 计算指定MOD集合按极化方案削减后的总耐受。
+     * @param mods MOD集合
+     * @param plan 极化方案索引
+     * @returns 极化后的总耐受
+     */
+    private calcPolarizedCost(mods: (LeveledMod | null | undefined)[], plan: number[]) {
+        const need = new Set(plan)
+        return mods.reduce(
+            (acc, cur, index) => acc + (cur?.耐受 || 0) - (need.has(index) ? (cur?.耐受 || 0) - Math.ceil((cur?.耐受 || 0) / 2) : 0),
+            0
+        )
+    }
+
+    /**
+     * 获取指定类型的MOD总耐受。
+     * @param charTab MOD类型（角色/近战/远程/同律）
+     * @param extraMods 可选的第二套MOD表（方案兼容注入，仅参与耐受/极性计算，不参与数据计算）。
+     *                 角色类型需传 9 元素（8 角色MOD + 1 光环MOD，光环可为 null，光环可被极化即光环极化）；
+     *                 其余类型传对应槽位数（近战/远程 8，同律 4），空元素用 null 占位。
+     * @returns 总耐受值（第一套 + 第二套）
+     */
+    getModCost(charTab: string, extraMods?: (LeveledMod | null)[]) {
+        if (charTab === "同律" && this.skillWeapon?.inherit) {
+            charTab = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
         }
-        return now
+        const extraCost = (extraMods || []).reduce((acc, cur) => acc + (cur?.耐受 || 0), 0)
+        return this.getMods(charTab).reduce((acc, cur) => acc + (cur?.耐受 || 0), 0) + extraCost
+    }
+
+    /**
+     * 获取指定类型按极化方案削减后的最大可行耐受。
+     * @param charTab MOD类型
+     * @param extraMods 可选的第二套MOD表（注入时返回两套在共享极化方案下的峰值负荷，含异极性惩罚）
+     * @returns 极化后的总耐受
+     */
+    getModCostMax(charTab: string, extraMods?: (LeveledMod | null)[]) {
+        if (charTab === "同律" && this.skillWeapon?.inherit) {
+            charTab = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
+        }
+        const cap = this.getModCap(charTab)
+        const base = this.getMods(charTab)
+        const extra = extraMods || []
+        if (extra.length === 0) return this.calcPolarizedCost(base, this.calcPolarizationPlan(base, cap))
+        const plan = this.getSharedPolarizationPlan(charTab, extra)
+        return Math.max(plan.cost1, plan.cost2)
     }
     getModCap(charTab: string) {
         if (charTab === "同律" && this.skillWeapon?.inherit) {
@@ -3158,25 +3210,256 @@ export class CharBuild {
         }
         return 20 + ((charTab === "角色" && this.auraMod?.最大耐受) || 0) + charOrWeapon.等级
     }
-    getModCostTransfer(charTab: string) {
+    /**
+     * 计算一套普通MOD（不含中央槽）在给定极化方案下的总耐受与各槽位状态。
+     * 规则：MOD极性 = 槽位极性 → 半价(ceil)；MOD有极性但与槽位极性不同 → ×1.5(ceil)（惩罚）；
+     *      无极性MOD不受影响；未极化槽位原价；空槽位中性。
+     * 分配：同极性槽优先半价最贵的MOD；其余极化槽优先落在空槽/无极性MOD上（无惩罚），
+     *      仍多余的极化槽由最便宜的未匹配MOD承受 ×1.5 惩罚。
+     * @param normals 普通槽MOD列表
+     * @param counts 各极性极化槽数量
+     * @param aura 中央槽MOD（光环，可为空）
+     * @param auraType 中央槽极性（未极化 null）
+     * @param normalSlotCount 普通槽位数（角色/近战/远程 8，同律 4）
+     * @param auraIndex 中央槽在完整MOD列表中的索引（用于标记槽位）
+     * @returns 总耐受与半价/惩罚槽位索引
+     */
+    private calcSetCost(
+        normals: (LeveledMod | null | undefined)[],
+        counts: Record<PolarityType, number>,
+        aura: LeveledMod | null,
+        auraType: PolarityType | null,
+        normalSlotCount: number,
+        auraIndex: number
+    ) {
+        const N = normalSlotCount
+        const K = POLARITY_TYPES.reduce((sum, T) => sum + counts[T], 0)
+        const groups: Record<PolarityType, { i: number; cost: number }[]> = { A: [], D: [], V: [], O: [] }
+        const noPol: { i: number; cost: number }[] = []
+        let occupied = 0
+        normals.forEach((m, i) => {
+            if (!m?.耐受) return
+            occupied++
+            ;(m.极性 ? groups[m.极性 as PolarityType] : noPol).push({ i, cost: m.耐受 })
+        })
+        POLARITY_TYPES.forEach(T => groups[T].sort((a, b) => b.cost - a.cost))
+
+        let cost = 0
+        const halved: number[] = []
+        const penalized: number[] = []
+        let matchedCount = 0
+
+        // 1. 同极性槽位半价（每极性最贵的 counts[T] 个）
+        POLARITY_TYPES.forEach(T => {
+            groups[T].slice(0, counts[T]).forEach(m => {
+                cost += Math.ceil(m.cost / 2)
+                halved.push(m.i)
+            })
+            matchedCount += Math.min(counts[T], groups[T].length)
+        })
+
+        // 2. 剩余极化槽优先落在空槽/无极性MOD上（无惩罚），多余的由未匹配MOD承受 ×1.5 惩罚
+        const unmatched = POLARITY_TYPES.flatMap(T => groups[T].slice(counts[T]))
+        const emptySlots = N - occupied
+        const dangerSlots = K - matchedCount
+        const safeHold = emptySlots + noPol.length
+        const penaltyCount = Math.min(unmatched.length, Math.max(0, dangerSlots - safeHold))
+        const sortedUnmatched = [...unmatched].sort((a, b) => a.cost - b.cost)
+        const penalizeSet = new Set(sortedUnmatched.slice(0, penaltyCount).map(m => m.i))
+        sortedUnmatched.forEach(m => {
+            if (penalizeSet.has(m.i)) {
+                cost += Math.ceil(m.cost * 1.5)
+                penalized.push(m.i)
+            } else {
+                cost += m.cost
+            }
+        })
+        noPol.forEach(m => (cost += m.cost))
+
+        // 3. 中央槽（光环）：同极性半价、异极性惩罚、无极性或未极化原价
+        if (aura?.耐受) {
+            if (auraType === aura.极性) {
+                cost += Math.ceil(aura.耐受 / 2)
+                halved.push(auraIndex)
+            } else if (auraType && aura.极性) {
+                cost += Math.ceil(aura.耐受 * 1.5)
+                penalized.push(auraIndex)
+            } else {
+                cost += aura.耐受
+            }
+        }
+
+        return { cost, halved, penalized }
+    }
+
+    /**
+     * 生成同时满足两套MOD的共享极化方案（本质：用同一套极化方案分别应用到两套MOD）。
+     * 极化方案 = 各极性极化槽数量（普通槽，不超过槽位数）+ 中央槽极性（角色类型，可极化一次）。
+     * 应用规则：每套中对应极性的MOD按耐受从高到低优先半价；异极性槽位 ×1.5 惩罚。
+     * 贪心：每步完整重算两套耐受，选择"对仍超出上限的套合计节省最大"的候选；
+     * 平局时优先帮助两套、其次缺口更大、再次优先满足第一套；不可破坏已满足的套；
+     * 若无法同时满足，优先满足第一套。
+     * @param charTab MOD类型
+     * @param extraMods 第二套MOD表（角色类型需含光环元素，光环可参与极化）
+     * @returns 共享极化方案（含各套半价/惩罚槽位索引与最终耐受）
+     */
+    getSharedPolarizationPlan(charTab: string, extraMods?: (LeveledMod | null)[]) {
         if (charTab === "同律" && this.skillWeapon?.inherit) {
             charTab = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
         }
-        const max = this.getModCap(charTab)
-        let now = this.getModCost(charTab)
-        const costs = this.getMods(charTab)
-            .map((m, i) => ({ m, i }))
-            .sort((a, b) => (b.m?.耐受 || 0) - (a.m?.耐受 || 0))
-        const need: number[] = []
-        for (const cost of costs) {
-            if (now > max) {
-                now -= (cost.m?.耐受 || 0) - Math.ceil((cost.m?.耐受 || 0) / 2)
-                need.push(cost.i)
-            } else {
-                break
-            }
+        const cap = this.getModCap(charTab)
+        const base = this.getMods(charTab)
+        const extra = extraMods || []
+        const isChar = charTab === "角色"
+        const normalSlotCount = ModTypeMaxSlot[RModTypeMap[charTab as keyof typeof RModTypeMap]] || 8
+
+        // 拆分中央槽（光环，仅角色类型为末尾元素）与普通MOD
+        const splitAura = (mods: (LeveledMod | null | undefined)[]) => {
+            if (!isChar || mods.length === 0) return { aura: null as LeveledMod | null, normals: mods }
+            return { aura: mods[mods.length - 1] || null, normals: mods.slice(0, -1) }
         }
-        return need
+        const s1 = splitAura(base)
+        const s2 = splitAura(extra)
+        const auraIndex1 = base.length - 1
+        const auraIndex2 = extra.length - 1
+
+        const counts: Record<PolarityType, number> = { A: 0, D: 0, V: 0, O: 0 }
+        let auraType: PolarityType | null = null
+
+        while (true) {
+            const r1 = this.calcSetCost(s1.normals, counts, s1.aura, auraType, normalSlotCount, auraIndex1)
+            const r2 = this.calcSetCost(s2.normals, counts, s2.aura, auraType, normalSlotCount, auraIndex2)
+            const cost1 = r1.cost
+            const cost2 = r2.cost
+            if (cost1 <= cap && cost2 <= cap) break
+
+            const over1 = cost1 > cap
+            const over2 = cost2 > cap
+            const deficit1 = Math.max(0, cost1 - cap)
+            const deficit2 = Math.max(0, cost2 - cap)
+            const totalPolarized = POLARITY_TYPES.reduce((sum, T) => sum + counts[T], 0)
+
+            type PolarCandidate = {
+                benefit: number
+                helped: number
+                maxDeficit: number
+                helpFirst: boolean
+                T: PolarityType
+                kind: "normal" | "aura"
+            }
+            const candidates: PolarCandidate[] = []
+            /**
+             * 收集候选极化（新增一个 T 型槽或把中央槽极化为 T）。
+             * @param benefit 对仍超上限的套合计节省
+             * @param T 极性
+             * @param kind 槽位种类
+             * @param help1 是否帮助第一套
+             * @param help2 是否帮助第二套
+             */
+            const consider = (benefit: number, T: PolarityType, kind: "normal" | "aura", help1: boolean, help2: boolean) => {
+                if (benefit <= 0) return
+                const helped = (help1 ? 1 : 0) + (help2 ? 1 : 0)
+                const maxDeficit = help1 && help2 ? Math.max(deficit1, deficit2) : help1 ? deficit1 : deficit2
+                candidates.push({ benefit, helped, maxDeficit, helpFirst: help1, T, kind })
+            }
+            /**
+             * 贪心优先级：合计节省 > 帮助套数 > 优先满足第一套 > 缺口更大 > 固定极性顺序。
+             * @param a 候选A
+             * @param b 候选B
+             * @returns b 是否优于 a
+             */
+            const isBetter = (a: PolarCandidate, b: PolarCandidate) =>
+                b.benefit > a.benefit ||
+                (b.benefit === a.benefit &&
+                    (b.helped > a.helped ||
+                        (b.helped === a.helped &&
+                            ((b.helpFirst && !a.helpFirst) || (b.helpFirst === a.helpFirst && b.maxDeficit > a.maxDeficit)))))
+
+            for (const T of POLARITY_TYPES) {
+                // 普通槽 +1（不超过槽位上限）
+                if (totalPolarized < normalSlotCount) {
+                    const newCounts = { ...counts, [T]: counts[T] + 1 }
+                    const c1 = this.calcSetCost(s1.normals, newCounts, s1.aura, auraType, normalSlotCount, auraIndex1).cost
+                    const c2 = this.calcSetCost(s2.normals, newCounts, s2.aura, auraType, normalSlotCount, auraIndex2).cost
+                    // 优先满足第一套：绝不使已满足的第一套超出上限或耐受增加；第二套可让步
+                    const valid = over1 || (c1 <= cap && c1 <= cost1)
+                    const benefit = (over1 ? Math.max(0, cost1 - c1) : 0) + (over2 ? Math.max(0, cost2 - c2) : 0)
+                    if (valid && benefit > 0) consider(benefit, T, "normal", over1 && c1 < cost1, over2 && c2 < cost2)
+                }
+                // 中央槽极化为 T（仅未极化时可极化一次）
+                if (auraType === null) {
+                    const c1 = this.calcSetCost(s1.normals, counts, s1.aura, T, normalSlotCount, auraIndex1).cost
+                    const c2 = this.calcSetCost(s2.normals, counts, s2.aura, T, normalSlotCount, auraIndex2).cost
+                    const valid = over1 || (c1 <= cap && c1 <= cost1)
+                    const benefit = (over1 ? Math.max(0, cost1 - c1) : 0) + (over2 ? Math.max(0, cost2 - c2) : 0)
+                    if (valid && benefit > 0) consider(benefit, T, "aura", over1 && c1 < cost1, over2 && c2 < cost2)
+                }
+            }
+
+            const best = candidates.reduce<PolarCandidate | null>((prev, cur) => (!prev || isBetter(prev, cur) ? cur : prev), null)
+            if (!best) break
+            if (best.kind === "aura") auraType = best.T
+            else counts[best.T]++
+        }
+
+        const final1 = this.calcSetCost(s1.normals, counts, s1.aura, auraType, normalSlotCount, auraIndex1)
+        const final2 = this.calcSetCost(s2.normals, counts, s2.aura, auraType, normalSlotCount, auraIndex2)
+        const over1 = final1.cost > cap
+        const over2 = final2.cost > cap
+
+        // 无法共存原因；优先满足第一套（第一套满足后第二套仍超上限才判定无法共存）
+        let reason: "" | "overcap" | "aura" = ""
+        if (over1) {
+            reason = "overcap"
+        } else if (over2) {
+            reason = s1.aura && s2.aura && s1.aura.极性 !== s2.aura.极性 ? "aura" : "overcap"
+        }
+
+        return {
+            plan: counts,
+            aura: auraType,
+            first: final1.halved,
+            second: final2.halved,
+            firstPenalty: final1.penalized,
+            secondPenalty: final2.penalized,
+            cost1: final1.cost,
+            cost2: final2.cost,
+            ok: !over1 && !over2,
+            reason,
+        }
+    }
+
+    /**
+     * 计算需要极化的MOD槽位索引（半价削减耐受）。
+     * - 无第二套时：对第一套按耐受从高到低贪心半价（含光环，可光环极化）；
+     * - 有第二套时：返回共享极化方案（getSharedPolarizationPlan）在各套的槽位索引并集，
+     *   第一套为 0..getMods(charTab).length-1，第二套从 getMods(charTab).length 起偏移。
+     * @param charTab MOD类型
+     * @param extraMods 可选的第二套MOD表（角色类型需含光环元素）
+     * @returns 需要极化的槽位索引
+     */
+    getModCostTransfer(charTab: string, extraMods?: (LeveledMod | null)[]) {
+        if (charTab === "同律" && this.skillWeapon?.inherit) {
+            charTab = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
+        }
+        const cap = this.getModCap(charTab)
+        const base = this.getMods(charTab)
+        const extra = extraMods || []
+        if (extra.length === 0) return this.calcPolarizationPlan(base, cap)
+        const plan = this.getSharedPolarizationPlan(charTab, extra)
+        const offset = base.length
+        return [...plan.first, ...plan.second.map(index => offset + index)]
+    }
+
+    /**
+     * 方案兼容检查：判断两套MOD能否共用同一套极化方案（见 getSharedPolarizationPlan）。
+     * @param charTab MOD类型
+     * @param extraMods 第二套MOD表（角色类型需含光环元素）
+     * @returns 兼容结果（ok 与 reason：overcap | aura）
+     */
+    checkSchemeCompat(charTab: string, extraMods?: (LeveledMod | null)[]) {
+        const plan = this.getSharedPolarizationPlan(charTab, extraMods)
+        return { ok: plan.ok, reason: plan.reason }
     }
 
     getCode(type = "角色") {

@@ -1609,6 +1609,203 @@ describe("CharBuild类测试", () => {
         })
     })
 
+    describe("方案兼容（共享极化方案）", () => {
+        /**
+         * 构造超上限的基础构筑：51411(28) + 41732(18) = 46 / 上限 40，第一套需极化 [0]。
+         * @returns CharBuild
+         */
+        function buildOverCap() {
+            const charBuild = createCharBuild()
+            charBuild.char.等级 = 20
+            charBuild.charMods = [new LeveledMod(51411), new LeveledMod(41732)]
+            charBuild.auraMod = undefined
+            return charBuild
+        }
+
+        /**
+         * 构造 8 槽空第二套MOD表。
+         * @returns 第二套MOD表
+         */
+        function emptyExtra() {
+            return Array(8).fill(null) as (LeveledMod | null)[]
+        }
+
+        /**
+         * 构造指定极性/耐受的角色MOD（复用同一基础MOD并覆写字段）。
+         * @param pol 极性
+         * @param cost 耐受
+         * @returns 角色MOD
+         */
+        function mk(pol: "A" | "D" | "V", cost: number) {
+            const mod = new LeveledMod(51411)
+            mod.极性 = pol
+            mod.耐受 = cost
+            return mod
+        }
+
+        it("无注入时返回第一套自身极化方案", () => {
+            const charBuild = buildOverCap()
+            expect(charBuild.getModCostTransfer("角色")).toEqual([0])
+            expect(charBuild.getModCostTransfer("角色", [])).toEqual([0])
+            expect(charBuild.getModCostMax("角色")).toBe(32)
+            expect(charBuild.getModCostMax("角色", [])).toBe(32)
+        })
+
+        it("角色光环可参与极化（光环极化）", () => {
+            const charBuild = buildOverCap()
+            const aura = new LeveledMod(31524) // 羽蛇·警惕
+            aura.耐受 = 30 // 模拟高耐受光环，使其参与极化排序
+            aura.最大耐受 = 0 // 不提升上限，保持 cap 40
+            charBuild.auraMod = aura
+            // 总 76 > 40：降序 30(光环 idx2)、28(idx0)、18(idx1)
+            expect(charBuild.getModCostTransfer("角色")).toEqual([2, 0, 1])
+            expect(charBuild.getModCostMax("角色")).toBe(38)
+        })
+
+        it("共享极化方案：用同一套方案同时满足两套（1V2A）", () => {
+            const charBuild = createCharBuild()
+            charBuild.char.等级 = 45 // cap = 20 + 45 = 65
+            // A方案：30V 30D 20A 20A
+            charBuild.charMods = [mk("V", 30), mk("D", 30), mk("A", 20), mk("A", 20)]
+            charBuild.auraMod = undefined
+            // B方案：30V 30A 20A 20A
+            const extra = emptyExtra()
+            extra[0] = mk("V", 30)
+            extra[1] = mk("A", 30)
+            extra[2] = mk("A", 20)
+            extra[3] = mk("A", 20)
+
+            const plan = charBuild.getSharedPolarizationPlan("角色", extra)
+            // 应生成 1V2A 而非 A方案最优(V+D)+B方案最优(V+A)
+            expect(plan.ok).toBe(true)
+            expect(plan.plan).toEqual({ A: 2, D: 0, V: 1, O: 0 })
+            // A方案被极化的槽位：V槽[0] + A槽[2,3]
+            expect(plan.first).toEqual([0, 2, 3])
+            // B方案被极化的槽位：V槽[0] + A槽[1,2]
+            expect(plan.second).toEqual([0, 1, 2])
+            // 合并索引：偏移 = base.length = 5
+            expect(charBuild.getModCostTransfer("角色", extra)).toEqual([0, 2, 3, 5, 6, 7])
+            // 两套应用共享方案后均不超上限
+            expect(charBuild.checkSchemeCompat("角色", extra).ok).toBe(true)
+            expect(charBuild.getModCostMax("角色", extra)).toBe(65)
+        })
+
+        it("无法同时满足时优先满足第一套（overcap）", () => {
+            const charBuild = createCharBuild()
+            charBuild.char.等级 = 45 // cap 65
+            // 第一套：30V 30D 20A 20A（可满足）
+            charBuild.charMods = [mk("V", 30), mk("D", 30), mk("A", 20), mk("A", 20)]
+            // 第二套：8×30A = 240，即使全部极化仍 120 > 65，无法满足
+            const extra = emptyExtra()
+            for (let i = 0; i < 8; i++) extra[i] = mk("A", 30)
+            extra.push(null) // 角色类型第二套需含光环位
+
+            const plan = charBuild.getSharedPolarizationPlan("角色", extra)
+            expect(plan.ok).toBe(false)
+            expect(plan.reason).toBe("overcap")
+            // 优先满足第一套：第一套应用共享方案后不超上限
+            expect(plan.cost1).toBeLessThanOrEqual(charBuild.getModCap("角色"))
+        })
+
+        it("两套光环槽极性不同且均需极化时不兼容（aura）", () => {
+            const charBuild = createCharBuild()
+            charBuild.char.等级 = 45 // cap 65
+            charBuild.charMods = [mk("A", 30), mk("A", 30)]
+            const aura1 = new LeveledMod(31524) // D
+            aura1.耐受 = 40
+            aura1.最大耐受 = 0
+            charBuild.auraMod = aura1 // 第一套光环需 D 槽（A槽全极化后仍 70 > 65）
+            const extra = emptyExtra()
+            extra[0] = mk("A", 30)
+            extra[1] = mk("A", 30)
+            const aura2 = new LeveledMod(31512) // V，与第一套不同
+            aura2.耐受 = 40
+            aura2.最大耐受 = 0
+            extra.push(aura2) // 第二套光环需 V 槽
+
+            const plan = charBuild.getSharedPolarizationPlan("角色", extra)
+            // 中央槽只能固定一种极性：优先满足第一套（D），第二套光环无法半价 → 不兼容
+            expect(plan.ok).toBe(false)
+            expect(plan.reason).toBe("aura")
+        })
+
+        it("共享极化数量不超过槽位上限，异极性槽位受×1.5惩罚", () => {
+            const charBuild = createCharBuild()
+            charBuild.char.等级 = 45 // cap 65
+            // A方案：8×A10 = 80；B方案：8×V10 = 80（满槽，V槽落入A槽受惩罚）
+            charBuild.charMods = Array(8)
+                .fill(null)
+                .map(() => mk("A", 10))
+            const extra = emptyExtra()
+            for (let i = 0; i < 8; i++) extra[i] = mk("V", 10)
+            extra.push(null) // 角色类型第二套需含光环位（末尾元素）
+
+            const plan = charBuild.getSharedPolarizationPlan("角色", extra)
+            // 共享极化槽位总数 ≤ 9（8 普通 + 1 中央）
+            const totalSlots = Object.values(plan.plan).reduce((sum, n) => sum + n, 0) + (plan.aura ? 1 : 0)
+            expect(totalSlots).toBeLessThanOrEqual(9)
+            // 第一套 3 个A槽半价后 65 ≤ 65；B方案V槽异极性×1.5惩罚后 95 > 65 → 无法共存
+            expect(plan.ok).toBe(false)
+            expect(plan.reason).toBe("overcap")
+            expect(plan.first).toHaveLength(3)
+            expect(plan.secondPenalty).toHaveLength(3)
+            expect(plan.cost1).toBeLessThanOrEqual(charBuild.getModCap("角色"))
+        })
+
+        it("两套均需多极性极化时共享槽位总数不超过上限", () => {
+            const charBuild = createCharBuild()
+            charBuild.char.等级 = 45 // cap 65
+            // 两套相同：4×A15 + 4×V15 = 120 → 全极化 64 ≤ 65
+            const buildSet = () => {
+                const mods = emptyExtra()
+                for (let i = 0; i < 4; i++) mods[i] = mk("A", 15)
+                for (let i = 4; i < 8; i++) mods[i] = mk("V", 15)
+                return mods
+            }
+            charBuild.charMods = buildSet()
+            const extra = buildSet()
+            extra.push(null) // 角色类型第二套需含光环位
+
+            const plan = charBuild.getSharedPolarizationPlan("角色", extra)
+            const totalSlots = Object.values(plan.plan).reduce((sum, n) => sum + n, 0) + (plan.aura ? 1 : 0)
+            expect(plan.ok).toBe(true)
+            expect(totalSlots).toBeLessThanOrEqual(9)
+            expect(totalSlots).toBe(8)
+        })
+
+        it("异极性惩罚修复假共存：旧模型误判可共存，加入×1.5惩罚后无法共存且优先满足第一套", () => {
+            const charBuild = createCharBuild()
+            charBuild.char.等级 = 50 // cap 70
+            // A方案：8×A15 = 120；B方案：4×V15 = 60（单独不超上限）
+            charBuild.charMods = Array(8)
+                .fill(null)
+                .map(() => mk("A", 15))
+            const extra = emptyExtra()
+            for (let i = 0; i < 4; i++) extra[i] = mk("V", 15)
+
+            const plan = charBuild.getSharedPolarizationPlan("角色", extra)
+            // 第一套全A槽极化后 64 ≤ 70；B方案V槽落入A槽受惩罚（92 > 70）→ 无法共存
+            expect(plan.ok).toBe(false)
+            expect(plan.reason).toBe("overcap")
+            // 优先满足第一套
+            expect(plan.cost1).toBeLessThanOrEqual(charBuild.getModCap("角色"))
+        })
+
+        it("近战类型同样支持共享极化方案注入", () => {
+            const charBuild = createCharBuild()
+            charBuild.meleeWeapon.等级 = 20
+            charBuild.meleeMods = [new LeveledMod(51411), new LeveledMod(41732)] // 46 > 40 → 极化 [0]
+            expect(charBuild.getModCostTransfer("近战")).toEqual([0])
+
+            const extra = emptyExtra()
+            extra[0] = new LeveledMod(51411)
+            extra[1] = new LeveledMod(41732)
+            // 偏移 = getMods("近战").length = 2；共享方案下两套各极化 1 个槽
+            expect(charBuild.getModCostTransfer("近战", extra)).toEqual([0, 2])
+            expect(charBuild.checkSchemeCompat("近战", extra).ok).toBe(true)
+        })
+    })
+
     // 自动构筑测试
     describe("自动构筑测试", () => {
         it("当初始MOD数量已达上限时不应继续超量添加", () => {

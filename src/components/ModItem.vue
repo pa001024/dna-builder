@@ -58,6 +58,8 @@ const props = defineProps<{
     charBuild?: CharBuild
     index?: number
     polset?: boolean
+    /** 槽位受异极性惩罚（×1.5），显示为红色 */
+    penalized?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -197,10 +199,13 @@ function handleMouseUp(event: MouseEvent) {
                 <img class="h-full w-full object-cover" :src="mod.url" :alt="mod.名称" />
                 <!-- 悬停遮罩 -->
                 <div class="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/15" />
-                <!-- 极性 + 耐受 -->
-                <div class="pointer-events-none absolute top-2 left-2 z-10 flex items-center text-xs" :class="{ 'text-green-500': polset }">
+                <!-- 极性 + 耐受：极化槽位绿色半价，异极性惩罚槽位红色×1.5 -->
+                <div
+                    class="pointer-events-none absolute top-2 left-2 z-10 flex items-center text-xs"
+                    :class="{ 'text-green-500': polset, 'text-red-500': penalized }"
+                >
                     <Icon v-if="mod.极性" class="inline-block" :icon="`po-${mod.极性 as 'A' | 'D' | 'V' | 'O'}`" />
-                    {{ polset ? Math.ceil(mod.耐受 / 2) : mod.耐受 }}
+                    {{ penalized ? Math.ceil(mod.耐受 * 1.5) : polset ? Math.ceil(mod.耐受 / 2) : mod.耐受 }}
                 </div>
 
                 <!-- 底部信息条：半透明叠加，固定高度（hover 等级控件原地覆盖，不撑高） -->

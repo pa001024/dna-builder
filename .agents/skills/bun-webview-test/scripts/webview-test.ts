@@ -116,7 +116,7 @@ export async function expectEval(ctx: TestContext, expr: string, expected: unkno
 /** 断言本轮运行中浏览器控制台没有 error / warning */
 export async function expectNoConsoleErrors(): Promise<void> {
     if (consoleErrors.length > 0) {
-        throw new Error(`存在 ${consoleErrors.length} 条浏览器控制台错误:\n  ` + consoleErrors.join("\n  "))
+        throw new Error(`存在 ${consoleErrors.length} 条浏览器控制台错误:\n  ${consoleErrors.join("\n  ")}`)
     }
 }
 

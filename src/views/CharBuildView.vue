@@ -1151,11 +1151,18 @@ async function shareCharBuild(title: string, desc: string = "") {
 ;(globalThis as any).__chapterCounter = 1
 
 let roleCache: DNARoleShowBean | null = null
-async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boolean = false) {
+/**
+ * 从游戏同步指定角色/武器的魔之楔数据（含中央槽光环）。
+ * @param id 角色或武器ID
+ * @param isWeapon 是否武器
+ * @param isConWeapon 是否同律武器
+ * @returns 解析后的魔之楔 [id, 等级] 列表、武器类型与光环ID；失败返回 null
+ */
+async function fetchGameMods(id: number, isWeapon: boolean, isConWeapon: boolean = false) {
     const dna = await setting.getDNAAPI()
     if (!dna) {
         ui.showErrorMessage(t("chat.needLogin"))
-        return
+        return null
     }
     if (!roleCache) {
         await setting.startHeartbeat()
@@ -1163,7 +1170,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             const res = await dna.defaultRoleForTool()
             if (!res.success || !res.data?.roleInfo.roleShow.roleChars) {
                 ui.showErrorMessage(t("char-build.fetch_char_info_failed"))
-                return
+                return null
             }
             roleCache = res.data.roleInfo.roleShow
         } finally {
@@ -1188,45 +1195,42 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
     if (isWeapon || isConWeapon) {
         if (!weapons[id]) {
             ui.showErrorMessage(t("char-build.unavailable_weapon"))
-            return
+            return null
         }
         const weapon = await dna.getWeaponDetail(id, weapons[id].weaponEid)
-        const lw = LeveledWeaponHelper.fromId(id)
         if (!weapon.success || !weapon.data) {
             ui.showErrorMessage(t("char-build.fetch_weapon_info_failed"))
-            return
+            return null
         }
-        const mods = reorderGameStyleModes(weapon.data.weaponDetail.modes)
-            .slice(0, 8)
-            .map(m => {
-                try {
-                    if (!m?.id) return null
-                    const mod = LeveledModHelper.fromId(+m.id, inv.getModLv(+m.id))
-                    return [+m.id, mod.等级] as [number, number]
-                } catch {
-                    return null
-                }
-            })
-        switch (lw.类型) {
-            case "近战":
-                charSettings.value.meleeMods = mods
-                break
-            case "远程":
-                charSettings.value.rangedMods = mods
-                break
+        return {
+            mods: reorderGameStyleModes(weapon.data.weaponDetail.modes)
+                .slice(0, 8)
+                .map(m => {
+                    try {
+                        if (!m?.id) return null
+                        const mod = LeveledModHelper.fromId(+m.id, inv.getModLv(+m.id))
+                        return [+m.id, mod.等级] as [number, number]
+                    } catch {
+                        return null
+                    }
+                }),
+            weaponType: LeveledWeaponHelper.fromId(id).类型,
+            auraMod: undefined,
         }
-    } else {
-        if (!chars[id]) {
-            ui.showErrorMessage(t("char-build.unavailable_char"))
-            return
-        }
-        const char = await dna.getRoleDetail(id, chars[id].charEid)
-        if (!char.success || !char.data) {
-            ui.showErrorMessage(t("char-build.fetch_char_info_failed"))
-            return
-        }
-        const reorderedModes = reorderGameStyleModes(char.data.charDetail.modes)
-        charSettings.value.charMods = reorderedModes
+    }
+
+    if (!chars[id]) {
+        ui.showErrorMessage(t("char-build.unavailable_char"))
+        return null
+    }
+    const char = await dna.getRoleDetail(id, chars[id].charEid)
+    if (!char.success || !char.data) {
+        ui.showErrorMessage(t("char-build.fetch_char_info_failed"))
+        return null
+    }
+    const reorderedModes = reorderGameStyleModes(char.data.charDetail.modes)
+    return {
+        mods: reorderedModes
             .map(m => {
                 try {
                     if (!m?.id) return null
@@ -1236,12 +1240,45 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     return null
                 }
             })
-            .slice(0, 8)
-        if (reorderedModes[8]?.id) {
-            charSettings.value.auraMod = +reorderedModes[8].id
-        }
+            .slice(0, 8),
+        weaponType: undefined,
+        auraMod: reorderedModes[8]?.id ? +reorderedModes[8].id : undefined,
+    }
+}
+
+/**
+ * 从游戏同步魔之楔到当前构筑（第一套）。
+ */
+async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boolean = false) {
+    const data = await fetchGameMods(id, isWeapon, isConWeapon)
+    if (!data) return
+    if (isWeapon || isConWeapon) {
+        if (data.weaponType === "近战") charSettings.value.meleeMods = data.mods
+        else if (data.weaponType === "远程") charSettings.value.rangedMods = data.mods
+    } else {
+        charSettings.value.charMods = data.mods
+        if (data.auraMod) charSettings.value.auraMod = data.auraMod
     }
     localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
+    ui.showSuccessMessage(t("char-build.sync_success"))
+}
+
+/**
+ * 从游戏同步魔之楔到方案B（兼容方案），通过回调写回 ModEditer 本地第二套状态。
+ * @param id 角色或武器ID
+ * @param isWeapon 是否武器
+ * @param isConWeapon 是否同律武器
+ * @param apply 写回回调（mods 为 [id, 等级] 列表，auraMod 为光环ID）
+ */
+async function syncModFromGameToSecond(
+    id: number,
+    isWeapon: boolean,
+    isConWeapon: boolean,
+    apply: (mods: ([number, number] | null)[], auraMod?: number) => void
+) {
+    const data = await fetchGameMods(id, isWeapon, isConWeapon)
+    if (!data) return
+    apply(data.mods, data.auraMod)
     ui.showSuccessMessage(t("char-build.sync_success"))
 }
 </script>
@@ -1943,6 +1980,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 @select-aura-mod="charSettings.auraMod = $event"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
                                 @sync="syncModFromGame(charBuild.char.id, false)"
+                                @sync-second="apply => syncModFromGameToSecond(charBuild.char.id, false, false, apply)"
                             />
 
                             <!-- 近战武器MOD -->
@@ -1964,6 +2002,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
                                 @sync="syncModFromGame(charBuild.meleeWeapon.id, true)"
+                                @sync-second="apply => syncModFromGameToSecond(charBuild.meleeWeapon.id, true, false, apply)"
                             />
 
                             <!-- 远程武器MOD -->
@@ -1985,6 +2024,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
                                 @sync="syncModFromGame(charBuild.rangedWeapon.id, true)"
+                                @sync-second="apply => syncModFromGameToSecond(charBuild.rangedWeapon.id, true, false, apply)"
                             />
 
                             <!-- 同律武器MOD -->
@@ -2006,6 +2046,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
                                 @sync="syncModFromGame(charBuild.char.id, false, true)"
+                                @sync-second="apply => syncModFromGameToSecond(charBuild.char.id, false, true, apply)"
                             />
                         </div>
                     </CollapsibleSection>

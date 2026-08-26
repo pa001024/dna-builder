@@ -9,7 +9,7 @@
  *
  * 失败时会自动在 screenshots/ 下保存 PNG，方便定位问题。
  */
-import { expectEval, expectNoConsoleErrors, expectVisible, run, snapshot, test } from "./webview-test.ts"
+import { expectNoConsoleErrors, run, snapshot, test } from "./webview-test.ts"
 
 // 1) 应用已挂载: Vue 根节点 #app 有子节点
 test("应用根节点 #app 已挂载且有子节点", async ({ view }) => {
