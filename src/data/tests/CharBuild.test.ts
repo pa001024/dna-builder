@@ -324,11 +324,11 @@ describe("CharBuild类测试", () => {
         // 普通属性部分先进入attr链：召唤物攻击速度 = 0.3
         const attrs = buffedBuild.calculateAttributes()
         expect(attrs.召唤物攻击速度).toBeCloseTo(0.3, 6)
-        // code部分在attr链之后计算：召唤物独立增伤 = 1 × (1 + 0.3) = 1.3
-        expect(attrs.召唤物独立增伤).toBeCloseTo(1.3, 6)
-        expect(baseBuild.calculateAttributes().召唤物独立增伤).toBeCloseTo(1, 6)
+        // code部分在attr链之后计算：召唤物独立增伤（0起始）= (1+0) × (1+0.3) - 1 = 0.3
+        expect(attrs.召唤物独立增伤).toBeCloseTo(0.3, 6)
+        expect(baseBuild.calculateAttributes().召唤物独立增伤).toBeCloseTo(0, 6)
 
-        // 目标test：使 [召唤物·战车]技能伤害 伤害增加（独立乘区 ×1.3）
+        // 目标test：使 [召唤物·战车]技能伤害 伤害增加（独立乘区 1+0.3 = 1.3）
         const baseDamage = baseBuild.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")
         const buffedDamage = buffedBuild.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")
 
@@ -364,6 +364,101 @@ describe("CharBuild类测试", () => {
         // 快照往返：同样按引用去重，恢复后结果一致
         const restored = createBuildFromSnapshot(createWorkerSnapshot(build))
         expect(restored.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")).toBeCloseTo(originalDamage, 6)
+    })
+
+    it("召唤物转化词条应按充盈威力范式汇总：近战攻速MOD 52004 + 水雾弥散 51921", () => {
+        const build = new CharBuild({
+            char: new LeveledChar("艾达（？？）"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 0,
+            charMods: [new LeveledMod(51921)], // 水雾弥散（召唤物攻击速度转化 49.5%，召唤物范围转化 24.2%）
+            meleeMods: [new LeveledMod(52004)], // 迅捷（近战攻速 +75%）
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "庆典开始喽",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "[召唤物·审判]技能伤害",
+        })
+        const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
+
+        // 召唤物转化（武器属性）：角色槽 51921 为公共转化词条，近战武器作用域可见
+        expect(attrs.weapon!.召唤物攻击速度转化).toBeCloseTo(0.495, 6)
+        expect(attrs.weapon!.召唤物范围转化).toBeCloseTo(0.242, 6)
+        // 近战武器攻速 = 1 × (1 + 0.75) = 1.75
+        expect(attrs.weapon!.攻速).toBeCloseTo(1.75, 6)
+        // 召唤物攻击速度（角色属性）= 近战武器攻速全额 1.75 × 转化 0.495 = 0.86625
+        expect(attrs.召唤物攻击速度).toBeCloseTo(1.75 * 0.495, 6)
+        // 召唤物范围（角色属性）= 转化词条 0.242
+        expect(attrs.召唤物范围).toBeCloseTo(0.242, 6)
+
+        // 召唤物实际攻速与攻击间隔（召唤物·审判：攻击间隔 3 秒）
+        const summonMap = build.selectedSkill!.getSummonAttrsMap(attrs)
+        expect(summonMap!.attackSpeed).toBeCloseTo(1.75 * 0.495, 6)
+        expect(summonMap!.interval).toBeCloseTo(3 / (1 + 1.75 * 0.495), 6)
+    })
+
+    it("艾达4溯预期收益应计入近战攻速转化：52004 + 51921 下召唤物独立增伤 = 0.3+1.75×0.495，召唤物伤害倍率 = 1+该值", () => {
+        const createBuild = (buffs: LeveledBuff[]) =>
+            new CharBuild({
+                char: new LeveledChar("艾达（？？）"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                charMods: [new LeveledMod(51921)],
+                meleeMods: [new LeveledMod(52004)],
+                buffs,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "庆典开始喽",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "[召唤物·审判]技能伤害",
+            })
+        const baseBuild = createBuild([])
+        const buffedBuild = createBuild([new LeveledBuff("艾达4溯")])
+
+        // 无武器上下文：召唤物攻击速度 = BUFF 直接加成 0.3，召唤物独立增伤（0起始）= 0.3
+        expect(buffedBuild.calculateAttributes().召唤物攻击速度).toBeCloseTo(0.3, 6)
+        expect(buffedBuild.calculateAttributes().召唤物独立增伤).toBeCloseTo(0.3, 6)
+
+        // 武器上下文：召唤物攻击速度 = 0.3 + 1.75×0.495 = 1.16625，召唤物独立增伤 = 1.16625
+        const attrs = buffedBuild.calculateWeaponAttributes()
+        expect(attrs.召唤物攻击速度).toBeCloseTo(0.3 + 1.75 * 0.495, 6)
+        expect(attrs.召唤物独立增伤).toBeCloseTo(0.3 + 1.75 * 0.495, 6)
+
+        // 预期收益：召唤物技能伤害倍率 = 召唤物独立增伤倍率（仅超过100%的部分转化）
+        const baseDamage = baseBuild.calculateTargetFunction(undefined, "[召唤物·审判]技能伤害")
+        const buffedDamage = buffedBuild.calculateTargetFunction(undefined, "[召唤物·审判]技能伤害")
+        expect(baseDamage).toBeGreaterThan(0)
+        expect(buffedDamage / baseDamage).toBeCloseTo(1 + 0.3 + 1.75 * 0.495, 5)
+    })
+
+    it("艾达4溯的直接攻速BUFF无需攻速MOD也应实际提速召唤物", () => {
+        const build = new CharBuild({
+            char: new LeveledChar("艾达（？？）"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 0,
+            buffs: [new LeveledBuff("艾达4溯")],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "庆典开始喽",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "[召唤物·审判]技能伤害",
+        })
+        const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
+        // 近战武器无攻速加成（攻速 = 1，溢出 0），召唤物攻击速度 = BUFF 直接增量 0.3
+        expect(attrs.weapon!.攻速).toBeCloseTo(1, 6)
+        expect(attrs.召唤物攻击速度).toBeCloseTo(0.3, 6)
+        const summonMap = build.selectedSkill!.getSummonAttrsMap(attrs)
+        expect(summonMap!.attackSpeed).toBeCloseTo(0.3, 6)
+        expect(summonMap!.interval).toBeCloseTo(3 / 1.3, 6)
     })
 
     it("[降灵]召唤物属性应按比例缩放召唤物伤害", () => {

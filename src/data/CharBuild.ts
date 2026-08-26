@@ -44,6 +44,8 @@ export interface CharAttr {
     技能倍率乘数: number
     技能倍率赋值: number
     召唤物属性继承比例: number
+    // 召唤物攻击速度/召唤物范围（角色属性，0起始增量）：= 角色直接加成（BUFF/角色MOD等）
+    // + 由 calculateWeaponAttributes 按武器作用域召唤物转化词条汇总（仿充盈威力范式）
     召唤物攻击速度: number
     召唤物范围: number
     召唤物伤害: number
@@ -91,6 +93,10 @@ export interface WeaponAttr {
     武器倍率: number
     /** 充盈威力转化（武器属性）：触发率溢出 100% 的部分按该比例转化为角色充盈威力，0 开始 */
     充盈威力转化: number
+    /** 召唤物攻击速度转化（武器属性）：近战武器攻速按该比例转化为角色召唤物攻击速度，0 开始 */
+    召唤物攻击速度转化: number
+    /** 召唤物范围转化（武器属性）：角色技能范围按该比例转化为召唤物范围，0 开始 */
+    召唤物范围转化: number
 }
 
 const weaponAttackTypeMap = [
@@ -630,8 +636,8 @@ export class CharBuild {
         let summonAttackSpeed = bonuses[characterBonusIndex.召唤物攻击速度]
         let summonRange = bonuses[characterBonusIndex.召唤物范围]
         let summonDamage = bonuses[characterBonusIndex.召唤物伤害]
-        // 召唤物独立增伤乘区：1起始的倍率（0起始的加成累加），供「艾达4溯」等BUFF的code做乘法转化
-        let summonIndependentDamage = 1 + bonuses[characterBonusIndex.召唤物独立增伤]
+        // 召唤物独立增伤：0起始的增量（1 + 该值 = 召唤物伤害乘区），供「艾达4溯」等BUFF的code做乘法转化
+        let summonIndependentDamage = bonuses[characterBonusIndex.召唤物独立增伤]
         const ignoreDefense = this.getTotalBonusMul("无视防御")
         const skillIgnoreDefense = this.getTotalBonusMul("技能无视防御")
         const independentDamageIncrease = this.getTotalBonusMul("独立增伤")
@@ -869,6 +875,27 @@ export class CharBuild {
         return { triggerRate, conversionRate }
     }
 
+    /**
+     * 计算单个武器的攻速与召唤物攻击速度转化。
+     * 攻速加成逻辑与 calculateWeaponAttributes 保持一致（含 200% 上限），供召唤物攻速转化汇总使用。
+     * @param weapon 武器
+     * @returns 攻速与召唤物攻击速度转化
+     */
+    private getWeaponSummonSpeed(weapon: LeveledWeapon | LeveledSkillWeapon) {
+        if (weapon.inherit) {
+            weapon = weapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
+        }
+        const prefix = weapon.类型
+        let attackSpeedBonus = this.getTotalBonus(`${prefix}攻速`, prefix) + this.getTotalBonus(`攻速`, prefix)
+        if (prefix.startsWith("同律")) {
+            const lowerPrefix = prefix.substring(2)
+            attackSpeedBonus += this.getTotalBonus(`${lowerPrefix}攻速`, lowerPrefix)
+        }
+        const attackSpeed = (weapon.射速 || 1) * (1 + Math.min(attackSpeedBonus, 2))
+        const conversionRate = this.getTotalBonus("召唤物攻击速度转化", prefix)
+        return { attackSpeed, conversionRate }
+    }
+
     // 计算武器属性
     public calculateWeaponAttributes(
         weapon = this.selectedWeapon || (this.selectedSkill?.召唤物 && this.meleeWeapon),
@@ -977,6 +1004,9 @@ export class CharBuild {
                 武器倍率: weaponDamageMul,
                 // 充盈威力转化（武器属性）：该武器作用域（角色槽 + 该武器槽）MOD 充盈威力转化词条之和
                 充盈威力转化: this.getTotalBonus("充盈威力转化", prefix),
+                // 召唤物转化（武器属性）：与充盈威力转化同理，该武器作用域（角色槽 + 该武器槽）转化词条之和
+                召唤物攻击速度转化: this.getTotalBonus("召唤物攻击速度转化", prefix),
+                召唤物范围转化: this.getTotalBonus("召唤物范围转化", prefix),
             }
             attrs.weapon = weaponAttrs
         }
@@ -988,6 +1018,13 @@ export class CharBuild {
             totalFullness += Math.max(0, triggerRate - 1) * conversionRate
         }
         attrs.充盈威力 = (attrs.充盈威力 || 0) + totalFullness
+        // 召唤物转化（角色属性）汇总，仿充盈威力转化范式：转化词条在武器作用域，转化结果计入角色属性。
+        // 召唤物绑定近战武器，攻速转化以近战武器攻速全额为来源（如攻速 1.75 × 转化 0.495）；范围转化以角色技能范围为来源（由 LeveledSkill 公式应用技能范围）。
+        if (this.meleeWeapon) {
+            const { attackSpeed, conversionRate } = this.getWeaponSummonSpeed(this.meleeWeapon)
+            attrs.召唤物攻击速度 = (attrs.召唤物攻击速度 || 0) + Math.max(0, attackSpeed) * conversionRate
+            attrs.召唤物范围 = (attrs.召唤物范围 || 0) + this.getTotalBonus("召唤物范围转化", "近战")
+        }
         if (nocode) return attrs
 
         if (this.dynamicBuffs.length > 0) {
@@ -1156,6 +1193,8 @@ export class CharBuild {
         }
         return bonus
     }
+    // 下列属性可以从角色穿透到武器
+    static attrAllowCharToWeapon = new Set(["暴击", "暴伤", "触发", "攻速", "充盈威力转化", "召唤物攻击速度转化", "召唤物范围转化"])
 
     // 获取总加成
     public getTotalBonus(attribute: string, prefix = "角色"): number {
@@ -1183,7 +1222,7 @@ export class CharBuild {
         // 添加MOD加成
         this.mods.forEach(mod => {
             if (
-                ["暴击", "暴伤", "触发", "攻速", "充盈威力转化"].includes(attribute)
+                CharBuild.attrAllowCharToWeapon.has(attribute)
                     ? mod.attrType !== "角色" && mod.attrType !== prefixScope
                     : prefixScope && mod.attrType !== prefixScope
             )
@@ -1456,8 +1495,8 @@ export class CharBuild {
         const isSummonDamage = resolvedFieldName ? resolvedFieldName.includes("召唤物") : !!skill?.召唤物
         const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (isSummonDamage ? attrs.召唤物伤害 : 0)
         const independentDamageIncrease = 1 + attrs.独立增伤
-        // 召唤物独立增伤乘区（1起始的倍率，仅召唤物伤害结算）：如「艾达4溯」将召唤物攻击速度超额部分按比例转化为该乘区
-        const summonIndependentDamageMultiplier = isSummonDamage ? attrs.召唤物独立增伤 : 1
+        // 召唤物独立增伤乘区（0起始增量，1 + 该值 = 仅召唤物伤害结算的倍率）：如「艾达4溯」将召唤物攻击速度超额部分按比例转化为该乘区
+        const summonIndependentDamageMultiplier = isSummonDamage ? 1 + attrs.召唤物独立增伤 : 1
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
         const hpMore = boostMultiplier * desperateMultiplier

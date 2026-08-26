@@ -814,8 +814,9 @@ watch(
     { immediate: true }
 )
 
-// 计算属性
-const attributes = computed(() => charBuild.value.calculateAttributes())
+// 计算属性（含武器作用域）：充盈威力、召唤物攻击速度/范围/独立增伤等依赖武器转化词条，
+// 需与伤害结算一致使用 calculateWeaponAttributes，否则召唤物独立增伤等会漏算转化部分
+const attributes = computed(() => charBuild.value.calculateWeaponAttributes())
 
 /**
  * 计算自定义变量表达式的当前结果（函数定义以示例参数 1,2,3... 代入预览）。

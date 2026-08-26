@@ -110,7 +110,7 @@ function getWeaponAttackLabelPrefix(key: string) {
                     </div>
                 </div>
                 <div
-                    v-for="[key, val] in Object.entries(attributes).filter(([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && v)"
+                    v-for="[key, val] in Object.entries(attributes).filter(([k, v]) => !['召唤物攻击速度', '召唤物范围'].includes(k) && typeof v === 'number' && v)"
                     :key="key"
                     class="rounded-xs bg-linear-to-br from-secondary/10 to-secondary/5 border border-secondary/20 hover:border-secondary/40 p-3 transition-colors duration-200"
                 >

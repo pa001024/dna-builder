@@ -182,7 +182,9 @@ export class LeveledSkill {
     getSummonAttrsMap(attrs?: CharAttr & { weapon?: WeaponAttr }) {
         if (this.召唤物) {
             const summon = this.召唤物
-            const atkspd = ((attrs?.weapon?.攻速 ?? 1) - 1) * (attrs?.召唤物攻击速度 ?? 0)
+            // 召唤物攻击速度（角色属性）已由 calculateWeaponAttributes 按充盈威力范式汇总近战武器攻速 × 召唤物攻击速度转化，
+            // 此处直接作为攻速增量（0起始）使用，不再重复乘以武器攻速。
+            const atkspd = attrs?.召唤物攻击速度 ?? 0
             const df = this.召唤物持续时间
             const duration = df ? (df.属性影响?.includes("技能耐久") ? df.值 * (attrs?.技能耐久 ?? 1) : df.值) : 0
             const interval = summon.攻击间隔 / (1 + atkspd)
@@ -193,6 +195,7 @@ export class LeveledSkill {
                 attackSpeed: atkspd,
                 duration,
                 attackTimes: Math.floor((duration - summon.攻击延迟) / interval),
+                // 召唤物范围（角色属性）同样已汇总召唤物范围转化，直接作为技能范围的增量比例
                 range: Math.min(2.8, (attrs?.技能范围 ?? 1) * (1 + (attrs?.召唤物范围 ?? 0))),
             }
         }

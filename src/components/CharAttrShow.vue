@@ -37,7 +37,8 @@ const dynamicAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() =>
     props.charBuild.dynamicBuffs.forEach((buff, buffIndex) => {
         const buildWithoutBuff = props.charBuild.clone()
         buildWithoutBuff.dynamicBuffs = props.charBuild.dynamicBuffs.filter((_, index) => index !== buffIndex).map(item => item.clone())
-        const attrsWithoutBuff = buildWithoutBuff.calculateAttributes()
+        // 与 attributes 保持同一武器作用域计算，避免充盈威力/召唤物独立增伤等转化属性产生上下文差异的虚假差值
+        const attrsWithoutBuff = buildWithoutBuff.calculateWeaponAttributes()
 
         Object.entries(props.attributes).forEach(([attrKey, attrValue]) => {
             const withoutValue = attrsWithoutBuff[attrKey as keyof CharAttr]
@@ -72,7 +73,7 @@ const modAttributeBonusSources = computed(() => {
 <template>
     <FullTooltip
         v-for="[key, val] in Object.entries(attributes).filter(([k, v]) =>
-            includeKeys ? includeKeys.includes(k) : !excludeKeys.includes(k) && v
+            includeKeys ? includeKeys.includes(k) : !excludeKeys.includes(k) && typeof v === 'number' && v
         )"
         :key="key"
         side="bottom"
