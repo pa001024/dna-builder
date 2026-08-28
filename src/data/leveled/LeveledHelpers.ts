@@ -48,6 +48,8 @@ export class LeveledBuffHelper {
  */
 export class LeveledCharHelper {
     static fromId(id: string | number, level?: number) {
+        if (typeof id === "string") id = +id
+        if (id > 9999) id = ~~(id / 100)
         const charData = charMap.get(id)
         if (!charData) {
             throw new Error(`角色 "${id}" 未在静态表中找到`)
@@ -67,10 +69,10 @@ export class LeveledCharHelper {
         const skills = charMap.get(charName)?.技能.map(skill => new LeveledSkill(skill)) || []
         return skills.flatMap(skill => [skill.名称, ...skill.子技能.map(subSkill => `${skill.名称}[${subSkill}]`)])
     }
-
     static idToUrl(id?: number) {
         if (id === 160101) return LeveledChar.url("Nanzhu")
         if (id === 120101) return LeveledChar.url("Nanzhu02")
+        if (id === 220101) return LeveledChar.url("WeitaM")
         const icon = charMap.get(id || 0)?.icon || "Empty"
         return LeveledChar.url(icon)
     }

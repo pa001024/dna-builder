@@ -58,9 +58,10 @@ export interface CharAttr {
     转贯穿?: number
     转震荡?: number
     转灾厄?: number
+    转充盈?: number
     转属克?: number
     转属逆?: number
-    // 充盈威力（角色属性）：Σ 各武器触发率溢出 100% 的部分 × 该武器充盈威力转化（由 calculateWeaponAttributes 汇总）
+    // 充盈威力（角色属性）：Σ 各武器触发率溢出 100% 的部分 × 该武器充盈转化（由 calculateWeaponAttributes 汇总）
     充盈威力: number
 }
 
@@ -91,19 +92,21 @@ export interface WeaponAttr {
     追加伤害: number
     /** 武器倍率 0开始 */
     武器倍率: number
-    /** 充盈威力转化（武器属性）：触发率溢出 100% 的部分按该比例转化为角色充盈威力，0 开始 */
-    充盈威力转化: number
+    /** 充盈转化（武器属性）：触发率溢出 100% 的部分按该比例转化为角色充盈威力，0 开始 */
+    充盈转化: number
     /** 召唤物攻击速度转化（武器属性）：近战武器攻速按该比例转化为角色召唤物攻击速度，0 开始 */
     召唤物攻击速度转化: number
     /** 召唤物范围转化（武器属性）：角色技能范围按该比例转化为召唤物范围，0 开始 */
     召唤物范围转化: number
 }
 
-const weaponAttackTypeMap = [
-    { prefix: "普攻", patterns: ["普通攻击"] },
-    { prefix: "蓄力", patterns: ["蓄力攻击"] },
-    { prefix: "下落", patterns: ["下落攻击"] },
-    { prefix: "滑行", patterns: ["滑行攻击"] },
+// 武器攻击细分类型 → 字段 tag 映射：伤害字段 tag 由数据侧标注（如 ["近战","武器","蓄力攻击"]），
+// 按 tag 判断攻击类型比按字段名解析更精确；「普通攻击」为「普攻」的别名（兼容 视为 等声明）。
+const weaponAttackTypeTagMap = [
+    { prefix: "普攻", tagNames: ["普攻", "普通攻击"] },
+    { prefix: "蓄力", tagNames: ["蓄力攻击"] },
+    { prefix: "下落", tagNames: ["下落攻击"] },
+    { prefix: "滑行", tagNames: ["滑行攻击"] },
 ] as const
 
 const weaponDamageFieldBaseMap = {
@@ -154,6 +157,7 @@ const characterBonusAttributes = [
     "转贯穿",
     "转震荡",
     "转灾厄",
+    "转充盈",
     "转属克",
     "转属逆",
     "充盈威力",
@@ -655,6 +659,7 @@ export class CharBuild {
         const convertPierce = bonuses[characterBonusIndex.转贯穿]
         const convertImpact = bonuses[characterBonusIndex.转震荡]
         const convertCalamity = bonuses[characterBonusIndex.转灾厄]
+        const convertFullness = bonuses[characterBonusIndex.转充盈]
         const convertRestraint = bonuses[characterBonusIndex.转属克]
         const convertReverse = bonuses[characterBonusIndex.转属逆]
         // 角色 MOD 的充盈威力词条加成（如 56201 充盈·巧击），经公共加成向量汇总
@@ -751,6 +756,7 @@ export class CharBuild {
             转贯穿: convertPierce,
             转震荡: convertImpact,
             转灾厄: convertCalamity,
+            转充盈: convertFullness,
             转属克: convertRestraint,
             转属逆: convertReverse,
             // 充盈威力为角色属性：角色 MOD 充盈威力加成（向量汇总），武器转化部分由 calculateWeaponAttributes 累加
@@ -860,10 +866,10 @@ export class CharBuild {
     }
 
     /**
-     * 计算单个武器的触发率与充盈威力转化。
+     * 计算单个武器的触发率与充盈转化。
      * 触发率数值允许溢出（不钳制 100% 上限），加成逻辑与 calculateWeaponAttributes 保持一致。
      * @param weapon 武器
-     * @returns 触发率与充盈威力转化
+     * @returns 触发率与充盈转化
      */
     private getWeaponFullness(weapon: LeveledWeapon | LeveledSkillWeapon) {
         if (weapon.inherit) {
@@ -873,10 +879,11 @@ export class CharBuild {
         let triggerRateBonus = this.getTotalBonus(`${prefix}触发`, prefix) + this.getTotalBonus(`触发`, prefix)
         if (prefix.startsWith("同律")) {
             const lowerPrefix = prefix.substring(2)
-            triggerRateBonus += this.getTotalBonus(`${lowerPrefix}触发`, lowerPrefix)
+            // 前缀降级仅对 BUFF/武器效果生效；近战/远程 MOD 不随降级穿透到同律武器
+            triggerRateBonus += this.getTotalBonus(`${lowerPrefix}触发`, lowerPrefix, { includeMods: false })
         }
         const triggerRate = Math.round(weapon.基础触发 * (1 + triggerRateBonus) * 100) / 100
-        const conversionRate = this.getTotalBonus("充盈威力转化", prefix)
+        const conversionRate = this.getTotalBonus("充盈转化", prefix)
         return { triggerRate, conversionRate }
     }
 
@@ -894,7 +901,8 @@ export class CharBuild {
         let attackSpeedBonus = this.getTotalBonus(`${prefix}攻速`, prefix) + this.getTotalBonus(`攻速`, prefix)
         if (prefix.startsWith("同律")) {
             const lowerPrefix = prefix.substring(2)
-            attackSpeedBonus += this.getTotalBonus(`${lowerPrefix}攻速`, lowerPrefix)
+            // 前缀降级仅对 BUFF/武器效果生效；近战/远程 MOD 不随降级穿透到同律武器
+            attackSpeedBonus += this.getTotalBonus(`${lowerPrefix}攻速`, lowerPrefix, { includeMods: false })
         }
         const attackSpeed = (weapon.射速 || 1) * (1 + Math.min(attackSpeedBonus, 2))
         const conversionRate = this.getTotalBonus("召唤物攻击速度转化", prefix)
@@ -944,19 +952,21 @@ export class CharBuild {
 
             if (prefix.startsWith("同律")) {
                 const lowerPrefix = prefix.substring(2)
-                attackBonus += this.getTotalBonus(`${lowerPrefix}攻击`, lowerPrefix)
-                critRateBonus += this.getTotalBonus(`${lowerPrefix}暴击`, lowerPrefix)
-                critDamageBonus += this.getTotalBonus(`${lowerPrefix}暴伤`, lowerPrefix)
-                triggerRateBonus += this.getTotalBonus(`${lowerPrefix}触发`, lowerPrefix)
-                attackSpeedBonus += this.getTotalBonus(`${lowerPrefix}攻速`, lowerPrefix)
-                damageIncrease += this.getTotalBonus(`${lowerPrefix}增伤`, lowerPrefix)
-                multiShotBonus += this.getTotalBonus(`${lowerPrefix}多重`, lowerPrefix)
-                reloadTimeBonus += this.getTotalBonus(`${lowerPrefix}装填`, lowerPrefix)
-                magazineBonus += this.getTotalBonus(`${lowerPrefix}弹匣`, lowerPrefix)
-                ammoBonus += this.getTotalBonus(`${lowerPrefix}弹药`, lowerPrefix)
-                weaponDamageMul += this.getTotalBonus(`${lowerPrefix}武器倍率`, lowerPrefix)
+                // 前缀降级仅对 BUFF/武器效果生效；近战/远程 MOD 不随降级穿透到同律武器（MOD 只作用于自身槽位）
+                const excludeMods = { includeMods: false }
+                attackBonus += this.getTotalBonus(`${lowerPrefix}攻击`, lowerPrefix, excludeMods)
+                critRateBonus += this.getTotalBonus(`${lowerPrefix}暴击`, lowerPrefix, excludeMods)
+                critDamageBonus += this.getTotalBonus(`${lowerPrefix}暴伤`, lowerPrefix, excludeMods)
+                triggerRateBonus += this.getTotalBonus(`${lowerPrefix}触发`, lowerPrefix, excludeMods)
+                attackSpeedBonus += this.getTotalBonus(`${lowerPrefix}攻速`, lowerPrefix, excludeMods)
+                damageIncrease += this.getTotalBonus(`${lowerPrefix}增伤`, lowerPrefix, excludeMods)
+                multiShotBonus += this.getTotalBonus(`${lowerPrefix}多重`, lowerPrefix, excludeMods)
+                reloadTimeBonus += this.getTotalBonus(`${lowerPrefix}装填`, lowerPrefix, excludeMods)
+                magazineBonus += this.getTotalBonus(`${lowerPrefix}弹匣`, lowerPrefix, excludeMods)
+                ammoBonus += this.getTotalBonus(`${lowerPrefix}弹药`, lowerPrefix, excludeMods)
+                weaponDamageMul += this.getTotalBonus(`${lowerPrefix}武器倍率`, lowerPrefix, excludeMods)
                 independentDamageIncrease =
-                    (1 + independentDamageIncrease) * (1 + this.getTotalBonusMul(`${lowerPrefix}独立增伤`, lowerPrefix)) - 1
+                    (1 + independentDamageIncrease) * (1 + this.getTotalBonusMul(`${lowerPrefix}独立增伤`, lowerPrefix, excludeMods)) - 1
             }
 
             // 攻速上限
@@ -965,7 +975,8 @@ export class CharBuild {
             let atkRatio = 1
             // 角色精通
             if (this.isWeaponCategoryMastered(weapon)) {
-                atkRatio = 1.2
+                // 同律武器精通倍率提高到 1.4，普通武器保持 1.2
+                atkRatio = weapon.类型.startsWith("同律") ? 1.4 : 1.2
             }
             // 计算武器属性
             let attack = weapon.基础攻击 * (1 + attackBonus) * atkRatio
@@ -983,7 +994,7 @@ export class CharBuild {
             attack *= 1 + physicalBonus
 
             // 触发率数值允许溢出（可超过 100%）：溢出部分由 calculateWeaponDamage 封顶触发效果，
-            // 并在下方按该武器作用域的充盈威力转化转为角色的充盈威力，因此此处不设上限。
+            // 并在下方按该武器作用域的充盈转化转为角色的充盈威力，因此此处不设上限。
             // 取整
             attack = Math.round(attack * 100) / 100
             critRate = Math.round(critRate * 100) / 100
@@ -1007,15 +1018,15 @@ export class CharBuild {
                 弹匣: magazine,
                 弹药: ammo,
                 武器倍率: weaponDamageMul,
-                // 充盈威力转化（武器属性）：该武器作用域（角色槽 + 该武器槽）MOD 充盈威力转化词条之和
-                充盈威力转化: this.getTotalBonus("充盈威力转化", prefix),
-                // 召唤物转化（武器属性）：与充盈威力转化同理，该武器作用域（角色槽 + 该武器槽）转化词条之和
+                // 充盈转化（武器属性）：该武器作用域（角色槽 + 该武器槽）MOD 充盈转化词条之和
+                充盈转化: this.getTotalBonus("充盈转化", prefix),
+                // 召唤物转化（武器属性）：与充盈转化同理，该武器作用域（角色槽 + 该武器槽）转化词条之和
                 召唤物攻击速度转化: this.getTotalBonus("召唤物攻击速度转化", prefix),
                 召唤物范围转化: this.getTotalBonus("召唤物范围转化", prefix),
             }
             attrs.weapon = weaponAttrs
         }
-        // 充盈威力（角色属性）= 角色 MOD 充盈威力加成 + Σ 所有武器（近战/远程/同律非继承）溢出触发 × 该武器充盈威力转化。
+        // 充盈威力（角色属性）= 角色 MOD 充盈威力加成 + Σ 所有武器（近战/远程/同律非继承）溢出触发 × 该武器充盈转化。
         // 各武器的转化率只作用于该武器自身溢出的触发率，不跨武器累加转化率。
         let totalFullness = 0
         for (const w of this.getAllFullnessWeapons()) {
@@ -1023,7 +1034,7 @@ export class CharBuild {
             totalFullness += Math.max(0, triggerRate - 1) * conversionRate
         }
         attrs.充盈威力 = (attrs.充盈威力 || 0) + totalFullness
-        // 召唤物转化（角色属性）汇总，仿充盈威力转化范式：转化词条在武器作用域，转化结果计入角色属性。
+        // 召唤物转化（角色属性）汇总，仿充盈转化范式：转化词条在武器作用域，转化结果计入角色属性。
         // 召唤物绑定近战武器，攻速转化以近战武器攻速全额为来源（如攻速 1.75 × 转化 0.495）；范围转化以角色技能范围为来源（由 LeveledSkill 公式应用技能范围）。
         if (this.meleeWeapon) {
             const { attackSpeed, conversionRate } = this.getWeaponSummonSpeed(this.meleeWeapon)
@@ -1139,33 +1150,38 @@ export class CharBuild {
     }
 
     /**
-     * 根据技能名或字段名判断武器攻击细分乘区。
-     * @param baseName 技能名称
-     * @param fieldName 字段名称
-     * @returns 细分乘区前缀
+     * 从伤害字段的 tag 中解析武器攻击细分乘区（普攻/蓄力/下落/滑行）。
+     * 字段 tag 由数据侧标注（如 ["近战","武器","普攻"]），比按字段名关键字解析更精确。
+     * @param tags 字段 tag 列表
+     * @returns 细分乘区前缀；无匹配 tag 返回 undefined
      */
-    private getWeaponAttackTypePrefix(baseName: string, fieldName?: string) {
-        const fieldPrefix = weaponAttackTypeMap.find(
-            ({ patterns }) => fieldName && patterns.some(pattern => fieldName.includes(pattern))
-        )?.prefix
-        if (fieldPrefix) return fieldPrefix
-        // 普攻连段字段（如"一段伤害"、"[萨麦尔]三段伤害"）不携带攻击类型关键字，
-        // 通过"段伤害"后缀归入普攻；但排除已含其他攻击类型关键字的字段（如"下落攻击二段伤害"、"骑乘攻击一段伤害"）。
-        if (fieldName && /段(?:剑气)?伤害$/.test(fieldName) && !/(蓄力|下落|滑行|射击|骑乘)攻击/.test(fieldName)) {
-            return "普攻"
-        }
-        const basePrefix = weaponAttackTypeMap.find(({ patterns }) => patterns.some(pattern => baseName === pattern))?.prefix
-        if (basePrefix) return basePrefix
-        const skillWeapon = this.skillWeapon
-        if (skillWeapon?.名称 === baseName) {
-            return weaponAttackTypeMap.find(({ patterns }) => skillWeapon.视为 && patterns.some(pattern => skillWeapon.视为 === pattern))
-                ?.prefix
-        }
-        return undefined
+    private getWeaponAttackTypePrefixFromTags(tags?: string[]) {
+        if (!tags?.length) return undefined
+        return weaponAttackTypeTagMap.find(({ tagNames }) => tagNames.some(tag => tags.includes(tag)))?.prefix
+    }
+
+    /**
+     * 按技能名与字段名查找伤害字段的 tag 列表。
+     * 优先按 baseName 定位所属技能（角色技能/武器技能/同律武器技能）；未命中时
+     * （如武器槽位命名空间 "近战"/"远程"/"同律"）回退到武器自身技能字段查找。
+     * @param baseName 技能名称或武器槽位命名空间
+     * @param fieldName 字段名称
+     * @param weapon 当前武器（用于武器槽位命名空间的回退查找）
+     * @returns 字段 tag 列表；未命中返回 undefined
+     */
+    private getFieldTags(baseName: string, fieldName: string | undefined, weapon?: LeveledWeapon | LeveledSkillWeapon) {
+        if (!fieldName) return undefined
+        const skill = this.allSkills.find(s => s.名称 === baseName)
+        const field = skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))
+        if (field?.tag) return field.tag
+        const weaponField = weapon?.技能?.flatMap(s => s.字段).find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))
+        return weaponField?.tag
     }
 
     /**
      * 获取当前武器伤害字段适用的细分加成。
+     * 攻击细分类型由字段 tag 判断（如 tag 含「蓄力攻击」→ 蓄力），不再依赖字段名关键字解析；
+     * 同律武器字段未标注攻击类型时回退到武器的「视为」声明。
      * @param weaponPrefix 武器前缀
      * @param baseName 技能名称
      * @param fieldName 字段名称
@@ -1179,30 +1195,46 @@ export class CharBuild {
         attribute: "增伤" | "独立增伤",
         weapon?: LeveledWeapon | LeveledSkillWeapon
     ) {
-        const attackTypePrefix = this.getWeaponAttackTypePrefix(baseName, fieldName)
+        // 从字段 tag 判断攻击细分类型（如 tag ["近战","武器","蓄力攻击"] → 蓄力）
+        const attackTypePrefix = this.getWeaponAttackTypePrefixFromTags(this.getFieldTags(baseName, fieldName, weapon))
+        // 同律武器字段未携带攻击类型 tag 时，回退到武器「视为」声明的攻击类型（如 视为: "下落攻击"）
         const weaponAttackTypePrefix =
-            attackTypePrefix || (weapon instanceof LeveledSkillWeapon ? this.getWeaponAttackTypePrefix(weapon.视为 || "") : undefined)
+            attackTypePrefix ||
+            (weapon instanceof LeveledSkillWeapon ? this.getWeaponAttackTypePrefixFromTags([weapon.视为 || ""]) : undefined)
         if (!weaponAttackTypePrefix) return 0
         const prefixScope = this.getAttributePrefixScope(weaponPrefix)
-        const getBonus = attribute === "独立增伤" ? this.getTotalBonusMul.bind(this) : this.getTotalBonus.bind(this)
+        const getBonus = (attr: string, prefix: string, includeMods?: boolean) =>
+            attribute.endsWith("独立增伤")
+                ? this.getTotalBonusMul(attr, prefix, { includeMods })
+                : this.getTotalBonus(attr, prefix, { includeMods })
         let bonus = getBonus(`${weaponPrefix}${weaponAttackTypePrefix}${attribute}`, prefixScope)
         if (weaponPrefix.includes("近战")) {
             bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, prefixScope)
         }
         if (weaponPrefix.startsWith("同律")) {
             const lowerPrefix = weaponPrefix.substring(2)
-            bonus += getBonus(`${lowerPrefix}${weaponAttackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix))
+            // 前缀降级仅对 BUFF/武器效果生效；近战/远程 MOD 不随降级穿透到同律武器（MOD 只作用于自身槽位）
+            bonus += getBonus(`${lowerPrefix}${weaponAttackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix), false)
             if (lowerPrefix.includes("近战")) {
-                bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix))
+                bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix), false)
             }
         }
         return bonus
     }
     // 下列属性可以从角色穿透到武器
-    static attrAllowCharToWeapon = new Set(["暴击", "暴伤", "触发", "攻速", "充盈威力转化", "召唤物攻击速度转化", "召唤物范围转化"])
+    static attrAllowCharToWeapon = new Set(["暴击", "暴伤", "触发", "攻速", "充盈转化", "召唤物攻击速度转化", "召唤物范围转化"])
 
     // 获取总加成
-    public getTotalBonus(attribute: string, prefix = "角色"): number {
+    /**
+     * 获取指定属性的总加成。
+     * @param attribute 属性名
+     * @param prefix 属性作用域前缀（角色/近战/远程/同律近战/同律远程）
+     * @param opts.includeMods 是否纳入 MOD 加成。前缀降级查询（同律武器继承下位作用域的加成）
+     *                         时传 false：MOD 只作用于自身槽位（仅 attrAllowCharToWeapon 属性可跨作用域），
+     *                         不可随降级穿透到同律武器；BUFF/武器效果则可正常降级。
+     * @returns 总加成
+     */
+    public getTotalBonus(attribute: string, prefix = "角色", opts?: { includeMods?: boolean }): number {
         let bonus = 0
         const prefixScope = this.getAttributePrefixScope(prefix)
 
@@ -1225,17 +1257,19 @@ export class CharBuild {
         }
 
         // 添加MOD加成
-        this.mods.forEach(mod => {
-            if (
-                CharBuild.attrAllowCharToWeapon.has(attribute)
-                    ? mod.attrType !== "角色" && mod.attrType !== prefixScope
-                    : prefixScope && mod.attrType !== prefixScope
-            )
-                return
-            if (typeof mod.addAttr[attribute] === "number") {
-                bonus += mod.addAttr[attribute]
-            }
-        })
+        if (opts?.includeMods !== false) {
+            this.mods.forEach(mod => {
+                if (
+                    CharBuild.attrAllowCharToWeapon.has(attribute)
+                        ? mod.attrType !== "角色" && mod.attrType !== prefixScope
+                        : prefixScope && mod.attrType !== prefixScope
+                )
+                    return
+                if (typeof mod.addAttr[attribute] === "number") {
+                    bonus += mod.addAttr[attribute]
+                }
+            })
+        }
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
@@ -1361,7 +1395,14 @@ export class CharBuild {
     }
 
     // 获取总加成
-    private getTotalBonusMul(attribute: string, prefix = "角色"): number {
+    /**
+     * 获取指定属性的乘法总加成（返回 1+总加成-1 的净增量）。
+     * @param attribute 属性名
+     * @param prefix 属性作用域前缀
+     * @param opts.includeMods 是否纳入 MOD 加成，同 getTotalBonus（前缀降级查询时传 false）。
+     * @returns 净增量（0 表示无加成）
+     */
+    private getTotalBonusMul(attribute: string, prefix = "角色", opts?: { includeMods?: boolean }): number {
         let bonus = 1
         const prefixScope = this.getAttributePrefixScope(prefix)
 
@@ -1371,12 +1412,14 @@ export class CharBuild {
         }
 
         // 添加MOD加成
-        this.mods.forEach(mod => {
-            if (prefixScope && mod.attrType !== prefixScope) return
-            if (typeof mod.addAttr[attribute] === "number") {
-                bonus *= 1 + mod.addAttr[attribute]
-            }
-        })
+        if (opts?.includeMods !== false) {
+            this.mods.forEach(mod => {
+                if (prefixScope && mod.attrType !== prefixScope) return
+                if (typeof mod.addAttr[attribute] === "number") {
+                    bonus *= 1 + mod.addAttr[attribute]
+                }
+            })
+        }
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
@@ -1492,12 +1535,10 @@ export class CharBuild {
         const resistancePenetration = Math.max(0, this.getResistanceFactor(attrs) * (1 + attrs.属性穿透))
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
-        // 召唤物伤害应按字段名判断（如「[召唤物·战车]技能伤害」），而不是技能名
+        // 召唤物伤害按字段 tag 判断：字段 tag 含「召唤物」（如「[召唤物·战车]技能伤害」）即视为召唤物伤害，不再依赖字段名或技能声明
         const skill = this.allSkills.find(s => s.名称 === baseName)
-        const resolvedFieldName = fieldName
-            ? skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))?.名称 || fieldName
-            : undefined
-        const isSummonDamage = resolvedFieldName ? resolvedFieldName.includes("召唤物") : !!skill?.召唤物
+        const field = fieldName ? skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName)) : undefined
+        const isSummonDamage = !!field?.tag?.includes("召唤物")
         const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (isSummonDamage ? attrs.召唤物伤害 : 0)
         const independentDamageIncrease = 1 + attrs.独立增伤
         // 召唤物独立增伤乘区（0起始增量，1 + 该值 = 仅召唤物伤害结算的倍率）：如「艾达4溯」将召唤物攻击速度超额部分按比例转化为该乘区
@@ -1556,7 +1597,7 @@ export class CharBuild {
                 : 0
         }
         // 触发效果按 100% 封顶：触发率数值允许溢出（>100%），但溢出部分不重复计入触发期望，
-        // 而是由 calculateWeaponAttributes 按该武器作用域的充盈威力转化转为角色的充盈威力；负值同样钳制为 0，
+        // 而是由 calculateWeaponAttributes 按该武器作用域的充盈转化转为角色的充盈威力；负值同样钳制为 0，
         // 避免触发期望溢出为负导致伤害输出归零（如 [近战]{触发:-9}）。
         const triggerRate = Math.min(1, Math.max(0, weaponAttrs.触发))
 
@@ -2170,11 +2211,11 @@ export class CharBuild {
         const getSummonAttrs = (base?: string, temporaryAttributes?: TemporaryAttributes, fieldName?: string) => {
             const key = base || this.baseName
             const summonSkill = this.allSkills.find(skill => skill.名称 === key)
-            // 召唤物属性继承判断：技能声明了召唤物，或字段名含「召唤物」（如「[召唤物·战车]技能伤害」，技能本身未声明召唤物元数据）
-            const resolvedFieldName = fieldName
-                ? summonSkill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))?.名称 || fieldName
+            // 召唤物属性继承判断：字段 tag 含「召唤物」（如「[召唤物·战车]技能伤害」字段带 tag:["召唤物"]）即继承召唤物属性，不再依赖字段名或技能声明
+            const summonField = fieldName
+                ? summonSkill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName))
                 : undefined
-            const isSummonField = !!summonSkill?.召唤物 || !!resolvedFieldName?.includes("召唤物")
+            const isSummonField = !!summonField?.tag?.includes("召唤物")
             const summonRatio = isSummonField ? attrs.召唤物属性继承比例 : 1
             const currentAttrs =
                 summonRatio === 1
@@ -2204,7 +2245,10 @@ export class CharBuild {
         }
         const damageCache = new Map<string, DamageResult>()
         const getWeaponAttackTypeBonus = (base: string | undefined, fieldName: string | undefined, attribute: "增伤" | "独立增伤") => {
-            const key = base || this.baseName
+            // 与 getDamage 的 key 解析保持一致（含武器伤害关键字 "[近战]"/"[远程]"/"[同律]"），
+            // 确保武器伤害与技能伤害两条路由都用同一套 tag 判断逻辑定位字段
+            const weaponFieldBase = getWeaponFieldBase(fieldName)
+            const key = weaponFieldBase || base || this.baseName
             const weapon = weaponsMap.get(key) || this.selectedWeapon || this.meleeWeapon
             return this.getWeaponAttackTypeBonus(weapon.类型, key, fieldName, attribute, weapon)
         }
@@ -2242,6 +2286,27 @@ export class CharBuild {
                           base,
                           fieldName
                       )
+            // 充盈乘区（独立额外乘区，统一在字段层结算，覆盖武器伤害与技能伤害）：
+            // 1) 字段带 tag ["充盈"] 时，伤害整体 × (1 + 充盈威力)（充盈威力为角色属性：角色 MOD 加成 + 武器溢出触发 × 充盈转化汇总）。
+            // 2) 否则按 转充盈 属性：转充盈: X 把 X 比例伤害视为充盈伤害并享受充盈威力加成，等价于整体 × (1 + X × 充盈威力)。
+            // 3) 两者互斥：字段已是充盈类型时 转充盈 不再重复计乘。
+            // 用字段上下文属性（skillAttrsContext 已汇总字段临时属性，如 {转充盈:1,充盈威力:1}）。
+            const fullnessField = fieldName ? getSkillAttr(fieldName, base) : undefined
+            let fullnessMultiplier = 1
+            if (fullnessField?.tag?.includes("充盈")) {
+                fullnessMultiplier = 1 + (skillAttrsContext.充盈威力 || 0)
+            } else {
+                const convertFullness = Math.max(0, skillAttrsContext.转充盈 || 0)
+                if (convertFullness > 0) fullnessMultiplier = 1 + convertFullness * (skillAttrsContext.充盈威力 || 0)
+            }
+            if (fullnessMultiplier !== 1) {
+                for (const key of Object.keys(damage) as (keyof DamageResult)[]) {
+                    const value = damage[key]
+                    if (typeof value === "number") {
+                        ;(damage as unknown as Record<string, number>)[key] = value * fullnessMultiplier
+                    }
+                }
+            }
             if (!temporaryAttributes) damageCache.set(cacheKey, damage)
             return damage
         }
@@ -3211,17 +3276,17 @@ export class CharBuild {
         return 20 + ((charTab === "角色" && this.auraMod?.最大耐受) || 0) + charOrWeapon.等级
     }
     /**
-     * 计算一套普通MOD（不含中央槽）在给定极化方案下的总耐受与各槽位状态。
+     * 计算一套普通MOD（不含中枢）在给定极化方案下的总耐受与各槽位状态。
      * 规则：MOD极性 = 槽位极性 → 半价(ceil)；MOD有极性但与槽位极性不同 → ×1.5(ceil)（惩罚）；
      *      无极性MOD不受影响；未极化槽位原价；空槽位中性。
      * 分配：同极性槽优先半价最贵的MOD；其余极化槽优先落在空槽/无极性MOD上（无惩罚），
      *      仍多余的极化槽由最便宜的未匹配MOD承受 ×1.5 惩罚。
      * @param normals 普通槽MOD列表
      * @param counts 各极性极化槽数量
-     * @param aura 中央槽MOD（光环，可为空）
-     * @param auraType 中央槽极性（未极化 null）
+     * @param aura 中枢MOD（光环，可为空）
+     * @param auraType 中枢极性（未极化 null）
      * @param normalSlotCount 普通槽位数（角色/近战/远程 8，同律 4）
-     * @param auraIndex 中央槽在完整MOD列表中的索引（用于标记槽位）
+     * @param auraIndex 中枢在完整MOD列表中的索引（用于标记槽位）
      * @returns 总耐受与半价/惩罚槽位索引
      */
     private calcSetCost(
@@ -3276,7 +3341,7 @@ export class CharBuild {
         })
         noPol.forEach(m => (cost += m.cost))
 
-        // 3. 中央槽（光环）：同极性半价、异极性惩罚、无极性或未极化原价
+        // 3. 中枢（光环）：同极性半价、异极性惩罚、无极性或未极化原价
         if (aura?.耐受) {
             if (auraType === aura.极性) {
                 cost += Math.ceil(aura.耐受 / 2)
@@ -3294,7 +3359,7 @@ export class CharBuild {
 
     /**
      * 生成同时满足两套MOD的共享极化方案（本质：用同一套极化方案分别应用到两套MOD）。
-     * 极化方案 = 各极性极化槽数量（普通槽，不超过槽位数）+ 中央槽极性（角色类型，可极化一次）。
+     * 极化方案 = 各极性极化槽数量（普通槽，不超过槽位数）+ 中枢极性（角色类型，可极化一次）。
      * 应用规则：每套中对应极性的MOD按耐受从高到低优先半价；异极性槽位 ×1.5 惩罚。
      * 贪心：每步完整重算两套耐受，选择"对仍超出上限的套合计节省最大"的候选；
      * 平局时优先帮助两套、其次缺口更大、再次优先满足第一套；不可破坏已满足的套；
@@ -3313,7 +3378,7 @@ export class CharBuild {
         const isChar = charTab === "角色"
         const normalSlotCount = ModTypeMaxSlot[RModTypeMap[charTab as keyof typeof RModTypeMap]] || 8
 
-        // 拆分中央槽（光环，仅角色类型为末尾元素）与普通MOD
+        // 拆分中枢（光环，仅角色类型为末尾元素）与普通MOD
         const splitAura = (mods: (LeveledMod | null | undefined)[]) => {
             if (!isChar || mods.length === 0) return { aura: null as LeveledMod | null, normals: mods }
             return { aura: mods[mods.length - 1] || null, normals: mods.slice(0, -1) }
@@ -3349,7 +3414,7 @@ export class CharBuild {
             }
             const candidates: PolarCandidate[] = []
             /**
-             * 收集候选极化（新增一个 T 型槽或把中央槽极化为 T）。
+             * 收集候选极化（新增一个 T 型槽或把中枢极化为 T）。
              * @param benefit 对仍超上限的套合计节省
              * @param T 极性
              * @param kind 槽位种类
@@ -3386,7 +3451,7 @@ export class CharBuild {
                     const benefit = (over1 ? Math.max(0, cost1 - c1) : 0) + (over2 ? Math.max(0, cost2 - c2) : 0)
                     if (valid && benefit > 0) consider(benefit, T, "normal", over1 && c1 < cost1, over2 && c2 < cost2)
                 }
-                // 中央槽极化为 T（仅未极化时可极化一次）
+                // 中枢极化为 T（仅未极化时可极化一次）
                 if (auraType === null) {
                     const c1 = this.calcSetCost(s1.normals, counts, s1.aura, T, normalSlotCount, auraIndex1).cost
                     const c2 = this.calcSetCost(s2.normals, counts, s2.aura, T, normalSlotCount, auraIndex2).cost

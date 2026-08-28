@@ -31,7 +31,7 @@ const isIdentifierUsed = (fieldName: string) => {
     return props.selectedIdentifiers.includes(fieldName)
 }
 
-const skillFieldExtraKeys = ["削韧", "Boss削韧", "延迟", "卡肉", "取消", "连段"] as const
+const skillFieldExtraKeys = ["标签", "削韧", "Boss削韧", "延迟", "卡肉", "取消", "连段"] as const
 
 interface SkillFieldExtraItem {
     key: "削韧" | "Boss削韧" | "延迟" | "卡肉" | "取消" | "连段"
@@ -63,13 +63,19 @@ function getFieldExpandKey(field: SkillField, index: number) {
 }
 
 /**
- * 获取技能字段的额外信息（削韧/Boss削韧/延迟/卡肉/取消/连段）
+ * 获取技能字段的额外信息（标签/削韧/Boss削韧/延迟/卡肉/取消/连段）
  * @param field 技能字段
  * @returns 可展示的额外字段列表
  */
 function getSkillFieldExtraItems(field: SkillField): SkillFieldExtraItem[] {
     return skillFieldExtraKeys
         .map(key => {
+            // 标签为字符串数组，需单独处理
+            if (key === "标签") {
+                const tags = field.tag
+                if (!tags || tags.length === 0) return undefined
+                return { key, value: tags.join("/") }
+            }
             const value = pickFieldValue(field[key])
             return value === undefined ? undefined : { key, value }
         })
@@ -81,6 +87,7 @@ function getSkillFieldExtraItems(field: SkillField): SkillFieldExtraItem[] {
  * @returns 格式化字符串
  */
 function formatSkillFieldExtra(item: SkillFieldExtraItem) {
+    if (typeof item.value === "string") return `${item.value}`
     if (["延迟", "卡肉", "取消", "连段"].includes(item.key)) return `${+item.value.toFixed(4)}秒`
     return `${+item.value.toFixed(2)}`
 }

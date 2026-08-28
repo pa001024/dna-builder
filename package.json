@@ -36,6 +36,7 @@
         "icon": "bun run tools/icon-tool.ts",
         "importdata": "bun run tools/import-i18n-data.ts",
         "imgs-upload": "bun tools/imgs-upload.ts",
+        "webp-import": "bun tools/webp-import.ts",
         "loc": "bun run tools/count-effective-loc.ts",
         "gen": "bun run tools/generate-api-calls.ts",
         "publish:dob-script": "pnpm run build:dob-script && cd packages/dob-script && npm publish --access public --registry https://registry.npmjs.org/"

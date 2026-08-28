@@ -10,6 +10,8 @@ export interface LeveledSkillField {
     基础?: string
     值2?: number
     safeName: string
+    /** 伤害类型标签（如 ["充盈"]）：命中该标签的伤害字段按对应类型结算 */
+    tag?: string[]
 }
 
 /**

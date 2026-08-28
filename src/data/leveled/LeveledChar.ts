@@ -196,4 +196,5 @@ const bgMap = {
     止流: "zhiliu.png",
     煜明: "yuming.png",
     芙罗拉: "fuluola.png",
+    伊薇: "yiwei.png",
 } as Record<string, string>

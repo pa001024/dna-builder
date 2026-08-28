@@ -65,6 +65,15 @@ function getInheritedAttackTooltip() {
     return baseWeapon.value.伤害类型
 }
 
+/**
+ * 获取当前面板武器的精通倍率：同律武器 1.4，普通武器 1.2。
+ * 与 CharBuild.calculateWeaponAttributes 保持一致，inherit 型同律武器按被继承武器面板结算。
+ * @returns 精通倍率
+ */
+function getWeaponMasteryRatio(): number {
+    return baseWeapon.value.类型.startsWith("同律") ? 1.4 : 1.2
+}
+
 const model = defineModel<boolean>("modelShow")
 
 function openWeaponSelect() {
@@ -379,13 +388,13 @@ const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
                             <li
                                 v-if="
                                     key === '攻击' &&
-                                    (charBuild.char.精通.includes(charBuild[`${wkey}Weapon`]!.类别) ||
+                                    (charBuild.char.精通.includes(baseWeapon.类别) ||
                                         charBuild.char.精通.includes('全部类型'))
                                 "
                                 class="flex justify-between gap-8 text-sm text-primary"
                             >
                                 <div class="text-base-content/80">武器精通</div>
-                                *{{ format100(1.2) }}
+                                *{{ format100(getWeaponMasteryRatio()) }}
                             </li>
                             <li
                                 v-if="
