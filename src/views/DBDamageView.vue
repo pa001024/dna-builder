@@ -411,7 +411,7 @@ function splitBaseAndBonus(base: number, finalValue: number): { base: number; bo
  * @param finalCharAttack 角色最终攻击
  * @param charBaseAttack 角色基础攻击
  * @param resonanceGain 和鸣增益
- * @param elementalDamageBonus 属性伤加成
+ * @param elementalDamageBonus 属性攻击加成
  * @param fixedAttackAdd 固定攻击
  * @returns 逆推后的角色攻击加成
  */
@@ -615,7 +615,7 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     } = extractSkillRateAndFlat(build, attrs.技能倍率乘数 || 1, attrs.技能倍率加数 || 0)
     const charBaseAttack = build.char.基础攻击
     const resonanceGain = build.resonanceGain
-    const elementalDamageBonus = build.getTotalBonus("属性伤")
+    const elementalDamageBonus = build.getTotalBonus("属性攻击")
     const fixedAttackAdd = build.getTotalBonus("固定攻击")
     const charAttackBonus = deriveCharAttackBonus(attrs.攻击, charBaseAttack, resonanceGain, elementalDamageBonus, fixedAttackAdd)
 
@@ -687,7 +687,7 @@ function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
     const { rate: skillRate, flat: skillFlatDamage } = extractSkillRateAndFlat(build, attrs.技能倍率乘数 || 1, attrs.技能倍率加数 || 0)
     const charBaseAttack = build.char.基础攻击
     const resonanceGain = build.resonanceGain
-    const elementalDamageBonus = build.getTotalBonus("属性伤")
+    const elementalDamageBonus = build.getTotalBonus("属性攻击")
     const fixedAttackAdd = build.getTotalBonus("固定攻击")
     const charAttackBonus = deriveCharAttackBonus(attrs.攻击, charBaseAttack, resonanceGain, elementalDamageBonus, fixedAttackAdd)
 
@@ -767,7 +767,7 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
         {
             id: "charAttack",
             title: "角色攻击",
-            formula: "角色攻击 = (角色基础攻击 * (1 + 角色攻击加成 + 和鸣增益) * (1 + 属性伤) + 固定攻击)保留2位",
+            formula: "角色攻击 = (角色基础攻击 * (1 + 角色攻击加成 + 和鸣增益) * (1 + 属性攻击) + 固定攻击)保留2位",
             compute: ({ input }) => {
                 const raw =
                     input.charBaseAttack * (1 + input.charAttackBonus + input.resonanceGain) * (1 + input.elementalDamageBonus) +
@@ -1269,7 +1269,7 @@ function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
         {
             id: "charAttack",
             title: "角色攻击",
-            formula: "角色攻击 = (角色基础攻击 * (1 + 角色攻击加成 + 和鸣增益) * (1 + 属性伤) + 固定攻击)保留2位",
+            formula: "角色攻击 = (角色基础攻击 * (1 + 角色攻击加成 + 和鸣增益) * (1 + 属性攻击) + 固定攻击)保留2位",
             compute: ({ input }) => {
                 const raw =
                     input.charBaseAttack * (1 + input.charAttackBonus + input.resonanceGain) * (1 + input.elementalDamageBonus) +
@@ -1472,7 +1472,7 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
             { key: "charBaseAttack", label: "角色基础攻击", step: "0.01" },
             { key: "charAttackBonus", label: "角色攻击加成", step: "0.01" },
             { key: "resonanceGain", label: "和鸣增益", step: "0.01" },
-            { key: "elementalDamageBonus", label: "属性伤", step: "0.01" },
+            { key: "elementalDamageBonus", label: "属性攻击", step: "0.01" },
             { key: "fixedAttackAdd", label: "固定攻击", step: "0.01" },
             { key: "weaponBaseAttack", label: "武器基础攻击", step: "0.01" },
             { key: "weaponAttackBonus", label: "武器攻击加成", step: "0.01" },
@@ -1585,7 +1585,7 @@ const skillNumberGroups: NumberFieldGroup<SkillNumberFieldKey, SkillToggleFieldK
             { key: "charBaseAttack", label: "角色基础攻击", step: "0.01" },
             { key: "charAttackBonus", label: "角色攻击加成", step: "0.01" },
             { key: "resonanceGain", label: "和鸣增益", step: "0.01" },
-            { key: "elementalDamageBonus", label: "属性伤", step: "0.01" },
+            { key: "elementalDamageBonus", label: "属性攻击", step: "0.01" },
             { key: "fixedAttackAdd", label: "固定攻击", step: "0.01" },
         ],
         outputs: [{ label: "角色攻击", stepId: "charAttack" }],

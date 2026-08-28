@@ -2766,6 +2766,67 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "梦魇残声系统解锁-BossLieche",
     },
+    "2071": {
+        id: 2071,
+        logic: "AND",
+        map: {
+            QuestChain: [110232],
+        },
+        remark: "梦魇残声-Boss艾达难度1解锁",
+    },
+    "2072": {
+        id: 2072,
+        logic: "OR",
+        map: {
+            DungeonComplete: [[50801, 1, 1]],
+            HardBossComplete: [[1071, 1]],
+        },
+        remark: "梦魇残声-Boss艾达难度2解锁",
+    },
+    "2073": {
+        id: 2073,
+        logic: "OR",
+        map: {
+            DungeonComplete: [[50802, 1, 1]],
+            HardBossComplete: [[1072, 1]],
+        },
+        remark: "梦魇残声-Boss艾达难度3解锁",
+    },
+    "2074": {
+        id: 2074,
+        logic: "OR",
+        map: {
+            DungeonComplete: [[50803, 1, 1]],
+            HardBossComplete: [[1073, 1]],
+        },
+        remark: "梦魇残声-Boss艾达难度4解锁",
+    },
+    "2075": {
+        id: 2075,
+        logic: "OR",
+        map: {
+            DungeonComplete: [[50804, 1, 1]],
+            HardBossComplete: [[1074, 1]],
+        },
+        remark: "梦魇残声-Boss艾达难度5解锁",
+    },
+    "2076": {
+        id: 2076,
+        logic: "OR",
+        map: {
+            DungeonComplete: [[50805, 1, 1]],
+            HardBossComplete: [[1075, 1]],
+        },
+        remark: "梦魇残声-Boss艾达难度6解锁",
+    },
+    "2077": {
+        id: 2077,
+        logic: "AND",
+        map: {
+            QuestChain: [110232],
+        },
+        remark: "梦魇残声系统解锁-Boss艾达",
+    },
     "3001": {
         id: 3001,
         logic: "AND",
@@ -3675,6 +3736,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "聊天解锁条件",
     },
+    "4261": {
+        id: 4261,
+        logic: "AND",
+        map: {
+            QuestChain: [100208],
+        },
+        remark: "组队大厅解锁条件",
+    },
     "4270": {
         id: 4270,
         logic: "AND",
@@ -3903,6 +3972,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             QuestChain: [120307],
         },
         remark: "常驻搜打撤解锁",
+    },
+    "4490": {
+        id: 4490,
+        logic: "AND",
+        map: {
+            Quest: [10020102],
+        },
+        remark: "自动召唤魅影解锁",
     },
     "5001": {
         id: 5001,
@@ -5325,6 +5402,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "公会试炼破除3个",
     },
+    "6028": {
+        id: 6028,
+        logic: "AND",
+        map: {
+            Quest: [11010101],
+        },
+        remark: "提前解锁任务功能条件",
+    },
     "7000": {
         id: 7000,
         logic: "AND",
@@ -5623,6 +5708,23 @@ export const conditionsMap: Record<number, ConditionItem> = {
             AvatarStatus: [["InSpecialQuest", "T"]],
         },
         remark: "活动--火车站联机活动NPC隐藏条件【已弃用】",
+    },
+    "8047": {
+        id: 8047,
+        logic: "AND",
+        map: {
+            ModArchiveReward: [1, 2, 3, 4, 5],
+        },
+        isNot: true,
+        remark: "魔之楔手册任务1-5阶段奖励未领取完",
+    },
+    "8048": {
+        id: 8048,
+        logic: "AND",
+        map: {
+            ModArchiveReward: [1, 2, 3, 4, 5],
+        },
+        remark: "魔之楔手册任务1-5阶段奖励领取完",
     },
     "9001": {
         id: 9001,
@@ -6570,6 +6672,51 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             PlayerLevelMin: [12],
             QuestChain: [100405],
+        },
+        remark: "动态事件解锁",
+    },
+    "80109": {
+        id: 80109,
+        logic: "AND",
+        map: {
+            PlayerLevelMin: [12],
+            QuestChain: [110232],
+        },
+        remark: "动态事件解锁",
+    },
+    "80110": {
+        id: 80110,
+        logic: "AND",
+        map: {
+            PlayerLevelMin: [12],
+            QuestChain: [110232],
+        },
+        remark: "动态事件解锁",
+    },
+    "80111": {
+        id: 80111,
+        logic: "AND",
+        map: {
+            PlayerLevelMin: [12],
+            QuestChain: [110232],
+        },
+        remark: "动态事件解锁",
+    },
+    "80112": {
+        id: 80112,
+        logic: "AND",
+        map: {
+            PlayerLevelMin: [12],
+            QuestChain: [110232],
+        },
+        remark: "动态事件解锁",
+    },
+    "80113": {
+        id: 80113,
+        logic: "AND",
+        map: {
+            PlayerLevelMin: [12],
+            QuestChain: [110232],
         },
         remark: "动态事件解锁",
     },
@@ -7690,6 +7837,61 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "可派遣前置条件",
     },
+    "89109": {
+        id: 89109,
+        logic: "OR",
+        map: {
+            DynamicEventCompleteTimes: [
+                [210904, 1],
+                [210905, 1],
+            ],
+        },
+        remark: "可派遣前置条件",
+    },
+    "89110": {
+        id: 89110,
+        logic: "OR",
+        map: {
+            DynamicEventCompleteTimes: [
+                [311004, 1],
+                [311005, 1],
+            ],
+        },
+        remark: "可派遣前置条件",
+    },
+    "89111": {
+        id: 89111,
+        logic: "OR",
+        map: {
+            DynamicEventCompleteTimes: [
+                [211104, 1],
+                [211105, 1],
+            ],
+        },
+        remark: "可派遣前置条件",
+    },
+    "89112": {
+        id: 89112,
+        logic: "OR",
+        map: {
+            DynamicEventCompleteTimes: [
+                [211204, 1],
+                [211205, 1],
+            ],
+        },
+        remark: "可派遣前置条件",
+    },
+    "89113": {
+        id: 89113,
+        logic: "OR",
+        map: {
+            DynamicEventCompleteTimes: [
+                [211304, 1],
+                [211305, 1],
+            ],
+        },
+        remark: "可派遣前置条件",
+    },
     "100101": {
         id: 100101,
         logic: "AND",
@@ -7962,6 +8164,22 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "签到活动（1.5伊薇）完成",
     },
+    "101018": {
+        id: 101018,
+        logic: "AND",
+        map: {
+            LoginEventFinish: [101018],
+        },
+        remark: "签到活动（1.6法露）完成",
+    },
+    "101019": {
+        id: 101019,
+        logic: "AND",
+        map: {
+            LoginEventFinish: [101019],
+        },
+        remark: "预热签到1.6完成",
+    },
     "101103": {
         id: 101103,
         logic: "AND",
@@ -8059,29 +8277,125 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "EX01任务完成",
     },
-    "110201": {
-        id: 110201,
+    "110180": {
+        id: 110180,
         logic: "AND",
         map: {
-            QuestChain: [110109],
+            OwnCharIdAndLevel: [[1101, 80]],
         },
-        remark: "ex02_完成ex01任务链",
+        remark: "获得80级贝蕾妮卡",
     },
-    "110202": {
-        id: 110202,
+    "110201": {
+        id: 110201,
         logic: "AND",
         map: {
             QuestChain: [110201],
         },
         remark: "ex02_完成第一条任务链",
     },
-    "110203": {
-        id: 110203,
+    "110202": {
+        id: 110202,
         logic: "AND",
         map: {
             QuestChain: [110202],
         },
         remark: "ex02_完成第二条任务链",
+    },
+    "110203": {
+        id: 110203,
+        logic: "AND",
+        map: {
+            QuestChain: [110203],
+        },
+        remark: "ex02_完成第三条任务链",
+    },
+    "110211": {
+        id: 110211,
+        logic: "AND",
+        map: {
+            QuestChain: [110211],
+        },
+        remark: "ex02_平台期1支线1",
+    },
+    "110212": {
+        id: 110212,
+        logic: "AND",
+        map: {
+            QuestChain: [110212],
+        },
+        remark: "ex02_平台期1支线2",
+    },
+    "110213": {
+        id: 110213,
+        logic: "AND",
+        map: {
+            QuestChain: [110213],
+        },
+        remark: "ex02_平台期1支线3",
+    },
+    "110214": {
+        id: 110214,
+        logic: "AND",
+        map: {
+            QuestChain: [110214],
+        },
+        remark: "ex02_平台期1支线4",
+    },
+    "110215": {
+        id: 110215,
+        logic: "AND",
+        map: {
+            QuestChain: [110215],
+        },
+        remark: "ex02_平台期1支线5",
+    },
+    "110220": {
+        id: 110220,
+        logic: "AND",
+        map: {
+            QuestChain: [110220],
+        },
+        remark: "ex02_完成第一天晚宴",
+    },
+    "110221": {
+        id: 110221,
+        logic: "AND",
+        map: {
+            QuestChain: [110221],
+        },
+        remark: "ex02_平台期2支线1",
+    },
+    "110222": {
+        id: 110222,
+        logic: "AND",
+        map: {
+            QuestChain: [110222],
+        },
+        remark: "ex02_平台期2支线2",
+    },
+    "110231": {
+        id: 110231,
+        logic: "AND",
+        map: {
+            QuestChain: [110231],
+        },
+        remark: "ex02_完成第二天晚宴",
+    },
+    "110232": {
+        id: 110232,
+        logic: "AND",
+        map: {
+            QuestChain: [110232],
+        },
+        remark: "完成EX02主线任务，解锁隐最终支线",
+    },
+    "110233": {
+        id: 110233,
+        logic: "AND",
+        map: {
+            QuestChain: [110233],
+        },
+        remark: "ex02_完成隐藏支线",
     },
     "112001": {
         id: 112001,
@@ -8091,6 +8405,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             QuestChain: [100208],
         },
         remark: "累计联机时长活动解锁跳转按钮",
+    },
+    "112005": {
+        id: 112005,
+        logic: "AND",
+        map: {
+            Quest: [10020105],
+        },
+        remark: "累计联机时长活动解锁跳转按钮（1.6及以后）",
     },
     "120001": {
         id: 120001,
@@ -8324,6 +8646,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "奉香大典任务8完成",
     },
+    "150180": {
+        id: 150180,
+        logic: "AND",
+        map: {
+            OwnCharIdAndLevel: [[1501, 80]],
+        },
+        remark: "获得80级莉兹贝尔",
+    },
     "200101": {
         id: 200101,
         logic: "AND",
@@ -8547,6 +8877,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             OwnCharIdAndLevel: [[3201, 80]],
         },
         remark: "获得80级海尔法",
+    },
+    "320280": {
+        id: 320280,
+        logic: "AND",
+        map: {
+            OwnCharIdAndLevel: [[3202, 80]],
+        },
+        remark: "获得80级卡米拉",
     },
     "443000": {
         id: 443000,
@@ -9657,7 +9995,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             HaveItem: [["Resource", 41064, 1]],
         },
-        remark: "获得初雪小夜曲·晴蓝",
+        remark: "获得初雪小夜曲·涅白",
     },
     "4030032": {
         id: 4030032,
@@ -9665,7 +10003,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             HaveItem: [["Resource", 41067, 1]],
         },
-        remark: "获得初雪小夜曲·鎏金",
+        remark: "获得初雪小夜曲·白樱",
     },
     "4030033": {
         id: 4030033,
@@ -9673,7 +10011,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             HaveItem: [["Resource", 41068, 1]],
         },
-        remark: "获得初雪小夜曲·白樱",
+        remark: "获得初雪小夜曲·晴蓝",
     },
     "4030034": {
         id: 4030034,
@@ -9719,6 +10057,113 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "获得伊薇皮肤逐光追雪",
     },
+    "4030039": {
+        id: 4030039,
+        logic: "AND",
+        map: {
+            HaveItem: [["Resource", 41069, 1]],
+        },
+        remark: "获得地狱01（法露茜红皮轮盘头像1解锁）",
+    },
+    "4030040": {
+        id: 4030040,
+        logic: "AND",
+        map: {
+            HaveItem: [["Resource", 41070, 1]],
+        },
+        remark: "获得地狱02（法露茜红皮轮盘头像2解锁）",
+    },
+    "4030041": {
+        id: 4030041,
+        logic: "AND",
+        map: {
+            HaveItem: [["Resource", 41071, 1]],
+        },
+        remark: "获得地狱03（法露茜红皮轮盘头像3解锁）",
+    },
+    "4030042": {
+        id: 4030042,
+        logic: "AND",
+        map: {
+            HaveItem: [["Mount", 1014, 1]],
+        },
+        remark: "获得黑龙坐骑",
+    },
+    "4030043": {
+        id: 4030043,
+        logic: "OR",
+        map: {
+            HaveItem: [
+                ["Resource", 41069, 1],
+                ["Resource", 41070, 1],
+                ["Resource", 41071, 1],
+            ],
+        },
+        remark: "获得任意地狱咆哮展示动作",
+    },
+    "4030044": {
+        id: 4030044,
+        logic: "AND",
+        map: {
+            HaveItem: [["Skin", 310401, 1]],
+        },
+        remark: "获得法露茜皮肤",
+    },
+    "4030045": {
+        id: 4030045,
+        logic: "AND",
+        map: {
+            HaveItem: [["CharAccessory", 30070, 1]],
+        },
+        remark: "获得外观收集1.6第一档外观奖励",
+    },
+    "4030046": {
+        id: 4030046,
+        logic: "AND",
+        map: {
+            GachaCount: [[9008, 60]],
+        },
+        remark: "伊薇池抽卡60次",
+    },
+    "4030047": {
+        id: 4030047,
+        logic: "AND",
+        map: {
+            GachaCount: [[9008, 120]],
+        },
+        remark: "伊薇池抽卡120次",
+    },
+    "4030048": {
+        id: 4030048,
+        logic: "AND",
+        map: {
+            GachaCount: [[9008, 180]],
+        },
+        remark: "伊薇池抽卡180次",
+    },
+    "4030049": {
+        id: 4030049,
+        logic: "AND",
+        map: {
+            HaveItem: [["Mount", 1001, 1]],
+        },
+        remark: "获得龙坐骑",
+    },
+    "4030050": {
+        id: 4030050,
+        logic: "AND",
+        map: {
+            HaveItem: [
+                ["WeaponSkin", 3010110, 1],
+                ["WeaponSkin", 3010611, 1],
+                ["WeaponSkin", 3010409, 1],
+                ["WeaponSkin", 3010209, 1],
+                ["WeaponSkin", 3010715, 1],
+                ["WeaponSkin", 3010807, 1],
+            ],
+        },
+        remark: "获得1.6所有呐喊武器皮肤",
+    },
     "7072038": {
         id: 7072038,
         logic: "AND",
@@ -9734,6 +10179,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             DungeonComplete: [[41809, 1, 1]],
         },
         remark: "搜打撤活动铜币本门票解锁条件",
+    },
+    "10020105": {
+        id: 10020105,
+        logic: "AND",
+        map: {
+            Quest: [10020105],
+        },
+        remark: "联机提前解锁",
     },
     "10020106": {
         id: 10020106,
@@ -9853,6 +10306,15 @@ export const conditionsMap: Record<number, ConditionItem> = {
             Quest: [10040209],
         },
         remark: "火车站医务室传送点开启",
+    },
+    "10040501": {
+        id: 10040501,
+        logic: "AND",
+        map: {
+            PlayerLevelMin: [50],
+            QuestChain: [100405],
+        },
+        remark: "ex02_完成第三章任务",
     },
     "10100101": {
         id: 10100101,
@@ -9974,6 +10436,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             QuestChain: [200220],
         },
         remark: "夜航者",
+    },
+    "10200401": {
+        id: 10200401,
+        logic: "AND",
+        map: {
+            QuestChain: [100405],
+        },
+        remark: "1.6探索活动解锁条件",
     },
     "10300101": {
         id: 10300101,
@@ -10191,6 +10661,17 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "搜打撤剧情关5完成",
     },
+    "10302103": {
+        id: 10302103,
+        logic: "AND",
+        map: {
+            HaveItem: [
+                ["Skin", 530102, 1],
+                ["Skin", 110101, 1],
+            ],
+        },
+        remark: "有限奖池获得2个皮肤",
+    },
     "10302208": {
         id: 10302208,
         logic: "AND",
@@ -10303,6 +10784,198 @@ export const conditionsMap: Record<number, ConditionItem> = {
             Quest: [11010903],
         },
         remark: "EX01典狱长boss战",
+    },
+    "11020101": {
+        id: 11020101,
+        logic: "AND",
+        map: {
+            Quest: [11020101],
+        },
+        remark: "ex02_11020101",
+    },
+    "11020102": {
+        id: 11020102,
+        logic: "AND",
+        map: {
+            Quest: [11020102],
+        },
+        remark: "ex02_11020102",
+    },
+    "11020103": {
+        id: 11020103,
+        logic: "AND",
+        map: {
+            Quest: [11020103],
+        },
+        remark: "ex02_11020103",
+    },
+    "11020104": {
+        id: 11020104,
+        logic: "AND",
+        map: {
+            Quest: [11020104],
+        },
+        remark: "ex02_11020104",
+    },
+    "11020201": {
+        id: 11020201,
+        logic: "AND",
+        map: {
+            Quest: [11020201],
+        },
+        remark: "ex02_11020201",
+    },
+    "11020202": {
+        id: 11020202,
+        logic: "AND",
+        map: {
+            Quest: [11020202],
+        },
+        remark: "ex02_11020202",
+    },
+    "11020301": {
+        id: 11020301,
+        logic: "AND",
+        map: {
+            Quest: [11020301],
+        },
+        remark: "ex02_11020301",
+    },
+    "11020302": {
+        id: 11020302,
+        logic: "AND",
+        map: {
+            Quest: [11020302],
+        },
+        remark: "ex02_11020302",
+    },
+    "11020306": {
+        id: 11020306,
+        logic: "AND",
+        map: {
+            Quest: [11020302],
+        },
+        remark: "ex02_11020306",
+    },
+    "11022000": {
+        id: 11022000,
+        logic: "AND",
+        map: {
+            QuestChain: [110211, 110212, 110213, 110214, 110215],
+        },
+        remark: "ex02_完成平台期1所有支线",
+    },
+    "11022001": {
+        id: 11022001,
+        logic: "AND",
+        map: {
+            Quest: [11022001],
+        },
+        remark: "ex02_11022001",
+    },
+    "11022002": {
+        id: 11022002,
+        logic: "AND",
+        map: {
+            Quest: [11022002],
+        },
+        remark: "ex02_11022002",
+    },
+    "11022101": {
+        id: 11022101,
+        logic: "AND",
+        map: {
+            Quest: [11022101],
+        },
+        remark: "ex02_11022101",
+    },
+    "11023100": {
+        id: 11023100,
+        logic: "AND",
+        map: {
+            QuestChain: [110221, 110222],
+        },
+        remark: "ex02_完成平台期2所有支线",
+    },
+    "11023101": {
+        id: 11023101,
+        logic: "AND",
+        map: {
+            Quest: [11023101],
+        },
+        remark: "ex02_11023101",
+    },
+    "11023102": {
+        id: 11023102,
+        logic: "AND",
+        map: {
+            Quest: [11023102],
+        },
+        remark: "ex02_11023102",
+    },
+    "11023103": {
+        id: 11023103,
+        logic: "AND",
+        map: {
+            Quest: [11023103],
+        },
+        remark: "ex02_11023103",
+    },
+    "11023104": {
+        id: 11023104,
+        logic: "AND",
+        map: {
+            Quest: [11023104],
+        },
+        remark: "ex02_11023104",
+    },
+    "11023201": {
+        id: 11023201,
+        logic: "AND",
+        map: {
+            Quest: [11023201],
+        },
+        remark: "ex02_11023201",
+    },
+    "11023202": {
+        id: 11023202,
+        logic: "AND",
+        map: {
+            Quest: [11023202],
+        },
+        remark: "ex02_11023202",
+    },
+    "11023203": {
+        id: 11023203,
+        logic: "AND",
+        map: {
+            Quest: [11023203],
+        },
+        remark: "ex02_11023203",
+    },
+    "11023204": {
+        id: 11023204,
+        logic: "AND",
+        map: {
+            Quest: [11023204],
+        },
+        remark: "ex02_11023204",
+    },
+    "11023205": {
+        id: 11023205,
+        logic: "AND",
+        map: {
+            Quest: [11023205],
+        },
+        remark: "ex02_11023205",
+    },
+    "11023206": {
+        id: 11023206,
+        logic: "AND",
+        map: {
+            Quest: [11023206],
+        },
+        remark: "ex02_11023206",
     },
     "12000201": {
         id: 12000201,
@@ -10736,6 +11409,24 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "马库斯第一环任务完成且车站传送点解锁",
     },
+    "20021514": {
+        id: 20021514,
+        logic: "AND",
+        map: {
+            Quest: [20021501],
+            TeleportIsUnlock: [1700],
+        },
+        remark: "马库斯第一环任务完成且乐园镇解锁",
+    },
+    "20021515": {
+        id: 20021515,
+        logic: "AND",
+        map: {
+            Quest: [20021501],
+            TeleportIsUnlock: [1702],
+        },
+        remark: "马库斯第一环任务完成且阿尔卡诺山裂隙传送点解锁",
+    },
     "20021602": {
         id: 20021602,
         logic: "AND",
@@ -11105,6 +11796,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "阿瓦尔（追加3）",
     },
+    "20101305": {
+        id: 20101305,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11117911],
+        },
+        remark: "阿瓦尔（追加4）",
+    },
     "20101401": {
         id: 20101401,
         logic: "OR",
@@ -11121,6 +11820,38 @@ export const conditionsMap: Record<number, ConditionItem> = {
             Quest: [11010704],
         },
         remark: "富尔维斯（追加1）",
+    },
+    "20101403": {
+        id: 20101403,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11111019],
+        },
+        remark: "富尔维斯（追加2）",
+    },
+    "20101404": {
+        id: 20101404,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11117502],
+        },
+        remark: "富尔维斯（追加3）",
+    },
+    "20101405": {
+        id: 20101405,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11120338],
+        },
+        remark: "富尔维斯（追加4）",
+    },
+    "20101406": {
+        id: 20101406,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11120819],
+        },
+        remark: "富尔维斯（追加5）",
     },
     "20101501": {
         id: 20101501,
@@ -11173,6 +11904,30 @@ export const conditionsMap: Record<number, ConditionItem> = {
             Quest: [11010906],
         },
         remark: "法露茜（追加1）",
+    },
+    "20101603": {
+        id: 20101603,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11102821],
+        },
+        remark: "法露茜（追加2）",
+    },
+    "20101604": {
+        id: 20101604,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11111043],
+        },
+        remark: "法露茜（追加3）",
+    },
+    "20101605": {
+        id: 20101605,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11121011],
+        },
+        remark: "法露茜（追加4）",
     },
     "20101701": {
         id: 20101701,
@@ -11384,6 +12139,86 @@ export const conditionsMap: Record<number, ConditionItem> = {
             DialogueHasRead: [10045117],
         },
         remark: "芙罗拉",
+    },
+    "20103401": {
+        id: 20103401,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11100221],
+        },
+        remark: "「战车」维克托",
+    },
+    "20103402": {
+        id: 20103402,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11117212],
+        },
+        remark: "「战车」维克托（追加1）",
+    },
+    "20103501": {
+        id: 20103501,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11100406],
+        },
+        remark: "「女祭司」艾达",
+    },
+    "20103502": {
+        id: 20103502,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11105834],
+        },
+        remark: "「女祭司」艾达（追加1）",
+    },
+    "20103503": {
+        id: 20103503,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11118623],
+        },
+        remark: "「女祭司」艾达（追加2）",
+    },
+    "20103504": {
+        id: 20103504,
+        logic: "OR",
+        map: {
+            QuestChain: [110232],
+        },
+        remark: "「女祭司」艾达（追加3）",
+    },
+    "20103601": {
+        id: 20103601,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11101101],
+        },
+        remark: "“兔妈妈”",
+    },
+    "20103602": {
+        id: 20103602,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11111034],
+        },
+        remark: "“兔妈妈”（追加1）",
+    },
+    "20103603": {
+        id: 20103603,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11120305],
+        },
+        remark: "“兔妈妈”（追加2）",
+    },
+    "20103604": {
+        id: 20103604,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11120815],
+        },
+        remark: "“兔妈妈”（追加3）",
     },
     "20300101": {
         id: 20300101,
@@ -11676,6 +12511,22 @@ export const conditionsMap: Record<number, ConditionItem> = {
             Quest: [11010516],
         },
         remark: "梦中的{性别2：少年|少女}（追加4）",
+    },
+    "20400106": {
+        id: 20400106,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11121116],
+        },
+        remark: "梦中的{性别2：少年|少女}（追加5）",
+    },
+    "20400107": {
+        id: 20400107,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11121403],
+        },
+        remark: "梦中的{性别2：少年|少女}（追加6）",
     },
     "20400201": {
         id: 20400201,
@@ -12123,7 +12974,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             QuestChain: [400128],
         },
-        remark: "拍照活动支线-Day1接取",
+        remark: "1.3-拍照活动支线-Day1接取",
     },
     "40012201": {
         id: 40012201,
@@ -12131,7 +12982,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             QuestChain: [400128, 100208],
         },
-        remark: "拍照活动支线-Day2接取",
+        remark: "1.3-拍照活动支线-Day2接取",
     },
     "40012301": {
         id: 40012301,
@@ -12139,7 +12990,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             QuestChain: [400128, 100208],
         },
-        remark: "拍照活动支线-Day3接取",
+        remark: "1.3-拍照活动支线-Day3接取",
     },
     "40012401": {
         id: 40012401,
@@ -12147,7 +12998,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             QuestChain: [400128, 100307],
         },
-        remark: "拍照活动支线-Day4接取",
+        remark: "1.3-拍照活动支线-Day4接取",
     },
     "40012501": {
         id: 40012501,
@@ -12155,7 +13006,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             QuestChain: [400128, 100307],
         },
-        remark: "拍照活动支线-Day5接取",
+        remark: "1.3-拍照活动支线-Day5接取",
     },
     "40012601": {
         id: 40012601,
@@ -12163,7 +13014,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             QuestChain: [400128, 120106],
         },
-        remark: "拍照活动支线-Day6接取",
+        remark: "1.3-拍照活动支线-Day6接取",
     },
     "40012701": {
         id: 40012701,
@@ -12171,7 +13022,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             QuestChain: [400128, 120206],
         },
-        remark: "拍照活动支线-Day7接取",
+        remark: "1.3-拍照活动支线-Day7接取",
     },
     "40012801": {
         id: 40012801,
@@ -12179,7 +13030,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             QuestChain: [100307, 200101],
         },
-        remark: "拍照活动支线-引入接取",
+        remark: "1.3-拍照活动支线-引入接取",
     },
     "40012901": {
         id: 40012901,
@@ -12187,7 +13038,63 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             QuestChain: [400121, 400122, 400123, 400124, 400125, 400126, 400127],
         },
-        remark: "拍照活动支线-尾声接取",
+        remark: "1.3-拍照活动支线-尾声接取",
+    },
+    "40013001": {
+        id: 40013001,
+        logic: "AND",
+        map: {
+            QuestChain: [100401],
+        },
+        remark: "1.6-拍照活动支线-Day1接取",
+    },
+    "40013101": {
+        id: 40013101,
+        logic: "AND",
+        map: {
+            QuestChain: [100401],
+        },
+        remark: "1.6-拍照活动支线-Day2接取",
+    },
+    "40013201": {
+        id: 40013201,
+        logic: "AND",
+        map: {
+            QuestChain: [100401],
+        },
+        remark: "1.6-拍照活动支线-Day3接取",
+    },
+    "40013301": {
+        id: 40013301,
+        logic: "AND",
+        map: {
+            QuestChain: [110201],
+        },
+        remark: "1.6-拍照活动支线-Day4接取",
+    },
+    "40013401": {
+        id: 40013401,
+        logic: "AND",
+        map: {
+            QuestChain: [110203],
+        },
+        remark: "1.6-拍照活动支线-Day5接取",
+    },
+    "40013501": {
+        id: 40013501,
+        logic: "AND",
+        map: {
+            QuestChain: [110203],
+        },
+        remark: "1.6-拍照活动支线-Day6接取",
+    },
+    "40013601": {
+        id: 40013601,
+        logic: "AND",
+        map: {
+            QuestChain: [110203],
+        },
+        remark: "1.6-拍照活动支线-Day7接取",
     },
     "40100101": {
         id: 40100101,
@@ -12310,6 +13217,22 @@ export const conditionsMap: Record<number, ConditionItem> = {
             Quest: [11010704],
         },
         remark: "“第二新枝”计划",
+    },
+    "40300302": {
+        id: 40300302,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11106555],
+        },
+        remark: "“第二新枝”计划（追加1）",
+    },
+    "40300303": {
+        id: 40300303,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11120334],
+        },
+        remark: "“第二新枝”计划（追加2）",
     },
     "40300401": {
         id: 40300401,
@@ -12745,6 +13668,38 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "汽笛沙龙",
     },
+    "40502301": {
+        id: 40502301,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11100230],
+        },
+        remark: "乐园巡游",
+    },
+    "40502302": {
+        id: 40502302,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11100804],
+        },
+        remark: "乐园巡游（追加1）",
+    },
+    "40502303": {
+        id: 40502303,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11115503],
+        },
+        remark: "乐园巡游（追加2）",
+    },
+    "40502401": {
+        id: 40502401,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11101619],
+        },
+        remark: "名牌",
+    },
     "40600101": {
         id: 40600101,
         logic: "OR",
@@ -13166,6 +14121,54 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "百花车站",
     },
+    "40802301": {
+        id: 40802301,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11100001],
+        },
+        remark: "阿尔卡诺山",
+    },
+    "40802302": {
+        id: 40802302,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11103704],
+        },
+        remark: "阿尔卡诺山（追加1）",
+    },
+    "40802401": {
+        id: 40802401,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11100003],
+        },
+        remark: "阿尔卡诺镇",
+    },
+    "40802402": {
+        id: 40802402,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11106517],
+        },
+        remark: "阿尔卡诺镇（追加1）",
+    },
+    "40802403": {
+        id: 40802403,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11110709],
+        },
+        remark: "阿尔卡诺镇（追加2）",
+    },
+    "40802404": {
+        id: 40802404,
+        logic: "OR",
+        map: {
+            DialogueHasRead: [11117237],
+        },
+        remark: "阿尔卡诺镇（追加3）",
+    },
     "40900101": {
         id: 40900101,
         logic: "OR",
@@ -13230,6 +14233,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "银星奔流",
     },
+    "40900901": {
+        id: 40900901,
+        logic: "OR",
+        map: {
+            QuestChain: [110232],
+        },
+        remark: "第22只乐园的白兔",
+    },
     "51001601": {
         id: 51001601,
         logic: "AND",
@@ -13279,6 +14290,17 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "有限奖池活动3的结束条件",
     },
+    "103021004": {
+        id: 103021004,
+        logic: "AND",
+        map: {
+            HaveItem: [
+                ["Skin", 530102, 1],
+                ["Skin", 110101, 1],
+            ],
+        },
+        remark: "有限奖池活动4的结束条件",
+    },
     "105101018": {
         id: 105101018,
         logic: "AND",
@@ -13319,6 +14341,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "角色试玩活动（1.5伊薇）完成",
     },
+    "105101023": {
+        id: 105101023,
+        logic: "AND",
+        map: {
+            TrialEventFinish: [105101023],
+        },
+        remark: "角色试玩活动（1.6法露）完成",
+    },
     "105102016": {
         id: 105102016,
         logic: "AND",
@@ -13350,6 +14380,38 @@ export const conditionsMap: Record<number, ConditionItem> = {
             TrialEventFinish: [105102024],
         },
         remark: "伊薇皮肤试玩完成",
+    },
+    "105102025": {
+        id: 105102025,
+        logic: "AND",
+        map: {
+            TrialEventFinish: [105102025],
+        },
+        remark: "法露皮肤试玩完成",
+    },
+    "110201024": {
+        id: 110201024,
+        logic: "AND",
+        map: {
+            VarEqual: [["ex02_11020102", 4]],
+        },
+        remark: "ex02_完成第一次悬崖边的观察者模式",
+    },
+    "110201032": {
+        id: 110201032,
+        logic: "AND",
+        map: {
+            VarEqual: [["ex02_11020103", 2]],
+        },
+        remark: "ex02_游玩一次打靶游戏",
+    },
+    "110201033": {
+        id: 110201033,
+        logic: "AND",
+        map: {
+            VarEqual: [["ex02_11020103", 3]],
+        },
+        remark: "ex02_游玩一次旋转茶杯",
     },
     "114001030": {
         id: 114001030,
@@ -13470,6 +14532,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             VarEqual: [["PhotoTalk110105", 1]],
         },
         remark: "EX01归还相片",
+    },
+    "1102200101": {
+        id: 1102200101,
+        logic: "AND",
+        map: {
+            VarEqual: [["ex02_11022001_FirstDay", 1]],
+        },
+        remark: "ex02_完成晚宴阶段1",
     },
     "1201035101": {
         id: 1201035101,

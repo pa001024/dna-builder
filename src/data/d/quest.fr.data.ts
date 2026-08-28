@@ -50308,6 +50308,14849 @@ export const questData_fr: QuestStory[] = [
         ],
     },
     {
+        id: 110201,
+        quests: [
+            {
+                id: 11020101,
+                name: "Se rendre aux Montagnes d’Arcano",
+                desc: "Après avoir pris congé de Vergilius, vous partez seul vers les Montagnes d’Arcano. Vous devez retrouver Fulvis, mettre fin à ses plans et laver le nom de votre professeur ainsi que celui de vos camarades tombés au combat.",
+            },
+            {
+                id: 11020102,
+                name: "Se rendre aux Montagnes d’Arcano",
+                desc: "Après avoir pris congé de Vergilius, vous partez seul vers les Montagnes d’Arcano. Vous devez retrouver Fulvis, mettre fin à ses plans et laver le nom de votre professeur ainsi que celui de vos camarades tombés au combat.",
+                nodes: [
+                    {
+                        id: "1780315440322308",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_01】",
+                        next: ["17804009481207050409", "17851555172566669159"],
+                        dialogues: [
+                            {
+                                id: 11100001,
+                                content:
+                                    "« Lorsque tu liras cette lettre, j’aurai probablement déjà pénétré dans les Montagnes d’Arcano. »",
+                                voice: "story/1102/111000/1BC9A5EA",
+                                npc: 110022,
+                                next: 11100002,
+                            },
+                            {
+                                id: 11100002,
+                                content:
+                                    "« Depuis longtemps, on n’a plus besoin de se remercier entre nous. Mais malgré cela, je tiens à te remercier au nom de mon mentor... et de tous mes camarades tombés au combat. »",
+                                voice: "story/1102/111000/1BC9A614",
+                                npc: 110022,
+                                next: 11100003,
+                            },
+                            {
+                                id: 11100003,
+                                content:
+                                    "« Merci de m’avoir laissé ce temps et cette liberté d’action afin d’accomplir la dernière volonté du Commandant Avar : pénétrer dans les Montagnes d’Arcano, rejoindre la ville d’Arcano... et y mener une mission secrète. »",
+                                voice: "story/1102/111000/1BC9A63E",
+                                npc: 110022,
+                                next: 11100004,
+                            },
+                            {
+                                id: 11100004,
+                                content:
+                                    "« Le complot de la Forteresse de Lonza n’était qu’un commencement. Je dois empêcher Fulvis de poursuivre ses manœuvres. Nous avons déjà sacrifié bien trop de vies... je refuse de voir davantage de sang couler. »",
+                                voice: "story/1102/111000/1BC9A668",
+                                npc: 110022,
+                                next: 11100005,
+                            },
+                            {
+                                id: 11100005,
+                                content: "« Et surtout... j’espère que cette mission permettra enfin de révéler les crimes de Fulvis. »",
+                                voice: "story/1102/111000/1BC9A692",
+                                npc: 110022,
+                                next: 11100006,
+                            },
+                            {
+                                id: 11100006,
+                                content:
+                                    "« Les soldats des Griffons et des Loups Blancs étaient des héros ayant versé leur sang pour l’Empire. Ils ne méritaient pas de finir comme de simples chiffres au cœur d’une conspiration... ni d’être condamnés à porter une honte qui n’était pas la leur. »",
+                                voice: "story/1102/111000/1BC9A6BC",
+                                npc: 110022,
+                                next: 11100007,
+                            },
+                            {
+                                id: 11100007,
+                                content:
+                                    "« Ce n’est qu’à ce moment-là que je pourrai me tenir à tes côtés en tant que garde du corps... et non avec les soupçons qui pèsent encore sur moi, au risque de t’entraîner dans ma chute. »",
+                                voice: "story/1102/111000/1BC9A6E6",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17804009481207050409",
+                        type: "TalkNode",
+                        name: "不会让你等太久的，维吉尔。",
+                        dialogues: [
+                            {
+                                id: 11100101,
+                                content: "Je ne te ferai pas attendre trop longtemps, Vergilius.",
+                                voice: "story/1102/111001/1BC9B652",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17851555172566669159",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_02】和伯纳德对话",
+                        dialogues: [
+                            {
+                                id: 11100201,
+                                content:
+                                    "<I>Arcano... une petite ville nichée sur les plateaux montagneux du sud de la province de Flagson. D’après les renseignements, ce n’était à l’origine qu’une bourgade isolée, avant d’être agrandie pour attirer les voyageurs. Pendant un temps, elle servit même de point de ravitaillement aux légions frontalières.</>",
+                                voice: "story/1102/111002/1BC9C6BA",
+                                npc: 110022,
+                                next: 11100202,
+                            },
+                            {
+                                id: 11100202,
+                                content:
+                                    "<I>Mais lorsque la guerre entre l’Empire et Élysium dégénéra il y a quatre ans, de nombreuses villes jusque-là éloignées du front furent elles aussi englouties par le conflit. Arcano fut l’une des victimes de cette guerre... et finit détruite.</>",
+                                voice: "story/1102/111002/1BC9C6E4",
+                                npc: 110022,
+                                next: 11100203,
+                            },
+                            {
+                                id: 11100203,
+                                content:
+                                    "<I>D’après le Commandant Avar, Arcano aurait pourtant retrouvé des habitants après la guerre... alors qu’il ne devait plus rester âme qui vive dans cette ville abandonnée.</>",
+                                voice: "story/1102/111002/1BC9C70E",
+                                npc: 110022,
+                                next: 11100204,
+                            },
+                            {
+                                id: 11100204,
+                                content: "<I>... J’ai soif. Je devrais trouver un point d’eau dans les environs.</>",
+                                voice: "story/1102/111002/1BC9C738",
+                                npc: 110022,
+                                next: 11100205,
+                            },
+                            {
+                                id: 11100205,
+                                content: "Un piège à mâchoires... ?",
+                                voice: "story/1102/111002/1BC9C762",
+                                npc: 110022,
+                                next: 11100206,
+                            },
+                            {
+                                id: 11100206,
+                                content:
+                                    "Hé... voyons voir ce qu’on a attrapé pour le dîner aujourd’hui. Vu le raffut, ça doit être un cerf.",
+                                voice: "story/1102/111002/1BC9C78C",
+                                npc: 111150,
+                                speakerName: "???",
+                                next: 11100207,
+                            },
+                            {
+                                id: 11100207,
+                                content: "Nom d’un chien ! Mais t’es {性别2:un gosse|une gosse} !",
+                                voice: "story/1102/111002/1BC9C7B6",
+                                npc: 111150,
+                                speakerName: "???",
+                                next: 11100208,
+                            },
+                            {
+                                id: 11100208,
+                                content: "Bouge pas ! Recule de quelques pas !",
+                                voice: "story/1102/111002/1BC9C7E0",
+                                npc: 111150,
+                                speakerName: "???",
+                                next: 11100209,
+                            },
+                            {
+                                id: 11100209,
+                                content:
+                                    "Même les Souillés les plus féroces tiennent pas deux minutes dans ce piège... alors un humain, j’t’en parle même pas. T’es pas blessé au moins ?",
+                                voice: "story/1102/111002/1BC9C80A",
+                                npc: 111150,
+                                speakerName: "???",
+                                next: 11100210,
+                            },
+                            {
+                                id: 11100210,
+                                content: "Hein... Petit Victor ? C’est toi ?",
+                                voice: "story/1102/111002/1BC9C834",
+                                npc: 111150,
+                                speakerName: "???",
+                                next: 11100211,
+                            },
+                            {
+                                id: 11100211,
+                                content: "... ?",
+                                voice: "story/1102/111002/1BC9C85E",
+                                npc: 110022,
+                                next: 11100212,
+                            },
+                            {
+                                id: 11100212,
+                                content: "Mais oui ! C’est moi ! « La Force » Bernard, ton voisin de toujours.",
+                                voice: "story/1102/111002/1BC9C888",
+                                npc: 111150,
+                                next: 11100213,
+                            },
+                            {
+                                id: 11100213,
+                                content:
+                                    "Tu te souviens pas ? Regarde ce fusil. Quand t’étais gamin, c’est moi qui t’ai appris à descendre un écureuil à plus de cent mètres.",
+                                voice: "story/1102/111002/1BC9C8B2",
+                                npc: 111150,
+                                next: 11100214,
+                            },
+                            {
+                                id: 11100214,
+                                content: "La portée effective de ce fusil dépasse difficilement cinquante mètres. C’est impossible.",
+                                voice: "story/1102/111002/1BC9C8DC",
+                                npc: 110022,
+                                next: 11100215,
+                            },
+                            {
+                                id: 11100215,
+                                content:
+                                    "Ah là là ! Toujours la langue bien pendue, comme quand t’étais gosse. Toujours à casser l’ambiance.",
+                                voice: "story/1102/111002/1BC9C906",
+                                npc: 111150,
+                                next: 11100216,
+                            },
+                            {
+                                id: 11100216,
+                                content:
+                                    "Enfin, te voilà revenu de Dismania. Tu disais toujours que la Légion te gardait trop occupé... et tes lettres arrivaient à peine une fois tous les deux ans. Allez, rentre au village. Tout le monde sera heureux de te revoir.",
+                                voice: "story/1102/111002/1BC9C930",
+                                npc: 111150,
+                                next: 11100217,
+                            },
+                            {
+                                id: 11100217,
+                                content:
+                                    "Une fois ma chasse terminée, je te préparerai du cerf rôti... et on videra trois verres de gin ensemble !",
+                                voice: "story/1102/111002/1BC9C95A",
+                                npc: 111150,
+                                next: 11100218,
+                            },
+                            {
+                                id: 11100218,
+                                content: "Vous faites erreur. Je suis {nickname2}.",
+                                voice: "story/1102/111002/1BC9C984",
+                                npc: 110022,
+                                next: 11100219,
+                            },
+                            {
+                                id: 11100219,
+                                content: "{nickname2} ? C’est quoi ce nom ? Un nom de code donné par la Légion ?",
+                                voice: "story/1102/111002/1BC9C9AE",
+                                npc: 111150,
+                                next: 11100220,
+                            },
+                            {
+                                id: 11100220,
+                                content:
+                                    "... Hmm. Les gens des grandes villes ont vraiment du goût. Je comprends rien à ce « {nickname2} », mais ça sonne drôlement imposant. Ça colle parfaitement à ton titre « Le Chariot ». ",
+                                voice: "story/1102/111002/1BC9C9D8",
+                                npc: 111150,
+                                next: 11100221,
+                            },
+                            {
+                                id: 11100221,
+                                content:
+                                    "Mais maintenant que t’es rentré au village, redeviens donc « Le Chariot » Victor. Ton vrai nom, c’est quand même plus chaleureux. Tout le monde y est habitué.",
+                                voice: "story/1102/111002/1BC9CA02",
+                                npc: 111150,
+                                next: 11100222,
+                            },
+                            {
+                                id: 11100222,
+                                content: "Je ne vous connais pas.",
+                                voice: "story/1102/111002/1BC9CA2C",
+                                npc: 110022,
+                                next: 11100223,
+                            },
+                            {
+                                id: 11100223,
+                                content: "Tu... tu te serais pas cogné la tête pendant la guerre ? T’aurais oublié toute ton enfance ?",
+                                voice: "story/1102/111002/1BC9CA56",
+                                npc: 111150,
+                                next: 11100224,
+                            },
+                            {
+                                id: 11100224,
+                                content:
+                                    "Va donc voir les autres au village : le chef du village, Teresa, Morgana... Peut-être que ça te rappellera quelque chose.",
+                                voice: "story/1102/111002/1BC9CA80",
+                                npc: 111150,
+                                next: 11100225,
+                            },
+                            {
+                                id: 11100225,
+                                content:
+                                    "<I>Mon enfance... Je ne me souviens de rien. Non... plus exactement, je n’ai aucun souvenir antérieur à mon entrée dans la Légion... Cet endroit pourrait-il vraiment être... ma ville natale ?</>",
+                                voice: "story/1102/111002/1BC9CAAA",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100226,
+                            },
+                            {
+                                id: 11100226,
+                                content:
+                                    "<W>Ces souvenirs brisés te font souffrir. Ce prétendu foyer ne t’apportera que confusion et égarement. Pourquoi ne pas tout oublier ? Prends ton épée... et grave dans ce passé disparu un nouveau souvenir, encore frais... écarlate de sang.</>",
+                                voice: "story/1102/111002/1BC9CAD4",
+                                speakerName: "???",
+                                next: 11100227,
+                            },
+                            {
+                                id: 11100227,
+                                content: "Tais-toi !",
+                                voice: "story/1102/111002/1BC9CAFE",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100228,
+                            },
+                            {
+                                id: 11100228,
+                                content:
+                                    "... Désolé. Je ne vous parlais pas. Enfin... j’ai peut-être marché trop vite. J’avais soif. Alors j’essayais simplement de me dire de moins parler.",
+                                voice: "story/1102/111002/1BC9CB28",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100229,
+                            },
+                            {
+                                id: 11100229,
+                                content: "Fallait le dire plus tôt ! J’ai une gourde sur moi. Tiens, bois donc une gorgée !",
+                                voice: "story/1102/111002/1BC9CB52",
+                                npc: 111150,
+                                next: 11100230,
+                            },
+                            {
+                                id: 11100230,
+                                content: "Petit Victor, tu arrives au moment idéal. Après-demain aura lieu la <H>Parade du Paradis</>.",
+                                voice: "story/1102/111002/1BC9CB7C",
+                                npc: 111150,
+                                next: 11100231,
+                            },
+                            {
+                                id: 11100231,
+                                content: "<H>Même si tu as tout oublié... Maman Lapin te fera retrouver la mémoire.</>",
+                                voice: "story/1102/111002/1BC9CBA6",
+                                npc: 111150,
+                                next: 11100232,
+                            },
+                            {
+                                id: 11100232,
+                                content: "... !",
+                                voice: "story/1102/111002/1BC9CBD0",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100233,
+                            },
+                            {
+                                id: 11100233,
+                                content: "Tiens, la voilà.",
+                                voice: "story/1102/111002/1BC9CBFA",
+                                npc: 111150,
+                                next: 11100234,
+                            },
+                            {
+                                id: 11100234,
+                                content: "<I>... De l’eau offerte par un inconnu. Même s’il prétend être mon voisin...</>",
+                                voice: "story/1102/111002/1BC9CC24",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100235,
+                            },
+                            {
+                                id: 11100235,
+                                content: "Vous avez aussi marché. Buvez d’abord une gorgée.",
+                                voice: "story/1102/111002/1BC9CC4E",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100236,
+                            },
+                            {
+                                id: 11100236,
+                                content: "Ah ah ! Très bien ! J’en bois juste un peu, et je te laisse le reste.",
+                                voice: "story/1102/111002/1BC9CC78",
+                                npc: 111150,
+                                next: 11100237,
+                            },
+                            {
+                                id: 11100237,
+                                content:
+                                    "Bernard... j’aimerais vous poser une question. Ces cinq derniers jours, quelqu’un d’autre est-il entré dans les montagnes ?",
+                                voice: "story/1102/111002/1BC9CCA2",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100238,
+                            },
+                            {
+                                id: 11100238,
+                                content: "Ces cinq derniers jours ? Non. Le seul venu de l’extérieur, c’est toi, petit Victor.",
+                                voice: "story/1102/111002/1BC9CCCC",
+                                npc: 111150,
+                                next: 11100239,
+                            },
+                            {
+                                id: 11100239,
+                                content: "Vous en êtes certain ? Je cherche un homme d’âge mûr.",
+                                voice: "story/1102/111002/1BC9CCF6",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100240,
+                            },
+                            {
+                                id: 11100240,
+                                content:
+                                    "Certain ! Qui aurait l’œil plus affûté qu’un vieux chasseur comme moi ? — Ah... attends, non. Ça me revient. Avant-hier, pendant une chasse au cerf, j’ai aperçu quelqu’un d’étrange au loin.",
+                                voice: "story/1102/111002/1BC9CD20",
+                                npc: 111150,
+                                next: 11100241,
+                            },
+                            {
+                                id: 11100241,
+                                content:
+                                    "Mais à la silhouette, c’était une jeune femme. Ton homme d’âge mûr venu de l’extérieur ? Ça, par contre, j’en suis sûr à cent pour cent : y en a pas eu.",
+                                voice: "story/1102/111002/1BC9CD21",
+                                npc: 111150,
+                                next: 11100242,
+                            },
+                            {
+                                id: 11100242,
+                                content:
+                                    "<I>Les renseignements indiquaient pourtant que Fulvis était venu dans cette direction il y a cinq jours... Peut-être n’est-il jamais entré dans les Montagnes d’Arcano. Ou alors il se cache quelque part...</>",
+                                voice: "story/1102/111002/1BC9CD4A",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100243,
+                            },
+                            {
+                                id: 11100243,
+                                content: "<I>... À moins que Bernard ne mente. Ou qu’il cherche délibérément à me tromper.</>",
+                                voice: "story/1102/111002/1BC9CD74",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                            },
+                        ],
+                    },
+                    {
+                        id: "1780315440331371",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_03】过场后和伊薇交谈",
+                        srId: 107001,
+                        pos: [-591, -9552],
+                        dialogues: [
+                            {
+                                id: 11100401,
+                                content:
+                                    "Tu l’as vu ? Mon insecte — une énorme bestiole, super jolie ! Je viens juste de l’attraper... mais il a disparu je sais pas où...",
+                                voice: "story/1102/111004/1BC9E78A",
+                                npc: 111001,
+                                speakerName: "???",
+                                next: 11100402,
+                            },
+                            {
+                                id: 11100402,
+                                content:
+                                    "Il vient de passer par là. Il est accroché à un arbre un peu plus loin. Petite Ada, je sais que t’es pressée de retourner chasser les insectes, mais avant ça... regarde donc qui est revenu.",
+                                voice: "story/1102/111004/1BC9E7B4",
+                                npc: 111150,
+                                next: 11100403,
+                            },
+                            {
+                                id: 11100403,
+                                content: "Yiou !",
+                                voice: "story/1102/111004/1BC9E7DE",
+                                npc: 111001,
+                                speakerName: "???",
+                                next: 11100404,
+                            },
+                            {
+                                id: 11100404,
+                                content: "J-je rêve pas, au moins... ? Tu veux bien me pincer la joue pour vérifier ?",
+                                voice: "story/1102/111004/1BC9E808",
+                                npc: 111001,
+                                speakerName: "???",
+                                next: 11100405,
+                            },
+                            {
+                                id: 11100405,
+                                content:
+                                    "Ah, non, attends, mauvaise idée. Ça fait mal quand on pince les joues... pince-moi plutôt le bras.",
+                                voice: "story/1102/111004/1BC9E832",
+                                npc: 111001,
+                                speakerName: "???",
+                                next: 11100406,
+                            },
+                            {
+                                id: 11100406,
+                                content:
+                                    "Tu vois ? On parlait justement de vieux amis. « La Papesse » Ada, ça te dit quand même quelque chose ? Quand vous étiez petits, vous passiez votre temps ensemble.",
+                                voice: "story/1102/111004/1BC9E85C",
+                                npc: 111150,
+                                next: 11100407,
+                            },
+                            {
+                                id: 11100407,
+                                content: "Ada...",
+                                voice: "story/1102/111004/1BC9E886",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100408,
+                            },
+                            {
+                                id: 11100408,
+                                content: "Ah ! Ça va ? Tu te sens mal... ?",
+                                voice: "story/1102/111004/1BC9E8B0",
+                                npc: 111001,
+                                next: 11100409,
+                            },
+                            {
+                                id: 11100409,
+                                content: "... Ça va.",
+                                voice: "story/1102/111004/1BC9E8DA",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100410,
+                            },
+                            {
+                                id: 11100410,
+                                content: "Vraiment... ? Si tu ne te sens pas bien, il faut me le dire !",
+                                voice: "story/1102/111004/1BC9E904",
+                                npc: 111001,
+                                next: 11100411,
+                            },
+                            {
+                                id: 11100411,
+                                content:
+                                    "Ada... c’est bien ça ? Je ne sais pas pourquoi, mais il y a beaucoup de choses de mon enfance dont je ne me souviens plus.",
+                                voice: "story/1102/111004/1BC9E92E",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100412,
+                            },
+                            {
+                                id: 11100412,
+                                content:
+                                    "Par exemple... je ne me rappelle même plus du chemin qui mène au village. Est-ce que tu pourrais me raccompagner ?",
+                                voice: "story/1102/111004/1BC9E958",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100413,
+                            },
+                            {
+                                id: 11100413,
+                                content: "Nooon~",
+                                voice: "story/1102/111004/1BC9E982",
+                                npc: 111001,
+                                next: 11100414,
+                            },
+                            {
+                                id: 11100414,
+                                content:
+                                    "<blue>Victor n’a jamais besoin d’être aussi poli avec Ada ! Victor et Ada sont les meilleurs amis du monde, après tout !</>",
+                                voice: "story/1102/111004/1BC9E9AC",
+                                npc: 111001,
+                                next: 11100415,
+                            },
+                            {
+                                id: 11100415,
+                                content:
+                                    "Et puis, si tu veux, je peux même jouer avec toi toute la journée ! Je vais te confier un secret : récemment, j’ai trouvé une grotte remplie d’insectes géants. Tu veux que je t’y emmène maintenant ?",
+                                voice: "story/1102/111004/1BC9E9D6",
+                                npc: 111001,
+                                next: 11100416,
+                            },
+                            {
+                                id: 11100416,
+                                content: "Les insectes... non merci. Je préfère rentrer au village.",
+                                voice: "story/1102/111004/1BC9EA00",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100417,
+                            },
+                            {
+                                id: 11100417,
+                                content:
+                                    "Yiou... <blue>Quand on était petits, Victor était toujours le premier à courir attraper les insectes. Et parfois, il les faisait même griller en cachette pour les manger.</>",
+                                voice: "story/1102/111004/1BC9EA2A",
+                                npc: 111001,
+                                next: 11100418,
+                            },
+                            {
+                                id: 11100418,
+                                content:
+                                    "Petite Ada, fais visiter les environs à ton ami. Ça l’aidera peut-être à se souvenir du passé. Mais rentrez avant la tombée de la nuit, compris ? Inutile d’inquiéter tout le monde.",
+                                voice: "story/1102/111004/1BC9EA54",
+                                npc: 111150,
+                                next: 11100419,
+                            },
+                            {
+                                id: 11100419,
+                                content: "Et toi alors, Bernard ? Tu vas pas encore repartir chasser, quand même ?",
+                                voice: "story/1102/111004/1BC9EA7E",
+                                npc: 111001,
+                                next: 11100420,
+                            },
+                            {
+                                id: 11100420,
+                                content:
+                                    "Exactement. Ça fait toute la journée que je cours après ce cerf... alors aujourd’hui, je vais finir par l’avoir.",
+                                voice: "story/1102/111004/1BC9EAA8",
+                                npc: 111150,
+                                next: 11100421,
+                            },
+                            {
+                                id: 11100421,
+                                content:
+                                    "Comment ça, Bernard peut nous renvoyer au village pendant qu’il s’amuse tout seul ?! Hors de question ! Donne-nous juste une cuisse de cerf et on t’aidera à le chasser. Franchement, c’est une super affaire~",
+                                voice: "story/1102/111004/1BC9EAD2",
+                                npc: 111001,
+                                next: 11100422,
+                            },
+                            {
+                                id: 11100422,
+                                content:
+                                    "Laisse tomber. Rien que le mois dernier, t’as déjà fait fuir sept proies. Si t’étais capable d’aider pendant une chasse, ça se saurait depuis longtemps.",
+                                voice: "story/1102/111004/1BC9EAFC",
+                                npc: 111150,
+                                next: 11100423,
+                            },
+                            {
+                                id: 11100423,
+                                content:
+                                    "Bon, voilà le marché : si vous rentrez tous les deux sains et saufs, alors pour la Parade du Paradis, je demanderai à Teresa de vous réserver deux belles cuisses de cerf.",
+                                voice: "story/1102/111004/1BC9EB26",
+                                npc: 111150,
+                                next: 11100424,
+                            },
+                            {
+                                id: 11100424,
+                                content:
+                                    "Bernard ne comprend vraiment rien... Ce qui compte, ce n’est pas les cuisses de cerf à la fin. Ce qui compte, c’est le plaisir de la chasse ! Donc...",
+                                voice: "story/1102/111004/1BC9EB50",
+                                npc: 111001,
+                                next: 11100425,
+                            },
+                            {
+                                id: 11100425,
+                                content: "Donc... ?",
+                                voice: "story/1102/111004/1BC9EB7A",
+                                npc: 111150,
+                                next: 11100426,
+                            },
+                            {
+                                id: 11100426,
+                                content:
+                                    "Donc deux cuisses de cerf, c’est quand même sacrément tentant. On va faire comme Bernard l’a dit ! Allez, viens~",
+                                voice: "story/1102/111004/1BC9EBA4",
+                                npc: 111001,
+                                next: 11100427,
+                            },
+                            {
+                                id: 11100427,
+                                content: "Va avec elle. Tant que t’es là pour accompagner cette gamine, je serai plus tranquille.",
+                                voice: "story/1102/111004/1BC9EBCE",
+                                npc: 111150,
+                                options: [
+                                    {
+                                        id: 11100428,
+                                        content: "<I>Compris. Laissez-moi faire.</>",
+                                        voice: "story/1102/111004/1BC9EBF8",
+                                        next: 11100430,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 11100429,
+                                        content: "<I>Je commence surtout à m’inquiéter pour moi-même.</>",
+                                        voice: "story/1102/111004/1BC9EC22",
+                                        next: 11100430,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11100430,
+                                content:
+                                    "Qu’est-ce que tu fabriques encore ?! Deux énormes cuisses de cerf nous attendent... ah non, je veux dire, tout le village nous attend !",
+                                voice: "story/1102/111004/1BC9EC4C",
+                                npc: 111001,
+                                next: 11100431,
+                            },
+                            {
+                                id: 11100431,
+                                content: "...",
+                                voice: "story/1102/111004/1BC9EC76",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                            },
+                        ],
+                    },
+                    {
+                        id: "178247083599137934017",
+                        type: "TalkNode",
+                        name: "山路虽然看着都差不多，但我们走的这一条还是有不少好玩的东西的！你不用担心路上无聊了。",
+                        dialogues: [
+                            {
+                                id: 11100501,
+                                content:
+                                    "Même si tous les chemins de montagne se ressemblent, celui-ci est rempli de choses amusantes ! Tu verras, tu ne t’ennuieras pas en route.",
+                                voice: "story/1102/111005/1BC9F7F2",
+                                npc: 111004,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1780315440335398",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_04】悬崖边头晕对话",
+                        dialogues: [
+                            {
+                                id: 11100801,
+                                content: "Mngh...",
+                                voice: "story/1102/111008/1BCA292A",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100802,
+                            },
+                            {
+                                id: 11100802,
+                                content:
+                                    "Pourquoi tu fronces autant les sourcils ? À force, ça attire la malchance. Regarde, fais comme moi : souris !",
+                                voice: "story/1102/111008/1BCA2954",
+                                npc: 111001,
+                                next: 11100803,
+                            },
+                            {
+                                id: 11100803,
+                                content: "Je suis juste... un peu étourdi. Ça devrait passer.",
+                                voice: "story/1102/111008/1BCA297E",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100804,
+                            },
+                            {
+                                id: 11100804,
+                                content:
+                                    "Tant mieux. Le jour de la Parade du Paradis, surtout, il faudra éviter de faire cette tête-là. Sinon, Maman Lapin sera triste.",
+                                voice: "story/1102/111008/1BCA29A8",
+                                npc: 111001,
+                                next: 11100805,
+                            },
+                            {
+                                id: 11100805,
+                                content: "Allez, Bernard m’a demandé de t’aider à retrouver tes souvenirs, alors viens par ici~",
+                                voice: "story/1102/111008/1BCA29D2",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17857233319392213280",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11100901,
+                                content: "Dis-moi... qui est cette « Maman Lapin » dont tu parles ? Tu pourrais me conduire jusqu’à elle ?",
+                                voice: "story/1102/111009/1BCA3992",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100902,
+                            },
+                            {
+                                id: 11100902,
+                                content:
+                                    "Maman Lapin veille sur le parc. Tu pourras la rencontrer pendant la Parade du Paradis. Nous sommes tous ses petits lapins.",
+                                voice: "story/1102/111009/1BCA39BC",
+                                npc: 111001,
+                                next: 11100903,
+                            },
+                            {
+                                id: 11100903,
+                                content: "... Et cette « Parade du Paradis », alors ? Qu’est-ce que c’est exactement ?",
+                                voice: "story/1102/111009/1BCA39E6",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11100904,
+                            },
+                            {
+                                id: 11100904,
+                                content:
+                                    "C’est une fête où tout le monde travaille ensemble pour rendre le parc encore plus merveilleux. Ne t’inquiète pas, tant que tu fais ce que je te dis, tout ira bien.",
+                                voice: "story/1102/111009/1BCA3A10",
+                                npc: 111001,
+                                next: 11100905,
+                            },
+                            {
+                                id: 11100905,
+                                content: "<I>... J’ai vraiment du mal à avoir une conversation normale avec cette fille.</>",
+                                voice: "story/1102/111009/1BCA3A3A",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                            },
+                        ],
+                    },
+                    {
+                        id: "178522993061210020029",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11101001,
+                                content: "On y est, on y est ! Descends par ici~",
+                                voice: "story/1102/111010/1BCA49FA",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11020103,
+                name: "Parc d’attractions en ruines",
+                desc: "Vous suivez Ada jusqu’aux ruines d’Arcano. Reposez-vous un moment avant de poursuivre votre route vers Arcano.",
+                nodes: [
+                    {
+                        id: "1780920816035374",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_05】乐园门口",
+                        dialogues: [
+                            {
+                                id: 11101101,
+                                content: "Ici, c’est...",
+                                voice: "story/1102/111011/1BCA5A62",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11101102,
+                            },
+                            {
+                                id: 11101102,
+                                content:
+                                    "<blue>Bienvenue dans le parc d’attractions privé de Victor et Ada ! Quand on était petits, Victor et Ada passaient toutes leurs journées ici.</>",
+                                voice: "story/1102/111011/1BCA5A8C",
+                                npc: 111001,
+                                next: 11101103,
+                            },
+                            {
+                                id: 11101103,
+                                content: "C’est l’endroit parfait pour se détendre. Je ne l’ai jamais montré à personne d’autre~",
+                                voice: "story/1102/111011/1BCA5AB6",
+                                npc: 111001,
+                                next: 11101104,
+                            },
+                            {
+                                id: 11101104,
+                                content: "Se détendre... ? Pourtant, cet endroit n’est rien d’autre qu’un amas de ruines.",
+                                voice: "story/1102/111011/1BCA5AE0",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11101105,
+                            },
+                            {
+                                id: 11101105,
+                                content:
+                                    "Même des ruines peuvent devenir un paradis. Allez, ferme les yeux... puis rouvre-les. Dis-moi ce que tu vois.",
+                                voice: "story/1102/111011/1BCA5B0A",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11101106,
+                                        content: "<I>Des ruines.</>",
+                                        voice: "story/1102/111011/1BCA5B34",
+                                        next: 11101107,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 11101108,
+                                        content: "<I>Certains bâtiments ressemblent effectivement à des attractions.</>",
+                                        voice: "story/1102/111011/1BCA5B88",
+                                        next: 11101109,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11101107,
+                                content:
+                                    "Nooon, c’est pas la bonne réponse. Tu es censé dire : « Waah, quel parc d’attractions unique en son genre ! »",
+                                voice: "story/1102/111011/1BCA5B5E",
+                                npc: 111001,
+                                next: 11101110,
+                            },
+                            {
+                                id: 11101109,
+                                content: "Tu vois ! Même après tout ce temps, on peut encore s’y amuser. C’est impressionnant, pas vrai ?",
+                                voice: "story/1102/111011/1BCA5BB2",
+                                npc: 111001,
+                                next: 11101110,
+                            },
+                            {
+                                id: 11101110,
+                                content: "Je crois que je vais plutôt pa—",
+                                voice: "story/1102/111011/1BCA5BDC",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11101111,
+                            },
+                            {
+                                id: 11101111,
+                                content: "Tu recommences à avoir la tête qui tourne ?",
+                                voice: "story/1102/111011/1BCA5C06",
+                                npc: 111001,
+                                next: 11101113,
+                            },
+                            {
+                                id: 11101113,
+                                content:
+                                    "<I>Mes vertiges deviennent de plus en plus fréquents. Est-ce encore à cause de cette voix... ? Heureusement, j’y suis déjà habitué. Je peux encore tenir.</>",
+                                voice: "story/1102/111011/1BCA5C07",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11101112,
+                            },
+                            {
+                                id: 11101112,
+                                content:
+                                    "À la Légion aussi, tu dois toujours faire semblant que tout va bien, hein ? Mais ici, c’est le parc. T’as pas besoin de rester tendu tout le temps. Te reposer un peu, c’est pas interdit~ Viens.",
+                                voice: "story/1102/111011/1BCA5C30",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809929683563081293",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11101201,
+                                content: "Par ici, par ici ! Celui-là est super relaxant à faire~",
+                                voice: "story/1102/111012/1BCA6ACA",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17868745995587814066",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_06】打靶",
+                        next: ["1780920816049444", "17809965419164107427"],
+                        dialogues: [
+                            {
+                                id: 11101401,
+                                content: "Bravo ! Tadaaam—— Voici ton grand prix !",
+                                voice: "story/1102/111014/1BCA8B9A",
+                                npc: 111001,
+                                next: 11101402,
+                            },
+                            {
+                                id: 11101402,
+                                content: "Ça, c’est... ? Hmm... c’est plutôt agréable au toucher...",
+                                voice: "story/1102/111014/1BCA8BC4",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11101403,
+                            },
+                            {
+                                id: 11101403,
+                                content:
+                                    "<blue>À l’époque, Ada avait enfin réussi à battre le score de Victor. Alors après avoir insisté pendant des heures, Victor avait fini par lui fabriquer cette peluche de ses propres mains.</>",
+                                voice: "story/1102/111014/1BCA8BEE",
+                                npc: 111001,
+                                next: 11101404,
+                            },
+                            {
+                                id: 11101404,
+                                content:
+                                    "Et maintenant, c’est à mon tour de te la remettre ! Hé hé... on dirait qu’elle te plaît beaucoup, finalement.",
+                                voice: "story/1102/111014/1BCA8C18",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11101405,
+                                        content: "<I>Je vois.</>",
+                                        voice: "story/1102/111014/1BCA8C42",
+                                        next: 11101407,
+                                    },
+                                    {
+                                        id: 11101406,
+                                        content: "<I>Pourquoi est-ce que c’est toi qui es si fière... ?</>",
+                                        voice: "story/1102/111014/1BCA8C6C",
+                                        next: 11101407,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11101407,
+                                content:
+                                    "Bon, bon, j’ai compris, tu adores la câliner. Passe-moi le petit lapin une seconde, je vais te montrer quelque chose d’encore plus incroyable ! Regarde bien... si je fais ça... et ça... il devrait se mettre à bouger.",
+                                voice: "story/1102/111014/1BCA8C96",
+                                npc: 111001,
+                                next: 11101408,
+                            },
+                            {
+                                id: 11101408,
+                                content: "Euh... c’était un accident ! Un accident !",
+                                voice: "story/1102/111014/1BCA8CC0",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11101409,
+                                        content: "<I>Ce n’est rien.</>",
+                                        voice: "story/1102/111014/1BCA8CEA",
+                                        next: 11101412,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 11101410,
+                                        content: "<I>Espèce de meurtrière de peluches.</>",
+                                        voice: "story/1102/111014/1BCA8D14",
+                                        next: 11101412,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11101412,
+                                content:
+                                    "Ah ah, pas de souci ! On n’aura qu’à la rapporter au village pour que Morgana la répare. Du coup... cette peluche ne te rappelle vraiment rien ?",
+                                voice: "story/1102/111014/1BCA8D68",
+                                npc: 111001,
+                                next: 11101413,
+                            },
+                            {
+                                id: 11101413,
+                                content: "<blue>Toi... oui, toi, là. Tu as vraiment perdu la mémoire, pas vrai ?</>",
+                                voice: "story/1102/111014/1BCA8D92",
+                                npc: 111001,
+                                next: 11101414,
+                            },
+                            {
+                                id: 11101414,
+                                content: "...",
+                                voice: "story/1102/111014/1BCA8DBC",
+                                npc: 111126,
+                                next: 11101415,
+                            },
+                            {
+                                id: 11101415,
+                                content:
+                                    "Bon, si tu n’arrives pas à t’en souvenir, ce n’est pas grave ! Le chef du village disait toujours que la mémoire ressemblait aux grandes grilles du parc d’attractions. À force d’être battues par la pluie, elles rouillent peu à peu... jusqu’à ne plus ressembler à ce qu’elles étaient autrefois.",
+                                voice: "story/1102/111014/1BCA8DE6",
+                                npc: 111001,
+                                next: 11101416,
+                            },
+                            {
+                                id: 11101416,
+                                content:
+                                    "Mais je pense qu’il manque une phrase à cette histoire ! « La rouille ne fait que cacher leur couleur d’origine. Elle n’a jamais vraiment disparu. »",
+                                voice: "story/1102/111014/1BCA8E10",
+                                npc: 111001,
+                                next: 11101417,
+                            },
+                            {
+                                id: 11101417,
+                                content: "Alors je suis sûre que tu finiras par retrouver tous tes souvenirs, petit à petit.",
+                                voice: "story/1102/111014/1BCA8E3A",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1780920816049444",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_07】旋转木马",
+                        dialogues: [
+                            {
+                                id: 11101601,
+                                content: "C’est... des tasses tournantes ?",
+                                voice: "story/1102/111016/1BCAAC6A",
+                                npc: 111126,
+                                next: 11101602,
+                            },
+                            {
+                                id: 11101602,
+                                content:
+                                    "Nooon. Ce sont des instruments de torture capables de donner le tournis à n’importe qui ! Mais maintenant qu’elles sont cassées, elles sont parfaites pour faire la sieste au soleil~",
+                                voice: "story/1102/111016/1BCAAC94",
+                                npc: 111001,
+                                next: 11101603,
+                            },
+                            {
+                                id: 11101603,
+                                content: "Le soleil fait du bien au corps et au moral ! Allez, viens t’asseoir un moment.",
+                                voice: "story/1102/111016/1BCAACBE",
+                                npc: 111001,
+                                next: 11101604,
+                            },
+                            {
+                                id: 11101604,
+                                content:
+                                    "Le soleil est tout chaud... Yiou... j’ai un peu sommeil... Je vais juste fermer les yeux un instant... juste... un tout petit...",
+                                voice: "story/1102/111016/1BCAACE8",
+                                npc: 111001,
+                                next: 11101605,
+                            },
+                            {
+                                id: 11101605,
+                                content: "Ada... ne t’endors pas tout de suite. J’ai quelques questions à te poser.",
+                                voice: "story/1102/111016/1BCAAD12",
+                                npc: 111126,
+                                options: [
+                                    {
+                                        id: 11101606,
+                                        content: "<I>Pourquoi ce parc est-il devenu un champ de ruines ?</>",
+                                        voice: "story/1102/111016/1BCAAD3C",
+                                        next: 11101607,
+                                    },
+                                    {
+                                        id: 11101612,
+                                        content: "<I>Des gens ressemblant à des membres de la Légion sont-ils venus récemment ?</>",
+                                        voice: "story/1102/111016/1BCAAE38",
+                                        next: 11101613,
+                                    },
+                                    {
+                                        id: 11101618,
+                                        content: "<I>Qu’est-ce que signifient tous ces titres comme « Le Chariot » ?</>",
+                                        voice: "story/1102/111016/1BCAAF34",
+                                        next: 11101619,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11101607,
+                                content:
+                                    "À cause de la guerre d’il y a quatre ans. Le chef du village disait que c’était la guerre la plus terrible qu’il ait vue de toute sa vie.",
+                                voice: "story/1102/111016/1BCAAD66",
+                                npc: 111001,
+                                next: 11101608,
+                            },
+                            {
+                                id: 11101613,
+                                content: "Bien sûr !",
+                                voice: "story/1102/111016/1BCAAE62",
+                                npc: 111001,
+                                next: 11101614,
+                            },
+                            {
+                                id: 11101619,
+                                content:
+                                    "Tu parles des noms d’arcane ? Il y en a vingt-et-un en tout. « Le Fou », « Le Magicien » et plein d’autres...",
+                                voice: "story/1102/111016/1BCAAF5E",
+                                npc: 111001,
+                                next: 11101620,
+                            },
+                            {
+                                id: 11101608,
+                                content:
+                                    "Le ciel n’était plus bleu du tout. Quand on levait les yeux, il n’y avait plus que des dirigeables noirs partout. Et il suffisait qu’un seul obus tombe du ciel... pour que plein de petits lapins perdent leur maison.",
+                                voice: "story/1102/111016/1BCAAD90",
+                                npc: 111001,
+                                next: 11101609,
+                            },
+                            {
+                                id: 11101614,
+                                content:
+                                    "Ada, essaie de me décrire cette personne aussi précisément que possible. Et dis-moi où elle est allée.",
+                                voice: "story/1102/111016/1BCAAE8C",
+                                npc: 111126,
+                                next: 11101615,
+                            },
+                            {
+                                id: 11101620,
+                                content:
+                                    "Quant à leur signification... c’est trop compliqué. Je ne m’en souviens plus très bien non plus ! Mais je sais que ces noms d’arcane signifient que nous faisons tous partie de la même famille du parc.",
+                                voice: "story/1102/111016/1BCAAF88",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11101621,
+                                        content: "<I>Une famille...</>",
+                                        voice: "story/1102/111016/1BCAAFB2",
+                                        next: 11101622,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 11101623,
+                                        content: "<I>Tu es sûre de ne pas avoir échangé ton titre avec celui du « Fou » ?</>",
+                                        voice: "story/1102/111016/1BCAB006",
+                                        next: 11101624,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                    {
+                                        id: 11101625,
+                                        content: "<I>Je veux un titre plus classe.</>",
+                                        voice: "story/1102/111016/1BCAB05A",
+                                        next: 11101626,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11101609,
+                                content: "<I>... Un village détruit par la guerre. Cela correspond effectivement aux renseignements.</>",
+                                voice: "story/1102/111016/1BCAADBA",
+                                npc: 111126,
+                                next: 11101610,
+                            },
+                            {
+                                id: 11101615,
+                                content: "Hein ? Mais cette personne est juste sous tes yeux~",
+                                voice: "story/1102/111016/1BCAAEB6",
+                                npc: 111001,
+                                next: 11101616,
+                            },
+                            {
+                                id: 11101622,
+                                content: "Oui. C’est ce que Maman Lapin nous a toujours appris.",
+                                voice: "story/1102/111016/1BCAAFDC",
+                                npc: 111001,
+                                next: 11101605,
+                            },
+                            {
+                                id: 11101624,
+                                content:
+                                    "C’est Joy qui porte le titre du « Fou », alors il n’y a aucune erreur ! Maman Lapin dit que les noms d’arcane représentent « l’essence » des petits lapins. On ne peut surtout pas les changer comme ça.",
+                                voice: "story/1102/111016/1BCAB030",
+                                npc: 111001,
+                                next: 11101605,
+                            },
+                            {
+                                id: 11101626,
+                                content:
+                                    "Maman Lapin dit que les noms d’arcane représentent « l’essence » des petits lapins, alors on ne peut pas les changer. Mais moi, je peux quand même te donner un surnom encore plus cool en secret ! Par exemple... « le Guerrier Ultime Supersonique du Retour Triomphal » ! Alors ? Ça en jette, non ?",
+                                voice: "story/1102/111016/1BCAB084",
+                                npc: 111001,
+                                next: 11101627,
+                            },
+                            {
+                                id: 11101610,
+                                content:
+                                    "Mais le village a déjà été reconstruit ! Tout ça, c’est grâce à Maman Lapin ! Je suis sûre qu’un jour, elle rendra aussi ce parc tout beau à nouveau.",
+                                voice: "story/1102/111016/1BCAADE4",
+                                npc: 111001,
+                                next: 11101611,
+                            },
+                            {
+                                id: 11101616,
+                                content: "... Si tu parles de moi, ce ne sera pas nécessaire.",
+                                voice: "story/1102/111016/1BCAAEE0",
+                                npc: 111126,
+                                next: 11101617,
+                            },
+                            {
+                                id: 11101627,
+                                content: "Tout compte fait... « Le Chariot », c’est très bien aussi.",
+                                voice: "story/1102/111016/1BCAB0AE",
+                                npc: 111126,
+                                next: 11101605,
+                            },
+                            {
+                                id: 11101611,
+                                content:
+                                    "<I>Encore cette « Maman Lapin »... On dirait une sorte... d’ingénieure chargée de la reconstruction ?</>",
+                                voice: "story/1102/111016/1BCAAE0E",
+                                npc: 111126,
+                                next: 11101605,
+                            },
+                            {
+                                id: 11101617,
+                                content: "<I>Elle n’a donc jamais vu Fulvis non plus.</>",
+                                voice: "story/1102/111016/1BCAAF0A",
+                                npc: 111126,
+                                next: 11101605,
+                            },
+                            {
+                                id: 11101628,
+                                content: "Il reste... encore... des... choses... à... demander... ? Fuuu...",
+                                voice: "story/1102/111016/1BCAB0D8",
+                                npc: 111001,
+                                next: 11101629,
+                            },
+                            {
+                                id: 11101629,
+                                content: "Attends... elle s’est déjà endormie...",
+                                voice: "story/1102/111016/1BCAB102",
+                                npc: 111126,
+                                next: 11101630,
+                            },
+                            {
+                                id: 11101630,
+                                content: "Fuuu... Bernard... les énormes cuisses de cerf... j’en peux plus... Yiou...",
+                                voice: "story/1102/111016/1BCAB12C",
+                                npc: 111001,
+                                next: 11101631,
+                            },
+                            {
+                                id: 11101631,
+                                content: "Ada... et Victor... seront... compagnons... pour toujours...",
+                                voice: "story/1102/111016/1BCAB156",
+                                npc: 111001,
+                                next: 11101632,
+                            },
+                            {
+                                id: 11101632,
+                                content: "Maman Lapin... pardon... moi... je veux pas...",
+                                voice: "story/1102/111016/1BCAB180",
+                                npc: 111001,
+                                next: 11101633,
+                            },
+                            {
+                                id: 11101633,
+                                content: "...",
+                                voice: "story/1102/111016/1BCAB1AA",
+                                npc: 111126,
+                                next: 11101634,
+                            },
+                            {
+                                id: 11101634,
+                                content:
+                                    "Yiou—— ! Aïe aïe aïe ! Quelle méchante tasse... Même cassée, elle arrive encore à faire des siennes.",
+                                voice: "story/1102/111016/1BCAB1D4",
+                                npc: 111001,
+                                next: 11101635,
+                            },
+                            {
+                                id: 11101635,
+                                content: "Tu t’es blessée ?",
+                                voice: "story/1102/111016/1BCAB1FE",
+                                npc: 111126,
+                                next: 11101636,
+                            },
+                            {
+                                id: 11101636,
+                                content: "Pas du tout ! Allez, on va essayer la prochaine attraction~",
+                                voice: "story/1102/111016/1BCAB228",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809965419164107427",
+                        type: "TalkNode",
+                        name: "开车",
+                        dialogues: [
+                            {
+                                id: 11101501,
+                                content: "On a encore du temps devant nous ! Allons essayer d’autres attractions~",
+                                voice: "story/1102/111015/1BCA9C02",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1780920816057481",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_08】饮水机",
+                        next: ["17810053683896160800", "1780920816057482"],
+                        dialogues: [
+                            {
+                                id: 11101701,
+                                content: "C’est quoi, cette machine... ?",
+                                voice: "story/1102/111017/1BCABCD2",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11101702,
+                            },
+                            {
+                                id: 11101702,
+                                content:
+                                    "C’est un distributeur de boissons. E-en fait... j’y ai caché quelques boissons en secret. Elles sont super sucrées, tu veux en goûter une ?",
+                                voice: "story/1102/111017/1BCABCFC",
+                                npc: 111001,
+                                next: 11101703,
+                            },
+                            {
+                                id: 11101703,
+                                content: "Non merci. Les boissons trop sucrées donnent encore plus soif.",
+                                voice: "story/1102/111017/1BCABD26",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11101704,
+                            },
+                            {
+                                id: 11101704,
+                                content: "A-ah... d’accord. Je comprends...",
+                                voice: "story/1102/111017/1BCABD50",
+                                npc: 111001,
+                                next: 11101705,
+                            },
+                            {
+                                id: 11101705,
+                                content: "... Tant mieux, alors.",
+                                voice: "story/1102/111017/1BCABD7A",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17810053683896160800",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11101801,
+                                content: "Allez, on va jouer avec ce truc stupide !",
+                                voice: "story/1102/111018/1BCACD3A",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1780920816057482",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_09】大锤机",
+                        srId: 107101,
+                        pos: [-30698, -33031],
+                        dialogues: [
+                            {
+                                id: 11101901,
+                                content: "Waaah... comment t’as fait pour obtenir un score pareil ?",
+                                voice: "story/1102/111019/1BCADDA2",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11101902,
+                                        content: "<I>J’ai imaginé un certain type insupportable avec sa coupe noir-et-blanc.</>",
+                                        voice: "story/1102/111019/1BCADDCC",
+                                        next: 11101905,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 11101903,
+                                        content: "<I>Le résultat de toutes ces années passées dans la Légion.</>",
+                                        voice: "story/1102/111019/1BCADDF6",
+                                        next: 11101905,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 11101904,
+                                        content: "<I>Avec un peu de technique, toi aussi tu pourrais y arriver.</>",
+                                        voice: "story/1102/111019/1BCADE20",
+                                        next: 11101905,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11101905,
+                                content:
+                                    "D’accord, j’essaierai moi aussi la prochaine fois ! Tant qu’il ne fait pas encore nuit, allons voir d’autres attractions~",
+                                voice: "story/1102/111019/1BCADE4A",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178107335548411271484",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11102001,
+                                content:
+                                    "Yiou ! Tu as bien meilleure mine maintenant. Alors dépêchons-nous d’aller essayer la dernière attraction !",
+                                voice: "story/1102/111020/1BCAEE0A",
+                                npc: 111001,
+                                next: 11102002,
+                            },
+                            {
+                                id: 11102002,
+                                content: "Et si on y va maintenant, on devrait rentrer au village juste à temps après~",
+                                voice: "story/1102/111020/1BCAEE34",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178110071961812294771",
+                        type: "TalkNode",
+                        name: "锵锵，最后一个项目就是——过山车！",
+                        next: ["1780920816070541"],
+                        dialogues: [
+                            {
+                                id: 11102101,
+                                content: "Tadaaam ! La dernière attraction, c’est—— les montagnes russes !",
+                                voice: "story/1102/111021/1BCAFE72",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1780920816070541",
+                        type: "TalkNode",
+                        name: " 【Ex02_FixSimple_13】过山车",
+                        dialogues: [
+                            {
+                                id: 11102201,
+                                content: "Ah... encore en panne... Quel dommage...",
+                                voice: "story/1102/111022/1BCB0EDA",
+                                npc: 111001,
+                                next: 11102202,
+                            },
+                            {
+                                id: 11102202,
+                                content:
+                                    "Même si elles fonctionnaient encore, avec les rails détruits dans cet état, ce serait impossible de les utiliser.",
+                                voice: "story/1102/111022/1BCB0F04",
+                                npc: 111126,
+                                next: 11102203,
+                            },
+                            {
+                                id: 11102203,
+                                content: "Mais si ! On peut encore avancer et reculer un peu dans ce petit morceau-là.",
+                                voice: "story/1102/111022/1BCB0F2E",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11102204,
+                                        content: "<I>Ça n’aurait aucun intérêt. Laisse tomber.</>",
+                                        voice: "story/1102/111022/1BCB0F58",
+                                        next: 11102206,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 11102205,
+                                        content: "<I>On est loin de vraies montagnes russes.</>",
+                                        voice: "story/1102/111022/1BCB0F82",
+                                        next: 11102206,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11102206,
+                                content: "... D’accord...",
+                                voice: "story/1102/111022/1BCB0FAC",
+                                npc: 111001,
+                                next: 11102207,
+                            },
+                            {
+                                id: 11102207,
+                                content: "Un coup de feu ?!",
+                                voice: "story/1102/111022/1BCB0FD6",
+                                npc: 111126,
+                                next: 11102208,
+                            },
+                            {
+                                id: 11102208,
+                                content: "Hein ? Bernard serait venu chasser jusque-là ?",
+                                voice: "story/1102/111022/1BCB1000",
+                                npc: 111001,
+                                next: 11102209,
+                            },
+                            {
+                                id: 11102209,
+                                content:
+                                    "Héhé, même s’il voulait pas de notre aide, cette fois c’est le petit cerf qui est venu nous chercher tout seul ! Il pourra pas me gronder pour ça. Allez, viens, on va le retrouver !",
+                                voice: "story/1102/111022/1BCB102A",
+                                npc: 111001,
+                                next: 11102210,
+                            },
+                            {
+                                id: 11102210,
+                                content: "Non... Ce tir ne ressemblait pas à celui d’un fusil de chasse...",
+                                voice: "story/1102/111022/1BCB1054",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11020104,
+                name: "Des coups de feu dans les ruines",
+                desc: "Après avoir joué un moment avec Ada dans le parc d’attractions en ruines, vous entendez des coups de feu provenant des profondeurs des ruines. Avancez prudemment en suivant leur direction.",
+                nodes: [
+                    {
+                        id: "17815218418292099598",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11102301,
+                                content:
+                                    "Par ici, par ici ! Le petit cerf a cassé des branches en courant. Il est forcément passé par là !",
+                                voice: "story/1102/111023/1BCB1F42",
+                                npc: 111001,
+                                next: 11102302,
+                            },
+                            {
+                                id: 11102302,
+                                content: "<I>Non... La coupe est bien trop nette. Impossible que ce soit un cerf...</>",
+                                voice: "story/1102/111023/1BCB1F6C",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17815251005483155494",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11102401,
+                                content:
+                                    "Hein ? Ces Souillés aussi ont été abattus par Bernard ? Alors ça veut dire qu’il est forcément dans les environs avec le petit cerf !",
+                                voice: "story/1102/111024/1BCB2FAA",
+                                npc: 111001,
+                                next: 11102402,
+                            },
+                            {
+                                id: 11102402,
+                                content:
+                                    "<I>Chaque tir a atteint un point vital... Un simple chasseur serait incapable d’une telle précision...</>",
+                                voice: "story/1102/111024/1BCB2FD4",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17815261489335255564",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11102501,
+                                content: "Grrrraaaah...",
+                                voice: "story/1102/111025/1BCB4012",
+                                speakerName: "Hurlement de Souillé",
+                                next: 11102502,
+                            },
+                            {
+                                id: 11102502,
+                                content: "Yiou ? Encore des Souillés ? Le petit cerf serait tombé dans un nid de monstres ?",
+                                voice: "story/1102/111025/1BCB403C",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17815271791665260078",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17815274559126307588"],
+                        dialogues: [
+                            {
+                                id: 11102601,
+                                content:
+                                    "<I>Par terre... un pistolet réglementaire de la Légion. Et un chargeur vide... Le canon est encore brûlant. Il a servi il y a quelques instants à peine.</>",
+                                voice: "story/1102/111026/1BCB507A",
+                                npc: 111126,
+                                next: 11102602,
+                            },
+                            {
+                                id: 11102602,
+                                content: "Ada, reviens ! Il pourrait y avoir du danger !",
+                                voice: "story/1102/111026/1BCB50A4",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17815274559126307588",
+                        type: "TalkNode",
+                        name: "【EX02_Fix_SEQ_01】法露茜偷袭",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110202,
+        quests: [
+            {
+                id: 11020201,
+                name: "Sous la faille",
+                desc: "Vous avez suivi les coups de feu jusqu’à leur origine, mais vous êtes tombés dans une embuscade et avez chuté du haut de la falaise. Qui vous attaque ?",
+                nodes: [
+                    {
+                        id: "17815778711223149814",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17815779439053150484"],
+                        dialogues: [
+                            {
+                                id: 11110001,
+                                content: "Kh... Une embuscade... ?",
+                                voice: "story/1102/111096/1BD00E8A",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17815779439053150484",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11110002,
+                                content: "Haa...",
+                                voice: "story/1102/111096/1BD00EB4",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17815782636514200585",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_14】法露茜与主角对峙",
+                        dialogues: [
+                            {
+                                id: 11102801,
+                                content: "Tch...",
+                                voice: "story/1102/111028/1BCB714A",
+                                npc: 111110,
+                                next: 11102802,
+                            },
+                            {
+                                id: 11102802,
+                                content: "Ada ! Tu n’as rien ?!",
+                                voice: "story/1102/111028/1BCB7174",
+                                npc: 111126,
+                                next: 11102803,
+                            },
+                            {
+                                id: 11102803,
+                                content: "S-si si si ! Je veux pas mourir écraséeeeee ! Yiou yiou !",
+                                voice: "story/1102/111028/1BCB719E",
+                                npc: 111001,
+                                next: 11102804,
+                            },
+                            {
+                                id: 11102804,
+                                content: "... Ouvre les yeux. Tu ne risques rien.",
+                                voice: "story/1102/111028/1BCB71C8",
+                                npc: 111126,
+                                next: 11102805,
+                            },
+                            {
+                                id: 11102805,
+                                content:
+                                    "Pfiou... C’était super excitant ! Mais qu’est-ce qui s’est passé ?! Pourquoi on s’est retrouvés propulsés tout en bas d’un coup ?!",
+                                voice: "story/1102/111028/1BCB71F2",
+                                npc: 111001,
+                                next: 11102806,
+                            },
+                            {
+                                id: 11102806,
+                                content:
+                                    "Tu n’as rien à dire... ? Très bien. Alors réponds-moi : où est l’enregistreur que tu as récupéré à la Forteresse de Lonza ?",
+                                voice: "story/1102/111028/1BCB721C",
+                                npc: 111126,
+                                next: 11102807,
+                            },
+                            {
+                                id: 11102807,
+                                content: "...",
+                                voice: "story/1102/111028/1BCB7246",
+                                npc: 111110,
+                                next: 11102808,
+                            },
+                            {
+                                id: 11102808,
+                                content: "Réponds.",
+                                voice: "story/1102/111028/1BCB7270",
+                                npc: 111126,
+                                next: 11102809,
+                            },
+                            {
+                                id: 11102809,
+                                content: "Yiou ?",
+                                voice: "story/1102/111028/1BCB729A",
+                                npc: 111001,
+                                next: 11102810,
+                            },
+                            {
+                                id: 11102810,
+                                content: "...",
+                                voice: "story/1102/111028/1BCB72C4",
+                                npc: 111110,
+                                next: 11102811,
+                            },
+                            {
+                                id: 11102811,
+                                content:
+                                    "<W>Une coquille vide sans la moindre vitalité... Même le sang qui jaillit lorsqu’on la tranche semble déjà desséché. Quel ennui.</>",
+                                voice: "story/1102/111028/1BCB72EE",
+                                speakerName: "???",
+                                next: 11102812,
+                            },
+                            {
+                                id: 11102812,
+                                content: "Je l’ai détruit. Pendant l’explosion de la Forteresse de Lonza.",
+                                voice: "story/1102/111028/1BCB7318",
+                                npc: 111110,
+                                next: 11102813,
+                            },
+                            {
+                                id: 11102813,
+                                content: "...",
+                                voice: "story/1102/111028/1BCB7342",
+                                npc: 111126,
+                                next: 11102814,
+                            },
+                            {
+                                id: 11102814,
+                                content: "Question suivante. C’est Antonius Fulvis qui t’a ordonné de me tendre cette embuscade ?",
+                                voice: "story/1102/111028/1BCB736C",
+                                npc: 111126,
+                                next: 11102815,
+                            },
+                            {
+                                id: 11102815,
+                                content:
+                                    "J’aimerais tellement qu’il apparaisse devant moi pour me donner des ordres... Comme ça, je pourrais lui faire sauter la tête d’une balle.",
+                                voice: "story/1102/111028/1BCB7396",
+                                npc: 111110,
+                                next: 11102816,
+                            },
+                            {
+                                id: 11102816,
+                                content: "Yiou !",
+                                voice: "story/1102/111028/1BCB73C0",
+                                npc: 111001,
+                                next: 11102817,
+                            },
+                            {
+                                id: 11102817,
+                                content: "Lui faire sauter la tête... ?",
+                                voice: "story/1102/111028/1BCB73EA",
+                                npc: 111126,
+                                next: 11102818,
+                            },
+                            {
+                                id: 11102818,
+                                content: "Et Falsi ? Tant qu’on retrouve Falsi et l’enregistreur, la vérité... !",
+                                voice: "story/1002/110169/1B946524",
+                                npc: 110022,
+                                next: 11102819,
+                            },
+                            {
+                                id: 11102819,
+                                content: "Elle a disparu.",
+                                voice: "story/1002/110169/1B94654E",
+                                npc: 110032,
+                                next: 11102820,
+                            },
+                            {
+                                id: 11102820,
+                                content:
+                                    "Lors d’une explosion à la Forteresse de Lonza, elle a chuté hors de la forteresse. Les soldats ont retrouvé son pistolet ensanglanté sur la rive. La Légion poursuit encore les recherches, mais d’après ce que l’on suppose, elle est probablement morte.",
+                                voice: "story/1002/110169/1B946578",
+                                npc: 110032,
+                                next: 11102821,
+                            },
+                            {
+                                id: 11102821,
+                                content:
+                                    "Fulvis a provoqué l’explosion de la Forteresse de Lonza pour s’assurer que tu emportes son secret dans la tombe. C’est bien ça ?",
+                                voice: "story/1102/111028/1BCB7492",
+                                npc: 111126,
+                                next: 11102822,
+                            },
+                            {
+                                id: 11102822,
+                                content: "Tu n’es pas obligé de poser une question dont tu connais déjà la réponse juste pour m’humilier.",
+                                voice: "story/1102/111028/1BCB74BC",
+                                npc: 111110,
+                                next: 11102823,
+                            },
+                            {
+                                id: 11102823,
+                                content:
+                                    "Ça ne m’intéresse pas. Et ce qui s’est passé entre vous deux ne me regarde pas. À partir de maintenant, tu restes dans mon champ de vision.",
+                                voice: "story/1102/111028/1BCB74E6",
+                                npc: 111126,
+                                next: 11102824,
+                            },
+                            {
+                                id: 11102824,
+                                content: "Comme tu voudras.",
+                                voice: "story/1102/111028/1BCB7510",
+                                npc: 111110,
+                                next: 11102825,
+                            },
+                            {
+                                id: 11102825,
+                                content: "Ada, ramasse son arme. On retourne sur le chemin principal.",
+                                voice: "story/1102/111028/1BCB753A",
+                                npc: 111126,
+                                next: 11102826,
+                            },
+                            {
+                                id: 11102826,
+                                content: "À vos ordres, commandant !",
+                                voice: "story/1102/111028/1BCB7564",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178304776717511888499",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11102901,
+                                content:
+                                    "T’es qui, au juste ?! Pourquoi tu nous as attaqués dès qu’on s’est rencontrés ?! T’es vraiment méchante !",
+                                voice: "story/1102/111029/1BCB81B2",
+                                npc: 111001,
+                                next: 11102902,
+                            },
+                            {
+                                id: 11102902,
+                                content: "...",
+                                voice: "story/1102/111029/1BCB81DC",
+                                npc: 111110,
+                                next: 11102903,
+                            },
+                            {
+                                id: 11102903,
+                                content: "Hé, vilaine ! Je te parle !",
+                                voice: "story/1102/111029/1BCB8206",
+                                npc: 111001,
+                                next: 11102904,
+                            },
+                            {
+                                id: 11102904,
+                                content: "Cette idiote est incapable de comprendre un mot de ce qu’on lui dit, c’est ça ?",
+                                voice: "story/1102/111029/1BCB8230",
+                                npc: 111110,
+                                next: 11102905,
+                            },
+                            {
+                                id: 11102905,
+                                content:
+                                    "Tu n’as pas de nom d’arcane, donc tu n’es pas un petit lapin. Et avec tes griffes toutes sorties comme ça... tu es un petit chat ! Un très méchant petit chat.",
+                                voice: "story/1102/111029/1BCB825A",
+                                npc: 111001,
+                                next: 11102906,
+                            },
+                            {
+                                id: 11102906,
+                                content: "Vous avez parlé tellement longtemps que ça m’a donné sommeil.",
+                                voice: "story/1102/111029/1BCB8284",
+                                npc: 111001,
+                                next: 11102907,
+                            },
+                            {
+                                id: 11102907,
+                                content:
+                                    "Tiens, méchant chat, comment tu t’appelles déjà ? Je viens de cueillir cette sauge, je te l’offre. Maintenant répète encore ce que vous disiez tout à l’heure~",
+                                voice: "story/1102/111029/1BCB82AE",
+                                npc: 111001,
+                                next: 11102908,
+                            },
+                            {
+                                id: 11102908,
+                                content: "Tu sais, le : « Ne m’humilie pas ! », puis : « Ça m’est égal ! »",
+                                voice: "story/1102/111029/1BCB82D8",
+                                npc: 111001,
+                                next: 11102909,
+                            },
+                            {
+                                id: 11102909,
+                                content: "...",
+                                voice: "story/1102/111029/1BCB8302",
+                                npc: 111110,
+                                next: 11102910,
+                            },
+                            {
+                                id: 11102910,
+                                content: "Ada. Concentre-toi sur le chemin.",
+                                voice: "story/1102/111029/1BCB832C",
+                                npc: 111126,
+                                next: 11102911,
+                            },
+                            {
+                                id: 11102911,
+                                content: "... Yiou.",
+                                voice: "story/1102/111029/1BCB8356",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1781531329392563",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_15】：暂时和法露茜和解",
+                        dialogues: [
+                            {
+                                id: 11103101,
+                                content: "Combien de temps avant d’atteindre le village ?",
+                                voice: "story/1102/111031/1BCBA282",
+                                npc: 111126,
+                                next: 11103102,
+                            },
+                            {
+                                id: 11103102,
+                                content:
+                                    "Environ... sept... huit... neuf... vingt-trois... cinquante minutes ? Je passe pas souvent par ce chemin, mais le village est dans cette direction. Si on continue tout droit, on finira forcément par arriver quelque part !",
+                                voice: "story/1102/111031/1BCBA2AC",
+                                npc: 111001,
+                                next: 11103103,
+                            },
+                            {
+                                id: 11103103,
+                                content: "...",
+                                voice: "story/1102/111031/1BCBA2D6",
+                                npc: 111126,
+                                next: 11103104,
+                            },
+                            {
+                                id: 11103104,
+                                content:
+                                    "Tu as encore la tête qui tourne ? Repose-toi un peu ici. Je vais chercher un gros rocher bien plat pour que tu puisses t’allonger~",
+                                voice: "story/1102/111031/1BCBA300",
+                                npc: 111001,
+                                next: 11103105,
+                            },
+                            {
+                                id: 11103105,
+                                content: "GROOOAAAR—",
+                                voice: "story/1102/111031/1BCBA32A",
+                                speakerName: "???",
+                                next: 11103106,
+                            },
+                            {
+                                id: 11103106,
+                                content: "Ne bouge pas.",
+                                voice: "story/1102/111031/1BCBA354",
+                                npc: 111126,
+                                next: 11103107,
+                            },
+                            {
+                                id: 11103107,
+                                content: "Mais tu as vraiment l’air de souffrir...",
+                                voice: "story/1102/111031/1BCBA37E",
+                                npc: 111001,
+                                next: 11103108,
+                            },
+                            {
+                                id: 11103108,
+                                content: "... Un groupe de Souillés approche droit devant. Au moins une dizaine.",
+                                voice: "story/1102/111031/1BCBA3A8",
+                                npc: 111126,
+                                next: 11103109,
+                            },
+                            {
+                                id: 11103109,
+                                content: "Yiou !",
+                                voice: "story/1102/111031/1BCBA3D2",
+                                npc: 111001,
+                                next: 11103110,
+                            },
+                            {
+                                id: 11103110,
+                                content: "Hm.",
+                                voice: "story/1102/111031/1BCBA3FC",
+                                npc: 111110,
+                                next: 11103111,
+                            },
+                            {
+                                id: 11103111,
+                                content:
+                                    "<W>Un boulet bruyant. Une prisonnière qui gaspille ton attention. Toutes deux épuisent peu à peu ta patience et tes forces.</>",
+                                voice: "story/1102/111031/1BCBA426",
+                                speakerName: "???",
+                                next: 11103112,
+                            },
+                            {
+                                id: 11103112,
+                                content:
+                                    "<W>Admets-le. Tu commences à être lassé de ces deux fardeaux. Si ça continue, aucun de vous trois ne quittera cette vallée vivant.</>",
+                                voice: "story/1102/111031/1BCBA450",
+                                speakerName: "???",
+                                next: 11103113,
+                            },
+                            {
+                                id: 11103113,
+                                content:
+                                    "<W>Alors utilise ton épée. Offre-leur une mort rapide. Elles souffriront moins... et toi, tu seras enfin libre de t’ouvrir un chemin seul hors d’ici.</>",
+                                voice: "story/1102/111031/1BCBA47A",
+                                speakerName: "???",
+                                next: 11103114,
+                            },
+                            {
+                                id: 11103114,
+                                content: "...",
+                                voice: "story/1102/111031/1BCBA4A4",
+                                npc: 111126,
+                                next: 11103115,
+                            },
+                            {
+                                id: 11103115,
+                                content:
+                                    "Je suis {性别2:blessé|blessée}, mais si tu tentes quoi que ce soit, je peux encore te tuer avant même que tu réagisses.",
+                                voice: "story/1102/111031/1BCBA4CE",
+                                npc: 111126,
+                                next: 11103116,
+                            },
+                            {
+                                id: 11103116,
+                                content:
+                                    "Tu as donc deux choix. Tu marches avec moi et tu m’aides à repousser les Souillés sur notre route... et nous survivrons tous les trois.",
+                                voice: "story/1102/111031/1BCBA4F8",
+                                npc: 111126,
+                                next: 11103117,
+                            },
+                            {
+                                id: 11103117,
+                                content:
+                                    "Ou bien tu ne fais rien, tu attends que les Souillés m’épuisent complètement... puis tu te fais dévorer à ton tour après qu’ils auront piétiné mon cadavre.",
+                                voice: "story/1102/111031/1BCBA522",
+                                npc: 111126,
+                                next: 11103118,
+                            },
+                            {
+                                id: 11103118,
+                                content: "Il existe une troisième option. Tue-moi maintenant.",
+                                voice: "story/1102/111031/1BCBA54C",
+                                npc: 111110,
+                                next: 11103119,
+                            },
+                            {
+                                id: 11103119,
+                                content: "Très bien. Fulvis en rirait jusque dans ses rêves.",
+                                voice: "story/1102/111031/1BCBA576",
+                                npc: 111126,
+                                next: 11103120,
+                            },
+                            {
+                                id: 11103120,
+                                content: "...",
+                                voice: "story/1102/111031/1BCBA5A0",
+                                npc: 111110,
+                                next: 11103121,
+                            },
+                            {
+                                id: 11103121,
+                                content: "Ada. Rends-lui son arme.",
+                                voice: "story/1102/111031/1BCBA5CA",
+                                npc: 111126,
+                                next: 11103122,
+                            },
+                            {
+                                id: 11103122,
+                                content:
+                                    "Pas besoin. Dis-moi simplement qui je dois tuer. Même avec des pierres, mes mains ou mes dents... j’exécuterai l’ordre.",
+                                voice: "story/1102/111031/1BCBA5F4",
+                                npc: 111110,
+                                next: 11103123,
+                            },
+                            {
+                                id: 11103123,
+                                content: "Méchant chat !",
+                                voice: "story/1102/111031/1BCBA61E",
+                                npc: 111001,
+                                next: 11103124,
+                            },
+                            {
+                                id: 11103124,
+                                content:
+                                    "... Finalement, c’est peut-être plus sûr pour nous qu’elle reste sans arme. Ada, passe devant. Si tu vois des Souillés, préviens-nous.",
+                                voice: "story/1102/111031/1BCBA648",
+                                npc: 111126,
+                                next: 11103125,
+                            },
+                            {
+                                id: 11103125,
+                                content: "À vos ordres, commandant ! Ada l’éclaireuse accomplira sa mission !",
+                                voice: "story/1102/111031/1BCBA672",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17851353871877811207",
+                        type: "TalkNode",
+                        name: "被怪物发现后的黑屏",
+                        next: ["17851353871877811207"],
+                        dialogues: [
+                            {
+                                id: 11125101,
+                                content: "Évitez les Souillés et avancez avec prudence !",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17851353797967811075",
+                        type: "TalkNode",
+                        name: "被怪物发现后的黑屏",
+                        next: ["17851353797967811075"],
+                        dialogues: [
+                            {
+                                id: 11125101,
+                                content: "Évitez les Souillés et avancez avec prudence !",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17851355073767812835",
+                        type: "TalkNode",
+                        name: "被怪物发现后的黑屏",
+                        next: ["17851355073767812835"],
+                        dialogues: [
+                            {
+                                id: 11125101,
+                                content: "Évitez les Souillés et avancez avec prudence !",
+                            },
+                        ],
+                    },
+                    {
+                        id: "178471045002814400073",
+                        type: "TalkNode",
+                        name: "被怪物发现后的黑屏",
+                        next: ["17842620067855549799", "17842588072105549278"],
+                        dialogues: [
+                            {
+                                id: 11125101,
+                                content: "Évitez les Souillés et avancez avec prudence !",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17842620067855549799",
+                        type: "TalkNode",
+                        name: "原来当年是军团将阿尔卡诺山炸为了平地……",
+                        dialogues: [
+                            {
+                                id: 11121701,
+                                content: "Alors... c’est la Légion qui a réduit les Montagnes d’Arcano en un champ de ruines...",
+                                voice: "story/1102/111096/1BD78E12",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17842588072105549278",
+                        type: "TalkNode",
+                        name: "阅读物ui界面",
+                        next: ["178471151588814402229", "178471153317614402595", "17842692488716667604", "178168140058312614716"],
+                    },
+                    {
+                        id: "178471151588814402229",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17842692488716667604", "178471153317614402595", "178168140058312614716"],
+                        dialogues: [
+                            {
+                                id: 11125101,
+                                content: "Évitez les Souillés et avancez avec prudence !",
+                            },
+                        ],
+                    },
+                    {
+                        id: "178471153317614402595",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17842692488716667604", "178168140058312614716"],
+                        dialogues: [
+                            {
+                                id: 11125101,
+                                content: "Évitez les Souillés et avancez avec prudence !",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17842692488716667604",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178299821273412997318"],
+                        dialogues: [
+                            {
+                                id: 11103301,
+                                content: "Les bavardages s’arrêtent ici. On ne peut plus passer.",
+                                voice: "story/1102/111033/1BCBC352",
+                                npc: 111110,
+                                next: 11103302,
+                            },
+                            {
+                                id: 11103302,
+                                content: "GROOOOAAAH !",
+                                voice: "story/1102/111033/1BCBC37C",
+                                speakerName: "Souillé errant",
+                                next: 11103303,
+                            },
+                            {
+                                id: 11103303,
+                                content: "Formation en pointe. J’ouvre la marche, Falsi couvre l’arrière.",
+                                voice: "story/1102/111033/1BCBC3A6",
+                                npc: 111126,
+                                next: 11103304,
+                            },
+                            {
+                                id: 11103304,
+                                content: "Pas besoin de me le dire.",
+                                voice: "story/1102/111033/1BCBC3D0",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178299821273412997318",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178299826098212997864"],
+                        dialogues: [
+                            {
+                                id: 11103401,
+                                content: "Ne vous arrêtez pas ! Foncez !",
+                                voice: "story/1102/111034/1BCBD3BA",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178299826098212997864",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11103501,
+                                content: "Par le haut !",
+                                voice: "story/1102/111035/1BCBE422",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178168140058312614716",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["1781531329404629"],
+                        dialogues: [
+                            {
+                                id: 11103601,
+                                content: "... Bien. Ça devrait tenir, plus ou moins.",
+                                voice: "story/1102/111036/1BCBF48A",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1781531329404629",
+                        type: "TalkNode",
+                        name: "【EX02_Fix_SEQ_02】启动炮台",
+                        next: ["178168156980812616090"],
+                    },
+                    {
+                        id: "178168156980812616090",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_16】前往启动机关",
+                        dialogues: [
+                            {
+                                id: 11103701,
+                                content: "Ce canon est complètement détruit... et il arrive encore à tirer ? Impressionnant...",
+                                voice: "story/1102/111037/1BCC04F2",
+                                npc: 111001,
+                                next: 11103702,
+                            },
+                            {
+                                id: 11103702,
+                                content: "Je ne sais pas combien de temps il tiendra encore. Trouvez vite un moyen de traverser.",
+                                voice: "story/1102/111037/1BCC051C",
+                                npc: 111110,
+                                next: 11103703,
+                            },
+                            {
+                                id: 11103703,
+                                content:
+                                    "Attends voir... Devant nous, c’est juste un lac, non ? On pourrait simplement le traverser à la nage.",
+                                voice: "story/1102/111037/1BCC0546",
+                                npc: 111001,
+                                next: 11103704,
+                            },
+                            {
+                                id: 11103704,
+                                content: "Impossible. L’eau n’a rien de normal.",
+                                voice: "story/1102/111038/1BCC155A",
+                                npc: 111126,
+                                next: 11103705,
+                            },
+                            {
+                                id: 11103705,
+                                content: "Hein ? Pourquoi tu dis ça ? Elle est jolie pourtant, avec toutes ces couleurs.",
+                                voice: "story/1102/111039/1BCC25C2",
+                                npc: 111001,
+                                next: 11103706,
+                            },
+                            {
+                                id: 11103706,
+                                content:
+                                    "Une eau normale n’aurait jamais cette couleur... ni cette odeur infecte. Pourquoi nous avoir conduits dans un endroit pareil ?",
+                                voice: "story/1102/111039/1BCC25EC",
+                                npc: 111110,
+                                next: 11103707,
+                            },
+                            {
+                                id: 11103707,
+                                content:
+                                    "P-parce que le village est censé être dans cette direction... A-alors qu’est-ce qu’on fait maintenant... ?",
+                                voice: "story/1102/111039/1BCC2616",
+                                npc: 111001,
+                                next: 11103708,
+                            },
+                            {
+                                id: 11103708,
+                                content:
+                                    "Calme-toi. Ada, ces rails au-dessus du lac... ce sont bien les anciennes voies servant au transport de marchandises vers le village ?",
+                                voice: "story/1102/111039/1BCC2640",
+                                npc: 111126,
+                                next: 11103709,
+                            },
+                            {
+                                id: 11103709,
+                                content:
+                                    "Oui... Enfin, je crois. Elles ont probablement été détruites pendant la guerre puis sont tombées ici...",
+                                voice: "story/1102/111039/1BCC266A",
+                                npc: 111001,
+                                next: 11103710,
+                            },
+                            {
+                                id: 11103710,
+                                content: "On peut les réparer ?",
+                                voice: "story/1102/111039/1BCC2694",
+                                npc: 111126,
+                                next: 11103711,
+                            },
+                            {
+                                id: 11103711,
+                                content:
+                                    "Peut-être... ? Je sais pas trop. Quand quelque chose se casse au village, c’est toujours Morgana qui s’en occupe...",
+                                voice: "story/1102/111039/1BCC26BE",
+                                npc: 111001,
+                                next: 11103712,
+                            },
+                            {
+                                id: 11103712,
+                                content: "On n’a pas le choix. Si les Souillés atteignent cette position, on mourra tous ici.",
+                                voice: "story/1102/111039/1BCC26E8",
+                                npc: 111126,
+                                next: 11103713,
+                            },
+                            {
+                                id: 11103713,
+                                content:
+                                    "Yiou... Dans un moment pareil, vous allez vraiment compter sur moi...? B-bon... je vais voir si les machines de réparation là-bas fonctionnent encore.",
+                                voice: "story/1102/111039/1BCC2712",
+                                npc: 111001,
+                                next: 11103714,
+                            },
+                            {
+                                id: 11103714,
+                                content: "Allons-y. Je viens avec toi. Falsi, couvre-nous.",
+                                voice: "story/1102/111039/1BCC273C",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178168239271814715948",
+                        type: "TalkNode",
+                        name: "1.3.8 【过场演出】：法露茜救场",
+                        dialogues: [
+                            {
+                                id: 10010101,
+                                content: "Berry, je...",
+                                voice: "story/1001/100101/190F2A32",
+                                npc: 100001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178365144942019669",
+                        type: "TalkNode",
+                        name: "朝这里打。知道了。",
+                        dialogues: [
+                            {
+                                id: 11123201,
+                                content: "Frappe ici.",
+                                voice: "story/1102/111096/1BD8842A",
+                                npc: 111127,
+                                next: 11123202,
+                            },
+                            {
+                                id: 11123202,
+                                content: "Compris.",
+                                voice: "story/1102/111096/1BD88454",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178365159386121763",
+                        type: "TalkNode",
+                        name: "待在我的轰炸范围里，否则我帮不到你们。",
+                        dialogues: [
+                            {
+                                id: 11123301,
+                                content: "Restez dans ma zone de bombardement. Sinon, je ne pourrai pas vous couvrir.",
+                                voice: "story/1102/111096/1BD89492",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178364994600111141",
+                        type: "TalkNode",
+                        name: "啧，秽兽在源源不断地涌出来。",
+                        dialogues: [
+                            {
+                                id: 11123101,
+                                content: "Tss... Les Souillés continuent d'affluer sans arrêt.",
+                                voice: "story/1102/111096/1BD873C2",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17836498302379489",
+                        type: "TalkNode",
+                        name: "太好了，还能用。交给你了，我来拦住秽兽。",
+                        dialogues: [
+                            {
+                                id: 11104001,
+                                content: "Super, ça marche encore !",
+                                voice: "story/1102/111040/1BCC362A",
+                                npc: 111001,
+                                next: 11104002,
+                            },
+                            {
+                                id: 11104002,
+                                content: "Occupe-t’en. Je retiens les Souillés.",
+                                voice: "story/1102/111040/1BCC3654",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17836495154967591",
+                        type: "TalkNode",
+                        name: "我想想……这里应该接这个，这里……",
+                        dialogues: [
+                            {
+                                id: 11104101,
+                                content: "Voyons voir... Ça devrait se brancher ici... puis ici...",
+                                voice: "story/1102/111041/1BCC4692",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178365240205928065",
+                        type: "TalkNode",
+                        name: "不，不行……剩下的用这台设备没法修，得去用下面的那台。",
+                        next: ["17836535449431126041", "178365144942019669"],
+                        dialogues: [
+                            {
+                                id: 11104201,
+                                content:
+                                    "N-non... ça ne suffit pas. Impossible de réparer le reste avec cette machine. Il faut utiliser celle d’en bas !",
+                                voice: "story/1102/111042/1BCC56FA",
+                                npc: 111001,
+                                next: 11104202,
+                            },
+                            {
+                                id: 11104202,
+                                content: "Hé ! Où est-ce que vous allez ?! Je ne pourrai plus vous couvrir depuis ici !",
+                                voice: "story/1102/111042/1BCC5724",
+                                npc: 111110,
+                                next: 11104203,
+                            },
+                            {
+                                id: 11104203,
+                                content: "... Allons-y. Dépêchons-nous. Je peux encore tenir un peu.",
+                                voice: "story/1102/111042/1BCC574E",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17836535449431126041",
+                        type: "TalkNode",
+                        name: "咳……我马上就好，马上就好！",
+                        dialogues: [
+                            {
+                                id: 11104301,
+                                content: "Khh...",
+                                voice: "story/1102/111043/1BCC6762",
+                                npc: 111126,
+                                next: 11104302,
+                            },
+                            {
+                                id: 11104302,
+                                content: "J’ai presque fini ! Presque fini !",
+                                voice: "story/1102/111043/1BCC678C",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178351143272514234332",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11104601,
+                                content: "Pfiou... On a failli finir en repas pour Souillés.",
+                                voice: "story/1102/111046/1BCC989A",
+                                npc: 111001,
+                                next: 11104602,
+                            },
+                            {
+                                id: 11104602,
+                                content: "Ne baissez pas votre garde.",
+                                voice: "story/1102/111046/1BCC98C4",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178351206068714235034",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11104603,
+                                content: "GROOOAAAH——",
+                                voice: "story/1102/111046/1BCC98EE",
+                                speakerName: "Souillé errant",
+                                next: 11104604,
+                            },
+                            {
+                                id: 11104604,
+                                content: "Je m’en charge.",
+                                voice: "story/1102/111046/1BCC9918",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178351212097614235730",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11104605,
+                                content: "Grrr...",
+                                voice: "story/1102/111046/1BCC9942",
+                                speakerName: "Souillé tourmenté",
+                                next: 11104606,
+                            },
+                            {
+                                id: 11104606,
+                                content: "Cette eau contaminée est corrosive. Même les Souillés n’y résistent pas.",
+                                voice: "story/1102/111046/1BCC996C",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178351215633814236279",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11104701,
+                                content: "Faites attention. Ne tombez surtout pas dans l’eau.",
+                                voice: "story/1102/111047/1BCCA902",
+                                npc: 111126,
+                                next: 11104702,
+                            },
+                            {
+                                id: 11104702,
+                                content: "Tch...",
+                                voice: "story/1102/111047/1BCCA92C",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11020202,
+                name: "S’échapper ?",
+                desc: "Lorsque Falsi tombe accidentellement dans le lac pendant la traversée, vous plongez à votre tour pour sauver ce témoin essentiel. Vous vous souvenez l’avoir sauvée et avoir nagé jusqu’à la rive... Mais ensuite...",
+                nodes: [
+                    {
+                        id: "1781686084680531",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_17】",
+                        srId: 107301,
+                        pos: [-38147, -17058],
+                        next: ["178453892059927637029"],
+                        dialogues: [
+                            {
+                                id: 11104901,
+                                content:
+                                    "Victor, tu devais être épuisé... Tu as dormi jusqu’à maintenant. Tu veux encore te reposer un peu ? Après tout, nous avons tout notre temps.",
+                                voice: "story/1102/111049/1BCCC9D2",
+                                npc: 111001,
+                                next: 11104902,
+                            },
+                            {
+                                id: 11104902,
+                                content: "Cet endroit... ? Pourquoi sommes-nous au parc d’attractions ?",
+                                voice: "story/1102/111049/1BCCC9FC",
+                                npc: 111126,
+                                next: 11104903,
+                            },
+                            {
+                                id: 11104903,
+                                content: "Mais qu’est-ce que tu racontes ? On a toujours été ici, voyons.",
+                                voice: "story/1102/111049/1BCCCA26",
+                                npc: 111001,
+                                next: 11104904,
+                            },
+                            {
+                                id: 11104904,
+                                content: "Quoi... ? Et Falsi ? Je me souviens qu’on est tombés dans le lac, puis...",
+                                voice: "story/1102/111049/1BCCCA50",
+                                npc: 111126,
+                                next: 11104905,
+                            },
+                            {
+                                id: 11104905,
+                                content: "Falsi ? C’est qui, ça ? Tu n’aurais pas de la fièvre ? Laisse Ada vérifier——",
+                                voice: "story/1102/111049/1BCCCA7A",
+                                npc: 111001,
+                                next: 11104906,
+                            },
+                            {
+                                id: 11104906,
+                                content: "Ça va.",
+                                voice: "story/1102/111049/1BCCCAA4",
+                                npc: 111126,
+                                next: 11104907,
+                            },
+                            {
+                                id: 11104907,
+                                content: "<I>Mes blessures ont disparu...</>",
+                                voice: "story/1102/111049/1BCCCACE",
+                                npc: 111126,
+                                next: 11104908,
+                            },
+                            {
+                                id: 11104908,
+                                content:
+                                    "Bon ! Alors on va bouger un peu avant de rentrer au village. Les nuits sont froides dans la montagne, il faut se réchauffer avant~",
+                                voice: "story/1102/111049/1BCCCAF8",
+                                npc: 111001,
+                                next: 11104909,
+                            },
+                            {
+                                id: 11104909,
+                                content: "♪ Lalala... Ada et Victor... dansent avec les petits lapins... lalala... ♪",
+                                voice: "story/1102/111049/1BCCCB22",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178453892059927637029",
+                        type: "TalkNode",
+                        name: "（这是……梦吗？已经有些搞不清楚了。）热好身啦，我们回去吧~",
+                        next: ["1781686084680537"],
+                        dialogues: [
+                            {
+                                id: 11105201,
+                                content: "<I>... Un rêve ? Je ne sais même plus ce qui est réel.</>",
+                                voice: "story/1102/111052/1BCCFB0A",
+                                npc: 111126,
+                                next: 11105202,
+                            },
+                            {
+                                id: 11105202,
+                                content: "On est bien échauffés maintenant~ Rentrons~",
+                                voice: "story/1102/111052/1BCCFB34",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1781686084680537",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_19】过山车",
+                        next: ["17816992638431058099"],
+                        dialogues: [
+                            {
+                                id: 11105301,
+                                content: "Les montagnes russes étaient pourtant cassées, non ?",
+                                voice: "story/1102/111053/1BCD0B72",
+                                npc: 111126,
+                                next: 11105302,
+                            },
+                            {
+                                id: 11105302,
+                                content:
+                                    "Je les ai réparées pendant que tu dormais. Génial, hein ? Lalala... Félicite-moi... allez, félicite-moi~",
+                                voice: "story/1102/111053/1BCD0B9C",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17816992638431058099",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_20】跑出轨道",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110203,
+        quests: [
+            {
+                id: 11020301,
+                name: "Veillée au coin du feu",
+                desc: "Vous vous réveillez en sursaut après un cauchemar. Que pouvait bien annoncer ce rêve ?",
+                nodes: [
+                    {
+                        id: "1781781035455495",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_25】：到回村子的路",
+                        next: ["17847242044432224942", "178213378408612830373"],
+                        dialogues: [
+                            {
+                                id: 11109801,
+                                content: "C’est... un chemin ?",
+                                voice: "story/1102/111096/1BCFEDBA",
+                                npc: 111126,
+                                next: 11109802,
+                            },
+                            {
+                                id: 11109802,
+                                content: "Mhm ! C’est le méchant chat qui l’a trouvé. J’aurais jamais cru qu’elle se lèverait avant moi.",
+                                voice: "story/1102/111096/1BCFEDE4",
+                                npc: 111001,
+                                next: 11109803,
+                            },
+                            {
+                                id: 11109803,
+                                content: "Vu sa direction, ce sentier devrait mener aux plateaux de la montagne. Donc vers Arcano.",
+                                voice: "story/1102/111096/1BCFEE0E",
+                                npc: 111110,
+                                next: 11109804,
+                            },
+                            {
+                                id: 11109804,
+                                content: "En fait, je voulais surtout te montrer le gros insecte que je viens d’attraper...",
+                                voice: "story/1102/111096/1BCFEE38",
+                                npc: 111001,
+                                next: 11109805,
+                            },
+                            {
+                                id: 11109805,
+                                content: "Ada... c’est bien ça ? Tu vas nous guider.",
+                                voice: "story/1102/111096/1BCFEE62",
+                                npc: 111110,
+                                next: 11109806,
+                            },
+                            {
+                                id: 11109806,
+                                content:
+                                    "Quoi ?! Le méchant chat accepte enfin de me parler normalement ?! Le médicament du chef du village soigne aussi les sales caractères maintenant ?",
+                                voice: "story/1102/111096/1BCFEE8C",
+                                npc: 111001,
+                                next: 11109807,
+                            },
+                            {
+                                id: 11109807,
+                                content: "Au lieu de perdre du temps à bavarder, avance.",
+                                voice: "story/1102/111096/1BCFEEB6",
+                                npc: 111110,
+                                next: 11109808,
+                            },
+                            {
+                                id: 11109808,
+                                content: "Yiou ! Ah, voilà le méchant chat que je connais.",
+                                voice: "story/1102/111096/1BCFEEE0",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17847242044432224942",
+                        type: "TalkNode",
+                        name: "开车",
+                        dialogues: [
+                            {
+                                id: 11106001,
+                                content:
+                                    "<blue>C’est ici. À ce moment-là, Ada et Victor marchaient simplement côte à côte sur ce petit sentier, sans dire un mot.</>",
+                                voice: "story/1102/111060/1BCD7E4A",
+                                npc: 111001,
+                                next: 11106002,
+                            },
+                            {
+                                id: 11106002,
+                                content:
+                                    "<blue>Parce que Victor allait rejoindre la Légion... et Ada avait l’impression qu’elle allait rester toute seule.</>",
+                                voice: "story/1102/111060/1BCD7E74",
+                                npc: 111001,
+                                next: 11106003,
+                            },
+                            {
+                                id: 11106003,
+                                content: "<blue>Alors Ada lui a dit : « Tu reviendras me voir, hein ? »</>",
+                                voice: "story/1102/111060/1BCD7E9E",
+                                npc: 111001,
+                                next: 11106004,
+                            },
+                            {
+                                id: 11106004,
+                                content:
+                                    "<blue>Ada a attendu... encore et encore... encore et encore... Mais tout ce qui est revenu jusqu’au village, ce furent les flammes de la guerre.</>",
+                                voice: "story/1102/111060/1BCD7EC8",
+                                npc: 111001,
+                                next: 11106005,
+                            },
+                            {
+                                id: 11106005,
+                                content: "...",
+                                voice: "story/1102/111060/1BCD7EF2",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178213378408612830373",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11105901,
+                                content: "À partir d’ici, je reconnais à peu près le chemin !",
+                                voice: "story/1102/111059/1BCD6DE2",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17866049769904471666",
+                        type: "TalkNode",
+                        name: "晚上踏入不熟悉的森林太危险了，等天亮再过去吧。",
+                        next: ["17866049769904471666"],
+                        dialogues: [
+                            {
+                                id: 11105701,
+                                content:
+                                    "S’aventurer dans une forêt inconnue en pleine nuit serait trop dangereux. Mieux vaut attendre le lever du jour.",
+                                voice: "story/1102/111057/1BCD4D12",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17866081233987818715",
+                        type: "TalkNode",
+                        name: "晚上踏入不熟悉的森林太危险了，等天亮再过去吧。",
+                        next: ["17866081233987818715"],
+                        dialogues: [
+                            {
+                                id: 11105701,
+                                content:
+                                    "S’aventurer dans une forêt inconnue en pleine nuit serait trop dangereux. Mieux vaut attendre le lever du jour.",
+                                voice: "story/1102/111057/1BCD4D12",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1781781035461531",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_21】：主角醒来",
+                        next: ["1781781035461532"],
+                        dialogues: [
+                            {
+                                id: 11105401,
+                                content: "N’approche pas !",
+                                voice: "story/1102/111054/1BCD1BDA",
+                                npc: 111126,
+                                next: 11105402,
+                            },
+                            {
+                                id: 11105402,
+                                content: "Yiou yiou—— ! Tu es enfin réveillé !",
+                                voice: "story/1102/111054/1BCD1C04",
+                                npc: 111001,
+                                next: 11105403,
+                            },
+                            {
+                                id: 11105403,
+                                content:
+                                    "Tu disais pourtant que l’eau était dangereuse ! Alors pourquoi tu as sauté dedans comme ça ? Ouin ouin... J’ai cru que tu ne te réveillerais jamais.",
+                                voice: "story/1102/111054/1BCD1C2E",
+                                npc: 111001,
+                                next: 11105404,
+                            },
+                            {
+                                id: 11105404,
+                                content: "Je n’avais pas le choix.",
+                                voice: "story/1102/111054/1BCD1C58",
+                                npc: 111126,
+                                next: 11105405,
+                            },
+                            {
+                                id: 11105405,
+                                content:
+                                    "Heureusement que le chef du village m’avait donné cette drôle de fiole médicinale ! Sinon, tu serais resté {性别2:inconscient|inconsciente} encore bien plus longtemps. Enfin bref, comment tu te sens ? Tu as mal quelque part ?",
+                                voice: "story/1102/111054/1BCD1C82",
+                                npc: 111001,
+                                next: 11105406,
+                            },
+                            {
+                                id: 11105406,
+                                content:
+                                    "<I>... Mes blessures me lancent encore un peu. Et je sens la chaleur du feu de camp. Alors je suis bien réveillé cette fois.</>",
+                                voice: "story/1102/111054/1BCD1CAC",
+                                npc: 111126,
+                                next: 11105407,
+                            },
+                            {
+                                id: 11105407,
+                                content: "Le cœur bat un peu trop vite. On dirait les effets d’un stimulant cardiaque.",
+                                voice: "story/1102/111054/1BCD1CD6",
+                                npc: 111126,
+                                next: 11105408,
+                            },
+                            {
+                                id: 11105408,
+                                content: "Un stimulant cardia— quoi ? Enfin, peu importe, tant que ça marche !",
+                                voice: "story/1102/111054/1BCD1D00",
+                                npc: 111001,
+                                next: 11105409,
+                            },
+                            {
+                                id: 11105409,
+                                content: "Et elle ?",
+                                voice: "story/1102/111054/1BCD1D2A",
+                                npc: 111126,
+                                next: 11105410,
+                            },
+                            {
+                                id: 11105410,
+                                content:
+                                    "Le méchant chat ne s’est toujours pas réveillé. Je voulais lui redonner du médicament, mais la fiole est vide... Je sais même pas si elle se réveillera encore...",
+                                voice: "story/1102/111054/1BCD1D54",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1781781035461532",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_22】：与法露茜交互",
+                        next: ["17866082444118936098", "17866082444118936103"],
+                        dialogues: [
+                            {
+                                id: 11105411,
+                                content: "Sa respiration est stable. Elle ne mourra pas.",
+                                voice: "story/1102/111054/1BCD1D7E",
+                                npc: 111126,
+                                next: 11105412,
+                            },
+                            {
+                                id: 11105412,
+                                content: "Yiou ! Tant mieux~",
+                                voice: "story/1102/111054/1BCD1DA8",
+                                npc: 111001,
+                                next: 11105413,
+                            },
+                            {
+                                id: 11105413,
+                                content: "Tu... sembles beaucoup tenir au méchant chat. C’est ton amie ?",
+                                voice: "story/1102/111054/1BCD1DD2",
+                                npc: 111001,
+                                next: 11105414,
+                            },
+                            {
+                                id: 11105414,
+                                content: "Non.",
+                                voice: "story/1102/111054/1BCD1DFC",
+                                npc: 111126,
+                                next: 11105415,
+                            },
+                            {
+                                id: 11105415,
+                                content: "Alors c’est ton ennemie.",
+                                voice: "story/1102/111054/1BCD1E26",
+                                npc: 111001,
+                                next: 11105416,
+                            },
+                            {
+                                id: 11105416,
+                                content: "... Plus vraiment maintenant.",
+                                voice: "story/1102/111054/1BCD1E50",
+                                npc: 111126,
+                                next: 11105417,
+                            },
+                            {
+                                id: 11105417,
+                                content: "Si elle n’est ni une amie ni une ennemie... alors qu’est-ce qu’elle est exactement ?",
+                                voice: "story/1102/111054/1BCD1E7A",
+                                npc: 111001,
+                                next: 11105418,
+                            },
+                            {
+                                id: 11105418,
+                                content:
+                                    "Elle est toi. Elle est moi. Elle est comme beaucoup de gens dans ce monde. À l’extérieur, les liens entre les gens sont bien plus compliqués que tu ne l’imagines... et plus compliqués encore que je ne le pensais moi-même.",
+                                voice: "story/1102/111054/1BCD1EA4",
+                                npc: 111126,
+                                next: 11105419,
+                            },
+                            {
+                                id: 11105419,
+                                content:
+                                    "Des compagnons d’armes peuvent soudain pointer une arme sur toi... et d’anciens ennemis peuvent devenir des alliés temporaires lorsqu’ils poursuivent le même objectif.",
+                                voice: "story/1102/111054/1BCD1ECE",
+                                npc: 111126,
+                                next: 11105420,
+                            },
+                            {
+                                id: 11105420,
+                                content:
+                                    "Alors... si tout le monde partage le même objectif, ils peuvent devenir amis ? Dans ce cas, si je trouvais le plus grand, le plus amusant et le plus adorable objectif du monde... aussi mignon qu’un insecte... alors tout le monde pourrait devenir mon compagnon ?",
+                                voice: "story/1102/111054/1BCD1EF8",
+                                npc: 111001,
+                                next: 11105421,
+                            },
+                            {
+                                id: 11105421,
+                                content: "... Peut-être.",
+                                voice: "story/1102/111054/1BCD1F22",
+                                npc: 111126,
+                                next: 11105422,
+                            },
+                            {
+                                id: 11105422,
+                                content: "Ada. Tu es restée ici tout ce temps ?",
+                                voice: "story/1102/111054/1BCD1F4C",
+                                npc: 111126,
+                                next: 11105423,
+                            },
+                            {
+                                id: 11105423,
+                                content: "Oui ! J’ai fait de mon mieux pour tenir bon. Je me suis même pas endormie une seule fois !",
+                                voice: "story/1102/111054/1BCD1F76",
+                                npc: 111001,
+                                next: 11105424,
+                            },
+                            {
+                                id: 11105424,
+                                content: "Merci. Va dormir un peu maintenant. Je vais prendre le tour de garde.",
+                                voice: "story/1102/111054/1BCD1FA0",
+                                npc: 111126,
+                                next: 11105425,
+                            },
+                            {
+                                id: 11105425,
+                                content:
+                                    "Tu veux vraiment pas que je reste avec toi ? Être seul dans une forêt sans personne à qui parler, c’est tellement... haaah... tellement ennuyeux...",
+                                voice: "story/1102/111054/1BCD1FCA",
+                                npc: 111001,
+                                next: 11105426,
+                            },
+                            {
+                                id: 11105426,
+                                content: "J’ai l’habitude. Et demain, j’aurai encore besoin de toi pour nous guider. Va te reposer.",
+                                voice: "story/1102/111054/1BCD1FF4",
+                                npc: 111126,
+                                next: 11105427,
+                            },
+                            {
+                                id: 11105427,
+                                content:
+                                    "Yiou... D’accord. Mais si quelque chose arrive, réveille-moi. Et si jamais je dors tellement fort que j’ai l’air morte... secoue-moi un peu pour me réveiller.",
+                                voice: "story/1102/111054/1BCD201E",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17866082444118936098",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11105501,
+                                content:
+                                    "Même si Ada a trouvé cet endroit à la hâte, au moins on a semé les Souillés... Le feu faiblit. Je devrais aller chercher un peu plus de bois.",
+                                voice: "story/1102/111055/1BCD2C42",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17866082444118936103",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17866082444128936109"],
+                        dialogues: [
+                            {
+                                id: 11105601,
+                                content: "<I>Dans cette terre désolée, les branches mortes ne manquent pas. Ça devrait suffire.</>",
+                                voice: "story/1102/111056/1BCD3CAA",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17866082444128936109",
+                        type: "TalkNode",
+                        name: "Ex02_FixSimple_23】：主角和法露茜交心",
+                        next: ["17866082444128936117"],
+                        dialogues: [
+                            {
+                                id: 11105801,
+                                content: "Mmh...",
+                                voice: "story/1102/111058/1BCD5D7A",
+                                npc: 111110,
+                                next: 11105802,
+                            },
+                            {
+                                id: 11105802,
+                                content: "Tu es réveillée.",
+                                voice: "story/1102/111058/1BCD5DA4",
+                                npc: 111126,
+                                next: 11105803,
+                            },
+                            {
+                                id: 11105803,
+                                content: "Pourquoi m’avoir sauvée ?",
+                                voice: "story/1102/111058/1BCD5DCE",
+                                npc: 111110,
+                                options: [
+                                    {
+                                        id: 11105804,
+                                        content: "<I>Mourir comme ça aurait été trop facile pour toi.</>",
+                                        voice: "story/1102/111058/1BCD5DF8",
+                                        next: 11105805,
+                                    },
+                                    {
+                                        id: 11105806,
+                                        content: "<I>Tu es plus utile en vie.</>",
+                                        voice: "story/1102/111058/1BCD5E4C",
+                                        next: 11105807,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11105805,
+                                content: "Le sang de mes compagnons pèse aussi sur tes mains. Je ne l’ai pas oublié.",
+                                voice: "story/1102/111058/1BCD5E22",
+                                npc: 111126,
+                                next: 11105808,
+                            },
+                            {
+                                id: 11105807,
+                                content:
+                                    "Pour accuser Fulvis... et pour affronter les dangers inconnus de cette montagne. Tu peux encore nous être utile.",
+                                voice: "story/1102/111058/1BCD5E76",
+                                npc: 111126,
+                                next: 11105808,
+                            },
+                            {
+                                id: 11105808,
+                                content:
+                                    "Tu étais l’adjudante de Fulvis. Tu dois forcément posséder des preuves capables de le faire tomber. Je veux que tu survives... pour témoigner devant le tribunal militaire.",
+                                voice: "story/1102/111058/1BCD5EA0",
+                                npc: 111126,
+                                next: 11105809,
+                            },
+                            {
+                                id: 11105809,
+                                content:
+                                    "Tu es bien {性别2:naïf|naïve}. Tu crois vraiment que Fulvis et le ministre de la Justice ne sont pas du même côté ? Ce qui s’est réellement passé à la Forteresse de Lonza ne les intéresse pas le moins du monde. Tout ce qu’ils veulent, c’est un prétexte pour éliminer les Charons Couronnés.",
+                                voice: "story/1102/111058/1BCD5ECA",
+                                npc: 111110,
+                                next: 11105810,
+                            },
+                            {
+                                id: 11105810,
+                                content:
+                                    "Tu ne peux pas combattre des gens qui manipulent les règles en espérant gagner avec ces mêmes règles. Tuer Fulvis et piétiner ce système pourri... voilà la seule issue possible.",
+                                voice: "story/1102/111058/1BCD5EF4",
+                                npc: 111110,
+                                next: 11105811,
+                            },
+                            {
+                                id: 11105811,
+                                content:
+                                    "S’ils ont absolument besoin de ce mensonge pour éliminer les Charons Couronnés... alors cela signifie forcément qu’au sommet du pouvoir, certains leur résistent encore dans l’ombre. Ils attendent la vérité.",
+                                voice: "story/1102/111058/1BCD5F1E",
+                                npc: 111126,
+                                next: 11105812,
+                            },
+                            {
+                                id: 11105812,
+                                content: "Ça ne ressemble pas à une conclusion que toi, tu tirerais.",
+                                voice: "story/1102/111058/1BCD5F48",
+                                npc: 111110,
+                                next: 11105813,
+                            },
+                            {
+                                id: 11105813,
+                                content: "C’est Verg— ... un ami à moi.",
+                                voice: "story/1102/111058/1BCD5F72",
+                                npc: 111126,
+                                next: 11105814,
+                            },
+                            {
+                                id: 11105814,
+                                content:
+                                    "Peu importe. Tant que tu ne m’empêches pas de tuer Fulvis, ça me va. Quant au témoignage... on verra déjà si je suis encore en vie d’ici là.",
+                                voice: "story/1102/111058/1BCD5F9C",
+                                npc: 111110,
+                                next: 11105815,
+                            },
+                            {
+                                id: 11105815,
+                                content: "Tu n’as vraiment pas peur de mourir.",
+                                voice: "story/1102/111058/1BCD5FC6",
+                                npc: 111126,
+                                next: 11105816,
+                            },
+                            {
+                                id: 11105816,
+                                content:
+                                    "Je suis déjà morte une fois à la Forteresse de Lonza. Au moment où je suis tombée pendant l’explosion... j’avais déjà accepté l’idée d’être jetée comme un vulgaire déchet.",
+                                voice: "story/1102/111058/1BCD5FF0",
+                                npc: 111110,
+                                next: 11105817,
+                            },
+                            {
+                                id: 11105817,
+                                content:
+                                    "Mais ce corps pathétique a quand même continué à ramper pour survivre. Alors il ne me restait plus qu’un seul choix.",
+                                voice: "story/1102/111058/1BCD601A",
+                                npc: 111110,
+                                next: 11105818,
+                            },
+                            {
+                                id: 11105818,
+                                content:
+                                    "La vie d’une moins-que-rien contre celle d’un sénateur puissant... Héhé. Il n’existe pas de marché plus avantageux que celui-là. Comparé à moi, c’est Fulvis qui devrait avoir peur de mourir.",
+                                voice: "story/1102/111058/1BCD6044",
+                                npc: 111110,
+                                next: 11105819,
+                            },
+                            {
+                                id: 11105819,
+                                content:
+                                    "Il est beaucoup trop avide. Et plus quelqu’un possède de choses, plus il craint de les perdre. Rien qu’en imaginant ses cris lorsqu’il suppliera avant de mourir... toutes les souffrances que j’ai endurées jusqu’ici me paraissent insignifiantes.",
+                                voice: "story/1102/111058/1BCD606E",
+                                npc: 111110,
+                                next: 11105820,
+                            },
+                            {
+                                id: 11105820,
+                                content:
+                                    "Ça suffit. J’ai compris à quel point tu hais Fulvis. Mais pourquoi m’avoir tendu une embuscade aujourd’hui ?",
+                                voice: "story/1102/111058/1BCD6098",
+                                npc: 111126,
+                                next: 11105821,
+                            },
+                            {
+                                id: 11105821,
+                                content: "Tu crois vraiment que Fulvis allait me laisser tranquille après avoir appris ma disparition ?",
+                                voice: "story/1102/111058/1BCD60C2",
+                                npc: 111110,
+                                next: 11105822,
+                            },
+                            {
+                                id: 11105822,
+                                content:
+                                    "Cela fait des nuits entières que je ne dors plus. Parce que si je ferme les yeux... les espions envoyés par Fulvis pourraient m’assassiner dans mon sommeil. Enfin... jusqu’à présent, ce sont surtout eux qui sont morts.",
+                                voice: "story/1102/111058/1BCD60EC",
+                                npc: 111110,
+                                next: 11105823,
+                            },
+                            {
+                                id: 11105823,
+                                content:
+                                    "Alors quand j’ai senti quelqu’un me suivre aujourd’hui, je me suis dit qu’il valait mieux frapper la première plutôt que perdre du temps à vérifier s’il s’agissait encore d’un des chiens de Fulvis.",
+                                voice: "story/1102/111058/1BCD6116",
+                                npc: 111110,
+                                next: 11105824,
+                            },
+                            {
+                                id: 11105824,
+                                content:
+                                    "Je ne m’excuserai donc pas pour cette embuscade. Mais... merci de m’avoir sauvée au dernier moment.",
+                                voice: "story/1102/111058/1BCD6140",
+                                npc: 111110,
+                                options: [
+                                    {
+                                        id: 11105825,
+                                        content: "<I>Je n’ai pas besoin des remerciements d’une ennemie.</>",
+                                        voice: "story/1102/111058/1BCD616A",
+                                        next: 11105827,
+                                    },
+                                    {
+                                        id: 11105826,
+                                        content: "<I>Pas besoin de me remercier. Tout ça, c’était pour arrêter Fulvis.</>",
+                                        voice: "story/1102/111058/1BCD6194",
+                                        next: 11105827,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11105827,
+                                content: "Mais tu peux récupérer cette arme.",
+                                voice: "story/1102/111058/1BCD61BE",
+                                npc: 111126,
+                                next: 11105828,
+                            },
+                            {
+                                id: 11105828,
+                                content: "Tu n’as pas peur que je la retourne contre toi dès que je l’aurai récupérée ?",
+                                voice: "story/1102/111058/1BCD61E8",
+                                npc: 111110,
+                                next: 11105829,
+                            },
+                            {
+                                id: 11105829,
+                                content: "Tu ne peux pas me battre.",
+                                voice: "story/1102/111058/1BCD6212",
+                                npc: 111126,
+                                next: 11105830,
+                            },
+                            {
+                                id: 11105830,
+                                content: "Quelle franchise brutale... Tant mieux. Nous n’avons jamais été du genre à nous ménager.",
+                                voice: "story/1102/111058/1BCD623C",
+                                next: 11105831,
+                            },
+                            {
+                                id: 11105831,
+                                content:
+                                    "Rassure-toi. Ça n’arrivera pas. Après tout... je n’ai plus aucun <H>ordre</> m’imposant de te tuer.",
+                                voice: "story/1102/111058/1BCD6266",
+                                npc: 111110,
+                                next: 11105832,
+                            },
+                            {
+                                id: 11105832,
+                                content: "... Au fait. Un conseil.",
+                                voice: "story/1102/111058/1BCD6290",
+                                npc: 111110,
+                                next: 11105833,
+                            },
+                            {
+                                id: 11105833,
+                                content: "<H>Cette Ada... elle cache quelque chose.</>",
+                                voice: "story/1102/111058/1BCD62BA",
+                                npc: 111110,
+                                next: 11105834,
+                            },
+                            {
+                                id: 11105834,
+                                content:
+                                    "Pendant que je me cachais dans la montagne, je l’ai vue tuer un habitant du village sans la moindre expression.",
+                                voice: "story/1102/111058/1BCD62E4",
+                                npc: 111110,
+                                next: 11105835,
+                            },
+                            {
+                                id: 11105835,
+                                content:
+                                    "Son regard à ce moment-là... comment dire... c’était comme si elle écrasait simplement un insecte. Et contrairement à Fulvis, il n’y avait chez elle ni satisfaction ni triomphe. Juste... une indifférence totale.",
+                                voice: "story/1102/111058/1BCD630E",
+                                npc: 111110,
+                                next: 11105836,
+                            },
+                            {
+                                id: 11105836,
+                                content:
+                                    "J’ignore pourquoi elle agit maintenant comme une enfant innocente... mais tu le sens toi aussi, non ? Cette montagne a quelque chose d’anormal.",
+                                voice: "story/1102/111058/1BCD6338",
+                                npc: 111110,
+                                next: 11105837,
+                            },
+                            {
+                                id: 11105837,
+                                content: "Je suis juste... un peu étourdi. Ça devrait passer.",
+                                voice: "story/1102/111008/1BCA297E",
+                                npc: 111126,
+                                next: 11105838,
+                            },
+                            {
+                                id: 11105838,
+                                content: "<I>Ada... tuer quelqu’un... ?</>",
+                                voice: "story/1102/111058/1BCD638C",
+                                npc: 111126,
+                                next: 11105839,
+                            },
+                            {
+                                id: 11105839,
+                                content:
+                                    "Tu l’as vu ? Mon insecte — une énorme bestiole, super jolie ! Je viens juste de l’attraper... mais il a disparu je sais pas où...",
+                                voice: "story/1102/111004/1BC9E78A",
+                                npc: 111001,
+                                next: 11105840,
+                            },
+                            {
+                                id: 11105840,
+                                content: "<blue>Toi... oui, toi, là. Tu as vraiment perdu la mémoire, pas vrai ?</>",
+                                voice: "story/1102/111014/1BCA8D92",
+                                npc: 111001,
+                                next: 11105841,
+                            },
+                            {
+                                id: 11105841,
+                                content:
+                                    "Tu disais pourtant que l’eau était dangereuse ! Alors pourquoi tu as sauté dedans comme ça ? Ouin ouin... J’ai cru que tu ne te réveillerais jamais.",
+                                voice: "story/1102/111054/1BCD1C2E",
+                                npc: 111001,
+                                next: 11105842,
+                            },
+                            {
+                                id: 11105842,
+                                content: "<W>Petit lapin... rentre à la maison... retourne dans ce paradis paisible et merveilleux...</>",
+                                voice: "story/1102/111053/1BCD0C1A",
+                                npc: 111001,
+                                next: 11105843,
+                            },
+                            {
+                                id: 11105843,
+                                content: "Mmh...",
+                                voice: "story/1102/111058/1BCD645E",
+                                npc: 111126,
+                                next: 11105844,
+                            },
+                            {
+                                id: 11105844,
+                                content:
+                                    "<W>Personne ne se soucie jamais sincèrement de toi. Des gens comme Ada, tu en as déjà rencontrés des dizaines. Ils convoitent tous quelque chose : ton statut, ta réputation, ta puissance... ou même ta vie.</>",
+                                voice: "story/1102/111058/1BCD6488",
+                                speakerName: "???",
+                                next: 11105845,
+                            },
+                            {
+                                id: 11105845,
+                                content:
+                                    "<W>Et si tu les confrontes, ils enfileront toujours leur masque d’innocence pour continuer à te tromper avec des paroles dont il est impossible de distinguer le vrai du faux.</>",
+                                voice: "story/1102/111058/1BCD64B2",
+                                speakerName: "???",
+                                next: 11105846,
+                            },
+                            {
+                                id: 11105846,
+                                content:
+                                    "<W>Alors peu importe ce qui se cache sous cette façade innocente d’Ada — un agneau ou une bête féroce — la solution la plus sûre reste de la tuer maintenant. Allez... lève ton épée. Et transperce-la.</>",
+                                voice: "story/1102/111058/1BCD64DC",
+                                speakerName: "???",
+                                next: 11105847,
+                            },
+                            {
+                                id: 11105847,
+                                content: "<I>Ça suffit... !</>",
+                                voice: "story/1102/111058/1BCD6506",
+                                npc: 111126,
+                                next: 11105848,
+                            },
+                            {
+                                id: 11105848,
+                                content:
+                                    "<I>J’ai encore besoin des habitants pour obtenir des informations sur Fulvis et le Catalyseur. Mon seul ennemi pour l’instant... c’est Fulvis.</>",
+                                voice: "story/1102/111058/1BCD6530",
+                                npc: 111126,
+                                next: 11105849,
+                            },
+                            {
+                                id: 11105849,
+                                content: "<I>Le feu faiblit encore... Je devrais aller chercher plus de bois.</>",
+                                voice: "story/1102/111058/1BCD655A",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17866082444128936117",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17866082444128936110", "17866049769904471666", "17866081233987818715"],
+                        dialogues: [
+                            {
+                                id: 11125201,
+                                content: "Le lendemain matin",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17866082444128936110",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_24】：第二天醒来",
+                        dialogues: [
+                            {
+                                id: 11109701,
+                                content:
+                                    "<I>Inspection terminée. Rien d’anormal dans les environs. Dès qu’elles seront réveillées, on pourra repartir.</>",
+                                voice: "story/1102/111096/1BCFDD52",
+                                npc: 111126,
+                                next: 11109702,
+                            },
+                            {
+                                id: 11109702,
+                                content: "Ada ?!",
+                                voice: "story/1102/111096/1BCFDD7C",
+                                npc: 111126,
+                                next: 11109703,
+                            },
+                            {
+                                id: 11109703,
+                                content: "Yiou !",
+                                voice: "story/1102/111096/1BCFDDA6",
+                                npc: 111001,
+                                next: 11109704,
+                            },
+                            {
+                                id: 11109704,
+                                content: "Viens vite, viens vite ! Regarde ce que j’ai trouvé !",
+                                voice: "story/1102/111096/1BCFDDD0",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11020302,
+                name: "Continuer d’avancer",
+                desc: "Après toutes ces péripéties, vous arrivez enfin à Arcano. Renseignez-vous sur le village et enquêtez sur le Catalyseur ainsi que sur Fulvis.",
+                nodes: [
+                    {
+                        id: "17821403733844282032",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_26】回到村庄",
+                        dialogues: [
+                            {
+                                id: 11106101,
+                                content: "Yiou~~ Nous voilà de retouuur—— ! Ouf, ouf... heureusement que tout le monde va bien !",
+                                voice: "story/1102/111061/1BCD8EB2",
+                                npc: 111001,
+                                next: 11106102,
+                            },
+                            {
+                                id: 11106102,
+                                content:
+                                    "<I>... D’après les renseignements, le village d’Arcano a été entièrement rasé il y a quatre ans. Il a déjà été reconstruit à ce point... ?</>",
+                                voice: "story/1102/111061/1BCD8EDC",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11106103,
+                            },
+                            {
+                                id: 11106103,
+                                content: "Ne reste pas planté là~~ Je vais d’abord t’emmener voir le chef du village !",
+                                voice: "story/1102/111061/1BCD8F06",
+                                npc: 111001,
+                                next: 11106104,
+                            },
+                            {
+                                id: 11106104,
+                                content:
+                                    "Ensuite, on rangera un peu ta maison tous les deux, et tu pourras t’y installer~ On pourra faire la grasse matinée tous les jours, puis aller attraper des insectes, pêcher, grimper aux arbres pour voler des nids d’oiseaux...",
+                                voice: "story/1102/111061/1BCD8F30",
+                                npc: 111001,
+                                next: 11106105,
+                            },
+                            {
+                                id: 11106105,
+                                content:
+                                    "Et si on n’a envie de rien faire, on n’aura qu’à accrocher un hamac entre deux arbres et paresser toute la journée !",
+                                voice: "story/1102/111061/1BCD8F5A",
+                                npc: 111001,
+                                next: 11106106,
+                            },
+                            {
+                                id: 11106106,
+                                content:
+                                    "<blue>Si Victor pouvait rester ici avec Ada pour toujours, il n’aurait plus jamais à souffrir dans la Légion.</>",
+                                voice: "story/1102/111061/1BCD8F84",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11106107,
+                                        content: "<I>Ça a l’air plutôt agréable.</>",
+                                        voice: "story/1102/111061/1BCD8FAE",
+                                        next: 11106109,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 11106108,
+                                        content: "<I>Non.</>",
+                                        voice: "story/1102/111061/1BCD8FD8",
+                                        next: 11106109,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11106109,
+                                content: "{性别2:Il|Elle} s’appelle {nickname2}, pas Victor.",
+                                voice: "story/1102/111061/1BCD9002",
+                                npc: 111110,
+                                next: 11106110,
+                            },
+                            {
+                                id: 11106110,
+                                content: "... Yiou...",
+                                voice: "story/1102/111061/1BCD902C",
+                                npc: 111001,
+                                next: 11106111,
+                            },
+                            {
+                                id: 11106111,
+                                content:
+                                    "Mais le passé de {nickname2} ne m’intéresse pas. Je voulais simplement rappeler {性别2:au Faucheur Pâle|à la Faucheuse Pâle} de la Légion la raison de sa venue ici.",
+                                voice: "story/1102/111061/1BCD9056",
+                                npc: 111110,
+                                next: 11106112,
+                            },
+                            {
+                                id: 11106112,
+                                content:
+                                    "Je le sais. Mon passé est complètement vide. Je suis incapable de retrouver le moindre fragment de souvenir... même flou. Mais ça n’a aucune importance.",
+                                voice: "story/1102/111061/1BCD9080",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11106113,
+                            },
+                            {
+                                id: 11106113,
+                                content: "Même si je ne découvre jamais qui j’étais... je sais au moins ce que je dois faire maintenant.",
+                                voice: "story/1102/111061/1BCD90AA",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11106114,
+                            },
+                            {
+                                id: 11106114,
+                                content:
+                                    "« Même si je ne découvre jamais qui j’étais... je sais au moins ce que je dois faire maintenant... »",
+                                voice: "story/1102/111061/1BCD90D4",
+                                npc: 111001,
+                                next: 11106115,
+                            },
+                            {
+                                id: 11106115,
+                                content:
+                                    "Même si je suis réellement Victor, je ne pourrai jamais rester ici éternellement. Au-delà de cette montagne, très loin d’ici... une mission m’attend encore. Je dois laver l’honneur de mes compagnons.",
+                                voice: "story/1102/111061/1BCD90FE",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11106116,
+                            },
+                            {
+                                id: 11106116,
+                                content: "Alors tu partiras quoi qu’il arrive ?",
+                                voice: "story/1102/111061/1BCD9128",
+                                npc: 111001,
+                                next: 11106117,
+                            },
+                            {
+                                id: 11106117,
+                                content: "Oui.",
+                                voice: "story/1102/111061/1BCD9152",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11106118,
+                            },
+                            {
+                                id: 11106118,
+                                content: "Alors j’ai encore une question. Est-ce qu’aujourd’hui... tu me considères comme ton amie ?",
+                                voice: "story/1102/111061/1BCD917C",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11106119,
+                                        content: "<I>Oui.</>",
+                                        voice: "story/1102/111061/1BCD91A6",
+                                        next: 11106120,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 11106122,
+                                        content: "<I>Non.</>",
+                                        voice: "story/1102/111061/1BCD9224",
+                                        next: 11106123,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11106120,
+                                content: "C’est évident. Tu l’as dit toi-même : nous étions amis depuis l’enfance, non ?",
+                                voice: "story/1102/111061/1BCD91D0",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11106121,
+                            },
+                            {
+                                id: 11106123,
+                                content:
+                                    "J’aimerais te répondre « oui » pour te rassurer... mais je ne veux pas te mentir. {性别2:Désolé|Désolée}. Je ne me souviens toujours de rien.",
+                                voice: "story/1102/111061/1BCD924E",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11106124,
+                            },
+                            {
+                                id: 11106121,
+                                content: "Mhm... oui, c’est vrai ! Alors, en tant qu’amie... laisse-moi t’aider !",
+                                voice: "story/1102/111061/1BCD91FA",
+                                npc: 111001,
+                                next: 11106125,
+                            },
+                            {
+                                id: 11106124,
+                                content:
+                                    "Ce n’est pas grave. Même si tu ne t’en souviens pas, ça n’a pas d’importance. Tu l’as dit toi-même : il suffit d’avoir un objectif commun pour devenir amis... et cet objectif, je l’ai déjà trouvé ! Alors laisse-moi t’aider~",
+                                voice: "story/1102/111061/1BCD9278",
+                                npc: 111001,
+                                next: 11106125,
+                            },
+                            {
+                                id: 11106125,
+                                content: "Quoi ?",
+                                voice: "story/1102/111061/1BCD92A2",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11106126,
+                            },
+                            {
+                                id: 11106126,
+                                content:
+                                    "Ne t’inquiète pas, ne t’inquiète pas~ Tout dans ce village risque de te sembler étrange ou inconnu, mais <H>avant de repartir, surtout, ne fais pas de scandale</> d’accord ?",
+                                voice: "story/1102/111061/1BCD92CC",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17821411550915353274",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11106201,
+                                content: "Allons-y, on va d’abord dire bonjour au chef du village.",
+                                voice: "story/1102/111062/1BCD9F1A",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17821419758038559068",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11106301,
+                                content:
+                                    "Tu vois le pont-levis relevé là-bas ? Normalement, c’est par là qu’on rentre au village. Cette fois, on a vraiment fait un énorme détour~",
+                                voice: "story/1102/111063/1BCDAF82",
+                                npc: 111001,
+                                next: 11106302,
+                            },
+                            {
+                                id: 11106302,
+                                content: "Mais après une aventure aussi palpitante, ce petit détour valait largement le coup !",
+                                voice: "story/1102/111063/1BCDAFAC",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17821419462738558648",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11106401,
+                                content:
+                                    "Ici, c’est la place de la <H>Parade du Paradis</>. Demain soir, tout le monde se réunira ici pour jouer ensemble. Et ce moment-là... tu devras absolument m’écouter, d’accord ?",
+                                voice: "story/1102/111064/1BCDBFEA",
+                                npc: 111001,
+                                next: 11106402,
+                            },
+                            {
+                                id: 11106402,
+                                content: "On dirait que le chef du village parle avec quelqu’un devant nous. Viens vite~",
+                                voice: "story/1102/111064/1BCDC014",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1782138091925573",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_27】：到达广场",
+                        dialogues: [
+                            {
+                                id: 11106501,
+                                content: "Vous avez retrouvé « La Papesse » et « Le Chariot » ?",
+                                voice: "story/1102/111065/1BCDD052",
+                                npc: 111125,
+                                next: 11106502,
+                            },
+                            {
+                                id: 11106502,
+                                content:
+                                    "Pas encore. Pfff... on a cherché toute la nuit. À part quelques Souillés abattus, on n’a rien trouvé !",
+                                voice: "story/1102/111065/1BCDD07C",
+                                npc: 111150,
+                                next: 11106503,
+                            },
+                            {
+                                id: 11106503,
+                                content:
+                                    "Qu’est-ce qu’on va faire... ? Ils ont sûrement été dévorés par les Souillés... Qu’est-ce qu’on va faire... ?",
+                                voice: "story/1102/111065/1BCDD0A6",
+                                npc: 111160,
+                                next: 11106504,
+                            },
+                            {
+                                id: 11106504,
+                                content:
+                                    "Calme-toi, Stella. Ce sont les Souillés qui ont été tués, pas l’inverse. Continuez les recherches. Fouillez aussi les ruines du champ de bataille dans la vallée.",
+                                voice: "story/1102/111065/1BCDD0D0",
+                                npc: 111125,
+                                next: 11106505,
+                            },
+                            {
+                                id: 11106505,
+                                content:
+                                    "... La vallée ?! Avec la pluie d’hier... ils ont peut-être glissé et chuté ? Ahh... et s’ils étaient tombés dans le lac toxique... Ada... ma préférée... ouin ouin...",
+                                voice: "story/1102/111065/1BCDD0FA",
+                                npc: 111160,
+                                next: 11106506,
+                            },
+                            {
+                                id: 11106506,
+                                content: "Chef du village ! Stella ! On est rentrés~",
+                                voice: "story/1102/111065/1BCDD124",
+                                npc: 111001,
+                                next: 11106507,
+                            },
+                            {
+                                id: 11106507,
+                                content: "Ada ! Ouin ouin... J’ai cru que je ne te reverrais jamais... ouin...",
+                                voice: "story/1102/111065/1BCDD14E",
+                                npc: 111160,
+                                next: 11106508,
+                            },
+                            {
+                                id: 11106508,
+                                content: "Victor... J’ai entendu parler de ton retour hier.",
+                                voice: "story/1102/111065/1BCDD178",
+                                npc: 111125,
+                                next: 11106509,
+                            },
+                            {
+                                id: 11106509,
+                                content:
+                                    "Ada, où est-ce que vous avez encore disparu cette nuit ? Tout le monde s’est fait un sang d’encre.",
+                                voice: "story/1102/111065/1BCDD1A2",
+                                npc: 111125,
+                                next: 11106510,
+                            },
+                            {
+                                id: 11106510,
+                                content: "Héhé... on a vu un très joli gros insecte, et sans faire exprès, on a perdu la notion du temps~",
+                                voice: "story/1102/111065/1BCDD1CC",
+                                npc: 111001,
+                                next: 11106511,
+                            },
+                            {
+                                id: 11106511,
+                                content:
+                                    "Pfff... c’est ma faute aussi, je t’ai trop gâtée. Maintenant tu ne rentres même plus dormir à la maison.",
+                                voice: "story/1102/111065/1BCDD1F6",
+                                npc: 111125,
+                                next: 11106512,
+                            },
+                            {
+                                id: 11106512,
+                                content:
+                                    "Bernard, Stella, prévenez tout le monde que les recherches sont terminées. Que chacun retourne préparer la Parade du Paradis. J’ai quelque chose à dire à Victor.",
+                                voice: "story/1102/111065/1BCDD220",
+                                npc: 111125,
+                                next: 11106513,
+                            },
+                            {
+                                id: 11106513,
+                                content: "D’accord... Ada, euh... tes cheveux sont tout ébouriffés. Pense à bien les brosser !",
+                                voice: "story/1102/111065/1BCDD24A",
+                                npc: 111160,
+                                next: 11106514,
+                            },
+                            {
+                                id: 11106514,
+                                content: "Victor... Bernard m’a dit que tu avais perdu la mémoire.",
+                                voice: "story/1102/111065/1BCDD274",
+                                npc: 111125,
+                                next: 11106515,
+                            },
+                            {
+                                id: 11106515,
+                                content:
+                                    "Si tu ne te souviens toujours de rien, alors laisse-moi me présenter à nouveau. Je suis le chef du village du Paradis. Tu peux m’appeler Cesare, « L’Empereur », ou simplement chef du village.",
+                                voice: "story/1102/111065/1BCDD29E",
+                                npc: 111125,
+                                next: 11106516,
+                            },
+                            {
+                                id: 11106516,
+                                content:
+                                    "« Le village du Paradis »... ? Vous voulez dire Arcano... ? Quand ce nom a-t-il changé ? Après la guerre d’il y a quatre ans ?",
+                                voice: "story/1102/111065/1BCDD2C8",
+                                npc: 111126,
+                                next: 11106517,
+                            },
+                            {
+                                id: 11106517,
+                                content: "Exactement. Avec l’aide de <H>Maman Lapin</>, nous avons reconstruit ce paradis.",
+                                voice: "story/1102/111065/1BCDD2F2",
+                                npc: 111125,
+                                next: 11106518,
+                            },
+                            {
+                                id: 11106518,
+                                content:
+                                    "La jeune fille qui vient de partir est « L’Étoile » Stella. L’anxiété et l’inquiétude sont <H>son essence</>, tout comme le courage et la détermination sont <H>la tienne</>. Ne t’en étonne pas.",
+                                voice: "story/1102/111065/1BCDD31C",
+                                npc: 111125,
+                                next: 11106519,
+                            },
+                            {
+                                id: 11106519,
+                                content: "Mais qu’est-ce que c’est que ce charabia... ? Je ne comprends rien.",
+                                voice: "story/1102/111065/1BCDD346",
+                                npc: 111110,
+                                next: 11106520,
+                            },
+                            {
+                                id: 11106520,
+                                content:
+                                    "... À force de discuter avec vous, j’en ai presque oublié cette nouvelle venue. Mademoiselle, puis-je connaître votre nom ?",
+                                voice: "story/1102/111065/1BCDD370",
+                                npc: 111125,
+                                next: 11106521,
+                            },
+                            {
+                                id: 11106521,
+                                content: "Falsi. L’adjudante de {nickname2} dans la Légion.",
+                                voice: "story/1102/111065/1BCDD39A",
+                                npc: 111110,
+                                next: 11106522,
+                            },
+                            {
+                                id: 11106522,
+                                content: "Ah... oui. Exact.",
+                                voice: "story/1102/111065/1BCDD3C4",
+                                npc: 111126,
+                                next: 11106523,
+                            },
+                            {
+                                id: 11106523,
+                                content:
+                                    "Hoh hoh... Victor fait vraiment la fierté du village du Paradis. Devenir quelqu’un d’aussi important à son âge...",
+                                voice: "story/1102/111065/1BCDD3EE",
+                                npc: 111125,
+                                next: 11106524,
+                            },
+                            {
+                                id: 11106524,
+                                content:
+                                    "Et toi, petite demoiselle, puisque c’est ta première visite ici, reste bien près de Victor. Les sentiers de montagne sont dangereux et le climat change vite. Alors une fois ici, il faut respecter certaines <H>règles</>.",
+                                voice: "story/1102/111065/1BCDD418",
+                                npc: 111125,
+                                next: 11106525,
+                            },
+                            {
+                                id: 11106525,
+                                content: "Compris.",
+                                voice: "story/1102/111065/1BCDD442",
+                                npc: 111110,
+                                next: 11106526,
+                            },
+                            {
+                                id: 11106526,
+                                content:
+                                    "Tout le monde semble occupé à préparer cette « Parade du Paradis », alors je vais faire court. Je voulais demander—",
+                                voice: "story/1102/111065/1BCDD46C",
+                                npc: 111126,
+                                next: 11106527,
+                            },
+                            {
+                                id: 11106527,
+                                content:
+                                    "Plus tard. Vous avez passé toute la nuit dehors. Vous devez être épuisés. Buvez déjà un peu d’eau et reposez-vous.",
+                                voice: "story/1102/111065/1BCDD496",
+                                npc: 111125,
+                                next: 11106528,
+                            },
+                            {
+                                id: 11106528,
+                                content: "Oui oui, je meurs de soif~",
+                                voice: "story/1102/111065/1BCDD4C0",
+                                npc: 111001,
+                                next: 11106529,
+                            },
+                            {
+                                id: 11106529,
+                                content: "... Doucement, tu vas t’étouffer.",
+                                voice: "story/1102/111065/1BCDD4EA",
+                                npc: 111125,
+                                next: 11106530,
+                            },
+                            {
+                                id: 11106530,
+                                content: "Kof kof kof ! Hé hé... oups, j’ai tout fini...",
+                                voice: "story/1102/111065/1BCDD514",
+                                npc: 111001,
+                                next: 11106531,
+                            },
+                            {
+                                id: 11106531,
+                                content: "Ne te précipite pas autant, petite Ada. Si tu en veux encore, j’en ai plein.",
+                                voice: "story/1102/111065/1BCDD53E",
+                                npc: 111161,
+                                next: 11106532,
+                            },
+                            {
+                                id: 11106532,
+                                content: "Hein ? Teresa, papi Aamon, et même Elio ! Pourquoi tout le monde est venu d’un coup ?",
+                                voice: "story/1102/111065/1BCDD568",
+                                npc: 111001,
+                                next: 11106533,
+                            },
+                            {
+                                id: 11106533,
+                                content:
+                                    "Parce qu’on a entendu dire que Victor était revenu ! Putain, cette tenue est trop classe ! Et ton épée aussi, elle brille carrément ! Je peux la toucher ? Juste une fois, Victor !",
+                                voice: "story/1102/111065/1BCDD592",
+                                npc: 111162,
+                                next: 11106534,
+                            },
+                            {
+                                id: 11106534,
+                                content: "Victor est là-bas.",
+                                voice: "story/1102/111065/1BCDD5BC",
+                                npc: 111110,
+                                next: 11106535,
+                            },
+                            {
+                                id: 11106535,
+                                content:
+                                    "Oh... OH ! Alors Victor ! Tu m’avais promis de me rapporter une énorme épée super classe de la capitale impériale, tu ne l’as pas oubliée hein ?!",
+                                voice: "story/1102/111065/1BCDD5E6",
+                                npc: 111162,
+                                next: 11106536,
+                            },
+                            {
+                                id: 11106536,
+                                content: "Pourquoi est-ce que tu m’as prise pour Victor ? Nous ne nous ressemblons pourtant pas du tout.",
+                                voice: "story/1102/111065/1BCDD610",
+                                npc: 111110,
+                                next: 11106537,
+                            },
+                            {
+                                id: 11106537,
+                                content:
+                                    "Victor a quitté le village il y a cinq ans. À l’époque, il était à peine plus grand qu’Ada. Elio était encore tout petit, il ne se souvient presque de rien.",
+                                voice: "story/1102/111065/1BCDD63A",
+                                npc: 111161,
+                                next: 11106538,
+                            },
+                            {
+                                id: 11106538,
+                                content:
+                                    "Regardez-moi ça... ses cheveux ont blanchi et ses yeux sont remplis de fatigue. La Légion l’a vraiment fait souffrir... ça me fend le cœur.",
+                                voice: "story/1102/111065/1BCDD664",
+                                npc: 111161,
+                                next: 11106539,
+                            },
+                            {
+                                id: 11106539,
+                                content:
+                                    "Un peu de souffrance ne fait pas de mal. Les jeunes sont solides. Quelques passages sur le champ de bataille, ça forge le caractère. Alors, Victor ? Toujours tous tes bras et toutes tes jambes ?",
+                                voice: "story/1102/111065/1BCDD6B8",
+                                npc: 111163,
+                                next: 11106540,
+                            },
+                            {
+                                id: 11106540,
+                                content:
+                                    "Bien sûr que oui ! Victor est solide comme un cheval ! C’est toujours les ennemis qui se font massacrer~",
+                                voice: "story/1102/111065/1BCDD6E2",
+                                npc: 111162,
+                                next: 11106541,
+                            },
+                            {
+                                id: 11106541,
+                                content:
+                                    "Franchement, vous les bourrins, vous ne pensez qu’à vous battre ! Personne n’est curieux de savoir qui est cette jolie fille aux cheveux bleus venue avec Victor ?",
+                                voice: "story/1102/111065/1BCDD70C",
+                                npc: 111164,
+                                next: 11106542,
+                            },
+                            {
+                                id: 11106542,
+                                content:
+                                    "J’ai discrètement observé~ Victor n’arrêtait pas de jeter des coups d’œil vers elle. C’était vraiment louche ! La petite Ada devrait peut-être commencer à se réveiller un peu~",
+                                voice: "story/1102/111065/1BCDD736",
+                                npc: 111164,
+                                next: 11106543,
+                            },
+                            {
+                                id: 11106543,
+                                content: "Yiou ? Me réveiller ? Mais je suis pas endormie !",
+                                voice: "story/1102/111065/1BCDD760",
+                                npc: 111001,
+                                next: 11106544,
+                            },
+                            {
+                                id: 11106544,
+                                content:
+                                    "Pfff... à ton âge, tu ne comprends toujours rien. Faudra vraiment que je t’explique deux ou trois choses un jour.",
+                                voice: "story/1102/111065/1BCDD78A",
+                                npc: 111164,
+                                next: 11106545,
+                            },
+                            {
+                                id: 11106545,
+                                content:
+                                    "Vena, arrête un peu de parler d’amour à tout le monde. Ils sont à l’âge où ils doivent partir accomplir de grandes choses, pas perdre leur temps comme toi.",
+                                voice: "story/1102/111065/1BCDD7B4",
+                                npc: 111163,
+                                next: 11106546,
+                            },
+                            {
+                                id: 11106546,
+                                content: "{性别2:Il|Elle} a simplement peur que je m’enfuie.",
+                                voice: "story/1102/111065/1BCDD7DE",
+                                npc: 111110,
+                                next: 11106547,
+                            },
+                            {
+                                id: 11106547,
+                                content:
+                                    "L’adjudante veut s’enfuir ?! Attends... Victor, tu serais pas en réalité un supérieur tyrannique tout droit sorti des légendes ?!",
+                                voice: "story/1102/111065/1BCDD808",
+                                npc: 111162,
+                                next: 11106548,
+                            },
+                            {
+                                id: 11106548,
+                                content:
+                                    "Bon, bon, ça suffit. L’essentiel, c’est que les enfants soient revenus sains et saufs. Victor, tout à l’heure, laisse Ada t’accompagner un peu dans le village. Va voir les autres habitants. Tout le monde s’inquiétait énormément pour toi.",
+                                voice: "story/1102/111065/1BCDD832",
+                                npc: 111125,
+                                next: 11106549,
+                            },
+                            {
+                                id: 11106549,
+                                content:
+                                    "Les choux dans mon jardin sont mûrs aussi. J’en ai préparé avec des pommes de terre mijotées. Venez goûter à la maison.",
+                                voice: "story/1102/111065/1BCDD85C",
+                                npc: 111161,
+                                next: 11106550,
+                            },
+                            {
+                                id: 11106550,
+                                content:
+                                    "Des pommes de terre encore ? Tes pigeons sont bien gras aussi. Maintenant que Victor est revenu, tu pourrais peut-être en sacrifier un ou deux pour nourrir tout le monde ?",
+                                voice: "story/1102/111065/1BCDD85D",
+                                npc: 111150,
+                                next: 11106551,
+                            },
+                            {
+                                id: 11106551,
+                                content: "Va donc les chasser toi-même ! Arrête de lorgner sur mes petits trésors.",
+                                voice: "story/1102/111065/1BCDD85E",
+                                npc: 111161,
+                                next: 11106552,
+                            },
+                            {
+                                id: 11106552,
+                                content:
+                                    "Demain soir aura lieu la Parade du Paradis. Tout le monde a encore beaucoup à préparer. Moi aussi, j’ai du travail. Victor, tu peux rentrer te reposer. Cette maison-là était autrefois la tienne.",
+                                voice: "story/1102/111065/1BCDD886",
+                                npc: 111125,
+                                next: 11106553,
+                            },
+                            {
+                                id: 11106553,
+                                content: "Très bien, Victor, mais viens nous voir quand tu auras un peu de temps !",
+                                voice: "story/1102/111065/1BCDD8B0",
+                                speakerName: "Foule bruyante",
+                                next: 11106554,
+                            },
+                            {
+                                id: 11106554,
+                                content:
+                                    "<I>... Je devrais profiter de mon séjour dans le village pour enquêter. Deux objectifs me viennent à l’esprit. Le premier, et le plus important : retrouver le « Catalyseur » mentionné par le commandant Avar avant que Fulvis ne mette la main dessus.</>",
+                                voice: "story/1102/111065/1BCDD8DA",
+                                npc: 111126,
+                                next: 11106555,
+                            },
+                            {
+                                id: 11106555,
+                                content:
+                                    "<I>D’après lui, il s’agit d’une substance capable de créer d’innombrables copies à partir d’un <H>prototype</> servant de modèle. Elle serait probablement gardée par « Maman Lapin ». Mais sous quelle forme exactement... même le commandant l’ignorait.</>",
+                                voice: "story/1102/111065/1BCDD904",
+                                npc: 111126,
+                                next: 11106556,
+                            },
+                            {
+                                id: 11106556,
+                                content:
+                                    "<I>Le second objectif : retrouver Fulvis. Et si possible, le capturer vivant pour le ramener à la capitale impériale. Mais pour l’instant, je ne sais toujours pas s’il se cache réellement dans cette montagne.</>",
+                                voice: "story/1102/111065/1BCDD92E",
+                                npc: 111126,
+                                next: 11106557,
+                            },
+                            {
+                                id: 11106557,
+                                content:
+                                    "<I>Et puis... si je suis réellement ce Victor, et que cet endroit est ma terre natale... alors peut-être que ce village me permettra de retrouver mes souvenirs perdus ?</>",
+                                voice: "story/1102/111065/1BCDD958",
+                                npc: 111126,
+                                next: 11106558,
+                            },
+                            {
+                                id: 11106558,
+                                content: "Yiou, tu recommences à rêvasser ? Allez viens, je vais te faire visiter le village~",
+                                voice: "story/1102/111065/1BCDD982",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110211,
+        quests: [
+            {
+                id: 11021101,
+                name: "Faire un tour",
+                desc: "Après avoir quitté les habitants, vous décidez de faire un tour dans le village afin de recueillir quelques informations.",
+                nodes: [
+                    {
+                        id: "1782291976792705",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_C1_01】玩具兵",
+                        next: ["1786872443222987", "17822920767321809"],
+                        dialogues: [
+                            {
+                                id: 11106601,
+                                content: "Kof kof...",
+                                voice: "story/1102/111066/1BCDE0BA",
+                                npc: 111110,
+                                next: 11106602,
+                            },
+                            {
+                                id: 11106602,
+                                content: "Hein ? Le petit chat s’est étouffé avec de la poussière ?",
+                                voice: "story/1102/111066/1BCDE0E4",
+                                npc: 111001,
+                                next: 11106603,
+                            },
+                            {
+                                id: 11106603,
+                                content: "Ah... c’est du sang sur ta main !",
+                                voice: "story/1102/111066/1BCDE10E",
+                                npc: 111001,
+                                next: 11106604,
+                            },
+                            {
+                                id: 11106604,
+                                content: "Ce n’est rien de grave. Allons-y.",
+                                voice: "story/1102/111066/1BCDE138",
+                                npc: 111110,
+                                next: 11106605,
+                            },
+                            {
+                                id: 11106605,
+                                content:
+                                    "Hors de question ! Teresa l’a dit : quand on est malade, il ne faut surtout pas courir partout ! Il faut rester au lit et se reposer !",
+                                voice: "story/1102/111066/1BCDE162",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11106606,
+                                        content: "<I>Tu ne peux pas mourir ici.</>",
+                                        voice: "story/1102/111066/1BCDE18C",
+                                        next: 11106607,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 11106608,
+                                        content: "<I>Va te reposer. Tu ne tiendras pas longtemps comme ça.</>",
+                                        voice: "story/1102/111066/1BCDE1E0",
+                                        next: 11106609,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11106607,
+                                content:
+                                    "Je te l’ai déjà dit. Tu dois témoigner devant le tribunal militaire. Va te reposer avant d’y laisser ta peau.",
+                                voice: "story/1102/111066/1BCDE1B6",
+                                npc: 111126,
+                                next: 11106609,
+                            },
+                            {
+                                id: 11106609,
+                                content: "Non. Ne perdons pas de temps. Je ne vais pas mourir tout de suite. Je connais mon propre corps.",
+                                voice: "story/1102/111066/1BCDE20A",
+                                npc: 111110,
+                                next: 11106610,
+                            },
+                            {
+                                id: 11106610,
+                                content:
+                                    "Yiou... Mais qu’est-ce qui peut être si important pour que vous ignoriez vos blessures à ce point... ?",
+                                voice: "story/1102/111066/1BCDE234",
+                                npc: 111001,
+                                next: 11106611,
+                            },
+                            {
+                                id: 11106611,
+                                content:
+                                    "Hé—— vous là-bas ! Arrêtez de bavarder et poussez-vous ! Je n’arrive plus à les retenir—— Ah ! Ils foncent droit sur vous !",
+                                voice: "story/1102/111066/1BCDE25E",
+                                npc: 111165,
+                                speakerName: "???",
+                            },
+                        ],
+                    },
+                    {
+                        id: "1786872443222987",
+                        type: "TalkNode",
+                        name: "咿呜，这几个核桃小人打人还挺痛的！莫甘娜姐姐，它们是怎么了？",
+                        dialogues: [
+                            {
+                                id: 11106701,
+                                content: "Yiou ! Ces petits soldats-noix frappent vraiment fort ! Morgana, qu’est-ce qui leur arrive ?",
+                                voice: "story/1102/111067/1BCDF122",
+                                npc: 111001,
+                                next: 11106702,
+                            },
+                            {
+                                id: 11106702,
+                                content:
+                                    "Elio a monté les pièces dans le mauvais ordre ! Maintenant ils sont impossibles à arrêter ! Faites attention !",
+                                voice: "story/1102/111067/1BCDF14C",
+                                npc: 111165,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17822920767321809",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_C1_02】打闹",
+                        dialogues: [
+                            {
+                                id: 11106801,
+                                content: "Bon travail... Voilà, je les ai réparés.",
+                                voice: "story/1102/111068/1BCE018A",
+                                npc: 111165,
+                                next: 11106802,
+                            },
+                            {
+                                id: 11106802,
+                                content:
+                                    "Pfff... J’ai beau répéter à ces enfants de toujours vérifier leurs jouets avant de jouer, ils restent aussi étourdis les uns que les autres. S’ils pouvaient être aussi soigneux que toi quand tu étais petit...",
+                                voice: "story/1102/111068/1BCE01B4",
+                                npc: 111165,
+                                next: 11106803,
+                            },
+                            {
+                                id: 11106803,
+                                content: "Moi ?",
+                                voice: "story/1102/111068/1BCE01DE",
+                                npc: 111126,
+                                next: 11106804,
+                            },
+                            {
+                                id: 11106804,
+                                content:
+                                    "Bien sûr. Toi aussi, Victor, tu étais aussi remuant qu’Ada. Vous vouliez tout apprendre. Tu as appris la chasse avec Bernard, mais aussi la fabrication de jouets avec moi. Tu ne t’en souviens pas ?",
+                                voice: "story/1102/111068/1BCE0208",
+                                npc: 111165,
+                                next: 11106805,
+                            },
+                            {
+                                id: 11106805,
+                                content: "{性别2:Désolé|Désolée}.",
+                                voice: "story/1102/111068/1BCE0232",
+                                npc: 111126,
+                                next: 11106806,
+                            },
+                            {
+                                id: 11106806,
+                                content: "Alors... tu voudrais peut-être toucher ces jouets ? Jouer un peu avec eux ?",
+                                voice: "story/1102/111068/1BCE025C",
+                                npc: 111165,
+                                next: 11106807,
+                            },
+                            {
+                                id: 11106807,
+                                content:
+                                    "<I>... En y regardant de plus près, ces petits soldats-noix sont sculptés avec un soin exceptionnel. Même les artisans de la capitale impériale ne feraient pas forcément mieux. Et ces oreilles de lapin... elles donnent presque envie de... Non ! Ce n’est pas le moment.</>",
+                                voice: "story/1102/111068/1BCE0286",
+                                npc: 111126,
+                                next: 11106808,
+                            },
+                            {
+                                id: 11106808,
+                                content: "Euh... Hum. Non merci ! Je ne suis plus {性别2:un|une} enfant.",
+                                voice: "story/1102/111068/1BCE02B0",
+                                npc: 111126,
+                                next: 11106809,
+                            },
+                            {
+                                id: 11106809,
+                                content:
+                                    "Héhé. Ce n’est pas grave. Peut-être qu’ils sont un peu trop enfantins pour les enfants... mais pour les grands enfants, ils sont parfaits.",
+                                voice: "story/1102/111068/1BCE02DA",
+                                npc: 111165,
+                                next: 11106810,
+                            },
+                            {
+                                id: 11106810,
+                                content:
+                                    "J’ai remarqué quelque chose. Tu gardes toujours un air sévère, mais quand tu regardes ces jouets, tu souris légèrement. Ça aussi, c’est exactement comme quand tu étais petit.",
+                                voice: "story/1102/111068/1BCE0304",
+                                npc: 111165,
+                                next: 11106811,
+                            },
+                            {
+                                id: 11106811,
+                                content: "Hmpf. C’est vraiment trop puéril~",
+                                voice: "story/1102/111068/1BCE032E",
+                                npc: 111001,
+                                next: 11106812,
+                            },
+                            {
+                                id: 11106812,
+                                content: "<I>Tu parles surtout de toi.</>",
+                                voice: "story/1102/111068/1BCE0358",
+                                npc: 111126,
+                                next: 11106813,
+                            },
+                            {
+                                id: 11106813,
+                                content:
+                                    "Bien sûr, tout le monde ne trouve pas son bonheur dans les jouets. Certains enfants préfèrent les casser dès qu’ils en voient un. N’est-ce pas, Ada ?",
+                                voice: "story/1102/111068/1BCE0382",
+                                npc: 111165,
+                                next: 11106814,
+                            },
+                            {
+                                id: 11106814,
+                                content:
+                                    "Je voulais juste les admirer de plus près ! Comment j’aurais pu savoir qu’ils se casseraient au moindre contact ? Hé hé... hé... pardon !",
+                                voice: "story/1102/111068/1BCE03AC",
+                                npc: 111001,
+                                next: 11106815,
+                            },
+                            {
+                                id: 11106815,
+                                content:
+                                    "Bon. Puisque tu n’as pas causé trop de problèmes ces derniers temps, je vais fermer les yeux pour cette fois.",
+                                voice: "story/1102/111068/1BCE03D6",
+                                npc: 111165,
+                                next: 11106816,
+                            },
+                            {
+                                id: 11106816,
+                                content: "Vraiment ? Super !",
+                                voice: "story/1102/111068/1BCE0400",
+                                npc: 111001,
+                                next: 11106817,
+                            },
+                            {
+                                id: 11106817,
+                                content: "D’ailleurs... j’ai cassé cette peluche lapin hier. Morgana, tu peux la réparer ?",
+                                voice: "story/1102/111068/1BCE042A",
+                                npc: 111001,
+                                next: 11106818,
+                            },
+                            {
+                                id: 11106818,
+                                content: "ADA !",
+                                voice: "story/1102/111068/1BCE0454",
+                                npc: 111165,
+                                next: 11106819,
+                            },
+                            {
+                                id: 11106819,
+                                content: "Yiou yiou ! Tu avais dit que tu ne me gronderais pas !",
+                                voice: "story/1102/111068/1BCE047E",
+                                npc: 111001,
+                                next: 11106820,
+                            },
+                            {
+                                id: 11106820,
+                                content: "Haa... haa... J’ai enfin réussi à semer Morgana. On ne peut plus rester ici. Vite, filons !",
+                                voice: "story/1102/111068/1BCE04A8",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110212,
+        quests: [
+            {
+                id: 11021201,
+                name: "Faire un tour",
+                desc: "Vous avez aperçu une silhouette familière dans les rues d’Arcano. Rattrapez-la pour voir de qui il s’agit.",
+                nodes: [
+                    {
+                        id: "17829220890758093151",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107001,
+                        pos: [-22907, -78514],
+                        dialogues: [
+                            {
+                                id: 11106901,
+                                content: "Qui va là... ?",
+                                voice: "story/1102/111069/1BCE11F2",
+                                npc: 111126,
+                                next: 11106902,
+                            },
+                            {
+                                id: 11106902,
+                                content: "Yiou~ Qu’est-ce qu’il y a ? Où tu cours comme ça, {nickname2} ?",
+                                voice: "story/1102/111069/1BCE121C",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17829042337722162587",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17829042439722162841"],
+                        dialogues: [
+                            {
+                                id: 11107001,
+                                content: "Fulvis ?!",
+                                voice: "story/1102/111070/1BCE225A",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17829042439722162841",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11107101,
+                                content: "Hé ! Où est-ce que tu vas ?",
+                                voice: "story/1102/111071/1BCE32C2",
+                                npc: 111110,
+                                next: 11107102,
+                            },
+                            {
+                                id: 11107102,
+                                content: "Ralentis un peu ! Avec tous ces détours, on ne va jamais réussir à te suivre !",
+                                voice: "story/1102/111071/1BCE32EC",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17829089792661082265",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: [
+                            "178316395249217860188",
+                            "178316398005417860736",
+                            "178316407332817861824",
+                            "178316413136717862800",
+                            "178316418556717863140",
+                            "178316471950720027029",
+                            "178316540714621109016",
+                            "178316555001421109657",
+                            "178316649244124356141",
+                            "178316673506525439424",
+                        ],
+                        dialogues: [
+                            {
+                                id: 11107201,
+                                content: "... Je me suis trompé... ?",
+                                voice: "story/1102/111072/1BCE432A",
+                                npc: 111126,
+                                next: 11107202,
+                            },
+                            {
+                                id: 11107202,
+                                content: "... Falsi ? Ada ? Où êtes-vous ?",
+                                voice: "story/1102/111072/1BCE4354",
+                                npc: 111126,
+                                next: 11107203,
+                            },
+                            {
+                                id: 11107203,
+                                content: "...",
+                                voice: "story/1102/111072/1BCE437E",
+                                npc: 111175,
+                                next: 11107204,
+                            },
+                            {
+                                id: 11107204,
+                                content: "?!",
+                                voice: "story/1102/111072/1BCE43A8",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316395249217860188",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11107301,
+                                content: "...",
+                                voice: "story/1102/111073/1BCE5392",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316398005417860736",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11107401,
+                                content: "<I>... Cet endroit me paraît étrangement familier...</>",
+                                voice: "story/1102/111074/1BCE63FA",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316407332817861824",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11107501,
+                                content: "<I>Je suis déjà passé par ici ?</>",
+                                voice: "story/1102/111075/1BCE7462",
+                                npc: 111126,
+                                next: 11107502,
+                            },
+                            {
+                                id: 11107502,
+                                content: "Qu’est-ce qui se passe...",
+                                voice: "story/1102/111075/1BCE748C",
+                                npc: 111126,
+                                next: 11107503,
+                            },
+                            {
+                                id: 11107503,
+                                content: "Héhéhé...",
+                                voice: "story/1102/111075/1BCE74B6",
+                                npc: 111120,
+                                speakerName: "Fulvis ?",
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316413136717862800",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11107601,
+                                content: "Cette impression familière...",
+                                voice: "story/1102/111076/1BCE84CA",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316418556717863140",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11107701,
+                                content: "C’est ton prix... Le petit lapin...",
+                                voice: "story/1102/111077/1BCE9532",
+                                npc: 111001,
+                                next: 11107702,
+                            },
+                            {
+                                id: 11107702,
+                                content: "... Ada... merci...",
+                                voice: "story/1102/111077/1BCE955C",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316471950720027029",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11107801,
+                                content: "... Observe bien... la détente... l’écureuil...",
+                                voice: "story/1102/111078/1BCEA59A",
+                                npc: 111150,
+                                next: 11107802,
+                            },
+                            {
+                                id: 11107802,
+                                content: "... Bernard... je l’ai eu...",
+                                voice: "story/1102/111078/1BCEA5C4",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316540714621109016",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178316557649021109871"],
+                        dialogues: [
+                            {
+                                id: 11107901,
+                                content:
+                                    "... Tu as joué toute la journée... tu dois être fatigué... viens manger du ragoût de pommes de terre...",
+                                voice: "story/1102/111079/1BCEB602",
+                                npc: 111161,
+                                next: 11107902,
+                            },
+                            {
+                                id: 11107902,
+                                content: "... Merci... c’est délicieux...",
+                                voice: "story/1102/111079/1BCEB62C",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316557649021109871",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11108001,
+                                content: "C’est... mes souvenirs ?",
+                                voice: "story/1102/111080/1BCEC66A",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316555001421109657",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11108101,
+                                content: "... La Légion... c’est dangereux... tu vas avoir la vie dure...",
+                                voice: "story/1102/111081/1BCED6D2",
+                                npc: 111125,
+                                next: 11108102,
+                            },
+                            {
+                                id: 11108102,
+                                content: "... Je vais découvrir le monde extérieur... et revenir couvert de gloire...",
+                                voice: "story/1102/111081/1BCED6FC",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316649244124356141",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11108201,
+                                content: "... Tu reviendras, d’accord... ?",
+                                voice: "story/1102/111082/1BCEE73A",
+                                npc: 111001,
+                                next: 11108202,
+                            },
+                            {
+                                id: 11108202,
+                                content: "... Ada... t’attendra...",
+                                voice: "story/1102/111082/1BCEE764",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178316673506525439424",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11108301,
+                                content: "<I>Je suis vraiment... Victor ?!</>",
+                                voice: "story/1102/111083/1BCEF7A2",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11108302,
+                            },
+                            {
+                                id: 11108302,
+                                content:
+                                    "<I>Mais alors pourquoi... je n’ai pas l’impression d’avoir retrouvé mes souvenirs ? C’est plutôt comme si j’observais les souvenirs de quelqu’un d’autre...</>",
+                                voice: "story/1102/111083/1BCEF7A3",
+                                npc: 111126,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11108303,
+                            },
+                            {
+                                id: 11108303,
+                                content: "On t’a enfin retrouvé ! Pourquoi tu restes planté là comme ça ?",
+                                voice: "story/1102/111083/1BCEF7CC",
+                                npc: 111001,
+                                next: 11108304,
+                            },
+                            {
+                                id: 11108304,
+                                content: "Tu as découvert quelque chose ?",
+                                voice: "story/1102/111083/1BCEF7F6",
+                                npc: 111110,
+                                next: 11108305,
+                            },
+                            {
+                                id: 11108305,
+                                content: "... Non. Rien.",
+                                voice: "story/1102/111083/1BCEF820",
+                                npc: 111126,
+                                next: 11108306,
+                            },
+                            {
+                                id: 11108306,
+                                content: "J’ai dû me tromper. Allons voir ailleurs.",
+                                voice: "story/1102/111083/1BCEF84A",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110213,
+        quests: [
+            {
+                id: 11021301,
+                name: "Faire un tour",
+                desc: "Après avoir quitté les habitants, vous décidez de faire un tour dans le village afin de recueillir quelques informations.",
+                nodes: [
+                    {
+                        id: "178099510542222372148",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107001,
+                        pos: [-15967, -72753],
+                        next: ["17833446070941632775"],
+                        dialogues: [
+                            {
+                                id: 11108401,
+                                content:
+                                    "Bonjour, Victor ! Je suis « La Lune » Selina... Le chef du village m’a demandé de te tenir compagnie pour te changer les idées.",
+                                voice: "story/1102/111084/1BCF080A",
+                                npc: 111166,
+                                next: 11108402,
+                            },
+                            {
+                                id: 11108402,
+                                content: "Mais je n’ai pas encore terminé ma partie...",
+                                voice: "story/1102/111084/1BCF0834",
+                                npc: 111166,
+                                next: 11108403,
+                            },
+                            {
+                                id: 11108403,
+                                content: "Une partie ?",
+                                voice: "story/1102/111084/1BCF085E",
+                                npc: 111126,
+                                next: 11108404,
+                            },
+                            {
+                                id: 11108404,
+                                content:
+                                    "Oui. Je me suis disputée avec Elio et Stella tout à l’heure. Selon les règles du village, les disputes doivent être réglées par un jeu. Alors nous avons décidé de nous affronter au Glouton.",
+                                voice: "story/1102/111084/1BCF0888",
+                                npc: 111166,
+                                next: 11108405,
+                            },
+                            {
+                                id: 11108405,
+                                content: "Des règles bien étranges.",
+                                voice: "story/1102/111084/1BCF08B2",
+                                npc: 111110,
+                                next: 11108406,
+                            },
+                            {
+                                id: 11108406,
+                                content:
+                                    "Victor, le chef du village a dit que tu avais perdu la mémoire. Mais tout le monde raconte que tu adorais jouer quand tu étais petit. Tu connais sûrement déjà le Glouton, non ?",
+                                voice: "story/1102/111084/1BCF08DC",
+                                npc: 111166,
+                                next: 11108407,
+                            },
+                            {
+                                id: 11108407,
+                                content: "Tu veux jouer avec moi ? Peut-être que ça t’aidera à retrouver tes souvenirs.",
+                                voice: "story/1102/111084/1BCF0906",
+                                npc: 111166,
+                                next: 11108408,
+                            },
+                            {
+                                id: 11108408,
+                                content: "Oui oui~ Jouons !",
+                                voice: "story/1102/111084/1BCF0930",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17833446070941632775",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107001,
+                        pos: [-15967, -72753],
+                        dialogues: [
+                            {
+                                id: 11108501,
+                                content: "Le Glouton... Quel genre de jeu est-ce ?",
+                                voice: "story/1102/111085/1BCF1872",
+                                npc: 111126,
+                                next: 11108502,
+                            },
+                            {
+                                id: 11108502,
+                                content:
+                                    "Nous sommes les Gloutons. Stella et Elio sont les patates grillées. Si les Gloutons trouvent toutes les patates grillées, ils gagnent.",
+                                voice: "story/1102/111085/1BCF189C",
+                                npc: 111166,
+                                next: 11108503,
+                            },
+                            {
+                                id: 11108503,
+                                content: "Je vois.",
+                                voice: "story/1102/111085/1BCF18C6",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11021302,
+                name: "Jouer au Glouton",
+                desc: "Selina s’est disputée avec ses camarades et a décidé de régler le différend par un jeu. À sa demande, vous décidez de l’aider à remporter une partie de Glouton.",
+                nodes: [
+                    {
+                        id: "17810086937653827",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107801,
+                        pos: [12038, -92901],
+                        next: ["178101042707816987", "17810115358291040402"],
+                        dialogues: [
+                            {
+                                id: 11108601,
+                                content: "Même si Victor m’a trouvé, tu n’as pas crié « Miam » ! Donc ça ne compte pas !",
+                                voice: "story/1102/111086/1BCF28DA",
+                                npc: 111162,
+                                next: 11108602,
+                            },
+                            {
+                                id: 11108602,
+                                content: "...",
+                                voice: "story/1102/111086/1BCF2904",
+                                npc: 111126,
+                                next: 11108603,
+                            },
+                            {
+                                id: 11108603,
+                                content: "Allez, fais-le ! Sinon la patate grillée va changer de cachette~",
+                                voice: "story/1102/111086/1BCF292E",
+                                npc: 111162,
+                                options: [
+                                    {
+                                        id: 11108604,
+                                        content: "<I>Lancer un vigoureux « Miam ! »</>",
+                                        voice: "story/1102/111086/1BCF2958",
+                                        next: 11108605,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 11108607,
+                                        content: "<I>Lancer un « Miam » sans conviction</>",
+                                        voice: "story/1102/111086/1BCF29D6",
+                                        next: 11108608,
+                                    },
+                                    {
+                                        id: 11108610,
+                                        content: "<I>Falsi, fais-le à ma place.</>",
+                                        voice: "story/1102/111086/1BCF2A54",
+                                        next: 11108611,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11108605,
+                                content: "Miam ! La patate grillée s’est fait dévorer !",
+                                voice: "story/1102/111086/1BCF2982",
+                                npc: 111126,
+                                next: 11108606,
+                            },
+                            {
+                                id: 11108608,
+                                content: "... Miam.",
+                                voice: "story/1102/111086/1BCF2A00",
+                                npc: 111126,
+                                next: 11108609,
+                            },
+                            {
+                                id: 11108611,
+                                content: "Hein ?",
+                                voice: "story/1102/111086/1BCF2A7E",
+                                npc: 111110,
+                                next: 11108612,
+                            },
+                            {
+                                id: 11108606,
+                                content: "Dévorée ! Héhé ! Victor est trop fort~",
+                                voice: "story/1102/111086/1BCF29AC",
+                                npc: 111162,
+                            },
+                            {
+                                id: 11108609,
+                                content:
+                                    "Pas assez d’énergie ! Un Glouton aussi discret ne mangera jamais de patates grillées ! Bon, tant pis. Comme tu débutes, je considère quand même que tu as gagné !",
+                                voice: "story/1102/111086/1BCF2A2A",
+                                npc: 111162,
+                            },
+                            {
+                                id: 11108612,
+                                content: "Crie « Miam ». Vite. Sinon ces enfants ne nous laisseront jamais partir.",
+                                voice: "story/1102/111086/1BCF2AA8",
+                                npc: 111126,
+                                next: 11108613,
+                            },
+                            {
+                                id: 11108613,
+                                content: "Mia... Mia... Non, impossible. Oublie ça.",
+                                voice: "story/1102/111086/1BCF2AD2",
+                                npc: 111110,
+                                next: 11108614,
+                            },
+                            {
+                                id: 11108614,
+                                content: "Ou alors on fait chacun la moitié du « Miam » ? Ça compte aussi, non ?",
+                                voice: "story/1102/111086/1BCF2AFC",
+                                npc: 111001,
+                                next: 11108615,
+                            },
+                            {
+                                id: 11108615,
+                                content: "Ada ! Tu n’as pas le droit de tricher ! Bon... d’accord. Je valide quand même.",
+                                voice: "story/1102/111086/1BCF2B26",
+                                npc: 111162,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178101042707816987",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11108701,
+                                content:
+                                    "Il ne reste plus qu’une dernière patate grillée. Séparons-nous. Je m’occupe de ce côté. Victor et Ada, vous pouvez chercher dans le reste de l’entrepôt ?",
+                                voice: "story/1102/111087/1BCF3942",
+                                npc: 111166,
+                                next: 11108702,
+                            },
+                            {
+                                id: 11108702,
+                                content: "D’accord ! Je vais leur montrer ce dont un vrai Glouton est capable~",
+                                voice: "story/1102/111087/1BCF396C",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17810115358291040402",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17810116771071043512"],
+                        dialogues: [
+                            {
+                                id: 11108801,
+                                content: "{nickname2}, viens voir.",
+                                voice: "story/1102/111088/1BCF49AA",
+                                npc: 111110,
+                                next: 11108802,
+                            },
+                            {
+                                id: 11108802,
+                                content: "Ça ressemble à un simple entrepôt... mais regarde ça.",
+                                voice: "story/1102/111088/1BCF49D4",
+                                npc: 111110,
+                                next: 11108803,
+                            },
+                            {
+                                id: 11108803,
+                                content: "Des fanions pour la fête ? Ils servent probablement à préparer la Parade du Paradis de demain.",
+                                voice: "story/1102/111088/1BCF49FE",
+                                npc: 111126,
+                                next: 11108804,
+                            },
+                            {
+                                id: 11108804,
+                                content: "Je trouve qu’ils ont quelque chose d’étrange.",
+                                voice: "story/1102/111088/1BCF4A28",
+                                npc: 111110,
+                                options: [
+                                    {
+                                        id: 11108805,
+                                        content:
+                                            "<I>Ils se ressemblent trop. Même les taches et les parties abîmées sont exactement identiques.</>",
+                                        voice: "story/1102/111088/1BCF4A52",
+                                        next: 11108806,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 11108807,
+                                        content:
+                                            "<I>Le plus étrange, c’est surtout de cacher des fanions aussi usés au fond d’un entrepôt. Je pensais qu’on allait trouver un trésor.</>",
+                                        voice: "story/1102/111088/1BCF4AA6",
+                                        next: 11108808,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11108806,
+                                content:
+                                    "Oui. C’est exactement ça. Ils sont tellement semblables qu’on dirait des objets fabriqués par une machine incapable de commettre la moindre erreur.",
+                                voice: "story/1102/111088/1BCF4A7C",
+                                npc: 111110,
+                                next: 11108809,
+                            },
+                            {
+                                id: 11108808,
+                                content:
+                                    "Des fanions usés... Oui. C’est justement ça qui est bizarre. Même les déchirures sont identiques. Comme s’ils avaient tous été fabriqués à partir du même moule par une machine incapable de se tromper.",
+                                voice: "story/1102/111088/1BCF4AD0",
+                                npc: 111110,
+                                next: 11108809,
+                            },
+                            {
+                                id: 11108809,
+                                content: "Mais si une machine les fabrique, pourquoi reproduire aussi les défauts ?",
+                                voice: "story/1102/111088/1BCF4AFA",
+                                npc: 111110,
+                                next: 11108810,
+                            },
+                            {
+                                id: 11108810,
+                                content:
+                                    "Et il y a aussi ce pain. Il a l’apparence d’un pain parfaitement ordinaire. Mais dès qu’on y mord, on comprend immédiatement que ce n’est pas une vraie nourriture.",
+                                voice: "story/1102/111088/1BCF4B24",
+                                npc: 111110,
+                                next: 11108811,
+                            },
+                            {
+                                id: 11108811,
+                                content:
+                                    "Il fond immédiatement dans la bouche. Impossible de calmer sa faim avec ça. Aucun artisan normal ne pourrait fabriquer quelque chose de pareil.",
+                                voice: "story/1102/111088/1BCF4B4E",
+                                npc: 111110,
+                                next: 11108812,
+                            },
+                            {
+                                id: 11108812,
+                                content: "...",
+                                voice: "story/1102/111088/1BCF4B78",
+                                npc: 111126,
+                                next: 11108813,
+                            },
+                            {
+                                id: 11108813,
+                                content:
+                                    "<I>Le commandant Avar l’avait dit. Le Catalyseur est capable de reproduire indéfiniment ce qui lui sert de modèle... Ces objets seraient-ils des créations du Catalyseur ?</>",
+                                voice: "story/1102/111088/1BCF4BA2",
+                                npc: 111126,
+                                next: 11108814,
+                            },
+                            {
+                                id: 11108814,
+                                content:
+                                    "Laissons tomber. Peu importe ce que cachent réellement les habitants de ce village. Tant que cela ne nous empêche pas de retrouver Fulvis.",
+                                voice: "story/1102/111088/1BCF4BCC",
+                                npc: 111110,
+                                next: 11108815,
+                            },
+                            {
+                                id: 11108815,
+                                content: "Oui.",
+                                voice: "story/1102/111088/1BCF4BF6",
+                                npc: 111126,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17810116771071043512",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11108901,
+                                content:
+                                    "Yiou, miam miam miam ! Je mange tout, je mange tout ! Les Gloutons remportent une victoire écrasante !",
+                                voice: "story/1102/111089/1BCF5A12",
+                                npc: 111001,
+                                next: 11108902,
+                            },
+                            {
+                                id: 11108902,
+                                content: "La partie est finie. Rends-moi mon pistolet-jouet, Elio.",
+                                voice: "story/1102/111089/1BCF5A3C",
+                                npc: 111166,
+                                next: 11108903,
+                            },
+                            {
+                                id: 11108903,
+                                content:
+                                    "Je te le rends, je te le rends ! De toute façon, si j’ai perdu aussi facilement, c’était juste parce que je voulais entendre plus vite les histoires de la Légion racontées par Victor !",
+                                voice: "story/1102/111089/1BCF5A66",
+                                npc: 111162,
+                                next: 11108904,
+                            },
+                            {
+                                id: 11108904,
+                                content: "Après cette partie, Victor, est-ce que quelque chose t’est revenu en mémoire ?",
+                                voice: "story/1102/111089/1BCF5A90",
+                                npc: 111166,
+                                next: 11108905,
+                            },
+                            {
+                                id: 11108905,
+                                content:
+                                    "Comme si on pouvait retrouver tous ses souvenirs après un seul jeu ! À mon avis, même si Victor a tout oublié, ce n’est pas grave. On n’a qu’à créer plein de nouveaux souvenirs ensemble !",
+                                voice: "story/1102/111089/1BCF5ABA",
+                                npc: 111162,
+                                next: 11108906,
+                            },
+                            {
+                                id: 11108906,
+                                content:
+                                    "Et puis Maman Lapin l’a déjà dit : le passé n’a pas d’importance. Ce qui compte vraiment, c’est l’essence des choses !",
+                                voice: "story/1102/111089/1BCF5AE4",
+                                npc: 111162,
+                                next: 11108907,
+                            },
+                            {
+                                id: 11108907,
+                                content:
+                                    "Tu dis surtout ça parce que tu n’as pas envie que Victor se souvienne de certaines choses que tu racontais autrefois...",
+                                voice: "story/1102/111089/1BCF5B0E",
+                                npc: 111166,
+                                next: 11108908,
+                            },
+                            {
+                                id: 11108908,
+                                content: "Selina—— pitié, tais-toi !",
+                                voice: "story/1102/111089/1BCF5B38",
+                                npc: 111162,
+                                next: 11108909,
+                            },
+                            {
+                                id: 11108909,
+                                content:
+                                    "Héhé... À l’époque, Elio avait pris un faon égaré pour un Souillé. Il avait tellement eu peur qu’il avait fait pipi dans son pantalon en s’accrochant à la jambe de Victor en criant : « Maman ! ». Pendant ce temps, Ada était cachée un peu plus loin et se moquait de lui.",
+                                voice: "story/1102/111089/1BCF5B62",
+                                npc: 111166,
+                                next: 11108910,
+                            },
+                            {
+                                id: 11108910,
+                                content: "Je t’en supplie—— Victor—— oublie encore une fois tout ça——",
+                                voice: "story/1102/111089/1BCF5B8C",
+                                npc: 111162,
+                                next: 11108911,
+                            },
+                            {
+                                id: 11108911,
+                                content: "Ça risque d’être difficile. Maintenant que tu me l’as raconté, je m’en souviendrai.",
+                                voice: "story/1102/111089/1BCF5BB6",
+                                npc: 111126,
+                                next: 11108912,
+                            },
+                            {
+                                id: 11108912,
+                                content:
+                                    "Ouin... Ce n’est pas juste ! Vous ne pouvez pas écouter uniquement mes histoires honteuses ! Victor, raconte-nous aussi ce que tu as vécu pendant toutes ces années !",
+                                voice: "story/1102/111089/1BCF5BE0",
+                                npc: 111162,
+                                options: [
+                                    {
+                                        id: 11108913,
+                                        content: "<I>D’accord. Voyons par où commencer...</>",
+                                        voice: "story/1102/111089/1BCF5C0A",
+                                        next: 11108914,
+                                    },
+                                    {
+                                        id: 11108915,
+                                        content: "<I>{性别2:Désolé|Désolée}, j’ai encore d’autres choses à faire.</>",
+                                        voice: "story/1102/111089/1BCF5C5E",
+                                        next: 11108916,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11108914,
+                                content: "Je veux entendre des secrets incroyables sur la Légion !",
+                                voice: "story/1102/111089/1BCF5C34",
+                                npc: 111162,
+                                options: [
+                                    {
+                                        id: 11108917,
+                                        content: "<I>Parler de l’École Militaire Impériale.</>",
+                                        voice: "story/1102/111089/1BCF5CB2",
+                                        next: 11108918,
+                                    },
+                                    {
+                                        id: 11108936,
+                                        content: "<I>Parler de la Légion</>",
+                                        voice: "story/1102/111089/1BCF5FD0",
+                                        next: 11108937,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11108916,
+                                content:
+                                    "Pas question ! Tu connais maintenant mon histoire la plus honteuse, alors tu dois forcément me raconter la tienne !",
+                                voice: "story/1102/111089/1BCF5C88",
+                                npc: 111162,
+                                next: 11108959,
+                            },
+                            {
+                                id: 11108918,
+                                content:
+                                    "À l’École Militaire Impériale, en plus de l’entraînement tactique quotidien, nous suivions des cours sur les doctrines militaires des différents pays, les nouveaux armements et l’histoire des guerres de l’Empire.",
+                                voice: "story/1102/111089/1BCF5CDC",
+                                npc: 111126,
+                                next: 11108919,
+                            },
+                            {
+                                id: 11108919,
+                                content:
+                                    "À l’époque, certains camarades trouvaient les cours ennuyeux et rêvaient de partir au combat au plus vite. Le commandant Avar répétait toujours d’un air sévère : « Ce sont les tâches répétitives et monotones qui vous protègent sur le champ de bataille. »",
+                                voice: "story/1102/111089/1BCF5D06",
+                                npc: 111126,
+                                next: 11108920,
+                            },
+                            {
+                                id: 11108920,
+                                content:
+                                    "Sans connaissances, nous risquons de rester paralysés face à des armes inconnues. Sans condition physique, nous ne survivrons pas à une embuscade ou à un combat rapproché.",
+                                voice: "story/1102/111089/1BCF5D30",
+                                npc: 111126,
+                                next: 11108921,
+                            },
+                            {
+                                id: 11108921,
+                                content:
+                                    "Sans réflexion tactique, une simple erreur peut nous condamner à la mort. Toutes ces études et tous ces entraînements existent précisément pour éliminer ces « si ».",
+                                voice: "story/1102/111089/1BCF5D5A",
+                                npc: 111126,
+                                next: 11108922,
+                            },
+                            {
+                                id: 11108922,
+                                content:
+                                    "Bien sûr... nous n’avons réellement compris le sens de ces paroles qu’une fois arrivés sur le champ de bataille.",
+                                voice: "story/1102/111089/1BCF5D84",
+                                npc: 111126,
+                                next: 11108923,
+                            },
+                            {
+                                id: 11108923,
+                                content:
+                                    "Mmh... Je comprends chaque mot séparément, mais quand tu les mets ensemble, je ne comprends plus rien... C’est trop compliqué.",
+                                voice: "story/1102/111089/1BCF5DAE",
+                                npc: 111162,
+                                next: 11108924,
+                            },
+                            {
+                                id: 11108924,
+                                content: "Personne ne peut tout savoir.",
+                                voice: "story/1102/111089/1BCF5DD8",
+                                npc: 111126,
+                                next: 11108925,
+                            },
+                            {
+                                id: 11108925,
+                                content:
+                                    "Par exemple, la cryptographie a toujours été mon point faible. Les systèmes de chiffrement impériaux me donnent tous une étrange impression de familiarité, tout en me paraissant inutilement compliqués. Au fond de moi, j’ai toujours l’impression <H>qu’il devrait exister une manière bien plus simple et plus efficace de faire tout ça.</>",
+                                voice: "story/1102/111089/1BCF5E02",
+                                npc: 111126,
+                                next: 11108926,
+                            },
+                            {
+                                id: 11108926,
+                                content:
+                                    "Un peu comme les énigmes qu’on se pose entre nous ? Les casse-têtes les plus compliqués finissent souvent par avoir une solution toute simple.",
+                                voice: "story/1102/111089/1BCF5E2C",
+                                npc: 111166,
+                                next: 11108927,
+                            },
+                            {
+                                id: 11108927,
+                                content:
+                                    "... Peut-être. Mais chaque fois que je disais ça, on avait surtout l’impression que je cherchais des excuses pour éviter de travailler. Le commandant Avar me rappelait alors très fermement à l’ordre.",
+                                voice: "story/1102/111089/1BCF5E56",
+                                npc: 111126,
+                                next: 11108928,
+                            },
+                            {
+                                id: 11108928,
+                                content: "Ah !",
+                                voice: "story/1102/111089/1BCF5E80",
+                                npc: 111001,
+                                next: 11108929,
+                            },
+                            {
+                                id: 11108929,
+                                content: "On dirait qu’il était particulièrement sévère... Encore plus que Morgana.",
+                                voice: "story/1102/111089/1BCF5EAA",
+                                npc: 111166,
+                                next: 11108930,
+                            },
+                            {
+                                id: 11108930,
+                                content:
+                                    "... Oui. Il était toujours le plus exigeant avec nous. Si un seul soldat rangeait mal son chargeur, tout le groupe devait courir plusieurs dizaines de kilomètres supplémentaires. Et lui courait avec nous.",
+                                voice: "story/1102/111089/1BCF5ED4",
+                                npc: 111126,
+                                next: 11108931,
+                            },
+                            {
+                                id: 11108931,
+                                content:
+                                    "Plus tard, lorsque j’ai vu des camarades mourir parce qu’ils n’avaient pas réussi à saisir leur chargeur à temps pour recharger leur arme... j’ai compris que c’était sa manière de veiller sur nous.",
+                                voice: "story/1102/111089/1BCF5EFE",
+                                npc: 111126,
+                                next: 11108932,
+                            },
+                            {
+                                id: 11108932,
+                                content:
+                                    "C’était ce genre de personne. Sévère... mais toujours inquiète pour ses élèves. Le meilleur professeur que nous aurions pu avoir. Il était même prêt à donner sa vie pour nous.",
+                                voice: "story/1102/111089/1BCF5F28",
+                                npc: 111126,
+                                next: 11108933,
+                            },
+                            {
+                                id: 11108933,
+                                content: "...",
+                                voice: "story/1102/111089/1BCF5F52",
+                                npc: 111110,
+                                next: 11108934,
+                            },
+                            {
+                                id: 11108934,
+                                content: "...",
+                                voice: "story/1102/111089/1BCF5F7C",
+                                npc: 111001,
+                                next: 11108935,
+                            },
+                            {
+                                id: 11108935,
+                                content: "<I>J’ai peut-être plombé l’ambiance... Mieux vaut parler d’autre chose.</>",
+                                voice: "story/1102/111089/1BCF5FA6",
+                                npc: 111126,
+                                next: 11108959,
+                            },
+                            {
+                                id: 11108937,
+                                content:
+                                    "Pendant les premières années, je n’ai pratiquement fait que m’entraîner et participer à des exercices. Je n’ai commencé à effectuer de véritables missions qu’au cours de ma dernière année.",
+                                voice: "story/1102/111089/1BCF5FFA",
+                                npc: 111126,
+                                next: 11108938,
+                            },
+                            {
+                                id: 11108938,
+                                content: "La plupart des détails sont confidentiels. Je doute que vous trouviez ça très intéressant.",
+                                voice: "story/1102/111089/1BCF6024",
+                                npc: 111126,
+                                next: 11108939,
+                            },
+                            {
+                                id: 11108939,
+                                content: "Tu n’as aucun souvenir marquant à raconter ?",
+                                voice: "story/1102/111089/1BCF604E",
+                                npc: 111166,
+                                next: 11108940,
+                            },
+                            {
+                                id: 11108940,
+                                content:
+                                    "Un souvenir marquant... Il y a quelque temps, j’ai participé à une opération visant à prendre d’assaut une forteresse.",
+                                voice: "story/1102/111089/1BCF6078",
+                                npc: 111126,
+                                next: 11108941,
+                            },
+                            {
+                                id: 11108941,
+                                content:
+                                    "Waah ! Trop génial ! Un assaut de forteresse ! Je t’imagine déjà foncer à travers les lignes ennemies pour planter ton drapeau tout en haut de leur bastion !",
+                                voice: "story/1102/111089/1BCF60A2",
+                                npc: 111162,
+                                next: 11108942,
+                            },
+                            {
+                                id: 11108942,
+                                content:
+                                    "... J’aurais aimé que l’histoire se termine ainsi. Mais la réalité n’est pas un conte. Elle ne se déroule jamais comme on le voudrait.",
+                                voice: "story/1102/111089/1BCF60CC",
+                                npc: 111126,
+                                next: 11108943,
+                            },
+                            {
+                                id: 11108943,
+                                content:
+                                    "Parmi ceux qui sont partis avec moi... {性别2:seuls une camarade et moi sommes revenus vivants|seules une camarade et moi sommes revenues vivantes}.",
+                                voice: "story/1102/111089/1BCF60F6",
+                                npc: 111126,
+                                next: 11108944,
+                            },
+                            {
+                                id: 11108944,
+                                content: "<I>Daphne... J’espère que tu vas bien.</>",
+                                voice: "story/1102/111089/1BCF6120",
+                                npc: 111126,
+                                next: 11108945,
+                            },
+                            {
+                                id: 11108945,
+                                content:
+                                    "Yiou... C-comment ça a pu arriver... ? Celui qui a fait ça est vraiment horrible ! Je vais attraper plein de chenilles super méchantes et leur faire piquer les fesses !",
+                                voice: "story/1102/111089/1BCF614A",
+                                npc: 111001,
+                                next: 11108946,
+                            },
+                            {
+                                id: 11108946,
+                                content:
+                                    "Exactement ! Victor, ne sois pas triste ! Quand je serai grand, moi aussi je prendrai une énorme épée et j’irai leur écraser la tête !",
+                                voice: "story/1102/111089/1BCF6174",
+                                npc: 111162,
+                                next: 11108947,
+                            },
+                            {
+                                id: 11108947,
+                                content: "...",
+                                voice: "story/1102/111089/1BCF619E",
+                                npc: 111110,
+                                next: 11108948,
+                            },
+                            {
+                                id: 11108948,
+                                content:
+                                    "Euh... Victor... Même si tout le monde se moque toujours de moi parce que je pleure facilement, je pense quand même que si tu es vraiment triste, alors tu devrais peut-être pleurer.",
+                                voice: "story/1102/111089/1BCF61C8",
+                                npc: 111160,
+                                next: 11108949,
+                            },
+                            {
+                                id: 11108949,
+                                content:
+                                    "Moi aussi, je garde un secret très douloureux et très effrayant dans mon cœur... À chaque fois que j’y pense, je pleure... Et après, je me sens un peu mieux.",
+                                voice: "story/1102/111089/1BCF61F2",
+                                npc: 111160,
+                                next: 11108950,
+                            },
+                            {
+                                id: 11108950,
+                                content:
+                                    "Ce n’est rien. Si je dois pleurer un jour ce sera après avoir accompli la mission qu’ils m’ont confiée.",
+                                voice: "story/1102/111089/1BCF621C",
+                                npc: 111126,
+                                next: 11108959,
+                            },
+                            {
+                                id: 11108951,
+                                content:
+                                    "Elio... Peut-être qu’on devrait arrêter de poser des questions. J’ai l’impression qu’on ne fait que lui rappeler des souvenirs douloureux.",
+                                voice: "story/1102/111089/1BCF6246",
+                                npc: 111166,
+                                next: 11108952,
+                            },
+                            {
+                                id: 11108952,
+                                content: "D-désolé Victor... Je n’aurais pas dû insister...",
+                                voice: "story/1102/111089/1BCF6270",
+                                npc: 111162,
+                                next: 11108953,
+                            },
+                            {
+                                id: 11108953,
+                                content:
+                                    "Pour me faire pardonner, nous allons redoubler d’efforts ! Nous allons créer avec toi plein de nouveaux souvenirs heureux ! Des souvenirs chaleureux !",
+                                voice: "story/1102/111089/1BCF629A",
+                                npc: 111162,
+                                next: 11108954,
+                            },
+                            {
+                                id: 11108954,
+                                content: "Et comment comptes-tu faire ça ?",
+                                voice: "story/1102/111089/1BCF62C4",
+                                npc: 111166,
+                                next: 11108955,
+                            },
+                            {
+                                id: 11108955,
+                                content: "Mmh... Je crois que dans ce genre de situation, il faut réunir nos trois cerveaux !",
+                                voice: "story/1102/111089/1BCF62EE",
+                                npc: 111162,
+                                next: 11108956,
+                            },
+                            {
+                                id: 11108956,
+                                content:
+                                    "L’équipe du « Soleil », de la « Lune » et de « l’Étoile » est invincible quand elle est au complet !",
+                                voice: "story/1102/111089/1BCF6318",
+                                npc: 111162,
+                                next: 11108957,
+                            },
+                            {
+                                id: 11108957,
+                                content:
+                                    "J’ai inspecté l’entrepôt une seconde fois. À part quelques coins parfaits pour tendre une embuscade, rien d’autre ne mérite vraiment notre attention. Allons-y nous aussi.",
+                                voice: "story/1102/111089/1BCF6342",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110214,
+        quests: [
+            {
+                id: 11021401,
+                name: "Faire un tour",
+                desc: "Sanctus vous interpelle. Voyez ce qu’il a à vous dire.",
+                nodes: [
+                    {
+                        id: "17809093618085065692",
+                        type: "TalkNode",
+                        name: "与桑图克斯交谈",
+                        srId: 107001,
+                        pos: [-20567, -77081],
+                        dialogues: [
+                            {
+                                id: 11109001,
+                                content: "Victor, viens donc par ici. Laisse-moi voir ce que tu es devenu toutes ces années.",
+                                voice: "story/1102/111090/1BCF6A7A",
+                                npc: 111167,
+                                next: 11109002,
+                            },
+                            {
+                                id: 11109002,
+                                content: "Vous êtes... ?",
+                                voice: "story/1102/111090/1BCF6AA4",
+                                npc: 111126,
+                                next: 11109003,
+                            },
+                            {
+                                id: 11109003,
+                                content:
+                                    "Je suis « Le Hiérophante » Sanctus. Un vieux bonhomme qui t’a vu grandir. Mais peu importe. Nous aurons tout le temps de faire connaissance à nouveau. Pour l’instant, laisse-moi te regarder.",
+                                voice: "story/1102/111090/1BCF6ACE",
+                                npc: 111167,
+                                next: 11109004,
+                            },
+                            {
+                                id: 11109004,
+                                content:
+                                    "Mmh... Tant mieux, tant mieux. J’ai vu bien des gens revenir de la Légion couverts de blessures ou mutilés. Te voir rentrer sain et sauf... c’est une bénédiction de Maman Lapin.",
+                                voice: "story/1102/111090/1BCF6AF8",
+                                npc: 111167,
+                                next: 11109005,
+                            },
+                            {
+                                id: 11109005,
+                                content: "<H>Maman Lapin</>...",
+                                voice: "story/1102/111090/1BCF6B22",
+                                npc: 111126,
+                                next: 11109006,
+                            },
+                            {
+                                id: 11109006,
+                                content:
+                                    "Oui. Maman Lapin. Peu importe ce dont tu te souviens ou non, il y a une chose qu’on ne devra jamais oublier : ce que nous lui devons.",
+                                voice: "story/1102/111090/1BCF6B4C",
+                                npc: 111167,
+                                next: 11109007,
+                            },
+                            {
+                                id: 11109007,
+                                content:
+                                    "Elle a reconstruit ce paradis à elle seule sur une terre ravagée par la guerre. Sans elle, aucun de nous ne serait là aujourd’hui.",
+                                voice: "story/1102/111090/1BCF6B76",
+                                npc: 111167,
+                                next: 11109008,
+                            },
+                            {
+                                id: 11109008,
+                                content: "On peut dire que Maman Lapin est notre divinité.",
+                                voice: "story/1102/111090/1BCF6BA0",
+                                npc: 111167,
+                                next: 11109009,
+                            },
+                            {
+                                id: 11109009,
+                                content:
+                                    "Impossible. Un projet d’une telle ampleur dépasse même les meilleurs architectes des Éolipyliens.",
+                                voice: "story/1102/111090/1BCF6BCA",
+                                npc: 111110,
+                                next: 11109010,
+                            },
+                            {
+                                id: 11109010,
+                                content:
+                                    "Héhé... Pour comprendre comment elle y est parvenue, il faudra lui poser la question toi-même. Elle apparaîtra lors de la prochaine nuit de la Parade du Paradis.",
+                                voice: "story/1102/111090/1BCF6BF4",
+                                npc: 111167,
+                                next: 11109011,
+                            },
+                            {
+                                id: 11109011,
+                                content: "Bon, Sanctus. Si tu n’as rien d’autre à nous demander, nous allons continuer notre promenade.",
+                                voice: "story/1102/111090/1BCF6C48",
+                                npc: 111001,
+                                next: 11109012,
+                            },
+                            {
+                                id: 11109012,
+                                content:
+                                    "Dans ce cas, pourquoi ne pas faire un détour par la vieille forêt derrière le village ? Lors du campement du mois dernier, plusieurs caisses de décorations y ont été oubliées.",
+                                voice: "story/1102/111090/1BCF6C72",
+                                npc: 111167,
+                                next: 11109013,
+                            },
+                            {
+                                id: 11109013,
+                                content:
+                                    "Yiou... Malheureusement, mes jambes me font un peu mal aujourd’hui... Et puis j’ai mal au dos aussi...",
+                                voice: "story/1102/111090/1BCF6C9C",
+                                npc: 111001,
+                                next: 11109014,
+                            },
+                            {
+                                id: 11109014,
+                                content:
+                                    "Quel dommage. Pourtant, j’ai aperçu hier au campement de magnifiques papillons aux ailes lumineuses. Ils étaient vraiment superbes.",
+                                voice: "story/1102/111090/1BCF6CC6",
+                                npc: 111167,
+                                next: 11109015,
+                            },
+                            {
+                                id: 11109015,
+                                content:
+                                    "D’accord, on y va tout de suite ! Fallait commencer par ça ! Comme par hasard, mon dos ne me fait plus mal du tout.",
+                                voice: "story/1102/111090/1BCF6CF0",
+                                npc: 111001,
+                                next: 11109016,
+                            },
+                            {
+                                id: 11109016,
+                                content:
+                                    "Héhéhé. Autant pour moi. Je compte sur vous alors. Je vais aider les autres à préparer le terrain pour l’arrivée de Maman Lapin.",
+                                voice: "story/1102/111090/1BCF6D1A",
+                                npc: 111167,
+                                next: 11109017,
+                            },
+                            {
+                                id: 11109017,
+                                content:
+                                    "Attends une seconde ! Si tu y étais hier, pourquoi tu n’as pas ramené les caisses toi-même ?! Yiou ! Non, attends—— il y a un piège quelque part——",
+                                voice: "story/1102/111090/1BCF6D44",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1780974999547512278",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107001,
+                        pos: [-20567, -77081],
+                        dialogues: [
+                            {
+                                id: 11109018,
+                                content: "Victor, viens donc par ici. Laisse-moi voir ce que tu es devenu toutes ces années.",
+                                voice: "story/1102/111090/1BCF6D45",
+                                npc: 111167,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11021402,
+                name: "Parler à Ada",
+                desc: "Sanctus vous a demandé d’aller récupérer du matériel pour la parade dans les bois. Mettez-vous en route.",
+                nodes: [
+                    {
+                        id: "17809174597345072066",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107001,
+                        pos: [7436, -39337],
+                        dialogues: [
+                            {
+                                id: 11109101,
+                                content: "Yiou... Bon. Puisqu’on a accepté, autant aller jusqu’au bout...",
+                                voice: "story/1102/111091/1BCF7AE2",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809218464671018676",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17809254969741024150"],
+                        dialogues: [
+                            {
+                                id: 11109201,
+                                content: "On a trouvé la première caisse. On dirait une cape. Je vais la prendre.",
+                                voice: "story/1102/111092/1BCF8B4A",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809254969741024150",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17809258060201026790"],
+                        dialogues: [
+                            {
+                                id: 11109301,
+                                content:
+                                    "Voyons voir ce qu’il y a là-dedans... Wah ! Des marionnettes à main ! Elles sont toutes douces, c’est trop agréable à presser.",
+                                voice: "story/1102/111093/1BCF9BB2",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809258060201026790",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17809255395781025097"],
+                        dialogues: [
+                            {
+                                id: 11109501,
+                                content: "Héhéhé... Je vous ai enfin attirés jusqu’ici.",
+                                voice: "story/1102/111095/1BCFBC82",
+                                npc: 111001,
+                                next: 11109502,
+                            },
+                            {
+                                id: 11109502,
+                                content:
+                                    "Venir ici sans la moindre méfiance... Je ne sais pas si je dois admirer votre courage ou plaindre votre stupidité.",
+                                voice: "story/1102/111095/1BCFBCAC",
+                                npc: 111001,
+                                next: 11109503,
+                            },
+                            {
+                                id: 11109503,
+                                content: "Tu abandonnes enfin ton masque ?",
+                                voice: "story/1102/111095/1BCFBCD6",
+                                npc: 111110,
+                                next: 11109504,
+                            },
+                            {
+                                id: 11109504,
+                                content: "Attends. Non...",
+                                voice: "story/1102/111095/1BCFBD00",
+                                npc: 111126,
+                                next: 11109505,
+                            },
+                            {
+                                id: 11109505,
+                                content:
+                                    "Soldats épuisés, même si vous osez me défier à nouveau, votre destin est déjà scellé. Cette forêt sera votre tombeau !",
+                                voice: "story/1102/111095/1BCFBD2A",
+                                npc: 111001,
+                                next: 11109506,
+                            },
+                            {
+                                id: 11109506,
+                                content: "... Je crois qu’elle joue simplement un rôle.",
+                                voice: "story/1102/111095/1BCFBD54",
+                                npc: 111126,
+                                options: [
+                                    {
+                                        id: 11109507,
+                                        content: "<I>Entrer dans son jeu avec réticence</>",
+                                        voice: "story/1102/111095/1BCFBD7E",
+                                        next: 11109508,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 11109509,
+                                        content: "<I>Entrer dans son jeu avec enthousiasme</>",
+                                        voice: "story/1102/111095/1BCFBDD2",
+                                        next: 11109510,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                    {
+                                        id: 11109511,
+                                        content: "<I>Entrer dans son jeu sérieusement</>",
+                                        voice: "story/1102/111095/1BCFBE26",
+                                        next: 11109512,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11109508,
+                                content: "... Très bien. Approche.",
+                                voice: "story/1102/111095/1BCFBDA8",
+                                npc: 111126,
+                                next: 11109513,
+                            },
+                            {
+                                id: 11109510,
+                                content: "Qu’est-ce que tu racontes ? Prends ça !",
+                                voice: "story/1102/111095/1BCFBDFC",
+                                npc: 111126,
+                                next: 11109513,
+                            },
+                            {
+                                id: 11109512,
+                                content: "Cette fois, je ne me bats plus seul. C’est ici que nous t’exilerons définitivement.",
+                                voice: "story/1102/111095/1BCFBE50",
+                                npc: 111126,
+                                next: 11109513,
+                            },
+                            {
+                                id: 11109513,
+                                content:
+                                    "Je suis le plus grand gentleman d’Élysium... le plus puissant des Émissaires Célestes ! J’admire votre courage, guerriers d’Hyperborea, mais face aux dieux, tous vos efforts sont vains !",
+                                voice: "story/1102/111095/1BCFBE7A",
+                                npc: 111001,
+                                next: 11109514,
+                            },
+                            {
+                                id: 11109514,
+                                content: "Ai-je le droit de l’exécuter pour espionnage ?",
+                                voice: "story/1102/111095/1BCFBEA4",
+                                npc: 111110,
+                                options: [
+                                    {
+                                        id: 11109515,
+                                        content: "<I>Ça fait partie du jeu de rôle. Ne prends pas ça au sérieux.</>",
+                                        voice: "story/1102/111095/1BCFBECE",
+                                        next: 11109519,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 11109516,
+                                        content: "<I>Je doute qu’Ada soit réellement un Émissaire Céleste. Ne t’inquiète pas.</>",
+                                        voice: "story/1102/111095/1BCFBEF8",
+                                        next: 11109519,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 11109517,
+                                        content: "<I>Si elle est un Émissaire Céleste, alors moi je suis l’Empereur.</>",
+                                        voice: "story/1102/111095/1BCFBF22",
+                                        next: 11109519,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                    {
+                                        id: 11109518,
+                                        content: "<I>Très bien, mais je veux ma part de la prime pour l’arrestation d’un espion.</>",
+                                        voice: "story/1102/111095/1BCFBF4C",
+                                        next: 11109519,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11109519,
+                                content:
+                                    "Mes mains s’embrasent ! Les dieux m’appellent à la victoire ! Ô flammes écarlates, brillantes et ardentes !",
+                                voice: "story/1102/111095/1BCFBF76",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11109520,
+                                        content: "<I>Attaquer</>",
+                                        voice: "story/1102/111095/1BCFBFA0",
+                                        next: 11109521,
+                                    },
+                                    {
+                                        id: 11109524,
+                                        content: "<I>Se défendre</>",
+                                        voice: "story/1102/111095/1BCFC048",
+                                        next: 11109525,
+                                    },
+                                    {
+                                        id: 11109528,
+                                        content: "<I>Utiliser une compétence</>",
+                                        voice: "story/1102/111095/1BCFC0F0",
+                                        next: 11109529,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11109521,
+                                content: "Tu avances vers moi au lieu d’esquiver ?! Reçois mon attaque !",
+                                voice: "story/1102/111095/1BCFBFCA",
+                                npc: 111001,
+                                next: 11109522,
+                            },
+                            {
+                                id: 11109525,
+                                content:
+                                    "Ridicule ! Comment une épée aussi faible pourrait-elle résister à mes flammes écarlates, brillantes et ardentes !",
+                                voice: "story/1102/111095/1BCFC072",
+                                npc: 111001,
+                                next: 11109526,
+                            },
+                            {
+                                id: 11109529,
+                                content: "Parfait ! Montre-moi donc la véritable puissance des guerriers d’Hyperborea ! Hyaaaaa !",
+                                voice: "story/1102/111095/1BCFC11A",
+                                npc: 111001,
+                                next: 11109530,
+                            },
+                            {
+                                id: 11109522,
+                                content: "...",
+                                voice: "story/1102/111095/1BCFBFF4",
+                                npc: 111126,
+                                next: 11109523,
+                            },
+                            {
+                                id: 11109526,
+                                content: "...",
+                                voice: "story/1102/111095/1BCFC09C",
+                                npc: 111126,
+                                next: 11109527,
+                            },
+                            {
+                                id: 11109530,
+                                content: "...",
+                                voice: "story/1102/111095/1BCFC144",
+                                npc: 111126,
+                                next: 11109531,
+                            },
+                            {
+                                id: 11109523,
+                                content: "Fourbe ! Tu as contré mon attaque avec une attaque !",
+                                voice: "story/1102/111095/1BCFC01E",
+                                npc: 111001,
+                                next: 11109532,
+                            },
+                            {
+                                id: 11109527,
+                                content:
+                                    "Quoi ?! Tu as vraiment réussi à bloquer ? Je vais devoir réévaluer la ténacité des guerriers d’Hyperborea.",
+                                voice: "story/1102/111095/1BCFC0C6",
+                                npc: 111001,
+                                next: 11109532,
+                            },
+                            {
+                                id: 11109531,
+                                content: "Argh... Belle attaque. Les dieux reconnaissent ta valeur.",
+                                voice: "story/1102/111095/1BCFC16E",
+                                npc: 111001,
+                                next: 11109532,
+                            },
+                            {
+                                id: 11109532,
+                                content:
+                                    "Hyperborea mérite bien sa réputation de nation forgée dans les flammes de la guerre. À ton tour maintenant.",
+                                voice: "story/1102/111095/1BCFC198",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11109533,
+                                        content: "<I>Attaquer</>",
+                                        voice: "story/1102/111095/1BCFC1C2",
+                                        next: 11109534,
+                                    },
+                                    {
+                                        id: 11109537,
+                                        content: "<I>Se défendre</>",
+                                        voice: "story/1102/111095/1BCFC26A",
+                                        next: 11109538,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11109534,
+                                content: "Inutile, inutile, inutile ! J’ai déjà percé à jour ton style de combat !",
+                                voice: "story/1102/111095/1BCFC1EC",
+                                npc: 111001,
+                                next: 11109535,
+                            },
+                            {
+                                id: 11109538,
+                                content: "Tu essaies de me provoquer ?",
+                                voice: "story/1102/111095/1BCFC294",
+                                npc: 111001,
+                                next: 11109539,
+                            },
+                            {
+                                id: 11109535,
+                                content: "...",
+                                voice: "story/1102/111095/1BCFC216",
+                                npc: 111126,
+                                next: 11109536,
+                            },
+                            {
+                                id: 11109539,
+                                content: "...",
+                                voice: "story/1102/111095/1BCFC2BE",
+                                npc: 111126,
+                                next: 11109540,
+                            },
+                            {
+                                id: 11109536,
+                                content: "Esquivé ! Tout esquivé ! Voilà la puissance d’un véritable Émissaire Céleste~",
+                                voice: "story/1102/111095/1BCFC240",
+                                npc: 111001,
+                                next: 11109541,
+                            },
+                            {
+                                id: 11109540,
+                                content: "Hmpf. Je ne tomberai pas dans le piège. Si tu refuses d’attaquer, j’en profite pour me reposer.",
+                                voice: "story/1102/111095/1BCFC2E8",
+                                npc: 111001,
+                                next: 11109541,
+                            },
+                            {
+                                id: 11109541,
+                                content:
+                                    "Bien. Alors c’est à mon tour de... Hein ? C’était pas une très jolie libellule qui vient de passer par là ?",
+                                voice: "story/1102/111095/1BCFC312",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11109542,
+                                        content: "<I>Utiliser une compétence</>",
+                                        voice: "story/1102/111095/1BCFC33C",
+                                        next: 11109543,
+                                    },
+                                    {
+                                        id: 11109546,
+                                        content: "<I>Attaque surprise</>",
+                                        voice: "story/1102/111095/1BCFC3E4",
+                                        next: 11109547,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11109543,
+                                content: "Ho ho ! Attends, attends ! Je ne suis pas prête !",
+                                voice: "story/1102/111095/1BCFC366",
+                                npc: 111001,
+                                next: 11109544,
+                            },
+                            {
+                                id: 11109547,
+                                content: "Ho ho ! Attends, attends ! Je ne suis pas prête !",
+                                voice: "story/1102/111095/1BCFC40E",
+                                npc: 111001,
+                                next: 11109548,
+                            },
+                            {
+                                id: 11109544,
+                                content: "...",
+                                voice: "story/1102/111095/1BCFC390",
+                                npc: 111126,
+                                next: 11109545,
+                            },
+                            {
+                                id: 11109548,
+                                content: "...",
+                                voice: "story/1102/111095/1BCFC438",
+                                npc: 111126,
+                                next: 11109549,
+                            },
+                            {
+                                id: 11109545,
+                                content: "Aïe... Ça fait mal...",
+                                voice: "story/1102/111095/1BCFC3BA",
+                                npc: 111001,
+                                next: 11109550,
+                            },
+                            {
+                                id: 11109549,
+                                content: "Aïe... Quelle perfidie !",
+                                voice: "story/1102/111095/1BCFC462",
+                                npc: 111001,
+                                next: 11109550,
+                            },
+                            {
+                                id: 11109550,
+                                content:
+                                    "Pfff... J’ai perdu. Je ne joue plus. Allons récupérer le reste des affaires que Sanctus nous a demandé de rapporter.",
+                                voice: "story/1102/111095/1BCFC48C",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809255395781025097",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17809261569091031281"],
+                        dialogues: [
+                            {
+                                id: 11109401,
+                                content: "On a trouvé la dernière caisse. Juste des petits ballons de fête.",
+                                voice: "story/1102/111094/1BCFAC1A",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17809261569091031281",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107001,
+                        pos: [-7282, -24240],
+                        dialogues: [
+                            {
+                                id: 11103801,
+                                content:
+                                    "On a tout trouvé~ Hé hé. Merci d’avoir accepté de jouer avec moi tout à l’heure. J’espère que tu ne t’es pas trop {性别2:ennuyé|ennuyée}.",
+                                voice: "story/1102/111095/1BCFC4B6",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11103802,
+                                        content: "<I>Oui. C’était... original.</>",
+                                        voice: "story/1102/111095/1BCFC4E0",
+                                        next: 11103805,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 11103803,
+                                        content: "<I>L’essentiel, c’est que tu te sois amusée.</>",
+                                        voice: "story/1102/111095/1BCFC50A",
+                                        next: 11103805,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 11103804,
+                                        content: "<I>Je me suis tellement {性别2:ennuyé|ennuyée} que j’ai failli m’endormir.</>",
+                                        voice: "story/1102/111095/1BCFC534",
+                                        next: 11103805,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11103805,
+                                content: "Moi, j’adore ce genre de jeux. Parce qu’on peut devenir toutes sortes de personnes différentes.",
+                                voice: "story/1102/111095/1BCFC55E",
+                                npc: 111001,
+                                next: 11103806,
+                            },
+                            {
+                                id: 11103806,
+                                content:
+                                    "On peut être un terrible démon, un courageux chevalier, un pieux Émissaire Céleste ou encore un médecin plein de bonté.",
+                                voice: "story/1102/111095/1BCFC588",
+                                npc: 111001,
+                                next: 11103807,
+                            },
+                            {
+                                id: 11103807,
+                                content: "Puéril.",
+                                voice: "story/1102/111095/1BCFC5B2",
+                                npc: 111110,
+                                next: 11103808,
+                            },
+                            {
+                                id: 11103808,
+                                content:
+                                    "Haha... Peut-être. Mais nous passerons toute notre vie dans ces montagnes. Nous ne pourrons jamais voyager librement comme vous. Alors... pour être honnête, je vous envie vraiment.",
+                                voice: "story/1102/111095/1BCFC5DC",
+                                npc: 111001,
+                                next: 11103809,
+                            },
+                            {
+                                id: 11103809,
+                                content:
+                                    "Nous envier ? Tu envies quoi exactement ? Le fait de pouvoir être trahis ou assassinés à tout moment ?",
+                                voice: "story/1102/111095/1BCFC630",
+                                npc: 111110,
+                                next: 11103810,
+                            },
+                            {
+                                id: 11103810,
+                                content:
+                                    "Ou bien les nuits passées au milieu des cadavres, couverts de sang et de vomi, à essayer de dormir sous les bombardements et les cris des mourants ?",
+                                voice: "story/1102/111095/1BCFC65A",
+                                npc: 111110,
+                                next: 11103811,
+                            },
+                            {
+                                id: 11103811,
+                                content:
+                                    "Pardon... Ce n’est pas ce que je voulais dire. Je voulais simplement... enfin... Plus j’essaie d’expliquer, plus ça sonne faux...",
+                                voice: "story/1102/111095/1BCFC684",
+                                npc: 111001,
+                                next: 11103812,
+                            },
+                            {
+                                id: 11103812,
+                                content: "... Laisse tomber.",
+                                voice: "story/1102/111095/1BCFC6AE",
+                                npc: 111110,
+                                next: 11103813,
+                            },
+                            {
+                                id: 11103813,
+                                content:
+                                    "Si quelque chose te tient à cœur, alors fais-le. Et si tu veux voir le monde extérieur, va le voir de tes propres yeux.",
+                                voice: "story/1102/111095/1BCFC702",
+                                npc: 111127,
+                                next: 11103814,
+                            },
+                            {
+                                id: 11103814,
+                                content: "... Je n’ai jamais quitté cette montagne. J’ai peur... de tout gâcher.",
+                                voice: "story/1102/111095/1BCFC72C",
+                                npc: 111001,
+                                next: 11103815,
+                            },
+                            {
+                                id: 11103815,
+                                content:
+                                    "Je sais que je suis maladroite. J’ai toujours l’impression de tout rater. Comme tout à l’heure... Je voulais juste remonter un peu le moral du petit chat, mais je ne savais rien de ce qu’elle avait vécu. Au final, je n’ai fait que la rendre encore plus triste.",
+                                voice: "story/1102/111095/1BCFC780",
+                                npc: 111001,
+                                next: 11103816,
+                            },
+                            {
+                                id: 11103816,
+                                content:
+                                    "Personne ne peut éviter les erreurs toute sa vie. Tu as le droit de te pardonner d’en commettre une.",
+                                voice: "story/1102/111095/1BCFC7AA",
+                                npc: 111127,
+                                next: 11103817,
+                            },
+                            {
+                                id: 11103817,
+                                content: "Je peux... me pardonner une erreur ?",
+                                voice: "story/1102/111095/1BCFC7D4",
+                                npc: 111001,
+                                next: 11103818,
+                            },
+                            {
+                                id: 11103818,
+                                content:
+                                    "Moi aussi, j’ai commis une erreur il y a peu. Depuis plusieurs jours, je me demande si les choses auraient changé si j’avais été plus {性别2:vigilant|vigilante}. Si j’avais découvert plus tôt l’ennemi qui se cachait parmi nous.",
+                                voice: "story/1102/111095/1BCFC7FE",
+                                npc: 111127,
+                                next: 11103819,
+                            },
+                            {
+                                id: 11103819,
+                                content: "...",
+                                voice: "story/1102/111095/1BCFC828",
+                                npc: 111110,
+                                next: 11103820,
+                            },
+                            {
+                                id: 11103820,
+                                content:
+                                    "Mais je sais également que je n’ai pas le temps de m’apitoyer sur mon sort. Parce que si je ne fais rien maintenant, alors je commettrai une seconde erreur.",
+                                voice: "story/1102/111095/1BCFC852",
+                                npc: 111127,
+                                next: 11103821,
+                            },
+                            {
+                                id: 11103821,
+                                content:
+                                    "... Alors tant que je ne regrette pas mon choix... même si je risque d’échouer, je peux quand même avancer ?",
+                                voice: "story/1102/111095/1BCFC87C",
+                                npc: 111001,
+                                next: 11103822,
+                            },
+                            {
+                                id: 11103822,
+                                content: "Oui.",
+                                voice: "story/1102/111095/1BCFC8A6",
+                                npc: 111127,
+                                next: 11103823,
+                            },
+                            {
+                                id: 11103823,
+                                content:
+                                    "Une erreur peut te coûter beaucoup. Mais ne rien faire par peur de l’échec te coûtera encore davantage.",
+                                voice: "story/1102/111095/1BCFC8D0",
+                                npc: 111127,
+                                next: 11103824,
+                            },
+                            {
+                                id: 11103824,
+                                content: "Pas étonnant qu’à l’époque tu... Peu importe.",
+                                voice: "story/1102/111095/1BCFC8FA",
+                                npc: 111110,
+                                next: 11103825,
+                            },
+                            {
+                                id: 11103825,
+                                content: "Petit chat ! Quand on commence une phrase, il faut la finir ! Sinon on dort mal après !",
+                                voice: "story/1102/111095/1BCFC924",
+                                npc: 111001,
+                                next: 11103826,
+                            },
+                            {
+                                id: 11103826,
+                                content:
+                                    "... Ce n’est pas vraiment un secret. C’était peu après que {nickname2} a obtenu son diplôme de l’École Militaire Impériale. À l’époque, nous étions encore dans la même unité.",
+                                voice: "story/1102/111095/1BCFC925",
+                                npc: 111110,
+                                next: 11103827,
+                            },
+                            {
+                                id: 11103827,
+                                content:
+                                    "Pour couper les lignes de ravitaillement des Déchus, {nickname2} a conduit son unité à travers les montagnes. Un glissement de terrain nous est tombé dessus, puis nous avons été pris dans une embuscade pendant la retraite. Les pertes furent lourdes.",
+                                voice: "story/1102/111095/1BCFC926",
+                                npc: 111110,
+                                next: 11103828,
+                            },
+                            {
+                                id: 11103828,
+                                content:
+                                    "Nous pensions tous qu’{性别2:un jeune officier fraîchement diplômé allait paniquer et nous entraîner avec lui|une jeune officière fraîchement diplômée allait paniquer et nous entraîner avec elle} dans la catastrophe. Mais cet imbécile est {性别2:resté|restée} d’un calme absolu. Plus calme que n’importe lequel d’entre nous.",
+                                voice: "story/1102/111095/1BCFC927",
+                                npc: 111110,
+                                next: 11103829,
+                            },
+                            {
+                                id: 11103829,
+                                content:
+                                    "Après une courte réorganisation, {性别2:il|elle} a utilisé la forêt pour tendre une contre-embuscade à nos poursuivants, puis a profité de l’occasion pour éliminer tous les avant-postes des Déchus dans la région.",
+                                voice: "story/1102/111095/1BCFC928",
+                                npc: 111110,
+                                next: 11103830,
+                            },
+                            {
+                                id: 11103830,
+                                content: "Cette mission t’avait valu ta combien déjà, de Distinction de l’Empereur ? La septième ?",
+                                voice: "story/1102/111095/1BCFC929",
+                                npc: 111110,
+                                next: 11103831,
+                            },
+                            {
+                                id: 11103831,
+                                content: "C-c’est incroyable... Voilà donc qui est vraiment {nickname2}...",
+                                voice: "story/1102/111095/1BCFC930",
+                                npc: 111001,
+                                next: 11103832,
+                            },
+                            {
+                                id: 11103832,
+                                content:
+                                    "Je n’y suis pas arrivé {性别2:seul|seule}. Sans chacun d’entre vous, nous aurions échoué. Surtout toi. Je t’ai confié mes arrières, et tu as dépassé toutes mes attentes.",
+                                voice: "story/1102/111095/1BCFC931",
+                                npc: 111127,
+                                next: 11103833,
+                            },
+                            {
+                                id: 11103833,
+                                content:
+                                    "À cette époque, je pensais que nous resterions toujours les camarades en qui nous avions le plus confiance.",
+                                voice: "story/1102/111095/1BCFC932",
+                                npc: 111127,
+                                next: 11103834,
+                            },
+                            {
+                                id: 11103834,
+                                content: "... Les choses qu’on ne peut plus retrouver n’ont pas besoin d’être évoquées.",
+                                voice: "story/1102/111095/1BCFC933",
+                                npc: 111110,
+                                next: 11103835,
+                            },
+                            {
+                                id: 11103835,
+                                content: "C’est pourtant toi qui as commencé.",
+                                voice: "story/1102/111095/1BCFC934",
+                                npc: 111127,
+                                next: 11103836,
+                            },
+                            {
+                                id: 11103836,
+                                content: "...",
+                                voice: "story/1102/111095/1BCFC935",
+                                npc: 111110,
+                                next: 11103837,
+                            },
+                            {
+                                id: 11103837,
+                                content: "Euh... Je peux dire quelque chose ?",
+                                voice: "story/1102/111095/1BCFC936",
+                                npc: 111001,
+                                next: 11103838,
+                            },
+                            {
+                                id: 11103838,
+                                content:
+                                    "Je ne sais pas ce qui s’est passé entre vous. Mais... enfin... d’après ce que j’ai compris, vous étiez de très {性别2:bons amis|bonnes amies} autrefois, non ? Puis quelque chose a mal tourné...",
+                                voice: "story/1102/111095/1BCFC937",
+                                npc: 111001,
+                                next: 11103839,
+                            },
+                            {
+                                id: 11103839,
+                                content:
+                                    "Mais {nickname2} l’a dit lui-même : « On peut se pardonner une erreur. » Alors... est-ce que cela ne veut pas dire que même les erreurs les plus graves peuvent parfois être réparées ?",
+                                voice: "story/1102/111095/1BCFC938",
+                                npc: 111001,
+                                next: 11103840,
+                            },
+                            {
+                                id: 11103840,
+                                content:
+                                    "Bernard et Justus passent leur temps à se disputer eux aussi. Pourtant, dès qu’ils partagent quelques verres, ils redeviennent inséparables.",
+                                voice: "story/1102/111095/1BCFC939",
+                                npc: 111001,
+                                next: 11103841,
+                            },
+                            {
+                                id: 11103841,
+                                content:
+                                    "Enfin... je ne veux pas dire que vous devriez porter le même pantalon ! Je veux juste dire que... peut-être que vous pourriez vous réconcilier un jour...",
+                                voice: "story/1102/111095/1BCFC940",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11103842,
+                                        content: "<I>Peut-être.</>",
+                                        voice: "story/1102/111095/1BCFC941",
+                                        next: 11103845,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 11103843,
+                                        content: "<I>Certaines erreurs ne peuvent pas être réparées.</>",
+                                        voice: "story/1102/111095/1BCFC942",
+                                        next: 11103845,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 11103844,
+                                        content: "<I>Ça dépendra de son comportement.</>",
+                                        voice: "story/1102/111095/1BCFC943",
+                                        next: 11103845,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11103845,
+                                content: "...",
+                                voice: "story/1102/111095/1BCFC944",
+                                npc: 111110,
+                                options: [
+                                    {
+                                        id: 11103846,
+                                        content: "<I>Les affaires des adultes ne regardent pas les enfants !</>",
+                                        voice: "story/1102/111095/1BCFC945",
+                                        next: 11103847,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11103847,
+                                content: "Yiou !",
+                                voice: "story/1102/111095/1BCFC946",
+                                npc: 111001,
+                                next: 11103848,
+                            },
+                            {
+                                id: 11103848,
+                                content: "Je vous rappelle que Sanctus attend toujours qu’on lui rapporte ses caisses.",
+                                voice: "story/1102/111095/1BCFC947",
+                                npc: 111110,
+                                next: 11103849,
+                            },
+                            {
+                                id: 11103849,
+                                content: "Ah oui ! J’avais complètement oublié ! Vite, retournons voir Sanctus ! Et puis...",
+                                voice: "story/1102/111095/1BCFC948",
+                                npc: 111001,
+                                next: 11103850,
+                            },
+                            {
+                                id: 11103850,
+                                content: "{nickname2}... Je me souviendrai de tout ce que tu viens de me dire.",
+                                voice: "story/1102/111095/1BCFC949",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11021403,
+                name: "Parler à Sanctus",
+                desc: "Tout le matériel de la parade a été récupéré. Retournez voir Sanctus.",
+            },
+            {
+                id: 11021404,
+                name: "Parler à Sanctus",
+                desc: "Tout le matériel de la parade a été récupéré. Retournez voir Sanctus.",
+            },
+            {
+                id: 11021405,
+                name: "Parler à Sanctus",
+                desc: "Tout le matériel de la parade a été récupéré. Retournez voir Sanctus.",
+            },
+            {
+                id: 11021406,
+                name: "Parler à Sanctus",
+                desc: "Tout le matériel de la parade a été récupéré. Retournez voir Sanctus.",
+                nodes: [
+                    {
+                        id: "178092626829914184861",
+                        type: "TalkNode",
+                        name: "与桑图克斯交谈",
+                        srId: 107001,
+                        pos: [-20567, -77081],
+                        dialogues: [
+                            {
+                                id: 11109601,
+                                content: "Héhé. Tu vois ? Je ne vous avais pas menti. Le campement est rempli de magnifiques papillons.",
+                                voice: "story/1102/111096/1BCFCCEA",
+                                npc: 111167,
+                                next: 11109602,
+                            },
+                            {
+                                id: 11109602,
+                                content:
+                                    "C’est vrai, il y en avait plein ! Bon, puisque tu avais raison, je te pardonne ton piège. Mais je n’en ai attrapé aucun... et j’ai perdu au jeu... Yiou...",
+                                voice: "story/1102/111096/1BCFCD14",
+                                npc: 111001,
+                                next: 11109603,
+                            },
+                            {
+                                id: 11109603,
+                                content: "Perdu au jeu ? Tu t’es disputée avec Victor ?",
+                                voice: "story/1102/111096/1BCFCD3E",
+                                npc: 111167,
+                                next: 11109604,
+                            },
+                            {
+                                id: 11109604,
+                                content: "Non non ! On a joué juste pour s’amuser. Ne t’inquiète pas.",
+                                voice: "story/1102/111096/1BCFCD68",
+                                npc: 111001,
+                                next: 11109605,
+                            },
+                            {
+                                id: 11109605,
+                                content:
+                                    "Tant mieux. Dans ce cas, je n’ai plus besoin de votre aide. Allez vous amuser. Et n’oubliez pas de revenir manger tout à l’heure.",
+                                voice: "story/1102/111096/1BCFCD92",
+                                npc: 111167,
+                                next: 11109606,
+                            },
+                            {
+                                id: 11109606,
+                                content: "Compris~",
+                                voice: "story/1102/111096/1BCFCDBC",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110215,
+        quests: [
+            {
+                id: 11021501,
+                name: "Faire un tour",
+                desc: "Après avoir quitté les habitants, vous décidez de faire un tour dans le village afin de recueillir quelques informations.",
+                nodes: [
+                    {
+                        id: "17805853516742655",
+                        type: "TalkNode",
+                        name: "开车对话-俯瞰镇子",
+                        srId: 107001,
+                        pos: [-11012, -70168],
+                        dialogues: [
+                            {
+                                id: 11110201,
+                                content:
+                                    "Ada, existe-t-il un endroit d’où l’on peut voir tout le village ? J’aimerais l’observer attentivement.",
+                                voice: "story/1102/111096/1BD02F5A",
+                                npc: 111127,
+                                next: 11110202,
+                            },
+                            {
+                                id: 11110202,
+                                content: "Dans ce cas... on peut aller à la grande roue ? C’est par ici.",
+                                voice: "story/1102/111096/1BD02F84",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11021502,
+                name: "Parler à Karma",
+                desc: "Afin d’observer l’ensemble du village depuis les hauteurs et de mieux en comprendre la disposition, Ada et vous vous rendez à la grande roue. Mais il faut la clé de Karma pour la mettre en marche. Demandez-lui son aide.",
+                nodes: [
+                    {
+                        id: "17805854407754465",
+                        type: "TalkNode",
+                        name: "对话节点-找卡尔玛站桩",
+                        srId: 107001,
+                        pos: [-11868, -69454],
+                        dialogues: [
+                            {
+                                id: 11110301,
+                                content: "Karma~ On voudrait monter dans la grande roue !",
+                                voice: "story/1102/111096/1BD03FC2",
+                                npc: 111001,
+                                next: 11110302,
+                            },
+                            {
+                                id: 11110302,
+                                content: "Je savais que vous viendriez. Alors...",
+                                voice: "story/1102/111096/1BD03FEC",
+                                npc: 111168,
+                                next: 11110303,
+                            },
+                            {
+                                id: 11110303,
+                                content: "Alors l’heure est venue...",
+                                voice: "story/1102/111096/1BD04016",
+                                npc: 111168,
+                                next: 11110304,
+                            },
+                            {
+                                id: 11110304,
+                                content: "...",
+                                voice: "story/1102/111096/1BD04040",
+                                npc: 111168,
+                                next: 11110305,
+                            },
+                            {
+                                id: 11110305,
+                                content: "Ah, Karma s’est encore endormi.",
+                                voice: "story/1102/111096/1BD0406A",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11110306,
+                                        content: "<I>Essayer de réveiller Karma</>",
+                                        voice: "story/1102/111096/1BD04094",
+                                        next: 11110307,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 11110308,
+                                        content: "<I>Chercher une autre façon de le réveiller</>",
+                                        voice: "story/1102/111096/1BD040E8",
+                                        next: 11110309,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 11110310,
+                                        content: "<I>Essayer de le réveiller à coups de poing</>",
+                                        voice: "story/1102/111096/1BD0413C",
+                                        next: 11110311,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11110307,
+                                content: "Réveille-toi. Ou alors dis-nous au moins comment démarrer cette machine.",
+                                voice: "story/1102/111096/1BD040BE",
+                                npc: 111127,
+                                next: 11110312,
+                            },
+                            {
+                                id: 11110309,
+                                content: "Il n’y a pas un autre moyen de le réveiller ?",
+                                voice: "story/1102/111096/1BD04112",
+                                npc: 111127,
+                                next: 11110312,
+                            },
+                            {
+                                id: 11110311,
+                                content:
+                                    "Karma se retourne dans son sommeil et reprend son ronflement. Votre coup de poing semble avoir frappé du coton.",
+                                voice: "story/1102/111096/1BD04166",
+                                next: 11110312,
+                            },
+                            {
+                                id: 11110312,
+                                content: "...",
+                                voice: "story/1102/111096/1BD04190",
+                                npc: 111168,
+                                next: 11110313,
+                            },
+                            {
+                                id: 11110313,
+                                content: "Karma est toujours le même. Mystérieux... et impossible à comprendre.",
+                                voice: "story/1102/111096/1BD041BA",
+                                npc: 111001,
+                                next: 11110314,
+                            },
+                            {
+                                id: 11110314,
+                                content: "Sans sa clé, on ne pourra jamais monter dans la grande roue... Qu’est-ce qu’on fait... ?",
+                                voice: "story/1102/111096/1BD041E4",
+                                npc: 111001,
+                                next: 11110315,
+                            },
+                            {
+                                id: 11110315,
+                                content: "...",
+                                voice: "story/1102/111096/1BD0420E",
+                                npc: 111127,
+                                next: 11110316,
+                            },
+                            {
+                                id: 11110316,
+                                content: "L’heure du destin est arrivée...",
+                                voice: "story/1102/111096/1BD04238",
+                                npc: 111168,
+                                next: 11110317,
+                            },
+                            {
+                                id: 11110317,
+                                content: "Hein ? Pourquoi tu es réveillé d’un coup ?",
+                                voice: "story/1102/111096/1BD04262",
+                                npc: 111001,
+                                next: 11110318,
+                            },
+                            {
+                                id: 11110318,
+                                content: "Le destin est silencieux. N’espère pas recevoir d’explications de sa part.",
+                                voice: "story/1102/111096/1BD0428C",
+                                npc: 111168,
+                                next: 11110319,
+                            },
+                            {
+                                id: 11110319,
+                                content: "Vous voyez ? Je vous avais dit qu’il était incompréhensible !",
+                                voice: "story/1102/111096/1BD042B6",
+                                npc: 111001,
+                                next: 11110320,
+                            },
+                            {
+                                id: 11110320,
+                                content:
+                                    "Votre cabine est arrivée. Un tour complet dure exactement vingt-deux minutes. Si vous ne montez pas maintenant, préférez-vous attendre ici à vous ennuyer ?",
+                                voice: "story/1102/111096/1BD042E0",
+                                npc: 111168,
+                                next: 11110321,
+                            },
+                            {
+                                id: 11110321,
+                                content: "On monte, on monte ! Vite !",
+                                voice: "story/1102/111096/1BD0430A",
+                                npc: 111001,
+                                next: 11110322,
+                            },
+                            {
+                                id: 11110322,
+                                content: "...",
+                                voice: "story/1102/111096/1BD04334",
+                                npc: 111110,
+                                next: 11110323,
+                            },
+                            {
+                                id: 11110323,
+                                content: "Le petit chat ne vient pas avec nous ?",
+                                voice: "story/1102/111096/1BD0435E",
+                                npc: 111001,
+                                next: 11110324,
+                            },
+                            {
+                                id: 11110324,
+                                content: "Je vous laisse y aller. Je... n’aime pas beaucoup les endroits aussi élevés.",
+                                voice: "story/1102/111096/1BD04388",
+                                npc: 111110,
+                                next: 11110325,
+                            },
+                            {
+                                id: 11110325,
+                                content: "D’accord. Quel dommage.",
+                                voice: "story/1102/111096/1BD043B2",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17807500562621019306",
+                        type: "TalkNode",
+                        name: "摩天轮对话",
+                        next: ["17807502694952031935"],
+                        dialogues: [
+                            {
+                                id: 11110401,
+                                content: "Alors ? C’est haut, hein~ ?",
+                                voice: "story/1102/111096/1BD0502A",
+                                npc: 111001,
+                                next: 11110402,
+                            },
+                            {
+                                id: 11110402,
+                                content: "Ce pont-levis ne fonctionne pas ?",
+                                voice: "story/1102/111096/1BD05054",
+                                npc: 111127,
+                                next: 11110403,
+                            },
+                            {
+                                id: 11110403,
+                                content:
+                                    "Il est presque toujours relevé. Très peu de gens quittent le village. Si quelqu’un veut l’utiliser, il faut qu’une autre personne reste de l’autre côté pour maintenir le levier.",
+                                voice: "story/1102/111096/1BD0507E",
+                                npc: 111001,
+                                next: 11110404,
+                            },
+                            {
+                                id: 11110404,
+                                content:
+                                    "Tu observes vraiment tout avec attention~ En vérité, presque personne ne monte dans cette grande roue. Alors si toi au moins tu profites du paysage, elle n’aura pas servi à rien.",
+                                voice: "story/1102/111096/1BD050A8",
+                                npc: 111001,
+                                next: 11110405,
+                            },
+                            {
+                                id: 11110405,
+                                content: "Le paysage... est magnifique.",
+                                voice: "story/1102/111096/1BD050D2",
+                                npc: 111127,
+                                next: 11110406,
+                            },
+                            {
+                                id: 11110406,
+                                content: "Magnifique ?",
+                                voice: "story/1102/111096/1BD050FC",
+                                npc: 111001,
+                                next: 11110407,
+                            },
+                            {
+                                id: 11110407,
+                                content:
+                                    "Ah, je ne dis pas le contraire. C’est juste que moi, je vois toujours le même village tous les jours. J’ai fini par m’en lasser.",
+                                voice: "story/1102/111096/1BD05126",
+                                npc: 111001,
+                                next: 11110408,
+                            },
+                            {
+                                id: 11110408,
+                                content:
+                                    "Même la durée d’un tour de grande roue est toujours de vingt-deux minutes. Hier, aujourd’hui, demain... rien ne change jamais.",
+                                voice: "story/1102/111096/1BD05150",
+                                npc: 111001,
+                                next: 11110409,
+                            },
+                            {
+                                id: 11110409,
+                                content: "Hé, vous comptez encore rester longtemps là-dedans ?",
+                                voice: "story/1102/111096/1BD0517A",
+                                npc: 111110,
+                                next: 11110410,
+                            },
+                            {
+                                id: 11110410,
+                                content:
+                                    "Quoi ? On a déjà fait un tour complet ?! C’est passé tellement vite ! Attends... Karma n’aurait quand même pas changé la durée du trajet pendant mon absence ?!",
+                                voice: "story/1102/111096/1BD051A4",
+                                npc: 111001,
+                                next: 11110411,
+                            },
+                            {
+                                id: 11110411,
+                                content: "Descendons.",
+                                voice: "story/1102/111096/1BD051CE",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17807502694952031935",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11110501,
+                                content: "Victor, ce voyage dans les airs t’a-t-il apporté une quelconque révélation ?",
+                                voice: "story/1102/111096/1BD06092",
+                                npc: 111168,
+                                next: 11110502,
+                            },
+                            {
+                                id: 11110502,
+                                content:
+                                    "Le paysage est magnifique. Les habitants ont l’air paisibles. Il règne ici une atmosphère chaleureuse.",
+                                voice: "story/1102/111096/1BD060BC",
+                                npc: 111127,
+                                next: 11110503,
+                            },
+                            {
+                                id: 11110503,
+                                content:
+                                    "Parce que c’est ici que se trouve ton foyer. Le sang qui coule dans tes veines se souvient encore de cette terre. Ce sentiment familier apporte naturellement du réconfort.",
+                                voice: "story/1102/111096/1BD060E6",
+                                npc: 111168,
+                                next: 11110504,
+                            },
+                            {
+                                id: 11110504,
+                                content: "J’espère qu’un jour tu retrouveras ici la paix qui t’appartient.",
+                                voice: "story/1102/111096/1BD06110",
+                                npc: 111168,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110220,
+        quests: [
+            {
+                id: 11022001,
+                name: "Faire un tour",
+                desc: "Après avoir quitté les habitants, vous décidez de faire un tour dans le village afin de recueillir quelques informations.",
+                nodes: [
+                    {
+                        id: "17832533351704342337",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17832539776346518526"],
+                        dialogues: [
+                            {
+                                id: 11110601,
+                                content:
+                                    "Victor, Ada, vous tombez bien. Pourriez-vous apporter ces bouteilles à Justus ? « La Justice » Justus. Il devrait être derrière le village en train d’aider aux préparatifs. Ada connaît le chemin.",
+                                voice: "story/1102/111096/1BD070FA",
+                                npc: 111161,
+                                next: 11110602,
+                            },
+                            {
+                                id: 11110602,
+                                content: "... Hein ?! D’accord, par ici !",
+                                voice: "story/1102/111096/1BD07124",
+                                npc: 111001,
+                                next: 11110603,
+                            },
+                            {
+                                id: 11110603,
+                                content:
+                                    "Dis-moi... ce commandant Avar dont tu parlais tout à l’heure. Tu pourrais me raconter encore quelque chose à son sujet ?",
+                                voice: "story/1102/111096/1BD0714E",
+                                npc: 111001,
+                                next: 11110604,
+                            },
+                            {
+                                id: 11110604,
+                                content: "Tu le connaissais ?",
+                                voice: "story/1102/111096/1BD07178",
+                                npc: 111127,
+                                next: 11110605,
+                            },
+                            {
+                                id: 11110605,
+                                content: "Je suis juste curieuse~ J’aimerais savoir à quoi ressemblait ton professeur !",
+                                voice: "story/1102/111096/1BD071A2",
+                                npc: 111001,
+                                next: 11110606,
+                            },
+                            {
+                                id: 11110606,
+                                content: "Comment va-t-il ces derniers temps ? Pourquoi n’est-il pas venu au village avec toi ?",
+                                voice: "story/1102/111096/1BD071CC",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11110607,
+                                        content: "<I>C’est une information confidentielle de la Légion.</>",
+                                        voice: "story/1102/111096/1BD071F6",
+                                        next: 11110608,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 11110610,
+                                        content: "<I>... Il est mort.</>",
+                                        voice: "story/1102/111096/1BD07274",
+                                        next: 11110611,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11110608,
+                                content:
+                                    "Yiou... Si je te donne le plus grand et le plus beau papillon que j’ai, tu me le diras en secret ? Je ne le raconterai à personne, promis !",
+                                voice: "story/1102/111096/1BD07220",
+                                npc: 111001,
+                                next: 11110609,
+                            },
+                            {
+                                id: 11110611,
+                                content: "Hein... ?",
+                                voice: "story/1102/111096/1BD0729E",
+                                npc: 111001,
+                                next: 11110612,
+                            },
+                            {
+                                id: 11110609,
+                                content: "... Je vais répondre à sa place. Il est mort.",
+                                voice: "story/1102/111096/1BD0724A",
+                                npc: 111110,
+                                next: 11110611,
+                            },
+                            {
+                                id: 11110612,
+                                content:
+                                    "Le commandant est devenu une victime de cette lutte de pouvoir. Il est tombé sous les balles d’un complot.",
+                                voice: "story/1102/111096/1BD072C8",
+                                npc: 111127,
+                                next: 11110613,
+                            },
+                            {
+                                id: 11110613,
+                                content: "...",
+                                voice: "story/1102/111096/1BD072F2",
+                                npc: 111001,
+                                next: 11110614,
+                            },
+                            {
+                                id: 11110614,
+                                content: "N-non... Il ne faut pas qu’ils nous entendent... Il faut trouver un endroit tranquille...",
+                                voice: "story/1102/111096/1BD0731C",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17832539776346518526",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17832568620548692803", "178325745520411954818"],
+                        dialogues: [
+                            {
+                                id: 11110701,
+                                content: "Ouin... ouin... Oncle Avar... pourquoi... ?",
+                                voice: "story/1102/111096/1BD08162",
+                                npc: 111001,
+                                next: 11110702,
+                            },
+                            {
+                                id: 11110702,
+                                content: "... Vous étiez proches ?",
+                                voice: "story/1102/111096/1BD0818C",
+                                npc: 111127,
+                                next: 11110703,
+                            },
+                            {
+                                id: 11110703,
+                                content:
+                                    "Non... Ce n’est pas ça... Je... Je ne voulais simplement pas que cela finisse ainsi. Pourquoi... Pourquoi est-ce qu’il y a <H>toujours</> quelqu’un qui doit mourir... ? Pourquoi... ?",
+                                voice: "story/1102/111096/1BD081B6",
+                                npc: 111001,
+                                next: 11110704,
+                            },
+                            {
+                                id: 11110704,
+                                content: "<H>... Il avait pourtant réussi à s’échapper...</>",
+                                voice: "story/1102/111096/1BD081E0",
+                                npc: 111001,
+                                options: [
+                                    {
+                                        id: 11110705,
+                                        content: "<I>Hé... n’essuie pas tes larmes sur mes vêtements !</>",
+                                        voice: "story/1102/111096/1BD0820A",
+                                        next: 11110708,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                    {
+                                        id: 11110706,
+                                        content: "<I>... Si tu as envie de pleurer, alors pleure.</>",
+                                        voice: "story/1102/111096/1BD08234",
+                                        next: 11110708,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 11110707,
+                                        content: "<I>Qu’est-ce que tu veux dire par « s’échapper » ? Cet endroit est dangereux ?</>",
+                                        voice: "story/1102/111096/1BD0825E",
+                                        next: 11110708,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11110708,
+                                content: "Hé ! Qu’est-ce que vous faites là-bas ?",
+                                voice: "story/1102/111096/1BD08288",
+                                npc: 111169,
+                                next: 11110709,
+                            },
+                            {
+                                id: 11110709,
+                                content: "Ada, pourquoi as-tu amené Victor ici ? Tu as oublié les règles du Paradis ?",
+                                voice: "story/1102/111096/1BD082B2",
+                                npc: 111169,
+                                next: 11110710,
+                            },
+                            {
+                                id: 11110710,
+                                content: "C’est moi qui l’ai amenée. Elle voulait entendre une histoire. Cet endroit était calme.",
+                                voice: "story/1102/111096/1BD082DC",
+                                npc: 111127,
+                                next: 11110711,
+                            },
+                            {
+                                id: 11110711,
+                                content: "Ne change pas de sujet. Ada. Les règles.",
+                                voice: "story/1102/111096/1BD08306",
+                                npc: 111169,
+                                next: 11110712,
+                            },
+                            {
+                                id: 11110712,
+                                content:
+                                    "La première... Les Montagnes d’Arcano sont notre Paradis. Nous sommes les petits lapins de Maman Lapin... La deuxième, les Lapins Blancs doivent s’aimer les uns les autres...",
+                                voice: "story/1102/111096/1BD08330",
+                                npc: 111001,
+                                next: 11110713,
+                            },
+                            {
+                                id: 11110713,
+                                content: "Va droit au but. La règle concernant cet endroit.",
+                                voice: "story/1102/111096/1BD0835A",
+                                npc: 111169,
+                                next: 11110714,
+                            },
+                            {
+                                id: 11110714,
+                                content:
+                                    "Désolée... Les règles sont longues... et je n’arrive plus à me souvenir de celle-là pour le moment...",
+                                voice: "story/1102/111096/1BD08384",
+                                npc: 111001,
+                                next: 11110715,
+                            },
+                            {
+                                id: 11110715,
+                                content:
+                                    "Pff... Règle numéro neuf : il est interdit d’approcher l’<W>Étang du Repos</> sans l’autorisation du chef du village.",
+                                voice: "story/1102/111096/1BD083AE",
+                                npc: 111169,
+                                next: 11110716,
+                            },
+                            {
+                                id: 11110716,
+                                content:
+                                    "... Je m’en souviendrai... Et puis, nous ne sommes même pas entrés. Justus, ne te fâche pas. Teresa m’a demandé de t’apporter ton gin préféré...",
+                                voice: "story/1102/111096/1BD083D8",
+                                npc: 111001,
+                                next: 11110717,
+                            },
+                            {
+                                id: 11110717,
+                                content:
+                                    "Laisse tomber. Que je me mette en colère importe peu. Mais si Maman Lapin venait à se fâcher, nous ne pourrions pas en supporter les conséquences. Tu ferais mieux de prier pour qu’elle ne s’intéresse pas à cette affaire lors de la Parade du Paradis de demain.",
+                                voice: "story/1102/111096/1BD08402",
+                                npc: 111169,
+                                next: 11110718,
+                            },
+                            {
+                                id: 11110718,
+                                content:
+                                    "Très bien. Le gin attendra la Parade du Paradis de demain. C’est l’heure du dîner. Venez avec moi.",
+                                voice: "story/1102/111096/1BD0842C",
+                                npc: 111169,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17832568620548692803",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11110801,
+                                content:
+                                    "Victor, même si tu as perdu la mémoire, je dois te rappeler une chose : tu devras toi aussi apprendre ces règles au plus vite.",
+                                voice: "story/1102/111096/1BD091CA",
+                                npc: 111169,
+                                next: 11110802,
+                            },
+                            {
+                                id: 11110802,
+                                content: "Ce sont elles qui ont permis à notre village de retrouver la paix après les années de guerre.",
+                                voice: "story/1102/111096/1BD091F4",
+                                npc: 111169,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178325745520411954818",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11110901,
+                                content:
+                                    "Ah là là... Quelques instants plus tôt, ces enfants étaient partis d’ici tout sourire avec des bouteilles à la main. Et voilà qu’ils reviennent avec toi, Justus, en faisant tous la tête.",
+                                voice: "story/1102/111096/1BD0A232",
+                                npc: 111161,
+                                next: 11110902,
+                            },
+                            {
+                                id: 11110902,
+                                content:
+                                    "Viens, Victor. Éloigne-toi un peu de ce gros grincheux et approche plutôt par ici. Le chef du village a retrouvé de vieilles photographies. Je suis sûre qu’elles t’intéresseront.",
+                                voice: "story/1102/111096/1BD0A25C",
+                                npc: 111161,
+                                next: 11110903,
+                            },
+                            {
+                                id: 11110903,
+                                content:
+                                    "Celle-ci a été prise le jour où nous avons fêté ta réussite aux épreuves de la Légion. Bernard et Justus étaient tellement heureux qu’ils ont terminé la soirée sous la table.",
+                                voice: "story/1102/111096/1BD0A286",
+                                npc: 111125,
+                                next: 11110904,
+                            },
+                            {
+                                id: 11110904,
+                                content: "C’était un accident. Ne prenez surtout pas exemple sur nous.",
+                                voice: "story/1102/111096/1BD0A2B0",
+                                npc: 111169,
+                                next: 11110905,
+                            },
+                            {
+                                id: 11110905,
+                                content:
+                                    "Hahahaha ! Je te le dis, mon vieux Justus : demain, à la Parade du Paradis, on remet ça ! Et on verra bien si c’était vraiment un accident !",
+                                voice: "story/1102/111096/1BD0A2DA",
+                                npc: 111150,
+                                next: 11110906,
+                            },
+                            {
+                                id: 11110906,
+                                content:
+                                    "Ah, celle-là... Ada venait de casser le Casse-Noisette de Morgana, et Morgana était en train de lui passer un savon.",
+                                voice: "story/1102/111096/1BD0A304",
+                                npc: 111125,
+                                next: 11110907,
+                            },
+                            {
+                                id: 11110907,
+                                content:
+                                    "Tu t’en souviens, Victor ? Tu avais essayé d’arranger les choses. Tu avais promis à Morgana de le réparer toi-même pour qu’elle arrête de gronder Ada.",
+                                voice: "story/1102/111096/1BD0A32E",
+                                npc: 111125,
+                                next: 11110908,
+                            },
+                            {
+                                id: 11110908,
+                                content:
+                                    "Hé hé. Et pour finir, celle-ci a été prise pendant les préparatifs de la Parade du Paradis. À l’époque déjà, tu étais exactement comme aujourd’hui : tu aidais à retrouver les jouets perdus et tu faisais les livraisons de bouteilles.",
+                                voice: "story/1102/111096/1BD0A358",
+                                npc: 111125,
+                                next: 11110909,
+                            },
+                            {
+                                id: 11110909,
+                                content:
+                                    "Tiens. Elles sont à toi désormais. J’espère qu’elles t’aideront à retrouver les souvenirs que tu as perdus, mon pauvre enfant.",
+                                voice: "story/1102/111096/1BD0A382",
+                                npc: 111125,
+                                next: 11110910,
+                            },
+                            {
+                                id: 11110910,
+                                content:
+                                    "Et si rien ne te revient, ne te force pas. Une photographie ne capture qu’un instant du passé. Avec le temps, il est normal que certains souvenirs s’effacent.",
+                                voice: "story/1102/111096/1BD0A3AC",
+                                npc: 111161,
+                                next: 11110911,
+                            },
+                            {
+                                id: 11110911,
+                                content:
+                                    "Mais ne t’inquiète pas. Nous nous en souvenons pour toi. Peu importe le temps qu’il te faudra pour nous reconnaître à nouveau. Peu importe la raison pour laquelle tu nous as oubliés. Tu resteras toujours « Le Chariot » du Paradis. Victor.",
+                                voice: "story/1102/111096/1BD0A3D6",
+                                npc: 111161,
+                                next: 11110912,
+                            },
+                            {
+                                id: 11110912,
+                                content: "— Bienvenue chez toi, Victor !",
+                                voice: "story/1102/111096/1BD0A400",
+                                npc: 111161,
+                                next: 11110913,
+                            },
+                            {
+                                id: 11110913,
+                                content: "Bienvenue chez toi !",
+                                voice: "story/1102/111096/1BD0A42A",
+                                speakerName: "Villageois",
+                                next: 11110914,
+                            },
+                            {
+                                id: 11110914,
+                                content: "Bien. À table ! À Victor, à la Parade du Paradis, et à Maman Lapin ! Santé !",
+                                voice: "story/1102/111096/1BD0A454",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11022002,
+                name: "Parler à Falsi",
+                desc: "Vous vous réveillez et trouvez Falsi à vos côtés. Avant de commencer cette nouvelle journée d’enquête, échangez avec elle les informations que vous avez recueillies.",
+                nodes: [
+                    {
+                        id: "178325887374323890681",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107501,
+                        pos: [10577, -92643],
+                        dialogues: [
+                            {
+                                id: 11111001,
+                                content: "Victor !",
+                                voice: "story/1102/111096/1BD0B29A",
+                                next: 11111002,
+                            },
+                            {
+                                id: 11111002,
+                                content: "Victor ?",
+                                voice: "story/1102/111096/1BD0B2C4",
+                                next: 11111003,
+                            },
+                            {
+                                id: 11111003,
+                                content: "Victor.",
+                                voice: "story/1102/111096/1BD0B2EE",
+                                next: 11111004,
+                            },
+                            {
+                                id: 11111004,
+                                content: "... Victor...",
+                                voice: "story/1102/111096/1BD0B318",
+                                next: 11111005,
+                            },
+                            {
+                                id: 11111005,
+                                content: "Où suis-je... ?",
+                                voice: "story/1102/111096/1BD0B342",
+                                npc: 111127,
+                                next: 11111006,
+                            },
+                            {
+                                id: 11111006,
+                                content: "Chez toi.",
+                                voice: "story/1102/111096/1BD0B36C",
+                                npc: 111110,
+                                next: 11111007,
+                            },
+                            {
+                                id: 11111007,
+                                content: "Je me souviens que nous étions en train de dîner. Que s’est-il passé ensuite ?",
+                                voice: "story/1102/111096/1BD0B396",
+                                npc: 111127,
+                                next: 11111008,
+                            },
+                            {
+                                id: 11111008,
+                                content: "Aucune idée. C’était hier. Je suis partie avant la fin pour aller vérifier quelque chose.",
+                                voice: "story/1102/111096/1BD0B3C0",
+                                npc: 111110,
+                                next: 11111009,
+                            },
+                            {
+                                id: 11111009,
+                                content: "...",
+                                voice: "story/1102/111096/1BD0B3EA",
+                                npc: 111127,
+                                next: 11111010,
+                            },
+                            {
+                                id: 11111010,
+                                content: "Tu ne t’en souviens plus parce que tu as trop bu ? Ou bien tu as encore perdu la mémoire ?",
+                                voice: "story/1102/111096/1BD0B414",
+                                npc: 111110,
+                                next: 11111011,
+                            },
+                            {
+                                id: 11111011,
+                                content:
+                                    "Tu ressembles vraiment au héros d’un roman. Parfois, j’aimerais pouvoir faire comme dans les histoires. Tout oublier d’un coup et ne plus avoir aucun souci. Malheureusement, quand je suis tombée du haut de cette falaise, ce n’est pas une aventure extraordinaire qui m’attendait en bas, mais un cauchemar après l’autre.",
+                                voice: "story/1102/111096/1BD0B43E",
+                                npc: 111110,
+                                next: 11111012,
+                            },
+                            {
+                                id: 11111012,
+                                content:
+                                    "Cela dit... il vaut peut-être mieux se souvenir. Je préfère ne pas imaginer ce que je serais devenue si j’avais oublié ma haine envers Fulvis.",
+                                voice: "story/1102/111096/1BD0B468",
+                                npc: 111110,
+                                next: 11111013,
+                            },
+                            {
+                                id: 11111013,
+                                content:
+                                    "Tu viens de me le rappeler... Fulvis. Pour l’instant, c’est toujours notre priorité. Si cet endroit est réellement mon village natal, alors sa présence représente également une menace pour les habitants.",
+                                voice: "story/1102/111096/1BD0B492",
+                                npc: 111127,
+                                next: 11111077,
+                            },
+                            {
+                                id: 11111077,
+                                content:
+                                    "<I>Mais... même si cet endroit est réellement mon village natal, il y a trop de choses étranges ici. Je ferais mieux de rester vigilant.</>",
+                                voice: "story/1102/111096/1BD0B493",
+                                next: 11111014,
+                            },
+                            {
+                                id: 11111014,
+                                content: "Puisque tu es {性别2:réveillé|réveillée}, échangeons nos informations.",
+                                voice: "story/1102/111096/1BD0B4BC",
+                                npc: 111110,
+                                options: [
+                                    {
+                                        id: 11111015,
+                                        content: "<I>Échanger des informations sur Fulvis</>",
+                                        voice: "story/1102/111096/1BD0B4E6",
+                                        next: 11111016,
+                                    },
+                                    {
+                                        id: 11111024,
+                                        content: "<I>Échanger des informations sur le Catalyseur</>",
+                                        voice: "story/1102/111096/1BD0B660",
+                                        next: 11111025,
+                                    },
+                                    {
+                                        id: 11111054,
+                                        content: "<I>Échanger des informations sur Arcano</>",
+                                        voice: "story/1102/111096/1BD0BB4C",
+                                        next: 11111055,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11111016,
+                                content:
+                                    "Une chose est certaine : Fulvis est déjà arrivé dans la région de Flagson. Il a quitté le quartier général de la Légion il y a quatre jours. Depuis, plus aucune trace de lui.",
+                                voice: "story/1102/111096/1BD0B510",
+                                npc: 111127,
+                                next: 11111017,
+                            },
+                            {
+                                id: 11111025,
+                                content: "Que sais-tu du Catalyseur ?",
+                                voice: "story/1102/111096/1BD0B68A",
+                                npc: 111127,
+                                next: 11111026,
+                            },
+                            {
+                                id: 11111055,
+                                content: "Quel est ton avis sur Arcano ?",
+                                voice: "story/1102/111096/1BD0BB76",
+                                npc: 111127,
+                                next: 11111056,
+                            },
+                            {
+                                id: 11111017,
+                                content:
+                                    "D’après les informations que le commandant Avar m’a confiées avant sa mort, il y a de fortes chances qu’il ait prévu de se rendre dans les Montagnes d’Arcano.",
+                                voice: "story/1102/111096/1BD0B53A",
+                                npc: 111127,
+                                next: 11111018,
+                            },
+                            {
+                                id: 11111026,
+                                content: "Du quoi ?",
+                                voice: "story/1102/111096/1BD0B6B4",
+                                npc: 111110,
+                                next: 11111027,
+                            },
+                            {
+                                id: 11111056,
+                                content: "J’ai du mal à croire que cet endroit fasse partie de l’Empire.",
+                                voice: "story/1102/111096/1BD0BBA0",
+                                npc: 111110,
+                                next: 11111057,
+                            },
+                            {
+                                id: 11111018,
+                                content:
+                                    "Quelle coïncidence. Il y a sept jours, j’ai capturé un espion envoyé par Fulvis pour m’éliminer. Je lui ai entaillé les bras. Puis les jambes. Encore et encore.",
+                                voice: "story/1102/111096/1BD0B564",
+                                npc: 111110,
+                                next: 11111019,
+                            },
+                            {
+                                id: 11111027,
+                                content:
+                                    "Ne fais pas l’innocente. Tu as entendu l’enregistrement de la salle de commande centrale. C’est l’objet que recherche Fulvis.",
+                                voice: "story/1102/111096/1BD0B6DE",
+                                npc: 111127,
+                                next: 11111028,
+                            },
+                            {
+                                id: 11111057,
+                                content:
+                                    "Ici... Personne ne semble accorder la moindre importance aux différences entre les Solariens et les Charons. Les adultes mangent et boivent ensemble à la même table. Les enfants jouent main dans la main.",
+                                voice: "story/1102/111096/1BD0BBCA",
+                                npc: 111110,
+                                next: 11111058,
+                            },
+                            {
+                                id: 11111019,
+                                content:
+                                    "Et lorsqu’il a compris que j’allais lui trancher la gorge, il a fini par parler. Fulvis avait divisé ses hommes en deux groupes et les avait déployés aux abords des Montagnes d’Arcano.",
+                                voice: "story/1102/111096/1BD0B58E",
+                                npc: 111110,
+                                next: 11111020,
+                            },
+                            {
+                                id: 11111028,
+                                content: "Je n’en sais rien. ... Je te dis la vérité.",
+                                voice: "story/1102/111096/1BD0B708",
+                                npc: 111110,
+                                next: 11111029,
+                            },
+                            {
+                                id: 11111058,
+                                content:
+                                    "Personne ne reproche à un enfant Charon d’entrer dans un restaurant réservé aux Solariens. Personne ne lui interdit de toucher les autres avec ses mains soi-disant sales.",
+                                voice: "story/1102/111096/1BD0BBF4",
+                                npc: 111110,
+                                next: 11111059,
+                            },
+                            {
+                                id: 11111020,
+                                content:
+                                    "Je suis donc venue ici avant lui pour l’attendre. Malheureusement... je n’ai pas eu cette chance.",
+                                voice: "story/1102/111096/1BD0B5B8",
+                                npc: 111110,
+                                next: 11111021,
+                            },
+                            {
+                                id: 11111029,
+                                content:
+                                    "À l’époque, ce que Fulvis cherchait ne m’intéressait pas. Je me contentais d’exécuter ses ordres.",
+                                voice: "story/1102/111096/1BD0B732",
+                                npc: 111110,
+                                next: 11111030,
+                            },
+                            {
+                                id: 11111059,
+                                content: "Ce genre de monde... J’ai cessé d’en rêver lorsque j’avais trois ans.",
+                                voice: "story/1102/111096/1BD0BC1E",
+                                npc: 111110,
+                                next: 11111060,
+                            },
+                            {
+                                id: 11111021,
+                                content:
+                                    "Dans ce cas, trois possibilités s’offrent à nous. Premièrement : Fulvis n’est pas encore arrivé. Deuxièmement : il se trouve quelque part dans ces montagnes, mais reste caché hors de la vue des habitants. Troisièmement...",
+                                voice: "story/1102/111096/1BD0B5E2",
+                                npc: 111127,
+                                next: 11111022,
+                            },
+                            {
+                                id: 11111030,
+                                content:
+                                    "Alors laisse-moi t’expliquer. La raison pour laquelle Fulvis est venu dans la région de Flagson, c’est le Catalyseur. Cet objet est la clé d’un projet extrêmement important pour la Légion.",
+                                voice: "story/1102/111096/1BD0B75C",
+                                npc: 111127,
+                                next: 11111031,
+                            },
+                            {
+                                id: 11111060,
+                                content: "... Vous autres Solariens ne pouvez pas comprendre.",
+                                voice: "story/1102/111096/1BD0BC48",
+                                npc: 111110,
+                                next: 11111061,
+                            },
+                            {
+                                id: 11111022,
+                                content: "Les habitants le protègent et le cachent.",
+                                voice: "story/1102/111096/1BD0B60C",
+                                npc: 111110,
+                                next: 11111023,
+                            },
+                            {
+                                id: 11111031,
+                                content:
+                                    "Avant sa mort, le commandant Avar s’était rendu à Arcano. Il avait conclu que le Catalyseur se trouvait probablement entre les mains de la véritable maîtresse de cette ville : cette mystérieuse « Maman Lapin ».",
+                                voice: "story/1102/111096/1BD0B786",
+                                npc: 111127,
+                                next: 11111032,
+                            },
+                            {
+                                id: 11111061,
+                                content: "Le commandant Avar était lui aussi un Charon. Comment as-tu pu lever la main sur lui ?",
+                                voice: "story/1102/111096/1BD0BC72",
+                                npc: 111127,
+                                next: 11111062,
+                            },
+                            {
+                                id: 11111023,
+                                content:
+                                    "... Pourtant, ils n’ont aucune raison de le faire. Fulvis est venu leur voler ce qu’ils possèdent. Ou plus exactement... le Catalyseur.",
+                                voice: "story/1102/111096/1BD0B636",
+                                npc: 111127,
+                                next: 11111014,
+                            },
+                            {
+                                id: 11111032,
+                                content:
+                                    "Il comptait transmettre personnellement ces informations à la commandante Sibylle. Malheureusement, la situation à la Forteresse de Lonza l’a forcé à intervenir contre les Déchus avant d’avoir pu faire son rapport. C’est ainsi que l’information a fini entre les mains de Fulvis.",
+                                voice: "story/1102/111096/1BD0B7B0",
+                                npc: 111127,
+                                next: 11111033,
+                            },
+                            {
+                                id: 11111062,
+                                content:
+                                    "Je me contentais d’exécuter les ordres de Fulvis. Je ne me souciais pas de ce qu’il voulait. Et je n’avais aucune envie de risquer ma vie pour jouer les héroïnes. À l’époque, je n’étais qu’une personne d’une banalité affligeante.",
+                                voice: "story/1102/111096/1BD0BC9C",
+                                npc: 111110,
+                                next: 11111063,
+                            },
+                            {
+                                id: 11111033,
+                                content:
+                                    "Le commandant lui a révélé ces informations pour deux raisons. D’abord, il espérait échanger ces renseignements contre la sécurité de l’équipe d’éclaireurs restée à l’extérieur. Ensuite... il voulait attirer Fulvis jusqu’ici.",
+                                voice: "story/1102/111096/1BD0B7DA",
+                                npc: 111127,
+                                next: 11111034,
+                            },
+                            {
+                                id: 11111063,
+                                content: "Je ne cherche pas à me justifier. Si tu me hais, alors tue-moi.",
+                                voice: "story/1102/111096/1BD0BCC6",
+                                npc: 111110,
+                                next: 11111064,
+                            },
+                            {
+                                id: 11111034,
+                                content:
+                                    "D’après ces informations, Maman Lapin est un Daimon dont la puissance dépasse l’entendement. Aucun avantage ne peut l’acheter, aucune menace ne peut l’intimider. Si la Légion tentait de s’emparer de cet endroit par la force, elle détruirait le Catalyseur ainsi que toute la ville.",
+                                voice: "story/1102/111096/1BD0B804",
+                                npc: 111127,
+                                next: 11111035,
+                            },
+                            {
+                                id: 11111064,
+                                content:
+                                    "Je te l’ai déjà dit. Puisque l’enregistrement a disparu, tu devras rester en vie pour témoigner devant le tribunal.",
+                                voice: "story/1102/111096/1BD0BCF0",
+                                npc: 111127,
+                                next: 11111065,
+                            },
+                            {
+                                id: 11111035,
+                                content:
+                                    "Connaissant la soif de gloire et de prestige de Fulvis, il choisira probablement de venir enquêter lui-même. Peut-être même seul. À ce stade, tu devrais avoir compris.",
+                                voice: "story/1102/111096/1BD0B82E",
+                                npc: 111127,
+                                next: 11111036,
+                            },
+                            {
+                                id: 11111065,
+                                content: "... Hah.",
+                                voice: "story/1102/111096/1BD0BD1A",
+                                npc: 111110,
+                                next: 11111066,
+                            },
+                            {
+                                id: 11111036,
+                                content:
+                                    "... Si je veux tuer Fulvis, c’est l’occasion idéale. S’il est lui aussi dans ces montagnes, il se cache probablement quelque part pour enquêter sur Maman Lapin et le Catalyseur.",
+                                voice: "story/1102/111096/1BD0B858",
+                                npc: 111110,
+                                next: 11111037,
+                            },
+                            {
+                                id: 11111066,
+                                content: "Revenons à notre sujet. Il y a quelque chose d’étrange dans cette ville.",
+                                voice: "story/1102/111096/1BD0BD44",
+                                npc: 111127,
+                                next: 11111067,
+                            },
+                            {
+                                id: 11111037,
+                                content:
+                                    "... Bon. Je ne sais pas où se trouvent Maman Lapin et le Catalyseur. Mais je peux au moins éliminer une hypothèse.",
+                                voice: "story/1102/111096/1BD0B882",
+                                npc: 111110,
+                                next: 11111038,
+                            },
+                            {
+                                id: 11111067,
+                                content:
+                                    "Que je sois réellement Victor ou non importe peu. Sur ce point, je partage ton avis. Cet endroit ne ressemble pas à l’Empire.",
+                                voice: "story/1102/111096/1BD0BD6E",
+                                npc: 111127,
+                                next: 11111068,
+                            },
+                            {
+                                id: 11111038,
+                                content: "Aucune idée. C’était hier. Je suis partie avant la fin pour aller vérifier quelque chose.",
+                                voice: "story/1102/111096/1BD0B8AC",
+                                npc: 111110,
+                                next: 11111039,
+                            },
+                            {
+                                id: 11111068,
+                                content:
+                                    "Daphne m’a raconté récemment un conte devenu très populaire. Celui d’une jeune fille qui découvre un autre monde en passant par un terrier de lapin au cœur de la forêt.",
+                                voice: "story/1102/111096/1BD0BD98",
+                                npc: 111127,
+                                next: 11111069,
+                            },
+                            {
+                                id: 11111039,
+                                content: "Tu es allée à l’Étang du Repos hier soir ?",
+                                voice: "story/1102/111096/1BD0B8D6",
+                                npc: 111127,
+                                next: 11111040,
+                            },
+                            {
+                                id: 11111069,
+                                content: "Tu crois que nous sommes dans un autre monde ?",
+                                voice: "story/1102/111096/1BD0BDC2",
+                                npc: 111110,
+                                next: 11111070,
+                            },
+                            {
+                                id: 11111040,
+                                content: "Tu as deviné.",
+                                voice: "story/1102/111096/1BD0B900",
+                                npc: 111110,
+                                next: 11111041,
+                            },
+                            {
+                                id: 11111070,
+                                content:
+                                    "Non. Ce n’est qu’un conte. Mais ce village me fait penser à ce monde imaginaire. Il ressemble beaucoup au nôtre, tout en étant subtilement différent.",
+                                voice: "story/1102/111096/1BD0BDEC",
+                                npc: 111127,
+                                next: 11111071,
+                            },
+                            {
+                                id: 11111041,
+                                content:
+                                    "Tu n’as jamais été difficile à lire. Tu es meilleure que moi au combat rapproché. Mais tes décisions restent toujours prévisibles.",
+                                voice: "story/1102/111096/1BD0B92A",
+                                npc: 111127,
+                                next: 11111042,
+                            },
+                            {
+                                id: 11111071,
+                                content:
+                                    "La rapidité avec laquelle la ville a été reconstruite après les années de guerre. Son atmosphère paisible, presque sortie d’un conte de fées. Les titres étranges que portent les habitants. Ou encore leur dévotion quasi fanatique envers Maman Lapin...",
+                                voice: "story/1102/111096/1BD0BE16",
+                                npc: 111127,
+                                next: 11111072,
+                            },
+                            {
+                                id: 11111042,
+                                content:
+                                    "Quand tu couvrais notre retraite à la perfection. Quand tu as choisi de suivre Fulvis. Quand tu as levé les armes contre tes anciens camarades pour obéir aux ordres. Et maintenant, quand tu es prête à tout sacrifier pour te venger de lui.",
+                                voice: "story/1102/111096/1BD0B954",
+                                npc: 111127,
+                                next: 11111043,
+                            },
+                            {
+                                id: 11111072,
+                                content: "Tout cela donne à cette ville quelque chose de profondément étrange.",
+                                voice: "story/1102/111096/1BD0BE40",
+                                npc: 111127,
+                                next: 11111014,
+                            },
+                            {
+                                id: 11111043,
+                                content:
+                                    "Mmh. Tu me l’avais déjà dit à l’époque. Que j’étais facile à comprendre. C’est aussi pour ça que je suis toujours restée deuxième à l’École Militaire Impériale.",
+                                voice: "story/1102/111096/1BD0B97E",
+                                npc: 111110,
+                                next: 11111044,
+                            },
+                            {
+                                id: 11111044,
+                                content: "... Enfin. Repenser à tout cela ne sert plus à rien.",
+                                voice: "story/1102/111096/1BD0B9A8",
+                                npc: 111110,
+                                next: 11111045,
+                            },
+                            {
+                                id: 11111045,
+                                content:
+                                    "Quoi qu’il en soit, je suis allée inspecter ce bâtiment qu’ils appellent l’Étang du Repos. Hier, j’ai remarqué que Justus se montrait particulièrement discret à propos de cet endroit. J’ai donc décidé d’aller voir moi-même.",
+                                voice: "story/1102/111096/1BD0B9D2",
+                                npc: 111110,
+                                next: 11111046,
+                            },
+                            {
+                                id: 11111046,
+                                content: "Mais Fulvis ne s’y cachait pas. Tu as dû être déçue.",
+                                voice: "story/1102/111096/1BD0B9FC",
+                                npc: 111127,
+                                next: 11111047,
+                            },
+                            {
+                                id: 11111047,
+                                content:
+                                    "Oui. Il n’y avait personne. Mais s’il fallait vraiment relever quelque chose d’étrange... l’aménagement des lieux ressemblait davantage à celui d’une <H>prison</>.",
+                                voice: "story/1102/111096/1BD0BA26",
+                                npc: 111110,
+                                next: 11111048,
+                            },
+                            {
+                                id: 11111048,
+                                content: "Une prison... ? Cette ville est donc loin d’être aussi paisible qu’elle en a l’air.",
+                                voice: "story/1102/111096/1BD0BA50",
+                                npc: 111127,
+                                next: 11111049,
+                            },
+                            {
+                                id: 11111049,
+                                content: "Mais cela n’a rien à voir avec ce que nous cherchons.",
+                                voice: "story/1102/111096/1BD0BA7A",
+                                npc: 111110,
+                                next: 11111050,
+                            },
+                            {
+                                id: 11111050,
+                                content:
+                                    "Le Catalyseur... J’imagine qu’il faudra attendre la Parade du Paradis de demain. Nous rencontrerons alors cette fameuse Maman Lapin en personne.",
+                                voice: "story/1102/111096/1BD0BAA4",
+                                npc: 111127,
+                                next: 11111051,
+                            },
+                            {
+                                id: 11111051,
+                                content:
+                                    "Nous pourrions aussi arracher quelques réponses au chef du village. Si tu ne veux pas te salir les mains, je peux m’en charger.",
+                                voice: "story/1102/111096/1BD0BACE",
+                                npc: 111110,
+                                next: 11111052,
+                            },
+                            {
+                                id: 11111052,
+                                content: "Un soldat ne devrait jamais recourir à la violence contre des civils désarmés.",
+                                voice: "story/1102/111096/1BD0BAF8",
+                                npc: 111127,
+                                next: 11111053,
+                            },
+                            {
+                                id: 11111053,
+                                content: "... D’accord. Comme tu veux.",
+                                voice: "story/1102/111096/1BD0BB22",
+                                npc: 111110,
+                                next: 11111014,
+                            },
+                            {
+                                id: 11111073,
+                                content: "Voilà à peu près tout ce que nous savons. Pour l’instant, ce n’est pas suffisant.",
+                                voice: "story/1102/111096/1BD0BE6A",
+                                npc: 111127,
+                                next: 11111074,
+                            },
+                            {
+                                id: 11111074,
+                                content:
+                                    "Hier, il restait encore plusieurs endroits que nous n’avons pas encore visités. Allons les inspecter aujourd’hui. Je pense que nous devrions retourner aux ruines du champ de bataille dans la vallée.",
+                                voice: "story/1102/111096/1BD0BE94",
+                                npc: 111110,
+                                next: 11111075,
+                            },
+                            {
+                                id: 11111075,
+                                content:
+                                    "Tu l’as vu toi-même. Il reste là-bas une grande quantité d’équipement de la Légion. Si Fulvis se cache réellement dans ces montagnes, mieux vaut disposer du plus grand nombre d’armes possible.",
+                                voice: "story/1102/111096/1BD0BEBE",
+                                npc: 111110,
+                                next: 11111076,
+                            },
+                            {
+                                id: 11111076,
+                                content: "Oui.",
+                                voice: "story/1102/111096/1BD0BEE8",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110221,
+        quests: [
+            {
+                id: 11022101,
+                name: "Traverser le pont-levis",
+                desc: "Aujourd’hui, vous devez enquêter avec Falsi sur les dernières zones encore inexplorées de la vallée. Commencez par traverser le pont-levis et rendez-vous dans la forêt de l’autre côté.",
+                nodes: [
+                    {
+                        id: "17821958639931120",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11111301,
+                                content:
+                                    "D’après Ada, il devrait y avoir un mécanisme permettant d’abaisser le pont-levis. Ça doit être celui-ci.",
+                                voice: "story/1102/111096/1BD0E3D2",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17821959800092931",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_C6_01】吊桥问题",
+                        dialogues: [
+                            {
+                                id: 11111401,
+                                content: "Il faut maintenir le levier en permanence. Nous allons devoir demander de l’aide à quelqu’un...",
+                                voice: "story/1102/111096/1BD0F43A",
+                                npc: 111127,
+                                next: 11111402,
+                            },
+                            {
+                                id: 11111402,
+                                content:
+                                    "Regarde ces montagnes qui s’étendent à perte de vue. On dirait qu’elles n’ont pas de fin. Les journées paisibles de cet endroit sont tout aussi infinies.",
+                                voice: "story/1102/111096/1BD0F464",
+                                npc: 111171,
+                                next: 11111403,
+                            },
+                            {
+                                id: 11111403,
+                                content:
+                                    "Vous voulez aller voir de l’autre côté, les enfants ? Je peux vous donner un coup de main. À mon âge, je n’ai peut-être plus grand-chose, mais du temps, ça, j’en ai à revendre.",
+                                voice: "story/1102/111096/1BD0F48E",
+                                npc: 111171,
+                                next: 11111404,
+                            },
+                            {
+                                id: 11111404,
+                                content: "Merci.",
+                                voice: "story/1102/111096/1BD0F4B8",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17832561435317176",
+                        type: "TalkNode",
+                        name: "和唱歌艾达对话",
+                        dialogues: [
+                            {
+                                id: 11111202,
+                                content: "La voix d’Ada résonne depuis la maison voisine. Ce doit être chez elle.",
+                                voice: "story/1102/111096/1BD0D394",
+                                next: 11111203,
+                            },
+                            {
+                                id: 11111203,
+                                content: "Tout là-haut dans le ciel...",
+                                voice: "story/1102/111096/1BD0D3BE",
+                                npc: 111001,
+                                speakerName: "Voix d’Ada",
+                                next: 11111204,
+                            },
+                            {
+                                id: 11111204,
+                                content: "Victor. C’est toi, dehors ?",
+                                voice: "story/1102/111096/1BD0D3E8",
+                                npc: 111001,
+                                speakerName: "Voix d’Ada",
+                                next: 11111205,
+                            },
+                            {
+                                id: 11111205,
+                                content: "... Oui. Nous allions faire un tour dans le village.",
+                                voice: "story/1102/111096/1BD0D412",
+                                npc: 111127,
+                                next: 11111206,
+                            },
+                            {
+                                id: 11111206,
+                                content: "Mmh. Fais attention à toi. Et rentre tôt à la maison.",
+                                voice: "story/1102/111096/1BD0D43C",
+                                npc: 111001,
+                                speakerName: "Voix d’Ada",
+                                next: 11111207,
+                            },
+                            {
+                                id: 11111207,
+                                content: "Tout le monde au Paradis... t’attend.",
+                                voice: "story/1102/111096/1BD0D466",
+                                npc: 111001,
+                                speakerName: "Voix d’Ada",
+                                next: 11111208,
+                            },
+                            {
+                                id: 11111208,
+                                content:
+                                    "<I>Étrange. Ada n’a même pas essayé de se joindre à nous aujourd’hui... Peut-être qu’elle est encore fatiguée de toutes les activités d’hier.</>",
+                                voice: "story/1102/111096/1BD0D490",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1783433088942130",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11111601,
+                                content: "C’est... un dirigeable de la Légion ?!",
+                                voice: "story/1102/111096/1BD1150A",
+                                npc: 111110,
+                                next: 11111602,
+                            },
+                            {
+                                id: 11111602,
+                                content: "Probablement l’épave d’un appareil écrasé il y a plusieurs années. Allons voir de plus près.",
+                                voice: "story/1102/111096/1BD11534",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1783433088942134",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_C6_02】调查飞艇",
+                        dialogues: [
+                            {
+                                id: 11111901,
+                                content:
+                                    "Il y a un chemin dégagé à travers les débris. Tu crois qu’un survivant du crash est parvenu à s’échapper ?",
+                                voice: "story/1102/111096/1BD14642",
+                                npc: 111110,
+                                next: 11111902,
+                            },
+                            {
+                                id: 11111902,
+                                content: "Ou bien les habitants sont venus inspecter les lieux après la guerre et ont dégagé le passage.",
+                                voice: "story/1102/111096/1BD1466C",
+                                npc: 111127,
+                                next: 11111903,
+                            },
+                            {
+                                id: 11111903,
+                                content:
+                                    "Qui irait perdre son temps à fouiller une épave militaire... Ah. Quoique. Il y a bien dans ce village une certaine idiote aussi louche que curieuse, avec beaucoup trop de temps libre.",
+                                voice: "story/1102/111096/1BD14696",
+                                npc: 111110,
+                                next: 11111904,
+                            },
+                            {
+                                id: 11111904,
+                                content:
+                                    "... Non. Elle n’est pas idiote. Il ne faut pas se laisser tromper par les apparences. Je l’ai vue tuer quelqu’un.",
+                                voice: "story/1102/111096/1BD146C0",
+                                npc: 111110,
+                                next: 11111905,
+                            },
+                            {
+                                id: 11111905,
+                                content:
+                                    "Il est encore trop tôt pour tirer des conclusions. Cherchons d’autres indices dans les environs. En tant que soldats de la Légion, nous avons le devoir de comprendre ce qui est arrivé aux survivants de l’époque.",
+                                voice: "story/1102/111096/1BD146EA",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1783433088959231",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["1783433088960238"],
+                        dialogues: [
+                            {
+                                id: 11112301,
+                                content:
+                                    "Nous pouvons désormais reconstituer grossièrement ce qui s’est passé. Quelqu’un a survécu au crash du dirigeable, puis a rencontré ici des soldats d’Élysium.",
+                                voice: "story/1102/111096/1BD187E2",
+                                npc: 111110,
+                                next: 11112302,
+                            },
+                            {
+                                id: 11112302,
+                                content:
+                                    "Oui. Si tel est le cas, après l’affrontement avec les soldats de l’Église Élyséenne, un soldat impérial aurait probablement choisi de...",
+                                voice: "story/1102/111096/1BD1880C",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1783433088960238",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17850542973483343378"],
+                        dialogues: [
+                            {
+                                id: 11112309,
+                                content: "Il a probablement battu en retraite dans cette direction.",
+                                voice: "story/1102/111096/1BD18932",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17850542973483343378",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11112401,
+                                content:
+                                    "Le terrain devient plus dégagé devant nous. Il sera difficile d’y semer d’éventuels poursuivants. Allons prendre de la hauteur et examinons les alentours.",
+                                voice: "story/1102/111096/1BD1984A",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17850576730676670317",
+                        type: "TalkNode",
+                        name: "那片灌木后面藏着一条小路，过去看看。",
+                        dialogues: [
+                            {
+                                id: 11112601,
+                                content: "Il y a un sentier caché derrière ces buissons. Allons voir où il mène.",
+                                voice: "story/1102/111096/1BD1B91A",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17850577823306671668",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["1783433088982367"],
+                    },
+                    {
+                        id: "1783433088982367",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_C6_05】祷告",
+                        dialogues: [
+                            {
+                                id: 11112801,
+                                content: "Reposez en paix.",
+                                voice: "story/1102/111096/1BD1D9EA",
+                                npc: 111127,
+                                next: 11112802,
+                            },
+                            {
+                                id: 11112802,
+                                content:
+                                    "L’enregistrement mentionne deux personnes, mais il n’y a qu’une seule tombe. Puisque quelqu’un est revenu ici pour l’ériger, ce commandant a probablement survécu à la guerre d’il y a quatre ans.",
+                                voice: "story/1102/111096/1BD1DA14",
+                                npc: 111110,
+                                next: 11112803,
+                            },
+                            {
+                                id: 11112803,
+                                content:
+                                    "Entre cet enregistrement et les rapports de la Légion affirmant qu’Arcano a été entièrement rasée, les combats qui ont eu lieu ici ont sans doute été bien plus terribles que nous l’imaginions.",
+                                voice: "story/1102/111096/1BD1DA3E",
+                                npc: 111110,
+                                next: 11112804,
+                            },
+                            {
+                                id: 11112804,
+                                content: "Je me demande comment les habitants ont réussi à survivre.",
+                                voice: "story/1102/111096/1BD1DA68",
+                                npc: 111127,
+                                next: 11112805,
+                            },
+                            {
+                                id: 11112805,
+                                content: "Les gens qui vivent dans les montagnes ont souvent leur propre manière de survivre.",
+                                voice: "story/1102/111096/1BD1DA92",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                ],
+                startIds: ["17821958639931120", "17821959800092931", "17832561435317176", "17850576730676670317"],
+            },
+            {
+                id: 11022102,
+                name: "调查山林",
+                desc: "Aujourd’hui, vous devez enquêter avec Falsi sur les dernières zones encore inexplorées de la vallée. Commencez par traverser le pont-levis et rendez-vous dans la forêt de l’autre côté.",
+                nodes: [
+                    {
+                        id: "1783433088942130",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11111601,
+                                content: "C’est... un dirigeable de la Légion ?!",
+                                voice: "story/1102/111096/1BD1150A",
+                                npc: 111110,
+                                next: 11111602,
+                            },
+                            {
+                                id: 11111602,
+                                content: "Probablement l’épave d’un appareil écrasé il y a plusieurs années. Allons voir de plus près.",
+                                voice: "story/1102/111096/1BD11534",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1783433088942134",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_C6_02】调查飞艇",
+                        dialogues: [
+                            {
+                                id: 11111901,
+                                content:
+                                    "Il y a un chemin dégagé à travers les débris. Tu crois qu’un survivant du crash est parvenu à s’échapper ?",
+                                voice: "story/1102/111096/1BD14642",
+                                npc: 111110,
+                                next: 11111902,
+                            },
+                            {
+                                id: 11111902,
+                                content: "Ou bien les habitants sont venus inspecter les lieux après la guerre et ont dégagé le passage.",
+                                voice: "story/1102/111096/1BD1466C",
+                                npc: 111127,
+                                next: 11111903,
+                            },
+                            {
+                                id: 11111903,
+                                content:
+                                    "Qui irait perdre son temps à fouiller une épave militaire... Ah. Quoique. Il y a bien dans ce village une certaine idiote aussi louche que curieuse, avec beaucoup trop de temps libre.",
+                                voice: "story/1102/111096/1BD14696",
+                                npc: 111110,
+                                next: 11111904,
+                            },
+                            {
+                                id: 11111904,
+                                content:
+                                    "... Non. Elle n’est pas idiote. Il ne faut pas se laisser tromper par les apparences. Je l’ai vue tuer quelqu’un.",
+                                voice: "story/1102/111096/1BD146C0",
+                                npc: 111110,
+                                next: 11111905,
+                            },
+                            {
+                                id: 11111905,
+                                content:
+                                    "Il est encore trop tôt pour tirer des conclusions. Cherchons d’autres indices dans les environs. En tant que soldats de la Légion, nous avons le devoir de comprendre ce qui est arrivé aux survivants de l’époque.",
+                                voice: "story/1102/111096/1BD146EA",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1783433088959231",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["1783433088960238"],
+                        dialogues: [
+                            {
+                                id: 11112301,
+                                content:
+                                    "Nous pouvons désormais reconstituer grossièrement ce qui s’est passé. Quelqu’un a survécu au crash du dirigeable, puis a rencontré ici des soldats d’Élysium.",
+                                voice: "story/1102/111096/1BD187E2",
+                                npc: 111110,
+                                next: 11112302,
+                            },
+                            {
+                                id: 11112302,
+                                content:
+                                    "Oui. Si tel est le cas, après l’affrontement avec les soldats de l’Église Élyséenne, un soldat impérial aurait probablement choisi de...",
+                                voice: "story/1102/111096/1BD1880C",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1783433088960238",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17850542973483343378"],
+                        dialogues: [
+                            {
+                                id: 11112309,
+                                content: "Il a probablement battu en retraite dans cette direction.",
+                                voice: "story/1102/111096/1BD18932",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17850542973483343378",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11112401,
+                                content:
+                                    "Le terrain devient plus dégagé devant nous. Il sera difficile d’y semer d’éventuels poursuivants. Allons prendre de la hauteur et examinons les alentours.",
+                                voice: "story/1102/111096/1BD1984A",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17850576730676670317",
+                        type: "TalkNode",
+                        name: "那片灌木后面藏着一条小路，过去看看。",
+                        dialogues: [
+                            {
+                                id: 11112601,
+                                content: "Il y a un sentier caché derrière ces buissons. Allons voir où il mène.",
+                                voice: "story/1102/111096/1BD1B91A",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17850577823306671668",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["1783433088982367"],
+                    },
+                    {
+                        id: "1783433088982367",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_C6_05】祷告",
+                        dialogues: [
+                            {
+                                id: 11112801,
+                                content: "Reposez en paix.",
+                                voice: "story/1102/111096/1BD1D9EA",
+                                npc: 111127,
+                                next: 11112802,
+                            },
+                            {
+                                id: 11112802,
+                                content:
+                                    "L’enregistrement mentionne deux personnes, mais il n’y a qu’une seule tombe. Puisque quelqu’un est revenu ici pour l’ériger, ce commandant a probablement survécu à la guerre d’il y a quatre ans.",
+                                voice: "story/1102/111096/1BD1DA14",
+                                npc: 111110,
+                                next: 11112803,
+                            },
+                            {
+                                id: 11112803,
+                                content:
+                                    "Entre cet enregistrement et les rapports de la Légion affirmant qu’Arcano a été entièrement rasée, les combats qui ont eu lieu ici ont sans doute été bien plus terribles que nous l’imaginions.",
+                                voice: "story/1102/111096/1BD1DA3E",
+                                npc: 111110,
+                                next: 11112804,
+                            },
+                            {
+                                id: 11112804,
+                                content: "Je me demande comment les habitants ont réussi à survivre.",
+                                voice: "story/1102/111096/1BD1DA68",
+                                npc: 111127,
+                                next: 11112805,
+                            },
+                            {
+                                id: 11112805,
+                                content: "Les gens qui vivent dans les montagnes ont souvent leur propre manière de survivre.",
+                                voice: "story/1102/111096/1BD1DA92",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11022103,
+                name: "Traverser le pont-levis",
+                desc: "Aujourd’hui, vous devez enquêter avec Falsi sur les dernières zones encore inexplorées de la vallée. Commencez par traverser le pont-levis et rendez-vous dans la forêt de l’autre côté.",
+            },
+            {
+                id: 11022104,
+                name: "Traverser le pont-levis",
+                desc: "Aujourd’hui, vous devez enquêter avec Falsi sur les dernières zones encore inexplorées de la vallée. Commencez par traverser le pont-levis et rendez-vous dans la forêt de l’autre côté.",
+            },
+            {
+                id: 11022105,
+                name: "Traverser le pont-levis",
+                desc: "Aujourd’hui, vous devez enquêter avec Falsi sur les dernières zones encore inexplorées de la vallée. Commencez par traverser le pont-levis et rendez-vous dans la forêt de l’autre côté.",
+            },
+        ],
+    },
+    {
+        id: 110222,
+        quests: [
+            {
+                id: 11022201,
+                name: "Chercher des provisions",
+                desc: "Pour affronter Fulvis qui se cache dans l’ombre, vous devez récupérer quelques ressources. Rendez-vous sur l’ancien champ de bataille et cherchez tout ce qui pourrait encore vous être utile.",
+                nodes: [
+                    {
+                        id: "17822716431658133",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11113001,
+                                content: "Cela devrait suffire. Falsi, de ton côté...",
+                                voice: "story/1102/111096/1BD1FABA",
+                                npc: 111127,
+                                next: 11113002,
+                            },
+                            {
+                                id: 11113002,
+                                content: "Falsi !",
+                                voice: "story/1102/111096/1BD1FAE4",
+                                npc: 111127,
+                                next: 11113003,
+                            },
+                            {
+                                id: 11113003,
+                                content: "Réveille-toi. Hé, Falsi...",
+                                voice: "story/1102/111096/1BD1FB0E",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11022202,
+                name: "Fuir la zone d’explosion",
+                desc: "La Forteresse de Lonza, entièrement tombée aux mains des Narvals, vient soudainement d’exploser pour une raison inconnue. Quittez d’abord les lieux et retrouvez vos camarades pour comprendre ce qui s’est passé.",
+                nodes: [
+                    {
+                        id: "17872811041401471",
+                        type: "TalkNode",
+                        name: "咳……龙莎要塞为什么会突然爆炸！“一角鲸”小队不是已经完全控制这里了吗？",
+                        next: ["17872815199363224"],
+                        dialogues: [
+                            {
+                                id: 11113101,
+                                content:
+                                    "<I>Kof...</> Pourquoi la Forteresse de Lonza est-elle en train d’exploser ? L’escouade des Narvals n’était-elle pas censée avoir totalement sécurisé la zone ?",
+                                voice: "story/1102/111096/1BD20B22",
+                                npc: 111110,
+                                next: 11113102,
+                            },
+                            {
+                                id: 11113102,
+                                content: "Merde... Même le communicateur ne capte plus rien...",
+                                voice: "story/1102/111096/1BD20B4C",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17872815199363224",
+                        type: "TalkNode",
+                        name: "（爆炸还在继续，得快点逃出去！）",
+                        next: ["17872814200922459", "17822886801162827"],
+                        dialogues: [
+                            {
+                                id: 11113201,
+                                content: "<I>Les explosions continuent. Il faut sortir d’ici au plus vite !</>",
+                                voice: "story/1102/111096/1BD21B8A",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17872814200922459",
+                        type: "TalkNode",
+                        name: "找到了，她在这里！",
+                        dialogues: [
+                            {
+                                id: 11113301,
+                                content: "Je l’ai trouvée ! Elle est ici !",
+                                voice: "story/1102/111096/1BD22BF2",
+                                npc: 111172,
+                                next: 11113302,
+                            },
+                            {
+                                id: 11113302,
+                                content: "... Qu’est-ce que vous faites ?!",
+                                voice: "story/1102/111096/1BD22C1C",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17822886801162827",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_C7_02】一角鲸",
+                        next: ["17834219647431101105", "17822892397504936"],
+                        dialogues: [
+                            {
+                                id: 11113401,
+                                content: "Hah... hah... Kamil... Nous étions pourtant camarades, non ?",
+                                voice: "story/1102/111096/1BD23C5A",
+                                npc: 111111,
+                                next: 11113402,
+                            },
+                            {
+                                id: 11113402,
+                                content: "<I>Kof...</> Quelle plaisanterie...",
+                                voice: "story/1102/111096/1BD23C84",
+                                npc: 111172,
+                                next: 11113403,
+                            },
+                            {
+                                id: 11113403,
+                                content: "Une moins que rien comme toi ose encore se prétendre notre camarade ?",
+                                voice: "story/1102/111096/1BD23CAE",
+                                npc: 111172,
+                                next: 11113404,
+                            },
+                            {
+                                id: 11113404,
+                                content: "Qu’est-ce que tu viens de dire... ?",
+                                voice: "story/1102/111096/1BD23CD8",
+                                npc: 111111,
+                                next: 11113405,
+                            },
+                            {
+                                id: 11113405,
+                                content:
+                                    "C’est la volonté du commandant Fulvis... Vous êtes tous des menaces. Si on vous laisse vivre, vous finirez forcément par trahir.",
+                                voice: "story/1102/111096/1BD23D02",
+                                npc: 111172,
+                                next: 11113406,
+                            },
+                            {
+                                id: 11113406,
+                                content: "Au moins, je n’aurai plus jamais à revoir ces dégoûtantes cornes de démon... Hahaha...",
+                                voice: "story/1102/111096/1BD23D2C",
+                                npc: 111172,
+                                next: 11113407,
+                            },
+                            {
+                                id: 11113407,
+                                content: "... Pourquoi... ?",
+                                voice: "story/1102/111096/1BD23D56",
+                                npc: 111111,
+                                next: 11113408,
+                            },
+                            {
+                                id: 11113408,
+                                content:
+                                    "... Pourquoi... ? J’ai pourtant toujours été loyale envers la Légion... Pourquoi ne me faites-vous pas confiance ?",
+                                voice: "story/1102/111096/1BD23D80",
+                                npc: 111111,
+                                next: 11113409,
+                            },
+                            {
+                                id: 11113409,
+                                content:
+                                    "... Je n’ai jamais désobéi à un seul ordre. Même lorsqu’il fallait s’en prendre aux Charons, j’ai toujours...",
+                                voice: "story/1102/111096/1BD23DAA",
+                                npc: 111111,
+                                next: 11113410,
+                            },
+                            {
+                                id: 11113410,
+                                content: "Elle est blessée ! Rattrapez-la !",
+                                voice: "story/1102/111096/1BD23DD4",
+                                npc: 111172,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17834219647431101105",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11113501,
+                                content: "Tout cela doit être un malentendu...",
+                                voice: "story/1102/111096/1BD24CC2",
+                                npc: 111110,
+                                next: 11113502,
+                            },
+                            {
+                                id: 11113502,
+                                content:
+                                    "C’est parce que je n’ai pas réussi à arrêter {nickname2} dans les égouts... Oui... Ça ne peut être que ça...",
+                                voice: "story/1102/111096/1BD24CEC",
+                                npc: 111110,
+                                next: 11113503,
+                            },
+                            {
+                                id: 11113503,
+                                content: "Ne la laissez pas s’échapper !",
+                                voice: "story/1102/111096/1BD24D16",
+                                npc: 111172,
+                                next: 11113504,
+                            },
+                            {
+                                id: 11113504,
+                                content: "Si je les rattrape maintenant... je pourrai regagner leur confiance !",
+                                voice: "story/1102/111096/1BD24D40",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17822892397504936",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_C7_03】富尔维斯",
+                        next: ["17834228359272193060", "17822901740956196"],
+                        dialogues: [
+                            {
+                                id: 11113601,
+                                content:
+                                    "Commandant ! Je suis désolée. {nickname2} s’est {性别2:échappé|échappée}. Je vais immédiatement rassembler des hommes et...",
+                                voice: "story/1102/111096/1BD25D2A",
+                                npc: 111111,
+                                next: 11113602,
+                            },
+                            {
+                                id: 11113602,
+                                content:
+                                    "Ce n’est rien. J’ai déjà envoyé quelqu’un à sa poursuite. En revanche, toi, comment as-tu réussi à te mettre dans un tel état ?",
+                                voice: "story/1102/111096/1BD25D54",
+                                npc: 111120,
+                                next: 11113603,
+                            },
+                            {
+                                id: 11113603,
+                                content:
+                                    "Je suis tombée sur plusieurs soldats des Narvals qui s’étaient rebellés. Mais ne vous inquiétez pas. Je me suis occupée d’eux.",
+                                voice: "story/1102/111096/1BD25D7E",
+                                npc: 111111,
+                                next: 11113604,
+                            },
+                            {
+                                id: 11113604,
+                                content: "Oh ? Une rébellion ? Tu as bien agi.",
+                                voice: "story/1102/111096/1BD25DA8",
+                                npc: 111120,
+                                next: 11113605,
+                            },
+                            {
+                                id: 11113605,
+                                content: "Quel soulagement... Tout cela n’était qu’un malentendu.",
+                                voice: "story/1102/111096/1BD25DD2",
+                                npc: 111111,
+                                next: 11113606,
+                            },
+                            {
+                                id: 11113606,
+                                content:
+                                    "Héhé. Oui. Tu as toujours bien travaillé. Qu’il s’agisse d’assassiner ces Solariens bornés ou de réprimer les Charons qui tentaient de se rebeller.",
+                                voice: "story/1102/111096/1BD25DFC",
+                                npc: 111120,
+                                next: 11113607,
+                            },
+                            {
+                                id: 11113607,
+                                content: "Tu exécutes parfaitement tous les ordres qu’on te donne. Tu es vraiment une excellente lame.",
+                                voice: "story/1102/111096/1BD25E26",
+                                npc: 111120,
+                                next: 11113608,
+                            },
+                            {
+                                id: 11113608,
+                                content: "C’est mon devoir.",
+                                voice: "story/1102/111096/1BD25E50",
+                                npc: 111111,
+                                next: 11113609,
+                            },
+                            {
+                                id: 11113609,
+                                content:
+                                    "{nickname2} court toujours, et Sibylle est déjà en route vers la Forteresse de Lonza. La situation nous est très défavorable. C’est pourquoi, Falsi, je vais maintenant te confier une mission que toi seule peux accomplir.",
+                                voice: "story/1102/111096/1BD25E7A",
+                                npc: 111120,
+                                next: 11113610,
+                            },
+                            {
+                                id: 11113610,
+                                content: "Compris. Je ne vous décevrai pas.",
+                                voice: "story/1102/111096/1BD25EA4",
+                                npc: 111111,
+                                next: 11113611,
+                            },
+                            {
+                                id: 11113611,
+                                content: "En effet... Tu ne m’as jamais déçue.",
+                                voice: "story/1102/111096/1BD25ECE",
+                                npc: 111120,
+                                next: 11113612,
+                            },
+                            {
+                                id: 11113612,
+                                content: "Alors meurs ici.",
+                                voice: "story/1102/111096/1BD25EF8",
+                                npc: 111120,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17834228359272193060",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11113701,
+                                content: "Urgh... Pour... quoi... ?",
+                                voice: "story/1102/111096/1BD26D92",
+                                npc: 111110,
+                                next: 11113702,
+                            },
+                            {
+                                id: 11113702,
+                                content:
+                                    "Même la meilleure lame finit un jour par rouiller. Lorsqu’elle ne sert plus à rien, il suffit de la jeter.",
+                                voice: "story/1102/111096/1BD26DBC",
+                                npc: 111120,
+                                next: 11113703,
+                            },
+                            {
+                                id: 11113703,
+                                content: "Comman... dant...",
+                                voice: "story/1102/111096/1BD26DE6",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17822901740956196",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17857704156354059"],
+                        dialogues: [
+                            {
+                                id: 11113801,
+                                content:
+                                    "La chaleur de l’explosion a englouti tous mes sens. Seule la douleur déchirante dans ma poitrine maintenait un semblant de conscience. Mon corps me répétait inlassablement une seule chose : Je tombais. Je tombais à une vitesse vertigineuse.",
+                                voice: "story/1102/111096/1BD27DFA",
+                                next: 11113802,
+                            },
+                            {
+                                id: 11113802,
+                                content:
+                                    "Les couloirs, la Forteresse de Lonza... et le monde entier furent réduits en morceaux par l’explosion. Puis nous avons chuté ensemble. Jusqu’aux eaux glaciales et tumultueuses de la rivière.",
+                                voice: "story/1102/111096/1BD27E24",
+                                next: 11113803,
+                            },
+                            {
+                                id: 11113803,
+                                content:
+                                    "Quelle stupidité... Une proie emportée dans les airs par un rapace avait fini par croire qu’elle possédait elle aussi le droit de voler...",
+                                voice: "story/1102/111096/1BD27E4E",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17857704156354059",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11113804,
+                                content: "Falsi... Falsi. Falsi !",
+                                voice: "story/1102/111096/1BD27E78",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11022203,
+                name: "Parler à Falsi",
+                desc: "Falsi reprend connaissance. Parlez-lui et vérifiez l’état de ses blessures.",
+                nodes: [
+                    {
+                        id: "178236949314315153426",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_C7_04】法露茜醒来",
+                        dialogues: [
+                            {
+                                id: 11113901,
+                                content: "Falsi ! Falsi !",
+                                voice: "story/1102/111096/1BD28E62",
+                                npc: 111127,
+                                next: 11113902,
+                            },
+                            {
+                                id: 11113902,
+                                content: "Hah... Hah...",
+                                voice: "story/1102/111096/1BD28E8C",
+                                npc: 111110,
+                                next: 11113903,
+                            },
+                            {
+                                id: 11113903,
+                                content: "Je vais bien. J’ai simplement marché sur une grenade qui n’avait pas explosé.",
+                                voice: "story/1102/111096/1BD28EB6",
+                                npc: 111110,
+                            },
+                            {
+                                id: 11114001,
+                                content:
+                                    "Une grenade spécialisée TS-200A. Leur puissance explosive est limitée, mais les substances toxiques qu’elles contiennent provoquent une défaillance des organes chez tous les êtres vivants exposés.",
+                                voice: "story/1102/111096/1BD29ECA",
+                                npc: 111110,
+                                next: 11114002,
+                            },
+                            {
+                                id: 11114002,
+                                content:
+                                    "Le lac voisin a probablement été contaminé par ces grenades. C’est ce qui l’a transformé en ce qu’il est aujourd’hui.",
+                                voice: "story/1102/111096/1BD29EF4",
+                                npc: 111110,
+                                next: 11114003,
+                            },
+                            {
+                                id: 11114003,
+                                content: "Des substances toxiques ? Tu vas bien ?",
+                                voice: "story/1102/111096/1BD29F1E",
+                                npc: 111127,
+                                next: 11114004,
+                            },
+                            {
+                                id: 11114004,
+                                content:
+                                    "<I>Kof...</> Je ne vais pas mourir tout de suite. Je dois encore garder cette vie pour tuer Fulvis.",
+                                voice: "story/1102/111096/1BD29F48",
+                                npc: 111110,
+                                next: 11114005,
+                            },
+                            {
+                                id: 11114005,
+                                content: "À ce rythme, tu ne tiendras même pas jusqu’au moment où tu le retrouveras. Alors le combattre...",
+                                voice: "story/1102/111096/1BD29F72",
+                                npc: 111127,
+                                next: 11114006,
+                            },
+                            {
+                                id: 11114006,
+                                content: "Mais tu es là, non ?",
+                                voice: "story/1102/111096/1BD29F9C",
+                                npc: 111110,
+                                next: 11114007,
+                            },
+                            {
+                                id: 11114007,
+                                content:
+                                    "Tu m’aideras à l’attraper. Sinon, certaines preuves capables de faire tomber Fulvis pourraient bien disparaître avec moi dans un coin oublié du monde.",
+                                voice: "story/1102/111096/1BD29FC6",
+                                npc: 111110,
+                                options: [
+                                    {
+                                        id: 11114008,
+                                        content: "<I>Tu es en train de me menacer.</>",
+                                        voice: "story/1102/111096/1BD29FF0",
+                                        next: 11114009,
+                                    },
+                                    {
+                                        id: 11114010,
+                                        content: "<I>Tu te sers de moi.</>",
+                                        voice: "story/1102/111096/1BD2A044",
+                                        next: 11114011,
+                                    },
+                                    {
+                                        id: 11114012,
+                                        content: "<I>Tu ne me fais toujours pas confiance.</>",
+                                        voice: "story/1102/111096/1BD2A098",
+                                        next: 11114013,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11114009,
+                                content:
+                                    "Peut-être. Après tout, nous sommes ennemis depuis longtemps. Alors une menace de plus ou de moins...",
+                                voice: "story/1102/111096/1BD2A01A",
+                                npc: 111110,
+                                next: 11114014,
+                            },
+                            {
+                                id: 11114011,
+                                content: "Et toi ? Tu ne te sers pas de moi pour atteindre Fulvis ?",
+                                voice: "story/1102/111096/1BD2A06E",
+                                npc: 111110,
+                                next: 11114014,
+                            },
+                            {
+                                id: 11114013,
+                                content: "Personne n’est capable d’accorder une confiance inconditionnelle. Toi non plus.",
+                                voice: "story/1102/111096/1BD2A0C2",
+                                npc: 111110,
+                                next: 11114014,
+                            },
+                            {
+                                id: 11114014,
+                                content:
+                                    "C’est simplement une manière d’ajouter un peu plus de poids sur la balance de nos intérêts respectifs.",
+                                voice: "story/1102/111096/1BD2A0EC",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11022204,
+                name: "Traverser le pont-levis",
+                desc: "Aujourd’hui, vous devez enquêter avec Falsi sur les dernières zones encore inexplorées de la vallée. Commencez par traverser le pont-levis et rendez-vous dans la forêt de l’autre côté.",
+            },
+            {
+                id: 11022205,
+                name: "Traverser le pont-levis",
+                desc: "Aujourd’hui, vous devez enquêter avec Falsi sur les dernières zones encore inexplorées de la vallée. Commencez par traverser le pont-levis et rendez-vous dans la forêt de l’autre côté.",
+            },
+            {
+                id: 11022206,
+                name: "Traverser le pont-levis",
+                desc: "Aujourd’hui, vous devez enquêter avec Falsi sur les dernières zones encore inexplorées de la vallée. Commencez par traverser le pont-levis et rendez-vous dans la forêt de l’autre côté.",
+            },
+        ],
+    },
+    {
+        id: 110231,
+        quests: [
+            {
+                id: 11023101,
+                name: "Poursuivre l’enquête",
+                desc: "Aujourd’hui, Falsi et vous devez enquêter sur les dernières zones encore inexplorées de la vallée. Pour l’instant, allez voir ailleurs.",
+                nodes: [
+                    {
+                        id: "178126927924727938653",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107001,
+                        pos: [-18323, -79876],
+                        dialogues: [
+                            {
+                                id: 11114101,
+                                content: "Il se fait tard. Rentrons au village.",
+                                voice: "story/1102/111096/1BD2AF32",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17811856045637236",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11114201,
+                                content:
+                                    "♪ Qu’il est beau, notre Paradis, notre Paradis, notre Paradis... ♪\n  ♪ Les petits lapins main dans la main, courent en tous sens... ♪",
+                                voice: "story/1102/111096/1BD2BF9A",
+                                speakerName: "Foule en chœur",
+                                next: 11114202,
+                            },
+                            {
+                                id: 11114202,
+                                content: "Qu’est-ce qu’ils sont en train de faire ?",
+                                voice: "story/1102/111096/1BD2BFC4",
+                                npc: 111127,
+                                next: 11114203,
+                            },
+                            {
+                                id: 11114203,
+                                content: "Victor, viens vite. La Parade du Paradis va bientôt commencer.",
+                                voice: "story/1102/111096/1BD2BFEE",
+                                npc: 111125,
+                                next: 11114204,
+                            },
+                            {
+                                id: 11114204,
+                                content: "Ça tombe bien. Avec vous deux, nous avons enfin le nombre de participants nécessaire.",
+                                voice: "story/1102/111096/1BD2C018",
+                                npc: 111125,
+                                next: 11114205,
+                            },
+                            {
+                                id: 11114205,
+                                content: "Un jeu qui permet au Paradis de fonctionner selon les règles et qui rend chacun plus heureux.",
+                                voice: "story/1102/111096/1BD2C042",
+                                npc: 111125,
+                                next: 11114206,
+                            },
+                            {
+                                id: 11114206,
+                                content: "Des règles ?",
+                                voice: "story/1102/111096/1BD2C06C",
+                                npc: 111127,
+                                next: 11114207,
+                            },
+                            {
+                                id: 11114207,
+                                content:
+                                    "Oui. Tous les jeux ont des règles. Prenons l’exemple le plus simple : pierre, feuille, ciseaux. La pierre bat les ciseaux, la feuille bat la pierre et les ciseaux battent la feuille.",
+                                voice: "story/1102/111096/1BD2C096",
+                                npc: 111125,
+                                next: 11114208,
+                            },
+                            {
+                                id: 11114208,
+                                content:
+                                    "Si quelqu’un décide d’ignorer les règles et affirme que les ciseaux battent la pierre, alors plus aucun jeu ne peut exister. <H>L’important n’est pas de savoir quelles sont les règles, mais de les respecter.</>",
+                                voice: "story/1102/111096/1BD2C0C0",
+                                npc: 111125,
+                                next: 11114209,
+                            },
+                            {
+                                id: 11114209,
+                                content: "...",
+                                voice: "story/1102/111096/1BD2C0EA",
+                                npc: 111110,
+                                next: 11114210,
+                            },
+                            {
+                                id: 11114210,
+                                content: "Vous pouvez jouer sans moi.",
+                                voice: "story/1102/111096/1BD2C114",
+                                npc: 111110,
+                                next: 11114211,
+                            },
+                            {
+                                id: 11114211,
+                                content: "Non, mademoiselle.",
+                                voice: "story/1102/111096/1BD2C13E",
+                                npc: 111125,
+                                next: 11114212,
+                            },
+                            {
+                                id: 11114212,
+                                content:
+                                    "Vous êtes notre invitée. Un jeu n’est amusant que lorsque tout le monde y participe. <W>Vous n’avez pas le droit de refuser.</>",
+                                voice: "story/1102/111096/1BD2C168",
+                                npc: 111125,
+                                next: 11114213,
+                            },
+                            {
+                                id: 11114213,
+                                content:
+                                    "Ne vous inquiétez pas. C’est un jeu très simple et très agréable. Lisez d’abord les règles, puis nous commencerons.",
+                                voice: "story/1102/111096/1BD2C192",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17811943098016146066",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17811942282405126760"],
+                        dialogues: [
+                            {
+                                id: 11114401,
+                                content: "Par ici, par ici ! Je vous ai gardé des places !",
+                                voice: "story/1102/111096/1BD2E06A",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17811942282405126760",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178124837273110287446"],
+                        dialogues: [
+                            {
+                                id: 11114402,
+                                content:
+                                    "Un instant. Puisque c’est votre première visite au Paradis, mademoiselle Falsi, votre place est plutôt de ce côté-ci.",
+                                voice: "story/1102/111096/1BD2E094",
+                                npc: 111125,
+                                next: 11114403,
+                            },
+                            {
+                                id: 11114403,
+                                content: "Peu importe.",
+                                voice: "story/1102/111096/1BD2E0BE",
+                                npc: 111110,
+                                next: 11114404,
+                            },
+                            {
+                                id: 11114404,
+                                content: "Hein ? Euh... d’accord... Alors petit chat, essaie de ne pas trop penser à nous~",
+                                voice: "story/1102/111096/1BD2E0E8",
+                                npc: 111001,
+                                next: 11114405,
+                            },
+                            {
+                                id: 11114405,
+                                content:
+                                    "Le but de cette partie est de... <W>trouver le lapin rouge caché parmi les lapins blancs.</> Pour l’expliquer d’une manière qu’Ada comprendra : <W>il faut découvrir lequel d’entre vous a enfreint les règles du Paradis hier.</>",
+                                voice: "story/1102/111096/1BD2E112",
+                                npc: 111125,
+                                next: 11114406,
+                            },
+                            {
+                                id: 11114406,
+                                content: "La partie commence. En partant de ma gauche, chacun parlera à son tour.",
+                                voice: "story/1102/111096/1BD2E13C",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178124837273110287446",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11114601,
+                                content:
+                                    "Même si les propos de « La Roue de la Fortune » restent vagues, ils correspondent parfaitement à son « essence ». En revanche, « La Magicienne », pourriez-vous nous dire où vous étiez hier ? Vous êtes toujours la plus occupée avant la fête, pourtant personne ne vous a vue après le banquet.",
+                                voice: "story/1102/111096/1BD3013A",
+                                npc: 111167,
+                                next: 11114602,
+                            },
+                            {
+                                id: 11114602,
+                                content:
+                                    "Une série de Casse-Noisettes est tombée en panne hier. Je suis restée à l’atelier pour les réparer en prévision de la célébration. Même après le dîner, je travaillais encore. Vous n’avez pas remarqué qu’il y avait davantage de Casse-Noisettes ce matin ? Ce sont ceux que j’ai terminés et installés.",
+                                voice: "story/1102/111096/1BD30164",
+                                npc: 111165,
+                                next: 11114603,
+                            },
+                            {
+                                id: 11114603,
+                                content:
+                                    "C’est vrai. Quand je suis rentrée après avoir fini la lessive, les cloches venaient tout juste de sonner dix heures. En passant devant l’atelier, la lumière était encore allumée. Je me suis tout de suite dit que Morgana travaillait encore.",
+                                voice: "story/1102/111096/1BD3018E",
+                                npc: 111161,
+                                next: 11114604,
+                            },
+                            {
+                                id: 11114604,
+                                content:
+                                    "À mon tour ! Hum, ce soir c’est la Parade du Paradis, mais j’ai toujours l’impression qu’il reste plein de choses à préparer ! Alors j’ai demandé à « La Justice » de faire une ronde avec moi dans le Paradis.",
+                                voice: "story/1102/111096/1BD301B8",
+                                npc: 111150,
+                                next: 11114605,
+                            },
+                            {
+                                id: 11114605,
+                                content: "Tiens ? Je n’avais même pas remarqué. Où est passé ce bon vieux Justus ?",
+                                voice: "story/1102/111096/1BD301E2",
+                                npc: 111150,
+                                next: 11114606,
+                            },
+                            {
+                                id: 11114606,
+                                content:
+                                    "Maman Lapin l’a appelé pour quelques préparatifs. Bien. Le prochain à parler est Victor. Raconte-nous simplement où tu es allé ces derniers jours et ce que tu as fait. Ne sois pas nerveux, ce n’est qu’un jeu.",
+                                voice: "story/1102/111096/1BD3020C",
+                                npc: 111125,
+                                next: 11114607,
+                            },
+                            {
+                                id: 11114607,
+                                content: "Nous avons simplement exploré les montagnes.",
+                                voice: "story/1102/111096/1BD30236",
+                                npc: 111127,
+                                next: 11114608,
+                            },
+                            {
+                                id: 11114608,
+                                content: "— Vous n’êtes pas allés dans un endroit où vous n’auriez pas dû aller, j’espère ?",
+                                voice: "story/1102/111096/1BD30260",
+                                npc: 111125,
+                                next: 11114609,
+                            },
+                            {
+                                id: 11114609,
+                                content:
+                                    "<I>Nous n’étions pas censés approcher de l’Étang du Repos hier. Justus s’y est rendu lui aussi, mais il n’est pas présent à cette table.</>",
+                                voice: "story/1102/111096/1BD3028A",
+                                npc: 111127,
+                                next: 11114610,
+                            },
+                            {
+                                id: 11114610,
+                                content: "<I>Alors, dans cette partie, je devrais répondre...</>",
+                                voice: "story/1102/111096/1BD302B4",
+                                npc: 111127,
+                                options: [
+                                    {
+                                        id: 11114611,
+                                        content: "<I>Admettre être allé près de l’Étang du Repos</>",
+                                        voice: "story/1102/111096/1BD302DE",
+                                        next: 11114613,
+                                    },
+                                    {
+                                        id: 11114612,
+                                        content: "<I>Nier être allé près de l’Étang du Repos</>",
+                                        voice: "story/1102/111096/1BD30308",
+                                        next: 11114613,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11114613,
+                                content: "<I>Ada a écrit quelque chose dans ma main... « Non »... ?</>",
+                                voice: "story/1102/111096/1BD30332",
+                                npc: 111127,
+                                next: 11114614,
+                            },
+                            {
+                                id: 11114614,
+                                content: "Hm ?",
+                                voice: "story/1102/111096/1BD3035C",
+                                npc: 111125,
+                                options: [
+                                    {
+                                        id: 11114615,
+                                        content: "<I>Nier être allé près de l’Étang du Repos</>",
+                                        voice: "story/1102/111096/1BD30386",
+                                        next: 11114616,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11114616,
+                                content:
+                                    "Non. Hier, Ada et moi avons simplement fait un tour dans le Paradis. Aujourd’hui, nous sommes allés à l’extérieur du village pour voir si cela pouvait m’aider à retrouver quelques souvenirs.",
+                                voice: "story/1102/111096/1BD303B0",
+                                npc: 111127,
+                                next: 11114617,
+                            },
+                            {
+                                id: 11114617,
+                                content: "Héhé. Très bien, alors. Ada, c’est à ton tour.",
+                                voice: "story/1102/111096/1BD303DA",
+                                npc: 111125,
+                                next: 11114618,
+                            },
+                            {
+                                id: 11114618,
+                                content:
+                                    "Yiou ! Après le dîner d’hier, je suis rentrée chez moi et je me suis endormie aussitôt ! Je viens tout juste de me réveiller. Je ne me suis même pas arrêtée pour manger avant de venir !",
+                                voice: "story/1102/111096/1BD30404",
+                                npc: 111001,
+                                next: 11114619,
+                            },
+                            {
+                                id: 11114619,
+                                content: "<I>Ada aussi est en train de mentir... Elle chantait encore chez elle dans la journée.</>",
+                                voice: "story/1102/111096/1BD3042E",
+                                npc: 111127,
+                                next: 11114620,
+                            },
+                            {
+                                id: 11114620,
+                                content:
+                                    "Ah là là... Notre petite Ada devait être épuisée. Quand la partie sera terminée, il faudra que tu manges davantage. Bernard a spécialement demandé qu’on te garde deux belles cuisses de cerf.",
+                                voice: "story/1102/111096/1BD30458",
+                                npc: 111161,
+                                next: 11114621,
+                            },
+                            {
+                                id: 11114621,
+                                content: "Youpi !",
+                                voice: "story/1102/111096/1BD30482",
+                                npc: 111001,
+                                next: 11114622,
+                            },
+                            {
+                                id: 11114622,
+                                content:
+                                    "Pff... À ce rythme, vous allez tous en faire une vraie paresseuse. Ada, à partir de demain, tu te coucheras tôt, tu te lèveras tôt et tu prendras tes repas à heures fixes. Et cesse aussi de traîner partout. Tu viendras chasser avec ton oncle. Compris ?",
+                                voice: "story/1102/111096/1BD304AC",
+                                npc: 111150,
+                                next: 11114623,
+                            },
+                            {
+                                id: 11114623,
+                                content: "Yiou ! Me lever tôt, autant me tuer tout de suite !",
+                                voice: "story/1102/111096/1BD304D6",
+                                npc: 111001,
+                                next: 11114624,
+                            },
+                            {
+                                id: 11114624,
+                                content: "Allons, allons. La partie n’est pas encore terminée. Mademoiselle Falsi, c’est à vous.",
+                                voice: "story/1102/111096/1BD30500",
+                                npc: 111125,
+                                next: 11114625,
+                            },
+                            {
+                                id: 11114625,
+                                content: "Je suis restée avec {nickname2} tout ce temps. Je n’ai rien à ajouter.",
+                                voice: "story/1102/111096/1BD3052A",
+                                npc: 111110,
+                                next: 11114626,
+                            },
+                            {
+                                id: 11114626,
+                                content: "C’est Victor, pas {nickname2}. Faites attention la prochaine fois.",
+                                voice: "story/1102/111096/1BD30554",
+                                npc: 111125,
+                                next: 11114627,
+                            },
+                            {
+                                id: 11114627,
+                                content:
+                                    "Bien. Cette manche est terminée. Nous allons faire une courte pause avant de commencer la seconde.",
+                                voice: "story/1102/111096/1BD3057E",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178125475648217604201",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178125624167118653976"],
+                        dialogues: [
+                            {
+                                id: 11114701,
+                                content: "Ô destinée, accorde-moi une révélation.",
+                                voice: "story/1102/111096/1BD311A2",
+                                npc: 111168,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178125485247417604838",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178125624167118653976"],
+                        dialogues: [
+                            {
+                                id: 11114702,
+                                content: "Mmh... C’est difficile... Victor, dis-moi discrètement qui tu soupçonnes ?",
+                                voice: "story/1102/111096/1BD311CC",
+                                npc: 111162,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178125487864717605326",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178125624167118653976"],
+                        dialogues: [
+                            {
+                                id: 11114703,
+                                content: "Pour le bonheur du Paradis, nous devons trouver le lapin rouge.",
+                                voice: "story/1102/111096/1BD311F6",
+                                npc: 111167,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178125489594017605600",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178125624167118653976"],
+                        dialogues: [
+                            {
+                                id: 11114704,
+                                content: "... Ah ! Hein ? Victor, quelque chose ne va pas ?",
+                                voice: "story/1102/111096/1BD31220",
+                                npc: 111161,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178125491549117605843",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178125624167118653976"],
+                        dialogues: [
+                            {
+                                id: 11114705,
+                                content: "Yiou ! Tant que je suis là, je ne vous laisserai jamais perdre, toi et petit chat~",
+                                voice: "story/1102/111096/1BD3124A",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178125494227517606410",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178125624167118653976"],
+                        dialogues: [
+                            {
+                                id: 11114706,
+                                content: "Ennuyeux.",
+                                voice: "story/1102/111096/1BD31274",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178125624167118653976",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11114801,
+                                content:
+                                    "Après cette première manche, j’imagine que beaucoup d’entre vous sont encore un peu perdus. Mais ne vous inquiétez pas...",
+                                voice: "story/1102/111096/1BD3220A",
+                                npc: 111125,
+                                next: 11114802,
+                            },
+                            {
+                                id: 11114802,
+                                content:
+                                    "Pendant la pause, j’ai reçu le rapport d’enquête de « La Justice ». La règle qui a été enfreinte est la suivante : l’un des participants ici présents s’est rendu hier à l’Étang du Repos sans autorisation. Il est temps de choisir votre principal suspect.",
+                                voice: "story/1102/111096/1BD32234",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178126096830321794247",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178126190350721796997"],
+                        dialogues: [
+                            {
+                                id: 11115001,
+                                content:
+                                    "Tiens, maintenant que j’y pense... Hier soir après le dîner, papi Isaac n’est-il pas parti du côté de l’Étang du Repos ?",
+                                voice: "story/1102/111096/1BD342DA",
+                                npc: 111162,
+                                next: 11115002,
+                            },
+                            {
+                                id: 11115002,
+                                content:
+                                    "Je suis simplement allé me promener de ce côté-là. Je ne suis jamais entré dans l’Étang du Repos, petit Elio. Il ne faut pas accuser les gens sans preuve.",
+                                voice: "story/1102/111096/1BD34304",
+                                npc: 111171,
+                                next: 11115003,
+                            },
+                            {
+                                id: 11115003,
+                                content:
+                                    "Attendez, je voudrais prendre la parole. Teresa, tu es ma meilleure amie, mais il y a quelque chose que je dois dire.",
+                                voice: "story/1102/111096/1BD3432E",
+                                npc: 111165,
+                                next: 11115004,
+                            },
+                            {
+                                id: 11115004,
+                                content:
+                                    "Hier à dix heures, j’étais dehors en train d’installer les Casse-Noisettes pour la fête. Si tu étais réellement passée devant l’atelier à ce moment-là, tu aurais dû me voir en train de régler les jouets.",
+                                voice: "story/1102/111096/1BD34358",
+                                npc: 111165,
+                                next: 11115005,
+                            },
+                            {
+                                id: 11115005,
+                                content:
+                                    "Et non pas te contenter de dire : « La lumière était encore allumée, alors j’ai supposé que Morgana travaillait encore. »",
+                                voice: "story/1102/111096/1BD34382",
+                                npc: 111165,
+                                next: 11115006,
+                            },
+                            {
+                                id: 11115006,
+                                content:
+                                    "Je... Je... Ce n’est pas ça... Peut-être que je me suis trompée... Peut-être qu’il n’était pas dix heures... Peut-être seulement neuf...",
+                                voice: "story/1102/111096/1BD343AC",
+                                npc: 111161,
+                                next: 11115007,
+                            },
+                            {
+                                id: 11115007,
+                                content: "Teresa bafouille rarement d’habitude. Mmh... Que se passe-t-il donc ?",
+                                voice: "story/1102/111096/1BD343D6",
+                                npc: 111166,
+                                next: 11115008,
+                            },
+                            {
+                                id: 11115008,
+                                content:
+                                    "Je... Je ne... Pourquoi... Morgana, j’essayais de t’aider ! Pourquoi te retournes-tu contre moi ? Morgana, réponds-moi !",
+                                voice: "story/1102/111096/1BD34400",
+                                npc: 111161,
+                                next: 11115009,
+                            },
+                            {
+                                id: 11115009,
+                                content: "Du calme, Teresa. Tout cela se fait selon la volonté de Maman Lapin.",
+                                voice: "story/1102/111096/1BD3442A",
+                                npc: 111167,
+                                next: 11115010,
+                            },
+                            {
+                                id: 11115010,
+                                content:
+                                    "Se concentrer sur une seule personne risque de nous entraîner sur une fausse piste. Nous devrions aussi examiner si d’autres personnes peuvent être suspectes.",
+                                voice: "story/1102/111096/1BD34454",
+                                npc: 111167,
+                                next: 11115011,
+                            },
+                            {
+                                id: 11115011,
+                                content:
+                                    "Non... Non... Ce n’est pas moi... Ah, je sais ! Hier soir, cette jeune femme qui accompagne Victor n’est-elle pas partie plus tôt en disant qu’elle ne se sentait pas bien ? Quelqu’un l’a vue ensuite ?",
+                                voice: "story/1102/111096/1BD3447E",
+                                npc: 111161,
+                                next: 11115012,
+                            },
+                            {
+                                id: 11115012,
+                                content:
+                                    "Maintenant que tu le dis... J’ai effectivement vu cette nouvelle venue se diriger vers l’Étang du Repos après avoir quitté la table.",
+                                voice: "story/1102/111096/1BD344A8",
+                                npc: 111171,
+                                next: 11115013,
+                            },
+                            {
+                                id: 11115013,
+                                content: "... Hmpf.",
+                                voice: "story/1102/111096/1BD344D2",
+                                npc: 111110,
+                                next: 11115014,
+                            },
+                            {
+                                id: 11115014,
+                                content: "Peu importe. Je me fiche de gagner ou de perdre. Finissons-en avec cette ridicule réunion.",
+                                voice: "story/1102/111096/1BD344FC",
+                                npc: 111110,
+                                next: 11115015,
+                            },
+                            {
+                                id: 11115015,
+                                content:
+                                    "Quoi qu’il en soit, je suis allée inspecter ce bâtiment qu’ils appellent l’Étang du Repos. Hier, j’ai remarqué que Justus se montrait particulièrement discret à propos de cet endroit. J’ai donc décidé d’aller voir moi-même.",
+                                voice: "story/1102/111096/1BD0B9D2",
+                                npc: 111110,
+                                next: 11115016,
+                            },
+                            {
+                                id: 11115016,
+                                content: "<I>Oui... C’est vrai. Falsi aussi est allée à l’Étang du Repos cette nuit-là...</>",
+                                voice: "story/1102/111096/1BD34550",
+                                npc: 111127,
+                                next: 11115017,
+                            },
+                            {
+                                id: 11115017,
+                                content:
+                                    "La femme aux cheveux bleus ne fait pas partie des vingt-et-un habitants du Paradis. Elle n’a pas à être mêlée au destin des Lapins Blancs.",
+                                voice: "story/1102/111096/1BD3457A",
+                                npc: 111168,
+                                next: 11115018,
+                            },
+                            {
+                                id: 11115018,
+                                content: "Non, Karma. Même les visiteurs doivent respecter les règles du jeu.",
+                                voice: "story/1102/111096/1BD345A4",
+                                npc: 111125,
+                                next: 11115019,
+                            },
+                            {
+                                id: 11115019,
+                                content: "Le temps est écoulé. On dirait que chacun a désormais un suspect en tête.",
+                                voice: "story/1102/111096/1BD345CE",
+                                npc: 111125,
+                                next: 11115020,
+                            },
+                            {
+                                id: 11115020,
+                                content: "Attendez !",
+                                voice: "story/1102/111096/1BD345F8",
+                                npc: 111001,
+                                next: 11115021,
+                            },
+                            {
+                                id: 11115021,
+                                content:
+                                    "Hier soir, Falsi est allée chercher mon Gladiateur Dompteur de Tempêtes ! Maintenant que tu as joué avec toute la journée, il est temps de me le rendre !",
+                                voice: "story/1102/111096/1BD34622",
+                                npc: 111001,
+                                next: 11115022,
+                            },
+                            {
+                                id: 11115022,
+                                content: "... Hein ?",
+                                voice: "story/1102/111096/1BD3464C",
+                                npc: 111110,
+                                next: 11115023,
+                            },
+                            {
+                                id: 11115023,
+                                content:
+                                    "Ne sois pas timide ! Aimer les insectes, c’est tout à fait normal ! J’ai même entendu dire que certaines personnes adorent ces gros insectes volants tout brillants avec deux longues antennes !",
+                                voice: "story/1102/111096/1BD34676",
+                                npc: 111001,
+                                next: 11115024,
+                            },
+                            {
+                                id: 11115024,
+                                content: "... D’accord. Le voilà.",
+                                voice: "story/1102/111096/1BD346A0",
+                                npc: 111110,
+                                next: 11115025,
+                            },
+                            {
+                                id: 11115025,
+                                content:
+                                    "À présent, mademoiselle Falsi a présenté une preuve. Teresa, as-tu quelque chose à présenter de ton côté ?",
+                                voice: "story/1102/111096/1BD346CA",
+                                npc: 111125,
+                                next: 11115026,
+                            },
+                            {
+                                id: 11115026,
+                                content: "Je... Je... Non...",
+                                voice: "story/1102/111096/1BD346F4",
+                                npc: 111161,
+                                next: 11115027,
+                            },
+                            {
+                                id: 11115027,
+                                content: "Très bien. Alors passons au vote.",
+                                voice: "story/1102/111096/1BD3471E",
+                                npc: 111125,
+                                next: 11115028,
+                            },
+                            {
+                                id: 11115028,
+                                content: "L’heure est venue de révéler le destin.",
+                                voice: "story/1102/111096/1BD34748",
+                                npc: 111168,
+                                next: 11115029,
+                            },
+                            {
+                                id: 11115029,
+                                content: "Falsi a joué avec nous hier ! Alors moi, je vote pour Teresa !",
+                                voice: "story/1102/111096/1BD34772",
+                                npc: 111162,
+                                next: 11115030,
+                            },
+                            {
+                                id: 11115030,
+                                content:
+                                    "Teresa paraît très suspecte. Cependant, j’ai également perçu une légère aura de danger autour de mademoiselle Falsi. Je dois encore réfléchir...",
+                                voice: "story/1102/111096/1BD3479C",
+                                npc: 111167,
+                                next: 11115031,
+                            },
+                            {
+                                id: 11115031,
+                                content:
+                                    "<I>D’après la réaction des habitants, ils semblent accorder une importance démesurée à la victoire et à la défaite dans ce jeu. Y aurait-il une sanction pour les perdants... ?</>",
+                                voice: "story/1102/111096/1BD347C6",
+                                npc: 111127,
+                                next: 11115032,
+                            },
+                            {
+                                id: 11115032,
+                                content: "Pour ma part...",
+                                voice: "story/1102/111096/1BD347F0",
+                                npc: 111127,
+                                options: [
+                                    {
+                                        id: 11115033,
+                                        content: "<I>Voter pour Teresa</>",
+                                        voice: "story/1102/111096/1BD3481A",
+                                        next: 11115037,
+                                        impr: [1011, "Benefit", 3],
+                                    },
+                                    {
+                                        id: 11115034,
+                                        content: "<I>Voter pour Falsi</>",
+                                        voice: "story/1102/111096/1BD34844",
+                                        next: 11115037,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                    {
+                                        id: 11115035,
+                                        content: "<I>Voter pour moi-même</>",
+                                        voice: "story/1102/111096/1BD3486E",
+                                        next: 11115037,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                    {
+                                        id: 11115036,
+                                        content: "<I>M’abstenir</>",
+                                        voice: "story/1102/111096/1BD34898",
+                                        next: 11115037,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11115037,
+                                content: "Bien. Le vote est terminé. Il est temps d’annoncer le résultat.",
+                                voice: "story/1102/111096/1BD348C2",
+                                npc: 111125,
+                                next: 11115038,
+                            },
+                            {
+                                id: 11115038,
+                                content: "Ada : une voix. Victor : une voix. Falsi : deux voix. Teresa... cinq voix.",
+                                voice: "story/1102/111096/1BD348EC",
+                                npc: 111125,
+                                next: 11115039,
+                            },
+                            {
+                                id: 11115039,
+                                content:
+                                    "Attendez, attendez ! Pourquoi est-ce que tout le monde vote contre moi ? Morgana, pourquoi tu me fais ça ? Pourquoi ? Avant-hier encore, je t’ai apporté des choux tout frais !",
+                                voice: "story/1102/111096/1BD34916",
+                                npc: 111161,
+                                next: 11115040,
+                            },
+                            {
+                                id: 11115040,
+                                content: "Bernard ! Quand tu te blesses à la chasse, ce n’est pas toujours moi qui soigne tes bandages ?",
+                                voice: "story/1102/111096/1BD34940",
+                                npc: 111161,
+                                next: 11115041,
+                            },
+                            {
+                                id: 11115041,
+                                content:
+                                    "Et le vin que vous buvez à chaque fête, c’est moi qui le prépare verre après verre ! Comment pouvez-vous me faire ça... ?",
+                                voice: "story/1102/111096/1BD3496A",
+                                npc: 111161,
+                                next: 11115042,
+                            },
+                            {
+                                id: 11115042,
+                                content: "Teresa. Une dernière chance. Où étais-tu hier soir à dix heures ? As-tu un témoin ?",
+                                voice: "story/1102/111096/1BD34994",
+                                npc: 111167,
+                                next: 11115043,
+                            },
+                            {
+                                id: 11115043,
+                                content:
+                                    "Je... Je... Un pigeon... Un de mes pigeons s’est envolé... Je suis allée dans la montagne pour le rattraper...",
+                                voice: "story/1102/111096/1BD349BE",
+                                npc: 111161,
+                                next: 11115044,
+                            },
+                            {
+                                id: 11115044,
+                                content: "Je n’ai... aucun témoin...",
+                                voice: "story/1102/111096/1BD349E8",
+                                npc: 111161,
+                                next: 11115045,
+                            },
+                            {
+                                id: 11115045,
+                                content: "Ça suffit. Ce n’est qu’un jeu, non ? Arrêtez donc de vous acharner sur elle. Hier—",
+                                voice: "story/1102/111096/1BD34A12",
+                                npc: 111110,
+                                next: 11115046,
+                            },
+                            {
+                                id: 11115046,
+                                content:
+                                    "Petit chat ! Mon Gladiateur Dompteur de Tempêtes a encore disparu ! C’est toi qui l’as emporté dans ta gueule ?!",
+                                voice: "story/1102/111096/1BD34A3C",
+                                npc: 111001,
+                                next: 11115047,
+                            },
+                            {
+                                id: 11115047,
+                                content: "... ?",
+                                voice: "story/1102/111096/1BD34A66",
+                                npc: 111110,
+                                next: 11115048,
+                            },
+                            {
+                                id: 11115048,
+                                content: "... Il n’est plus nécessaire de poursuivre cet interrogatoire. Emmenez « L’Impératrice ».",
+                                voice: "story/1102/111096/1BD34A90",
+                                npc: 111125,
+                                next: 11115049,
+                            },
+                            {
+                                id: 11115049,
+                                content:
+                                    "Nous nous endormons dans le bassin et renaissons dans les bras bienveillants de Maman Lapin. Puissions-nous nous retrouver à nouveau au Paradis.",
+                                voice: "story/1102/111096/1BD34ABA",
+                                npc: 111167,
+                                next: 11115050,
+                            },
+                            {
+                                id: 11115050,
+                                content: "Puissions-nous nous retrouver à nouveau au Paradis.",
+                                voice: "story/1102/111096/1BD34AE4",
+                                speakerName: "Voix des villageois",
+                                next: 11115051,
+                            },
+                            {
+                                id: 11115051,
+                                content:
+                                    "Non ! Non— ! Je n’ai enfreint aucune règle ! Ce n’est pas moi ! Je ne veux pas aller à l’Étang du Repos !",
+                                voice: "story/1102/111096/1BD34B0E",
+                                npc: 111161,
+                                next: 11115052,
+                            },
+                            {
+                                id: 11115052,
+                                content: "<I>Sa réaction... Qu’est-ce qui se passe ici au juste ?</>",
+                                voice: "story/1102/111096/1BD34B38",
+                                npc: 111127,
+                                next: 11115053,
+                            },
+                            {
+                                id: 11115053,
+                                content: "C’est assez, Teresa. Maman Lapin... est arrivée.",
+                                voice: "story/1102/111096/1BD34B62",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178126190350721796997",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11115201,
+                                voice: "story/1102/111096/1BD363AA",
+                                options: [
+                                    {
+                                        id: 11115202,
+                                        content: "<I>Intervenir</>",
+                                        voice: "story/1102/111096/1BD363D4",
+                                        next: 11115204,
+                                    },
+                                    {
+                                        id: 11115203,
+                                        content: "<I>Observer la situation</>",
+                                        voice: "story/1102/111096/1BD363FE",
+                                        next: 11115204,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11115204,
+                                content:
+                                    "Deuxième règle : il est interdit d’user de violence envers les Lapins Blancs. Mademoiselle Falsi, vous avez enfreint les règles du Paradis.",
+                                voice: "story/1102/111096/1BD36428",
+                                npc: 111125,
+                                next: 11115205,
+                            },
+                            {
+                                id: 11115205,
+                                content: "Justice, emmène également mademoiselle Falsi à l’Étang du Repos.",
+                                voice: "story/1102/111096/1BD36452",
+                                npc: 111125,
+                                next: 11115206,
+                            },
+                            {
+                                id: 11115206,
+                                content: "<I>Kof, kof...</>",
+                                voice: "story/1102/111096/1BD3647C",
+                                npc: 111110,
+                                next: 11115207,
+                            },
+                            {
+                                id: 11115207,
+                                content: "Mademoiselle Falsi, vous êtes déjà blessée. Veillez à ne pas aggraver votre état.",
+                                voice: "story/1102/111096/1BD364A6",
+                                npc: 111125,
+                                next: 11115208,
+                            },
+                            {
+                                id: 11115208,
+                                content:
+                                    "La ferme... Vous prétendiez qu’aucun étranger n’était jamais venu ici ! Vous disiez que personne n’avait jamais vu Fulvis ! Alors qui est ce type ?!",
+                                voice: "story/1102/111096/1BD364D0",
+                                npc: 111110,
+                                next: 11115209,
+                            },
+                            {
+                                id: 11115209,
+                                content:
+                                    "Voici « Le Fou » Joy, un Lapin Blanc du Paradis. Il n’y a aucun « Fulvis » ici. J’imagine que vos blessures sont trop graves, mademoiselle Falsi. Vous êtes victime d’hallucinations.",
+                                voice: "story/1102/111096/1BD364FA",
+                                npc: 111125,
+                                next: 11115210,
+                            },
+                            {
+                                id: 11115210,
+                                content:
+                                    "Tes hallucinations de malheur ! Même réduit en cendres, je reconnaîtrais cette ordure de Fulvis !",
+                                voice: "story/1102/111096/1BD36524",
+                                npc: 111110,
+                                next: 11115211,
+                            },
+                            {
+                                id: 11115211,
+                                content:
+                                    "Ô étrangère accablée de chagrin ! Si me frapper peut te rendre le sourire, alors n’hésite pas ! Car la raison d’être du « Fou » est de transformer la tristesse des gens en joie.",
+                                voice: "story/1102/111096/1BD3654E",
+                                npc: 111128,
+                                next: 11115212,
+                            },
+                            {
+                                id: 11115212,
+                                content: "Ça suffit ! Combien de temps vas-tu encore continuer cette comédie ?!",
+                                voice: "story/1102/111096/1BD36578",
+                                npc: 111110,
+                                next: 11115213,
+                            },
+                            {
+                                id: 11115213,
+                                content:
+                                    "Si la danse de Joy vous a offensée, je vous présente mes excuses en son nom. En revanche, avoir recours à la violence contre Joy, qui fait partie de notre grande famille unie, voilà qui est regrettable.",
+                                voice: "story/1102/111096/1BD365A2",
+                                npc: 111125,
+                                next: 11115214,
+                            },
+                            {
+                                id: 11115214,
+                                content: "Heureusement que Maman Lapin est là.\n C’est bien vrai.\n Joy, tu n’es pas blessé au moins ?",
+                                voice: "story/1102/111096/1BD365CC",
+                                speakerName: "Voix des villageois",
+                                next: 11115215,
+                            },
+                            {
+                                id: 11115215,
+                                content: "<I>Kof... Kof...</> Qu’est-ce qui se passe ici... ?",
+                                voice: "story/1102/111096/1BD365F6",
+                                npc: 111110,
+                                next: 11115216,
+                            },
+                            {
+                                id: 11115216,
+                                content: "Bien. Les fausses notes ont été éliminées. Poursuivons maintenant la célébration !",
+                                voice: "story/1102/111096/1BD36620",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178127103721032264098",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["178127117007732264717"],
+                        dialogues: [
+                            {
+                                id: 11115301,
+                                content:
+                                    "♪ Qu’il est beau, notre Paradis, notre Paradis, notre Paradis... ♪\n ♪ Les petits lapins main dans la main, courent en tous sens... ♪",
+                                voice: "story/1102/111096/1BD37412",
+                                speakerName: "Foule en chœur",
+                            },
+                        ],
+                    },
+                    {
+                        id: "178127119092432265048",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107001,
+                        pos: [-20167, -80407],
+                        next: ["178332436985225003484"],
+                        dialogues: [
+                            {
+                                id: 11115501,
+                                content: "Qu’est-ce que cette mascarade signifie au juste ?",
+                                voice: "story/1102/111096/1BD394E2",
+                                npc: 111127,
+                                next: 11115502,
+                            },
+                            {
+                                id: 11115502,
+                                content:
+                                    "Les personnes qui enfreignent les règles sont emmenées par Maman Lapin à l’Étang du Repos. Ensuite... elles ne reviennent jamais. Alors tant qu’il est encore temps, va vite les sauver !",
+                                voice: "story/1102/111096/1BD3950C",
+                                npc: 111001,
+                                next: 11115503,
+                            },
+                            {
+                                id: 11115503,
+                                content: "<H>Maman Lapin se sert donc des règles du jeu pour tuer les habitants du village ?</>",
+                                voice: "story/1102/111096/1BD39536",
+                                npc: 111127,
+                                next: 11115504,
+                            },
+                            {
+                                id: 11115504,
+                                content: "Je vais distraire les autres pendant ce temps. Profite-en pour te faufiler là-bas !",
+                                voice: "story/1102/111096/1BD39560",
+                                npc: 111001,
+                                next: 11115505,
+                            },
+                            {
+                                id: 11115505,
+                                content: "Pourquoi m’aides-tu ?",
+                                voice: "story/1102/111096/1BD3958A",
+                                npc: 111127,
+                                next: 11115506,
+                            },
+                            {
+                                id: 11115506,
+                                content: "Parce que tu m’as dit que si on ne faisait rien... alors on échouerait une seconde fois.",
+                                voice: "story/1102/111096/1BD395B4",
+                                npc: 111001,
+                                next: 11115507,
+                            },
+                            {
+                                id: 11115507,
+                                content:
+                                    "Moi, j’ai déjà échoué une fois. Il y a trois mois, oncle Avar nous a encouragés à nous opposer à Maman Lapin. Mais je n’ai pas osé... Comme les autres, je suis restée sans rien faire.",
+                                voice: "story/1102/111096/1BD395DE",
+                                npc: 111001,
+                                next: 11115508,
+                            },
+                            {
+                                id: 11115508,
+                                content:
+                                    "Quand j’ai vu Maman Lapin le blesser grièvement sous mes yeux et le faire tomber du haut de la falaise, j’ai eu l’impression que quelque chose me serrait soudainement le cœur.",
+                                voice: "story/1102/111096/1BD39608",
+                                npc: 111001,
+                                next: 11115509,
+                            },
+                            {
+                                id: 11115509,
+                                content:
+                                    "J’ai longtemps cherché comment décrire ce sentiment, mais avec ma tête toute vide, je n’arrivais à trouver aucun mot. Pourtant, après avoir passé ces deux derniers jours avec toi, j’ai l’impression de pouvoir à nouveau le saisir un peu.",
+                                voice: "story/1102/111096/1BD39632",
+                                npc: 111001,
+                                next: 11115510,
+                            },
+                            {
+                                id: 11115510,
+                                content:
+                                    "J’ai passé toute la journée à réfléchir à ce que c’était exactement. Et juste avant le début de la Parade du Paradis, j’ai enfin trouvé la réponse.",
+                                voice: "story/1102/111096/1BD3965C",
+                                npc: 111001,
+                                next: 11115511,
+                            },
+                            {
+                                id: 11115511,
+                                content:
+                                    "Ce que toi et oncle Avar avez essayé de m’enseigner... c’était le courage. Le courage de faire un pas en avant même quand on risque d’échouer. Même quand il faut en payer le prix.",
+                                voice: "story/1102/111096/1BD39686",
+                                npc: 111001,
+                                next: 11115512,
+                            },
+                            {
+                                id: 11115512,
+                                content: "Commandant... Je comprends mieux pourquoi tu as tant pleuré hier quand je t’ai parlé de lui.",
+                                voice: "story/1102/111096/1BD396B0",
+                                npc: 111127,
+                                next: 11115513,
+                            },
+                            {
+                                id: 11115513,
+                                content:
+                                    "Cette fois, je ne veux plus avoir de regrets. Je vais t’aider. Je vais t’aider de toutes mes forces ! Comme oncle Avar croyait en toi, je vais faire de mon mieux pour croire en toi aussi.",
+                                voice: "story/1102/111096/1BD396DA",
+                                npc: 111001,
+                                next: 11115514,
+                            },
+                            {
+                                id: 11115514,
+                                content:
+                                    "Alors si toi aussi tu acceptes de me faire confiance, laisse-moi m’occuper d’ici et va sauver petit chat !",
+                                voice: "story/1102/111096/1BD39704",
+                                npc: 111001,
+                                next: 11115515,
+                            },
+                            {
+                                id: 11115515,
+                                content:
+                                    "Et toi ? S’ils découvrent ce que tu fais, cela ne te fera-t-il pas enfreindre cette règle qui oblige tout le monde à s’aimer ?",
+                                voice: "story/1102/111096/1BD3972E",
+                                npc: 111127,
+                                next: 11115516,
+                            },
+                            {
+                                id: 11115516,
+                                content:
+                                    "Tu peux être parfaitement tranquille. Parce que... pour Maman Lapin, <H>je suis différente.</> Je suis certaine qu’elle ne me punira jamais comme elle punit les autres.",
+                                voice: "story/1102/111096/1BD39758",
+                                npc: 111001,
+                                next: 11115517,
+                            },
+                            {
+                                id: 11115517,
+                                content:
+                                    "... Tu m’as dit que tu voulais quitter cet endroit, n’est-ce pas ? Une fois Falsi sauvée, je t’emmènerai avec nous.",
+                                voice: "story/1102/111096/1BD39782",
+                                npc: 111127,
+                                next: 11115518,
+                            },
+                            {
+                                id: 11115518,
+                                content: "Oui ! Alors promis, juré !",
+                                voice: "story/1102/111096/1BD397AC",
+                                npc: 111001,
+                                next: 11115519,
+                            },
+                            {
+                                id: 11115519,
+                                content: "Tu dois tenir ta promesse... <H>{nickname2}</>.",
+                                voice: "story/1102/111096/1BD397D6",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178127117007732264717",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11115401,
+                                content: "Suis-moi.",
+                                voice: "story/1102/111096/1BD3847A",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178332436985225003484",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11115520,
+                                content:
+                                    "Ne perdons pas de temps ! Prends cette potion magique du chef du village et va sauver petit chat à l’Étang du Repos !",
+                                voice: "story/1102/111096/1BD3A54A",
+                                npc: 111001,
+                                next: 11115521,
+                            },
+                            {
+                                id: 11115521,
+                                content:
+                                    "C’est une catastrophe ! Une catastrophe ! Si Teresa n’est plus là, qui va me préparer mes grandes cuisses de cerf ?!",
+                                voice: "story/1102/111096/1BD3A574",
+                                npc: 111001,
+                                next: 11115522,
+                            },
+                            {
+                                id: 11115522,
+                                content:
+                                    "Héhé. Ada ne changera jamais. Pour elle, rien n’est plus important que manger. Bernard, va chercher le cerf que tu as chassé. Je vais le faire rôtir immédiatement.",
+                                voice: "story/1102/111096/1BD3A59E",
+                                npc: 111125,
+                                next: 11115523,
+                            },
+                            {
+                                id: 11115523,
+                                content:
+                                    "Mon ventre gargouille déjà depuis des heures ! Tout le monde, venez vite vous asseoir ! À table !",
+                                voice: "story/1102/111096/1BD3A5C8",
+                                npc: 111001,
+                                next: 11115524,
+                            },
+                            {
+                                id: 11115524,
+                                content:
+                                    "C’est... un stimulant cardiaque de la Légion ? Pourquoi le chef du village possède-t-il quelque chose comme ça ?",
+                                voice: "story/1102/111096/1BD3A5F2",
+                                npc: 111127,
+                                next: 11115525,
+                            },
+                            {
+                                id: 11115525,
+                                content:
+                                    "Peu importe. Au moins, c’est un produit que je connais. Je n’ai pas à m’inquiéter d’éventuels effets secondaires.",
+                                voice: "story/1102/111096/1BD3A61C",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11023102,
+                name: "Sauver Falsi",
+                desc: "Après avoir réussi à éviter les habitants tout au long du trajet, vous êtes enfin parvenu à entrer dans l’Étang du Repos. Trouvez maintenant un moyen de libérer Falsi.",
+                nodes: [
+                    {
+                        id: "17814401326641052163",
+                        type: "TalkNode",
+                        name: "开车对话节点",
+                        next: ["17814402317571054062"],
+                        dialogues: [
+                            {
+                                id: 11115801,
+                                content: "... Mmh... <I>Kof.</>",
+                                voice: "story/1102/111096/1BD3C61A",
+                                npc: 111110,
+                                next: 11115802,
+                            },
+                            {
+                                id: 11115802,
+                                content: "<I>À en juger par sa voix, Falsi doit se trouver par là...</>",
+                                voice: "story/1102/111096/1BD3C644",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17814402317571054062",
+                        type: "TalkNode",
+                        name: "与法露茜对话节点",
+                        next: ["17814401851231053411", "17814400010461050959", "17814404980191057963"],
+                        dialogues: [
+                            {
+                                id: 11116101,
+                                content: "... Impossible à ouvrir.",
+                                voice: "story/1102/111096/1BD3F752",
+                                npc: 111127,
+                                next: 11116102,
+                            },
+                            {
+                                id: 11116102,
+                                content: "Laisse tomber. J’ai déjà essayé.",
+                                voice: "story/1102/111096/1BD3F77C",
+                                npc: 111110,
+                                next: 11116103,
+                            },
+                            {
+                                id: 11116103,
+                                content: "Va plutôt chercher Fulvis maintenant... Ne t’occupe pas de moi... <I>Kof !</>",
+                                voice: "story/1102/111096/1BD3F7A6",
+                                npc: 111110,
+                                next: 11116104,
+                            },
+                            {
+                                id: 11116104,
+                                content: "Tes blessures se sont aggravées... Recule !",
+                                voice: "story/1102/111096/1BD3F7D0",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17814401851231053411",
+                        type: "TalkNode",
+                        name: "与死亡特蕾莎对话节点",
+                        srId: 107701,
+                        pos: [-5332, -93544],
+                        next: ["17814400010461050959", "17814404980191057963"],
+                        dialogues: [
+                            {
+                                id: 11116001,
+                                content: "...",
+                                voice: "story/1102/111096/1BD3E6EA",
+                                npc: 111194,
+                                next: 11116002,
+                            },
+                            {
+                                id: 11116002,
+                                content: "Madame Teresa ? Vous allez bien ?",
+                                voice: "story/1102/111096/1BD3E714",
+                                npc: 111127,
+                                next: 11116003,
+                            },
+                            {
+                                id: 11116003,
+                                content: "...",
+                                voice: "story/1102/111096/1BD3E73E",
+                                npc: 111194,
+                                next: 11116004,
+                            },
+                            {
+                                id: 11116004,
+                                content: "<I>Elle est... encore vivante ?</>",
+                                voice: "story/1102/111096/1BD3E768",
+                                npc: 111127,
+                                next: 11116005,
+                            },
+                            {
+                                id: 11116005,
+                                content: "Falsi, tiens bon. Je vais trouver un moyen de te faire sortir de là.",
+                                voice: "story/1102/111096/1BD3E792",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17814400010461050959",
+                        type: "TalkNode",
+                        name: "开车对话节点",
+                        dialogues: [
+                            {
+                                id: 11116201,
+                                content: "Impossible. Je vais essayer de la forcer.",
+                                voice: "story/1102/111096/1BD407BA",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17814404980191057963",
+                        type: "TalkNode",
+                        name: "开车对话节点",
+                        next: ["17814405201791058305"],
+                        dialogues: [
+                            {
+                                id: 11116301,
+                                content: "... Elle ne bouge pas d’un millimètre.",
+                                voice: "story/1102/111096/1BD41822",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17814405201791058305",
+                        type: "TalkNode",
+                        name: "站桩对话节点",
+                        next: ["17814405641081059259"],
+                        dialogues: [
+                            {
+                                id: 11116401,
+                                content: "Ça suffit. Pars maintenant. Tu dois absolument... <I>Kof, kof...</> l’attraper...",
+                                voice: "story/1102/111096/1BD4288A",
+                                npc: 111110,
+                                next: 11116402,
+                            },
+                            {
+                                id: 11116402,
+                                content: "Arrête de parler. Tu craches du sang.",
+                                voice: "story/1102/111096/1BD428B4",
+                                npc: 111127,
+                                next: 11116403,
+                            },
+                            {
+                                id: 11116403,
+                                content: "Victor... Victor...",
+                                voice: "story/1102/111096/1BD428DE",
+                                npc: 111121,
+                                next: 11116404,
+                            },
+                            {
+                                id: 11116404,
+                                content: "Ful... vis !",
+                                voice: "story/1102/111096/1BD42908",
+                                npc: 111110,
+                                next: 11116405,
+                            },
+                            {
+                                id: 11116405,
+                                content:
+                                    "Mais enfin, je t’ai déjà dit que je ne connaissais aucun Ful-quelque-chose ! Victor, attrape ! Voilà la clé de cette cage. Utilise-la ! Fais sortir cette demoiselle !",
+                                voice: "story/1102/111096/1BD42932",
+                                npc: 111121,
+                                next: 11116406,
+                            },
+                            {
+                                id: 11116406,
+                                content: "... ? Pourquoi nous aider ?",
+                                voice: "story/1102/111096/1BD4295C",
+                                npc: 111127,
+                                next: 11116407,
+                            },
+                            {
+                                id: 11116407,
+                                content:
+                                    "Oh non ! Des Casse-Noisettes approchent de l’entrée de l’Étang du Repos ! Pfff... Je sais faire rire les gens, mais je ne sais pas faire rire les jouets, moi ! Enfin bon ! Je trouverai bien une solution !",
+                                voice: "story/1102/111096/1BD42986",
+                                npc: 111121,
+                                next: 11116408,
+                            },
+                            {
+                                id: 11116408,
+                                content: "Je vais les retenir ! Sortez vite par la porte de derrière !",
+                                voice: "story/1102/111096/1BD429B0",
+                                npc: 111121,
+                                next: 11116409,
+                            },
+                            {
+                                id: 11116409,
+                                content: "<I>Kof...</> Ça pourrait être un piège...",
+                                voice: "story/1102/111096/1BD429DA",
+                                npc: 111110,
+                                next: 11116410,
+                            },
+                            {
+                                id: 11116410,
+                                content: "Ne parle pas.",
+                                voice: "story/1102/111096/1BD42A04",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17814405641081059259",
+                        type: "TalkNode",
+                        name: "开车对话节点",
+                        next: ["17815808060318420502"],
+                        dialogues: [
+                            {
+                                id: 11116501,
+                                content: "C’est ouvert. Vite, partons d’ici.",
+                                voice: "story/1102/111096/1BD438F2",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17815808060318420502",
+                        type: "TalkNode",
+                        name: "与死亡特蕾莎对话节点",
+                        srId: 107701,
+                        pos: [-5332, -93544],
+                        next: ["17815814472479475723"],
+                        dialogues: [
+                            {
+                                id: 11116601,
+                                content:
+                                    "<I>Du sang continue de couler au coin de ses lèvres. Elle ne respire plus. Elle semble s’être étouffée après s’être sectionné la langue.</>",
+                                voice: "story/1102/111096/1BD4495A",
+                                next: 11116602,
+                            },
+                            {
+                                id: 11116602,
+                                content: "Reposez en paix.",
+                                voice: "story/1102/111096/1BD44984",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17815814472479475723",
+                        type: "TalkNode",
+                        name: "开车对话节点",
+                        next: ["17814406595511060963"],
+                        dialogues: [
+                            {
+                                id: 11116701,
+                                content:
+                                    "Fulvis ne doit pas être allé bien loin. Si nous rebroussons chemin maintenant, nous pourrons peut-être encore l’intercepter...",
+                                voice: "story/1102/111096/1BD459C2",
+                                npc: 111110,
+                                next: 11116702,
+                            },
+                            {
+                                id: 11116702,
+                                content:
+                                    "Fulvis peut attendre. Si Maman Lapin a pu précipiter le commandant Avar du haut d’une falaise aussi facilement, c’est elle qui représente le plus grand danger.",
+                                voice: "story/1102/111096/1BD459EC",
+                                npc: 111127,
+                                next: 11116703,
+                            },
+                            {
+                                id: 11116703,
+                                content: "Tu ne mourras pas ici. Nous devons quitter les Montagnes d’Arcano immédiatement.",
+                                voice: "story/1102/111096/1BD45A16",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17814406595511060963",
+                        type: "TalkNode",
+                        name: "站桩对话节点",
+                        next: ["17814406715741061309", "178159535807910534456"],
+                        dialogues: [
+                            {
+                                id: 11116801,
+                                content: "C’est... un cimetière ?",
+                                voice: "story/1102/111096/1BD46A2A",
+                                npc: 111127,
+                                next: 11116802,
+                            },
+                            {
+                                id: 11116802,
+                                content: "Tant mieux. Tu peux me laisser ici. Cet endroit... me convient parfaitement.",
+                                voice: "story/1102/111096/1BD46A54",
+                                npc: 111110,
+                                next: 11116803,
+                            },
+                            {
+                                id: 11116803,
+                                content:
+                                    "Ce n’est pas le moment de dire ce genre de choses. Je vais te faire une injection de stimulant cardiaque.",
+                                voice: "story/1102/111096/1BD46A7E",
+                                npc: 111127,
+                                next: 11116804,
+                            },
+                            {
+                                id: 11116804,
+                                content: "Tu as toujours le don de trouver les choses les plus improbables quand tout semble perdu...",
+                                voice: "story/1102/111096/1BD46AA8",
+                                npc: 111110,
+                                next: 11116805,
+                            },
+                            {
+                                id: 11116805,
+                                content: "Non. Il appartenait au chef du village. Ada me l’a discrètement confié.",
+                                voice: "story/1102/111096/1BD46AD2",
+                                npc: 111127,
+                                next: 11116806,
+                            },
+                            {
+                                id: 11116806,
+                                content:
+                                    "Voyons voir... Oui. C’est bien un stimulant cardiaque distribué il y a quatre ans par l’Académie d’Alchimie aux officiers supérieurs. Mais comment une telle chose a-t-elle pu finir entre les mains du chef d’un village perdu dans les montagnes... ?",
+                                voice: "story/1102/111096/1BD46AFC",
+                                npc: 111110,
+                                next: 11116807,
+                            },
+                            {
+                                id: 11116807,
+                                content: "Soit il l’a récupéré dans l’épave du dirigeable... soit il est lui-même...",
+                                voice: "story/1102/111096/1BD46B26",
+                                npc: 111127,
+                                next: 11116808,
+                            },
+                            {
+                                id: 11116808,
+                                content: "... Lui... ? Impossible...",
+                                voice: "story/1102/111096/1BD46B50",
+                                npc: 111110,
+                                next: 11116809,
+                            },
+                            {
+                                id: 11116809,
+                                content:
+                                    "Laissons ça pour plus tard. Nous en avons déjà utilisé dans la vallée sans problème. Il faudra encore un peu de temps avant que le produit fasse effet. Reste cachée ici. Je vais chercher une sortie.",
+                                voice: "story/1102/111096/1BD46B7A",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17814406715741061309",
+                        type: "TalkNode",
+                        name: "开车对话节点",
+                        dialogues: [
+                            {
+                                id: 11116901,
+                                content: "Hm ? Qu’est-ce que c’est... ?",
+                                voice: "story/1102/111096/1BD47A92",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178159535807910534456",
+                        type: "TalkNode",
+                        name: "开车对话节点",
+                        next: ["17814407914931063417"],
+                        dialogues: [
+                            {
+                                id: 11117101,
+                                content: "« Victor Perkins, mon ami le plus cher au monde... »",
+                                voice: "story/1102/111096/1BD49B62",
+                                npc: 111127,
+                                next: 11117102,
+                            },
+                            {
+                                id: 11117102,
+                                content: "La tombe... de Victor ?",
+                                voice: "story/1102/111096/1BD49B8C",
+                                npc: 111127,
+                                next: 11117103,
+                            },
+                            {
+                                id: 11117103,
+                                content: "Qu’est-ce que cela signifie ? Et les autres tombes... ?",
+                                voice: "story/1102/111096/1BD49BB6",
+                                npc: 111127,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17814407914931063417",
+                        type: "TalkNode",
+                        name: "站桩对话节点",
+                        dialogues: [
+                            {
+                                id: 11117201,
+                                content:
+                                    "Victor, Bernard, Morgana, Teresa, Sanctus... Ici, il n’y a que des tombes... Ce sont toutes les tombes des habitants d’Arcano ?! Alors les gens que nous avons rencontrés ces derniers jours dans le village étaient...",
+                                voice: "story/1102/111096/1BD4ABCA",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11117202,
+                            },
+                            {
+                                id: 11117202,
+                                content: "Je vois que vous vous cachiez ici.",
+                                voice: "story/1102/111096/1BD4ABF4",
+                                npc: 111125,
+                                next: 11117203,
+                            },
+                            {
+                                id: 11117203,
+                                content:
+                                    "Vous prétendez interdire la violence, mais au final, vous comptez quand même régler les problèmes avec une invention conçue pour tuer.",
+                                voice: "story/1102/111096/1BD4AC1E",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11117204,
+                            },
+                            {
+                                id: 11117204,
+                                content:
+                                    "Pour que les règles conservent leur autorité, un certain degré de violence est parfois nécessaire.",
+                                voice: "story/1102/111096/1BD4AC48",
+                                npc: 111125,
+                                next: 11117205,
+                            },
+                            {
+                                id: 11117205,
+                                content:
+                                    "Les règles sont les règles. Mon rôle se limite à les faire respecter. Ni Maman Lapin ni moi n’aimons recourir à la violence quand nous pouvons l’éviter. Pourquoi ne pas discuter calmement ?",
+                                voice: "story/1102/111096/1BD4AC72",
+                                npc: 111125,
+                                options: [
+                                    {
+                                        id: 11117206,
+                                        content: "<I>Accepter</>",
+                                        voice: "story/1102/111096/1BD4AC9C",
+                                        next: 11117208,
+                                    },
+                                    {
+                                        id: 11117207,
+                                        content: "<I>Refuser</>",
+                                        voice: "story/1102/111096/1BD4ACC6",
+                                        next: 11117208,
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11117208,
+                                content: "<I>Le stimulant cardiaque n’a pas encore fait effet sur Falsi. Je dois gagner du temps.</>",
+                                voice: "story/1102/111096/1BD4ACF0",
+                                npc: 110022,
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11117209,
+                            },
+                            {
+                                id: 11117209,
+                                content:
+                                    "Très bien. Au moins, vous n’avez pas perdu la raison. Dans ce cas, lorsque vous aurez entendu l’histoire du Paradis, nous pourrons peut-être nous réconcilier.",
+                                voice: "story/1102/111096/1BD4AD1A",
+                                npc: 111125,
+                                next: 11117210,
+                            },
+                            {
+                                id: 11117210,
+                                content:
+                                    "Comme vous pouvez le constater, Victor, Bernard, Morgana... tous les habitants du village sont morts le même jour, lors de la guerre entre Hyperborea et Élysium il y a quatre ans.",
+                                voice: "story/1102/111096/1BD4AD44",
+                                npc: 111125,
+                                next: 11117211,
+                            },
+                            {
+                                id: 11117211,
+                                content:
+                                    "Ceux que vous voyez aujourd’hui ne sont que des étrangers portant leurs noms et imitant leur façon d’être.",
+                                voice: "story/1102/111096/1BD4AD6E",
+                                npc: 111125,
+                                next: 11117212,
+                            },
+                            {
+                                id: 11117212,
+                                content: "Je m’en doutais. Je ne suis pas le véritable Victor.",
+                                voice: "story/1102/111096/1BD4AD98",
+                                npc: 110022,
+                                next: 11117213,
+                            },
+                            {
+                                id: 11117213,
+                                content:
+                                    "On reconnaît bien là quelqu’un formé par la Légion. Même après avoir bu tant d’Eau de l’Oubli, vous êtes encore capable de distinguer qui vous êtes réellement. Hélas, avec des personnes aussi déterminées que vous, il faut augmenter les doses.",
+                                voice: "story/1102/111096/1BD4ADC2",
+                                npc: 111125,
+                                next: 11117214,
+                            },
+                            {
+                                id: 11117214,
+                                content: "L’eau du village... était droguée ?",
+                                voice: "story/1102/111096/1BD4ADEC",
+                                npc: 110022,
+                                next: 11117215,
+                            },
+                            {
+                                id: 11117215,
+                                content: "Fallait le dire plus tôt ! J’ai une gourde sur moi. Tiens, bois donc une gorgée !",
+                                voice: "story/1102/111002/1BC9CB52",
+                                speakerName: "« La Force » Bernard",
+                                next: 11117216,
+                            },
+                            {
+                                id: 11117216,
+                                content: "Petit Victor, tu arrives au moment idéal. Après-demain aura lieu la <H>Parade du Paradis</>.",
+                                voice: "story/1102/111002/1BC9CB7C",
+                                speakerName: "« La Force » Bernard",
+                                next: 11117217,
+                            },
+                            {
+                                id: 11117217,
+                                content: "<W>Même si tu as tout oublié... Maman Lapin te fera retrouver la mémoire.</>",
+                                voice: "story/1102/111002/1BC9CBA6",
+                                speakerName: "« La Force » Bernard",
+                                next: 11117218,
+                            },
+                            {
+                                id: 11117218,
+                                content: "... !",
+                                voice: "story/1102/111002/1BC9CBD0",
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11117219,
+                            },
+                            {
+                                id: 11117219,
+                                content:
+                                    "C’est un distributeur de boissons. E-en fait... j’y ai caché quelques boissons en secret. Elles sont super sucrées, tu veux en goûter une ?",
+                                voice: "story/1102/111017/1BCABCFC",
+                                speakerName: "« La Papesse » Ada",
+                                next: 11117220,
+                            },
+                            {
+                                id: 11117220,
+                                content: "Non merci. Les boissons trop sucrées donnent encore plus soif.",
+                                voice: "story/1102/111017/1BCABD26",
+                                speakerName: "« Le Chariot » Victor ?",
+                                next: 11117221,
+                            },
+                            {
+                                id: 11117221,
+                                content: "A-ah... d’accord. Je comprends...",
+                                voice: "story/1102/111017/1BCABD50",
+                                speakerName: "« La Papesse » Ada",
+                                next: 11117222,
+                            },
+                            {
+                                id: 11117222,
+                                content: "... Tant mieux, alors.",
+                                voice: "story/1102/111017/1BCABD7A",
+                                speakerName: "« La Papesse » Ada",
+                                next: 11117223,
+                            },
+                            {
+                                id: 11117223,
+                                content:
+                                    "Plus tard. Vous avez passé toute la nuit dehors. Vous devez être épuisés. Buvez déjà un peu d’eau et reposez-vous.",
+                                voice: "story/1102/111065/1BCDD496",
+                                speakerName: "« L’Empereur » Cesare",
+                                next: 11117224,
+                            },
+                            {
+                                id: 11117224,
+                                content:
+                                    "Exactement. Un produit incolore et inodore une fois dissous dans l’eau. L’une des plus grandes réussites des Spathatoi. Une invention digne de confiance.",
+                                voice: "story/1102/111096/1BD4AF90",
+                                npc: 111125,
+                                next: 11117225,
+                            },
+                            {
+                                id: 11117225,
+                                content:
+                                    "Les quatre années de guerre furent si terribles que, vers la fin, de nombreux soldats commencèrent à craindre le combat. L’Académie d’Alchimie développa donc un produit permettant d’apaiser l’esprit. Les soldats devenaient plus calmes, plus obéissants et suivaient les ordres sans hésitation.",
+                                voice: "story/1102/111096/1BD4AFBA",
+                                npc: 111125,
+                                next: 11117226,
+                            },
+                            {
+                                id: 11117226,
+                                content:
+                                    "Cependant, lorsqu’on en abuse, ce produit finit par altérer l’esprit. À la fin, il ne reste plus rien dans leur tête, sinon les ordres de leurs supérieurs.",
+                                voice: "story/1102/111096/1BD4AFE4",
+                                npc: 111125,
+                                next: 11117227,
+                            },
+                            {
+                                id: 11117227,
+                                content:
+                                    "Lorsqu’on recouvre entièrement une toile colorée de peinture blanche, n’est-il pas possible d’y peindre une toute nouvelle œuvre ?",
+                                voice: "story/1102/111096/1BD4B00E",
+                                npc: 111125,
+                                next: 11117228,
+                            },
+                            {
+                                id: 11117228,
+                                content: "Victor ! J’ai attiré tous les Casse-Noisettes ailleurs ! Vite, viens avec moi—",
+                                voice: "story/1102/111096/1BD4B038",
+                                npc: 111121,
+                                next: 11117229,
+                            },
+                            {
+                                id: 11117229,
+                                content:
+                                    "Ah ! C-Chef du village... Je... Je répétais simplement une petite comédie avec Victor. Je vous en prie, au nom de Maman Lapin, ne le prenez surtout pas au sérieux !",
+                                voice: "story/1102/111096/1BD4B062",
+                                npc: 111121,
+                                next: 11117230,
+                            },
+                            {
+                                id: 11117230,
+                                content: "Du calme, Joy. Quoi que tu sois en train de faire, tu incarnes parfaitement le rôle du « Fou ».",
+                                voice: "story/1102/111096/1BD4B08C",
+                                npc: 111125,
+                                next: 11117231,
+                            },
+                            {
+                                id: 11117231,
+                                content:
+                                    "Autrefois, Victor était la seule personne disposée à apprendre à Joy à se maquiller, à jouer la comédie et à danser. Ainsi, « aider Victor coûte que coûte, même au mépris des règles », fait partie intégrante de l’essence même de Joy.",
+                                voice: "story/1102/111096/1BD4B0B6",
+                                npc: 111125,
+                                next: 11117232,
+                            },
+                            {
+                                id: 11117232,
+                                content: "Par conséquent, Maman Lapin t’accorde son pardon pour ta désobéissance.",
+                                voice: "story/1102/111096/1BD4B0E0",
+                                npc: 111125,
+                                next: 11117233,
+                            },
+                            {
+                                id: 11117233,
+                                content: "Vraiment...? Tant mieux... Tant mieux...",
+                                voice: "story/1102/111096/1BD4B10A",
+                                npc: 111121,
+                                next: 11117234,
+                            },
+                            {
+                                id: 11117234,
+                                content: "Vous voyez ? Voilà une toile entièrement nouvelle.",
+                                voice: "story/1102/111096/1BD4B134",
+                                npc: 111125,
+                                next: 11117235,
+                            },
+                            {
+                                id: 11117235,
+                                content:
+                                    "Il est devenu quelqu’un d’autre. À force de drogues et de manipulation, vous avez fait de tous les habitants du village quelqu’un d’autre.",
+                                voice: "story/1102/111096/1BD4B15E",
+                                npc: 110022,
+                                next: 11117236,
+                            },
+                            {
+                                id: 11117236,
+                                content: "<I>Kof...</> Bande de...",
+                                voice: "story/1102/111096/1BD4B188",
+                                npc: 111110,
+                                next: 11117237,
+                            },
+                            {
+                                id: 11117237,
+                                content:
+                                    "Ne vous emportez pas. « Antonius Fulvis » a disparu depuis longtemps. Il a saisi l’opportunité offerte par le Paradis et est devenu un <H>Lapin Blanc du Paradis</>.",
+                                voice: "story/1102/111096/1BD4B1B2",
+                                npc: 111125,
+                                next: 11117238,
+                            },
+                            {
+                                id: 11117238,
+                                content:
+                                    "Les produits de l’Académie d’Alchimie ont une durée de conservation limitée. Comment avez-vous pu obtenir assez de doses pour droguer un village entier ?",
+                                voice: "story/1102/111096/1BD4B1DC",
+                                npc: 110022,
+                                next: 11117239,
+                            },
+                            {
+                                id: 11117239,
+                                content:
+                                    "Nous n’en avons jamais eu besoin d’autant. Quelques injections suffisent au début. Ensuite, les habitants apprennent à aimer le Paradis et choisissent d’eux-mêmes de devenir de dociles Lapins Blancs.",
+                                voice: "story/1102/111096/1BD4B206",
+                                npc: 111125,
+                                next: 11117240,
+                            },
+                            {
+                                id: 11117240,
+                                content:
+                                    "Bien sûr, il existe aussi des <H>lapins rouges</> comme vous, qui préfèrent regarder leur souffrance en face et gaspiller cette chance. La plupart sont morts. Ils reposent ici avec le rôle qu’ils auraient dû jouer.",
+                                voice: "story/1102/111096/1BD4B230",
+                                npc: 111125,
+                                next: 11117241,
+                            },
+                            {
+                                id: 11117241,
+                                content:
+                                    "Peut-être pensez-vous que ces Lapins Blancs manquent d’intelligence ou de force de caractère. Pour ma part, je ne les trouve pas honteux. Au contraire, je pense qu’ils sont chanceux.",
+                                voice: "story/1102/111096/1BD4B25A",
+                                npc: 111125,
+                                next: 11117242,
+                            },
+                            {
+                                id: 11117242,
+                                content:
+                                    "Au Paradis, personne n’a à craindre le mépris des autres pour être resté sur place. Personne n’a besoin de se trouver de nobles excuses pour justifier son désir de mener une vie tranquille.",
+                                voice: "story/1102/111096/1BD4B284",
+                                npc: 111125,
+                                next: 11117243,
+                            },
+                            {
+                                id: 11117243,
+                                content:
+                                    "Alors les gens finissent par accepter le jeu. Après tout, il suffit à un être humain de se mentir à lui-même pour prendre un nouveau départ. Et tôt ou tard, chacun finit par aimer notre Paradis.",
+                                voice: "story/1102/111096/1BD4B2AE",
+                                npc: 111125,
+                                next: 11117244,
+                            },
+                            {
+                                id: 11117244,
+                                content:
+                                    "Je crois plutôt que vous avez raconté ce mensonge si souvent que vous avez fini par y croire vous-même. Ces gens n’ont pas choisi. Vous et Maman Lapin les avez simplement forcés.",
+                                voice: "story/1102/111096/1BD4B2D8",
+                                npc: 110022,
+                                next: 11117245,
+                            },
+                            {
+                                id: 11117245,
+                                content:
+                                    "Cette femme, Teresa, était si terrifiée qu’elle a fini par se suicider. Dans ses cris, je n’ai entendu aucun amour. Seulement de la peur.",
+                                voice: "story/1102/111096/1BD4B302",
+                                npc: 110022,
+                                next: 11117246,
+                            },
+                            {
+                                id: 11117246,
+                                content:
+                                    "Cela n’a aucune importance. Tout ce que nous recherchons, c’est un village paisible. Tant qu’ils respectent les règles, qu’ils agissent par choix ou par peur, nous les accueillons avec bienveillance dans notre famille de Lapins Blancs.",
+                                voice: "story/1102/111096/1BD4B32C",
+                                npc: 111125,
+                                next: 11117247,
+                            },
+                            {
+                                id: 11117247,
+                                content: "Chef du village, de quoi êtes-vous en train de parler ? Je ne comprends plus rien...",
+                                voice: "story/1102/111096/1BD4B356",
+                                npc: 111121,
+                                next: 11117248,
+                            },
+                            {
+                                id: 11117248,
+                                content:
+                                    "Tu n’as pas besoin de comprendre. Demain, lorsque tu te réveilleras, tout fonctionnera de nouveau parfaitement selon les règles du Paradis.",
+                                voice: "story/1102/111096/1BD4B380",
+                                npc: 111125,
+                                next: 11117249,
+                            },
+                            {
+                                id: 11117249,
+                                content: "P-Pardon... J’ai encore tout gâché, c’est ça... ?",
+                                voice: "story/1102/111096/1BD4B3AA",
+                                npc: 111121,
+                                next: 11117250,
+                            },
+                            {
+                                id: 11117250,
+                                content: "Non. Peut-être que tout n’est pas encore perdu.",
+                                voice: "story/1102/111096/1BD4B3D4",
+                                npc: 110022,
+                                next: 11117251,
+                            },
+                            {
+                                id: 11117251,
+                                content: "Victor ! Q-Qu’est-ce que tu fais ?! Je suis pourtant ton seul ami !",
+                                voice: "story/1102/111096/1BD4B3FE",
+                                npc: 111121,
+                                next: 11117252,
+                            },
+                            {
+                                id: 11117252,
+                                content: "Cesare. Laissez-nous partir.",
+                                voice: "story/1102/111096/1BD4B428",
+                                npc: 110022,
+                                next: 11117253,
+                            },
+                            {
+                                id: 11117253,
+                                content:
+                                    "La personne que vous cherchiez a déjà commencé une nouvelle vie. Quel intérêt y aurait-il à l’emmener avec vous ? Joy n’est plus qu’une feuille blanche immaculée.",
+                                voice: "story/1102/111096/1BD4B452",
+                                npc: 111125,
+                                next: 11117254,
+                            },
+                            {
+                                id: 11117254,
+                                content:
+                                    "Même si vous tuiez Joy maintenant, le « Fulvis » que vous haïssez n’éprouverait pas le moindre remords. Seul un homme bon et malheureux mourrait sans comprendre pourquoi. Un homme qui, il y a quelques instants encore, risquait sa vie pour vous aider.",
+                                voice: "story/1102/111096/1BD4B47C",
+                                npc: 111125,
+                                next: 11117255,
+                            },
+                            {
+                                id: 11117255,
+                                content: "Alors pourquoi ne pas abandonner votre haine et vivre paisiblement avec nous au Paradis ?",
+                                voice: "story/1102/111096/1BD4B4A6",
+                                npc: 111125,
+                                next: 11117256,
+                            },
+                            {
+                                id: 11117256,
+                                content:
+                                    "Pour être honnête, vous ressemblez énormément au véritable Victor. Vous êtes tout aussi {性别2:droit, tout aussi bienveillant, tout aussi silencieux... et pourtant toujours attentif|droite, tout aussi bienveillante, tout aussi silencieuse... et pourtant toujours attentive} à ceux qui vous entourent.",
+                                voice: "story/1102/111096/1BD4B4D0",
+                                npc: 111125,
+                                next: 11117257,
+                            },
+                            {
+                                id: 11117257,
+                                content:
+                                    "Tous les habitants reconnaissent le Victor que vous incarnez. C’est pourquoi j’espère sincèrement que vous resterez.",
+                                voice: "story/1102/111096/1BD4B4FA",
+                                npc: 111125,
+                                next: 11117258,
+                            },
+                            {
+                                id: 11117258,
+                                content: "Falsi. Tu peux bouger ? Si oui, suis-moi.",
+                                voice: "story/1102/111096/1BD4B524",
+                                npc: 110022,
+                                next: 11117259,
+                            },
+                            {
+                                id: 11117259,
+                                content: "<I>Kof...</> Oui. Ça ira.",
+                                voice: "story/1102/111096/1BD4B54E",
+                                npc: 111110,
+                                next: 11117260,
+                            },
+                            {
+                                id: 11117260,
+                                content:
+                                    "Quel dommage. Vous auriez pu laisser derrière vous tous les fardeaux du passé. J’imagine que je vais devoir recourir à des méthodes plus brutales que je n’apprécie guère.",
+                                voice: "story/1102/111096/1BD4B578",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11023103,
+                name: "Fuir Arcano",
+                desc: "Le chef du village vous a révélé la vérité sur Arcano. Fulvis, que vous croyez avoir été manipulé pour devenir Joy, s’est interposé pour vous protéger et s’est effondré après avoir été touché par balle. Les événements inattendus s’enchaînent, mais votre priorité reste de faire sortir Falsi d’Arcano en vie. Elle est un témoin essentiel et ne doit surtout pas mourir ici.",
+                nodes: [
+                    {
+                        id: "17821180686671072380",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11117401,
+                                content:
+                                    "Fulvis... Il est vraiment mort comme ça ? En clown jusqu’au bout... Sans le moindre remords. Sans la moindre souffrance ?",
+                                voice: "story/1102/111096/1BD4CC9A",
+                                npc: 111110,
+                                next: 11117402,
+                            },
+                            {
+                                id: 11117402,
+                                content: "Alors tous les jours que j’ai passés à vivre pour ça... qu’est-ce qu’ils valaient ?",
+                                voice: "story/1102/111096/1BD4CCC4",
+                                npc: 111110,
+                                next: 11117403,
+                            },
+                            {
+                                id: 11117403,
+                                content: "Nous réglerons ça une fois sortis d’ici.",
+                                voice: "story/1102/111096/1BD4CCEE",
+                                npc: 110022,
+                                next: 11117404,
+                            },
+                            {
+                                id: 11117404,
+                                content:
+                                    "Et après ? Qu’est-ce que ça changera ?! Si même ma vengeance m’a été arrachée, pourquoi continuer à vivre ?!",
+                                voice: "story/1102/111096/1BD4CD18",
+                                npc: 111110,
+                                next: 11117405,
+                            },
+                            {
+                                id: 11117405,
+                                content: "Arrête-toi.",
+                                voice: "story/1102/111096/1BD4CD42",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17821311495563216064",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17821359497585359094", "17821356865343222416", "17821357697574290660"],
+                        dialogues: [
+                            {
+                                id: 11117501,
+                                content: "Pourquoi tiens-tu tant à te venger ?",
+                                voice: "story/1102/111096/1BD4DD02",
+                                npc: 110022,
+                                next: 11117502,
+                            },
+                            {
+                                id: 11117502,
+                                content:
+                                    "Si tout ce que tu voulais, c’était voir Fulvis mourir... alors le destin s’en est chargé à ta place. Il a déjà payé de sa vie.",
+                                voice: "story/1102/111096/1BD4DD2C",
+                                npc: 110022,
+                                next: 11117503,
+                            },
+                            {
+                                id: 11117503,
+                                content: "Je...",
+                                voice: "story/1102/111096/1BD4DD56",
+                                npc: 111110,
+                                next: 11117504,
+                            },
+                            {
+                                id: 11117504,
+                                content: "... Je n’en sais rien...",
+                                voice: "story/1102/111096/1BD4DD80",
+                                npc: 111110,
+                                next: 11117505,
+                            },
+                            {
+                                id: 11117505,
+                                content:
+                                    "Je n’ai jamais vraiment su pourquoi je faisais les choses. J’ai toujours vécu en obéissant aux ordres.",
+                                voice: "story/1102/111096/1BD4DDAA",
+                                npc: 111110,
+                                next: 11117506,
+                            },
+                            {
+                                id: 11117506,
+                                content:
+                                    "Exécuter les ordres d’un instructeur, les tiens, puis ceux de Fulvis... Pour moi, cela revenait exactement au même.",
+                                voice: "story/1102/111096/1BD4DDD4",
+                                npc: 111110,
+                                next: 11117507,
+                            },
+                            {
+                                id: 11117507,
+                                content:
+                                    "Après l’explosion de la Forteresse de Lonza, plus personne ne m’a donné d’ordres. J’étais « libre ». Mais cette liberté n’a fait que me plonger dans le vide... Sans quelqu’un pour me dire quoi faire, je ne savais plus pourquoi je vivais.",
+                                voice: "story/1102/111096/1BD4DDFE",
+                                npc: 111110,
+                                next: 11117508,
+                            },
+                            {
+                                id: 11117508,
+                                content:
+                                    "Pourtant mon corps s’accrochait encore à la vie. Alors la vengeance est devenue la seule raison qui me restait pour continuer.",
+                                voice: "story/1102/111096/1BD4DE28",
+                                npc: 111110,
+                                next: 11117509,
+                            },
+                            {
+                                id: 11117509,
+                                content:
+                                    "Mais Fulvis est devenu cette chose... Puis il est mort en se croyant héroïque, sacrifiant sa vie pour un ami. Il m’a tout pris. Et maintenant, il m’a même volé ma vengeance.",
+                                voice: "story/1102/111096/1BD4DE52",
+                                npc: 111110,
+                                next: 11117510,
+                            },
+                            {
+                                id: 11117510,
+                                content: "... Alors la dernière raison qui me maintenait en vie a disparu elle aussi.",
+                                voice: "story/1102/111096/1BD4DE7C",
+                                npc: 111110,
+                                next: 11117511,
+                            },
+                            {
+                                id: 11117511,
+                                content: "Non. Il t’en reste une.",
+                                voice: "story/1102/111096/1BD4DEA6",
+                                npc: 110022,
+                                next: 11117512,
+                            },
+                            {
+                                id: 11117512,
+                                content:
+                                    "Tu portes encore une dette de sang depuis la Forteresse de Lonza. Elle ne peut pas être effacée aussi facilement.",
+                                voice: "story/1102/111096/1BD4DED0",
+                                npc: 110022,
+                                next: 11117513,
+                            },
+                            {
+                                id: 11117513,
+                                content:
+                                    "Falsi... tu es lâche. Tu as peur de la liberté. Même la mort te paraît préférable à l’idée de réfléchir à ce que tu veux réellement faire de ta vie.",
+                                voice: "story/1102/111096/1BD4DEFA",
+                                npc: 110022,
+                                next: 11117514,
+                            },
+                            {
+                                id: 11117514,
+                                content: "... Si tu abandonnes maintenant, je te mépriserai.",
+                                voice: "story/1102/111096/1BD4DF24",
+                                npc: 110022,
+                                next: 11117515,
+                            },
+                            {
+                                id: 11117515,
+                                content: "Moi aussi... je dois continuer à vivre... ?",
+                                voice: "story/1102/111096/1BD4DF4E",
+                                npc: 111110,
+                                next: 11117516,
+                            },
+                            {
+                                id: 11117516,
+                                content:
+                                    "Même si tu dois mourir, ce doit être après avoir répondu de tes actes devant la loi et devant ceux que tu as blessés. Pas en mourant ici.",
+                                voice: "story/1102/111096/1BD4DF78",
+                                npc: 110022,
+                                next: 11117517,
+                            },
+                            {
+                                id: 11117517,
+                                content: "Tu dois comparaître devant un tribunal et faire face à ce que tu ne peux plus fuir.",
+                                voice: "story/1102/111096/1BD4DFA2",
+                                npc: 110022,
+                                next: 11117518,
+                            },
+                            {
+                                id: 11117518,
+                                content: "...",
+                                voice: "story/1102/111096/1BD4DFCC",
+                                npc: 111110,
+                                next: 11117519,
+                            },
+                            {
+                                id: 11117519,
+                                content: "Hé ! Quelqu’un a dit que Victor s’était enfui vers la grande roue ! Dépêchez-vous !",
+                                voice: "story/1102/111096/1BD4DFF6",
+                                speakerName: "Voix dans le brouhaha",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17821359497585359094",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11117801,
+                                content:
+                                    "Oui. Mais toi ? Il faut bien que quelqu’un maintienne le levier en position pendant toute la traversée, non ?",
+                                voice: "story/1102/111096/1BD50E3A",
+                                npc: 111110,
+                                next: 11117802,
+                            },
+                            {
+                                id: 11117802,
+                                content: "Je partirai de l’autre côté.",
+                                voice: "story/1102/111096/1BD50E64",
+                                npc: 110022,
+                                next: 11117803,
+                            },
+                            {
+                                id: 11117803,
+                                content: "Ce n’est pas justement la direction du village ?",
+                                voice: "story/1102/111096/1BD50E8E",
+                                npc: 111110,
+                                next: 11117804,
+                            },
+                            {
+                                id: 11117804,
+                                content: "{nickname2} ! Falsi !",
+                                voice: "story/1102/111096/1BD50EB8",
+                                npc: 111001,
+                                next: 11117805,
+                            },
+                            {
+                                id: 11117805,
+                                content: "Partez devant ! Je vais vous aider à abaisser le pont !",
+                                voice: "story/1102/111096/1BD50EE2",
+                                npc: 111001,
+                                next: 11117806,
+                            },
+                            {
+                                id: 11117806,
+                                content: "Qu’est-ce que tu fais ici ?!",
+                                voice: "story/1102/111096/1BD50F0C",
+                                npc: 110022,
+                                next: 11117807,
+                            },
+                            {
+                                id: 11117807,
+                                content:
+                                    "Je viens d’envoyer tout le monde du côté de la grande roue. Impossible de s’échapper par le petit sentier maintenant, alors je suis venue vous attendre ici !",
+                                voice: "story/1102/111096/1BD50F36",
+                                npc: 111001,
+                                next: 11117808,
+                            },
+                            {
+                                id: 11117808,
+                                content: "Vite, partez ! Quand ils s’en rendront compte, il sera trop tard !",
+                                voice: "story/1102/111096/1BD50F60",
+                                npc: 111001,
+                                next: 11117809,
+                            },
+                            {
+                                id: 11117809,
+                                content: "Et toi ?!",
+                                voice: "story/1102/111096/1BD50F8A",
+                                npc: 110022,
+                                next: 11117810,
+                            },
+                            {
+                                id: 11117810,
+                                content:
+                                    "Moi, ça ira ! Je te l’ai dit : pour Maman Lapin, je suis différente. Elle a une raison de ne jamais me faire de mal. Mais si vous ne partez pas tout de suite, toi et petit chat allez vous faire tuer par Maman Lapin !",
+                                voice: "story/1102/111096/1BD50FB4",
+                                npc: 111001,
+                                next: 11117811,
+                            },
+                            {
+                                id: 11117811,
+                                content: "... Prends soin de toi.",
+                                voice: "story/1102/111096/1BD50FDE",
+                                npc: 110022,
+                                next: 11117901,
+                            },
+                            {
+                                id: 11117901,
+                                content: "Le pont-levis ! Quelqu’un l’a abaissé !",
+                                voice: "story/1102/111096/1BD51EA2",
+                                speakerName: "Foule bruyante",
+                                next: 11117902,
+                            },
+                            {
+                                id: 11117902,
+                                content: "Vite ! Ne les laissez pas s’échapper !",
+                                voice: "story/1102/111096/1BD51ECC",
+                                speakerName: "Foule bruyante",
+                                next: 11117903,
+                            },
+                            {
+                                id: 11117903,
+                                content: "Hah... Hah...",
+                                voice: "story/1102/111096/1BD51EF6",
+                                npc: 111001,
+                                next: 11117904,
+                            },
+                            {
+                                id: 11117904,
+                                content:
+                                    "Ada ! Même si tu apprécies Victor, tu ne peux pas aider {性别2:ce type|cette fille} à quitter le village ! C’est contraire aux règles !",
+                                voice: "story/1102/111096/1BD51F20",
+                                npc: 111150,
+                                next: 11117905,
+                            },
+                            {
+                                id: 11117905,
+                                content:
+                                    "Continuez la poursuite ! Moi, je vais faire descendre Ada ! Si Maman Lapin voit cette petite idiote faire une chose pareille, elle ne lui pardonnera jamais !",
+                                voice: "story/1102/111096/1BD51F4A",
+                                npc: 111150,
+                                next: 11117906,
+                            },
+                            {
+                                id: 11117906,
+                                content:
+                                    "Que personne n’approche ! Si quelqu’un avance encore, je saute ! On verra bien comment Maman Lapin vous punira après ça !",
+                                voice: "story/1102/111096/1BD51F74",
+                                npc: 111001,
+                                next: 11117907,
+                            },
+                            {
+                                id: 11117907,
+                                content: "Ma petite, descends. Ce n’est vraiment pas le moment de faire des bêtises.",
+                                voice: "story/1102/111096/1BD51F9E",
+                                npc: 111171,
+                                next: 11117908,
+                            },
+                            {
+                                id: 11117908,
+                                content: "Je ne fais pas de bêtises. Je crois même n’avoir jamais eu l’esprit aussi clair.",
+                                voice: "story/1102/111096/1BD51FC8",
+                                npc: 111001,
+                                next: 11117909,
+                            },
+                            {
+                                id: 11117909,
+                                content:
+                                    "Combien de temps allez-vous encore continuer à faire semblant de ne rien voir par peur ? Oncle Avar nous l’avait déjà dit : « Nous ne savons qu’obéir aux règles et vivre selon la volonté des autres. »",
+                                voice: "story/1102/111096/1BD51FF2",
+                                npc: 111001,
+                                next: 11117910,
+                            },
+                            {
+                                id: 11117910,
+                                content:
+                                    "Je n’ai jamais réfléchi à des choses compliquées comme la façon dont on devrait vivre. Mais je sais une chose : ce n’est pas normal de vivre ainsi. À se reprocher mutuellement des choses et à craindre à chaque instant d’être tué par Maman Lapin ! Je ne veux plus voir tout le monde se faire du mal !",
+                                voice: "story/1102/111096/1BD5201C",
+                                npc: 111001,
+                                next: 11117911,
+                            },
+                            {
+                                id: 11117911,
+                                content:
+                                    "... Avar... Ce <H>Lapin Rouge</> d’il y a quelques mois... Le précédent « Diable »... Celui qui a percé le fuseau du destin...",
+                                voice: "story/1102/111096/1BD52046",
+                                npc: 111168,
+                                next: 11117912,
+                            },
+                            {
+                                id: 11117912,
+                                content:
+                                    "Quand cet homme est tombé de la montagne, tu allais très bien ! Comment as-tu pu devenir comme ça ?!",
+                                voice: "story/1102/111096/1BD52070",
+                                npc: 111169,
+                                next: 11117913,
+                            },
+                            {
+                                id: 11117913,
+                                content:
+                                    "C’est Victor qui t’a mis ces idées dans la tête ?! Qu’est-ce que {性别2:ce garçon|cette fille} t’a raconté comme absurdités ?!",
+                                voice: "story/1102/111096/1BD5209A",
+                                npc: 111150,
+                                next: 11117914,
+                            },
+                            {
+                                id: 11117914,
+                                content:
+                                    "Non ! Nous ne pouvons plus revenir en arrière... Je ne suis pas Ada. Et toi, tu n’es pas Bernard. Nous ne sommes que des lâches qui se mentent à eux-mêmes pour éviter d’avancer.",
+                                voice: "story/1102/111096/1BD520C4",
+                                npc: 111001,
+                                next: 11117915,
+                            },
+                            {
+                                id: 11117915,
+                                content: "ÇA SUFFIT !",
+                                voice: "story/1102/111096/1BD520EE",
+                                npc: 111150,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17821356865343222416",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11117601,
+                                content: "Ne traîne pas. Profitons-en pour sortir par le pont-levis.",
+                                voice: "story/1102/111096/1BD4ED6A",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17821357697574290660",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11117701,
+                                content: "On aperçoit le pont-levis. Je vais l’abaisser. Tu peux traverser seule ?",
+                                voice: "story/1102/111096/1BD4FDD2",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11023104,
+                name: "Mettre Falsi à l’abri",
+                desc: "Grâce à l’aide d’Ada, vous avez réussi à franchir le pont-levis et à fuir Arcano. Une fois Falsi mise à l’abri, il sera temps de régler les derniers détails.",
+                nodes: [
+                    {
+                        id: "17849871835811277",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118101,
+                                content: "<I>Kof...</> Ces fichus jouets sont vraiment impossibles à semer...",
+                                voice: "story/1102/111096/1BD53F72",
+                                npc: 111110,
+                                next: 11118102,
+                            },
+                            {
+                                id: 11118102,
+                                content:
+                                    "Au moins, les habitants ne nous ont pas rattrapés. Allons nous abriter dans la grotte que nous avons découverte auparavant.",
+                                voice: "story/1102/111096/1BD53F9C",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17849878632343580",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118201,
+                                content: "Tes blessures... Repose-toi ici un instant.",
+                                voice: "story/1102/111096/1BD54FDA",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110232,
+        quests: [
+            {
+                id: 11023201,
+                name: "Mettre fin à tout cela",
+                desc: "Il est temps de mettre fin au cauchemar qui plane sur Arcano.",
+                nodes: [
+                    {
+                        id: "17823026824922155381",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17823027047922155929"],
+                        dialogues: [
+                            {
+                                id: 11118301,
+                                content: "Tu es réveillée... Ma petite lapine adorée.",
+                                voice: "story/1102/111096/1BD56042",
+                                npc: 111123,
+                                next: 11118302,
+                            },
+                            {
+                                id: 11118302,
+                                content:
+                                    "Allons... Dis-moi pourquoi. Pourquoi as-tu enfreint les règles du Paradis ? Nous t’aimons pourtant tant.",
+                                voice: "story/1102/111096/1BD5606C",
+                                npc: 111123,
+                                next: 11118303,
+                            },
+                            {
+                                id: 11118303,
+                                content: "Nn... N-Non...",
+                                voice: "story/1102/111096/1BD56096",
+                                npc: 111001,
+                                next: 11118304,
+                            },
+                            {
+                                id: 11118304,
+                                content:
+                                    "Pourquoi pleures-tu, ma petite lapine ? Qu’est-ce qui te rend si triste ? Il ne devrait pas y avoir de larmes au Paradis. Tu sais pourtant combien cela fait souffrir tout le monde.",
+                                voice: "story/1102/111096/1BD560C0",
+                                npc: 111123,
+                                next: 11118305,
+                            },
+                            {
+                                id: 11118305,
+                                content:
+                                    "NON ! Tu ne le sais pas ! Tu ne sais faire qu’une chose : sourire bêtement ! Hypocrite ! Répugnante ! Peu importe ce qui arrive ! Même lorsque notre foyer, que nous avons reconstruit pierre après pierre, est réduit en ruines ! Tu te contentes toujours de rire et de dire : « Oups... j’ai encore tout gâché ! »",
+                                voice: "story/1102/111096/1BD560EA",
+                                npc: 111123,
+                                next: 11118306,
+                            },
+                            {
+                                id: 11118306,
+                                content:
+                                    "Tu n’as jamais aimé qui que ce soit. Tu n’as jamais aimé notre Paradis. Dis-moi, petite lapine... Comment pourrions-nous réchauffer ce cœur de pierre qui est le tien ?",
+                                voice: "story/1102/111096/1BD56114",
+                                npc: 111123,
+                                next: 11118307,
+                            },
+                            {
+                                id: 11118307,
+                                content: "... Nn !",
+                                voice: "story/1102/111096/1BD5613E",
+                                npc: 111001,
+                                next: 11118308,
+                            },
+                            {
+                                id: 11118308,
+                                content:
+                                    "Ce n’est pas vrai... ! J’aime tout le monde... C’est justement parce que je les aime que je voudrais qu’ils arrêtent de vivre dans la peur... Cette sensation... est tellement douloureuse...",
+                                voice: "story/1102/111096/1BD56168",
+                                npc: 111001,
+                                next: 11118309,
+                            },
+                            {
+                                id: 11118309,
+                                content: "Vraiment ? Morgana. Viens donc expliquer à cette pauvre idiote si tu souffres ou non.",
+                                voice: "story/1102/111096/1BD56192",
+                                npc: 111123,
+                                next: 11118310,
+                            },
+                            {
+                                id: 11118310,
+                                content:
+                                    "Oui, Maman Lapin... Au Paradis, je suis heureuse comme jamais auparavant. Je n’ai jamais connu un tel bonheur.",
+                                voice: "story/1102/111096/1BD561BC",
+                                npc: 111165,
+                                next: 11118311,
+                            },
+                            {
+                                id: 11118311,
+                                content:
+                                    "Non... Toi et Teresa étiez si proches... Elle est morte... Elle a perdu tellement de sang... Quand je me fais juste une égratignure, j’ai déjà mal... Alors elle... combien a-t-elle souffert ? Tu n’es vraiment pas triste ?",
+                                voice: "story/1102/111096/1BD561E6",
+                                npc: 111001,
+                                next: 11118312,
+                            },
+                            {
+                                id: 11118312,
+                                content: "Elle a simplement obtenu une paix et un bonheur éternels.",
+                                voice: "story/1102/111096/1BD56210",
+                                npc: 111165,
+                                next: 11118313,
+                            },
+                            {
+                                id: 11118313,
+                                content: "Tu vois, petite lapine ? Tout le monde est heureux. Il n’y a que toi qui souffres.",
+                                voice: "story/1102/111096/1BD5623A",
+                                npc: 111123,
+                                next: 11118314,
+                            },
+                            {
+                                id: 11118314,
+                                content: "... Nn... Ce n’est pas juste...",
+                                voice: "story/1102/111096/1BD56264",
+                                npc: 111001,
+                                next: 11118315,
+                            },
+                            {
+                                id: 11118315,
+                                content:
+                                    "Ne pleure pas, mon trésor. Si tu souffres autant, c’est à cause de l’arrivée du « Chariot », n’est-ce pas ? Et aujourd’hui... tu es plus malheureuse que tu ne l’as jamais été.",
+                                voice: "story/1102/111096/1BD5628E",
+                                npc: 111123,
+                                next: 11118316,
+                            },
+                            {
+                                id: 11118316,
+                                content: "...",
+                                voice: "story/1102/111096/1BD562B8",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823027047922155929",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: [
+                            "17823028030812157607",
+                            "17823033824792158741",
+                            "17860343713555575443",
+                            "17860344412535576210",
+                            "178603505889610034545",
+                        ],
+                        dialogues: [
+                            {
+                                id: 11118401,
+                                content:
+                                    "Personne ne te connaît mieux que moi, ma petite lapine. Au fond de ton cœur, tu espérais que « Le Chariot » t’emmène avec lui hors du Paradis, n’est-ce pas ? Mais tu n’as jamais osé le lui demander. Parce que tu avais peur.",
+                                voice: "story/1102/111096/1BD570AA",
+                                npc: 111123,
+                                next: 11118402,
+                            },
+                            {
+                                id: 11118402,
+                                content:
+                                    "« Le Chariot » est venu ici pour accomplir une mission de la Légion. Il ne se serait jamais arrêté pour toi. Tu savais que s’il te rejetait, tu ne trouverais plus jamais le courage de le lui demander à nouveau.",
+                                voice: "story/1102/111096/1BD570D4",
+                                npc: 111123,
+                                next: 11118403,
+                            },
+                            {
+                                id: 11118403,
+                                content:
+                                    "Alors tu as choisi de rester derrière pour couvrir leur fuite. Parce que tu craignais par-dessus tout que « Le Chariot » refuse de partir avec toi. Une telle réponse t’aurait couverte de honte, de douleur et d’humiliation.",
+                                voice: "story/1102/111096/1BD570FE",
+                                npc: 111123,
+                                next: 11118404,
+                            },
+                            {
+                                id: 11118404,
+                                content:
+                                    "Et pourtant, tout au fond de toi, tu nourrissais encore un mince espoir. Tu espérais que « Le Chariot » comprenne ce que tu n’osais pas dire... et qu’il te réponde : « Quoi qu’il arrive, nous partirons ensemble. »",
+                                voice: "story/1102/111096/1BD57128",
+                                npc: 111123,
+                                next: 11118405,
+                            },
+                            {
+                                id: 11118405,
+                                content:
+                                    "Quel dommage... {性别2:il|elle} ne t’a même pas accordé un regard de plus. {性别2:Il est parti|Elle est partie} sans hésiter avec cette fille venue de la Légion.",
+                                voice: "story/1102/111096/1BD57152",
+                                npc: 111123,
+                                next: 11118406,
+                            },
+                            {
+                                id: 11118406,
+                                content: "...",
+                                voice: "story/1102/111096/1BD5717C",
+                                npc: 111001,
+                                next: 11118407,
+                            },
+                            {
+                                id: 11118407,
+                                content:
+                                    "Ni « Le Diable » ni « Le Chariot » ne t’ont choisie. Et pourquoi l’auraient-ils fait ? À leurs yeux, tu n’es pas différente des autres habitants du Paradis. Tu n’es qu’une menteuse parmi tant d’autres.",
+                                voice: "story/1102/111096/1BD571A6",
+                                npc: 111123,
+                                next: 11118408,
+                            },
+                            {
+                                id: 11118408,
+                                content: "Ils ne reviendront jamais. Ils t’abandonneront simplement à ton sort.",
+                                voice: "story/1102/111096/1BD571D0",
+                                npc: 111123,
+                                next: 11118409,
+                            },
+                            {
+                                id: 11118409,
+                                content: "Tu les as aidés à s’enfuir. Et qu’as-tu obtenu en retour ? Rien du tout.",
+                                voice: "story/1102/111096/1BD571FA",
+                                npc: 111123,
+                                next: 11118410,
+                            },
+                            {
+                                id: 11118410,
+                                content: "...",
+                                voice: "story/1102/111096/1BD57224",
+                                npc: 111001,
+                                next: 11118411,
+                            },
+                            {
+                                id: 11118411,
+                                content:
+                                    "Dans leur histoire, tu n’as joué qu’un rôle insignifiant. Et ton propre récit n’était jamais destiné à se poursuivre au-delà du Paradis.",
+                                voice: "story/1102/111096/1BD5724E",
+                                npc: 111123,
+                                next: 11118412,
+                            },
+                            {
+                                id: 11118412,
+                                content:
+                                    "Nous seuls sommes ta véritable famille. Ceux qui enfreignent les règles doivent être punis. Mais toi, tu es différente. Peu importe combien de fois tu te tromperas, je te pardonnerai toujours avec douceur.",
+                                voice: "story/1102/111096/1BD57278",
+                                npc: 111123,
+                                next: 11118413,
+                            },
+                            {
+                                id: 11118413,
+                                content:
+                                    "Reviens donc, ma plus chère petite lapine. Avec le temps, nous corrigerons ensemble tous tes défauts.",
+                                voice: "story/1102/111096/1BD572A2",
+                                npc: 111123,
+                                next: 11118414,
+                            },
+                            {
+                                id: 11118414,
+                                content:
+                                    "Maman Lapin est prête à t’accorder une nouvelle chance. Il te suffit de reconnaître tes erreurs et d’abandonner ces rêves impossibles... À présent, laisse-moi rendre le « Jugement » en son nom.",
+                                voice: "story/1102/111096/1BD572CC",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823028030812157607",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118501,
+                                content: "Ada. Reconnais-tu avoir enfreint les règles établies par « Le Jugement » Maman Lapin ?",
+                                voice: "story/1102/111096/1BD58112",
+                                npc: 111125,
+                                next: 11118502,
+                            },
+                            {
+                                id: 11118502,
+                                content: "... Oui.",
+                                voice: "story/1102/111096/1BD5813C",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823033824792158741",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17823844041572170055", "17823850660962171603"],
+                        dialogues: [
+                            {
+                                id: 11118601,
+                                content: "...",
+                                voice: "story/1102/111096/1BD5917A",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118602,
+                            },
+                            {
+                                id: 11118602,
+                                content: "Ada... ?",
+                                voice: "story/1102/111096/1BD591A4",
+                                npc: 111165,
+                                next: 11118603,
+                            },
+                            {
+                                id: 11118603,
+                                content: "Qu’attends-tu encore ? Remercie Maman Lapin pour sa clémence et viens.",
+                                voice: "story/1102/111096/1BD591CE",
+                                npc: 111167,
+                                next: 11118604,
+                            },
+                            {
+                                id: 11118604,
+                                content:
+                                    "... Maman Lapin. Tout ce que vous avez dit est vrai. J’ai enfreint les règles de Maman Lapin. J’ai fait des choses qu’« Ada » n’aurait jamais dû faire...",
+                                voice: "story/1102/111096/1BD591F8",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118605,
+                            },
+                            {
+                                id: 11118605,
+                                content: "Mais... je ne regrette rien ! Parce que je ne suis pas Ada ! Je suis moi-même !",
+                                voice: "story/1102/111096/1BD59222",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118606,
+                            },
+                            {
+                                id: 11118606,
+                                content: "... Qu’as-tu dit ?",
+                                voice: "story/1102/111096/1BD5924C",
+                                npc: 111123,
+                                next: 11118607,
+                            },
+                            {
+                                id: 11118607,
+                                content: "Idiote ! Tu vas mourir si tu mets Maman Lapin en colère !",
+                                voice: "story/1102/111096/1BD59276",
+                                npc: 111165,
+                                next: 11118608,
+                            },
+                            {
+                                id: 11118608,
+                                content: "Peut-être. Morgana m’a toujours dit que j’étais une imbécile finie. Et je l’ai toujours su.",
+                                voice: "story/1102/111096/1BD592A0",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118609,
+                            },
+                            {
+                                id: 11118609,
+                                content:
+                                    "Mais je suis plus heureuse que vous ! Parce que même si j’échoue... même si Maman Lapin me tue... j’ai tout de même fait un pas vers un avenir que je ne regretterai jamais ! Alors que vous, malgré toute votre intelligence, vous n’êtes capables de rien !",
+                                voice: "story/1102/111096/1BD592CA",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118610,
+                            },
+                            {
+                                id: 11118610,
+                                content: "... Hah.",
+                                voice: "story/1102/111096/1BD592F4",
+                                npc: 111165,
+                                next: 11118611,
+                            },
+                            {
+                                id: 11118611,
+                                content: "Pathétique... Pathétique !",
+                                voice: "story/1102/111096/1BD5931E",
+                                npc: 111123,
+                                next: 11118612,
+                            },
+                            {
+                                id: 11118612,
+                                content: "Le mal doit être éliminé.",
+                                voice: "story/1102/111096/1BD59348",
+                                npc: 111169,
+                                next: 11118613,
+                            },
+                            {
+                                id: 11118613,
+                                content: "... Victor... Non. {nickname2}.",
+                                voice: "story/1102/111096/1BD59372",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118614,
+                            },
+                            {
+                                id: 11118614,
+                                content:
+                                    "Il existe un petit secret que je suis la seule à connaître. Peut-être que tu l’ignores. Peut-être même que Maman Lapin l’ignore.",
+                                voice: "story/1102/111096/1BD5939C",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118615,
+                            },
+                            {
+                                id: 11118615,
+                                content:
+                                    "<blue>Je ne suis pas une menteuse. En vérité, je ne t’ai jamais menti. Je ne t’ai jamais vraiment dit que tu étais Victor.</>",
+                                voice: "story/1102/111096/1BD593C6",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118616,
+                            },
+                            {
+                                id: 11118616,
+                                content:
+                                    "<blue>Victor n’a jamais besoin d’être aussi poli avec Ada ! Victor et Ada sont les meilleurs amis du monde, après tout !</>",
+                                voice: "story/1102/111004/1BC9E9AC",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118617,
+                            },
+                            {
+                                id: 11118617,
+                                content:
+                                    "<blue>Bienvenue dans le parc d’attractions privé de Victor et Ada ! Quand on était petits, Victor et Ada passaient toutes leurs journées ici.</>",
+                                voice: "story/1102/111011/1BCA5A8C",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118618,
+                            },
+                            {
+                                id: 11118618,
+                                content:
+                                    "<blue>À l’époque, Ada avait enfin réussi à battre le score de Victor. Alors après avoir insisté pendant des heures, Victor avait fini par lui fabriquer cette peluche de ses propres mains.</>",
+                                voice: "story/1102/111014/1BCA8BEE",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118619,
+                            },
+                            {
+                                id: 11118619,
+                                content:
+                                    "<blue>Si Victor pouvait rester ici avec Ada pour toujours, il n’aurait plus jamais à souffrir dans la Légion.</>",
+                                voice: "story/1102/111061/1BCD8F84",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118620,
+                            },
+                            {
+                                id: 11118620,
+                                content:
+                                    "Je ne voulais pas te mentir. Mais je n’osais pas non plus désobéir à Maman Lapin... Alors c’est le seul moyen que j’ai trouvé. Finalement, je ne suis peut-être pas aussi bête que ça. Regarde : même Maman Lapin ne s’en est jamais aperçue.",
+                                voice: "story/1102/111096/1BD59498",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118621,
+                            },
+                            {
+                                id: 11118621,
+                                content: "... Tais-toi !",
+                                voice: "story/1102/111096/1BD594C2",
+                                npc: 111123,
+                                next: 11118622,
+                            },
+                            {
+                                id: 11118622,
+                                content: "... Le destin l’a déjà révélé. La mort l’attend.",
+                                voice: "story/1102/111096/1BD594EC",
+                                npc: 111168,
+                                next: 11118623,
+                            },
+                            {
+                                id: 11118623,
+                                content:
+                                    "Je me suis choisi un nouveau nom. <H>Eve</>. Il est joli, n’est-ce pas ? Si un jour tu reviens... grave ce nom sur ma tombe.",
+                                voice: "story/1102/111096/1BD59516",
+                                npc: 111002,
+                                speakerName: "« La Papesse » Ada",
+                                next: 11118624,
+                            },
+                            {
+                                id: 11118624,
+                                content:
+                                    "... Tu es irrécupérable ! Créature défectueuse ! Lapine pourrie ! Tu n’es même pas digne d’endosser <H>mon rôle</> !",
+                                voice: "story/1102/111096/1BD59540",
+                                npc: 111123,
+                                next: 11118625,
+                            },
+                            {
+                                id: 11118625,
+                                content: "Le monde au-delà du Paradis... doit être immense, n’est-ce pas ?",
+                                voice: "story/1102/111096/1BD5956A",
+                                npc: 111002,
+                                next: 11118626,
+                            },
+                            {
+                                id: 11118626,
+                                content: "Hein ?",
+                                voice: "story/1102/111096/1BD59594",
+                                npc: 111002,
+                                next: 11118627,
+                            },
+                            {
+                                id: 11118627,
+                                content: "Une gre-gre... grenade ! C’est une grenade ! Vite ! Fuyez tous !",
+                                voice: "story/1102/111096/1BD595BE",
+                                npc: 111150,
+                                next: 11118628,
+                            },
+                            {
+                                id: 11118628,
+                                content: "Ne paniquez pas. Ce n’était qu’une grenade aveuglante.",
+                                voice: "story/1102/111096/1BD595E8",
+                                npc: 111125,
+                                next: 11118629,
+                            },
+                            {
+                                id: 11118629,
+                                content: "Tu es revenu me chercher... Tu ne m’as pas abandonnée !",
+                                voice: "story/1102/111096/1BD59612",
+                                npc: 111002,
+                                next: 11118630,
+                            },
+                            {
+                                id: 11118630,
+                                content: "Je... Je... Je suis en train de rêver... ? Tu peux me pincer la joue pour vérifier ?",
+                                voice: "story/1102/111096/1BD5963C",
+                                npc: 111002,
+                                next: 11118631,
+                            },
+                            {
+                                id: 11118631,
+                                content:
+                                    "Tu continues à interpréter ton rôle de « Chariot » avec beaucoup de sérieux. Impulsif. Décisif. Et pourtant incapable de comprendre la situation dans son ensemble.",
+                                voice: "story/1102/111096/1BD59666",
+                                npc: 111123,
+                                next: 11118632,
+                            },
+                            {
+                                id: 11118632,
+                                content:
+                                    "Parmi tous ceux de ces dernières années, tu es {性别2:celui|celle} qui convenait le mieux au rôle de Victor. La première fois que je t’ai vu, j’ai eu l’impression que cet ami d’enfance auquel je pensais sans cesse se tenait à nouveau devant moi...",
+                                voice: "story/1102/111096/1BD59690",
+                                npc: 111123,
+                                next: 11118633,
+                            },
+                            {
+                                id: 11118633,
+                                content: "Mais... Je ne suis plus disposée à t’accorder une seconde chance.",
+                                voice: "story/1102/111096/1BD596BA",
+                                npc: 111123,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17860343713555575443",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118503,
+                                content: "Ada. Reconnais-tu avoir aidé Victor et Falsi à s’enfuir, exposant ainsi le Paradis au danger ?",
+                                voice: "story/1102/111096/1BD58166",
+                                npc: 111125,
+                                next: 11118504,
+                            },
+                            {
+                                id: 11118504,
+                                content: "... Oui.",
+                                voice: "story/1102/111096/1BD58190",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823844041572170055",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118701,
+                                content: "Toute résistance est vaine.",
+                                voice: "story/1102/111096/1BD5A1E2",
+                                npc: 111123,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17860344412535576210",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17860344698155576507"],
+                        dialogues: [
+                            {
+                                id: 11118505,
+                                content:
+                                    "Ada. Comprends-tu que tout ce que tu as fait cette nuit n’est pas ce qu’aurait dû faire « La Papesse » Ada ?",
+                                voice: "story/1102/111096/1BD581BA",
+                                npc: 111125,
+                                next: 11118506,
+                            },
+                            {
+                                id: 11118506,
+                                content: "... Oui.",
+                                voice: "story/1102/111096/1BD581E4",
+                                npc: 111001,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17860344698155576507",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118507,
+                                content:
+                                    "Ha ha ! Je savais bien qu’Ada était simplement un peu perdue ! Il suffisait d’en parler calmement !",
+                                voice: "story/1102/111096/1BD5820E",
+                                npc: 111150,
+                                next: 11118508,
+                            },
+                            {
+                                id: 11118508,
+                                content: "Veille à ce que cela ne se reproduise plus.",
+                                voice: "story/1102/111096/1BD58238",
+                                npc: 111169,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823850660962171603",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17823850875872172012"],
+                        dialogues: [
+                            {
+                                id: 11118801,
+                                content: "C’est tout ce dont tu es capable ?",
+                                voice: "story/1102/111096/1BD5B24A",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178603505889610034545",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118509,
+                                content: "Viens, Ada. Rentre enfin dans ton véritable foyer.",
+                                voice: "story/1102/111096/1BD58262",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17823850875872172012",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17841064289151111581", "17841065337092213630", "178427082216818756502"],
+                        dialogues: [
+                            {
+                                id: 11118901,
+                                content: "Lapins Blancs du Paradis. Tuez-{性别2:le|la}.",
+                                voice: "story/1102/111096/1BD5C2B2",
+                                npc: 111123,
+                                next: 11118902,
+                            },
+                            {
+                                id: 11118902,
+                                content: "<H>Vous vous opposez par les armes</> à un militaire impérial. J’ai donc le droit de riposter.",
+                                voice: "story/1102/111096/1BD5C2DC",
+                                npc: 110022,
+                                next: 11118903,
+                            },
+                            {
+                                id: 11118903,
+                                content: "Je vous donne une dernière chance. Posez vos armes et éloignez-vous d’ici.",
+                                voice: "story/1102/111096/1BD5C306",
+                                npc: 110022,
+                                next: 11118904,
+                            },
+                            {
+                                id: 11118904,
+                                content:
+                                    "Reprenez-vous ! Je sais que... dans le fond, vous avez toujours voulu partir, pas vrai ?! C’est notre unique chance !",
+                                voice: "story/1102/111096/1BD5C330",
+                                npc: 111002,
+                                next: 11118905,
+                            },
+                            {
+                                id: 11118905,
+                                content: "Je... Maman Lapin... P-pardon... Mon véritable amoureux est dehors !",
+                                voice: "story/1102/111096/1BD5C35A",
+                                npc: 111164,
+                                next: 11118906,
+                            },
+                            {
+                                id: 11118906,
+                                content: "Tu n’oserais pas !",
+                                voice: "story/1102/111096/1BD5C384",
+                                npc: 111125,
+                                next: 11118907,
+                            },
+                            {
+                                id: 11118907,
+                                content: "Laisse tomber, Cesare. Laisse-les partir.",
+                                voice: "story/1102/111096/1BD5C3AE",
+                                npc: 111123,
+                                next: 11118908,
+                            },
+                            {
+                                id: 11118908,
+                                content:
+                                    "Puisque mes petites lapines ne sont plus sages... Nous en élèverons d’autres. Considérons cela comme un nouveau cycle de purification, de destruction et de renaissance du Paradis.",
+                                voice: "story/1102/111096/1BD5C3D8",
+                                npc: 111123,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17841064289151111581",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118909,
+                                content: "Victor... enfin non... {性别2:monsieur|madame} ! Je vous en supplie, retenez Maman Lapin !",
+                                voice: "story/1102/111096/1BD5C402",
+                                npc: 111173,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17841065337092213630",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118910,
+                                content: "... Le destin annonçait donc réellement notre départ ? Dans ce cas...",
+                                voice: "story/1102/111096/1BD5C42C",
+                                npc: 111168,
+                                next: 11118911,
+                            },
+                            {
+                                id: 11118911,
+                                content:
+                                    "Au diable Karma ! Au diable le destin ! Pfiou... Ça fait un bien fou ! Je vais enfin pouvoir arrêter de parler par énigmes !",
+                                voice: "story/1102/111096/1BD5C456",
+                                npc: 111168,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178427082216818756502",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17841155727334420257", "17841156367984420727", "17841156682394421035", "17841157613054421476"],
+                        dialogues: [
+                            {
+                                id: 11118912,
+                                content: "Tu ne pars pas ?",
+                                voice: "story/1102/111096/1BD5C480",
+                                npc: 110022,
+                                next: 11118913,
+                            },
+                            {
+                                id: 11118913,
+                                content:
+                                    "À l’extérieur du Paradis, les gens me méprisent parce que je suis un Charon. Ils m’ont tout pris : le travail pour lequel j’ai lutté toute ma vie, la fortune que j’avais amassée, et même ma femme et mes enfants qui m’aimaient.",
+                                voice: "story/1102/111096/1BD5C4AA",
+                                npc: 111167,
+                                next: 11118914,
+                            },
+                            {
+                                id: 11118914,
+                                content:
+                                    "J’avais enfin trouvé ici un endroit où vivre... Pourquoi ?! Pourquoi vous autres Solariens voulez-vous même me voler le droit de rêver ?! Meurs... Crève donc... !",
+                                voice: "story/1102/111096/1BD5C4D4",
+                                npc: 111167,
+                                next: 11118917,
+                            },
+                            {
+                                id: 11118917,
+                                content:
+                                    "J’étais un tueur à gages. Le monde extérieur ne m’acceptait déjà plus. C’est Maman Lapin qui m’a offert une seconde chance. Je ne la trahirai jamais.",
+                                voice: "story/1102/111096/1BD5C552",
+                                npc: 111169,
+                                next: 11118918,
+                            },
+                            {
+                                id: 11118918,
+                                content: "Pour Maman Lapin ! Pour notre foyer !",
+                                voice: "story/1102/111096/1BD5C57C",
+                                npc: 111169,
+                                options: [
+                                    {
+                                        id: 11118915,
+                                        content: "<I>Pour protéger vos rêves, vous pensez avoir le droit d’ôter la vie aux autres ?</>",
+                                        voice: "story/1102/111096/1BD5C4FE",
+                                        next: 11118919,
+                                        impr: [1011, "Wisdom", 3],
+                                    },
+                                    {
+                                        id: 11118916,
+                                        content: "<I>Tous les rêves finissent un jour par prendre fin.</>",
+                                        voice: "story/1102/111096/1BD5C528",
+                                        next: 11118919,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11118919,
+                                content: "...",
+                                voice: "story/1102/111096/1BD5C5A6",
+                                npc: 110022,
+                                next: 11118920,
+                            },
+                            {
+                                id: 11118920,
+                                content: "Au suivant.",
+                                voice: "story/1102/111096/1BD5C5D0",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17841155727334420257",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119001,
+                                content:
+                                    "... On dirait que le moment est enfin venu. Professeur Woodville. Partons ensemble. Rentrons en Aethyrie.",
+                                voice: "story/1102/111096/1BD5D31A",
+                                npc: 111165,
+                                next: 11119002,
+                            },
+                            {
+                                id: 11119002,
+                                content:
+                                    "Merci pour tout ce temps passé parmi vous, maître d’Arcano. Morgana... non, Catherine. Nous devons emmener ces enfants avec nous. Ils ne pourront jamais grandir correctement dans un endroit pareil.",
+                                voice: "story/1102/111096/1BD5D344",
+                                npc: 111171,
+                                speakerName: "Woodville",
+                                next: 11119003,
+                            },
+                            {
+                                id: 11119003,
+                                content: "D’accord. Partez devant, professeur. Je vais aller les chercher.",
+                                voice: "story/1102/111096/1BD5D36E",
+                                npc: 111165,
+                                speakerName: "Catherine",
+                                next: 11119004,
+                            },
+                            {
+                                id: 11119004,
+                                content: "Vous deux... E-emmenez aussi ce vieil homme avec vous !",
+                                voice: "story/1102/111096/1BD5D398",
+                                npc: 111163,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17841156367984420727",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119005,
+                                content:
+                                    "Je ne peux pas partir... Maman Lapin me tuera... Non... Si je reste ici, elle risque aussi de me tuer !",
+                                voice: "story/1102/111096/1BD5D3C2",
+                                npc: 111174,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17841156682394421035",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119006,
+                                content: "T-toi... N’approche pas...",
+                                voice: "story/1102/111096/1BD5D3EC",
+                                npc: 111201,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17841157613054421476",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119101,
+                                content: "Maman Lapin. Il est temps de mettre fin à cette petite comédie.",
+                                voice: "story/1102/111096/1BD5E382",
+                                npc: 110022,
+                                next: 11119102,
+                            },
+                            {
+                                id: 11119102,
+                                content:
+                                    "J’ai dû contourner la montagne par la vallée. Ça m’a pris un peu plus de temps que prévu. Je ne suis pas arrivé trop tard ?",
+                                voice: "story/1102/111096/1BD5E3AC",
+                                npc: 110022,
+                                next: 11119103,
+                            },
+                            {
+                                id: 11119103,
+                                content: "Yiou... ! Non... Pas du tout...",
+                                voice: "story/1102/111096/1BD5E3D6",
+                                npc: 111002,
+                                next: 11119104,
+                            },
+                            {
+                                id: 11119104,
+                                content: "Très bien. Maintenant, arrête de pleurer.",
+                                voice: "story/1102/111096/1BD5E400",
+                                npc: 110022,
+                                next: 11119105,
+                            },
+                            {
+                                id: 11119105,
+                                content: "Ouuuin... OUUUUIIIIIIN !",
+                                voice: "story/1102/111096/1BD5E42A",
+                                npc: 111002,
+                                next: 11119106,
+                            },
+                            {
+                                id: 11119106,
+                                content: "... Tu pleures trop fort. Ça me donne mal au crâne.",
+                                voice: "story/1102/111096/1BD5E454",
+                                npc: 110022,
+                                next: 11119107,
+                            },
+                            {
+                                id: 11119107,
+                                content: "Ouuuin... D-d’accord ! Alors je vais t’encourager ! Courage ! Courage ! Va battre Maman Lapin !",
+                                voice: "story/1102/111096/1BD5E47E",
+                                npc: 111002,
+                                next: 11119108,
+                            },
+                            {
+                                id: 11119108,
+                                content:
+                                    "Partez donc, partez donc... Mes petits lapins ont grandi, et cela me remplit de joie... Désormais, les règles du Paradis changent. Maman Lapin va chasser tous les petits lapins et sélectionner les participants du prochain jeu !",
+                                voice: "story/1102/111096/1BD5E4A8",
+                                npc: 111123,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11023202,
+                name: "Mettre fin à tout cela",
+                desc: "Il est temps de mettre fin au cauchemar qui plane sur Arcano.",
+                nodes: [
+                    {
+                        id: "17857738455844453424",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17857741454785568441"],
+                        dialogues: [
+                            {
+                                id: 11119801,
+                                content: "Ah... Comme les efforts désespérés des petits lapins sont attendrissants.",
+                                voice: "story/1102/111096/1BD6565A",
+                                npc: 111123,
+                                next: 11119802,
+                            },
+                            {
+                                id: 11119802,
+                                content:
+                                    "Je ne suis pas le commandant Avar. Je ne peux pas résoudre tous les problèmes à la perfection. Alors tout ce qu’il me reste à faire... c’est te vaincre ici.",
+                                voice: "story/1102/111096/1BD65684",
+                                npc: 110022,
+                                next: 11119803,
+                            },
+                            {
+                                id: 11119803,
+                                content: "Vraiment...? Dans ce cas, je vais ériger une tombe au nom du « Chariot » sur ton cadavre.",
+                                voice: "story/1102/111096/1BD656AE",
+                                npc: 111123,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17857741454785568441",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17857743811715572241", "17857744086435572963"],
+                        dialogues: [
+                            {
+                                id: 11119901,
+                                content: "Falsi ! Pourquoi es-tu revenue ? Tes blessures...",
+                                voice: "story/1102/111096/1BD666C2",
+                                npc: 110022,
+                                next: 11119902,
+                            },
+                            {
+                                id: 11119902,
+                                content: "Ça n’a aucune importance. Je ne ressens plus la douleur. C’est tout ce qui compte.",
+                                voice: "story/1102/111096/1BD666EC",
+                                npc: 111110,
+                                next: 11119903,
+                            },
+                            {
+                                id: 11119903,
+                                content:
+                                    "Ne t’inquiète pas. Je ne suis pas revenue ici pour mourir. Tu m’as dit que tu continuerais à me regarder.",
+                                voice: "story/1102/111096/1BD66716",
+                                npc: 111110,
+                                next: 11119904,
+                            },
+                            {
+                                id: 11119904,
+                                content: "Alors regarde-moi... expier tous les péchés de mon passé.",
+                                voice: "story/1102/111096/1BD66740",
+                                npc: 111110,
+                                next: 11119905,
+                            },
+                            {
+                                id: 11119905,
+                                content: "Ça suffit ! Ça suffit ! ÇA SUFFIT ! Vous allez tous être ensevelis avec mon Paradis !",
+                                voice: "story/1102/111096/1BD6676A",
+                                npc: 111123,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17857743811715572241",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11120001,
+                                content: "Pourquoi... Pourquoi est-ce que tout le monde m’abandonne ?!",
+                                voice: "story/1102/111096/1BD6772A",
+                                npc: 111123,
+                                next: 11120002,
+                            },
+                            {
+                                id: 11120002,
+                                content: "Pourquoi... Pourquoi voulez-vous détruire ce Paradis ?!",
+                                voice: "story/1102/111096/1BD67754",
+                                npc: 111123,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17857744086435572963",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11120101,
+                                content: "Je vous en prie... Ne détruisez pas mon Paradis...",
+                                voice: "story/1102/111096/1BD68792",
+                                npc: 111123,
+                                next: 11120102,
+                            },
+                            {
+                                id: 11120102,
+                                content: "Maman Lapin... Cette farce absurde touche à sa fin.",
+                                voice: "story/1102/111096/1BD687BC",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17861020334603351118",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119301,
+                                content: "Il y a quatre ans, les soldats de la Légion ont réduit ma patrie en cendres.",
+                                voice: "story/1102/111096/1BD60452",
+                                npc: 111123,
+                                next: 11119302,
+                            },
+                            {
+                                id: 11119302,
+                                content: "Quatre ans plus tard, la Légion est revenue jusqu’aux Montagnes d’Arcano.",
+                                voice: "story/1102/111096/1BD6047C",
+                                npc: 111123,
+                                next: 11119303,
+                            },
+                            {
+                                id: 11119303,
+                                content:
+                                    "Pourquoi est-ce toujours vous ? Pourquoi revenez-vous sans cesse pour détruire notre foyer ? Pour nous arracher tout ce qui nous reste ?",
+                                voice: "story/1102/111096/1BD604A6",
+                                npc: 111123,
+                                next: 11119304,
+                            },
+                            {
+                                id: 11119304,
+                                content:
+                                    "Et toi, quand tu imposes tes règles par la peur à des innocents, n’es-tu pas en train de leur arracher tout ce qu’ils possèdent ?",
+                                voice: "story/1102/111096/1BD604D0",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17862055158821671",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119401,
+                                content:
+                                    "Tais-toi ! Dans mon monde, chacun tient le rôle qui lui revient. Tout y est parfaitement ordonné.",
+                                voice: "story/1102/111096/1BD614BA",
+                                npc: 111123,
+                                next: 11119402,
+                            },
+                            {
+                                id: 11119402,
+                                content:
+                                    "C’est moi qui leur ai offert la stabilité et le bonheur. C’est moi qui leur ai offert ce merveilleux Paradis.",
+                                voice: "story/1102/111096/1BD614E4",
+                                npc: 111123,
+                                next: 11119403,
+                            },
+                            {
+                                id: 11119403,
+                                content:
+                                    "Si ce Paradis était aussi merveilleux que tu le prétends, quelqu’un comme Teresa ne se serait jamais suicidée par peur de toi.",
+                                voice: "story/1102/111096/1BD6150E",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17861022810575582390",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119701,
+                                content:
+                                    "<I>Jusqu’à présent, je ne comprenais pas pourquoi le commandant Avar devenait soudain silencieux lorsqu’il évoquait Arcano.</>",
+                                voice: "story/1102/111096/1BD645F2",
+                                npc: 110022,
+                                next: 11119702,
+                            },
+                            {
+                                id: 11119702,
+                                content:
+                                    "<I>Maintenant, je comprends. Il n’avait jamais oublié les habitants qui continuaient à vivre ici dans la peur.</>",
+                                voice: "story/1102/111096/1BD6461C",
+                                npc: 110022,
+                                next: 11119703,
+                            },
+                            {
+                                id: 11119703,
+                                content:
+                                    "<I>Il est simplement parti trop tôt. Trop tôt pour pouvoir changer quoi que ce soit. Mais sans les paroles qu’il nous avait laissées...</>",
+                                voice: "story/1102/111096/1BD64646",
+                                npc: 110022,
+                                next: 11119704,
+                            },
+                            {
+                                id: 11119704,
+                                content:
+                                    "<I>Peut-être qu’aujourd’hui Eve n’aurait jamais enfreint les règles du Paradis. Peut-être que les habitants n’auraient jamais trouvé le courage de s’enfuir.</>",
+                                voice: "story/1102/111096/1BD64670",
+                                npc: 110022,
+                                next: 11119705,
+                            },
+                            {
+                                id: 11119705,
+                                content: "<I>C’est lui qui a ouvert la première brèche dans ce Paradis prétendument parfait.</>",
+                                voice: "story/1102/111096/1BD6469A",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17865247134258961559",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119502,
+                                content: "{nickname2} ! J’ai trouvé une sortie ! Par là !",
+                                voice: "story/1102/111096/1BD6254C",
+                                npc: 111002,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17863768663015583861",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119501,
+                                content: "<I>Je vais bientôt manquer d’espace...</>",
+                                voice: "story/1102/111096/1BD62522",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17863769875776700126",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119601,
+                                content:
+                                    "Tu as sûrement déjà remarqué dans le village des objets parfaitement identiques. Même leurs défauts sont reproduits à l’identique !",
+                                voice: "story/1102/111096/1BD6358A",
+                                npc: 111002,
+                                next: 11119602,
+                            },
+                            {
+                                id: 11119602,
+                                content: "C’est pareil pour les obstacles ! Cherche bien où se cache l’imperfection !",
+                                voice: "story/1102/111096/1BD635B4",
+                                npc: 111002,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17865407761438468",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119603,
+                                content: "Ada... Espèce de traîtresse...",
+                                voice: "story/1102/111096/1BD635DE",
+                                npc: 111125,
+                                next: 11119604,
+                            },
+                            {
+                                id: 11119604,
+                                content: "Raté ! Je ne suis pas Ada !",
+                                voice: "story/1102/111096/1BD63608",
+                                npc: 111002,
+                                next: 11119605,
+                            },
+                            {
+                                id: 11119605,
+                                content:
+                                    "Peu importe. J’ai déjà éliminé d’innombrables produits défectueux. Le Paradis renaîtra encore une fois.",
+                                voice: "story/1102/111096/1BD63632",
+                                npc: 111125,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178654117933211870",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11119606,
+                                content: "Ada ? Ada !",
+                                voice: "story/1102/111096/1BD6365C",
+                                npc: 110022,
+                                next: 11119607,
+                            },
+                            {
+                                id: 11119607,
+                                content: "Ne t’inquiète pas, {nickname2} ! Je suis très forte aux jeux ! Cette fois aussi, on va gagner !",
+                                voice: "story/1102/111096/1BD63686",
+                                npc: 111002,
+                                next: 11119608,
+                            },
+                            {
+                                id: 11119608,
+                                content: "Et puis, après ça, n’oublie pas de m’appeler Eve. C’est le nouveau nom que je me suis choisi !",
+                                voice: "story/1102/111096/1BD636B0",
+                                npc: 111002,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11023203,
+                name: "Mettre fin à tout cela",
+                desc: "Il est temps de mettre fin au cauchemar qui plane sur Arcano.",
+                nodes: [
+                    {
+                        id: "17835147825507111413",
+                        type: "TalkNode",
+                        name: "SQ_Ex02_FixSimple_50_1",
+                        srId: 107101,
+                        pos: [-43987, -21755],
+                        next: ["17835148262467111891"],
+                        dialogues: [
+                            {
+                                id: 11120301,
+                                content: "...",
+                                voice: "story/1102/111096/1BD6A862",
+                                npc: 111003,
+                                speakerName: "« Le Jugement » Maman Lapin",
+                                next: 11120302,
+                            },
+                            {
+                                id: 11120302,
+                                content: "Ton visage...",
+                                voice: "story/1102/111096/1BD6A88C",
+                                npc: 110022,
+                                next: 11120303,
+                            },
+                            {
+                                id: 11120303,
+                                content:
+                                    "Je comprends maintenant... La personne que j’ai vue tuer ces gens, ce n’était pas Eve. C’était toi.",
+                                voice: "story/1102/111096/1BD6A8B6",
+                                npc: 111110,
+                                next: 11120304,
+                            },
+                            {
+                                id: 11120304,
+                                content: "Tu lui ressembles trait pour trait. Vous êtes jumelles ?",
+                                voice: "story/1102/111096/1BD6A8E0",
+                                npc: 110022,
+                                next: 11120305,
+                            },
+                            {
+                                id: 11120305,
+                                content:
+                                    "Non... C’est ma création. La copie la plus proche de la <H>véritable Ada</>... Une copie de <H>moi-même</>.",
+                                voice: "story/1102/111096/1BD6A90A",
+                                npc: 111003,
+                                next: 11120306,
+                            },
+                            {
+                                id: 11120306,
+                                content:
+                                    "Et pourtant, elle présentait encore un défaut majeur... Elle a trahi la voie que j’avais tracée pour elle. Elle vous a choisis, vous, et a détruit tout ce que j’avais bâti.",
+                                voice: "story/1102/111096/1BD6A934",
+                                npc: 111003,
+                                next: 11120307,
+                            },
+                            {
+                                id: 11120307,
+                                content: "Le Catalyseur... Il est donc capable de copier des êtres humains.",
+                                voice: "story/1102/111096/1BD6A95E",
+                                npc: 110022,
+                                next: 11120308,
+                            },
+                            {
+                                id: 11120308,
+                                content:
+                                    "Malheureusement, je ne peux copier que ce qui existe déjà. J’ai reproduit chaque pierre, chaque brique, pour reconstruire ce village tel qu’il était autrefois. Mais ceux qui sont morts... eux, je n’ai jamais pu les faire revenir.",
+                                voice: "story/1102/111096/1BD6A988",
+                                npc: 111003,
+                                next: 11120309,
+                            },
+                            {
+                                id: 11120309,
+                                content: "Pourquoi... La guerre a-t-elle emporté tout le monde ?",
+                                voice: "story/1102/111096/1BD6A9B2",
+                                npc: 111003,
+                                next: 11120310,
+                            },
+                            {
+                                id: 11120310,
+                                content: "Et pourquoi... m’a-t-elle laissée seule en vie ?",
+                                voice: "story/1102/111096/1BD6A9DC",
+                                npc: 111003,
+                                next: 11120311,
+                            },
+                            {
+                                id: 11120311,
+                                content: "... Pourquoi m’avoir sauvée, moi... ?",
+                                voice: "story/1102/111096/1BD6AA06",
+                                npc: 111003,
+                                next: 11120312,
+                            },
+                            {
+                                id: 11120312,
+                                content: "Ada... Toi aussi...",
+                                voice: "story/1102/111096/1BD6AA30",
+                                npc: 111002,
+                                next: 11120313,
+                            },
+                            {
+                                id: 11120313,
+                                content: "Va-t’en ! Sale produit défectueux !",
+                                voice: "story/1102/111096/1BD6AA5A",
+                                npc: 111003,
+                                next: 11120314,
+                            },
+                            {
+                                id: 11120314,
+                                content:
+                                    "Tu portes mon visage, mais tu passes tes journées à sourire bêtement comme une idiote ! Tu n’as jamais connu ne serait-ce qu’une fraction de ma souffrance ! De quel droit oses-tu me prendre en pitié ?!",
+                                voice: "story/1102/111096/1BD6AA84",
+                                npc: 111003,
+                                next: 11120315,
+                            },
+                            {
+                                id: 11120315,
+                                content: "Tu...",
+                                voice: "story/1102/111096/1BD6AAAE",
+                                npc: 111003,
+                                next: 11120316,
+                            },
+                            {
+                                id: 11120316,
+                                content: "Je comprends, tu sais. Parce que je suis toi. Et que tu es moi.",
+                                voice: "story/1102/111096/1BD6AAD8",
+                                npc: 111002,
+                                next: 11120317,
+                            },
+                            {
+                                id: 11120317,
+                                content: "Si Ada m’a créée... c’est parce qu’Ada était malheureuse, n’est-ce pas ?",
+                                voice: "story/1102/111096/1BD6AB02",
+                                npc: 111002,
+                                next: 11120318,
+                            },
+                            {
+                                id: 11120318,
+                                content:
+                                    "Peu importe tous tes efforts, tu n’arrivais plus à être heureuse. Alors tu m’as créée dans l’espoir qu’une nouvelle Ada <H>puisse vivre heureuse à ta place dans ce monde</>.",
+                                voice: "story/1102/111096/1BD6AB2C",
+                                npc: 111002,
+                                next: 11120319,
+                            },
+                            {
+                                id: 11120319,
+                                content:
+                                    "Le premier nom d’arcane que tu m’as donné n’était pas « La Papesse », mais « Le Monde »... Ce vingt-deuxième nom qui n’est jamais apparu.",
+                                voice: "story/1102/111096/1BD6AB56",
+                                npc: 111002,
+                                next: 11120320,
+                            },
+                            {
+                                id: 11120320,
+                                content: "Tu... Comment...",
+                                voice: "story/1102/111096/1BD6AB80",
+                                npc: 111003,
+                                next: 11120321,
+                            },
+                            {
+                                id: 11120321,
+                                content: "Désolée, Ada. J’ai lu ton journal sans faire exprès...",
+                                voice: "story/1102/111096/1BD6ABAA",
+                                npc: 111002,
+                                next: 11120322,
+                            },
+                            {
+                                id: 11120322,
+                                content:
+                                    "C-ce n’est pas vrai ! Ce n’était rien d’important ! J’écrivais ça sans réfléchir ! Qu’est-ce que tu peux comprendre ?!",
+                                voice: "story/1102/111096/1BD6ABD4",
+                                npc: 111003,
+                                next: 11120323,
+                            },
+                            {
+                                id: 11120323,
+                                content: "Si. Je comprends. Parce que je suis celle que tu étais autrefois, non ?",
+                                voice: "story/1102/111096/1BD6ABFE",
+                                npc: 111002,
+                                next: 11120324,
+                            },
+                            {
+                                id: 11120324,
+                                content:
+                                    "Tu as porté tout ça seule pendant des années. Tout ça juste pour te rapprocher un peu de ce foyer disparu... Tu devais être terriblement seule.",
+                                voice: "story/1102/111096/1BD6AC28",
+                                npc: 111002,
+                                next: 11120325,
+                            },
+                            {
+                                id: 11120325,
+                                content:
+                                    "À partir de maintenant, laisse-moi rester à tes côtés. Ensemble, nous irons demander pardon à ceux que tu as blessés. D’accord ?",
+                                voice: "story/1102/111096/1BD6AC52",
+                                npc: 111002,
+                                next: 11120326,
+                            },
+                            {
+                                id: 11120326,
+                                content: "Je...",
+                                voice: "story/1102/111096/1BD6AC7C",
+                                npc: 111003,
+                                next: 11120327,
+                            },
+                            {
+                                id: 11120327,
+                                content: "Attendez !",
+                                voice: "story/1102/111096/1BD6ACA6",
+                                npc: 110022,
+                                next: 11120328,
+                            },
+                            {
+                                id: 11120328,
+                                content: "Je suis désolé d’interrompre ce moment, mais nous avons un problème bien plus urgent !",
+                                voice: "story/1102/111096/1BD6ACD0",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835148262467111891",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-43987, -21755],
+                        next: ["17835148518967112305"],
+                    },
+                    {
+                        id: "17835148518967112305",
+                        type: "TalkNode",
+                        name: "SQ_Ex02_FixSimple_50_2",
+                        srId: 107101,
+                        pos: [-43987, -21755],
+                        next: ["17835149056027112768"],
+                        dialogues: [
+                            {
+                                id: 11120329,
+                                content:
+                                    "Eh bien, eh bien... Quelle scène bouleversante. Un amour entre sœurs ? Entre mère et fille ? Je ne sais plus trop. Quoi qu’il en soit, j’en aurais presque les larmes aux yeux.",
+                                voice: "story/1102/111096/1BD6ACFA",
+                                npc: 111120,
+                                speakerName: "???",
+                                next: 11120330,
+                            },
+                            {
+                                id: 11120330,
+                                content: "Fulvis. Je savais que tu étais encore en vie.",
+                                voice: "story/1102/111096/1BD6AD24",
+                                npc: 110022,
+                                next: 11120331,
+                            },
+                            {
+                                id: 11120331,
+                                content:
+                                    "Héhé... Si je n’avais pas pris soin de préparer un gilet pare-balles à l’avance, jamais je ne me serais montré devant toi.",
+                                voice: "story/1102/111096/1BD6AD4E",
+                                npc: 111120,
+                                next: 11120332,
+                            },
+                            {
+                                id: 11120332,
+                                content:
+                                    "Je vous dois même des remerciements. Sans vous, il aurait été bien plus difficile de mettre la main sur un Catalyseur intact après avoir blessé Maman Lapin.",
+                                voice: "story/1102/111096/1BD6AD78",
+                                npc: 111120,
+                                next: 11120333,
+                            },
+                            {
+                                id: 11120333,
+                                content: "Le Catalyseur... c’est Ada elle-même.",
+                                voice: "story/1102/111096/1BD6ADA2",
+                                npc: 110022,
+                                next: 11120334,
+                            },
+                            {
+                                id: 11120334,
+                                content:
+                                    "Le pouvoir de copie qui coule dans son sang pourra nourrir le Projet Nouvel Héritier. Pour une humble Charon, quel honneur suprême que de...",
+                                voice: "story/1102/111096/1BD6ADCC",
+                                npc: 111120,
+                                next: 11120335,
+                            },
+                            {
+                                id: 11120335,
+                                content:
+                                    "Cela fait tant d’années... Et pourtant... la Légion... <I>Kof...</> trouve toujours le moyen de parler d’honneur... Relâchez-la !",
+                                voice: "story/1102/111096/1BD6ADF6",
+                                npc: 111125,
+                                next: 11120336,
+                            },
+                            {
+                                id: 11120336,
+                                content:
+                                    "<I>Tss...</> Il y a encore un insecte qui bourdonne à mes oreilles ? Très bien. Considérez ceci comme un remerciement pour cette balle que vous m’avez offerte tout à l’heure...",
+                                voice: "story/1102/111096/1BD6AE20",
+                                npc: 111120,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835149056027112768",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-43987, -21755],
+                        next: ["17835149542027113650"],
+                    },
+                    {
+                        id: "17835149542027113650",
+                        type: "TalkNode",
+                        name: "SQ_Ex02_FixSimple_50_3",
+                        srId: 107101,
+                        pos: [-43987, -21755],
+                        dialogues: [
+                            {
+                                id: 11120337,
+                                content: "Rendre au centuple le moindre service reçu a toujours été l’une de mes plus grandes qualités.",
+                                voice: "story/1102/111096/1BD6AE4A",
+                                npc: 111120,
+                                next: 11120338,
+                            },
+                            {
+                                id: 11120338,
+                                content:
+                                    "Alors depuis le début, tu te cachais derrière le masque de Joy. Tu faisais semblant de nous aider pour nous pousser à affronter Maman Lapin et récolter les fruits de notre victoire.",
+                                voice: "story/1102/111096/1BD6AE74",
+                                npc: 110022,
+                                next: 11120339,
+                            },
+                            {
+                                id: 11120339,
+                                content: "Bien joué. Tu ne m’as pas déçu.",
+                                voice: "story/1102/111096/1BD6AE9E",
+                                npc: 111120,
+                                next: 11120340,
+                            },
+                            {
+                                id: 11120340,
+                                content: "... Tant mieux...",
+                                voice: "story/1102/111096/1BD6AEC8",
+                                npc: 111110,
+                                next: 11120341,
+                            },
+                            {
+                                id: 11120341,
+                                content: "Pardon ?",
+                                voice: "story/1102/111096/1BD6AEF2",
+                                npc: 111120,
+                                next: 11120342,
+                            },
+                            {
+                                id: 11120342,
+                                content: "Tu es toujours le Fulvis que je connais. Tant mieux.",
+                                voice: "story/1102/111096/1BD6AF1C",
+                                npc: 111110,
+                                next: 11120343,
+                            },
+                            {
+                                id: 11120343,
+                                content: "Merci. Je vais enfin pouvoir me venger.",
+                                voice: "story/1102/111096/1BD6AF46",
+                                npc: 111110,
+                                next: 11120344,
+                            },
+                            {
+                                id: 11120344,
+                                content:
+                                    "Alors viens. La Forteresse de Lonza aurait dû être votre tombeau. Cette fois, vous pouvez mourir l’esprit tranquille. Une seconde fois.",
+                                voice: "story/1102/111096/1BD6AF70",
+                                npc: 111120,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11023204,
+                name: "Vaincre Fulvis",
+                desc: "Une fois le cauchemar qui planait sur Arcano terminé, Fulvis surgit soudain. Tout cela faisait en réalité partie d’un complot qu’il avait soigneusement préparé. Heureusement, il reste bien le même salaud que vous connaissez. Battez-le et réduisez son plan à néant.",
+            },
+            {
+                id: 11023205,
+                name: "Fuir le Paradis",
+                desc: "Fulvis compte entraîner toutes les personnes présentes dans sa mort. Rassemblant ses dernières forces, Ada vous ouvre une voie pour vous échapper.",
+                nodes: [
+                    {
+                        id: "1783516069623818",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["1783516069623820"],
+                        dialogues: [
+                            {
+                                id: 11120601,
+                                content: "Hah... Hah...",
+                                voice: "story/1102/111096/1BD6D99A",
+                                npc: 110022,
+                                next: 11120602,
+                            },
+                            {
+                                id: 11120602,
+                                content: "Nous avons réussi... pas vrai... ?",
+                                voice: "story/1102/111096/1BD6D9C4",
+                                npc: 111110,
+                                next: 11120603,
+                            },
+                            {
+                                id: 11120603,
+                                content: "Hah... Hah... Vous croyez vraiment que tout est terminé parce que vous m’avez vaincu... ?",
+                                voice: "story/1102/111096/1BD6D9EE",
+                                npc: 111120,
+                                next: 11120604,
+                            },
+                            {
+                                id: 11120604,
+                                content: "Commandant Fulvis, nous avons enfin réussi à vous joindre.",
+                                voice: "story/1102/111096/1BD6DA18",
+                                npc: 111124,
+                                speakerName: "???",
+                                next: 11120605,
+                            },
+                            {
+                                id: 11120605,
+                                content:
+                                    "Ruines d’Arcano. Position du Catalyseur confirmée. Bouclez immédiatement les Montagnes d’Arcano. Déployez tous les dirigeables. Mettez les parachutistes en position. Exécutez les traîtres de la Légion, {nickname2} et Falsi !",
+                                voice: "story/1102/111096/1BD6DA42",
+                                npc: 111120,
+                                next: 11120606,
+                            },
+                            {
+                                id: 11120606,
+                                content: "Pourquoi ces deux individus se trouvent-ils avec vous, commandant ?",
+                                voice: "story/1102/111096/1BD6DA6C",
+                                npc: 111124,
+                                speakerName: "???",
+                                next: 11120607,
+                            },
+                            {
+                                id: 11120607,
+                                content:
+                                    "Pas de questions inutiles. {性别2:Il|Elle} aurait dû mourir à la Forteresse de Lonza. Cette fois, nous allons les éliminer jusqu’au dernier.",
+                                voice: "story/1102/111096/1BD6DA96",
+                                npc: 111120,
+                                next: 11120608,
+                            },
+                            {
+                                id: 11120608,
+                                content: "Oh... La Forteresse de Lonza ? Je comprends ce que vous voulez dire.",
+                                voice: "story/1102/111096/1BD6DAC0",
+                                npc: 111124,
+                                speakerName: "???",
+                                next: 11120609,
+                            },
+                            {
+                                id: 11120609,
+                                content: "Les renforts de la Légion sont arrivés. Vous l’avez mauvaise, n’est-ce pas ?",
+                                voice: "story/1102/111096/1BD6DAEA",
+                                npc: 111120,
+                                next: 11120610,
+                            },
+                            {
+                                id: 11120610,
+                                content:
+                                    "Vous me haïssez au plus haut point. Pourtant, vous n’osez pas me tuer. Parce que si je disparais, toutes les pistes menant à la Forteresse de Lonza disparaîtront avec moi.",
+                                voice: "story/1102/111096/1BD6DB14",
+                                npc: 111120,
+                                next: 11120611,
+                            },
+                            {
+                                id: 11120611,
+                                content: "Hé...",
+                                voice: "story/1102/111096/1BD6DB3E",
+                                npc: 110022,
+                                next: 11120612,
+                            },
+                            {
+                                id: 11120612,
+                                content: "Hm ?",
+                                voice: "story/1102/111096/1BD6DB68",
+                                npc: 111120,
+                                next: 11120613,
+                            },
+                            {
+                                id: 11120613,
+                                content: "Ce sont bien des renforts. Mais tu es sûr de savoir qui tu viens d’appeler ?",
+                                voice: "story/1102/111096/1BD6DB92",
+                                npc: 110022,
+                                next: 11120614,
+                            },
+                            {
+                                id: 11120614,
+                                content: "... ?!",
+                                voice: "story/1102/111096/1BD6DBBC",
+                                npc: 111120,
+                                next: 11120615,
+                            },
+                            {
+                                id: 11120615,
+                                content: "C-Ce n’est pas mon communicateur !",
+                                voice: "story/1102/111096/1BD6DBE6",
+                                npc: 111120,
+                                next: 11120616,
+                            },
+                            {
+                                id: 11120616,
+                                content:
+                                    "Fulvis, dois-je comprendre de vos paroles que ce qui est arrivé aux Loups Blancs et aux Griffons à la Forteresse de Lonza relevait également de votre manière d’« éliminer jusqu’au dernier » ?",
+                                voice: "story/1102/111096/1BD6DC10",
+                                npc: 111124,
+                                next: 11120617,
+                            },
+                            {
+                                id: 11120617,
+                                content: "Vous êtes...",
+                                voice: "story/1102/111096/1BD6DC3A",
+                                npc: 111120,
+                                next: 11120618,
+                            },
+                            {
+                                id: 11120618,
+                                content: "Votre Altesse... le prince Vergilius...",
+                                voice: "story/1102/111096/1BD6DC64",
+                                npc: 111120,
+                                next: 11120619,
+                            },
+                            {
+                                id: 11120619,
+                                content: "Cesare. Laissez-nous partir.",
+                                voice: "story/1102/111096/1BD4B428",
+                                npc: 110022,
+                                next: 11120620,
+                            },
+                            {
+                                id: 11120620,
+                                content:
+                                    "Pendant que tu me prenais en otage pour détourner mon attention... tu as échangé mon communicateur. Bien joué.",
+                                voice: "story/1102/111096/1BD6DCB8",
+                                npc: 111120,
+                                next: 11120621,
+                            },
+                            {
+                                id: 11120621,
+                                content: "Comment l’as-tu deviné ? Joy jouait mal son rôle ?",
+                                voice: "story/1102/111096/1BD6DCE2",
+                                npc: 111120,
+                                next: 11120622,
+                            },
+                            {
+                                id: 11120622,
+                                content:
+                                    "Au contraire. Joy le jouait trop bien. Le Fulvis que nous connaissons n’aurait jamais accepté de devenir un clown médiocre et ridicule. Ni son ambition ni sa cruauté ne l’auraient permis.",
+                                voice: "story/1102/111096/1BD6DD0C",
+                                npc: 111110,
+                                next: 11120623,
+                            },
+                            {
+                                id: 11120623,
+                                content: "Tout comme {性别2:il ne deviendra jamais Victor|elle ne deviendra jamais Victor}.",
+                                voice: "story/1102/111096/1BD6DD36",
+                                npc: 111110,
+                                next: 11120624,
+                            },
+                            {
+                                id: 11120624,
+                                content:
+                                    "Dès notre première rencontre avec « Joy », j’ai contacté Son Altesse le Prince et nous avons élaboré un plan.",
+                                voice: "story/1102/111096/1BD6DD60",
+                                npc: 110022,
+                                next: 11120625,
+                            },
+                            {
+                                id: 11120625,
+                                content:
+                                    "Tu étais trop avide. Si tu n’avais pas été aussi obsédé par cette récompense, tu ne te serais jamais aventuré seul ici sans prendre le temps d’enquêter.",
+                                voice: "story/1102/111096/1BD6DD8A",
+                                npc: 110022,
+                                next: 11120626,
+                            },
+                            {
+                                id: 11120626,
+                                content: "Héhéhé... Ahahahahahah...",
+                                voice: "story/1102/111096/1BD6DDB4",
+                                npc: 111120,
+                                next: 11120627,
+                            },
+                            {
+                                id: 11120627,
+                                content:
+                                    "Arrête de rire. Tu n’es plus un clown maintenant. Économise tes forces. Une fois rentré, plusieurs interrogatoires t’attendent encore. Je suis certain que la geôlière Vulcera saura parfaitement s’occuper de toi.",
+                                voice: "story/1102/111096/1BD6DDDE",
+                                npc: 110022,
+                                next: 11120628,
+                            },
+                            {
+                                id: 11120628,
+                                content: "Ridicule... Les procès ne sont qu’un jeu inventé par les faibles.",
+                                voice: "story/1102/111096/1BD6DE08",
+                                npc: 111120,
+                            },
+                        ],
+                    },
+                    {
+                        id: "1783516069623820",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17835175289181099378"],
+                        dialogues: [
+                            {
+                                id: 11120801,
+                                content: "<I>Kof... kof, kof...</>",
+                                voice: "story/1102/111096/1BD6FA6A",
+                                npc: 110022,
+                                next: 11120802,
+                            },
+                            {
+                                id: 11120802,
+                                content: "{nickname2} ! Falsi ! Vous allez bien ?!",
+                                voice: "story/1102/111096/1BD6FA94",
+                                npc: 111002,
+                                next: 11120803,
+                            },
+                            {
+                                id: 11120803,
+                                content: "Toujours {性别2:vivants|vivantes}. Occupe-toi de Falsi.",
+                                voice: "story/1102/111096/1BD6FABE",
+                                npc: 110022,
+                                next: 11120804,
+                            },
+                            {
+                                id: 11120804,
+                                content: "S-Sa respiration est très rapide...",
+                                voice: "story/1102/111096/1BD6FAE8",
+                                npc: 111002,
+                                next: 11120805,
+                            },
+                            {
+                                id: 11120805,
+                                content: "Surcharge du Moteur Phoxichor terminée. Passage à la phase suivante.",
+                                voice: "story/1102/111096/1BD6FB12",
+                                speakerName: "Voix mécanique",
+                                next: 11120806,
+                            },
+                            {
+                                id: 11120806,
+                                content: "Yiouuu— ! On dirait que ce tas de ferraille va encore exploser ! Je vais vous sortir d’ici !",
+                                voice: "story/1102/111096/1BD6FB3C",
+                                npc: 111002,
+                                next: 11120807,
+                            },
+                            {
+                                id: 11120807,
+                                content: "D-Désolée... Je n’arrive même pas à vous porter... Ouuuin...",
+                                voice: "story/1102/111096/1BD6FB66",
+                                npc: 111002,
+                                next: 11120808,
+                            },
+                            {
+                                id: 11120808,
+                                content:
+                                    "Là-bas... derrière cet abri... <I>Kof...</> Avec un peu de chance, il nous protégera du souffle de l’explosion.",
+                                voice: "story/1102/111096/1BD6FB90",
+                                npc: 110022,
+                                next: 11120809,
+                            },
+                            {
+                                id: 11120809,
+                                content: "...",
+                                voice: "story/1102/111096/1BD6FBBA",
+                                npc: 111125,
+                                next: 11120810,
+                            },
+                            {
+                                id: 11120810,
+                                content: "C’est terminé.",
+                                voice: "story/1102/111096/1BD6FBE4",
+                                npc: 111125,
+                                next: 11120811,
+                            },
+                            {
+                                id: 11120811,
+                                content: "Pardonne-moi. Une fois encore, j’ai laissé le Paradis être détruit.",
+                                voice: "story/1102/111096/1BD6FC0E",
+                                npc: 111125,
+                                next: 11120812,
+                            },
+                            {
+                                id: 11120812,
+                                content:
+                                    "Pourquoi n’es-tu pas parti avec les autres ? Même si tu restes ici pour mourir avec moi... <H>la patrie que tu as détruite</>, elle, ne reviendra jamais.",
+                                voice: "story/1102/111096/1BD6FC38",
+                                npc: 111003,
+                                next: 11120813,
+                            },
+                            {
+                                id: 11120813,
+                                content: "Pardonne-moi.",
+                                voice: "story/1102/111096/1BD6FC62",
+                                npc: 111125,
+                                next: 11120814,
+                            },
+                            {
+                                id: 11120814,
+                                content: "Sale... criminel de guerre...",
+                                voice: "story/1102/111096/1BD6FC8C",
+                                npc: 111003,
+                                next: 11120815,
+                            },
+                            {
+                                id: 11120815,
+                                content: "Je veux rentrer chez moi... Ma famille m’attend encore là-bas.",
+                                voice: "story/1102/111096/1BD6FCB6",
+                                npc: 111003,
+                                next: 11120816,
+                            },
+                            {
+                                id: 11120816,
+                                content: "Oui. Rentrons.",
+                                voice: "story/1102/111096/1BD6FCE0",
+                                npc: 111125,
+                                next: 11120817,
+                            },
+                            {
+                                id: 11120817,
+                                content: "<I>Le Catalyseur... réside dans le sang d’Ada.</>",
+                                voice: "story/1102/111096/1BD6FD0A",
+                                npc: 110022,
+                                next: 11120818,
+                            },
+                            {
+                                id: 11120818,
+                                content:
+                                    "<I>Le prince Vergilius a déjà pris contact avec les forces de la XIIIᵉ Légion stationnées dans la région de Flagson... À en juger par la situation, les Montagnes d’Arcano sont désormais complètement bouclées.</>",
+                                voice: "story/1102/111096/1BD6FD34",
+                                npc: 110022,
+                                next: 11120819,
+                            },
+                            {
+                                id: 11120819,
+                                content:
+                                    "<I>Le reste... je peux leur laisser. La seule question maintenant, c’est de savoir comment Eve, Falsi et moi allons survivre à cette explosion.</>",
+                                voice: "story/1102/111096/1BD6FD5E",
+                                npc: 110022,
+                                next: 11120820,
+                            },
+                            {
+                                id: 11120820,
+                                content: "... Toi...",
+                                voice: "story/1102/111096/1BD6FD88",
+                                npc: 110022,
+                                next: 11120821,
+                            },
+                            {
+                                id: 11120821,
+                                content: "Partez. Vous n’êtes plus les bienvenus au Paradis.",
+                                voice: "story/1102/111096/1BD6FDB2",
+                                npc: 111003,
+                                next: 11120822,
+                            },
+                            {
+                                id: 11120822,
+                                content: "♪ Brille, brille, petite étoile... ♪ Suspendue là-haut, dans le ciel... ♪",
+                                voice: "story/1102/111096/1BD6FDDC",
+                                npc: 111003,
+                                next: 11120823,
+                            },
+                            {
+                                id: 11120823,
+                                content: "C-C’est Ada qui nous dit de nous enfuir avec ce grand huit ?",
+                                voice: "story/1102/111096/1BD6FE06",
+                                npc: 111002,
+                                next: 11120824,
+                            },
+                            {
+                                id: 11120824,
+                                content: "{nickname2}, vite ! Allons-y !",
+                                voice: "story/1102/111096/1BD6FE30",
+                                npc: 111002,
+                                next: 11120825,
+                            },
+                            {
+                                id: 11120825,
+                                content: "Prends Falsi sur ton dos. Moi... ça ira.",
+                                voice: "story/1102/111096/1BD6FE5A",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835175289181099378",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11121002,
+                                content:
+                                    "<I>Kof...</> L’enregistreur... Pendant le combat contre Maman Lapin... il a été projeté plus loin...",
+                                voice: "story/1102/111096/1BD71B64",
+                                npc: 111110,
+                                next: 11121003,
+                            },
+                            {
+                                id: 11121003,
+                                content: "L’enregistreur ? Je croyais qu’il était détruit.",
+                                voice: "story/1102/111096/1BD71B8E",
+                                npc: 110022,
+                                next: 11121004,
+                            },
+                            {
+                                id: 11121004,
+                                content: "Désolée... Je t’ai menti au début.",
+                                voice: "story/1102/111096/1BD71BB8",
+                                npc: 111110,
+                                next: 11121005,
+                            },
+                            {
+                                id: 11121005,
+                                content:
+                                    "J’avais peur que tu veuilles te débarrasser de moi, comme Fulvis l’aurait fait. Alors j’ai gardé cet enregistreur comme ultime assurance. Et puis tout s’est enchaîné tellement vite... Je n’ai jamais eu le temps de te le remettre.",
+                                voice: "story/1102/111096/1BD71BE2",
+                                npc: 111110,
+                                next: 11121006,
+                            },
+                            {
+                                id: 11121006,
+                                content: "Maintenant, je dois... retrouver cette preuve. Je dois la protéger.",
+                                voice: "story/1102/111096/1BD71C0C",
+                                npc: 111110,
+                                next: 11121007,
+                            },
+                            {
+                                id: 11121007,
+                                content: "La Légion s’occupera des recherches ! Reviens immédiatement !",
+                                voice: "story/1102/111096/1BD71C36",
+                                npc: 110022,
+                                next: 11121008,
+                            },
+                            {
+                                id: 11121008,
+                                content: "Petit chat ! On ne contrôle pas ce grand huit ! On ne peut pas l’arrêter pour t’attendre !",
+                                voice: "story/1102/111096/1BD71C60",
+                                npc: 111002,
+                                next: 11121009,
+                            },
+                            {
+                                id: 11121009,
+                                content: "Ne vous en faites pas. Je ne mourrai pas ici.",
+                                voice: "story/1102/111096/1BD71C8A",
+                                npc: 111110,
+                                next: 11121010,
+                            },
+                            {
+                                id: 11121010,
+                                content:
+                                    "Parce qu’aujourd’hui plus que jamais... j’ai envie de vivre. Ce n’est pas un ordre que j’exécute. C’est ce que moi, j’ai décidé de faire.",
+                                voice: "story/1102/111096/1BD71CB4",
+                                npc: 111110,
+                                next: 11121011,
+                            },
+                            {
+                                id: 11121011,
+                                content: "Je vais vivre... et assumer tout ce que j’ai fait.",
+                                voice: "story/1102/111096/1BD71CDE",
+                                npc: 111110,
+                                next: 11121012,
+                            },
+                            {
+                                id: 11121012,
+                                content:
+                                    "Au revoir. J’espère que lorsque j’aurai expié tous mes péchés... j’aurai encore l’occasion de redevenir ton alliée.",
+                                voice: "story/1102/111096/1BD71D08",
+                                npc: 111110,
+                                next: 11121013,
+                            },
+                            {
+                                id: 11121013,
+                                content: "Falsi !",
+                                voice: "story/1102/111096/1BD71D32",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11023206,
+                name: "Parler à Vergilius",
+                desc: "Tout est désormais terminé. Vous avez déjoué le complot de Fulvis et, grâce à votre aide, la XIIIᵉ Légion a obtenu une piste concernant le Catalyseur. Vergilius vous attend à présent et semble avoir quelque chose à vous dire.",
+                nodes: [
+                    {
+                        id: "178352951395643287729",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107001,
+                        pos: [-3705, -20510],
+                        dialogues: [
+                            {
+                                id: 11121601,
+                                content: "Pendant ce temps...",
+                                voice: "story/1102/111096/1BD77DAA",
+                                next: 11121602,
+                            },
+                            {
+                                id: 11121602,
+                                content: "Mmh...",
+                                voice: "story/1102/111096/1BD77DD4",
+                                npc: 111110,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835266045061099231",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17853967676851339"],
+                        dialogues: [
+                            {
+                                id: 11121101,
+                                content: "A-t-on retrouvé Falsi ? Et Ada ?",
+                                voice: "story/1102/111096/1BD72BA2",
+                                npc: 110022,
+                                next: 11121102,
+                            },
+                            {
+                                id: 11121102,
+                                content:
+                                    "Les soldats poursuivent les recherches sans relâche. Le moindre résultat sera immédiatement transmis à la Légion.",
+                                voice: "story/1102/111096/1BD72BCC",
+                                npc: 111124,
+                                next: 11121103,
+                            },
+                            {
+                                id: 11121103,
+                                content:
+                                    "Avec les preuves récupérées par Falsi, mon frère aura sans doute matière à agir. Il pourra probablement s’en servir pour purger également les factions du Sénat qui se tenaient derrière Fulvis.",
+                                voice: "story/1102/111096/1BD72BF6",
+                                npc: 111124,
+                                next: 11121104,
+                            },
+                            {
+                                id: 11121104,
+                                content:
+                                    "Si c’est le cas... alors je pourrai enfin être à la hauteur de la confiance que le commandant Avar et mes camarades avaient placée en moi.",
+                                voice: "story/1102/111096/1BD72C20",
+                                npc: 110022,
+                                next: 11121105,
+                            },
+                            {
+                                id: 11121105,
+                                content:
+                                    "Au fait. Le témoignage de Falsi est également essentiel. Veille à ce qu’elle reçoive les meilleurs soins possibles.",
+                                voice: "story/1102/111096/1BD72C4A",
+                                npc: 110022,
+                                next: 11121106,
+                            },
+                            {
+                                id: 11121106,
+                                content:
+                                    "Naturellement. La Légion protégera ses témoins clés dans l’affaire de Lonza. Mais toi... comment as-tu encore réussi à finir {性别2:couvert|couverte} de blessures ? Heureusement, j’ai apporté un remède particulièrement efficace. Daphne l’a fait parvenir spécialement pour toi. Tiens, bois un peu d’eau.",
+                                voice: "story/1102/111096/1BD72C74",
+                                npc: 111124,
+                                next: 11121107,
+                            },
+                            {
+                                id: 11121107,
+                                content: "De l’eau...",
+                                voice: "story/1102/111096/1BD72C9E",
+                                npc: 110022,
+                                next: 11121108,
+                            },
+                            {
+                                id: 11121108,
+                                content:
+                                    "De l’eau normale. Prise à bord du dirigeable. Pas celle mélangée à des substances étranges dont tu parlais dans ton rapport.",
+                                voice: "story/1102/111096/1BD72CC8",
+                                npc: 111124,
+                                next: 11121109,
+                            },
+                            {
+                                id: 11121109,
+                                content: "Je vois.",
+                                voice: "story/1102/111096/1BD72CF2",
+                                npc: 110022,
+                                next: 11121110,
+                            },
+                            {
+                                id: 11121110,
+                                content: "Et si c’était moi qui te mentais ?",
+                                voice: "story/1102/111096/1BD72D1C",
+                                npc: 111124,
+                                next: 11121111,
+                            },
+                            {
+                                id: 11121111,
+                                content: "Tu pourrais bien me mentir sur quoi ?",
+                                voice: "story/1102/111096/1BD72D46",
+                                npc: 110022,
+                                next: 11121112,
+                            },
+                            {
+                                id: 11121112,
+                                content:
+                                    "Hmm... Voilà une excellente question. Laisse-moi le temps d'y réfléchir. Je te le dirai quand j'aurai trouvé.",
+                                voice: "story/1102/111096/1BD72D70",
+                                npc: 111124,
+                                next: 11121113,
+                            },
+                            {
+                                id: 11121113,
+                                content: "Merci encore. Tu es toujours là pour régler les situations les plus désespérées.",
+                                voice: "story/1102/111096/1BD72D9A",
+                                npc: 110022,
+                                next: 11121114,
+                            },
+                            {
+                                id: 11121114,
+                                content:
+                                    "Pourquoi me remercier ? Je n’ai fait que servir de messager en disant à la commandante Sibylle : « Il y a quelque chose dans les Montagnes d’Arcano que vous cherchez. » Le mérite revient entièrement à votre Légion.",
+                                voice: "story/1102/111096/1BD72DC4",
+                                npc: 111124,
+                                next: 11121115,
+                            },
+                            {
+                                id: 11121115,
+                                content: "Ça n’a rien à voir. Avec mon statut actuel, je serais incapable de mobiliser la Légion.",
+                                voice: "story/1102/111096/1BD72DEE",
+                                npc: 110022,
+                                next: 11121116,
+                            },
+                            {
+                                id: 11121116,
+                                content:
+                                    "Tu te trompes. Tu devrais dire : « avec ton statut d’alors ». Aujourd’hui, tu n’es plus du tout {性别2:le|la} même. Tu es désormais {性别2:celui|celle} qui a découvert l’un des éléments clés du Projet Nouvel Héritier.",
+                                voice: "story/1102/111096/1BD72E18",
+                                npc: 111124,
+                                next: 11121117,
+                            },
+                            {
+                                id: 11121117,
+                                content:
+                                    "Et puis... je pense que mon frère t’a toujours fait confiance. Avant notre départ de la capitale impériale, il m’a remis cette lettre écrite de sa propre main, avec pour instruction de te la remettre avant ton arrivée à Rougerive.",
+                                voice: "story/1102/111096/1BD72E42",
+                                npc: 111124,
+                                next: 11121118,
+                            },
+                            {
+                                id: 11121118,
+                                content:
+                                    "Maintenant que l’affaire Fulvis est réglée, je peux enfin te la confier. Je me demande bien quelle mission secrète il va te confier... Même moi, je n’ai pas le droit de la lire.",
+                                voice: "story/1102/111096/1BD72E6C",
+                                npc: 111124,
+                                next: 11121119,
+                            },
+                            {
+                                id: 11121119,
+                                content: "Il y a donc même ce genre de choses...",
+                                voice: "story/1102/111096/1BD72E96",
+                                npc: 110022,
+                                next: 11121120,
+                            },
+                            {
+                                id: 11121120,
+                                content: "Allons-y. Le duc Servius de Rougerive a déjà préparé un banquet en notre honneur.",
+                                voice: "story/1102/111096/1BD72EC0",
+                                npc: 111124,
+                                next: 11121121,
+                            },
+                            {
+                                id: 11121121,
+                                content:
+                                    "Ah, j’oubliais. Avec tes blessures, tu ne peux pas boire d’alcool pour le moment. Quoi qu’il en soit, monte à bord du dirigeable et repose-toi un peu. Les médecins doivent encore t’examiner.",
+                                voice: "story/1102/111096/1BD72EEA",
+                                npc: 111124,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17853967676851339",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17835268384651101749"],
+                        dialogues: [
+                            {
+                                id: 11121301,
+                                content:
+                                    "À brûler après lecture.\n  Protège Vergilius.\n  Dans les six mois à venir, assassine le duc Servius sans laisser la moindre trace.",
+                                voice: "story/1102/111096/1BD74C72",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835268384651101749",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11121401,
+                                content: "... ?!",
+                                voice: "story/1102/111096/1BD75CDA",
+                                npc: 110022,
+                                next: 11121402,
+                            },
+                            {
+                                id: 11121402,
+                                content: "Mmh... Hum ! Hm... Yiou.",
+                                voice: "story/1102/111096/1BD75D04",
+                                npc: 111002,
+                                speakerName: "???",
+                                next: 11121403,
+                            },
+                            {
+                                id: 11121403,
+                                content: "... Il est parti. Tu peux sortir.",
+                                voice: "story/1102/111096/1BD75D2E",
+                                npc: 110022,
+                                next: 11121404,
+                            },
+                            {
+                                id: 11121404,
+                                content:
+                                    "Cette personne qui avait l’air si noble... c’est un ami à toi ? Si jamais je t’ai offensé d’une manière ou d’une autre avant... ne m’en veux surtout pas !",
+                                voice: "story/1102/111096/1BD75D58",
+                                npc: 111002,
+                                options: [
+                                    {
+                                        id: 11121405,
+                                        content: "<I>Ne t’inquiète pas.</>",
+                                        voice: "story/1102/111096/1BD75D82",
+                                        next: 11121409,
+                                        impr: [1011, "Empathy", 3],
+                                    },
+                                    {
+                                        id: 11121406,
+                                        content: "<I>Je n’irai pas me plaindre à lui.</>",
+                                        voice: "story/1102/111096/1BD75DAC",
+                                        next: 11121409,
+                                        impr: [1011, "Morality", 3],
+                                    },
+                                    {
+                                        id: 11121407,
+                                        content:
+                                            "<I>Je me souviens de tout. Je suis de la vieille noblesse de Dismania. Tu vas avoir de sérieux ennuis.</>",
+                                        voice: "story/1102/111096/1BD75DD6",
+                                        next: 11121408,
+                                        impr: [1011, "Chaos", 3],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 11121409,
+                                content: "Euh... tu ne peux vraiment pas m’emmener avec toi ?",
+                                voice: "story/1102/111096/1BD75E2A",
+                                npc: 111002,
+                                next: 11121410,
+                            },
+                            {
+                                id: 11121408,
+                                content: "Yiou ! Noooon !",
+                                voice: "story/1102/111096/1BD75E00",
+                                npc: 111002,
+                                next: 11121409,
+                            },
+                            {
+                                id: 11121410,
+                                content: "Non. La mission qui m’attend est dangereuse. Si tu me suis, tu risques d’y laisser la vie.",
+                                voice: "story/1102/111096/1BD75E54",
+                                npc: 110022,
+                                next: 11121411,
+                            },
+                            {
+                                id: 11121411,
+                                content: "Wah... C-c’est à ce point-là... ?",
+                                voice: "story/1102/111096/1BD75E7E",
+                                npc: 111002,
+                                next: 11121412,
+                            },
+                            {
+                                id: 11121412,
+                                content: "C’est le métier de soldat. Rien d’inhabituel.",
+                                voice: "story/1102/111096/1BD75EA8",
+                                npc: 110022,
+                                next: 11121413,
+                            },
+                            {
+                                id: 11121413,
+                                content:
+                                    "Alors tu pourrais faire comme moi et te faire la malle de votre... euh... je-ne-sais-plus-combienième Légion !",
+                                voice: "story/1102/111096/1BD75ED2",
+                                npc: 111002,
+                                next: 11121414,
+                            },
+                            {
+                                id: 11121414,
+                                content: "Les déserteurs risquent aussi leur vie lorsqu’on les rattrape.",
+                                voice: "story/1102/111096/1BD75EFC",
+                                npc: 110022,
+                                next: 11121415,
+                            },
+                            {
+                                id: 11121415,
+                                content:
+                                    "Yiou ! C’est la mort des deux côtés ! Le chef de votre Légion serait-il une version géante de Maman Lapin ?! Le monde extérieur... ce ne serait pas aussi une immense version du Paradis ?",
+                                voice: "story/1102/111096/1BD75F26",
+                                npc: 111002,
+                                next: 11121416,
+                            },
+                            {
+                                id: 11121416,
+                                content:
+                                    "Arrête de dire n’importe quoi et va-t’en. Si quelqu’un de la Légion te voit, tu risques de ne plus pouvoir partir.",
+                                voice: "story/1102/111096/1BD75F50",
+                                npc: 110022,
+                                next: 11121417,
+                            },
+                            {
+                                id: 11121417,
+                                content: "Alors je vais devoir entreprendre mon voyage toute seule... Prends soin de toi, d’accord ?",
+                                voice: "story/1102/111096/1BD75F7A",
+                                npc: 111002,
+                                next: 11121418,
+                            },
+                            {
+                                id: 11121418,
+                                content: "Toi aussi.",
+                                voice: "story/1102/111096/1BD75FA4",
+                                npc: 110022,
+                                next: 11121419,
+                            },
+                            {
+                                id: 11121419,
+                                content: "Yiou ! Dans ce cas... tu veux bien refaire une promesse avec moi ?",
+                                voice: "story/1102/111096/1BD75FCE",
+                                npc: 111002,
+                                next: 11121420,
+                            },
+                            {
+                                id: 11121420,
+                                content:
+                                    "Promets-moi qu’on se reverra ! Et ce jour-là, je te raconterai tout, absolument tout ce que j’aurai vu pendant mon voyage !",
+                                voice: "story/1102/111096/1BD75FF8",
+                                npc: 111002,
+                                next: 11121421,
+                            },
+                            {
+                                id: 11121421,
+                                content: "Hein ? Ce n’est pas le petit lapin qu’Ada avait créé ?",
+                                voice: "story/1102/111096/1BD76022",
+                                npc: 111002,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 110233,
+        quests: [
+            {
+                id: 11023300,
+                name: "Ouvrir la boîte poussiéreuse",
+                desc: "Une fois la poussière retombée, vous repensez à cette boîte oubliée découverte dans le tombeau. Allez l’ouvrir pour voir ce qu’elle contient.",
+            },
+            {
+                id: 11023301,
+                name: "Ouvrir la boîte poussiéreuse",
+                desc: "Une fois la poussière retombée, vous repensez à cette boîte oubliée découverte dans le tombeau. Allez l’ouvrir pour voir ce qu’elle contient.",
+                nodes: [
+                    {
+                        id: "17833283092983263344",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107701,
+                        pos: [-8002, -106187],
+                        dialogues: [
+                            {
+                                id: 11123801,
+                                content:
+                                    "En ouvrant la boîte, vous trouvez un uniforme d’officier de l’Empire ainsi qu’un journal. Vous en retirez la poussière sur la couverture avant de l’ouvrir lentement.",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11023302,
+                name: "Feuilleter le journal",
+                desc: "Vous avez enfin ouvert la boîte poussiéreuse et y avez trouvé un journal. Il semble relater ce qu’a vécu un officier de l’Empire il y a quatre ans. Feuilletez-le pour découvrir ce qu’il a écrit.",
+                nodes: [
+                    {
+                        id: "17833275075243262406",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835028044952230"],
+                        dialogues: [
+                            {
+                                id: 11123802,
+                                content:
+                                    "J’ai enterré mon nom, mes souvenirs et tout mon passé ici.\nJe me souviens encore très clairement de la pluie de bombardements qui s’abattait comme une tempête de feu.\nUne fois le bombardement terminé, après que les corps de mes camarades se furent refroidis, je suis sorti de la grotte où je me cachais et j’ai essayé de trouver d’autres survivants...",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835028044952230",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835030094213259"],
+                        dialogues: [
+                            {
+                                id: 11123803,
+                                content: "Il ne respire plus...",
+                                npc: 700637,
+                                next: 11123804,
+                            },
+                            {
+                                id: 11123804,
+                                content: "Aucune réaction...",
+                                npc: 700637,
+                                next: 11123805,
+                            },
+                            {
+                                id: 11123805,
+                                content: "Est-ce qu’il reste quelqu’un en vie... ?",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835030094213259",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835028267352540"],
+                        dialogues: [
+                            {
+                                id: 11123806,
+                                content:
+                                    "Je cherchais des survivants dans un état d’engourdissement total, espérant qu’on réponde à mes appels. Mais seul le vent chaud et chargé d’odeur de sang me répondait.\nPlusieurs fois, j’ai cru sentir encore de la chaleur dans les corps de mes camarades. Mais en les sortant des décombres, j’ai compris que ce n’était que la chaleur résiduelle des explosions.\nJ’ai continué à fouiller parmi les cadavres, un après l’autre... jusqu’à ce qu’au fond d’un cratère, j’entende un bruit faible.\n \nJ’ai couru comme un fou, j’ai glissé en descendant le cratère, ma botte a volé au loin... mais je n’ai pas senti la douleur des pierres qui me déchiraient le pied. J’ai continué à dégager les corps... puis je l’ai vu... un soldat de l’Église Élyséenne...",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835028267352540",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835030285193411"],
+                        dialogues: [
+                            {
+                                id: 11123807,
+                                content: "Sale chien d’Hyperborea...",
+                                npc: 700638,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835030285193411",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835081923067252"],
+                        dialogues: [
+                            {
+                                id: 11123808,
+                                content:
+                                    "Il a soudain attrapé mon col avec une force incroyable pour quelqu’un en train de mourir, et m’a plaqué au sol.\nIl s’est retrouvé sur moi, une main serrée autour de ma gorge. Mon corps s’est affaibli, mais j’ai réussi à le repousser. J’ai voulu tirer, mais j’avais déjà vidé mes dernières balles avant de me cacher dans la grotte.\nIl est revenu à la charge, m’agrippant à la taille. J’ai frappé son dos avec la crosse, encore et encore... un coup, deux coups, trois coups... à chaque impact, je sentais son sang éclabousser mes pieds, mais il ne lâchait pas.\n \nSoudain, une douleur m’a transpercé le flanc. Je l’ai repoussé violemment... et il a craché un morceau de chair ensanglanté sur le sol. C’était le mien.\nSans arme, il ne nous restait que nos corps. Nous nous sommes battus comme des bêtes mourantes, sans technique, sans honneur, seulement avec l’instinct de survivre... à coups de morsures et de coups.\nLa boue mêlée au sang nous recouvrait entièrement. Ses coups étaient d’une violence extrême, il pouvait me faire perdre connaissance à tout moment. Je n’ai pu que serrer de toutes mes forces la plaie de son bras arraché.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835081923067252",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835030297593455"],
+                        dialogues: [
+                            {
+                                id: 11123809,
+                                content: "AAAAHHH !",
+                                npc: 700638,
+                                next: 11123810,
+                            },
+                            {
+                                id: 11123810,
+                                content: "Meurs... meurs... crève...",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835030297593455",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835081934907300"],
+                        dialogues: [
+                            {
+                                id: 11123811,
+                                content:
+                                    "La douleur de son bras arraché a ralenti ses coups. Je l’ai plaqué sous moi et je l’ai frappé au visage encore et encore.\nIl griffait mon corps à l’aveugle, laissant des traces sanglantes sur ma peau. Je ne sais pas combien de temps cela a duré... une minute ? Peut-être dix ?\nQuand j’ai repris mes esprits, il était déjà mort. Mon bras droit s’était disloqué à force de frapper, mais à ce moment-là, je continuais encore, de manière mécanique, à répéter les coups avec tout mon corps sans même m’en rendre compte.\nJe me suis finalement effondré. J’ai réussi à remettre mon bras en place tant bien que mal... puis j’ai perdu connaissance.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835081934907300",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835080451304758"],
+                        dialogues: [
+                            {
+                                id: 11123812,
+                                content: "Haa... haa...",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835080451304758",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835081958127378"],
+                        dialogues: [
+                            {
+                                id: 11123813,
+                                content:
+                                    "Quand je me suis réveillé, sa main s’était enfin relâchée. Dans sa paume... une montre de poche couverte de sang.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835081958127378",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835080461774804"],
+                        dialogues: [
+                            {
+                                id: 11123814,
+                                content: "Non... non... impossible...",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835080461774804",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835081979667452"],
+                        dialogues: [
+                            {
+                                id: 11123815,
+                                content:
+                                    "J’ai ouvert la montre en tremblant.\nÀ l’intérieur... une photo d’un soldat de l’Église Élyséenne et d’une jeune fille...",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835081979667452",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835080873615026"],
+                        dialogues: [
+                            {
+                                id: 11123816,
+                                content: "C’est impossible !",
+                                npc: 700637,
+                                next: 11123817,
+                            },
+                            {
+                                id: 11123817,
+                                content:
+                                    "Ce sont les maudits Élyséens qui ont commencé la guerre ! Ils ont détruit notre glorieuse capitale impériale ! Ils ont tué nos compatriotes ! Tout est de leur faute !",
+                                npc: 700637,
+                                next: 11123818,
+                            },
+                            {
+                                id: 11123818,
+                                content: "Ils méritent tous de mourir !",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835080873615026",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835081998187522"],
+                        dialogues: [
+                            {
+                                id: 11123819,
+                                content: "J’ai jeté la montre et pris le sédatif fourni par les alchimistes.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835081998187522",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835080884435067"],
+                        dialogues: [
+                            {
+                                id: 11123820,
+                                content: "Le sédatif... le sédatif...",
+                                npc: 700637,
+                                next: 11123821,
+                            },
+                            {
+                                id: 11123821,
+                                content:
+                                    "Nous sommes les justes... nous protégeons notre patrie... les Élyséens ne méritent aucune pitié...",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835080884435067",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835082014337578"],
+                        dialogues: [
+                            {
+                                id: 11123822,
+                                content:
+                                    "Sous l’effet du sédatif, j’ai retrouvé un peu de calme. J’ai eu du mal à sortir du cratère en rampant. Devant moi s’étendait une terre désolée, couverte de cadavres empilés, et je me suis retrouvé plongé dans une profonde confusion quant à la suite des événements. J’ai commencé à marcher sans but sur cette terre brûlée. Puis, soudain, j’ai aperçu quelque chose qui n’aurait jamais dû se trouver dans mon champ de vision.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835082014337578",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        next: ["17835081163795294"],
+                        dialogues: [
+                            {
+                                id: 11123823,
+                                content:
+                                    "Comment... c’est impossible... pourquoi l’artillerie tire-t-elle directement sur une ville impériale... ? Est-ce que la ville a entièrement été perdue... ?",
+                                npc: 700637,
+                                next: 11123824,
+                            },
+                            {
+                                id: 11123824,
+                                content: "Ou bien... est-ce que l’Empire a simplement abandonné nos... compatriotes... ?",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835081163795294",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-75184, -10063],
+                        dialogues: [
+                            {
+                                id: 11123825,
+                                content:
+                                    "Dans l’Empire, les soldats doivent mourir pour leur devoir. Mais les civils aussi... ?\nLes Élyséens ont détruit notre glorieuse capitale impériale, blessé nos compatriotes et nos camarades... c’est pour cela que j’ai pris les armes.\nMais si la guerre entraîne à nouveau la mort de nos propres compatriotes... alors pourquoi est-ce que je me bats... ?\nQuelle est la signification de tout cela... ?",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11023303,
+                name: "Feuilleter le journal",
+                desc: "Vous avez enfin ouvert la boîte poussiéreuse et y avez trouvé un journal. Il semble relater ce qu’a vécu un officier de l’Empire il y a quatre ans. Feuilletez-le pour découvrir ce qu’il a écrit.",
+                nodes: [
+                    {
+                        id: "17835814006514927772",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-35755, -20337],
+                        next: ["17835813993594927692"],
+                        dialogues: [
+                            {
+                                id: 11123826,
+                                content: "Hé ! Est-ce que quelqu’un m’entend ?!",
+                                npc: 700637,
+                                next: 11123827,
+                            },
+                            {
+                                id: 11123827,
+                                content: "N’importe qui ! Répondez-moi !",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835813993594927692",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-35755, -20337],
+                        next: ["17835818643664928608"],
+                        dialogues: [
+                            {
+                                id: 11123828,
+                                content:
+                                    "Arcano n’était plus qu’un champ de ruines.\nLes équipements de la ville étaient détruits par les bombardements et les flammes, s’écrasant au sol et laissant des marques terrifiantes mêlées à des flaques de sang rouge vif.\nAu début, j’avançais prudemment. Puis je me suis mis à marcher plus vite. Ensuite, j’ai fini par courir comme un fou. Mais où que j’aille, je ne voyais qu’un chaos de ruines.\nEt pourtant... au fond de moi, une légère lueur d’espoir a commencé à naître.",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835818643664928608",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-35755, -20337],
+                        next: ["17835818538274928287"],
+                        dialogues: [
+                            {
+                                id: 11123829,
+                                content:
+                                    "Je n’avais encore vu aucun cadavre. Peut-être que l’Empire avait évacué les habitants avant le bombardement... oui... c’était sûrement ça...",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835818538274928287",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-35755, -20337],
+                        next: ["17835818655794928653"],
+                        dialogues: [
+                            {
+                                id: 11123830,
+                                content:
+                                    "Puis je me suis arrêté au centre du village. Toutes ces illusions se sont effondrées face à la réalité la plus cruelle.\nLà... j’ai vu des rangées de corps de villageois soigneusement alignés.\nTremblant, je me suis approché. J’ai retiré mes gants usés et déchirés, et j’ai tendu une main couverte de sang pour vérifier un par un leur souffle... même si beaucoup de corps étaient déjà réduits en cendres, même si certains n’étaient plus qu’à moitié là...",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835818655794928653",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-35755, -20337],
+                        next: ["17835818549374928329"],
+                        dialogues: [
+                            {
+                                id: 11123831,
+                                content: "Non... non...",
+                                npc: 700637,
+                                next: 11123832,
+                            },
+                            {
+                                id: 11123832,
+                                content: "Attendez...",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835818549374928329",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-35755, -20337],
+                        next: ["17835818667274928690"],
+                        dialogues: [
+                            {
+                                id: 11123833,
+                                content:
+                                    "Enfin... enfin, parmi ces corps, je l’ai trouvée. Une jeune fille inconsciente. Le bas de son corps était écrasé sous des décombres, mais elle respirait encore faiblement.\nJ’ai retiré un à un les blocs de pierre qui la recouvraient.\n Je ne pouvais déjà plus distinguer la pierre du sang sur son corps... ni savoir ce qui était le sien ou le mien.\nJe savais seulement une chose : elle était encore en vie. Je devais absolument la sauver.\nElle... était tout ce qui me restait d’espoir...",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835818667274928690",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-35755, -20337],
+                        next: ["17835818559754928368"],
+                        dialogues: [
+                            {
+                                id: 11123834,
+                                content: "C’est... c’est incroyable... tu es encore en vie... vraiment... tu es encore en vie...",
+                                npc: 700637,
+                                next: 11123835,
+                            },
+                            {
+                                id: 11123835,
+                                content: "Pardon... pardon...",
+                                npc: 700637,
+                                next: 11123836,
+                            },
+                            {
+                                id: 11123836,
+                                content: "Je... je vais te chercher des stimulants, attends-moi.",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835818559754928368",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-35755, -20337],
+                        next: ["17835818678694928730"],
+                        dialogues: [
+                            {
+                                id: 11123837,
+                                content:
+                                    "Elle est la seule survivante d’Arcano. Je ne dois absolument pas la laisser mourir.\nAprès l’avoir sauvée et réveillée...\nPeu importe ce qu’elle me demandera, je devrai tout lui accorder.\nPeu importe ce qu’elle dira, je ne la quitterai jamais.\nPeu importe quelle punition elle voudra m’imposer, je l’accepterai.\nC’est mon expiation...",
+                            },
+                        ],
+                    },
+                    {
+                        id: "17835818678694928730",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107101,
+                        pos: [-35755, -20337],
+                        dialogues: [
+                            {
+                                id: 11123838,
+                                content: "Cette unique survivante d’Arcano... est mon salut... mon seul espoir...",
+                                npc: 700637,
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 11023304,
+                name: "Feuilleter le journal",
+                desc: "Vous avez enfin ouvert la boîte poussiéreuse et y avez trouvé un journal. Il semble relater ce qu’a vécu un officier de l’Empire il y a quatre ans. Feuilletez-le pour découvrir ce qu’il a écrit.",
+                nodes: [
+                    {
+                        id: "17836699707862602",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 107001,
+                        pos: [-20804, -76992],
+                        dialogues: [
+                            {
+                                id: 11123839,
+                                content: "C’est moi... l’espoir de Horn.",
+                                npc: 700639,
+                                next: 11123840,
+                            },
+                            {
+                                id: 11123840,
+                                content: "Ada... j’ai trouvé un moyen de réaliser ton souhait...",
+                                npc: 700639,
+                                next: 11123841,
+                            },
+                            {
+                                id: 11123841,
+                                content:
+                                    "À partir d’aujourd’hui... ils seront notre famille. À partir d’aujourd’hui, le Paradis sera notre « monde ».",
+                                npc: 700639,
+                                next: 11123842,
+                            },
+                            {
+                                id: 11123842,
+                                content: "Arcano renaîtra de ses ruines.",
+                                npc: 700639,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
         id: 120001,
         quests: [
             {
@@ -94865,12 +109708,12 @@ export const questData_fr: QuestStory[] = [
             {
                 id: 20010305,
                 name: "Obtenir un Géniemon",
-                desc: "Le système des Géniemons est désormais accessible. Offrez-leur de la nourriture et gagnez leur amitié — ils seront de précieux alliés pour la suite de votre voyage.",
+                desc: "Le système des Géniemon est désormais accessible. Offrez-leur de la nourriture et gagnez leur amitié — ils seront de précieux alliés pour la suite de votre voyage.",
             },
             {
                 id: 20010306,
                 name: "Obtenir un Géniemon",
-                desc: "Le système des Géniemons est désormais accessible. Offrez-leur de la nourriture et gagnez leur amitié — ils seront de précieux alliés pour la suite de votre voyage.",
+                desc: "Le système des Géniemon est désormais accessible. Offrez-leur de la nourriture et gagnez leur amitié — ils seront de précieux alliés pour la suite de votre voyage.",
                 nodes: [
                     {
                         id: "17482486937414067641",
@@ -141152,13 +155995,13 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215002,
                                 content:
                                     "... Vous voilà revenu, mon {性别:ami|amie}. On dirait que vous êtes enfin {性别:prêt|prête} à assister avec le Salon du Sifflet à la chute d’Eisenbahn.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215003,
                                 content:
                                     "Votre arrivée tombe à merveille. Le piège que j’ai préparé depuis si longtemps contre Eisenbahn a encore besoin d’un dernier coup de main avant de pouvoir se refermer parfaitement...",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215004,
@@ -141169,25 +156012,25 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215005,
                                 content:
                                     "Haha... Là, vous vous emballez un peu. Même si vous avez été particulièrement remarquable, sachez qu’au sein du Salon du Sifflet, nombreux sont ceux qui nourrissent depuis longtemps une haine profonde envers Eisenbahn.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215006,
                                 content:
                                     "Ainsi, lorsque j’ai discrètement révélé mon plan aux membres du Salon en qui j’avais confiance, même ceux qui ne jetteraient normalement pas un regard vers un théâtre se sont précipités pour participer.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215007,
                                 content:
                                     "Sans se soucier de leur âge, de leur voix ou du reste... ils ne pensaient qu’à une chose : tirer sur Eisenbahn lors du dernier acte.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215008,
                                 content:
                                     "Pour être honnête, si je n’avais pas eu peur de laisser mon excitation prendre le dessus au point de gâcher la représentation, j’aurais insisté pour monter moi-même sur scène. Mais pour garantir le succès du plan, j’ai finalement choisi ce jeune Levi.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215009,
@@ -141198,13 +156041,13 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215010,
                                 content:
                                     "Allons, ne soyez pas si pressé, jeune {性别:homme|femme}. Mais peut-être est-ce justement cette impatience qui vous rend différent des autres.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215011,
                                 content:
                                     "À vrai dire, vous êtes probablement la seule personne depuis des années à avoir obtenu à la fois la confiance du Salon du Sifflet... et celle de l’Union du Tournevis.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215012,
@@ -141215,25 +156058,25 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215013,
                                 content:
                                     "Puisque je suis capable d’organiser une tentative d’assassinat contre Eisenbahn à son insu, c’est que je possède naturellement quelques réseaux d’informations.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215014,
                                 content:
                                     "Bref. Étant donné vos relations plutôt amicales avec l’Union du Tournevis, j’aimerais que vous les convainquiez de provoquer quelques troubles dans la gare... afin qu’ils puissent eux aussi assister à la chute finale d’Eisenbahn.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215015,
                                 content:
                                     "Sinon, ces types qui vivent sous terre comme des taupes risquent de ne même pas remarquer avant demain matin que la Gare des Cent-Fleurs a changé de maître.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215016,
                                 content:
                                     "Je veux qu’ils comprennent immédiatement que cette gare appartiendra désormais à moi : Seaton Brutus.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215017,
@@ -141244,13 +156087,13 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215018,
                                 content:
                                     "Exactement. Même si l’Union du Tournevis reste une organisation clandestine, son influence auprès des ouvriers est loin d’être négligeable. Ils seront donc le public parfait pour cette grande représentation.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215019,
                                 content:
                                     "Alors ? Qu’en dites-vous ? Si vous parvenez à les convaincre de venir, après notre réussite, je pourrai vous céder un vingtième des richesses accumulées par Eisenbahn... Non, disons plutôt un dixième.",
-                                npc: 700580,
+                                npc: 700400,
                                 options: [
                                     {
                                         id: 51215020,
@@ -141273,7 +156116,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215021,
                                 content: "Les grands esprits finissent toujours par se comprendre, mon {性别:ami|amie}.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215022,
@@ -141285,7 +156128,7 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215024,
                                 content:
                                     "Intelligent. La Gare des Cent-Fleurs finira tôt ou tard sous mon contrôle. Dans ce cas, satisfaire ma demande est pour vous le choix le plus raisonnable... et probablement le seul.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215025,
@@ -141309,24 +156152,24 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215029,
                                 content:
                                     "Haha, ne vous inquiétez pas. S’ils ont réussi à survivre aussi longtemps sous Eisenbahn, c’est qu’ils savent reconnaître quand le vent tourne.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215030,
                                 content: "Alors allez-y. Plus tard, nous contemplerons ensemble la chute de notre cher Eisenbahn.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215031,
                                 content:
                                     "À votre avis... suppliera-t-il pour sa vie ? Ou bien nous traitera-t-il de monstres jusqu’au dernier instant ? À moins que Levi ne tire suffisamment bien pour qu’il meure avant même de comprendre ce qui lui arrive...",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215032,
                                 content:
                                     "Hmm... Non, ce serait dommage. Je devrais peut-être avoir une petite discussion avec Levi avant le spectacle.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215033,
@@ -141358,13 +156201,13 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215036,
                                 content:
                                     "Oh ? Mais regardez qui revoilà ! Tu viens à peine de repartir avec le Tournevis de la gloire que te voilà déjà de retour ? Et en plus, t’as ramené un grand gaillard avec toi...",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215037,
                                 content:
                                     "Alors ? T’as raté le dernier train et tu viens boire un coup ici pour faire passer la nuit jusqu’au lever du soleil ? Ou tu voulais simplement voir comment fonctionne vraiment l’emblème de l’Union du Tournevis ?",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215038,
@@ -141376,36 +156219,36 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215039,
                                 content:
                                     "Le Salon du Sifflet ? Alors comme ça, ces chiens domestiques arrivent maintenant à t’envoyer transmettre leurs messages ? Je croyais qu’ils passaient leurs journées à rêver de se frotter aux bottes d’Eisenbahn pour attirer son attention.",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215040,
                                 content: "Alors, qu’est-ce qu’ils veulent cette fois ? Bah... je te fais confiance.",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215041,
                                 content:
                                     "Si tu penses que cette information vaut quelque chose, raconte-la-moi. Mais si c’est juste un tas d’ordures, alors retourne leur dire de ma part que ceux du Salon du Sifflet sont tous une bande de tocards.",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215042,
                                 content:
                                     "Tu recommences à insulter les gens ? Franchement... Avec ta façon de parler, je n’ose même plus garder un perroquet ici. Cette petite peste finirait par lui apprendre toutes les insultes possibles visant la famille entière des gens.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215043,
                                 content:
                                     "Vous disiez que le Salon du Sifflet avait une affaire sérieuse à proposer ? Pour le coup, c’est rare. Même si nous vivons dans la même gare, nous n’avons jamais vraiment eu grand-chose à voir avec eux.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215044,
                                 content:
                                     "Le président du Salon du Sifflet... Seaton, c’est ça ? Qu’est-ce qu’il veut ? Nous déclarer la guerre ? Haha... Ou alors annoncer qu’il a finalement décidé d’éliminer l’Union du Tournevis au nom d’Eisenbahn ?",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215045,
@@ -141425,24 +156268,24 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215048,
                                 content: "Attends... Tu veux dire le président du Salon du Sifflet... comment il s’appelle déjà ? Citron ?",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215049,
                                 content: "Seaton.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215050,
                                 content:
                                     "Ah oui, Seaton ! Donc il veut qu’on l’aide à éliminer Eisenbahn ? Sérieusement... Comment ça se fait qu’une occasion aussi incroyable leur soit tombée dessus avant nous ?!",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215051,
                                 content:
                                     "Lorent, dis vite quelque chose pour me remonter le moral, sinon je vais vraiment commencer à douter de moi. Me dis pas qu’une bande de chiens domestiques a plus de cran que moi ?",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215052,
@@ -141454,60 +156297,60 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215053,
                                 content:
                                     "Merci pour le soutien, Snow. Mais honnêtement, si je suis devenue patronne, c’est uniquement parce que j’ai plus de cran que tous les autres !",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215054,
                                 content:
                                     "Les anciens patrons de l’Union finissaient tous par se suicider mystérieusement d’une balle dans le dos ou ce genre de trucs. Résultat : plus personne voulait du poste. Sauf moi ! Maggie la Brave ! Moi, j’ai accepté !",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215055,
                                 content:
                                     "Hum hum... Disons plutôt qu’on s’est dit qu’Eisenbahn n’irait probablement pas jusqu’à s’en prendre sérieusement à une gamine. C’est surtout pour ça qu’on t’a choisie comme mascotte, d’accord ?",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215056,
                                 content: "Pas important ! Dans tous les cas : Maggie est la plus forte !",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215057,
                                 content:
                                     "Bon, revenons au sujet. Lorent, vu comme t’as immédiatement reconnu ce Seaton, j’imagine que tu le connais un peu. On peut lui faire confiance ? On se lance avec lui ou pas ?",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215058,
                                 content:
                                     "Honnêtement... ça fait tellement longtemps que j’attends une occasion pareille que si tu refuses, je vais finir par te fracasser le crâne avec une clé à molette.",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215059,
                                 content:
                                     "Le connaître... pas vraiment. Mais puisqu’il est venu nous chercher directement, ça veut dire qu’ils sont déjà décidés à agir, avec ou sans nous...",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215060,
                                 content:
                                     "C’est peut-être une opportunité. Peu importe le genre d’homme qu’est Seaton, il ne pourra jamais contrôler cette gare aussi fermement qu’Eisenbahn. S’il prend sa place, alors au moins... nous aurons matière à négocier.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215061,
                                 content:
                                     "Magnifique, Lorent ! Je crois que c’est la première fois que je te vois ne pas te dégonfler ! Alors, qu’est-ce qu’on fait ?",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215062,
                                 content:
                                     "On se met immédiatement au travail. Nous n’avons plus beaucoup de temps. Que tout le monde commence à prévenir les ouvriers des forges.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215063,
@@ -141518,73 +156361,73 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215064,
                                 content: "Les occasions comme celle-ci ne nous attendront pas éternellement.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215065,
                                 content:
                                     "L’Union du Tournevis a été fondée pour aider les ouvriers. Et renverser Eisenbahn serait la plus grande aide que nous puissions leur apporter.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215066,
                                 content:
                                     "Et puis, maintenant que nous sommes au courant, nous sommes déjà montés à bord de ce navire malgré nous. Faire semblant de n’avoir rien entendu ou tenter d’en descendre maintenant ne ferait qu’aggraver la situation.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215067,
                                 content:
                                     "Alors il n’y a plus vraiment à hésiter. Aujourd’hui, nous allons enfin venger les anciens patrons de l’Union du Tournevis.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215068,
                                 content:
                                     "On va tout faire exploser ! Tout exploser ! Franchement, Lorent, derrière tes airs de type respectable, t’es encore plus cinglé que moi quand ce genre d’occasion se présente. Et ce livre de comptes ? On continue de le chercher ou pas ?",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215069,
                                 content:
                                     "Le livre de comptes attendra. Pour l’instant, la priorité absolue est d’arracher Eisenbahn de son siège de chef de gare.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215070,
                                 content:
                                     "Nous allons encore avoir besoin de votre aide. Je sais déjà que nous vous avons fait courir partout aujourd’hui... mais croyez-moi, ce sera la dernière fois.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215071,
                                 content:
                                     "Les adultes et leurs belles paroles~♪ Du boulot interminable et des courses à répétition~♪ Autant rentrer boire jusqu’à l’oubli et dormir jusqu’au matin~♪",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215072,
                                 content:
                                     "Continue de chanter comme ça et je t’attache avant de t’envoyer directement dans le bureau d’Eisenbahn.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215073,
                                 content:
                                     "Pourquoi tu t’énerves comme ça ?! Si je finis dans son bureau, toi aussi tu y passeras. Bon, assez bavardé. Au travail, au travail ! Je vais aller prévenir mes copains sur les structures métalliques au sommet de la gare.",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215074,
                                 content:
                                     "Ils vont sûrement croire que je raconte n’importe quoi... mais quelques coups de clé à molette sur la tête devraient vite les ramener à la réalité.",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215075,
                                 content:
                                     "Très bien. Moi aussi, je vais prévenir les ingénieurs. Quant aux ouvriers des forges... je vous les confie.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215076,
@@ -141611,7 +156454,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215078,
                                 content: "Le travail s’arrête là pour aujourd’hui. Alors viens pas me casser les pieds.",
-                                npc: 700584,
+                                npc: 700470,
                             },
                             {
                                 id: 51215079,
@@ -141627,12 +156470,12 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215081,
                                 content:
                                     "Buter Eisenbahn ? Sérieusement ? C’est Maggie qui t’envoie ? Arrête tes conneries... Quoi ? Même Lorent dit que c’est vrai ?",
-                                npc: 700584,
+                                npc: 700470,
                             },
                             {
                                 id: 51215082,
                                 content: "Alors là, faut que je me prépare sérieusement. Attends-moi ici !",
-                                npc: 700584,
+                                npc: 700470,
                             },
                         ],
                     },
@@ -141648,13 +156491,13 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215084,
                                 content:
                                     "J’ai entendu dire qu’en haut, tout le monde racontait qu’Eisenbahn faisait de la contrebande et qu’il méritait plus d’être chef de gare.",
-                                npc: 700585,
+                                npc: 700471,
                             },
                             {
                                 id: 51215085,
                                 content:
                                     "Et alors ? Même si c’est vrai, qu’est-ce que ça change ? Eisenbahn dirige cette gare depuis tellement longtemps que ce serait presque plus bizarre s’il n’avait pas sa propre caisse noire. Tout le monde en fait des tonnes... comme si quelqu’un pouvait vraiment lui faire quoi que ce soit.",
-                                npc: 700586,
+                                npc: 700472,
                             },
                             {
                                 id: 51215086,
@@ -141665,12 +156508,12 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215087,
                                 content:
                                     "Une affaire aussi énorme ?! Dire que même les nobles peuvent plus voir Eisenbahn en peinture... Ce type est vraiment pourri jusqu’à la moelle.",
-                                npc: 700585,
+                                npc: 700471,
                             },
                             {
                                 id: 51215088,
                                 content: "Allez, venez ! Cette fois, on va enfin avoir droit à un vrai spectacle.",
-                                npc: 700586,
+                                npc: 700473,
                             },
                         ],
                     },
@@ -141767,12 +156610,6 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215101,
                                 content: "Là ! Cette voix... je la reconnaîtrais entre mille.",
                                 npc: 100402,
-                                next: 51215102,
-                            },
-                            {
-                                id: 51215102,
-                                content: "Encore un peu plus loin... oui... C’est bien Lorent. Ouf...",
-                                npc: 100402,
                             },
                         ],
                     },
@@ -141787,12 +156624,6 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215103,
                                 content:
                                     "Juste devant... Attends, c’est mauvais signe. Il parle vraiment avec des types en uniforme rouge. Des gardes de la gare !",
-                                npc: 100402,
-                                next: 51215104,
-                            },
-                            {
-                                id: 51215104,
-                                content: "Vite ! Il faut aller l’aider !",
                                 npc: 100402,
                             },
                         ],
@@ -141821,58 +156652,58 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215107,
                                 content:
                                     "... Bref, voilà la situation. Vous devez prévenir Eisenbahn immédiatement : il ne doit surtout pas assister à la représentation de ce soir. Sa vie est en danger.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215108,
                                 content:
                                     "Calme-toi, Lorent. Eisenbahn reçoit plus de menaces de mort que tu n’as vu de pièces dans toute ta vie. T’as l’air au bout de ta vie.",
-                                npc: 700588,
+                                npc: 700474,
                             },
                             {
                                 id: 51215109,
                                 content: "Et évite aussi d’attirer l’attention. Quelqu’un pourrait finir par te suivre.",
-                                npc: 700588,
+                                npc: 700474,
                             },
                             {
                                 id: 51215110,
                                 content:
                                     "Ne prenez pas ça à la légère. Cette fois, c’est différent. Vous le savez aussi bien que moi : depuis ce concours photo organisé par le Salon du Sifflet, toute la gare est au courant des accusations de contrebande visant Eisenbahn.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215111,
                                 content:
                                     "Même certains gardes commencent à se demander si Eisenbahn sert réellement l’Empire comme il le prétend.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215112,
                                 content:
                                     "Et même si la tentative d’assassinat échoue, cette agitation risque d’ébranler la loyauté d’autres personnes envers lui. À ce moment-là, les gardes deviendront aussi difficiles à contrôler que les ouvriers.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215113,
                                 content: "Facile. Il suffit d’infiltrer un ou deux hommes totalement loyaux à Eisenbahn parmi les gardes.",
-                                npc: 700588,
+                                npc: 700474,
                             },
                             {
                                 id: 51215114,
                                 content: "Comme si c’était aussi simple...",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215115,
                                 content:
                                     "Ah bon ? Moi, je trouve ça très simple. L’argent. Les femmes. Les hommes. Ou à défaut, une belle promotion. Tout le monde a un prix.",
-                                npc: 700588,
+                                npc: 700474,
                             },
                             {
                                 id: 51215116,
                                 content:
                                     "Après tout, Lorent... toi aussi, tu travailles pour nous contre de l’argent et tu nous fournis des informations sur l’Union du Tournevis, non ? Alors pourquoi douter de nos méthodes ? Tu serais pas en train de retrouver une conscience morale, par hasard ?",
-                                npc: 700588,
+                                npc: 700474,
                             },
                             {
                                 id: 51215117,
@@ -141983,12 +156814,12 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215134,
                                 content:
                                     "Elle va bien. Exactement comme les gardes que vous avez assommés tout à l’heure : elle est simplement inconsciente. Reste à savoir si c’est surtout la peur ou le coup qui l’a mise dans cet état.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215135,
                                 content: "Quant à vous... depuis quand vous écoutiez ?",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215136,
@@ -142005,19 +156836,19 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215138,
                                 content:
                                     "... Haha. Oui, difficile de nier ça. Honnêtement, je m’attendais même à ce que vous utilisiez un terme encore moins flatteur. Quelque chose comme « chien d’Eisenbahn », par exemple.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215139,
                                 content:
                                     "Mais je vais être clair : depuis le début, je suis persuadé de ne pas avoir fait le mauvais choix.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215140,
                                 content:
                                     "Tout ce que j’ai fait, c’est essayer de préserver l’ordre dans la Gare des Cent-Fleurs... au prix le plus faible possible.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215141,
@@ -142029,60 +156860,60 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215142,
                                 content:
                                     "Pas étonnant venant d’un célèbre Chasseur de Phoxène de Givrelac. Vous savez agir vite... et devenir impitoyable quand il le faut.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215143,
                                 content:
                                     "Vous devez comprendre une chose : la majorité des membres de l’Union du Tournevis ne sont que des gens ordinaires. Contrairement à vous, ils ne sont pas les héros intelligents et courageux des romans d’aventure.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215144,
                                 content:
                                     "Le travail et les machines ont depuis longtemps écrasé leurs rêves et émoussé leurs esprits. Leur vie est banale, misérable. Aujourd’hui ils se saoulent et se battent dans un coin de rue ; demain ils perdent jusqu’à leur pantalon dans des jeux d’argent.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215145,
                                 content:
                                     "Dans les romans d’aventure, ce sont généralement des figurants sans nom. Leur vie vaut si peu qu’une simple bagarre autour du héros suffit à les tuer.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215146,
                                 content: "Et pourtant... quelqu’un les attend malgré tout à la maison.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215147,
                                 content:
                                     "Renverser Eisenbahn... Les promesses du Salon du Sifflet étaient séduisantes, évidemment. Mais aucun d’eux ne semble avoir réfléchi à ce qui arriverait aux simples ouvriers de l’Union du Tournevis si cette tentative d’assassinat échouait.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215148,
                                 content:
                                     "Les nobles auront toujours une porte de sortie. Mais les gens ordinaires de l’Union du Tournevis ? Ceux qui vivent réellement ici, qui survivent ici en dépendant du bon vouloir des autres... c’est nous. Nous, les simples ouvriers enracinés dans ces usines.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215149,
                                 content:
                                     "Si ce plan échoue, ce sont des coups de feu qui nous attendent. Et nos familles, alors ? Nos enfants ? Maggie... qu’adviendra-t-il de Maggie ?",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215150,
                                 content:
                                     "Repensez aux précédents patrons de l’Union. Exactement comme Maggie aujourd’hui, ils débordaient d’enthousiasme et rêvaient de faire tomber Eisenbahn... alors qu’en réalité, ils n’avaient même jamais tenu une arme.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215151,
                                 content:
                                     "Pour Eisenbahn, les éliminer est aussi simple qu’écraser une fourmi. Quand on est incapable de se protéger soi-même, on ne devrait pas entraîner dans sa chute des ouvriers qui cherchent simplement à survivre.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215152,
@@ -142094,19 +156925,19 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215153,
                                 content:
                                     "Exactement. Alors je joue le rôle d’intermédiaire. D’un côté, j’empêche les ouvriers de provoquer Eisenbahn afin de maintenir un minimum d’ordre. De l’autre, je négocie avec lui pour arracher quelques maigres avantages pour tout le monde.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215154,
                                 content:
                                     "Ce que je n’avais pas prévu, en revanche, c’est que ce genre d’idées suicidaires capables uniquement de tout détruire ne se trouverait pas seulement chez les pauvres qui ne savent même pas s’ils mangeront demain... mais aussi chez ces messieurs du Salon du Sifflet.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215155,
                                 content:
                                     "On parle toujours des différences entre les classes sociales... mais au fond, les gens ont tous la même folie dans la tête.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215156,
@@ -142117,13 +156948,13 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215157,
                                 content:
                                     "De qui d’autre ? Depuis le début, il était condamné à échouer. Alors autant vendre cette information à Eisenbahn pendant qu’elle vaut encore quelque chose. Dès l’instant où vous avez commencé à parler, c’est ce que j’ai décidé de faire.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215158,
                                 content:
                                     "Et puis, est-ce que vous connaissez vraiment Seaton ? Qu’est-ce qui vous garantit que la Gare des Cent-Fleurs ne deviendra pas encore pire sous son contrôle ?",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215159,
@@ -142134,13 +156965,13 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215160,
                                 content:
                                     "Très bien. Je pense avoir été suffisamment clair. Si l’assassinat réussit, l’Union du Tournevis ne gagnera peut-être rien. Mais s’il échoue, alors l’Union paiera forcément le prix du sang.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215161,
                                 content:
                                     "Laissez-moi partir. Je peux encore rejoindre Eisenbahn et empêcher cet assassinat. C’est la seule manière de sauver l’Union du Tournevis du navire de fous dans lequel Seaton l’a embarquée.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215162,
@@ -142192,13 +157023,13 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215170,
                                 content:
                                     "Et quand les gens progressent, ils commencent aussi à penser qu’ils méritent un meilleur salaire. Alors ils sont allés réclamer une augmentation collective, en menaçant de partir si on refusait.",
-                                npc: 700591,
+                                npc: 700480,
                             },
                             {
                                 id: 51215171,
                                 content:
                                     "Et tu sais ce qui s’est passé ? La Gare des Cent-Fleurs s’en fichait complètement. Ils voulaient juste des ouvriers obéissants. Les dirigeants leur ont dit qu’ils coûtaient trop cher et les ont virés. Au final... Hugh a été le seul à rester.",
-                                npc: 700591,
+                                npc: 700480,
                             },
                             {
                                 id: 51215172,
@@ -142232,7 +157063,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215176,
                                 content: "Merci. Vous avez pris une décision raisonnable.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215178,
@@ -142265,7 +157096,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215183,
                                 content: "Très bien... Alors vous assisterez vous-mêmes à quel point votre choix était absurde.",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215184,
@@ -142353,7 +157184,7 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215197,
                                 content:
                                     "Ainsi donc, mon ancien et cher compagnon d’armes, le chef de gare Eisenbahn. Afin de célébrer vos dix années passées à la Gare des Cent-Fleurs, le Salon du Sifflet a préparé une pièce retraçant vos exploits. Nous espérons sincèrement qu’elle saura vous plaire.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215198,
@@ -142365,12 +157196,12 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215199,
                                 content:
                                     "... Si telle est la volonté du chef de gare Eisenbahn, alors le Salon du Sifflet s’y pliera naturellement. Mais Levi s’est entraîné sans relâche pendant un mois entier pour cette représentation.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215200,
                                 content: "Je vous en prie, ne laissez pas tous ses efforts être réduits à néant !",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215201,
@@ -142381,7 +157212,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215202,
                                 content: "À vos ordres, chef de gare. De toute façon... il n’y aura pas d’après.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215203,
@@ -142392,48 +157223,48 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215204,
                                 content:
                                     "Moi... Eisenbahn. Dans les forteresses du Sud, j’ai vu la naissance de la mort de mes propres yeux. Tandis que les autres sombraient dans le sommeil, nous découpions nos pantalons au milieu de la fumée pour bander nos blessures.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215205,
                                 content:
                                     "La guerre prit fin. Et vint enfin pour moi le moment de dormir seul. Pourtant, même dans mes rêves, ce démon perfide qu’est le sommeil ne m’accordait aucun répit. Il continuait de murmurer des chiffres à mon oreille... 214. 97. 83. 7,62. 1.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215206,
                                 content:
                                     "214 jours : la durée de la rébellion. 97 escouades : le nombre d’unités envoyées pour la réprimer.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215207,
                                 content:
                                     "83 grammes : le poids des rations distribuées chaque jour. 7,62 millimètres : le calibre des balles de nos fusils.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215208,
                                 content: "1 survivant... lorsque la guerre prit fin.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215209,
                                 content:
                                     "Les balles de laiton ne m’ont pas tué. Les tranchées glaciales ne m’ont pas brisé non plus. Et les regards de mes compagnons tombés au combat... ne m’ont jamais quitté un seul instant.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215210,
                                 content:
                                     "Si j’oublie leurs regards, je ne peux pas mourir en paix. Mais si je m’en souviens, je suis incapable de vivre correctement. Alors j’ai fui jusqu’à ce royaume enneigé du Nord... dans l’espoir de trouver, au milieu de la glace et de la neige, un soleil plus chaleureux que celui du Sud.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215211,
                                 content:
                                     "Cette partie raconte sans doute la vie d’Eisenbahn avant son arrivée à la Gare des Cent-Fleurs. Je me souviens que le responsable de l’entrepôt avait mentionné qu’ils avaient autrefois combattu côte à côte.",
-                                npc: 100401,
+                                npc: 100416,
                             },
                             {
                                 id: 51215212,
@@ -142603,13 +157434,13 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215236,
                                 content:
                                     "Oh ? Vous voilà enfin. Vu votre retard, j’imagine que vous apportez d’excellentes nouvelles. Alors ? L’Union du Tournevis a accepté de nous soutenir ?",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215237,
                                 content:
                                     "Enfin... j’ai déjà ma réponse. Il suffit de regarder autour de nous : il y a des ouvriers des forges partout dans cette salle. C’est forcément grâce à vous.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215238,
@@ -142621,7 +157452,7 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215239,
                                 content:
                                     "Bien dit ! Mais au fait... où sont les dirigeants de l’Union du Tournevis ? Je ne les ai encore jamais rencontrés. Ne me dites pas qu’ils comptent continuer à se cacher à un moment pareil ?",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215240,
@@ -142636,19 +157467,19 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215242,
                                 content:
                                     "Vous voulez dire que ce Lorent... l’un des dirigeants de l’Union du Tournevis... travaillait en réalité avec Eisenbahn ?",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215243,
                                 content:
                                     "C’est scandaleux ! Vous n’avez parlé de ça à personne d’autre, j’espère ? Non... ça ne va pas du tout... Dès demain, je remplacerai tous ces ouvriers des forges sans exception !",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215244,
                                 content:
                                     "Ils sont déloyaux. Pas fiables. Certains sont peut-être même encore des partisans cachés d’Eisenbahn.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215245,
@@ -142660,19 +157491,19 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215246,
                                 content:
                                     "Aujourd’hui seulement. Quand le soleil se couchera ce soir, demain sera un autre monde. Notre position ne sera plus la même.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215247,
                                 content:
                                     "Je vous conseille d’ailleurs de commencer à penser comme un vainqueur. Tout le monde ne mérite pas votre confiance.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215248,
                                 content:
                                     "Bien. Assez perdu de temps avec ces bavardages inutiles. Concentrez-vous plutôt sur la représentation. Le véritable spectacle... va enfin commencer.",
-                                npc: 700580,
+                                npc: 700400,
                             },
                         ],
                     },
@@ -142699,35 +157530,35 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215251,
                                 content:
                                     "Qu’est-ce donc qui vous a arraché votre âme ? Non... même privés d’âme, vous ne devriez pas nourrir autant de doutes. Vous craignez que la neige ensevelisse les rails, que les vents renversent les wagons.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215252,
                                 content:
                                     "Si de telles peurs suffisent à vous empêcher de devenir chef de gare... alors pourquoi êtes-vous capables de manger sans vous inquiéter de vous noyer dans votre soupe ou de mourir étouffés par son odeur ?",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215253,
                                 content:
                                     "La tempête finira par disparaître, et cette longue nuit prendra fin elle aussi. Les trains deviendront comme des fils d’or tissés par le soleil, reliant Givrelac à Dismania.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215254,
                                 content:
                                     "Alors je la maudis. Je maudis cette tempête qui ralentit toute chose. Je vais insuffler toute ma haine dans ces trois balles... et ouvrir le feu sur cette bête invisible qui rugit dans l’ombre.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215255,
                                 content: "Et finalement... devenir le soleil qui la dissipera—",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215256,
                                 content: "Crève, Eisenbahn !",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215257,
@@ -142752,7 +157583,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215259,
                                 content: "Qu... quoi... ?",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215260,
@@ -142781,7 +157612,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215264,
                                 content: "À vos ordres, monsieur. Mais... vous ne souhaitez pas l’interroger personnellement ?",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215265,
@@ -142825,35 +157656,35 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215251,
                                 content:
                                     "Qu’est-ce donc qui vous a arraché votre âme ? Non... même privés d’âme, vous ne devriez pas nourrir autant de doutes. Vous craignez que la neige ensevelisse les rails, que les vents renversent les wagons.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215252,
                                 content:
                                     "Si de telles peurs suffisent à vous empêcher de devenir chef de gare... alors pourquoi êtes-vous capables de manger sans vous inquiéter de vous noyer dans votre soupe ou de mourir étouffés par son odeur ?",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215253,
                                 content:
                                     "La tempête finira par disparaître, et cette longue nuit prendra fin elle aussi. Les trains deviendront comme des fils d’or tissés par le soleil, reliant Givrelac à Dismania.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215254,
                                 content:
                                     "Alors je la maudis. Je maudis cette tempête qui ralentit toute chose. Je vais insuffler toute ma haine dans ces trois balles... et ouvrir le feu sur cette bête invisible qui rugit dans l’ombre.",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215255,
                                 content: "Et finalement... devenir le soleil qui la dissipera—",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215256,
                                 content: "Crève, Eisenbahn !",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215257,
@@ -142878,7 +157709,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215270,
                                 content: "Qu... quoi...? Comment... comment pouviez-vous savoir... ?",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215271,
@@ -142900,7 +157731,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215274,
                                 content: "N’insultez pas le président Seaton... Il est...",
-                                npc: 700594,
+                                npc: 700462,
                             },
                             {
                                 id: 51215275,
@@ -142917,7 +157748,7 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215277,
                                 content:
                                     "V-vous... qu’est-ce que vous comptez faire ?! Vous savez qui je suis ?! Je porte le nom des Brutus ! Je suis noble ! Si vous osez me toucher, réfléchissez bien aux conséquences !",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215278,
@@ -142928,13 +157759,13 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215279,
                                 content: "...",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215280,
                                 content:
                                     "... Dites-moi... comment avez-vous découvert la vérité ? Tout ce temps, j’ai joué le rôle de votre fidèle partisan. Je me suis humilié devant vous. À mes yeux, je n’avais laissé aucune faille. Alors pourquoi vous méfier de moi ?",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215281,
@@ -142950,7 +157781,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215283,
                                 content: "Vous voulez dire que cette photo... vous avez volontairement laissé quelqu’un la prendre ?",
-                                npc: 700580,
+                                npc: 700400,
                             },
                             {
                                 id: 51215284,
@@ -142995,7 +157826,7 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215293,
                                 content:
                                     "Monsieur... ils m’ont beaucoup aidé au sein de l’Union du Tournevis... Ne pourriez-vous pas les laisser partir ?",
-                                npc: 700582,
+                                npc: 700469,
                             },
                             {
                                 id: 51215294,
@@ -143356,19 +158187,19 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215352,
                                 content:
                                     "Va tout de suite casser la gueule de Lorent ! Ce type est un traître jusqu’au bout des ongles ! Il a laissé les gardes me frapper !",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215353,
                                 content:
                                     "Putain, mais qu’est-ce qui s’est passé ici... ? Je suis juste revenu pour demander ce qu’était cette pièce bizarre dans le hall.",
-                                npc: 700591,
+                                npc: 700480,
                             },
                             {
                                 id: 51215354,
                                 content:
                                     "Arrête de poser des questions ! Lorent disait aux gardes que j’étais une gamine louche ! Et il les a regardés me frapper sans rien faire ! Je m’en fiche, va le retrouver et cogne-le pour me défouler !",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215355,
@@ -143378,7 +158209,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215356,
                                 content: "Hein ?! {nickname} ? Snow ? Le grand gaillard ?",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215357,
@@ -143389,7 +158220,7 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215358,
                                 content:
                                     "{nickname}, tu as tout vu tout à l’heure, hein ?! J’ai raison, pas vrai ?! Lorent est un traître ! Il me critiquait avec les gardes !",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215359,
@@ -143405,23 +158236,23 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215361,
                                 content:
                                     "Putain... Si j’avais su que la gare allait devenir un tel bordel aujourd’hui, je serais jamais sorti avec Hugh !",
-                                npc: 700591,
+                                npc: 700480,
                             },
                             {
                                 id: 51215362,
                                 content: "Lorent... Comment a-t-il pu faire ça... ? Ce n’est pas quelqu’un comme ça... Il...",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215363,
                                 content:
                                     "Comment ça, ce n’est pas quelqu’un comme ça ?! Moi, je trouvais déjà ce type louche depuis longtemps ! Un ouvrier qui jure jamais, qui parle poliment et qui affiche toujours son air de faux gentil ? Je savais depuis le début qu’il cachait quelque chose !",
-                                npc: 700591,
+                                npc: 700480,
                             },
                             {
                                 id: 51215364,
                                 content: "Mais pourtant...",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215365,
@@ -143444,7 +158275,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215368,
                                 content: "Alors ce livre de comptes que vous m’avez demandé d’aller récupérer...",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215369,
@@ -143456,7 +158287,7 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215370,
                                 content:
                                     "Donc si Lorent cherchait désespérément ce livre de comptes... ce n’était pas pour faire tomber Eisenbahn avec moi... mais pour le lui rendre ?",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215371,
@@ -143466,7 +158297,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 51215372,
                                 content: "...",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215373,
@@ -143483,23 +158314,23 @@ export const questData_fr: QuestStory[] = [
                                 id: 51215375,
                                 content:
                                     "Ouah ! On dirait presque que l’avenir entier de l’Union du Tournevis vient soudainement d’être confié à sa mascotte !",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215376,
                                 content:
                                     "Qu’est-ce que t’as à avoir peur ?! Petite Maggie ! Même sans Lorent, tu m’as encore moi ! Avec ça, tôt ou tard, on finira par faire tomber Eisenbahn ! Et ensuite, on ira botter le cul de Lorent tous ensemble !",
-                                npc: 700591,
+                                npc: 700480,
                             },
                             {
                                 id: 51215377,
                                 content: "O-oui ! On va faire tomber Eisenbahn ! Et botter le cul de Lorent !",
-                                npc: 700581,
+                                npc: 700468,
                             },
                             {
                                 id: 51215378,
                                 content: "Faire tomber Eisenbahn ! Et botter le cul de Lorent !",
-                                npc: 700591,
+                                npc: 700480,
                             },
                             {
                                 id: 51215379,
@@ -145433,6 +160264,76 @@ export const questData_fr: QuestStory[] = [
                         ],
                     },
                 ],
+            },
+        ],
+    },
+    {
+        id: 400130,
+        quests: [
+            {
+                id: 40013000,
+                name: "Se rendre à la Gare des Cent-Fleurs",
+                desc: "Sous la voûte baignée de lumière, les voyageurs vont et viennent sans cesse, certains courant après leur gagne-pain, d’autres s’apprêtant à entreprendre un voyage paisible.",
+            },
+        ],
+    },
+    {
+        id: 400131,
+        quests: [
+            {
+                id: 40013100,
+                name: "Se rendre à la Gare des Cent-Fleurs",
+                desc: "Le vaste monde qui s’étend au loin porte en lui notre promesse de nous retrouver et nos espoirs pour l’avenir... jusqu’au jour où les flammes embrasant l’horizon réduisirent tout en cendres.",
+            },
+        ],
+    },
+    {
+        id: 400132,
+        quests: [
+            {
+                id: 40013200,
+                name: "Se rendre aux Installations de forge",
+                desc: "Dans cette usine souterraine où la lumière du soleil ne pénètre jamais, les ouvriers travaillent à la sueur de leur front. Tous ces efforts accomplis dans l’ombre finissent par nourrir les longs dragons d’acier argenté qui déferlent à la surface.",
+            },
+        ],
+    },
+    {
+        id: 400133,
+        quests: [
+            {
+                id: 40013300,
+                name: "Se rendre aux Ruines d’Arcano",
+                desc: "Autrefois, une jeune fille parcourait joyeusement ces ruines, explorant des attractions abandonnées depuis longtemps et saisissant la moindre occasion d’y trouver un peu de bonheur.",
+            },
+        ],
+    },
+    {
+        id: 400134,
+        quests: [
+            {
+                id: 40013400,
+                name: "Se rendre à Arcano",
+                desc: "Vingt-deux minutes figées pour l’éternité. Un paysage si familier qu’il suffirait de fermer les yeux pour en retracer chaque détail.",
+            },
+        ],
+    },
+    {
+        id: 400135,
+        quests: [
+            {
+                id: 40013500,
+                name: "Se rendre à Arcano",
+                desc: "Les habitants rient et chantent, rassemblés sur cette place chaleureuse et paisible pour célébrer les bienfaits du Paradis.",
+            },
+        ],
+    },
+    {
+        id: 400136,
+        quests: [
+            {
+                id: 40013600,
+                name: "Se rendre à la Faille des Montagnes d’Arcano",
+                desc: "Il faut trois jours à une fleur pour éclore, trois mois pour construire un pont et trois ans pour qu’un arbre grandisse. Mais trois secondes suffisent à un obus pour tout détruire.",
             },
         ],
     },

@@ -62,9 +62,7 @@ const dynamicAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() =>
  * 各武器对角色充盈威力的武器转化来源（武器转化充盈威力），用于充盈威力来源明细。
  * 与 CharBuild.calculateWeaponAttributes 的汇总逻辑保持一致，仅保留非零贡献的武器。
  */
-const fullnessWeaponSources = computed(() =>
-    props.charBuild.getFullnessWeaponSources().filter(source => Math.abs(source.value) > 1e-10)
-)
+const fullnessWeaponSources = computed(() => props.charBuild.getFullnessWeaponSources().filter(source => Math.abs(source.value) > 1e-10))
 
 const modAttributeBonusSources = computed(() => {
     const modAttributeBonus = props.charBuild.getTotalBonus(`${props.charBuild.char.属性}MOD属性`)
@@ -77,6 +75,54 @@ const modAttributeBonusSources = computed(() => {
     }
     return []
 })
+
+/**
+ * 角色属性行的实际加成来源字段名：角色「攻击」属性由「属性攻击」百分比乘区贡献
+ * （角色攻击 = 角色基础攻击 × (1 + 角色攻击加成 + 和鸣增益) × (1 + 属性攻击) + 固定攻击）。
+ * @param key 展示的属性键名
+ * @returns 对应的加成来源字段名
+ */
+function attrSourceKey(key: string): string {
+    return key === "攻击" ? "属性攻击" : key
+}
+
+/**
+ * 动态来源的展示格式与主属性保持一致：数值型属性（攻击/生命/护盾/防御/神智/有效生命）按带符号数值展示，
+ * 其余百分比型属性按带符号百分比展示，避免 flat 差值（如「法露茜Q」将攻击百位转化生命）被误显示为百分比。
+ * @param key 属性键名
+ * @param value 来源贡献值
+ * @returns 展示字符串
+ */
+function formatDynamicSource(key: string, value: number): string {
+    if (["攻击", "生命", "护盾", "防御", "神智", "有效生命"].includes(key)) {
+        return `${value >= 0 ? "+" : ""}${+value.toFixed(key === "攻击" ? 2 : 0)}`
+    }
+    return format100r(value)
+}
+
+/**
+ * 角色属性行的附加来源字段：攻击 行额外展示「属性攻击」（百分比乘区）与「固定攻击」（平值），
+ * 生命 行额外展示「固定生命」（平值）。基础字段（攻击/生命等）由既有来源块处理。
+ * @param key 展示的属性键名
+ * @returns 附加来源字段名列表
+ */
+function extraAttrSourceKeys(key: string): string[] {
+    if (key === "攻击") return ["属性攻击", "固定攻击"]
+    if (key === "生命") return ["固定生命"]
+    return []
+}
+
+/**
+ * 附加来源数值的展示格式：属性攻击 为百分比，固定攻击/固定生命 为带符号平值。
+ * @param key 展示的属性键名
+ * @param sourceField 来源字段名
+ * @param value 来源贡献值
+ * @returns 展示字符串
+ */
+function formatExtraSource(key: string, sourceField: string, value: number): string {
+    if (sourceField === "属性攻击") return format100r(value)
+    return formatDynamicSource(key, value)
+}
 </script>
 <template>
     <FullTooltip
@@ -137,6 +183,31 @@ const modAttributeBonusSources = computed(() => {
                         </div>
                         {{ format100r(mod[key]!) }}
                     </li>
+                    <template v-for="sourceField in extraAttrSourceKeys(key)" :key="sourceField">
+                        <li
+                            v-for="(mod, index) in [
+                                ...[charBuild.auraMod].filter((m): m is LeveledMod => m != null && typeof m[sourceField] === 'number'),
+                                ...charBuild.charMods.filter((m): m is LeveledMod => m != null && typeof m[sourceField] === 'number'),
+                            ]"
+                            :key="`extra-mod-${sourceField}-${index}`"
+                            class="flex justify-between gap-8 text-sm text-primary"
+                        >
+                            <div class="text-base-content/80">
+                                {{ $t(mod.名称) }}
+                            </div>
+                            {{ sourceField === '属性攻击' ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, mod[sourceField]!) }}
+                        </li>
+                        <li
+                            v-for="(buff, index) in charBuild.buffs.filter(b => typeof b[sourceField] === 'number')"
+                            :key="`extra-buff-${sourceField}-${index}`"
+                            class="flex justify-between gap-8 text-sm text-primary"
+                        >
+                            <div class="text-base-content/80">
+                                {{ buff.名称 }}
+                            </div>
+                            {{ sourceField === '属性攻击' ? '(*)' : '' }}{{ formatExtraSource(key, sourceField, buff[sourceField]!) }}
+                        </li>
+                    </template>
                     <li
                         v-for="(buff, index) in charBuild.buffs.filter(b => b[key])"
                         :key="index"
@@ -153,7 +224,7 @@ const modAttributeBonusSources = computed(() => {
                         class="flex justify-between gap-8 text-sm text-primary"
                     >
                         <div class="text-base-content/80">{{ dynamicSource.sourceName }}</div>
-                        {{ format100r(dynamicSource.value) }}
+                        {{ formatDynamicSource(key, dynamicSource.value) }}
                     </li>
                     <li
                         v-for="(source, index) in key === '充盈威力' ? fullnessWeaponSources : []"
@@ -166,7 +237,7 @@ const modAttributeBonusSources = computed(() => {
                     <li
                         v-if="
                             charBuild.getTotalBonus(`${charBuild.char.属性}MOD属性`) > 0 &&
-                            modAttributeBonusSources.some(v => v.addAttr[key])
+                            modAttributeBonusSources.some(v => v.addAttr[attrSourceKey(key)])
                         "
                         v-for="(buff, index) in charBuild.buffs.filter(b => b[`${charBuild.char.属性}MOD属性`])"
                         :key="index"
@@ -174,8 +245,9 @@ const modAttributeBonusSources = computed(() => {
                     >
                         <div class="text-base-content/80">{{ buff.名称 }}</div>
                         {{
+                            (key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "") +
                             format100r(
-                                modAttributeBonusSources.reduce((v, r) => v + (r.addAttr[key] ?? 0), 0) *
+                                modAttributeBonusSources.reduce((v, r) => v + (r.addAttr[attrSourceKey(key)] ?? 0), 0) *
                                     buff[`${charBuild.char.属性}MOD属性`]!
                             )
                         }}

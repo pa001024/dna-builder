@@ -2315,7 +2315,7 @@ export const npcData: NPC[] = [
     },
     {
         id: 82102,
-        name: "艾达（？？）",
+        name: "伊薇",
         camp: "NPC",
         charId: 2102,
         type: "Show",
@@ -2338,6 +2338,21 @@ export const npcData: NPC[] = [
                         content: "嗯？你手里拿着的是什么？",
                         next: 90290201,
                     },
+                    {
+                        id: 90290300,
+                        content: "你不会怨恨她吗？",
+                        next: 90290301,
+                    },
+                    {
+                        id: 90290400,
+                        content: "聊聊真正的维克托吧。",
+                        next: 90290401,
+                    },
+                    {
+                        id: 90290500,
+                        content: "你为什么经常说“咿呜”？这个词有什么特殊含义吗？",
+                        next: 90290501,
+                    },
                 ],
             },
             {
@@ -2355,6 +2370,27 @@ export const npcData: NPC[] = [
                 next: 90290202,
             },
             {
+                id: 90290301,
+                content: "嗯……我想，那些被抓来的镇民，还有他们的家人，一定都很讨厌她。她曾经被深深伤害过，也深深地伤害了其他人。",
+                voice: "char/Eve/vo_topic_03_3",
+                npc: 82102,
+                next: 90290302,
+            },
+            {
+                id: 90290401,
+                content: "哦哦，原本的那位维克托呀，他是艾达从小玩到大的好朋友，一个非常开朗，非常有正义感，非常非常喜欢阿尔卡诺镇的人。",
+                voice: "char/Eve/vo_topic_04_1",
+                npc: 82102,
+                next: 90290402,
+            },
+            {
+                id: 90290501,
+                content: "咿呜？没有哦！只是一个很好用的语气词而已~",
+                voice: "char/Eve/vo_topic_05_1",
+                npc: 82102,
+                next: 90290502,
+            },
+            {
                 id: 90290102,
                 content: "棕色的，有拇指那么大，翅膀亮亮的，长着两根触须，六条毛毛的脚……",
                 voice: "char/Eve/vo_topic_01_2",
@@ -2369,6 +2405,27 @@ export const npcData: NPC[] = [
                 next: 90290203,
             },
             {
+                id: 90290302,
+                content: "但我自己……我无法去怨恨她什么，毕竟是她带我来到这个世界上的。",
+                voice: "char/Eve/vo_topic_03_4",
+                npc: 82102,
+                next: 90290303,
+            },
+            {
+                id: 90290402,
+                content: "他是一个很好的人……也是正因为此，他丢掉了性命。",
+                voice: "char/Eve/vo_topic_04_2",
+                npc: 82102,
+                next: 90290403,
+            },
+            {
+                id: 90290502,
+                content: "我也记不得是从什么时候开始用的了，好像不知不觉地就习惯了，很神奇吧！",
+                voice: "char/Eve/vo_topic_05_2",
+                npc: 82102,
+                next: 90290503,
+            },
+            {
                 id: 90290103,
                 content: "？！",
                 npc: 100001,
@@ -2379,6 +2436,38 @@ export const npcData: NPC[] = [
                 content: "（与心中的道德展开激烈斗争！）",
                 npc: 100001,
                 next: 90290204,
+            },
+            {
+                id: 90290303,
+                content:
+                    "如果可以，我希望能找到那些曾经一起在乐园中的人。毕竟我就是艾达，艾达就是我……如果我能帮帮大家忙的话，或许也能帮艾达赔一些罪吧。",
+                voice: "char/Eve/vo_topic_03_5",
+                npc: 82102,
+                options: [
+                    {
+                        id: 90290002,
+                        content: "聊点别的",
+                        next: 90290001,
+                    },
+                    {
+                        id: 90290003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90290403,
+                content:
+                    "那天，他原本已经出发去军团报道了。但听到炮火声，他还是折返了回来，拼命去拯救他的家乡……后来的事你都知道了，那一天，除了艾达，没有人活下来。",
+                voice: "char/Eve/vo_topic_04_3",
+                npc: 82102,
+                next: 90290404,
+            },
+            {
+                id: 90290503,
+                content: "我还以为是来源于你的名字呢，毕竟听起来很像。",
+                npc: 100001,
+                next: 90290504,
             },
             {
                 id: 90290104,
@@ -2395,6 +2484,19 @@ export const npcData: NPC[] = [
                 next: 90290205,
             },
             {
+                id: 90290404,
+                content: "难怪艾达会如此怀念他。",
+                npc: 100001,
+                next: 90290405,
+            },
+            {
+                id: 90290504,
+                content: "咿呜？！你很聪明嘛，竟然发现了这个秘密~不过，你说反了哦！",
+                voice: "char/Eve/vo_topic_05_3",
+                npc: 82102,
+                next: 90290505,
+            },
+            {
                 id: 90290105,
                 content: "不要！！那是害虫！！",
                 npc: 100001,
@@ -2405,6 +2507,32 @@ export const npcData: NPC[] = [
                 content: "好像不太对……这些银币掂起来轻轻的。",
                 npc: 100001,
                 next: 90290206,
+            },
+            {
+                id: 90290405,
+                content:
+                    "嗯！所以说，艾达的游戏最后由一位扮演“维克托”的人结束，其实是个很不错的结局吧？真正的维克托，一定也会想把艾达从那个可怕的地方救出来。",
+                voice: "char/Eve/vo_topic_04_4",
+                npc: 82102,
+                options: [
+                    {
+                        id: 90290002,
+                        content: "聊点别的",
+                        next: 90290001,
+                    },
+                    {
+                        id: 90290003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90290505,
+                content:
+                    "其实是先有“咿呜”，再有“伊薇”的！毕竟我没读过什么书，没法给自己起那种厉害的名字，所以我就“咿呜咿呜”地拍拍脑袋，决定叫自己“伊薇”啦！",
+                voice: "char/Eve/vo_topic_05_4",
+                npc: 82102,
+                next: 90290506,
             },
             {
                 id: 90290106,
@@ -2421,6 +2549,12 @@ export const npcData: NPC[] = [
                 next: 90290207,
             },
             {
+                id: 90290506,
+                content: "名字这么随便起真的好吗？！不过倒是符合你的作风。",
+                npc: 100001,
+                next: 90290507,
+            },
+            {
                 id: 90290107,
                 content: "不要再说了……",
                 npc: 100001,
@@ -2431,6 +2565,23 @@ export const npcData: NPC[] = [
                 content: "这很明显是假币，赶紧销毁，否则会被抓走的。",
                 npc: 100001,
                 next: 90290208,
+            },
+            {
+                id: 90290507,
+                content: "对呀对呀，你也这么觉得吧！我其实是个起名天才呢~",
+                voice: "char/Eve/vo_topic_05_5",
+                npc: 82102,
+                options: [
+                    {
+                        id: 90290002,
+                        content: "聊点别的",
+                        next: 90290001,
+                    },
+                    {
+                        id: 90290003,
+                        content: "再见",
+                    },
+                ],
             },
             {
                 id: 90290108,
@@ -3481,6 +3632,185 @@ export const npcData: NPC[] = [
                     },
                     {
                         id: 90180005,
+                        content: "再见",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 83104,
+        name: "法露茜",
+        camp: "NPC",
+        charId: 3104,
+        type: "Show",
+        talks: [
+            {
+                id: 90300001,
+                content: "嗯，早。",
+                voice: "char/Falu/vo_welcome",
+                npc: 83104,
+                options: [
+                    {
+                        id: 90300100,
+                        content: "你为什么要为富尔维斯做事？",
+                        next: 90300101,
+                    },
+                    {
+                        id: 90300200,
+                        content: "跟我讲讲第十三军团吧。",
+                        next: 90300201,
+                    },
+                    {
+                        id: 90300300,
+                        content: "你在发抖吗？",
+                        next: 90300301,
+                    },
+                ],
+            },
+            {
+                id: 90300101,
+                content: "能进入十三军团就已经是大部分军人的奢望，为十三军团的谁卖命，在我看来都没有区别。",
+                voice: "char/Falu/vo_topic_01_1",
+                npc: 83104,
+                next: 90300102,
+            },
+            {
+                id: 90300201,
+                content:
+                    "军团的内幕我不关心，战友的私事我不过问，我在军团只与他人维持脆弱的表面关系，这样利用与背叛他们时也不会有什么心理负担。",
+                voice: "char/Falu/vo_topic_02_1",
+                npc: 83104,
+                next: 90300202,
+            },
+            {
+                id: 90300301,
+                content: "你看错了。",
+                voice: "char/Falu/vo_topic_03_1",
+                npc: 83104,
+                next: 90300302,
+            },
+            {
+                id: 90300102,
+                content: "当然，也可能只是为了争一口气，因为我不想一直做那个“第二名”。",
+                voice: "char/Falu/vo_topic_01_2",
+                npc: 83104,
+                next: 90300103,
+            },
+            {
+                id: 90300202,
+                content: "至于经我之手的机密文件，我也只是奉命转交或是销毁而已。所以能被我知道的情报，往往都是一些很浅显的信息。",
+                voice: "char/Falu/vo_topic_02_2",
+                npc: 83104,
+                next: 90300203,
+            },
+            {
+                id: 90300302,
+                content: "但你的声音都在颤抖。",
+                npc: 100001,
+                next: 90300303,
+            },
+            {
+                id: 90300103,
+                content: "但是，一旦走上这条路，就回不了头了。自从被卷入他的阴谋开始，我就只能被裹挟着一步步往前。",
+                voice: "char/Falu/vo_topic_01_3",
+                npc: 83104,
+                next: 90300104,
+            },
+            {
+                id: 90300203,
+                content: "有时间的话我倒是可以跟你讲讲我在十三军团执行过的各种任务，它们每一件都清楚地刻在我的脑海。",
+                voice: "char/Falu/vo_topic_02_3",
+                npc: 83104,
+                next: 90300204,
+            },
+            {
+                id: 90300303,
+                content: "……离开军团后，我时常在梦里看到很多血。",
+                voice: "char/Falu/vo_topic_03_2",
+                npc: 83104,
+                next: 90300304,
+            },
+            {
+                id: 90300104,
+                content: "向前和向后都是深渊。",
+                npc: 100001,
+                next: 90300105,
+            },
+            {
+                id: 90300204,
+                content: "事先声明，如果任务内容引起了你的生理不适，或是因为知道了这些任务而给你造成了什么影响，我不会为此负责。",
+                voice: "char/Falu/vo_topic_02_4",
+                npc: 83104,
+                options: [
+                    {
+                        id: 90300002,
+                        content: "聊点别的",
+                        next: 90300001,
+                    },
+                    {
+                        id: 90300003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90300304,
+                content: "那是过去因我而死之人的血。它们顺着我的手流着，一直流到脚下，在地面扎了根，变成一片猩红的荆棘，将我死死钉在原地。",
+                voice: "char/Falu/vo_topic_03_3",
+                npc: 83104,
+                next: 90300305,
+            },
+            {
+                id: 90300105,
+                content: "嗯，不过，现在的我不会为手上的血辩解。你可以随意处置我，打骂都无所谓，我不会还手。",
+                voice: "char/Falu/vo_topic_01_4",
+                npc: 83104,
+                options: [
+                    {
+                        id: 90300002,
+                        content: "聊点别的",
+                        next: 90300001,
+                    },
+                    {
+                        id: 90300003,
+                        content: "再见",
+                    },
+                ],
+            },
+            {
+                id: 90300305,
+                content: "于是我会在梦里洗手，但血实在是太烫了，无论我如何清洗，都洗不掉那灼烧的疼痛。我想要呐喊，但连呼吸都必须竭尽全力。",
+                voice: "char/Falu/vo_topic_03_4",
+                npc: 83104,
+                next: 90300306,
+            },
+            {
+                id: 90300306,
+                content: "这是我必须承担的惩罚，我不会也不能逃避。",
+                voice: "char/Falu/vo_topic_03_5",
+                npc: 83104,
+                next: 90300307,
+            },
+            {
+                id: 90300307,
+                content: "深呼吸。",
+                npc: 100001,
+                next: 90300308,
+            },
+            {
+                id: 90300308,
+                content: "呼……呼……谢谢。",
+                voice: "char/Falu/vo_topic_03_6",
+                npc: 83104,
+                options: [
+                    {
+                        id: 90300002,
+                        content: "聊点别的",
+                        next: 90300001,
+                    },
+                    {
+                        id: 90300003,
                         content: "再见",
                     },
                 ],
@@ -6606,7 +6936,7 @@ export const npcData: NPC[] = [
     },
     {
         id: 92102,
-        name: "艾达（？？）",
+        name: "伊薇",
         camp: "NPC",
         charId: 2102,
         type: "Normal",
@@ -6644,6 +6974,13 @@ export const npcData: NPC[] = [
         name: "耶尔",
         camp: "NPC",
         charId: 3103,
+        type: "Normal",
+    },
+    {
+        id: 93104,
+        name: "法露茜",
+        camp: "NPC",
+        charId: 3104,
         type: "Normal",
     },
     {
@@ -8637,6 +8974,7 @@ export const npcData: NPC[] = [
         id: 110022,
         name: "{nickname2}",
         camp: "NPC",
+        charId: 220101,
         type: "Normal",
     },
     {
@@ -8797,6 +9135,7 @@ export const npcData: NPC[] = [
         id: 110040,
         name: "{nickname2}",
         camp: "NPC",
+        charId: 220101,
         type: "Normal",
     },
     {
@@ -9572,6 +9911,7 @@ export const npcData: NPC[] = [
         id: 110048,
         name: "{nickname2}",
         camp: "NPC",
+        charId: 220101,
         type: "Normal",
     },
     {
@@ -9649,7 +9989,72 @@ export const npcData: NPC[] = [
         type: "Normal",
     },
     {
+        id: 111005,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111006,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111007,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111008,
+        name: "？？？",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111009,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
         id: 111110,
+        name: "法露茜",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111111,
+        name: "法露茜",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111112,
+        name: "法露茜",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111113,
+        name: "法露茜",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111114,
+        name: "法露茜",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111115,
+        name: "法露茜",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111116,
         name: "法露茜",
         camp: "NPC",
         type: "Normal",
@@ -9694,12 +10099,14 @@ export const npcData: NPC[] = [
         id: 111126,
         name: "「战车」维克托？",
         camp: "NPC",
+        charId: 220101,
         type: "Normal",
     },
     {
         id: 111127,
         name: "「战车」维克托？",
         camp: "NPC",
+        charId: 220101,
         type: "Normal",
     },
     {
@@ -9788,7 +10195,7 @@ export const npcData: NPC[] = [
     },
     {
         id: 111163,
-        name: "「魔鬼」亚蒙",
+        name: "「恶魔」亚蒙",
         camp: "NPC",
         type: "Normal",
     },
@@ -9848,7 +10255,7 @@ export const npcData: NPC[] = [
     },
     {
         id: 111173,
-        name: "UI_CMNpc_Name_Anbixiu",
+        name: "「塔」安比修",
         camp: "NPC",
         type: "Normal",
     },
@@ -9974,6 +10381,172 @@ export const npcData: NPC[] = [
     {
         id: 111194,
         name: "「女皇」特蕾莎",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111195,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111196,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111197,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111198,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111199,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111200,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111201,
+        name: "「力量」伯纳德",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111202,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111203,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111204,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111205,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111206,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111207,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111208,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111209,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111210,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111211,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111212,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111213,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111214,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111215,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111216,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111217,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111218,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111219,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111220,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111221,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111222,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 111223,
+        name: "「倒吊人」伊萨克",
         camp: "NPC",
         type: "Normal",
     },
@@ -14979,6 +15552,252 @@ export const npcData: NPC[] = [
         id: 250036,
         camp: "NPC",
         type: "Normal",
+    },
+    {
+        id: 250037,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250038,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250039,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250040,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250041,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250042,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250043,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250044,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250045,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250046,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250047,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250048,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250049,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250050,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250051,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250052,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250053,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250054,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250055,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250056,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250057,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250058,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250059,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250060,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250061,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 250062,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 260001,
+        name: "黎瑟",
+    },
+    {
+        id: 260002,
+        name: "卡米拉",
+    },
+    {
+        id: 260003,
+        name: "雾区居民",
+    },
+    {
+        id: 260004,
+        name: "落寞的老人",
+    },
+    {
+        id: 260005,
+        name: "罗德斯奶奶",
+    },
+    {
+        id: 260006,
+        name: "不耐烦的卫兵",
+    },
+    {
+        id: 260007,
+        name: "走神的工人",
+    },
+    {
+        id: 260008,
+        name: "克拉拉",
+    },
+    {
+        id: 260009,
+        name: "警觉的卫兵",
+    },
+    {
+        id: 260010,
+        name: "马蒂斯",
+    },
+    {
+        id: 260011,
+        name: "暴躁的工人",
+    },
+    {
+        id: 260012,
+        name: "态度凶恶的催债人",
+    },
+    {
+        id: 260013,
+        name: "道吉",
+    },
+    {
+        id: 260014,
+        name: "气急败坏的男人",
+    },
+    {
+        id: 260015,
+        name: "路过的邻居",
+    },
+    {
+        id: 260016,
+        name: "憔悴的卡戎少女",
+    },
+    {
+        id: 260017,
+        name: "蕾伊",
+    },
+    {
+        id: 260018,
+        name: "热情的摊贩",
+    },
+    {
+        id: 260019,
+        name: "开朗的市民",
+    },
+    {
+        id: 260020,
+        name: "卡森",
+    },
+    {
+        id: 260021,
+        name: "巡逻的士兵",
+    },
+    {
+        id: 260022,
+        name: "约翰森中校",
+    },
+    {
+        id: 260023,
+        name: "慌张的卫兵",
+    },
+    {
+        id: 260024,
+        name: "热心肠的酒客",
+    },
+    {
+        id: 260025,
+        name: "芙蕾达",
+    },
+    {
+        id: 260026,
+        name: "剧院工作人员",
+    },
+    {
+        id: 260027,
+        name: "珂芮",
+    },
+    {
+        id: 260028,
+        name: "苏珊娜",
+    },
+    {
+        id: 260029,
+        name: "布鲁斯",
     },
     {
         id: 700002,
@@ -23317,6 +24136,8 @@ export const npcData: NPC[] = [
     {
         id: 700474,
         name: "车站警卫",
+        camp: "NPC",
+        type: "Normal",
     },
     {
         id: 700475,
@@ -28266,6 +29087,89 @@ export const npcData: NPC[] = [
     },
     {
         id: 700635,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700636,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700637,
+        name: "日记的主人",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700638,
+        name: "濒死的传颂会士兵",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700639,
+        name: "日记的主人",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700640,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700641,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700642,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700643,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700644,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700645,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700646,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700647,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700648,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700649,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700650,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 700651,
         camp: "NPC",
         type: "Normal",
     },
@@ -59988,6 +60892,504 @@ export const npcData: NPC[] = [
         ],
     },
     {
+        id: 703128,
+        name: "「女皇」特蕾莎",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51301301,
+                content: "维克托是来尝炖土豆的吗？等阿姨喂完这些鸽子差不多就炖好了，稍等一下哦。",
+                npc: 703128,
+                next: 51301302,
+            },
+            {
+                id: 51301302,
+                content: "没事，我们还不饿。请问你知道怎么才能见到兔妈妈吗？",
+                speakerName: "「战车」维克托？",
+                next: 51301303,
+            },
+            {
+                id: 51301303,
+                content: "……兔妈妈啊……呵呵，那你更不用着急了，明晚乐园巡游的时候，你自然就能见到她了。",
+                npc: 703128,
+            },
+        ],
+    },
+    {
+        id: 703129,
+        name: "「恶魔」亚蒙",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51301401,
+                content: "安比修，帮我把这些箱子搬过来。",
+                npc: 703129,
+                next: 51301402,
+            },
+            {
+                id: 51301402,
+                content: "哦，哦……",
+                npc: 703132,
+                next: 51301403,
+            },
+            {
+                id: 51301403,
+                content: "错啦，我说的是箱子，你给我搬了几个花篮做什么！又不是小孩子了，连花篮和箱子都分不清吗？",
+                npc: 703129,
+                next: 51301404,
+            },
+            {
+                id: 51301404,
+                content: "花篮，好看……",
+                npc: 703132,
+                next: 51301405,
+            },
+            {
+                id: 51301405,
+                content: "你你你，我真的早晚有一天要被你气死！",
+                npc: 703129,
+                next: 51301406,
+            },
+            {
+                id: 51301406,
+                content: "喂，看那个安比修的衣服。",
+                npc: 703134,
+                next: 51301407,
+            },
+            {
+                id: 51301407,
+                content: "那个暗淡的图案是……神弃者同盟的标志？！",
+                speakerName: "「战车」维克托？",
+                next: 51301408,
+            },
+            {
+                id: 51301408,
+                content: "维克托你们这是怎么了，一副要杀人的样子。",
+                npc: 703129,
+                next: 51301409,
+            },
+            {
+                id: 51301409,
+                content: "安比修可能是神弃者同盟的成员，你先退后。",
+                speakerName: "「战车」维克托？",
+                next: 51301410,
+            },
+            {
+                id: 51301410,
+                content: "神弃者同盟？那是什么东西……安比修就是一个花篮和箱子都分不清的傻子，肯定不是你说的什么同盟。",
+                npc: 703129,
+                next: 51301411,
+            },
+            {
+                id: 51301411,
+                content: "他没事就喜欢捡一些奇奇怪怪的东西挂身上，你们不用紧张。",
+                npc: 703129,
+                next: 51301412,
+            },
+            {
+                id: 51301412,
+                content: "这个图案，酷。维克托你要来一件吗？我给你画一个。",
+                npc: 703132,
+                next: 51301413,
+            },
+            {
+                id: 51301413,
+                content: "不用了……",
+                speakerName: "「战车」维克托？",
+                next: 51301414,
+            },
+            {
+                id: 51301414,
+                content: "好了，安比修，我再教你最后一次。这个是箱子，这个是花篮，你再复述一遍！",
+                npc: 703129,
+                next: 51301415,
+            },
+            {
+                id: 51301415,
+                content: "箱子……花篮……箱子……花篮……箱篮……花子……",
+                npc: 703132,
+                next: 51301416,
+            },
+            {
+                id: 51301416,
+                content: "…………",
+                speakerName: "「战车」维克托？",
+                next: 51301417,
+            },
+            {
+                id: 51301417,
+                content: "（他的反应确实不像神弃者同盟的成员，衣服看起来也不太合身，可能真是我想多了吧……）",
+                speakerName: "「战车」维克托？",
+            },
+        ],
+    },
+    {
+        id: 703130,
+        name: "「恋人」维娜",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51301101,
+                content: "汉赛尔……我真的好想你，想念你怀里的温度，想念我们破败但温馨的小家……",
+                npc: 703130,
+                next: 51301102,
+            },
+            {
+                id: 51301102,
+                content: "咦，维克托什么时候来的？怎么，是要跟姐姐分享你的爱情故事吗？对象是——这位小姑娘？",
+                npc: 703130,
+                next: 51301103,
+            },
+            {
+                id: 51301103,
+                content: "别做这种无聊的揣测。",
+                npc: 703134,
+                next: 51301104,
+            },
+            {
+                id: 51301104,
+                content: "诶诶，小姑娘害羞啦？好吧好吧，那姐姐就不问了。",
+                npc: 703130,
+                next: 51301105,
+            },
+            {
+                id: 51301105,
+                content: "维克托，下次只有我们两个人的时候悄悄告诉我哦~",
+                npc: 703130,
+            },
+        ],
+    },
+    {
+        id: 703131,
+        name: "「倒吊人」伊萨克",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51301701,
+                content: "小维克托，还记得镇子上这些红白的花瓣吗？",
+                npc: 703131,
+                next: 51301702,
+            },
+            {
+                id: 51301702,
+                content: "呵呵，一看就是不记得了，没事，我来跟你讲一讲吧。",
+                npc: 703131,
+                next: 51301703,
+            },
+            {
+                id: 51301703,
+                content: "在曾经的阿尔卡诺镇流传着这样的传说，很久很久以前，一位少女与家人在战乱中走失。",
+                npc: 703131,
+                next: 51301704,
+            },
+            {
+                id: 51301704,
+                content: "战争结束后，少女踏上了寻找家人的旅途，最终，她被阿尔卡诺山这种红白相间的花丛吸引，于是坐到花丛里休息。",
+                npc: 703131,
+                next: 51301705,
+            },
+            {
+                id: 51301705,
+                content: "休息完毕后，她随手摘下一朵红花，起身时发现花丛的另一端也站起了一位年轻人，而那名年轻人手中，则捧着一朵白花。",
+                npc: 703131,
+                next: 51301706,
+            },
+            {
+                id: 51301706,
+                content:
+                    "少女这才注意到对面那名年轻人正是她的同胞兄弟。原来她的家人这些年也在四处寻找她的下落，今天恰好被这红白相间的花丛吸引而来此休息。",
+                npc: 703131,
+                next: 51301707,
+            },
+            {
+                id: 51301707,
+                content: "所以红白花瓣在阿尔卡诺山中代表着“希望”与“重逢”，无论多么困难，也请怀抱希望，静候花海重逢的那天。",
+                npc: 703131,
+                next: 51301708,
+            },
+            {
+                id: 51301708,
+                content: "哎呦不好意思，老毛病又犯了，跟你们讲这些有的没的。",
+                npc: 703131,
+                next: 51301709,
+            },
+            {
+                id: 51301709,
+                content: "没关系。",
+                speakerName: "「战车」维克托？",
+                next: 51301710,
+            },
+            {
+                id: 51301710,
+                content: "呵呵，那你们便去忙吧，我去别处布置些花瓣。有兴趣的话，下次再跟你讲讲其他的故事。",
+                npc: 703131,
+            },
+        ],
+    },
+    {
+        id: 703132,
+        name: "「塔」安比修",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51301401,
+                content: "安比修，帮我把这些箱子搬过来。",
+                npc: 703129,
+                next: 51301402,
+            },
+            {
+                id: 51301402,
+                content: "哦，哦……",
+                npc: 703132,
+                next: 51301403,
+            },
+            {
+                id: 51301403,
+                content: "错啦，我说的是箱子，你给我搬了几个花篮做什么！又不是小孩子了，连花篮和箱子都分不清吗？",
+                npc: 703129,
+                next: 51301404,
+            },
+            {
+                id: 51301404,
+                content: "花篮，好看……",
+                npc: 703132,
+                next: 51301405,
+            },
+            {
+                id: 51301405,
+                content: "你你你，我真的早晚有一天要被你气死！",
+                npc: 703129,
+                next: 51301406,
+            },
+            {
+                id: 51301406,
+                content: "喂，看那个安比修的衣服。",
+                npc: 703134,
+                next: 51301407,
+            },
+            {
+                id: 51301407,
+                content: "那个暗淡的图案是……神弃者同盟的标志？！",
+                speakerName: "「战车」维克托？",
+                next: 51301408,
+            },
+            {
+                id: 51301408,
+                content: "维克托你们这是怎么了，一副要杀人的样子。",
+                npc: 703129,
+                next: 51301409,
+            },
+            {
+                id: 51301409,
+                content: "安比修可能是神弃者同盟的成员，你先退后。",
+                speakerName: "「战车」维克托？",
+                next: 51301410,
+            },
+            {
+                id: 51301410,
+                content: "神弃者同盟？那是什么东西……安比修就是一个花篮和箱子都分不清的傻子，肯定不是你说的什么同盟。",
+                npc: 703129,
+                next: 51301411,
+            },
+            {
+                id: 51301411,
+                content: "他没事就喜欢捡一些奇奇怪怪的东西挂身上，你们不用紧张。",
+                npc: 703129,
+                next: 51301412,
+            },
+            {
+                id: 51301412,
+                content: "这个图案，酷。维克托你要来一件吗？我给你画一个。",
+                npc: 703132,
+                next: 51301413,
+            },
+            {
+                id: 51301413,
+                content: "不用了……",
+                speakerName: "「战车」维克托？",
+                next: 51301414,
+            },
+            {
+                id: 51301414,
+                content: "好了，安比修，我再教你最后一次。这个是箱子，这个是花篮，你再复述一遍！",
+                npc: 703129,
+                next: 51301415,
+            },
+            {
+                id: 51301415,
+                content: "箱子……花篮……箱子……花篮……箱篮……花子……",
+                npc: 703132,
+                next: 51301416,
+            },
+            {
+                id: 51301416,
+                content: "…………",
+                speakerName: "「战车」维克托？",
+                next: 51301417,
+            },
+            {
+                id: 51301417,
+                content: "（他的反应确实不像神弃者同盟的成员，衣服看起来也不太合身，可能真是我想多了吧……）",
+                speakerName: "「战车」维克托？",
+            },
+        ],
+    },
+    {
+        id: 703133,
+        name: "「隐士」塔西",
+        camp: "NPC",
+        type: "Normal",
+        talks: [
+            {
+                id: 51301501,
+                content: "…………",
+                npc: 703133,
+                next: 51301502,
+            },
+            {
+                id: 51301502,
+                content: "你好？",
+                speakerName: "「战车」维克托？",
+                next: 51301503,
+            },
+            {
+                id: 51301503,
+                content: "……………………",
+                npc: 703133,
+                next: 51301504,
+            },
+            {
+                id: 51301504,
+                content: "抱歉，维克托。我并不知道你所寻找的那些问题的答案。",
+                npc: 703133,
+                next: 51301505,
+            },
+            {
+                id: 51301505,
+                content: "（我还什么都没问呢？）",
+                speakerName: "「战车」维克托？",
+                next: 51301506,
+            },
+            {
+                id: 51301506,
+                content: "塔西婆婆不怎么爱说话，我们还是去其他地方转转吧。",
+                npc: 111001,
+                speakerName: "「女祭司」艾达",
+                next: 51301507,
+            },
+            {
+                id: 51301507,
+                content: "呵呵，并不是不爱说话，只是到了我这个年纪，就会知道言多必失的道理了。",
+                npc: 703133,
+                next: 51301508,
+            },
+            {
+                id: 51301508,
+                content: "你们也要记得，不是百分百确定的事，千万不要随随便便对他人说出来啊……",
+                npc: 703133,
+            },
+        ],
+    },
+    {
+        id: 703134,
+        name: "法露茜",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 703135,
+        name: "维吉尔",
+        camp: "NPC",
+        type: "Normal",
+        srId: 101901,
+        pos: [23006, 9824],
+        talks: [
+            {
+                id: 51300101,
+                content: "士兵们在阿尔卡诺山附近找到了一些镇民，这边是他们交上来的审讯报告。",
+                npc: 703135,
+                next: 51300102,
+            },
+            {
+                id: 51300102,
+                content: "结果我看了半天，报告不仅没变少，反而变得更多了……",
+                npc: 703135,
+                next: 51300103,
+            },
+            {
+                id: 51300103,
+                content: "要不你也一起看一下，看看和你在这里得到的情报有无出入？",
+                npc: 703135,
+            },
+            {
+                id: 51301001,
+                content: "相比列车，飞艇的设施还是过于糟糕……梆硬的座椅坐得人骨头都要散架了。",
+                npc: 703135,
+                next: 51301002,
+            },
+            {
+                id: 51301002,
+                content: "因为飞艇还没有转民用吧。军人们没什么好挑剔的。",
+                speakerName: "「战车」维克托？",
+                next: 51301003,
+            },
+            {
+                id: 51301003,
+                content: "好吧，你凑合一下，等到了丹流城，就能好好休息一阵子了。",
+                npc: 703135,
+            },
+        ],
+    },
+    {
+        id: 703136,
+        name: "「节制」门苏拉",
+        camp: "NPC",
+        type: "Normal",
+        srId: 107001,
+        pos: [-15644, -72966],
+        talks: [
+            {
+                id: 51301601,
+                content: "这些彩旗再往左边挪5厘米吧，还是保持对称比较好。",
+                npc: 703136,
+                next: 51301602,
+            },
+            {
+                id: 51301602,
+                content: "……感觉还是有点歪，算了我自己来吧。",
+                npc: 703136,
+                next: 51301603,
+            },
+            {
+                id: 51301603,
+                content: "咦，梯子哪去了，我刚刚还放在身后的……唉，记性真是越来越差了……我也到了该服老的年纪吗？",
+                npc: 703136,
+            },
+        ],
+    },
+    {
+        id: 703137,
+        name: "伊薇",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 703138,
+        name: "「正义」加斯图斯",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 703139,
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
         id: 790001,
         name: "米娅",
         camp: "NPC",
@@ -60590,6 +61992,52 @@ export const npcData: NPC[] = [
     {
         id: 790091,
         name: "芙罗拉",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790092,
+        name: "「女祭司」艾达",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790093,
+        name: "「审判」兔妈妈",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790094,
+        name: "法露茜",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790095,
+        name: "阿瓦尔",
+        camp: "NPC",
+        type: "Normal",
+        srId: 102102,
+        pos: [630, 7268],
+        talks: [
+            {
+                id: 11017901,
+                content: "去吧，保持联络，听我指示。",
+                voice: "story/1002/110179/1B950862",
+                npc: 110010,
+            },
+        ],
+    },
+    {
+        id: 790096,
+        name: "海芙",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 790097,
+        name: "巴顿",
         camp: "NPC",
         type: "Normal",
     },
@@ -62644,7 +64092,7 @@ export const npcData: NPC[] = [
     },
     {
         id: 992102,
-        name: "艾达（？？）",
+        name: "伊薇",
         camp: "NPC",
         charId: 2102,
         type: "Normal",
@@ -62682,6 +64130,13 @@ export const npcData: NPC[] = [
         name: "耶尔",
         camp: "NPC",
         charId: 3103,
+        type: "Normal",
+    },
+    {
+        id: 993104,
+        name: "法露茜",
+        camp: "NPC",
+        charId: 3104,
         type: "Normal",
     },
     {
@@ -63055,18 +64510,21 @@ export const npcData: NPC[] = [
         id: 1100221,
         name: "{nickname2}",
         camp: "NPC",
+        charId: 2201,
         type: "Normal",
     },
     {
         id: 1100401,
         name: "{nickname2}",
         camp: "NPC",
+        charId: 2201,
         type: "Normal",
     },
     {
         id: 1100481,
         name: "{nickname2}",
         camp: "NPC",
+        charId: 2201,
         type: "Normal",
     },
     {
@@ -63165,12 +64623,14 @@ export const npcData: NPC[] = [
         id: 11112601,
         name: "「战车」维克托？",
         camp: "NPC",
+        charId: 2201,
         type: "Normal",
     },
     {
         id: 11112701,
         name: "「战车」维克托？",
         camp: "NPC",
+        charId: 2201,
         type: "Normal",
     },
     {
@@ -70828,6 +72288,12 @@ export const npcData: NPC[] = [
     {
         id: 77000008,
         name: "interact测试",
+        camp: "NPC",
+        type: "Normal",
+    },
+    {
+        id: 77000009,
+        name: "「女祭司」艾达",
         camp: "NPC",
         type: "Normal",
     },

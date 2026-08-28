@@ -193,6 +193,12 @@ export const headSculptureData: HeadSculpture[] = [
         icon: "T_Head_Eve",
     },
     {
+        id: 10033,
+        name: "复仇者的肖像",
+        desc: "UI_PlayerHead_Des_10031",
+        icon: "T_Head_Falu",
+    },
+    {
         id: 20001,
         name: "播种之人的肖像·仲夏",
         desc: '可将头像更换为"梦中的舞会"的形象。',
@@ -263,6 +269,24 @@ export const headSculptureData: HeadSculpture[] = [
         name: "生意人的肖像·绯色",
         desc: "适用于头像。",
         icon: "T_Head_Kami01",
+    },
+    {
+        id: 20013,
+        name: "播种之人的肖像·旋舞",
+        desc: "适用于头像。",
+        icon: "T_Head_Saiqi02",
+    },
+    {
+        id: 20014,
+        name: "回忆中的肖像·旋舞",
+        desc: "适用于头像。",
+        icon: "T_Head_Heitao01",
+    },
+    {
+        id: 20015,
+        name: "复仇者的肖像·缄言",
+        desc: "适用于头像。",
+        icon: "T_Head_Falu01",
     },
     {
         id: 30001,
@@ -1297,6 +1321,48 @@ export const headSculptureData: HeadSculpture[] = [
         icon: "T_Head_Other0048",
     },
     {
+        id: 30173,
+        name: "追猎·晴蓝",
+        desc: "适用于头像。",
+        icon: "T_Head_Other0061",
+    },
+    {
+        id: 30174,
+        name: "追猎·绣红",
+        desc: "适用于头像。",
+        icon: "T_Head_Other0060",
+    },
+    {
+        id: 30175,
+        name: "追猎·鎏金",
+        desc: "适用于头像。",
+        icon: "T_Head_Other0059",
+    },
+    {
+        id: 30176,
+        name: "布豪",
+        desc: "适用于头像。",
+        icon: "T_Head_Other0062",
+    },
+    {
+        id: 30177,
+        name: "睿智",
+        desc: "适用于头像。",
+        icon: "T_Head_Other0063",
+    },
+    {
+        id: 30178,
+        name: "虚实之兔",
+        desc: "适用于头像。",
+        icon: "T_Head_Other0057",
+    },
+    {
+        id: 30179,
+        name: "白兔的餐刀",
+        desc: "适用于头像。",
+        icon: "T_Head_Other0058",
+    },
+    {
         id: 40001,
         name: "诡异的光·闪烁",
         desc: "适用于头像。",
@@ -1311,6 +1377,12 @@ export const headSculptureData: HeadSculpture[] = [
     {
         id: 40003,
         name: "华彩殿堂·闪烁",
+        desc: "适用于头像。",
+        icon: "",
+    },
+    {
+        id: 40004,
+        name: "凝视",
         desc: "适用于头像。",
         icon: "",
     },

@@ -98,6 +98,22 @@ export const limitedPrizeItems: Record<number, LimitedPrizeItem> = {
         Probability: [8, 92, 100, 200, 1300, 1300, 3500, 3500],
         Type: [2, 4, 4, 4, 7, 8, 6, 6],
     },
+    "1007": {
+        CostRuleId: 1001,
+        Count: [1, 1, 1, 1, 1, 1, 3, 6],
+        Id: [[530102, 110101], [80065, 80064], [13057, 13058], [10159, 10160], [10047, 10048], [20013, 20014], [30112], [208]],
+        LimitedPrizePoolId: 1007,
+        Probability: [8, 92, 100, 200, 1300, 1300, 3500, 3500],
+        Type: [2, 4, 4, 4, 7, 8, 6, 6],
+    },
+    "1008": {
+        CostRuleId: 1002,
+        Count: [1, 1, 1, 1, 1, 1, 3, 6],
+        Id: [[530102, 110101], [80065, 80064], [13057, 13058], [10159, 10160], [10047, 10048], [20013, 20014], [30112], [208]],
+        LimitedPrizePoolId: 1008,
+        Probability: [8, 92, 100, 200, 1300, 1300, 3500, 3500],
+        Type: [2, 4, 4, 4, 7, 8, 6, 6],
+    },
 }
 
 /** 限时奖池活动映射表，由 importdata 从 out 自动写入。 */
@@ -165,5 +181,34 @@ export const limitedPrizePools: Record<number, LimitedPrizePool> = {
             "WidgetBlueprint'/Game/UI/WBP/Activity/Mobile/LimitedPrizePool/Succubus/WBP_LimitedPrizePool_GetReward_Succubus_M.WBP_LimitedPrizePool_GetReward_Succubus_M'",
         RoundBPPath:
             "WidgetBlueprint'/Game/UI/WBP/Activity/Widget/LimitedPrizePool/Succubus/WBP_LimitedPrizePool_RewardSwitchTip_Succubus.WBP_LimitedPrizePool_RewardSwitchTip_Succubus'",
+    },
+    "10302103": {
+        BigPrizeBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/PC/LimitedPrizePool/Doll/WBP_LimitedPrizePool_SelectPrize_Doll_P.WBP_LimitedPrizePool_SelectPrize_Doll_P'",
+        BigPrizeMobileBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Mobile/LimitedPrizePool/Doll/WBP_LimitedPrizePool_SelectPrize_Doll_M.WBP_LimitedPrizePool_SelectPrize_Doll_M'",
+        BigPrizeSoundEffects: "event:/ui/common/limit_gift_pool_sub_page_in_muou",
+        BigPrizeVideoPath:
+            "FileMediaSource'/Game/Asset/UIVideo/SystemShow/Activity/Activity_LimitedPrizePool_BG02.Activity_LimitedPrizePool_BG02'",
+        EventId: 10302103,
+        ExtraItem: {
+            "2": [80059, 1],
+            "3": [13059, 1],
+            "4": [10161, 1],
+        },
+        HistoryBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Widget/LimitedPrizePool/Doll/History/WBP_LimitedPrizePool_DetailHistoryContent_Doll.WBP_LimitedPrizePool_DetailHistoryContent_Doll'",
+        LimitedPrizePoolId: [1007, 1008],
+        ProcessBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/PC/LimitedPrizePool/Doll/WBP_LimitedPrizePool_Gacha_Doll_P.WBP_LimitedPrizePool_Gacha_Doll_P'",
+        ProcessMobileBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Mobile/LimitedPrizePool/Doll/WBP_LimitedPrizePool_Gacha_Doll_M.WBP_LimitedPrizePool_Gacha_Doll_M'",
+        ProcessSoundEffects: "event:/ui/common/limit_gift_pool_gacha_show_muou",
+        ResultBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/PC/LimitedPrizePool/Doll/WBP_LimitedPrizePool_GetReward_Doll_P.WBP_LimitedPrizePool_GetReward_Doll_P'",
+        ResultMobileBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Mobile/LimitedPrizePool/Doll/WBP_LimitedPrizePool_GetReward_Doll_M.WBP_LimitedPrizePool_GetReward_Doll_M'",
+        RoundBPPath:
+            "WidgetBlueprint'/Game/UI/WBP/Activity/Widget/LimitedPrizePool/Doll/WBP_LimitedPrizePool_RewardSwitchTip_Doll.WBP_LimitedPrizePool_RewardSwitchTip_Doll'",
     },
 }

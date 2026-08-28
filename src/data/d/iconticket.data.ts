@@ -18,7 +18,7 @@ export const iconticketData: IconTicket[] = [
         icon: "T_Resource_Coin_Zaie",
         level: 100,
         rarity: 5,
-        accessKey: ["Forging"],
+        accessKey: ["Forging", "Dungeon"],
     },
     {
         id: 1002,
@@ -28,7 +28,7 @@ export const iconticketData: IconTicket[] = [
         icon: "T_Resource_Coin_Zaie01",
         level: 100,
         rarity: 5,
-        accessKey: ["Forging"],
+        accessKey: ["Forging", "Dungeon"],
     },
 ]
 export const iconticketMap = new Map(iconticketData.map(ticket => [ticket.id, ticket]))

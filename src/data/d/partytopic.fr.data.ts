@@ -869,7 +869,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             },
             {
                 id: 80040420,
-                content: "... Il y a <H>elle</>. Je ne sais même pas si j’ai le droit de l’appeler « maman ».\nEt puis il y a toi.",
+                content: "... Il y a <H>elle</>. Je ne sais même pas si j’ai le droit de l’appeler « maman ».\n Et puis il y a toi.",
                 voice: "inv/Heitao/004/C85F6F68",
                 npc: 790060,
                 next: 80040421,
@@ -1406,7 +1406,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80260206,
                 content:
-                    "Le vent glacé fut déchiré par un éclair d’acier.\n Tapie dans l’ombre, la silhouette noire se mouvait plus vite encore que Hilda.\n Une lame froide, semblable à la langue d’un serpent, vint se poser contre la gorge de la servante aux cheveux rouges.\n Mais elle ne trancha point. Avec un long soupir, l’inconnue laissa tomber la dague à terre.",
+                    "Le vent glacé fut déchiré par un éclair d’acier.\n  Tapie dans l’ombre, la silhouette noire se mouvait plus vite encore que Hilda.\n  Une lame froide, semblable à la langue d’un serpent, vint se poser contre la gorge de la servante aux cheveux rouges.\n  Mais elle ne trancha point. Avec un long soupir, l’inconnue laissa tomber la dague à terre.",
                 voice: "inv/Fuluo/002/C8EC4A0C",
                 next: 80260207,
             },
@@ -4522,7 +4522,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170134,
                 content:
-                    "En voyant cette détresse mêlée de révolte sur le visage de la jeune sœur, elle vacilla.\nCar en elle, quelque chose s’éveilla, le souvenir d’un passé douloureux, d’une question laissée sans réponse.",
+                    "En voyant cette détresse mêlée de révolte sur le visage de la jeune sœur, elle vacilla.\n Car en elle, quelque chose s’éveilla, le souvenir d’un passé douloureux, d’une question laissée sans réponse.",
                 voice: "inv/Nifu/001/C8B2909C",
                 npc: 91502,
                 next: 80170135,
@@ -4530,7 +4530,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170135,
                 content:
-                    "Que se serait-il passé... si elle avait pu sauver son amie, et sa propre fille ?\nQuel avenir l’attendait, au bout de ce chemin qu’elle n’a jamais pu prendre ?",
+                    "Que se serait-il passé... si elle avait pu sauver son amie, et sa propre fille ?\n Quel avenir l’attendait, au bout de ce chemin qu’elle n’a jamais pu prendre ?",
                 voice: "inv/Nifu/001/C8B290C6",
                 npc: 91502,
                 next: 80170136,
@@ -4675,7 +4675,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80170152,
                 content:
-                    "En entendant cela, l’aînée n’a pu s’empêcher de pleurer, répétant mille fois « pardon »...\n Mais à la fin, elle s’est tournée vers l’urne funéraire de sa sœur, emportée par le courant, et lui a simplement dit... « merci ».",
+                    "En entendant cela, l’aînée n’a pu s’empêcher de pleurer, répétant mille fois « pardon »...\n  Mais à la fin, elle s’est tournée vers l’urne funéraire de sa sœur, emportée par le courant, et lui a simplement dit... « merci ».",
                 voice: "inv/Nifu/001/C8B29390",
                 npc: 91502,
                 next: 80170153,
@@ -7115,7 +7115,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80210421,
                 content:
-                    "Mais à force d’errance, même la liberté lasse. Elle s’est fatiguée de fuir sans cesse,\nde vivre sous la menace des Magistrats de Yingtian.",
+                    "Mais à force d’errance, même la liberté lasse. Elle s’est fatiguée de fuir sans cesse,\n de vivre sous la menace des Magistrats de Yingtian.",
                 voice: "inv/Kezhou/004/C8CC6232",
                 npc: 790067,
                 next: 80210422,
@@ -8158,7 +8158,6 @@ export const partyTopicData_fr: PartyTopic[] = [
                 id: 80240201,
                 content: "— Quatre ans plus tôt —",
                 voice: "inv/Suyi/002/C8DF77FA",
-                next: 80240202,
             },
         ],
     },
@@ -11259,11 +11258,942 @@ export const partyTopicData_fr: PartyTopic[] = [
     {
         id: 210201,
         charId: 2102,
-        name: "",
+        name: "Les contes du Lapin blanc",
+        desc: "Pour sauver davantage d’innocents des mains du Roi du Paradis, la jeune fille maladroite se creuse la tête pour inventer des histoires.",
+        memoryName: "Ballon de Lapin blanc",
+        memoryDesc: "Petit ballon, emmène-moi jusqu’à la maison... Fais-moi retrouver tous ceux que j’aime.",
         reward: 7050,
         consume: {
-            "19006": 2,
+            "19001": 3,
+            "19007": 3,
+            "19008": 3,
         },
+        dialogues: [
+            {
+                id: 80270101,
+                content:
+                    "... Et à la fin de son voyage, la petite fille arriva dans une immense forêt. Il y avait plein, plein de choses qu’elle n’avait encore jamais vues.",
+                npc: 790092,
+                next: 80270102,
+            },
+            {
+                id: 80270102,
+                content:
+                    "Les petits animaux jouaient avec elle au Glouton. Quand elle avait faim, les oiseaux lui apportaient des fruits. Quand elle avait sommeil, elle se blottissait contre eux pour faire une grande sieste. Elle s’amusait tellement dans cette forêt !",
+                npc: 790092,
+                next: 80270103,
+            },
+            {
+                id: 80270103,
+                content:
+                    "Et puis, un jour, elle aperçut une grappe de ballons flotter entre les arbres. Alors elle serra très fort ses amis les animaux dans ses bras, attrapa les ballons... et rentra chez elle, toute heureuse !",
+                npc: 790092,
+                next: 80270104,
+            },
+            {
+                id: 80270104,
+                content: "Yiou~ Voilà, c’est fini ! Maman Lapin, tu en as pensé quoi ?",
+                npc: 790092,
+                next: 80270105,
+            },
+            {
+                id: 80270105,
+                content:
+                    "Pour être honnête... cela ressemblait davantage à une simple succession d’événements qu’à une véritable histoire. Ton héroïne est allée dans le ciel, sous la mer, dans le désert, puis dans la forêt. À chaque nouvel endroit, elle rencontrait de nouveaux amis, découvrait de nouveaux jeux... puis repartait vers le suivant.",
+                npc: 790093,
+                next: 80270106,
+            },
+            {
+                id: 80270106,
+                content: "Et une fois le récit terminé... je ne connais même pas le nom de ton héroïne.",
+                npc: 790093,
+                next: 80270107,
+            },
+            {
+                id: 80270107,
+                content:
+                    "Yiou... J’ai déjà mis tellement de temps à inventer l’histoire... qu’au moment de lui trouver un nom, j’avais complètement la tête vide ! Plus une seule idée !",
+                npc: 790092,
+                next: 80270108,
+            },
+            {
+                id: 80270108,
+                content: "En revanche... ton histoire m’en a rappelé une autre.",
+                npc: 790093,
+                next: 80270109,
+            },
+            {
+                id: 80270109,
+                content: "Yiou ? Une histoire de Maman Lapin ? Alors je vais bien ouvrir les oreilles !",
+                npc: 790092,
+                next: 80270110,
+            },
+            {
+                id: 80270110,
+                content:
+                    "Il y a très longtemps, une petite fille poursuivait un papillon jusque dans les profondeurs d’une forêt. Lorsqu’il se posa enfin sur un champ de fleurs, elle réussit à l’attraper.",
+                npc: 790093,
+                next: 80270111,
+            },
+            {
+                id: 80270111,
+                content:
+                    "Elle se laissa tomber dans les fleurs et ouvrit tout doucement les mains. À l’instant où elle les ouvrit, d’innombrables papillons s’envolèrent des fleurs alentour, formant dans le ciel un magnifique tableau aux mille couleurs.",
+                npc: 790093,
+                next: 80270112,
+            },
+            {
+                id: 80270112,
+                content:
+                    "La petite fille resta longtemps à jouer parmi les fleurs. Lorsqu’elle reprit enfin ses esprits... elle ne retrouva plus le chemin de la maison.",
+                npc: 790093,
+                next: 80270113,
+            },
+            {
+                id: 80270113,
+                content: "Yiou ! C’est dangereux, ça !",
+                npc: 790092,
+                next: 80270114,
+            },
+            {
+                id: 80270114,
+                content:
+                    "Oui. Elle erra longtemps dans la forêt sans parvenir à en sortir. À la nuit tombée, les rugissements des bêtes sauvages résonnaient régulièrement entre les arbres, et la petite fille passait son temps à se cacher, morte de peur.",
+                npc: 790093,
+                next: 80270115,
+            },
+            {
+                id: 80270115,
+                content:
+                    "Alors qu’elle était à bout de forces, terrifiée et sur le point de perdre connaissance... elle aperçut plusieurs énormes ballons descendre du ciel.",
+                npc: 790093,
+                next: 80270116,
+            },
+            {
+                id: 80270116,
+                content:
+                    "Quelques adultes en sautèrent. Les habitants du village s’étaient inquiétés pour elle et étaient partis la chercher en montgolfière.",
+                npc: 790093,
+                next: 80270117,
+            },
+            {
+                id: 80270117,
+                content: "Oh ! Tant mieux ! Et après ? Après ?",
+                npc: 790092,
+                next: 80270118,
+            },
+            {
+                id: 80270118,
+                content:
+                    "Après... comme dans tous les contes. La petite fille rentra au village en montgolfière et vécut heureuse auprès des habitants.",
+                npc: 790093,
+                next: 80270119,
+            },
+            {
+                id: 80270119,
+                content: "Hein ? C’est déjà fini ? Mais toi non plus, Maman Lapin, tu ne lui as pas donné de nom !",
+                npc: 790092,
+                next: 80270120,
+            },
+            {
+                id: 80270120,
+                content: "Son nom, pourtant, tu le connais très bien. Car cette histoire s’est réellement déroulée à Arcano.",
+                npc: 790093,
+                next: 80270121,
+            },
+            {
+                id: 80270121,
+                content: "Cette petite fille... c’était Ada. Un souvenir que tu as oublié depuis bien longtemps.",
+                npc: 790093,
+                next: 80270122,
+            },
+            {
+                id: 80270122,
+                content: "... Tiens, tu n’as aucune réaction.",
+                npc: 790093,
+                next: 80270123,
+            },
+            {
+                id: 80270123,
+                content:
+                    "C’est parce que j’ai déjà regardé ton— Ah ! Non, non ! Ou alors... c’est peut-être parce que je l’ai oublié depuis tellement longtemps. Du coup, je n’ai pas vraiment l’impression que ce soit mon histoire... C’est comme si j’écoutais celle de quelqu’un d’autre.",
+                npc: 790092,
+                next: 80270124,
+            },
+            {
+                id: 80270124,
+                content: "Ce n’est pas l’histoire de quelqu’un d’autre, Ada. C’est un souvenir heureux qui t’appartient.",
+                npc: 790093,
+                next: 80270125,
+            },
+            {
+                id: 80270125,
+                content:
+                    "Les membres du Paradis allumeront toujours les lumières pour te guider jusqu’à la maison. Ils resteront toujours à tes côtés... pour apaiser tes blessures.",
+                npc: 790093,
+                next: 80270126,
+            },
+            {
+                id: 80270126,
+                content: "Je comprends...",
+                npc: 790092,
+                next: 80270127,
+            },
+            {
+                id: 80270127,
+                content: "Tu devrais avoir l’air un peu plus heureuse.",
+                npc: 790093,
+                next: 80270128,
+            },
+            {
+                id: 80270128,
+                content: "Yiou ! Je comprends !",
+                npc: 790092,
+                next: 80270129,
+            },
+            {
+                id: 80270129,
+                content: "Très bien... Voilà. Exactement comme autrefois...",
+                npc: 790093,
+                next: 80270130,
+            },
+            {
+                id: 80270130,
+                content: "Un si gentil petit lapin mérite bien une récompense. Dis-moi... qu’est-ce qui te ferait plaisir ?",
+                npc: 790093,
+                next: 80270131,
+            },
+            {
+                id: 80270131,
+                content: "Hein ? Vraiment n’importe quoi ?",
+                npc: 790092,
+                next: 80270132,
+            },
+            {
+                id: 80270132,
+                content: "Absolument. Tu m’as rappelé un très beau souvenir.",
+                npc: 790093,
+                next: 80270133,
+            },
+            {
+                id: 80270133,
+                content:
+                    "Alors... Ces derniers temps, papi « La Mort » n’arrête pas de parler de nobles, de capitale impériale et de plein de choses que je ne comprends pas. Le chef du village pense qu’il n’est plus capable de continuer à jouer « La Mort »... et veut l’envoyer à l’Étang du Repos...",
+                npc: 790092,
+                next: 80270134,
+            },
+            {
+                id: 80270134,
+                content: "Est-ce que Maman Lapin pourrait lui laisser encore une chance... ?",
+                npc: 790092,
+                next: 80270135,
+            },
+            {
+                id: 80270135,
+                content: "Bien sûr. Comment pourrais-je refuser une demande de mon plus cher petit lapin ?",
+                npc: 790093,
+                next: 80270136,
+            },
+            {
+                id: 80270136,
+                content: "Vraiment ?! Trop bien !",
+                npc: 790092,
+                next: 80270137,
+            },
+            {
+                id: 80270137,
+                content: "Oui. Je l’autorise à continuer de jouer « La Mort »... <H>Pour le moment.</>",
+                npc: 790093,
+                next: 80270138,
+            },
+            {
+                id: 80270138,
+                content: "Merci, Maman Lapin ! Merci !",
+                npc: 790092,
+                next: 80270139,
+            },
+            {
+                id: 80270139,
+                content: "Mais, en échange... tu vas répondre à une question.",
+                npc: 790093,
+                next: 80270140,
+            },
+            {
+                id: 80270140,
+                content:
+                    "D’habitude, tu viens simplement me raconter ce que tu as vu au village dans la journée. Alors pourquoi, aujourd’hui, as-tu soudain voulu me raconter une histoire ? Et qui plus est... une histoire maladroite que tu as inventée toi-même.",
+                npc: 790093,
+                next: 80270141,
+            },
+            {
+                id: 80270141,
+                content:
+                    "Ces derniers jours, « Le Diable » m’a raconté plein de contes. Mais certains avaient des fins tellement tristes... Il n’y était question que de séparations et de morts. Moi, je n’aime pas ça. Alors... j’ai voulu inventer une histoire avec une fin heureuse.",
+                npc: 790092,
+                next: 80270142,
+            },
+            {
+                id: 80270142,
+                content: "Cette fois, ta nouvelle lubie, c’était donc d’écrire des histoires.",
+                npc: 790093,
+                next: 80270143,
+            },
+            {
+                id: 80270143,
+                content:
+                    "Héhé... Comme elle n’est pas très réussie, je n’osais pas la raconter aux autres. Alors je suis contente que Maman Lapin l’ait aimée.",
+                npc: 790092,
+                next: 80270144,
+            },
+            {
+                id: 80270144,
+                content:
+                    "Pour une première histoire... c’était déjà très bien. J’y ai ressenti ton désir de rendre les autres heureux grâce à ton histoire.",
+                npc: 790093,
+                next: 80270145,
+            },
+            {
+                id: 80270145,
+                content:
+                    "C’était déjà le cas de l’ancienne Ada. Naïve... optimiste... toujours en train de chercher une nouvelle façon de faire sourire tout le monde. Même si ses méthodes étaient parfois très simples. Même si cela tournait parfois au joyeux désordre.",
+                npc: 790093,
+                next: 80270146,
+            },
+            {
+                id: 80270146,
+                content: "Mais c’est précisément tout cela qui constitue l’essence de « La Papesse » Ada.",
+                npc: 790093,
+                next: 80270147,
+            },
+            {
+                id: 80270147,
+                content: "Yiou... Mon essence... ?",
+                npc: 790092,
+                next: 80270148,
+            },
+            {
+                id: 80270148,
+                content:
+                    "Oui. Les souvenirs peuvent être embellis avec le temps et devenir de merveilleux idéaux. Mais l’essence propre à une personne est quelque chose qui, peu importe le temps qui passe, ne devrait jamais changer.",
+                npc: 790093,
+                next: 80270149,
+            },
+            {
+                id: 80270149,
+                content: "Compris ! J’ai tout compris !",
+                npc: 790092,
+                next: 80270150,
+            },
+            {
+                id: 80270150,
+                content: "Ha... Ton visage ne donne pourtant pas du tout cette impression.",
+                npc: 790093,
+                next: 80270151,
+            },
+            {
+                id: 80270151,
+                content: "Enfin... Pour aujourd’hui, notre histoire du soir s’arrête ici. Fais de beaux rêves.",
+                npc: 790093,
+                next: 80270152,
+            },
+            {
+                id: 80270152,
+                content:
+                    "« Le Diable » Aamon qui aime tant raconter des histoires... On dirait que lui aussi... a enfin retrouvé son essence.",
+                npc: 790093,
+                next: 80270153,
+            },
+            {
+                id: 80270153,
+                content: "C’est une si bonne nouvelle... Mon Paradis... est en train de redevenir complet.",
+                npc: 790093,
+            },
+        ],
+    },
+    {
+        id: 210202,
+        charId: 2102,
+        name: "Une fin heureuse",
+        desc: "Chacun a sa propre définition du bonheur. Mais ces fins heureuses imaginées par les auteurs de contes... sont-elles vraiment un bonheur pour les héros de leurs histoires ?",
+        memoryName: "Boules de papier de la jeune fille",
+        memoryDesc:
+            "Chaque boule de papier renferme une histoire différente imaginée par la jeune fille. Cette montagne de brouillons témoigne de tous les efforts qu’elle a déployés pour trouver une fin véritablement heureuse.",
+        reward: 7051,
+        consume: {
+            "19002": 6,
+            "19003": 6,
+            "19007": 6,
+            "19008": 6,
+        },
+        dialogues: [
+            {
+                id: 80270201,
+                content:
+                    "Il était une fois, dans une forêt, un groupe de petits lapins. Ils étaient intelligents et pleins d’énergie. De leurs petites pattes habiles, ils construisirent une jolie maison de chaume, une adorable maison en bois et une solide maison en pierre.",
+                npc: 790092,
+                next: 80270202,
+            },
+            {
+                id: 80270202,
+                content:
+                    "Mais la maison en pierre était bien trop laide. Aucun des petits lapins ne l’aimait, si bien qu’un seul d’entre eux accepta d’y vivre.",
+                npc: 790092,
+                next: 80270203,
+            },
+            {
+                id: 80270203,
+                content:
+                    "Puis, un jour, un très, très méchant grand méchant loup fit irruption dans la forêt. Il piétina sans effort la maison de chaume, réduisit la maison en bois en morceaux, et les petits lapins, privés de leur foyer, s’enfuirent dans tous les sens avant de se réfugier ensemble dans la maison en pierre.",
+                npc: 790092,
+                next: 80270204,
+            },
+            {
+                id: 80270204,
+                content:
+                    "Le grand méchant loup les rattrapa et se mit à donner de violents coups contre la maison. Les petits lapins se dirent que cette fois, c’en était fini d’eux... Mais au bout d’un moment, le loup s’arrêta.",
+                npc: 790092,
+                next: 80270205,
+            },
+            {
+                id: 80270205,
+                content:
+                    "Le petit lapin qui avait construit la maison en pierre regarda par la fenêtre. Le grand méchant loup était simplement épuisé. Son ventre criait famine et il était adossé au mur, haletant à grandes bouffées.",
+                npc: 790092,
+                next: 80270206,
+            },
+            {
+                id: 80270206,
+                content:
+                    "Alors le petit lapin lui lança quelques carottes par la fenêtre. Dès qu’il les vit, le grand méchant loup les ramassa et les dévora en un instant.",
+                npc: 790092,
+                next: 80270207,
+            },
+            {
+                id: 80270207,
+                content:
+                    "Puis... le grand méchant loup devint le meilleur ami des petits lapins ! Les lapins lui donnaient des carottes, le loup protégeait leur jolie maison... et tous vécurent heureux ensemble dans la forêt !",
+                npc: 790092,
+                next: 80270208,
+            },
+            {
+                id: 80270208,
+                content:
+                    "Hum. Cette fois, ton histoire a un véritable déroulement. C’est déjà bien mieux que le récit que tu m’as raconté avant-hier.",
+                npc: 790093,
+                next: 80270209,
+            },
+            {
+                id: 80270209,
+                content:
+                    "Yiou, moi aussi je trouve~ Surtout le passage où le grand méchant loup devient ami avec les petits lapins. C’est mon préféré !",
+                npc: 790092,
+                next: 80270210,
+            },
+            {
+                id: 80270210,
+                content: "Et pourtant... c’est précisément cette partie qui ne me plaît pas.",
+                npc: 790093,
+                next: 80270211,
+            },
+            {
+                id: 80270211,
+                content: "Hein ? Pourquoi ?",
+                npc: 790092,
+                next: 80270212,
+            },
+            {
+                id: 80270212,
+                content:
+                    "Un loup restera toujours un loup. Pour qu’il puisse vivre avec des lapins, il faut d’abord lui arracher les crocs afin qu’il ne puisse plus jamais se rebeller. C’est seulement à cette condition qu’un loup et des lapins peuvent cohabiter.",
+                npc: 790093,
+                next: 80270213,
+            },
+            {
+                id: 80270213,
+                content:
+                    "Mais... c’est un conte... Écrire une scène aussi cruelle que « lui arracher les crocs » dans un conte... je trouve ça un peu triste...",
+                npc: 790092,
+                next: 80270214,
+            },
+            {
+                id: 80270214,
+                content:
+                    "Petit lapin bien naïf... Ce n’est pas de la cruauté. C’est la condition indispensable pour offrir à cette histoire une fin parfaite.",
+                npc: 790093,
+                next: 80270215,
+            },
+            {
+                id: 80270215,
+                content:
+                    "Mais... si tout le monde reste ensemble parce qu’on lui fait peur... est-ce qu’on peut vraiment appeler ça une fin heureuse ?",
+                npc: 790092,
+                next: 80270216,
+            },
+            {
+                id: 80270216,
+                content: "Chercherais-tu à insinuer quelque chose, Ada ?",
+                npc: 790093,
+                next: 80270217,
+            },
+            {
+                id: 80270217,
+                content: "Tu... Es-tu en train de condamner tout ce que j’ai fait pour le Paradis ?!",
+                npc: 790093,
+                next: 80270218,
+            },
+            {
+                id: 80270218,
+                content: "N-Non... ! Je ne voulais pas critiquer Maman Lapin...",
+                npc: 790092,
+                next: 80270219,
+            },
+            {
+                id: 80270219,
+                content: "...",
+                npc: 790093,
+                next: 80270220,
+            },
+            {
+                id: 80270220,
+                content: "Très bien. En récompense de cette histoire... je t’autorise à formuler un nouveau souhait.",
+                npc: 790093,
+                next: 80270221,
+            },
+            {
+                id: 80270221,
+                content:
+                    "Yiou ?! Je croyais que Maman Lapin n’avait pas aimé mon histoire... Je pensais que je n’aurais pas de récompense cette fois.",
+                npc: 790092,
+                next: 80270222,
+            },
+            {
+                id: 80270222,
+                content:
+                    "En fait... j’ai entendu le chef du village discuter avec « La Justice ». Ils disaient que « Le Diable » se comportait bizarrement ces derniers temps, qu’il rôdait sans cesse autour des Montagnes d’Arcano... et qu’ils soupçonnaient que c’était lui qui était entré dans l’Étang du Repos.",
+                npc: 790092,
+                next: 80270223,
+            },
+            {
+                id: 80270223,
+                content: "Est-ce que Maman Lapin pourrait... lui laisser une chance à lui aussi ?",
+                npc: 790092,
+                next: 80270224,
+            },
+            {
+                id: 80270224,
+                content: "Héhé... Bien sûr que non.",
+                npc: 790093,
+                next: 80270225,
+            },
+            {
+                id: 80270225,
+                content: "Hein ?!",
+                npc: 790092,
+                next: 80270226,
+            },
+            {
+                id: 80270226,
+                content: "Je t’ai seulement autorisée à faire un vœu. Je n’ai jamais dit que je l’exaucerais.",
+                npc: 790093,
+                next: 80270227,
+            },
+            {
+                id: 80270227,
+                content:
+                    "Comme je m’y attendais... tu as effectivement choisi de prendre la défense de « Le Diable ». On dirait que même mon plus parfait petit lapin finira par me trahir.",
+                npc: 790093,
+                next: 80270228,
+            },
+            {
+                id: 80270228,
+                content:
+                    "Réponds-moi ! Pourquoi protèges-tu ce Lapin rouge qui pourrait menacer la paix du Paradis ?! Est-ce que « Le Diable » t’a raconté des choses étranges ?!",
+                npc: 790093,
+                next: 80270229,
+            },
+            {
+                id: 80270229,
+                content: "N-Non, pas du tout ! Que ce soit les histoires ou le reste... tout venait de moi !",
+                npc: 790092,
+                next: 80270230,
+            },
+            {
+                id: 80270230,
+                content:
+                    "Peu importe. Quoi que tu puisses dire ou faire... « Le Diable » n’est déjà plus l’un des nôtres. Il n’a plus sa place au Paradis.",
+                npc: 790093,
+                next: 80270231,
+            },
+            {
+                id: 80270231,
+                content: "...",
+                npc: 790092,
+                next: 80270232,
+            },
+            {
+                id: 80270232,
+                content: "Alors... est-ce que je peux poser une question à Maman Lapin ? Tu n’es pas obligée d’y répondre...",
+                npc: 790092,
+                next: 80270233,
+            },
+            {
+                id: 80270233,
+                content: "... Parle.",
+                npc: 790093,
+                next: 80270234,
+            },
+            {
+                id: 80270234,
+                content: "Tout ce que fait Maman Lapin... est-ce que... ça la rend vraiment heureuse... ?",
+                npc: 790092,
+                next: 80270235,
+            },
+            {
+                id: 80270236,
+                content: "Tais-toi !",
+                npc: 790093,
+                next: 80270237,
+            },
+            {
+                id: 80270237,
+                content:
+                    "Toi, simple copie imparfaite... tu te moques de moi ?! Je t’ai créée pour servir le Paradis, pas pour te complaire dans tes états d’âme ou me faire cette tête-là !",
+                npc: 790093,
+                next: 80270238,
+            },
+            {
+                id: 80270238,
+                content:
+                    "À qui essaies-tu de faire pitié avec cet air malheureux ?! Tu voudrais que je me sente coupable ? Que j’éprouve des remords ?!",
+                npc: 790093,
+                next: 80270239,
+            },
+            {
+                id: 80270239,
+                content:
+                    "Tout ce que j’ai fait... c’était pour le bonheur du Paradis ! Est-ce que j’ai eu tort ?! Est-ce que c’est moi qui t’ai rendue si malheureuse ?!",
+                npc: 790093,
+                next: 80270240,
+            },
+            {
+                id: 80270240,
+                content: "Haa... haa...",
+                npc: 790093,
+                next: 80270241,
+            },
+            {
+                id: 80270241,
+                content: "P-Pardon...",
+                npc: 790092,
+                next: 80270242,
+            },
+            {
+                id: 80270242,
+                content:
+                    "Ce n’est rien. Tu es mon petit lapin le plus précieux. Peu importe le nombre de fois où tu te tromperas... je te pardonnerai toujours avec douceur.",
+                npc: 790093,
+                next: 80270243,
+            },
+            {
+                id: 80270243,
+                content:
+                    "Va-t’en. Du moins... pas maintenant. Je n’ai plus envie de te voir. Que tu sois triste ou heureuse... tout chez toi me répugne. Va-t’en !",
+                npc: 790093,
+                next: 80270244,
+            },
+            {
+                id: 80270245,
+                content: "Ouin... Pardon...",
+                npc: 790092,
+            },
+        ],
+    },
+    {
+        id: 210203,
+        charId: 2102,
+        name: "Adieu au Paradis",
+        desc: "Il n’existe aucun véritable Paradis en ce monde. Il est temps de lui dire adieu.",
+        memoryName: "« Le Monde »",
+        memoryDesc: "Merci de m’avoir donnée naissance dans ce monde. À ta place, je prendrai le temps de le découvrir.",
+        reward: 7052,
+        consume: {
+            "19002": 9,
+            "19005": 9,
+            "19008": 9,
+        },
+        dialogues: [
+            {
+                id: 80270301,
+                content: "Aujourd’hui... Victor est revenu.",
+                npc: 790092,
+                next: 80270302,
+            },
+            {
+                id: 80270302,
+                content:
+                    "Nous sommes allés jouer dans la forêt. Nous avons même refait ce jeu que « Le Soleil » trouvait beaucoup trop enfantin. Je ne pensais pas que Victor accepterait de jouer avec moi... J’ai eu tellement de chance.",
+                npc: 790092,
+                next: 80270303,
+            },
+            {
+                id: 80270303,
+                content:
+                    "Ensuite, nous sommes allés attraper des insectes. C’est d’ailleurs à cause de ça que nous sommes rentrés si tard aujourd’hui. Le chef du village et les autres se sont fait du souci... Je me sens vraiment désolée...",
+                npc: 790092,
+                next: 80270304,
+            },
+            {
+                id: 80270304,
+                content:
+                    "Ah, et Maman Lapin ne devinera jamais ! Aujourd’hui, « La Roue de la Fortune » était réveillé ! Il a fait monter Victor et moi dans la grande roue. Sans Victor, je me demande combien de temps il m’aurait fallu avant d’y monter un jour.",
+                npc: 790092,
+                next: 80270305,
+            },
+            {
+                id: 80270305,
+                content:
+                    "Yiou... Qu’est-ce qu’il s’est encore passé... ? Ah oui ! Victor et moi avons aidé tout le monde à préparer la Parade du Paradis de demain. Nous avons transporté toutes sortes de choses, livré du vin et même raconté des histoires aux enfants... Nous sommes complètement épuisés.",
+                npc: 790092,
+                next: 80270306,
+            },
+            {
+                id: 80270306,
+                content: "Hum. Voilà exactement à quoi doivent ressembler les petits lapins du Paradis.",
+                npc: 790093,
+                next: 80270307,
+            },
+            {
+                id: 80270307,
+                content:
+                    "Et les tasses tournantes, vous y êtes allés ? Quand vous étiez petits, Victor refusait toujours de te laisser y monter seule. Il disait sans arrêt que c’était « trop dangereux ».",
+                npc: 790093,
+                next: 80270308,
+            },
+            {
+                id: 80270308,
+                content:
+                    "Il inspectait toujours l’attraction dans les moindres détails, vérifiait soigneusement les ceintures de sécurité... puis seulement après t’autorisait à y monter.",
+                npc: 790093,
+                next: 80270309,
+            },
+            {
+                id: 80270309,
+                content: "On y est allés hier ! On est restés au soleil dans les tasses tournantes ensemble. C’était vraiment amusant~",
+                npc: 790092,
+                next: 80270310,
+            },
+            {
+                id: 80270310,
+                content:
+                    "Parfait. Victor et Ada ont toujours été les meilleurs compagnons de jeu. Vous voir si heureux me fait énormément plaisir.",
+                npc: 790093,
+                next: 80270311,
+            },
+            {
+                id: 80270311,
+                content: "Héhé... Tant que Maman Lapin est heureuse.",
+                npc: 790092,
+                next: 80270312,
+            },
+            {
+                id: 80270312,
+                content:
+                    "Au fait, Victor est venu accomplir une mission, il me semble. Une fois qu’il l’aura terminée... est-ce qu’il pourra retourner dans la Légion ?",
+                npc: 790092,
+                next: 80270313,
+            },
+            {
+                id: 80270313,
+                content:
+                    "Après tout, Victor est militaire. Une fois sa mission terminée, retourner dans la Légion... ça compte aussi comme bien jouer le rôle de « Le Chariot », non ?",
+                npc: 790092,
+                next: 80270314,
+            },
+            {
+                id: 80270314,
+                content: "Un interprète aussi parfait devrait rester au Paradis pour toujours et continuer d’y faire vivre le bonheur.",
+                npc: 790093,
+                next: 80270315,
+            },
+            {
+                id: 80270315,
+                content:
+                    "Victor n’aurait jamais dû rejoindre la Légion à l’époque. Ce n’est qu’en accueillant notre Paradis dans ses bras qu’il pourra connaître le véritable bonheur.",
+                npc: 790093,
+                next: 80270316,
+            },
+            {
+                id: 80270316,
+                content: "Alors...",
+                npc: 790092,
+                next: 80270317,
+            },
+            {
+                id: 80270317,
+                content: "Je suis fatiguée. J’espère que le retour de Victor me permettra de faire de beaux rêves cette nuit.",
+                npc: 790093,
+                next: 80270318,
+            },
+            {
+                id: 80270318,
+                content: "Mais...",
+                npc: 790092,
+                next: 80270319,
+            },
+            {
+                id: 80270319,
+                content: "Qu’y a-t-il ? Tu voudrais gâcher ma bonne humeur avec tes questions absurdes ?",
+                npc: 790093,
+                next: 80270320,
+            },
+            {
+                id: 80270320,
+                content:
+                    "N-Non, pas du tout... Alors... allons nous reposer. Nous avons été occupés toute la journée, moi aussi, je suis fatiguée~",
+                npc: 790092,
+                next: 80270321,
+            },
+            {
+                id: 80270321,
+                content: "<I>Ce n’est qu’en accueillant le Paradis dans ses bras... qu’on peut être heureux... ?</>",
+                npc: 790092,
+                next: 80270322,
+            },
+            {
+                id: 80270322,
+                content: "<I>Non... Ce n’est pas vrai. Enfermer tout le monde ici par la peur... ce n’est pas le bonheur.</>",
+                npc: 790092,
+                next: 80270323,
+            },
+            {
+                id: 80270323,
+                content: "<I>« Le Diable »... Non... Oncle Avar... Je me souviens encore de la dernière histoire que tu m’as racontée.</>",
+                npc: 790092,
+                next: 80270324,
+            },
+            {
+                id: 80270324,
+                content: "Après avoir vaincu d’innombrables ennemis, le chevalier arriva enfin devant le Roi Démon.",
+                speakerName: "Avar",
+                next: 80270325,
+            },
+            {
+                id: 80270325,
+                content:
+                    "Le Roi Démon méprisait la faiblesse de ce simple mortel, mais admirait son courage. Il lui promit d’immenses richesses, mais le chevalier méprisa cette offre dérisoire. Il lui promit ensuite le pouvoir, mais le chevalier ne fit que resserrer sa prise sur son épée.",
+                speakerName: "Avar",
+                next: 80270326,
+            },
+            {
+                id: 80270326,
+                content: "Hélas, les attaques du chevalier étaient bien trop faibles pour blesser le Roi Démon. Il fut rapidement vaincu.",
+                speakerName: "Avar",
+                next: 80270327,
+            },
+            {
+                id: 80270327,
+                content:
+                    "Le Roi Démon lui accorda une dernière chance. S’il acceptait de se soumettre à Lui et de combattre avec Lui le roi des humains, alors il lui laisserait la vie sauve.",
+                speakerName: "Avar",
+                next: 80270328,
+            },
+            {
+                id: 80270328,
+                content:
+                    "Mais le chevalier refusa une nouvelle fois avec un sourire. Il rassembla ses dernières forces et porta un ultime coup d’épée. La lame s’enfonça profondément dans le corps du Roi Démon... et même après la mort du chevalier, elle y resta fichée.",
+                speakerName: "Avar",
+                next: 80270329,
+            },
+            {
+                id: 80270329,
+                content:
+                    "De nombreuses années plus tard, une jeune fille humaine se présenta à son tour devant le Roi Démon. Au cours du combat, elle retira du corps du démon l’épée du chevalier et frappa sans relâche la blessure laissée par cette lame... jusqu’à finalement le vaincre.",
+                speakerName: "Avar",
+                next: 80270330,
+            },
+            {
+                id: 80270330,
+                content:
+                    "Le Roi Démon fut stupéfait. Les humains pouvaient donc acquérir une telle force pour sauver le monde... Mais la jeune fille répondit simplement qu’elle ne souhaitait pas sauver le monde. Elle ne faisait que marcher dans les pas de son père.",
+                speakerName: "Avar",
+                next: 80270331,
+            },
+            {
+                id: 80270331,
+                content: "L’héritage... et le courage... Voilà la véritable force qui permet aux êtres humains de continuer d’avancer.",
+                speakerName: "Avar",
+                next: 80270332,
+            },
+            {
+                id: 80270332,
+                content:
+                    "<I>Je m’en souviens... C’est toi qui m’as donné le courage d’aller raconter des histoires à Maman Lapin... d’essayer de sauver quelques personnes de ses mains.</>",
+                npc: 790092,
+                next: 80270333,
+            },
+            {
+                id: 80270333,
+                content:
+                    "<I>Même si... au final, rien ne s’est vraiment bien terminé. Ni toi... ni « La Mort »... je n’ai réussi à vous sauver.</>",
+                npc: 790092,
+                next: 80270334,
+            },
+            {
+                id: 80270334,
+                content:
+                    "<I>Mais aujourd’hui, après avoir rencontré {nickname2}... {性别2:il|elle} m’a dit que j’avais le droit d’échouer. Que nous n’avions pas à avoir peur de l’échec.</>",
+                npc: 790092,
+                next: 80270335,
+            },
+            {
+                id: 80270335,
+                content: "<I>Ces paroles... m’ont donné encore davantage de courage !</>",
+                npc: 790092,
+                next: 80270336,
+            },
+            {
+                id: 80270336,
+                content: "<I>Je crois que le moment est enfin venu... de faire le pas le plus important.</>",
+                npc: 790092,
+                next: 80270337,
+            },
+            {
+                id: 80270337,
+                content: "<I>Merci... Oncle Avar.</>",
+                npc: 790092,
+                next: 80270338,
+            },
+            {
+                id: 80270338,
+                content: "<I>Merci... {nickname2}.</>",
+                npc: 790092,
+                next: 80270339,
+            },
+            {
+                id: 80270339,
+                content:
+                    "Maman Lapin... Si tout se passe comme prévu... demain, nous devrons probablement nous dire adieu. De la façon que tu détestes le plus...",
+                npc: 790092,
+                next: 80270340,
+            },
+            {
+                id: 80270340,
+                content: "Mais malgré tout... merci de m’avoir amenée dans ce monde.",
+                npc: 790092,
+                next: 80270341,
+            },
+            {
+                id: 80270341,
+                content: "Bonne nuit, Maman Lapin... Non... Puisque ce sera la dernière fois... Je devrais plutôt dire...",
+                npc: 790092,
+                next: 80270342,
+            },
+            {
+                id: 80270342,
+                content: "Bonne nuit... la véritable Ada.",
+                npc: 790092,
+            },
+        ],
     },
     {
         id: 230101,
@@ -17703,6 +18633,1016 @@ export const partyTopicData_fr: PartyTopic[] = [
         ],
     },
     {
+        id: 310401,
+        charId: 3104,
+        name: "« Les ordres »",
+        desc: "Obéir aux ordres est la seule règle qu’un soldat doit suivre.",
+        memoryName: "Le mouchoir de Falsi",
+        memoryDesc:
+            "Le mouchoir que Falsi garde toujours sur elle. Son tissu est d’une grande douceur, en contraste saisissant avec l’attitude inflexible qu’elle affiche aujourd’hui.",
+        reward: 7050,
+        consume: {
+            "19002": 3,
+            "19003": 3,
+        },
+        dialogues: [
+            {
+                id: 80280101,
+                content: "Entrez.",
+                npc: 790094,
+                next: 80280102,
+            },
+            {
+                id: 80280102,
+                content: "Bonjour... Officier Falsi...",
+                npc: 790096,
+                speakerName: "Femme anxieuse",
+                next: 80280103,
+            },
+            {
+                id: 80280103,
+                content: "Bonjour, madame.",
+                npc: 790094,
+                next: 80280104,
+            },
+            {
+                id: 80280104,
+                content: "Votre nom ?",
+                npc: 790094,
+                next: 80280105,
+            },
+            {
+                id: 80280105,
+                content: "Heve.",
+                npc: 790096,
+                next: 80280106,
+            },
+            {
+                id: 80280106,
+                content: "Motif de votre visite ?",
+                npc: 790094,
+                next: 80280107,
+            },
+            {
+                id: 80280107,
+                content: "Je suis venue... pour mon fils.",
+                npc: 790096,
+                next: 80280108,
+            },
+            {
+                id: 80280108,
+                content: "Je vois. Asseyez-vous.",
+                npc: 790094,
+                next: 80280109,
+            },
+            {
+                id: 80280109,
+                content: "Bonjour, officier... J’ai entendu dire que le commandant Fulvis se trouvait ici ?",
+                npc: 790096,
+                next: 80280110,
+            },
+            {
+                id: 80280110,
+                content:
+                    "Le commandant Fulvis est très occupé par ses fonctions et n’a pas le temps de recevoir les visiteurs. Je suis son adjudante et je m’occupe de certaines affaires en son nom. Vous pouvez donc m’exposer votre requête.",
+                npc: 790094,
+                next: 80280111,
+            },
+            {
+                id: 80280111,
+                content: "Ah... D’accord.",
+                npc: 790096,
+                next: 80280112,
+            },
+            {
+                id: 80280112,
+                content:
+                    "Euh... Excusez-moi, officier... C’est la première fois que je viens ici... Je ne connais pas vraiment les règles. Si je commets une maladresse, j’espère que vous me le pardonnerez.",
+                npc: 790096,
+                next: 80280113,
+            },
+            {
+                id: 80280113,
+                content:
+                    "Mon mari m’avait interdit de venir... Lui aussi est officier... Mais je suis quand même venue en cachette... Parce que... je voulais vraiment revoir mon fils.",
+                npc: 790096,
+                next: 80280114,
+            },
+            {
+                id: 80280114,
+                content:
+                    "Mon fils... Benjamin, soldat de deuxième classe. Il fait partie de l’escouade des Narvals. Peut-être... peut-être le connaissez-vous ?",
+                npc: 790096,
+                next: 80280115,
+            },
+            {
+                id: 80280115,
+                content:
+                    "Je n’ai aucun soldat de ce nom sous mes ordres. Quant à l’escouade des Narvals, plusieurs personnes peuvent porter le même nom. Je ne sais pas de qui vous parlez précisément.",
+                npc: 790094,
+                next: 80280116,
+            },
+            {
+                id: 80280116,
+                content:
+                    "Il... Il a présenté les premiers symptômes de la Dégradation pendant une mission... J’ai reçu l’avis il y a deux jours.",
+                npc: 790096,
+                next: 80280117,
+            },
+            {
+                id: 80280117,
+                content: "Les premiers symptômes de la Dégradation... Dans ce cas, il a déjà été placé sous la surveillance de la Légion.",
+                npc: 790094,
+                next: 80280118,
+            },
+            {
+                id: 80280118,
+                content:
+                    "Puisqu’il est toujours au sein de la XIIIᵉ Légion... Est-ce que je pourrais le voir ? Lui parler quelques instants ?",
+                npc: 790096,
+                next: 80280119,
+            },
+            {
+                id: 80280119,
+                content: "Depuis qu’il s’est engagé... je ne l’ai jamais revu...",
+                npc: 790096,
+                next: 80280120,
+            },
+            {
+                id: 80280120,
+                content:
+                    "Article soixante-quinze du Code Militaire Impérial : tout soldat présentant des signes de Dégradation se voit interdit de tout contact avec des personnes extérieures à la Légion. Je vous prie de repartir.",
+                npc: 790094,
+                next: 80280121,
+            },
+            {
+                id: 80280121,
+                content:
+                    "Officier... Je sais que c’est le règlement... Mais pourriez-vous avoir un peu de compassion pour une mère qui n’a plus que quelques années à vivre ? Mon mari comme mon fils ont toujours servi l’Empire avec loyauté... Ne pourriez-vous pas faire une exception ?",
+                npc: 790096,
+                next: 80280122,
+            },
+            {
+                id: 80280122,
+                content: "C’est mon seul souhait... Je vous en supplie... Réfléchissez encore...",
+                npc: 790096,
+                next: 80280123,
+            },
+            {
+                id: 80280123,
+                content:
+                    "Officier... Il n’en est qu’au premier stade de la Dégradation. Il peut encore vivre presque comme une personne normale, n’est-ce pas ? Je vous en prie... Fermez les yeux, cette fois seulement... Rien que cette fois...",
+                npc: 790096,
+                next: 80280124,
+            },
+            {
+                id: 80280124,
+                content:
+                    "Il ne s’agit pas de savoir s’il est possible de faire une exception, madame. En tant que proche d’un militaire, vous devriez être la première à montrer l’exemple.",
+                npc: 790094,
+                next: 80280125,
+            },
+            {
+                id: 80280125,
+                content:
+                    "N’essayez pas de bafouer l’autorité du Code Militaire... à moins que vous ne souhaitiez faire un séjour en prison.",
+                npc: 790094,
+                next: 80280126,
+            },
+            {
+                id: 80280126,
+                content: "Tenez, madame. Un mouchoir. Essuyez vos larmes.",
+                npc: 790094,
+                next: 80280127,
+            },
+            {
+                id: 80280127,
+                content:
+                    "Avant de quitter ce bureau, je vous prie de retrouver votre calme et de conserver une attitude digne, afin de ne pas porter atteinte inutilement à la réputation de la Légion.",
+                npc: 790094,
+                next: 80280128,
+            },
+            {
+                id: 80280128,
+                content: "...",
+                npc: 790096,
+                next: 80280129,
+            },
+            {
+                id: 80280129,
+                content: "Si vous n’avez rien d’autre à ajouter, je vous prie de partir.",
+                npc: 790094,
+                next: 80280130,
+            },
+            {
+                id: 80280130,
+                content: "... Officier.",
+                npc: 790096,
+                next: 80280131,
+            },
+            {
+                id: 80280131,
+                content: "Oui ?",
+                npc: 790094,
+                next: 80280132,
+            },
+            {
+                id: 80280132,
+                content: "Vous aussi... vous avez des cornes. Vous êtes une Charon.",
+                npc: 790096,
+                next: 80280133,
+            },
+            {
+                id: 80280133,
+                content: "Avant même de devenir soldat de la Légion... vous étiez déjà une Charon.",
+                npc: 790096,
+                next: 80280134,
+            },
+            {
+                id: 80280134,
+                content:
+                    "Vous avez simplement eu plus de chance que mon fils. Voilà pourquoi vous pouvez rester ici... à répéter encore et encore : « C’est le règlement. »",
+                npc: 790096,
+                next: 80280135,
+            },
+            {
+                id: 80280135,
+                content:
+                    "Mais si vous n’aviez pas eu cette chance ? Si la Dégradation vous avait, elle aussi, choisie... alors vous seriez enfermée dans une petite cellule obscure, comme Benjamin, privée de votre famille... attendant seule la mort.",
+                npc: 790096,
+                next: 80280136,
+            },
+            {
+                id: 80280136,
+                content: "C’est exact. Alors ? Où voulez-vous en venir ?",
+                npc: 790094,
+                next: 80280137,
+            },
+            {
+                id: 80280137,
+                content: "Au fond... vous, Benjamin et nous... il n’y a aucune véritable différence entre nous, n’est-ce pas ?",
+                npc: 790096,
+                next: 80280138,
+            },
+            {
+                id: 80280138,
+                content:
+                    "Nous portons tous dans nos veines un sang maudit par la Dégradation. Nous portons tous le même péché. Nous consacrons tous notre vie à Hyperborea... puis, une fois devenus inutiles... nous sommes jetés comme de simples mouchoirs.",
+                npc: 790096,
+                next: 80280139,
+            },
+            {
+                id: 80280139,
+                content: "J’espère simplement... que jamais vous ne connaîtrez le même sort que lui.",
+                npc: 790096,
+                next: 80280140,
+            },
+            {
+                id: 80280140,
+                content: "...",
+                npc: 790096,
+                next: 80280141,
+            },
+            {
+                id: 80280141,
+                content:
+                    "<I>À cette époque... les ordres étaient le seul principe que je suivais. Tant que j’obéissais aux ordres et respectais le règlement, je n’avais rien d’autre à faire.</>",
+                npc: 790094,
+                next: 80280142,
+            },
+            {
+                id: 80280142,
+                content:
+                    "<I>Les paroles de cette mère... « Vous n’êtes pas différente de nous. » Je les ai entendues... puis je les ai aussitôt oubliées. Elles ne m’ont ni mise en colère... ni poussée à réfléchir davantage.</>",
+                npc: 790094,
+                next: 80280143,
+            },
+            {
+                id: 80280143,
+                content: "<I>Et lorsque j’ai enfin commencé à en comprendre le sens... il était déjà trop tard.</>",
+                npc: 790094,
+            },
+        ],
+    },
+    {
+        id: 310402,
+        charId: 3104,
+        name: "« L’échange »",
+        desc: "Tu n’as compris le poids de toute une vie qu’en plaçant ton âme sur une balance. Sur l’autre plateau reposait une médaille. Ni plus, ni moins. Son poids était exactement celui de ton existence.",
+        memoryName: "Médaille d’honneur",
+        memoryDesc:
+            "La médaille d’un vieux soldat ayant combattu durant de longues années. Suspendue à la poitrine, elle paraît étonnamment lourde. Une fois retirée, pourtant... elle ne pèse presque plus rien.",
+        reward: 7051,
+        consume: {
+            "19002": 6,
+            "19004": 6,
+            "19006": 6,
+        },
+        dialogues: [
+            {
+                id: 80280201,
+                content: "Désolée de vous avoir fait attendre.",
+                npc: 790094,
+                next: 80280202,
+            },
+            {
+                id: 80280202,
+                content: "Pas du tout, pas du tout. Je viens tout juste d’arriver. Officier, je vous en prie, asseyez-vous.",
+                npc: 790097,
+                next: 80280203,
+            },
+            {
+                id: 80280203,
+                content: "Très bien. Merci de votre compréhension et de votre coopération. Une urgence est survenue, j’ai dû m’en occuper.",
+                npc: 790094,
+                next: 80280204,
+            },
+            {
+                id: 80280204,
+                content: "Que s’est-il passé ?",
+                npc: 790097,
+                next: 80280205,
+            },
+            {
+                id: 80280205,
+                content: "Cela ne vous regarde pas.",
+                npc: 790094,
+                next: 80280206,
+            },
+            {
+                id: 80280206,
+                content:
+                    "... Je comprends. J’ai été indiscret. Veuillez me pardonner, officier. Je n’avais pas l’intention de chercher à obtenir des informations confidentielles.",
+                npc: 790097,
+                next: 80280207,
+            },
+            {
+                id: 80280207,
+                content: "Très bien. Veillez à ce que cela ne se reproduise pas.",
+                npc: 790094,
+                next: 80280208,
+            },
+            {
+                id: 80280208,
+                content: "Officier...",
+                npc: 790097,
+                next: 80280209,
+            },
+            {
+                id: 80280209,
+                content:
+                    "Ce Charon, incapable de trouver ses mots, commençait à susciter autant la lassitude que l’agacement de Falsi. Elle entreprit alors de deviner elle-même la raison de sa visite.",
+                next: 80280210,
+            },
+            {
+                id: 80280210,
+                content:
+                    "Elle observa attentivement l’homme assis devant elle. Aujourd’hui, sa poitrine était couverte de décorations qui brillaient de mille feux. Un vieux vétéran Charon couvert de distinctions attirait immanquablement les regards, où qu’il se trouve.",
+                next: 80280211,
+            },
+            {
+                id: 80280211,
+                content: "On dirait que vous vous apprêtez à assister à une cérémonie importante.",
+                npc: 790094,
+                next: 80280212,
+            },
+            {
+                id: 80280212,
+                content:
+                    "Je suis seulement venu vous voir, officier. Pour moi, il n’existe pas d’occasion plus importante. Je suis honoré que vous ayez remarqué le respect que je vous témoigne.",
+                npc: 790097,
+                next: 80280213,
+            },
+            {
+                id: 80280213,
+                content: "Je... suis venu vous demander une faveur. Alors j’ai mis ma plus belle tenue avant de venir.",
+                npc: 790097,
+                next: 80280214,
+            },
+            {
+                id: 80280214,
+                content: "Allons droit au but. Les politesses et les flatteries sont inutiles.",
+                npc: 790094,
+                next: 80280215,
+            },
+            {
+                id: 80280215,
+                content: "Euh... Très bien.",
+                npc: 790097,
+                next: 80280216,
+            },
+            {
+                id: 80280216,
+                content: "Mon fils... Il était soldat au sein de la XIIIᵉ Légion. Il y a quelques jours... il est tombé au combat.",
+                npc: 790097,
+                next: 80280217,
+            },
+            {
+                id: 80280217,
+                content: "Toutes mes condoléances. L’Empire et la Légion se souviendront de son sacrifice.",
+                npc: 790094,
+                next: 80280218,
+            },
+            {
+                id: 80280218,
+                content: "Aujourd’hui... je suis venu pour récupérer les effets personnels qu’il a laissés derrière lui.",
+                npc: 790097,
+                next: 80280219,
+            },
+            {
+                id: 80280219,
+                content:
+                    "Article quatre-vingt-neuf du Code Militaire Impérial : les biens appartenant aux soldats morts au combat sont placés sous la garde de la Légion.",
+                npc: 790094,
+                next: 80280220,
+            },
+            {
+                id: 80280220,
+                content: "En compensation, une indemnité vous sera versée sous sept jours ouvrés.",
+                npc: 790094,
+                next: 80280221,
+            },
+            {
+                id: 80280221,
+                content: "Non...",
+                npc: 790097,
+                next: 80280222,
+            },
+            {
+                id: 80280222,
+                content:
+                    "L’indemnité ne pourra vous être versée qu’une fois la procédure de validation terminée. Nous vous informerons lorsque vous pourrez venir la récupérer.",
+                npc: 790094,
+                next: 80280223,
+            },
+            {
+                id: 80280223,
+                content:
+                    "En tant que soldat de deuxième classe, votre fils ouvre droit à une indemnité d’environ vingt à vingt-cinq pièces d’argent. Chaque grade supplémentaire augmente cette somme de dix à vingt pièces. Vous pouvez faire le calcul vous-même.",
+                npc: 790094,
+                next: 80280224,
+            },
+            {
+                id: 80280224,
+                content: "Avez-vous d’autres questions ?",
+                npc: 790094,
+                next: 80280225,
+            },
+            {
+                id: 80280225,
+                content:
+                    "Officier... Est-ce que je pourrais renoncer à cette indemnité ? Ces pièces d’argent... mon fils les a payées de sa vie. Je ne peux pas les accepter.",
+                npc: 790097,
+                next: 80280226,
+            },
+            {
+                id: 80280226,
+                content: "Je ne veux pas de cet argent. Je veux seulement récupérer les affaires de mon fils...",
+                npc: 790097,
+                next: 80280227,
+            },
+            {
+                id: 80280227,
+                content: "Cela est contraire au règlement.",
+                npc: 790094,
+                next: 80280228,
+            },
+            {
+                id: 80280228,
+                content:
+                    "Ce ne sont que des objets sans valeur... Ses carnets, ses photographies... À part un vieil homme comme moi, qui pourrait bien y tenir ?",
+                npc: 790097,
+                next: 80280229,
+            },
+            {
+                id: 80280229,
+                content:
+                    "Même comme bois de chauffage, ils ne brûleraient pas longtemps. Laissez-moi simplement garder ces quelques souvenirs...",
+                npc: 790097,
+                next: 80280230,
+            },
+            {
+                id: 80280230,
+                content:
+                    "Le jour où je quitterai ce monde, je les emporterai avec moi jusqu’à la Mer du Silence... Peut-être que là-bas, mon fils et moi pourrons enfin nous retrouver.",
+                npc: 790097,
+                next: 80280231,
+            },
+            {
+                id: 80280231,
+                content:
+                    "J’ai entendu dire que, chez les Loups Blancs, certains officiers acceptaient parfois de rendre quelques effets personnels sans valeur aux familles. Alors je me demandais si vous pourriez, vous aussi...",
+                npc: 790097,
+                next: 80280232,
+            },
+            {
+                id: 80280232,
+                content:
+                    "Si des officiers d’autres escouades enfreignent le règlement, cela les regarde. Ce n’est en aucun cas une raison pour que les Narvals fassent de même.",
+                npc: 790094,
+                next: 80280233,
+            },
+            {
+                id: 80280233,
+                content: "... Officier. Aujourd’hui marque ma vingt-septième année de service au sein de la XIIIᵉ Légion.",
+                npc: 790097,
+                next: 80280234,
+            },
+            {
+                id: 80280234,
+                content:
+                    "J’ai participé à une dizaine de batailles, petites comme grandes. Regardez mon bras gauche... Une balle l’a traversé. Il y a encore un trou où la chair n’a jamais repoussé.",
+                npc: 790097,
+                next: 80280235,
+            },
+            {
+                id: 80280235,
+                content:
+                    "Barton détacha les décorations accrochées à sa poitrine. Au moment où elles quittèrent son uniforme, ces morceaux de métal étincelants semblèrent perdre tout leur éclat.",
+                next: 80280236,
+            },
+            {
+                id: 80280236,
+                content:
+                    "Il les aligna une à une sur le bureau. Chacune représentait un mérite ou un grade. Elles tombèrent sur le bois avec leur poids de métal. Une, puis une autre... Jusqu’à parsemer le bureau de Falsi comme autant d’étoiles privées de propriétaire.",
+                next: 80280237,
+            },
+            {
+                id: 80280237,
+                content: "Qu’est-ce que vous faites ?",
+                npc: 790094,
+                next: 80280238,
+            },
+            {
+                id: 80280238,
+                content: "Je voudrais échanger tout cela... contre une seule chance, officier.",
+                npc: 790097,
+                next: 80280239,
+            },
+            {
+                id: 80280239,
+                content:
+                    "J’ai consacré plus de la moitié de ma vie à la Légion. Voilà plus de vingt ans que je suis soldat de la XIIIᵉ Légion. J’étais un jeune homme plein d’ardeur... puis je me suis marié, j’ai eu un enfant... avant de tout perdre.",
+                npc: 790097,
+                next: 80280240,
+            },
+            {
+                id: 80280240,
+                content:
+                    "Et je me suis soudain rendu compte que je n’avais jamais vraiment vécu en tant que « Barton ». Je n’ai jamais vécu pour moi-même.",
+                npc: 790097,
+                next: 80280241,
+            },
+            {
+                id: 80280241,
+                content:
+                    "J’ai toujours suivi les règles. Enfant, j’obéissais à mes parents. Une fois adulte, j’obéissais à mes supérieurs. Je voulais être un Charon irréprochable... et un soldat exemplaire.",
+                npc: 790097,
+                next: 80280242,
+            },
+            {
+                id: 80280242,
+                content:
+                    "Je me suis battu sur les champs de bataille pendant toutes ces années. J’ai accumulé les états de service et les mérites. J’ai gravi les échelons... encore et encore... Et lorsque je suis enfin arrivé au sommet... il ne restait plus personne à mes côtés.",
+                npc: 790097,
+                next: 80280243,
+            },
+            {
+                id: 80280243,
+                content:
+                    "Ma femme est partie. Mon fils aussi. Il ne reste plus que moi. J’ai peut-être été un bon soldat... Mais aujourd’hui... je ne suis plus qu’un vieil homme impuissant.",
+                npc: 790097,
+                next: 80280244,
+            },
+            {
+                id: 80280244,
+                content: "Je vous en supplie... laissez-moi récupérer les affaires de mon fils.",
+                npc: 790097,
+                next: 80280245,
+            },
+            {
+                id: 80280245,
+                content: "...",
+                npc: 790094,
+                next: 80280246,
+            },
+            {
+                id: 80280246,
+                content:
+                    "Le vieux vétéran, qui avait passé toute sa vie à respecter les règles, resta longtemps la tête baissée, incapable de la relever.",
+                next: 80280247,
+            },
+            {
+                id: 80280247,
+                content: "Les ordres passent avant tout. Je vous prie de repartir.",
+                npc: 790094,
+                next: 80280248,
+            },
+            {
+                id: 80280248,
+                content: "... Je comprends.",
+                npc: 790097,
+            },
+        ],
+    },
+    {
+        id: 310403,
+        charId: 3104,
+        name: "« La colère »",
+        desc: "La colère était la sienne. Elle était aussi la leur. Née de la haine, du désespoir et d’un dernier pari sans retour, elle brûlait comme un feu ardent, inextinguible et éternel.",
+        memoryName: "Photo de famille",
+        memoryDesc:
+            "Une photo de famille représentant trois Charons. Le père, la poitrine couverte de décorations étincelantes, regarde fièrement l’objectif. La mère baisse les yeux avec un sourire empreint de douceur. Leur enfant tire une grimace. Falsi retrouva plus tard cette photographie dans un entrepôt de la Légion. Sans savoir pourquoi, cette image revenait sans cesse hanter ses pensées.",
+        reward: 7052,
+        consume: {
+            "19002": 9,
+            "19005": 9,
+            "19008": 9,
+        },
+        dialogues: [
+            {
+                id: 80280301,
+                content: "Pourquoi est-ce que tu boites encore ? Tes blessures ne sont toujours pas complètement guéries ?",
+                npc: 790095,
+                next: 80280302,
+            },
+            {
+                id: 80280302,
+                content: "Commandant Avar. Bonjour.",
+                npc: 790094,
+                next: 80280303,
+            },
+            {
+                id: 80280303,
+                content:
+                    "Le commandant Fulvis vous attend déjà dans la salle de réunion. Si vous n’avez pas d’autres instructions à me donner, je vais retourner m’entraîner.",
+                npc: 790094,
+                next: 80280304,
+            },
+            {
+                id: 80280304,
+                content:
+                    "T’entraîner ? Attends un peu. Il n’y a quasiment plus d’opérations en ce moment. Tu devrais rester alitée quelque temps pour récupérer. Sinon, tu risques de garder des séquelles toute ta vie.",
+                npc: 790095,
+                next: 80280305,
+            },
+            {
+                id: 80280305,
+                content: "Commandant, je ne fais pas partie de votre escouade. Vous n’avez pas à vous préoccuper de moi.",
+                npc: 790094,
+                next: 80280306,
+            },
+            {
+                id: 80280306,
+                content:
+                    "Les soldats sont des êtres humains, Falsi. Ne traite pas les autres comme de simples rouages... et ne te considère pas toi-même comme un simple rouage.",
+                npc: 790095,
+                next: 80280307,
+            },
+            {
+                id: 80280307,
+                content: "On dirait que vous faites allusion à quelque chose.",
+                npc: 790094,
+                next: 80280308,
+            },
+            {
+                id: 80280308,
+                content:
+                    "Il y a une semaine, un vieux vétéran a fait exploser une grenade réglementaire dans le bureau d’un officier des Narvals, le lendemain même du refus qu’il avait essuyé en réclamant les effets personnels de son fils.",
+                npc: 790095,
+                next: 80280309,
+            },
+            {
+                id: 80280309,
+                content: "Cet officier... c’était moi. Vous le saviez déjà, n’est-ce pas ?",
+                npc: 790094,
+                next: 80280310,
+            },
+            {
+                id: 80280310,
+                content: "J’ai consulté le médecin. Mes blessures sont légères. Je ne garderai aucune séquelle.",
+                npc: 790094,
+                next: 80280311,
+            },
+            {
+                id: 80280311,
+                content: "Alors... qu’est-ce que tu penses de toute cette affaire ?",
+                npc: 790095,
+                next: 80280312,
+            },
+            {
+                id: 80280312,
+                content: "Je la trouve incompréhensible. Je ne comprends pas pourquoi Barton Gallo a agi de cette façon.",
+                npc: 790094,
+                next: 80280313,
+            },
+            {
+                id: 80280313,
+                content:
+                    "À partir du moment où il est passé à l’attaque, tous les mérites qu’il avait accumulés ont été réduits à néant. D’ancien vétéran décoré, il est devenu un criminel couvert de honte.",
+                npc: 790094,
+                next: 80280314,
+            },
+            {
+                id: 80280314,
+                content:
+                    "Il aurait pu percevoir une indemnité et vivre paisiblement le reste de ses jours. Au lieu de cela, il a sacrifié son honneur pour s’en prendre à une personne qui ne lui avait rien fait... et a tout perdu. N’est-ce pas étrange ?",
+                npc: 790094,
+                next: 80280315,
+            },
+            {
+                id: 80280315,
+                content: "Non, Falsi. Ce n’est pas étrange.",
+                npc: 790095,
+                next: 80280316,
+            },
+            {
+                id: 80280316,
+                content:
+                    "Tout ce que tu viens d’énoncer, ce sont des considérations de vivants. Pour quelqu’un qui a déjà décidé de mourir... tout cela n’a plus aucune importance.",
+                npc: 790095,
+                next: 80280317,
+            },
+            {
+                id: 80280317,
+                content: "Tu es trop calme... trop objective... trop détachée.",
+                npc: 790095,
+                next: 80280318,
+            },
+            {
+                id: 80280318,
+                content:
+                    "Les intérêts personnels et la discipline militaire ne sont pas les seuls moteurs qui poussent les êtres humains à agir. Il existe quelque chose de bien plus important... de bien plus ardent. Quelque chose qui leur donne la force de continuer à vivre. Et c’est précisément ce qui te manque.",
+                npc: 790095,
+                next: 80280319,
+            },
+            {
+                id: 80280319,
+                content: "... Que voulez-vous dire ?",
+                npc: 790094,
+                next: 80280320,
+            },
+            {
+                id: 80280320,
+                content: "Barton n’a pas tout perdu parce qu’il a lancé cette grenade.",
+                npc: 790095,
+                next: 80280321,
+            },
+            {
+                id: 80280321,
+                content:
+                    "Pour lui, sa femme et son fils représentaient tout ce qu’il avait. Ils étaient la raison même de son existence. Lorsqu’ils sont morts, il n’avait plus aucune envie de continuer à vivre.",
+                npc: 790095,
+                next: 80280322,
+            },
+            {
+                id: 80280322,
+                content:
+                    "Peu importe le nombre de décorations qu’il pouvait serrer dans ses mains... à ses yeux, ce n’étaient plus que de vulgaires morceaux de métal.",
+                npc: 790095,
+                next: 80280323,
+            },
+            {
+                id: 80280323,
+                content: "...",
+                npc: 790094,
+                next: 80280324,
+            },
+            {
+                id: 80280324,
+                content:
+                    "Mais si tu trouves encore cela étrange, c’est que tu commences enfin à prêter attention à ce genre de choses. Et c’est une bonne chose.",
+                npc: 790095,
+                next: 80280325,
+            },
+            {
+                id: 80280325,
+                content: "Avar posa doucement une main sur l’épaule de Falsi.",
+                next: 80280326,
+            },
+            {
+                id: 80280326,
+                content: "Barton... Heve... le fils de Barton... et Benjamin... Ces noms te disent-ils quelque chose ?",
+                npc: 790095,
+                next: 80280327,
+            },
+            {
+                id: 80280327,
+                content:
+                    "Je m’en souviens. Heve souhaitait revoir une dernière fois son fils Benjamin, atteint par la Dégradation. Quant à Barton, il était venu réclamer les effets personnels de son fils, tombé au combat.",
+                npc: 790094,
+                next: 80280328,
+            },
+            {
+                id: 80280328,
+                content: "Ils étaient donc...",
+                npc: 790094,
+                next: 80280329,
+            },
+            {
+                id: 80280329,
+                content:
+                    "Tu ne t’en rends compte que maintenant ? Falsi, tu es très perspicace lorsqu’il s’agit du combat... mais beaucoup moins lorsqu’il s’agit des gens qui t’entourent.",
+                npc: 790095,
+                next: 80280330,
+            },
+            {
+                id: 80280330,
+                content:
+                    "Le Dégradé s’appelait Benjamin Gallo. Barton Gallo était son père. Heve Petty était sa mère. Ils formaient une famille.",
+                npc: 790095,
+                next: 80280331,
+            },
+            {
+                id: 80280331,
+                content: "Et alors... ? Ce n’est pas moi qui ai tué Benjamin Gallo.",
+                npc: 790094,
+                next: 80280332,
+            },
+            {
+                id: 80280332,
+                content:
+                    "Je n’ai fait que refuser leur demande conformément au Code Militaire Impérial. Je ne comprends pas pourquoi Barton Gallo a dirigé sa colère contre moi.",
+                npc: 790094,
+                next: 80280333,
+            },
+            {
+                id: 80280333,
+                content: "Objectivement, leur mort n’a effectivement rien à voir avec toi.",
+                npc: 790095,
+                next: 80280334,
+            },
+            {
+                id: 80280334,
+                content:
+                    "Benjamin est mort de la Dégradation. Heve s’est jetée dans la rivière. Quant à Barton... il a péri sous l’explosion de sa propre grenade.",
+                npc: 790095,
+                next: 80280335,
+            },
+            {
+                id: 80280335,
+                content:
+                    "Tu connais le Code Militaire Impérial sur le bout des doigts. C’est une bonne chose. Mais tu lui accordes une confiance aveugle. Tu es persuadée que tous les problèmes trouvent leur réponse dans les ordres.",
+                npc: 790095,
+                next: 80280336,
+            },
+            {
+                id: 80280336,
+                content: "Or, tout le monde ne connaît pas les règles aussi bien que toi. Cette vieille dame, Heve Petty, par exemple.",
+                npc: 790095,
+                next: 80280337,
+            },
+            {
+                id: 80280337,
+                content:
+                    "Laisse-moi deviner comment tu lui as répondu. Tu as certainement cité l’article soixante-quinze... avant de refuser sa demande en toute impartialité.",
+                npc: 790095,
+                next: 80280338,
+            },
+            {
+                id: 80280338,
+                content: "... Où voulez-vous en venir ?",
+                npc: 790094,
+                next: 80280339,
+            },
+            {
+                id: 80280339,
+                content:
+                    "Les gens ordinaires ne sont ni des juges, ni des magistrats. Ils n’ouvrent pas le Code Militaire Impérial pour comparer chaque article avec sang-froid afin de déterminer si tu as eu tort ou raison.",
+                npc: 790095,
+                next: 80280340,
+            },
+            {
+                id: 80280340,
+                content:
+                    "Tu ne pouvais pas empêcher un homme qui venait de perdre successivement sa femme et son fils, et qui n’avait déjà plus aucune raison de vivre, de laisser exploser tout son désespoir et toute sa colère.",
+                npc: 790095,
+                next: 80280341,
+            },
+            {
+                id: 80280341,
+                content:
+                    "Pourtant... au dernier instant, je pense qu’il t’a pardonné. C’est pour cela qu’il a serré la grenade contre sa poitrine. Sinon... tu n’aurais probablement pas survécu.",
+                npc: 790095,
+                next: 80280342,
+            },
+            {
+                id: 80280342,
+                content: "...",
+                npc: 790094,
+                next: 80280343,
+            },
+            {
+                id: 80280343,
+                content: "Mais... je n’avais rien fait de mal.",
+                npc: 790094,
+                next: 80280344,
+            },
+            {
+                id: 80280344,
+                content:
+                    "Tu n’as effectivement rien fait de mal... parce que tu n’as rien fait du tout. Et pourtant... tu aurais pu faire quelque chose.",
+                npc: 790095,
+                next: 80280345,
+            },
+            {
+                id: 80280345,
+                content:
+                    "La Légion interdit la restitution des biens des soldats afin d’éviter les trafics. Mais pour ces quelques objets sans valeur aux yeux de la Légion, et pourtant inestimables pour leur famille... ne pouvais-tu pas envisager de les rendre discrètement à ce père malheureux ?",
+                npc: 790095,
+                next: 80280346,
+            },
+            {
+                id: 80280346,
+                content:
+                    "La Légion interdit aux Dégradés tout contact avec l’extérieur afin d’éviter de nouvelles victimes. Mais pour cette mère au cœur brisé... ne pouvais-tu pas l’autoriser à apercevoir son fils quelques instants derrière une vitre ? Rien de tout cela n’aurait enfreint le règlement.",
+                npc: 790095,
+                next: 80280347,
+            },
+            {
+                id: 80280347,
+                content: "Nous sommes des soldats. Obéir aux ordres est une règle de fer. Un mur infranchissable.",
+                npc: 790095,
+                next: 80280348,
+            },
+            {
+                id: 80280348,
+                content: "Mais même à l’intérieur de ce mur... il nous reste toujours la liberté de tendre une main à quelqu’un.",
+                npc: 790095,
+                next: 80280349,
+            },
+            {
+                id: 80280349,
+                content: "...",
+                npc: 790094,
+                next: 80280350,
+            },
+            {
+                id: 80280350,
+                content: "Falsi.",
+                npc: 790095,
+                next: 80280351,
+            },
+            {
+                id: 80280351,
+                content:
+                    "Le règlement de l’école militaire, les règlements de la Légion, les ordres... Toutes ces choses nous disent ce que nous devons faire. Mais elles ne nous donnent aucune raison de continuer à vivre.",
+                npc: 790095,
+                next: 80280352,
+            },
+            {
+                id: 80280352,
+                content:
+                    "J’ai une fille. Elle doit avoir à peu près ton âge. Elle consacre toute sa passion à des recherches auxquelles elle croit profondément. Elle est convaincue qu’elles rendront le monde meilleur. C’est cela qui lui donne la force d’avancer.",
+                npc: 790095,
+                next: 80280353,
+            },
+            {
+                id: 80280353,
+                content: "Falsi... Un jour, toi aussi, tu trouveras cette raison.",
+                npc: 790095,
+                next: 80280354,
+            },
+            {
+                id: 80280354,
+                content: "<I>Commandant Avar... Je comprends enfin.</>",
+                npc: 790094,
+                next: 80280355,
+            },
+            {
+                id: 80280355,
+                content:
+                    "<I>Rester spectatrice de la souffrance des autres, c’est aussi une faute. Chaque fois que nous choisissons l’indifférence, nous ajoutons une pierre de plus à l’édifice d’un monde plongé dans les ténèbres.</>",
+                npc: 790094,
+                next: 80280356,
+            },
+            {
+                id: 80280356,
+                content:
+                    "<I>« Même à l’intérieur de ce mur, il nous reste toujours la liberté de tendre une main à quelqu’un. » À présent... je comprends enfin le sens de ces paroles.</>",
+                npc: 790094,
+                next: 80280357,
+            },
+            {
+                id: 80280357,
+                content: "<I>Et je comprends aussi... ce que moi, Falsi, je veux désormais accomplir.</>",
+                npc: 790094,
+                next: 80280358,
+            },
+            {
+                id: 80280358,
+                content: "Je le ferai...",
+                npc: 790094,
+                next: 80280359,
+            },
+            {
+                id: 80280359,
+                content: "Attends-moi, {nickname2}.",
+                npc: 790094,
+            },
+        ],
+    },
+    {
         id: 320101,
         charId: 3201,
         name: "Une invitée inattendue",
@@ -18348,7 +20288,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160345,
                 content:
-                    "« Ma petite boule de neige,\nje suis si fière de voir comme tu as grandi !\nPar la grâce de Sa Majesté,\nj’ai longtemps craint que tu ne sois pas vraiment heureuse.\nTu travailles sans relâche, jour et nuit,\ncomme si une seule minute d’oisiveté était un crime.\nMais en tant que mère, tout ce que je souhaite,\nc’est que tu vives pleinement ta vie.\nLa vie est courte, et nous n’en avons qu’une.\nSois plus douce avec toi-même, tu veux bien, ma chérie ? »",
+                    "« Ma petite boule de neige,\n je suis si fière de voir comme tu as grandi !\n Par la grâce de Sa Majesté,\n j’ai longtemps craint que tu ne sois pas vraiment heureuse.\n Tu travailles sans relâche, jour et nuit,\n comme si une seule minute d’oisiveté était un crime.\n Mais en tant que mère, tout ce que je souhaite,\n c’est que tu vives pleinement ta vie.\n La vie est courte, et nous n’en avons qu’une.\n Sois plus douce avec toi-même, tu veux bien, ma chérie ? »",
                 voice: "inv/Haier/003/C8AC4A9A",
                 npc: 93201,
                 next: 80160346,
@@ -18356,7 +20296,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160346,
                 content:
-                    "« Commandante,\nMerci pour une année de plus à te démener sans relâche, et bon anniversaire.\nBon, ça, c’était pour la politesse.\nMaintenant, arrête de tourner comme une toupie.\nEt surtout : le travail, c’est pas censé être une fuite.\nFranchement, ça fait presque dix ans qu’on se connaît,\net même moi, qui suis plutôt douée pour déterrer des vérités,\nje n’ai toujours pas compris ce que tu redoutes autant.\nSouviens-toi : le monde n’est pas (encore) en train de s’écrouler.\nAlors arrête de trop penser, et vis un peu, tu ne crois pas ?\nToi, t’as peut-être pas besoin de repos, mais moi, si. »",
+                    "« Commandante,\n Merci pour une année de plus à te démener sans relâche, et bon anniversaire.\n Bon, ça, c’était pour la politesse.\n Maintenant, arrête de tourner comme une toupie.\n Et surtout : le travail, c’est pas censé être une fuite.\n Franchement, ça fait presque dix ans qu’on se connaît,\n et même moi, qui suis plutôt douée pour déterrer des vérités,\n je n’ai toujours pas compris ce que tu redoutes autant.\n Souviens-toi : le monde n’est pas (encore) en train de s’écrouler.\n Alors arrête de trop penser, et vis un peu, tu ne crois pas ?\n Toi, t’as peut-être pas besoin de repos, mais moi, si. »",
                 voice: "inv/Haier/003/C8AC4AC4",
                 npc: 93201,
                 next: 80160347,
@@ -18364,7 +20304,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160347,
                 content:
-                    "« Madame la Geôlière,\nMerci pour toutes ces années de service fidèle au sein de l’Empire Hyperboréen. Recevez nos plus sincères respects, ainsi que nos vœux les plus chaleureux pour votre anniversaire.\nNous espérons que vous saurez savourer chaque minute de cette journée mémorable, et que les jours à venir vous offriront autant de joie que celui-ci.\n\nVeuillez trouver ci-joint votre allocation annuelle de repas, votre prime d’heures supplémentaires, ainsi qu’une invitation à votre bilan médical. Nous vous prions d’en accuser réception. »",
+                    "« Madame la Geôlière,\n Merci pour toutes ces années de service fidèle au sein de l’Empire Hyperboréen. Recevez nos plus sincères respects, ainsi que nos vœux les plus chaleureux pour votre anniversaire.\n Nous espérons que vous saurez savourer chaque minute de cette journée mémorable, et que les jours à venir vous offriront autant de joie que celui-ci.\n \n Veuillez trouver ci-joint votre allocation annuelle de repas, votre prime d’heures supplémentaires, ainsi qu’une invitation à votre bilan médical. Nous vous prions d’en accuser réception. »",
                 voice: "inv/Haier/003/C8AC4AEE",
                 npc: 93201,
                 next: 80160348,
@@ -18372,7 +20312,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80160348,
                 content:
-                    "« Très chère Madame la Geôlière,\nPardonnez-moi de ne pas signer, pensez à moi comme à une admiratrice discrète, qui vous observe de loin.\nPeut-être ne vous souvenez-vous pas de moi, mais moi, je n’ai jamais oublié comment vous faisiez face aux criminels...\nPour vos idéaux, pour les attentes des autres... peut-être même pour une personne insignifiante comme moi (hihi).\nVous vous consumiez sans hésiter, flamboyante, aussi ardente que votre nom le laisse entendre.\nBon anniversaire !\nJ’aimerais que vous sachiez que vous méritez pleinement tout ce que vous avez accompli.\nAlors, je vous en prie, acceptez cette reconnaissance et ces vœux avec fierté et sérénité. »",
+                    "« Très chère Madame la Geôlière,\n Pardonnez-moi de ne pas signer, pensez à moi comme à une admiratrice discrète, qui vous observe de loin.\n Peut-être ne vous souvenez-vous pas de moi, mais moi, je n’ai jamais oublié comment vous faisiez face aux criminels...\n Pour vos idéaux, pour les attentes des autres... peut-être même pour une personne insignifiante comme moi (hihi).\n Vous vous consumiez sans hésiter, flamboyante, aussi ardente que votre nom le laisse entendre.\n Bon anniversaire !\n J’aimerais que vous sachiez que vous méritez pleinement tout ce que vous avez accompli.\n Alors, je vous en prie, acceptez cette reconnaissance et ces vœux avec fierté et sérénité. »",
                 voice: "inv/Haier/003/C8AC4B18",
                 npc: 93201,
             },
@@ -25180,7 +27120,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80220314,
                 content:
-                    "J’ai tenté de la recoller, de la conserver comme un souvenir... Mais ce qui est brisé\nest destiné à se briser à nouveau.",
+                    "J’ai tenté de la recoller, de la conserver comme un souvenir... Mais ce qui est brisé\n est destiné à se briser à nouveau.",
                 voice: "inv/Yuming/003/C8D2B944",
                 npc: 790075,
                 next: 80220315,
@@ -25732,7 +27672,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80220429,
                 content:
-                    "Je pensais qu’une fois la poussière retombée, il me faudrait à nouveau affronter ces trois interrogations, longuement, douloureusement. Comme autrefois,\nquand Buxia, Kezhou, le maître... et même Taihao venaient hanter mes nuits.",
+                    "Je pensais qu’une fois la poussière retombée, il me faudrait à nouveau affronter ces trois interrogations, longuement, douloureusement. Comme autrefois,\n quand Buxia, Kezhou, le maître... et même Taihao venaient hanter mes nuits.",
                 voice: "inv/Yuming/004/C8D2CC22",
                 npc: 790072,
                 next: 80220430,
@@ -29353,7 +31293,7 @@ export const partyTopicData_fr: PartyTopic[] = [
         id: 510202,
         charId: 5102,
         name: "Les fauteurs de troubles",
-        desc: "Même les règles les plus contraignantes finissent par s’apprivoiser.\nMais les gens compliqués ? S’y habituer ne mène qu’au chaos, et votre vie devient un nœud impossible à défaire.",
+        desc: "Même les règles les plus contraignantes finissent par s’apprivoiser. Mais les gens compliqués ? S’y habituer ne mène qu’au chaos, et votre vie devient un nœud impossible à défaire.",
         memoryName: "Boisson — Au labeur",
         memoryDesc:
             "Après une journée harassante, ce qui compte, ce n’est pas le goût — mais la fraîcheur... et la présence d’un ami avec qui refaire le monde.",
@@ -31866,7 +33806,7 @@ export const partyTopicData_fr: PartyTopic[] = [
             {
                 id: 80180305,
                 content:
-                    "Mais je ne regrette pas mon choix, car je crois qu’un jour, bien loin dans le futur,\n nous verrons l’aube d’une époque plus lumineuse.",
+                    "Mais je ne regrette pas mon choix, car je crois qu’un jour, bien loin dans le futur,\n  nous verrons l’aube d’une époque plus lumineuse.",
                 voice: "inv/Dafu/003/C8B9154A",
                 npc: 790045,
                 next: 80180306,

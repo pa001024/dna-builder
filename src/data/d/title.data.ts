@@ -528,7 +528,7 @@ export const titleData: Title[] = [
     },
     {
         id: 10093,
-        name: "艾达（？？）的",
+        name: "伊薇的",
         suf: false,
     },
     {
@@ -677,6 +677,18 @@ export const titleData: Title[] = [
         name: "芙罗拉的",
         suf: false,
         src: "成就「停驻光阴·芙罗拉」",
+    },
+    {
+        id: 10119,
+        name: "乐园的",
+        suf: false,
+        src: "成就「白兔的乐园」",
+    },
+    {
+        id: 10120,
+        name: "失忆的",
+        suf: false,
+        src: "成就「我是谁」",
     },
     {
         id: 20001,
@@ -1109,7 +1121,7 @@ export const titleData: Title[] = [
     },
     {
         id: 20077,
-        name: "艾达（？？）",
+        name: "伊薇",
         suf: true,
     },
     {
@@ -1247,6 +1259,24 @@ export const titleData: Title[] = [
         name: "芙罗拉",
         suf: true,
         src: "成就「休憩一刻·芙罗拉」",
+    },
+    {
+        id: 20101,
+        name: "靶子",
+        suf: true,
+        src: "成就「专业对口」",
+    },
+    {
+        id: 20102,
+        name: "战车",
+        suf: true,
+        src: "成就「荣归故里？」",
+    },
+    {
+        id: 20103,
+        name: "乐园",
+        suf: true,
+        src: "成就「乐园之下」",
     },
 ]
 

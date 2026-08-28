@@ -131,11 +131,12 @@ const weaponAttributeBaseMap = {
 const characterBonusAttributes = [
     "攻击",
     "固定攻击",
+    "固定生命",
     "生命",
     "护盾",
     "防御",
     "神智",
-    "属性伤",
+    "属性攻击",
     "技能威力",
     "技能耐久",
     "技能效益",
@@ -630,11 +631,12 @@ export class CharBuild {
         // 计算各种加成
         let attackBonus = bonuses[characterBonusIndex.攻击]
         const attackAdd = bonuses[characterBonusIndex.固定攻击]
+        const healthAdd = bonuses[characterBonusIndex.固定生命]
         let healthBonus = bonuses[characterBonusIndex.生命]
         let shieldBonus = bonuses[characterBonusIndex.护盾]
         let defenseBonus = bonuses[characterBonusIndex.防御]
         let sanityBonus = bonuses[characterBonusIndex.神智]
-        let elemDamageBonus = bonuses[characterBonusIndex.属性伤]
+        let elemDamageBonus = bonuses[characterBonusIndex.属性攻击]
         // 计算基础值为1的属性
         let power = 1 + bonuses[characterBonusIndex.技能威力]
         let durability = 1 + bonuses[characterBonusIndex.技能耐久]
@@ -687,7 +689,7 @@ export class CharBuild {
             shieldBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "护盾")
             defenseBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "防御")
             sanityBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "神智")
-            elemDamageBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "属性伤")
+            elemDamageBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "属性攻击")
             power += modAttributeBonus * this.getModsBonus(modsBySeries, "技能威力")
             durability += modAttributeBonus * this.getModsBonus(modsBySeries, "技能耐久")
             efficiency += modAttributeBonus * this.getModsBonus(modsBySeries, "技能效益")
@@ -717,11 +719,11 @@ export class CharBuild {
         let defense = char.基础防御 * (1 + defenseBonus + this.resonanceGain)
         let sanity = char.基础神智 * (1 + sanityBonus)
 
-        // 应用属性伤加成
+        // 应用属性攻击加成
         attack = attack * (1 + elemDamageBonus) + attackAdd
 
         // 结果处理
-        health = Math.round(health)
+        health = Math.round(health + healthAdd)
         shield = Math.round(shield)
         defense = Math.round(defense)
         sanity = Math.round(sanity)

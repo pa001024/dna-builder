@@ -161,6 +161,12 @@ export const subRegionData: SubRegion[] = [
                 name: "秽兽肆虐的村庄",
                 icon: "T_Gp_Camera",
             },
+            {
+                id: 2876,
+                pos: [761, 9252],
+                name: "留影地·净界岛",
+                icon: "T_Gp_Camera",
+            },
         ],
     },
     {
@@ -587,6 +593,12 @@ export const subRegionData: SubRegion[] = [
                 pos: [1831, -419],
                 name: "站前穹顶",
                 icon: "T_Gp_Station",
+            },
+            {
+                id: 2865,
+                pos: [-5117, -4284],
+                name: "留影地·冰湖城广场",
+                icon: "T_Gp_Camera",
             },
         ],
     },
@@ -1193,6 +1205,18 @@ export const subRegionData: SubRegion[] = [
                 pos: [-39990, 6541],
                 name: "费西尔秘密基地",
                 icon: "T_Gp_Secr",
+            },
+            {
+                id: 2874,
+                pos: [-38853, 27042],
+                name: "留影地·泪湖湖畔",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 2866,
+                pos: [-52190, 41000],
+                name: "留影地·泪湖",
+                icon: "T_Gp_Camera",
             },
         ],
     },
@@ -2458,6 +2482,48 @@ export const subRegionData: SubRegion[] = [
                 pos: [-1440, -13200],
                 name: "灵鸟回声·驱离（往隙）",
                 icon: "T_Gp_AreaCoop",
+            },
+            {
+                id: 2875,
+                pos: [-44803, 7630],
+                name: "留影地·听鸦原",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 2872,
+                pos: [28956, 27042],
+                name: "留影地·蓼风岭",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 2871,
+                pos: [-18481, 15712],
+                name: "留影地·微茫市",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 2870,
+                pos: [32354, 54041],
+                name: "留影地·浮星埠",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 2869,
+                pos: [39258, 5329],
+                name: "留影地·百年春",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 2868,
+                pos: [6408, -2469],
+                name: "留影地·幽明涧",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 2867,
+                pos: [17489, -37970],
+                name: "留影地·枯荣阁",
+                icon: "T_Gp_Camera",
             },
         ],
     },
@@ -4362,7 +4428,19 @@ export const subRegionData: SubRegion[] = [
                 id: 2855,
                 pos: [-18687, 2],
                 name: "黄金旅途·魔灵竞速",
-                icon: "T_Gp_Trans02",
+                icon: "T_Gp_Racing",
+            },
+            {
+                id: 2858,
+                pos: [-4552, 15],
+                name: "站前穹顶",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 2859,
+                pos: [-42679, -1136],
+                name: "站外空地",
+                icon: "T_Gp_Camera",
             },
         ],
     },
@@ -4578,12 +4656,18 @@ export const subRegionData: SubRegion[] = [
                 name: "站厅",
                 icon: "T_Gp_Leave",
             },
+            {
+                id: 2860,
+                pos: [-13366, 8034],
+                name: "锻铁厂",
+                icon: "T_Gp_Camera",
+            },
         ],
     },
     {
         id: 107001,
         rid: 1070,
-        name: "UI_SUBREGION_NAME_107001",
+        name: "阿尔卡诺山",
         desc: "UI_SUBREGION_DES_107001",
         map: "Haiboliya_Thc_Lxzs01",
         pos: [-20078, -79259],
@@ -4591,59 +4675,418 @@ export const subRegionData: SubRegion[] = [
             center: [-20078, -79259],
             extent: [0, 0],
         },
+        rc: [
+            {
+                id: 9080101,
+                info: [
+                    {
+                        id: 4131,
+                        w: 333,
+                    },
+                    {
+                        id: 4132,
+                        w: 333,
+                    },
+                    {
+                        id: 4133,
+                        w: 167,
+                    },
+                    {
+                        id: 4031,
+                        w: 778,
+                    },
+                    {
+                        id: 4032,
+                        w: 778,
+                    },
+                    {
+                        id: 4033,
+                        w: 389,
+                    },
+                    {
+                        id: 4911,
+                        w: 903,
+                    },
+                    {
+                        id: 4912,
+                        w: 903,
+                    },
+                    {
+                        id: 4913,
+                        w: 903,
+                    },
+                    {
+                        id: 4921,
+                        w: 903,
+                    },
+                    {
+                        id: 4922,
+                        w: 903,
+                    },
+                    {
+                        id: 4923,
+                        w: 903,
+                    },
+                    {
+                        id: 4931,
+                        w: 903,
+                    },
+                    {
+                        id: 4932,
+                        w: 903,
+                    },
+                ],
+                count: 2,
+                pos: [
+                    [-17410, -68610],
+                    [-9510, -75970],
+                    [-34800, -82210],
+                ],
+            },
+            {
+                id: 9080102,
+                info: [
+                    {
+                        id: 4081,
+                        w: 133,
+                    },
+                    {
+                        id: 4082,
+                        w: 133,
+                    },
+                    {
+                        id: 4083,
+                        w: 67,
+                    },
+                    {
+                        id: 4151,
+                        w: 322,
+                    },
+                    {
+                        id: 4152,
+                        w: 322,
+                    },
+                    {
+                        id: 4153,
+                        w: 161,
+                    },
+                    {
+                        id: 4051,
+                        w: 752,
+                    },
+                    {
+                        id: 4052,
+                        w: 752,
+                    },
+                    {
+                        id: 4053,
+                        w: 376,
+                    },
+                    {
+                        id: 4932,
+                        w: 6981,
+                    },
+                ],
+                count: 3,
+                pos: [
+                    [-3980, -21020],
+                    [-4760, -24620],
+                    [-11710, -70790],
+                    [-18560, -83340],
+                ],
+            },
+            {
+                id: 9080103,
+                info: [
+                    {
+                        id: 4121,
+                        w: 333,
+                    },
+                    {
+                        id: 4122,
+                        w: 333,
+                    },
+                    {
+                        id: 4123,
+                        w: 167,
+                    },
+                    {
+                        id: 4021,
+                        w: 778,
+                    },
+                    {
+                        id: 4022,
+                        w: 778,
+                    },
+                    {
+                        id: 4023,
+                        w: 389,
+                    },
+                    {
+                        id: 4911,
+                        w: 903,
+                    },
+                    {
+                        id: 4912,
+                        w: 903,
+                    },
+                    {
+                        id: 4913,
+                        w: 903,
+                    },
+                    {
+                        id: 4921,
+                        w: 903,
+                    },
+                    {
+                        id: 4922,
+                        w: 903,
+                    },
+                    {
+                        id: 4923,
+                        w: 903,
+                    },
+                    {
+                        id: 4931,
+                        w: 903,
+                    },
+                    {
+                        id: 4932,
+                        w: 903,
+                    },
+                ],
+                count: 2,
+                pos: [
+                    [9310, -35660],
+                    [4120, -30230],
+                    [-11020, -85730],
+                ],
+            },
+        ],
         tp: [
             {
                 id: 1700,
                 pos: [4740, -4868],
-                name: "UI_TELEPORTPOINT_NAME_107001_1",
+                name: "阿尔卡诺山入口",
                 icon: "T_Gp_Trans02",
             },
             {
                 id: 1701,
                 pos: [7613, -39897],
-                name: "UI_TELEPORTPOINT_NAME_107001_2",
+                name: "山中密林",
                 icon: "T_Gp_Trans02",
             },
             {
                 id: 1702,
                 pos: [-21821, -76669],
-                name: "UI_TELEPORTPOINT_NAME_107001_3",
+                name: "乐园镇",
                 icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2505,
+                pos: [-19450, -78420],
+                name: "集结",
+                icon: "T_Gp_Gathering",
+            },
+            {
+                id: 2024,
+                pos: [-11100, -29528],
+                name: "阿尔卡诺镇旧址",
+                icon: "T_Gp_EX02_LXZS",
+            },
+            {
+                id: 2025,
+                pos: [-29933, -58905],
+                name: "阿尔卡诺镇旧址",
+                icon: "T_Gp_EX02_LXZS",
+            },
+            {
+                id: 2030,
+                pos: [-20847, -88214],
+                name: "酣梦池",
+                icon: "T_Gp_EX02_JHS",
+            },
+            {
+                id: 2028,
+                pos: [-21304, -65937],
+                name: "山谷裂隙",
+                icon: "T_Gp_EX02_LXZX",
+            },
+            {
+                id: 2856,
+                pos: [-34129, -71879],
+                name: "乐园镇钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 2031,
+                pos: [-6624, -75596],
+                name: "维克托的家",
+                icon: "T_Gp_EX02_ZZJ",
+            },
+            {
+                id: 2862,
+                pos: [-11900, -74820],
+                name: "乐园镇",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 2863,
+                pos: [-21510, -76030],
+                name: "乐园镇",
+                icon: "T_Gp_Camera",
             },
         ],
     },
     {
         id: 107101,
         rid: 1071,
-        name: "UI_SUBREGION_NAME_107101",
+        name: "阿尔卡诺镇旧址",
         desc: "UI_SUBREGION_DES_107101",
         map: "Haiboliya_Thc_Lxzs02",
-        pos: [-41437, -34128],
+        pos: [-36840, -34639],
+        rc: [
+            {
+                id: 9080104,
+                info: [
+                    {
+                        id: 4161,
+                        w: 333,
+                    },
+                    {
+                        id: 4162,
+                        w: 333,
+                    },
+                    {
+                        id: 4163,
+                        w: 167,
+                    },
+                    {
+                        id: 4061,
+                        w: 778,
+                    },
+                    {
+                        id: 4062,
+                        w: 778,
+                    },
+                    {
+                        id: 4063,
+                        w: 389,
+                    },
+                    {
+                        id: 4932,
+                        w: 7222,
+                    },
+                ],
+                count: 2,
+                pos: [
+                    [-27030, -32760],
+                    [-36310, -19310],
+                    [-61490, -10750],
+                ],
+            },
+            {
+                id: 9080105,
+                info: [
+                    {
+                        id: 4071,
+                        w: 133,
+                    },
+                    {
+                        id: 4072,
+                        w: 133,
+                    },
+                    {
+                        id: 4073,
+                        w: 67,
+                    },
+                    {
+                        id: 4141,
+                        w: 322,
+                    },
+                    {
+                        id: 4142,
+                        w: 322,
+                    },
+                    {
+                        id: 4143,
+                        w: 161,
+                    },
+                    {
+                        id: 4041,
+                        w: 752,
+                    },
+                    {
+                        id: 4042,
+                        w: 752,
+                    },
+                    {
+                        id: 4043,
+                        w: 376,
+                    },
+                    {
+                        id: 4932,
+                        w: 6981,
+                    },
+                ],
+                count: 2,
+                pos: [
+                    [-61080, -47270],
+                    [-66120, -56220],
+                    [-30570, -20550],
+                    [-23840, -32620],
+                ],
+            },
+        ],
         tp: [
             {
                 id: 1705,
                 pos: [-20624, -30522],
-                name: "UI_TELEPORTPOINT_NAME_107101_3",
+                name: "废墟游乐场",
                 icon: "T_Gp_Trans02",
             },
             {
                 id: 1703,
                 pos: [-49721, -51971],
-                name: "UI_TELEPORTPOINT_NAME_107101_1",
+                name: "吊桥",
                 icon: "T_Gp_Trans02",
             },
             {
                 id: 1704,
                 pos: [-53967, -19890],
-                name: "UI_TELEPORTPOINT_NAME_107101_2",
+                name: "焦土地",
                 icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2026,
+                pos: [-18788, -33285],
+                name: "阿尔卡诺山",
+                icon: "T_Gp_EX02_LXZS",
+            },
+            {
+                id: 2027,
+                pos: [-45563, -54903],
+                name: "阿尔卡诺山",
+                icon: "T_Gp_EX02_LXZS",
+            },
+            {
+                id: 2861,
+                pos: [-25203, -29482],
+                name: "废墟游乐场",
+                icon: "T_Gp_Camera",
+            },
+            {
+                id: 9007,
+                pos: [-44015, -22422],
+                name: "",
+                icon: "T_Gp_Boss",
             },
         ],
     },
     {
         id: 107201,
         rid: 1072,
-        name: "UI_SUBREGION_NAME_107201",
+        name: "山谷裂隙",
         desc: "UI_SUBREGION_DES_107201",
         map: "Haiboliya_Thc_Lxzx",
         pos: [-63630, -21235],
@@ -4651,31 +5094,120 @@ export const subRegionData: SubRegion[] = [
             center: [-63630, -21235],
             extent: [0, 0],
         },
+        rc: [
+            {
+                id: 9080106,
+                info: [
+                    {
+                        id: 4111,
+                        w: 333,
+                    },
+                    {
+                        id: 4112,
+                        w: 333,
+                    },
+                    {
+                        id: 4113,
+                        w: 167,
+                    },
+                    {
+                        id: 4011,
+                        w: 778,
+                    },
+                    {
+                        id: 4012,
+                        w: 778,
+                    },
+                    {
+                        id: 4013,
+                        w: 389,
+                    },
+                    {
+                        id: 4911,
+                        w: 903,
+                    },
+                    {
+                        id: 4912,
+                        w: 903,
+                    },
+                    {
+                        id: 4913,
+                        w: 903,
+                    },
+                    {
+                        id: 4921,
+                        w: 903,
+                    },
+                    {
+                        id: 4922,
+                        w: 903,
+                    },
+                    {
+                        id: 4923,
+                        w: 903,
+                    },
+                    {
+                        id: 4931,
+                        w: 903,
+                    },
+                    {
+                        id: 4932,
+                        w: 903,
+                    },
+                ],
+                count: 3,
+                pos: [
+                    [19910, 160],
+                    [-1610, -15890],
+                    [11860, -17670],
+                    [16870, -63510],
+                    [-52700, -22150],
+                ],
+            },
+        ],
         tp: [
             {
                 id: 1706,
                 pos: [-76640, -27516],
-                name: "UI_TELEPORTPOINT_NAME_107201_1",
+                name: "山谷裂隙",
                 icon: "T_Gp_Trans02",
             },
             {
                 id: 1707,
                 pos: [-33285, -14447],
-                name: "UI_TELEPORTPOINT_NAME_107201_2",
+                name: "污染湖泊",
                 icon: "T_Gp_Trans02",
             },
             {
                 id: 1708,
                 pos: [6900, -74208],
-                name: "UI_TELEPORTPOINT_NAME_107201_3",
+                name: "湖边营地",
                 icon: "T_Gp_Trans02",
+            },
+            {
+                id: 2029,
+                pos: [24821, -80946],
+                name: "阿尔卡诺山",
+                icon: "T_Gp_EX02_LXZS",
+            },
+            {
+                id: 2857,
+                pos: [18735, -61739],
+                name: "阿尔卡诺山裂隙钓鱼点",
+                icon: "T_Gp_Angling",
+            },
+            {
+                id: 2864,
+                pos: [-33280, -12150],
+                name: "山谷裂隙",
+                icon: "T_Gp_Camera",
             },
         ],
     },
     {
         id: 107301,
         rid: 1073,
-        name: "UI_SUBREGION_NAME_107301",
+        name: "？？？",
         desc: "UI_SUBREGION_DES_107301",
         map: "Haiboliya_Thc_Emyly",
         pos: [-44555, -27139],
@@ -4683,14 +5215,14 @@ export const subRegionData: SubRegion[] = [
     {
         id: 107401,
         rid: 1074,
-        name: "UI_SUBREGION_NAME_107401",
+        name: "龙莎要塞",
         desc: "UI_SUBREGION_DES_107401",
         map: "Haiboliya_Thc_Zchj",
     },
     {
         id: 107501,
         rid: 1075,
-        name: "UI_SUBREGION_NAME_107501",
+        name: "维克托的家",
         desc: "UI_SUBREGION_DES_107501",
         map: "Haiboliya_Thc_Zjfj",
         pos: [10810, -92220],
@@ -4698,14 +5230,14 @@ export const subRegionData: SubRegion[] = [
     {
         id: 107601,
         rid: 1076,
-        name: "UI_SUBREGION_NAME_107601",
+        name: "失控的乐园",
         desc: "UI_SUBREGION_DES_107601",
         map: "Haiboliya_Thc_Boss",
     },
     {
         id: 107701,
         rid: 1077,
-        name: "UI_SUBREGION_NAME_107701",
+        name: "酣梦池",
         desc: "UI_SUBREGION_DES_107701",
         map: "Haiboliya_Thc_Jhs",
         pos: [-6292, -89233],
@@ -4713,30 +5245,44 @@ export const subRegionData: SubRegion[] = [
     {
         id: 107801,
         rid: 1078,
-        name: "UI_SUBREGION_NAME_107801",
+        name: "乐园镇",
         desc: "UI_SUBREGION_DES_107801",
         map: "Haiboliya_Thc_Ck",
     },
     {
         id: 108101,
         rid: 1081,
-        name: "测试区域",
-        desc: "测试区域",
-        map: "Ailixian_Sailafei",
+        name: "",
+        desc: "",
+        map: "Ailixian_SLF",
     },
     {
         id: 108201,
         rid: 1082,
-        name: "测试区域",
-        desc: "测试区域",
+        name: "",
+        desc: "",
         map: "Ailixian_Miandao",
     },
     {
         id: 108301,
         rid: 1083,
-        name: "测试区域",
-        desc: "测试区域",
-        map: "Ailixian_DreamSailafei",
+        name: "",
+        desc: "",
+        map: "Ailixian_LLKWon",
+    },
+    {
+        id: 108401,
+        rid: 1084,
+        name: "",
+        desc: "",
+        map: "Ailixian_Miandao_Yyhf",
+    },
+    {
+        id: 108501,
+        rid: 1085,
+        name: "",
+        desc: "",
+        map: "Ailixian_Yidai_Boss",
     },
     {
         id: 109001,

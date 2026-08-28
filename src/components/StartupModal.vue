@@ -287,6 +287,9 @@ async function goSetting(): Promise<void> {
 }
 
 function dismissPack(): void {
+    // 忽略本次数据包提示：将 lastApply 记为当前时间，使 hasNewPack 判定（builtAt > lastApply）失效，
+    // 从而阻止同一数据包（同一 builtAt）再次弹出更新/安装提示。
+    lastApply.value = Date.now()
     closeDialog()
     void runChangelogFlow()
 }
@@ -411,11 +414,7 @@ declare global {
                                 {{ appNewVersion }}
                             </div>
                             <ul v-if="appNewNotes.length" class="mt-1.5 space-y-1">
-                                <li
-                                    v-for="item in appNewNotes"
-                                    :key="item"
-                                    class="flex items-start gap-1.5 text-xs text-base-content/65"
-                                >
+                                <li v-for="item in appNewNotes" :key="item" class="flex items-start gap-1.5 text-xs text-base-content/65">
                                     <span class="mt-1.25 h-1 w-1 shrink-0 rounded-full bg-primary/60" aria-hidden="true" />
                                     <span class="min-w-0">{{ item }}</span>
                                 </li>
@@ -480,7 +479,7 @@ declare global {
                                 {{ dataPack.isDownloading ? "下载中" : latestVersion ? `下载 ${latestVersion}` : "下载最新数据包" }}
                             </button>
                             <button class="btn btn-ghost w-full min-w-28 sm:w-auto" @click="goSetting">打开设置</button>
-                            <button class="btn btn-ghost w-full min-w-24 sm:w-auto" @click="dismissPack">关闭</button>
+                            <button class="btn btn-ghost w-full min-w-24 sm:w-auto" @click="dismissPack">忽略</button>
                         </div>
                     </template>
 

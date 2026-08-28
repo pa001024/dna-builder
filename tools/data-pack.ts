@@ -190,8 +190,9 @@ function getPublicUrl(ossKey: string): string {
 /**
  * 构建并输出数据包。
  * @param targetVersion 目标版本
+ * @param updateVersions 是否更新 versions.json（仅 upload 模式下写版本列表）
  */
-async function buildDataPack(targetVersion: string): Promise<PackVersionEntry> {
+async function buildDataPack(targetVersion: string, updateVersions: boolean): Promise<PackVersionEntry> {
     fs.mkdirSync(outDir, { recursive: true })
 
     const files = globSync("**/*.data.ts", { cwd: sourceRoot, absolute: true }).sort()
@@ -248,8 +249,11 @@ async function buildDataPack(targetVersion: string): Promise<PackVersionEntry> {
         version: manifest.version,
         notes,
     }
-    const nextVersions = [entry, ...readVersions().filter(item => item.version !== targetVersion)]
-    writeVersions(nextVersions)
+    // 仅 upload 模式写版本列表；非 upload 模式（如 build）不修改 versions.json
+    if (updateVersions) {
+        const nextVersions = [entry, ...readVersions().filter(item => item.version !== targetVersion)]
+        writeVersions(nextVersions)
+    }
 
     return entry
 }
@@ -295,7 +299,7 @@ async function main() {
     }
 
     const targetVersion = version
-    const entry = await buildDataPack(targetVersion)
+    const entry = await buildDataPack(targetVersion, shouldUpload)
 
     if (shouldUpload) {
         await uploadDataPack(entry)
