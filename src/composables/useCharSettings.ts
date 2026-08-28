@@ -171,16 +171,15 @@ function readLegacyCustomBuff(): [string, number][] {
 }
 
 /**
- * 创建角色配置本地存储引用。
+ * 创建角色配置本地存储引用（以角色 id 为键）。
  * 可选传入专武解析回调：首次创建默认值时由调用方解析角色专武并写入默认武器，避免在 composable 中静态依赖数据包。
- * @param charNameRef 角色名称引用
- * @param getSignatureWeapon 专武解析回调（可选）
+ * @param charIdRef 角色 id 引用（存储键主键）
+ * @param getSignatureWeapon 专武解析回调（可选，按角色 id 解析）
  * @returns 角色配置引用
  */
-export const useCharSettings = (charNameRef?: Ref<string>, getSignatureWeapon?: (charName: string) => SignatureWeapon | null) => {
-    const charName = charNameRef ?? useLocalStorage("selectedChar", "赛琪")
-    const charSettingsKey = computed(() => `build.${charName.value}`)
-    const charSettings = useLocalStorage(charSettingsKey, createDefaultCharSettings(getSignatureWeapon?.(charName.value)))
+export const useCharSettings = (charIdRef: Ref<number>, getSignatureWeapon?: (charId: number) => SignatureWeapon | null) => {
+    const charSettingsKey = computed(() => `build.${charIdRef.value}`)
+    const charSettings = useLocalStorage(charSettingsKey, createDefaultCharSettings(getSignatureWeapon?.(charIdRef.value)))
     charSettings.value = normalizeCharSettings(charSettings.value)
 
     if (charSettings.value.customBuff.length === 0) {

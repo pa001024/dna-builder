@@ -18,7 +18,6 @@ import { copyText } from "@/util"
 import { formatDateTime } from "@/utils/time"
 
 const props = defineProps<{
-    charName: string
     charId: number
 }>()
 
@@ -47,7 +46,7 @@ const expandedBuildIds = ref<Record<string, boolean>>({})
 const DESCRIPTION_COLLAPSE_THRESHOLD = 40
 
 // 当前角色的 charSettings
-const charSettings = useCharSettings(computed(() => props.charName))
+const charSettings = useCharSettings(computed(() => props.charId))
 
 /**
  * 判断描述是否超过折叠阈值，超长时显示展开按钮。

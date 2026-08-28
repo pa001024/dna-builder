@@ -32,6 +32,8 @@ export interface CharAttr {
     昂扬: number
     背水: number
     增伤: number
+    元素增伤: number
+    物理增伤: number
     武器伤害: number
     技能伤害: number
     独立增伤: number
@@ -141,6 +143,8 @@ const characterBonusAttributes = [
     "昂扬",
     "背水",
     "增伤",
+    "元素增伤",
+    "物理增伤",
     "武器伤害",
     "技能伤害",
     "技能速度",
@@ -242,7 +246,7 @@ export interface CharBuildOptions {
 
 export class CharBuild {
     static fromCharSetting: (
-        selectedChar: string,
+        selectedChar: number,
         charSettings: typeof import("../composables/useCharSettings").defaultCharSettings,
         inv?: ReturnType<typeof import("../store/inv").useInvStore>,
         timeline?: CharBuildTimeline
@@ -491,7 +495,7 @@ export class CharBuild {
         this.meleeMods = options.meleeMods || []
         this.rangedMods = options.rangedMods || []
         this.skillMods = options.skillMods || []
-        // 复合BUFF（同时含普通属性与code，如「艾达4溯」）需同时进入普通槽位与code槽位：
+        // 复合BUFF（同时含普通属性与code，如「伊薇4溯」）需同时进入普通槽位与code槽位：
         // 普通属性部分先进属性链汇总，code部分在其后基于完整属性计算（普通buff优先于code）
         this.buffs = options.buffs?.filter(v => !v.code || v.properties.length > 0) || []
         this.dynamicBuffs = options.buffs?.filter(v => v.code) || []
@@ -635,6 +639,8 @@ export class CharBuild {
         let boost = bonuses[characterBonusIndex.昂扬]
         let desperate = bonuses[characterBonusIndex.背水]
         let damageIncrease = bonuses[characterBonusIndex.增伤]
+        let elementDamageIncrease = bonuses[characterBonusIndex.元素增伤]
+        let physicalDamageIncrease = bonuses[characterBonusIndex.物理增伤]
         let weaponDamage = bonuses[characterBonusIndex.武器伤害]
         let skillDamage = bonuses[characterBonusIndex.技能伤害]
         let skillSpeed = bonuses[characterBonusIndex.技能速度]
@@ -645,7 +651,7 @@ export class CharBuild {
         let summonAttackSpeed = bonuses[characterBonusIndex.召唤物攻击速度]
         let summonRange = bonuses[characterBonusIndex.召唤物范围]
         let summonDamage = bonuses[characterBonusIndex.召唤物伤害]
-        // 召唤物独立增伤：0起始的增量（1 + 该值 = 召唤物伤害乘区），供「艾达4溯」等BUFF的code做乘法转化
+        // 召唤物独立增伤：0起始的增量（1 + 该值 = 召唤物伤害乘区），供「伊薇4溯」等BUFF的code做乘法转化
         let summonIndependentDamage = bonuses[characterBonusIndex.召唤物独立增伤]
         const ignoreDefense = this.getTotalBonusMul("无视防御")
         const skillIgnoreDefense = this.getTotalBonusMul("技能无视防御")
@@ -683,6 +689,8 @@ export class CharBuild {
             boost += modAttributeBonus * this.getModsBonus(modsBySeries, "昂扬")
             desperate += modAttributeBonus * this.getModsBonus(modsBySeries, "背水")
             damageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "增伤")
+            elementDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "元素增伤")
+            physicalDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "物理增伤")
             weaponDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "武器伤害")
             skillDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "技能伤害")
             skillSpeed += modAttributeBonus * this.getModsBonus(modsBySeries, "技能速度")
@@ -733,6 +741,8 @@ export class CharBuild {
             昂扬: boost,
             背水: desperate,
             增伤: damageIncrease,
+            元素增伤: elementDamageIncrease,
+            物理增伤: physicalDamageIncrease,
             武器伤害: weaponDamage,
             技能伤害: skillDamage,
             独立增伤: independentDamageIncrease,
@@ -1539,9 +1549,10 @@ export class CharBuild {
         const skill = this.allSkills.find(s => s.名称 === baseName)
         const field = fieldName ? skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName)) : undefined
         const isSummonDamage = !!field?.tag?.includes("召唤物")
-        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (isSummonDamage ? attrs.召唤物伤害 : 0)
+        // 技能伤害视为纯元素结算（无物理分量），故吃 元素增伤，不吃 物理增伤
+        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (isSummonDamage ? attrs.召唤物伤害 : 0) + (attrs.元素增伤 || 0)
         const independentDamageIncrease = 1 + attrs.独立增伤
-        // 召唤物独立增伤乘区（0起始增量，1 + 该值 = 仅召唤物伤害结算的倍率）：如「艾达4溯」将召唤物攻击速度超额部分按比例转化为该乘区
+        // 召唤物独立增伤乘区（0起始增量，1 + 该值 = 仅召唤物伤害结算的倍率）：如「伊薇4溯」将召唤物攻击速度超额部分按比例转化为该乘区
         const summonIndependentDamageMultiplier = isSummonDamage ? 1 + attrs.召唤物独立增伤 : 1
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
@@ -1618,13 +1629,19 @@ export class CharBuild {
         const resistancePenetration = Math.max(0, 1 + attrs.属性穿透)
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
-        const damageIncrease = 1 + attrs.增伤 + weaponAttrs.增伤 + attrs.武器伤害
+        // 增伤按结算类型分分量加算：元素分量吃 元素增伤，物理分量吃 物理增伤，二者均与 增伤/武器增伤/武器伤害 同池加算
+        const damageIncreaseBase = 1 + attrs.增伤 + weaponAttrs.增伤 + attrs.武器伤害
+        const elementDamageIncrease = attrs.元素增伤 || 0
+        const physicalDamageIncrease = attrs.物理增伤 || 0
         const independentDamageIncrease = (1 + attrs.独立增伤) * (1 + weaponAttrs.独立增伤)
         const additionalDamage = 1 + weaponAttrs.追加伤害
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
         const hpMore = boostMultiplier * desperateMultiplier
-        const otherMore = damageIncrease * independentDamageIncrease * additionalDamage * imbalanceDamageMultiplier * resistancePenetration
+        const otherMore = independentDamageIncrease * additionalDamage * imbalanceDamageMultiplier * resistancePenetration
         const commonMore = hpMore * otherMore
+        // per-part 有效增伤：元素 part 取元素池，物理 part 取物理池（与 增伤 加算，非独立乘区）
+        const partDamageIncrease = (p: { settlesElement: boolean }) =>
+            p.settlesElement ? damageIncreaseBase + elementDamageIncrease : damageIncreaseBase + physicalDamageIncrease
 
         // 计算最终伤害（支持 转xx 系列属性）
         // 转属克/转属逆（按敌人抗性方向取其一）与 转切割/转贯穿/转震荡/转灾厄 共享同一转换比例池：
@@ -1687,16 +1704,16 @@ export class CharBuild {
                 }
             }
         }
-        const allPart = parts.reduce((sum, p) => sum + p.ratio, 0)
-        const triggerAllPart = parts.reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd), 0)
-        const expectedTriggerAllPart = parts.reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate), 0)
+        const allPart = parts.reduce((sum, p) => sum + p.ratio * partDamageIncrease(p), 0)
+        const triggerAllPart = parts.reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd) * partDamageIncrease(p), 0)
+        const expectedTriggerAllPart = parts.reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate) * partDamageIncrease(p), 0)
         // 按结算类型拆分期望伤害（物理/元素），用于 物理/元素 属性访问器
         const physicalExpectedTriggerAllPart = parts
             .filter(p => !p.settlesElement)
-            .reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate), 0)
+            .reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate) * partDamageIncrease(p), 0)
         const elementExpectedTriggerAllPart = parts
             .filter(p => p.settlesElement)
-            .reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate), 0)
+            .reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate) * partDamageIncrease(p), 0)
         const lowerCritNoTriggerBase = lowerCritDamage * commonMore
         const higherCritNoTriggerBase = higherCritDamage * commonMore
         const expectedCritNoTriggerBase = critExpectedDamage * commonMore
@@ -2990,7 +3007,7 @@ export class CharBuild {
         if (!buffs.length) return this
         const names = new Set(typeof buffs[0] === "string" ? (buffs as string[]) : (buffs as LeveledBuff[]).map(b => b.名称))
         this.buffs = this.buffs.filter(b => !names.has(b.名称))
-        // 复合BUFF（如「艾达4溯」）同一实例同时位于code槽位，需一并移除
+        // 复合BUFF（如「伊薇4溯」）同一实例同时位于code槽位，需一并移除
         this.dynamicBuffs = this.dynamicBuffs.filter(b => !names.has(b.名称))
         return this
     }
@@ -3029,7 +3046,7 @@ export class CharBuild {
             let mval = 0
             if (props instanceof LeveledBuff) {
                 if (props.code) {
-                    // 复合BUFF需同时从普通槽位与code槽位移除（如「艾达4溯」的召唤物攻击速度+code部分）
+                    // 复合BUFF需同时从普通槽位与code槽位移除（如「伊薇4溯」的召唤物攻击速度+code部分）
                     this.buffs = this.buffs.filter(b => b.名称 !== props.名称)
                     this.dynamicBuffs = this.dynamicBuffs.filter(b => b.名称 !== props.名称)
                     mval = this.calculate()

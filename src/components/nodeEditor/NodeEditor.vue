@@ -9,6 +9,7 @@ import type { EdgeMouseEvent, NodeMouseEvent } from "@vue-flow/core"
 import { nanoid } from "nanoid"
 import { computed, markRaw, onMounted, onUnmounted, ref } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
+import { charMap } from "@/data"
 import { useNodeEditorStore } from "@/store/nodeEditor"
 import { useUIStore } from "@/store/ui"
 import { importCharSettingsToNodeEditor } from "@/utils/importCharSettingsToNodeEditor"
@@ -468,11 +469,12 @@ onUnmounted(() => {
 const transferDialogShow = ref(false)
 const selectedCharName = ref("")
 function handleTransfer(charName: string) {
-    const charSettings = useCharSettings(computed(() => charName))
-    if (!charSettings) {
+    const charId = charMap.get(charName)?.id
+    if (!charId) {
         ui.showErrorMessage(`角色 ${charName} 不存在`)
         return
     }
+    const charSettings = useCharSettings(ref(charId))
     importCharSettingsToNodeEditor(charName, charSettings.value)
     transferDialogShow.value = false
 }

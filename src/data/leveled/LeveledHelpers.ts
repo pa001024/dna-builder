@@ -48,7 +48,7 @@ export class LeveledBuffHelper {
  */
 export class LeveledCharHelper {
     static fromId(id: string | number, level?: number) {
-        if (typeof id === "string") id = +id
+        if (typeof id === "string") id = charMap.get(id)?.id || +id
         if (id > 9999) id = ~~(id / 100)
         const charData = charMap.get(id)
         if (!charData) {

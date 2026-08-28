@@ -512,7 +512,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbm-item-active" })
                                                 <span
                                                     class="font-medium tabular-nums"
                                                     :class="{ 'text-primary': selectedMod?.id !== mod.id }"
-                                                    >{{ Object.keys(mod.技能替换).length }}</span
+                                                    v-for="(v, key) in mod.技能替换"
+                                                    :key="key"
+                                                    >{{ $t(v.名称) }}</span
                                                 >
                                             </span>
                                         </div>

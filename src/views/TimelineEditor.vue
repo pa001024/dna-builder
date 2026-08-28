@@ -1255,6 +1255,7 @@ import {
     buffData,
     CharBuild,
     charData,
+    charMap,
     LeveledBuffHelper,
     LeveledChar,
     LeveledCharHelper,
@@ -1269,7 +1270,8 @@ import { formatProp, formatSkillProp } from "@/util"
 const inv = useInvStore()
 const charOptions = charData.map(char => ({ value: char.名称, label: char.名称, elm: char.属性, icon: LeveledChar.url(char.icon) }))
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
-const charSettings = useCharSettings(selectedChar)
+const selectedCharId = computed(() => charMap.get(selectedChar.value)?.id || 0)
+const charSettings = useCharSettings(selectedCharId)
 const baseName = ref(charSettings.value.baseName)
 const targetFunction = ref("")
 const charBuild = computed(() => {

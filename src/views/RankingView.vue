@@ -34,20 +34,11 @@ const rankedItems = ref<RankedItem[]>([])
 
 const rankingId = computed(() => String(route.params.id || ""))
 
-function getCharName(charId: number) {
-    return charMap.get(charId)?.名称 || `角色${charId}`
-}
-
-function getCharIcon(charId: number) {
-    return LeveledChar.url(charMap.get(charId)?.icon)
-}
-
 function calcBuildDps(build: RankingListItem["build"]) {
     if (!build) return
     try {
         const settings = normalizeCharSettings(JSON.parse(build.charSettings))
-        const charName = charMap.get(build.charId)?.名称 || build.charId.toString()
-        const charBuild = createCharBuildFromSettings(charName, settings, inv)
+        const charBuild = createCharBuildFromSettings(build.charId, settings, inv)
         const result = charBuild.calculate()
         return {
             baseName: settings.baseName,
@@ -65,13 +56,14 @@ function mapRanking(result: RankingList | null) {
     rankedItems.value = (result?.items || [])
         .map(item => {
             const r = calcBuildDps(item.build)
+            const char = charMap.get(item.charId)
             return {
                 id: item.id,
                 charId: item.charId,
                 buildId: item.buildId,
                 title: item.build?.title || item.buildId,
-                charName: getCharName(item.charId),
-                charIcon: getCharIcon(item.charId),
+                charName: char?.名称 || "-",
+                charIcon: LeveledChar.url(char?.icon),
                 authorName: item.build?.user?.name || "匿名",
                 authorQq: item.build?.user?.qq || 0,
                 baseName: r?.baseName || "-",

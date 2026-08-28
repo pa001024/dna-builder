@@ -15,8 +15,8 @@ const props = withDefaults(
         excludeKeys: () => ["召唤物攻击速度", "召唤物范围", "召唤物属性继承比例"],
     }
 )
-const nameRef = computed(() => props.charBuild.char.名称)
-const charSettings = useCharSettings(nameRef)
+const charIdRef = computed(() => props.charBuild?.char?.id || 0)
+const charSettings = useCharSettings(charIdRef)
 
 defineEmits<{
     addSkill: [skill: string]

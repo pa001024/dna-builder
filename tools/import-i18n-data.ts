@@ -10,8 +10,17 @@ const TARGET_DIR = path.resolve("src", "data", "d")
 const LOCALES = ["cn", "en", "fr", "jp", "kr", "tc"] as const
 type Locale = (typeof LOCALES)[number]
 
+type MappingContext = {
+    /** 目标文件绝对路径 */
+    targetFile: string
+    /** 目标文件原始文本 */
+    originalText: string
+    /** 目标文件 AST */
+    sourceFile: ts.SourceFile
+}
+
 type Mapping = {
-    source: string | (() => Promise<GeneratedReplacement[]> | GeneratedReplacement[])
+    source: string | ((context: MappingContext) => Promise<GeneratedReplacement[]> | GeneratedReplacement[])
     targetStem: string
     targetVar: string
     locales?: readonly string[]
@@ -23,6 +32,11 @@ type GeneratedReplacement = {
     targetVar: string
     /** 原始 JS 值，写入前才序列化，便于与文件现有值做语义 diff */
     value: unknown
+    /**
+     * 可选：对目标文件做额外文本改写（返回替换区间，null 表示无改动）。
+     * 用于 PreRaidRank 导入时按当前赛季从奖励表补齐 PreRaidRankRewardVersions。
+     */
+    augment?: () => { start: number; end: number; text: string } | null
 }
 
 const MAPPINGS: Mapping[] = [
@@ -161,12 +175,42 @@ const MAPPINGS: Mapping[] = [
         locales: ["cn", "en", "fr", "jp", "kr", "tc"],
     },
     {
-        source: async () => {
-            const [raidCalculationText, raidDungeonText, raidSeasonText] = await Promise.all([
+        source: async context => {
+            const [raidCalculationText, raidDungeonText, raidSeasonText, preRaidRankText, rewardText] = await Promise.all([
                 readFile(path.join(OUT_ROOT, "RaidCalculation.json"), "utf8"),
                 readFile(path.join(OUT_ROOT, "RaidDungeon.json"), "utf8"),
                 readFile(path.join(OUT_ROOT, "RaidSeason.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "PreRaidRank.json"), "utf8"),
+                readFile(path.join(OUT_ROOT, "Reward.json"), "utf8"),
             ])
+
+            const preRaidRanks = JSON.parse(preRaidRankText) as PreRaidRankRow[]
+            const seasons = JSON.parse(raidSeasonText) as Record<string, { PreRaidRank?: number }>
+            const rewards = JSON.parse(rewardText) as Record<string, RewardRow>
+
+            // 当前赛季：导出配置只代表当前赛季状态，取 RaidSeason 中最大赛季
+            const currentSeason = Object.keys(seasons)
+                .map(Number)
+                .sort((a, b) => b - a)[0]
+            const currentConfig =
+                currentSeason === undefined
+                    ? undefined
+                    : preRaidRanks.find(row => row.PreRaidRank === seasons[String(currentSeason)]?.PreRaidRank)
+
+            // PreRaidRank：只影响当前赛季，旧赛季保持文件中的原值
+            const preRaidRankRecord = literalToValue(findVariableInitializerNode(context.sourceFile, "PreRaidRank")) as Record<
+                string,
+                PreRaidRankRow
+            >
+            if (currentSeason !== undefined && currentConfig) {
+                preRaidRankRecord[String(currentSeason)] = {
+                    IsOnline: currentConfig.IsOnline,
+                    PreRaidRank: currentConfig.PreRaidRank,
+                    RankName: currentConfig.RankName,
+                    RankPercent: currentConfig.RankPercent,
+                    RankReward: currentConfig.RankReward,
+                }
+            }
 
             return [
                 {
@@ -180,6 +224,17 @@ const MAPPINGS: Mapping[] = [
                 {
                     targetVar: "RaidSeason",
                     value: JSON.parse(raidSeasonText),
+                },
+                {
+                    targetVar: "PreRaidRank",
+                    value: preRaidRankRecord,
+                    // 导入 PreRaidRank 时，按当前赛季从奖励表补齐 PreRaidRankRewardVersions 缺失条目
+                    augment: () => {
+                        if (currentSeason === undefined || !currentConfig) {
+                            return null
+                        }
+                        return augmentPreRaidRankRewardVersions(context.sourceFile, currentSeason, currentConfig, rewards)
+                    },
                 },
             ]
         },
@@ -693,6 +748,24 @@ type RougeRoomCondition = {
     remark?: string
 }
 
+/** PreRaidRank 导出行（前端 PreRaidRankItem 的源数据，按 PreRaidRank 配置ID 展开到各赛季） */
+type PreRaidRankRow = {
+    IsOnline: boolean[]
+    PreRaidRank: number
+    RankName: string[]
+    RankPercent: number[]
+    RankReward: number[]
+}
+
+/** Reward 奖励表行 */
+type RewardRow = {
+    Count: number[][]
+    Id: number[]
+    Mode: string
+    RewardId: number
+    Type: string[]
+}
+
 const SKIPPED_SOURCES = ["RegionPoint", "RewardView", "translation"]
 
 /**
@@ -916,6 +989,88 @@ function findVariableInitializerNode(sourceFile: ts.SourceFile, targetVar: strin
 }
 
 /**
+ * 为 PreRaidRankRewardVersions 补齐缺失赛季的排位奖励条目。
+ * 当当前赛季（如 1006）在版本表中缺失时，从 Reward 奖励表查询最新的物品ID
+ * （称号框ID 与资源数量）生成 createPreRaidRankReward 条目并插入版本表末尾。
+ * @param sourceFile 目标文件 AST。
+ * @param season 当前赛季。
+ * @param config 当前赛季的 PreRaidRank 配置（含排名名与奖励组ID）。
+ * @param rewards Reward 奖励表。
+ * @returns 替换区间；无需改动时返回 null。
+ */
+function augmentPreRaidRankRewardVersions(
+    sourceFile: ts.SourceFile,
+    season: number,
+    config: PreRaidRankRow,
+    rewards: Record<string, RewardRow>
+): { start: number; end: number; text: string } | null {
+    const initializer = findVariableInitializerNode(sourceFile, "PreRaidRankRewardVersions")
+    if (!ts.isObjectLiteralExpression(initializer)) {
+        throw new Error("PreRaidRankRewardVersions 的初始化表达式必须是对象字面量")
+    }
+
+    // 版本表中已存在该赛季则跳过
+    for (const property of initializer.properties) {
+        if (!ts.isPropertyAssignment(property)) {
+            continue
+        }
+        const existing = Number(property.name.getText(sourceFile).replace(/"/g, ""))
+        if (existing === season) {
+            return null
+        }
+    }
+
+    // 从奖励表查询各排名的奖励组内容（称号框ID + 资源数量），构建 createPreRaidRankReward 调用
+    const seasonTail = season % 100
+    const titleSuffix = seasonTail === 1 ? "" : `·${seasonTail}`
+    const calls = config.RankReward.map((rewardId, index) => {
+        const reward = rewards[String(rewardId)]
+        if (!reward) {
+            throw new Error(`PreRaidRank 奖励组 ${rewardId} 不在 Reward 表中`)
+        }
+        const titleId = extractFirstTitleFrameId(reward)
+        const rankName = config.RankName[index] ?? "?"
+        const titleName = `${rankName}级狩月人${titleSuffix}`
+        const coinCount = extractResourceCount(reward, 220)
+        const moduleCount = extractResourceCount(reward, 201)
+        const weaponModuleCount = extractResourceCount(reward, 202)
+        return `        createPreRaidRankReward(${rewardId}, ${titleId}, ${JSON.stringify(titleName)}, ${coinCount}, ${moduleCount}, ${weaponModuleCount})`
+    })
+
+    // 生成当前赛季条目，插入到对象字面量闭合括号之前
+    const block = `    ${season}: [\n${calls.join(",\n")}\n    ],`
+    const end = initializer.getEnd()
+    return { start: end - 1, end: end - 1, text: `\n${block}` }
+}
+
+/**
+ * 从奖励组中取第一个称号框ID。
+ * @param reward 奖励组行。
+ * @returns 称号框ID。
+ */
+function extractFirstTitleFrameId(reward: RewardRow): number {
+    const index = reward.Type.indexOf("TitleFrame")
+    if (index < 0) {
+        throw new Error(`奖励组 ${reward.RewardId} 中找不到 TitleFrame`)
+    }
+    return reward.Id[index]
+}
+
+/**
+ * 从奖励组中取指定资源的数量。
+ * @param reward 奖励组行。
+ * @param resourceId 资源ID。
+ * @returns 资源数量。
+ */
+function extractResourceCount(reward: RewardRow, resourceId: number): number {
+    const index = reward.Id.indexOf(resourceId)
+    if (index < 0) {
+        throw new Error(`奖励组 ${reward.RewardId} 中找不到资源 ${resourceId}`)
+    }
+    return reward.Count[index]?.[0] ?? 0
+}
+
+/**
  * 将单个目标文件中的多个数组替换应用到文本上。
  */
 function applyReplacements(fileText: string, replacements: Array<{ start: number; end: number; text: string }>): string {
@@ -1115,9 +1270,17 @@ async function main() {
         const targetFile = path.join(TARGET_DIR, `${mapping.targetStem}.data.ts`)
         const originalText = await readFile(targetFile, "utf-8")
         const sourceFile = ts.createSourceFile(targetFile, originalText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
-        const generatedReplacements = await mapping.source()
+        const context: MappingContext = { targetFile, originalText, sourceFile }
+        const generatedReplacements = await mapping.source(context)
         const replacements: Array<{ start: number; end: number; text: string }> = []
         for (const replacement of generatedReplacements) {
+            // 额外文本改写（如按当前赛季从奖励表补齐 PreRaidRankRewardVersions）
+            if (replacement.augment) {
+                const span = replacement.augment()
+                if (span) {
+                    replacements.push(span)
+                }
+            }
             const node = findVariableInitializerNode(sourceFile, replacement.targetVar)
             // 语义 diff：文件现有值与导出数据一致时跳过
             if (deepEqual(literalToValue(node), replacement.value)) {

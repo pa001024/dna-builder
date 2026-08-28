@@ -246,18 +246,33 @@ const fillMaxScoreAndTime = () => {
 
 watch(selectedDungeon, fillMaxScoreAndTime, { immediate: true })
 
+// 当前赛季/副本的分数奖励配置（RaidPointToRewrad 与最大奖励次数）
+/**
+ * 新赛季（1006 起）奖励配置迁移到副本维度，优先取当前副本的配置，旧赛季回退到赛季维度。
+ */
+const rewardConfig = computed(() => {
+    const dungeon = currentDungeonData.value
+    const seasonData = RaidSeason[selectedSeason.value]
+    return {
+        reward: dungeon?.RaidPointToRewrad ?? seasonData?.RaidPointToRewrad,
+        maxTime: dungeon?.RaidPointToRewradMaxTime ?? seasonData?.RaidPointToRewradMaxTime,
+    }
+})
+
 // 计算奖励次数函数
 const calculateRewardCount = (score: number, season: number | string): number => {
     const seasonData = RaidSeason[season]
     if (!seasonData) return 0
 
-    const { RaidPointToRewradMaxTime } = seasonData
+    // 最大奖励次数优先取当前副本配置（新赛季），旧赛季回退到赛季配置
+    const maxTime =
+        currentDungeonData.value?.RaidPointToRewradMaxTime ?? seasonData.RaidPointToRewradMaxTime ?? 0
 
     // 计算奖励次数 = 分数 / 1000（向下取整）
     let rewardCount = Math.floor(score / 1000)
 
     // 限制最大奖励次数
-    rewardCount = Math.min(rewardCount, RaidPointToRewradMaxTime)
+    rewardCount = Math.min(rewardCount, maxTime)
 
     return rewardCount
 }
@@ -267,14 +282,15 @@ const currentRewardCount = computed(() => {
     return calculateRewardCount(currentScore.value, selectedSeason.value)
 })
 
-// 获取当前赛季的奖励ID
+// 获取当前赛季/副本的奖励ID
 const rewardId = computed(() => {
-    const seasonData = RaidSeason[selectedSeason.value]
-    if (!seasonData) return 0
-
     // RaidPointToRewrad的键是分数阈值，值是奖励ID
-    const firstRewardKey = Object.keys(seasonData.RaidPointToRewrad)[0]
-    return seasonData.RaidPointToRewrad[firstRewardKey as keyof typeof seasonData.RaidPointToRewrad] || 0
+    // 新赛季配置迁移到副本维度，优先取副本配置，旧赛季回退到赛季配置
+    const rewardMap = rewardConfig.value.reward
+    if (!rewardMap) return 0
+
+    const firstRewardKey = Object.keys(rewardMap)[0]
+    return rewardMap[firstRewardKey] || 0
 })
 
 // 获取当前奖励详情
@@ -473,7 +489,7 @@ function isTopThreeRank(index: number): boolean {
                     <SectionHeader no-animate compact kicker="REWARD" title="分数奖励计算:" />
                     <p class="text-sm leading-relaxed text-base-content/90">
                         每1000分可获得 <b class="font-orbitron tabular-nums text-primary">1</b> 次奖励 | 最大奖励次数:
-                        <b class="font-orbitron tabular-nums text-primary">{{ RaidSeason[selectedSeason]?.RaidPointToRewradMaxTime }}</b>
+                        <b class="font-orbitron tabular-nums text-primary">{{ rewardConfig.maxTime ?? 0 }}</b>
                         次
                     </p>
                     <div class="mt-3">

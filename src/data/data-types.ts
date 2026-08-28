@@ -426,6 +426,8 @@ export interface SkillField {
     取消?: number[] | number
     连段?: number[] | number
     段数?: number
+    /** 伤害类型标签（如 ["充盈"]）：命中该标签的伤害字段按对应类型结算 */
+    tag?: string[]
 }
 
 export enum HpType {

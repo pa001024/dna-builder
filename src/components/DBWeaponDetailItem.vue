@@ -221,7 +221,13 @@ const singleSkillComboSummaryByName = computed<Record<string, MeleeSkillComboSum
         if (comboTime <= 0) continue
 
         const totalMultiplier = fields.reduce((sum, field) => sum + getFieldMultiplier(field as SkillField), 0)
-        const totalBossStagger = fields.reduce((sum, field) => sum + (pickFieldValue((field as SkillField).Boss削韧) || 0), 0)
+        // Boss削韧 字段缺失时回退到 削韧 字段，再求和
+        const totalBossStagger = fields.reduce((sum, field) => {
+            const fieldData = field as SkillField
+            const bossStagger = pickFieldValue(fieldData.Boss削韧)
+            const value = bossStagger !== undefined ? bossStagger : (pickFieldValue(fieldData.削韧) || 0)
+            return sum + value
+        }, 0)
         result[skill.名称] = {
             comboTime,
             totalMultiplier,

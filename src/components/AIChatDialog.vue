@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { useTranslation } from "i18next-vue"
-import { nextTick, ref, watch } from "vue"
+import { computed, nextTick, ref, watch } from "vue"
 import { BuildAgent } from "@/api/buildAgent"
 import { useCharSettings } from "@/composables/useCharSettings"
 import type { CharBuild } from "@/data"
@@ -15,7 +15,8 @@ const props = defineProps<{
 }>()
 const inv = useInvStore()
 const selectedChar = useLocalStorage("selectedChar", "赛琪")
-const charSettings = useCharSettings(selectedChar)
+const selectedCharId = computed(() => props.charBuild?.char?.id || 0)
+const charSettings = useCharSettings(selectedCharId)
 const settingStore = useSettingStore()
 const { t } = useTranslation()
 

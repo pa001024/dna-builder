@@ -9,6 +9,7 @@ import {
     CharAttr,
     CharBuild,
     CharBuildTimeline,
+    charMap,
     LeveledBuff,
     LeveledBuffHelper,
     LeveledCharHelper,
@@ -92,7 +93,8 @@ function createLeveledBuff(name: string, level: number, customBuff: [string, num
 // Helper function to create a new configuration
 function createConfig(name: string, char?: string): BuildConfiguration {
     const selectedChar = char ? ref(char) : useLocalStorage("selectedChar", "赛琪")
-    const charSettingsRef = useCharSettings(selectedChar)
+    const selectedCharId = computed(() => charMap.get(selectedChar.value)?.id || 0)
+    const charSettingsRef = useCharSettings(selectedCharId)
 
     // Clone charSettings value
     const charSettings = normalizeCharSettings(cloneDeep(charSettingsRef.value))

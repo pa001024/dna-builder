@@ -2,7 +2,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import { computed, onBeforeUnmount, reactive, ref } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
-import { CharBuild, CharBuildTimeline, LeveledCharHelper } from "@/data"
+import { CharBuild, CharBuildTimeline, charMap, LeveledCharHelper } from "@/data"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import { useInvStore } from "@/store/inv"
 import { useTimeline } from "@/store/timeline"
@@ -47,6 +47,9 @@ type WeaponNumberFieldKey =
     | "skillRate"
     | "skillFlatDamage"
     | "skillPowerMultiplier"
+    | "fullnessConversion"
+    | "fullnessModBonus"
+    | "fullnessConvertRatio"
 
 type SkillNumberFieldKey =
     | "enemyResistance"
@@ -71,9 +74,16 @@ type SkillNumberFieldKey =
     | "skillRate"
     | "skillFlatDamage"
     | "skillPowerMultiplier"
+    | "fullnessPower"
+    | "fullnessConvertRatio"
 
-type WeaponToggleFieldKey = "weaponMasteryEnabled" | "skillWeaponEnabled" | "sameDamageType" | "imbalanceEnabled"
-type SkillToggleFieldKey = "imbalanceEnabled"
+type WeaponToggleFieldKey =
+    | "weaponMasteryEnabled"
+    | "skillWeaponEnabled"
+    | "sameDamageType"
+    | "imbalanceEnabled"
+    | "fullnessFieldEnabled"
+type SkillToggleFieldKey = "imbalanceEnabled" | "fullnessFieldEnabled"
 
 interface WeaponDamageInput {
     charBaseAttack: number
@@ -111,9 +121,16 @@ interface WeaponDamageInput {
     skillFlatDamage: number
     skillPowerMultiplier: number
     weaponMasteryEnabled: boolean
+    weaponMasteryMultiplier: number
     skillWeaponEnabled: boolean
     sameDamageType: boolean
     imbalanceEnabled: boolean
+    // 充盈：武器充盈转化（该武器作用域），充盈威力基础（角色MOD加成 + 其他武器转化），转充盈比例
+    fullnessConversion: number
+    fullnessModBonus: number
+    fullnessConvertRatio: number
+    // 当前伤害字段是否为充盈伤害（tag 含“充盈”）
+    fullnessFieldEnabled: boolean
 }
 
 interface SkillDamageInput {
@@ -140,6 +157,10 @@ interface SkillDamageInput {
     skillFlatDamage: number
     skillPowerMultiplier: number
     imbalanceEnabled: boolean
+    // 充盈：充盈威力（角色属性汇总），转充盈比例；当前伤害字段是否为充盈伤害（tag 含“充盈”）
+    fullnessPower: number
+    fullnessConvertRatio: number
+    fullnessFieldEnabled: boolean
 }
 
 interface DamageStepContext<TInput> {
@@ -307,9 +328,14 @@ function createDefaultWeaponInput(): WeaponDamageInput {
         skillFlatDamage: 0,
         skillPowerMultiplier: 1,
         weaponMasteryEnabled: true,
+        weaponMasteryMultiplier: 1.2,
         skillWeaponEnabled: false,
         sameDamageType: true,
         imbalanceEnabled: false,
+        fullnessConversion: 0,
+        fullnessModBonus: 0,
+        fullnessConvertRatio: 0,
+        fullnessFieldEnabled: false,
     }
 }
 
@@ -342,13 +368,17 @@ function createDefaultSkillInput(): SkillDamageInput {
         skillFlatDamage: 0,
         skillPowerMultiplier: 1,
         imbalanceEnabled: false,
+        fullnessPower: 0,
+        fullnessConvertRatio: 0,
+        fullnessFieldEnabled: false,
     }
 }
 
 const ui = useUIStore()
 const inv = useInvStore()
 const selectedCharForImport = useLocalStorage("selectedChar", "赛琪")
-const charSettingsForImport = useCharSettings(selectedCharForImport)
+const selectedCharForImportId = computed(() => charMap.get(selectedCharForImport.value)?.id || 0)
+const charSettingsForImport = useCharSettings(selectedCharForImportId)
 const timelinesForImport = useTimeline(selectedCharForImport)
 
 interface ImportSkillField {
@@ -487,6 +517,29 @@ function extractSkillRateAndFlat(
 }
 
 /**
+ * 判断当前构筑的目标伤害字段是否为充盈伤害（tag 含“充盈”）。
+ * 与 extractSkillRateAndFlat 使用同一套字段解析优先级：先 targetFunction 命中，其次兜底伤害字段。
+ * @param build 当前构筑
+ * @returns 是否为充盈伤害字段
+ */
+function isResolvedFieldFullness(build: CharBuild): boolean {
+    const selectedSkill = build.selectedSkill
+    if (!selectedSkill) return false
+
+    const fallbackDamageField =
+        selectedSkill.字段.find(field => field.名称.endsWith("伤害") && !field.名称.includes("召唤物")) ||
+        selectedSkill.字段.find(field => field.名称.endsWith("伤害"))
+    // 优先采用 targetFunction 命中的字段（对象来自 selectedSkill.字段，可反查原始字段以读取 tag）
+    const targetField = resolveSkillFieldFromTargetFunction(build)
+    const damageField = targetField
+        ? selectedSkill.字段.find(field => field.safeName === targetField.safeName && field.名称 === targetField.名称) ||
+          fallbackDamageField
+        : fallbackDamageField
+
+    return !!damageField?.tag?.includes("充盈")
+}
+
+/**
  * 解析当前构筑使用的时间线（优先内联动作，其次命名时间线）。
  * @param charName 角色名称
  * @param baseName 技能名
@@ -516,7 +569,7 @@ function createBuildFromCurrentCharView(): CharBuild {
     }
 
     const rawSettings = charSettingsForImport.value
-    const fallbackChar = LeveledCharHelper.fromId(charName, rawSettings.charLevel)
+    const fallbackChar = LeveledCharHelper.fromId(selectedCharForImportId.value, rawSettings.charLevel)
     const baseName = rawSettings.baseName || fallbackChar.技能[0]?.名称 || ""
     if (!baseName) {
         throw new Error("当前构筑未配置技能")
@@ -527,7 +580,7 @@ function createBuildFromCurrentCharView(): CharBuild {
         baseName,
     }
     const timeline = resolveTimelineFromCurrentBuild(charName, baseName, normalizedSettings.actions)
-    return createCharBuildFromSettings(charName, normalizedSettings, inv, timeline)
+    return createCharBuildFromSettings(selectedCharForImportId.value, normalizedSettings, inv, timeline)
 }
 
 /**
@@ -542,9 +595,11 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     const selectedWeapon = build.selectedWeapon
     const weaponPrefix = selectedWeapon?.类型 || "角色"
     const masteryEnabled = !!(selectedWeapon && (build.char.精通.includes(selectedWeapon.类别) || build.char.精通.includes("全部类型")))
+    // 同律武器精通倍率 1.4，普通武器 1.2
+    const masteryMultiplier = selectedWeapon?.类型.startsWith("同律") ? 1.4 : 1.2
     const physicalDamageBonus = selectedWeapon ? build.getTotalBonus("物理", weaponPrefix) : 0
     const weaponBaseAttack = selectedWeapon?.基础攻击 || 0
-    const weaponAttackDenominator = weaponBaseAttack * (masteryEnabled ? 1.2 : 1) * (1 + physicalDamageBonus)
+    const weaponAttackDenominator = weaponBaseAttack * (masteryEnabled ? masteryMultiplier : 1) * (1 + physicalDamageBonus)
     const weaponAttackBonus = weaponAttackDenominator > Number.EPSILON ? safeDivide(weaponAttrs?.攻击 || 0, weaponAttackDenominator) - 1 : 0
     const critRateSplit = splitBaseAndBonus(selectedWeapon?.基础暴击 || 0, weaponAttrs?.暴击 || 0)
     const critDamageSplit = splitBaseAndBonus(selectedWeapon?.基础暴伤 || 0, weaponAttrs?.暴伤 || 0)
@@ -605,8 +660,19 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     result.skillPowerMultiplier = attrs.技能威力
     result.skillWeaponEnabled = affectedByPower
     result.weaponMasteryEnabled = masteryEnabled
+    result.weaponMasteryMultiplier = masteryMultiplier
     result.sameDamageType = sameDamageType
     result.imbalanceEnabled = build.imbalance
+    /**
+     * 充盈：充盈威力（角色属性）= 角色MOD充盈威力加成 + Σ各武器溢出触发 × 该武器充盈转化。
+     * 本页武器模式只建模当前武器，导入时扣除当前武器的溢出转化，避免与“武器转化充盈威力”步骤重复计算。
+     */
+    const weaponFullnessConversion = weaponAttrs?.充盈转化 || 0
+    const selectedWeaponOverflow = Math.max(0, (weaponAttrs?.触发 || 0) - 1)
+    result.fullnessConversion = weaponFullnessConversion
+    result.fullnessModBonus = Math.max(0, attrs.充盈威力 - selectedWeaponOverflow * weaponFullnessConversion)
+    result.fullnessConvertRatio = attrs.转充盈 || 0
+    result.fullnessFieldEnabled = isResolvedFieldFullness(build)
     return result
 }
 
@@ -648,6 +714,12 @@ function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
     result.skillFlatDamage = skillFlatDamage
     result.skillPowerMultiplier = attrs.技能威力
     result.imbalanceEnabled = build.imbalance
+    // 充盈：充盈威力为角色属性（MOD加成 + 武器溢出转化汇总），技能模式直接取汇总结果。
+    // 注意：calculateAttributes 只含角色MOD加成，武器溢出转化需经 calculateWeaponAttributes 汇总。
+    const weaponAttrsForFullness = build.calculateWeaponAttributes()
+    result.fullnessPower = weaponAttrsForFullness.充盈威力 || 0
+    result.fullnessConvertRatio = attrs.转充盈 || 0
+    result.fullnessFieldEnabled = isResolvedFieldFullness(build)
     return result
 }
 
@@ -687,9 +759,10 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
         {
             id: "weaponMasteryRatio",
             title: "武器精通倍率",
-            formula: "武器精通倍率 = 命中武器精通时为 1.2，否则为 1",
-            compute: ({ input }) => (input.weaponMasteryEnabled ? 1.2 : 1),
-            explain: ({ input }, value) => `${input.weaponMasteryEnabled ? "命中精通" : "未命中精通"} => ${formatNumber(value)}`,
+            formula: "武器精通倍率 = 命中武器精通时为 1.2（同律武器 1.4），否则为 1",
+            compute: ({ input }) => (input.weaponMasteryEnabled ? input.weaponMasteryMultiplier : 1),
+            explain: ({ input }, value) =>
+                `${input.weaponMasteryEnabled ? `命中精通(${formatNumber(input.weaponMasteryMultiplier)}倍)` : "未命中精通"} => ${formatNumber(value)}`,
         },
         {
             id: "charAttack",
@@ -1019,6 +1092,52 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
                 `${formatNumber(get("expectedDamage"))} * ${formatNumber(get("skillDamageMultiplier"))} = ${formatNumber(value)}`,
         },
         {
+            id: "fullnessOverflowTrigger",
+            title: "触发溢出率",
+            formula: "触发溢出率 = max(0, 最终触发率 - 1)",
+            compute: ({ get }) => Math.max(0, get("finalTriggerRate") - 1),
+            explain: ({ get }, value) =>
+                `max(0, ${formatNumber(get("finalTriggerRate"))} - 1) = ${formatNumber(value)}`,
+        },
+        {
+            id: "weaponFullnessPower",
+            title: "武器转化充盈威力",
+            formula: "武器转化充盈威力 = 触发溢出率 * 充盈转化",
+            compute: ({ input, get }) => get("fullnessOverflowTrigger") * input.fullnessConversion,
+            explain: ({ input, get }, value) =>
+                `${formatNumber(get("fullnessOverflowTrigger"))} * ${formatNumber(input.fullnessConversion)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "fullnessPower",
+            title: "总充盈威力",
+            formula: "总充盈威力 = 充盈威力基础(角色MOD+其他武器) + 武器转化充盈威力",
+            compute: ({ input, get }) => input.fullnessModBonus + get("weaponFullnessPower"),
+            explain: ({ input, get }, value) =>
+                `${formatNumber(input.fullnessModBonus)} + ${formatNumber(get("weaponFullnessPower"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "fullnessMultiplier",
+            title: "充盈乘区",
+            formula: "充盈乘区 = 字段为充盈伤害时(1 + 总充盈威力)，否则(1 + 转充盈 * 总充盈威力)",
+            compute: ({ input, get }) =>
+                input.fullnessFieldEnabled ? 1 + get("fullnessPower") : 1 + input.fullnessConvertRatio * get("fullnessPower"),
+            explain: ({ input, get }, value) => {
+                const power = get("fullnessPower")
+                const expression = input.fullnessFieldEnabled
+                    ? `1 + ${formatNumber(power)}`
+                    : `1 + ${formatNumber(input.fullnessConvertRatio)} * ${formatNumber(power)}`
+                return `${expression} = ${formatNumber(value)}`
+            },
+        },
+        {
+            id: "fullnessDamage",
+            title: "充盈后最终伤害",
+            formula: "充盈后最终伤害 = 最终伤害(期望) * 充盈乘区",
+            compute: ({ get }) => get("calculateExpectedDamage") * get("fullnessMultiplier"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("calculateExpectedDamage"))} * ${formatNumber(get("fullnessMultiplier"))} = ${formatNumber(value)}`,
+        },
+        {
             id: "levelDiff",
             title: "等级差修正",
             formula: "等级差修正 = min(20, max(0, min(80, 怪物等级) - 角色等级))",
@@ -1069,10 +1188,10 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
         {
             id: "finalDamageAfterDefense",
             title: "防御后最终伤害",
-            formula: "防御后最终伤害 = 最终伤害(期望) * 防御乘区",
-            compute: ({ get }) => get("calculateExpectedDamage") * get("defenseMultiplier"),
+            formula: "防御后最终伤害 = 充盈后最终伤害 * 防御乘区",
+            compute: ({ get }) => get("fullnessDamage") * get("defenseMultiplier"),
             explain: ({ get }, value) =>
-                `${formatNumber(get("calculateExpectedDamage"))} * ${formatNumber(get("defenseMultiplier"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("fullnessDamage"))} * ${formatNumber(get("defenseMultiplier"))} = ${formatNumber(value)}`,
         },
     ]
 }
@@ -1215,6 +1334,35 @@ function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
             explain: ({ get }, value) => `${formatNumber(get("expectedDamage"))} = ${formatNumber(value)}`,
         },
         {
+            id: "fullnessPower",
+            title: "总充盈威力",
+            formula: "总充盈威力 = 充盈威力(角色属性汇总)",
+            compute: ({ input }) => input.fullnessPower,
+            explain: ({ input }, value) => `${formatNumber(input.fullnessPower)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "fullnessMultiplier",
+            title: "充盈乘区",
+            formula: "充盈乘区 = 字段为充盈伤害时(1 + 总充盈威力)，否则(1 + 转充盈 * 总充盈威力)",
+            compute: ({ input, get }) =>
+                input.fullnessFieldEnabled ? 1 + get("fullnessPower") : 1 + input.fullnessConvertRatio * get("fullnessPower"),
+            explain: ({ input, get }, value) => {
+                const power = get("fullnessPower")
+                const expression = input.fullnessFieldEnabled
+                    ? `1 + ${formatNumber(power)}`
+                    : `1 + ${formatNumber(input.fullnessConvertRatio)} * ${formatNumber(power)}`
+                return `${expression} = ${formatNumber(value)}`
+            },
+        },
+        {
+            id: "fullnessDamage",
+            title: "充盈后最终伤害",
+            formula: "充盈后最终伤害 = 最终伤害(期望) * 充盈乘区",
+            compute: ({ get }) => get("calculateExpectedDamage") * get("fullnessMultiplier"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("calculateExpectedDamage"))} * ${formatNumber(get("fullnessMultiplier"))} = ${formatNumber(value)}`,
+        },
+        {
             id: "levelDiff",
             title: "等级差修正",
             formula: "等级差修正 = min(20, max(0, min(80, 怪物等级) - 角色等级))",
@@ -1273,10 +1421,10 @@ function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
         {
             id: "finalDamageAfterDefense",
             title: "防御后最终伤害",
-            formula: "防御后最终伤害 = 最终伤害(期望) * 防御乘区",
-            compute: ({ get }) => get("calculateExpectedDamage") * get("defenseMultiplier"),
+            formula: "防御后最终伤害 = 充盈后最终伤害 * 防御乘区",
+            compute: ({ get }) => get("fullnessDamage") * get("defenseMultiplier"),
             explain: ({ get }, value) =>
-                `${formatNumber(get("calculateExpectedDamage"))} * ${formatNumber(get("defenseMultiplier"))} = ${formatNumber(value)}`,
+                `${formatNumber(get("fullnessDamage"))} * ${formatNumber(get("defenseMultiplier"))} = ${formatNumber(value)}`,
         },
     ]
 }
@@ -1330,7 +1478,7 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
             { key: "weaponAttackBonus", label: "武器攻击加成", step: "0.01" },
             { key: "physicalDamageBonus", label: "物理", step: "0.01" },
         ],
-        toggles: [{ key: "weaponMasteryEnabled", label: "武器精通(1.2倍)" }],
+        toggles: [{ key: "weaponMasteryEnabled", label: "武器精通" }],
         outputs: [
             { label: "角色攻击", stepId: "charAttack" },
             { label: "武器攻击", stepId: "weaponAttack" },
@@ -1377,6 +1525,20 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
         ],
         toggles: [{ key: "sameDamageType", label: "伤害类型匹配(触发生效)" }],
         outputs: [{ label: "触发期望倍率", stepId: "triggerExpectedDamageAdd" }],
+    },
+    {
+        title: "充盈",
+        fields: [
+            { key: "fullnessConversion", label: "充盈转化", step: "0.01" },
+            { key: "fullnessModBonus", label: "充盈威力基础(角色MOD+其他武器)", step: "0.01" },
+            { key: "fullnessConvertRatio", label: "转充盈", step: "0.01" },
+        ],
+        toggles: [{ key: "fullnessFieldEnabled", label: "字段为充盈伤害" }],
+        outputs: [
+            { label: "总充盈威力", stepId: "fullnessPower" },
+            { label: "充盈乘区", stepId: "fullnessMultiplier" },
+            { label: "充盈后最终伤害", stepId: "fullnessDamage" },
+        ],
     },
     {
         title: "血量",
@@ -1456,6 +1618,18 @@ const skillNumberGroups: NumberFieldGroup<SkillNumberFieldKey, SkillToggleFieldK
         outputs: [{ label: "血量相关乘区", stepId: "hpMore" }],
     },
     {
+        title: "充盈",
+        fields: [
+            { key: "fullnessPower", label: "充盈威力", step: "0.01" },
+            { key: "fullnessConvertRatio", label: "转充盈", step: "0.01" },
+        ],
+        toggles: [{ key: "fullnessFieldEnabled", label: "字段为充盈伤害" }],
+        outputs: [
+            { label: "充盈乘区", stepId: "fullnessMultiplier" },
+            { label: "充盈后最终伤害", stepId: "fullnessDamage" },
+        ],
+    },
+    {
         title: "防御",
         fields: [
             { key: "enemyDefense", label: "怪物防御", step: "1" },
@@ -1518,6 +1692,11 @@ const resultLabelMap: Record<string, string> = {
     expectedCritNoTrigger: "未触发期望暴击",
     lowerCritExpectedTrigger: "低暴击期望触发",
     higherCritExpectedTrigger: "高暴击期望触发",
+    fullnessOverflowTrigger: "触发溢出率",
+    weaponFullnessPower: "武器转化充盈威力",
+    fullnessPower: "总充盈威力",
+    fullnessMultiplier: "充盈乘区",
+    fullnessDamage: "充盈后最终伤害",
 }
 
 /**
@@ -1635,8 +1814,18 @@ const summaryItems = computed(() => {
                   "expectedCritNoTrigger",
                   "lowerCritExpectedTrigger",
                   "higherCritExpectedTrigger",
+                  "fullnessPower",
+                  "fullnessMultiplier",
               ]
-            : ["finalDamageAfterDefense", "expectedDamage", "calculateExpectedDamage", "skillBaseDamage", "finalDamage"]
+            : [
+                  "finalDamageAfterDefense",
+                  "expectedDamage",
+                  "calculateExpectedDamage",
+                  "skillBaseDamage",
+                  "finalDamage",
+                  "fullnessPower",
+                  "fullnessMultiplier",
+              ]
 
     return keys
         .filter(key => key in stepValueMap.value)
@@ -1706,6 +1895,18 @@ function setWeaponFieldValue(key: WeaponNumberFieldKey, rawValue: string): void 
  */
 function getWeaponToggleValue(key: WeaponToggleFieldKey): boolean {
     return weaponInput[key]
+}
+
+/**
+ * 获取武器开关展示标签，武器精通开关会跟随当前精通倍率展示。
+ * @param toggleField 开关配置
+ * @returns 展示标签
+ */
+function getWeaponToggleLabel(toggleField: ToggleFieldConfig<WeaponToggleFieldKey>): string {
+    if (toggleField.key === "weaponMasteryEnabled") {
+        return `武器精通(${formatNumber(weaponInput.weaponMasteryMultiplier)}倍)`
+    }
+    return toggleField.label
 }
 
 /**
@@ -2141,7 +2342,7 @@ onBeforeUnmount(() => {
                                         :checked="getWeaponToggleValue(toggleField.key)"
                                         @change="setWeaponToggleValue(toggleField.key, ($event.target as HTMLInputElement).checked)"
                                     />
-                                    <span class="label-text">{{ toggleField.label }}</span>
+                                    <span class="label-text">{{ getWeaponToggleLabel(toggleField) }}</span>
                                 </label>
                             </div>
                             <div v-if="group.outputs && group.outputs.length > 0" class="mt-3 border-t border-base-content/15 pt-2">

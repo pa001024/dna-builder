@@ -1,3 +1,33 @@
+import { skinData } from "@/data/d/accessory.data"
+import { skinGachaItems } from "@/data/d/skingacha.data"
+
+/**
+ * 万华（皮肤抽卡）中引用的角色皮肤 id 集合。
+ * 依据 SkinGacha 奖池奖励中命中角色皮肤数据（skinData）的条目自动推导，
+ * 用于为角色皮肤自动标注“通过万华获得”来源。
+ */
+const WANHUA_SKIN_ID_SET: ReadonlySet<number> = new Set(
+    skinGachaItems.flatMap(pool => pool.rewards.filter(reward => skinData.some(skin => skin.id === reward.id)).map(reward => reward.id))
+)
+
+/**
+ * 判断角色皮肤 id 是否为万华皮肤（在 SkinGacha 奖池中被引用）。
+ * @param skinId 皮肤 id
+ * @returns 是否为万华皮肤
+ */
+export function isWanhuaSkinId(skinId: number): boolean {
+    return WANHUA_SKIN_ID_SET.has(skinId)
+}
+
+/**
+ * 获取角色皮肤自动填充的万华来源文本；非万华皮肤返回空字符串。
+ * @param skinId 皮肤 id
+ * @returns “通过万华获得”或空字符串
+ */
+export function getWanhuaSkinUnlock(skinId: number): string {
+    return isWanhuaSkinId(skinId) ? "通过万华获得" : ""
+}
+
 /**
  * 归一化饰品获取方式，用于列表筛选与文案展示。
  * 规则：

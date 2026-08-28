@@ -19,6 +19,10 @@ export const CDN_LIST = [
         name: "海外",
         url: "https://pan01-pack2.dna-panstudio.com",
     },
+    {
+        name: "AWS",
+        url: "https://pan01-cdn-aws-jp.dna-panstudio.com",
+    },
 ]
 export const VERSION_URL_PUB = (server: string) => `/Packages/${server}/WindowsNoEditor/`
 

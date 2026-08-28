@@ -8,7 +8,13 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
 import FullTooltip from "@/components/FullTooltip.vue"
-import { CharSettings, createDefaultCharSettings, normalizeCharSettings, type SignatureWeapon, useCharSettings } from "@/composables/useCharSettings"
+import {
+    CharSettings,
+    createDefaultCharSettings,
+    normalizeCharSettings,
+    type SignatureWeapon,
+    useCharSettings,
+} from "@/composables/useCharSettings"
 import {
     buffData,
     CharBuild,
@@ -93,14 +99,15 @@ const selectedChar = computed(() => {
     dataPackTick.value
     return charMap.get(+route.params.charId)?.名称 || ""
 })
+const selectedCharId = computed(() => +route.params.charId)
 
 /**
  * 解析角色专武（签名武器）信息。
- * @param charName 角色名称
+ * @param charId 角色 id
  * @returns 专武 id 与所在槽位类型（近战/远程）；角色无专武或数据缺失时返回 null
  */
-function getSignatureWeapon(charName: string): SignatureWeapon | null {
-    const char = charMap.get(charName)
+function getSignatureWeapon(charId: number): SignatureWeapon | null {
+    const char = charMap.get(charId)
     if (!char?.专武) return null
     const weapon = weaponData.find(item => item.id === char.专武)
     if (!weapon) return null
@@ -109,8 +116,8 @@ function getSignatureWeapon(charName: string): SignatureWeapon | null {
     return { id: char.专武, type }
 }
 
-const charSettings = useCharSettings(selectedChar, getSignatureWeapon)
-const charProjectKey = computed(() => `project.${selectedChar.value}`)
+const charSettings = useCharSettings(selectedCharId, getSignatureWeapon)
+const charProjectKey = computed(() => `project.${selectedCharId.value}`)
 const charProject = useLocalStorage(charProjectKey, {
     selected: "",
     projects: [] as { name: string; charSettings: typeof charSettings.value }[],
@@ -316,7 +323,7 @@ const charBuild = computed(() => {
         })
         return b
     } catch {
-        localStorage.removeItem(`build.${selectedChar.value}`)
+        localStorage.removeItem(`build.${selectedCharId.value}`)
         return createEmptyCharBuild()
     }
 })
@@ -600,6 +607,49 @@ const addProject = () => {
 }
 
 /**
+ * 将当前构筑以纯 JSON 文本形式复制到剪贴板。
+ * @returns Promise<void>
+ */
+const copyBuildToClipboard = async () => {
+    try {
+        await copyText(JSON.stringify(charSettings.value))
+        ui.showSuccessMessage(t("char-build.copied_to_clipboard"))
+    } catch (error) {
+        ui.showErrorMessage(t("char-build.copy_failed"), error instanceof Error ? error.message : t("char-build.unknown_error"))
+    }
+}
+
+/**
+ * 从剪贴板读取纯 JSON 构筑文本并导入为当前构筑。
+ * @returns Promise<void>
+ */
+const importBuildFromClipboard = async () => {
+    try {
+        const text = (await pasteText()).trim()
+        if (!text) {
+            ui.showErrorMessage(t("char-build.clipboard_empty"))
+            return
+        }
+        let parsed: unknown
+        try {
+            parsed = JSON.parse(text)
+        } catch {
+            ui.showErrorMessage(t("char-build.import_format_invalid"))
+            return
+        }
+        if (!parsed || typeof parsed !== "object") {
+            ui.showErrorMessage(t("char-build.import_format_invalid"))
+            return
+        }
+        charSettings.value = normalizeCharSettings(parsed as CharSettings)
+        targetFunction.value = charSettings.value.targetFunction
+        ui.showSuccessMessage(t("char-build.imported_from_clipboard"))
+    } catch (error) {
+        ui.showErrorMessage(t("char-build.import_failed"), error instanceof Error ? error.message : t("char-build.unknown_error"))
+    }
+}
+
+/**
  * 开始编辑方案名称
  * @param index 方案在列表中的索引
  * @returns void
@@ -692,7 +742,7 @@ const applyLoadedSettings = (loadedSettings: CharSettings) => {
  * @returns void
  */
 const resetConfig = () => {
-    Object.assign(charSettings.value, createDefaultCharSettings(getSignatureWeapon(selectedChar.value)))
+    Object.assign(charSettings.value, createDefaultCharSettings(getSignatureWeapon(selectedCharId.value)))
 }
 //#endregion
 
@@ -948,7 +998,7 @@ function updateTeamBuff(newValue: string, oldValue: string) {
         }
     }
     charSettings.value.buffs = dedupeBuffs(newBuffs)
-    localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
+    localStorage.setItem(`build.${selectedCharId.value}`, JSON.stringify(charSettings.value))
 }
 
 // 外部调用接口
@@ -1152,7 +1202,7 @@ async function shareCharBuild(title: string, desc: string = "") {
 
 let roleCache: DNARoleShowBean | null = null
 /**
- * 从游戏同步指定角色/武器的魔之楔数据（含中央槽光环）。
+ * 从游戏同步指定角色/武器的魔之楔数据（含中枢光环）。
  * @param id 角色或武器ID
  * @param isWeapon 是否武器
  * @param isConWeapon 是否同律武器
@@ -1259,7 +1309,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         charSettings.value.charMods = data.mods
         if (data.auraMod) charSettings.value.auraMod = data.auraMod
     }
-    localStorage.setItem(`build.${selectedChar.value}`, JSON.stringify(charSettings.value))
+    localStorage.setItem(`build.${selectedCharId.value}`, JSON.stringify(charSettings.value))
     ui.showSuccessMessage(t("char-build.sync_success"))
 }
 
@@ -1446,7 +1496,7 @@ async function syncModFromGameToSecond(
                             <span class="hidden sm:inline">{{ $t("char-build.save_project") }}</span>
                             <span class="sm:hidden">{{ $t("char-build.save") }}</span>
                         </div>
-                        <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 shadow-sm">
+                        <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-96 shadow-sm">
                             <div class="card-body space-y-2">
                                 <ul v-if="charProject.projects.length > 0" class="max-h-[60vh] overflow-y-auto">
                                     <li
@@ -1498,7 +1548,17 @@ async function syncModFromGameToSecond(
                                 <div v-else class="text-sm opacity-70">
                                     {{ $t("char-build.no_saved_projects") }}
                                 </div>
-                                <div class="btn btn-primary" @click="addProject()">{{ $t("char-build.new_project") }}</div>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="btn btn-primary btn-sm flex-1 min-w-20" @click="addProject()">
+                                        {{ $t("char-build.new_project") }}
+                                    </button>
+                                    <button class="btn btn-outline btn-sm flex-1 min-w-20" @click="copyBuildToClipboard()">
+                                        {{ $t("char-build.copy_to_clipboard") }}
+                                    </button>
+                                    <button class="btn btn-outline btn-sm flex-1 min-w-20" @click="importBuildFromClipboard()">
+                                        {{ $t("char-build.import_from_clipboard") }}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

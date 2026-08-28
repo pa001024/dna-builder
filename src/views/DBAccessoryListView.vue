@@ -17,7 +17,7 @@ import {
     weaponSkinData,
 } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
-import { getAccessoryUnlockLabelKey, normalizeAccessoryUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getAccessoryUnlockLabelKey, getWanhuaSkinUnlock, normalizeAccessoryUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityBadgeClass, getRarityGradientClass, getRarityName } from "@/utils/rarity-utils"
 
@@ -26,7 +26,7 @@ type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headf
 type CharAccessoryItem = Accessory & { accessoryType: "char" }
 type WeaponAccessoryItem = Accessory & { accessoryType: "weapon" }
 type WeaponSkinAccessoryItem = Accessory & { accessoryType: "weaponskin" }
-type SkinAccessoryItem = SkinItem & { accessoryType: "skin" }
+type SkinAccessoryItem = SkinItem & { accessoryType: "skin"; unlock?: string }
 type HairAccessoryItem = HairItem & { accessoryType: "hair" }
 type HeadFrameAccessoryItem = HeadFrameItem & { accessoryType: "headframe" }
 type HeadAccessoryItem = HeadSculptureItem & { accessoryType: "head" }
@@ -85,11 +85,19 @@ const selectedUnlock = useSearchParam<string>("ul", "all")
 
 /**
  * 合并角色饰品与武器饰品数据，并标记来源类型。
+ * 角色皮肤（skin）根据 SkinGacha 中的引用自动填充万华来源，便于解锁方式筛选。
  */
 const allAccessories = computed<AccessoryItem[]>(() => {
     const charItems: CharAccessoryItem[] = charAccessoryData.map(item => ({ ...item, accessoryType: "char" }))
     const weaponItems: WeaponAccessoryItem[] = weaponAccessoryData.map(item => ({ ...item, accessoryType: "weapon" }))
-    const skinItems: SkinAccessoryItem[] = skinData.map(item => ({ ...item, accessoryType: "skin" }))
+    const skinItems: SkinAccessoryItem[] = skinData.map(item => {
+        const wanhuaUnlock = getWanhuaSkinUnlock(item.id)
+        return {
+            ...item,
+            accessoryType: "skin",
+            ...(wanhuaUnlock ? { unlock: wanhuaUnlock } : {}),
+        }
+    })
     const weaponSkinItems: WeaponSkinAccessoryItem[] = weaponSkinData.map(item => ({ ...item, accessoryType: "weaponskin" }))
     const hairItems: HairAccessoryItem[] = hairData.map(item => ({ ...item, accessoryType: "hair" }))
     const headFrameItems: HeadFrameAccessoryItem[] = headFrameData.map(item => ({ ...item, accessoryType: "headframe" }))
@@ -422,9 +430,12 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dba-item-active" })
                                                 {{ $t(accessory.name) }}
                                             </div>
                                             <div class="mt-1 line-clamp-1 text-[11px] text-base-content/50">
-                                                <span v-if="accessory.accessoryType === 'skin'">{{
-                                                    $t(charMap.get(accessory.charId)?.名称 ?? "")
-                                                }}</span>
+                                                <span v-if="accessory.accessoryType === 'skin'">
+                                                    {{ $t(charMap.get(accessory.charId)?.名称 ?? "") }}
+                                                    <template v-if="getAccessoryUnlockText(accessory)">
+                                                        · {{ $t(getAccessoryUnlockText(accessory)) }}
+                                                    </template>
+                                                </span>
                                                 <span v-else>
                                                     {{ getAccessoryUnlockText(accessory) ? $t(getAccessoryUnlockText(accessory)) : "-" }}
                                                 </span>

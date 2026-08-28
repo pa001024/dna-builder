@@ -14,19 +14,19 @@ import {
 
 /**
  * 按角色配置构建 CharBuild，查表逻辑集中在 Helper 侧以保持 CharBuild 计算类可用于 worker。
- * @param selectedChar 角色名
+ * @param charId 角色 id
  * @param charSettings 角色配置
  * @param inv 背包快照
  * @param timeline 时间线
  * @returns 构筑实例
  */
 export function createCharBuildFromSettings(
-    selectedChar: string,
+    charId: number,
     charSettings: CharSettings,
     inv?: CharBuildInvSnapshot,
     timeline?: CharBuildTimeline
 ) {
-    const char = LeveledCharHelper.fromId(selectedChar, charSettings.charLevel)
+    const char = LeveledCharHelper.fromId(charId, charSettings.charLevel)
     const hydratedTimeline = timeline ? hydrateCharBuildTimeline(timeline) : undefined
     const useGlobal = charSettings.useGlobal
     const effectConfig = charSettings.effectConfig || {}

@@ -70,7 +70,7 @@ describe("特效等级解析", () => {
         const settings = baseSettings({
             charMods: [[51313, 10], ...Array(7).fill(null)],
         })
-        const build = createCharBuildFromSettings("黎瑟", settings)
+        const build = createCharBuildFromSettings(4101, settings)
         const mod = build.charMods.find(m => m?.id === 51313)
         expect(mod?.buffLv).toBe(1)
         // 关闭特效后 buffLv 为 0
@@ -78,7 +78,7 @@ describe("特效等级解析", () => {
             effectConfig: { "m:51313": 0 },
             charMods: [[51313, 10], ...Array(7).fill(null)],
         })
-        const offBuild = createCharBuildFromSettings("黎瑟", offSettings)
+        const offBuild = createCharBuildFromSettings(4101, offSettings)
         const offMod = offBuild.charMods.find(m => m?.id === 51313)
         expect(offMod?.buffLv).toBe(0)
     })
@@ -88,14 +88,14 @@ describe("特效等级解析", () => {
             useGlobal: true,
             charMods: [[51313, 10], ...Array(7).fill(null)],
         })
-        const build = createCharBuildFromSettings("黎瑟", settings, {
+        const build = createCharBuildFromSettings(4101, settings, {
             buffLv: { 51313: 1 },
         })
         const mod = build.charMods.find(m => m?.id === 51313)
         expect(mod?.buffLv).toBe(1)
 
         // 快照中未配置时回退 0（旧行为）
-        const emptyBuild = createCharBuildFromSettings("黎瑟", settings)
+        const emptyBuild = createCharBuildFromSettings(4101, settings)
         const emptyMod = emptyBuild.charMods.find(m => m?.id === 51313)
         expect(emptyMod?.buffLv).toBe(0)
     })

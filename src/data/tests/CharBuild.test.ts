@@ -187,7 +187,7 @@ describe("CharBuild类测试", () => {
 
     it("字段名含召唤物时应计入召唤物伤害，即使技能名不含召唤物", () => {
         const baseBuild = new CharBuild({
-            char: new LeveledChar("艾达（？？）"),
+            char: new LeveledChar("伊薇"),
             skillLevel: 10,
             hpPercent: 1,
             resonanceGain: 0,
@@ -201,7 +201,7 @@ describe("CharBuild类测试", () => {
             targetFunction: "[召唤物·战车]技能伤害",
         })
         const buffedBuild = new CharBuild({
-            char: new LeveledChar("艾达（？？）"),
+            char: new LeveledChar("伊薇"),
             skillLevel: 10,
             hpPercent: 1,
             resonanceGain: 0,
@@ -232,7 +232,7 @@ describe("CharBuild类测试", () => {
     it("[召唤物·战车]技能伤害应被无止无休5熔的召唤物属性继承比例增幅", () => {
         const createBuild = (buffs: LeveledBuff[]) =>
             new CharBuild({
-                char: new LeveledChar("艾达（？？）"),
+                char: new LeveledChar("伊薇"),
                 skillLevel: 10,
                 hpPercent: 1,
                 resonanceGain: 0,
@@ -267,7 +267,7 @@ describe("CharBuild类测试", () => {
     it("[召唤物·皇帝]技能伤害应被无止无休5熔的召唤物属性继承比例增幅", () => {
         const createBuild = (buffs: LeveledBuff[]) =>
             new CharBuild({
-                char: new LeveledChar("艾达（？？）"),
+                char: new LeveledChar("伊薇"),
                 skillLevel: 10,
                 hpPercent: 1,
                 resonanceGain: 0,
@@ -298,10 +298,10 @@ describe("CharBuild类测试", () => {
         expect(buffedDamage / baseDamage).toBeCloseTo(1.075, 5)
     })
 
-    it("艾达4溯应作为复合BUFF同时生效普通属性与code，提升[召唤物·战车]技能伤害", () => {
+    it("伊薇4溯应作为复合BUFF同时生效普通属性与code，提升[召唤物·战车]技能伤害", () => {
         const createBuild = (buffs: LeveledBuff[]) =>
             new CharBuild({
-                char: new LeveledChar("艾达（？？）"),
+                char: new LeveledChar("伊薇"),
                 skillLevel: 10,
                 hpPercent: 1,
                 resonanceGain: 0,
@@ -315,11 +315,11 @@ describe("CharBuild类测试", () => {
                 targetFunction: "[召唤物·战车]技能伤害",
             })
         const baseBuild = createBuild([])
-        const buffedBuild = createBuild([new LeveledBuff("艾达4溯")])
+        const buffedBuild = createBuild([new LeveledBuff("伊薇4溯")])
 
         // 复合BUFF：普通属性部分进入属性链（buffs），code部分进入dynamicBuffs
-        expect(buffedBuild.buffs.map(b => b.名称)).toContain("艾达4溯")
-        expect(buffedBuild.dynamicBuffs.map(b => b.名称)).toContain("艾达4溯")
+        expect(buffedBuild.buffs.map(b => b.名称)).toContain("伊薇4溯")
+        expect(buffedBuild.dynamicBuffs.map(b => b.名称)).toContain("伊薇4溯")
 
         // 普通属性部分先进入attr链：召唤物攻击速度 = 0.3
         const attrs = buffedBuild.calculateAttributes()
@@ -337,14 +337,14 @@ describe("CharBuild类测试", () => {
         expect(buffedDamage / baseDamage).toBeCloseTo(1.3, 5)
     })
 
-    it("艾达4溯克隆与快照往返不应重复生效", () => {
+    it("伊薇4溯克隆与快照往返不应重复生效", () => {
         const createBuild = () =>
             new CharBuild({
-                char: new LeveledChar("艾达（？？）"),
+                char: new LeveledChar("伊薇"),
                 skillLevel: 10,
                 hpPercent: 1,
                 resonanceGain: 0,
-                buffs: [new LeveledBuff("艾达4溯")],
+                buffs: [new LeveledBuff("伊薇4溯")],
                 melee: new LeveledWeapon(10302),
                 ranged: new LeveledWeapon(20601),
                 baseName: "乐园构想",
@@ -368,7 +368,7 @@ describe("CharBuild类测试", () => {
 
     it("召唤物转化词条应按充盈威力范式汇总：近战攻速MOD 52004 + 水雾弥散 51921", () => {
         const build = new CharBuild({
-            char: new LeveledChar("艾达（？？）"),
+            char: new LeveledChar("伊薇"),
             skillLevel: 10,
             hpPercent: 1,
             resonanceGain: 0,
@@ -400,10 +400,10 @@ describe("CharBuild类测试", () => {
         expect(summonMap!.interval).toBeCloseTo(3 / (1 + 1.75 * 0.495), 6)
     })
 
-    it("艾达4溯预期收益应计入近战攻速转化：52004 + 51921 下召唤物独立增伤 = 0.3+1.75×0.495，召唤物伤害倍率 = 1+该值", () => {
+    it("伊薇4溯预期收益应计入近战攻速转化：52004 + 51921 下召唤物独立增伤 = 0.3+1.75×0.495，召唤物伤害倍率 = 1+该值", () => {
         const createBuild = (buffs: LeveledBuff[]) =>
             new CharBuild({
-                char: new LeveledChar("艾达（？？）"),
+                char: new LeveledChar("伊薇"),
                 skillLevel: 10,
                 hpPercent: 1,
                 resonanceGain: 0,
@@ -419,7 +419,7 @@ describe("CharBuild类测试", () => {
                 targetFunction: "[召唤物·审判]技能伤害",
             })
         const baseBuild = createBuild([])
-        const buffedBuild = createBuild([new LeveledBuff("艾达4溯")])
+        const buffedBuild = createBuild([new LeveledBuff("伊薇4溯")])
 
         // 无武器上下文：召唤物攻击速度 = BUFF 直接加成 0.3，召唤物独立增伤（0起始）= 0.3
         expect(buffedBuild.calculateAttributes().召唤物攻击速度).toBeCloseTo(0.3, 6)
@@ -437,13 +437,13 @@ describe("CharBuild类测试", () => {
         expect(buffedDamage / baseDamage).toBeCloseTo(1 + 0.3 + 1.75 * 0.495, 5)
     })
 
-    it("艾达4溯的直接攻速BUFF无需攻速MOD也应实际提速召唤物", () => {
+    it("伊薇4溯的直接攻速BUFF无需攻速MOD也应实际提速召唤物", () => {
         const build = new CharBuild({
-            char: new LeveledChar("艾达（？？）"),
+            char: new LeveledChar("伊薇"),
             skillLevel: 10,
             hpPercent: 1,
             resonanceGain: 0,
-            buffs: [new LeveledBuff("艾达4溯")],
+            buffs: [new LeveledBuff("伊薇4溯")],
             melee: new LeveledWeapon(10302),
             ranged: new LeveledWeapon(20601),
             baseName: "庆典开始喽",
@@ -580,6 +580,40 @@ describe("CharBuild类测试", () => {
         charBuild.baseName = "普通攻击"
         const { weapon: meleeWeaponAttrs2 } = charBuild.calculateWeaponAttributes()
         expect(meleeWeaponAttrs2!.暴击).toBeCloseTo(基础暴击 * 3, 1)
+    })
+
+    it("同律武器精通倍率为 1.4，普通武器保持 1.2，未命中精通为 1", () => {
+        // 贝蕾妮卡精通：单手剑 / 突击枪，拥有同律近战武器「伊弥尔」（单手剑）
+        const charBuild = new CharBuild({
+            char: new LeveledChar("贝蕾妮卡"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 0,
+            charMods: [],
+            meleeMods: [],
+            rangedMods: [],
+            skillMods: [],
+            buffs: [],
+            melee: new LeveledWeapon(10302), // 铸铁者（近战重剑，未命中精通）
+            ranged: new LeveledWeapon(20201), // 赘生（远程双枪，命中精通）
+            baseName: "普通攻击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "伤害",
+        })
+
+        // 普通武器未命中精通：1 倍
+        const meleeWeaponAttrs = charBuild.calculateWeaponAttributes(charBuild.meleeWeapon).weapon
+        expect(meleeWeaponAttrs!.攻击).toBeCloseTo(charBuild.meleeWeapon.基础攻击, 2)
+
+        // 普通武器命中精通：1.2 倍
+        const rangedWeaponAttrs = charBuild.calculateWeaponAttributes(charBuild.rangedWeapon).weapon
+        expect(rangedWeaponAttrs!.攻击).toBeCloseTo(charBuild.rangedWeapon.基础攻击 * 1.2, 2)
+
+        // 同律武器命中精通：1.4 倍
+        const skillWeaponAttrs = charBuild.calculateWeaponAttributes(charBuild.skillWeapon!).weapon
+        expect(skillWeaponAttrs!.攻击).toBeCloseTo(charBuild.skillWeapon!.基础攻击 * 1.4, 2)
     })
 
     it("权火将熄5熔按近战MOD原始属性25%提升同律武器，且不受BUFF影响", () => {
@@ -1401,7 +1435,7 @@ describe("CharBuild类测试", () => {
             expect(charBuild.calculate()).toBeGreaterThan(0)
         })
 
-        it("同律武器的 type=下落攻击 应参与下落增伤判断", () => {
+        it("同律武器的下落攻击应参与下落增伤判断", () => {
             const charBuild = new CharBuild({
                 char: new LeveledChar("煜明"),
                 skillLevel: 10,
@@ -1419,15 +1453,25 @@ describe("CharBuild类测试", () => {
                 skillMods: [new LeveledMod(54202)],
             })
 
-            const withType = charBuild.calculateTargetFunction(charBuild.calculateWeaponAttributes(charBuild.skillWeapon), "[疑星落]伤害")
+            expect(charBuild.skillWeapon?.名称).toBe("疑星落")
+            // 字段 tag 携带「下落攻击」（[疑星落]伤害 数据 tag 为 ["近战","武器","下落攻击"]）→ 按 tag 参与下落增伤
+            const withTag = charBuild.calculateTargetFunction(charBuild.calculateWeaponAttributes(charBuild.skillWeapon), "[疑星落]伤害")
+            // 移除字段 tag 的下落攻击后，回退到同律武器「视为」声明（仍为下落攻击）
+            const field = charBuild.skillWeapon?.技能?.[0]?.字段.find(f => f.名称.includes("[疑星落]伤害"))
+            const originalTags = field?.tag
+            if (field) field.tag = ["近战", "武器"]
+            const viaShiwei = charBuild.calculateTargetFunction(charBuild.calculateWeaponAttributes(charBuild.skillWeapon), "[疑星落]伤害")
+            // 同时移除「视为」声明后不再享受下落增伤
             charBuild.skillWeapon!.视为 = undefined
             const withoutType = charBuild.calculateTargetFunction(
                 charBuild.calculateWeaponAttributes(charBuild.skillWeapon),
                 "[疑星落]伤害"
             )
+            if (field && originalTags) field.tag = originalTags
 
-            expect(charBuild.skillWeapon?.名称).toBe("疑星落")
-            expect(withType).toBeGreaterThan(withoutType)
+            expect(withTag).toBeGreaterThan(withoutType)
+            expect(viaShiwei).toBeGreaterThan(withoutType)
+            expect(withTag).toBeCloseTo(viaShiwei, 6)
         })
 
         it("角色mod的effect暴击词条应对所有武器生效", () => {
@@ -1724,7 +1768,7 @@ describe("CharBuild类测试", () => {
             extra.push(aura2) // 第二套光环需 V 槽
 
             const plan = charBuild.getSharedPolarizationPlan("角色", extra)
-            // 中央槽只能固定一种极性：优先满足第一套（D），第二套光环无法半价 → 不兼容
+            // 中枢只能固定一种极性：优先满足第一套（D），第二套光环无法半价 → 不兼容
             expect(plan.ok).toBe(false)
             expect(plan.reason).toBe("aura")
         })
@@ -2136,7 +2180,7 @@ describe("CharBuild类测试", () => {
 
     describe("E2E", () => {
         it("clone 的计算结果应该相同", () => {
-            const build = createCharBuildFromSettings("苏乙", {
+            const build = createCharBuildFromSettings(1504, {
                 charLevel: 80,
                 baseName: "射击",
                 hpPercent: 1,
@@ -2384,6 +2428,162 @@ describe("CharBuild类测试", () => {
             const exprA = "[圆舞]路径伤害{转灾厄:1,转属逆:1,触发:-9}"
             const exprB = "[圆舞]路径伤害{转灾厄:0.5,转属逆:0.5,触发:-9}"
             expect(cb.evaluateAST(exprA) / cb.evaluateAST(exprB)).toBeCloseTo(1, 5)
+        })
+
+        // 转充盈：独立额外乘区，不参与转换池、不改变物理/元素比例。
+        // 转充盈: X 把 X 比例的伤害视为充盈伤害并享受充盈威力加成，整体乘区 = 1 + X × 充盈威力
+        describe("转充盈（独立额外乘区）", () => {
+            // 护盾木桩：近战切割在护盾木桩下可触发（物理分量>0），便于验证物理/元素比例不变
+            function buildConvertField(enemyResistance = 0.5) {
+                return new CharBuild({
+                    char: new LeveledChar("黎瑟"),
+                    hpPercent: 0.5,
+                    resonanceGain: 2,
+                    melee: new LeveledWeapon(10302), // 切割，护盾木桩下触发
+                    ranged: new LeveledWeapon(20601), // 贯穿
+                    baseName: "快速出击",
+                    enemyId: 0, // 护盾木桩
+                    enemyLevel: 80,
+                    enemyResistance,
+                    targetFunction: "[近战]",
+                })
+            }
+
+            it("无充盈威力时转充盈不改变伤害", () => {
+                const cb = buildConvertField()
+                const F = cb.calculateWeaponAttributes().充盈威力 || 0
+                const base = cb.evaluateAST("[近战]")
+                const converted = cb.evaluateAST("[近战]{转充盈:1}")
+                // 充盈威力为 0 → 乘区 = 1 + 转充盈×F = 1，伤害不变
+                expect(converted).toBeCloseTo(base * (1 + F), 3)
+            })
+
+            it("整体乘区 = 1 + 转充盈×充盈威力，作用于所有伤害分量", () => {
+                const cb = buildConvertField()
+                const F = cb.calculateWeaponAttributes().充盈威力 || 0
+                const base = cb.evaluateAST("[近战]")
+                const full = cb.evaluateAST("[近战]{转充盈:1,充盈威力:1}")
+                const half = cb.evaluateAST("[近战]{转充盈:0.5,充盈威力:1}")
+                expect(full).toBeCloseTo(base * (1 + (F + 1)), 3)
+                expect(half).toBeCloseTo(base * (1 + 0.5 * (F + 1)), 3)
+            })
+
+            it("不改变物理/元素比例：物理、元素分量同倍放大", () => {
+                const cb = buildConvertField()
+                const phys0 = cb.evaluateAST("[近战].物理")
+                const elem0 = cb.evaluateAST("[近战].元素")
+                const expr = "[近战]{转充盈:1,充盈威力:1}"
+                const phys = cb.evaluateAST(`${expr}.物理`)
+                const elem = cb.evaluateAST(`${expr}.元素`)
+                expect(phys0).toBeGreaterThan(0)
+                expect(elem0).toBeGreaterThan(0)
+                // 物理与元素同乘同一乘区 → 比例保持不变
+                expect(phys / phys0).toBeCloseTo(elem / elem0, 3)
+                // 结构性成立：合计 = 物理 + 元素
+                expect(phys + elem).toBeCloseTo(cb.evaluateAST(expr), 0)
+            })
+
+            it("不参与转换池：与 转切割 独立叠加", () => {
+                const cb = buildConvertField()
+                const F = cb.calculateWeaponAttributes().充盈威力 || 0
+                const cut = cb.evaluateAST("[近战]{转切割:1}")
+                const cutFull = cb.evaluateAST("[近战]{转切割:1,转充盈:1,充盈威力:1}")
+                // 转充盈 不压缩转换池 → 转切割 100% 转换保持，额外乘区 ×(1+充盈威力)
+                expect(cutFull).toBeCloseTo(cut * (1 + (F + 1)), 3)
+            })
+
+            it("对纯元素同律字段（atk=all）同样生效", () => {
+                const cb = buildFlora(0.5) // [圆舞]路径伤害 为 inherit+atk=all 纯元素
+                const F = cb.calculateWeaponAttributes().充盈威力 || 0
+                const base = cb.evaluateAST("[圆舞]路径伤害")
+                const buffed = cb.evaluateAST("[圆舞]路径伤害{转充盈:1,充盈威力:1}")
+                expect(buffed).toBeCloseTo(base * (1 + (F + 1)), 3)
+            })
+        })
+    })
+
+    // 元素增伤/物理增伤：与 增伤 同池加算，只作用于对应分量（元素/物理），不影响另一分量。
+    // 技能伤害视为纯元素，故 元素增伤 生效、物理增伤 不生效。
+    describe("元素增伤/物理增伤（分量级加算增伤）", () => {
+        // 护盾木桩 + 切割近战：物理与元素分量均 > 0，便于验证分量选择性
+        function buildField(enemyResistance = 0.5) {
+            return new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                melee: new LeveledWeapon(10302), // 切割，护盾木桩下触发
+                ranged: new LeveledWeapon(20601), // 贯穿
+                baseName: "快速出击",
+                enemyId: 0, // 护盾木桩
+                enemyLevel: 80,
+                enemyResistance,
+                targetFunction: "[近战]",
+            })
+        }
+
+        it("基线：无分量增伤时物理/元素分量均 > 0", () => {
+            const cb = buildField()
+            expect(cb.evaluateAST("[近战].物理")).toBeGreaterThan(0)
+            expect(cb.evaluateAST("[近战].元素")).toBeGreaterThan(0)
+        })
+
+        it("元素增伤 只放大元素分量，物理分量不变", () => {
+            const cb = buildField()
+            const phys0 = cb.evaluateAST("[近战].物理")
+            const elem0 = cb.evaluateAST("[近战].元素")
+            const phys = cb.evaluateAST("[近战]{元素增伤:0.5}.物理")
+            const elem = cb.evaluateAST("[近战]{元素增伤:0.5}.元素")
+            // 物理分量不受 元素增伤 影响
+            expect(phys / phys0).toBeCloseTo(1, 6)
+            // 元素分量被放大
+            expect(elem).toBeGreaterThan(elem0)
+        })
+
+        it("物理增伤 只放大物理分量，元素分量不变", () => {
+            const cb = buildField()
+            const phys0 = cb.evaluateAST("[近战].物理")
+            const elem0 = cb.evaluateAST("[近战].元素")
+            const phys = cb.evaluateAST("[近战]{物理增伤:0.5}.物理")
+            const elem = cb.evaluateAST("[近战]{物理增伤:0.5}.元素")
+            // 元素分量不受 物理增伤 影响
+            expect(elem / elem0).toBeCloseTo(1, 6)
+            // 物理分量被放大
+            expect(phys).toBeGreaterThan(phys0)
+        })
+
+        it("元素增伤 与 增伤 加算（非独立乘区）", () => {
+            const cb = buildField()
+            const elem0 = cb.evaluateAST("[近战].元素")
+            const elem1 = cb.evaluateAST("[近战]{元素增伤:0.5}.元素")
+            const elem2 = cb.evaluateAST("[近战]{增伤:0.5}.元素")
+            const elem12 = cb.evaluateAST("[近战]{增伤:0.5,元素增伤:0.5}.元素")
+            // 加算：+0.5 元素增伤 的增益等于 +0.5 增伤（同一加法池）
+            expect(elem1 / elem0).toBeCloseTo(elem2 / elem0, 5)
+            // 叠加后非独立乘区：(base+0.5+0.5)/(base+0) 而非 (base+0.5)*1.5/base
+            const ratio = elem12 / elem0
+            const independent = (elem2 / elem0) * (elem1 / elem0)
+            expect(ratio).toBeLessThan(independent)
+        })
+
+        it("合计 = 物理 + 元素（分量增伤后结构性成立）", () => {
+            const cb = buildField()
+            const expr = "[近战]{元素增伤:0.5,物理增伤:0.3}"
+            const phys = cb.evaluateAST(`${expr}.物理`)
+            const elem = cb.evaluateAST(`${expr}.元素`)
+            const total = cb.evaluateAST(expr)
+            expect(phys + elem).toBeCloseTo(total, 1)
+        })
+
+        it("技能伤害（纯元素）吃 元素增伤，不吃 物理增伤", () => {
+            const cb = buildField()
+            const base = cb.evaluateAST("[近战]")
+            const elemBuffed = cb.evaluateAST("[近战]{元素增伤:0.5}")
+            const physBuffed = cb.evaluateAST("[近战]{物理增伤:0.5}")
+            // [近战] 整体 = 物理+元素：元素增伤提升合计，物理增伤也提升合计（因含物理分量）
+            expect(elemBuffed).toBeGreaterThan(base)
+            expect(physBuffed).toBeGreaterThan(base)
+            // 但物理增伤不改变元素分量本身
+            expect(cb.evaluateAST("[近战]{物理增伤:0.5}.元素") / cb.evaluateAST("[近战].元素")).toBeCloseTo(1, 6)
         })
     })
 })

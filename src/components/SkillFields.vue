@@ -157,7 +157,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div v-if="skill && skillFields.length > 0" class="text-sm">
+    <div v-if="skill && skillFields.length > 0" class="text-sm mt-2">
         <div
             v-for="(field, index) in skillFields"
             :key="index"

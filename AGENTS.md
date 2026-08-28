@@ -182,5 +182,6 @@ Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
 9. **Use `bun -e "code"`** for inline code execution
 10. Sensitive operations, such as generating migrations via `bun run gen`, must be confirmed by the user.
 11. put all temporary files in `.tmp` directory
+12. **Don't touch git**: Never use git for test, like add, stash, commit, push, pull, merge, rebase, cherry-pick, etc.
 
 </system_rules>

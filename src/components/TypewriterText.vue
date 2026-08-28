@@ -601,6 +601,7 @@ onBeforeUnmount(() => {
                             :class="{
                                 'text-primary font-semibold': segment.tone === 'highlight',
                                 'text-error font-semibold': segment.tone === 'warning',
+                                'text-info font-semibold': segment.tone === 'blue',
                             }"
                         >
                             {{ segment.text.slice(0, -1) }}
@@ -612,6 +613,7 @@ onBeforeUnmount(() => {
                             :class="{
                                 'text-primary font-semibold': lastVisibleCharacter.tone === 'highlight',
                                 'text-error font-semibold': lastVisibleCharacter.tone === 'warning',
+                                'text-info font-semibold': lastVisibleCharacter.tone === 'blue',
                             }"
                         >
                             {{ lastVisibleCharacter.text }}
@@ -622,6 +624,7 @@ onBeforeUnmount(() => {
                         :class="{
                             'text-primary font-semibold': segment.tone === 'highlight',
                             'text-error font-semibold': segment.tone === 'warning',
+                            'text-info font-semibold': segment.tone === 'blue',
                         }"
                     >
                         {{ segment.text }}

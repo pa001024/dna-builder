@@ -37,8 +37,8 @@ const props = defineProps<{
 }>()
 
 // 获取角色设置
-const nameRef = computed(() => props.charName)
-const charSettings = useCharSettings(nameRef)
+const charIdRef = computed(() => props.charBuild?.char?.id || 0)
+const charSettings = useCharSettings(charIdRef)
 
 // 技能列表
 const allSkills = computed(() => props.charBuild?.allSkills || [])

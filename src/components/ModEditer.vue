@@ -425,9 +425,9 @@ function mirrorFirstToSecond() {
  */
 function handleSyncSecond() {
     emit("syncSecond", (pairs, auraMod) => {
-        secondMods.value = pairs.slice(0, props.mods.length).map(pair =>
-            pair ? LeveledModHelper.fromId(pair[0], pair[1], inv.getBuffLv(pair[0])) : null
-        )
+        secondMods.value = pairs
+            .slice(0, props.mods.length)
+            .map(pair => (pair ? LeveledModHelper.fromId(pair[0], pair[1], inv.getBuffLv(pair[0])) : null))
         secondAuraMod.value = auraMod
     })
 }
@@ -520,7 +520,7 @@ const secondSetInjection = computed<(LeveledMod | null)[] | undefined>(() => {
 })
 
 /**
- * 共享极化方案：同一套方案（各极性极化槽数量 + 中央槽极性）同时应用到两套MOD。
+ * 共享极化方案：同一套方案（各极性极化槽数量 + 中枢极性）同时应用到两套MOD。
  * 第二套为空时返回 null（此时沿用第一套自身极化方案）。
  */
 const compatPlan = computed(() => {
@@ -711,53 +711,53 @@ const bTolerance = computed(() => {
                 </span>
             </div>
             <div class="ml-auto flex items-center gap-2">
-            <!-- 方案兼容：输入第二套MOD，不参与数据计算，仅参与极性计算 -->
-            <div
-                class="btn btn-sm border"
-                :class="compatMode ? 'btn-secondary' : 'btn-ghost border-base-content/15'"
-                :title="$t('char-build.compat_scheme_hint')"
-                @click="toggleCompatMode"
-            >
-                方案兼容
-            </div>
-            <ShowProps
-                v-if="aMod"
-                :props="aMod.getProperties()"
-                :title="`${$t(aMod.系列)}${$t(aMod.名称)}`"
-                :polarity="aMod.极性"
-                :cost="aMod.耐受"
-                :type="`${$t(aMod.类型)}${aMod.属性 ? `,${$t(aMod.属性 + '属性')}` : ''}${aMod.限定 ? `,${$t(aMod.限定)}` : ''}`"
-                :effdesc="aMod.效果"
-                :eff="charBuild?.checkModEffective(aMod, true)"
-            >
-                <div class="flex items-center gap-2">
-                    <img :src="aMod.url" :alt="aMod.名称" class="w-8 h-8 inline-block" />
-                    <Select
-                        class="w-30 input input-bordered input-sm"
-                        :model-value="auraMod"
-                        @update:model-value="handleSelectAuraMod($event, 0)"
-                    >
-                        <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
-                            {{ $t(m.quality + "色") }} - {{ $t(m.label) }}
-                        </SelectItem>
-                    </Select>
-                    <!-- 光环槽：明显展示所极化的槽位类型（趋向图标）与半价/惩罚耐受 -->
-                    <span
-                        v-if="aMod.极性"
-                        class="badge badge-sm gap-1"
-                        :class="
-                            firstAuraPenalized
-                                ? 'badge-error text-red-800'
-                                : firstAuraPolset
-                                  ? 'badge-success text-green-800'
-                                  : 'badge-soft text-base-content/80'
-                        "
-                    >
-                        <Icon class="inline-block" :icon="`po-${aMod.极性}`" />
-                        {{ firstAuraPenalized ? Math.ceil(aMod.耐受 * 1.5) : firstAuraPolset ? Math.ceil(aMod.耐受 / 2) : aMod.耐受 }}
-                    </span>
+                <!-- 方案兼容：输入第二套MOD，不参与数据计算，仅参与极性计算 -->
+                <div
+                    class="btn btn-sm border"
+                    :class="compatMode ? 'btn-secondary' : 'btn-ghost border-base-content/15'"
+                    :title="$t('char-build.compat_scheme_hint')"
+                    @click="toggleCompatMode"
+                >
+                    方案兼容
                 </div>
-            </ShowProps>
+                <ShowProps
+                    v-if="aMod"
+                    :props="aMod.getProperties()"
+                    :title="`${$t(aMod.系列)}${$t(aMod.名称)}`"
+                    :polarity="aMod.极性"
+                    :cost="aMod.耐受"
+                    :type="`${$t(aMod.类型)}${aMod.属性 ? `,${$t(aMod.属性 + '属性')}` : ''}${aMod.限定 ? `,${$t(aMod.限定)}` : ''}`"
+                    :effdesc="aMod.效果"
+                    :eff="charBuild?.checkModEffective(aMod, true)"
+                >
+                    <div class="flex items-center gap-2">
+                        <img :src="aMod.url" :alt="aMod.名称" class="w-8 h-8 inline-block" />
+                        <Select
+                            class="w-30 input input-bordered input-sm"
+                            :model-value="auraMod"
+                            @update:model-value="handleSelectAuraMod($event, 0)"
+                        >
+                            <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
+                                {{ $t(m.quality + "色") }} - {{ $t(m.label) }}
+                            </SelectItem>
+                        </Select>
+                        <!-- 光环槽：明显展示所极化的槽位类型（趋向图标）与半价/惩罚耐受 -->
+                        <span
+                            v-if="aMod.极性"
+                            class="badge badge-sm gap-1"
+                            :class="
+                                firstAuraPenalized
+                                    ? 'badge-error text-red-800'
+                                    : firstAuraPolset
+                                      ? 'badge-success text-green-800'
+                                      : 'badge-soft text-base-content/80'
+                            "
+                        >
+                            <Icon class="inline-block" :icon="`po-${aMod.极性}`" />
+                            {{ firstAuraPenalized ? Math.ceil(aMod.耐受 * 1.5) : firstAuraPolset ? Math.ceil(aMod.耐受 / 2) : aMod.耐受 }}
+                        </span>
+                    </div>
+                </ShowProps>
                 <div v-if="type !== '同律'" class="btn btn-secondary btn-sm" @click="$emit('sync')">
                     {{ $t("char-build.sync_game") }}
                 </div>
@@ -883,7 +883,7 @@ const bTolerance = computed(() => {
             <!-- 共享极化方案摘要 -->
             <div v-if="compatPlan" class="mb-2 flex items-center gap-2 text-xs text-base-content/70">
                 <span class="font-bold text-primary">{{ $t("char-build.compat_scheme_plan") }}</span>
-                <template v-for="T in (['V', 'D', 'A', 'O'] as const)" :key="T">
+                <template v-for="T in ['V', 'D', 'A', 'O'] as const" :key="T">
                     <span v-if="compatPlan.plan[T]" class="badge badge-sm badge-soft gap-1">
                         <Icon class="inline-block" :icon="`po-${T}`" />×{{ compatPlan.plan[T] }}
                     </span>
@@ -919,11 +919,7 @@ const bTolerance = computed(() => {
             </div>
             <div v-if="compatFailed" class="mt-2 flex items-center gap-1 text-xs text-error">
                 <Icon icon="ri:error-warning-line" class="inline-block" />
-                {{
-                    compatPlan?.reason === "aura"
-                        ? $t("char-build.compat_scheme_aura")
-                        : $t("char-build.compat_scheme_overcap")
-                }}
+                {{ compatPlan?.reason === "aura" ? $t("char-build.compat_scheme_aura") : $t("char-build.compat_scheme_overcap") }}
             </div>
         </div>
     </div>

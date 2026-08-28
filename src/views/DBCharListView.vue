@@ -165,14 +165,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
     <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <!-- 左侧列表面板 -->
-            <div
-                class="flex-1 flex flex-col overflow-hidden min-w-0"
-                :class="{ 'sm:border-r border-base-content/10': selectedChar }"
-            >
+            <div class="flex-1 flex flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedChar }">
                 <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
-                <div
-                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
-                >
+                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
                     <div class="relative">
                         <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
                         <input
@@ -399,7 +394,10 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                                 />
                                 <div class="flex items-start gap-3 p-3">
                                     <!-- 角色头像（稀有度渐变底） -->
-                                    <div class="size-12 shrink-0 overflow-hidden rounded-xs bg-linear-15" :class="getRarityGradientClass(5)">
+                                    <div
+                                        class="size-12 shrink-0 overflow-hidden rounded-xs bg-linear-15"
+                                        :class="getRarityGradientClass(5)"
+                                    >
                                         <img
                                             :src="LeveledChar.url(char.icon)"
                                             :alt="$t(char.名称)"
@@ -418,6 +416,10 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                                             <span v-if="char.别名" class="truncate text-[11px] text-base-content/45">
                                                 ({{ $t(char.别名) }})
                                             </span>
+                                            <!-- 阵营 -->
+                                            <div v-if="char.阵营" class="shrink-0 text-right text-[11px] leading-5 text-base-content/45">
+                                                {{ $t(char.阵营) }}
+                                            </div>
                                             <CopyID :id="char.id" class="ml-auto shrink-0" />
                                         </div>
                                         <!-- 元信息行：元素 / 版本 / 标签 -->
@@ -439,10 +441,6 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                                                 {{ $t(`tag.${tag}`, $t(tag)) }}
                                             </span>
                                         </div>
-                                    </div>
-                                    <!-- 阵营 -->
-                                    <div v-if="char.阵营" class="shrink-0 text-right text-[11px] leading-5 text-base-content/45">
-                                        {{ $t(char.阵营) }}
                                     </div>
                                 </div>
                             </article>
@@ -476,4 +474,3 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
         </div>
     </div>
 </template>
-

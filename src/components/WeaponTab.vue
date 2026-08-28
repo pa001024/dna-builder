@@ -10,8 +10,8 @@ const props = defineProps<{
     attributes: CharAttr
 }>()
 
-const nameRef = computed(() => props.charBuild.char.名称)
-const charSettings = useCharSettings(nameRef)
+const charIdRef = computed(() => props.charBuild?.char?.id || 0)
+const charSettings = useCharSettings(charIdRef)
 const weaponAttrs = computed(() => props.charBuild.calculateWeaponAttributes(props.charBuild[`${props.wkey}Weapon`]).weapon!)
 
 const emit = defineEmits<{

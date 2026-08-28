@@ -5,7 +5,7 @@ import { charData } from "@/data"
 import type { Accessory, HairItem, HeadFrameItem, HeadSculptureItem, SkinItem } from "@/data/d/accessory.data"
 import draftData, { type Draft } from "@/data/d/draft.data"
 import shopData from "@/data/d/shop.data"
-import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getWanhuaSkinUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import type { ResourceDraftSourceInfo } from "@/utils/draft-source"
 import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
@@ -400,6 +400,7 @@ const accessoryRarityValue = computed(() => {
 
 /**
  * 详情页获取方式文本。
+ * 角色皮肤根据 SkinGacha 中的引用自动填充万华来源。
  */
 const accessoryUnlock = computed(() => {
     if (isHeadFrameAccessory(props.accessory)) {
@@ -409,7 +410,7 @@ const accessoryUnlock = computed(() => {
         return "-"
     }
     if (isSkinAccessory(props.accessory)) {
-        return "-"
+        return getWanhuaSkinUnlock(props.accessory.id) || "-"
     }
     if (isWeaponSkinAccessory(props.accessory)) {
         return "-"

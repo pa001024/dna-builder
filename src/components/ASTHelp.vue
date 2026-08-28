@@ -202,7 +202,7 @@ const attributeGroups: { key: string; title: string; items: string[] }[] = [
     {
         key: "convert",
         title: t("ast-help.attrGroups.convert"),
-        items: ["转切割", "转贯穿", "转震荡", "转灾厄", "转属克", "转属逆"],
+        items: ["转切割", "转贯穿", "转震荡", "转灾厄", "转充盈", "转属克", "转属逆"],
     },
 ]
 

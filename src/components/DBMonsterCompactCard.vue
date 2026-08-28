@@ -277,7 +277,9 @@ function handleClickMonsterCard(): void {
                 :title="$t('生命')"
             >
                 <div class="text-[10px] text-base-content/55">{{ $t("生命") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-error">{{ formatBigNumber(displayMonster.hp) }}</div>
+                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-error">
+                    {{ formatBigNumber(displayMonster.hp, 0) }}
+                </div>
             </div>
             <div
                 class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
@@ -285,7 +287,7 @@ function handleClickMonsterCard(): void {
             >
                 <div class="text-[10px] text-base-content/55">{{ $t("护盾") }}</div>
                 <div class="font-orbitron text-[13px] font-semibold tabular-nums text-info">
-                    {{ formatBigNumber(displayMonster.es || 0) }}
+                    {{ formatBigNumber(displayMonster.es || 0, 0) }}
                 </div>
             </div>
             <div
@@ -302,7 +304,9 @@ function handleClickMonsterCard(): void {
                 :title="$t('有效生命')"
             >
                 <div class="text-[10px] text-base-content/55">{{ $t("有效生命") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-accent">{{ formatBigNumber(effectiveHealth) }}</div>
+                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-accent">
+                    {{ formatBigNumber(effectiveHealth, 0) }}
+                </div>
             </div>
         </div>
 

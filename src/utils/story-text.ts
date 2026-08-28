@@ -9,7 +9,7 @@ export interface StoryTextConfig {
 
 export interface StoryTextSegment {
     text: string
-    tone: "normal" | "highlight" | "warning" | "title"
+    tone: "normal" | "highlight" | "warning" | "title" | "blue"
 }
 
 export interface SearchTextSegment {
@@ -35,10 +35,11 @@ export function replaceStoryPlaceholders(input: string, config: StoryTextConfig)
         return ""
     }
 
+    // 性别占位符的分隔符同时兼容 ASCII 竖线 `|` 与 CJK 竖线 `丨`（数据中混用两者）
     return input
         .replace(/\{nickname2\}/g, config.nickname2)
         .replace(/\{nickname\}/g, config.nickname)
-        .replace(/\{(性别2?)[:：]([^|{}]*)\|([^{}]*)\}/g, (_, key: string, maleText: string, femaleText: string) => {
+        .replace(/\{(性别2?)[:：]([^|丨{}]*)[|丨]([^|丨{}]*)\}/g, (_, key: string, maleText: string, femaleText: string) => {
             const selectedGender = key === "性别2" ? config.gender2 : config.gender
             return selectedGender === "male" ? maleText : femaleText
         })
@@ -54,7 +55,7 @@ export function stripStoryTextTags(input: string): string {
         return ""
     }
 
-    return input.replace(/<(?:H|W|Highlight|highlight|Title)>|<\/>/g, "")
+    return input.replace(/<(?:H|W|Highlight|highlight|Title|blue|Blue)>|<\/>/g, "")
 }
 
 /**
@@ -69,7 +70,7 @@ export function parseStoryTextSegments(input: string, config: StoryTextConfig): 
         return []
     }
 
-    const segmentRegex = /<(H|W|Highlight|highlight|Title)>([\s\S]*?)<\/>/g
+    const segmentRegex = /<(H|W|Highlight|highlight|Title|blue|Blue)>([\s\S]*?)<\/>/g
     const segments: StoryTextSegment[] = []
     let lastIndex = 0
 
@@ -94,7 +95,9 @@ export function parseStoryTextSegments(input: string, config: StoryTextConfig): 
                     ? "title"
                     : tagName === "H" || tagName === "Highlight" || tagName === "highlight"
                       ? "highlight"
-                      : "warning",
+                      : tagName === "blue" || tagName === "Blue"
+                        ? "blue"
+                        : "warning",
         })
         lastIndex = endIndex
     }
