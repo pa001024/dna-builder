@@ -58,6 +58,14 @@ const dynamicAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() =>
     return sourceMap
 })
 
+/**
+ * 各武器对角色充盈威力的武器转化来源（武器转化充盈威力），用于充盈威力来源明细。
+ * 与 CharBuild.calculateWeaponAttributes 的汇总逻辑保持一致，仅保留非零贡献的武器。
+ */
+const fullnessWeaponSources = computed(() =>
+    props.charBuild.getFullnessWeaponSources().filter(source => Math.abs(source.value) > 1e-10)
+)
+
 const modAttributeBonusSources = computed(() => {
     const modAttributeBonus = props.charBuild.getTotalBonus(`${props.charBuild.char.属性}MOD属性`)
 
@@ -146,6 +154,14 @@ const modAttributeBonusSources = computed(() => {
                     >
                         <div class="text-base-content/80">{{ dynamicSource.sourceName }}</div>
                         {{ format100r(dynamicSource.value) }}
+                    </li>
+                    <li
+                        v-for="(source, index) in key === '充盈威力' ? fullnessWeaponSources : []"
+                        :key="`fullness-weapon-${index}`"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">{{ $t(source.weapon.名称) }}</div>
+                        {{ format100r(source.value) }}
                     </li>
                     <li
                         v-if="

@@ -5494,6 +5494,9 @@
         "enter_title": "請輸入標題",
         "equipment_preview": "裝配預覽",
         "export_code": "複製代碼",
+        "extra_mastery_clear": "清除額外精通",
+        "extra_mastery_desc": "選擇一種額外精通的武器類型。額外精通後，對應類型的武器會享受精通加成（攻擊×1.2），災厄武器的熔煉潛能也會同步生效。",
+        "extra_mastery_hint": "選擇額外精通武器",
         "faction": "陣營",
         "fetch_char_info_failed": "取得角色資訊失敗",
         "fetch_weapon_info_failed": "取得武器資訊失敗",
@@ -7249,6 +7252,8 @@
         "top_actions": "使用頂部按鈕分享配置、自動構築、保存項目等",
         "weapon_select": "點擊這裡更換武器/設定精煉"
     },
+    "UI_Armory_ExtraExcelResource": "解鎖消耗材料",
+    "UI_Armory_ExtraExcelWeponTitle": "額外精通武器",
     "UI_FORGING_BLUEPRINT": "設計稿：",
     "unpack": {
         "desc": "讀取並匯出 pak 檔案",

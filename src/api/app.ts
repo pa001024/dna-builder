@@ -285,17 +285,33 @@ export interface LuaDecompileBatchResult {
 /**
  * 使用 unluac 反编译 Lua 字节码文件。
  * @param inputFiles 输入文件路径列表
+ * @param sourceRoot 源目录
  * @param unluacPath unluac jar 路径
  * @param outputDir 输出目录
+ * @param onProgress 反编译进度回调
  * @returns 反编译结果
  */
 export async function decompileLuaBytecodeFiles(
     inputFiles: string[],
     sourceRoot: string,
     unluacPath: string,
-    outputDir: string
+    outputDir: string,
+    onProgress?: (current: number, total: number) => void
 ): Promise<LuaDecompileBatchResult> {
-    return await invoke("decompile_lua_bytecode_files", { inputFiles, sourceRoot, unluacPath, outputDir })
+    let unlistenFn: UnlistenFn | undefined
+
+    try {
+        if (onProgress) {
+            unlistenFn = await listen<{ current: number; total: number; outputDir: string }>("lua_decompile_progress", event => {
+                if (event.payload.outputDir === outputDir) {
+                    onProgress(event.payload.current, event.payload.total)
+                }
+            })
+        }
+        return await invoke("decompile_lua_bytecode_files", { inputFiles, sourceRoot, unluacPath, outputDir })
+    } finally {
+        unlistenFn?.()
+    }
 }
 
 /**

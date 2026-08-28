@@ -7829,12 +7829,6 @@ export const partyTopicData_en: PartyTopic[] = [
         },
         dialogues: [
             {
-                id: 80240201,
-                content: "Four years ago",
-                voice: "inv/Suyi/002/C8DF77FA",
-                next: 80240202,
-            },
-            {
                 id: 80240202,
                 content: "Inky, I'm off. Once I'm gone, looking after Mum and Dad... that's all on you.",
                 voice: "inv/Suyi/002/C8DF7824",
@@ -8114,6 +8108,12 @@ export const partyTopicData_en: PartyTopic[] = [
                 content: "Take your things and get out! Don't you ever come back! Get out!",
                 voice: "inv/Suyi/002/C8DF7E36",
                 npc: 790084,
+            },
+            {
+                id: 80240201,
+                content: "Four years ago",
+                voice: "inv/Suyi/002/C8DF77FA",
+                next: 80240202,
             },
         ],
     },

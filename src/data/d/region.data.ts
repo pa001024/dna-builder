@@ -300,13 +300,13 @@ const t: Region[] = [
         mapMapping: [
             {
                 name: "WBP_Map_East_HaoJing_BG",
-                pos: [1864, 1444, 8192, 8192],
+                pos: [0, 0, 8192, 8192],
                 opacity: 1,
                 zOrder: -1,
             },
             {
                 name: "WBP_Map_East_HaoJing",
-                pos: [1864, 1444, 8192, 8192],
+                pos: [0, 0, 8192, 8192],
                 opacity: 1,
                 zOrder: 0,
             },
@@ -600,13 +600,13 @@ const t: Region[] = [
         mapMapping: [
             {
                 name: "WBP_Map_East_HaoJing_BG",
-                pos: [1864, 1444, 8192, 8192],
+                pos: [0, 0, 8192, 8192],
                 opacity: 1,
                 zOrder: -1,
             },
             {
                 name: "WBP_Map_East_HaoJing",
-                pos: [1864, 1444, 8192, 8192],
+                pos: [0, 0, 8192, 8192],
                 opacity: 1,
                 zOrder: 0,
             },

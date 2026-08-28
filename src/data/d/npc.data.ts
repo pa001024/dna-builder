@@ -258,8 +258,8 @@ export const npcData: NPC[] = [
         charId: 1102,
         type: "Show",
         icon: "Fuluo",
-        srId: 102102,
-        pos: [-10847, -21383],
+        srId: 210101,
+        pos: [-230, 4961],
         talks: [
             {
                 id: 90280001,
@@ -2319,6 +2319,8 @@ export const npcData: NPC[] = [
         camp: "NPC",
         charId: 2102,
         type: "Show",
+        srId: 210101,
+        pos: [-226, 4952],
         talks: [
             {
                 id: 90290001,
@@ -3046,7 +3048,7 @@ export const npcData: NPC[] = [
         type: "Show",
         icon: "Xier",
         srId: 210101,
-        pos: [31, 5110],
+        pos: [31, 5031],
         talks: [
             {
                 id: 90140001,
@@ -36701,8 +36703,8 @@ export const npcData: NPC[] = [
         name: "陈老爹",
         camp: "NPC",
         type: "Normal",
-        srId: 104504,
-        pos: [-25530, -64659],
+        srId: 104108,
+        pos: [40190, 69060],
     },
     {
         id: 701113,
@@ -64757,6 +64759,8 @@ export const npcData: NPC[] = [
         name: "法露茜",
         camp: "NPC",
         type: "Normal",
+        srId: 210101,
+        pos: [-219, 4944],
         talks: [
             {
                 id: 741147210,
@@ -68904,7 +68908,7 @@ export const npcData: NPC[] = [
         camp: "NPC",
         type: "Normal",
         srId: 210101,
-        pos: [31, 5110],
+        pos: [31, 5031],
         talks: [
             {
                 id: 741149001,

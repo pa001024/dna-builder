@@ -1827,16 +1827,51 @@ async fn move_file(source_path: String, target_path: String) -> Result<(), Strin
 /// 使用 unluac 反编译 Lua 字节码文件。
 #[tauri::command]
 async fn decompile_lua_bytecode_files(
+    app: tauri::AppHandle,
     input_files: Vec<String>,
     source_root: String,
     unluac_path: String,
     output_dir: String,
 ) -> Result<repak_tools::LuaDecompileBatchResult, String> {
+    let total = input_files.len();
+    let output_dir_for_progress = output_dir.clone();
+    let _ = app.emit(
+        "lua_decompile_progress",
+        serde_json::json!({
+            "current": 0,
+            "total": total,
+            "outputDir": output_dir_for_progress,
+        }),
+    );
+    let last_percent = Mutex::new(0);
     repak_tools::decompile_lua_bytecode_files(
         &input_files,
         Path::new(&source_root),
         Path::new(&unluac_path),
         Path::new(&output_dir),
+        move |current| {
+            let percent = if total > 0 {
+                current.saturating_mul(100) / total
+            } else {
+                0
+            };
+            let mut guard = last_percent
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            // 百分比未变化时不重复发送事件，避免大量小文件造成 IPC 拥塞。
+            if *guard == percent && current < total {
+                return;
+            }
+            *guard = percent;
+            let _ = app.emit(
+                "lua_decompile_progress",
+                serde_json::json!({
+                    "current": current,
+                    "total": total,
+                    "outputDir": output_dir_for_progress,
+                }),
+            );
+        },
     )
 }
 

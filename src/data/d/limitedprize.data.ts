@@ -28,6 +28,8 @@ export interface LimitedPrizePool {
     ResultBPPath?: string
     ResultMobileBPPath?: string
     RoundBPPath?: string
+    /** 额外奖励条目：档位索引 -> [奖励ID, 数量]，由 importdata 从 out 自动写入。 */
+    ExtraItem?: Record<string, [number, number]>
 }
 
 /** 限时奖池成本规则，由 importdata 从 out 自动写入。 */

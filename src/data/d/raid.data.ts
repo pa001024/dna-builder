@@ -28,6 +28,10 @@ export interface RaidDungeonItem {
     MinCompleteDamage: number
     RaidBuffID: number[]
     RaidDungeonType: number
+    /** 新赛季（1006 起）分数奖励配置迁移到副本维度，键为分数阈值、值为奖励ID */
+    RaidPointToRewrad?: Record<string, number>
+    /** 新赛季（1006 起）分数奖励最大次数迁移到副本维度 */
+    RaidPointToRewradMaxTime?: number
     RaidSeason: number
     TicketNum?: {
         "217": number
@@ -489,10 +493,10 @@ export interface RaidSeasonItem {
     EventId: number
     PreRaidRank: number
     PreRaidTime: number
-    RaidPointToRewrad: {
-        "1000": number
-    }
-    RaidPointToRewradMaxTime: number
+    /** 旧赛季在赛季维度配置分数奖励；新赛季（1006 起）迁移到 RaidDungeon 维度，故可空 */
+    RaidPointToRewrad?: Record<string, number>
+    /** 旧赛季在赛季维度配置分数奖励最大次数；新赛季（1006 起）迁移到 RaidDungeon 维度，故可空 */
+    RaidPointToRewradMaxTime?: number
     RaidRankCount: number
     RaidSeason: number
     RaidTime: number
@@ -625,6 +629,10 @@ function createPreRaidRankReward(
     }
 }
 
+/**
+ * 手动维护的排位奖励版本表（含各赛季称号框与命名）。
+ * 新赛季（如 1006）缺少条目时，由 importdata 脚本按奖励表自动补齐。
+ */
 const PreRaidRankRewardVersions: Record<number, PreRaidRankRewardItem[]> = {
     1001: [
         createPreRaidRankReward(300316, 10008, "SSS级狩月人", 3000, 2, 2),
@@ -660,6 +668,14 @@ const PreRaidRankRewardVersions: Record<number, PreRaidRankRewardItem[]> = {
         createPreRaidRankReward(300318, 10046, "S级狩月人·5", 2000, 2, 2),
         createPreRaidRankReward(300319, 10047, "A级狩月人·5", 1500, 1, 1),
         createPreRaidRankReward(300320, 10048, "B级狩月人·5", 1000, 1, 1),
+    ],
+
+    1006: [
+        createPreRaidRankReward(300316, 10049, "SSS级狩月人·6", 3000, 2, 2),
+        createPreRaidRankReward(300317, 10050, "SS级狩月人·6", 2500, 2, 2),
+        createPreRaidRankReward(300318, 10051, "S级狩月人·6", 2000, 2, 2),
+        createPreRaidRankReward(300319, 10052, "A级狩月人·6", 1500, 1, 1),
+        createPreRaidRankReward(300320, 10053, "B级狩月人·6", 1000, 1, 1),
     ],
 }
 
@@ -701,7 +717,14 @@ export const PreRaidRank: Record<string | number, PreRaidRankItem> = {
         RankReward: [300316, 300317, 300318, 300319, 300320],
     },
     "1005": {
-        IsOnline: [false, false, false, false, false],
+        IsOnline: [true, false, false, false, false],
+        PreRaidRank: 1,
+        RankName: ["SSS", "SS", "S", "A", "B"],
+        RankPercent: [15, 35, 55, 75, 100],
+        RankReward: [300316, 300317, 300318, 300319, 300320],
+    },
+    "1006": {
+        IsOnline: [true, false, false, false, false],
         PreRaidRank: 1,
         RankName: ["SSS", "SS", "S", "A", "B"],
         RankPercent: [15, 35, 55, 75, 100],

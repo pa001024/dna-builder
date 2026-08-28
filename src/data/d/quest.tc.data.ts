@@ -29624,16 +29624,16 @@ export const questData_tc: QuestStory[] = [
                         id: "177763795518716773324",
                         type: "TalkNode",
                         name: "对话节点",
-                        srId: 106301,
-                        pos: [-38250, -6680],
+                        srId: 106001,
+                        pos: [-38560, -6600],
                         next: ["177763795518716773319"],
                     },
                     {
                         id: "177763795518716773319",
                         type: "TalkNode",
                         name: "芙罗拉出场",
-                        srId: 106301,
-                        pos: [-38250, -6680],
+                        srId: 106001,
+                        pos: [-38560, -6600],
                         next: ["177763795518716773320"],
                         dialogues: [
                             {
@@ -29861,8 +29861,8 @@ export const questData_tc: QuestStory[] = [
                         id: "177763795518716773320",
                         type: "TalkNode",
                         name: "与芙罗拉交谈",
-                        srId: 106301,
-                        pos: [-38250, -6680],
+                        srId: 106001,
+                        pos: [-38560, -6600],
                         next: ["177763795518716773321"],
                         dialogues: [
                             {
@@ -29982,8 +29982,8 @@ export const questData_tc: QuestStory[] = [
                         id: "177763795518716773321",
                         type: "TalkNode",
                         name: "与希尔妲交谈",
-                        srId: 106301,
-                        pos: [-38250, -6680],
+                        srId: 106001,
+                        pos: [-38560, -6600],
                         dialogues: [
                             {
                                 id: 10042801,

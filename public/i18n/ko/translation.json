@@ -6375,6 +6375,9 @@
         "enter_title": "제목을 입력해주세요",
         "equipment_preview": "장비 미리보기",
         "export_code": "코드 복사",
+        "extra_mastery_clear": "추가 숙련 해제",
+        "extra_mastery_desc": "추가로 숙련할 무기 유형을 선택하세요. 선택하면 해당 유형의 무기가 숙련 보너스(공격 ×1.2)를 받고, 재앙 무기의 단조 잠재 능력도 함께 활성화됩니다.",
+        "extra_mastery_hint": "추가 숙련 무기 선택",
         "faction": "진영",
         "fetch_char_info_failed": "캐릭터 정보를 가져오지 못했습니다",
         "fetch_weapon_info_failed": "무기 정보를 가져오지 못했습니다",
@@ -8131,6 +8134,8 @@
         "top_actions": "상단 버튼으로 설정 공유, 자동 구축, 프로젝트 저장 등을 수행하세요",
         "weapon_select": "여기를 클릭하여 무기 변경/정련 설정"
     },
+    "UI_Armory_ExtraExcelResource": "해제 소모 재료",
+    "UI_Armory_ExtraExcelWeponTitle": "추가 마스터리 무기",
     "UI_FORGING_BLUEPRINT": "설계도: ",
     "unpack": {
         "desc": "pak 파일을 읽고 내보냅니다",

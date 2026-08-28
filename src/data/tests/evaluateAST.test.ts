@@ -510,6 +510,53 @@ describe("evaluateAST函数测试", () => {
             expect(build.evaluateAST("充盈威力", attrs)).toBeCloseTo(attrs.充盈威力, 6)
         })
 
+        it("getFullnessWeaponSources 返回各武器转化来源，合计等于武器转化充盈威力", () => {
+            const mkMod = (id: number, 类型: string, 触发: number, 充盈转化: number) =>
+                new LeveledMod({
+                    id,
+                    icon: "Test01",
+                    名称: "测试·充盈",
+                    版本: "1.0",
+                    系列: "测试",
+                    品质: "金",
+                    极性: "A",
+                    耐受: 15,
+                    类型,
+                    触发,
+                    充盈转化: 充盈转化,
+                    效果: "测试用充盈转化MOD",
+                })
+            // 近战与远程武器都触发溢出，且不携带角色 MOD 充盈威力加成，便于直接对账
+            const build = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                hpPercent: 0.5,
+                resonanceGain: 2,
+                meleeMods: [mkMod(999903, "近战", 4, 1)],
+                rangedMods: [mkMod(999904, "远程", 5, 1)],
+                melee: new LeveledWeapon(10102),
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "[近战]",
+            })
+            const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
+            const sources = build.getFullnessWeaponSources()
+
+            // 每个来源携带武器名称与贡献值，且与溢出触发 × 充盈转化一致
+            expect(sources.length).toBeGreaterThan(0)
+            for (const source of sources) {
+                expect(source.weapon.名称).toBeTruthy()
+                expect(source.value).toBeCloseTo(Math.max(0, source.triggerRate - 1) * source.conversionRate, 6)
+            }
+            // 至少近战武器贡献非零溢出转化
+            expect(sources.some(source => source.value > 0)).toBe(true)
+            // 武器转化来源合计 = 角色充盈威力（本构建无角色 MOD 充盈威力加成）
+            const total = sources.reduce((sum, source) => sum + source.value, 0)
+            expect(total).toBeCloseTo(attrs.充盈威力, 6)
+        })
+
         it("技能字段带 tag 充盈 时，最终伤害应乘以 (1+充盈威力)", () => {
             const mkFullnessMod = (id: number, 充盈威力: number) =>
                 new LeveledMod({
@@ -1783,6 +1830,15 @@ describe("evaluateAST函数测试", () => {
             expect(build.validateAST("攻击!")).toBeUndefined()
             expect(build.validateAST("攻击! * 2")).toBeUndefined()
             expect(build.validateAST("q::不存在!")).toContain("找不到标识符")
+        })
+
+        it("角色:: 命名空间 + ! 后缀应解析为角色属性", () => {
+            const build = forceBuild()
+            const attrs = build.calculateWeaponAttributes()
+            // 角色::攻击! 命中角色属性「攻击」
+            expect(build.evaluateAST("角色::攻击!", attrs)).toBeCloseTo(attrs.攻击, 6)
+            expect(build.validateAST("角色::攻击!")).toBeUndefined()
+            expect(build.validateAST("角色::不存在!")).toContain("找不到标识符")
         })
     })
 

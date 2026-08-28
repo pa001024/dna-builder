@@ -75,6 +75,7 @@ export function createCharBuildFromSettings(
         customVariables: charSettings.customVariables,
         timeline: hydratedTimeline,
         timelineDPS: charSettings.timelineDPS,
+        extraMastery: charSettings.extraMastery,
         teamWeaponCategories: [charSettings.team1Weapon, charSettings.team2Weapon]
             .filter((weapon): weapon is number => typeof weapon === "number")
             .map(weapon => LeveledWeaponHelper.getCategory(weapon)),

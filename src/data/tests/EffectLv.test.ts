@@ -40,6 +40,7 @@ function baseSettings(overrides: Record<string, unknown> = {}) {
         useGlobal: false,
         effectConfig: {} as Record<string, number>,
         actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
+        extraMastery: "",
         ...overrides,
     }
 }

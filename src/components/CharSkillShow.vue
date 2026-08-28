@@ -75,13 +75,19 @@ watchEffect(() => {
                 >
                     CD: {{ selectedSkill.skillData.cd }}s
                 </span>
+                <button
+                    class="ml-auto mr-2 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-xs transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    @click="expandedBehavior[selectedSkill.safeName] = !expandedBehavior[selectedSkill.safeName]"
+                >
+                    EX
+                </button>
             </div>
 
             <!-- 技能描述 -->
             <p class="mt-2.5 leading-relaxed text-base-content/85">{{ $t(selectedSkill.描述 || "") }}</p>
 
             <!-- 技能行为（可展开显示 skill.行为 字段） -->
-            <div v-if="selectedSkill.skillData.行为" class="mt-2.5">
+            <div v-if="selectedSkill?.skillData.行为 && expandedBehavior[selectedSkill.safeName]" class="mt-2.5">
                 <button
                     type="button"
                     class="flex flex-col w-full cursor-pointer gap-1.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs font-medium text-base-content/70 transition-colors duration-150 hover:border-primary/40 hover:text-primary active:scale-[0.99]"

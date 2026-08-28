@@ -57,6 +57,8 @@ export interface CharBuildWorkerSnapshot {
     customVariables: [string, string][]
     timelineDPS: boolean
     teamWeaponCategories: string[]
+    /** 额外精通武器类型（如 "长柄"） */
+    extraMastery: string
 }
 
 /**
@@ -118,6 +120,7 @@ export function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnaps
         customVariables: charBuild.customVariables,
         timelineDPS: charBuild.timelineDPS,
         teamWeaponCategories: charBuild.teamWeaponCategories,
+        extraMastery: charBuild.extraMastery,
     }
 }
 
@@ -156,6 +159,7 @@ export function createBuildFromSnapshot(snapshot: CharBuildWorkerSnapshot) {
         customVariables: snapshot.customVariables,
         timelineDPS: snapshot.timelineDPS,
         teamWeaponCategories: snapshot.teamWeaponCategories,
+        extraMastery: snapshot.extraMastery,
     }
     return new CharBuild(options)
 }

@@ -7773,12 +7773,6 @@ export const partyTopicData_jp: PartyTopic[] = [
         },
         dialogues: [
             {
-                id: 80240201,
-                content: "四年前",
-                voice: "inv/Suyi/002/C8DF77FA",
-                next: 80240202,
-            },
-            {
                 id: 80240202,
                 content: "クロ、もう行くね。パパとママのこと、頼んだよ。",
                 voice: "inv/Suyi/002/C8DF7824",
@@ -8058,6 +8052,12 @@ export const partyTopicData_jp: PartyTopic[] = [
                 content: "荷物持って、とっとと出て行きなさい！二度と顔見せるんじゃないよ……！！",
                 voice: "inv/Suyi/002/C8DF7E36",
                 npc: 790084,
+            },
+            {
+                id: 80240201,
+                content: "四年前",
+                voice: "inv/Suyi/002/C8DF77FA",
+                next: 80240202,
             },
         ],
     },

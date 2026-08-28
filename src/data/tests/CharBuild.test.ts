@@ -1102,6 +1102,67 @@ describe("CharBuild类测试", () => {
             expect(unmatchedBuild.meleeWeapon.addAttr).toEqual({})
             expect(unmatchedBuild.calculateAttributes().技能威力).toBe(1)
         })
+
+        it("额外精通武器使匹配类型的灾厄熔炼潜能生效并按 1.2 倍攻击乘算", () => {
+            // 黎瑟精通：重剑 / 霰弹枪，未精通「长柄」；设置额外精通长柄后，
+            // 灾厄武器「无止无休」(10299, 长柄) 的熔炼潜能应生效，且攻击按精通 1.2 倍乘算
+            const build = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 0,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10299), // 无止无休（近战长柄，灾厄武器）
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+                extraMastery: "长柄",
+            })
+
+            // 未设置额外精通时灾厄熔炼潜能不生效
+            const baseline = new CharBuild({
+                char: new LeveledChar("黎瑟"),
+                skillLevel: 10,
+                hpPercent: 0.5,
+                resonanceGain: 0,
+                charMods: [],
+                buffs: [],
+                melee: new LeveledWeapon(10299),
+                ranged: new LeveledWeapon(20601),
+                baseName: "快速出击",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0.5,
+                targetFunction: "伤害",
+            })
+            expect(baseline.meleeWeapon.forgeEffective).toBe(false)
+            expect(baseline.meleeWeapon.addAttr).toEqual({})
+            expect(baseline.calculateWeaponAttributes(baseline.meleeWeapon).weapon!.攻击).toBeCloseTo(baseline.meleeWeapon.基础攻击, 2)
+
+            // 额外精通长柄后：精通匹配，熔炼潜能生效
+            expect(build.isWeaponCategoryMastered(build.meleeWeapon)).toBe(true)
+            expect(build.meleeWeapon.forgeEffective).toBe(true)
+            expect(build.meleeWeapon.addAttr.技能威力).toBeCloseTo(0.45, 10)
+            expect(build.calculateAttributes().技能威力).toBeGreaterThan(1)
+
+            // 1.2 倍攻击乘算正确应用
+            const meleeAttrs = build.calculateWeaponAttributes(build.meleeWeapon).weapon
+            expect(meleeAttrs!.攻击).toBeCloseTo(build.meleeWeapon.基础攻击 * 1.2, 2)
+
+            // 克隆保留额外精通
+            const cloned = build.clone()
+            expect(cloned.isWeaponCategoryMastered(cloned.meleeWeapon)).toBe(true)
+            expect(cloned.meleeWeapon.forgeEffective).toBe(true)
+
+            // 快照往返保留额外精通
+            const restored = createBuildFromSnapshot(createWorkerSnapshot(build))
+            expect(restored.isWeaponCategoryMastered(restored.meleeWeapon)).toBe(true)
+            expect(restored.meleeWeapon.forgeEffective).toBe(true)
+        })
     })
 
     // 错误处理测试
@@ -2243,6 +2304,7 @@ describe("CharBuild类测试", () => {
                 useGlobal: false,
                 effectConfig: {},
                 actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
+                extraMastery: "",
             })
             const cloned = build.clone()
             expect(build.calculate()).toBe(cloned.calculate())

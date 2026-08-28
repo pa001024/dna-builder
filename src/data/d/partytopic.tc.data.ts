@@ -7520,12 +7520,6 @@ export const partyTopicData_tc: PartyTopic[] = [
         },
         dialogues: [
             {
-                id: 80240201,
-                content: "四年前",
-                voice: "inv/Suyi/002/C8DF77FA",
-                next: 80240202,
-            },
-            {
                 id: 80240202,
                 content: "小黑，我要走了。我走之後，爸媽只能托你來照顧了。",
                 voice: "inv/Suyi/002/C8DF7824",
@@ -7795,6 +7789,12 @@ export const partyTopicData_tc: PartyTopic[] = [
                 content: "拿好你的東西，滾！再也別回來！滾——",
                 voice: "inv/Suyi/002/C8DF7E36",
                 npc: 790084,
+            },
+            {
+                id: 80240201,
+                content: "四年前",
+                voice: "inv/Suyi/002/C8DF77FA",
+                next: 80240202,
             },
         ],
     },

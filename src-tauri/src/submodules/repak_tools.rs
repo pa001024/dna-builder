@@ -255,12 +255,27 @@ fn collect_pack_files(
     Ok(())
 }
 
+/// 每个文件处理结束（成功或失败）时上报一次进度的 RAII 守卫，
+/// 保证循环内任何 `continue` 分支都不会漏报进度。
+struct DecompileProgressGuard<'a> {
+    completed: &'a AtomicUsize,
+    on_progress: &'a dyn Fn(usize),
+}
+
+impl Drop for DecompileProgressGuard<'_> {
+    fn drop(&mut self) {
+        let done = self.completed.fetch_add(1, Ordering::Relaxed) + 1;
+        (self.on_progress)(done);
+    }
+}
+
 /// 使用 unluac 将 Lua 字节码反编译到指定目录。
 pub fn decompile_lua_bytecode_files(
     input_files: &[String],
     source_root: &Path,
     unluac_path: &Path,
     output_dir: &Path,
+    on_progress: impl Fn(usize) + Send + Sync + 'static,
 ) -> Result<LuaDecompileBatchResult, String> {
     if !unluac_path.exists() {
         return Err(format!("unluac 文件不存在: {}", unluac_path.display()));
@@ -281,12 +296,16 @@ pub fn decompile_lua_bytecode_files(
     let next_index = Arc::new(AtomicUsize::new(0));
     let results = Arc::new(Mutex::new(vec![None; input_files.len()]));
     let failed_files = Arc::new(Mutex::new(Vec::<String>::new()));
+    let progress = Arc::new(on_progress);
+    let completed = Arc::new(AtomicUsize::new(0));
 
     thread::scope(|scope| {
         for _ in 0..worker_count {
             let next_index = Arc::clone(&next_index);
             let results = Arc::clone(&results);
             let failed_files = Arc::clone(&failed_files);
+            let progress = Arc::clone(&progress);
+            let completed = Arc::clone(&completed);
 
             scope.spawn(move || {
                 loop {
@@ -294,6 +313,11 @@ pub fn decompile_lua_bytecode_files(
                     if index >= input_files.len() {
                         break;
                     }
+                    // 每个文件处理结束后统一上报一次进度（含失败分支），由守卫在作用域退出时触发
+                    let _progress_guard = DecompileProgressGuard {
+                        completed: &completed,
+                        on_progress: progress.as_ref(),
+                    };
 
                     let input_file = &input_files[index];
                     let input_path = Path::new(input_file);

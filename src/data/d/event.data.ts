@@ -15,6 +15,13 @@ export interface EventItem {
         rewardCount: number[]
         rewardId: number[]
     }
+    topUpDetail?: {
+        eventDes: string
+        eventId: number
+        eventRule: string
+        jumpId: number
+        scoreRankReward: Record<string, number>
+    }
 }
 
 export const eventData: EventItem[] = [
@@ -510,6 +517,23 @@ export const eventData: EventItem[] = [
         desc: "活动期间累计充值领取赠礼",
         startTime: 3376699200,
         endTime: 3384925200,
+        topUpDetail: {
+            eventDes: "累计积分",
+            eventId: 113001,
+            eventRule:
+                "活动期间购买皎皎的月度订单、吟游诗集、月石晶胚及直购礼包时，会获得活动积分。积分达到对应阶段后可领取奖励。活动结束后，所有未领取的奖励会通过补领邮件补发。\n参与本活动的商品及对应积分如下所示：",
+            jumpId: 85,
+            scoreRankReward: {
+                "60": 11300101,
+                "300": 11300102,
+                "1000": 11300103,
+                "2000": 11300104,
+                "4000": 11300105,
+                "7000": 11300106,
+                "12000": 11300107,
+                "20000": 11300108,
+            },
+        },
     },
     {
         id: 114001,

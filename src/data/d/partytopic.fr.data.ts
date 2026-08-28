@@ -7869,12 +7869,6 @@ export const partyTopicData_fr: PartyTopic[] = [
         },
         dialogues: [
             {
-                id: 80240201,
-                content: "— Quatre ans plus tôt —",
-                voice: "inv/Suyi/002/C8DF77FA",
-                next: 80240202,
-            },
-            {
                 id: 80240202,
                 content: "Charbon... je pars. Une fois que je serai partie, il faudra que tu t’occupes de papa et maman à ma place.",
                 voice: "inv/Suyi/002/C8DF7824",
@@ -8159,6 +8153,12 @@ export const partyTopicData_fr: PartyTopic[] = [
                 content: "Prends tes affaires et disparais ! Ne reviens jamais ! Pars !",
                 voice: "inv/Suyi/002/C8DF7E36",
                 npc: 790084,
+            },
+            {
+                id: 80240201,
+                content: "— Quatre ans plus tôt —",
+                voice: "inv/Suyi/002/C8DF77FA",
+                next: 80240202,
             },
         ],
     },

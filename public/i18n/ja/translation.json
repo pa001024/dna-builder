@@ -6272,6 +6272,9 @@
         "enter_title": "タイトルを入力してください",
         "equipment_preview": "装備プレビュー",
         "export_code": "コードをコピーする",
+        "extra_mastery_clear": "追加熟練を解除",
+        "extra_mastery_desc": "追加で熟練できる武器タイプを選択します。選択後はそのタイプの武器が熟練ボーナス（攻撃×1.2）を受け、災厄武器の鍛造潜在能力も有効になります。",
+        "extra_mastery_hint": "追加熟練武器を選択",
         "faction": "陣営",
         "fetch_char_info_failed": "キャラクター情報の取得に失敗しました",
         "fetch_weapon_info_failed": "武器情報の取得に失敗しました",
@@ -8028,6 +8031,8 @@
         "top_actions": "上部のボタンで設定の共有、自動構築、プロジェクトの保存などを行います",
         "weapon_select": "ここをクリックして武器を変更/精錬を設定"
     },
+    "UI_Armory_ExtraExcelResource": "アンロック消費素材",
+    "UI_Armory_ExtraExcelWeponTitle": "追加熟練武器",
     "UI_FORGING_BLUEPRINT": "設計図：",
     "unpack": {
         "desc": "pakファイルを読み込み、書き出します",

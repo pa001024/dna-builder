@@ -6354,6 +6354,9 @@
         "enter_title": "Please enter title",
         "equipment_preview": "Equipment Preview",
         "export_code": "Copy code",
+        "extra_mastery_clear": "Clear extra proficiency",
+        "extra_mastery_desc": "Choose an extra weapon proficiency type. Weapons of that type then gain the proficiency bonus (ATK ×1.2), and calamity weapons' forge potentials also become effective.",
+        "extra_mastery_hint": "Select extra weapon proficiency",
         "faction": "Faction",
         "fetch_char_info_failed": "Failed to fetch character info",
         "fetch_weapon_info_failed": "Failed to fetch weapon info",
@@ -8114,6 +8117,8 @@
         "top_actions": "Use top buttons to share configuration, auto-build, save project, etc.",
         "weapon_select": "Click here to change weapon/set refinement"
     },
+    "UI_Armory_ExtraExcelResource": "Materials required to unlock",
+    "UI_Armory_ExtraExcelWeponTitle": "Additional Weapon Proficiency",
     "UI_FORGING_BLUEPRINT": "Blueprint: ",
     "unpack": {
         "desc": "Read and export pak files",

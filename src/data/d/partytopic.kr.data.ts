@@ -7749,12 +7749,6 @@ export const partyTopicData_kr: PartyTopic[] = [
         },
         dialogues: [
             {
-                id: 80240201,
-                content: "4년 전",
-                voice: "inv/Suyi/002/C8DF77FA",
-                next: 80240202,
-            },
-            {
                 id: 80240202,
                 content: "까미야, 나 갈게. 나 없으면 엄마랑 아빠는 네가 챙겨 드려야 해.",
                 voice: "inv/Suyi/002/C8DF7824",
@@ -8031,6 +8025,12 @@ export const partyTopicData_kr: PartyTopic[] = [
                 content: "네 물건 챙겨서, 당장 나가! 두 번 다시 돌아오지 마! 꼴도 보기 싫으니까!",
                 voice: "inv/Suyi/002/C8DF7E36",
                 npc: 790084,
+            },
+            {
+                id: 80240201,
+                content: "4년 전",
+                voice: "inv/Suyi/002/C8DF77FA",
+                next: 80240202,
             },
         ],
     },

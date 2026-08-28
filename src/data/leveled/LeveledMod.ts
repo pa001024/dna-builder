@@ -368,6 +368,8 @@ export class LeveledMod implements Mod {
             昂扬: 0,
             背水: 0,
             增伤: 0,
+            元素增伤: 0,
+            物理增伤: 0,
             武器伤害: 0,
             技能伤害: 0,
             独立增伤: 0,

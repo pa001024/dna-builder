@@ -76,6 +76,7 @@ const MAPPINGS: Mapping[] = [
     { source: "Dungeon", targetStem: "dungeon", targetVar: "dungeonsData", locales: ["cn"] },
     { source: "Dispatch", targetStem: "dynquest", targetVar: "t", locales: ["cn"] },
     { source: "Cutoff", targetStem: "cutoff", targetVar: "cutoffData", locales: ["cn"] },
+    { source: "ExtraExcelWeapon", targetStem: "charext", targetVar: "charExtraExcelWeapon", locales: ["cn"] },
     {
         source: "Event",
         targetStem: "event",

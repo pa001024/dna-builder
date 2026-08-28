@@ -25,6 +25,7 @@ const selectedMergedPaths = ref<string[]>([])
 const showSettingsDialog = ref(false)
 const loading = ref(false)
 const exportProgress = ref<number | null>(null)
+const luaProgress = ref<number | null>(null)
 const packProgress = ref<number | null>(null)
 const pakPathFilter = ref("")
 const filePathFilter = ref("")
@@ -249,15 +250,25 @@ async function exportSelectedFiles() {
             exportProgress.value = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 0
         })
         const luaFiles = result.flatMap(item => item.exportedFiles).filter(path => path.toLowerCase().endsWith(".lua"))
+        // 导出阶段完成，切换为反编译进度浮层
+        exportProgress.value = null
         if (luaFiles.length && unluacPath.value.trim() && luaOutputPath.value.trim()) {
-            const decompileResult = await decompileLuaBytecodeFiles(
-                luaFiles,
-                targetPath.value.trim(),
-                unluacPath.value.trim(),
-                luaOutputPath.value.trim()
-            )
-            if (decompileResult.failedFiles.length) {
-                ui.showErrorMessage(`反编译失败 ${decompileResult.failedFiles.length} 个文件`)
+            luaProgress.value = 0
+            try {
+                const decompileResult = await decompileLuaBytecodeFiles(
+                    luaFiles,
+                    targetPath.value.trim(),
+                    unluacPath.value.trim(),
+                    luaOutputPath.value.trim(),
+                    (current, total) => {
+                        luaProgress.value = total > 0 ? Math.min(100, Math.round((current / total) * 100)) : 0
+                    }
+                )
+                if (decompileResult.failedFiles.length) {
+                    ui.showErrorMessage(`反编译失败 ${decompileResult.failedFiles.length} 个文件`)
+                }
+            } finally {
+                luaProgress.value = null
             }
         }
         ui.showSuccessMessage("导出完成")
@@ -439,6 +450,21 @@ onMounted(async () => {
         >
             <div class="mb-2 text-center text-sm font-medium tabular-nums">{{ exportProgress }}%</div>
             <progress class="progress progress-primary block h-2 w-full" :value="exportProgress" max="100" />
+        </div>
+    </div>
+
+    <!-- 反编译进度浮层 -->
+    <div
+        v-if="luaProgress !== null"
+        class="fixed bottom-4 left-1/2 z-50 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2"
+        role="status"
+        aria-live="polite"
+    >
+        <div
+            class="rounded-xs border border-accent/30 bg-base-100/85 p-3 shadow-lg backdrop-blur-md animate-ef-rise motion-reduce:animate-none"
+        >
+            <div class="mb-2 text-center text-sm font-medium tabular-nums">反编译中 {{ luaProgress }}%</div>
+            <progress class="progress progress-accent block h-2 w-full" :value="luaProgress" max="100" />
         </div>
     </div>
 

@@ -242,6 +242,8 @@ export interface CharBuildOptions {
     timelineDPS?: boolean
     teamWeapons?: (number | string)[]
     teamWeaponCategories?: string[]
+    /** 额外精通武器类型（如 "长柄"），未解锁时为空字符串 */
+    extraMastery?: string
 }
 
 export class CharBuild {
@@ -456,6 +458,8 @@ export class CharBuild {
     public skillWeapon?: LeveledSkillWeapon
     public timeline?: CharBuildTimeline
     public timelineDPS = false
+    /** 额外精通武器类型（如 "长柄"），未解锁时为空字符串 */
+    public extraMastery = ""
 
     get baseWithTarget() {
         return `${this.baseName}::${this.targetFunction}`
@@ -486,6 +490,7 @@ export class CharBuild {
     }
 
     constructor(options: CharBuildOptions) {
+        this.extraMastery = options.extraMastery || ""
         this.skillLevel = options.skillLevel || 10
         this.char = options.char
         this.hpPercent = Math.max(0, Math.min(1, options.hpPercent))
@@ -557,11 +562,12 @@ export class CharBuild {
 
     /**
      * 判断角色精通是否匹配武器类型。
+     * 除角色自带精通外，额外精通武器（如灾厄武器所需类型）也视为已精通。
      * @param weapon 目标武器
      * @returns 是否匹配精通类型
      */
     public isWeaponCategoryMastered(weapon: Pick<LeveledWeapon | LeveledSkillWeapon, "类别">) {
-        return this.char.精通.includes(weapon.类别) || this.char.精通.includes("全部类型")
+        return this.char.精通.includes(weapon.类别) || this.char.精通.includes("全部类型") || weapon.类别 === this.extraMastery
     }
 
     /**
@@ -895,6 +901,23 @@ export class CharBuild {
         const triggerRate = Math.round(weapon.基础触发 * (1 + triggerRateBonus) * 100) / 100
         const conversionRate = this.getTotalBonus("充盈转化", prefix)
         return { triggerRate, conversionRate }
+    }
+
+    /**
+     * 获取各武器对角色充盈威力的武器转化来源，用于充盈威力来源明细展示。
+     * 与 calculateWeaponAttributes 的汇总逻辑保持一致：贡献值 = 触发率溢出 100% 的部分 × 该武器充盈转化。
+     * @returns 武器转化来源列表（武器、溢出触发率、充盈转化率、贡献值）
+     */
+    public getFullnessWeaponSources(): {
+        weapon: LeveledWeapon | LeveledSkillWeapon
+        triggerRate: number
+        conversionRate: number
+        value: number
+    }[] {
+        return this.getAllFullnessWeapons().map(w => {
+            const { triggerRate, conversionRate } = this.getWeaponFullness(w)
+            return { weapon: w, triggerRate, conversionRate, value: Math.max(0, triggerRate - 1) * conversionRate }
+        })
     }
 
     /**
@@ -3194,6 +3217,7 @@ export class CharBuild {
             timeline: this.timeline,
             timelineDPS: this.timelineDPS,
             teamWeaponCategories: [...this.teamWeaponCategories],
+            extraMastery: this.extraMastery,
         })
         return cloned
     }

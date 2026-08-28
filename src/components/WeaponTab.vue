@@ -388,8 +388,7 @@ const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
                             <li
                                 v-if="
                                     key === '攻击' &&
-                                    (charBuild.char.精通.includes(baseWeapon.类别) ||
-                                        charBuild.char.精通.includes('全部类型'))
+                                    (charBuild.char.精通.includes(baseWeapon.类别) || charBuild.char.精通.includes('全部类型'))
                                 "
                                 class="flex justify-between gap-8 text-sm text-primary"
                             >
@@ -419,7 +418,7 @@ const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
                 </template>
                 <div
                     class="cursor-pointer flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
-                    @click="$emit('addSkill', `${wkey}::${key}`)"
+                    @click="$emit('addSkill', `${wkey}::${key}!`)"
                 >
                     <div class="flex items-center gap-1 text-sm text-base-content/80">
                         <span>{{

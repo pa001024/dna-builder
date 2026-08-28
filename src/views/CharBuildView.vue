@@ -33,7 +33,9 @@ import {
     weaponData,
 } from "@/data"
 import { createBuffFromSettings } from "@/data/CharBuildHelper"
+import { charExtraExcelWeapon } from "@/data/d/charext.data"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
+import { resourceMap } from "@/data/d/resource.data"
 import { dataPackHydrationKey, isDataPackHydrated } from "@/data/data-pack-bridge"
 import type { SkillWeapon, Weapon } from "@/data/data-types"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
@@ -320,6 +322,7 @@ const charBuild = computed(() => {
             customVariables: charSettings.value.customVariables,
             timeline: charSettings.value.actions.enable ? getInlineActions() : getTimelineByName(charSettings.value.baseName),
             teamWeapons: [charSettings.value.team1Weapon, charSettings.value.team2Weapon],
+            extraMastery: charSettings.value.extraMastery,
         })
         return b
     } catch {
@@ -420,9 +423,11 @@ function getWeaponTooltipProps(weapon: LeveledWeapon) {
 function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTooltipData | undefined {
     if (tab.name === "角色") {
         const props = pickNumericProps(charBuild.value.char.加成)
+        // 精通列表包含额外精通武器（如灾厄武器所需类型）
+        const mastery = [...(charBuild.value.char.精通 || []), ...(charBuild.value.extraMastery ? [charBuild.value.extraMastery] : [])]
         return {
             title: charBuild.value.char.名称,
-            mastery: charBuild.value.char.精通,
+            mastery,
             type: charBuild.value.char.属性,
             props,
             propEntries: Object.entries(props).filter(([, val]) => val !== 0 && val != null),
@@ -1065,8 +1070,86 @@ function toggleSection(section: keyof typeof collapsedSections.value) {
 const charTab = ref(charBuild.value.selectedSkillType)
 
 function addSkill(skillName: string) {
-    targetFunction.value += skillName.replace(/\//g, "_")
+    const cleaned = skillName.replace(/\//g, "_")
+    // 已带命名空间的字段（如 近战::攻击）直接追加
+    if (skillName.includes("::")) {
+        targetFunction.value += cleaned
+        return
+    }
+    // 未带命名空间的技能字段自动补全对应命名空间（角色主技能 e/q/p，其余按技能 safeName）
+    const ns = getSkillFieldNamespace(skillName)
+    if (ns) {
+        targetFunction.value += `${ns}::${cleaned}`
+        return
+    }
+    // 角色属性：补全 角色:: 命名空间并以 ! 强制按属性解析（如 角色::攻击!）
+    targetFunction.value += `角色::${cleaned}!`
 }
+
+/**
+ * 获取当前选中技能字段对应的 AST 命名空间。
+ * 角色主技能按 e/q/p 映射；其余技能（含武器技能）按技能 safeName 映射，
+ * 与 evaluateAST 的 skillAttrs 键一致（skillAttrs 仅按技能名与 e/q/p 建立索引）。
+ * @param skillName 技能字段名
+ * @returns 命名空间；非技能字段（如角色属性）返回空字符串
+ */
+function getSkillFieldNamespace(skillName: string): string {
+    const skill = charBuild.value.selectedSkill
+    if (!skill) return ""
+    const isField = skill.字段.some(field => field.名称 === skillName || field.safeName === skillName)
+    if (!isField) return ""
+    const index = charBuild.value.skills.findIndex(s => s.名称 === skill.名称)
+    if (index >= 0) return ["e", "q", "p"][index] || skill.safeName
+    return skill.safeName
+}
+
+//#region 额外精通武器
+const extraMasteryModalShow = ref(false)
+
+/**
+ * 可选的额外精通武器类型：排除角色自带精通（精通「全部类型」的角色无额外精通可选）。
+ */
+const extraMasteryOptions = computed(() => {
+    dataPackTick.value
+    const innate = new Set(charBuild.value.char.精通 || [])
+    if (innate.has("全部类型")) return []
+    return charExtraExcelWeapon.filter(item => !innate.has(item.名称))
+})
+
+/**
+ * 当前已选择的额外精通武器条目。
+ */
+const selectedExtraMastery = computed(() => charExtraExcelWeapon.find(item => item.名称 === charSettings.value.extraMastery) || null)
+
+/**
+ * 选择额外精通武器类型并刷新构筑。
+ * @param type 武器类型中文名
+ * @returns void
+ */
+function selectExtraMastery(type: string) {
+    charSettings.value.extraMastery = type
+    extraMasteryModalShow.value = false
+    updateCharBuild()
+}
+
+/**
+ * 清除额外精通武器类型并刷新构筑。
+ * @returns void
+ */
+function clearExtraMastery() {
+    charSettings.value.extraMastery = ""
+    updateCharBuild()
+}
+
+/**
+ * 按资源 ID 取资源名，缺失时回退到原始 ID。
+ * @param id 资源 ID
+ * @returns 资源展示名
+ */
+function getExtraMasteryResourceName(id: number): string {
+    return resourceMap.get(id)?.name || String(id)
+}
+//#endregion
 
 /**
  * 添加一行自定义表达式变量。
@@ -1406,6 +1489,59 @@ async function syncModFromGameToSecond(
         <div class="modal-backdrop" @click="weapon_select_model_show = false" />
     </dialog>
 
+    <!-- 额外精通武器选择弹窗 -->
+    <dialog class="modal" :class="{ 'modal-open': extraMasteryModalShow }">
+        <div class="modal-box bg-base-300 w-11/12 max-w-3xl">
+            <h3 class="text-lg font-bold mb-1">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</h3>
+            <p class="text-xs text-base-content/60 mb-4">{{ $t("char-build.extra_mastery_desc") }}</p>
+            <div class="grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,1fr))]">
+                <button
+                    v-for="item in extraMasteryOptions"
+                    :key="item.id"
+                    type="button"
+                    class="flex flex-col items-center gap-1.5 rounded-xs border p-2.5 cursor-pointer transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        charSettings.extraMastery === item.名称
+                            ? 'border-primary bg-primary/10 text-primary shadow-sm'
+                            : 'border-base-content/20 text-base-content/70 hover:border-primary/60 hover:text-primary'
+                    "
+                    @click="selectExtraMastery(item.名称)"
+                >
+                    <img :src="LeveledWeapon.typeUrl(item.名称)" alt="" class="size-9 object-contain" />
+                    <span class="text-xs">{{ $t(item.名称) }}</span>
+                </button>
+            </div>
+            <div v-if="selectedExtraMastery" class="mt-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    <div class="text-sm font-semibold">{{ $t(selectedExtraMastery.名称) }}</div>
+                    <div class="shrink-0 font-mono text-[10px] tracking-[0.2em] text-base-content/40 uppercase">
+                        {{ selectedExtraMastery.id }}
+                    </div>
+                </div>
+                <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t("UI_Armory_ExtraExcelResource") }}</div>
+                <div class="grid gap-1.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+                    <ResourceCostItem
+                        v-for="[resourceId, count] in Object.entries(selectedExtraMastery.消耗)"
+                        :key="resourceId"
+                        :name="getExtraMasteryResourceName(Number(resourceId))"
+                        :value="count"
+                    />
+                </div>
+            </div>
+            <div class="mt-4 flex justify-between gap-2">
+                <button v-if="charSettings.extraMastery" type="button" class="btn btn-sm btn-error btn-outline" @click="clearExtraMastery">
+                    <Icon icon="ri:delete-bin-line" class="size-4" />
+                    {{ $t("char-build.extra_mastery_clear") }}
+                </button>
+                <div class="ml-auto" />
+                <button type="button" class="btn btn-sm" @click="extraMasteryModalShow = false">
+                    {{ $t("取消") }}
+                </button>
+            </div>
+        </div>
+        <div class="modal-backdrop" @click="extraMasteryModalShow = false" />
+    </dialog>
+
     <!-- 配装分享弹窗 -->
     <DialogModel v-model="share_model_show" @submit="confirmShare" class="bg-base-300">
         <div class="space-y-4">
@@ -1639,6 +1775,38 @@ async function syncModFromGameToSecond(
                                     />
                                     <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
                                 </div>
+                            </FullTooltip>
+                        </div>
+                        <!-- 额外精通武器：虚线加号框，点击选择额外精通的武器类型 -->
+                        <div v-if="extraMasteryOptions.length > 0 || selectedExtraMastery" class="flex items-center gap-2 shrink-0">
+                            <FullTooltip side="bottom">
+                                <template #tooltip>
+                                    <div class="flex flex-col gap-1 max-w-60">
+                                        <div class="text-sm font-bold">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</div>
+                                        <div class="text-xs text-base-content/70">
+                                            {{ selectedExtraMastery ? $t(selectedExtraMastery.名称) : $t("char-build.extra_mastery_hint") }}
+                                        </div>
+                                    </div>
+                                </template>
+                                <button
+                                    type="button"
+                                    class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-dashed aspect-square flex items-center justify-center transition-colors duration-150"
+                                    :class="
+                                        selectedExtraMastery
+                                            ? 'border-primary/60 text-primary hover:border-primary hover:shadow-lg hover:shadow-primary/40'
+                                            : 'border-base-100 text-base-content/50 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    @click="extraMasteryModalShow = true"
+                                >
+                                    <img
+                                        v-if="selectedExtraMastery"
+                                        :src="LeveledWeapon.typeUrl(selectedExtraMastery.名称)"
+                                        alt=""
+                                        class="w-full h-full object-cover object-top"
+                                    />
+                                    <Icon v-else icon="ri:add-line" class="size-5" />
+                                    <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
+                                </button>
                             </FullTooltip>
                         </div>
                     </div>

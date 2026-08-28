@@ -61,6 +61,8 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
         targetFunction: "",
         customVariables: [] as [string, string][],
         charSkillLevel: 10,
+        /** 额外精通武器类型（如 "长柄"），空字符串表示未解锁 */
+        extraMastery: "",
         meleeWeapon: signatureWeapon?.type === "近战" ? signatureWeapon.id : 10206, //"枯朽",
         meleeWeaponLevel: 80,
         meleeWeaponRefine: 5,

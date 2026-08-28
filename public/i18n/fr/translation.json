@@ -6382,6 +6382,9 @@
         "exclude_default_buff": "Exclure les BUFF par défaut",
         "export_build": "Exporter la construction",
         "export_code": "Copier le code",
+        "extra_mastery_clear": "Effacer la maîtrise supplémentaire",
+        "extra_mastery_desc": "Choisissez un type de maîtrise d'arme supplémentaire. Les armes de ce type bénéficient alors du bonus de maîtrise (ATQ ×1,2) et les potentiels de forge des armes calamiteuses s'activent également.",
+        "extra_mastery_hint": "Choisir une maîtrise d'arme supplémentaire",
         "faction": "Faction",
         "fetch_char_info_failed": "Echec de la recuperation des informations du personnage",
         "fetch_weapon_info_failed": "Echec de la recuperation des informations de l'arme",
@@ -8170,6 +8173,8 @@
         "top_actions": "Utilisez les boutons en haut pour partager la configuration, construire automatiquement, sauvegarder le projet, etc.",
         "weapon_select": "Cliquez ici pour changer d'arme/définir le raffinement"
     },
+    "UI_Armory_ExtraExcelResource": "Matériaux requis",
+    "UI_Armory_ExtraExcelWeponTitle": "Arme supplémentaire",
     "UI_FORGING_BLUEPRINT": "Plan de fabrication : ",
     "unpack": {
         "desc": "Lire et exporter les fichiers pak",

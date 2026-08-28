@@ -795,6 +795,8 @@ onBeforeUnmount(() => {
             </div>
         </section>
 
+        <CharExtraExcelWeaponUnlock :char="char" />
+
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <AniTabs
                 v-model="activeBottomTab"
