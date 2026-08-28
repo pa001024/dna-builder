@@ -6,6 +6,7 @@ import {
     CDN_LIST,
     downloadHotUpdateAssets,
     getDownloadProgress,
+    getFullPackageInfo,
     getHotUpdatePakFilesInfo,
     getHotUpdateResDiscreteInfo,
     getHotUpdateVersionList,
@@ -40,6 +41,9 @@ export const useGameUpdateStore = defineStore("gameUpdate", () => {
     const customChannel = useLocalStorage("selectedChannel.custom", "")
     const concurrentThreads = useLocalStorage("download_threads", 8)
 
+    // 按渠道分区的游戏安装路径（更新页选择目录时写入），确保迷你启动器与完整启动器检查同一份安装
+    const channelGamePathMap = useLocalStorage<Record<string, string>>("game.path_by_channel", {})
+
     /**
      * 判断当前是否选中了自定义 channel。
      * @returns 是否选中自定义 channel
@@ -57,6 +61,97 @@ export const useGameUpdateStore = defineStore("gameUpdate", () => {
             return selectedChannel.value
         }
         return customChannel.value.trim()
+    }
+
+    /**
+     * 判断 CDN 是否面向海外（AWS 与「海外」同属海外节点，仅海外渠道可用）。
+     * @param cdnUrl CDN 地址
+     * @returns 是否海外 CDN
+     */
+    function isOverseasCDN(cdnUrl: string) {
+        const cdn = CDN_LIST.find(item => item.url === cdnUrl)
+        return cdn?.name === "海外" || cdn?.name === "AWS"
+    }
+
+    /**
+     * 当前渠道可用的 CDN 列表（与更新页一致：海外渠道仅海外 CDN，其余排除海外）。
+     * 自定义 channel 时不做 CDN 过滤（内容地址可能落在任意节点）。
+     * @returns 可用 CDN 列表
+     */
+    const availableCDN = computed(() => {
+        const activeChannel = getActiveChannel()
+        if (isCustomChannelSelected()) {
+            return CDN_LIST
+        }
+        if (activeChannel === "PC_OBT_Global_Pub") {
+            return CDN_LIST.filter(cdn => isOverseasCDN(cdn.url))
+        }
+        return CDN_LIST.filter(cdn => !isOverseasCDN(cdn.url))
+    })
+
+    /**
+     * 将当前选中的 CDN 校正到当前渠道可用列表内（选中项失效时回退到列表首个）。
+     */
+    function ensureValidCDN() {
+        if (!availableCDN.value.find(cdn => cdn.url === selectedCDN.value)) {
+            selectedCDN.value = availableCDN.value[0].url
+        }
+    }
+
+    /**
+     * 兼容旧版全局路径存储，首次把全局路径迁移到当前渠道专属配置。
+     */
+    function migrateLegacyGamePath() {
+        const channel = getActiveChannel()
+        if (!gameStore.path || !channel || channelGamePathMap.value[channel]) return
+        channelGamePathMap.value = {
+            ...channelGamePathMap.value,
+            [channel]: gameStore.path,
+        }
+    }
+
+    /**
+     * 切换服务器时同步对应的游戏路径到共享状态（迷你启动器检查前与更新页一致地调用）。
+     */
+    function syncGamePathByChannel() {
+        const channel = getActiveChannel()
+        if (!channel) return
+        const channelPath = channelGamePathMap.value[channel] ?? ""
+        if (gameStore.path !== channelPath) {
+            gameStore.path = channelPath
+        }
+    }
+
+    /**
+     * 将当前服务器的游戏路径写入独立存储。
+     * @param path 游戏主程序（EM.exe）路径
+     */
+    function saveChannelGamePath(path: string) {
+        const channel = getActiveChannel()
+        if (!channel || !path || channelGamePathMap.value[channel] === path) return
+        channelGamePathMap.value = {
+            ...channelGamePathMap.value,
+            [channel]: path,
+        }
+    }
+
+    /** 迷你启动器等入口检查前需要同步输入（路径 / CDN）与完整启动器保持一致。 */
+    function syncLauncherInputs() {
+        migrateLegacyGamePath()
+        syncGamePathByChannel()
+        ensureValidCDN()
+    }
+
+    /**
+     * 获取当前渠道生效的完整包信息（自定义 channel 时解析 selectedChannel.custom，
+     * 并先校正 CDN 到可用列表；无有效 channel 时返回 null）。两个启动器共用同一实现。
+     * @returns 完整包信息或 null
+     */
+    async function getFullPackageInfoForActiveChannel() {
+        const activeChannel = getActiveChannel()
+        if (!activeChannel) return null
+        ensureValidCDN()
+        return await getFullPackageInfo(selectedCDN.value, activeChannel)
     }
 
     /** 游戏安装根目录（由 EM.exe 路径推导）。 */
@@ -718,11 +813,21 @@ export const useGameUpdateStore = defineStore("gameUpdate", () => {
     //#endregion
 
     return {
+        CUSTOM_CHANNEL_VALUE,
         selectedCDN,
         selectedChannel,
         customChannel,
         concurrentThreads,
+        isCustomChannelSelected,
         getActiveChannel,
+        availableCDN,
+        ensureValidCDN,
+        channelGamePathMap,
+        migrateLegacyGamePath,
+        syncGamePathByChannel,
+        saveChannelGamePath,
+        syncLauncherInputs,
+        getFullPackageInfoForActiveChannel,
         gamePath,
         hotUpdatePatchRootDir,
         getHotUpdateVersionDir,

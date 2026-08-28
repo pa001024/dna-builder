@@ -317,23 +317,7 @@ watch(
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="LEVEL" />
             <LevelSlider v-model="currentLevel" />
-            <div v-if="!weapon.熔炉 || weapon.熔炉.length === 0" class="mt-2 flex items-center gap-4">
-                <span class="flex-none text-[11px] tabular-nums text-base-content/55">
-                    熔炼
-                    <b class="ml-1 font-orbitron text-[13px] font-semibold text-primary">{{
-                        ["0", "I", "II", "III", "IV", "V"][currentRefine]
-                    }}</b>
-                </span>
-                <input
-                    :key="leveledWeapon.id"
-                    v-model.number="currentRefine"
-                    type="range"
-                    class="range range-primary range-xs grow"
-                    :min="0"
-                    :max="5"
-                    step="1"
-                />
-            </div>
+            <WeaponRefineTabs v-if="!weapon.熔炉 || weapon.熔炉.length === 0" v-model="currentRefine" />
         </section>
 
         <!-- 基础属性 -->

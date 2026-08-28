@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { listen } from "@tauri-apps/api/event"
 import * as dialog from "@tauri-apps/plugin-dialog"
-import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
 import { storeToRefs } from "pinia"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
@@ -21,7 +20,6 @@ import { useGameUpdateStore } from "@/store/gameUpdate"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import {
-    CDN_LIST,
     compareGameVersions,
     type DownloadProgress,
     downloadAssets,
@@ -31,7 +29,6 @@ import {
     type GameVersionListWithPre,
     getBaseVersion,
     getDownloadProgress,
-    getFullPackageInfo,
     getHotUpdatePakFilesInfo,
     getPreFullPackageInfo,
     type HotUpdatePakFileInfo,
@@ -198,8 +195,6 @@ const displayOverallProgressPercent = computed(() => Math.min(100, Math.max(0, M
 // 是否需要预下载
 const needPreDownload = ref(false)
 
-const CUSTOM_CHANNEL_VALUE = "__custom_channel__"
-
 const channels = [
     {
         name: t("game-update.formal_server"),
@@ -209,60 +204,13 @@ const channels = [
         name: "bilibili",
         value: "PC_OBT_Bili_Pub",
     },
-    // {
-    //     name: "1.2Beta",
-    //     value: "PC_OBT12_Media_CN_Pub",
-    // },
-    // {
-    //     name: "1.3Beta",
-    //     value: "PC_OBT13_Media_CN_Pub",
-    // },
     {
         name: t("game-update.global_server"),
         value: "PC_OBT_Global_Pub",
     },
 ]
 
-const selectedChannel = useLocalStorage("selectedChannel", channels[0].value)
-const customChannel = useLocalStorage("selectedChannel.custom", "")
-const channelGamePathMap = useLocalStorage<Record<string, string>>("game.path_by_channel", {})
 const gameInstalled = ref(false)
-
-/**
- * 兼容旧版全局路径存储，首次迁移到当前服务器专属配置。
- */
-function migrateLegacyGamePath() {
-    const channel = getActiveChannel()
-    if (!gameStore.path || !channel || channelGamePathMap.value[channel]) return
-    channelGamePathMap.value = {
-        ...channelGamePathMap.value,
-        [channel]: gameStore.path,
-    }
-}
-
-/**
- * 切换服务器时同步对应的游戏路径到共享状态。
- */
-function syncGamePathByChannel() {
-    const channel = getActiveChannel()
-    if (!channel) return
-    const channelPath = channelGamePathMap.value[channel] ?? ""
-    if (gameStore.path !== channelPath) {
-        gameStore.path = channelPath
-    }
-}
-
-/**
- * 将当前服务器的游戏路径写入独立存储。
- */
-function saveChannelGamePath(path: string) {
-    const channel = getActiveChannel()
-    if (!channel || !path || channelGamePathMap.value[channel] === path) return
-    channelGamePathMap.value = {
-        ...channelGamePathMap.value,
-        [channel]: path,
-    }
-}
 
 /**
  * 根据 CDN 正式版本刷新当前游戏是否正确安装。
@@ -273,41 +221,14 @@ async function refreshGameInstalled() {
     gameInstalled.value = gameStore.installed
 }
 
-/**
- * 判断当前是否选中了自定义 channel。
- * @returns 是否选中自定义 channel
- */
-function isCustomChannelSelected() {
-    return selectedChannel.value === CUSTOM_CHANNEL_VALUE
-}
-
-/**
- * 获取当前实际生效的 channel。
- * @returns 实际 channel，若自定义未填写则返回空字符串
- */
-function getActiveChannel() {
-    if (!isCustomChannelSelected()) {
-        return selectedChannel.value
-    }
-    return customChannel.value.trim()
-}
-
-migrateLegacyGamePath()
-const availableCDN = computed(() => {
-    const activeChannel = getActiveChannel()
-    if (activeChannel === channels[2].value) {
-        return CDN_LIST.filter(cdn => cdn.name === "海外")
-    }
-    return CDN_LIST.filter(cdn => cdn.name !== "海外")
-})
-
-const selectedCDN = useLocalStorage("selectedCDN", CDN_LIST[1].url)
+// 服务器 / CDN / 游戏路径配置统一在公共 store（与迷你启动器共用同一份输入）
+gameUpdateStore.migrateLegacyGamePath()
 
 watch(
-    selectedChannel,
+    () => gameUpdateStore.selectedChannel,
     () => {
-        if (isCustomChannelSelected() && !getActiveChannel()) return
-        syncGamePathByChannel()
+        if (gameUpdateStore.isCustomChannelSelected() && !gameUpdateStore.getActiveChannel()) return
+        gameUpdateStore.syncGamePathByChannel()
     },
     { immediate: true }
 )
@@ -315,13 +236,13 @@ watch(
 watch(
     () => gameStore.path,
     path => {
-        saveChannelGamePath(path)
+        gameUpdateStore.saveChannelGamePath(path)
         void refreshGameInstalled()
     }
 )
 
-watch([selectedChannel, customChannel, selectedCDN], async () => {
-    const activeChannel = getActiveChannel()
+watch([() => gameUpdateStore.selectedChannel, () => gameUpdateStore.customChannel, () => gameUpdateStore.selectedCDN], async () => {
+    const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) {
         versionList.value = null
         fullPackageInfo.value = null
@@ -338,12 +259,10 @@ watch([selectedChannel, customChannel, selectedCDN], async () => {
         optionalPatchSignsCache.value = { optionalPatchInfos: {} }
         return
     }
-    syncGamePathByChannel()
-    saveChannelGamePath(gameStore.path)
+    gameUpdateStore.syncGamePathByChannel()
+    gameUpdateStore.saveChannelGamePath(gameStore.path)
     await refreshGameInstalled()
-    if (!availableCDN.value.find(cdn => cdn.url === selectedCDN.value)) {
-        selectedCDN.value = availableCDN.value[0].url
-    }
+    gameUpdateStore.ensureValidCDN()
     await fetchVersionList()
     await checkForUpdates()
     await gameUpdateStore.checkHotUpdateStatus()
@@ -489,7 +408,7 @@ function isOptionalPackQueued(sign: string) {
  * @param sign 语音包签名
  */
 async function downloadOptionalPackTask(sign: string) {
-    const activeChannel = getActiveChannel()
+    const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) {
         ui.showErrorMessage("请先填写自定义 channel")
         return
@@ -566,7 +485,7 @@ async function downloadOptionalPackTask(sign: string) {
                 continue
             }
             const downloadTask = downloadHotUpdateAssets(
-                selectedCDN.value,
+                gameUpdateStore.selectedCDN,
                 file.fileName,
                 activeChannel,
                 version,
@@ -627,7 +546,7 @@ async function processOptionalPackDownloadQueue() {
  * @param sign 语音包签名
  */
 async function downloadOptionalPack(sign: string) {
-    const activeChannel = getActiveChannel()
+    const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) {
         ui.showErrorMessage("请先填写自定义 channel")
         return
@@ -673,7 +592,7 @@ function getResourceServer(channel: string) {
 function getGameAssetUrl(filename: string, channel: string, subVersion: string) {
     const server = getResourceServer(channel)
     const versionUrl = VERSION_URL_PUB(server)
-    return `${selectedCDN.value}${versionUrl}${channel}/${subVersion ? `${subVersion}/` : ""}${filename}`
+    return `${gameUpdateStore.selectedCDN}${versionUrl}${channel}/${subVersion ? `${subVersion}/` : ""}${filename}`
 }
 
 /**
@@ -705,7 +624,7 @@ async function resumeCurrentDownload() {
 }
 
 async function fetchVersionList() {
-    const activeChannel = getActiveChannel()
+    const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) {
         versionList.value = null
         fullPackageInfo.value = null
@@ -727,10 +646,10 @@ async function fetchVersionList() {
     preFullPackageInfo.value = null
     try {
         const [fullPackage, preFullPackage] = await Promise.all([
-            getFullPackageInfo(selectedCDN.value, activeChannel),
-            getPreFullPackageInfo(selectedCDN.value, activeChannel),
+            gameUpdateStore.getFullPackageInfoForActiveChannel(),
+            getPreFullPackageInfo(gameUpdateStore.selectedCDN, activeChannel),
         ])
-        const baseVersion = fullPackage ? null : await getBaseVersion(selectedCDN.value, activeChannel)
+        const baseVersion = fullPackage ? null : await getBaseVersion(gameUpdateStore.selectedCDN, activeChannel)
         versionList.value = baseVersion
         fullPackageInfo.value = fullPackage
         preFullPackageInfo.value = preFullPackage
@@ -781,7 +700,7 @@ function calculateTotalSize() {
 }
 
 async function checkPreDownloadStatus() {
-    const activeChannel = getActiveChannel()
+    const activeChannel = gameUpdateStore.getActiveChannel()
     if (!gamePath.value || !activeChannel) {
         needPreDownload.value = false
         return
@@ -827,7 +746,7 @@ async function checkPreDownloadStatus() {
 }
 
 async function checkForUpdates() {
-    const activeChannel = getActiveChannel()
+    const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) {
         needUpdate.value = false
         updateSize.value = 0
@@ -874,7 +793,7 @@ async function checkForUpdates() {
  */
 async function syncDownloadProgressAfterRefresh() {
     if (!gamePath.value) return
-    const activeChannel = getActiveChannel()
+    const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) return
     if (needUpdate.value && fullPackageInfo.value) {
         const fullFilePath = `${fullPackageDownloadDir.value}${fullPackageInfo.value.fileName}`
@@ -1006,7 +925,7 @@ async function syncDownloadProgressAfterRefresh() {
  * 打开热更详情弹窗。
  */
 async function openHotUpdateDetail() {
-    const activeChannel = getActiveChannel()
+    const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) return
     const versions = hotUpdatePendingVersions.value.length
         ? hotUpdatePendingVersions.value
@@ -1021,7 +940,7 @@ async function openHotUpdateDetail() {
             if (localContent) {
                 pakInfo = normalizeHotUpdatePakFilesInfo(JSON.parse(localContent))
             } else {
-                pakInfo = normalizeHotUpdatePakFilesInfo(await getHotUpdatePakFilesInfo(selectedCDN.value, activeChannel, version))
+                pakInfo = normalizeHotUpdatePakFilesInfo(await getHotUpdatePakFilesInfo(gameUpdateStore.selectedCDN, activeChannel, version))
             }
             entries.push({
                 version,
@@ -1064,7 +983,7 @@ async function selectGameDir() {
         if (selected) {
             const emExePath = `${selected}\\DNA Game\\EM.exe`
             gameStore.path = emExePath
-            saveChannelGamePath(emExePath)
+            gameUpdateStore.saveChannelGamePath(emExePath)
             await refreshGameInstalled()
             ui.showSuccessMessage(`游戏目录设置成功: ${emExePath}`)
             if (versionList.value || fullPackageInfo.value) {
@@ -1156,7 +1075,7 @@ async function downloadAndApplyFullPackage() {
 }
 
 async function downloadAllFiles() {
-    const activeChannel = getActiveChannel()
+    const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) {
         ui.showErrorMessage("请先填写自定义 channel")
         return
@@ -1248,7 +1167,7 @@ async function downloadAllFiles() {
                 continue
             }
             const downloadTask = downloadAssets(
-                selectedCDN.value,
+                gameUpdateStore.selectedCDN,
                 filename,
                 activeChannel,
                 currentVersionList.subVersion,
@@ -1350,7 +1269,7 @@ async function preDownloadFullPackage() {
 }
 
 async function preDownloadAllFiles() {
-    const activeChannel = getActiveChannel()
+    const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) {
         ui.showErrorMessage("请先填写自定义 channel")
         return
@@ -1429,7 +1348,7 @@ async function preDownloadAllFiles() {
                 continue
             }
             const downloadTask = downloadAssets(
-                selectedCDN.value,
+                gameUpdateStore.selectedCDN,
                 filename,
                 activeChannel,
                 versionList.value.preVersion!,
@@ -1616,17 +1535,17 @@ const launchGame = async () => {
                         >
                             <Icon icon="ri:server-line" class="text-base-content/40 w-4 h-4" />
                             <input
-                                v-if="!setting.safeMode && selectedChannel === CUSTOM_CHANNEL_VALUE"
-                                v-model.lazy="customChannel"
+                                v-if="!setting.safeMode && gameUpdateStore.selectedChannel === gameUpdateStore.CUSTOM_CHANNEL_VALUE"
+                                v-model.lazy="gameUpdateStore.customChannel"
                                 type="text"
                                 class="bg-transparent border-none outline-hidden text-sm min-w-36 placeholder:text-base-content/30"
                                 placeholder="自定义 channel"
                             />
-                            <Select v-model="selectedChannel" variant="ghost" class="min-w-20">
+                            <Select v-model="gameUpdateStore.selectedChannel" variant="ghost" class="min-w-20">
                                 <SelectItem v-for="channel in channels" :key="channel.value" :value="channel.value" xs>
                                     {{ channel.name }}
                                 </SelectItem>
-                                <SelectItem v-if="!setting.safeMode" :value="CUSTOM_CHANNEL_VALUE" xs>自定义</SelectItem>
+                                <SelectItem v-if="!setting.safeMode" :value="gameUpdateStore.CUSTOM_CHANNEL_VALUE" xs>自定义</SelectItem>
                             </Select>
                         </div>
                     </div>
@@ -1636,26 +1555,28 @@ const launchGame = async () => {
                             class="flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200 cursor-pointer"
                         >
                             <Icon icon="ri:cloud-line" class="text-base-content/40 w-4 h-4" />
-                            <Select v-model="selectedCDN" variant="ghost" class="min-w-20 truncate">
-                                <SelectItem v-for="cdn in availableCDN" :key="cdn.url" :value="cdn.url">
+                            <Select v-model="gameUpdateStore.selectedCDN" variant="ghost" class="min-w-20 truncate">
+                                <SelectItem v-for="cdn in gameUpdateStore.availableCDN" :key="cdn.url" :value="cdn.url">
                                     {{ cdn.name }}
                                 </SelectItem>
                             </Select>
                         </div>
                     </div>
 
-                    <div
-                        class="group relative flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200"
-                        :title="t('game-update.threads')"
-                    >
-                        <Icon icon="ri:speed-line" class="text-base-content/40 w-4 h-4" />
-                        <input
-                            v-model.number="concurrentThreads"
-                            type="number"
-                            class="bg-transparent border-none outline-hidden text-sm w-8 text-center"
-                            min="1"
-                            max="32"
-                        />
+                    <div class="tooltip" data-tip="自定义 channel 时不限制 CDN（内容可能位于任意节点）">
+                        <div
+                            class="group relative flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200"
+                            :title="t('game-update.threads')"
+                        >
+                            <Icon icon="ri:speed-line" class="text-base-content/40 w-4 h-4" />
+                            <input
+                                v-model.number="concurrentThreads"
+                                type="number"
+                                class="bg-transparent border-none outline-hidden text-sm w-8 text-center"
+                                min="1"
+                                max="32"
+                            />
+                        </div>
                     </div>
 
                     <label

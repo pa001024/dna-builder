@@ -31,11 +31,24 @@ const tickValues = computed(() => {
 
     return values
 })
+
+/**
+ * 刻度在滑块轨道上的水平位置（百分比）。
+ * 滑块把 min 映射到左端、max 映射到右端，刻度必须按 (tick - min) / (max - min) 定位，
+ * 否则 min 不为 0 时（默认 1）刻度会整体偏向 0 起点而产生偏移。
+ */
+const tickPosition = (tick: number) => {
+    const span = props.max - props.min
+    if (span <= 0) return "0%"
+    return `${((tick - props.min) / span) * 100}%`
+}
 </script>
 
 <template>
     <div class="flex items-center gap-4">
-        <span class="text-sm min-w-20">Lv. <input v-model.number="model" type="text" class="w-12 text-center" /> </span>
+        <span class="mr-1 shrink-0 text-xs text-base-content/55 min-w-20"
+            >Lv. <input v-model.number="model" type="text" class="w-12 text-center" />
+        </span>
         <div class="grow">
             <input
                 v-model.number="model"
@@ -45,11 +58,12 @@ const tickValues = computed(() => {
                 :max="props.max"
                 step="1"
             />
-            <div class="w-full flex justify-between text-xs">
+            <div class="relative h-4 text-xs mx-2">
                 <span
                     v-for="tick in tickValues"
                     :key="tick"
-                    class="cursor-pointer"
+                    class="cursor-pointer absolute top-0 -translate-x-1/2"
+                    :style="{ left: tickPosition(tick) }"
                     @click="model = tick"
                     :class="{ 'text-secondary': model === tick }"
                 >

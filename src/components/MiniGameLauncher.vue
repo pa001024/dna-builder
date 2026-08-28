@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as dialog from "@tauri-apps/plugin-dialog"
-import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
 import { computed, onMounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
@@ -8,7 +7,7 @@ import { pathExists, readTextFile } from "@/api/app"
 import { useGameStore } from "@/store/game"
 import { useGameUpdateStore } from "@/store/gameUpdate"
 import { useUIStore } from "@/store/ui"
-import { CDN_LIST, getFullPackageInfo, resolveGameVersion } from "@/utils/game-download"
+import { resolveGameVersion } from "@/utils/game-download"
 
 // 迷你游戏启动器：首页 header 内的紧凑启动入口（仅 app 端）
 // 状态机：checking(检测中) / no-path(未设置路径) / needs-update(需要更新) / downloading(热更下载中) / ready(就绪)
@@ -19,10 +18,6 @@ const game = useGameStore()
 const ui = useUIStore()
 const router = useRouter()
 const gameUpdateStore = useGameUpdateStore()
-
-// 与游戏更新页共用同一份 CDN / 服务器配置（localStorage）
-const selectedCDN = useLocalStorage("selectedCDN", CDN_LIST[1].url)
-const selectedChannel = useLocalStorage("selectedChannel", "PC_OBT_CN_Pub")
 
 const launcherState = ref<LauncherState>("checking")
 
@@ -35,10 +30,13 @@ async function refreshLauncherState() {
         launcherState.value = "no-path"
         return
     }
+    // 与完整启动器统一检查输入：先把路径/CDN 校正到当前渠道生效值，避免两处判定分叉
+    gameUpdateStore.syncLauncherInputs()
     launcherState.value = "checking"
     try {
         const [fullPackage, localVersionRes, extracting] = await Promise.all([
-            getFullPackageInfo(selectedCDN.value, selectedChannel.value).catch(() => null),
+            // 复用公共 store：解析自定义 channel 并校正 CDN 后获取完整包信息（与完整启动器一致）
+            gameUpdateStore.getFullPackageInfoForActiveChannel().catch(() => null),
             readTextFile(`${game.gameDir}GameVersion.json`)
                 .then(resolveGameVersion)
                 .catch(() => null),
@@ -66,6 +64,7 @@ async function selectGamePath() {
     })
     if (result && typeof result === "string") {
         game.path = result
+        gameUpdateStore.saveChannelGamePath(result)
         await refreshLauncherState()
     }
 }
