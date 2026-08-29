@@ -159,6 +159,26 @@ describe("evaluateAST函数测试", () => {
             expect(result).not.toBeCloseTo(directAddedResult, 6)
         })
 
+        it("固定攻击 临时属性应按平值加到攻击上", () => {
+            const baseDamage = charBuild.evaluateAST("伤害", testAttrs)
+            const temporaryDamage = charBuild.evaluateAST("伤害{固定攻击:1}", testAttrs)
+            const expectedDamage = charBuild.evaluateAST("伤害", { ...testAttrs, 攻击: testAttrs.攻击 + 1 })
+
+            expect(charBuild.validateAST("伤害{固定攻击:1}")).toBeUndefined()
+            expect(temporaryDamage).toBeCloseTo(expectedDamage, 6)
+            expect(temporaryDamage).toBeGreaterThan(baseDamage)
+        })
+
+        it("固定生命 临时属性应按平值加到生命上", () => {
+            const baseValue = charBuild.evaluateAST("[生命]", testAttrs)
+            const temporaryValue = charBuild.evaluateAST("[生命]{固定生命:100}", testAttrs)
+            const expectedValue = charBuild.evaluateAST("[生命]", { ...testAttrs, 生命: testAttrs.生命 + 100 })
+
+            expect(charBuild.validateAST("[生命]{固定生命:100}")).toBeUndefined()
+            expect(temporaryValue).toBeCloseTo(expectedValue, 6)
+            expect(temporaryValue).toBeGreaterThan(baseValue)
+        })
+
         it("临时属性将触发率加成到负值时不应导致伤害输出归零", () => {
             // 灾厄武器的触发倍率为 1（敌方抗性非 0），触发率被临时属性推成负值后
             // 触发期望会溢出为负，最终 calculate 输出归零

@@ -154,7 +154,11 @@ const functionInserts: Record<string, string> = {
 
 // 属性修改区：可插入的临时属性，按用途分组。展示原始属性名（即表达式中实际输入的写法）。
 const attributeGroups: { key: string; title: string; items: string[] }[] = [
-    { key: "basic", title: t("ast-help.attrGroups.basic"), items: ["攻击", "生命", "防御", "护盾", "神智"] },
+    {
+        key: "basic",
+        title: t("ast-help.attrGroups.basic"),
+        items: ["攻击", "固定攻击", "生命", "固定生命", "防御", "护盾", "神智"],
+    },
     {
         key: "damage",
         title: t("ast-help.attrGroups.damage"),

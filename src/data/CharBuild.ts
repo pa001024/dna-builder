@@ -173,6 +173,16 @@ const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((att
     number
 >
 
+/**
+ * 角色加成属性中按平值折叠进基础属性的映射（临时属性专用）：
+ * 固定攻击/固定生命 不直接存在于 CharAttr，而是在 calculateAttributes 中平值加算进 攻击/生命；
+ * 作为字段临时属性时按映射后的基础属性平值加算，语义与角色全局加成一致（如 伤害{固定攻击:1} 表示该字段多算 1 点固定攻击）。
+ */
+const temporaryFlatAttributeMap: Record<string, keyof CharAttr> = {
+    固定攻击: "攻击",
+    固定生命: "生命",
+}
+
 /** 魔之楔极性类型（趋向） */
 type PolarityType = "A" | "D" | "V" | "O"
 /** 极性遍历顺序（用于极化方案的确定性） */
@@ -1988,7 +1998,9 @@ export class CharBuild {
                         for (const attribute of node.attributes) {
                             const isWeaponAttribute = typeof temporaryWeaponAttrs?.[attribute.name as keyof WeaponAttr] === "number"
                             const isCharAttribute = typeof attrs[attribute.name as keyof typeof attrs] === "number"
-                            if (!isWeaponAttribute && !isCharAttribute) {
+                            // 固定攻击/固定生命 等按平值折叠进基础属性的角色加成（临时Flat属性映射）同样合法
+                            const isFlatAttribute = attribute.name in temporaryFlatAttributeMap
+                            if (!isWeaponAttribute && !isCharAttribute && !isFlatAttribute) {
                                 return `找不到临时属性: "${attribute.name}"`
                             }
                             const valueError = validateNode(attribute.value)
@@ -2275,8 +2287,11 @@ export class CharBuild {
             for (const [attribute, value] of Object.entries(temporaryAttributes)) {
                 if (getWeaponDamageBase(base, fieldName) && typeof temporaryWeaponAttr?.[attribute as keyof WeaponAttr] === "number")
                     continue
-                if (typeof attrs[attribute as keyof typeof attrs] !== "number") throw new Error(`找不到临时属性: "${attribute}"`)
-                writableAttrs[attribute] = (writableAttrs[attribute] || 0) + value
+                // 固定攻击/固定生命 等按平值折叠的属性：映射到对应基础属性（攻击/生命）平值加算
+                const flatTarget = temporaryFlatAttributeMap[attribute]
+                const targetAttribute = flatTarget || attribute
+                if (typeof attrs[targetAttribute as keyof typeof attrs] !== "number") throw new Error(`找不到临时属性: "${attribute}"`)
+                writableAttrs[targetAttribute] = (writableAttrs[targetAttribute] || 0) + value
             }
             return fieldAttrs
         }
