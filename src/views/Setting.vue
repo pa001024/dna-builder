@@ -2,9 +2,10 @@
 import { t } from "i18next"
 import { computed, onMounted, ref, watch } from "vue"
 import { MATERIALS } from "@/api/app"
+import SafeModeQuizDialog from "@/components/SafeModeQuizDialog.vue"
 import { clearAllDataPackOpfs, getInstalledDataPackVersions, getMergedDataPackVersions } from "@/data/data-pack"
 import { deleteImgsCache, imgsDownloadState } from "@/data/imgs-runtime"
-import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
+import { closeSafeMode, openSafeMode } from "@/data/versionGate"
 import { env } from "@/env"
 import { i18nLanguages } from "@/i18n"
 import { useDataPackStore } from "@/store/dataPack"
@@ -17,25 +18,10 @@ const setting = useSettingStore()
 const ui = useUIStore()
 const dataPack = useDataPackStore()
 const isUpdatingLaunchAtStartup = ref(false)
-const safeModeGuardDialogRef = ref<HTMLDialogElement | null>(null)
-const safeModeAnswer = ref("")
+const safeModeQuizOpen = ref(false)
 const dataPackFileInput = ref<HTMLInputElement | null>(null)
 const dataPackSourceBaseUrl = ref("")
 const dataPackSourceKind = ref<"official" | "custom">("custom")
-const questions = [
-    { question: "What is the ultimate answer to the universe?", answer: "42" },
-    { question: "What is the current game version?", answer: String(DNA_SAFE_VERSION_LIMIT) },
-    { question: "What is the game server opening date? (8-digit number)", answer: "20251028" },
-    { question: "What time do daily tasks refresh every day? (1-digit number)", answer: "5" },
-    { question: "What color is the sky on a clear day?", answer: "blue" },
-    { question: "Type the word 'unlock' backwards.", answer: "kcolnu" },
-    { question: "What is the second day of the week in English?", answer: "Tuesday" },
-    { question: "What is the first month of the year?", answer: "January" },
-    { question: "What is the color of a banana?", answer: "yellow" },
-    { question: "What is the opposite of cold?", answer: "hot" },
-    { question: "How many days are in a week?", answer: "7" },
-]
-const currentSafeModeQuestion = ref<(typeof questions)[number] | null>(null)
 const CDN_DATA_PACK_BASE_URL = "https://cdn.dna-builder.cn/data-pack"
 const versionDragUrls = ref<Record<string, string>>({})
 const sourceSaveTimer = ref<number | null>(null)
@@ -358,40 +344,41 @@ async function deleteSelectedCustomFont() {
 
 function applySafeMode(enabled: boolean) {
     setting.safeMode = enabled
+    // 开启 = 删除键（键不存在 → 与当前版本不一致 → 视为开启）；关闭 = 键写为当前版本
+    if (enabled) {
+        openSafeMode()
+    } else {
+        closeSafeMode()
+    }
     location.reload()
 }
 
+/**
+ * 安全模式开关：开启直接生效；关闭需弹出三题校验。
+ * @param enabled 目标状态
+ */
 function handleSafeModeToggle(enabled: boolean) {
     if (enabled) {
         applySafeMode(true)
         return
     }
-
-    safeModeAnswer.value = ""
-    currentSafeModeQuestion.value = questions[Math.floor(Math.random() * questions.length)]
-    safeModeGuardDialogRef.value?.showModal()
+    safeModeQuizOpen.value = true
 }
 
-function cancelDisableSafeMode() {
-    safeModeGuardDialogRef.value?.close()
-    safeModeAnswer.value = ""
-    setting.safeMode = true
-}
-
-function confirmDisableSafeMode() {
-    if (!currentSafeModeQuestion.value) {
-        ui.showErrorMessage(t("setting.noSafeModeQuestion"))
-        return
-    }
-
-    if (safeModeAnswer.value.trim() !== currentSafeModeQuestion.value.answer) {
-        ui.showErrorMessage(t("setting.safeModeAnswerWrong"))
-        return
-    }
-
-    safeModeGuardDialogRef.value?.close()
-    currentSafeModeQuestion.value = null
+/**
+ * 校验全部通过：关闭弹窗并关闭安全模式。
+ */
+function onSafeModeQuizPassed() {
+    safeModeQuizOpen.value = false
     applySafeMode(false)
+}
+
+/**
+ * 校验取消：安全模式保持开启。
+ */
+function onSafeModeQuizCancelled() {
+    safeModeQuizOpen.value = false
+    setting.safeMode = true
 }
 
 async function resetStorage() {
@@ -1167,21 +1154,5 @@ onMounted(() => {
         </div>
     </div>
 
-    <dialog ref="safeModeGuardDialogRef" class="modal">
-        <div class="modal-box font-wt">
-            <h3 class="font-bold text-lg">Turn off Safe Mode</h3>
-            <p class="py-2 text-sm text-base-content/70">Please answer the question correctly.</p>
-            <div class="flex flex-col gap-3">
-                <label class="w-full flex flex-col gap-2">
-                    <span class="text-sm">{{ currentSafeModeQuestion?.question || "no question" }}</span>
-                    <input v-model="safeModeAnswer" type="password" class="input input-bordered" placeholder="enter your answer" />
-                </label>
-            </div>
-            <div class="modal-action">
-                <button class="btn" type="button" @click="cancelDisableSafeMode">Forget it</button>
-                <button class="btn btn-error" type="button" @click="confirmDisableSafeMode">Confirm</button>
-            </div>
-        </div>
-        <div class="modal-backdrop" @click="cancelDisableSafeMode"></div>
-    </dialog>
+    <SafeModeQuizDialog v-model="safeModeQuizOpen" @passed="onSafeModeQuizPassed" @cancelled="onSafeModeQuizCancelled" />
 </template>

@@ -7,7 +7,7 @@ import packageJson from "../package.json"
 import { dataPackBootstrapLoading } from "./data/data-pack-bridge"
 import { bootstrapDataPack, getLoadedDataPackImgsCacheInfo, getLoadedDataPackImgsManifest } from "./data/data-pack-runtime"
 import { mountImgsToVirtualPath } from "./data/imgs-runtime"
-import { DNA_SAFE_VERSION_LIMIT, setCurrentVersionLimit } from "./data/versionGate"
+import { getCurrentVersionLimit, setCurrentVersionLimit } from "./data/versionGate"
 
 import { env } from "./env"
 import { applyLanguageFontClass, initI18n } from "./i18n"
@@ -74,7 +74,7 @@ async function bootstrapRuntimeAssets(): Promise<void> {
 }
 
 initI18n(localStorage.getItem("setting_lang") || navigator.language)
-setCurrentVersionLimit(localStorage.getItem("setting_safe_mode") === "false" ? Number.POSITIVE_INFINITY : DNA_SAFE_VERSION_LIMIT)
+setCurrentVersionLimit(getCurrentVersionLimit())
 
 /**
  * 启动主应用。

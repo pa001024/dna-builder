@@ -11,6 +11,7 @@ import {
     tauriFetch,
 } from "@/api/app"
 import { executeSignFlow } from "@/api/dna-sign"
+import { isSafeModeClosed } from "@/data/versionGate"
 import { env } from "@/env"
 import { applyLanguageFontClass, changeLanguage } from "@/i18n"
 import { sleep } from "@/util"
@@ -63,7 +64,7 @@ export const useSettingStore = defineStore("setting", {
             protagonistName2: useLocalStorage("story_protagonist_name_2", "墨斯"),
             protagonistGender: useLocalStorage<"male" | "female">("story_protagonist_gender", "female"),
             protagonistGender2: useLocalStorage<"male" | "female">("story_protagonist_gender_2", "female"),
-            safeMode: useLocalStorage("setting_safe_mode", true),
+            safeMode: !isSafeModeClosed(),
             lastHeartbeatTime: 0,
             // 自定义底图（图片 data URL；空字符串表示未设置），持久化在 OPFS 中，启动时通过 initCustomWallpaper 加载
             customWallpaper: "",
