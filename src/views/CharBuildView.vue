@@ -17,6 +17,7 @@ import {
 } from "@/composables/useCharSettings"
 import {
     buffData,
+    buffMap,
     CharBuild,
     CharBuildTimeline,
     charData,
@@ -32,6 +33,7 @@ import {
     monsterMap,
     weaponData,
 } from "@/data"
+import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
 import { createBuffFromSettings } from "@/data/CharBuildHelper"
 import { charExtraExcelWeapon } from "@/data/d/charext.data"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
@@ -168,6 +170,7 @@ function reorderGameStyleModes<T>(modes: T[]): (T | null)[] {
 }
 const _buffOptions = reactive(
     buffData.map(buff => ({
+        buff,
         value: createBuffFromSettings(buff.名称, buff.mx || 1, charSettings.value.customBuff),
         label: buff.名称,
         limit: buff.限定,
@@ -176,8 +179,20 @@ const _buffOptions = reactive(
 )
 const buffOptions = computed(() => {
     dataPackTick.value
+    const ctx = createBuffSelectContext({
+        charElm: charBuild.value.char.属性,
+        mainIds: [selectedCharId.value, charBuild.value.meleeWeapon?.id, charBuild.value.rangedWeapon?.id].filter(
+            (id): id is number => typeof id === "number"
+        ),
+        phantomIds: [
+            charMap.get(charSettings.value.team1)?.id,
+            charMap.get(charSettings.value.team2)?.id,
+            charSettings.value.team1Weapon,
+            charSettings.value.team2Weapon,
+        ].filter((id): id is number => typeof id === "number"),
+    })
     return _buffOptions
-        .filter(buff => !buff.limit || buff.limit === selectedChar.value || buff.limit === charBuild.value.char.属性)
+        .filter(v => isBuffSelectable(v.buff, ctx))
         .map(v => {
             const b = charSettings.value.buffs.find(b => b[0] === v.label)
             const lv = b?.[1] ?? v.value.等级
@@ -190,16 +205,17 @@ const buffOptions = computed(() => {
                 limit: v.limit,
                 description: v.description,
                 lv,
+                buff: v.buff,
             }
         })
 })
-// 近战和远程武器选项
+// 近战和远程武器选项（team1/team2 助战武器，值统一为武器 id）
 const meleeWeaponOptions = computed(() => {
     dataPackTick.value
     return weaponData
         .filter(weapon => weapon.类型[0] === "近战")
         .map(weapon => ({
-            value: weapon.名称,
+            value: weapon.id,
             label: weapon.名称,
             type: weapon.类型[1],
             icon: LeveledWeapon.url(weapon.icon),
@@ -210,7 +226,7 @@ const rangedWeaponOptions = computed(() => {
     return weaponData
         .filter(weapon => weapon.类型[0] === "远程")
         .map(weapon => ({
-            value: weapon.名称,
+            value: weapon.id,
             label: weapon.名称,
             type: weapon.类型[1],
             icon: LeveledWeapon.url(weapon.icon),
@@ -254,20 +270,34 @@ const selectedBuffs = computed(() => {
         .filter(b => b !== null)
 })
 
-const team1Options = computed(() =>
-    [{ value: "-", label: "无", elm: "", icon: `/imgs/1.png` }].concat(
-        charOptions.value.filter(char => char.label !== selectedChar.value && char.label !== charSettings.value.team2)
-    )
-)
-const team2Options = computed(() =>
-    [{ value: "-", label: "无", elm: "", icon: `/imgs/1.png` }].concat(
-        charOptions.value.filter(char => char.label !== selectedChar.value && char.label !== charSettings.value.team1)
-    )
-)
+const team1Options = computed(() => [
+    { value: "-" as number | "-", label: "无", elm: "", icon: `/imgs/1.png` },
+    ...charOptions.value
+        .map(char => ({
+            value: (charMap.get(char.value)?.id ?? "-") as number | "-",
+            label: char.label,
+            elm: char.elm,
+            icon: char.icon,
+        }))
+        .filter(char => char.value !== selectedCharId.value && char.value !== charSettings.value.team2),
+])
+const team2Options = computed(() => [
+    { value: "-" as number | "-", label: "无", elm: "", icon: `/imgs/1.png` },
+    ...charOptions.value
+        .map(char => ({
+            value: (charMap.get(char.value)?.id ?? "-") as number | "-",
+            label: char.label,
+            elm: char.elm,
+            icon: char.icon,
+        }))
+        .filter(char => char.value !== selectedCharId.value && char.value !== charSettings.value.team1),
+])
 
-const teamWeaponOptions = computed(() =>
-    [{ value: "-", label: "无", type: "", icon: `/imgs/1.png` }].concat(meleeWeaponOptions.value.concat(rangedWeaponOptions.value))
-)
+const teamWeaponOptions = computed(() => [
+    { value: "-" as number | "-", label: "无", type: "", icon: `/imgs/1.png` },
+    ...meleeWeaponOptions.value,
+    ...rangedWeaponOptions.value,
+])
 const hpPercentOptions = [1, ...Array.from({ length: 20 }, (_, i) => (i + 1) * 5)]
 const resonanceGainOptions = [0, 0.5, 1, 1.5, 2, 2.5, 3]
 const enemyResistanceOptions = [0, 0.5, -4]
@@ -991,10 +1021,23 @@ function dedupeBuffs(buffs: [string, number][]): [string, number][] {
     return [...uniqueBuffs.entries()]
 }
 
-function updateTeamBuff(newValue: string, oldValue: string) {
-    const newBuffs = [...charSettings.value.buffs.filter(v => !v[0].includes(oldValue))]
+function updateTeamBuff(newValue: string | number, oldValue: string | number) {
+    // 移除旧选择对应的 BUFF：数字=来源 id（角色/武器）精确匹配；字符串=旧格式角色名子串
+    const newBuffs = [
+        ...charSettings.value.buffs.filter(([name]) => {
+            if (typeof oldValue === "number") {
+                if (buffMap.get(name)?.id === oldValue) return false
+            } else if (oldValue !== "-" && name.includes(String(oldValue))) {
+                return false
+            }
+            return true
+        }),
+    ]
     if (newValue !== "-") {
-        const teamBuffs = buffOptions.value.filter(v => v.label.includes(newValue))
+        // 助战角色/助战武器均按来源 id 精确匹配；旧格式角色名退化为名称子串
+        const teamBuffs = buffOptions.value.filter(v =>
+            typeof newValue === "number" ? v.buff?.id === newValue : v.label.includes(String(newValue))
+        )
         if (teamBuffs.length > 0) {
             const buffs = teamBuffs
                 .map(v => [v.label, teamBuffLvs.value[v.label] || v.value.等级] as [string, number])
@@ -2195,7 +2238,10 @@ async function syncModFromGameToSecond(
                                     modOptions.filter(
                                         m =>
                                             m.type === '角色' &&
-                                            (!m.limit || m.limit === charBuild.char.名称 || m.limit === charBuild.char.属性)
+                                            (!m.limit ||
+                                                (typeof m.limit === 'number'
+                                                    ? m.limit === charBuild.char.id
+                                                    : m.limit === charBuild.char.名称 || m.limit === charBuild.char.属性))
                                     )
                                 "
                                 :char-build="charBuild"
@@ -2219,7 +2265,9 @@ async function syncModFromGameToSecond(
                                     modOptions.filter(
                                         m =>
                                             m.type === '近战' &&
-                                            (!m.limit || [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit))
+                                            (!m.limit ||
+                                                (typeof m.limit === 'string' &&
+                                                    [charBuild.meleeWeapon.类别, charBuild.meleeWeapon.伤害类型].includes(m.limit)))
                                     )
                                 "
                                 :char-build="charBuild"
@@ -2241,7 +2289,9 @@ async function syncModFromGameToSecond(
                                     modOptions.filter(
                                         m =>
                                             m.type === '远程' &&
-                                            (!m.limit || [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit))
+                                            (!m.limit ||
+                                                (typeof m.limit === 'string' &&
+                                                    [charBuild.rangedWeapon.类别, charBuild.rangedWeapon.伤害类型].includes(m.limit)))
                                     )
                                 "
                                 :char-build="charBuild"
@@ -2263,7 +2313,9 @@ async function syncModFromGameToSecond(
                                     modOptions.filter(
                                         m =>
                                             m.type === charBuild.skillWeapon!.类型 &&
-                                            (!m.limit || [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit))
+                                            (!m.limit ||
+                                                (typeof m.limit === 'string' &&
+                                                    [charBuild.skillWeapon!.类别, charBuild.skillWeapon!.伤害类型].includes(m.limit)))
                                     )
                                 "
                                 :char-build="charBuild"

@@ -1,4 +1,4 @@
-import { effectMap, modMap, weaponMap } from "./d"
+import { modEffectMap, weaponEffectMap } from "./d"
 
 /**
  * 从构筑本地配置读取 MOD 特殊效果等级。
@@ -9,8 +9,8 @@ import { effectMap, modMap, weaponMap } from "./d"
  */
 export function getModBuffLvFromSetting(effectConfig: Record<string, number> | undefined, modId: number) {
     if (effectConfig?.[`m:${modId}`] !== undefined) return effectConfig[`m:${modId}`]
-    const mod = modMap.get(modId)
-    const buff = mod?.名称 ? effectMap.get(mod.名称) : undefined
+    // MOD 特效按 id 精确匹配（金色/紫色分别配置）
+    const buff = modEffectMap.get(modId)
     return buff?.mx || 1
 }
 
@@ -23,9 +23,9 @@ export function getModBuffLvFromSetting(effectConfig: Record<string, number> | u
  * @returns 特效等级；效果不存在时按 1 处理（与"全部最大"一致）
  */
 export function getWBuffLvFromSetting(effectConfig: Record<string, number> | undefined, weaponId: number, elm = "any") {
-    const weapon = weaponMap.get(weaponId)
-    const buff = weapon?.名称 ? effectMap.get(weapon.名称) : undefined
-    if (buff?.限定 && buff.限定 !== elm && elm !== "any") return 0
+    // 武器特效按 id 精确匹配
+    const buff = weaponEffectMap.get(weaponId)
+    if (typeof buff?.限定 === "string" && buff.限定 !== elm && elm !== "any") return 0
     if (effectConfig?.[`w:${weaponId}`] !== undefined) return effectConfig[`w:${weaponId}`]
     return buff?.mx || 1
 }

@@ -243,13 +243,19 @@ describe("数据类型测试", () => {
     describe("数据一致性测试", () => {
         it("MOD应该引用有效的角色或武器", () => {
             const charNames = charData.map(c => c.名称)
+            const charIds = charData.map(c => c.id)
             const weaponNames = weaponData.map(w => w.名称)
             const weaponTypes = [...new Set(weaponData.map(w => w.类型[1]))]
             const allNames = [...charNames, ...weaponNames, ...weaponTypes, "切割", "贯穿", "震荡"]
 
             modData.forEach(mod => {
                 if (mod.限定) {
-                    expect(allNames).toContain(mod.限定)
+                    if (typeof mod.限定 === "number") {
+                        // 数字限定 = 角色 id
+                        expect(charIds).toContain(mod.限定)
+                    } else {
+                        expect(allNames).toContain(mod.限定)
+                    }
                 }
             })
         })

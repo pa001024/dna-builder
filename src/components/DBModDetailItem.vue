@@ -9,6 +9,7 @@ import weaponData from "@/data/d/weapon.data"
 import type { Draft, Mod, WeaponSkill } from "@/data/data-types"
 import { LeveledMod } from "@/data/leveled/LeveledMod"
 import { formatProp } from "@/util"
+import { formatModLimit } from "@/utils/mod-limit"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { collectModCharBreakthroughSources, collectModPackSources, collectModQuestSources } from "@/utils/resource-source"
 import { getModDropInfo } from "@/utils/reward-utils"
@@ -330,7 +331,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                         </template>
                         <template v-if="leveledMod.限定">
                             <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                            <span>{{ $t(leveledMod.限定) }}</span>
+                            <span>{{ $t(formatModLimit(leveledMod.限定)) }}</span>
                         </template>
                         <template v-if="mod.版本">
                             <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />

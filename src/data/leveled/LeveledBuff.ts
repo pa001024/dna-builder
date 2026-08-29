@@ -281,6 +281,7 @@ export class LeveledBuff implements Buff {
         return properties
     }
     static _exclude_properties = new Set([
+        "id",
         "名称",
         "描述",
         "限定",

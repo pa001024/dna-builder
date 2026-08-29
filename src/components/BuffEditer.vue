@@ -17,7 +17,7 @@ interface BuffOption {
     label: string
     value: LeveledBuff
     lv: number
-    limit?: string
+    limit?: string | number
     description?: string
 }
 

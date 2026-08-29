@@ -1,5 +1,6 @@
 import { useLocalStorage } from "@vueuse/core"
 import { computed, type Ref } from "vue"
+import { charMap, weaponNameMap } from "@/data/d"
 
 const LEGACY_CUSTOM_BUFF_STORAGE_KEY = "customBuff"
 
@@ -77,9 +78,9 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
         skillWeaponMods: Array(4).fill(null) as ([number, number] | null)[],
         buffs: [] as [string, number][],
         customBuff: [] as [string, number][],
-        team1: "-",
+        team1: "-" as number | "-",
         team1Weapon: "-" as number | "-",
-        team2: "-",
+        team2: "-" as number | "-",
         team2Weapon: "-" as number | "-",
         timelineDPS: false,
         /** 是否使用全局背包特效等级（true 时忽略 effectConfig，行为同旧版） */
@@ -139,6 +140,32 @@ export function normalizeCharSettings(settings?: Partial<CharSettings> | null): 
             ;(normalized[key] as typeof defaultValue) = value as typeof defaultValue
         }
     })
+
+    // team1/team2 兼容旧格式（角色名）与新格式（角色 id）：统一归一化为角色 id
+    for (const key of ["team1", "team2"] as const) {
+        const value = settings[key]
+        if (value === undefined || value === null || value === "-") continue
+        if (typeof value === "number") {
+            normalized[key] = value
+        } else if (typeof value === "string") {
+            const char = charMap.get(value)
+            // 查不到时保留原值，避免旧存档丢失
+            normalized[key] = (char?.id ?? value) as CharSettings[typeof key]
+        }
+    }
+
+    // team1Weapon/team2Weapon 兼容旧格式（武器名）与新格式（武器 id）：统一归一化为武器 id
+    for (const key of ["team1Weapon", "team2Weapon"] as const) {
+        const value = settings[key]
+        if (value === undefined || value === null || value === "-") continue
+        if (typeof value === "number") {
+            normalized[key] = value
+        } else if (typeof value === "string") {
+            const weapon = weaponNameMap.get(value)
+            // 查不到时保留原值，避免旧存档丢失
+            normalized[key] = (weapon?.id ?? value) as CharSettings[typeof key]
+        }
+    }
 
     return normalized
 }

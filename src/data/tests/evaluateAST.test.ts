@@ -954,8 +954,8 @@ describe("evaluateAST函数测试", () => {
 
         it("自定义MOD带多作用域蓄力属性时只吃自身作用域加成", () => {
             // 同一自定义MOD同时携带 同律近战蓄力增伤 / 近战蓄力增伤 / 蓄力增伤（各1）：
-            // - 装在同律近战槽时，同律武器吃到 同律近战蓄力增伤 + 蓄力增伤 = 2；
-            //   近战蓄力增伤 是近战作用域属性，同律MOD不应用（修复前后一致）。
+            // - 装在同律近战槽时，同律武器吃到 同律近战蓄力增伤 + 近战蓄力增伤 + 蓄力增伤 = 3；
+            //   同律槽位 MOD 直接作用于同律武器自身，其下位作用域（近战蓄力增伤）同样生效。
             // - 装在近战槽时，同律武器完全吃不到（近战MOD不随前缀降级穿透到同律武器，修复点）。
             const mkMod = (id: number, 类型: string) =>
                 new LeveledMod({
@@ -993,9 +993,9 @@ describe("evaluateAST函数测试", () => {
                     skillLevel: 10,
                 })
 
-            // 同律近战槽：吃到 同律近战蓄力增伤 + 蓄力增伤 = 2
+            // 同律近战槽：吃到 同律近战蓄力增伤 + 近战蓄力增伤 + 蓄力增伤 = 3
             const skillBonus = (makeBuild("skill") as any).getWeaponAttackTypeBonus("同律近战", "萨麦尔", "蓄力攻击伤害", "增伤")
-            expect(skillBonus).toBe(2)
+            expect(skillBonus).toBe(3)
             // 近战槽：完全不穿透到同律武器
             const meleeBonus = (makeBuild("melee") as any).getWeaponAttackTypeBonus("同律近战", "萨麦尔", "蓄力攻击伤害", "增伤")
             expect(meleeBonus).toBe(0)

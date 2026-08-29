@@ -11,9 +11,11 @@ import type { Draft } from "./d/draft.data"
 export type { Draft }
 
 export interface Buff {
+    id?: number
     名称: string
     描述: string
-    限定?: string
+    /** BUFF：角色 id；特效：元素名（旧存档可能为角色名） */
+    限定?: string | number
     a?: number
     b?: number
     dx?: number
@@ -468,7 +470,8 @@ export interface Mod {
     耐受: number
     类型: string
     属性?: string
-    限定?: string
+    /** 角色名/角色 id，或武器伤害类型/类别（字符串） */
+    限定?: string | number
     效果?: string
     消耗?: number[]
     技能替换?: Record<string, WeaponSkill>

@@ -45,6 +45,7 @@ import titleData from "@/data/d/title.data"
 import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel, getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
+import { formatModLimit } from "@/utils/mod-limit"
 import { getRelatedMonstersByMonsterTagId } from "@/utils/monster-tag-utils"
 import { getPinyin, getPinyinFirst } from "@/utils/pinyin-utils"
 
@@ -260,7 +261,7 @@ export class GlobalSearchService {
                         typeLabel: t("database.mod"),
                         path: `/db/mod/${mod.id}`,
                     },
-                    [mod.id, mod.名称, mod.系列, mod.类型, mod.品质, mod.属性, mod.限定, mod.版本, mod.极性, mod.耐受]
+                    [mod.id, mod.名称, mod.系列, mod.类型, mod.品质, mod.属性, formatModLimit(mod.限定), mod.版本, mod.极性, mod.耐受]
                 )
             )
         )

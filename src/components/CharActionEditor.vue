@@ -64,7 +64,12 @@ const buffOptions = computed(() =>
             lv: buff.mx || 1,
         }))
         .filter(
-            buff => (!buff.limit || buff.limit === props.charBuild.char.名称) && !charSettings.value.buffs.some(b => b[0] === buff.label)
+            buff =>
+                (!buff.limit ||
+                    (typeof buff.limit === "number"
+                        ? buff.limit === props.charBuild.char.id
+                        : buff.limit === props.charBuild.char.名称)) &&
+                !charSettings.value.buffs.some(b => b[0] === buff.label)
         )
 )
 

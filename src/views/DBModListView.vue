@@ -8,6 +8,7 @@ import { modMap } from "@/data/d"
 import { modConvertData } from "@/data/d/convert.data"
 import modData from "@/data/d/mod.data"
 import { formatProp } from "@/util"
+import { formatModLimit } from "@/utils/mod-limit"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 
@@ -466,7 +467,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbm-item-active" })
                                         <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
                                             <span>{{ $t(mod.类型) }}</span>
                                             <span v-if="mod.属性">{{ $t(`${mod.属性}属性`) }}</span>
-                                            <span v-if="mod.限定">{{ $t(mod.限定) }}</span>
+                                            <span v-if="mod.限定">{{ $t(formatModLimit(mod.限定)) }}</span>
                                             <span v-if="mod.版本" class="font-mono tabular-nums">v{{ mod.版本 }}</span>
                                             <span
                                                 v-if="mod.极性 || mod.耐受"

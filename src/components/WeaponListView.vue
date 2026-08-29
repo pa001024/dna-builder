@@ -81,6 +81,41 @@ const filteredWeapons = computed(() => {
 })
 
 /**
+ * 各武器的真实替换收益：在克隆构筑上把对应槽位替换为目标武器后重算，
+ * 以「替换后总伤害 / 当前总伤害 - 1」度量实际更换武器带来的收益变化，
+ * 避免 `calcIncome` 在槽位类型与构筑不匹配时把武器当作附加 MOD 处理而算错。
+ * 收益只依赖配装上下文与武器数据，不随筛选变化，故一次性缓存供排序与展示复用。
+ */
+const weaponIncomes = computed(() => {
+    const charBuild = props.charBuild
+    const map = new Map<number, number>()
+    if (!charBuild) return map
+
+    // 全程在克隆构筑上替换并重算，避免污染实时构筑
+    const clone = charBuild.clone()
+    const currentTotal = clone.calculate()
+
+    for (const weapon of weaponData) {
+        const effectLv = getWBuffLv(weapon.id, charBuild.char.属性)
+        const candidate = new LeveledWeapon(weapon, undefined, undefined, effectLv)
+        let newTotal: number
+        if (weapon.类型[0] === "近战") {
+            const old = clone.meleeWeapon
+            clone.meleeWeapon = candidate
+            newTotal = clone.calculate()
+            clone.meleeWeapon = old
+        } else {
+            const old = clone.rangedWeapon
+            clone.rangedWeapon = candidate
+            newTotal = clone.calculate()
+            clone.rangedWeapon = old
+        }
+        map.set(weapon.id, !currentTotal ? 0 : newTotal / currentTotal - 1)
+    }
+    return map
+})
+
+/**
  * 按收益排序后的展示列表；无配装上下文或未开启收益排序时保持原顺序。
  */
 const displayedWeapons = computed(() => {
@@ -89,14 +124,9 @@ const displayedWeapons = computed(() => {
         return filteredWeapons.value
     }
 
-    return [...filteredWeapons.value]
-        .map(weapon => {
-            const effectLv = getWBuffLv(weapon.id, charBuild.char.属性)
-            const income = charBuild.calcIncome(new LeveledWeapon(weapon, undefined, undefined, effectLv)) || 0
-            return { weapon, income }
-        })
-        .sort((a, b) => b.income - a.income)
-        .map(item => item.weapon)
+    return [...filteredWeapons.value].sort(
+        (a, b) => (weaponIncomes.value.get(b.id) || 0) - (weaponIncomes.value.get(a.id) || 0)
+    )
 })
 
 /**
@@ -287,18 +317,7 @@ function selectWeapon(weapon: Weapon) {
                                     <Icon icon="ri:bar-chart-line" class="h-3.5 w-3.5 shrink-0 text-primary/80" />
                                     <span class="text-base-content/50">{{ $t("weapon-list.income") }}:</span>
                                     <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
-                                        {{
-                                            format100r(
-                                                charBuild.calcIncome(
-                                                    new LeveledWeapon(
-                                                        weapon,
-                                                        undefined,
-                                                        undefined,
-                                                        getWBuffLv(weapon.id, charBuild.char.属性)
-                                                    )
-                                                )
-                                            )
-                                        }}
+                                        {{ format100r(weaponIncomes.get(weapon.id) || 0) }}
                                     </span>
                                 </div>
 

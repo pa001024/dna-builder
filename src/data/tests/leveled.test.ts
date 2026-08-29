@@ -617,6 +617,28 @@ describe("LeveledWeapon类测试", () => {
         expect(暴虐mod.近战攻速).toBeUndefined()
     })
 
+    it("紫色MOD正确应用特效数值（特效按MOD id匹配，金色/紫色分别配置）", () => {
+        // 蛮勇：紫满级 54% / 金满级 100%（修复前紫也吃到金色的 100%）
+        const 蛮勇紫 = new LeveledMod(41312)
+        expect(蛮勇紫.品质).toBe("紫")
+        expect(蛮勇紫.技能威力).toBeCloseTo(0.54, 10)
+
+        const 蛮勇金 = new LeveledMod(51312)
+        expect(蛮勇金.品质).toBe("金")
+        expect(蛮勇金.技能威力).toBeCloseTo(1, 10)
+
+        // 进击（每层 6%/11%，最多 15 层）：紫 0.06×15=0.9 / 金 0.11×15=1.65
+        expect(new LeveledMod(41311).攻击).toBeCloseTo(0.9, 10)
+        expect(new LeveledMod(51311).攻击).toBeCloseTo(1.65, 10)
+
+        // 决斗：紫 24% / 金 44%
+        expect(new LeveledMod(41313).增伤).toBeCloseTo(0.24, 10)
+        expect(new LeveledMod(51313).增伤).toBeCloseTo(0.44, 10)
+
+        // 仅紫色存在的MOD（暴虐）保持自身数值，不受金色满级假设影响
+        expect(new LeveledMod(42311).攻速).toBeCloseTo(0.6, 10)
+    })
+
     // 测试11：测试不存在的武器名称
     it("测试不存在的武器名称会抛出错误", () => {
         expect(() => {

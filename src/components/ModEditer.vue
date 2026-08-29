@@ -6,6 +6,7 @@ import { CharBuild } from "@/data/CharBuild"
 import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 import { useInvStore } from "@/store/inv"
 import { copyText, pasteText } from "@/util"
+import { formatModLimit } from "@/utils/mod-limit"
 
 interface ModOption {
     value: number
@@ -726,7 +727,7 @@ const bTolerance = computed(() => {
                     :title="`${$t(aMod.系列)}${$t(aMod.名称)}`"
                     :polarity="aMod.极性"
                     :cost="aMod.耐受"
-                    :type="`${$t(aMod.类型)}${aMod.属性 ? `,${$t(aMod.属性 + '属性')}` : ''}${aMod.限定 ? `,${$t(aMod.限定)}` : ''}`"
+                    :type="`${$t(aMod.类型)}${aMod.属性 ? `,${$t(aMod.属性 + '属性')}` : ''}${aMod.限定 ? `,${$t(formatModLimit(aMod.限定))}` : ''}`"
                     :effdesc="aMod.效果"
                     :eff="charBuild?.checkModEffective(aMod, true)"
                 >
@@ -820,7 +821,7 @@ const bTolerance = computed(() => {
                             :title="`${$t(secondAMod.系列)}${$t(secondAMod.名称)}`"
                             :polarity="secondAMod.极性"
                             :cost="secondAMod.耐受"
-                            :type="`${$t(secondAMod.类型)}${secondAMod.属性 ? `,${$t(secondAMod.属性 + '属性')}` : ''}${secondAMod.限定 ? `,${$t(secondAMod.限定)}` : ''}`"
+                            :type="`${$t(secondAMod.类型)}${secondAMod.属性 ? `,${$t(secondAMod.属性 + '属性')}` : ''}${secondAMod.限定 ? `,${$t(formatModLimit(secondAMod.限定))}` : ''}`"
                             :effdesc="secondAMod.效果"
                             :eff="charBuild?.checkModEffective(secondAMod, true)"
                         >

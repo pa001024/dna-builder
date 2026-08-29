@@ -19,6 +19,7 @@ import {
     modData,
     WeaponAttr,
 } from "@/data"
+import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
 import { useInvStore } from "@/store/inv"
 import { useTimeline } from "@/store/timeline"
@@ -50,6 +51,7 @@ const modOptions = modData
 
 const _buffOptions = reactive(
     buffData.map(buff => ({
+        buff,
         value: LeveledBuffHelper.fromName(buff.名称),
         label: buff.名称,
         limit: buff.限定,
@@ -147,8 +149,23 @@ const getFilteredBuffOptions = (configIndex: number) => {
     const project = config.projects.find((p: { name: string; charSettings: any }) => p.name === config.selectedProject)
     const projectBuffs = project?.charSettings.buffs.map((b: any) => b[0]) || []
 
+    const ctx = createBuffSelectContext({
+        charElm: charBuilds.value[configIndex]?.char.属性 || "",
+        mainIds: [
+            charMap.get(config.selectedChar)?.id || 0,
+            charBuilds.value[configIndex]?.meleeWeapon?.id,
+            charBuilds.value[configIndex]?.rangedWeapon?.id,
+        ].filter((id): id is number => typeof id === "number"),
+        phantomIds: [
+            charMap.get(config.charSettings.team1)?.id,
+            charMap.get(config.charSettings.team2)?.id,
+            config.charSettings.team1Weapon,
+            config.charSettings.team2Weapon,
+        ].filter((id): id is number => typeof id === "number"),
+    })
+
     return _buffOptions
-        .filter(buff => !buff.limit || buff.limit === config.selectedChar || buff.limit === charBuilds.value[configIndex]?.char.属性)
+        .filter(v => isBuffSelectable(v.buff, ctx))
         .filter(buff => !projectBuffs.includes(buff.label))
         .map(v => {
             const b = config.additionalBuffs.find(b => b[0] === v.label)
@@ -549,8 +566,10 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                             m =>
                                                 m.type === '角色' &&
                                                 (!m.limit ||
-                                                    m.limit === charBuilds[index]?.char.名称 ||
-                                                    m.limit === charBuilds[index]?.char.属性)
+                                                    (typeof m.limit === 'number'
+                                                        ? m.limit === charBuilds[index]?.char.id
+                                                        : m.limit === charBuilds[index]?.char.名称 ||
+                                                          m.limit === charBuilds[index]?.char.属性))
                                         )
                                     "
                                     :char-build="charBuilds[index]"
@@ -577,9 +596,11 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                             m =>
                                                 m.type === '近战' &&
                                                 (!m.limit ||
-                                                    [charBuilds[index]?.meleeWeapon.类别, charBuilds[index]?.meleeWeapon.伤害类型].includes(
-                                                        m.limit
-                                                    ))
+                                                    (typeof m.limit === 'string' &&
+                                                        [
+                                                            charBuilds[index]?.meleeWeapon.类别,
+                                                            charBuilds[index]?.meleeWeapon.伤害类型,
+                                                        ].includes(m.limit)))
                                         )
                                     "
                                     :char-build="charBuilds[index]"
@@ -600,10 +621,11 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                             m =>
                                                 m.type === '远程' &&
                                                 (!m.limit ||
-                                                    [
-                                                        charBuilds[index]?.rangedWeapon.类别,
-                                                        charBuilds[index]?.rangedWeapon.伤害类型,
-                                                    ].includes(m.limit))
+                                                    (typeof m.limit === 'string' &&
+                                                        [
+                                                            charBuilds[index]?.rangedWeapon.类别,
+                                                            charBuilds[index]?.rangedWeapon.伤害类型,
+                                                        ].includes(m.limit)))
                                         )
                                     "
                                     :char-build="charBuilds[index]"
@@ -626,10 +648,11 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                             m =>
                                                 m.type === charBuilds[index]?.skillWeapon?.类型 &&
                                                 (!m.limit ||
-                                                    [
-                                                        charBuilds[index]?.skillWeapon?.类别,
-                                                        charBuilds[index]?.skillWeapon?.伤害类型,
-                                                    ].includes(m.limit))
+                                                    (typeof m.limit === 'string' &&
+                                                        [
+                                                            charBuilds[index]?.skillWeapon?.类别,
+                                                            charBuilds[index]?.skillWeapon?.伤害类型,
+                                                        ].includes(m.limit)))
                                         )
                                     "
                                     :char-build="charBuilds[index]"

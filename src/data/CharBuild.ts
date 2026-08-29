@@ -1248,23 +1248,45 @@ export class CharBuild {
             (weapon instanceof LeveledSkillWeapon ? this.getWeaponAttackTypePrefixFromTags([weapon.视为 || ""]) : undefined)
         if (!weaponAttackTypePrefix) return 0
         const prefixScope = this.getAttributePrefixScope(weaponPrefix)
+        const multiplicative = attribute.endsWith("独立增伤")
         const getBonus = (attr: string, prefix: string, includeMods?: boolean) =>
-            attribute.endsWith("独立增伤")
-                ? this.getTotalBonusMul(attr, prefix, { includeMods })
-                : this.getTotalBonus(attr, prefix, { includeMods })
+            multiplicative ? this.getTotalBonusMul(attr, prefix, { includeMods }) : this.getTotalBonus(attr, prefix, { includeMods })
         let bonus = getBonus(`${weaponPrefix}${weaponAttackTypePrefix}${attribute}`, prefixScope)
         if (weaponPrefix.includes("近战")) {
             bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, prefixScope)
         }
         if (weaponPrefix.startsWith("同律")) {
             const lowerPrefix = weaponPrefix.substring(2)
+            const lowerScope = this.getAttributePrefixScope(lowerPrefix)
             // 前缀降级仅对 BUFF/武器效果生效；近战/远程 MOD 不随降级穿透到同律武器（MOD 只作用于自身槽位）
-            bonus += getBonus(`${lowerPrefix}${weaponAttackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix), false)
+            bonus += getBonus(`${lowerPrefix}${weaponAttackTypePrefix}${attribute}`, lowerScope, false)
             if (lowerPrefix.includes("近战")) {
-                bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, this.getAttributePrefixScope(lowerPrefix), false)
+                bonus += getBonus(`${weaponAttackTypePrefix}${attribute}`, lowerScope, false)
             }
+            // 同律槽位 MOD 直接作用于同律武器自身：其下位作用域（近战/远程）的细分属性同样生效。
+            // 仅统计同律作用域 MOD，不随前缀降级穿透的规则只约束近战/远程槽位 MOD。
+            bonus += this.getModsScopeBonus(`${lowerPrefix}${weaponAttackTypePrefix}${attribute}`, prefixScope, multiplicative)
         }
         return bonus
+    }
+    /**
+     * 统计指定作用域 MOD 对某属性的加成（仅 MOD，不含 BUFF/武器/角色基础加成）。
+     * 供同律武器的下位作用域查询使用：近战/远程槽位 MOD 不随前缀降级穿透到同律武器，
+     * 但同律槽位 MOD 直接作用于同律武器自身，其下位作用域（近战/远程）细分属性也应生效。
+     * @param attribute 属性名
+     * @param prefixScope 属性作用域（角色/近战/远程/同律近战/同律远程）
+     * @param multiplicative 独立增伤类属性按乘法汇总，返回净增量
+     * @returns 加成值
+     */
+    private getModsScopeBonus(attribute: string, prefixScope: string, multiplicative = false): number {
+        let bonus = multiplicative ? 1 : 0
+        this.mods.forEach(mod => {
+            if (prefixScope && mod.attrType !== prefixScope) return
+            const value = mod.addAttr[attribute]
+            if (typeof value !== "number") return
+            bonus = multiplicative ? bonus * (1 + value) : bonus + value
+        })
+        return multiplicative ? bonus - 1 : bonus
     }
     // 下列属性可以从角色穿透到武器
     static attrAllowCharToWeapon = new Set(["暴击", "暴伤", "触发", "攻速", "充盈转化", "召唤物攻击速度转化", "召唤物范围转化"])
@@ -3778,11 +3800,19 @@ export class CharBuild {
                         (!polarity || v.极性 === polarity) &&
                         (!v.属性 || v.属性 === localBuild.char.属性) &&
                         (!v.限定 ||
-                            (key === "charMods" && [localBuild.char.名称, localBuild.char.属性].includes(v.限定)) ||
-                            (key === "meleeMods" && [localBuild.meleeWeapon.伤害类型, localBuild.meleeWeapon.类别].includes(v.限定)) ||
-                            (key === "rangedMods" && [localBuild.rangedWeapon.伤害类型, localBuild.rangedWeapon.类别].includes(v.限定)) ||
+                            (key === "charMods" &&
+                                (typeof v.限定 === "number"
+                                    ? localBuild.char.id === v.限定
+                                    : [localBuild.char.名称, localBuild.char.属性].includes(v.限定))) ||
+                            (key === "meleeMods" &&
+                                typeof v.限定 === "string" &&
+                                [localBuild.meleeWeapon.伤害类型, localBuild.meleeWeapon.类别].includes(v.限定)) ||
+                            (key === "rangedMods" &&
+                                typeof v.限定 === "string" &&
+                                [localBuild.rangedWeapon.伤害类型, localBuild.rangedWeapon.类别].includes(v.限定)) ||
                             (key === "skillMods" &&
                                 localBuild.skillWeapon &&
+                                typeof v.限定 === "string" &&
                                 [localBuild.skillWeapon.伤害类型, localBuild.skillWeapon.类别].includes(v.限定))) &&
                         !selectedExclusiveNames[key].has(v.名称) &&
                         !selectedExclusiveSeries[key].has(v.系列 === "囚狼" && v.id > 100000 ? "囚狼1" : v.系列) &&

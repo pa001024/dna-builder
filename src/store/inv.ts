@@ -1,7 +1,6 @@
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
 import {
-    effectMap,
     LeveledModHelper,
     LeveledWeaponHelper,
     type ModTypeKey,
@@ -9,6 +8,7 @@ import {
     modData,
     modMap,
     weaponData,
+    weaponEffectMap,
     weaponMap,
 } from "../data"
 
@@ -58,8 +58,9 @@ export const useInvStore = defineStore("inv", {
             if (!weapon?.名称) {
                 return 0
             }
-            const eff = effectMap.get(weapon.名称)
-            if (eff?.限定 && eff.限定 !== elm && elm !== "any") {
+            // 武器特效按 id 精确匹配
+            const eff = weaponEffectMap.get(weaponId)
+            if (typeof eff?.限定 === "string" && eff.限定 !== elm && elm !== "any") {
                 return 0
             }
             return this.wLv[weaponId] || 0

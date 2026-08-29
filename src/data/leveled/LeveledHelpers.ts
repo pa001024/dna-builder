@@ -1,4 +1,4 @@
-import { buffMap, charMap, effectMap, modMap, monsterMap, petMap, weaponMap, weaponNameMap } from "../d"
+import { buffMap, charMap, modEffectMap, modMap, monsterMap, petMap, weaponEffectMap, weaponMap, weaponNameMap } from "../d"
 import type { Buff, Char, Mod, Weapon } from "../data-types"
 import { LeveledBuff, setLeveledBuffResolver } from "./LeveledBuff"
 import { LeveledChar, setLeveledCharResolver } from "./LeveledChar"
@@ -12,11 +12,13 @@ setLeveledBuffResolver(name => buffMap.get(name))
 setLeveledCharResolver(id => charMap.get(id))
 setLeveledModResolver(id => {
     const mod = modMap.get(id)
-    return mod ? { mod, effect: effectMap.get(mod.名称) } : undefined
+    // MOD 特效按 id 精确匹配（金色/紫色分别配置），不再按名称共享
+    return mod ? { mod, effect: modEffectMap.get(id) } : undefined
 })
 setLeveledWeaponResolver(id => {
     const weapon = typeof id === "number" ? weaponMap.get(id) : weaponNameMap.get(id)
-    return weapon ? { weapon, effect: effectMap.get(weapon.名称) } : undefined
+    // 武器特效按 id 精确匹配
+    return weapon ? { weapon, effect: weaponEffectMap.get(weapon.id) } : undefined
 })
 setLeveledMonsterResolver(id => monsterMap.get(id) || monsterMap.get(130))
 setLeveledPetResolver(id => petMap.get(id))
@@ -87,11 +89,11 @@ export class LeveledModHelper {
         if (!modData) {
             throw new Error(`MOD ID "${id}" 未在静态表中找到`)
         }
-        return new LeveledMod(modData, level, buffLv, effectMap.get(modData.名称))
+        return new LeveledMod(modData, level, buffLv, modEffectMap.get(modData.id))
     }
 
     static fromData(modData: Mod, level?: number, buffLv?: number) {
-        return new LeveledMod(modData, level, buffLv, effectMap.get(modData.名称))
+        return new LeveledMod(modData, level, buffLv, modEffectMap.get(modData.id))
     }
 
     static optionalFromId(id: number, level: number, buffLv?: number) {
@@ -99,13 +101,13 @@ export class LeveledModHelper {
         if (!modData) {
             return null
         }
-        return new LeveledMod(modData, level, buffLv, effectMap.get(modData.名称))
+        return new LeveledMod(modData, level, buffLv, modEffectMap.get(modData.id))
     }
 
     static fromDNA(dnaMod: import("dna-api").DNAModesBean) {
         const modData = modMap.get(+dnaMod.id)
         if (modData) {
-            return new LeveledMod(modData, dnaMod.level, undefined, effectMap.get(modData.名称))
+            return new LeveledMod(modData, dnaMod.level, undefined, modEffectMap.get(modData.id))
         }
         if (+dnaMod.id === -1) return null
         return new LeveledMod({
@@ -119,7 +121,7 @@ export class LeveledModHelper {
     }
 
     static withCount(modData: Mod, level?: number, buffLv?: number, count?: number) {
-        return new LeveledModWithCount(modData, level, buffLv, count, effectMap.get(modData.名称))
+        return new LeveledModWithCount(modData, level, buffLv, count, modEffectMap.get(modData.id))
     }
 
     static withCountFromId(id: number, level?: number, buffLv?: number, count?: number) {
@@ -149,11 +151,11 @@ export class LeveledWeaponHelper {
         if (!weaponData) {
             throw new Error(`武器 "${id}" 未在静态表中找到`)
         }
-        return new LeveledWeapon(weaponData, refine, level, effectLv, effectMap.get(weaponData.名称))
+        return new LeveledWeapon(weaponData, refine, level, effectLv, weaponEffectMap.get(weaponData.id))
     }
 
     static fromData(weaponData: Weapon, refine?: number, level?: number, effectLv?: number) {
-        return new LeveledWeapon(weaponData, refine, level, effectLv, effectMap.get(weaponData.名称))
+        return new LeveledWeapon(weaponData, refine, level, effectLv, weaponEffectMap.get(weaponData.id))
     }
 
     static idToUrl(id?: number) {
@@ -216,8 +218,8 @@ export function getWBuffLvFromSnapshot(inv: CharBuildInvSnapshot | undefined, we
     const level = inv?.wLv?.[weaponId] || 0
     if (!level) return 0
     const weapon = weaponMap.get(weaponId)
-    const effect = weapon?.名称 ? effectMap.get(weapon.名称) : undefined
-    if (effect?.限定 && effect.限定 !== elm && elm !== "any") {
+    const effect = weapon ? weaponEffectMap.get(weapon.id) : undefined
+    if (typeof effect?.限定 === "string" && effect.限定 !== elm && elm !== "any") {
         return 0
     }
     return level

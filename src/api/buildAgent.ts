@@ -12,7 +12,6 @@ import {
     buffData,
     charData,
     charMap,
-    effectMap,
     LeveledCharHelper,
     type LeveledMod,
     LeveledModHelper,
@@ -22,7 +21,9 @@ import {
     type LeveledWeapon,
     type ModTypeKey,
     modData,
+    modEffectMap,
     weaponData,
+    weaponEffectMap,
     weaponMap,
 } from "../data"
 import { createCharBuildFromSettings } from "../data/CharBuildHelper"
@@ -249,7 +250,8 @@ export class BuildAgent {
         limit?: string
         maxLevel: number
     } | null {
-        const effect = effectMap.get(mod.名称)
+        // MOD 特效按 id 精确匹配（金色/紫色分别配置）
+        const effect = modEffectMap.get(mod.id)
         if (!effect) {
             return null
         }
@@ -262,7 +264,7 @@ export class BuildAgent {
         return {
             name: effect.名称,
             description: effect.描述 || "",
-            limit: effect.限定,
+            limit: typeof effect.限定 === "string" ? effect.限定 : undefined,
             maxLevel: Math.max(1, typeof effect.mx === "number" ? Math.floor(effect.mx) : 1),
         }
     }
@@ -282,14 +284,15 @@ export class BuildAgent {
         if (!weapon) {
             return null
         }
-        const effect = effectMap.get(weapon.名称)
+        // 武器特效按 id 精确匹配
+        const effect = weaponEffectMap.get(weapon.id)
         if (!effect) {
             return null
         }
         return {
             name: effect.名称,
             description: effect.描述 || "",
-            limit: effect.限定,
+            limit: typeof effect.限定 === "string" ? effect.限定 : undefined,
             maxLevel: Math.max(1, typeof effect.mx === "number" ? Math.floor(effect.mx) : 1),
         }
     }

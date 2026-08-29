@@ -32,6 +32,12 @@ export const buffMap = new Map<string, Buff>()
 
 export const effectMap = new Map<string, Buff>()
 
+/** MOD 特效按 MOD id 精确索引（金色/紫色分别配置特效条目） */
+export const modEffectMap = new Map<number, Buff>()
+
+/** 武器特效按武器 id 精确索引 */
+export const weaponEffectMap = new Map<number, Buff>()
+
 export const weaponMap = new Map<number, Weapon>()
 export const weaponNameMap = new Map<string, Weapon>()
 export const skinMap = new Map<number, (typeof skinData)[number]>()
@@ -128,11 +134,26 @@ function rebuildStaticIndexes(): void {
         effectMap.set(buff.名称, buff as Buff)
     }
 
+    modEffectMap.clear()
+    for (const buff of effectData) {
+        if (buff.id !== undefined && modMap.has(buff.id)) {
+            modEffectMap.set(buff.id, buff as Buff)
+        }
+    }
+
     weaponMap.clear()
     weaponNameMap.clear()
     for (const weapon of weaponData) {
         weaponMap.set(weapon.id, weapon as Weapon)
         weaponNameMap.set(weapon.名称, weapon as Weapon)
+    }
+
+    // 武器特效需在 weaponMap 建立后再按 id 索引
+    weaponEffectMap.clear()
+    for (const buff of effectData) {
+        if (buff.id !== undefined && weaponMap.has(buff.id)) {
+            weaponEffectMap.set(buff.id, buff as Buff)
+        }
     }
 
     skinMap.clear()

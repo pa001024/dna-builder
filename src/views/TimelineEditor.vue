@@ -1262,6 +1262,7 @@ import {
     LeveledModHelper,
     LeveledWeaponHelper,
 } from "@/data"
+import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
 import { useInvStore } from "@/store/inv"
 import { useTimeline } from "@/store/timeline"
@@ -1329,14 +1330,26 @@ const charBuild = computed(() => {
         teamWeapons: [charSettings.value.team1Weapon, charSettings.value.team2Weapon],
     })
 })
-const buffOptions = computed(() =>
-    buffData
-        .filter(buff => !buff.限定 || buff.限定 === selectedChar.value || buff.限定 === charBuild.value.char.属性)
+const buffOptions = computed(() => {
+    const ctx = createBuffSelectContext({
+        charElm: charBuild.value.char.属性,
+        mainIds: [selectedCharId.value, charBuild.value.meleeWeapon?.id, charBuild.value.rangedWeapon?.id].filter(
+            (id): id is number => typeof id === "number"
+        ),
+        phantomIds: [
+            charMap.get(charSettings.value.team1)?.id,
+            charMap.get(charSettings.value.team2)?.id,
+            charSettings.value.team1Weapon,
+            charSettings.value.team2Weapon,
+        ].filter((id): id is number => typeof id === "number"),
+    })
+    return buffData
+        .filter(buff => isBuffSelectable(buff, ctx))
         .map(v => ({
             mx: v.mx,
             label: v.名称,
         }))
-)
+})
 const selectedBuff = ref("")
 const selectedBuffLv = ref(1)
 const selectedBuffMaxLv = computed(() => buffOptions.value.find(buff => buff.label === selectedBuff.value)?.mx || 1)

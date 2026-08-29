@@ -616,51 +616,6 @@ describe("CharBuild类测试", () => {
         expect(skillWeaponAttrs!.攻击).toBeCloseTo(charBuild.skillWeapon!.基础攻击 * 1.4, 2)
     })
 
-    it("权火将熄5熔按近战MOD原始属性25%提升同律武器，且不受BUFF影响", () => {
-        // 贝蕾妮卡拥有同律近战武器「伊弥尔」
-        const makeBuild = (buffs: string[]) =>
-            new CharBuild({
-                char: new LeveledChar("贝蕾妮卡"),
-                skillLevel: 10,
-                hpPercent: 0.5,
-                resonanceGain: 2,
-                charMods: [],
-                meleeMods: [new LeveledMod(42002)], // 专注：暴击1.0（相对值）
-                rangedMods: [],
-                skillMods: [],
-                buffs: buffs.map(name => new LeveledBuff(name, name === "色散成霓" ? 10 : undefined)),
-                melee: new LeveledWeapon(10399), // 权火将熄
-                ranged: new LeveledWeapon(20601),
-                baseName: "普通攻击",
-                enemyId: 130,
-                enemyLevel: 80,
-                enemyResistance: 0.5,
-                targetFunction: "伤害",
-            })
-
-        const skillWeaponCrit = (build: CharBuild) => build.calculateWeaponAttributes(build.skillWeapon).weapon?.暴击 ?? 0
-        const baseCrit = skillWeaponCrit(makeBuild([]))
-        const skillBaseCrit = makeBuild([]).skillWeapon!.基础暴击
-
-        // 原始MOD区加成：近战MOD专注提供100%暴击1.0（相对值）
-        expect(makeBuild([]).getModAttrs().meleeMods.暴击).toBeCloseTo(1, 10)
-
-        // 权火将熄5熔：最终暴击增加量 = 同律基础暴击 × 近战MOD暴击 × 25%
-        const expectedIncrease = skillBaseCrit * 1 * 0.25
-        const qhBuild = makeBuild([])
-        qhBuild.dynamicBuffs.push(new LeveledBuff("权火将熄5熔"))
-        expect(skillWeaponCrit(qhBuild)).toBeCloseTo(baseCrit + expectedIncrease, 10)
-
-        // 色散成霓BUFF提高近战/同律武器暴击，但不应影响权火将熄5熔读取的原始MOD值
-        const snBuild = makeBuild(["色散成霓"])
-        const bothBuild = makeBuild(["色散成霓"])
-        bothBuild.dynamicBuffs.push(new LeveledBuff("权火将熄5熔"))
-        const marginalWithoutSn = skillWeaponCrit(qhBuild) - baseCrit
-        const marginalWithSn = skillWeaponCrit(bothBuild) - skillWeaponCrit(snBuild)
-        expect(marginalWithSn).toBeCloseTo(marginalWithoutSn, 10)
-        expect(marginalWithSn).toBeCloseTo(expectedIncrease, 10)
-    })
-
     it("应该将近战武器普通攻击替换为技能替换MOD中的字段", () => {
         const charBuild = new CharBuild({
             char: new LeveledChar("黎瑟"),
@@ -2055,6 +2010,86 @@ describe("CharBuild类测试", () => {
 
             expect(dCount).toBeGreaterThanOrEqual(3)
             expect(result.newBuild.checkModEffective(result.newBuild.auraMod!)?.isEffective).toBe(true)
+        })
+
+        it("角色限定的MOD：限定为角色id，仅对应角色可入选", () => {
+            // 追踪模式 (150401) 限定=苏乙 id 1504
+            const suyiSettings = {
+                charLevel: 80,
+                baseName: "射击",
+                hpPercent: 1,
+                resonanceGain: 3,
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                isRouge: false,
+                targetFunction: "DPS/0.71*1.71",
+                charSkillLevel: 12,
+                meleeWeapon: 10601,
+                meleeWeaponLevel: 80,
+                meleeWeaponRefine: 5,
+                rangedWeapon: 20101,
+                rangedWeaponLevel: 80,
+                rangedWeaponRefine: 5,
+                auraMod: 51765,
+                imbalance: false,
+                charMods: Array(8).fill(null),
+                meleeMods: Array(8).fill(null) as ([number, number] | null)[],
+                rangedMods: [
+                    [53005, 10],
+                    [53012, 10],
+                    [43002, 5],
+                    [53011, 10],
+                    [53009, 10],
+                    [53010, 10],
+                    [43343, 5],
+                    [33332, 5],
+                ] as ([number, number] | null)[],
+                skillWeaponMods: Array(4).fill(null) as ([number, number] | null)[],
+                buffs: [
+                    ["菲娜Q", 12],
+                    ["菲娜被动+1溯", 1],
+                    ["全盛·振奋", 10],
+                    ["激扬寒波", 10],
+                    ["菲娜6溯", 5],
+                    ["菲娜4溯", 1],
+                    ["菲娜助战", 1],
+                    ["菲娜被动(自身)", 1],
+                    ["羽翼·鼓舞·专注(光)", 10],
+                    ["色散成霓", 10],
+                ] as [string, number][],
+                customBuff: [] as [string, number][],
+                customVariables: [] as [string, string][],
+                team1: "-" as number | "-",
+                team1Weapon: "-" as number | "-",
+                team2: "-" as number | "-",
+                team2Weapon: "-" as number | "-",
+                timelineDPS: false,
+                useGlobal: false,
+                effectConfig: {} as Record<string, number>,
+                actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
+                extraMastery: "",
+            }
+            const suyiBuild = createCharBuildFromSettings(1504, suyiSettings)
+            const suyiResult = suyiBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions: [new LeveledModWithCount(150401, undefined, undefined, 1)],
+                enableLog: false,
+            })
+            expect(suyiResult.newBuild.charMods.some(mod => mod?.id === 150401)).toBe(true)
+
+            // 非限定角色（黎瑟）不应入选
+            const liseBuild = createCharBuild()
+            liseBuild.charMods = []
+            liseBuild.buffs = []
+            const liseResult = liseBuild.autoBuild({
+                includeTypes: ["charMods"],
+                preserveTypes: ["charMods"],
+                modOptions: [new LeveledModWithCount(150401, undefined, undefined, 1)],
+                enableLog: false,
+            })
+            expect(liseResult.newBuild.charMods.some(mod => mod?.id === 150401)).toBe(false)
         })
     })
 

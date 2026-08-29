@@ -161,7 +161,12 @@ describe("模块使用场景测试", () => {
         expect(moduleExports.effectData).toBeDefined()
     })
 
-    it("1.5版本武器应有对应的特效数据", () => {
+    it("1.5版本武器应有对应的特效数据（按武器id匹配）", () => {
+        // 特效按武器 id 精确匹配
+        expect(dataModule.weaponEffectMap.get(10209)?.暴伤).toBe(0.06)
+        expect(dataModule.weaponEffectMap.get(20104)?.暴击).toBe(0.1)
+        expect(dataModule.weaponEffectMap.get(20207)?.召唤物伤害).toBe(0.15)
+        // 名称索引仍保留（兼容按名称查询）
         expect(dataModule.effectMap.get("锥心黑曜镰")?.暴伤).toBe(0.06)
         expect(dataModule.effectMap.get("圣血·手枪")?.暴击).toBe(0.1)
         expect(dataModule.effectMap.get("最好的一天")?.召唤物伤害).toBe(0.15)

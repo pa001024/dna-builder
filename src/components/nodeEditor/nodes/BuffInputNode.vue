@@ -16,7 +16,7 @@ interface BuffOption {
     label: string
     value: string
     description?: string
-    limit?: string
+    limit?: string | number
     lx: number
     mx: number
 }
