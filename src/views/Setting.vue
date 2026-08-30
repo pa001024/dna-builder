@@ -665,11 +665,7 @@ onMounted(() => {
                                     class="group relative h-9 w-16 cursor-pointer overflow-hidden rounded-xs border border-base-content/15"
                                     @click="pickWallpaper"
                                 >
-                                    <img
-                                        :src="setting.customWallpaper"
-                                        alt="自定义底图预览"
-                                        class="h-full w-full object-cover"
-                                    />
+                                    <img :src="setting.customWallpaper" alt="自定义底图预览" class="h-full w-full object-cover" />
                                     <span
                                         class="absolute inset-0 flex items-center justify-center bg-base-content/55 text-[11px] font-medium text-base-100 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
                                         >更换</span
@@ -699,8 +695,7 @@ onMounted(() => {
                                     step="0.05"
                                     @input="setting.customWallpaperOpacity = +($event.target as HTMLInputElement)!.value"
                                 />
-                                <span
-                                    class="w-10 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                <span class="w-10 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
                                     >{{ Math.round(setting.customWallpaperOpacity * 100) }}%</span
                                 >
                             </div>
@@ -724,8 +719,7 @@ onMounted(() => {
                                     step="1"
                                     @input="setting.customWallpaperBlur = +($event.target as HTMLInputElement)!.value"
                                 />
-                                <span
-                                    class="w-12 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                <span class="w-12 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
                                     >{{ setting.customWallpaperBlur }}px</span
                                 >
                             </div>
@@ -858,6 +852,7 @@ onMounted(() => {
                             </div>
                         </div>
                         <div
+                            v-if="env.isApp"
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
@@ -872,7 +867,7 @@ onMounted(() => {
                             />
                         </div>
                         <div
-                            v-if="!setting.safeMode"
+                            v-if="env.isApp && !setting.safeMode"
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text"> {{ $t("setting.initScriptHotkeysAtStartup") }} </span>

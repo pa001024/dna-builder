@@ -1,7 +1,14 @@
 import { hash } from "bcryptjs"
 import { describe, expect, it } from "vitest"
 import type { SafeModeQuestion } from "../safe-mode-questions"
-import { checkSafeModeAnswers, pickSafeModeQuestions, SAFE_MODE_QUESTIONS, SAFE_MODE_REQUIRED_COUNT } from "../safe-mode-questions"
+import {
+    checkSafeModeAnswers,
+    pickSafeModeQuestions,
+    SAFE_MODE_CHOICE_COUNT,
+    SAFE_MODE_QUESTIONS,
+    SAFE_MODE_REQUIRED_COUNT,
+    SAFE_MODE_TEXT_COUNT,
+} from "../safe-mode-questions"
 
 /** bcrypt 哈希串格式（$2a/$2b/$2x/$2y + 轮数 + 53 字符盐与校验和） */
 const BCRYPT_HASH_RE = /^\$2[abxy]\$\d{2}\$[./A-Za-z0-9]{53}$/
@@ -27,18 +34,30 @@ describe("SAFE_MODE_QUESTIONS 题目库", () => {
 })
 
 describe("pickSafeModeQuestions 随机抽题", () => {
-    it("抽取数量与请求一致且不重复", () => {
-        const picked = pickSafeModeQuestions(SAFE_MODE_REQUIRED_COUNT)
+    it("默认抽取 2 道选择题 + 1 道填空题", () => {
+        const picked = pickSafeModeQuestions()
         expect(picked).toHaveLength(SAFE_MODE_REQUIRED_COUNT)
+        expect(picked).toHaveLength(SAFE_MODE_CHOICE_COUNT + SAFE_MODE_TEXT_COUNT)
+        expect(picked.filter(question => question.kind === "choice")).toHaveLength(SAFE_MODE_CHOICE_COUNT)
+        expect(picked.filter(question => question.kind === "text")).toHaveLength(SAFE_MODE_TEXT_COUNT)
         expect(new Set(picked).size).toBe(SAFE_MODE_REQUIRED_COUNT)
         for (const question of picked) {
             expect(SAFE_MODE_QUESTIONS).toContain(question)
         }
     })
 
-    it("抽取数量超过题库时返回全部题目", () => {
-        const picked = pickSafeModeQuestions(SAFE_MODE_QUESTIONS.length + 5)
-        expect(picked).toHaveLength(SAFE_MODE_QUESTIONS.length)
+    it("可自定义选择/填空抽取数量", () => {
+        const picked = pickSafeModeQuestions(3, 2)
+        expect(picked.filter(question => question.kind === "choice")).toHaveLength(3)
+        expect(picked.filter(question => question.kind === "text")).toHaveLength(2)
+    })
+
+    it("抽取数量超过对应题型池时返回该题型全部题目", () => {
+        const choicePool = SAFE_MODE_QUESTIONS.filter(question => question.kind === "choice")
+        const textPool = SAFE_MODE_QUESTIONS.filter(question => question.kind === "text")
+        const picked = pickSafeModeQuestions(choicePool.length + 5, textPool.length + 5)
+        expect(picked).toHaveLength(choicePool.length + textPool.length)
+        expect(new Set(picked).size).toBe(choicePool.length + textPool.length)
     })
 })
 

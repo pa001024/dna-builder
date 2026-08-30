@@ -2110,6 +2110,7 @@
         "safeModeAnswerWrong": "回答错误，安全模式仍保持开启",
         "safeModeHint": "你知道的太多了",
         "safeModeQuizCancel": "放弃",
+        "safeModeQuizCooldown": "回答错误，请在 {{time}} 后重试",
         "safeModeQuizInputPlaceholder": "请输入答案",
         "safeModeQuizTip": "请正确回答全部 {{count}} 道验证题，才能关闭安全模式",
         "safeModeQuizTitle": "关闭安全模式",
