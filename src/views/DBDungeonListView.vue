@@ -126,14 +126,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
     <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
             <!-- 左侧列表面板 -->
-            <div
-                class="flex-1 flex flex-col overflow-hidden min-w-0"
-                :class="{ 'sm:border-r border-base-content/10': selectedDungeon }"
-            >
+            <div class="flex-1 flex flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedDungeon }">
                 <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
-                <div
-                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
-                >
+                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
                     <div class="relative">
                         <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
                         <input
@@ -198,9 +193,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                 >
                     <!-- 类型筛选 -->
                     <div v-show="showTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            类型
-                        </span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40"> 类型 </span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -217,7 +210,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                             :key="type.t"
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs px-2 py-0.5 text-[11px] transition-all duration-200 active:scale-[0.97]"
                             :class="
-                                selectedType === type.t ? type.color + ' font-semibold text-white' : 'border border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                selectedType === type.t
+                                    ? type.color + ' font-semibold text-white'
+                                    : 'border border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                             "
                             @click="selectedType = type.t"
                         >
@@ -227,9 +222,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
 
                     <!-- 等级筛选 -->
                     <div v-show="showLevelFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            等级
-                        </span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40"> 等级 </span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -261,7 +254,10 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                 <ScrollArea class="flex-1">
                     <div class="p-3">
                         <!-- 空状态 -->
-                        <div v-if="filteredDungeons.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
+                        <div
+                            v-if="filteredDungeons.length === 0"
+                            class="flex flex-col items-center justify-center py-20 text-base-content/45"
+                        >
                             <p class="text-sm">未找到匹配的副本</p>
                         </div>
 
@@ -316,12 +312,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                                             <span class="font-mono tabular-nums">Lv.{{ dungeon.lv }}</span>
                                             <span>怪物 {{ (dungeon.m || []).length }} 种</span>
                                             <span v-if="(dungeon.sm || []).length">特殊 {{ (dungeon.sm || []).length }} 个</span>
-                                            <span v-if="dungeon.r?.length" class="truncate">奖励: {{ getDungeonRewardNames(dungeon) }}</span>
+                                            <span v-if="dungeon.r?.length" class="truncate"
+                                                >奖励: {{ getDungeonRewardNames(dungeon) }}</span
+                                            >
                                         </div>
                                     </div>
-                                </div>
-                                <div class="absolute top-2 right-2">
-                                    <CopyID :id="dungeon.id" />
                                 </div>
                             </article>
                         </div>
