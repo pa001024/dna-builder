@@ -170,8 +170,10 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="flex flex-col h-full overflow-hidden relative">
-        <nav class="flex-none flex items-center gap-1 px-2 border-b border-base-300 bg-base-100 relative">
+    <div class="relative flex h-full flex-col overflow-hidden">
+        <!-- 顶部导航：悬浮于内容之上，让 GameUpdate 视频背景全屏 -->
+        <nav class="absolute inset-x-0 top-0 z-20 border-b border-base-content/15 bg-base-100/60 backdrop-blur-sm">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
             <div
                 class="pointer-events-none absolute inset-0"
                 style="
@@ -183,155 +185,218 @@ onMounted(async () => {
                 "
                 aria-hidden="true"
             />
-            <button
-                type="button"
-                class="px-3 py-2 text-sm rounded-t-lg border-b-2 transition-colors flex items-center gap-1.5"
-                :class="
-                    tab === 'update'
-                        ? 'border-primary text-primary font-semibold'
-                        : 'border-transparent text-base-content/60 hover:text-base-content'
-                "
-                @click="tab = 'update'"
-            >
-                <Icon icon="ri:refresh-line" class="size-4" />
-                {{ $t("game-launcher.gameUpdate") }}
-            </button>
-            <button
-                type="button"
-                class="px-3 py-2 text-sm rounded-t-lg border-b-2 transition-colors flex items-center gap-1.5"
-                :class="
-                    tab === 'setting'
-                        ? 'border-primary text-primary font-semibold'
-                        : 'border-transparent text-base-content/60 hover:text-base-content'
-                "
-                @click="tab = 'setting'"
-            >
-                <Icon icon="ri:settings-3-line" class="size-4" />
-                {{ $t("game-launcher.gameSetting") }}
-            </button>
-            <button
-                type="button"
-                class="px-3 py-2 text-sm rounded-t-lg border-b-2 transition-colors flex items-center gap-1.5"
-                :class="
-                    tab === 'account'
-                        ? 'border-primary text-primary font-semibold'
-                        : 'border-transparent text-base-content/60 hover:text-base-content'
-                "
-                @click="tab = 'account'"
-            >
-                <Icon icon="ri:user-line" class="size-4" />
-                {{ $t("game-launcher.accountManage") }}
-            </button>
-            <RouterLink
-                to="/mods"
-                class="btn btn-sm btn-square btn-ghost tooltip tooltip-bottom ml-auto"
-                :data-tip="$t('game-launcher.modManager')"
-            >
-                <Icon icon="ri:puzzle-line" class="w-6 h-6" />
-            </RouterLink>
-            <div
-                class="btn btn-sm btn-square btn-ghost tooltip tooltip-bottom"
-                :data-tip="$t('game-launcher.openGameDir')"
-                @click="openGameDirectory()"
-            >
-                <Icon icon="ri:folder-line" class="w-6 h-6" />
-            </div>
-            <div
-                class="btn btn-sm btn-square btn-ghost tooltip tooltip-bottom"
-                :class="{ 'btn-primary': cloudgame.isWindowOpen || cloudgame.opening }"
-                :data-tip="cloudGameEntryTitle"
-                @click="openCloudGameFromLauncher()"
-            >
-                <Icon :icon="cloudgame.isBridgeConnected ? 'ri:cloud-fill' : 'ri:cloud-line'" class="w-6 h-6" />
-            </div>
-            <div
-                class="btn btn-sm btn-square btn-ghost btn-error tooltip tooltip-bottom"
-                :data-tip="$t('game-launcher.uninstall')"
-                @click="uninstallGame()"
-            >
-                <Icon icon="ri:delete-bin-6-line" class="w-6 h-6" />
-            </div>
-            <div class="w-40 btn btn-primary mx-2" :class="{ 'btn-disabled': game.running }" @click="launchGame()">
-                <Icon icon="ri:rocket-2-line" class="w-6 h-6" />
-                {{ $t("game-launcher.launch") }}
+            <div class="relative flex items-center gap-1">
+                <!-- 标签页：下划线指示，选中态主色；极窄下只留图标 -->
+                <button
+                    type="button"
+                    class="flex cursor-pointer items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm transition-colors -mb-px whitespace-nowrap"
+                    :class="
+                        tab === 'update'
+                            ? 'border-primary text-primary font-semibold'
+                            : 'border-transparent text-base-content/60 hover:text-base-content'
+                    "
+                    @click="tab = 'update'"
+                >
+                    <Icon icon="ri:refresh-line" class="size-4 shrink-0" />
+                    <span class="hidden sm:inline">{{ $t("game-launcher.gameUpdate") }}</span>
+                </button>
+                <button
+                    type="button"
+                    class="flex cursor-pointer items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm transition-colors -mb-px whitespace-nowrap"
+                    :class="
+                        tab === 'setting'
+                            ? 'border-primary text-primary font-semibold'
+                            : 'border-transparent text-base-content/60 hover:text-base-content'
+                    "
+                    @click="tab = 'setting'"
+                >
+                    <Icon icon="ri:settings-3-line" class="size-4 shrink-0" />
+                    <span class="hidden sm:inline">{{ $t("game-launcher.gameSetting") }}</span>
+                </button>
+                <button
+                    type="button"
+                    class="flex cursor-pointer items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm transition-colors -mb-px whitespace-nowrap"
+                    :class="
+                        tab === 'account'
+                            ? 'border-primary text-primary font-semibold'
+                            : 'border-transparent text-base-content/60 hover:text-base-content'
+                    "
+                    @click="tab = 'account'"
+                >
+                    <Icon icon="ri:user-line" class="size-4 shrink-0" />
+                    <span class="hidden sm:inline">{{ $t("game-launcher.accountManage") }}</span>
+                </button>
+
+                <div class="ml-auto flex items-center gap-1.5 pl-2">
+                    <RouterLink
+                        to="/mods"
+                        class="tooltip tooltip-bottom inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary"
+                        :data-tip="$t('game-launcher.modManager')"
+                    >
+                        <Icon icon="ri:puzzle-line" class="size-4" />
+                    </RouterLink>
+                    <button
+                        type="button"
+                        class="tooltip tooltip-bottom inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary"
+                        :data-tip="$t('game-launcher.openGameDir')"
+                        @click="openGameDirectory()"
+                    >
+                        <Icon icon="ri:folder-line" class="size-4" />
+                    </button>
+                    <button
+                        type="button"
+                        class="tooltip tooltip-bottom inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border transition-colors duration-150"
+                        :class="
+                            cloudgame.isWindowOpen || cloudgame.opening
+                                ? 'border-primary/70 bg-primary/10 text-primary'
+                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                        "
+                        :data-tip="cloudGameEntryTitle"
+                        @click="openCloudGameFromLauncher()"
+                    >
+                        <Icon :icon="cloudgame.isBridgeConnected ? 'ri:cloud-fill' : 'ri:cloud-line'" class="size-4" />
+                    </button>
+                    <button
+                        type="button"
+                        class="tooltip tooltip-bottom inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error"
+                        :data-tip="$t('game-launcher.uninstall')"
+                        @click="uninstallGame()"
+                    >
+                        <Icon icon="ri:delete-bin-6-line" class="size-4" />
+                    </button>
+                    <button
+                        type="button"
+                        class="mx-1 inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-xs bg-primary px-3.5 text-sm font-semibold text-primary-content transition-opacity duration-150 whitespace-nowrap"
+                        :class="{ 'pointer-events-none opacity-45': game.running }"
+                        @click="launchGame()"
+                    >
+                        <Icon icon="ri:rocket-2-line" class="size-4 shrink-0" />
+                        <span class="hidden sm:inline">{{ $t("game-launcher.launch") }}</span>
+                    </button>
+                </div>
             </div>
         </nav>
+
+        <!-- 游戏设置 -->
         <ScrollArea v-if="tab === 'setting'" class="flex-1">
-            <div class="bg-base-100 p-4">
-                <div class="max-w-6xl m-auto">
-                    <div v-for="key in keys" :key="key">
-                        <div class="p-2 flex flex-row justify-between items-center flex-wrap">
-                            <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
-                                <input v-model="game[`${key}Enable`]" type="checkbox" class="checkbox checkbox-primary" />
-                                <span class="label-text">{{ $t("game-launcher." + key) }}</span>
-                            </label>
-                            <div v-show="game[`${key}Enable`]" class="flex flex-1 space-x-2">
-                                <input
-                                    type="text"
-                                    disabled
-                                    :value="game[key]"
-                                    :placeholder="$t('game-launcher.selectPath')"
-                                    class="input input-bordered input-sm w-full min-w-32"
-                                />
-                                <div class="btn btn-primary btn-sm" @click="selectPath(key)">
-                                    {{ $t("game-launcher.select") }}
+            <div class="mx-auto w-full max-w-6xl space-y-4 px-4 pb-6 pt-16">
+                <!-- 启动路径 -->
+                <section
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    style="animation-delay: 0ms"
+                >
+                    <SectionHeader no-animate compact kicker="LAUNCH" title="启动路径" />
+                    <div class="space-y-2">
+                        <div v-for="key in keys" :key="key">
+                            <div class="flex flex-row flex-wrap items-center justify-between gap-2">
+                                <label class="label flex cursor-pointer items-center justify-start gap-2 px-0 py-1">
+                                    <input v-model="game[`${key}Enable`]" type="checkbox" class="checkbox checkbox-primary checkbox-sm" />
+                                    <span class="label-text text-sm">{{ $t("game-launcher." + key) }}</span>
+                                </label>
+                                <div v-show="game[`${key}Enable`]" class="flex flex-1 items-center gap-2">
+                                    <input
+                                        type="text"
+                                        disabled
+                                        :value="game[key]"
+                                        :placeholder="$t('game-launcher.selectPath')"
+                                        class="input input-bordered input-sm w-full min-w-32 rounded-xs"
+                                    />
+                                    <div
+                                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-base-content/20 px-2 py-1 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        @click="selectPath(key)"
+                                    >
+                                        {{ $t("game-launcher.select") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 启动参数（仅游戏路径开启时显示） -->
+                            <div
+                                v-if="key === 'path' && game.pathEnable"
+                                class="flex flex-row flex-wrap items-center justify-between gap-2 border-t border-base-content/10 pt-2"
+                            >
+                                <label class="label flex cursor-pointer items-center justify-start gap-2 px-0 py-1">
+                                    <span class="w-4 shrink-0" aria-hidden="true" />
+                                    <span class="label-text text-sm">{{ $t("game-launcher.params") }}</span>
+                                </label>
+                                <div class="flex flex-1 items-center gap-2">
+                                    <input
+                                        v-model="game.pathParams"
+                                        type="text"
+                                        class="input input-bordered input-sm w-full min-w-32 rounded-xs"
+                                    />
                                 </div>
                             </div>
                         </div>
-                        <div v-if="key === 'path' && game[`${key}Enable`]" class="p-2 flex flex-row justify-between items-center flex-wrap">
-                            <label class="label cursor-pointer min-w-32 justify-start">
-                                <span class="label-text ml-12">{{ $t("game-launcher.params") }}</span>
-                            </label>
-                            <div v-show="game.pathEnable" class="flex flex-1 space-x-2">
-                                <input v-model="game.pathParams" type="text" class="input input-bordered input-sm w-full min-w-32" />
-                            </div>
-                        </div>
                     </div>
-                    <div>
-                        <div class="p-2 flex flex-row justify-between items-center flex-wrap">
-                            <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
-                                <input v-model="game.dx11Enable" type="checkbox" class="checkbox checkbox-primary" />
-                                <span class="label-text">{{ $t("game-launcher.dx11Enable") }}</span>
+                </section>
+
+                <!-- 游戏选项 -->
+                <section
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    style="animation-delay: 70ms"
+                >
+                    <SectionHeader no-animate compact kicker="GAME" title="游戏选项" />
+                    <div class="space-y-2">
+                        <div class="flex flex-row flex-wrap items-center justify-between gap-2">
+                            <label class="label flex cursor-pointer items-center justify-start gap-2 px-0 py-1">
+                                <input v-model="game.dx11Enable" type="checkbox" class="checkbox checkbox-primary checkbox-sm" />
+                                <span class="label-text text-sm">{{ $t("game-launcher.dx11Enable") }}</span>
                             </label>
                         </div>
-                        <div class="p-2 flex flex-row justify-between items-center flex-wrap">
-                            <label class="label cursor-pointer space-x-2 min-w-32 justify-start">
-                                <input v-model="game.modEnable" type="checkbox" class="checkbox checkbox-primary" />
-                                <span class="label-text">{{ $t("game-launcher.modEnable") }}</span>
+                        <div class="flex flex-row flex-wrap items-center justify-between gap-2">
+                            <label class="label flex cursor-pointer items-center justify-start gap-2 px-0 py-1">
+                                <input v-model="game.modEnable" type="checkbox" class="checkbox checkbox-primary checkbox-sm" />
+                                <span class="label-text text-sm">{{ $t("game-launcher.modEnable") }}</span>
                             </label>
                         </div>
-                        <div v-if="game.modEnable" class="p-2 flex flex-row justify-between items-center flex-wrap">
-                            <label class="label cursor-pointer min-w-32 justify-start">
-                                <span class="label-text ml-12">{{ $t("game-launcher.modLoader") }}</span>
+                        <div
+                            v-if="game.modEnable"
+                            class="flex flex-row flex-wrap items-center justify-between gap-2 border-t border-base-content/10 pt-2"
+                        >
+                            <label class="label flex cursor-pointer items-center justify-start gap-2 px-0 py-1">
+                                <span class="w-4 shrink-0" aria-hidden="true" />
+                                <span class="label-text text-sm">{{ $t("game-launcher.modLoader") }}</span>
                             </label>
-                            <div class="flex flex-1 space-x-2">
-                                <label class="label tooltip" data-tip="启动命令行添加-fileopenlog, 可能导致游戏卡顿">
-                                    <input v-model="game.modLoader" type="radio" value="legacy" class="radio radio-primary" />
-                                    <span class="label-text">{{ $t("game-launcher.legacy") }}</span>
+                            <div class="flex flex-1 items-center gap-2">
+                                <label class="label tooltip cursor-pointer gap-2 px-0 py-1" data-tip="启动命令行添加-fileopenlog, 可能导致游戏卡顿">
+                                    <input v-model="game.modLoader" type="radio" value="legacy" class="radio radio-primary radio-sm" />
+                                    <span class="label-text text-sm">{{ $t("game-launcher.legacy") }}</span>
                                 </label>
                             </div>
                         </div>
-                        <div class="p-2 flex flex-row justify-between items-center flex-wrap">
-                            <button class="btn btn-primary btn-sm" :class="{ 'btn-disabled': !game.path }" @click="createDesktopShortcut()">
-                                <Icon icon="ri:file-copy-line" class="w-4 h-4" />
-                                {{ $t("game-launcher.desktopShortcut") }}
-                            </button>
-                        </div>
                     </div>
-                    <div class="mt-3">
-                        <GameSetting />
-                    </div>
-                </div>
+                </section>
+
+                <!-- 桌面快捷方式 -->
+                <section
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    style="animation-delay: 140ms"
+                >
+                    <SectionHeader no-animate compact kicker="SHORTCUT" :title="$t('game-launcher.desktopShortcut')" />
+                    <button
+                        type="button"
+                        class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-content transition-opacity duration-150"
+                        :class="{ 'pointer-events-none opacity-45': !game.path }"
+                        @click="createDesktopShortcut()"
+                    >
+                        <Icon icon="ri:file-copy-line" class="size-4" />
+                        {{ $t("game-launcher.desktopShortcut") }}
+                    </button>
+                </section>
+
+                <GameSetting />
             </div>
         </ScrollArea>
-        <div v-if="tab === 'update'" class="flex-1 bg-base-100 border-base-300 h-full overflow-hidden">
+
+        <!-- 游戏更新：悬浮导航之下全屏展示（视频背景铺满窗口） -->
+        <div v-if="tab === 'update'" class="h-full flex-1 overflow-hidden">
             <GameUpdate />
         </div>
+
+        <!-- 账号管理 -->
         <ScrollArea v-if="tab === 'account'" class="flex-1">
-            <div class="bg-base-100 p-4">
-                <div class="max-w-6xl m-auto">
-                    <GameSessionManager />
-                </div>
+            <div class="mx-auto w-full max-w-6xl space-y-4 px-4 pb-6 pt-16">
+                <GameSessionManager />
             </div>
         </ScrollArea>
 
@@ -343,7 +408,7 @@ onMounted(async () => {
                     {{ $t("game-launcher.uninstallTitle") }}
                 </h3>
                 <p class="py-4 text-base-content/70">{{ $t("game-launcher.uninstallContent") }}</p>
-                <label class="label cursor-pointer justify-start gap-2 rounded-lg bg-base-200 p-3">
+                <label class="label cursor-pointer justify-start gap-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-3">
                     <input v-model="uninstallKeepSettings" type="checkbox" class="checkbox checkbox-primary" />
                     <div class="flex flex-col">
                         <span class="label-text font-semibold">{{ $t("game-launcher.uninstallKeepSettings") }}</span>

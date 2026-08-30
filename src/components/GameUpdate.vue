@@ -940,7 +940,9 @@ async function openHotUpdateDetail() {
             if (localContent) {
                 pakInfo = normalizeHotUpdatePakFilesInfo(JSON.parse(localContent))
             } else {
-                pakInfo = normalizeHotUpdatePakFilesInfo(await getHotUpdatePakFilesInfo(gameUpdateStore.selectedCDN, activeChannel, version))
+                pakInfo = normalizeHotUpdatePakFilesInfo(
+                    await getHotUpdatePakFilesInfo(gameUpdateStore.selectedCDN, activeChannel, version)
+                )
             }
             entries.push({
                 version,
@@ -1509,7 +1511,7 @@ const launchGame = async () => {
 
 <template>
     <!-- 主容器：深色背景，全屏 -->
-    <div class="relative w-full h-full overflow-hidden select-none bg-base-100 font-sans">
+    <div class="relative w-full h-full overflow-hidden select-none bg-base-100/30 font-sans">
         <video
             src="http://cdn.dna-builder.cn/bg.mp4"
             muted
@@ -1517,21 +1519,21 @@ const launchGame = async () => {
             loop
             class="absolute top-0 left-0 w-full h-full object-cover pointer-events-none opacity-80"
         ></video>
-        <div class="flex flex-col h-full p-8 max-w-7xl mx-auto gap-8">
+        <div class="flex flex-col h-full max-w-7xl mx-auto gap-8 px-8 pt-16 pb-4">
             <!-- 顶部 HUD：服务器配置 -->
             <header
-                class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-base-300/20 backdrop-blur-md rounded-2xl p-4 border border-base-content/5 shadow-xl transition-all duration-200 hover:border-base-content/10"
+                class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm transition-colors duration-200 hover:border-base-content/15"
             >
                 <div class="flex items-center gap-3">
-                    <img src="/setup-icon.webp" alt="LOGO" class="h-8" />
-                    <h1 class="text-2xl font-semibold">{{ t("game-update.game") }}</h1>
+                    <img src="/setup-icon.webp" alt="LOGO" class="h-7" />
+                    <h1 class="text-lg font-semibold">{{ t("game-update.game") }}</h1>
                 </div>
 
                 <!-- 配置区域 -->
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="group relative">
                         <div
-                            class="flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200 cursor-pointer"
+                            class="flex items-center gap-2 bg-base-content/3 px-3 py-1.5 rounded-xs border border-base-content/15 transition-colors duration-200 hover:border-primary/40 cursor-pointer"
                         >
                             <Icon icon="ri:server-line" class="text-base-content/40 w-4 h-4" />
                             <input
@@ -1552,7 +1554,7 @@ const launchGame = async () => {
 
                     <div class="group relative">
                         <div
-                            class="flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200 cursor-pointer"
+                            class="flex items-center gap-2 bg-base-content/3 px-3 py-1.5 rounded-xs border border-base-content/15 transition-colors duration-200 hover:border-primary/40 cursor-pointer"
                         >
                             <Icon icon="ri:cloud-line" class="text-base-content/40 w-4 h-4" />
                             <Select v-model="gameUpdateStore.selectedCDN" variant="ghost" class="min-w-20 truncate">
@@ -1563,24 +1565,22 @@ const launchGame = async () => {
                         </div>
                     </div>
 
-                    <div class="tooltip" data-tip="自定义 channel 时不限制 CDN（内容可能位于任意节点）">
-                        <div
-                            class="group relative flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200"
-                            :title="t('game-update.threads')"
-                        >
-                            <Icon icon="ri:speed-line" class="text-base-content/40 w-4 h-4" />
-                            <input
-                                v-model.number="concurrentThreads"
-                                type="number"
-                                class="bg-transparent border-none outline-hidden text-sm w-8 text-center"
-                                min="1"
-                                max="32"
-                            />
-                        </div>
+                    <div
+                        class="group relative flex items-center gap-2 bg-base-content/3 px-3 py-1.5 rounded-xs border border-base-content/15 transition-colors duration-200 hover:border-primary/40"
+                        :title="t('game-update.threads')"
+                    >
+                        <Icon icon="ri:speed-line" class="text-base-content/40 w-4 h-4" />
+                        <input
+                            v-model.number="concurrentThreads"
+                            type="number"
+                            class="bg-transparent border-none outline-hidden text-sm w-8 text-center"
+                            min="1"
+                            max="32"
+                        />
                     </div>
 
                     <label
-                        class="group relative flex items-center gap-2 bg-base-content/5 hover:bg-base-content/10 px-3 py-1.5 rounded-lg border border-base-content/5 transition-colors duration-200 cursor-pointer"
+                        class="group relative flex items-center gap-2 bg-base-content/3 px-3 py-1.5 rounded-xs border border-base-content/15 transition-colors duration-200 hover:border-primary/40 cursor-pointer"
                     >
                         <input v-model="showOptionalVoicePacks" type="checkbox" class="checkbox checkbox-xs" />
                         <span class="text-sm">语音包</span>
@@ -1594,10 +1594,11 @@ const launchGame = async () => {
                 <div v-if="versionList || fullPackageInfo" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <!-- 目录设置卡片 -->
                     <div
-                        class="md:col-span-2 bg-base-300/40 backdrop-blur-sm border border-base-content/10 rounded-2xl p-5 hover:bg-base-300/50 transition-colors duration-200 group"
+                        class="md:col-span-2 animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm transition-colors duration-200 group"
+                        style="animation-delay: 0ms"
                     >
                         <div class="flex justify-between items-center mb-3">
-                            <span class="opacity-60 text-xs font-bold uppercase tracking-wider">{{ t("game-update.install_path") }}</span>
+                            <span class="text-[11px] font-semibold text-base-content/45">{{ t("game-update.install_path") }}</span>
                             <button
                                 @click="selectGameDir"
                                 class="text-primary hover:text-base-content text-xs flex items-center gap-1 transition-colors duration-200"
@@ -1611,31 +1612,35 @@ const launchGame = async () => {
                         >
                             {{ gamePath || t("game-update.no_path_selected") }}
                         </div>
-                        <div class="mt-2 h-1 w-full bg-base-content/5 rounded-full overflow-hidden">
+                        <div class="mt-2 h-1 w-full overflow-hidden rounded-xs bg-base-content/5">
                             <div class="h-full bg-primary/50 w-full" v-if="gamePath"></div>
                         </div>
                     </div>
 
                     <!-- 版本信息 -->
                     <div
-                        class="relative bg-base-300/40 backdrop-blur-sm border border-base-content/10 rounded-2xl p-5 flex flex-col justify-between"
+                        class="animate-ef-rise motion-reduce:animate-none relative rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm flex flex-col justify-between"
+                        style="animation-delay: 70ms"
                     >
                         <button
-                            class="absolute top-3 right-3 btn btn-ghost btn-xs btn-circle"
+                            class="absolute top-3 right-3 inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary"
                             :disabled="!hotUpdateVersionListCache && !hotUpdatePendingVersions.length"
                             @click="openHotUpdateDetail()"
                         >
-                            <Icon icon="ri:file-list-line" class="w-4 h-4" />
+                            <Icon icon="ri:file-list-line" class="size-4" />
                         </button>
-                        <span class="text-base-content/40 text-xs font-bold uppercase tracking-wider">{{ t("game-update.version") }}</span>
+                        <span class="text-[11px] font-semibold text-base-content/45">{{ t("game-update.version") }}</span>
                         <div class="flex items-end gap-2">
-                            <span class="text-2xl font-bold font-mono">{{
+                            <span class="text-2xl font-bold font-mono tabular-nums">{{
+                                gameUpdateStore.concreteVersion ?? fullPackageInfo?.latestVersion ?? versionList?.subVersion
+                            }}</span>
+                            <span v-if="gameUpdateStore.concreteVersion" class="mb-1 text-xs font-mono tabular-nums text-base-content/45">{{
                                 fullPackageInfo?.latestVersion ?? versionList?.subVersion
                             }}</span>
-                            <span class="text-xs mb-1 px-1.5 py-0.5 rounded bg-base-content/10 opacity-80" v-if="needUpdate">{{
+                            <span class="text-xs mb-1 px-1.5 py-0.5 rounded-xs bg-base-content/10 opacity-80" v-if="needUpdate">{{
                                 t("game-update.old_version")
                             }}</span>
-                            <span class="text-xs mb-1 px-1.5 py-0.5 rounded bg-success/20 text-success" v-else>{{
+                            <span class="text-xs mb-1 px-1.5 py-0.5 rounded-xs bg-success/20 text-success" v-else>{{
                                 t("game-update.latest_version")
                             }}</span>
                         </div>
@@ -1643,11 +1648,14 @@ const launchGame = async () => {
 
                     <!-- 大小信息 -->
                     <div
-                        class="bg-base-300/40 backdrop-blur-sm border border-base-content/10 rounded-2xl p-5 flex flex-col justify-between"
+                        class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm flex flex-col justify-between"
+                        style="animation-delay: 140ms"
                     >
-                        <span class="opacity-60 text-xs font-bold uppercase tracking-wider">{{ t("game-update.size") }}</span>
+                        <span class="text-[11px] font-semibold text-base-content/45">{{ t("game-update.size") }}</span>
                         <div class="flex items-end gap-2">
-                            <span class="text-2xl font-bold text-secondary">{{ gameUpdateStore.formatSize(displayDownloadSize) }}</span>
+                            <span class="font-orbitron text-2xl font-bold tabular-nums text-primary">{{
+                                gameUpdateStore.formatSize(displayDownloadSize)
+                            }}</span>
                             <span class="text-xs opacity-80 mb-1.5">{{ displayDownloadFileCount }} {{ t("game-update.files") }}</span>
                         </div>
                     </div>
@@ -1656,14 +1664,15 @@ const launchGame = async () => {
                 <!-- 预下载通知条 -->
                 <div
                     v-if="needPreDownload && (versionList || preFullPackageInfo)"
-                    class="bg-linear-to-r from-info/20 to-transparent border-l-4 border-info backdrop-blur-sm p-4 rounded-r-xl flex items-center justify-between animate-in slide-in-from-left-4 fade-in duration-500"
+                    class="animate-ef-rise motion-reduce:animate-none flex items-center justify-between rounded-xs border-l-2 border-info bg-info/10 p-3 backdrop-blur-sm"
+                    style="animation-delay: 210ms"
                 >
                     <div class="flex items-center gap-3">
-                        <div class="p-2 rounded-full bg-info/20">
-                            <Icon icon="ri:download-cloud-2-line" class="w-5 h-5 text-info" />
+                        <div class="rounded-xs bg-info/15 p-2">
+                            <Icon icon="ri:download-cloud-2-line" class="size-5 text-info" />
                         </div>
                         <div>
-                            <h3 class="font-bold text-base-content text-sm">{{ t("game-update.pre_download_available") }}</h3>
+                            <h3 class="text-sm font-bold text-base-content">{{ t("game-update.pre_download_available") }}</h3>
                             <p class="text-xs text-info/80">
                                 {{
                                     t("game-update.pre_download_size", {
@@ -1677,7 +1686,7 @@ const launchGame = async () => {
                     <button
                         @click="preDownloadAllFiles()"
                         :disabled="isDownloading || isExtracting"
-                        class="px-4 py-2 bg-info hover:bg-info/80 text-base-content text-xs font-bold uppercase tracking-wide rounded-lg transition-all duration-200 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs bg-info px-3 py-1.5 text-xs font-semibold text-base-content transition-colors duration-150 hover:bg-info/80 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {{ isDownloading ? t("game-update.downloading") : t("game-update.start_pre_download") }}
                     </button>
@@ -1686,27 +1695,28 @@ const launchGame = async () => {
                 <!-- 语音包列表 -->
                 <div
                     v-if="showOptionalVoicePacks && optionalPackEntries.length"
-                    class="bg-base-300/40 backdrop-blur-sm border border-base-content/10 rounded-2xl p-4 space-y-3"
+                    class="animate-ef-rise motion-reduce:animate-none space-y-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    style="animation-delay: 280ms"
                 >
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider opacity-60">语音包</span>
-                        <span class="text-xs opacity-50">本地缓存</span>
+                        <span class="text-[11px] font-semibold text-base-content/45">语音包</span>
+                        <span class="text-xs text-base-content/50">本地缓存</span>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div
                             v-for="pack in optionalPackEntries"
                             :key="pack.sign"
-                            class="flex items-center justify-between gap-3 rounded-xl border border-base-content/10 bg-base-100/30 px-4 py-3"
+                            class="flex items-center justify-between gap-3 rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2.5"
                         >
                             <div class="min-w-0">
-                                <div class="text-sm font-medium">{{ getOptionalPackLabel(pack.sign) }}</div>
-                                <div class="text-xs opacity-50 truncate">{{ pack.sign }} · {{ pack.version }}</div>
+                                <div class="text-sm font-medium text-base-content/85">{{ getOptionalPackLabel(pack.sign) }}</div>
+                                <div class="text-xs text-base-content/50 truncate">{{ pack.sign }} · {{ pack.version }}</div>
                             </div>
                             <button
                                 v-if="!isOptionalPackDownloaded(pack.sign, pack.version)"
                                 @click="downloadOptionalPack(pack.sign)"
                                 :disabled="isOptionalPackQueued(pack.sign)"
-                                class="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold disabled:opacity-50"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {{
                                     downloadingOptionalSign === pack.sign
@@ -1724,11 +1734,12 @@ const launchGame = async () => {
                 <!-- 进度面板 (下载/解压时显示) -->
                 <div
                     v-if="isDownloading || isExtracting || isDownloadPaused"
-                    class="space-y-3 bg-base-300/60 backdrop-blur-2xl rounded-2xl p-6 border border-base-content/10 shadow-2xl animate-in slide-in-from-bottom-4"
+                    class="animate-ef-rise motion-reduce:animate-none space-y-3 rounded-xs border border-base-content/10 bg-base-100/60 p-4 backdrop-blur-sm"
+                    style="animation-delay: 280ms"
                 >
                     <div class="flex justify-between items-end">
                         <div>
-                            <h2 class="text-xl font-bold text-base-content flex items-center gap-2">
+                            <h2 class="text-lg font-bold text-base-content flex items-center gap-2">
                                 <Icon v-if="isDownloading || isDownloadPaused" icon="ri:download-2-line" class="animate-bounce" />
                                 <Icon v-else icon="ri:install-line" class="animate-pulse" />
                                 {{ isExtracting ? t("game-update.extracting_resources") : t("game-update.downloading_resources") }}
@@ -1748,30 +1759,30 @@ const launchGame = async () => {
                             </p>
                         </div>
                         <div class="text-right">
-                            <div class="text-3xl font-black font-mono text-transparent bg-clip-text bg-linear-to-r from-white to-gray-400">
+                            <div class="font-orbitron text-3xl font-black tabular-nums text-primary">
                                 {{ displayOverallProgressPercent }}<span class="text-lg">%</span>
                             </div>
-                            <div class="text-xs font-mono text-primary" v-if="isDownloading">
+                            <div class="text-xs font-mono text-primary tabular-nums" v-if="isDownloading">
                                 {{ downloadSpeed }}
                             </div>
-                            <div class="text-xs font-mono text-warning" v-else-if="isDownloadPaused">已暂停</div>
+                            <div class="text-xs text-warning" v-else-if="isDownloadPaused">已暂停</div>
                         </div>
                     </div>
 
                     <!-- 总进度条 -->
-                    <div class="h-4 bg-gray-900 rounded-full overflow-hidden border border-base-content/5 relative">
+                    <div class="relative h-2.5 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/10">
                         <!-- 动态条纹背景 -->
                         <div
-                            class="absolute inset-0 w-full h-full opacity-10 bg-size-[20px_20px] bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#fff_10px,#fff_20px)] animate-[move-bg_1s_linear_infinite]"
+                            class="absolute inset-0 w-full h-full opacity-10 bg-size-[20px_20px] bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,color-mix(in oklab,var(--color-base-content) 60%,transparent)_10px,color-mix(in oklab,var(--color-base-content) 60%,transparent)_20px)] animate-[move-bg_1s_linear_infinite]"
                         ></div>
                         <div
-                            class="h-full bg-linear-to-r from-primary via-secondary to-primary bg-size-[200%_100%] animate-[shimmer_2s_linear_infinite] shadow-[0_0_20px_rgba(var(--primary),0.5)] transition-all duration-300 ease-out"
+                            class="h-full bg-linear-to-r from-primary via-secondary to-primary bg-size-[200%_100%] animate-[shimmer_2s_linear_infinite] transition-all duration-300 ease-out"
                             :style="{ width: `${overallProgress * 100}%` }"
                         ></div>
                     </div>
 
                     <!-- 详细数据行 -->
-                    <div class="flex justify-between text-xs text-gray-500 font-mono pt-1">
+                    <div class="flex justify-between pt-1 font-mono text-xs text-base-content/45 tabular-nums">
                         <span>
                             {{
                                 isDownloading || isDownloadPaused
@@ -1787,21 +1798,21 @@ const launchGame = async () => {
                         <button
                             v-if="isDownloading && !isPauseRequested"
                             @click="gameUpdateStore.pauseCurrentDownload()"
-                            class="px-4 py-2 rounded-lg bg-warning text-warning-content text-xs font-semibold"
+                            class="cursor-pointer whitespace-nowrap rounded-xs bg-warning px-4 py-1.5 text-xs font-semibold text-warning-content transition-colors duration-150 hover:bg-warning/90"
                         >
                             暂停
                         </button>
                         <button
                             v-else-if="isDownloading && isPauseRequested"
                             disabled
-                            class="px-4 py-2 rounded-lg bg-warning text-warning-content text-xs font-semibold opacity-60"
+                            class="cursor-not-allowed whitespace-nowrap rounded-xs bg-warning px-4 py-1.5 text-xs font-semibold text-warning-content opacity-60"
                         >
                             暂停中
                         </button>
                         <button
                             v-else
                             @click="resumeCurrentDownload()"
-                            class="px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold"
+                            class="cursor-pointer whitespace-nowrap rounded-xs bg-primary px-4 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90"
                         >
                             继续
                         </button>
@@ -1812,7 +1823,7 @@ const launchGame = async () => {
                 <div v-else class="flex gap-4 items-center">
                     <div
                         v-if="!gamePath"
-                        class="w-full text-center py-8 text-gray-500 font-mono border-2 border-dashed border-base-content/10 rounded-2xl"
+                        class="w-full rounded-xs border border-dashed border-base-content/15 py-8 text-center text-base-content/45"
                     >
                         {{ t("game-update.select_game_dir_first") }}
                     </div>
@@ -1821,27 +1832,27 @@ const launchGame = async () => {
                         v-else
                         @click="needUpdate ? downloadAllFiles() : needHotUpdate ? gameUpdateStore.downloadHotUpdate() : launchGame()"
                         :disabled="!hasUpdate && !gamePath"
-                        class="group relative w-full h-20 overflow-hidden rounded-2xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:hover:scale-100 shadow-xl"
+                        class="group relative w-full h-16 overflow-hidden rounded-xs transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:hover:scale-100"
                         :class="
                             hasUpdate
-                                ? 'bg-primary hover:shadow-[0_0_40px_rgba(var(--primary),0.6)]'
-                                : 'bg-base-200/40 backdrop-blur-sm border border-base-content/10 cursor-default'
+                                ? 'bg-primary hover:bg-primary/90'
+                                : 'bg-base-100/60 backdrop-blur-sm border border-base-content/10 cursor-default'
                         "
                     >
                         <!-- 按钮背景特效 -->
                         <div
                             v-if="hasUpdate"
-                            class="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"
+                            class="absolute inset-0 bg-linear-to-r from-transparent via-primary-content/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"
                         ></div>
 
                         <div class="relative z-10 flex flex-col items-center justify-center h-full gap-1">
-                            <div class="flex items-center gap-3" :class="hasUpdate ? 'text-white' : 'text-white/40'">
-                                <Icon :icon="hasUpdate ? 'ri:download-fill' : 'ri:play-fill'" class="w-8 h-8" />
-                                <span class="text-2xl font-black tracking-widest uppercase">
+                            <div class="flex items-center gap-3" :class="hasUpdate ? 'text-primary-content' : 'text-base-content/40'">
+                                <Icon :icon="hasUpdate ? 'ri:download-fill' : 'ri:play-fill'" class="size-7" />
+                                <span class="text-xl font-black">
                                     {{ hasUpdate ? t("game-update.update_game") : t("game-update.game_ready") }}
                                 </span>
                             </div>
-                            <span v-if="hasUpdate" class="text-xs text-white/80 bg-white/20 px-2 py-0.5 rounded">
+                            <span v-if="hasUpdate" class="rounded-xs bg-primary-content/15 px-2 py-0.5 text-xs text-primary-content">
                                 {{
                                     t("game-update.update_size", {
                                         size: gameUpdateStore.formatSize(needUpdate ? updateSize : hotUpdateSize),
@@ -1861,7 +1872,11 @@ const launchGame = async () => {
             </div>
             <div class="max-h-96 overflow-y-auto py-4">
                 <div v-if="hotUpdateDetailEntries.length" class="space-y-4">
-                    <div v-for="entry in hotUpdateDetailEntries" :key="entry.version" class="bg-base-200 p-4 rounded-lg">
+                    <div
+                        v-for="entry in hotUpdateDetailEntries"
+                        :key="entry.version"
+                        class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                    >
                         <div class="font-bold text-primary">
                             {{ entry.version }}
                         </div>
@@ -1874,7 +1889,7 @@ const launchGame = async () => {
                         </div>
                     </div>
                 </div>
-                <div v-else class="text-center text-gray-500">暂无热更</div>
+                <div v-else class="text-center text-base-content/45">暂无热更</div>
             </div>
             <div class="modal-action justify-center">
                 <button class="btn btn-primary" @click="hotUpdateDetailOpen = false">关闭</button>

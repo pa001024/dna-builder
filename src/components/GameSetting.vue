@@ -931,79 +931,117 @@ function openConfigDir() {
 </script>
 
 <template>
-    <div class="p-4 flex flex-col gap-4">
+    <div class="flex flex-col gap-4">
         <!-- 配置文件路径显示 -->
-        <div v-if="game.path" class="bg-base-200 p-2 rounded-lg text-sm">
-            <div class="text-base-content/70">配置目录:</div>
-            <div class="font-mono text-xs break-all hover:underline cursor-pointer" @click="openConfigDir">{{ configDir }}</div>
+        <div v-if="game.path" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm">
+            <div class="text-xs text-base-content/60">配置目录:</div>
+            <div class="mt-1 break-all font-mono text-xs text-primary hover:underline cursor-pointer" @click="openConfigDir">{{ configDir }}</div>
         </div>
-        <div v-else class="bg-warning/10 p-2 rounded-lg text-sm text-warning">请先在游戏设置中配置游戏路径</div>
+        <div v-else class="rounded-xs border border-warning/30 bg-warning/10 p-2.5 text-sm text-warning">请先在游戏设置中配置游戏路径</div>
 
         <!-- 预设配置 -->
-        <div v-if="game.path" class="bg-base-100 p-4 rounded-lg">
-            <h3 class="text-sm font-bold mb-3">性能优化预设</h3>
-            <div class="flex gap-2">
-                <button class="btn btn-sm btn-outline" @click="resetToDefault">无优化</button>
-                <button class="btn btn-sm btn-outline" @click="applyPreset('low')">极低</button>
-                <button class="btn btn-sm btn-outline" @click="applyPreset('medium')">低</button>
-                <button class="btn btn-sm btn-outline" @click="applyPreset('high')">中</button>
-                <button class="btn btn-sm btn-outline" @click="applyPreset('ultra')">高</button>
+        <div v-if="game.path" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="PRESET" title="性能优化预设" />
+            <div class="flex flex-wrap gap-1.5">
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    @click="resetToDefault"
+                >
+                    无优化
+                </button>
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    @click="applyPreset('low')"
+                >
+                    极低
+                </button>
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    @click="applyPreset('medium')"
+                >
+                    低
+                </button>
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    @click="applyPreset('high')"
+                >
+                    中
+                </button>
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
+                    @click="applyPreset('ultra')"
+                >
+                    高
+                </button>
             </div>
         </div>
 
         <!-- 游戏设置（单独显示，不放在折叠框中） -->
-        <div v-if="game.path" class="bg-base-100 p-4 rounded-lg mb-4">
-            <h3 class="text-sm font-bold mb-3">游戏设置</h3>
-            <div v-if="gameSettingsCategory.description" class="text-xs text-base-content/50 my-3">
+        <div v-if="game.path" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="GAME" title="游戏设置" />
+            <div v-if="gameSettingsCategory.description" class="mb-2 text-xs text-base-content/50">
                 {{ gameSettingsCategory.description }}
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 <!-- 分辨率设置 -->
-                <div class="flex flex-col gap-2 p-3 bg-base-200 rounded md:col-span-2">
-                    <div class="text-sm font-medium">分辨率</div>
+                <div class="flex flex-col gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 md:col-span-2">
+                    <div class="text-sm font-medium text-base-content/85">分辨率</div>
                     <div class="text-xs text-base-content/50">游戏窗口分辨率</div>
-                    <div class="flex flex-wrap gap-2 mt-2">
+                    <div class="mt-1 flex flex-wrap gap-1.5">
                         <button
                             v-for="res in commonResolutions"
                             :key="res.label"
-                            class="btn btn-sm"
-                            :class="{
-                                'btn-primary':
-                                    !isCustomResolution && currentResolution.width === res.width && currentResolution.height === res.height,
-                                'btn-outline':
-                                    isCustomResolution || currentResolution.width !== res.width || currentResolution.height !== res.height,
-                            }"
+                            type="button"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                !isCustomResolution && currentResolution.width === res.width && currentResolution.height === res.height
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="selectResolution(res.width, res.height)"
                         >
                             {{ res.label }}
                         </button>
                         <button
-                            class="btn btn-sm"
-                            :class="{
-                                'btn-primary': isCustomResolution,
-                                'btn-outline': !isCustomResolution,
-                            }"
+                            type="button"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                            :class="
+                                isCustomResolution
+                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
                             @click="isCustomResolution = true"
                         >
                             自定义
                         </button>
                     </div>
                     <!-- 自定义分辨率输入 -->
-                    <div v-if="isCustomResolution" class="flex items-center gap-2 mt-2">
+                    <div v-if="isCustomResolution" class="mt-1 flex items-center gap-2">
                         <input
                             v-model.number="customResolution.width"
                             type="number"
-                            class="input input-bordered input-sm w-24"
+                            class="input input-bordered input-sm w-24 rounded-xs"
                             placeholder="宽度"
                         />
                         <span class="text-base-content/50">x</span>
                         <input
                             v-model.number="customResolution.height"
                             type="number"
-                            class="input input-bordered input-sm w-24"
+                            class="input input-bordered input-sm w-24 rounded-xs"
                             placeholder="高度"
                         />
-                        <button class="btn btn-sm btn-primary" @click="applyCustomResolution">应用</button>
+                        <button
+                            type="button"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                            @click="applyCustomResolution"
+                        >
+                            应用
+                        </button>
                     </div>
                 </div>
 
@@ -1011,11 +1049,11 @@ function openConfigDir() {
                 <div
                     v-for="option in gameSettingsCategory.options.filter(opt => opt.key !== 'ResolutionSize')"
                     :key="option.key"
-                    class="flex flex-col gap-2 p-3 bg-base-200 rounded"
+                    class="flex flex-col gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                 >
                     <!-- 标题和操作区 -->
                     <div class="flex items-center justify-between gap-2">
-                        <span class="text-sm font-medium">{{ option.label }}</span>
+                        <span class="text-sm font-medium text-base-content/85">{{ option.label }}</span>
                         <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值" @click="resetOption(option)">
                             <Icon icon="ri:refresh-line" />
                         </button>
@@ -1043,7 +1081,7 @@ function openConfigDir() {
                             <input
                                 :value="getOptionValue(option)"
                                 type="number"
-                                class="input input-bordered input-sm w-full"
+                                class="input input-bordered input-sm w-full rounded-xs"
                                 @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))"
                             />
                         </div>
@@ -1052,7 +1090,7 @@ function openConfigDir() {
                         <div v-else-if="option.type === 'select'" class="flex-1">
                             <Select
                                 :model-value="getOptionValue(option)"
-                                class="input input-bordered input-sm w-full"
+                                class="input input-bordered input-sm w-full rounded-xs"
                                 @update:model-value="setOptionValue(option, $event)"
                             >
                                 <SelectItem v-for="(opt, idx) in option.options" :key="idx" :value="opt.value">
@@ -1080,8 +1118,8 @@ function openConfigDir() {
                 <div v-if="category.description" class="text-xs text-base-content/50 my-3">
                     {{ category.description }}
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div v-for="option in category.options" :key="option.key" class="flex flex-col gap-2 p-3 bg-base-200 rounded">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                    <div v-for="option in category.options" :key="option.key" class="flex flex-col gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                         <!-- 标题和操作区 -->
                         <div class="flex items-center justify-between gap-2">
                             <div class="flex items-center gap-2">
@@ -1092,7 +1130,7 @@ function openConfigDir() {
                                     class="toggle toggle-primary toggle-sm"
                                     @change="toggleOptionEnabled(option)"
                                 />
-                                <span class="text-sm font-medium">{{ option.label }}</span>
+                                <span class="text-sm font-medium text-base-content/85">{{ option.label }}</span>
                             </div>
                             <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值" @click="resetOption(option)">
                                 <Icon icon="ri:refresh-line" />
@@ -1122,7 +1160,7 @@ function openConfigDir() {
                                 <input
                                     :value="getOptionValue(option)"
                                     type="number"
-                                    class="input input-bordered input-sm w-full"
+                                    class="input input-bordered input-sm w-full rounded-xs"
                                     :disabled="!isOptionEnabled(option)"
                                     @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))"
                                 />
@@ -1133,7 +1171,7 @@ function openConfigDir() {
                                 <input
                                     :value="getOptionValue(option)"
                                     type="text"
-                                    class="input input-bordered input-sm w-full"
+                                    class="input input-bordered input-sm w-full rounded-xs"
                                     :disabled="!isOptionEnabled(option)"
                                     @input="setOptionValue(option, ($event.target as HTMLInputElement).value)"
                                 />
@@ -1143,7 +1181,7 @@ function openConfigDir() {
                             <div v-else-if="option.type === 'select'" class="flex-1">
                                 <Select
                                     :model-value="getOptionValue(option)"
-                                    class="input input-bordered input-sm w-full"
+                                    class="input input-bordered input-sm w-full rounded-xs"
                                     :disabled="!isOptionEnabled(option)"
                                     @update:model-value="setOptionValue(option, $event)"
                                 >

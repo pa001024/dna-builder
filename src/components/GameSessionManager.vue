@@ -181,60 +181,91 @@ async function removeAccount(account: GameAccount) {
         <!-- 登录缓存文件缺失提示 -->
         <div
             v-if="loginFileChecked && !loginFileExists"
-            class="bg-warning/10 text-warning rounded-lg p-3 text-sm flex items-center gap-2"
+            class="flex items-center gap-2 rounded-xs border border-warning/30 bg-warning/10 p-3 text-sm text-warning"
         >
             <Icon icon="ri:error-warning-line" class="size-4 flex-none" />
             {{ $t("game-launcher.accountNoLoginFile") }}
         </div>
 
         <!-- 添加账号入口 -->
-        <div class="bg-base-200 rounded-lg p-4 flex flex-col gap-3">
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ACCOUNT" :title="$t('game-launcher.accountManage')" />
             <div class="flex items-center gap-2">
-                <button class="btn btn-primary btn-sm" :class="{ 'btn-disabled': !game.path }" @click="addCurrentAccount()">
+                <button
+                    type="button"
+                    class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-content transition-opacity duration-150"
+                    :class="{ 'pointer-events-none opacity-45': !game.path }"
+                    @click="addCurrentAccount()"
+                >
                     <Icon icon="ri:save-line" class="size-4" />
                     {{ $t("game-launcher.accountAdd") }}
                 </button>
             </div>
-        </div>
+        </section>
 
         <!-- 账号列表 -->
-        <div v-if="accounts?.length" class="flex flex-col gap-2">
-            <div
-                v-for="account in accounts"
-                :key="account.id"
-                class="flex items-center gap-3 p-3 rounded-lg bg-base-200 cursor-pointer transition-colors hover:bg-primary/10"
-                :class="{ 'ring-1 ring-primary': account.id === Number(currentAccountId) }"
-                @click="switchAccount(account)"
-            >
-                <div class="size-9 rounded-full bg-base-300 flex items-center justify-center flex-none">
-                    <Icon icon="ri:user-line" class="size-5" />
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2">
-                        <span class="font-semibold truncate">{{ account.name }}</span>
-                        <span v-if="account.id === Number(currentAccountId)" class="badge badge-primary badge-sm">
-                            {{ $t("game-launcher.accountCurrent") }}
-                        </span>
-                    </div>
-                    <div class="text-xs text-base-content/50">
-                        {{ $t("game-launcher.accountAddTime") }}: {{ ui.timeDistancePassed(account.addTime) }}
-                        <template v-if="account.lastUsed">
-                            · {{ $t("game-launcher.accountLastUsed") }}: {{ ui.timeDistancePassed(account.lastUsed) }}
-                        </template>
-                    </div>
-                </div>
-                <button
-                    class="btn btn-square btn-sm btn-ghost btn-error flex-none"
-                    :data-tip="$t('game-launcher.accountDelete')"
-                    @click.stop="removeAccount(account)"
+        <section v-if="accounts?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="LIST" :count="accounts.length" />
+            <div class="flex flex-col gap-2">
+                <div
+                    v-for="account in accounts"
+                    :key="account.id"
+                    class="group animate-ef-rise motion-reduce:animate-none relative flex cursor-pointer items-center gap-3 overflow-hidden rounded-xs border bg-base-100/60 p-2.5 backdrop-blur-sm transition-all duration-200 hover:border-primary/50"
+                    :class="
+                        account.id === Number(currentAccountId)
+                            ? 'border-primary/70 bg-primary/10'
+                            : 'border-base-content/15 hover:-translate-y-0.5'
+                    "
+                    :style="{ animationDelay: `${Math.min((accounts?.indexOf(account) ?? 0) * 40, 280)}ms` }"
+                    @click="switchAccount(account)"
                 >
-                    <Icon icon="ri:delete-bin-6-line" class="size-4" />
-                </button>
+                    <!-- 选中态主色竖条 -->
+                    <span
+                        class="absolute inset-y-0 left-0 w-[3px] bg-primary transition-opacity duration-200"
+                        :class="account.id === Number(currentAccountId) ? 'opacity-100' : 'opacity-0'"
+                        aria-hidden="true"
+                    />
+                    <div class="flex size-9 flex-none items-center justify-center rounded-xs bg-base-content/10 text-base-content/60">
+                        <Icon icon="ri:user-line" class="size-5" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="truncate font-semibold"
+                                :class="account.id === Number(currentAccountId) ? 'text-primary' : 'text-base-content/85'"
+                                >{{ account.name }}</span
+                            >
+                            <span
+                                v-if="account.id === Number(currentAccountId)"
+                                class="shrink-0 whitespace-nowrap rounded-xs border border-primary/50 bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
+                            >
+                                {{ $t("game-launcher.accountCurrent") }}
+                            </span>
+                        </div>
+                        <div class="text-xs text-base-content/50">
+                            {{ $t("game-launcher.accountAddTime") }}: {{ ui.timeDistancePassed(account.addTime) }}
+                            <template v-if="account.lastUsed">
+                                · {{ $t("game-launcher.accountLastUsed") }}: {{ ui.timeDistancePassed(account.lastUsed) }}
+                            </template>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        class="tooltip tooltip-bottom inline-flex h-7 w-7 flex-none cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error"
+                        :data-tip="$t('game-launcher.accountDelete')"
+                        @click.stop="removeAccount(account)"
+                    >
+                        <Icon icon="ri:delete-bin-6-line" class="size-4" />
+                    </button>
+                </div>
             </div>
-        </div>
-        <div v-else class="bg-base-200 rounded-lg p-6 text-center text-sm text-base-content/50">
+        </section>
+        <section
+            v-else
+            class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-6 text-center text-sm text-base-content/50 backdrop-blur-sm"
+        >
             {{ $t("game-launcher.accountEmpty") }}
-        </div>
+        </section>
 
         <!-- 账号命名对话框 -->
         <dialog id="account_name_modal" class="modal" :class="{ 'modal-open': nameDialogVisible }">
@@ -245,7 +276,7 @@ async function removeAccount(account: GameAccount) {
                         v-model="pendingAccountName"
                         type="text"
                         :placeholder="$t('game-launcher.accountNamePlaceholder')"
-                        class="input input-bordered input-md w-full"
+                        class="input input-bordered input-md w-full rounded-xs"
                     />
                 </p>
                 <div class="modal-action">
