@@ -1,10 +1,19 @@
-import { getModDropInfo } from "../utils/reward-utils"
-import { draftDungeonMap, modDraftMap, modDungeonMap, resourceDraftMap, weaponDraftMap } from "./d"
+import { getModDropInfo, getPackDropInfo } from "../utils/reward-utils"
+import {
+    draftDungeonMap,
+    modDraftMap,
+    modDungeonMap,
+    modPackMap,
+    packDungeonMap,
+    packResourceMap,
+    resourceDraftMap,
+    weaponDraftMap,
+} from "./d"
 import modData from "./d/mod.data"
 import { draftShopSourceMap, modShopSourceMap, weaponShopSourceMap } from "./d/shop.data"
 import type { Char, Mod, Weapon } from "./data-types"
 import type { MergeCalculateData, WorkerMessageData, WorkerMethod, WorkerResponse } from "./LevelUpCalculator.worker"
-import type { ModExt, WeaponExt } from "./LevelUpCalculatorImpl"
+import type { DungeonExt, ModExt, WeaponExt } from "./LevelUpCalculatorImpl"
 
 /**
  * 角色养成配置
@@ -54,9 +63,10 @@ export interface LevelUpCalculatorConfig {
 
 /**
  * 资源消耗结果
+ * 数组形式 [数量, 目标ID, 类型]，类型支持 Mod（魔之楔本体）、Draft（设计稿）、Pack（道具箱）。
  */
 export interface ResourceCost {
-    [resourceName: string]: [number, number, "Mod" | "Draft"] | number | undefined
+    [resourceName: string]: [number, number, "Mod" | "Draft" | "Pack"] | number | undefined
     铜币?: number
     深红凝珠?: number
 }
@@ -68,7 +78,7 @@ export interface ResourceTreeNode {
     id: string
     cid?: number
     name: string | string[]
-    type: "Resource" | "Mod" | "Draft"
+    type: "Resource" | "Mod" | "Draft" | "Pack"
     amount: number
     children?: ResourceTreeNode[]
 }
@@ -295,6 +305,22 @@ export class LevelUpCalculator {
                 t: d.t,
                 dropInfo: getModDropInfo(d, mod.id),
             })),
+            // 道具箱来源：仅当本体/图纸无法从副本直接获取时用于回退计算。
+            // 按可刷取副本数降序、ID 升序排序，保证计算端取第一个即为最优来源。
+            packInfo: (modPackMap.get(mod.id) || [])
+                .map(p => ({
+                    packId: p.packId,
+                    packName: p.packName,
+                    perPack: p.count,
+                    isDraft: p.isDraft,
+                    dungeons: (packDungeonMap.get(p.packId) || []).map(d => ({
+                        id: d.id,
+                        name: d.n,
+                        t: d.t,
+                        dropInfo: getPackDropInfo(d, p.packId),
+                    })),
+                }))
+                .sort((a, b) => b.dungeons.length - a.dungeons.length || a.packId - b.packId),
         }
     }
 
@@ -371,7 +397,22 @@ export class LevelUpCalculator {
                 acc.set(mod.id, mod)
                 return acc
             }, new Map<number, ModExt>())
-        return (await this.sendMessage("estimateTime", { totalCost, modMap, config })) as TimeEstimateResult
+        // 道具箱时间估算数据：packId -> 道具箱名称 + 掉落副本信息
+        const packMap: Record<number, { packName: string; dungeons: DungeonExt[] }> = {}
+        for (const [packId, dungeons] of packDungeonMap) {
+            const packResource = packResourceMap.get(packId)
+            if (!packResource) continue
+            packMap[packId] = {
+                packName: packResource.name,
+                dungeons: dungeons.map(d => ({
+                    id: d.id,
+                    name: d.n,
+                    t: d.t,
+                    dropInfo: getPackDropInfo(d, packId),
+                })),
+            }
+        }
+        return (await this.sendMessage("estimateTime", { totalCost, modMap, packMap, config })) as TimeEstimateResult
     }
 
     /**

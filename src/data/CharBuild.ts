@@ -94,7 +94,7 @@ export interface WeaponAttr {
     追加伤害: number
     /** 武器倍率 0开始 */
     武器倍率: number
-    /** 充盈转化（武器属性）：触发率溢出 100% 的部分按该比例转化为角色充盈威力，0 开始 */
+    /** 充盈转化（武器属性）：触发率溢出 100% 的部分按该比例转化为角色充盈威力，1 开始 */
     充盈转化: number
     /** 召唤物攻击速度转化（武器属性）：近战武器攻速按该比例转化为角色召唤物攻击速度，0 开始 */
     召唤物攻击速度转化: number
@@ -1064,7 +1064,7 @@ export class CharBuild {
                 弹药: ammo,
                 武器倍率: weaponDamageMul,
                 // 充盈转化（武器属性）：该武器作用域（角色槽 + 该武器槽）MOD 充盈转化词条之和
-                充盈转化: this.getTotalBonus("充盈转化", prefix),
+                充盈转化: 1 + this.getTotalBonus("充盈转化", prefix),
                 // 召唤物转化（武器属性）：与充盈转化同理，该武器作用域（角色槽 + 该武器槽）转化词条之和
                 召唤物攻击速度转化: this.getTotalBonus("召唤物攻击速度转化", prefix),
                 召唤物范围转化: this.getTotalBonus("召唤物范围转化", prefix),

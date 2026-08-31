@@ -1438,25 +1438,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
     localStorage.setItem(`build.${selectedCharId.value}`, JSON.stringify(charSettings.value))
     ui.showSuccessMessage(t("char-build.sync_success"))
 }
-
-/**
- * 从游戏同步魔之楔到方案B（兼容方案），通过回调写回 ModEditer 本地第二套状态。
- * @param id 角色或武器ID
- * @param isWeapon 是否武器
- * @param isConWeapon 是否同律武器
- * @param apply 写回回调（mods 为 [id, 等级] 列表，auraMod 为光环ID）
- */
-async function syncModFromGameToSecond(
-    id: number,
-    isWeapon: boolean,
-    isConWeapon: boolean,
-    apply: (mods: ([number, number] | null)[], auraMod?: number) => void
-) {
-    const data = await fetchGameMods(id, isWeapon, isConWeapon)
-    if (!data) return
-    apply(data.mods, data.auraMod)
-    ui.showSuccessMessage(t("char-build.sync_success"))
-}
 </script>
 
 <template>
@@ -2254,7 +2235,7 @@ async function syncModFromGameToSecond(
                                 @select-aura-mod="charSettings.auraMod = $event"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
                                 @sync="syncModFromGame(charBuild.char.id, false)"
-                                @sync-second="apply => syncModFromGameToSecond(charBuild.char.id, false, false, apply)"
+                                
                             />
 
                             <!-- 近战武器MOD -->
@@ -2278,7 +2259,7 @@ async function syncModFromGameToSecond(
                                 @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
                                 @sync="syncModFromGame(charBuild.meleeWeapon.id, true)"
-                                @sync-second="apply => syncModFromGameToSecond(charBuild.meleeWeapon.id, true, false, apply)"
+                                
                             />
 
                             <!-- 远程武器MOD -->
@@ -2302,7 +2283,7 @@ async function syncModFromGameToSecond(
                                 @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
                                 @sync="syncModFromGame(charBuild.rangedWeapon.id, true)"
-                                @sync-second="apply => syncModFromGameToSecond(charBuild.rangedWeapon.id, true, false, apply)"
+                                
                             />
 
                             <!-- 同律武器MOD -->
@@ -2326,7 +2307,7 @@ async function syncModFromGameToSecond(
                                 @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
                                 @sync="syncModFromGame(charBuild.char.id, false, true)"
-                                @sync-second="apply => syncModFromGameToSecond(charBuild.char.id, false, true, apply)"
+                                
                             />
                         </div>
                     </CollapsibleSection>

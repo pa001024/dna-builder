@@ -15,6 +15,7 @@ import { isDataPackHydrated, registerDataPackHydrationCallback } from "../data-p
 import { skinData } from "./accessory.data"
 import modData from "./mod.data"
 import monsterData, { monsterMap } from "./monster.data"
+import resourceData, { type Resource } from "./resource.data"
 import rewardData from "./reward.data"
 import weaponData from "./weapon.data"
 
@@ -58,10 +59,26 @@ export const dungeonMap = new Map<number, Dungeon>()
 export const modDungeonMap = new Map<number, Dungeon[]>()
 export const draftDungeonMap = new Map<number, Dungeon[]>()
 
+/** 道具箱资源：带 pack 字段的 Resource（打开后产出 Mod/设计稿等） */
+export const packResourceMap = new Map<number, Resource>()
+/** 道具箱掉落副本：packId -> 掉落该道具箱的副本列表 */
+export const packDungeonMap = new Map<number, Dungeon[]>()
+/**
+ * Mod 的道具箱来源：modId -> 包含该 Mod（或其图纸 d=1）的道具箱列表。
+ * count 为单个道具箱产出的数量，isDraft 标记该条目是否为设计稿。
+ */
+export const modPackMap = new Map<number, { packId: number; packName: string; count: number; isDraft: boolean }[]>()
+
 /**
  * 递归查找奖励树中的所有Mod类型的奖励
  */
-function findModRewards(child: RewardChild[], modIds: Set<number>, draftIds: Set<number>, visited: Set<number> = new Set()): void {
+function findModRewards(
+    child: RewardChild[],
+    modIds: Set<number>,
+    draftIds: Set<number>,
+    packIds: Set<number>,
+    visited: Set<number> = new Set()
+): void {
     if (!child || child.length === 0) return
 
     for (const item of child) {
@@ -73,7 +90,7 @@ function findModRewards(child: RewardChild[], modIds: Set<number>, draftIds: Set
             const reward = rewardMap.get(item.id)
             if (reward?.child) {
                 // 递归查找子奖励
-                findModRewards(reward.child, modIds, draftIds, visited)
+                findModRewards(reward.child, modIds, draftIds, packIds, visited)
             }
         } else if (item.t === "Mod") {
             // 找到Mod类型的奖励
@@ -82,6 +99,9 @@ function findModRewards(child: RewardChild[], modIds: Set<number>, draftIds: Set
             } else {
                 modIds.add(item.id)
             }
+        } else if (item.t === "Resource" && packResourceMap.has(item.id)) {
+            // 找到道具箱类型的奖励（如 契约者魔之楔·风）
+            packIds.add(item.id)
         }
     }
 }
@@ -198,6 +218,15 @@ function rebuildStaticIndexes(): void {
     dungeonMap.clear()
     modDungeonMap.clear()
     draftDungeonMap.clear()
+    packResourceMap.clear()
+    packDungeonMap.clear()
+    modPackMap.clear()
+    // 道具箱索引：先登记所有带 pack 字段的资源，供奖励树扫描识别
+    for (const resource of resourceData) {
+        if (resource.pack !== undefined) {
+            packResourceMap.set(resource.id, resource)
+        }
+    }
     for (const dungeon of dungeonData) {
         dungeonMap.set(dungeon.id, dungeon as Dungeon)
         const rewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
@@ -207,7 +236,8 @@ function rebuildStaticIndexes(): void {
             if (!reward?.child) continue
             const modIds = new Set<number>()
             const draftIds = new Set<number>()
-            findModRewards(reward.child, modIds, draftIds)
+            const packIds = new Set<number>()
+            findModRewards(reward.child, modIds, draftIds, packIds)
             for (const modId of modIds) {
                 if (!modDungeonMap.has(modId)) {
                     modDungeonMap.set(modId, [])
@@ -226,6 +256,33 @@ function rebuildStaticIndexes(): void {
                     draftDungeons.push(dungeon as Dungeon)
                 }
             }
+            for (const packId of packIds) {
+                if (!packDungeonMap.has(packId)) {
+                    packDungeonMap.set(packId, [])
+                }
+                const packDungeons = packDungeonMap.get(packId)!
+                if (!packDungeons.some(existingDungeon => existingDungeon.id === dungeon.id)) {
+                    packDungeons.push(dungeon as Dungeon)
+                }
+            }
+        }
+    }
+    // 反查 Mod（或图纸）的道具箱来源
+    for (const [packId, packResource] of packResourceMap) {
+        const reward = rewardMap.get(packResource.pack!)
+        if (!reward?.child) continue
+        for (const item of reward.child) {
+            if (item.t !== "Mod") continue
+            const isDraft = item.d === 1
+            if (!modPackMap.has(item.id)) {
+                modPackMap.set(item.id, [])
+            }
+            modPackMap.get(item.id)!.push({
+                packId,
+                packName: packResource.name,
+                count: item.c || 1,
+                isDraft,
+            })
         }
     }
 

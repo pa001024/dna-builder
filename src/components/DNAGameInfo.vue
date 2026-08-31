@@ -399,7 +399,7 @@ async function generateScreenshot() {
 }
 </script>
 <template>
-    <div class="space-y-3">
+    <div class="mx-auto space-y-3 max-w-4xl">
         <div v-if="!nobtn" class="flex justify-between items-center">
             <span class="text-xs tracking-wide text-base-content/50">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
             <div class="flex gap-2">

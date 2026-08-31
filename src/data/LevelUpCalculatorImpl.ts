@@ -334,6 +334,20 @@ function generateResourceTree(
             }
         }
 
+        // 图纸仅能通过道具箱开出时，在依赖树中标注道具箱来源
+        if (costDraft.t === "Mod") {
+            const pack = mod.packInfo?.find(p => p.isDraft)
+            if (pack) {
+                root.children!.push({
+                    id: `mod-${mod.id}-pack-${pack.packId}`,
+                    cid: pack.packId,
+                    name: pack.packName,
+                    type: "Pack",
+                    amount: Math.ceil(totalGold / pack.perPack),
+                })
+            }
+        }
+
         // 处理设计稿
         processDraft(costDraft, totalGold, root)
     }
@@ -745,6 +759,23 @@ export interface ModExt {
     shop?: { price: string; n: number }
     dropInfo?: DungeonExt[]
     draftInfo?: DungeonExt[]
+    /**
+     * 道具箱来源：包含本 Mod 或其图纸（isDraft）的道具箱。
+     * 已按可刷取副本数降序、packId 升序排序，第一个即为最优来源。
+     */
+    packInfo?: PackExt[]
+}
+
+/** 道具箱来源信息 */
+export interface PackExt {
+    packId: number
+    packName: string
+    /** 单个道具箱产出的数量 */
+    perPack: number
+    /** 是否为设计稿（d=1） */
+    isDraft: boolean
+    /** 掉落该道具箱的副本 */
+    dungeons: DungeonExt[]
 }
 
 export interface DungeonExt {
@@ -789,6 +820,20 @@ function calculateModLevelUpCost(
     }
     const draft = mod.draft
     const costDraft = mod.costDraft
+    /**
+     * 将图纸需求折算为道具箱开销（Pack 类型）。
+     * 仅当本体图纸无法从副本直接获取（packInfo 存在 isDraft 条目）时触发。
+     * @param modId 图纸对应的魔之楔 ID
+     * @param amount 图纸数量
+     */
+    function addPackCost(modId: number, amount: number) {
+        if (modId !== mod.id) return
+        const pack = mod.packInfo?.find(p => p.isDraft)
+        if (!pack) return
+        const packCount = Math.ceil(amount / pack.perPack)
+        const existing = cost[pack.packName] as number[] | undefined
+        cost[pack.packName] = [((existing || [0])[0] || 0) + packCount, pack.packId, "Pack"]
+    }
     function calcDraftCost(d: Draft, n = 1, sub: boolean = false) {
         const name = `设计稿: ${d.n}-${d.id}`
         let selfGold = n
@@ -808,6 +853,8 @@ function calculateModLevelUpCost(
                 if (d.id !== draft.id) {
                     const self = `设计稿: ${draft.n}-${draft.id}`
                     cost[self] = [n, draft.p, "Draft"]
+                    // 本体图纸需开箱获取时，折算道具箱开销
+                    addPackCost(draft.p, n)
                 } else {
                     selfGold = totalGold = totalGold + n
                 }
@@ -824,7 +871,13 @@ function calculateModLevelUpCost(
         } else {
             totalGold = selfGold
         }
-        if (d.t === "Mod") cost[name] = [totalGold, d.p, "Draft"]
+        if (d.t === "Mod") {
+            cost[name] = [totalGold, d.p, "Draft"]
+            // 本体图纸仅能通过道具箱开出时，折算道具箱开销
+            if (!sub) {
+                addPackCost(d.p, totalGold)
+            }
+        }
         // 金色魔之楔需要5个同名紫色魔之楔
         cost.铜币 += d.m * totalGold
         for (const costmod of d.x) {
@@ -951,8 +1004,17 @@ export interface ModDropInfo {
  * 2. 迭代模拟：在每一步选择当前需求下 DPM 总和最高的副本。
  * 3. 计算该最优副本的"瓶颈资源"（最先被刷满的资源），计算刷满所需的次数。
  * 4. 累加次数，扣除资源需求。若某个资源需求归零，则在下一轮计算中不再贡献 DPM，从而触发副本切换。
+ * @param totalCost 总消耗
+ * @param modMap 魔之楔数据映射
+ * @param config 时间估算配置
+ * @param packMap 道具箱数据映射（packId -> 道具箱名称与掉落副本）
  */
-function getModDropDungeons(totalCost: ResourceCost, modMap: Record<number, ModExt>, config?: TimeEstimateConfig) {
+function getModDropDungeons(
+    totalCost: ResourceCost,
+    modMap: Record<number, ModExt>,
+    config?: TimeEstimateConfig,
+    packMap: Record<number, { packName: string; dungeons: DungeonExt[] }> = {}
+) {
     // --- 1. 初始化数据结构 ---
 
     // 记录资源的剩余需求量: "Draft-123" -> 100
@@ -977,46 +1039,65 @@ function getModDropDungeons(totalCost: ResourceCost, modMap: Record<number, ModE
         return typeTime * resolvedConfig.dungeonTimeMultiplier
     }
 
+    // 将一组来源副本登记到效率缓存中（按 key 区分所需资源）
+    const addDungeonSources = (key: string, dungeons: DungeonExt[]) => {
+        // 记录稀缺度 (来源越少越稀缺)
+        resourceMeta.set(key, { sourceCount: dungeons.length })
+
+        for (const dungeon of dungeons) {
+            // 缓存 Dungeon 对象引用，实现 O(1) 查找
+            if (!dungeonLookup.has(dungeon.id)) {
+                dungeonLookup.set(dungeon.id, dungeon)
+            }
+
+            // 计算掉率效率
+            const dropInfo = dungeon.dropInfo
+            const rawRate = (dropInfo?.pp || 0) * resolvedConfig.dropRateMultiplier // pp 是掉落概率 (0-1)
+            if (rawRate <= 0) continue
+
+            const time = getDungeonTime(dungeon)
+            const dpm = rawRate / time // 分均掉率
+
+            if (!dungeonEfficiencyCache.has(dungeon.id)) {
+                dungeonEfficiencyCache.set(dungeon.id, [])
+            }
+            dungeonEfficiencyCache.get(dungeon.id)!.push({ key, dpm, rawRate })
+        }
+    }
+
     // --- 2. 解析需求并构建缓存 ---
     for (const amount of Object.values(totalCost)) {
         if (Array.isArray(amount)) {
-            const [count, modId, type] = amount
+            const [count, targetId, type] = amount
             if (count <= 0) continue
 
-            const key = `${type}-${modId}`
+            const key = `${type}-${targetId}`
             remainingNeeds.set(key, count)
-            const mod = modMap[modId]
+
+            if (type === "Pack") {
+                // 道具箱需求：图纸/魔之楔需开箱获得，按道具箱掉落副本估算
+                const pack = packMap[targetId]
+                if (!pack) {
+                    console.warn(`未找到 ID ${targetId} 的道具箱数据`)
+                    continue
+                }
+                addDungeonSources(key, pack.dungeons)
+                continue
+            }
+
+            const mod = modMap[targetId]
             if (!mod) {
-                console.warn(`未找到 ID ${modId} 的 ${type} 数据`)
+                console.warn(`未找到 ID ${targetId} 的 ${type} 数据`)
                 continue
             }
 
             // 获取该资源的所有来源副本
-            const dungeons = (type === "Draft" ? mod.draftInfo : mod.dropInfo) || []
-
-            // 记录稀缺度 (来源越少越稀缺)
-            resourceMeta.set(key, { sourceCount: dungeons.length })
-
-            // 遍历副本构建缓存
-            for (const dungeon of dungeons) {
-                // 2.1 缓存 Dungeon 对象引用，实现 O(1) 查找
-                if (!dungeonLookup.has(dungeon.id)) {
-                    dungeonLookup.set(dungeon.id, dungeon)
-                }
-
-                // 2.2 计算掉率效率
-                const dropInfo = dungeon.dropInfo
-                const rawRate = (dropInfo?.pp || 0) * resolvedConfig.dropRateMultiplier // pp 是掉落概率 (0-1)
-                if (rawRate <= 0) continue
-
-                const time = getDungeonTime(dungeon)
-                const dpm = rawRate / time // 分均掉率
-
-                if (!dungeonEfficiencyCache.has(dungeon.id)) {
-                    dungeonEfficiencyCache.set(dungeon.id, [])
-                }
-                dungeonEfficiencyCache.get(dungeon.id)!.push({ key, dpm, rawRate })
+            let dungeons = (type === "Draft" ? mod.draftInfo : mod.dropInfo) || []
+            // 本体仅能通过道具箱获取时，回退到道具箱掉落副本（图纸需求已在成本中折算为道具箱）
+            if (dungeons.length === 0 && type === "Mod") {
+                dungeons = (mod.packInfo || []).filter(p => !p.isDraft).flatMap(p => p.dungeons)
             }
+            addDungeonSources(key, dungeons)
         }
     }
 
@@ -1158,9 +1239,15 @@ function getModDropDungeons(totalCost: ResourceCost, modMap: Record<number, ModE
  * 估算资源获取时间
  * @param totalCost 总消耗
  * @param config 时间估算配置
+ * @param packMap 道具箱数据映射（packId -> 道具箱名称与掉落副本）
  * @returns 时间估算
  */
-export function estimateTime(totalCost: ResourceCost, modMap: Record<number, ModExt>, config?: TimeEstimateConfig) {
+export function estimateTime(
+    totalCost: ResourceCost,
+    modMap: Record<number, ModExt>,
+    config?: TimeEstimateConfig,
+    packMap: Record<number, { packName: string; dungeons: DungeonExt[] }> = {}
+) {
     const resolvedConfig = resolveTimeEstimateConfig(config)
 
     // 计算每个资源所需的副本次数和总时间
@@ -1180,13 +1267,15 @@ export function estimateTime(totalCost: ResourceCost, modMap: Record<number, Mod
         }
     }
     // 计算魔之楔
-    const modDungeonsWithCount = getModDropDungeons(totalCost, modMap, config)
+    const modDungeonsWithCount = getModDropDungeons(totalCost, modMap, config, packMap)
     for (const { id, count, time, items } of modDungeonsWithCount) {
         const minutesNeeded = (count || 0) * time
         totalMinutes += minutesNeeded
         const res = Object.keys(items).map(k => {
             const [type, name] = k.split("-")
-            return type === "Mod" ? modMap[+name]?.名称 || name : `设计稿: ${modMap[+name]?.名称 || name}`
+            if (type === "Mod") return modMap[+name]?.名称 || name
+            if (type === "Pack") return packMap[+name]?.packName || name
+            return `设计稿: ${modMap[+name]?.名称 || name}`
         })
         dungeonTimes[id] = [(dungeonTimes[id]?.[0] || 0) + (count || 0), [...(dungeonTimes[id]?.[1] || []), ...res]]
     }

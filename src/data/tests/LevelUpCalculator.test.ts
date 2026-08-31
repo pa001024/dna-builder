@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest"
 import { collectResourceQuestSources, collectResourceShopSources } from "../../utils/resource-source"
-import { weaponDraftMap } from "../d"
+import { modDraftMap, packDungeonMap, resourceDraftMap, weaponDraftMap } from "../d"
 import modData from "../d/mod.data"
 import resourceData from "../d/resource.data"
 import weaponData from "../d/weapon.data"
 import { LevelUpCalculator, type ResourceCost } from "../LevelUpCalculator"
-import { calculateCharLevelUp, calculateWeaponLevelUp, estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
+import { calculateCharLevelUp, calculateModLevelUp, calculateWeaponLevelUp, estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
 
 describe("LevelUpCalculator", () => {
     const mockResourceNeeds: ResourceCost = {
@@ -277,5 +277,42 @@ describe("LevelUpCalculator", () => {
         expect(result.details.craft?.熔铸突击枪的领悟).toBe(5)
         expect(result.details.craft?.棘刺绝响的原型).toBe(450)
         expect(shopSources.length + questSources.length).toBeGreaterThan(0)
+    })
+
+    it("should convert draft cost to pack cost when the draft only drops from a pack (mod 51758 -> pack 110064 -> dungeon 615010)", () => {
+        const mod = modData.find(item => item.id === 51758)
+        expect(mod).toBeDefined()
+
+        const ext = calc.extractMinimalModData(mod!)
+        // 图纸仅能从道具箱开出，packInfo 应包含可刷取的道具箱来源（110064 契约者魔之楔·风 -> 副本 615010）
+        const draftPack = ext.packInfo?.find(p => p.isDraft && p.dungeons.length > 0)
+        expect(draftPack?.packId).toBe(110064)
+        expect(draftPack?.dungeons.map(d => d.id)).toContain(615010)
+
+        const result = calculateModLevelUp([ext], modDraftMap, resourceDraftMap, {
+            mods: [{ currentLevel: 0, targetLevel: 10, count: 1 }],
+        })
+        // 开销应包含 Pack 类型的道具箱条目，而不是无法从副本获取的纯图纸条目
+        const packEntry = Object.entries(result.totalCost).find(([, value]) => Array.isArray(value) && value[2] === "Pack")
+        expect(packEntry).toBeDefined()
+        expect(packEntry?.[1]).toEqual([10, 110064, "Pack"])
+
+        // 时间估算应映射到道具箱掉落副本 615010
+        const modMap = createModMap()
+        const packMap: Record<
+            number,
+            { packName: string; dungeons: { id: number; name: string; t: string; dropInfo: { pp?: number } }[] }
+        > = {}
+        for (const [packId, packResource] of packDungeonMap) {
+            const resource = resourceData.find(r => r.id === packId)
+            if (!resource) continue
+            packMap[packId] = {
+                packName: resource.name,
+                dungeons: packResource.map(d => ({ id: d.id, name: d.n, t: d.t, dropInfo: { pp: 1 } })),
+            }
+        }
+        const time = estimateTime(result.totalCost, Object.fromEntries(modMap), { dungeonDropRateBonus: 0 }, packMap)
+        expect(time.dungeonTimes["615010"]).toBeDefined()
+        expect(time.dungeonTimes["615010"]![0]).toBeGreaterThan(0)
     })
 })

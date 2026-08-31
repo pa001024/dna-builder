@@ -21,6 +21,7 @@ const props = defineProps<{
               (
                   | "Mod"
                   | "Draft"
+                  | "Pack"
                   | "Weapon"
                   | "Char"
                   | "CharAccessory"
@@ -593,7 +594,9 @@ function handleCardClick() {
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
     </div>
     <div
-        v-else-if="Array.isArray(value) && value[2] === 'Resource' && getResourceById(value[1])"
+        v-else-if="
+            Array.isArray(value) && (value[2] === 'Resource' || value[2] === 'Pack') && getResourceById(value[1])
+        "
         :class="
             mini
                 ? 'flex items-center transition-colors duration-200'

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { t } from "i18next"
-import { computed, onBeforeUnmount, type Ref, ref, shallowRef, watch } from "vue"
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
 import { LeveledMod, LeveledModHelper } from "@/data"
 import { CharBuild } from "@/data/CharBuild"
 import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
@@ -40,14 +40,10 @@ const incomeMap = ref<Record<string, number>>({})
 const workerRef = shallowRef<Worker>()
 let workerRequestId = 0
 const mod_model_show = ref(false)
-// 方案兼容：第二套MOD（不参与数据计算，仅参与极性计算）
-const compatMode = ref(false)
-// 注意：显式标注 Ref<(LeveledMod | null)[]>，避免 Vue 的 UnwrapRef 将 LeveledMod 类映射为结构性类型
-const secondMods: Ref<(LeveledMod | null)[]> = ref([])
-const secondAuraMod = ref<number | undefined>(undefined)
-// 当前为哪一套打开选MOD弹窗 / 拖拽（0=第一套，1=第二套）
-const localSelectedSet = ref<0 | 1>(0)
-const draggedSet = ref<0 | 1>(0)
+// 当前打开选MOD弹窗的槽位索引
+const localSelectedSlot = ref(-1)
+// 养成开销估算面板是否展开（默认隐藏）
+const showCostCalc = ref(false)
 const auraModOptions = computed(() => {
     const options = props.modOptions.filter(option => option.ser === "羽蛇")
     /**
@@ -97,16 +93,9 @@ const filteredModOptions = computed(() => {
         })
     }
 
-    // 仅收集当前正在编辑的套别的互斥信息：
-    // - 第一套（A方案）：收集第一套 + otherMods；
-    // - 第二套（兼容方案 B）：只收集第二套自身。两套为同一批槽位的备选方案，
-    //   A方案中出现的MOD在B方案中应可用（系列/名称/数量互不限制）。
-    if (localSelectedSet.value === 1) {
-        collectExclusives(secondMods.value)
-    } else {
-        collectExclusives(props.mods)
-        collectExclusives(props.otherMods)
-    }
+    // 收集当前编辑套别的互斥信息（A方案：第一套 + otherMods）
+    collectExclusives(props.mods)
+    collectExclusives(props.otherMods)
 
     // 过滤选项：如果mod属于已装备的互斥系列或同名非契约者MOD，则不显示
     return props.modOptions.filter(option => {
@@ -272,12 +261,8 @@ const emit = defineEmits<{
     swapMods: [index1: number, index2: number]
     levelChange: [indexAndLevel: [number, number]]
     sync: []
-    /** 从游戏同步魔之楔到方案B：父级获取游戏数据后通过回调写回本地第二套 */
-    syncSecond: [apply: (mods: ([number, number] | null)[], auraMod?: number) => void]
 }>()
 
-// 本地状态
-const localSelectedSlot = ref(-1)
 const draggedModIndex = ref<number | null>(null)
 const dropTargetIndex = ref<number | null>(null)
 
@@ -285,18 +270,15 @@ const dropTargetIndex = ref<number | null>(null)
 /**
  * 点击MOD槽位打开选MOD弹窗。
  * @param index 槽位索引
- * @param set 套别（0=第一套，1=兼容第二套）
  */
-function handleSlotClick(index: number, set: 0 | 1 = 0) {
+function handleSlotClick(index: number) {
     localSelectedSlot.value = index
-    localSelectedSet.value = set
     mod_model_show.value = true
 }
 
 // 拖动开始
-function handleDragStart(index: number, set: 0 | 1 = 0) {
+function handleDragStart(index: number) {
     draggedModIndex.value = index
-    draggedSet.value = set
 }
 
 // 拖动结束
@@ -309,26 +291,17 @@ function handleDragEnd(_e: MouseEvent, targetElement: Element | null) {
         targetModItem = targetModItem.parentElement
     }
 
-    // 如果找到了目标 ModItem，读取它的 data-index 与 data-set
+    // 如果找到了目标 ModItem，读取它的 data-index
     if (targetModItem) {
         const targetIndex = parseInt(targetModItem.getAttribute("data-index") || "-1")
-        const targetSet = targetModItem.getAttribute("data-set") === "1" ? 1 : 0
 
         if (targetIndex !== -1 && draggedModIndex.value !== targetIndex) {
             const fromIndex = draggedModIndex.value
-            const fromSet = draggedSet.value
             draggedModIndex.value = null
             dropTargetIndex.value = null
 
-            if (fromSet === 1 && targetSet === 1) {
-                // 第二套：本地交换
-                const temp = secondMods.value[fromIndex]
-                secondMods.value[fromIndex] = secondMods.value[targetIndex]
-                secondMods.value[targetIndex] = temp
-            } else if (fromSet === 0 && targetSet === 0) {
-                // 发送交换事件
-                emit("swapMods", fromIndex, targetIndex)
-            }
+            // 发送交换事件
+            emit("swapMods", fromIndex, targetIndex)
             localSelectedSlot.value = -1
             return
         }
@@ -348,42 +321,26 @@ function handleDragOver(index: number) {
 /**
  * 选择光环MOD。
  * @param id 光环MOD id
- * @param set 套别（0=第一套，1=兼容第二套）
  */
-function handleSelectAuraMod(id: number, set: 0 | 1 = 0) {
-    if (set === 1) {
-        secondAuraMod.value = id
-    } else {
-        emit("selectAuraMod", id)
-    }
+function handleSelectAuraMod(id: number) {
+    emit("selectAuraMod", id)
 }
 
 /**
  * 移除MOD。
  * @param index 槽位索引
- * @param set 套别
  */
-function handleRemoveMod(index: number, set: 0 | 1 = 0) {
-    if (set === 1) {
-        secondMods.value[index] = null
-    } else {
-        emit("removeMod", index)
-    }
+function handleRemoveMod(index: number) {
+    emit("removeMod", index)
 }
 
 /**
  * 修改MOD等级。
  * @param index 槽位索引
  * @param level 等级
- * @param set 套别
  */
-function handleLevelChange(index: number, level: number, set: 0 | 1 = 0) {
-    if (set === 1) {
-        const mod = secondMods.value[index]
-        if (mod) secondMods.value[index] = LeveledModHelper.fromId(mod.id, level, mod.buffLv)
-    } else {
-        emit("levelChange", [index, level])
-    }
+function handleLevelChange(index: number, level: number) {
+    emit("levelChange", [index, level])
 }
 
 /**
@@ -393,44 +350,8 @@ function handleLevelChange(index: number, level: number, set: 0 | 1 = 0) {
  * @param lv 等级
  */
 function handleSelectMod(index: number, value: number, lv: number) {
-    if (localSelectedSet.value === 1) {
-        // 第二套：写入本地状态（不参与数据计算，仅参与极性计算）
-        secondMods.value[index] = LeveledModHelper.fromId(value, lv, inv.getBuffLv(value))
-    } else {
-        emit("selectMod", [index, value, lv])
-    }
+    emit("selectMod", [index, value, lv])
     mod_model_show.value = false
-}
-
-/**
- * 切换"方案兼容"模式。
- */
-function toggleCompatMode() {
-    compatMode.value = !compatMode.value
-    // 打开时按当前套槽位数初始化第二套（近战/远程/角色 8 槽，同律 4 槽）
-    if (compatMode.value && secondMods.value.length !== props.mods.length) {
-        secondMods.value = Array(props.mods.length).fill(null) as (LeveledMod | null)[]
-    }
-}
-
-/**
- * 镜像：复制第一套MOD（含光环）到第二套，作为兼容方案的起点。
- */
-function mirrorFirstToSecond() {
-    secondMods.value = props.mods.map(mod => (mod ? mod.clone() : null))
-    secondAuraMod.value = props.auraMod
-}
-
-/**
- * 同步游戏魔之楔到方案B（导入）：父级获取游戏数据后经回调写回本地第二套。
- */
-function handleSyncSecond() {
-    emit("syncSecond", (pairs, auraMod) => {
-        secondMods.value = pairs
-            .slice(0, props.mods.length)
-            .map(pair => (pair ? LeveledModHelper.fromId(pair[0], pair[1], inv.getBuffLv(pair[0])) : null))
-        secondAuraMod.value = auraMod
-    })
 }
 
 function toggleSortByIncome() {
@@ -438,10 +359,9 @@ function toggleSortByIncome() {
 }
 
 /**
- * 导入构筑代码到指定套别。
- * @param set 套别（0=第一套，1=兼容第二套）
+ * 导入构筑代码。
  */
-async function handleImportCode(set: 0 | 1 = 0) {
+async function handleImportCode() {
     let charCode = ""
     try {
         charCode = (await pasteText()) || ""
@@ -455,180 +375,39 @@ async function handleImportCode(set: 0 | 1 = 0) {
     for (let i = 0; i < result.mods.length; i++) {
         const modId = result.mods[i]
         if (!modId) {
-            if (set === 1) {
-                if (i < secondMods.value.length) secondMods.value[i] = null
-            } else {
-                emit("removeMod", i)
-            }
+            emit("removeMod", i)
             continue
         }
         const lv = inv.getModLv(modId, LeveledModHelper.getQuality(modId)) ?? 10
-        if (set === 1) {
-            if (i < secondMods.value.length) {
-                secondMods.value[i] = LeveledModHelper.fromId(modId, lv, inv.getBuffLv(modId))
-            }
-        } else {
-            emit("selectMod", [i, modId, lv])
-        }
+        emit("selectMod", [i, modId, lv])
     }
     if (result.auraMod) {
-        if (set === 1) {
-            secondAuraMod.value = result.auraMod
-        } else {
-            emit("selectAuraMod", result.auraMod)
-        }
+        emit("selectAuraMod", result.auraMod)
     }
-}
-
-/**
- * 导出兼容第二套的构筑代码（复用克隆构筑的 getCode 保证格式一致）。
- */
-function handleExportSecondSetCode() {
-    const clone = props.charBuild.clone()
-    if (props.type === "角色") {
-        clone.charMods = [...secondMods.value]
-        clone.auraMod = secondAuraMod.value ? LeveledModHelper.fromId(secondAuraMod.value) : undefined
-    } else if (props.type === "近战") {
-        clone.meleeMods = [...secondMods.value]
-    } else if (props.type === "远程") {
-        clone.rangedMods = [...secondMods.value]
-    } else if (props.type === "同律") {
-        clone.skillMods = [...secondMods.value]
-    }
-    copyText(clone.getCode(props.type))
 }
 
 const aMod = computed(() => {
     return props.auraMod ? LeveledModHelper.fromId(props.auraMod) : undefined
 })
 
-const secondAMod = computed(() => {
-    if (props.type !== "角色" || !secondAuraMod.value) return undefined
-    return LeveledModHelper.fromId(secondAuraMod.value)
-})
-
 /**
- * 第二套MOD表（角色类型末尾追加光环MOD，光环可参与极化即光环极化）。
- * 仅在方案兼容模式下注入，不参与数据计算。
+ * 需要极化的MOD槽位索引（半价削减耐受，含光环极化）。
  */
-const secondSetInjection = computed<(LeveledMod | null)[] | undefined>(() => {
-    if (!compatMode.value) return undefined
-    const mods = [...secondMods.value]
-    if (props.type === "角色") {
-        mods.push(secondAuraMod.value ? LeveledModHelper.fromId(secondAuraMod.value) : null)
-    }
-    return mods
-})
+const polsetIndices = computed(() => props.charBuild.getModCostTransfer(props.type))
 
 /**
- * 共享极化方案：同一套方案（各极性极化槽数量 + 中枢极性）同时应用到两套MOD。
- * 第二套为空时返回 null（此时沿用第一套自身极化方案）。
- */
-const compatPlan = computed(() => {
-    if (!compatMode.value) return null
-    if (!secondSetInjection.value?.some(mod => mod?.耐受)) return null
-    return props.charBuild.getSharedPolarizationPlan(props.type, secondSetInjection.value)
-})
-
-/**
- * 合并两套MOD的极化槽位索引（第一套 0 起，第二套按偏移追加）。
- */
-const combinedPolset = computed(() => {
-    if (!compatPlan.value) return props.charBuild.getModCostTransfer(props.type)
-    return [...compatPlan.value.first, ...compatPlan.value.second.map(index => setOffset.value + index)]
-})
-
-/**
- * 第一套在合并表中的长度（第二套索引偏移起点）。
- */
-const setOffset = computed(() => props.charBuild.getMods(props.type).length)
-
-/**
- * 判断第一套槽位是否需要极化。
- * @param index 第一套槽位索引
+ * 判断槽位是否需要极化。
+ * @param index 槽位索引
  * @returns 是否极化
  */
-function isFirstSetPolset(index: number) {
-    return combinedPolset.value.includes(index)
+function isPolset(index: number) {
+    return polsetIndices.value.includes(index)
 }
 
 /**
- * 判断第二套槽位是否需要极化。
- * @param index 第二套槽位索引（0 起）
- * @returns 是否极化
+ * 光环槽是否被极化（光环极化）。
  */
-function isSecondSetPolset(index: number) {
-    return combinedPolset.value.includes(setOffset.value + index)
-}
-
-/**
- * 判断第一套槽位是否受异极性惩罚（×1.5，显示红色）。
- * @param index 第一套槽位索引
- * @returns 是否受惩罚
- */
-function isFirstSetPenalty(index: number) {
-    return !!compatPlan.value?.firstPenalty.includes(index)
-}
-
-/**
- * 判断第二套槽位是否受异极性惩罚（×1.5，显示红色）。
- * @param index 第二套槽位索引（0 起）
- * @returns 是否受惩罚
- */
-function isSecondSetPenalty(index: number) {
-    return !!compatPlan.value?.secondPenalty.includes(index)
-}
-
-/**
- * 第一套光环槽是否受异极性惩罚。
- */
-const firstAuraPenalized = computed(() => props.type === "角色" && !!compatPlan.value?.firstPenalty.includes(setOffset.value - 1))
-
-/**
- * 第二套光环槽是否受异极性惩罚（第二套光环在 extra 中的索引为 secondMods.length）。
- */
-const secondAuraPenalized = computed(() => props.type === "角色" && !!compatPlan.value?.secondPenalty.includes(secondMods.value.length))
-
-/**
- * 第一套光环槽是否被极化（光环极化）。
- */
-const firstAuraPolset = computed(() => props.type === "角色" && combinedPolset.value.includes(setOffset.value - 1))
-
-/**
- * 第二套光环槽是否被极化（光环极化）。
- */
-const secondAuraPolset = computed(() => props.type === "角色" && combinedPolset.value.includes(setOffset.value * 2 - 1))
-
-/**
- * 两套MOD无法共存（共享极化方案无法同时满足两套），此时优先满足第一套。
- */
-const compatFailed = computed(() => !!compatPlan.value && !compatPlan.value.ok)
-
-/**
- * 方案兼容模式下第一套（A方案）的当前耐受显示。
- * 有共享方案时显示方案后耐受（cost1）；否则显示正常极化后耐受（与区块标题一致），而非原始耐受。
- */
-const aTolerance = computed(() => {
-    if (!compatMode.value) return null
-    const cap = props.charBuild.getModCap(props.type)
-    const cost = compatPlan.value ? compatPlan.value.cost1 : props.charBuild.getModCostMax(props.type)
-    return { cost, cap }
-})
-
-/**
- * 第二套（B方案）自身原始耐受（不含第一套）。
- */
-const bRawCost = computed(() => (secondSetInjection.value || []).reduce((sum, m) => sum + (m?.耐受 || 0), 0))
-
-/**
- * 方案兼容模式下第二套（B方案）的当前耐受显示（共享方案后的耐受/上限；B为空时显示其自身耐受）。
- */
-const bTolerance = computed(() => {
-    if (!compatMode.value) return null
-    const cap = props.charBuild.getModCap(props.type)
-    const cost = compatPlan.value ? compatPlan.value.cost2 : bRawCost.value
-    return { cost, cap }
-})
+const auraPolset = computed(() => props.type === "角色" && polsetIndices.value.includes(props.charBuild.getMods(props.type).length - 1))
 </script>
 <template>
     <div>
@@ -639,11 +418,7 @@ const bTolerance = computed(() => {
                     <SectionHeader
                         number="01"
                         kicker="MOD"
-                        :title="
-                            localSelectedSet === 1
-                                ? `${$t('char-build.compat_scheme')} · ${$t('char-build.select_mod_slot')} ${localSelectedSlot + 1}`
-                                : `${$t('char-build.select_mod_slot')} ${localSelectedSlot + 1}`
-                        "
+                        :title="`${$t('char-build.select_mod_slot')} ${localSelectedSlot + 1}`"
                         no-animate
                         compact
                     >
@@ -704,22 +479,15 @@ const bTolerance = computed(() => {
             </dialog>
         </Teleport>
         <div class="flex items-center gap-2 mb-3">
-            <!-- 方案兼容模式下左对齐展示当前耐受 -->
-            <div v-if="aTolerance" class="flex items-center gap-1 text-xs">
-                <span class="text-base-content/60">{{ $t("char-build.tolerance") }}</span>
-                <span class="font-orbitron" :class="aTolerance.cost > aTolerance.cap ? 'text-error' : 'text-base-content/90'">
-                    {{ aTolerance.cost }}/{{ aTolerance.cap }}
-                </span>
-            </div>
             <div class="ml-auto flex items-center gap-2">
-                <!-- 方案兼容：输入第二套MOD，不参与数据计算，仅参与极性计算 -->
+                <!-- 养成开销估算：点击展开/收起副本开销估算面板（默认隐藏） -->
                 <div
                     class="btn btn-sm border"
-                    :class="compatMode ? 'btn-secondary' : 'btn-ghost border-base-content/15'"
-                    :title="$t('char-build.compat_scheme_hint')"
-                    @click="toggleCompatMode"
+                    :class="showCostCalc ? 'btn-secondary' : 'btn-ghost border-base-content/15'"
+                    title="估算当前魔之楔养成所需的副本次数与时间，可一键跳转完整计算器"
+                    @click="showCostCalc = !showCostCalc"
                 >
-                    方案兼容
+                    开销估算
                 </div>
                 <ShowProps
                     v-if="aMod"
@@ -736,26 +504,20 @@ const bTolerance = computed(() => {
                         <Select
                             class="w-30 input input-bordered input-sm"
                             :model-value="auraMod"
-                            @update:model-value="handleSelectAuraMod($event, 0)"
+                            @update:model-value="handleSelectAuraMod($event)"
                         >
                             <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
                                 {{ $t(m.quality + "色") }} - {{ $t(m.label) }}
                             </SelectItem>
                         </Select>
-                        <!-- 光环槽：明显展示所极化的槽位类型（趋向图标）与半价/惩罚耐受 -->
+                        <!-- 光环槽：明显展示所极化的槽位类型（趋向图标）与半价耐受 -->
                         <span
                             v-if="aMod.极性"
                             class="badge badge-sm gap-1"
-                            :class="
-                                firstAuraPenalized
-                                    ? 'badge-error text-red-800'
-                                    : firstAuraPolset
-                                      ? 'badge-success text-green-800'
-                                      : 'badge-soft text-base-content/80'
-                            "
+                            :class="auraPolset ? 'badge-success text-green-800' : 'badge-soft text-base-content/80'"
                         >
                             <Icon class="inline-block" :icon="`po-${aMod.极性}`" />
-                            {{ firstAuraPenalized ? Math.ceil(aMod.耐受 * 1.5) : firstAuraPolset ? Math.ceil(aMod.耐受 / 2) : aMod.耐受 }}
+                            {{ auraPolset ? Math.ceil(aMod.耐受 / 2) : aMod.耐受 }}
                         </span>
                     </div>
                 </ShowProps>
@@ -777,151 +539,23 @@ const bTolerance = computed(() => {
                 :mod="mod"
                 :income="mod ? getEquippedModIncome(index) : 0"
                 :index="index"
-                data-set="0"
-                :polset="isFirstSetPolset(index)"
-                :penalized="isFirstSetPenalty(index)"
+                :polset="isPolset(index)"
                 control
                 :char-build="charBuild"
                 :selected="undefined"
                 :class="{
-                    'opacity-50': draggedModIndex === index && draggedSet === 0,
-                    'border-2 border-primary': dropTargetIndex === index && draggedModIndex !== index && draggedSet === 0,
+                    'opacity-50': draggedModIndex === index,
+                    'border-2 border-primary': dropTargetIndex === index && draggedModIndex !== index,
                 }"
                 @click="!mod && handleSlotClick(index)"
                 @remove-mod="handleRemoveMod(index)"
                 @drag-start="handleDragStart(index)"
                 @drag-end="handleDragEnd"
-                @mouseenter="draggedModIndex !== null && draggedSet === 0 && handleDragOver(index)"
+                @mouseenter="draggedModIndex !== null && handleDragOver(index)"
                 @lv-change="handleLevelChange(index, $event)"
             />
         </div>
-        <!-- 方案兼容：第二套MOD（不参与数据计算，仅参与极性计算），布局与正常一致 -->
-        <div v-if="compatMode" class="mt-4 rounded-xs border border-dashed border-primary/40 p-3">
-            <div class="flex items-center gap-2 mb-3">
-                <!-- 左对齐：当前耐受显示 -->
-                <div v-if="bTolerance" class="flex items-center gap-1 text-xs">
-                    <span class="text-base-content/60">{{ $t("char-build.tolerance") }}</span>
-                    <span class="font-orbitron" :class="bTolerance.cost > bTolerance.cap ? 'text-error' : 'text-base-content/90'">
-                        {{ bTolerance.cost }}/{{ bTolerance.cap }}
-                    </span>
-                </div>
-                <div class="ml-auto flex items-center gap-2">
-                    <!-- 镜像：复制第一套MOD到第二套（置于角色ShowProps左侧） -->
-                    <div
-                        class="btn btn-ghost btn-sm border border-base-content/15"
-                        :title="$t('char-build.compat_scheme_mirror_hint')"
-                        @click="mirrorFirstToSecond"
-                    >
-                        {{ $t("char-build.compat_scheme_mirror") }}
-                    </div>
-                    <template v-if="type === '角色'">
-                        <ShowProps
-                            v-if="secondAMod"
-                            :props="secondAMod.getProperties()"
-                            :title="`${$t(secondAMod.系列)}${$t(secondAMod.名称)}`"
-                            :polarity="secondAMod.极性"
-                            :cost="secondAMod.耐受"
-                            :type="`${$t(secondAMod.类型)}${secondAMod.属性 ? `,${$t(secondAMod.属性 + '属性')}` : ''}${secondAMod.限定 ? `,${$t(formatModLimit(secondAMod.限定))}` : ''}`"
-                            :effdesc="secondAMod.效果"
-                            :eff="charBuild?.checkModEffective(secondAMod, true)"
-                        >
-                            <div class="flex items-center gap-2">
-                                <img :src="secondAMod.url" :alt="secondAMod.名称" class="w-8 h-8 inline-block" />
-                                <Select
-                                    class="w-30 input input-bordered input-sm"
-                                    :model-value="secondAuraMod"
-                                    @update:model-value="handleSelectAuraMod($event, 1)"
-                                >
-                                    <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
-                                        {{ $t(m.quality + "色") }} - {{ $t(m.label) }}
-                                    </SelectItem>
-                                </Select>
-                                <span
-                                    v-if="secondAMod.极性"
-                                    class="badge badge-sm gap-1"
-                                    :class="
-                                        secondAuraPenalized
-                                            ? 'badge-error text-red-800'
-                                            : secondAuraPolset
-                                              ? 'badge-success text-green-800'
-                                              : 'badge-soft text-base-content/80'
-                                    "
-                                >
-                                    <Icon class="inline-block" :icon="`po-${secondAMod.极性}`" />
-                                    {{
-                                        secondAuraPenalized
-                                            ? Math.ceil(secondAMod.耐受 * 1.5)
-                                            : secondAuraPolset
-                                              ? Math.ceil(secondAMod.耐受 / 2)
-                                              : secondAMod.耐受
-                                    }}
-                                </span>
-                            </div>
-                        </ShowProps>
-                        <Select
-                            v-else
-                            class="w-30 input input-bordered input-sm"
-                            :model-value="secondAuraMod"
-                            @update:model-value="handleSelectAuraMod($event, 1)"
-                        >
-                            <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
-                                {{ $t(m.quality + "色") }} - {{ $t(m.label) }}
-                            </SelectItem>
-                        </Select>
-                    </template>
-                    <!-- 同步游戏魔之楔到方案B（导入） -->
-                    <div class="btn btn-secondary btn-sm" @click="handleSyncSecond">
-                        {{ $t("char-build.sync_game") }}
-                    </div>
-                    <div class="btn btn-ghost btn-sm border border-base-content/15" @click="handleImportCode(1)">
-                        {{ $t("char-build.import_code") }}
-                    </div>
-                    <div class="btn btn-ghost btn-sm border border-base-content/15" @click="handleExportSecondSetCode">
-                        {{ $t("char-build.export_code") }}
-                    </div>
-                </div>
-            </div>
-            <!-- 共享极化方案摘要 -->
-            <div v-if="compatPlan" class="mb-2 flex items-center gap-2 text-xs text-base-content/70">
-                <span class="font-bold text-primary">{{ $t("char-build.compat_scheme_plan") }}</span>
-                <template v-for="T in ['V', 'D', 'A', 'O'] as const" :key="T">
-                    <span v-if="compatPlan.plan[T]" class="badge badge-sm badge-soft gap-1">
-                        <Icon class="inline-block" :icon="`po-${T}`" />×{{ compatPlan.plan[T] }}
-                    </span>
-                </template>
-                <span v-if="compatPlan.aura" class="badge badge-sm badge-soft gap-1">
-                    <Icon class="inline-block" :icon="`po-${compatPlan.aura}`" />
-                    <span class="text-base-content/50">{{ $t("char-build.compat_scheme_central") }}</span>
-                </span>
-            </div>
-            <div class="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8 gap-4">
-                <ModItem
-                    v-for="(mod, index) in secondMods"
-                    :key="index"
-                    :mod="mod"
-                    :index="index"
-                    data-set="1"
-                    :polset="isSecondSetPolset(index)"
-                    :penalized="isSecondSetPenalty(index)"
-                    control
-                    :char-build="charBuild"
-                    :selected="undefined"
-                    :class="{
-                        'opacity-50': draggedModIndex === index && draggedSet === 1,
-                        'border-2 border-primary': dropTargetIndex === index && draggedModIndex !== index && draggedSet === 1,
-                    }"
-                    @click="!mod && handleSlotClick(index, 1)"
-                    @remove-mod="handleRemoveMod(index, 1)"
-                    @drag-start="handleDragStart(index, 1)"
-                    @drag-end="handleDragEnd"
-                    @mouseenter="draggedModIndex !== null && draggedSet === 1 && handleDragOver(index)"
-                    @lv-change="handleLevelChange(index, $event, 1)"
-                />
-            </div>
-            <div v-if="compatFailed" class="mt-2 flex items-center gap-1 text-xs text-error">
-                <Icon icon="ri:error-warning-line" class="inline-block" />
-                {{ compatPlan?.reason === "aura" ? $t("char-build.compat_scheme_aura") : $t("char-build.compat_scheme_overcap") }}
-            </div>
-        </div>
+        <!-- 养成开销估算：复用 LevelUpCalculator（worker 计算），展示副本估算时间并一键跳转完整计算器 -->
+        <MiniCostCalculator v-if="showCostCalc" class="mt-3" :mods="mods" />
     </div>
 </template>

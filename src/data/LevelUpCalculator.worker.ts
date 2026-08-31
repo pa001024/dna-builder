@@ -5,6 +5,7 @@ import {
     calculateCharLevelUp,
     calculateModLevelUp,
     calculateWeaponLevelUp,
+    type DungeonExt,
     estimateTime,
     type ModExt,
     type WeaponExt,
@@ -52,6 +53,7 @@ export type CalculateModLevelUpData = {
 export type EstimateTimeData = {
     totalCost: ResourceCost
     modMap: Map<number, ModExt>
+    packMap: Record<number, { packName: string; dungeons: DungeonExt[] }>
     config?: TimeEstimateConfig
 }
 
@@ -120,7 +122,7 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
                 }
                 case "estimateTime": {
                     const timeData = data as EstimateTimeData
-                    result = estimateTime(timeData.totalCost, Object.fromEntries(timeData.modMap), timeData.config)
+                    result = estimateTime(timeData.totalCost, Object.fromEntries(timeData.modMap), timeData.config, timeData.packMap)
                     break
                 }
                 case "mergeCalculate": {

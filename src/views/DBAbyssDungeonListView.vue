@@ -124,10 +124,7 @@ useInitialScrollToSelectedItem({
 <template>
     <div class="h-full flex flex-col">
         <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div
-                class="flex-1 flex flex-col overflow-hidden min-w-0"
-                :class="{ 'sm:border-r border-base-content/10': selectedDungeon }"
-            >
+            <div class="flex-1 flex flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedDungeon }">
                 <!-- 检索带：下划线搜索 + 计数 -->
                 <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
                     <div class="relative">
@@ -210,7 +207,10 @@ useInitialScrollToSelectedItem({
                 <ScrollArea class="flex-1">
                     <div class="p-3">
                         <!-- 空状态 -->
-                        <div v-if="filteredDungeons.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
+                        <div
+                            v-if="filteredDungeons.length === 0"
+                            class="flex flex-col items-center justify-center py-20 text-base-content/45"
+                        >
                             <p class="text-sm">未找到匹配的深渊副本</p>
                         </div>
 
@@ -242,9 +242,11 @@ useInitialScrollToSelectedItem({
                                                     :class="{ 'text-primary': getDefaultDungeonInGroup(group)?.id === selectedDungeon?.id }"
                                                 >
                                                     <span v-if="group.sn">{{ group.sn }}</span>
-                                                    <span v-if="group.cid">{{ $t(getCharName(group.cid)) }}</span>
+                                                    <span v-if="group.cid"> - {{ $t(getCharName(group.cid)) }}</span>
                                                 </h3>
-                                                <span class="shrink-0 rounded-xs bg-warning px-1.5 py-0.5 text-[10px] leading-4 tracking-wide text-warning-content whitespace-nowrap">
+                                                <span
+                                                    class="shrink-0 rounded-xs bg-warning px-1.5 py-0.5 text-[10px] leading-4 tracking-wide text-warning-content whitespace-nowrap"
+                                                >
                                                     {{ $t(getAbyssDungeonGroup(group.dungeons[0])) }}
                                                 </span>
                                             </div>
@@ -296,13 +298,17 @@ useInitialScrollToSelectedItem({
                                             >
                                                 {{ buff.n }}
                                             </span>
-                                            <span v-if="group.dungeons[0].buff.length > 3" class="font-mono text-[10px] tabular-nums text-base-content/40"
+                                            <span
+                                                v-if="group.dungeons[0].buff.length > 3"
+                                                class="font-mono text-[10px] tabular-nums text-base-content/40"
                                                 >+{{ group.dungeons[0].buff.length - 3 }}</span
                                             >
                                         </span>
                                         <span v-if="group.dungeons[0]?.mb" class="ml-auto flex items-center gap-2">
                                             <img
-                                                v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter(k => group.dungeons[0].mb![k] > 0)"
+                                                v-for="key in ['暗', '水', '火', '雷', '风', '光'].filter(
+                                                    k => group.dungeons[0].mb![k] > 0
+                                                )"
                                                 :key="key"
                                                 :src="LeveledChar.elementUrl(key)"
                                                 alt=""

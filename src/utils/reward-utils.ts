@@ -188,6 +188,29 @@ export function getModDropInfo(dungeon: Dungeon, modId: number): { pp?: number; 
 }
 
 /**
+ * 获取道具箱在特定副本中的掉落概率信息
+ * 道具箱在奖励树中以 Resource 类型出现（如 110064 契约者魔之楔·风）。
+ * @param dungeon 副本数据
+ * @param packId 道具箱资源 ID
+ * @returns 掉落概率信息
+ */
+export function getPackDropInfo(dungeon: Dungeon, packId: number): { pp?: number; times?: number } {
+    // 合并所有奖励组ID，确保r和sr都是数组
+    const allRewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
+
+    // 遍历所有奖励组，查找当前道具箱
+    for (const rewardId of allRewardIds) {
+        const rewardDetails = getRewardDetails(rewardId)
+        const packDropInfo = findInRewardTree(rewardDetails, packId, "Resource")
+        if (packDropInfo) {
+            return packDropInfo
+        }
+    }
+
+    return {}
+}
+
+/**
  * 获取Draft在特定副本中的掉落概率信息
  */
 export function getDraftDropInfo(dungeon: Dungeon, draftId: number): { pp?: number; times?: number } {

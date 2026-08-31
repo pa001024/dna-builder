@@ -2,6 +2,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNARoleEntity } from "dna-api"
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue"
+import { useSearchParam } from "@/composables/useSearchParam"
 import {
     charData,
     charMap,
@@ -661,7 +662,7 @@ const isOpenGraph = ref(false)
 
 // 养成计划活动页签：角色 / 武器 / 魔之楔 / 估算配置 合并管理
 type PlanTab = "chars" | "weapons" | "mods" | "settings"
-const activePlanTab = ref<PlanTab>("chars")
+const activePlanTab = useSearchParam<PlanTab>("tab", "chars")
 
 // 当前页签对应的添加动作
 const planTabAddActions: Partial<Record<PlanTab, () => void>> = {
