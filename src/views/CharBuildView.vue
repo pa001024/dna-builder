@@ -353,6 +353,7 @@ const charBuild = computed(() => {
             timeline: charSettings.value.actions.enable ? getInlineActions() : getTimelineByName(charSettings.value.baseName),
             teamWeapons: [charSettings.value.team1Weapon, charSettings.value.team2Weapon],
             extraMastery: char.额外精通?.includes(charSettings.value.extraMastery) ? charSettings.value.extraMastery : "",
+            dotSettings: charSettings.value.dotSettings,
         })
         return b
     } catch {
@@ -902,6 +903,24 @@ watch(
 // 计算属性（含武器作用域）：充盈威力、召唤物攻击速度/范围/独立增伤等依赖武器转化词条，
 // 需与伤害结算一致使用 calculateWeaponAttributes，否则召唤物独立增伤等会漏算转化部分
 const attributes = computed(() => charBuild.value.calculateWeaponAttributes())
+
+//#region DOT计算
+/** DOT 设置弹窗显隐 */
+const dot_model_show = ref(false)
+/** DOT 频率分解（技能/近战/远程），供主界面显示与弹窗配置 */
+const dotFrequencies = computed(() => {
+    // 构筑未就绪时返回空结果，避免对空构建调用计算接口
+    if (typeof charBuild.value.calculateDotFrequencies !== "function") {
+        return { cap: 0, ownFreq: 0, otherFreq: 0, totalFreq: 0, sources: [] }
+    }
+    return charBuild.value.calculateDotFrequencies()
+})
+/** 每秒 DOT 伤害（全部来源） */
+const dotDamage = computed(() => {
+    if (typeof charBuild.value.calculateDotDamage !== "function") return 0
+    return charBuild.value.calculateDotDamage()
+})
+//#endregion
 
 /**
  * 计算自定义变量表达式的当前结果（函数定义以示例参数 1,2,3... 代入预览）。
@@ -1527,10 +1546,19 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         </div>
         <div class="modal-backdrop" @click="weapon_select_model_show = false" />
     </dialog>
+    <!-- DOT设置详情弹窗 -->
+    <dialog class="modal" :class="{ 'modal-open': dot_model_show }">
+        <DotConfigDialog
+            v-if="dot_model_show"
+            :char-build="charBuild"
+            :dot-settings="charSettings.dotSettings"
+            @close="dot_model_show = false"
+        />
+        <div class="modal-backdrop" @click="dot_model_show = false" />
+    </dialog>
 
     <!-- 额外精通武器选择弹窗 -->
-    <dialog class="modal" :class="{ 'modal-open': extraMasteryModalShow }">
-        <div class="modal-box bg-base-300 w-11/12 max-w-3xl">
+    <DialogModel v-model="extraMasteryModalShow" class="bg-base-300 w-11/12 max-w-3xl">
             <h3 class="text-lg font-bold mb-1">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</h3>
             <p class="text-xs text-base-content/60 mb-4">{{ $t("char-build.extra_mastery_desc") }}</p>
             <div class="grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,1fr))]">
@@ -1567,7 +1595,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     />
                 </div>
             </div>
-            <div class="mt-4 flex justify-between gap-2">
+        <template #action>
+            <div class="flex w-full justify-between gap-2">
                 <button v-if="pendingExtraMastery" type="button" class="btn btn-sm btn-error btn-outline" @click="clearExtraMastery">
                     <Icon icon="ri:delete-bin-line" class="size-4" />
                     {{ $t("char-build.extra_mastery_clear") }}
@@ -1580,9 +1609,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     {{ $t("确定") }}
                 </button>
             </div>
-        </div>
-        <div class="modal-backdrop" @click="closeExtraMasteryModal" />
-    </dialog>
+        </template>
+    </DialogModel>
 
     <!-- 配装分享弹窗 -->
     <DialogModel v-model="share_model_show" @submit="confirmShare" class="bg-base-300">
@@ -2051,6 +2079,23 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <div v-else data-tour="damage-result" class="flex justify-between items-center p-1">
                                 <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
                                 <DamageShow :value="charBuild.calculate()" />
+                            </div>
+                            <!-- DOT计算：显示每秒DOT伤害，点击打开详情弹窗 -->
+                            <div
+                                class="flex justify-between items-center p-1 cursor-pointer hover:bg-base-100/60 rounded-sm transition-all duration-200"
+                                title="DOT伤害计算设置"
+                                @click="dot_model_show = true"
+                            >
+                                <div class="flex items-center gap-1 text-sm text-base-content/80">
+                                    每秒DOT伤害
+                                    <span v-if="dotFrequencies.totalFreq > 0" class="text-xs text-base-content/50 tabular-nums">
+                                        {{ +dotFrequencies.totalFreq.toFixed(2) }} 次/秒
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <DamageShow :value="dotDamage" />
+                                    <Icon icon="ri:settings-3-line" class="size-3.5 opacity-60" />
+                                </div>
                             </div>
                         </div>
                     </div>

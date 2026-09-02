@@ -1,4 +1,4 @@
-import { CharBuild, type CharBuildOptions } from "./CharBuild"
+import { CharBuild, type CharBuildOptions, type DotFrequencySettings } from "./CharBuild"
 import type { Buff, Char, Mod, Weapon } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import { LeveledChar } from "./leveled/LeveledChar"
@@ -59,6 +59,8 @@ export interface CharBuildWorkerSnapshot {
     teamWeaponCategories: string[]
     /** 额外精通武器类型（如 "长柄"） */
     extraMastery: string
+    /** DOT 频率设置（每种来源每秒造成伤害的次数） */
+    dotSettings: DotFrequencySettings
 }
 
 /**
@@ -121,6 +123,7 @@ export function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnaps
         timelineDPS: charBuild.timelineDPS,
         teamWeaponCategories: charBuild.teamWeaponCategories,
         extraMastery: charBuild.extraMastery,
+        dotSettings: { ...charBuild.dotSettings },
     }
 }
 
@@ -160,6 +163,7 @@ export function createBuildFromSnapshot(snapshot: CharBuildWorkerSnapshot) {
         timelineDPS: snapshot.timelineDPS,
         teamWeaponCategories: snapshot.teamWeaponCategories,
         extraMastery: snapshot.extraMastery,
+        dotSettings: snapshot.dotSettings,
     }
     return new CharBuild(options)
 }

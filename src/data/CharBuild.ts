@@ -65,6 +65,10 @@ export interface CharAttr {
     转属逆?: number
     // 充盈威力（角色属性）：Σ 各武器触发率溢出 100% 的部分 × 该武器充盈转化（由 calculateWeaponAttributes 汇总）
     充盈威力: number
+    /** 技能触发（角色属性，0 起始）：技能伤害 DOT 的触发值，由 MOD 词条提供（如 充盈·巧力） */
+    技能触发: number
+    /** 异常数量（角色属性，去重后元素种数）：武器伤害附加元素种数的来源（如 菲娜Q 追加 4；非光暗角色自身属性与附加异常重叠 1 种 → n=4，光暗角色 n=5） */
+    异常数量: number
 }
 
 export interface WeaponAttr {
@@ -100,6 +104,66 @@ export interface WeaponAttr {
     召唤物攻击速度转化: number
     /** 召唤物范围转化（武器属性）：角色技能范围按该比例转化为召唤物范围，0 开始 */
     召唤物范围转化: number
+}
+
+/** DOT 来源类型 */
+export type DotSourceType = "skill" | "melee" | "ranged" | "skillweapon"
+
+/** DOT 频率设置：每种来源每秒造成伤害的次数（0 表示不触发） */
+export interface DotFrequencySettings {
+    /** 技能DOT每秒次数 */
+    skill: number
+    /** 近战武器DOT每秒次数 */
+    melee: number
+    /** 远程武器DOT每秒次数 */
+    ranged: number
+    /** 同律武器DOT每秒次数 */
+    skillweapon: number
+}
+
+/** DOT 频率设置的默认值（全部关闭） */
+export const defaultDotFrequencySettings: DotFrequencySettings = { skill: 0, melee: 0, ranged: 0, skillweapon: 0 }
+
+/** 单个 DOT 来源的配置与频率分解 */
+export interface DotSourceConfig {
+    /** 来源类型 */
+    type: DotSourceType
+    /** 展示名称（武器来源为武器名称） */
+    label: string
+    /** 触发值：技能读取 技能触发 字段；武器读取 min(武器触发, 1) */
+    trigger: number
+    /** 触发为 0 时隐藏滑块（防止除零） */
+    hidden: boolean
+    /** 上限 = 1/(0.4×触发) */
+    cap: number
+    /** 用户输入频率（每秒次数，已钳制到上限内） */
+    freq: number
+    /** 其余属性元素种数（仅武器来源；技能固定 1 且不参与其余属性） */
+    otherElementCount: number
+    /** 武器追加伤害是否大于 0（异常数量=1 且 追加伤害>0 时频率翻倍） */
+    hasAdditionalDamage: boolean
+    /** 频率是否翻倍（异常数量=1 且 追加伤害>0） */
+    doubled: boolean
+    /** 翻倍并钳制到上限后的有效频率 */
+    effectiveFreq: number
+    /** 角色自身属性 DOT 频率贡献（共享上限内，技能→近战→远程 依次填充） */
+    ownFreq: number
+    /** 其余属性 DOT 频率贡献（武器有效频率 × 元素种数） */
+    otherFreq: number
+}
+
+/** DOT 频率计算结果 */
+export interface DotFrequencyResult {
+    /** 角色自身属性 DOT 共享上限（各来源上限最大值；全部隐藏时为 0） */
+    cap: number
+    /** 角色自身属性 DOT 频率 */
+    ownFreq: number
+    /** 其余属性 DOT 频率总和 */
+    otherFreq: number
+    /** 总频率 = 角色自身属性 + 其余属性 */
+    totalFreq: number
+    /** 各来源分解 */
+    sources: DotSourceConfig[]
 }
 
 // 武器攻击细分类型 → 字段 tag 映射：伤害字段 tag 由数据侧标注（如 ["近战","武器","蓄力攻击"]），
@@ -166,6 +230,8 @@ const characterBonusAttributes = [
     "转属克",
     "转属逆",
     "充盈威力",
+    "技能触发",
+    "异常数量",
 ] as const
 
 const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((attribute, index) => [attribute, index])) as Record<
@@ -255,6 +321,8 @@ export interface CharBuildOptions {
     teamWeaponCategories?: string[]
     /** 额外精通武器类型（如 "长柄"），未解锁时为空字符串 */
     extraMastery?: string
+    /** DOT 频率设置（每种来源每秒造成伤害的次数） */
+    dotSettings?: Partial<DotFrequencySettings>
 }
 
 export class CharBuild {
@@ -471,6 +539,8 @@ export class CharBuild {
     public timelineDPS = false
     /** 额外精通武器类型（如 "长柄"），未解锁时为空字符串 */
     public extraMastery = ""
+    /** DOT 频率设置（每种来源每秒造成伤害的次数） */
+    public dotSettings: DotFrequencySettings = { ...defaultDotFrequencySettings }
 
     get baseWithTarget() {
         return `${this.baseName}::${this.targetFunction}`
@@ -531,6 +601,7 @@ export class CharBuild {
         this.timeline = options.timeline
         this.timelineDPS = options.timelineDPS || false
         this.teamWeaponCategories = options.teamWeaponCategories || []
+        this.dotSettings = { ...defaultDotFrequencySettings, ...(options.dotSettings || {}) }
     }
 
     /**
@@ -688,6 +759,10 @@ export class CharBuild {
         const convertReverse = bonuses[characterBonusIndex.转属逆]
         // 角色 MOD 的充盈威力词条加成（如 56201 充盈·巧击），经公共加成向量汇总
         const fullnessBonus = bonuses[characterBonusIndex.充盈威力]
+        // 技能触发（0 起始）：技能伤害 DOT 触发值（如 充盈·巧力 的 54%/100% 概率）
+        const skillTrigger = bonuses[characterBonusIndex.技能触发]
+        // 异常数量（0 起始增量）：武器伤害附加元素种数，如 菲娜Q 追加 4（去重见 attrs.异常数量 赋值处）
+        const anomalyCountBonus = bonuses[characterBonusIndex.异常数量]
 
         // 应用MOD属性加成
         const modAttributeBonus = this.getTotalBonus(`${this.char.属性}MOD属性`)
@@ -789,6 +864,11 @@ export class CharBuild {
             转属逆: convertReverse,
             // 充盈威力为角色属性：角色 MOD 充盈威力加成（向量汇总），武器转化部分由 calculateWeaponAttributes 累加
             充盈威力: fullnessBonus,
+            技能触发: skillTrigger,
+            // 异常数量（去重后元素种数）：基础 1 为角色自身属性；
+            // 附加异常（如 菲娜Q 追加 4）为水/火/雷/风四种非光暗元素：光/暗角色不重叠 → n = 1 + 追加；
+            // 非光暗角色自身属性与其中一种重叠 → n = 追加（至少 1，如 黎瑟雷 + 菲娜Q → 4）
+            异常数量: ["光", "暗"].includes(this.char.属性) ? 1 + anomalyCountBonus : Math.max(1, anomalyCountBonus),
         }
         // 应用MOD条件 如果有变化就再计算一次
         const condMods = this.charModsWithAura.filter(mod => mod.生效?.条件)
@@ -1812,6 +1892,172 @@ export class CharBuild {
     }
 
     /**
+     * 计算 DOT 各来源的触发、上限与频率分解。
+     * 规则：
+     * - 技能来源触发读取 技能触发 字段（0 起始，默认 0）；武器来源触发读取 min(武器触发, 1)。
+     * - 各来源上限 = 1 / (0.4 × 触发)，触发为 0 时隐藏滑块（防止除零）。
+     * - 角色自身属性 DOT 频率由 技能→近战→远程 依次填充，共享上限（各来源上限最大值）：
+     *   技能造成角色自身属性 DOT 频率达到上限时，武器伤害的角色自身属性 DOT 部分视为 0。
+     * - 其余属性 DOT 频率 = Σ 武器有效频率 × 元素种数（n-1，n 为去重后异常数量：非光暗如 黎瑟雷+菲娜Q → n=4、光暗 → n=5；异常数量 = 1 时无其余属性）。
+     * - 异常数量 = 1 且 武器追加伤害 > 0 时武器频率翻倍（不超过该来源上限）。
+     * @param inputattrs 预计算的武器属性（可选，复用角色属性部分）
+     * @returns 各来源配置与频率分解
+     */
+    public calculateDotFrequencies(inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>): DotFrequencyResult {
+        const attrs = inputattrs || this.calculateWeaponAttributes()
+        const meleeAttrs = this.calculateWeaponAttributes(this.meleeWeapon)
+        const rangedAttrs = this.calculateWeaponAttributes(this.rangedWeapon)
+        const skillWeaponAttrs = this.skillWeapon ? this.calculateWeaponAttributes(this.skillWeapon) : undefined
+        // 异常数量属性（去重后元素种数）：如 黎瑟雷(非光暗)+菲娜Q → 4、光暗角色 → 5；无 buff 时 = 1
+        const anomalyCount = Math.max(1, attrs.异常数量 || 1)
+        /**
+         * 计算武器来源的其余属性元素种数。
+         * 规则：其余属性数量 = n-1（n 为去重后异常数量）；异常数量 = 1 时无其余属性（n-1 = 0）。
+         * 去重已在属性层完成：非光暗角色自身属性与附加异常重叠 1 种 → n=4（其余 3 种）；光暗角色不重叠 → n=5（其余 4 种）。
+         * @returns 其余属性元素种数
+         */
+        const otherElementCount = () => {
+            if (anomalyCount <= 1) return 0
+            return anomalyCount - 1
+        }
+        /**
+         * 构建单个 DOT 来源配置（含上限、有效频率与翻倍标记）。
+         * @param type 来源类型
+         * @param label 展示名称
+         * @param trigger 触发值
+         * @param freqSetting 用户输入频率
+         * @param elemCount 其余属性元素种数
+         * @param hasAdditionalDamage 是否具备追加伤害
+         * @returns 来源配置
+         */
+        const buildSource = (
+            type: DotSourceType,
+            label: string,
+            trigger: number,
+            freqSetting: number,
+            elemCount: number,
+            hasAdditionalDamage: boolean
+        ): DotSourceConfig => {
+            const hidden = trigger <= 0
+            const cap = hidden ? 0 : 1 / (0.4 * trigger)
+            const freq = Math.max(0, Math.min(cap, freqSetting || 0))
+            // 异常数量=1 且 追加伤害>0 时频率翻倍（不能超过该来源上限）
+            const doubled = !hidden && anomalyCount === 1 && hasAdditionalDamage
+            const effectiveFreq = Math.min(cap, freq * (doubled ? 2 : 1))
+            return {
+                type,
+                label,
+                trigger,
+                hidden,
+                cap,
+                freq,
+                otherElementCount: elemCount,
+                hasAdditionalDamage,
+                doubled,
+                effectiveFreq,
+                ownFreq: 0,
+                otherFreq: 0,
+            }
+        }
+        const skillTrigger = Math.max(0, attrs.技能触发 || 0)
+        const meleeTrigger = Math.min(1, Math.max(0, meleeAttrs.weapon?.触发 || 0))
+        const rangedTrigger = Math.min(1, Math.max(0, rangedAttrs.weapon?.触发 || 0))
+        // 同律武器触发：读取同律武器自身触发（未装备同律武器时为 0，滑块隐藏）
+        const skillWeaponTrigger = Math.min(1, Math.max(0, skillWeaponAttrs?.weapon?.触发 || 0))
+        const meleeAdditional = (meleeAttrs.weapon?.追加伤害 || 0) > 0
+        const rangedAdditional = (rangedAttrs.weapon?.追加伤害 || 0) > 0
+        const skillWeaponAdditional = (skillWeaponAttrs?.weapon?.追加伤害 || 0) > 0
+        const sources: DotSourceConfig[] = [
+            buildSource("skill", "技能", skillTrigger, this.dotSettings.skill, 1, false),
+            buildSource("melee", this.meleeWeapon.名称, meleeTrigger, this.dotSettings.melee, otherElementCount(), meleeAdditional),
+            buildSource("ranged", this.rangedWeapon.名称, rangedTrigger, this.dotSettings.ranged, otherElementCount(), rangedAdditional),
+            buildSource(
+                "skillweapon",
+                this.skillWeapon?.名称 || "同律",
+                skillWeaponTrigger,
+                this.dotSettings.skillweapon,
+                otherElementCount(),
+                skillWeaponAdditional
+            ),
+        ]
+        // 角色自身属性 DOT 共享上限 = 各来源上限最大值；技能→近战→远程 依次填充
+        const cap = sources.reduce((max, source) => Math.max(max, source.hidden ? 0 : source.cap), 0)
+        let remaining = cap
+        for (const source of sources) {
+            source.ownFreq = Math.min(source.effectiveFreq, remaining)
+            remaining -= source.ownFreq
+        }
+        // 其余属性 DOT：仅武器来源，技能来源不产生其余属性
+        for (const source of sources) {
+            source.otherFreq = source.type === "skill" ? 0 : source.effectiveFreq * source.otherElementCount
+        }
+        const ownFreq = sources.reduce((sum, source) => sum + source.ownFreq, 0)
+        const otherFreq = sources.reduce((sum, source) => sum + source.otherFreq, 0)
+        return { cap, ownFreq, otherFreq, totalFreq: ownFreq + otherFreq, sources }
+    }
+
+    /**
+     * 按命名空间拆分 DOT 频率为「角色自身属性部分」与「其余属性部分」。
+     * @param namespace 命名空间：空/undefined 全部；"角色" 技能分量；"melee"/"近战" 近战分量；"ranged"/"远程" 远程分量；"skillweapon"/"同律" 同律武器分量
+     * @param freqs 频率分解结果
+     * @returns 角色自身属性频率与其余属性频率
+     */
+    private getDotNamespaceFrequency(namespace: string | undefined, freqs: DotFrequencyResult): { ownFreq: number; otherFreq: number } {
+        if (!namespace) return { ownFreq: freqs.ownFreq, otherFreq: freqs.otherFreq }
+        if (namespace === "角色") {
+            return { ownFreq: freqs.sources.find(source => source.type === "skill")?.ownFreq || 0, otherFreq: 0 }
+        }
+        const source = freqs.sources.find(
+            source =>
+                (source.type === "melee" && (namespace === "melee" || namespace === "近战")) ||
+                (source.type === "ranged" && (namespace === "ranged" || namespace === "远程")) ||
+                (source.type === "skillweapon" && (namespace === "skillweapon" || namespace === "同律"))
+        )
+        return source ? { ownFreq: source.ownFreq, otherFreq: source.otherFreq } : { ownFreq: 0, otherFreq: 0 }
+    }
+
+    /**
+     * 计算其余属性 DOT 的抗性反转因子（怪物抗性不为 0 时生效，等同转属克/转属逆的翻转结算）：
+     * - 负抗（如 -4）：全部其余属性按翻转抗性 0.5（因子 0.5，等同转属逆整体效果）。
+     * - 正抗（如 0.5）：其中一种其余属性做 -4（因子 5），其余 n-1 种保持原抗性。
+     * - 0 抗：不反转，按正常抗性区。
+     * 返回值为「每单位其余属性频率」的等效因子：Σ各属性因子 / 其余属性种数。
+     * @param attrs 属性
+     * @param freqs 频率分解结果
+     * @returns 其余属性抗性反转等效因子
+     */
+    private getOtherDotResistanceFactor(attrs: CharAttr, freqs: DotFrequencyResult): number {
+        // 其余属性种数取武器来源（技能来源的 otherElementCount 为占位 1，排除）
+        const otherCount = Math.max(...freqs.sources.filter(source => source.type !== "skill").map(source => source.otherElementCount), 0)
+        const normal = Math.max(0, this.getResistanceFactor(attrs))
+        const r = this.enemyResistance
+        if (r === 0 || otherCount <= 0) return normal
+        if (r < 0) return Math.max(0, 1 - 0.5)
+        // 正抗：其中一种属性做 -4（因子 5），其余 otherCount-1 种保持原抗性
+        return (Math.max(0, 1 - -4) + normal * (otherCount - 1)) / otherCount
+    }
+
+    /**
+     * 计算每秒 DOT 伤害。
+     * 公式：角色::攻击! × 0.2 × 6 × 3 × (1 + 充盈威力) × (角色自身属性频率 × 正常抗性区 + 其余属性频率 × 反转抗性区)
+     * 角色自身属性部分按正常抗性区（含转属克/转属逆）；其余属性部分按抗性反转区（怪物抗性不为 0 时：负抗 → 0.5，正抗 → 其中一种 -4）。
+     * 抗性区含属性穿透。
+     * @param namespace 命名空间：空/undefined 全部来源；"角色" 技能分量；"melee"/"近战" 近战分量；"ranged"/"远程" 远程分量；"skillweapon"/"同律" 同律武器分量
+     * @param inputattrs 预计算的武器属性（可选，复用角色属性部分）
+     * @returns 每秒 DOT 伤害
+     */
+    public calculateDotDamage(namespace?: string, inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>): number {
+        const freqs = this.calculateDotFrequencies(inputattrs)
+        const attrs = inputattrs || this.calculateWeaponAttributes()
+        const { ownFreq, otherFreq } = this.getDotNamespaceFrequency(namespace, freqs)
+        // 抗性区含属性穿透：与技能伤害结算一致（转属克/转属逆 经 getResistanceFactor 改变敌人抗性因子，属性穿透整体相乘）
+        const penetration = 1 + (attrs.属性穿透 || 0)
+        const ownZone = Math.max(0, this.getResistanceFactor(attrs) * penetration)
+        const otherZone = this.getOtherDotResistanceFactor(attrs, freqs) * penetration
+        return attrs.攻击 * 0.2 * 6 * 3 * (1 + (attrs.充盈威力 || 0)) * (ownFreq * ownZone + otherFreq * otherZone)
+    }
+
+    /**
      * 计算随机伤害 (immutable)
      */
     public calculateRandomDamage(baseWithTarget: string, enemy?: DynamicMonster) {
@@ -1963,6 +2209,8 @@ export class CharBuild {
                         const fieldName = node.name
                         if (knownIdentifiers?.has(fieldName)) break
                         if (["[攻击]", "[防御]", "[生命]", "[近战]", "[远程]", "[同律]"].includes(fieldName)) break
+                        // DOT伤害 特殊标识符：支持 角色::DOT伤害 / melee::DOT伤害 / 近战::DOT伤害 / 远程::DOT伤害 等命名空间
+                        if (fieldName === "DOT伤害") break
                         if (!node.namespace && !node.forceAttr && customVariableNames.has(fieldName)) break
                         // ! 后缀强制按属性解析：技能字段不参与匹配
                         const isSkillField = node.forceAttr ? undefined : getSkillAttr(fieldName, node.namespace)
@@ -2512,6 +2760,11 @@ export class CharBuild {
             forceAttr = false,
             currentScope?: Map<string, number>
         ) => {
+            // DOT伤害 特殊标识符：无命名空间为全部来源，加命名空间只计算该命名空间内的 DOT 伤害
+            // （如 角色::DOT伤害 技能分量 / melee::DOT伤害 近战分量 / ranged::DOT伤害 远程分量）
+            if (fieldName === "DOT伤害") {
+                return this.calculateDotDamage(ns, attrs)
+            }
             if (!ns && !forceAttr && currentScope?.has(fieldName)) return currentScope.get(fieldName)!
             if (!forceAttr && !ns) {
                 const customValue = evaluateCustomVariable(fieldName)
@@ -3257,6 +3510,7 @@ export class CharBuild {
             timelineDPS: this.timelineDPS,
             teamWeaponCategories: [...this.teamWeaponCategories],
             extraMastery: this.extraMastery,
+            dotSettings: { ...this.dotSettings },
         })
         return cloned
     }

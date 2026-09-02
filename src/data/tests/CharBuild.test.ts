@@ -2069,6 +2069,7 @@ describe("CharBuild类测试", () => {
                 effectConfig: {} as Record<string, number>,
                 actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
                 extraMastery: "",
+                dotSettings: { skill: 0, melee: 0, ranged: 0, skillweapon: 0 },
             }
             const suyiBuild = createCharBuildFromSettings(1504, suyiSettings)
             const suyiResult = suyiBuild.autoBuild({
@@ -2340,6 +2341,7 @@ describe("CharBuild类测试", () => {
                 effectConfig: {},
                 actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
                 extraMastery: "",
+                dotSettings: { skill: 0, melee: 0, ranged: 0, skillweapon: 0 },
             })
             const cloned = build.clone()
             expect(build.calculate()).toBe(cloned.calculate())

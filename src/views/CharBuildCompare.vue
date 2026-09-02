@@ -262,6 +262,7 @@ const baseCharBuilds = computed(() => {
             targetFunction: settings.targetFunction,
             timeline: getTimelineByName(settings.baseName),
             teamWeapons: [settings.team1Weapon, settings.team2Weapon],
+            dotSettings: settings.dotSettings,
         })
     })
 })

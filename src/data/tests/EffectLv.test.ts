@@ -41,6 +41,7 @@ function baseSettings(overrides: Record<string, unknown> = {}) {
         effectConfig: {} as Record<string, number>,
         actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
         extraMastery: "",
+        dotSettings: { skill: 0, melee: 0, ranged: 0, skillweapon: 0 },
         ...overrides,
     }
 }

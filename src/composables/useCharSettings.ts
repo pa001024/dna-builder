@@ -43,6 +43,18 @@ export interface InlineActions {
     bgs: [string, number][][]
 }
 
+/** DOT 频率设置：每种来源每秒造成伤害的次数（与 CharBuild.DotFrequencySettings 结构一致） */
+export interface DotFrequencySettings {
+    /** 技能DOT每秒次数 */
+    skill: number
+    /** 近战武器DOT每秒次数 */
+    melee: number
+    /** 远程武器DOT每秒次数 */
+    ranged: number
+    /** 同律武器DOT每秒次数 */
+    skillweapon: number
+}
+
 /**
  * 创建一份新的角色配置默认值，避免数组和对象在多个角色之间共享引用。
  * 传入角色专武时，默认武器直接装备该专武（无专武则回退通用默认武器）。
@@ -87,6 +99,13 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
         useGlobal: false,
         /** 构筑本地特效等级配置（key: `m:<modId>` / `w:<weaponId>`，缺省为最大） */
         effectConfig: {} as Record<string, number>,
+        /** DOT 频率设置（技能/近战/远程/同律 每秒造成伤害的次数，0 表示不触发） */
+        dotSettings: {
+            skill: 0,
+            melee: 0,
+            ranged: 0,
+            skillweapon: 0,
+        } as DotFrequencySettings,
         actions: {
             enable: false,
             i: [],

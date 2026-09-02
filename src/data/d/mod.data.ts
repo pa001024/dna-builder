@@ -9522,6 +9522,15 @@ const p = [
         id: 510101,
         限定: 5101,
     },
+    // 充盈·巧力：技能伤害 DOT 触发值（紫 54% / 金 100%），供 DOT 计算读取技能触发字段
+    {
+        id: 41317,
+        技能触发: 0.54,
+    },
+    {
+        id: 51317,
+        技能触发: 1,
+    },
 ] satisfies Partial<Mod>[]
 
 const idmap = new Map(p.map(item => [item.id, item]))

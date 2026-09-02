@@ -12,7 +12,7 @@ const props = withDefaults(
         includeKeys?: string[]
     }>(),
     {
-        excludeKeys: () => ["召唤物攻击速度", "召唤物范围", "召唤物属性继承比例"],
+        excludeKeys: () => ["召唤物攻击速度", "召唤物范围", "召唤物属性继承比例", "技能触发", "异常数量"],
     }
 )
 const charIdRef = computed(() => props.charBuild?.char?.id || 0)
