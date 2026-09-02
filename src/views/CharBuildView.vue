@@ -352,7 +352,7 @@ const charBuild = computed(() => {
             customVariables: charSettings.value.customVariables,
             timeline: charSettings.value.actions.enable ? getInlineActions() : getTimelineByName(charSettings.value.baseName),
             teamWeapons: [charSettings.value.team1Weapon, charSettings.value.team2Weapon],
-            extraMastery: charSettings.value.extraMastery,
+            extraMastery: char.额外精通?.includes(charSettings.value.extraMastery) ? charSettings.value.extraMastery : "",
         })
         return b
     } catch {
@@ -1148,40 +1148,55 @@ function getSkillFieldNamespace(skillName: string): string {
 
 //#region 额外精通武器
 const extraMasteryModalShow = ref(false)
+const pendingExtraMastery = ref("")
 
-/**
- * 可选的额外精通武器类型：排除角色自带精通（精通「全部类型」的角色无额外精通可选）。
- */
+/** 可选的额外精通武器类型：仅匹配角色「额外精通」字段。 */
 const extraMasteryOptions = computed(() => {
     dataPackTick.value
-    const innate = new Set(charBuild.value.char.精通 || [])
-    if (innate.has("全部类型")) return []
-    return charExtraExcelWeapon.filter(item => !innate.has(item.名称))
+    return charExtraExcelWeapon.filter(item => charBuild.value.char.额外精通?.includes(item.名称))
 })
 
 /**
  * 当前已选择的额外精通武器条目。
  */
-const selectedExtraMastery = computed(() => charExtraExcelWeapon.find(item => item.名称 === charSettings.value.extraMastery) || null)
+const selectedExtraMastery = computed(() => extraMasteryOptions.value.find(item => item.名称 === charSettings.value.extraMastery) || null)
+
+/** 当前弹窗临时选择的额外精通武器条目。 */
+const pendingExtraMasteryItem = computed(() => extraMasteryOptions.value.find(item => item.名称 === pendingExtraMastery.value) || null)
+
+/** 打开额外精通弹窗并初始化临时选择。 */
+function openExtraMasteryModal() {
+    pendingExtraMastery.value = selectedExtraMastery.value?.名称 || ""
+    extraMasteryModalShow.value = true
+}
 
 /**
- * 选择额外精通武器类型并刷新构筑。
+ * 选择额外精通武器类型，仅更新弹窗内的临时选择。
  * @param type 武器类型中文名
  * @returns void
  */
 function selectExtraMastery(type: string) {
-    charSettings.value.extraMastery = type
+    pendingExtraMastery.value = type
+}
+
+/**
+ * 清除弹窗内临时选择，提交后才会更新构筑。
+ * @returns void
+ */
+function clearExtraMastery() {
+    pendingExtraMastery.value = ""
+}
+
+/** 确认弹窗内的额外精通选择并刷新构筑。 */
+function confirmExtraMastery() {
+    charSettings.value.extraMastery = pendingExtraMastery.value
     extraMasteryModalShow.value = false
     updateCharBuild()
 }
 
-/**
- * 清除额外精通武器类型并刷新构筑。
- * @returns void
- */
-function clearExtraMastery() {
-    charSettings.value.extraMastery = ""
-    updateCharBuild()
+/** 关闭额外精通弹窗并丢弃临时选择。 */
+function closeExtraMasteryModal() {
+    extraMasteryModalShow.value = false
 }
 
 /**
@@ -1525,7 +1540,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     type="button"
                     class="flex flex-col items-center gap-1.5 rounded-xs border p-2.5 cursor-pointer transition-colors duration-150 active:scale-[0.97]"
                     :class="
-                        charSettings.extraMastery === item.名称
+                        pendingExtraMastery === item.名称
                             ? 'border-primary bg-primary/10 text-primary shadow-sm'
                             : 'border-base-content/20 text-base-content/70 hover:border-primary/60 hover:text-primary'
                     "
@@ -1535,17 +1550,17 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <span class="text-xs">{{ $t(item.名称) }}</span>
                 </button>
             </div>
-            <div v-if="selectedExtraMastery" class="mt-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
+            <div v-if="pendingExtraMasteryItem" class="mt-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
                 <div class="flex items-center justify-between gap-2 mb-1">
-                    <div class="text-sm font-semibold">{{ $t(selectedExtraMastery.名称) }}</div>
+                    <div class="text-sm font-semibold">{{ $t(pendingExtraMasteryItem.名称) }}</div>
                     <div class="shrink-0 font-mono text-[10px] tracking-[0.2em] text-base-content/40 uppercase">
-                        {{ selectedExtraMastery.id }}
+                        {{ pendingExtraMasteryItem.id }}
                     </div>
                 </div>
                 <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t("UI_Armory_ExtraExcelResource") }}</div>
                 <div class="grid gap-1.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
                     <ResourceCostItem
-                        v-for="[resourceId, count] in Object.entries(selectedExtraMastery.消耗)"
+                        v-for="[resourceId, count] in Object.entries(pendingExtraMasteryItem.消耗)"
                         :key="resourceId"
                         :name="getExtraMasteryResourceName(Number(resourceId))"
                         :value="count"
@@ -1553,17 +1568,20 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 </div>
             </div>
             <div class="mt-4 flex justify-between gap-2">
-                <button v-if="charSettings.extraMastery" type="button" class="btn btn-sm btn-error btn-outline" @click="clearExtraMastery">
+                <button v-if="pendingExtraMastery" type="button" class="btn btn-sm btn-error btn-outline" @click="clearExtraMastery">
                     <Icon icon="ri:delete-bin-line" class="size-4" />
                     {{ $t("char-build.extra_mastery_clear") }}
                 </button>
                 <div class="ml-auto" />
-                <button type="button" class="btn btn-sm" @click="extraMasteryModalShow = false">
+                <button type="button" class="btn btn-sm" @click="closeExtraMasteryModal">
                     {{ $t("取消") }}
+                </button>
+                <button type="button" class="btn btn-sm btn-primary" @click="confirmExtraMastery">
+                    {{ $t("确定") }}
                 </button>
             </div>
         </div>
-        <div class="modal-backdrop" @click="extraMasteryModalShow = false" />
+        <div class="modal-backdrop" @click="closeExtraMasteryModal" />
     </dialog>
 
     <!-- 配装分享弹窗 -->
@@ -1820,7 +1838,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             ? 'border-primary/60 text-primary hover:border-primary hover:shadow-lg hover:shadow-primary/40'
                                             : 'border-base-100 text-base-content/50 hover:border-primary/60 hover:text-primary'
                                     "
-                                    @click="extraMasteryModalShow = true"
+                                    @click="openExtraMasteryModal"
                                 >
                                     <img
                                         v-if="selectedExtraMastery"

@@ -11,17 +11,9 @@ const props = defineProps<{
 /** 当前选中的额外精通武器类型 */
 const activeType = ref<string>("")
 
-/**
- * 额外精通武器解锁：展示角色自带精通之外的全部可选武器类型。
- * 与角色档案「精通」字段的武器类型中文名对齐，仅排除角色已自带的精通；
- * 精通「全部类型」的角色无额外精通可选。
- */
+/** 额外精通武器解锁：仅展示角色「额外精通」字段指定的武器类型。 */
 const unlockList = computed<CharExtraExcelWeapon[]>(() => {
-    if (props.char.精通.includes("全部类型")) {
-        return []
-    }
-    const innateNames = new Set(props.char.精通)
-    return charExtraExcelWeapon.filter(item => !innateNames.has(item.名称))
+    return charExtraExcelWeapon.filter(item => props.char.额外精通?.includes(item.名称))
 })
 
 const selectedItem = computed<CharExtraExcelWeapon | null>(() => {

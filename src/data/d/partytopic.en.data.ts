@@ -11875,14 +11875,14 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80270307,
                 content:
-                    "Have you ridden the spinning teacups yet? When you were little, Victor never let you ride them alone. Too dangerous, {性别2：he丨she} would say.",
+                    "Have you ridden the spinning teacups yet? When you were little, Victor never let you ride them alone. Too dangerous, {性别2：he|she} would say.",
                 npc: 790093,
                 next: 80270308,
             },
             {
                 id: 80270308,
                 content:
-                    "{性别2：He丨She} would check the whole ride over and over, and only let you on once the safety belt was fastened just right.",
+                    "{性别2：He|She} would check the whole ride over and over, and only let you on once the safety belt was fastened just right.",
                 npc: 790093,
                 next: 80270309,
             },
@@ -11908,7 +11908,7 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80270312,
                 content:
-                    "Oh, right. Victor said {性别2：he丨she} came back this time for a mission. So once it's over... could you let {性别2：him丨her} go back to the Legion?",
+                    "Oh, right. Victor said {性别2：he|she} came back this time for a mission. So once it's over... could you let {性别2：him|her} go back to the Legion?",
                 npc: 790092,
                 next: 80270313,
             },
@@ -11928,7 +11928,7 @@ export const partyTopicData_en: PartyTopic[] = [
             {
                 id: 80270315,
                 content:
-                    "Victor should never have gone to the Legion in the first place. {性别2：He丨She} belongs here, in our Paradise. This is the only place {性别2：he丨she} can be happy.",
+                    "Victor should never have gone to the Legion in the first place. {性别2：He|She} belongs here, in our Paradise. This is the only place {性别2：he|she} can be happy.",
                 npc: 790093,
                 next: 80270316,
             },

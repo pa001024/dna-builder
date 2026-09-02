@@ -49619,8 +49619,8 @@ export const questData_kr: QuestStory[] = [
                     {
                         id: "1780315440322308",
                         type: "TalkNode",
-                        name: "【Ex02_FixSimple_01】",
-                        next: ["17804009481207050409", "17851555172566669159"],
+                        name: "【Ex02_FixSimple_01】上半",
+                        next: ["17878172730435714"],
                         dialogues: [
                             {
                                 id: 11100001,
@@ -49676,6 +49676,12 @@ export const questData_kr: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17878172730435714",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_01】下半",
+                        next: ["17804009481207050409", "17851555172566669159"],
                     },
                     {
                         id: "17804009481207050409",
@@ -57951,7 +57957,7 @@ export const questData_kr: QuestStory[] = [
             },
             {
                 id: 11022102,
-                name: "调查山林",
+                name: "숲속을 조사하기",
                 desc: "오늘은 펄시와 함께 골짜기의 남은 지역들을 조사해야 한다. 우선 출렁다리를 건너, 맞은편에 있는 숲부터 살펴보자.",
                 nodes: [
                     {

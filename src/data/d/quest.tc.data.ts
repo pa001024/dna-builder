@@ -48641,8 +48641,8 @@ export const questData_tc: QuestStory[] = [
                     {
                         id: "1780315440322308",
                         type: "TalkNode",
-                        name: "【Ex02_FixSimple_01】",
-                        next: ["17804009481207050409", "17851555172566669159"],
+                        name: "【Ex02_FixSimple_01】上半",
+                        next: ["17878172730435714"],
                         dialogues: [
                             {
                                 id: 11100001,
@@ -48697,6 +48697,12 @@ export const questData_tc: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17878172730435714",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_01】下半",
+                        next: ["17804009481207050409", "17851555172566669159"],
                     },
                     {
                         id: "17804009481207050409",
@@ -56796,7 +56802,7 @@ export const questData_tc: QuestStory[] = [
             },
             {
                 id: 11022102,
-                name: "调查山林",
+                name: "調查山林",
                 desc: "今天需要與法露茜調查一下山谷中的剩餘區域，現在先通過吊橋，去吊橋對面的山林看看吧。",
                 nodes: [
                     {

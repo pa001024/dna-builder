@@ -48687,8 +48687,8 @@ export const questData: QuestStory[] = [
                     {
                         id: "1780315440322308",
                         type: "TalkNode",
-                        name: "【Ex02_FixSimple_01】",
-                        next: ["17804009481207050409", "17851555172566669159"],
+                        name: "【Ex02_FixSimple_01】上半",
+                        next: ["17878172730435714"],
                         dialogues: [
                             {
                                 id: 11100001,
@@ -48742,6 +48742,12 @@ export const questData: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17878172730435714",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_01】下半",
+                        next: ["17804009481207050409", "17851555172566669159"],
                     },
                     {
                         id: "17804009481207050409",

@@ -50323,8 +50323,8 @@ export const questData_fr: QuestStory[] = [
                     {
                         id: "1780315440322308",
                         type: "TalkNode",
-                        name: "【Ex02_FixSimple_01】",
-                        next: ["17804009481207050409", "17851555172566669159"],
+                        name: "【Ex02_FixSimple_01】上半",
+                        next: ["17878172730435714"],
                         dialogues: [
                             {
                                 id: 11100001,
@@ -50381,6 +50381,12 @@ export const questData_fr: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17878172730435714",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_01】下半",
+                        next: ["17804009481207050409", "17851555172566669159"],
                     },
                     {
                         id: "17804009481207050409",
@@ -58765,7 +58771,7 @@ export const questData_fr: QuestStory[] = [
             },
             {
                 id: 11022102,
-                name: "调查山林",
+                name: "Explorer les bois",
                 desc: "Aujourd’hui, vous devez enquêter avec Falsi sur les dernières zones encore inexplorées de la vallée. Commencez par traverser le pont-levis et rendez-vous dans la forêt de l’autre côté.",
                 nodes: [
                     {

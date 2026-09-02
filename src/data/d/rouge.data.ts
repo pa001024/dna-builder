@@ -622,7 +622,7 @@ export const rougeLikeBlessings: RougeLikeBlessing[] = [
     {
         id: 112,
         name: "纵横之刃",
-        desc: "近战武器攻击速度提高<Highlight>60.0%</>，攻击范围提高<Highlight>2.25</>。",
+        desc: "近战武器攻击速度提高<Highlight>60.0%</>，攻击范围提高<Highlight>2.2</>。",
         simpleDesc: "近战武器攻击速度与攻击范围提高。",
         blessingGroup: 1,
         rarity: 3,

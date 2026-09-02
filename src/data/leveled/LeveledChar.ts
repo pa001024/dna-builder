@@ -20,6 +20,7 @@ export class LeveledChar {
     名称: string
     属性: string
     精通: string[]
+    额外精通?: string[]
     溯源?: string[]
     同律武器?: SkillWeapon[]
     基础攻击: number
@@ -59,6 +60,7 @@ export class LeveledChar {
         this.名称 = charData.名称
         this.属性 = charData.属性
         this.精通 = charData.精通
+        this.额外精通 = charData.额外精通
         this.溯源 = charData.溯源
         this.基础攻击 = charData.基础攻击
         this.基础生命 = charData.基础生命

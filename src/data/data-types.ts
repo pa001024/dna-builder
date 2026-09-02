@@ -72,6 +72,7 @@ export interface Char {
     韩文CV?: string
     突破?: Record<string, number>[]
     精通: string[]
+    额外精通?: string[]
     标签?: string[]
     基础攻击: number
     基础生命: number

@@ -49982,8 +49982,8 @@ export const questData_en: QuestStory[] = [
                     {
                         id: "1780315440322308",
                         type: "TalkNode",
-                        name: "【Ex02_FixSimple_01】",
-                        next: ["17804009481207050409", "17851555172566669159"],
+                        name: "【Ex02_FixSimple_01】上半",
+                        next: ["17878172730435714"],
                         dialogues: [
                             {
                                 id: 11100001,
@@ -50039,6 +50039,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17878172730435714",
+                        type: "TalkNode",
+                        name: "【Ex02_FixSimple_01】下半",
+                        next: ["17804009481207050409", "17851555172566669159"],
                     },
                     {
                         id: "17804009481207050409",
@@ -55187,7 +55193,7 @@ export const questData_en: QuestStory[] = [
                             },
                             {
                                 id: 11108810,
-                                content: "And these loaves. They look real. But put one in your mouth, and you'll know it isn't food.",
+                                content: "And the bread. It looks real. But put one in your mouth, and you'll know it isn't food.",
                                 voice: "story/1102/111088/1BCF4B24",
                                 npc: 111110,
                                 next: 11108811,
@@ -58319,7 +58325,7 @@ export const questData_en: QuestStory[] = [
             },
             {
                 id: 11022102,
-                name: "调查山林",
+                name: "Investigate the woods",
                 desc: "You and Falsi still need to investigate the rest of the valley today. Cross the drawbridge and search the woods beyond.",
                 nodes: [
                     {
