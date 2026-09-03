@@ -1897,6 +1897,19 @@ describe("CharBuild类测试", () => {
 
     // 自动构筑测试
     describe("自动构筑测试", () => {
+        it("无同律武器角色勾选同律MOD时不应报错", () => {
+            const charBuild = createCharBuild()
+            charBuild.buffs = []
+
+            expect(() =>
+                charBuild.autoBuild({
+                    includeTypes: ["skillMods"],
+                    modOptions: [new LeveledModWithCount(54202, undefined, undefined, 1)],
+                    enableLog: false,
+                })
+            ).not.toThrow()
+        })
+
         it("当初始MOD数量已达上限时不应继续超量添加", () => {
             const charBuild = createCharBuild()
             charBuild.mods = [

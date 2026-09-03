@@ -16,6 +16,19 @@ const autoBuildSetting = useLocalStorage("autobuild.setting", {
     includeMelee: false, // 包含近战武器
     includeRanged: false, // 包含远程武器
 })
+
+/**
+ * 将旧版本保存的同律槽位名迁移为自动构筑核心使用的字段名。
+ * @param types 已保存的MOD类型
+ * @returns 规范化且去重后的MOD类型
+ */
+function normalizeStoredModTypes(types: ModTypeKey[]): ModTypeKey[] {
+    return Array.from(new Set(types.map(type => ((type as string) === "skillWeaponMods" ? "skillMods" : type))))
+}
+
+autoBuildSetting.value.includeTypes = normalizeStoredModTypes(autoBuildSetting.value.includeTypes)
+autoBuildSetting.value.preserveTypes = normalizeStoredModTypes(autoBuildSetting.value.preserveTypes)
+
 const props = defineProps<{
     charBuild: CharBuild
     update?: boolean
@@ -292,7 +305,7 @@ function modCount(key: ModTypeKey): number {
             <div class="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5">
                 <span class="mr-1 shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("autobuild.includeTypes") }}</span>
                 <button
-                    v-for="option in [{ label: $t('角色'), value: 'charMods' }, { label: $t('近战'), value: 'meleeMods' }, { label: $t('远程'), value: 'rangedMods' }, { label: $t('同律'), value: 'skillWeaponMods' }]"
+                    v-for="option in [{ label: $t('角色'), value: 'charMods' }, { label: $t('近战'), value: 'meleeMods' }, { label: $t('远程'), value: 'rangedMods' }, { label: $t('同律'), value: 'skillMods' }]"
                     :key="option.value"
                     type="button"
                     class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
@@ -310,7 +323,7 @@ function modCount(key: ModTypeKey): number {
             <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
                 <span class="mr-1 shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("autobuild.preserveTypes") }}</span>
                 <button
-                    v-for="option in [{ label: $t('角色'), value: 'charMods' }, { label: $t('近战'), value: 'meleeMods' }, { label: $t('远程'), value: 'rangedMods' }, { label: $t('同律'), value: 'skillWeaponMods' }]"
+                    v-for="option in [{ label: $t('角色'), value: 'charMods' }, { label: $t('近战'), value: 'meleeMods' }, { label: $t('远程'), value: 'rangedMods' }, { label: $t('同律'), value: 'skillMods' }]"
                     :key="option.value"
                     type="button"
                     class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"

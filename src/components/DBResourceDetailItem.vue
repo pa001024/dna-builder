@@ -11,6 +11,7 @@ import { getRarityGradientClass } from "@/utils/rarity-utils"
 import {
     collectResourceDungeonSources,
     collectResourceHardbossSources,
+    collectResourcePackSources,
     collectResourceQuestSources,
     collectResourceShopSources,
 } from "@/utils/resource-source"
@@ -23,6 +24,7 @@ const props = defineProps<{
 const draftSources = computed(() => collectResourceDraftSources(props.resource))
 const dungeonSources = computed(() => collectResourceDungeonSources(props.resource))
 const hardbossSources = computed(() => collectResourceHardbossSources(props.resource))
+const packSources = computed(() => collectResourcePackSources(props.resource))
 const questSources = computed(() => collectResourceQuestSources(props.resource))
 const shopSources = computed(() => collectResourceShopSources(props.resource))
 const bookTarget = computed(() => {
@@ -138,6 +140,7 @@ const sourceCounts = computed(
         draftSources.value.length +
         dungeonSources.value.length +
         hardbossSources.value.length +
+        packSources.value.length +
         questSources.value.length +
         shopSources.value.length
 )
@@ -305,6 +308,7 @@ function getResourceIconUrl(icon: string): string {
                 draftSources.length ||
                 dungeonSources.length ||
                 hardbossSources.length ||
+                packSources.length ||
                 questSources.length ||
                 shopSources.length ||
                 resource.source?.length
@@ -315,6 +319,7 @@ function getResourceIconUrl(icon: string): string {
                 <DraftSource :draft-sources="draftSources" />
                 <DungeonSource :dungeon-sources="dungeonSources" />
                 <BossSource :boss-sources="hardbossSources" />
+                <PackSource :pack-sources="packSources" source-title="道具箱" />
                 <QuestSource :quest-sources="questSources" :resource-id="resource.id" />
                 <ShopSource :shop-sources="shopSources" />
                 <MapSource :resource="resource" />

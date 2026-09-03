@@ -6,6 +6,7 @@ import {
     collectModPackSources,
     collectModQuestSources,
     collectResourceHardbossSources,
+    collectResourcePackSources,
     collectResourceQuestSources,
 } from "./resource-source"
 
@@ -52,6 +53,16 @@ describe("resource-source", () => {
         const matchedSource = sources.find(source => source.rewardId === 4000022)
 
         expect(matchedSource?.d).toBe(1)
+    })
+
+    it("应该从道具箱奖励中反查资源来源", () => {
+        const resource = resourceMap.get(226)
+        expect(resource).toBeTruthy()
+
+        const sources = collectResourcePackSources(resource!)
+
+        expect(sources.some(source => source.resourceId === 110038 && source.rewardId === 351010)).toBe(true)
+        expect(sources.some(source => source.resourceId === 110039 && source.rewardId === 351000)).toBe(true)
     })
 
     it("应该从任务奖励组中反查魔之楔来源", () => {

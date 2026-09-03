@@ -2,11 +2,11 @@
 import { computed } from "vue"
 import { resourceMap } from "@/data"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
-import type { ModPackSourceInfo } from "@/utils/resource-source"
+import type { PackSourceInfo } from "@/utils/resource-source"
 import { getRewardDetails } from "@/utils/reward-utils"
 
 const props = defineProps<{
-    packSources: ModPackSourceInfo[]
+    packSources: PackSourceInfo[]
     sourceTitle?: string
 }>()
 

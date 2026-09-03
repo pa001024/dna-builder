@@ -78,7 +78,7 @@ export interface ModCharBreakthroughSourceInfo {
     num?: number
 }
 
-export interface ModPackSourceInfo {
+export interface PackSourceInfo {
     key: string
     resourceId: number
     resourceName: string
@@ -88,6 +88,8 @@ export interface ModPackSourceInfo {
     pp?: number
     times?: number
 }
+
+export type ModPackSourceInfo = PackSourceInfo
 
 /**
  * 扫描梦魇残声奖励表，反查资源对应的来源。
@@ -325,8 +327,8 @@ export function collectModCharBreakthroughSources(modId: number): ModCharBreakth
  * @param modId 魔之楔ID
  * @returns 道具箱来源列表
  */
-export function collectModPackSources(modId: number): ModPackSourceInfo[] {
-    const sources: ModPackSourceInfo[] = []
+export function collectModPackSources(modId: number): PackSourceInfo[] {
+    const sources: PackSourceInfo[] = []
     const sourceKeySet = new Set<string>()
 
     for (const resource of Array.from(resourceMap.values())) {
@@ -357,6 +359,47 @@ export function collectModPackSources(modId: number): ModPackSourceInfo[] {
             resourceIcon: resource.icon,
             resourceRarity: resource.rarity,
             rewardId: resource.pack,
+            pp: matched.pp,
+            times: matched.times,
+        })
+    }
+
+    return sources
+}
+
+/**
+ * 反查资源对应的道具箱来源。
+ * @param resource 资源数据
+ * @returns 道具箱来源列表
+ */
+export function collectResourcePackSources(resource: Resource): PackSourceInfo[] {
+    const sources: PackSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    for (const packResource of resourceMap.values()) {
+        if (packResource.pack === undefined) {
+            continue
+        }
+
+        const reward = getRewardDetails(packResource.pack)
+        const matched = findInRewardTree(reward, resource.id, "Resource")
+        if (!matched) {
+            continue
+        }
+
+        const key = `resource-pack-${packResource.id}-${packResource.pack}-${resource.id}`
+        if (sourceKeySet.has(key)) {
+            continue
+        }
+
+        sourceKeySet.add(key)
+        sources.push({
+            key,
+            resourceId: packResource.id,
+            resourceName: packResource.name,
+            resourceIcon: packResource.icon,
+            resourceRarity: packResource.rarity,
+            rewardId: packResource.pack,
             pp: matched.pp,
             times: matched.times,
         })
