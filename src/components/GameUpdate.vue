@@ -617,10 +617,18 @@ async function resumeCurrentDownload() {
     } else if (action === "pre") {
         await preDownloadAllFiles()
     } else if (action === "hot") {
-        await gameUpdateStore.downloadHotUpdate()
+        await downloadHotUpdateAndRefresh()
     } else if (action === "optional" && activeOptionalSign.value) {
         await downloadOptionalPackTask(activeOptionalSign.value)
     }
+}
+
+/**
+ * 下载热更后重新检查完整包与热更状态，确保主操作按钮显示最终状态。
+ */
+async function downloadHotUpdateAndRefresh() {
+    await gameUpdateStore.downloadHotUpdate()
+    await checkForUpdates()
 }
 
 async function fetchVersionList() {
@@ -1057,7 +1065,7 @@ async function downloadAndApplyFullPackage() {
         await checkForUpdates()
         resetExtractionState()
         if (needHotUpdate.value && hotUpdatePendingVersions.value.length) {
-            await gameUpdateStore.downloadHotUpdate()
+            await downloadHotUpdateAndRefresh()
         }
     } catch (err) {
         resetExtractionState()
@@ -1189,7 +1197,7 @@ async function downloadAllFiles() {
         await checkForUpdates()
         resetExtractionState()
         if (needHotUpdate.value && hotUpdatePendingVersions.value.length) {
-            await gameUpdateStore.downloadHotUpdate()
+            await downloadHotUpdateAndRefresh()
         }
     } catch (err) {
         if (isExtracting.value) {
@@ -1830,7 +1838,7 @@ const launchGame = async () => {
 
                     <button
                         v-else
-                        @click="needUpdate ? downloadAllFiles() : needHotUpdate ? gameUpdateStore.downloadHotUpdate() : launchGame()"
+                        @click="needUpdate ? downloadAllFiles() : needHotUpdate ? downloadHotUpdateAndRefresh() : launchGame()"
                         :disabled="!hasUpdate && !gamePath"
                         class="group relative w-full h-16 overflow-hidden rounded-xs transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:hover:scale-100"
                         :class="
