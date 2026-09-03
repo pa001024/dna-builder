@@ -1551,6 +1551,62 @@ describe("evaluateAST函数测试", () => {
             // 50% 按原抗性（5 倍）+ 50% 等效 0.5（0.5 倍）→ 2.75 倍
             expect(ladyBuild(-4).evaluateAST("E::伤害{转属逆:0.5}", attrs)).toBeCloseTo(base * 2.75, 6)
         })
+
+        // 转物理（转切割/转贯穿/转震荡/转灾厄）对技能伤害同样生效：转换出的分量按对应物理子类结算，
+        // 物理伤害不受敌人元素抗性影响 → 100% 转换后伤害与敌人抗性无关。
+        for (const key of ["转切割", "转贯穿", "转震荡", "转灾厄"] as const) {
+            it(`技能伤害{${key}:1} 100%转物理后不受敌人抗性影响（夫人 E::伤害 0抗/正抗/负抗一致）`, () => {
+                const attrs = ladyBuild(0).calculateAttributes()
+                const base = ladyBuild(0).evaluateAST("E::伤害", attrs)
+                const expr = `E::伤害{${key}:1}`
+                // 0.5 强抗 与 -4 弱抗下均与 0 抗基准一致（不再乘抗性因子 0.5 / 5）
+                expect(ladyBuild(0.5).evaluateAST(expr, attrs)).toBeCloseTo(base, 6)
+                expect(ladyBuild(-4).evaluateAST(expr, attrs)).toBeCloseTo(base, 6)
+            })
+        }
+
+        it("技能伤害部分转物理：{转震荡:0.5} 未转换部分按原抗性、转换部分不受抗性（夫人 E::伤害）", () => {
+            const attrs = ladyBuild(0).calculateAttributes()
+            const base = ladyBuild(0).evaluateAST("E::伤害", attrs)
+            // 0.5 强抗：未转换 0.5×0.5 + 转震荡 0.5×1 = 0.75 倍
+            expect(ladyBuild(0.5).evaluateAST("E::伤害{转震荡:0.5}", attrs)).toBeCloseTo(base * 0.75, 6)
+            // -4 弱抗：未转换 0.5×5 + 转震荡 0.5×1 = 3 倍
+            expect(ladyBuild(-4).evaluateAST("E::伤害{转震荡:0.5}", attrs)).toBeCloseTo(base * 3, 6)
+        })
+
+        it("技能伤害转物理后 物理/元素 访问器按结算类型拆分（夫人 E::伤害）", () => {
+            const attrs = ladyBuild(0).calculateAttributes()
+            const base = ladyBuild(0).evaluateAST("E::伤害", attrs)
+            // 100% 转震荡：物理=合计、元素≈0
+            const total = ladyBuild(0.5).evaluateAST("E::伤害{转震荡:1}", attrs)
+            expect(ladyBuild(0.5).evaluateAST("E::伤害{转震荡:1}.物理", attrs)).toBeCloseTo(total, 6)
+            expect(ladyBuild(0.5).evaluateAST("E::伤害{转震荡:1}.元素", attrs)).toBeCloseTo(0, 6)
+            // 50% 转震荡（0.5 强抗）：物理=0.5×base、元素=0.25×base，合计=0.75×base
+            const phys = ladyBuild(0.5).evaluateAST("E::伤害{转震荡:0.5}.物理", attrs)
+            const elem = ladyBuild(0.5).evaluateAST("E::伤害{转震荡:0.5}.元素", attrs)
+            expect(phys).toBeCloseTo(base * 0.5, 6)
+            expect(elem).toBeCloseTo(base * 0.25, 6)
+            expect(phys + elem).toBeCloseTo(base * 0.75, 6)
+        })
+
+        it("技能伤害 转物理 与 转属克 共享转换池（夫人 E::伤害）", () => {
+            const attrs = ladyBuild(0).calculateAttributes()
+            const base = ladyBuild(0).evaluateAST("E::伤害", attrs)
+            const exprA = "E::伤害{转震荡:1,转属克:1}"
+            const exprB = "E::伤害{转震荡:0.5,转属克:0.5}"
+            // 0.5 强抗：转震荡 0.5×1（不受抗性）+ 属克 0.5×5（翻转抗性 -4）= 3 倍
+            expect(ladyBuild(0.5).evaluateAST(exprA, attrs)).toBeCloseTo(base * 3, 5)
+            // 合计转换比例 >1 时等比重压缩，与各占 0.5 完全等价
+            expect(ladyBuild(0.5).evaluateAST(exprA, attrs)).toBeCloseTo(ladyBuild(0.5).evaluateAST(exprB, attrs), 5)
+        })
+
+        it("技能伤害转物理后吃 物理增伤、不吃 元素增伤（夫人 E::伤害）", () => {
+            const attrs = ladyBuild(0).calculateAttributes()
+            const base = ladyBuild(0).evaluateAST("E::伤害", attrs)
+            // 100% 转震荡：分量按物理结算 → 元素增伤 不放大、物理增伤 全额放大
+            expect(ladyBuild(0.5).evaluateAST("E::伤害{转震荡:1,元素增伤:0.5}", attrs)).toBeCloseTo(base, 6)
+            expect(ladyBuild(0.5).evaluateAST("E::伤害{转震荡:1,物理增伤:0.5}", attrs)).toBeCloseTo(base * 1.5, 6)
+        })
     })
 
     describe("命名空间解析测试", () => {

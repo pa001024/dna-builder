@@ -247,6 +247,9 @@ const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((att
     number
 >
 
+/** 转物理类型关键词：把物理+元素按比例转为对应物理子类（切割/贯穿/震荡/灾厄），按对应物理类型的触发/抗性规则结算 */
+const physicalConvertKeywords = ["转切割", "转贯穿", "转震荡", "转灾厄"] as const
+
 /**
  * 角色加成属性中按平值折叠进基础属性的映射（临时属性专用）：
  * 固定攻击/固定生命 不直接存在于 CharAttr，而是在 calculateAttributes 中平值加算进 攻击/生命；
@@ -1687,36 +1690,74 @@ export class CharBuild {
         baseName = this.baseName,
         fieldName?: string
     ): DamageResult {
-        // 计算各种乘区（转属克/转属逆经 getResistanceFactor 改变敌人抗性因子，属性穿透整体相乘）
-        const resistancePenetration = Math.max(0, this.getResistanceFactor(attrs) * (1 + attrs.属性穿透))
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
         // 召唤物伤害按字段 tag 判断：字段 tag 含「召唤物」（如「[召唤物·战车]技能伤害」）即视为召唤物伤害，不再依赖字段名或技能声明
         const skill = this.allSkills.find(s => s.名称 === baseName)
         const field = fieldName ? skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName)) : undefined
         const isSummonDamage = !!field?.tag?.includes("召唤物")
-        // 技能伤害视为纯元素结算（无物理分量），故吃 元素增伤，不吃 物理增伤
-        const damageIncrease = 1 + attrs.增伤 + attrs.技能伤害 + (isSummonDamage ? attrs.召唤物伤害 : 0) + (attrs.元素增伤 || 0)
+        // 技能伤害默认按纯元素结算（无物理基座），元素分量吃 元素增伤；
+        // 经 转物理（转切割/转贯穿/转震荡/转灾厄）转换出的分量按对应物理子类结算（吃 物理增伤，不受敌人元素抗性影响）
+        const damageIncreaseBase = 1 + attrs.增伤 + attrs.技能伤害 + (isSummonDamage ? attrs.召唤物伤害 : 0)
+        const elementDamageIncrease = attrs.元素增伤 || 0
+        const physicalDamageIncrease = attrs.物理增伤 || 0
         const independentDamageIncrease = 1 + attrs.独立增伤
         // 召唤物独立增伤乘区（0起始增量，1 + 该值 = 仅召唤物伤害结算的倍率）：如「伊薇4溯」将召唤物攻击速度超额部分按比例转化为该乘区
         const summonIndependentDamageMultiplier = isSummonDamage ? 1 + attrs.召唤物独立增伤 : 1
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
 
         const hpMore = boostMultiplier * desperateMultiplier
-        // 计算最终伤害
-        const finalDamage =
-            resistancePenetration *
-            damageIncrease *
-            independentDamageIncrease *
-            summonIndependentDamageMultiplier *
-            imbalanceDamageMultiplier
+        // 属性穿透对所有结算类型整体生效（与武器伤害结算一致）
+        const otherMore =
+            independentDamageIncrease * summonIndependentDamageMultiplier * imbalanceDamageMultiplier * Math.max(0, 1 + attrs.属性穿透)
+        // per-part 有效增伤：元素分量取元素池（元素增伤），转物理 分量取物理池（物理增伤），均与 增伤/技能伤害 同池加算
+        const partDamageIncrease = (p: { settlesElement: boolean }) =>
+            p.settlesElement ? damageIncreaseBase + elementDamageIncrease : damageIncreaseBase + physicalDamageIncrease
 
+        const enemyResistance = this.enemyResistance
+        // 元素抗性因子：元素伤害按 max(0, 1 - 敌人抗性) 结算；物理伤害不受敌人元素抗性影响（因子恒 1）
+        const factor = (r: number) => Math.max(0, 1 - r)
+        // 转属克/转属逆 翻转后的抗性：负抗（弱抗，如 -4）翻转为 0.5、正抗（强抗，如 0.5）翻转为 -4
+        const flippedResistance = enemyResistance > 0 ? -4 : 0.5
+        const flippedFactor = Math.max(0, 1 - flippedResistance)
+        // 转物理（转切割/转贯穿/转震荡/转灾厄）与 转属克/转属逆（按敌人抗性方向取其一）共享同一转换比例池：
+        // 转属克/转属逆 把元素按比例转为属克/属逆元素（按翻转抗性结算）；转物理 把元素按比例转为对应物理子类（不受抗性影响）。
+        // 合计转换比例超过 100% 时等比重压缩（convertScale），不足 100% 时剩余部分按原始元素结算。
+        const activeElementKey: "转属克" | "转属逆" | undefined =
+            enemyResistance > 0 ? "转属克" : enemyResistance < 0 ? "转属逆" : undefined
+        const rawElementConvert = activeElementKey ? Math.max(0, attrs[activeElementKey] || 0) : 0
+        const rawPhysicalConvert = physicalConvertKeywords.reduce((sum, key) => sum + Math.max(0, attrs[key] || 0), 0)
+        const poolTotal = rawElementConvert + rawPhysicalConvert
+        const convertScale = poolTotal > 1 ? 1 / poolTotal : 1
+        const unconverted = Math.max(0, 1 - Math.min(1, poolTotal))
+        // parts 记录每个伤害分量的比例、抗性因子与最终结算类型（技能纯元素基座比例 = 1）：
+        // 未转换部分按原始敌人抗性结算；转属克/转属逆 部分按翻转抗性结算；转物理 部分按物理子类结算（抗性因子 1）
+        type SkillPart = { ratio: number; resistanceFactor: number; settlesElement: boolean }
+        const parts: SkillPart[] = []
+        if (unconverted > 0) parts.push({ ratio: unconverted, resistanceFactor: factor(enemyResistance), settlesElement: true })
+        if (activeElementKey) {
+            const ratio = Math.max(0, attrs[activeElementKey] || 0) * convertScale
+            if (ratio > 0) parts.push({ ratio, resistanceFactor: flippedFactor, settlesElement: true })
+        }
+        for (const key of physicalConvertKeywords) {
+            const ratio = Math.max(0, attrs[key] || 0) * convertScale
+            if (ratio <= 0) continue
+            parts.push({ ratio, resistanceFactor: 1, settlesElement: false })
+        }
+
+        // 汇总各分量：ratio × 抗性因子 × 该分量有效增伤（物理/元素 访问器按结算类型拆分）
+        const physicalPart = parts
+            .filter(p => !p.settlesElement)
+            .reduce((sum, p) => sum + p.ratio * p.resistanceFactor * partDamageIncrease(p), 0)
+        const elementPart = parts
+            .filter(p => p.settlesElement)
+            .reduce((sum, p) => sum + p.ratio * p.resistanceFactor * partDamageIncrease(p), 0)
+        const allPart = physicalPart + elementPart
         return {
-            expectedDamage: finalDamage * hpMore,
-            noHpDamage: finalDamage,
-            // 技能伤害视为纯元素结算，无物理分量
-            physicalDamage: 0,
-            elementDamage: finalDamage * hpMore,
+            expectedDamage: allPart * otherMore * hpMore,
+            noHpDamage: allPart * otherMore,
+            physicalDamage: physicalPart * otherMore * hpMore,
+            elementDamage: elementPart * otherMore * hpMore,
         }
     }
 
@@ -1795,7 +1836,6 @@ export class CharBuild {
         // 合计转换比例超过 100% 时等比重压缩（convertScale），不足 100% 时剩余 (1 - total) 按原始物理/元素比例结算。
         const activeElementKey: "转属克" | "转属逆" | undefined =
             enemyResistance > 0 ? "转属克" : enemyResistance < 0 ? "转属逆" : undefined
-        const physicalConvertKeywords = ["转切割", "转贯穿", "转震荡", "转灾厄"] as const
         const rawElementConvert = activeElementKey ? Math.max(0, attrs[activeElementKey] || 0) : 0
         const rawPhysicalConvert = physicalConvertKeywords.reduce((sum, k) => sum + Math.max(0, attrs[k] || 0), 0)
         const poolTotal = rawElementConvert + rawPhysicalConvert
