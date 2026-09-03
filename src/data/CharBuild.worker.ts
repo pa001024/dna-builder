@@ -14,6 +14,8 @@ type IncomeRequest = {
         data: Buff
         level: number
         minus: boolean
+        /** 覆盖率（0-1，默认1表示100%） */
+        coverage?: number
     }[]
     mods?: {
         key: string
@@ -40,7 +42,11 @@ self.onmessage = (event: MessageEvent<IncomeRequest>) => {
         const build = createBuildFromSnapshot(event.data.build)
         const incomes: Record<string, number> = {}
         event.data.buffs?.forEach(buff => {
-            incomes[buff.key] = build.calcIncome(new LeveledBuff(buff.data, buff.level), buff.minus)
+            const leveled = new LeveledBuff(buff.data, buff.level)
+            if (buff.coverage !== undefined) {
+                leveled.coverage = buff.coverage
+            }
+            incomes[buff.key] = build.calcIncome(leveled, buff.minus)
         })
         event.data.mods?.forEach(mod => {
             incomes[mod.key] = build.calcIncome(new LeveledMod(mod.data, mod.level, mod.buffLv, mod.effect))

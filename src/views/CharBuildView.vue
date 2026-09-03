@@ -13,6 +13,7 @@ import {
     createDefaultCharSettings,
     normalizeCharSettings,
     type SignatureWeapon,
+    serializeCharSettings,
     useCharSettings,
 } from "@/composables/useCharSettings"
 import {
@@ -48,7 +49,7 @@ import { useSettingStore } from "@/store/setting"
 import { useTimeline } from "@/store/timeline"
 import { useTourStore } from "@/store/tour"
 import { useUIStore } from "@/store/ui"
-import { copyText, formatBigNumber, formatProp, pasteText } from "@/util"
+import { copyText, formatBigNumber, formatProp, pasteText, roundBuffValue } from "@/util"
 import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 
@@ -196,15 +197,15 @@ const buffOptions = computed(() => {
         .map(v => {
             const b = charSettings.value.buffs.find(b => b[0] === v.label)
             const lv = b?.[1] ?? v.value.等级
+            const coverage = b?.[2] ?? 1
+            const value = createBuffFromSettings(v.label, lv, charSettings.value.customBuff, coverage)
             return {
-                value:
-                    v.label === "自定义BUFF"
-                        ? createBuffFromSettings(v.label, lv, charSettings.value.customBuff)
-                        : new LeveledBuff(v.value._originalBuffData, lv),
+                value,
                 label: v.label,
                 limit: v.limit,
                 description: v.description,
                 lv,
+                coverage,
                 buff: v.buff,
             }
         })
@@ -260,7 +261,7 @@ const selectedBuffs = computed(() => {
     return charSettings.value.buffs
         .map(v => {
             try {
-                return createBuffFromSettings(v[0], v[1], charSettings.value.customBuff)
+                return createBuffFromSettings(v[0], v[1], charSettings.value.customBuff, v[2])
             } catch (error) {
                 console.error(error)
                 charSettings.value.buffs = charSettings.value.buffs.filter(b => b[0] !== v[0])
@@ -584,6 +585,19 @@ function setBuffLv(buff: LeveledBuff, lv: number) {
     updateCharBuild()
 }
 
+/**
+ * 设置BUFF覆盖率：覆盖率 >= 1 时回退为默认的两元素条目，否则追加第三元素（保留六位小数）。
+ * @param buff 目标BUFF
+ * @param coverage 覆盖率（0-1，如0.5表示50%）
+ */
+function setBuffCoverage(buff: LeveledBuff, coverage: number) {
+    const index = charSettings.value.buffs.findIndex(v => v[0] === buff.名称)
+    if (index === -1) return
+    const [name, level] = charSettings.value.buffs[index]
+    charSettings.value.buffs[index] = coverage >= 1 ? [name, level] : [name, level, roundBuffValue(coverage)]
+    updateCharBuild()
+}
+
 const editingProjectIndex = ref(-1)
 const editProjectName = ref("")
 
@@ -648,7 +662,7 @@ const addProject = () => {
  */
 const copyBuildToClipboard = async () => {
     try {
-        await copyText(JSON.stringify(charSettings.value))
+        await copyText(serializeCharSettings(charSettings.value))
         ui.showSuccessMessage(t("char-build.copied_to_clipboard"))
     } catch (error) {
         ui.showErrorMessage(t("char-build.copy_failed"), error instanceof Error ? error.message : t("char-build.unknown_error"))
@@ -1026,18 +1040,22 @@ function handleTourStep(index: number) {
 const teamBuffLvs = useLocalStorage("teamBuffLvs", {} as Record<string, number>)
 
 /**
- * 合并并去重 BUFF 列表，同名 BUFF 仅保留一条记录
+ * 合并并去重 BUFF 列表，同名 BUFF 仅保留一条记录，并保留可选的覆盖率（第三元素）。
  * @param buffs BUFF 列表
  * @returns 去重后的 BUFF 列表
  */
-function dedupeBuffs(buffs: [string, number][]): [string, number][] {
-    const uniqueBuffs = new Map<string, number>()
-    buffs.forEach(([name, level]) => {
+function dedupeBuffs(buffs: [string, number, number?][]): [string, number, number?][] {
+    const uniqueBuffs = new Map<string, [number, number?]>()
+    buffs.forEach(([name, level, coverage]) => {
         if (level > 0) {
-            uniqueBuffs.set(name, level)
+            const previousCoverage = uniqueBuffs.get(name)?.[1]
+            const nextCoverage = coverage ?? previousCoverage
+            uniqueBuffs.set(name, nextCoverage === undefined ? [level] : [level, nextCoverage])
         }
     })
-    return [...uniqueBuffs.entries()]
+    return [...uniqueBuffs.entries()].map(([name, [level, coverage]]) =>
+        coverage === undefined ? [name, level] : [name, level, coverage]
+    )
 }
 
 function updateTeamBuff(newValue: string | number, oldValue: string | number) {
@@ -1065,7 +1083,7 @@ function updateTeamBuff(newValue: string | number, oldValue: string | number) {
         }
     }
     charSettings.value.buffs = dedupeBuffs(newBuffs)
-    localStorage.setItem(`build.${selectedCharId.value}`, JSON.stringify(charSettings.value))
+    localStorage.setItem(`build.${selectedCharId.value}`, serializeCharSettings(charSettings.value))
 }
 
 // 外部调用接口
@@ -1320,6 +1338,8 @@ watch(
     }, 500)
 )
 const charDetailExpend = ref(true)
+/** 自定义变量区域折叠状态（默认展开，折叠交互同「词条」charattr） */
+const customVariableExpend = ref(true)
 const weapon_select_model_show = ref(false)
 const weaponDefaultTab = ref("近战")
 const newWeaponSelection = ref({ melee: 0, ranged: 0 })
@@ -1339,7 +1359,7 @@ const ast_help_model_show = ref(false)
 
 async function shareCharBuild(title: string, desc: string = "") {
     try {
-        const settingsString = JSON.stringify(charSettings.value)
+        const settingsString = serializeCharSettings(charSettings.value)
         const result = await createBuildMutation({
             input: {
                 title,
@@ -1469,7 +1489,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         charSettings.value.charMods = data.mods
         if (data.auraMod) charSettings.value.auraMod = data.auraMod
     }
-    localStorage.setItem(`build.${selectedCharId.value}`, JSON.stringify(charSettings.value))
+    localStorage.setItem(`build.${selectedCharId.value}`, serializeCharSettings(charSettings.value))
     ui.showSuccessMessage(t("char-build.sync_success"))
 }
 </script>
@@ -1989,66 +2009,127 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             </template>
                         </SectionHeader>
                         <div class="space-y-2 p-1">
+                            <!-- 目标函数模式：自定义变量（折叠同词条 charattr）+ DOT 伤害 + 表达式输入 -->
                             <div v-if="!isTimeline" class="space-y-2">
-                                <div
-                                    v-for="(variable, index) in customVariableInputs"
-                                    :key="index"
-                                    class="grid grid-cols-[1fr_1fr_auto] gap-2"
-                                >
-                                    <input v-model="variable[0]" type="text" class="input input-sm input-bordered" placeholder="变量名" />
-                                    <FullTooltip side="top">
-                                        <template #tooltip>
-                                            <div class="space-y-1">
-                                                <div class="text-xs text-base-content/80 max-w-60 break-all">
-                                                    {{ variable[0] }} = {{ variable[1] }}
-                                                </div>
-                                                <div class="font-mono">{{ getCustomVariableResult(variable) }}</div>
+                                <!-- 自定义变量：折叠交互同「词条」charattr -->
+                                <div class="collapse" :class="{ 'collapse-open': customVariableExpend }">
+                                    <div class="space-y-1.5 collapse-content p-0">
+                                        <!-- 变量行：变量名 = 表达式（下划线输入，不加外框） -->
+                                        <div
+                                            v-for="(variable, index) in customVariableInputs"
+                                            :key="index"
+                                            class="flex items-center gap-2"
+                                        >
+                                            <input
+                                                v-model="variable[0]"
+                                                type="text"
+                                                class="w-20 shrink-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                                placeholder="变量名"
+                                            />
+                                            <span class="flex-none select-none text-[11px] text-base-content/35">=</span>
+                                            <FullTooltip side="top">
+                                                <template #tooltip>
+                                                    <div class="space-y-1">
+                                                        <div class="max-w-60 break-all text-xs text-base-content/80">
+                                                            {{ variable[0] }} = {{ variable[1] }}
+                                                        </div>
+                                                        <div class="text-xs text-primary tabular-nums">{{ getCustomVariableResult(variable) }}</div>
+                                                    </div>
+                                                </template>
+                                                <input
+                                                    v-model="variable[1]"
+                                                    type="text"
+                                                    class="min-w-0 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                                    placeholder="表达式"
+                                                />
+                                            </FullTooltip>
+                                            <button
+                                                type="button"
+                                                class="grid size-6 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/40 transition-colors duration-150 hover:bg-red-500/10 hover:text-red-400 active:scale-[0.95]"
+                                                :title="$t('common.delete')"
+                                                @click="removeCustomVariable(index)"
+                                            >
+                                                <Icon icon="codicon:chrome-close" class="size-3.5" />
+                                            </button>
+                                        </div>
+                                        <!-- 变量操作：添加 / 复制 / 粘贴（无边框 tint 芯片） -->
+                                        <div class="flex items-center gap-1.5 pt-0.5">
+                                            <button
+                                                type="button"
+                                                class="flex h-7 flex-1 cursor-pointer items-center justify-center gap-1 rounded-xs bg-primary/10 px-2 text-[11px] font-semibold text-primary transition-colors duration-150 hover:bg-primary/15 active:scale-[0.97]"
+                                                @click="addCustomVariable"
+                                            >
+                                                <Icon icon="ri:add-line" class="size-3.5" />
+                                                变量
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.97]"
+                                                title="复制自定义变量"
+                                                @click="copyCustomVariables"
+                                            >
+                                                <Icon icon="ri:file-copy-line" class="size-3.5" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-xs text-base-content/55 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary active:scale-[0.97]"
+                                                title="粘贴自定义变量"
+                                                @click="pasteCustomVariables"
+                                            >
+                                                <Icon icon="ri:clipboard-line" class="size-3.5" />
+                                            </button>
+                                        </div>
+                                        <!-- 变量校验错误 -->
+                                        <template v-for="(variable, index) in customVariableInputs" :key="`variable-error-${index}`">
+                                            <div
+                                                v-if="
+                                                    variable[0] || variable[1] ? charBuild.validateCustomVariable(variable[0], variable[1]) : false
+                                                "
+                                                class="flex text-xs items-center text-red-500"
+                                            >
+                                                {{ charBuild.validateCustomVariable(variable[0], variable[1]) }}
                                             </div>
                                         </template>
-                                        <input
-                                            v-model="variable[1]"
-                                            type="text"
-                                            class="input input-sm input-bordered w-full"
-                                            placeholder="表达式"
-                                        />
-                                    </FullTooltip>
-                                    <button class="btn btn-sm btn-ghost btn-square" @click="removeCustomVariable(index)">
-                                        <Icon icon="codicon:chrome-close" />
-                                    </button>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="btn btn-sm btn-primary flex-1" @click="addCustomVariable">
-                                        <Icon icon="ri:add-line" />
-                                        变量
-                                    </button>
-                                    <button class="btn btn-sm btn-square" title="复制自定义变量" @click="copyCustomVariables">
-                                        <Icon icon="ri:file-copy-line" class="size-4" />
-                                    </button>
-                                    <button class="btn btn-sm btn-square" title="粘贴自定义变量" @click="pasteCustomVariables">
-                                        <Icon icon="ri:clipboard-line" class="size-4" />
-                                    </button>
-                                </div>
-                                <template v-for="(variable, index) in customVariableInputs" :key="`variable-error-${index}`">
-                                    <div
-                                        v-if="
-                                            variable[0] || variable[1] ? charBuild.validateCustomVariable(variable[0], variable[1]) : false
-                                        "
-                                        class="flex text-xs items-center text-red-500"
-                                    >
-                                        {{ charBuild.validateCustomVariable(variable[0], variable[1]) }}
                                     </div>
-                                </template>
-                            </div>
-                            <label v-if="!isTimeline" class="input input-sm input-primary text-sm flex justify-between">
-                                <input v-model="targetFunction" type="text" :placeholder="$t('char-build.damage')" class="grow" />
-                                <div
-                                    v-if="targetFunction"
-                                    class="flex items-center cursor-pointer hover:text-primary"
-                                    @click="targetFunction = ''"
-                                >
-                                    <Icon icon="codicon:chrome-close" />
                                 </div>
-                            </label>
+                                <!-- 折叠开关（同「词条」charattr） -->
+                                <div
+                                    class="flex justify-center items-center cursor-pointer p-2 hover:bg-base-100/60 transition-all duration-200"
+                                    @click="customVariableExpend = !customVariableExpend"
+                                >
+                                    <Icon
+                                        icon="radix-icons:chevron-down"
+                                        :class="{ 'rotate-180': customVariableExpend }"
+                                    />
+                                </div>
+                                <!-- DOT伤害：显示每秒DOT伤害（样式保持原样，仅移到表达式输入框之前），点击打开详情弹窗 -->
+                                <div
+                                    class="flex justify-between items-center p-1 cursor-pointer hover:bg-base-100/60 rounded-sm transition-all duration-200"
+                                    title="DOT伤害计算设置"
+                                    @click="dot_model_show = true"
+                                >
+                                    <div class="flex items-center gap-1 text-sm text-base-content/80">
+                                        每秒DOT伤害
+                                        <span v-if="dotFrequencies.totalFreq > 0" class="text-xs text-base-content/50 tabular-nums">
+                                            {{ +dotFrequencies.totalFreq.toFixed(2) }} 次/秒
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <DamageShow :value="dotDamage" />
+                                        <Icon icon="ri:settings-3-line" class="size-3.5 opacity-60" />
+                                    </div>
+                                </div>
+                                <label class="input input-sm input-primary text-sm flex justify-between">
+                                    <input v-model="targetFunction" type="text" :placeholder="$t('char-build.damage')" class="grow" />
+                                    <div
+                                        v-if="targetFunction"
+                                        class="flex items-center cursor-pointer hover:text-primary"
+                                        @click="targetFunction = ''"
+                                    >
+                                        <Icon icon="codicon:chrome-close" />
+                                    </div>
+                                </label>
+                            </div>
                             <!-- 时间线 -->
                             <template v-else>
                                 <Select
@@ -2079,23 +2160,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <div v-else data-tour="damage-result" class="flex justify-between items-center p-1">
                                 <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
                                 <DamageShow :value="charBuild.calculate()" />
-                            </div>
-                            <!-- DOT计算：显示每秒DOT伤害，点击打开详情弹窗 -->
-                            <div
-                                class="flex justify-between items-center p-1 cursor-pointer hover:bg-base-100/60 rounded-sm transition-all duration-200"
-                                title="DOT伤害计算设置"
-                                @click="dot_model_show = true"
-                            >
-                                <div class="flex items-center gap-1 text-sm text-base-content/80">
-                                    每秒DOT伤害
-                                    <span v-if="dotFrequencies.totalFreq > 0" class="text-xs text-base-content/50 tabular-nums">
-                                        {{ +dotFrequencies.totalFreq.toFixed(2) }} 次/秒
-                                    </span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <DamageShow :value="dotDamage" />
-                                    <Icon icon="ri:settings-3-line" class="size-3.5 opacity-60" />
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -2465,6 +2529,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             :char-build="charBuild"
                             @toggle-buff="toggleBuff"
                             @set-buff-lv="setBuffLv"
+                            @set-buff-coverage="setBuffCoverage"
                         />
                     </CollapsibleSection>
 

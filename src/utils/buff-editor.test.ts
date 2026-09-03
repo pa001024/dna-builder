@@ -51,6 +51,11 @@ describe("buff-editor", () => {
         ])
     })
 
+    it("应该将百分数转换为小数并消除浮点尾差", () => {
+        expect(parseCustomBuffSummary("自定义BUFF(攻击+23.5%)")).toEqual([["攻击", 0.235]])
+        expect(parseCustomBuffSummary("自定义BUFF(攻击+33.3%)")).toEqual([["攻击", 0.333]])
+    })
+
     it("应该支持 BUFF 名称拼音搜索", () => {
         const option = {
             label: "色散成霓",

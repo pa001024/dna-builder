@@ -115,6 +115,10 @@ describe("CharBuild类测试", () => {
         expect(buffA.攻击).toBe(0.1)
         expect(buffB.攻击).toBe(0.2)
 
+        const halfBuff = createBuffFromSettings("自定义BUFF", 1, [["攻击", 0.1]], 0.5)
+        expect(halfBuff.coverage).toBe(0.5)
+        expect(halfBuff.攻击).toBe(0.05)
+
         const buildA = new CharBuild({
             char: new LeveledChar("黎瑟"),
             skillLevel: 10,
@@ -364,6 +368,31 @@ describe("CharBuild类测试", () => {
         // 快照往返：同样按引用去重，恢复后结果一致
         const restored = createBuildFromSnapshot(createWorkerSnapshot(build))
         expect(restored.calculateTargetFunction(undefined, "[召唤物·战车]技能伤害")).toBeCloseTo(originalDamage, 6)
+    })
+
+    it("BUFF覆盖率应在快照往返后保持", () => {
+        const build = new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 1,
+            resonanceGain: 0,
+            buffs: [new LeveledBuff("助战50攻", 1)],
+            melee: new LeveledWeapon(10302),
+            ranged: new LeveledWeapon(20601),
+            baseName: "快速出击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "伤害",
+        })
+        build.buffs[0].coverage = 0.5
+
+        const snapshot = createWorkerSnapshot(build)
+        expect(snapshot.buffs[0].coverage).toBe(0.5)
+
+        const restored = createBuildFromSnapshot(snapshot)
+        expect(restored.buffs[0].coverage).toBe(0.5)
+        expect(restored.buffs[0].攻击).toBeCloseTo(build.buffs[0].攻击, 10)
     })
 
     it("召唤物转化词条应按充盈威力范式汇总：近战攻速MOD 52004 + 水雾弥散 51921", () => {

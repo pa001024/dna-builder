@@ -1,6 +1,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import { computed, type Ref } from "vue"
 import { charMap, weaponNameMap } from "@/data/d"
+import { roundBuffValue } from "@/util"
 
 const LEGACY_CUSTOM_BUFF_STORAGE_KEY = "customBuff"
 
@@ -88,7 +89,7 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
         meleeMods: Array(8).fill(null) as ([number, number] | null)[],
         rangedMods: Array(8).fill(null) as ([number, number] | null)[],
         skillWeaponMods: Array(4).fill(null) as ([number, number] | null)[],
-        buffs: [] as [string, number][],
+        buffs: [] as [string, number, number?][],
         customBuff: [] as [string, number][],
         team1: "-" as number | "-",
         team1Weapon: "-" as number | "-",
@@ -173,6 +174,18 @@ export function normalizeCharSettings(settings?: Partial<CharSettings> | null): 
         }
     }
 
+    // 归一化BUFF覆盖率为合理精度：仅序列化设置过的覆盖率（第三元素），默认100%时保持旧的两元素格式
+    normalized.buffs = normalized.buffs.map(buff => {
+        const [name, level, coverage] = buff
+        if (coverage === undefined || coverage >= 1) {
+            return [name, level]
+        }
+        return [name, level, roundBuffValue(coverage)]
+    })
+
+    // 归一化自定义BUFF数值精度，清理旧存档中的浮点尾差（如 0.23499999），保持向前兼容
+    normalized.customBuff = normalized.customBuff.map(([property, value]) => [property, roundBuffValue(value)])
+
     // team1Weapon/team2Weapon 兼容旧格式（武器名）与新格式（武器 id）：统一归一化为武器 id
     for (const key of ["team1Weapon", "team2Weapon"] as const) {
         const value = settings[key]
@@ -187,6 +200,15 @@ export function normalizeCharSettings(settings?: Partial<CharSettings> | null): 
     }
 
     return normalized
+}
+
+/**
+ * 将角色配置标准化后序列化，确保覆盖率和自定义 BUFF 数值使用稳定格式。
+ * @param settings 待序列化的角色配置
+ * @returns JSON 文本
+ */
+export function serializeCharSettings(settings: Partial<CharSettings> | null | undefined): string {
+    return JSON.stringify(normalizeCharSettings(settings))
 }
 
 /**

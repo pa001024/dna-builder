@@ -44,7 +44,7 @@ export function createCharBuildFromSettings(
         buffs: charSettings.buffs
             .map(v => {
                 try {
-                    return createBuffFromSettings(v[0], v[1], charSettings.customBuff)
+                    return createBuffFromSettings(v[0], v[1], charSettings.customBuff, v[2])
                 } catch (error) {
                     console.error(error)
                     return null
@@ -87,9 +87,10 @@ export function createCharBuildFromSettings(
  * 按当前配置构造实例内独立的自定义 BUFF。
  * @param customBuff 自定义 BUFF 属性列表
  * @param level 自定义 BUFF 等级
+ * @param coverage 覆盖率（0-1，默认1表示100%）
  * @returns 自定义 BUFF 实例
  */
-export function createCustomBuff(customBuff: [string, number][], level?: number) {
+export function createCustomBuff(customBuff: [string, number][], level?: number, coverage = 1) {
     const buffData = {
         名称: "自定义BUFF",
         描述: "自行填写",
@@ -97,7 +98,11 @@ export function createCustomBuff(customBuff: [string, number][], level?: number)
     customBuff.forEach(([property, value]) => {
         buffData[property] = value
     })
-    return new LeveledBuff(buffData as never, level)
+    const buff = new LeveledBuff(buffData as never, level)
+    if (coverage !== 1) {
+        buff.coverage = coverage
+    }
+    return buff
 }
 
 /**
@@ -105,13 +110,15 @@ export function createCustomBuff(customBuff: [string, number][], level?: number)
  * @param name BUFF 名称
  * @param level BUFF 等级
  * @param customBuff 自定义 BUFF 配置
+ * @param coverage 覆盖率（0-1，默认1表示100%）
  * @returns BUFF 实例
  */
-export function createBuffFromSettings(name: string, level: number, customBuff: [string, number][]) {
-    if (name === "自定义BUFF") {
-        return createCustomBuff(customBuff, level)
+export function createBuffFromSettings(name: string, level: number, customBuff: [string, number][], coverage = 1) {
+    const buff = name === "自定义BUFF" ? createCustomBuff(customBuff, level, coverage) : LeveledBuffHelper.fromName(name, level)
+    if (coverage !== 1) {
+        buff.coverage = coverage
     }
-    return LeveledBuffHelper.fromName(name, level)
+    return buff
 }
 
 ;(CharBuild as typeof CharBuild & { fromCharSetting?: typeof createCharBuildFromSettings }).fromCharSetting = createCharBuildFromSettings

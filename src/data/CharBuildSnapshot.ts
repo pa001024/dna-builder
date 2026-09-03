@@ -39,6 +39,8 @@ export interface CharBuildWorkerSnapshot {
     buffs: {
         data: Buff
         level: number
+        /** 覆盖率（0-1，默认1表示100%） */
+        coverage?: number
     }[]
     melee: WeaponSnapshot
     ranged: WeaponSnapshot
@@ -104,6 +106,7 @@ export function createWorkerSnapshot(charBuild: CharBuild): CharBuildWorkerSnaps
         buffs: [...new Set([...charBuild.buffs, ...charBuild.dynamicBuffs])].map(buff => ({
             data: buff._originalBuffData,
             level: buff.等级,
+            coverage: buff.coverage !== 1 ? buff.coverage : undefined,
         })),
         melee: createWeaponSnapshot(charBuild.meleeWeapon),
         ranged: createWeaponSnapshot(charBuild.rangedWeapon),
@@ -149,7 +152,13 @@ export function createBuildFromSnapshot(snapshot: CharBuildWorkerSnapshot) {
         meleeMods: snapshot.meleeMods.map(createMod),
         rangedMods: snapshot.rangedMods.map(createMod),
         skillMods: snapshot.skillMods.map(createMod),
-        buffs: snapshot.buffs.map(buff => new LeveledBuff(buff.data, buff.level)),
+        buffs: snapshot.buffs.map(buff => {
+            const leveled = new LeveledBuff(buff.data, buff.level)
+            if (buff.coverage !== undefined) {
+                leveled.coverage = buff.coverage
+            }
+            return leveled
+        }),
         melee: createWeapon(snapshot.melee),
         ranged: createWeapon(snapshot.ranged),
         baseName: snapshot.baseName,

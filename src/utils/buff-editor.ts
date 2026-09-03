@@ -1,4 +1,5 @@
 import type { LeveledBuff } from "@/data"
+import { roundBuffValue } from "@/util"
 import { matchPinyin } from "./pinyin-utils"
 
 export interface BuffEditorOption {
@@ -138,7 +139,8 @@ export function parseCustomBuffSummary(token: string): [string, number][] | null
             const property = propertyMatch[1]
             const value = Number(propertyMatch[2])
             if (Number.isNaN(value)) return null
-            return [property, propertyMatch[3] ? value / 100 : value] as [string, number]
+            // 百分数除以100与累加可能产生浮点尾差（如0.23499999），统一舍入到6位小数后再序列化
+            return [property, roundBuffValue(propertyMatch[3] ? value / 100 : value)] as [string, number]
         })
         .filter((item): item is [string, number] => item !== null)
 }

@@ -48,6 +48,17 @@ export class LeveledBuff implements Buff {
         this.updatePropertiesByLevel()
     }
 
+    // 覆盖率（0-1），用于按覆盖率缩放BUFF数值，默认1表示100%
+    _coverage = 1
+
+    get coverage() {
+        return this._coverage
+    }
+    set coverage(value: number) {
+        this._coverage = value
+        this.updatePropertiesByLevel()
+    }
+
     /**
      * 构造函数
      * @param 名称 buff的名称
@@ -193,7 +204,7 @@ export class LeveledBuff implements Buff {
         if (!this.attr) return false
         let changed = false
         Object.entries(this.attr as Record<string, string>).forEach(([key, expression]) => {
-            const value = normalizeDynamicAttrValue(evaluateAttr(expression, attrs))
+            const value = normalizeDynamicAttrValue(evaluateAttr(expression, attrs)) * this._coverage
             if (this[key] !== value) {
                 this[key] = value
                 changed = true
@@ -259,10 +270,10 @@ export class LeveledBuff implements Buff {
             const maxValue = this._originalBuffData[prop]
             if (maxValue !== undefined) {
                 if (Array.isArray(maxValue)) {
-                    this[prop] = maxValue[Math.min(x, maxValue.length) - (this.lx ?? 1)] * this._ratio
+                    this[prop] = maxValue[Math.min(x, maxValue.length) - (this.lx ?? 1)] * this._ratio * this._coverage
                 } else if (typeof maxValue === "number") {
                     // 属性值 = 满级属性/a*(1+(x-1)/b)
-                    let currentValue = (maxValue / a) * (1 + (x - lx) / b) * this._ratio
+                    let currentValue = (maxValue / a) * (1 + (x - lx) / b) * this._ratio * this._coverage
                     if (prop === "神智回复") currentValue = Math.round(currentValue)
                     this[prop] = currentValue
                 }
@@ -299,6 +310,7 @@ export class LeveledBuff implements Buff {
         "code",
         "attr",
         "_ratio",
+        "_coverage",
     ])
     get properties(): string[] {
         return Object.keys(this).filter(prop => !LeveledBuff._exclude_properties.has(prop))
@@ -311,6 +323,7 @@ export class LeveledBuff implements Buff {
         const buff = new LeveledBuff(this._originalBuffData, this._等级)
         buff.描述 = this.描述
         buff.ratio = this._ratio
+        buff.coverage = this._coverage
         if (this.pid) buff.pid = this.pid
         if (this.pt) buff.pt = this.pt
         return buff

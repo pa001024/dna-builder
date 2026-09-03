@@ -10,7 +10,7 @@ import {
     unlikeBuildMutation,
     updateBuildMutation,
 } from "@/api/graphql"
-import { CharSettings, useCharSettings } from "@/composables/useCharSettings"
+import { CharSettings, serializeCharSettings, useCharSettings } from "@/composables/useCharSettings"
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
@@ -169,7 +169,7 @@ async function confirmEdit() {
                 title: edit_title.value,
                 desc: edit_desc.value,
                 charId: editingBuild.value.charId,
-                charSettings: JSON.stringify(charSettings.value),
+                charSettings: serializeCharSettings(charSettings.value),
             },
         })
 

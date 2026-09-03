@@ -362,6 +362,33 @@ describe("LeveledBuff类测试", () => {
         expect(minusAttr.技能倍率乘数).toBeCloseTo(-(buff.技能倍率乘数 / (1 + buff.技能倍率乘数)), 10)
     })
 
+    it("覆盖率应缩放BUFF数值并随等级变化保持一致", () => {
+        const buff = new LeveledBuff("助战50攻", 1)
+        buff.coverage = 0.5
+
+        expect(buff.攻击).toBeCloseTo(0.5 * 0.5, 10)
+
+        buff.等级 = 2
+        expect(buff.攻击).toBeCloseTo(1.0 * 0.5, 10)
+    })
+
+    it("覆盖率设置回100%后数值应恢复原值", () => {
+        const buff = new LeveledBuff("助战50攻", 1)
+        buff.coverage = 0.5
+        buff.coverage = 1
+
+        expect(buff.攻击).toBeCloseTo(0.5, 10)
+    })
+
+    it("clone应保留覆盖率", () => {
+        const buff = new LeveledBuff("助战50攻", 1)
+        buff.coverage = 0.5
+        const cloned = buff.clone()
+
+        expect(cloned.coverage).toBe(0.5)
+        expect(cloned.攻击).toBeCloseTo(0.25, 10)
+    })
+
     // 测试6：测试不存在的Buff名称
     it("测试不存在的Buff名称会抛出错误", () => {
         expect(() => {

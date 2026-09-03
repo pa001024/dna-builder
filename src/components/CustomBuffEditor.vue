@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue"
-import { formatProp } from "@/util"
+import { formatProp, roundBuffValue } from "@/util"
 
 // 获取所有可用的属性名
 const properties = [
@@ -133,11 +133,12 @@ const cloneCustomBuffs = () => customBuff.value.map(([property, value]) => [prop
  */
 const addBuff = () => {
     if (validateForm()) {
-        const nextBuff: [string, number] = [newBuff.property, +newBuff.value]
+        // 输入与累加可能产生浮点尾差（如0.23499999），统一舍入到6位小数后再持久化
+        const nextBuff: [string, number] = [newBuff.property, roundBuffValue(+newBuff.value)]
         const nextCustomBuff = cloneCustomBuffs()
         const existingIndex = nextCustomBuff.findIndex(buff => buff[0] === nextBuff[0])
         if (existingIndex !== -1) {
-            nextCustomBuff[existingIndex][1] += nextBuff[1]
+            nextCustomBuff[existingIndex][1] = roundBuffValue(nextCustomBuff[existingIndex][1] + nextBuff[1])
         } else {
             nextCustomBuff.push(nextBuff)
         }

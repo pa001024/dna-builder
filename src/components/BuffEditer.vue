@@ -19,6 +19,8 @@ interface BuffOption {
     lv: number
     limit?: string | number
     description?: string
+    /** 覆盖率（0-1，默认1表示100%） */
+    coverage?: number
 }
 
 interface BuffDisplayOption extends BuffOption {
@@ -39,6 +41,7 @@ let workerRequestId = 0
 const emit = defineEmits<{
     toggleBuff: [buff: LeveledBuff]
     setBuffLv: [buff: LeveledBuff, level: number]
+    setBuffCoverage: [buff: LeveledBuff, coverage: number]
     replaceBuffs: [buffs: [string, number][]]
     replaceCustomBuff: [buffs: [string, number][]]
 }>()
@@ -49,6 +52,10 @@ const toggleBuff = (buff: LeveledBuff) => {
 
 const setBuffLv = (buff: LeveledBuff, lv: number) => {
     emit("setBuffLv", buff, lv)
+}
+
+const setBuffCoverage = (buff: LeveledBuff, coverage: number) => {
+    emit("setBuffCoverage", buff, coverage)
 }
 
 /**
@@ -132,7 +139,7 @@ const selectedBuffs = computed(() => {
 })
 
 function getIncomeKey(buff: BuffOption, minus: boolean) {
-    return `${minus ? "minus" : "add"}:${buff.label}:${buff.lv}`
+    return `${minus ? "minus" : "add"}:${buff.label}:${buff.lv}:${buff.coverage ?? 1}`
 }
 
 function getIncome(buff: BuffOption, minus: boolean) {
@@ -194,6 +201,7 @@ function refreshIncomes() {
                 data: buff.value._originalBuffData,
                 level: buff.value.等级,
                 minus: buff.minus,
+                coverage: buff.coverage,
             })),
         })
     )
@@ -240,7 +248,9 @@ function getDisplayBuff(buff: LeveledBuff) {
                     :lv="buff.lv"
                     selected
                     :income="buff.income"
+                    :coverage="buff.coverage"
                     @set-buff-lv="setBuffLv"
+                    @set-buff-coverage="setBuffCoverage"
                     @click="toggleBuff(buff.value)"
                 />
                 <!-- 未选择的BUFF -->

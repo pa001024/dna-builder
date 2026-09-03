@@ -10,6 +10,15 @@ export function useState<T, N extends keyof T>(obj: T, key: N) {
 export function format1(n1: number, di = 2) {
     return `${+n1.toFixed(di)}`
 }
+/**
+ * 将数值舍入到指定位数小数，用于序列化时消除浮点尾差（如 0.23499999 → 0.235）。
+ * @param value 原数值
+ * @param digits 保留的小数位数，默认 6 位
+ * @returns 舍入后的数值
+ */
+export function roundBuffValue(value: number, digits = 6): number {
+    return Number(value.toFixed(digits))
+}
 export function format100(n100: number, di = 2) {
     return `${+(n100 * 100).toFixed(di)}%`
 }

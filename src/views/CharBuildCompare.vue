@@ -23,6 +23,7 @@ import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
 import { useInvStore } from "@/store/inv"
 import { useTimeline } from "@/store/timeline"
+import { roundBuffValue } from "@/util"
 
 // Initialize stores and data
 const inv = useInvStore()
@@ -62,7 +63,7 @@ const _buffOptions = reactive(
 // Define configuration type
 interface BuildConfiguration {
     additionalMods: ([number, number] | null)[][] // [charMods, meleeMods, rangedMods, skillWeaponMods]
-    additionalBuffs: [string, number][]
+    additionalBuffs: [string, number, number?][]
     name: string
     selectedChar: string
     selectedProject: string
@@ -76,20 +77,27 @@ interface BuildConfiguration {
  * @param name BUFF 名称
  * @param level BUFF 等级
  * @param customBuff 自定义 BUFF 配置
+ * @param coverage 覆盖率（0-1，默认1表示100%）
  * @returns BUFF 实例
  */
-function createLeveledBuff(name: string, level: number, customBuff: [string, number][] = []) {
+function createLeveledBuff(name: string, level: number, customBuff: [string, number][] = [], coverage = 1) {
+    let buff: LeveledBuff
     if (name !== "自定义BUFF") {
-        return LeveledBuffHelper.fromName(name, level)
+        buff = LeveledBuffHelper.fromName(name, level)
+    } else {
+        const buffObj: Buff = {
+            名称: "自定义BUFF",
+            描述: "自行填写",
+        }
+        customBuff.forEach(([property, value]) => {
+            buffObj[property] = value
+        })
+        buff = new LeveledBuff(buffObj, level)
     }
-    const buffObj: Buff = {
-        名称: "自定义BUFF",
-        描述: "自行填写",
+    if (coverage !== 1) {
+        buff.coverage = coverage
     }
-    customBuff.forEach(([property, value]) => {
-        buffObj[property] = value
-    })
-    return new LeveledBuff(buffObj, level)
+    return buff
 }
 
 // Helper function to create a new configuration
@@ -170,15 +178,14 @@ const getFilteredBuffOptions = (configIndex: number) => {
         .map(v => {
             const b = config.additionalBuffs.find(b => b[0] === v.label)
             const lv = b?.[1] ?? v.value.等级
+            const coverage = b?.[2] ?? 1
             return {
-                value:
-                    v.label === "自定义BUFF"
-                        ? createLeveledBuff(v.label, lv, config.charSettings.customBuff)
-                        : new LeveledBuff(v.value._originalBuffData, lv),
+                value: createLeveledBuff(v.label, lv, config.charSettings.customBuff, coverage),
                 label: v.label,
                 limit: v.limit,
                 description: v.description,
                 lv,
+                coverage,
             }
         })
 }
@@ -239,7 +246,7 @@ const baseCharBuilds = computed(() => {
                 .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             skillLevel: settings.charSkillLevel,
-            buffs: settings.buffs.map((v: any) => createLeveledBuff(v[0], v[1], settings.customBuff)),
+            buffs: settings.buffs.map((v: any) => createLeveledBuff(v[0], v[1], settings.customBuff, v[2])),
             melee: LeveledWeaponHelper.fromId(
                 settings.meleeWeapon,
                 settings.meleeWeaponRefine,
@@ -329,7 +336,7 @@ const charBuilds = computed(() => {
         // Combine BUFFs from project and additional selections for this configuration
         const combinedBuffs = [
             ...baseBuild.buffs,
-            ...config.additionalBuffs.map(v => createLeveledBuff(v[0], v[1], config.charSettings.customBuff)),
+            ...config.additionalBuffs.map(v => createLeveledBuff(v[0], v[1], config.charSettings.customBuff, v[2])),
         ]
 
         // Create new CharBuild instance with combined settings for this configuration
@@ -420,6 +427,19 @@ function setBuffLv(configIndex: number, buff: LeveledBuff, lv: number) {
     if (index > -1) {
         configs.value[configIndex].additionalBuffs[index][1] = lv
     }
+}
+
+/**
+ * 设置对比配置中 BUFF 的覆盖率。
+ * @param configIndex 配置索引
+ * @param buff 目标 BUFF
+ * @param coverage 覆盖率（0-1）
+ */
+function setBuffCoverage(configIndex: number, buff: LeveledBuff, coverage: number) {
+    const index = configs.value[configIndex].additionalBuffs.findIndex(v => v[0] === buff.名称)
+    if (index === -1) return
+    const [name, level] = configs.value[configIndex].additionalBuffs[index]
+    configs.value[configIndex].additionalBuffs[index] = coverage >= 1 ? [name, level] : [name, level, roundBuffValue(coverage)]
 }
 
 // Table customization
@@ -676,12 +696,15 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                             </div>
                             <BuffEditer
                                 :selected-buffs="
-                                    config.additionalBuffs.map(([name, lv]) => createLeveledBuff(name, lv, config.charSettings.customBuff))
+                                    config.additionalBuffs.map(([name, lv, coverage]) =>
+                                        createLeveledBuff(name, lv, config.charSettings.customBuff, coverage)
+                                    )
                                 "
                                 :buff-options="getFilteredBuffOptions(index)"
                                 :char-build="charBuilds[index]"
                                 @toggle-buff="toggleBuff(index, $event)"
                                 @set-buff-lv="setBuffLv(index, $event[0], $event[1])"
+                                @set-buff-coverage="setBuffCoverage(index, $event[0], $event[1])"
                             />
                         </div>
                     </div>
