@@ -54,6 +54,8 @@ export interface DotFrequencySettings {
     ranged: number
     /** 同律武器DOT每秒次数 */
     skillweapon: number
+    /** 手动设置存在自属性追加伤害（仅允许设置为有；未设置时按属性与来源自动判定） */
+    forceOwnAdditionalDamage?: boolean
 }
 
 /**
@@ -106,6 +108,7 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
             melee: 0,
             ranged: 0,
             skillweapon: 0,
+            forceOwnAdditionalDamage: false,
         } as DotFrequencySettings,
         actions: {
             enable: false,

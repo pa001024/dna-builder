@@ -298,11 +298,11 @@ describe("evaluateAST函数测试", () => {
             })
             const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
 
-            // 充盈转化（武器属性）= ∑ 该武器作用域 MOD 充盈转化
-            expect(attrs.weapon!.充盈转化).toBe(1)
+            // 充盈转化（武器属性）= 基础转化 1 + 该武器作用域 MOD 充盈转化
+            expect(attrs.weapon!.充盈转化).toBe(2)
             // 充盈威力（角色属性）= 溢出触发 × 充盈转化（仅近战溢出）
             const overflow = Math.max(0, attrs.weapon!.触发 - 1)
-            expect(attrs.充盈威力).toBeCloseTo(overflow * 1, 6)
+            expect(attrs.充盈威力).toBeCloseTo(overflow * 2, 6)
             // 作为角色属性可被 AST 表达式引用
             expect(build.evaluateAST("充盈威力", attrs)).toBeCloseTo(attrs.充盈威力, 6)
         })
@@ -337,9 +337,9 @@ describe("evaluateAST函数测试", () => {
                 targetFunction: "[近战]",
             })
             const attrs = build.calculateWeaponAttributes(build.meleeWeapon)
-            expect(attrs.weapon!.充盈转化).toBe(1.5)
+            expect(attrs.weapon!.充盈转化).toBe(2.5)
             const overflow = Math.max(0, attrs.weapon!.触发 - 1)
-            expect(attrs.充盈威力).toBeCloseTo(overflow * 1.5, 6)
+            expect(attrs.充盈威力).toBeCloseTo(overflow * 2.5, 6)
         })
 
         it("充盈转化为武器属性（各自作用域），充盈威力为角色汇总属性", () => {
@@ -381,10 +381,10 @@ describe("evaluateAST函数测试", () => {
             expect(rangedOverflow).toBeGreaterThan(0)
 
             // 充盈转化（武器属性）：近战/远程 MOD 的转化只作用于各自武器
-            expect(aMelee.weapon!.充盈转化).toBe(1)
-            expect(aRanged.weapon!.充盈转化).toBe(1)
+            expect(aMelee.weapon!.充盈转化).toBe(2)
+            expect(aRanged.weapon!.充盈转化).toBe(2)
             // 充盈威力（角色属性）= Σ 各武器溢出触发 × 该武器充盈转化，与武器上下文无关
-            const expected = (meleeOverflow + rangedOverflow) * 1
+            const expected = (meleeOverflow + rangedOverflow) * 2
             expect(aMelee.充盈威力).toBeCloseTo(expected, 6)
             expect(aRanged.充盈威力).toBeCloseTo(expected, 6)
         })
@@ -405,7 +405,7 @@ describe("evaluateAST函数测试", () => {
                     充盈转化: 充盈转化,
                     效果: "测试用充盈转化MOD",
                 })
-            // 仅近战 MOD 带充盈转化词条：近战武器转化 = 1，远程武器转化 = 0
+            // 仅近战 MOD 带充盈转化词条：近战武器转化 = 2，远程武器保留基础转化 = 1
             const build = new CharBuild({
                 char: new LeveledChar("黎瑟"),
                 hpPercent: 0.5,
@@ -421,10 +421,10 @@ describe("evaluateAST函数测试", () => {
             })
             const aMelee = build.calculateWeaponAttributes(build.meleeWeapon)
             const aRanged = build.calculateWeaponAttributes(build.rangedWeapon)
-            expect(aMelee.weapon!.充盈转化).toBe(1)
-            expect(aRanged.weapon!.充盈转化).toBe(0)
+            expect(aMelee.weapon!.充盈转化).toBe(2)
+            expect(aRanged.weapon!.充盈转化).toBe(1)
             // 充盈威力为角色汇总属性：近战溢出已计入，与武器上下文无关
-            const expected = Math.max(0, aMelee.weapon!.触发 - 1) * 1
+            const expected = Math.max(0, aMelee.weapon!.触发 - 1) * 2
             expect(expected).toBeGreaterThan(0)
             expect(aMelee.充盈威力).toBeCloseTo(expected, 6)
             expect(aRanged.充盈威力).toBeCloseTo(expected, 6)
@@ -464,11 +464,11 @@ describe("evaluateAST函数测试", () => {
             const aSkill = build.calculateWeaponAttributes(build.skillWeapon!)
             const skillOverflow = Math.max(0, aSkill.weapon!.触发 - 1)
             expect(skillOverflow).toBeGreaterThan(0)
-            expect(aSkill.weapon!.充盈转化).toBe(1)
-            expect(aSkill.充盈威力).toBeCloseTo(skillOverflow * 1, 6)
-            // 同律 MOD 不作用于近战武器：近战武器转化 = 0，但角色充盈威力汇总已含同律溢出
+            expect(aSkill.weapon!.充盈转化).toBe(2)
+            expect(aSkill.充盈威力).toBeCloseTo(skillOverflow * 2, 6)
+            // 同律 MOD 不作用于近战武器：近战武器保留基础转化 = 1，但角色充盈威力汇总已含同律溢出
             const aMelee = build.calculateWeaponAttributes(build.meleeWeapon)
-            expect(aMelee.weapon!.充盈转化).toBe(0)
+            expect(aMelee.weapon!.充盈转化).toBe(1)
             expect(aMelee.充盈威力).toBeCloseTo(aSkill.充盈威力, 6)
         })
 

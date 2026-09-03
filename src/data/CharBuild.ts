@@ -119,10 +119,18 @@ export interface DotFrequencySettings {
     ranged: number
     /** 同律武器DOT每秒次数 */
     skillweapon: number
+    /** 手动设置存在自属性追加伤害（仅允许设置为有；未设置时按属性与来源自动判定） */
+    forceOwnAdditionalDamage?: boolean
 }
 
 /** DOT 频率设置的默认值（全部关闭） */
-export const defaultDotFrequencySettings: DotFrequencySettings = { skill: 0, melee: 0, ranged: 0, skillweapon: 0 }
+export const defaultDotFrequencySettings: DotFrequencySettings = {
+    skill: 0,
+    melee: 0,
+    ranged: 0,
+    skillweapon: 0,
+    forceOwnAdditionalDamage: false,
+}
 
 /** 单个 DOT 来源的配置与频率分解 */
 export interface DotSourceConfig {
@@ -136,13 +144,13 @@ export interface DotSourceConfig {
     hidden: boolean
     /** 上限 = 1/(0.4×触发) */
     cap: number
-    /** 用户输入频率（每秒次数，已钳制到上限内） */
+    /** 用户输入频率（每秒次数，可高于计算上限） */
     freq: number
     /** 其余属性元素种数（仅武器来源；技能固定 1 且不参与其余属性） */
     otherElementCount: number
-    /** 武器追加伤害是否大于 0（异常数量=1 且 追加伤害>0 时频率翻倍） */
+    /** 本属性追加伤害是否大于 0（满足翻倍条件时频率翻倍） */
     hasAdditionalDamage: boolean
-    /** 频率是否翻倍（异常数量=1 且 追加伤害>0） */
+    /** 频率是否翻倍 */
     doubled: boolean
     /** 翻倍并钳制到上限后的有效频率 */
     effectiveFreq: number
@@ -991,7 +999,8 @@ export class CharBuild {
             triggerRateBonus += this.getTotalBonus(`${lowerPrefix}触发`, lowerPrefix, { includeMods: false })
         }
         const triggerRate = Math.round(weapon.基础触发 * (1 + triggerRateBonus) * 100) / 100
-        const conversionRate = this.getTotalBonus("充盈转化", prefix)
+        // 充盈转化包含每把武器固定的基础转化 1，再叠加对应作用域的 MOD 转化。
+        const conversionRate = 1 + this.getTotalBonus("充盈转化", prefix)
         return { triggerRate, conversionRate }
     }
 
@@ -1899,7 +1908,7 @@ export class CharBuild {
      * - 角色自身属性 DOT 频率由 技能→近战→远程 依次填充，共享上限（各来源上限最大值）：
      *   技能造成角色自身属性 DOT 频率达到上限时，武器伤害的角色自身属性 DOT 部分视为 0。
      * - 其余属性 DOT 频率 = Σ 武器有效频率 × 元素种数（n-1，n 为去重后异常数量：非光暗如 黎瑟雷+菲娜Q → n=4、光暗 → n=5；异常数量 = 1 时无其余属性）。
-     * - 异常数量 = 1 且 武器追加伤害 > 0 时武器频率翻倍（不超过该来源上限）。
+     * - 光暗角色：来源于 MOD 的追加伤害 > 0 时该来源频率翻倍；其他角色：总追加伤害 > 0 时该来源频率翻倍（不超过该来源上限）。
      * @param inputattrs 预计算的武器属性（可选，复用角色属性部分）
      * @returns 各来源配置与频率分解
      */
@@ -1927,7 +1936,7 @@ export class CharBuild {
          * @param trigger 触发值
          * @param freqSetting 用户输入频率
          * @param elemCount 其余属性元素种数
-         * @param hasAdditionalDamage 是否具备追加伤害
+         * @param hasAdditionalDamage 是否具备满足翻倍条件的追加伤害
          * @returns 来源配置
          */
         const buildSource = (
@@ -1940,9 +1949,9 @@ export class CharBuild {
         ): DotSourceConfig => {
             const hidden = trigger <= 0
             const cap = hidden ? 0 : 1 / (0.4 * trigger)
-            const freq = Math.max(0, Math.min(cap, freqSetting || 0))
-            // 异常数量=1 且 追加伤害>0 时频率翻倍（不能超过该来源上限）
-            const doubled = !hidden && anomalyCount === 1 && hasAdditionalDamage
+            const freq = Math.max(0, freqSetting || 0)
+            // 满足角色属性对应的追加伤害条件时频率翻倍（不能超过该来源上限）
+            const doubled = !hidden && hasAdditionalDamage
             const effectiveFreq = Math.min(cap, freq * (doubled ? 2 : 1))
             return {
                 type,
@@ -1964,20 +1973,22 @@ export class CharBuild {
         const rangedTrigger = Math.min(1, Math.max(0, rangedAttrs.weapon?.触发 || 0))
         // 同律武器触发：读取同律武器自身触发（未装备同律武器时为 0，滑块隐藏）
         const skillWeaponTrigger = Math.min(1, Math.max(0, skillWeaponAttrs?.weapon?.触发 || 0))
-        const meleeAdditional = (meleeAttrs.weapon?.追加伤害 || 0) > 0
-        const rangedAdditional = (rangedAttrs.weapon?.追加伤害 || 0) > 0
-        const skillWeaponAdditional = (skillWeaponAttrs?.weapon?.追加伤害 || 0) > 0
+        const isLightOrDark = this.char.属性 === "光" || this.char.属性 === "暗"
+        const modAdditionalDamage = this.mods.reduce((sum, mod) => sum + (mod.addAttr.追加伤害 || 0), 0)
+        const totalAdditionalDamage = this.getTotalBonus("追加伤害")
+        const hasAdditionalDamage =
+            this.dotSettings.forceOwnAdditionalDamage || (isLightOrDark ? modAdditionalDamage > 0 : totalAdditionalDamage > 0)
         const sources: DotSourceConfig[] = [
-            buildSource("skill", "技能", skillTrigger, this.dotSettings.skill, 1, false),
-            buildSource("melee", this.meleeWeapon.名称, meleeTrigger, this.dotSettings.melee, otherElementCount(), meleeAdditional),
-            buildSource("ranged", this.rangedWeapon.名称, rangedTrigger, this.dotSettings.ranged, otherElementCount(), rangedAdditional),
+            buildSource("skill", "技能", skillTrigger, this.dotSettings.skill, 1, hasAdditionalDamage),
+            buildSource("melee", this.meleeWeapon.名称, meleeTrigger, this.dotSettings.melee, otherElementCount(), hasAdditionalDamage),
+            buildSource("ranged", this.rangedWeapon.名称, rangedTrigger, this.dotSettings.ranged, otherElementCount(), hasAdditionalDamage),
             buildSource(
                 "skillweapon",
                 this.skillWeapon?.名称 || "同律",
                 skillWeaponTrigger,
                 this.dotSettings.skillweapon,
                 otherElementCount(),
-                skillWeaponAdditional
+                hasAdditionalDamage
             ),
         ]
         // 角色自身属性 DOT 共享上限 = 各来源上限最大值；技能→近战→远程 依次填充

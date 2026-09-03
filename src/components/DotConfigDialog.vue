@@ -138,8 +138,8 @@ function sourceNamespace(type: DotSourceConfig["type"]): string {
                     <span v-if="source.type !== 'skill' && source.otherElementCount > 0">
                         其余属性 <span class="font-orbitron tabular-nums text-primary">{{ source.otherElementCount }}</span> 种
                     </span>
-                    <span v-if="source.type !== 'skill' && source.hasAdditionalDamage" class="text-primary">
-                        追加伤害 &gt; 0（异常数量=1 时频率翻倍）
+                    <span v-if="source.hasAdditionalDamage" class="text-primary">
+                        自属性追加伤害 &gt; 0（频率翻倍）
                     </span>
                     <span v-if="source.doubled" class="text-secondary">
                         频率翻倍 → <span class="font-orbitron tabular-nums">{{ formatFreq(source.effectiveFreq) }}</span> 次/秒
@@ -153,6 +153,11 @@ function sourceNamespace(type: DotSourceConfig["type"]): string {
                 </div>
             </div>
         </div>
+
+        <label class="mt-3 flex items-center gap-2 text-[11px] text-base-content/65">
+            <input v-model="dotSettings.forceOwnAdditionalDamage" type="checkbox" class="checkbox checkbox-xs checkbox-primary" />
+            <span>手动设置有自属性追加伤害</span>
+        </label>
 
         <!-- 频率分解汇总 -->
         <div class="mt-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">

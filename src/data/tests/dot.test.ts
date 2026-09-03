@@ -104,14 +104,16 @@ describe("DOT计算", () => {
             expect(freqs.cap).toBe(0)
         })
 
-        it("用户输入频率钳制到上限内", () => {
+        it("用户输入频率可高于上限，但计算频率仍受上限约束", () => {
             const build = createDotBuild({
                 charMods: [new LeveledMod(51317)],
                 dotSettings: { skill: 99, melee: 99, ranged: 99 },
             })
             const freqs = build.calculateDotFrequencies()
-            expect(freqs.sources[0].freq).toBeCloseTo(2.5, 6)
-            expect(freqs.sources[1].freq).toBeCloseTo(2.5, 6)
+            expect(freqs.sources[0].freq).toBeCloseTo(99, 6)
+            expect(freqs.sources[1].freq).toBeCloseTo(99, 6)
+            expect(freqs.sources[0].effectiveFreq).toBeCloseTo(2.5, 6)
+            expect(freqs.sources[1].effectiveFreq).toBeCloseTo(2.5, 6)
         })
     })
 
@@ -192,8 +194,8 @@ describe("DOT计算", () => {
                 dotSettings: { skill: 0, melee: 1, ranged: 0 },
             })
             const freqs = build.calculateDotFrequencies()
-            expect(freqs.sources[1].otherFreq).toBeCloseTo(3, 6)
-            expect(freqs.otherFreq).toBeCloseTo(3, 6)
+            expect(freqs.sources[1].otherFreq).toBeCloseTo(6, 6)
+            expect(freqs.otherFreq).toBeCloseTo(6, 6)
         })
     })
 
@@ -206,9 +208,9 @@ describe("DOT计算", () => {
             })
             const attrs = build.calculateWeaponAttributes()
             const freqs = build.calculateDotFrequencies()
-            // ownFreq=1（近战自身属性）、otherFreq=3（异常数量去重 n=4 → 非光暗 n-1=3）
-            expect(freqs.ownFreq).toBeCloseTo(1, 6)
-            expect(freqs.otherFreq).toBeCloseTo(3, 6)
+            // 总追加伤害 > 0 时频率翻倍：ownFreq=2、otherFreq=6
+            expect(freqs.ownFreq).toBeCloseTo(2, 6)
+            expect(freqs.otherFreq).toBeCloseTo(6, 6)
             const base = attrs.攻击 * 0.2 * 6 * 3 * (1 + attrs.充盈威力)
             const penetration = 1 + (attrs.属性穿透 || 0)
             // 角色自身属性按正常抗性区 factor(-4)=5；其余属性全部按 0.5
@@ -231,8 +233,8 @@ describe("DOT计算", () => {
             expect(otherZone).toBeCloseTo(2, 6)
             const expected = base * (freqs.ownFreq * Math.max(0, 1 - 0.5) + freqs.otherFreq * otherZone) * penetration
             expect(build.calculateDotDamage()).toBeCloseTo(expected, 6)
-            // 其余属性贡献 = 6 × base × penetration（5+0.5×2）
-            expect(base * freqs.otherFreq * otherZone * penetration).toBeCloseTo(base * 6 * penetration, 6)
+            // 其余属性贡献 = 12 × base × penetration（频率翻倍后为 6×2）
+            expect(base * freqs.otherFreq * otherZone * penetration).toBeCloseTo(base * 12 * penetration, 6)
         })
 
         it("0 抗：不反转，按正常抗性区（自身与其余属性同一因子）", () => {
@@ -288,7 +290,7 @@ describe("DOT计算", () => {
     })
 
     describe("追加伤害频率翻倍", () => {
-        it("异常数量=1 且 追加伤害>0 时频率翻倍（不超过上限）", () => {
+        it("非光暗角色总追加伤害>0 时频率翻倍（不超过上限）", () => {
             const build = createDotBuild({
                 buffs: [createBuffFromSettings("自定义BUFF", 1, [["追加伤害", 0.5]])],
                 dotSettings: { skill: 0, melee: 1, ranged: 0 },
@@ -312,15 +314,62 @@ describe("DOT计算", () => {
             expect(freqs.sources[1].effectiveFreq).toBeCloseTo(2.5, 6)
         })
 
-        it("异常数量>1 时即使有追加伤害也不翻倍", () => {
+        it("非光暗角色总追加伤害>0 时即使异常数量>1 也翻倍", () => {
             const build = createDotBuild({
                 buffs: [new LeveledBuff("菲娜Q"), createBuffFromSettings("自定义BUFF", 1, [["追加伤害", 0.5]])],
                 dotSettings: { skill: 0, melee: 1, ranged: 0 },
             })
             const freqs = build.calculateDotFrequencies()
             expect(freqs.sources[1].hasAdditionalDamage).toBe(true)
+            expect(freqs.sources[1].doubled).toBe(true)
+            expect(freqs.sources[1].effectiveFreq).toBeCloseTo(2, 6)
+        })
+
+        it("光暗角色仅来源于 MOD 的追加伤害时频率翻倍", () => {
+            const char = new LeveledChar("菲娜")
+            const mod = new LeveledMod({
+                id: 999902,
+                icon: "Test02",
+                名称: "测试追加伤害",
+                版本: "1.0",
+                系列: "测试",
+                品质: "金",
+                极性: "A",
+                耐受: 15,
+                类型: "角色",
+                追加伤害: 0.5,
+                效果: "测试追加伤害",
+            })
+            const build = createDotBuild({ char, charMods: [mod], dotSettings: { skill: 0, melee: 1, ranged: 0 } })
+            const freqs = build.calculateDotFrequencies()
+            expect(freqs.sources[1].hasAdditionalDamage).toBe(true)
+            expect(freqs.sources[1].doubled).toBe(true)
+            expect(freqs.sources[1].effectiveFreq).toBeCloseTo(2, 6)
+        })
+
+        it("光暗角色仅有 BUFF 追加伤害时不翻倍", () => {
+            const char = new LeveledChar("菲娜")
+            const build = createDotBuild({
+                char,
+                buffs: [createBuffFromSettings("自定义BUFF", 1, [["追加伤害", 0.5]])],
+                dotSettings: { skill: 0, melee: 1, ranged: 0 },
+            })
+            const freqs = build.calculateDotFrequencies()
+            expect(freqs.sources[1].hasAdditionalDamage).toBe(false)
             expect(freqs.sources[1].doubled).toBe(false)
             expect(freqs.sources[1].effectiveFreq).toBeCloseTo(1, 6)
+        })
+
+        it("光暗角色手动设置有自属性追加伤害时翻倍", () => {
+            const char = new LeveledChar("菲娜")
+            const build = createDotBuild({
+                char,
+                dotSettings: { skill: 0, melee: 1, ranged: 0, forceOwnAdditionalDamage: true },
+            })
+            const freqs = build.calculateDotFrequencies()
+            expect(freqs.sources[1].hasAdditionalDamage).toBe(true)
+            expect(freqs.sources[1].doubled).toBe(true)
+            expect(freqs.sources[1].effectiveFreq).toBeCloseTo(2, 6)
         })
     })
 
@@ -516,7 +565,7 @@ describe("DOT计算", () => {
     describe("快照与设置", () => {
         it("dotSettings 缺省为全 0（默认不触发）", () => {
             const build = createDotBuild({ dotSettings: undefined as unknown as DotFrequencySettings })
-            expect(build.dotSettings).toEqual({ skill: 0, melee: 0, ranged: 0, skillweapon: 0 })
+            expect(build.dotSettings).toEqual({ skill: 0, melee: 0, ranged: 0, skillweapon: 0, forceOwnAdditionalDamage: false })
             expect(build.calculateDotFrequencies().totalFreq).toBe(0)
         })
 
