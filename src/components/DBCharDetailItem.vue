@@ -4,7 +4,7 @@ import { LeveledChar, LeveledSkillWeapon } from "@/data"
 import { type SkinItem, skinData } from "@/data/d/accessory.data"
 import { type CharExt, charExtData } from "@/data/d/charext.data"
 import { type CharVoice, charVoiceData } from "@/data/d/charvoice.data"
-import { resourceMap } from "@/data/d/resource.data"
+import { type Resource, resourceMap } from "@/data/d/resource.data"
 import weaponData from "@/data/d/weapon.data"
 import type { Char, Weapon } from "@/data/data-types"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
@@ -24,7 +24,7 @@ const setting = useSettingStore()
 const currentLevel = ref(80) // 默认80级
 // 当前技能等级
 const currentSkillLevel = ref(12)
-const activeBottomTab = ref<"profile" | "skin" | "voice">("skin")
+const activeBottomTab = ref<"profile" | "skin" | "voice" | "source">("skin")
 const currentVoiceId = ref<number | null>(null)
 const isVoicePlaying = ref(false)
 const voiceAudioRef = ref<HTMLAudioElement | null>(null)
@@ -346,6 +346,16 @@ async function loadLocalizedCharVoiceData(locale: VoiceLocale): Promise<void> {
 }
 
 const charVoiceList = computed(() => localizedCharVoiceData.value.filter(item => item.charId === props.char.id))
+
+// 当前角色所属的角色碎片资源（思绪片段·XXX），用于“获取方式”Tab 内嵌其 DB 资源详情。
+// 角色未配置碎片或资源数据缺失时返回 null，对应 Tab 不展示。
+const charFragmentResource = computed<Resource | null>(() => {
+    const fragmentId = props.char.碎片
+    if (fragmentId === undefined) {
+        return null
+    }
+    return resourceMap.get(fragmentId) ?? null
+})
 
 /**
  * 根据语音语言获取角色对应 CV 名称。
@@ -804,6 +814,7 @@ onBeforeUnmount(() => {
                     { label: $t('皮肤'), value: 'skin' },
                     { label: $t('档案'), value: 'profile' },
                     { label: $t('语音'), value: 'voice' },
+                    ...(charFragmentResource ? [{ label: $t('获取方式'), value: 'source' }] : []),
                 ]"
             />
 
@@ -892,7 +903,7 @@ onBeforeUnmount(() => {
                 </div>
             </div>
 
-            <div v-else class="mt-2 space-y-3">
+            <div v-else-if="activeBottomTab === 'voice'" class="mt-2 space-y-3">
                 <!-- 语音语言选择方章 -->
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-1.5">
                     <button
@@ -942,6 +953,11 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- 获取方式：直接内嵌该角色碎片资源的 DB 资源详情（含获取途径列表） -->
+            <div v-else-if="activeBottomTab === 'source' && charFragmentResource" class="mt-2">
+                <DBResourceDetailItem :resource="charFragmentResource" />
             </div>
             <audio
                 ref="voiceAudioRef"
