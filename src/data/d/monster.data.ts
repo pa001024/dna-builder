@@ -3566,6 +3566,17 @@ const monsterData: Monster[] = [
         tags: ["Mon.Boss", "Mon.Reward.A"],
     },
     {
+        id: 8516701,
+        n: "转雷 帝皇怒号",
+        t: "Boss",
+        atk: 75,
+        def: 1000,
+        hp: 112500,
+        tn: 1000,
+        icon: "Boss16_Fuer",
+        tags: ["Mon.Boss", "Mon.Reward.A", "Mon.Strong.ThunderLaser"],
+    },
+    {
         id: 8518001,
         n: "巨阙",
         t: "Boss",

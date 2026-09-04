@@ -50154,7 +50154,7 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11100411,
-                                content: "エイダ……で、合ってる？どういうわけか、子どもの頃のことをあまり思い出せないんだ。",
+                                content: "エイダ……で、合ってる？どういうわけか、子どもの頃のことをあまり思い出せないん{性别2:だ|の}。",
                                 voice: "story/1102/111004/1BC9E92E",
                                 npc: 111126,
                                 speakerName: "「戦車」ヴィクター？",
@@ -50773,7 +50773,7 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11101614,
-                                content: "エイダ。その人物の外見と、どこへ向かったのかを詳しく教えて{性别2:くれ|ほしい}。",
+                                content: "エイダ。その人物の外見と、どこへ向かったのかを詳しく教えて{性别2:くれ|}。",
                                 voice: "story/1102/111016/1BCAAE8C",
                                 npc: 111126,
                                 next: 11101615,
@@ -50876,7 +50876,7 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11101617,
-                                content: "（やはり、この子もフルヴィスを見ていないようだ。）",
+                                content: "（やはり、この子もフルヴィスを見ていないよう{性别2:だ|}。）",
                                 voice: "story/1102/111016/1BCAAF0A",
                                 npc: 111126,
                                 next: 11101605,
@@ -50890,7 +50890,7 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11101629,
-                                content: "もう寝てる……",
+                                content: "{性别2:ちょっと、もう寝てるのか……|ちょっと、もう寝てるの……}",
                                 voice: "story/1102/111016/1BCAB102",
                                 npc: 111126,
                                 next: 11101630,
@@ -51286,7 +51286,7 @@ export const questData_jp: QuestStory[] = [
                         dialogues: [
                             {
                                 id: 11110001,
-                                content: "{性别2:くっ……敵襲か。|くっ……敵襲か？}",
+                                content: "{性别2:くっ……敵襲か。|くっ……敵襲？}",
                                 voice: "story/1102/111096/1BD00E8A",
                                 npc: 111127,
                             },
@@ -51340,7 +51340,7 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11102805,
-                                content: "ふぅ……びっくりしたぁ！何が起きたの？なんで急に下まで吹っ飛ばされたの？",
+                                content: "ひぅ……びっくりしたぁ！何が起きたの？なんで急に下まで吹っ飛ばされたの？",
                                 voice: "story/1102/111028/1BCB71F2",
                                 npc: 111001,
                                 next: 11102806,
@@ -51424,14 +51424,15 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11102817,
-                                content: "撃ち殺す{性别2:、だと|}……？",
+                                content: "撃ち殺す{性别2:だと|ですって}……？",
                                 voice: "story/1102/111028/1BCB73EA",
                                 npc: 111126,
                                 next: 11102818,
                             },
                             {
                                 id: 11102818,
-                                content: "フォルスは？フォルス本人はどうした！？それに録音機も！何か痕跡でも見つかれば、真実が……！",
+                                content:
+                                    "フォルスは？フォルス本人はどうした{性别2:|の}！？それに録音機も！何か痕跡でも見つかれば、真実が……！",
                                 voice: "story/1002/110169/1B946524",
                                 npc: 110022,
                                 next: 11102819,
@@ -51490,7 +51491,7 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11102826,
-                                content: "はいっ！了解であります、長官！",
+                                content: "はっ！了解であります、長官！",
                                 voice: "story/1102/111028/1BCB7564",
                                 npc: 111001,
                             },
@@ -51568,7 +51569,7 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11102910,
-                                content: "エイダ。黙って歩{性别2:け|く}。",
+                                content: "エイダ。黙って歩{性别2:け|いて}。",
                                 voice: "story/1102/111029/1BCB832C",
                                 npc: 111126,
                                 next: 11102911,
@@ -51624,7 +51625,7 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11103106,
-                                content: "ダメだ、動{性别2:くな|かないで}。",
+                                content: "ダメ{性别2:だ|}、動{性别2:くな|かないで}。",
                                 voice: "story/1102/111031/1BCBA354",
                                 npc: 111126,
                                 next: 11103107,
@@ -51748,7 +51749,7 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11103123,
-                                content: "凶暴なにゃんこさんだね！",
+                                content: "トゲトゲ猫ちゃんだね！",
                                 voice: "story/1102/111031/1BCBA61E",
                                 npc: 111001,
                                 next: 11103124,
@@ -51763,7 +51764,7 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11103125,
-                                content: "ラジャー！偵察班、必ず任務を果たします！",
+                                content: "ラジャー！偵察兵エイダ、必ず任務を果たします！",
                                 voice: "story/1102/111031/1BCBA672",
                                 npc: 111001,
                             },
@@ -53226,7 +53227,8 @@ export const questData_jp: QuestStory[] = [
                             },
                             {
                                 id: 11106102,
-                                content: "（……情報では、アルカノの町は四年前に壊滅したはずだ。もう、ここまで復興しているのか……？）",
+                                content:
+                                    "（……情報では、アルカノの町は四年前に壊滅したはず{性别2:だ|}。もう、ここまで復興している{性别2:のか|の}……？）",
                                 voice: "story/1102/111061/1BCD8EDC",
                                 npc: 111126,
                                 speakerName: "「戦車」ヴィクター？",
@@ -53302,7 +53304,7 @@ export const questData_jp: QuestStory[] = [
                             {
                                 id: 11106112,
                                 content:
-                                    "……わかっている。私の過去は空白だ。かすかな記憶の欠片さえ、何ひとつ思い出せない。それでも、かまわない。",
+                                    "……わかっている。私の過去は空白{性别2:だ|}。かすかな記憶の欠片さえ、何ひとつ思い出せない。それでも、かまわない。",
                                 voice: "story/1102/111061/1BCD9080",
                                 npc: 111126,
                                 speakerName: "「戦車」ヴィクター？",

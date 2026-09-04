@@ -54617,7 +54617,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11106555,
                                 content:
-                                    "<I>D’après lui, il s’agit d’une substance capable de créer d’innombrables copies à partir d’un <H>prototype</> servant de modèle. Elle serait probablement gardée par « Maman Lapin ». Mais sous quelle forme exactement... même le commandant l’ignorait.</>",
+                                    '<I>D’après lui, il s’agit d’une substance capable de créer d’innombrables copies à partir d’un</> <I spec="H">prototype</> <I>servant de modèle. Elle serait probablement gardée par « Maman Lapin ». Mais sous quelle forme exactement... même le commandant l’ignorait.</>',
                                 voice: "story/1102/111065/1BCDD904",
                                 npc: 111126,
                                 next: 11106556,

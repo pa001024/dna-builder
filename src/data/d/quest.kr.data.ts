@@ -58358,7 +58358,7 @@ export const questData_kr: QuestStory[] = [
                             },
                             {
                                 id: 11113504,
-                                content: "지금이라도 녀석들을 잡아내면... 날 다시 믿어 줄 거야!",
+                                content: "지금이라도 녀석을 잡아내면... 날 다시 믿어 줄 거야!",
                                 voice: "story/1102/111096/1BD24D40",
                                 npc: 111110,
                             },

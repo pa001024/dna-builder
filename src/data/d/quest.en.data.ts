@@ -60032,7 +60032,7 @@ export const questData_en: QuestStory[] = [
                             },
                             {
                                 id: 11115214,
-                                content: "Good thing Mother Bunny was here.\n Exactly.\n Joy, you're not hurt, are you?",
+                                content: "Good thing Mother Bunny was here. Exactly.\nJoy, you're not hurt, are you?",
                                 voice: "story/1102/111096/1BD365CC",
                                 speakerName: "Villagers' Voices",
                                 next: 11115215,
@@ -62901,7 +62901,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 11120305,
                                 content:
-                                    "No... I made her. She is the replica closest to the<H>real Ada</>. The closest replica of <H>me</>.",
+                                    "No... I made her. She is the replica closest to the <H>real Ada</>. The closest replica of <H>me</>.",
                                 voice: "story/1102/111096/1BD6A90A",
                                 npc: 111003,
                                 next: 11120306,

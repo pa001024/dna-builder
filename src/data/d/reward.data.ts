@@ -16820,7 +16820,7 @@ const t: import("../data-types").Reward[] = [
                 n: "璀璨晶块",
             },
             {
-                id: 110062,
+                id: 110073,
                 t: "Resource",
                 c: 40,
                 n: "晶块自选礼箱·其三",
@@ -16839,7 +16839,7 @@ const t: import("../data-types").Reward[] = [
                 n: "璀璨晶块",
             },
             {
-                id: 110062,
+                id: 110073,
                 t: "Resource",
                 c: 64,
                 n: "晶块自选礼箱·其三",
@@ -16858,7 +16858,7 @@ const t: import("../data-types").Reward[] = [
                 n: "璀璨晶块",
             },
             {
-                id: 110062,
+                id: 110073,
                 t: "Resource",
                 c: 90,
                 n: "晶块自选礼箱·其三",
@@ -67026,7 +67026,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110067,
+                id: 110065,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·水",
@@ -67038,7 +67038,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110065,
+                id: 110063,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·火",
@@ -67050,7 +67050,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110066,
+                id: 110064,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·雷",
@@ -67062,7 +67062,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110064,
+                id: 110062,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·风",
@@ -67074,7 +67074,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110069,
+                id: 110067,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·暗",
@@ -67086,7 +67086,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110068,
+                id: 110066,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·光",
@@ -75233,28 +75233,28 @@ const t: import("../data-types").Reward[] = [
         m: "Sequence",
         child: [
             {
-                id: 41725,
+                id: 41726,
                 t: "Mod",
                 c: 1,
                 p: 10,
                 dp: 1,
-                n: "唤醒",
+                n: "永恒",
             },
             {
-                id: 42413,
+                id: 42421,
                 t: "Mod",
                 c: 1,
                 p: 45,
                 dp: 1,
-                n: "迅捷闪击",
+                n: "残影",
             },
             {
-                id: 43405,
+                id: 42403,
                 t: "Mod",
                 c: 1,
                 p: 45,
                 dp: 1,
-                n: "失速",
+                n: "瞬袭",
             },
         ],
     },
@@ -88999,7 +88999,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110067,
+                id: 110065,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·水",
@@ -89011,7 +89011,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110065,
+                id: 110063,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·火",
@@ -89023,7 +89023,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110066,
+                id: 110064,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·雷",
@@ -89035,7 +89035,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110064,
+                id: 110062,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·风",
@@ -89047,7 +89047,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110069,
+                id: 110067,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·暗",
@@ -89059,7 +89059,7 @@ const t: import("../data-types").Reward[] = [
         m: "Fixed",
         child: [
             {
-                id: 110068,
+                id: 110066,
                 t: "Resource",
                 c: 1,
                 n: "契约者魔之楔·光",
@@ -98159,12 +98159,12 @@ const t: import("../data-types").Reward[] = [
         m: "Sequence",
         child: [
             {
-                id: 51737,
+                id: 51738,
                 t: "Mod",
                 c: 1,
                 p: 1,
                 d: 1,
-                n: "决断",
+                n: "涅槃·决断",
             },
             {
                 id: 41737,
@@ -98208,6 +98208,13 @@ const t: import("../data-types").Reward[] = [
                 p: 49,
                 n: "深红凝珠",
             },
+            {
+                id: 41738,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                n: "涅槃·决断",
+            },
         ],
     },
     {
@@ -98215,12 +98222,12 @@ const t: import("../data-types").Reward[] = [
         m: "Sequence",
         child: [
             {
-                id: 51767,
+                id: 51768,
                 t: "Mod",
                 c: 1,
                 p: 1,
                 d: 1,
-                n: "决断·精炼",
+                n: "炽灼·决断",
             },
             {
                 id: 41767,
@@ -98263,6 +98270,13 @@ const t: import("../data-types").Reward[] = [
                 c: 88,
                 p: 49,
                 n: "深红凝珠",
+            },
+            {
+                id: 41768,
+                t: "Mod",
+                c: 1,
+                p: 10,
+                n: "炽灼·决断",
             },
         ],
     },

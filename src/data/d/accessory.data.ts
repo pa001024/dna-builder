@@ -5741,8 +5741,8 @@ export const skinData: SkinItem[] = [
     },
     {
         id: 2201,
-        name: "UI_Skin_Name_2201",
-        desc: "UI_Skin_Des_2201",
+        name: "{nickname2}的衣饰",
+        desc: "一人，一剑，一袭白衣。跨过汪洋与寒夜，只为在黎明的尽头相逢。",
         icon: "T_Head_WeitaF",
         rarity: 5,
         charId: 2201,
@@ -6501,8 +6501,8 @@ export const skinData: SkinItem[] = [
     },
     {
         id: 220101,
-        name: "UI_Skin_Name_2201",
-        desc: "UI_Skin_Des_2201",
+        name: "{nickname2}的衣饰",
+        desc: "一人，一剑，一袭白衣。跨过汪洋与寒夜，只为在黎明的尽头相逢。",
         icon: "T_Head_WeitaM",
         rarity: 5,
         charId: 220101,
