@@ -233,6 +233,47 @@ describe("CharBuild类测试", () => {
         expect(buffedDamage / baseDamage).toBeCloseTo(1.5, 5)
     })
 
+    it("技能命名空间应保留技能上下文并应用召唤物伤害加成", () => {
+        const createBuild = (buffs: LeveledBuff[]) =>
+            new CharBuild({
+                char: new LeveledChar("主角-水"),
+                skillLevel: 10,
+                hpPercent: 1,
+                resonanceGain: 0,
+                buffs,
+                melee: new LeveledWeapon(10302),
+                ranged: new LeveledWeapon(20601),
+                baseName: "斩首行动",
+                enemyId: 130,
+                enemyLevel: 80,
+                enemyResistance: 0,
+                targetFunction: "e::召唤物伤害",
+            })
+
+        const baseBuild = createBuild([])
+        const buffedBuild = createBuild([
+            new LeveledBuff({
+                名称: "召唤物伤害测试",
+                描述: "测试用召唤物伤害加成",
+                召唤物伤害: 0.5,
+            }),
+        ])
+        const baseDamage = baseBuild.calculateTargetFunction(undefined, "e::召唤物伤害")
+        const buffedDamage = buffedBuild.calculateTargetFunction(undefined, "e::召唤物伤害")
+
+        expect(baseDamage).toBeGreaterThan(0)
+        expect(buffedDamage / baseDamage).toBeCloseTo(1.5, 5)
+    })
+
+    it("角色、近战、远程命名空间支持中英文别名并拒绝无效命名空间", () => {
+        const build = createCharBuild()
+        expect(build.validateAST("角色::攻击")).toBeUndefined()
+        expect(build.validateAST("character::攻击")).toBeUndefined()
+        expect(build.evaluateAST("近战::攻击")).toBeCloseTo(build.evaluateAST("melee::攻击"), 6)
+        expect(build.evaluateAST("远程::攻击")).toBeCloseTo(build.evaluateAST("ranged::攻击"), 6)
+        expect(build.validateAST("invalid::攻击")).toContain('无效命名空间: "invalid"')
+    })
+
     it("[召唤物·战车]技能伤害应被无止无休5熔的召唤物属性继承比例增幅", () => {
         const createBuild = (buffs: LeveledBuff[]) =>
             new CharBuild({

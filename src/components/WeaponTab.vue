@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
-import { CharAttr, CharBuild, LeveledMod, LeveledWeapon } from "@/data"
+import { CharAttr, CharBuild, LeveledMod, type LeveledSkill, LeveledWeapon } from "@/data"
 import { format100, format100r, formatWeaponProp } from "@/util"
 
 const props = defineProps<{
@@ -15,9 +15,25 @@ const charSettings = useCharSettings(charIdRef)
 const weaponAttrs = computed(() => props.charBuild.calculateWeaponAttributes(props.charBuild[`${props.wkey}Weapon`]).weapon!)
 
 const emit = defineEmits<{
-    addSkill: [skill: string]
+    addSkill: [skill: string | { fieldName: string; skill: LeveledSkill }]
     openWeaponSelect: []
 }>()
+
+/**
+ * 获取武器页签在表达式中使用的中文命名空间。
+ * @returns 近战、远程或同律命名空间
+ */
+function getWeaponNamespace() {
+    return { melee: "近战", ranged: "远程", skill: "同律" }[props.wkey]
+}
+
+/**
+ * 将点击的武器属性插入目标函数。
+ * @param key 武器属性键名
+ */
+function addWeaponAttribute(key: string) {
+    emit("addSkill", `${getWeaponNamespace()}::${key}!`)
+}
 
 const baseWeapon = computed(() => {
     let wkey = props.wkey
@@ -418,7 +434,7 @@ const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
                 </template>
                 <div
                     class="cursor-pointer flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
-                    @click="$emit('addSkill', `${wkey}::${key}!`)"
+                    @click="addWeaponAttribute(key)"
                 >
                     <div class="flex items-center gap-1 text-sm text-base-content/80">
                         <span>{{

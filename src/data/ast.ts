@@ -22,6 +22,8 @@ export interface ASTProperty extends ASTNodeBase {
     name: string
     namespace?: string // 命名空间 (从 xxx::yyy 中提取的 xxx)
     forceAttr?: boolean // ! 后缀: 强制按属性值解析，跳过技能字段匹配
+    /** 解析后绑定的技能上下文，避免计算阶段再次按名称查找 */
+    skillContext?: import("./leveled/LeveledSkill").LeveledSkill
 }
 
 export interface ASTFunction extends ASTNodeBase {

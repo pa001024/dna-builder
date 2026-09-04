@@ -35,7 +35,7 @@ const visibleSources = computed(() => dotFrequencies.value.sources.filter(source
  */
 function sourceDamage(type: DotSourceConfig["type"]): number {
     if (typeof props.charBuild.calculateDotDamage !== "function") return 0
-    const namespace = type === "skill" ? "角色" : type === "melee" ? "melee" : type === "ranged" ? "ranged" : "同律"
+    const namespace = type === "skill" ? "角色" : type === "melee" ? "近战" : type === "ranged" ? "远程" : "同律"
     return props.charBuild.calculateDotDamage(namespace)
 }
 
@@ -76,8 +76,8 @@ function sourceName(type: DotSourceConfig["type"]): string {
  */
 function sourceNamespace(type: DotSourceConfig["type"]): string {
     if (type === "skill") return "角色"
-    if (type === "melee") return "melee"
-    if (type === "ranged") return "ranged"
+    if (type === "melee") return "近战"
+    if (type === "ranged") return "远程"
     return "同律"
 }
 </script>

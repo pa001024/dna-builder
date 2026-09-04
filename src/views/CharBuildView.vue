@@ -27,6 +27,7 @@ import {
     LeveledChar,
     LeveledCharHelper,
     LeveledModHelper,
+    type LeveledSkill,
     LeveledWeapon,
     LeveledWeaponHelper,
     modData,
@@ -1149,15 +1150,19 @@ function toggleSection(section: keyof typeof collapsedSections.value) {
 
 const charTab = ref(charBuild.value.selectedSkillType)
 
-function addSkill(skillName: string) {
-    const cleaned = skillName.replace(/\//g, "_")
+function addSkill(skill: string | { fieldName: string; skill: LeveledSkill }) {
+    if (typeof skill !== "string") {
+        targetFunction.value += `${skill.skill.safeName}::${skill.fieldName}`
+        return
+    }
+    const cleaned = skill.replace(/\//g, "_")
     // 已带命名空间的字段（如 近战::攻击）直接追加
-    if (skillName.includes("::")) {
+    if (skill.includes("::")) {
         targetFunction.value += cleaned
         return
     }
     // 未带命名空间的技能字段自动补全对应命名空间（角色主技能 e/q/p，其余按技能 safeName）
-    const ns = getSkillFieldNamespace(skillName)
+    const ns = getSkillFieldNamespace(skill)
     if (ns) {
         targetFunction.value += `${ns}::${cleaned}`
         return

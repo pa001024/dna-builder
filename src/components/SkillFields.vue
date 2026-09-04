@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
-import type { CharAttr, CharBuild, LeveledSkill, SkillField } from "@/data"
+import type { CharAttr, CharBuild, LeveledSkill, LeveledSkillField, SkillField } from "@/data"
 import { formatSkillProp } from "@/util"
 
 // 组件属性
@@ -13,7 +13,7 @@ const props = defineProps<{
 
 // 组件事件
 const emit = defineEmits<{
-    addSkill: [fieldName: string]
+    addSkill: [selection: { fieldName: string; skill: LeveledSkill }]
 }>()
 
 // 计算技能字段列表
@@ -123,11 +123,12 @@ function syncTouchExpandMode() {
 
 /**
  * 处理字段点击事件。
- * 保留原有 addSkill 行为。
+ * 将当前技能实例随字段一起传出，调用方无需再按字段名反查技能命名空间。
  * @param field 技能字段。
  */
-function handleFieldClick(field: SkillField) {
-    emit("addSkill", field.名称)
+function handleFieldClick(field: LeveledSkillField) {
+    if (!props.skill) return
+    emit("addSkill", { fieldName: field.safeName, skill: props.skill })
 }
 
 /**
