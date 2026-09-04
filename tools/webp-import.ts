@@ -296,6 +296,7 @@ async function evaluateDataUrls(): Promise<Set<string>> {
     const { hardBossMap } = await loadModule<{ hardBossMap: Map<number, IconItem> }>("d/hardboss.data.ts")
     const { subRegionData } = await loadModule<{ subRegionData: IconItem[] }>("d/subregion.data.ts")
     const { extractionTreasureData } = await loadModule<{ extractionTreasureData: IconItem[] }>("d/solotreasure.data.ts")
+    const { skinGachaTabs } = await loadModule<{ skinGachaTabs: IconItem[] }>("d/skingacha.data.ts")
 
     const { LeveledChar } = await loadModule<{ LeveledChar: LeveledCharLike }>("leveled/LeveledChar.ts")
     const { LeveledWeapon } = await loadModule<{ LeveledWeapon: LeveledWeaponLike }>("leveled/LeveledWeapon.ts")
@@ -478,6 +479,15 @@ async function evaluateDataUrls(): Promise<Set<string>> {
     for (const treasure of extractionTreasureData) {
         if (treasure.icon) {
             urls.add(`/imgs/res/${treasure.icon}.webp`)
+        }
+    }
+
+    // 万华（皮肤抽卡）页签 Banner: 视图（SkinGachaView 万华模拟页面）左侧卡池列表与
+    // 背景回退大图统一按 `/imgs/webp/${tab.icon}.webp` 直接引用（icon 已是完整 T_Gacha_PoolBanner_* 名）。
+    // 该引用在视图里是 ${icon} 模板，文本扫描只能得到骨架正则，必须在此枚举页签数据才能生成真实任务。
+    for (const tab of skinGachaTabs) {
+        if (tab.icon) {
+            urls.add(`/imgs/webp/${tab.icon}.webp`)
         }
     }
 
