@@ -49,7 +49,6 @@ type WeaponNumberFieldKey =
     | "skillPowerMultiplier"
     | "fullnessConversion"
     | "fullnessModBonus"
-    | "fullnessConvertRatio"
 
 type SkillNumberFieldKey =
     | "enemyResistance"
@@ -75,7 +74,6 @@ type SkillNumberFieldKey =
     | "skillFlatDamage"
     | "skillPowerMultiplier"
     | "fullnessPower"
-    | "fullnessConvertRatio"
 
 type WeaponToggleFieldKey =
     | "weaponMasteryEnabled"
@@ -125,10 +123,9 @@ interface WeaponDamageInput {
     skillWeaponEnabled: boolean
     sameDamageType: boolean
     imbalanceEnabled: boolean
-    // 充盈：武器充盈转化（该武器作用域），充盈威力基础（角色MOD加成 + 其他武器转化），转充盈比例
+    // 充盈：武器充盈转化（该武器作用域），充盈威力基础（角色MOD加成 + 其他武器转化）
     fullnessConversion: number
     fullnessModBonus: number
-    fullnessConvertRatio: number
     // 当前伤害字段是否为充盈伤害（tag 含“充盈”）
     fullnessFieldEnabled: boolean
 }
@@ -157,9 +154,8 @@ interface SkillDamageInput {
     skillFlatDamage: number
     skillPowerMultiplier: number
     imbalanceEnabled: boolean
-    // 充盈：充盈威力（角色属性汇总），转充盈比例；当前伤害字段是否为充盈伤害（tag 含“充盈”）
+    // 充盈：充盈威力（角色属性汇总）；当前伤害字段是否为充盈伤害（tag 含“充盈”）
     fullnessPower: number
-    fullnessConvertRatio: number
     fullnessFieldEnabled: boolean
 }
 
@@ -334,7 +330,6 @@ function createDefaultWeaponInput(): WeaponDamageInput {
         imbalanceEnabled: false,
         fullnessConversion: 0,
         fullnessModBonus: 0,
-        fullnessConvertRatio: 0,
         fullnessFieldEnabled: false,
     }
 }
@@ -369,7 +364,6 @@ function createDefaultSkillInput(): SkillDamageInput {
         skillPowerMultiplier: 1,
         imbalanceEnabled: false,
         fullnessPower: 0,
-        fullnessConvertRatio: 0,
         fullnessFieldEnabled: false,
     }
 }
@@ -671,7 +665,6 @@ function buildWeaponInputFromCharBuild(build: CharBuild): WeaponDamageInput {
     const selectedWeaponOverflow = Math.max(0, (weaponAttrs?.触发 || 0) - 1)
     result.fullnessConversion = weaponFullnessConversion
     result.fullnessModBonus = Math.max(0, attrs.充盈威力 - selectedWeaponOverflow * weaponFullnessConversion)
-    result.fullnessConvertRatio = attrs.转充盈 || 0
     result.fullnessFieldEnabled = isResolvedFieldFullness(build)
     return result
 }
@@ -718,7 +711,6 @@ function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
     // 注意：calculateAttributes 只含角色MOD加成，武器溢出转化需经 calculateWeaponAttributes 汇总。
     const weaponAttrsForFullness = build.calculateWeaponAttributes()
     result.fullnessPower = weaponAttrsForFullness.充盈威力 || 0
-    result.fullnessConvertRatio = attrs.转充盈 || 0
     result.fullnessFieldEnabled = isResolvedFieldFullness(build)
     return result
 }
@@ -1118,14 +1110,11 @@ function buildWeaponStepDefinitions(): DamageStepDefinition<WeaponDamageInput>[]
         {
             id: "fullnessMultiplier",
             title: "充盈乘区",
-            formula: "充盈乘区 = 字段为充盈伤害时(1 + 总充盈威力)，否则(1 + 转充盈 * 总充盈威力)",
-            compute: ({ input, get }) =>
-                input.fullnessFieldEnabled ? 1 + get("fullnessPower") : 1 + input.fullnessConvertRatio * get("fullnessPower"),
+            formula: "充盈乘区 = 视为充盈伤害时(1 + 总充盈威力)，否则为 1",
+            compute: ({ input, get }) => (input.fullnessFieldEnabled ? 1 + get("fullnessPower") : 1),
             explain: ({ input, get }, value) => {
                 const power = get("fullnessPower")
-                const expression = input.fullnessFieldEnabled
-                    ? `1 + ${formatNumber(power)}`
-                    : `1 + ${formatNumber(input.fullnessConvertRatio)} * ${formatNumber(power)}`
+                const expression = input.fullnessFieldEnabled ? `1 + ${formatNumber(power)}` : "1"
                 return `${expression} = ${formatNumber(value)}`
             },
         },
@@ -1343,14 +1332,11 @@ function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
         {
             id: "fullnessMultiplier",
             title: "充盈乘区",
-            formula: "充盈乘区 = 字段为充盈伤害时(1 + 总充盈威力)，否则(1 + 转充盈 * 总充盈威力)",
-            compute: ({ input, get }) =>
-                input.fullnessFieldEnabled ? 1 + get("fullnessPower") : 1 + input.fullnessConvertRatio * get("fullnessPower"),
+            formula: "充盈乘区 = 视为充盈伤害时(1 + 总充盈威力)，否则为 1",
+            compute: ({ input, get }) => (input.fullnessFieldEnabled ? 1 + get("fullnessPower") : 1),
             explain: ({ input, get }, value) => {
                 const power = get("fullnessPower")
-                const expression = input.fullnessFieldEnabled
-                    ? `1 + ${formatNumber(power)}`
-                    : `1 + ${formatNumber(input.fullnessConvertRatio)} * ${formatNumber(power)}`
+                const expression = input.fullnessFieldEnabled ? `1 + ${formatNumber(power)}` : "1"
                 return `${expression} = ${formatNumber(value)}`
             },
         },
@@ -1531,9 +1517,8 @@ const weaponNumberGroups: NumberFieldGroup<WeaponNumberFieldKey, WeaponToggleFie
         fields: [
             { key: "fullnessConversion", label: "充盈转化", step: "0.01" },
             { key: "fullnessModBonus", label: "充盈威力基础(角色MOD+其他武器)", step: "0.01" },
-            { key: "fullnessConvertRatio", label: "转充盈", step: "0.01" },
         ],
-        toggles: [{ key: "fullnessFieldEnabled", label: "字段为充盈伤害" }],
+        toggles: [{ key: "fullnessFieldEnabled", label: "视为充盈伤害" }],
         outputs: [
             { label: "总充盈威力", stepId: "fullnessPower" },
             { label: "充盈乘区", stepId: "fullnessMultiplier" },
@@ -1621,9 +1606,8 @@ const skillNumberGroups: NumberFieldGroup<SkillNumberFieldKey, SkillToggleFieldK
         title: "充盈",
         fields: [
             { key: "fullnessPower", label: "充盈威力", step: "0.01" },
-            { key: "fullnessConvertRatio", label: "转充盈", step: "0.01" },
         ],
-        toggles: [{ key: "fullnessFieldEnabled", label: "字段为充盈伤害" }],
+        toggles: [{ key: "fullnessFieldEnabled", label: "视为充盈伤害" }],
         outputs: [
             { label: "充盈乘区", stepId: "fullnessMultiplier" },
             { label: "充盈后最终伤害", stepId: "fullnessDamage" },
