@@ -1,4 +1,4 @@
-import { dungeonMap, resourceMap, rewardMap } from "@/data"
+import { dungeonMap, ironSurvivalDungeonData, monsterLevelDropData, resourceMap, rewardMap } from "@/data"
 import { charMap, draftMap, modMap } from "@/data/d"
 import { getHardBossDetail, hardBossMap } from "@/data/d/hardboss.data"
 import { questChainData } from "@/data/d/questchain.data"
@@ -159,7 +159,50 @@ export function collectResourceHardbossSources(resource: Resource): WeaponHardbo
 }
 
 /**
+ * 收集深境探险/扼守（铁血/灾厄）副本的补充奖励组 ID。
+ *
+ * 这类副本除 dungeon.r/sr（波次奖励）外，实际产出还分布在两份独立表里：
+ * - ironSurvivalDungeonData.IronRoundsReward(View)：等级档位奖励（元素晶块、深境罗盘等）；
+ * - monsterLevelDropData.RewardId：强敌/首领掉落（灾厄武器原型等）。
+ *
+ * 反查资源来源时需要把这两张表的奖励组也纳入扫描，否则像
+ * 深境探险 91604 掉落的「无止无休的原型」(15002) 这类道具在资源详情页会查不到副本来源。
+ * @param dungeonId 副本 ID
+ * @returns 补充奖励组 ID 列表（已去重）
+ */
+function collectIronSurvivalDungeonRewardIds(dungeonId: number): number[] {
+    const detail = ironSurvivalDungeonData[dungeonId]
+    if (!detail) {
+        return []
+    }
+
+    const rewardIds = new Set<number>()
+    for (const rewardId of Object.values(detail.IronRoundsRewardView ?? detail.IronRoundsReward ?? {})) {
+        if (rewardId > 0) {
+            rewardIds.add(rewardId)
+        }
+    }
+
+    for (const dropId of detail.MonsterLevelDrop ?? []) {
+        const drop = monsterLevelDropData[dropId]
+        if (!drop) {
+            continue
+        }
+        for (const rewardId of drop.RewardId ?? []) {
+            if (rewardId > 0) {
+                rewardIds.add(rewardId)
+            }
+        }
+    }
+
+    return [...rewardIds]
+}
+
+/**
  * 扫描奖励表，反查资源对应的副本来源。
+ *
+ * 除常规 dungeon.r/sr 波次奖励外，也会扫描深境探险/扼守副本的
+ * 等级档位奖励表与强敌掉落表（见 collectIronSurvivalDungeonRewardIds）。
  * @param resource 资源数据
  * @returns 副本来源列表
  */
@@ -168,7 +211,9 @@ export function collectResourceDungeonSources(resource: Resource): ResourceDunge
     const sourceKeySet = new Set<string>()
 
     dungeonMap.forEach(dungeon => {
-        const rewardIds = [...(dungeon.r || []), ...(dungeon.sr || [])]
+        const ironRewardIds = collectIronSurvivalDungeonRewardIds(dungeon.id)
+        const ironRewardIdSet = new Set(ironRewardIds)
+        const rewardIds = [...new Set([...(dungeon.r || []), ...(dungeon.sr || []), ...ironRewardIds])]
         rewardIds.forEach(rewardId => {
             const reward = rewardMap.get(rewardId)
             if (!reward) {
@@ -186,6 +231,9 @@ export function collectResourceDungeonSources(resource: Resource): ResourceDunge
                 return
             }
 
+            // 深境探险/扼守的补充奖励是“达到等级档位/击杀强敌”的条件掉落，
+            // 奖励组本身不含可换算的掉落概率，因此不展示 pp/times。
+            const isIronSurvivalReward = ironRewardIdSet.has(rewardId)
             sourceKeySet.add(key)
             sources.push({
                 key,
@@ -194,8 +242,8 @@ export function collectResourceDungeonSources(resource: Resource): ResourceDunge
                 dungeonType: dungeon.t,
                 dungeonLv: dungeon.lv,
                 rewardId,
-                pp: matched.pp,
-                times: matched.times,
+                pp: isIronSurvivalReward ? undefined : matched.pp,
+                times: isIronSurvivalReward ? undefined : matched.times,
             })
         })
     })
