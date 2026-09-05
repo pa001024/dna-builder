@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { t } from "i18next"
 import { computed, onMounted, ref, watch } from "vue"
-import { MATERIALS } from "@/api/app"
+import type { FloatWindowConfig } from "@/api/app"
+import { FLOAT_WINDOW_DEFAULTS, floatWindowDisable, floatWindowSet, floatWindowState, MATERIALS } from "@/api/app"
 import SafeModeQuizDialog from "@/components/SafeModeQuizDialog.vue"
 import { clearAllDataPackOpfs, getInstalledDataPackVersions, getMergedDataPackVersions } from "@/data/data-pack"
 import { deleteImgsCache, imgsDownloadState } from "@/data/imgs-runtime"
@@ -598,12 +599,102 @@ async function clearDataPackStorage() {
         isClearingDataPackOpfs.value = false
     }
 }
+
+// ===== 技能 CD 倒计时浮窗(E) =====
+const skillCdOverlayBusy = ref(false)
+const skillCdOverlayError = ref("")
+
+/**
+ * 把持久化设置组装成后端浮窗配置(触发键固定 E 键 0x45,颜色沿用默认色板)。
+ * @returns 后端 float_window_set 所需的完整配置
+ */
+function buildSkillCdOverlayConfig(): FloatWindowConfig {
+    return {
+        x: setting.skillCdOverlayX,
+        y: setting.skillCdOverlayY,
+        scale: setting.skillCdOverlayScale,
+        hideWhenReady: setting.skillCdOverlayHideWhenReady,
+        triggerKey: 0x45, // E
+        triggerCdSeconds: setting.skillCdOverlayCdSeconds,
+        gameOnlyTrigger: setting.skillCdOverlayGameOnly,
+        ringColor: FLOAT_WINDOW_DEFAULTS.ringColor,
+        progressColor: FLOAT_WINDOW_DEFAULTS.progressColor,
+        readyColor: FLOAT_WINDOW_DEFAULTS.readyColor,
+        textColor: FLOAT_WINDOW_DEFAULTS.textColor,
+        labelColor: FLOAT_WINDOW_DEFAULTS.labelColor,
+        discColor: FLOAT_WINDOW_DEFAULTS.discColor,
+    }
+}
+
+/**
+ * 把当前持久化设置应用到后端(启用=启动或更新;停用=关闭)。
+ * @param enable 目标启停状态,缺省取 store 中开关值
+ */
+async function syncSkillCdOverlay(enable = setting.skillCdOverlayEnabled) {
+    if (!env.isApp) return
+    skillCdOverlayBusy.value = true
+    skillCdOverlayError.value = ""
+    try {
+        if (enable) {
+            const state = await floatWindowSet(buildSkillCdOverlayConfig())
+            setting.skillCdOverlayRunning = state.enabled
+        } else {
+            await floatWindowDisable()
+            setting.skillCdOverlayRunning = false
+        }
+    } catch (error) {
+        skillCdOverlayError.value = error instanceof Error ? error.message : String(error)
+        setting.skillCdOverlayRunning = false
+        setting.skillCdOverlayEnabled = false
+        ui.showErrorMessage(skillCdOverlayError.value)
+    } finally {
+        skillCdOverlayBusy.value = false
+    }
+}
+
+/**
+ * 总开关变化:同步持久化开关并启停后端浮窗。
+ * @param checked 新开关值
+ */
+async function toggleSkillCdOverlay(checked: boolean) {
+    setting.skillCdOverlayEnabled = checked
+    await syncSkillCdOverlay(checked)
+}
+
+/**
+ * 局部配置变化(位置/CD 秒数/缩放等)即时应用到已开启的浮窗。
+ */
+async function applySkillCdOverlayChanges() {
+    if (!setting.skillCdOverlayEnabled) return
+    await syncSkillCdOverlay(true)
+}
+
+/**
+ * 页面挂载时对齐后端运行状态:应用重启后后端浮窗不会自启,
+ * 若持久化开关为开则自动按上次设置恢复,保证状态一致。
+ */
+async function syncSkillCdOverlayOnMount() {
+    if (!env.isApp) return
+    try {
+        const state = await floatWindowState()
+        setting.skillCdOverlayRunning = state.enabled
+        if (state.enabled) {
+            if (!setting.skillCdOverlayEnabled) setting.skillCdOverlayEnabled = true
+        } else if (setting.skillCdOverlayEnabled) {
+            await syncSkillCdOverlay(true)
+        }
+    } catch {
+        setting.skillCdOverlayRunning = false
+    }
+}
+
 onMounted(() => {
     if (!dataPack.status) {
         void dataPack.bootstrap()
     }
     // 懒加载系统字体列表（桌面端读注册表；Web 端需要用户手势授权，失败时可手动刷新重试）
     void setting.loadSystemFonts()
+    void syncSkillCdOverlayOnMount()
 })
 </script>
 
@@ -881,6 +972,147 @@ onMounted(() => {
                                 <div class="text-xs text-base-content/50">开启后所有页面的 CopyID 组件不再显示</div>
                             </span>
                             <input v-model="setting.hideID" type="checkbox" class="toggle toggle-secondary" />
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article v-if="env.isApp">
+                <SectionHeader no-animate compact kicker="GAME OVERLAY" :title="'技能CD浮窗(E)'" />
+                <div
+                    class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    :style="{ animationDelay: '0.03s' }"
+                >
+                    <div class="flex flex-col gap-2">
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                技能 CD 倒计时浮窗
+                                <div class="text-xs text-base-content/50">
+                                    原生 Win32 置顶浮窗(点击穿透、不抢焦点);开启后游戏中按 E 即从完整 CD
+                                    {{ setting.skillCdOverlayCdSeconds }} 秒开始倒计时,技能就绪时整环变绿。
+                                </div>
+                                <div v-if="skillCdOverlayError" class="mt-0.5 text-xs text-error">
+                                    {{ skillCdOverlayError }}
+                                </div>
+                            </span>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <span v-if="skillCdOverlayBusy" class="loading loading-spinner loading-xs" />
+                                <span
+                                    v-else
+                                    class="text-xs"
+                                    :class="setting.skillCdOverlayRunning ? 'text-success' : 'text-base-content/40'"
+                                    >{{ setting.skillCdOverlayRunning ? "运行中" : "未运行" }}</span
+                                >
+                                <input
+                                    type="checkbox"
+                                    class="toggle toggle-secondary"
+                                    :checked="setting.skillCdOverlayEnabled"
+                                    :disabled="skillCdOverlayBusy"
+                                    @change="toggleSkillCdOverlay(($event.target as HTMLInputElement).checked)"
+                                />
+                            </div>
+                        </div>
+                        <div
+                            class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                浮窗位置(屏幕左上角)
+                                <div class="text-xs text-base-content/50">游戏窗口化后建议放在技能条附近,如 E 技能图标旁</div>
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs text-base-content/60">X</span>
+                                <input
+                                    v-model.number="setting.skillCdOverlayX"
+                                    type="number"
+                                    class="input input-bordered input-sm w-24"
+                                    min="0"
+                                    :disabled="skillCdOverlayBusy"
+                                    @change="applySkillCdOverlayChanges()"
+                                />
+                                <span class="text-xs text-base-content/60">Y</span>
+                                <input
+                                    v-model.number="setting.skillCdOverlayY"
+                                    type="number"
+                                    class="input input-bordered input-sm w-24"
+                                    min="0"
+                                    :disabled="skillCdOverlayBusy"
+                                    @change="applySkillCdOverlayChanges()"
+                                />
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                完整冷却(秒)
+                                <div class="text-xs text-base-content/50">按 E 施放后从该值开始倒计时</div>
+                            </span>
+                            <input
+                                v-model.number="setting.skillCdOverlayCdSeconds"
+                                type="number"
+                                class="input input-bordered input-sm w-24"
+                                min="1"
+                                max="120"
+                                step="0.5"
+                                :disabled="skillCdOverlayBusy"
+                                @change="applySkillCdOverlayChanges()"
+                            />
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                浮窗缩放
+                                <div class="text-xs text-base-content/50">按屏幕分辨率缩放浮窗尺寸</div>
+                            </span>
+                            <div class="flex min-w-52 items-center gap-2">
+                                <input
+                                    :value="setting.skillCdOverlayScale"
+                                    type="range"
+                                    class="range range-secondary w-full"
+                                    min="0.5"
+                                    max="3"
+                                    step="0.1"
+                                    :disabled="skillCdOverlayBusy"
+                                    @input="setting.skillCdOverlayScale = +($event.target as HTMLInputElement)!.value"
+                                    @change="applySkillCdOverlayChanges()"
+                                />
+                                <span class="w-10 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                    setting.skillCdOverlayScale.toFixed(1)
+                                }}</span>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                就绪后隐藏
+                                <div class="text-xs text-base-content/50">CD 归零立即隐藏该条目,只在使用期间显示</div>
+                            </span>
+                            <input
+                                v-model="setting.skillCdOverlayHideWhenReady"
+                                type="checkbox"
+                                class="toggle toggle-secondary"
+                                :disabled="skillCdOverlayBusy"
+                                @change="applySkillCdOverlayChanges()"
+                            />
+                        </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                仅游戏窗口前台触发
+                                <div class="text-xs text-base-content/50">开启后只在 EM 游戏进程获得焦点时响应 E 键,避免聊天输入误触发</div>
+                            </span>
+                            <input
+                                v-model="setting.skillCdOverlayGameOnly"
+                                type="checkbox"
+                                class="toggle toggle-secondary"
+                                :disabled="skillCdOverlayBusy"
+                                @change="applySkillCdOverlayChanges()"
+                            />
                         </div>
                     </div>
                 </div>

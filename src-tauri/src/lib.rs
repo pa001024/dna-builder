@@ -3755,6 +3755,37 @@ fn get_window_by_process_name(process_name: String) -> Result<isize, String> {
         .ok_or_else(|| format!("未找到进程对应窗口: {process_name}"))
 }
 
+/// 启动/更新通用倒计时浮窗(E 技能 CD 倒计时;包含按键触发等配置)。
+#[tauri::command]
+fn float_window_set(
+    config: submodules::float_window::FloatWindowConfig,
+) -> Result<submodules::float_window::FloatWindowState, String> {
+    submodules::float_window::set(config)
+}
+
+/// 停止通用倒计时浮窗。
+#[tauri::command]
+fn float_window_disable() -> Result<String, String> {
+    submodules::float_window::disable();
+    Ok("倒计时浮窗已关闭".to_string())
+}
+
+/// 通用入口:推送/重设一个倒计时条目(如 Q 技能、道具 CD)。
+#[tauri::command]
+fn float_window_trigger(
+    id: String,
+    label: String,
+    total_seconds: f64,
+) -> Result<submodules::float_window::FloatWindowState, String> {
+    submodules::float_window::trigger(&id, &label, total_seconds)
+}
+
+/// 查询倒计时浮窗当前状态。
+#[tauri::command]
+fn float_window_state() -> submodules::float_window::FloatWindowState {
+    submodules::float_window::state()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut app = tauri::Builder::default()
@@ -3966,6 +3997,10 @@ pub fn run() {
         eval_cloudgame_window,
         set_window_style,
         get_window_by_process_name,
+        float_window_set,
+        float_window_disable,
+        float_window_trigger,
+        float_window_state,
         get_documents_dir,
         create_desktop_shortcut,
         rename_file,
