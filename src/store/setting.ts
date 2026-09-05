@@ -58,6 +58,8 @@ export const useSettingStore = defineStore("setting", {
             autoSign: useLocalStorage("setting_auto_sign", false),
             launchAtStartup: useLocalStorage("setting_launch_at_startup", false),
             initScriptHotkeysAtStartup: useLocalStorage("setting_init_script_hotkeys_at_startup", true),
+            // 隐藏全局 CopyID 组件（开启后所有页面不再显示 ID 复制按钮）
+            hideID: useLocalStorage("setting_hide_id", false),
             nextSignCheckTime: useLocalStorage("setting_next_sign_check_time", 0),
             // 剧情文本替换设置
             protagonistName1: useLocalStorage("story_protagonist_name_1", "维塔"),

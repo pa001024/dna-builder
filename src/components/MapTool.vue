@@ -67,6 +67,12 @@ interface MapPoint {
     y: number
 }
 
+interface PinchGestureState {
+    initialDistance: number
+    initialZoom: number
+    mapPointAtMidpoint: MapPoint
+}
+
 interface RcPetRate {
     petId: number
     petName: string
@@ -232,6 +238,8 @@ function resolveMapMappingOffset(mapping: { name: string; pos: number[] }): [num
 
 const containerRef = ref<HTMLElement>()
 const canvasRef = ref<HTMLCanvasElement>()
+/** 悬浮侧栏根元素引用，用于测量其占位宽度。 */
+const sidebarRef = ref<HTMLElement>()
 const route = useRoute()
 const router = useRouter()
 
@@ -297,6 +305,8 @@ const pointFocusAnimationState = ref<{
 const isDragging = ref(false)
 const dragDistance = ref(0)
 const lastPointerPosition = ref({ x: 0, y: 0 })
+const activePointers = new Map<number, MapPoint>()
+let pinchGestureState: PinchGestureState | null = null
 
 const selectedSubRegionId = ref<number | null>(null)
 const isAllSubRegionsSelected = ref(false)
@@ -1193,8 +1203,8 @@ function animatePointFocus(targetMapX: number, targetMapY: number) {
     const endZoom = Math.min(maxZoom, Math.max(startZoom * 1.6, 1.4))
     const startPan = { ...panOffset.value }
     const endPan = {
-        x: container.clientWidth / 2 - targetMapX * endZoom,
-        y: container.clientHeight / 2 - targetMapY * endZoom,
+        x: getMapViewportCenterX() - targetMapX * endZoom,
+        y: getMapViewportCenterY() - targetMapY * endZoom,
     }
     const snapshotCanvas = document.createElement("canvas")
     const dpr = window.devicePixelRatio || 1
@@ -1207,8 +1217,8 @@ function animatePointFocus(targetMapX: number, targetMapY: number) {
         snapshotCanvas,
         snapshotZoom: startZoom,
         snapshotPan: startPan,
-        centerX: container.clientWidth / 2,
-        centerY: container.clientHeight / 2,
+        centerX: getMapViewportCenterX(),
+        centerY: getMapViewportCenterY(),
         dpr,
     }
     capturePointFocusSnapshot(mainCanvas)
@@ -1233,8 +1243,8 @@ function animatePointFocus(targetMapX: number, targetMapY: number) {
                     snapshotCanvas,
                     snapshotZoom: currentZoom,
                     snapshotPan: currentPan,
-                    centerX: container.clientWidth / 2,
-                    centerY: container.clientHeight / 2,
+                    centerX: getMapViewportCenterX(),
+                    centerY: getMapViewportCenterY(),
                     dpr,
                 }
                 lastRenderTime = now
@@ -1715,16 +1725,51 @@ function screenToMap(screenX: number, screenY: number) {
 }
 
 /**
- * 重置视图到居中适配状态。
+ * 可视地图区域左偏移（相对容器坐标）。
+ * 侧栏为悬浮浮层后画布铺满容器，其下方区域被遮挡，缩放/居中/聚焦等需按可视区计算，
+ * 从而保持与原先侧栏占宽布局一致（按钮与可视区中心随侧栏右缘移动）。
+ * @returns 可视区左边缘的像素偏移
+ */
+function getMapViewportLeft(): number {
+    if (isSidebarCollapsed.value) return 0
+    return sidebarRef.value?.offsetWidth ?? 320
+}
+
+/**
+ * 可视地图区域中心 X（相对容器坐标）。
+ * @returns 中心横坐标
+ */
+function getMapViewportCenterX(): number {
+    const container = containerRef.value
+    if (!container) return 0
+    const left = getMapViewportLeft()
+    const width = Math.max(1, container.clientWidth - left)
+    return left + width / 2
+}
+
+/**
+ * 可视地图区域中心 Y（相对容器坐标）。
+ * @returns 中心纵坐标
+ */
+function getMapViewportCenterY(): number {
+    const container = containerRef.value
+    if (!container) return 0
+    return container.clientHeight / 2
+}
+
+/**
+ * 重置视图到居中适配状态（按可视地图区域适配）。
  */
 function resetView() {
     const container = containerRef.value
     if (!container) return
     cancelPointFocusAnimation()
-    const fitZoom = Math.min(container.clientWidth / renderSize.value.width, container.clientHeight / renderSize.value.height)
+    const viewportLeft = getMapViewportLeft()
+    const viewportWidth = Math.max(1, container.clientWidth - viewportLeft)
+    const fitZoom = Math.min(viewportWidth / renderSize.value.width, container.clientHeight / renderSize.value.height)
     zoom.value = Math.max(minZoom, Math.min(maxZoom, fitZoom))
     panOffset.value = {
-        x: (container.clientWidth - renderSize.value.width * zoom.value) / 2,
+        x: viewportLeft + (viewportWidth - renderSize.value.width * zoom.value) / 2,
         y: (container.clientHeight - renderSize.value.height * zoom.value) / 2,
     }
     requestDraw()
@@ -1743,7 +1788,10 @@ function focusSubRegion(subRegionId: number) {
         requestDraw()
         return
     }
-    panOffset.value = { x: container.clientWidth / 2 - target.mapX * zoom.value, y: container.clientHeight / 2 - target.mapY * zoom.value }
+    panOffset.value = {
+        x: getMapViewportCenterX() - target.mapX * zoom.value,
+        y: getMapViewportCenterY() - target.mapY * zoom.value,
+    }
     requestDraw()
 }
 
@@ -1777,7 +1825,10 @@ function focusTeleportPoint(subRegionId: number, tpPoint: ProjectedTeleportPoint
         requestDraw()
         return
     }
-    panOffset.value = { x: container.clientWidth / 2 - tpPoint.x * zoom.value, y: container.clientHeight / 2 - tpPoint.y * zoom.value }
+    panOffset.value = {
+        x: getMapViewportCenterX() - tpPoint.x * zoom.value,
+        y: getMapViewportCenterY() - tpPoint.y * zoom.value,
+    }
     requestDraw()
 }
 
@@ -2797,19 +2848,82 @@ function updateHoveredSubRegionByPointerEvent(event: PointerEvent) {
  * 指针按下进入拖拽状态。
  */
 function handlePointerDown(event: PointerEvent) {
-    if (event.button !== 0) return
+    if (event.pointerType === "mouse" && event.button !== 0) return
+
+    activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    ;(event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId)
+
+    if (activePointers.size >= 2) {
+        isDragging.value = true
+        dragDistance.value = Math.max(dragDistance.value, 5)
+        beginPinchGesture()
+        return
+    }
+
     isDragging.value = true
     dragDistance.value = 0
     lastPointerPosition.value = { x: event.clientX, y: event.clientY }
-    ;(event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId)
+}
+
+/**
+ * 读取前两个活动指针在画布中的距离和中点。
+ */
+function getPinchMetrics(): { distance: number; midpoint: MapPoint } | null {
+    const canvas = canvasRef.value
+    if (!canvas || activePointers.size < 2) return null
+
+    const pointers = [...activePointers.values()].slice(0, 2)
+    const rect = canvas.getBoundingClientRect()
+    const first = { x: pointers[0].x - rect.left, y: pointers[0].y - rect.top }
+    const second = { x: pointers[1].x - rect.left, y: pointers[1].y - rect.top }
+
+    return {
+        distance: Math.hypot(second.x - first.x, second.y - first.y),
+        midpoint: { x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 },
+    }
+}
+
+/**
+ * 记录双指手势开始时的缩放和地图锚点。
+ */
+function beginPinchGesture() {
+    const metrics = getPinchMetrics()
+    if (!metrics || metrics.distance <= 0) return
+
+    pinchGestureState = {
+        initialDistance: metrics.distance,
+        initialZoom: zoom.value,
+        mapPointAtMidpoint: screenToMap(metrics.midpoint.x, metrics.midpoint.y),
+    }
 }
 
 /**
  * 指针移动：执行平移并更新悬停坐标。
  */
 function handlePointerMove(event: PointerEvent) {
+    if (activePointers.has(event.pointerId)) {
+        activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    }
+
     updateHoverCoordinateByPointerEvent(event)
     updateHoveredSubRegionByPointerEvent(event)
+
+    if (activePointers.size >= 2) {
+        if (!pinchGestureState) beginPinchGesture()
+        const metrics = getPinchMetrics()
+        if (!pinchGestureState || !metrics) return
+
+        const nextZoom = Math.max(minZoom, Math.min(maxZoom, pinchGestureState.initialZoom * (metrics.distance / pinchGestureState.initialDistance)))
+        zoom.value = nextZoom
+        panOffset.value = {
+            x: metrics.midpoint.x - pinchGestureState.mapPointAtMidpoint.x * nextZoom,
+            y: metrics.midpoint.y - pinchGestureState.mapPointAtMidpoint.y * nextZoom,
+        }
+        dragDistance.value = Math.max(dragDistance.value, 5)
+        requestDraw()
+        return
+    }
+
     if (!isDragging.value) return
 
     const dx = event.clientX - lastPointerPosition.value.x
@@ -2821,11 +2935,22 @@ function handlePointerMove(event: PointerEvent) {
 }
 
 /**
- * 指针释放：结束拖拽状态。
+ * 指针释放：结束拖拽状态，或将双指手势切换回单指拖动。
  */
 function handlePointerUp(event: PointerEvent) {
-    isDragging.value = false
+    activePointers.delete(event.pointerId)
     ;(event.currentTarget as HTMLElement | null)?.releasePointerCapture?.(event.pointerId)
+
+    pinchGestureState = null
+    if (activePointers.size === 1) {
+        isDragging.value = true
+        dragDistance.value = Math.max(dragDistance.value, 5)
+        const remainingPointer = activePointers.values().next().value as MapPoint | undefined
+        if (remainingPointer) lastPointerPosition.value = { ...remainingPointer }
+        return
+    }
+
+    isDragging.value = false
 }
 
 /**
@@ -2859,19 +2984,39 @@ function handleWheel(event: WheelEvent) {
 }
 
 /**
- * 快捷放大。
+ * 以可视地图区域中心为锚点调整缩放（左上角 +/- 按钮使用）。
+ * 与滚轮（光标锚点）、双指（中点锚点）一致：先取锚点处的地图坐标，再反推平移量，保证中心内容不跳动。
+ * @param nextZoom 目标缩放值（内部会再次夹取到 [minZoom, maxZoom]）
  */
-function zoomIn() {
-    zoom.value = Math.min(maxZoom, zoom.value + 0.2)
+function zoomAtViewportCenter(nextZoom: number) {
+    const container = containerRef.value
+    if (!container) return
+
+    const next = Math.max(minZoom, Math.min(maxZoom, nextZoom))
+    const centerX = getMapViewportCenterX()
+    const centerY = getMapViewportCenterY()
+    // 在缩放前锁定可视区域中心对应的地图坐标
+    const anchorMapPoint = screenToMap(centerX, centerY)
+    zoom.value = next
+    panOffset.value = {
+        x: centerX - anchorMapPoint.x * next,
+        y: centerY - anchorMapPoint.y * next,
+    }
     requestDraw()
 }
 
 /**
- * 快捷缩小。
+ * 快捷放大（锚点为视口中心）。
+ */
+function zoomIn() {
+    zoomAtViewportCenter(zoom.value + 0.2)
+}
+
+/**
+ * 快捷缩小（锚点为视口中心）。
  */
 function zoomOut() {
-    zoom.value = Math.max(minZoom, zoom.value - 0.2)
-    requestDraw()
+    zoomAtViewportCenter(zoom.value - 0.2)
 }
 
 /**
@@ -2993,12 +3138,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="flex h-full min-h-0 bg-base-100">
-        <!-- 左侧面板：区域 / 图层 / 子区域 / 详情（首页风格） -->
-        <aside
-            class="shrink-0 overflow-hidden border-r border-base-content/10 transition-all duration-200 ease-in-out"
-            :class="isSidebarCollapsed ? 'w-0 border-r-0 opacity-0 pointer-events-none' : 'w-80 max-w-[46vw]'"
-        >
+    <div class="relative h-full min-h-0">
+        <!-- 悬浮控制组：侧栏毛玻璃浮层 + 左上角按钮列。
+             absolute 覆盖画布、不占布局宽度；侧栏展开/收起时按钮列随侧栏右缘移动，保持原先的相对位置 -->
+        <div class="pointer-events-none absolute inset-y-3 left-0 z-10 flex items-start">
+            <aside
+                ref="sidebarRef"
+                class="pointer-events-auto h-full shrink-0 overflow-hidden rounded-xs border border-base-content/15 bg-base-100/85 shadow-lg backdrop-blur-md transition-all duration-200 ease-in-out"
+                :class="isSidebarCollapsed ? 'w-0 border-transparent opacity-0 pointer-events-none' : 'w-80 max-w-[46vw]'"
+            >
             <ScrollArea class="h-full">
                 <div class="flex flex-col gap-4 p-3">
                     <!-- 当前地图点（路由传入） -->
@@ -3390,27 +3538,8 @@ onUnmounted(() => {
             </ScrollArea>
         </aside>
 
-        <!-- 主地图区 -->
-        <section ref="containerRef" class="relative min-w-0 flex-1 overflow-hidden bg-[#070b1e]">
-            <canvas
-                ref="canvasRef"
-                class="absolute inset-0 h-full w-full touch-none cursor-grab active:cursor-grabbing"
-                @pointerdown="handlePointerDown"
-                @pointermove="handlePointerMove"
-                @pointerup="handlePointerUp"
-                @pointercancel="handlePointerUp"
-                @pointerleave="handlePointerLeave"
-                @wheel="handleWheel"
-                @click="handleCanvasClick"
-            />
-            <canvas
-                ref="pointFocusOverlayCanvasRef"
-                class="pointer-events-none absolute inset-0 h-full w-full touch-none cursor-grab active:cursor-grabbing"
-                :class="pointFocusOverlayVisible ? 'block' : 'hidden'"
-            />
-
-            <!-- 左上角：折叠侧栏 + 缩放控制（首页风格小按钮） -->
-            <div class="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+            <!-- 左上角：折叠侧栏 + 缩放控制（首页风格小按钮）；位于侧栏右缘，保持原先的相对位置 -->
+            <div class="pointer-events-auto ml-3 flex shrink-0 flex-col gap-1.5">
                 <button
                     class="inline-flex size-8 cursor-pointer items-center justify-center rounded-xs border border-base-content/15 bg-base-100/85 text-base-content/70 backdrop-blur-xs transition-[border-color,color,transform] duration-150 hover:border-primary/50 hover:text-primary active:translate-y-px"
                     :title="isSidebarCollapsed ? '展开侧栏' : '折叠侧栏'"
@@ -3441,6 +3570,26 @@ onUnmounted(() => {
                     <Icon icon="ri:crosshair-line" class="size-4" />
                 </button>
             </div>
+        </div>
+
+        <!-- 主地图区：铺满整个容器，不受侧栏折叠影响 -->
+        <section ref="containerRef" class="relative h-full min-h-0 overflow-hidden bg-[#070b1e]">
+            <canvas
+                ref="canvasRef"
+                class="absolute inset-0 h-full w-full touch-none cursor-grab active:cursor-grabbing"
+                @pointerdown="handlePointerDown"
+                @pointermove="handlePointerMove"
+                @pointerup="handlePointerUp"
+                @pointercancel="handlePointerUp"
+                @pointerleave="handlePointerLeave"
+                @wheel="handleWheel"
+                @click="handleCanvasClick"
+            />
+            <canvas
+                ref="pointFocusOverlayCanvasRef"
+                class="pointer-events-none absolute inset-0 h-full w-full touch-none cursor-grab active:cursor-grabbing"
+                :class="pointFocusOverlayVisible ? 'block' : 'hidden'"
+            />
 
             <!-- 右下角：坐标 + 缩放 -->
             <div class="absolute right-3 bottom-3 z-10 flex flex-col items-end gap-1.5">

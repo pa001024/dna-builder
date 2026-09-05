@@ -310,7 +310,7 @@ function getPriceIcon(name: string) {
                 />
             </div>
             <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-1.5">
+                <div class="flex flex-wrap items-center gap-1.5">
                     <span
                         v-if="item.diffState"
                         class="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded text-xs font-bold"
@@ -350,7 +350,7 @@ function getPriceIcon(name: string) {
                                 </div>
                             </div>
                         </template>
-                        <span class="ml-auto shrink-0 border border-base-content/25 bg-base-100/60 px-1 py-px text-[10px]">
+                        <span class="ml-auto max-w-full min-w-0 shrink border border-base-content/25 bg-base-100/60 px-1 py-px text-[10px] break-words">
                             {{ payInfo.currency }} {{ payInfo.amount }}
                         </span>
                     </FullTooltip>
@@ -379,7 +379,7 @@ function getPriceIcon(name: string) {
                             </div>
                         </template>
                         <span
-                            class="ml-auto flex shrink-0 items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs"
+                            class="ml-auto flex max-w-full min-w-0 shrink items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs break-words"
                         >
                             <img :src="getPriceIcon(item.priceName)" class="size-3 object-cover rounded" :alt="item.priceName" />
                             {{ currentPrice }}
@@ -388,7 +388,7 @@ function getPriceIcon(name: string) {
                     </FullTooltip>
                     <span
                         v-else
-                        class="ml-auto flex shrink-0 items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs"
+                        class="ml-auto flex max-w-full min-w-0 shrink items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs break-words"
                     >
                         <img :src="getPriceIcon(item.priceName)" class="size-3 object-cover rounded" :alt="item.priceName" />
                         {{ item.priceName }} {{ currentPrice }}

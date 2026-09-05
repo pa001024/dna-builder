@@ -873,6 +873,15 @@ onMounted(() => {
                             <span class="label-text"> {{ $t("setting.initScriptHotkeysAtStartup") }} </span>
                             <input v-model="setting.initScriptHotkeysAtStartup" type="checkbox" class="toggle toggle-secondary" />
                         </div>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="label-text">
+                                隐藏ID
+                                <div class="text-xs text-base-content/50">开启后所有页面的 CopyID 组件不再显示</div>
+                            </span>
+                            <input v-model="setting.hideID" type="checkbox" class="toggle toggle-secondary" />
+                        </div>
                     </div>
                 </div>
             </article>
