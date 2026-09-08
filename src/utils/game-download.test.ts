@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { tauriFetch } from "@/api/app"
 import {
     getHotUpdateVersionList,
@@ -143,14 +143,18 @@ describe("normalizeFullPackageInfo", () => {
 })
 
 describe("getPreFullPackageInfo", () => {
-    it("应该使用 PreVersionManifest.json 获取预下载版本", async () => {
+    beforeEach(() => {
+        vi.mocked(tauriFetch).mockReset()
+    })
+
+    it("应该解析 PreVersionManifest.json 的预下载字段并生成下载地址", async () => {
         vi.mocked(tauriFetch)
             .mockResolvedValueOnce({
                 ok: true,
                 json: async () => ({
-                    latest_version: "16001",
-                    latest_version_number: "1.6",
-                    min_supported_version: "15002",
+                    pre_download_version: "16001",
+                    pre_download_version_number: "1.6",
+                    bOpen: true,
                 }),
             } as Response)
             .mockResolvedValueOnce({
@@ -170,9 +174,68 @@ describe("getPreFullPackageInfo", () => {
         expect(vi.mocked(tauriFetch).mock.calls[0][0]).toBe(
             "https://cdn.example.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/PreVersionManifest.json"
         )
-        expect(result?.downloadUrl).toBe(
-            "https://cdn.example.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/1.6/16001/full_16001/full_16001.hdiff"
-        )
+        expect(result).toMatchObject({
+            latestVersion: "16001",
+            latestVersionNumber: "1.6",
+            fileName: "full_16001.hdiff",
+            size: 100,
+            newSize: 200,
+            downloadUrl: "https://cdn.example.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/1.6/16001/full_16001/full_16001.hdiff",
+        })
+    })
+
+    it("预下载清单不含 min_supported_version 时不应报错", async () => {
+        vi.mocked(tauriFetch)
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    pre_download_version: "16001",
+                    pre_download_version_number: "1.6",
+                    bOpen: true,
+                }),
+            } as Response)
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    hdiff_file: {
+                        name: "full_16001.hdiff",
+                        md5: "abc",
+                        size: 100,
+                    },
+                    new_size: 200,
+                }),
+            } as Response)
+
+        const result = await getPreFullPackageInfo("https://cdn.example.com", "PC_OBT_CN_Pub")
+
+        expect(result?.minSupportedVersion).toBeUndefined()
+    })
+
+    it("预下载未开放（bOpen=false）时应该返回 null", async () => {
+        vi.mocked(tauriFetch).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                pre_download_version: "16001",
+                pre_download_version_number: "1.6",
+                bOpen: false,
+            }),
+        } as Response)
+
+        const result = await getPreFullPackageInfo("https://cdn.example.com", "PC_OBT_CN_Pub")
+
+        expect(result).toBeNull()
+        expect(vi.mocked(tauriFetch)).toHaveBeenCalledTimes(1)
+    })
+
+    it("预下载清单无效时不应该抛出异常，而是返回 null", async () => {
+        vi.mocked(tauriFetch).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({}),
+        } as Response)
+
+        const result = await getPreFullPackageInfo("https://cdn.example.com", "PC_OBT_CN_Pub")
+
+        expect(result).toBeNull()
     })
 })
 

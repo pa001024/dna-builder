@@ -1,7 +1,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
-import { deleteFile, getFileSize, listDirectories, listFiles, readTextFile, writeTextFile } from "../api/app"
+import { deleteFile, getFileSize, listDirectories, listFiles, readTextFile, removeDirAll, writeTextFile } from "../api/app"
 import {
     CDN_LIST,
     downloadHotUpdateAssets,
@@ -429,6 +429,49 @@ export const useGameUpdateStore = defineStore("gameUpdate", () => {
     }
 
     /**
+     * 清理热更根目录下不在当前热更版本列表中的旧版本文件夹（含其中残留的语音包等文件）。
+     * 仅处理目录名为纯数字的版本目录；无有效补丁根目录时跳过。
+     * 内存中无版本列表缓存时（如仅下载语音包未做过热更检查）按当前远端列表兜底刷新一次。
+     * 单个目录删除失败只记录日志，不影响主流程。
+     */
+    async function cleanupObsoleteHotUpdateVersionDirs() {
+        const rootDir = hotUpdatePatchRootDir.value
+        if (!rootDir) return
+        let versionList = hotUpdateVersionListCache.value
+        if (!versionList) {
+            const activeChannel = getActiveChannel()
+            if (!activeChannel || !gamePath.value) return
+            try {
+                versionList = await getHotUpdateVersionList(selectedCDN.value, activeChannel)
+                hotUpdateVersionListCache.value = versionList
+            } catch (err) {
+                console.error("清理旧热更版本目录时获取版本列表失败，跳过:", err)
+                return
+            }
+        }
+        const keepVersions = new Set(getSortedHotUpdateVersions(versionList).map(version => version.patchVersion))
+        if (!keepVersions.size) return
+        let directories: string[]
+        try {
+            directories = await listDirectories(rootDir)
+        } catch (err) {
+            console.error("读取热更版本目录列表失败，跳过清理:", err)
+            return
+        }
+        for (const dir of directories) {
+            const version = Number(dir)
+            // 只删除数字命名的版本目录，避免误删非热更目录
+            if (!Number.isFinite(version) || keepVersions.has(version)) continue
+            try {
+                await removeDirAll(`${rootDir}${dir}\\`)
+                console.log(`已删除不在当前热更列表中的旧版本目录: ${dir}`)
+            } catch (err) {
+                console.error(`删除旧热更版本目录 ${dir} 失败:`, err)
+            }
+        }
+    }
+
+    /**
      * 读取本地 OptionalPatchSigns.json。
      */
     async function loadOptionalPatchSignsCache() {
@@ -617,6 +660,9 @@ export const useGameUpdateStore = defineStore("gameUpdate", () => {
             }
             const pendingVersions = sortedVersions.filter(version => version.patchVersion > localLatestVersion)
             hotUpdatePendingVersions.value = pendingVersions.map(version => version.patchVersion)
+
+            // 远端版本列表已是最新，清理不在列表中的旧版本目录（含热更下载完成后残留的老版本文件）
+            await cleanupObsoleteHotUpdateVersionDirs()
 
             // 提取最新热更版本的具体版本号（检查更新过程必然请求热更信息，顺带复用）
             const latestHotUpdateVersion = sortedVersions.at(-1)
@@ -869,6 +915,7 @@ export const useGameUpdateStore = defineStore("gameUpdate", () => {
         startPendingHashChecks,
         getHotUpdateAssetUrl,
         listLocalHotUpdateVersions,
+        cleanupObsoleteHotUpdateVersionDirs,
         loadOptionalPatchSignsCache,
         getDownloadedOptionalSigns,
         getHotUpdateFilesToDownload,

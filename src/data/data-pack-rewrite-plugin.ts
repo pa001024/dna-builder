@@ -68,6 +68,7 @@ const DATA_PACK_MODULES = new Set([
     "quest.kr.data.ts",
     "quest.tc.data.ts",
     "questchain.data.ts",
+    "storysummary.data.ts",
 ])
 
 type ExportFallback = {

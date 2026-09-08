@@ -5210,7 +5210,7 @@ export const subRegionData: SubRegion[] = [
         name: "？？？",
         desc: "UI_SUBREGION_DES_107301",
         map: "Haiboliya_Thc_Emyly",
-        pos: [-44051, -26252],
+        pos: [-44555, -27139],
     },
     {
         id: 107401,

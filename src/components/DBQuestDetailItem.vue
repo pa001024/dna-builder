@@ -4,6 +4,7 @@ import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reac
 import type { QuestItem, QuestStory } from "@/data/d/quest.data"
 import type { QuestChain } from "@/data/d/questchain.data"
 import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
+import { storySummaryData } from "@/data/d/storysummary.data"
 import { useSettingStore } from "@/store/setting"
 import { getQuestTypeDisplay } from "@/utils/quest-utils"
 import { getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
@@ -400,6 +401,12 @@ const activeSearchQuestId = computed(() => activeSearchMatch.value?.questId)
  */
 const questChainVersion = computed(() => props.questChain.版本 || "")
 const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChain.type))
+
+/**
+ * 当前任务链的 AI 剧情总结文本（已应用剧情占位符替换）。
+ * 数据来自 storysummary.data.ts（storySummary.json 导入），无摘要时返回空文本。
+ */
+const questChainAiSummary = computed(() => formatStoryText(storySummaryData[props.questChain.id]))
 </script>
 
 <template>
@@ -530,6 +537,19 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
                 </div>
             </div>
         </header>
+
+        <!-- 任务链 AI 剧情总结（数据由 storySummary.json 导入，无摘要时隐藏） -->
+        <section
+            v-if="questChainAiSummary"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="AI" title="剧情 AI 总结">
+                <template #trailing>
+                    <span class="text-[10px] tracking-wide text-base-content/45">AI 生成 · 仅供参考</span>
+                </template>
+            </SectionHeader>
+            <p class="text-sm leading-relaxed whitespace-pre-line text-base-content/75">{{ questChainAiSummary }}</p>
+        </section>
 
         <!-- 奖励信息 -->
         <section v-if="questChain.reward?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">

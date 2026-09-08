@@ -600,6 +600,13 @@ watch(
                     </div>
                     <div class="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs text-base-content/60">
                         <span
+                            v-if="dungeon.waves != null"
+                            class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
+                            title="每阶段刷怪波数"
+                        >
+                            {{ dungeon.waves }} 波
+                        </span>
+                        <span
                             v-if="dungeon.mod != null"
                             class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
                         >

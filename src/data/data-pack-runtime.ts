@@ -75,6 +75,7 @@ const DATA_PACK_MODULES = [
     "quest.kr.data",
     "quest.tc.data",
     "questchain.data",
+    "storysummary.data",
     "raid.data",
     "region.data",
     "dynquest.data",

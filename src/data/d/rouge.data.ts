@@ -5416,7 +5416,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1715072973679414138",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1715072964431413638"],
                 dialogues: [
                     {
                         id: 6100101,
@@ -5476,7 +5475,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "171851536988011639815",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["171851536988011639813"],
                 dialogues: [
                     {
                         id: 6100201,
@@ -5552,7 +5550,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "171851536988611639917",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["171851536988611639915"],
                 dialogues: [
                     {
                         id: 6100301,
@@ -5631,7 +5628,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "171851536989511640003",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["171851536989511640001"],
                 dialogues: [
                     {
                         id: 6100401,
@@ -5709,7 +5705,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "171851536990211640105",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["171851536990211640103"],
                 dialogues: [
                     {
                         id: 6100501,
@@ -5788,7 +5783,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "171851536991211640208",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["171851536991211640206"],
                 dialogues: [
                     {
                         id: 6100601,
@@ -5901,7 +5895,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1721630102172388558",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1721630102172388556"],
                 dialogues: [
                     {
                         id: 6100701,
@@ -6017,7 +6010,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1721630102179388643",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1721630102179388641"],
                 dialogues: [
                     {
                         id: 6100801,
@@ -6099,7 +6091,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1721630102187388745",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1721630102187388743"],
                 dialogues: [
                     {
                         id: 6100901,
@@ -6197,7 +6188,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1721630102194388830",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1721630102194388828"],
                 dialogues: [
                     {
                         id: 6101001,
@@ -6279,7 +6269,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1739608900306688985",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1739608900306688983"],
                 dialogues: [
                     {
                         id: 6101101,
@@ -6392,7 +6381,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1739608900307689092",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1739608900307689090"],
                 dialogues: [
                     {
                         id: 6101201,
@@ -6503,7 +6491,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1739608900307689200",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1739608900307689198"],
                 dialogues: [
                     {
                         id: 6101301,
@@ -6604,7 +6591,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1739608900307689291",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1739608900307689289"],
                 dialogues: [
                     {
                         id: 6101401,
@@ -6688,7 +6674,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1739608900308689381",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1739608900308689379"],
                 dialogues: [
                     {
                         id: 6101501,
@@ -6767,7 +6752,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1739608900308689489",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1739608900308689487"],
                 dialogues: [
                     {
                         id: 6101601,
@@ -6878,7 +6862,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1739608900308689579",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1739608900308689577"],
                 dialogues: [
                     {
                         id: 6101701,
@@ -6978,7 +6961,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1748589441224503615",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1748589441224503613"],
                 dialogues: [
                     {
                         id: 6102001,
@@ -7067,7 +7049,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1748589441224503524",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1748589441224503522"],
                 dialogues: [
                     {
                         id: 6101901,
@@ -7156,7 +7137,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1748589441225503726",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1748589441225503724"],
                 dialogues: [
                     {
                         id: 6102101,
@@ -7255,7 +7235,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1754303988206559939",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1754303988206559937"],
                 dialogues: [
                     {
                         id: 6102201,
@@ -7337,7 +7316,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1754303988207560059",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1754303988207560057"],
                 dialogues: [
                     {
                         id: 6102301,
@@ -7422,7 +7400,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1754303988207560179",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1754303988207560177"],
                 dialogues: [
                     {
                         id: 6102401,
@@ -7508,7 +7485,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1754303988208560299",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1754303988208560297"],
                 dialogues: [
                     {
                         id: 6102501,
@@ -7592,7 +7568,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1754303988208560419",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1754303988208560417"],
                 dialogues: [
                     {
                         id: 6102601,
@@ -7689,7 +7664,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1754303988208560539",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1754303988208560537"],
                 dialogues: [
                     {
                         id: 6102701,
@@ -7776,7 +7750,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1754303988209560659",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1754303988209560657"],
                 dialogues: [
                     {
                         id: 6102801,
@@ -7879,7 +7852,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "17546503285961385789",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17546503285961385787"],
                 dialogues: [
                     {
                         id: 6103001,
@@ -7991,7 +7963,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "17758149970381652836",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17758149970381652834"],
                 dialogues: [
                     {
                         id: 6103101,
@@ -8100,7 +8071,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "17758150540093466960",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17758150540093466958"],
                 dialogues: [
                     {
                         id: 6103201,
@@ -8236,7 +8206,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1736847954553636378",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1736847954553636375"],
                 dialogues: [
                     {
                         id: 6102901,
@@ -8304,7 +8273,6 @@ export const rougeLikeRooms: RougeLikeRoom[] = [
                 id: "1742196066378954315",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1742196066378954313"],
                 dialogues: [
                     {
                         id: 6101801,
@@ -9946,7 +9914,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17407355325341221165",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17407355325341221163"],
                 dialogues: [
                     {
                         id: 6201401,
@@ -10040,7 +10007,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "1749707917144524449",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1749707917144524447"],
                 dialogues: [
                     {
                         id: 6200501,
@@ -10122,7 +10088,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "1749707917146524728",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["1749707917146524726"],
                 dialogues: [
                     {
                         id: 6200601,
@@ -10258,7 +10223,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17455729469881304103",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17455729469881304101"],
                 dialogues: [
                     {
                         id: 6200701,
@@ -10342,7 +10306,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17455729853492415467",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17455729853492415465"],
                 dialogues: [
                     {
                         id: 6200801,
@@ -10417,7 +10380,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17455730091213526812",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17455730091213526810"],
                 dialogues: [
                     {
                         id: 6200901,
@@ -10494,7 +10456,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17548952813542289120",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17548952813542289118"],
                 dialogues: [
                     {
                         id: 6201001,
@@ -10594,7 +10555,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17548953041323485126",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17548953041323485124"],
                 dialogues: [
                     {
                         id: 6201101,
@@ -10651,7 +10611,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17548953265534681328",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17548953265534681326"],
                 dialogues: [
                     {
                         id: 6201201,
@@ -10753,7 +10712,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17548953718965877802",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17548953718965877800"],
                 dialogues: [
                     {
                         id: 6201301,
@@ -10910,7 +10868,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17370335783171628455",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17370335783171628453"],
                 dialogues: [
                     {
                         id: 6200101,
@@ -11113,7 +11070,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17370336555793086238",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17370336555793086236"],
                 dialogues: [
                     {
                         id: 6200201,
@@ -11259,7 +11215,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17370337590115274595",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17370337590115274593"],
                 dialogues: [
                     {
                         id: 6200301,
@@ -11352,7 +11307,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17370338708858923226",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17370338708858923224"],
                 dialogues: [
                     {
                         id: 6200401,
@@ -11555,7 +11509,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17549052019767075239",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17549052019767075237"],
                 dialogues: [
                     {
                         id: 6201501,
@@ -11745,7 +11698,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17549052293298272094",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17549052293298272092"],
                 dialogues: [
                     {
                         id: 6201601,
@@ -11954,7 +11906,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "17549052579549469196",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["17549052579549469194"],
                 dialogues: [
                     {
                         id: 6201701,
@@ -12113,7 +12064,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "175490527999910666452",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["175490527999910666450"],
                 dialogues: [
                     {
                         id: 6201801,
@@ -12266,7 +12216,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "175490530825311863970",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["175490530825311863968"],
                 dialogues: [
                     {
                         id: 6201901,
@@ -12417,7 +12366,6 @@ export const rougeLikeStoryEvents: RougeLikeStoryEvent[] = [
                 id: "175490533304413061627",
                 type: "TalkNode",
                 name: "对话节点",
-                next: ["175490533304413061625"],
                 dialogues: [
                     {
                         id: 6202001,

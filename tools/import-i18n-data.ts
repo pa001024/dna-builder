@@ -176,6 +176,13 @@ const MAPPINGS: Mapping[] = [
         locales: ["cn", "en", "fr", "jp", "kr", "tc"],
     },
     {
+        // 任务剧情 AI 总结：按任务链 ID 记录 AI 生成的整链剧情摘要（目前仅简体中文导出）
+        source: "storySummary",
+        targetStem: "storysummary",
+        targetVar: "storySummaryData",
+        locales: ["cn"],
+    },
+    {
         source: async context => {
             const [raidCalculationText, raidDungeonText, raidSeasonText, preRaidRankText, rewardText] = await Promise.all([
                 readFile(path.join(OUT_ROOT, "RaidCalculation.json"), "utf8"),

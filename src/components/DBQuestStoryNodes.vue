@@ -5,6 +5,7 @@ import { type DetectiveAnswer, type DetectiveQuestion, type Dialogue, type Dialo
 import { useSettingStore } from "@/store/setting"
 import { getDialogueDisplayContent } from "@/utils/dialogue"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
+import { buildQuestBgmUrl } from "@/utils/quest-bgm"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
 interface DialogueChainItem {
@@ -47,6 +48,9 @@ const highlightedQuestNodeMap = reactive<Record<string, boolean>>({})
 const currentVoiceKey = ref<string | null>(null)
 const isVoicePlaying = ref(false)
 const dialogueAudioRef = ref<HTMLAudioElement | null>(null)
+const bgmAudioRef = ref<HTMLAudioElement | null>(null)
+const currentBgmNodeId = ref<string | null>(null)
+const isBgmPlaying = ref(false)
 const autoPlayEnabled = ref(false)
 const autoPlayCurrentIndex = ref(-1)
 const lastManualPlayedDialogueKey = ref<string | null>(null)
@@ -347,6 +351,7 @@ onBeforeUnmount(() => {
     dialogueElementMap.clear()
     stopAutoPlay()
     stopDialogueVoicePlayback()
+    stopBgmPlayback()
     clearPreloadedDialogueVoices()
 })
 
@@ -980,6 +985,101 @@ function handleDialogueVoiceError(): void {
 }
 
 /**
+ * 获取节点 BGM 资源的可播放地址。
+ * @param node 任务节点
+ * @returns BGM 音频 URL；不可播放时返回空字符串
+ */
+function getNodeBgmUrl(node: QuestNode): string {
+    if (!node.resource) {
+        return ""
+    }
+
+    return buildQuestBgmUrl(node.resource)
+}
+
+/**
+ * 判断 BGM 资源键是否为无声/停止类控制键。
+ * @param resource BGM 资源键
+ * @returns 是否为无声控制键
+ */
+function isBgmNodeMute(resource: string | undefined): boolean {
+    if (!resource) {
+        return true
+    }
+
+    const trimmedResource = resource.trim()
+    return trimmedResource === "mute" || trimmedResource.startsWith("mute_") || trimmedResource.startsWith("0_1_mute")
+}
+
+/**
+ * 停止当前 BGM 试听并重置状态。
+ */
+function stopBgmPlayback(): void {
+    const audio = bgmAudioRef.value
+    if (!audio) {
+        return
+    }
+    audio.pause()
+    audio.removeAttribute("src")
+    audio.load()
+    currentBgmNodeId.value = null
+    isBgmPlaying.value = false
+}
+
+/**
+ * 切换节点 BGM 试听播放状态（一次仅试听一个节点）。
+ * @param node 任务节点
+ */
+function toggleBgmPlayback(node: QuestNode): void {
+    const audio = bgmAudioRef.value
+    if (!audio) {
+        return
+    }
+
+    // 再次点击正在播放的节点 → 停止
+    if (currentBgmNodeId.value === node.id && isBgmPlaying.value) {
+        stopBgmPlayback()
+        return
+    }
+
+    const bgmUrl = getNodeBgmUrl(node)
+    if (!bgmUrl) {
+        return
+    }
+
+    // BGM 试听与对话语音相互独立，仅接管独立 BGM 音频通道
+    stopBgmPlayback()
+    audio.src = bgmUrl
+
+    audio
+        .play()
+        .then(() => {
+            currentBgmNodeId.value = node.id
+            isBgmPlaying.value = true
+        })
+        .catch(error => {
+            currentBgmNodeId.value = null
+            isBgmPlaying.value = false
+            console.error("BGM 试听播放失败:", error)
+        })
+}
+
+/**
+ * BGM 试听结束事件回调。
+ */
+function handleBgmEnded(): void {
+    isBgmPlaying.value = false
+    currentBgmNodeId.value = null
+}
+
+/**
+ * BGM 试听暂停事件回调。
+ */
+function handleBgmPause(): void {
+    isBgmPlaying.value = false
+}
+
+/**
  * 计算节点分支链。
  */
 const questNodeChains = computed<QuestNodeWithChain[]>(() => {
@@ -1049,6 +1149,7 @@ watch(
     () => {
         stopAutoPlay()
         stopDialogueVoicePlayback()
+        stopBgmPlayback()
     }
 )
 
@@ -1104,6 +1205,47 @@ watch(flattenedDialogueChain, () => {
                         />
                     </span>
                 </div>
+            </div>
+
+            <!-- 剧情媒体节点：BGM / 视频 -->
+            <div v-if="node.resource || node.video" class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-base-content/70">
+                    <span class="min-w-0 truncate font-medium text-base-content/85">
+                        {{ formatStoryText(node.name) || "未命名媒体节点" }}
+                    </span>
+                    <span class="text-base-content/45">·</span>
+                    <span class="truncate text-[11px] text-accent">{{ node.type }}</span>
+                </div>
+
+                <div v-if="node.resource" class="flex flex-wrap items-center gap-1.5 text-xs">
+                    <span class="inline-flex items-center gap-1 text-accent">
+                        <Icon icon="ri:music-2-line" />
+                        <span>BGM 资源</span>
+                    </span>
+                    <code
+                        class="rounded-xs border border-base-content/15 bg-base-100/60 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-base-content/80"
+                    >
+                        {{ node.resource }}
+                    </code>
+                    <span v-if="isBgmNodeMute(node.resource)" class="text-base-content/40">（无声/停止控制节点，无试听）</span>
+                    <button
+                        v-else-if="getNodeBgmUrl(node)"
+                        type="button"
+                        class="cursor-pointer rounded-xs border px-1.5 py-0.5 text-[11px] transition-colors duration-150"
+                        :class="
+                            currentBgmNodeId === node.id && isBgmPlaying
+                                ? 'border-primary/60 bg-primary/10 font-semibold text-primary'
+                                : 'border-base-content/20 text-base-content/60 hover:border-primary/50 hover:text-primary'
+                        "
+                        @click="toggleBgmPlayback(node)"
+                    >
+                        {{ currentBgmNodeId === node.id && isBgmPlaying ? "停止试听" : "试听" }}
+                    </button>
+                    <span v-else class="text-base-content/40">（暂未收录 CDN 音频）</span>
+                </div>
+
+                <!-- 剧情内嵌视频 -->
+                <StoryVideoPlayer v-if="node.video" :src="node.video" :title="formatStoryText(node.name)" />
             </div>
 
             <TransitionGroup
@@ -1187,7 +1329,9 @@ watch(flattenedDialogueChain, () => {
                 </template>
             </div>
 
-            <div v-if="!node.chain.length && !node.questions?.length" class="text-base-content/70">该节点暂无可展示内容</div>
+            <div v-if="!node.chain.length && !node.questions?.length && !node.resource && !node.video" class="text-base-content/70">
+                该节点暂无可展示内容
+            </div>
         </div>
         <audio
             ref="dialogueAudioRef"
@@ -1198,5 +1342,6 @@ watch(flattenedDialogueChain, () => {
             @pause="handleDialogueVoicePause"
             @play="handleDialogueVoicePlay"
         />
+        <audio ref="bgmAudioRef" class="hidden" preload="none" @ended="handleBgmEnded" @pause="handleBgmPause" />
     </div>
 </template>

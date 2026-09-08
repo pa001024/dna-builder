@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { readFile } from "node:fs/promises"
+import { readFile, realpath } from "node:fs/promises"
 import path from "node:path"
 import process from "node:process"
 import { glob } from "glob"
@@ -214,6 +214,25 @@ async function countFileEffectiveLoc(filePath: string): Promise<EffectiveLocResu
 }
 
 /**
+ * 将目标路径解析为真实绝对路径（穿透 Windows 目录符号链接 / junction）。
+ *
+ * glob 在「cwd 本身就是目录符号链接」时（例如 D:\dev\dna-builder -> E:\dev\dna-builder）
+ * 会匹配不到任何文件，因此扫描目录前需先解析出真实路径。
+ *
+ * @param targetPath 目标路径
+ * @returns {Promise<string>} 真实绝对路径；解析失败（如目录不存在）时退回绝对路径
+ */
+async function resolveRealPath(targetPath: string): Promise<string> {
+    const absoluteTargetPath = path.resolve(targetPath)
+    try {
+        return await realpath(absoluteTargetPath)
+    } catch (_error) {
+        // 保持旧行为：路径不存在时交给 glob 处理（返回空列表）
+        return absoluteTargetPath
+    }
+}
+
+/**
  * 获取参与统计的文件列表。
  *
  * @param targetPath 目标目录或文件
@@ -230,8 +249,10 @@ async function collectFiles(targetPath: string): Promise<string[]> {
         return [normalizedTargetPath]
     }
 
+    // 以真实路径作为 glob 的 cwd，避免软链接目录下扫描结果为空
+    const cwd = await resolveRealPath(normalizedTargetPath)
     const files = await glob(DEFAULT_PATTERNS, {
-        cwd: normalizedTargetPath,
+        cwd,
         ignore: DEFAULT_IGNORE_PATTERNS,
         nodir: true,
         posix: false,

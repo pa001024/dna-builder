@@ -497,6 +497,9 @@ async function downloadOptionalPackTask(sign: string) {
             await downloadTask
             fileBytesBefore += file.fileSize
         }
+        // 语音包下载同属热更新流程，完成后同样清理不在当前热更版本列表中的旧版本目录
+        // （先清理再记录下载状态，避免把已删除旧目录的版本号写进语音包缓存）
+        await gameUpdateStore.cleanupObsoleteHotUpdateVersionDirs()
         await gameUpdateStore.markOptionalPatchDownloaded(sign)
         await refreshLocalHotUpdateCaches()
         ui.showSuccessMessage(`${getOptionalPackLabel(sign)} 下载完成`)
@@ -655,7 +658,11 @@ async function fetchVersionList() {
     try {
         const [fullPackage, preFullPackage] = await Promise.all([
             gameUpdateStore.getFullPackageInfoForActiveChannel(),
-            getPreFullPackageInfo(gameUpdateStore.selectedCDN, activeChannel),
+            // 预下载是可选能力：清单异常不应阻断正式版本检查
+            getPreFullPackageInfo(gameUpdateStore.selectedCDN, activeChannel).catch(err => {
+                console.warn("获取预下载完整包信息失败:", err)
+                return null
+            }),
         ])
         const baseVersion = fullPackage ? null : await getBaseVersion(gameUpdateStore.selectedCDN, activeChannel)
         versionList.value = baseVersion

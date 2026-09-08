@@ -1,4 +1,4 @@
-import type { Dialogue } from "./quest.data"
+import type { Dialogue, StoryMediaMarker } from "./quest.data"
 
 /** 光阴集 */
 export interface PartyTopic {
@@ -10,7 +10,7 @@ export interface PartyTopic {
     memoryDesc?: string
     reward: number
     consume: Record<string, number>
-    dialogues?: Dialogue[]
+    dialogues?: (Dialogue | StoryMediaMarker)[]
     conditionId?: number
 }
 
@@ -294,6 +294,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……岛外面啊。",
                 voice: "inv/Heitao/001/C85F4124",
                 npc: 790007,
+            },
+            {
+                id: "17758085662685145919",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0016_judian",
             },
         ],
     },
@@ -720,6 +726,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Heitao/003/C85F5DB0",
                 npc: 790008,
             },
+            {
+                id: "1725258853360197968",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0026_maintheme_website",
+            },
         ],
     },
     {
@@ -910,6 +922,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "没什么好怕的——已经没什么好怕的了。",
                 voice: "inv/Heitao/004/C85F70E2",
                 npc: 790060,
+            },
+            {
+                id: "1725258907075198913",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0026_maintheme_website",
             },
         ],
     },
@@ -1311,6 +1329,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Fuluo/001/C8EC4184",
                 npc: 790088,
             },
+            {
+                id: "1725246375878179820",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0167_story_fuluo_theme",
+            },
         ],
     },
     {
@@ -1700,6 +1724,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Fuluo/002/C8EC51C2",
                 npc: 790090,
             },
+            {
+                id: "1775633123486592770",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0017_story_incave",
+            },
         ],
     },
     {
@@ -1952,6 +1982,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……最后的愿望……希尔妲……",
                 voice: "inv/Fuluo/003/C8EC5EE2",
                 npc: 790088,
+            },
+            {
+                id: "1775633162769893540",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0016_judian",
             },
         ],
     },
@@ -2284,6 +2320,12 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80260415,
                 content: "五日后",
                 voice: "inv/Fuluo/004/C8EC6C56",
+            },
+            {
+                id: "177607137712010498191",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0036_story_renweidaozu",
             },
         ],
     },
@@ -3680,6 +3722,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Tuosi/003/C89F7B28",
                 npc: 790036,
             },
+            {
+                id: "17600797530901247325",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0081_scene_alchemyacademy",
+            },
         ],
     },
     {
@@ -4066,6 +4114,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "放心吧，布鲁斯。答应你的，我定然会做到。",
                 voice: "inv/Tuosi/004/C89F8A94",
                 npc: 790029,
+            },
+            {
+                id: "17601720579201246281",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0040_story_enlike_death",
             },
         ],
     },
@@ -4570,6 +4624,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Nifu/001/C8B294E0",
                 npc: 91502,
             },
+            {
+                id: "176008115203014305596",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0017_story_incave",
+            },
         ],
     },
     {
@@ -4895,6 +4955,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "至于现在……就让我们放下那些沉重的东西，一起将这壶茶饮尽，好好享受这来之不易的片刻安宁吧。",
                 voice: "inv/Nifu/002/C8B2A1AC",
                 npc: 91502,
+            },
+            {
+                id: "176008122481914927927",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0017_story_incave",
             },
         ],
     },
@@ -5312,6 +5378,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Nifu/003/C8B2B436",
                 npc: 91502,
             },
+            {
+                id: "176008127674215550093",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0071_lise_secret",
+            },
         ],
     },
     {
@@ -5675,6 +5747,12 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80170445,
                 content: "（一个充满着浆果的香气和阳光的暖意——或许还有一只调皮的野兔飞奔而过——的好梦。）",
                 voice: "inv/Nifu/004/C8B2C3A2",
+            },
+            {
+                id: "176008137938317415608",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0071_lise_secret",
             },
         ],
     },
@@ -7182,6 +7260,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "等到了你就知道了。",
                 voice: "inv/Kezhou/004/C8CC5FBC",
                 npc: 790067,
+            },
+            {
+                id: "17647598060221907423",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0117_scene_tingyayuan",
             },
         ],
     },
@@ -8918,6 +9002,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Feina/002/C865BAFE",
                 npc: 790017,
             },
+            {
+                id: "17252443077681630",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0034_atomos_feina_home",
+            },
         ],
     },
     {
@@ -9172,6 +9262,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我有大魔法师，还有你。现在的我啊，已经很满足了。",
                 voice: "inv/Feina/003/C865CA40",
                 npc: 790017,
+            },
+            {
+                id: "1725258957911199915",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0034_atomos_feina_home",
             },
         ],
     },
@@ -11100,6 +11196,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "真好啊……我的乐园，正在变得更加完整。",
                 npc: 790093,
             },
+            {
+                id: "178832927078615095531",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0185_scene_aerkanuo_town",
+            },
         ],
     },
     {
@@ -11378,6 +11480,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "呜……对不起……",
                 npc: 790092,
             },
+            {
+                id: "178832934452916214442",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0185_scene_aerkanuo_town",
+            },
         ],
     },
     {
@@ -11650,6 +11758,12 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80270342,
                 content: "晚安，真正的“艾达”。",
                 npc: 790092,
+            },
+            {
+                id: "178833150146318451476",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0185_scene_aerkanuo_town",
             },
         ],
     },
@@ -11926,6 +12040,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "嘻嘻嘻，我们来玩捉迷藏吧，这次我可不会再被你轻松找到了！",
                 npc: 92301,
             },
+            {
+                id: "176008440102828618603",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0033_story_humour",
+            },
         ],
     },
     {
@@ -12117,6 +12237,12 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80090229,
                 content: "等你下次准备好新饮料了，我再讲给你听！",
                 npc: 92301,
+            },
+            {
+                id: "176008445662029241616",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0033_story_humour",
             },
         ],
     },
@@ -13206,6 +13332,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Fushu/001/C8C5BDB0",
                 npc: 790053,
             },
+            {
+                id: "17647591425661233",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0110_story_fushu_theme",
+            },
         ],
     },
     {
@@ -13638,6 +13770,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Fushu/002/C8C5CF14",
                 npc: 790053,
             },
+            {
+                id: "17647591904771524",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0110_story_fushu_theme",
+            },
         ],
     },
     {
@@ -13996,6 +14134,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "离这里不远的水域中，常有寿星乌贼出没，帮我钓些来，不难的吧！",
                 voice: "inv/Fushu/003/C8C5D772",
                 npc: 790054,
+            },
+            {
+                id: "1764759223485636953",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0110_story_fushu_theme",
             },
         ],
     },
@@ -14388,6 +14532,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "唉……下一次，换个道歉礼物吧。",
                 voice: "inv/Fushu/004/C8C5EF3C",
                 npc: 790053,
+            },
+            {
+                id: "17647597740291272372",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0110_story_fushu_theme",
             },
         ],
     },
@@ -16731,6 +16881,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "来自丹流城的耶尔和奥利弗，让人印象深刻的奇怪组合，有空的话买一些小玩具吧，炸裂陀螺和飞高高烟花听起来都很有趣……",
                 voice: "inv/Yeer/001/C898ED9E",
             },
+            {
+                id: "176008143312118037889",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0016_judian",
+            },
         ],
     },
     {
@@ -17015,6 +17171,12 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80130234,
                 content: "耶尔急匆匆地跑开了，看样子他下定决心想要把“噼里啪啦”还给那个突然出现的老店主。",
                 voice: "inv/Yeer/002/C898FE84",
+            },
+            {
+                id: "176008152749919281850",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0016_judian",
             },
         ],
     },
@@ -17460,6 +17622,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "奥利弗非常焦虑地坐在椅子上抖着腿，看来等到耶尔苏醒，还需要一段时间……",
                 voice: "inv/Yeer/003/C899110E",
             },
+            {
+                id: "176008162166121147628",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0024_story_pub",
+            },
         ],
     },
     {
@@ -17801,6 +17969,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "漫长的白天过去，随之而来的，并非是同样漫长的黑夜，而天际边缘，晨晖即将出现。",
                 voice: "inv/Yeer/004/C89920CE",
             },
+            {
+                id: "176008169603322392013",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0017_story_incave",
+            },
         ],
     },
     {
@@ -18075,6 +18249,12 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80280143,
                 content: "（而当我开始思索这句话的意义时，一切都已太迟了。）",
                 npc: 790094,
+            },
+            {
+                id: "17881666516268388121",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0180_cs_intro_loop_ver",
             },
         ],
     },
@@ -18376,6 +18556,12 @@ export const partyTopicData: PartyTopic[] = [
                 id: 80280248,
                 content: "……是吗，我明白了。",
                 npc: 790097,
+            },
+            {
+                id: "17881667279959505938",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0180_cs_intro_loop_ver",
             },
         ],
     },
@@ -18750,6 +18936,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "等着我，{nickname2}。",
                 npc: 790094,
             },
+            {
+                id: "178816678216310623600",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0180_cs_intro_loop_ver",
+            },
         ],
     },
     {
@@ -19054,6 +19246,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "因为一些原因，我不会奉上自我介绍。你可以把我当做一个风尘仆仆的过路人，此刻琐事缠身，需要一杯能暂忘忧愁的饮料。",
                 voice: "inv/Haier/001/C8AC28A4",
                 npc: 790055,
+            },
+            {
+                id: "17601725152201869432",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0016_judian",
             },
         ],
     },
@@ -21856,6 +22054,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "去看看吧……",
                 voice: "inv/Maer/002/C89290A4",
             },
+            {
+                id: "176008420383726750698",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0024_story_pub",
+            },
         ],
     },
     {
@@ -22397,6 +22601,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "“鉴于我们共享一个姓氏，我将你的名字刻于锅底，既免于丢我的人，也能让灶火灼烧你的耻辱。”",
                 voice: "inv/Maer/003/C892AA3C",
             },
+            {
+                id: "176008429880827373191",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0016_judian",
+            },
         ],
     },
     {
@@ -22838,6 +23048,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "……算了，不找借口了！到下次，我和胖尾巴的下一次见面，我会笑着和它说再见的！",
                 voice: "inv/Maer/004/C892B92A",
                 npc: 93301,
+            },
+            {
+                id: "176008434936427995784",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0016_judian",
             },
         ],
     },
@@ -27972,6 +28188,12 @@ export const partyTopicData: PartyTopic[] = [
                 npc: 790015,
                 next: 800701271,
             },
+            {
+                id: "1725259468464205017",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0043_story_empire",
+            },
         ],
     },
     {
@@ -28234,6 +28456,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我欣赏你的坦诚，琳恩。虽然很微小，但你也有愿意不断为之攀登的目标，这便足够了。",
                 voice: "inv/Xibi/002/C8728AEE",
                 npc: 790013,
+            },
+            {
+                id: "1725259813489206196",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0036_story_renweidaozu",
             },
         ],
     },
@@ -28782,6 +29010,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Songlu/001/C86C12E2",
                 npc: 95101,
             },
+            {
+                id: "176008235483123636444",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0024_story_pub",
+            },
         ],
     },
     {
@@ -29032,6 +29266,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "嗯——不能再等啦！我和榛子现在就去筹备粮食！改天再来找你玩，你要记得多吃饭哦！",
                 voice: "inv/Songlu/002/C86C224E",
                 npc: 95101,
+            },
+            {
+                id: "176008242309324259069",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0024_story_pub",
             },
         ],
     },
@@ -29324,6 +29564,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "我得先走了，{nickname}，我们下次再见吧！",
                 voice: "inv/Songlu/003/C86C335E",
                 npc: 95101,
+            },
+            {
+                id: "176008246779524881542",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0024_story_pub",
             },
         ],
     },
@@ -29667,6 +29913,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Songlu/004/C86C4540",
                 npc: 95101,
                 next: 80060449,
+            },
+            {
+                id: "176008405759425504975",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0024_story_pub",
             },
         ],
     },
@@ -30841,6 +31093,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Saiqi/001/C878E4A0",
                 npc: 790004,
             },
+            {
+                id: "1725259200699203740",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0044_story_first_meet_saiqi_loop",
+            },
         ],
     },
     {
@@ -31196,6 +31454,12 @@ export const partyTopicData: PartyTopic[] = [
                 voice: "inv/Saiqi/002/C878F5B0",
                 npc: 790006,
             },
+            {
+                id: "1725259081013202362",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0044_story_first_meet_saiqi_loop",
+            },
         ],
     },
     {
@@ -31507,6 +31771,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "命运啊……求你怜悯我唯一一次……让我帮她实现这个愿望吧。",
                 voice: "inv/Saiqi/003/C879051C",
                 npc: 790005,
+            },
+            {
+                id: "1725259036826201498",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0039_story_saiqi_see_flower",
             },
         ],
     },
@@ -32174,6 +32444,12 @@ export const partyTopicData: PartyTopic[] = [
                 content: "——告诉我，<H>你的理想依旧在吗？</>",
                 voice: "inv/Dafu/002/C8B90C1A",
                 npc: 790013,
+            },
+            {
+                id: "1760171867976500",
+                type: "PlayOrStopBGMNode",
+                name: "BGM节点",
+                resource: "0036_story_renweidaozu",
             },
         ],
     },

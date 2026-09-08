@@ -27,6 +27,14 @@ export const questData_en: QuestStory[] = [
             {
                 id: 10010102,
                 name: "???",
+                nodes: [
+                    {
+                        id: "174782280482333956126",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "char_pick",
+                    },
+                ],
             },
             {
                 id: 10010103,
@@ -60,6 +68,31 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "quest_16940528724831102",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - start",
+                        resource: "0002_story_shahai",
+                        next: ["quest_16939946055681077"],
+                    },
+                    {
+                        id: "quest_16940525957161093",
+                        type: "PlayOrStopBGMNode",
+                        name: "noise - state 1 - start",
+                        resource: "SC002",
+                    },
+                    {
+                        id: "quest_16939946055681077",
+                        type: "PlayOrStopBGMNode",
+                        name: "noise - state 0 - start",
+                        resource: "SC002",
+                    },
+                    {
+                        id: "quest_16940691773581109",
+                        type: "PlayOrStopBGMNode",
+                        name: "noise - state 2 - start",
+                        resource: "Cine00_SC002",
+                    },
                 ],
             },
             {
@@ -70,7 +103,7 @@ export const questData_en: QuestStory[] = [
                         id: "17096430398514460",
                         type: "TalkNode",
                         name: "黑屏-100257-净界岛",
-                        next: ["17047805518314946"],
+                        next: ["170928206780818056", "17047805518314946"],
                         dialogues: [
                             {
                                 id: 10025701,
@@ -93,10 +126,16 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "170928206780818056",
+                        type: "PlayOrStopBGMNode",
+                        name: "noise - state 2 - start",
+                        resource: "SC002",
+                    },
+                    {
                         id: "17047805518314946",
                         type: "TalkNode",
                         name: "黑屏-100257-秽兽撕碎",
-                        next: ["quest_1688640351446845"],
+                        next: ["quest_1688640351446845", "quest_16940815139431509"],
                         dialogues: [
                             {
                                 id: 10025704,
@@ -117,6 +156,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 100003,
                             },
                         ],
+                    },
+                    {
+                        id: "quest_16940815139431509",
+                        type: "PlayOrStopBGMNode",
+                        name: "出山洞过渡音效 - start",
+                        resource: "connect_01_cave_sfx",
                     },
                 ],
             },
@@ -173,6 +218,14 @@ export const questData_en: QuestStory[] = [
             {
                 id: 10010106,
                 name: "Make your way down to the village",
+                nodes: [
+                    {
+                        id: "quest_1685600508920400",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - cunzhuang - start",
+                        resource: "0003_story_cunzhuang",
+                    },
+                ],
             },
             {
                 id: 10010107,
@@ -244,6 +297,16 @@ export const questData_en: QuestStory[] = [
             {
                 id: 10010108,
                 name: "Repel the approaching Filthoids",
+                nodes: [
+                    {
+                        id: "1706007306143137059",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - huishou - start",
+                        resource: "0004_atmos_huishou",
+                        srId: 100101,
+                        pos: [2362, 2664],
+                    },
+                ],
             },
             {
                 id: 10010109,
@@ -466,6 +529,16 @@ export const questData_en: QuestStory[] = [
             {
                 id: 10010203,
                 name: "Head to the ruins on the mountain",
+                nodes: [
+                    {
+                        id: "quest_16940700911492987",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - nvshenxiang - start",
+                        resource: "0005_story_nvshenxiang",
+                        srId: 100101,
+                        pos: [10111, -3793],
+                    },
+                ],
             },
             {
                 id: 10010204,
@@ -514,6 +587,16 @@ export const questData_en: QuestStory[] = [
             {
                 id: 10010206,
                 name: "Open the gate ahead",
+                nodes: [
+                    {
+                        id: "quest_1694142034518804",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - shendianyiji - start",
+                        resource: "0006_atmos_shendianyiji",
+                        srId: 100102,
+                        pos: [18714, -3998],
+                    },
+                ],
             },
             {
                 id: 10010207,
@@ -658,6 +741,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "quest_16940703816133006",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 07- start",
+                        resource: "07",
+                        srId: 100102,
+                        pos: [16281, 8965],
+                    },
                 ],
             },
         ],
@@ -668,6 +759,25 @@ export const questData_en: QuestStory[] = [
             {
                 id: 10010301,
                 name: "Continue searching for the airship",
+                nodes: [
+                    {
+                        id: "quest_1685947271598238",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - _zaoyudiguojun  - start",
+                        resource: "0007_story_zaoyudiguojun",
+                        srId: 100103,
+                        pos: [22268, 19929],
+                    },
+                    {
+                        id: "1708484335215205339",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - shendianyiji上层 - Play",
+                        resource: "0029_atmos_shendianshangceng",
+                        srId: 100103,
+                        pos: [22268, 19929],
+                    },
+                ],
+                startIds: ["quest_1685947271598238", "1708484335215205339"],
             },
             {
                 id: 10010302,
@@ -741,10 +851,30 @@ export const questData_en: QuestStory[] = [
             {
                 id: 10010304,
                 name: "Escape from the soldiers' besiegement",
+                nodes: [
+                    {
+                        id: "quest_16940706250363385",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - zhuizhuzhan  - start",
+                        resource: "0008_combat_zhuizhuzhan",
+                        srId: 100103,
+                        pos: [25358, 22091],
+                    },
+                ],
             },
             {
                 id: 10010305,
                 name: "Escape from this place",
+                nodes: [
+                    {
+                        id: "169935322288426436",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - xibi_p1  - start",
+                        resource: "0009_combat_xibi_p1",
+                        srId: 100103,
+                        pos: [36189, 23535],
+                    },
+                ],
             },
             {
                 id: 10010306,
@@ -783,6 +913,12 @@ export const questData_en: QuestStory[] = [
                                 content: "……",
                             },
                         ],
+                    },
+                    {
+                        id: "quest_16940707345323398",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - xibi p2  - start",
+                        resource: "0011_combat_xibi_p2",
                     },
                     {
                         id: "quest_1686818656143291",
@@ -833,13 +969,32 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1730293403920418558",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - tiaoya  - start",
+                        resource: "0012_story_tiaoya",
+                    },
                 ],
-                startIds: ["quest_16926743134633260", "quest_16941646614348815", "quest_1686818656143291"],
+                startIds: [
+                    "quest_16926743134633260",
+                    "quest_16941646614348815",
+                    "quest_16940707345323398",
+                    "quest_1686818656143291",
+                    "1730293403920418558",
+                ],
             },
             {
                 id: 10010307,
                 name: "???",
                 nodes: [
+                    {
+                        id: "170970524420825041",
+                        type: "PlayOrStopBGMNode",
+                        name: "prologue_void_2d - noise - Play",
+                        resource: "prologue_void_2d",
+                        next: ["1708484399604207504"],
+                    },
                     {
                         id: "1708484399604207502",
                         type: "TalkNode",
@@ -912,6 +1067,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1708484399604207504",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 沙海2 - Play",
+                        resource: "0028_story_shahai_part2",
+                    },
                 ],
             },
             {
@@ -934,6 +1095,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 100005,
                             },
                         ],
+                    },
+                    {
+                        id: "173028002823318208",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - xibi p2  - start",
+                        resource: "0011_combat_xibi_p2",
                     },
                     {
                         id: "173028002823318202",
@@ -984,6 +1151,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1730293403920418558",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - tiaoya  - start",
+                        resource: "0012_story_tiaoya",
+                    },
                 ],
             },
             {
@@ -991,25 +1164,28 @@ export const questData_en: QuestStory[] = [
                 name: "Explore the ruins and search for the airship",
                 nodes: [
                     {
-                        id: "17468608271436328",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17467774050433073",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 07- end",
+                        resource: "07",
                         srId: 100102,
                         pos: [19977, 11262],
-                        dialogues: [
-                            {
-                                id: 10010101,
-                                content: "Berry, I...",
-                                voice: "story/1001/100101/190F2A32",
-                                npc: 100001,
-                            },
-                        ],
                     },
                 ],
             },
             {
                 id: 10010312,
                 name: "Explore the ruins and search for the airship",
+                nodes: [
+                    {
+                        id: "17468601216233220",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 07- end",
+                        resource: "07",
+                        srId: 100102,
+                        pos: [22410, 15735],
+                    },
+                ],
             },
         ],
     },
@@ -2010,6 +2186,13 @@ export const questData_en: QuestStory[] = [
                 name: "Head to the Hypnos' House for accommodations",
                 desc: "Ms Camilla suggests you lodge at the Hypnos' House.\nDespite its eerie tales, you decide to delve deeper...",
                 nodes: [
+                    {
+                        id: "170912107815515005",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放疗养院剧情音乐",
+                        resource: "0020_story_sanatorium",
+                        next: ["17371907445847875041"],
+                    },
                     {
                         id: "17371907445847875041",
                         type: "TalkNode",
@@ -3014,6 +3197,13 @@ export const questData_en: QuestStory[] = [
                 name: "Hear out Margie's situation",
                 desc: "The scavenger girl named Margie has encountered some difficulties.\nAsk about her situation.",
                 nodes: [
+                    {
+                        id: "170912272639927108",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放酒馆剧情音乐",
+                        resource: "0024_story_pub",
+                        next: ["1703162571823213439"],
+                    },
                     {
                         id: "1703162571823213439",
                         type: "TalkNode",
@@ -4109,6 +4299,13 @@ export const questData_en: QuestStory[] = [
                 name: "Check the Commission bulletin board",
                 desc: "All Commissions for Phoxhunters are on the bulletin board in The Asphodel. Go check it out.",
                 nodes: [
+                    {
+                        id: "17181605173287021",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放酒馆剧情音乐",
+                        resource: "0024_story_pub",
+                        next: ["17406612041766353"],
+                    },
                     {
                         id: "17406612041766353",
                         type: "TalkNode",
@@ -5405,6 +5602,13 @@ export const questData_en: QuestStory[] = [
                 desc: "Your arrival has awakened the giant Filthoid dwelling in the depths of Glevum Pit.\nNow that it has come to this, the first order of business is to defeat it.",
                 nodes: [
                     {
+                        id: "17184248768162029924",
+                        type: "PlayOrStopBGMNode",
+                        name: "开启声音",
+                        resource: "0032_combat_shijingzhe",
+                        next: ["17241238357881232873"],
+                    },
+                    {
                         id: "17241238357881232873",
                         type: "TalkNode",
                         name: "赛琪道歉",
@@ -5880,6 +6084,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 200021,
                             },
                         ],
+                    },
+                    {
+                        id: "1717642566949173641",
+                        type: "PlayOrStopBGMNode",
+                        name: "开启幽默音乐",
+                        resource: "0033_story_humour",
+                        srId: 101304,
+                        pos: [16189, 30813],
                     },
                 ],
             },
@@ -8075,6 +8287,14 @@ export const questData_en: QuestStory[] = [
                 desc: "Per Outsider's instructions, defeat the approaching Filthoids to complete your combat training.",
                 nodes: [
                     {
+                        id: "17289734866038503",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放训练bgm",
+                        resource: "combat01_state1_r01",
+                        srId: 101103,
+                        pos: [-28000, -9451],
+                    },
+                    {
                         id: "1719560298979297148",
                         type: "TalkNode",
                         name: "地上这些是",
@@ -8146,6 +8366,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "17582680876436601",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放训练bgm",
+                        resource: "combat01_state1_r01",
+                        srId: 101103,
+                        pos: [-32982, -3359],
                     },
                     {
                         id: "174282395557227023049",
@@ -8445,6 +8673,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17305368913881073",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放训练bgm",
+                        resource: "combat01_state1_r01",
+                    },
+                    {
                         id: "17421242991512880432",
                         type: "TalkNode",
                         name: "碎了！",
@@ -8465,7 +8699,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["1717643155721700430", "1717643155721700434", "1717643155722700436", "1717643155722700441"],
+                startIds: ["1717643155721700430", "1717643155721700434", "1717643155722700436", "1717643155722700441", "17305368913881073"],
             },
             {
                 id: 10020507,
@@ -9002,6 +9236,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17491238392664102804",
+                        type: "PlayOrStopBGMNode",
+                        name: "停止播放站桩bgm",
+                        resource: "0050_story_saiqi_grow_flower",
+                    },
+                    {
                         id: "174228308433410206522",
                         type: "TalkNode",
                         name: "是你。",
@@ -9156,6 +9396,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 200006,
                             },
                         ],
+                    },
+                    {
+                        id: "17441070471244931503",
+                        type: "PlayOrStopBGMNode",
+                        name: "放Bgm",
+                        resource: "0039_story_saiqi_see_flower",
+                        srId: 101103,
+                        pos: [-29128, 12608],
                     },
                     {
                         id: "17437437824491316483",
@@ -9559,6 +9807,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17441070471244931502", "17441070471244931503"],
             },
             {
                 id: 10020611,
@@ -11445,6 +11694,12 @@ export const questData_en: QuestStory[] = [
                 desc: "On your way to meet Psyche, a sudden scream came from the direction of Hypnos' House — it sounded like Snow.\nIt sent a chill down your spine, urging you to investigate the source of the disturbance.",
                 nodes: [
                     {
+                        id: "1729666715845568782",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放站桩bgm",
+                        resource: "0051_story_danger",
+                    },
+                    {
                         id: "1725459527481552476",
                         type: "TalkNode",
                         name: "你们终于来了",
@@ -11530,6 +11785,12 @@ export const questData_en: QuestStory[] = [
                 desc: "According to Snow, Psyche is exhibiting signs of Deterioration. Meanwhile, a boy from Hypnos' House implores you to help Henrik.\nFollow the boy into Hypnos' House to understand the situation fully.",
                 nodes: [
                     {
+                        id: "17296685922142047194",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放站桩bgm",
+                        resource: "0051_story_danger",
+                    },
+                    {
                         id: "171161181907811033",
                         type: "TalkNode",
                         name: "拜托了，请跟我来！",
@@ -11564,6 +11825,12 @@ export const questData_en: QuestStory[] = [
                 name: "Enter Henrik's office",
                 desc: "The usually locked office on the ground floor of Hypnos' House is now wide open, suggesting that Henrik's office is the epicentre of the ongoing incident.",
                 nodes: [
+                    {
+                        id: "17296677862101491667",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放站桩bgm",
+                        resource: "0051_story_danger",
+                    },
                     {
                         id: "1711011247473162271",
                         type: "TalkNode",
@@ -12169,6 +12436,14 @@ export const questData_en: QuestStory[] = [
                 desc: "Following the butterflies, you arrive at Lamenting Lake, where raging winds seem intent on blocking your way. \nFortunately, the gusts follow a pattern. Stay vigilant and carefully cross the icy lake.",
                 nodes: [
                     {
+                        id: "17815073625007744",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放站桩Bgm",
+                        resource: "0042_story_find_saiqi",
+                        srId: 101103,
+                        pos: [-30270, 8943],
+                    },
+                    {
                         id: "17289895830894995",
                         type: "TalkNode",
                         name: "别担心",
@@ -12225,12 +12500,21 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17815073625007744", "17289895830894995"],
             },
             {
                 id: 10020708,
                 name: "Awaken Psyche",
                 desc: "Psyche's condition worsens. By the time you finally catch up to her, she has morphed into a Filthoid known as the Eclosioner.\nDefeat the Eclosioner and awaken Psyche from her slumber.",
                 nodes: [
+                    {
+                        id: "1715756785354969639",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放声音",
+                        resource: "0032_combat_shijingzhe",
+                        srId: 101103,
+                        pos: [-8918, 37856],
+                    },
                     {
                         id: "1715756785354969659",
                         type: "TalkNode",
@@ -12297,6 +12581,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17442139067709240929",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放声音",
+                        resource: "0047_combat_saiqi_p1",
+                    },
+                    {
                         id: "17442139067719240933",
                         type: "TalkNode",
                         name: "赛琪，听得见我的声音吗？",
@@ -12359,7 +12649,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17442139067719240962",
+                        type: "PlayOrStopBGMNode",
+                        name: "播bgm",
+                        resource: "0042_story_find_saiqi",
+                    },
                 ],
+                startIds: ["1715756785354969639", "1715756785354969659", "17442139067719240962"],
             },
             {
                 id: 10020709,
@@ -12372,75 +12669,24 @@ export const questData_en: QuestStory[] = [
                 desc: "Butterflies flutter along the path Psyche took, as if guiding you. \nFollow them to find her.",
                 nodes: [
                     {
-                        id: "17442870280653025516",
-                        type: "TalkNode",
-                        name: "赛琪，听得见我的声音吗？",
+                        id: "17442870280663025531",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放站桩bgm",
+                        resource: "0042_story_find_saiqi",
                         srId: 101103,
                         pos: [-8918, 37856],
-                        dialogues: [
-                            {
-                                id: 10111101,
-                                content: "Psyche, can you hear me?",
-                                voice: "story/1002/101111/194FE482",
-                                npc: 100001,
-                                next: 10111102,
-                            },
-                            {
-                                id: 10111102,
-                                content: "Talk to me, Psyche...",
-                                voice: "story/1002/101111/194FE4AC",
-                                npc: 100001,
-                                next: 10111103,
-                            },
-                            {
-                                id: 10111103,
-                                content: "You said it yourself, there's so much you want to do...",
-                                voice: "story/1002/101111/194FE4D6",
-                                npc: 100001,
-                                next: 10111104,
-                            },
-                            {
-                                id: 10111104,
-                                content: "You'll leave Icelake for those unseen places—",
-                                voice: "story/1002/101111/194FE500",
-                                npc: 100001,
-                                next: 10111105,
-                            },
-                            {
-                                id: 10111105,
-                                content: "...You'll go to a small island, where you can build a house by the sea...",
-                                voice: "story/1002/101111/194FE52A",
-                                npc: 100001,
-                                next: 10111106,
-                            },
-                            {
-                                id: 10111106,
-                                content: "...and grow white flowers around it...",
-                                voice: "story/1002/101111/194FE554",
-                                npc: 100001,
-                                next: 10111107,
-                            },
-                            {
-                                id: 10111107,
-                                content:
-                                    "...Talk about the snow in Icelake with your friends, while shading yourself with a wide-brimmed sunhat...",
-                                voice: "story/1002/101111/194FE57E",
-                                npc: 100001,
-                                next: 10111108,
-                            },
-                            {
-                                id: 10111108,
-                                content: "Talk to me, Psyche...",
-                                voice: "story/1002/101111/194FE5A8",
-                                npc: 100001,
-                            },
-                        ],
                     },
                     {
                         id: "17247499176511946",
                         type: "TalkNode",
                         name: "看风暴顺便切女主",
                         next: ["174524051291634693153"],
+                    },
+                    {
+                        id: "17296873159381488469",
+                        type: "PlayOrStopBGMNode",
+                        name: "播风暴音效",
+                        resource: "storm",
                     },
                     {
                         id: "174524051291634693153",
@@ -12462,7 +12708,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17321974593475231515",
+                        type: "PlayOrStopBGMNode",
+                        name: "播bgm",
+                        resource: "0042_story_find_saiqi",
+                    },
                 ],
+                startIds: ["17442870280663025531", "17321974593475231515"],
             },
         ],
     },
@@ -12518,6 +12771,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17253485743162756940",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幻境bgm",
+                        resource: "0049_combat_saiqi_memory",
+                    },
+                    {
                         id: "17182738991682003306",
                         type: "TalkNode",
                         name: "这是我家",
@@ -12556,6 +12815,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 200006,
                             },
                         ],
+                    },
+                    {
+                        id: "174800614085416893",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放 积木效果音",
+                        resource: "woodblockfall",
                     },
                     {
                         id: "17452243953059266116",
@@ -12954,6 +13219,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17266278147504676",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放 传送门效果音",
+                        resource: "portal1",
+                    },
+                    {
                         id: "174522755786114725048",
                         type: "TalkNode",
                         name: "开车",
@@ -12996,7 +13267,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17586165531244413", "17233704523623771", "17247600117205632559"],
+                startIds: ["17586165531244413", "17233704523623771", "17247600117205632559", "17253485743162756940"],
             },
             {
                 id: 10020802,
@@ -13033,7 +13304,20 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17253486084042757490",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幻境bgm",
+                        resource: "0049_combat_saiqi_memory",
+                    },
+                    {
+                        id: "1748006422260594157",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放 传送门效果音",
+                        resource: "portal1",
+                    },
                 ],
+                startIds: ["1723444322797832601", "17253645968161098414", "17253486084042757490"],
             },
             {
                 id: 10020803,
@@ -13074,7 +13358,7 @@ export const questData_en: QuestStory[] = [
                         id: "1722527552047487765",
                         type: "TalkNode",
                         name: "看到自己的一生",
-                        next: ["17184319496412590176"],
+                        next: ["17253488456182758722", "17184319496412590176"],
                         dialogues: [
                             {
                                 id: 10112101,
@@ -13132,6 +13416,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17253488456182758722",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0048_combat_saiqi_p2",
+                    },
+                    {
                         id: "17184319496412590176",
                         type: "TalkNode",
                         name: "成为野兽吧",
@@ -13183,6 +13473,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1725360950241785",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放bgm",
+                        resource: "0054_combat_saiqi_p3",
+                    },
+                    {
                         id: "17184325923652866005",
                         type: "TalkNode",
                         name: "你在做什么？！",
@@ -13217,10 +13513,16 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17268145457014179",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放bgm",
+                        resource: "0056_story_saiqi_fly_to_sun",
+                    },
+                    {
                         id: "17214660590632549",
                         type: "TalkNode",
                         name: "胜利结算",
-                        next: ["172595089212717610"],
+                        next: ["17268145457014179", "172595089212717610"],
                         dialogues: [
                             {
                                 id: 10113401,
@@ -15345,6 +15647,13 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1756978090241967878",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["1756978090241967878"],
+                    },
+                    {
                         id: "174575163271510499",
                         type: "UnlockDetectiveAnswerNode",
                         name: "开启推理线索",
@@ -15638,13 +15947,27 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17485135772303487435",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                    },
                 ],
+                startIds: ["17358100632406816", "17485135772303487435"],
             },
             {
                 id: 10030107,
                 name: "Investigate the crime scene",
                 desc: "You and Rhythm agree to join forces on the Charon Hunt case. First step: comb the scene for clues that could lead to the culprit's whereabouts.",
                 nodes: [
+                    {
+                        id: "17569849459422877933",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["17569849459422877933"],
+                    },
                     {
                         id: "173934612267415556",
                         type: "TalkNode",
@@ -16026,6 +16349,12 @@ export const questData_en: QuestStory[] = [
                                 icon: "InformtIcon",
                             },
                         ],
+                    },
+                    {
+                        id: "17485137736544361469",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
                     },
                 ],
             },
@@ -16459,6 +16788,13 @@ export const questData_en: QuestStory[] = [
                 desc: "The troupe appears to lack both the motive and the opportunity to commit the crime. With no useful leads here, it's time to regroup and see if Rhythm found anything at the factory.",
                 nodes: [
                     {
+                        id: "17485141117565241874",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["173278031895721846"],
+                    },
+                    {
                         id: "173278031895721846",
                         type: "TalkNode",
                         name: "对话节点",
@@ -16856,6 +17192,13 @@ export const questData_en: QuestStory[] = [
                                 npc: 100314,
                             },
                         ],
+                    },
+                    {
+                        id: "17485141466885243290",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["173278046099127774"],
                     },
                     {
                         id: "173278046099127774",
@@ -17407,6 +17750,15 @@ export const questData_en: QuestStory[] = [
                 desc: "You've gathered several promising clues — all possibly linked to the Charon Hunt. When the trail runs cold, try combining them. A new lead might surface.",
                 nodes: [
                     {
+                        id: "17569849790292879155",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["17569849790292879155"],
+                        srId: 101101,
+                        pos: [-9617, -4083],
+                    },
+                    {
                         id: "17473096152385189",
                         type: "TalkNode",
                         name: "对话节点",
@@ -17605,6 +17957,15 @@ export const questData_en: QuestStory[] = [
                                 npc: 100304,
                             },
                         ],
+                    },
+                    {
+                        id: "17569849524302878190",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["17569849524302878190"],
+                        srId: 101101,
+                        pos: [-9617, -4083],
                     },
                     {
                         id: "17459174708204377",
@@ -17928,6 +18289,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17485143570986987157",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "combat01_state2_r01",
+                    },
+                    {
                         id: "1735872857075698526",
                         type: "TalkNode",
                         name: "对话节点",
@@ -18139,6 +18506,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 100304,
                             },
                         ],
+                    },
+                    {
+                        id: "17485144742537568794",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "combat01_state2_r01",
                     },
                     {
                         id: "1739519063115783217",
@@ -18575,6 +18948,13 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17485210385975016",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0074_story_encounter_with_blues",
+                        next: ["17308902087824166012", "17485146243129308614"],
+                    },
+                    {
                         id: "17308902087824166012",
                         type: "TalkNode",
                         name: "对话节点",
@@ -18601,6 +18981,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 100344,
                             },
                         ],
+                    },
+                    {
+                        id: "17485146243129308614",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0060_boss_ex01_lizhanzhe_loop",
                     },
                     {
                         id: "17308903579024168935",
@@ -18709,7 +19095,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["173313073996623541", "173313073996623542"],
+                startIds: ["173313073996623541", "173313073996623542", "17485210385975016"],
             },
             {
                 id: 10030214,
@@ -18824,6 +19210,13 @@ export const questData_en: QuestStory[] = [
                 name: "Head to the Legion Medical Centre",
                 desc: "Back at Rhythm's secret base, you come across the silver seal — along with a few keepsakes from her past. As you sift through them, something shifts: maybe the distance between you was never as great as it seemed. Bring the seal back and hear what she has to say.",
                 nodes: [
+                    {
+                        id: "174851558636215115484",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0071_lise_secret",
+                        next: ["1730701647488815970"],
+                    },
                     {
                         id: "1730701647488815970",
                         type: "TalkNode",
@@ -19521,6 +19914,15 @@ export const questData_en: QuestStory[] = [
                 name: "Head to the Legion Medical Centre",
                 desc: "The exit is a scene of carnage. Poison traces — not standard issue for Imperial forces — hint at something far darker behind the Charon Hunt. After some discussion, Outsider stays to report to the Legion. You and Snow stick to the plan and head to the hospital to visit Rhythm.",
                 nodes: [
+                    {
+                        id: "17503156862002873807",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0071_lise_secret",
+                        next: ["17503156861962873791"],
+                        srId: 101110,
+                        pos: [4668, 1173],
+                    },
                     {
                         id: "17503156861962873791",
                         type: "TalkNode",
@@ -20611,7 +21013,7 @@ export const questData_en: QuestStory[] = [
                         name: "开启推理线索",
                         srId: 101101,
                         pos: [-3270, -5180],
-                        next: ["17320110260813252"],
+                        next: ["174851693411720345331"],
                         answers: [
                             {
                                 id: 100501,
@@ -20628,6 +21030,15 @@ export const questData_en: QuestStory[] = [
                                 icon: "VoiceIcon",
                             },
                         ],
+                    },
+                    {
+                        id: "174851693411720345331",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["17320110260813252"],
+                        srId: 101101,
+                        pos: [-3270, -5180],
                     },
                     {
                         id: "17320110260813252",
@@ -20754,10 +21165,17 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17482426816602665",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "clue_cd1",
+                        next: ["17367606070361918123"],
+                    },
+                    {
                         id: "17367606070361918123",
                         type: "TalkNode",
                         name: "调频后开车",
-                        next: ["17406417410512353775"],
+                        next: ["17482427161512948"],
                         dialogues: [
                             {
                                 id: 10035303,
@@ -20768,10 +21186,17 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17482427161512948",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "clue_cd2",
+                        next: ["17406417410512353775"],
+                    },
+                    {
                         id: "17406417410512353775",
                         type: "TalkNode",
                         name: "调频后开车",
-                        next: ["17406417461232353972"],
+                        next: ["17482427196483163"],
                         dialogues: [
                             {
                                 id: 10035304,
@@ -20780,6 +21205,13 @@ export const questData_en: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "17482427196483163",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "clue_cd3",
+                        next: ["17406417461232353972"],
                     },
                     {
                         id: "17406417461232353972",
@@ -21054,6 +21486,13 @@ export const questData_en: QuestStory[] = [
                 desc: "Rhythm hums a melody — hauntingly similar to the one the killer sang that night. It's from Children From the Snowfield, a well-known opera. You were just discussing how to use that clue to lure the killer out... but it seems they've come to you first.",
                 nodes: [
                     {
+                        id: "174851716764521218491",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0071_lise_secret",
+                        next: ["17410579739793624"],
+                    },
+                    {
                         id: "17410579739793624",
                         type: "TalkNode",
                         name: "站桩",
@@ -21249,8 +21688,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1758013775481962685",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
                 ],
-                startIds: ["17410579739793624", "1750150983705388"],
+                startIds: ["174851716764521218491", "17410579739793624", "1750150983705388", "1758013775481962685"],
             },
             {
                 id: 10030498,
@@ -22434,6 +22879,18 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17570423189393040",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0074_story_encounter_with_blues",
+                    },
+                    {
+                        id: "17496318501493969",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0060_boss_ex01_lizhanzhe_loop",
+                    },
+                    {
                         id: "17483503991223351",
                         type: "TalkNode",
                         name: "对话节点",
@@ -22650,6 +23107,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "174851589174118308519",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "combat01_state2_r01",
+                    },
+                    {
                         id: "1740033517474519887",
                         type: "TalkNode",
                         name: "对话节点",
@@ -22678,7 +23141,7 @@ export const questData_en: QuestStory[] = [
                         id: "1733734212424597771",
                         type: "TalkNode",
                         name: "黑屏剧情+过场",
-                        next: ["1733734212424597775"],
+                        next: ["17485746346556744"],
                         dialogues: [
                             {
                                 id: 10035501,
@@ -22707,6 +23170,13 @@ export const questData_en: QuestStory[] = [
                                 speakerName: "Blues",
                             },
                         ],
+                    },
+                    {
+                        id: "17485746346556744",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0081_scene_alchemyacademy",
+                        next: ["1733734212424597775"],
                     },
                     {
                         id: "1733734212424597775",
@@ -23400,6 +23870,7 @@ export const questData_en: QuestStory[] = [
                         id: "17339128118721345209",
                         type: "TalkNode",
                         name: "站桩",
+                        next: ["17485753485211757557"],
                         dialogues: [
                             {
                                 id: 10036001,
@@ -23667,6 +24138,19 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17485753485211757557",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0079_story_escape_from_lab_cs",
+                        next: ["17485231754334936731"],
+                    },
+                    {
+                        id: "17485231754334936731",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0075_story_escape_from_lab",
+                    },
                 ],
             },
             {
@@ -23878,6 +24362,15 @@ export const questData_en: QuestStory[] = [
                 name: "Talk to Rhythm",
                 desc: "The title of Laurelled Charon is nothing but a cruel ruse. You can't let Rhythm chase a dream spun from deceit. Tell her the truth about the Alchemy Academy... then do what must be done.",
                 nodes: [
+                    {
+                        id: "17503164627055761930",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0071_lise_secret",
+                        next: ["17503164627045761924"],
+                        srId: 101103,
+                        pos: [-39720, 4650],
+                    },
                     {
                         id: "17503164627045761924",
                         type: "TalkNode",
@@ -24279,6 +24772,12 @@ export const questData_en: QuestStory[] = [
                 desc: "At the Galea Theatre, the Silvercandle Carnival is in full swing. The place swirls with masks and outlandish costumes — the perfect veil for a monster like you. Slip through the revelry and find your contact.",
                 nodes: [
                     {
+                        id: "17496457592087833",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
+                    {
                         id: "173459408267631729",
                         type: "TalkNode",
                         name: "开车",
@@ -24380,7 +24879,7 @@ export const questData_en: QuestStory[] = [
                         name: "站桩",
                         srId: 101901,
                         pos: [18230, -410],
-                        next: ["174083203793914499"],
+                        next: ["174083203793914499", "17496457592087833"],
                         dialogues: [
                             {
                                 id: 10036308,
@@ -24463,6 +24962,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17580230240234936",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0086_cs_thea_fight",
+                    },
                 ],
             },
             {
@@ -24470,6 +24975,12 @@ export const questData_en: QuestStory[] = [
                 name: "Head to the Galea Theatre",
                 desc: "At the Galea Theatre, the Silvercandle Carnival is in full swing. The place swirls with masks and outlandish costumes — the perfect veil for a monster like you. Slip through the revelry and find your contact.",
                 nodes: [
+                    {
+                        id: "17503190879501855467",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
                     {
                         id: "17503190879501855435",
                         type: "TalkNode",
@@ -24511,7 +25022,7 @@ export const questData_en: QuestStory[] = [
                         id: "17503190879501855436",
                         type: "TalkNode",
                         name: "站桩",
-                        next: ["17503190879501855437", "17503190879501855439"],
+                        next: ["17503190879501855467", "17503190879501855437", "17503190879501855439"],
                         dialogues: [
                             {
                                 id: 10036501,
@@ -28572,6 +29083,14 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1779520323568669",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0163_combat_jazz_01",
+                        srId: 106301,
+                        pos: [-15620, 4980],
+                    },
+                    {
                         id: "177816111617563890722",
                         type: "TalkNode",
                         name: "对话节点",
@@ -28683,6 +29202,14 @@ export const questData_en: QuestStory[] = [
                 name: "Go deeper into the Ironworks",
                 desc: "Continue along the Ironworks assembly line.",
                 nodes: [
+                    {
+                        id: "1779718823633504",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0162_story_jazz_sneak_into",
+                        srId: 106001,
+                        pos: [-16870, 4860],
+                    },
                     {
                         id: "177796908032114036388",
                         type: "TalkNode",
@@ -29101,6 +29628,14 @@ export const questData_en: QuestStory[] = [
                 name: "Follow the path along the station rooftop",
                 desc: "We've reached the rooftop of Bloomfield Station. Move along the roof beams and look for a way down.",
                 nodes: [
+                    {
+                        id: "17797124105732838",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0162_story_jazz_sneak_into",
+                        srId: 106001,
+                        pos: [-16870, 4860],
+                    },
                     {
                         id: "17782485231261432511",
                         type: "TalkNode",
@@ -29929,6 +30464,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17830648152597543",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0166_story_danger",
+                    },
+                    {
                         id: "177892286027192226921",
                         type: "TalkNode",
                         name: "对话节点",
@@ -29957,6 +30498,7 @@ export const questData_en: QuestStory[] = [
                         id: "177763204613266981140",
                         type: "TalkNode",
                         name: "站长出场 ",
+                        next: ["17797130795419200613"],
                         dialogues: [
                             {
                                 id: 10042401,
@@ -30052,6 +30594,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17797130795419200613",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0163_combat_jazz_01",
+                    },
                 ],
             },
             {
@@ -30059,6 +30607,14 @@ export const questData_en: QuestStory[] = [
                 name: "Follow Hilda",
                 desc: "We reached the lift, only to run into Eisenbahn, the stationmaster. He suspects we caused the explosion.\nJust then, Hilda — whom we met on top of the Jackdaw — appeared and held off Eisenbahn's men. Follow Hilda.",
                 nodes: [
+                    {
+                        id: "177978411478316956143",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0165_story_xier_theme",
+                        srId: 106001,
+                        pos: [-17343, 4858],
+                    },
                     {
                         id: "177763808527098680864",
                         type: "TalkNode",
@@ -30099,9 +30655,27 @@ export const questData_en: QuestStory[] = [
                 desc: "We reached the lift, only to run into Eisenbahn, the stationmaster. He suspects we caused the explosion.\nJust then, Hilda — whom we met on top of the Jackdaw — appeared and held off Eisenbahn's men. Follow Hilda.",
                 nodes: [
                     {
+                        id: "17797131316471940065",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0164_cs_xier_show",
+                        next: ["177763795417816773252"],
+                        srId: 106001,
+                        pos: [-16550, 100],
+                    },
+                    {
                         id: "177763795417816773252",
                         type: "TalkNode",
                         name: "希尔妲救场",
+                        srId: 106001,
+                        pos: [-16550, 100],
+                        next: ["17800554634351458143"],
+                    },
+                    {
+                        id: "17800554634351458143",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0165_story_xier_theme",
                         srId: 106001,
                         pos: [-16550, 100],
                     },
@@ -30428,7 +31002,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["177763795417816773252", "177780108292048558302"],
+                startIds: ["17797131316471940065", "177763795417816773252", "17800554634351458143", "177780108292048558302"],
             },
             {
                 id: 10040207,
@@ -31509,6 +32083,12 @@ export const questData_en: QuestStory[] = [
                         next: ["177847399602678", "177847399602354"],
                     },
                     {
+                        id: "1779520549383969223",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0162_story_jazz_sneak_into",
+                    },
+                    {
                         id: "177847399602678",
                         type: "TalkNode",
                         name: "对话节点",
@@ -31593,12 +32173,21 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["177847399602986", "1779520549383969223"],
             },
             {
                 id: 10040213,
                 name: "Prepare to create a distraction",
                 desc: "A woman claiming to be Hilda blocked the way and warned us off. We had no choice but to retreat for now. Before leaving, we could check out the station office Stéphane mentioned.",
                 nodes: [
+                    {
+                        id: "177969493425927101363",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0164_cs_xier_show",
+                        srId: 106001,
+                        pos: [-39010, -2730],
+                    },
                     {
                         id: "177763838346920967014",
                         type: "TalkNode",
@@ -31745,6 +32334,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 100403,
                             },
                         ],
+                    },
+                    {
+                        id: "17797127232322907865",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0165_story_xier_theme",
+                        srId: 106001,
+                        pos: [-39010, -2730],
                     },
                     {
                         id: "177763838346920967016",
@@ -33586,7 +34183,7 @@ export const questData_en: QuestStory[] = [
                         name: "boss战前战斗",
                         srId: 106001,
                         pos: [-87180, -10870],
-                        next: ["17782435125899548989"],
+                        next: ["17795206183041936545", "17782435125899548989"],
                         dialogues: [
                             {
                                 id: 10044501,
@@ -33646,6 +34243,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 100444,
                             },
                         ],
+                    },
+                    {
+                        id: "17795206183041936545",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0168_boss_haluoji",
+                        srId: 106001,
+                        pos: [-87180, -10870],
                     },
                     {
                         id: "17782435125899548989",
@@ -33923,7 +34528,7 @@ export const questData_en: QuestStory[] = [
                         name: "站长又出场",
                         srId: 106001,
                         pos: [-20650, -4950],
-                        next: ["177824401290211462364"],
+                        next: ["177824401290211462364", "177969555969913542774"],
                         dialogues: [
                             {
                                 id: 10044901,
@@ -34106,6 +34711,14 @@ export const questData_en: QuestStory[] = [
                                 speakerName: "Princess Flodia",
                             },
                         ],
+                    },
+                    {
+                        id: "177969555969913542774",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0167_story_fuluo_theme",
+                        srId: 106001,
+                        pos: [-20650, -4950],
                     },
                     {
                         id: "177824401290211462366",
@@ -35552,6 +36165,12 @@ export const questData_en: QuestStory[] = [
                 desc: "Even though the escape plan is about to start, Miss Flora is still focused on her painting.\nPrepare some tea and refreshments for her.",
                 nodes: [
                     {
+                        id: "17795207159622903847",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0167_story_fuluo_theme",
+                    },
+                    {
                         id: "17787400372049740479",
                         type: "TalkNode",
                         name: "与芙罗拉交谈开车",
@@ -35838,6 +36457,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "177969628728015478056",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0165_story_xier_theme",
+                    },
                 ],
             },
             {
@@ -36066,6 +36691,14 @@ export const questData_en: QuestStory[] = [
                 name: "Follow Stéphane to the regular carriage",
                 desc: "We've reached the regular carriage. It's bustling with lively passengers. Have a chat with them to lighten the mood.",
                 nodes: [
+                    {
+                        id: "177969673256533392057",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0161_scene_train_station",
+                        srId: 106101,
+                        pos: [255430, -10960],
+                    },
                     {
                         id: "177874559521014606165",
                         type: "TalkNode",
@@ -36988,6 +37621,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1779696794706404",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0162_story_jazz_sneak_into",
+                    },
                 ],
             },
             {
@@ -37749,6 +38388,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1779697034679969208",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0170_story_fuluo_play_piano",
+                    },
                 ],
             },
             {
@@ -37818,6 +38463,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 100438,
                             },
                         ],
+                    },
+                    {
+                        id: "17796972200011936342",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0166_story_danger",
                     },
                 ],
             },
@@ -38427,12 +39078,31 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17795207468333872443",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0167_story_fuluo_theme",
+                        srId: 106101,
+                        pos: [255430, -10960],
+                    },
                 ],
+                startIds: ["17733852121786481894", "17795207468333872443"],
             },
             {
                 id: 10040424,
                 name: "Prepare to rescue Flora",
                 desc: "Lead Flora away from the Jackdaw and jump to freedom!",
+                nodes: [
+                    {
+                        id: "177980054136812121858",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0169_cs_tiaoche",
+                        srId: 106101,
+                        pos: [255430, -10960],
+                    },
+                ],
             },
             {
                 id: 10040426,
@@ -38445,7 +39115,7 @@ export const questData_en: QuestStory[] = [
                         name: "飞艇出场",
                         srId: 106101,
                         pos: [255430, -10960],
-                        next: ["177364906021122135839"],
+                        next: ["177364906021122135839", "17834256782697945545"],
                     },
                     {
                         id: "177364906021122135839",
@@ -38573,6 +39243,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 100413,
                             },
                         ],
+                    },
+                    {
+                        id: "17834256782697945545",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0008_combat_zhuizhuzhan",
+                        srId: 106101,
+                        pos: [255430, -10960],
                     },
                 ],
             },
@@ -39279,12 +39957,29 @@ export const questData_en: QuestStory[] = [
                 id: 10040501,
                 name: "Operate the cannon to fend off the airship's attacks",
                 desc: "Even though we stopped Katya, the distress signal the conductor sent out has drawn in Legion airships. They want to destroy the train and everyone on it.\nUse the turret on the train to stop the airships.",
+                nodes: [
+                    {
+                        id: "17797874344247271808",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0008_combat_zhuizhuzhan",
+                        srId: 106101,
+                        pos: [256340, 13040],
+                    },
+                ],
             },
             {
                 id: 10040502,
                 name: "Listen to Flora",
                 desc: "The airship cannons have stopped.",
                 nodes: [
+                    {
+                        id: "17798724048563879013",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0008_combat_zhuizhuzhan",
+                        next: ["177772041576114019395"],
+                    },
                     {
                         id: "177772041576114019395",
                         type: "TalkNode",
@@ -39711,10 +40406,16 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1779520994099968656",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0168_boss_haluoji",
+                    },
+                    {
                         id: "177772041577114019461",
                         type: "TalkNode",
                         name: "击败哈洛吉",
-                        next: ["177772041577114019460"],
+                        next: ["177969828211040647726"],
                         dialogues: [
                             {
                                 id: 10048501,
@@ -39797,6 +40498,13 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "177969828211040647726",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0080_story_the_abandoned_theme",
+                        next: ["177772041577114019460"],
+                    },
+                    {
                         id: "177772041577114019460",
                         type: "TalkNode",
                         name: "卡嘉击坠飞艇后 ",
@@ -39876,9 +40584,16 @@ export const questData_en: QuestStory[] = [
                 desc: "Katya has taken control of the train's main cannon and is firing at the airships. We need to stop her.\nDefeat the Aurora Express's main cannon.",
                 nodes: [
                     {
+                        id: "1779787486825797",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0080_story_the_abandoned_theme",
+                    },
+                    {
                         id: "177772045534914953121",
                         type: "TalkNode",
                         name: "对话节点",
+                        next: ["177969834552341616074"],
                         dialogues: [
                             {
                                 id: 10048611,
@@ -39927,6 +40642,19 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "177969834552341616074",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0171_combat_lieche_intro",
+                        next: ["17795210722591935845"],
+                    },
+                    {
+                        id: "17795210722591935845",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0171_combat_lieche_loop",
+                    },
                 ],
             },
             {
@@ -39938,7 +40666,7 @@ export const questData_en: QuestStory[] = [
                         id: "177772053087715887760",
                         type: "TalkNode",
                         name: "boss战一阶段结束对话",
-                        next: ["17788440692621930548"],
+                        next: ["17795211629842903298", "17788440692621930548"],
                         dialogues: [
                             {
                                 id: 10048701,
@@ -39978,6 +40706,18 @@ export const questData_en: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "177969863473044520369",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0080_story_the_abandoned_theme",
+                    },
+                    {
+                        id: "17795211629842903298",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0171_combat_lieche_loop",
                     },
                     {
                         id: "17788440692621930548",
@@ -40858,6 +41598,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "177969907659952263446",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0043_story_empire",
+                        srId: 106101,
+                        pos: [256340, 12660],
+                    },
                 ],
             },
             {
@@ -40974,6 +41722,16 @@ export const questData_en: QuestStory[] = [
                 id: 10040512,
                 name: "What is this place... ?",
                 desc: "What is this place... the Misty Sea? Look around and see.",
+                nodes: [
+                    {
+                        id: "177969881698146457301",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0172_story_counter_attack",
+                        srId: 106101,
+                        pos: [256340, 12660],
+                    },
+                ],
             },
             {
                 id: 10040514,
@@ -41076,6 +41834,12 @@ export const questData_en: QuestStory[] = [
                 name: "Defeat the Filthoid",
                 desc: "Your squad has been ambushed by fierce Filthoids. Defeat them and reunite with your squad.",
                 nodes: [
+                    {
+                        id: "17283896795166504",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0060_boss_ex01_lizhanzhe_loop",
+                    },
                     {
                         id: "173010246588627112540",
                         type: "TalkNode",
@@ -41259,7 +42023,7 @@ export const questData_en: QuestStory[] = [
                         id: "17193902221801415",
                         type: "TalkNode",
                         name: "因鲜血而震颤",
-                        next: ["17193902221801416"],
+                        next: ["17193902221801416", "1728390134697194412"],
                         dialogues: [
                             {
                                 id: 11010207,
@@ -41323,6 +42087,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "1728390134697194412",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
                     },
                     {
                         id: "17537756449062114",
@@ -41584,6 +42354,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1728390768716196045",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                    },
+                    {
                         id: "1718864280999136821",
                         type: "TalkNode",
                         name: "开车-达芙涅求助",
@@ -41696,6 +42472,15 @@ export const questData_en: QuestStory[] = [
                 name: "Speak with Daphne",
                 desc: "Together with Avar, you've successfully repelled the Filthoids. Time to return to the medical post to discuss the next move.",
                 nodes: [
+                    {
+                        id: "1728391611239201164",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
+                        next: ["1728391598499200670"],
+                        srId: 102101,
+                        pos: [29180, -36070],
+                    },
                     {
                         id: "1723793345850530559",
                         type: "TalkNode",
@@ -42099,6 +42884,7 @@ export const questData_en: QuestStory[] = [
                     },
                 ],
                 startIds: [
+                    "1728391611239201164",
                     "1723793345850530559",
                     "1723793345854530570",
                     "1723793345855530571",
@@ -42117,6 +42903,14 @@ export const questData_en: QuestStory[] = [
                 name: "Advance deeper into the Fortress",
                 desc: "Avar instructs Daphne and the wounded to stay at the post and wait for reinforcements. Meanwhile, you and Avar press on into the heart of the Fortress to continue the mission.",
                 nodes: [
+                    {
+                        id: "1728391958638568742",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102101,
+                        pos: [20409, -42328],
+                    },
                     {
                         id: "1722414724009163501",
                         type: "TalkNode",
@@ -42342,6 +43136,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17314987663599959662",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                    },
+                    {
                         id: "17314987663559959648",
                         type: "TalkNode",
                         name: "那些髓动轮",
@@ -42480,13 +43280,21 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["1735196316056240910", "17563841613355289"],
+                startIds: ["1735196316056240910", "17563841613355289", "17314987663599959662"],
             },
             {
                 id: 11010306,
                 name: "Examine the Phoxichor tanks",
                 desc: "You've shut down three power sources — but an alarm suddenly blares from the Phoxichor tanks in the engine room...",
                 nodes: [
+                    {
+                        id: "17601019900401742",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                        srId: 102101,
+                        pos: [1011, -38089],
+                    },
                     {
                         id: "17601019900401743",
                         type: "TalkNode",
@@ -42687,8 +43495,15 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17552626061712131505",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
                 ],
                 startIds: [
+                    "17601019900401742",
                     "17601019900401743",
                     "17253323291847833643",
                     "17253323177727833260",
@@ -43434,6 +44249,16 @@ export const questData_en: QuestStory[] = [
                 id: 11010309,
                 name: "Escape from the Engine Room",
                 desc: "Though Vic has fallen, you must continue the mission.\nWork with Avar to disable the mechanisms in the engine room and stay alert for lurking Filthoids.",
+                nodes: [
+                    {
+                        id: "17346895450532728966",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
+                        srId: 102101,
+                        pos: [-2516, -33328],
+                    },
+                ],
             },
             {
                 id: 11010311,
@@ -43594,6 +44419,15 @@ export const questData_en: QuestStory[] = [
                 desc: "Though Fulvis, the chief commander, insists on continuing the mission, Avar's judgment proves sound. Instead of a reckless attack that might cost you your lives, you focus on rescuing the Griffins first.",
                 nodes: [
                     {
+                        id: "17283928471781846317",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        next: ["17364998973465905300"],
+                        srId: 102101,
+                        pos: [-9791, -41953],
+                    },
+                    {
                         id: "17364998973465905300",
                         type: "TalkNode",
                         name: "对话节点",
@@ -43607,6 +44441,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17346900009364774201",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102101,
+                        pos: [-9791, -41953],
                     },
                 ],
             },
@@ -43775,13 +44617,30 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17346901796314778328",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [-5951, -20611],
+                    },
                 ],
+                startIds: ["17371841728019834760", "17346901796314778328"],
             },
             {
                 id: 11010509,
                 name: "Meet up with the trapped squad mates",
                 desc: "You've dealt with the Filthoids. Time to join your squad.",
                 nodes: [
+                    {
+                        id: "172844402509811394203",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [-10970, -21730],
+                    },
                     {
                         id: "17371840620838853254",
                         type: "TalkNode",
@@ -44137,6 +44996,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["172844402509811394203", "17371840620838853254"],
             },
             {
                 id: 11010510,
@@ -44224,6 +45084,14 @@ export const questData_en: QuestStory[] = [
                 desc: "The turret is moving along the track. Protect it from incoming Filthoids with Avar until it reaches its destination.",
                 nodes: [
                     {
+                        id: "172844407937311940011",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [-17100, -980],
+                    },
+                    {
                         id: "172466334872716973514",
                         type: "TalkNode",
                         name: "站桩 - 阿瓦尔 - 找到燃料了",
@@ -44252,6 +45120,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17283936245673679378",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0059_scene_ex01_encounter",
+                    },
+                    {
                         id: "17203249441934033964",
                         type: "TalkNode",
                         name: "推车开车对话",
@@ -44278,7 +45152,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["172466334872716973514", "172597340089719500774"],
+                startIds: ["172844407937311940011", "172466334872716973514", "172597340089719500774", "17283936245673679378"],
             },
             {
                 id: 11010513,
@@ -44299,6 +45173,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17284429951917373268",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0059_scene_ex01_encounter",
                     },
                     {
                         id: "17212737371581673097",
@@ -44475,7 +45355,16 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17283936453023683366",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [4799, 6952],
+                    },
                 ],
+                startIds: ["17237965473031049370", "17283936453023683366"],
             },
             {
                 id: 11010515,
@@ -44488,7 +45377,7 @@ export const questData_en: QuestStory[] = [
                         name: "黑屏",
                         srId: 102102,
                         pos: [1145, 7280],
-                        next: ["17484420387791169527"],
+                        next: ["17283938260834414078", "17484420387791169527"],
                         dialogues: [
                             {
                                 id: 11019201,
@@ -44518,6 +45407,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 110034,
                             },
                         ],
+                    },
+                    {
+                        id: "17283938260834414078",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
+                        srId: 102102,
+                        pos: [1145, 7280],
                     },
                     {
                         id: "17484420387791169527",
@@ -45097,6 +45994,14 @@ export const questData_en: QuestStory[] = [
                 desc: "Though you were too late to save Simon, his final words reveal more comrades trapped near the rail tracks.\nPress forward to rescue those you still can.",
                 nodes: [
                     {
+                        id: "1735894963114941906",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102101,
+                        pos: [-42, -39244],
+                    },
+                    {
                         id: "17392630798972537295",
                         type: "TalkNode",
                         name: "开车- 打给达芙涅",
@@ -45131,6 +46036,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["1735894963114941906", "17392630798972537295"],
             },
             {
                 id: 11010519,
@@ -45328,6 +46234,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17358952675115599136",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102101,
+                        pos: [-56, -28328],
+                    },
                 ],
             },
             {
@@ -45448,6 +46362,14 @@ export const questData_en: QuestStory[] = [
                 name: "Rendezvous with Avar",
                 desc: "You encounter two Charon civilians — a young woman and an old man. She claims they were captured by the Forsakens and forced into labour, while he offers a shortcut. With no way to confirm their story, you decide to proceed cautiously in the direction he suggests, hoping to regroup with Avar.",
                 nodes: [
+                    {
+                        id: "173633192837710583603",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [-17755, -670],
+                    },
                     {
                         id: "173633192837710583605",
                         type: "TalkNode",
@@ -45718,6 +46640,21 @@ export const questData_en: QuestStory[] = [
                 desc: "Avar initially plans to head to the central control room alone, but the fellow soldiers don't want to leave him to face the danger by himself. After some persuasion, Avar agrees to move forward with the group.",
                 nodes: [
                     {
+                        id: "172854286752423290978",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
+                        srId: 102102,
+                        pos: [0, 9850],
+                    },
+                    {
+                        id: "17283942605365339857",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0060_boss_ex01_lizhanzhe_loop",
+                        next: ["17229280300911386820"],
+                    },
+                    {
                         id: "17229280300911386820",
                         type: "TalkNode",
                         name: "阿瓦尔说小心点",
@@ -45834,7 +46771,7 @@ export const questData_en: QuestStory[] = [
                         name: "阿瓦尔在楼上",
                         srId: 102102,
                         pos: [-10, 17587],
-                        next: ["17272521340302785298"],
+                        next: ["17272521340302785298", "17283943979645526499"],
                         dialogues: [
                             {
                                 id: 11013409,
@@ -46221,6 +47158,14 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17283943979645526499",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0043_story_empire",
+                        srId: 102102,
+                        pos: [-10, 17587],
+                    },
+                    {
                         id: "17272521340302785296",
                         type: "TalkNode",
                         name: "对话节点",
@@ -46290,6 +47235,14 @@ export const questData_en: QuestStory[] = [
                 name: "Head to the central control room",
                 desc: "You've defeated the formidable Filthoid. Keep moving forward.",
                 nodes: [
+                    {
+                        id: "17349231817402736518",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [-10, 17587],
+                    },
                     {
                         id: "17349231817402736519",
                         type: "TalkNode",
@@ -46690,6 +47643,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17349231817402736518", "17349231817402736519"],
             },
             {
                 id: 11010706,
@@ -46710,10 +47664,16 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17344912306295971",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
+                    {
                         id: "17253450193859109322",
                         type: "TalkNode",
                         name: "黑屏 - 醒来",
-                        next: ["17424592240842094065", "17253450193859109326", "174219548213613269307"],
+                        next: ["17283945330285897420", "17424592240842094065", "17253450193859109326", "174219548213613269307"],
                         dialogues: [
                             {
                                 id: 11013801,
@@ -46736,6 +47696,12 @@ export const questData_en: QuestStory[] = [
                                 speakerName: "???",
                             },
                         ],
+                    },
+                    {
+                        id: "17283945330285897420",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
                     },
                     {
                         id: "17424592240842094065",
@@ -46918,8 +47884,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1733380183841608",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
                 ],
-                startIds: ["1722421160212347710", "1725013293956559677"],
+                startIds: ["1722421160212347710", "1725013293956559677", "1733380183841608"],
             },
             {
                 id: 11010802,
@@ -46936,6 +47908,12 @@ export const questData_en: QuestStory[] = [
                                 voice: "story/1002/110174/1B94B65A",
                             },
                         ],
+                    },
+                    {
+                        id: "173165997827929022663",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
                     },
                     {
                         id: "1752833494727974",
@@ -47034,6 +48012,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17250135336031463503", "173165997827929022663"],
             },
             {
                 id: 11010804,
@@ -47528,12 +48507,30 @@ export const questData_en: QuestStory[] = [
                 id: 11010808,
                 name: "Defeat the approaching Narwhal soldiers",
                 desc: "You've found Daphne. Despite her panic, she does her best to stay calm and fulfil her duties as a medic.\nThe Fortress is no longer safe. Escape with her through the sewers.",
+                nodes: [
+                    {
+                        id: "17344913204799605",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                        srId: 102102,
+                        pos: [-750, 12320],
+                    },
+                ],
             },
             {
                 id: 11010809,
                 name: "Use the control panel to open the gate",
                 desc: "You've found Daphne. Despite her panic, she does her best to stay calm and fulfil her duties as a medic.\nThe Fortress is no longer safe. Escape with her through the sewers.",
                 nodes: [
+                    {
+                        id: "172844423166912492404",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                        srId: 102102,
+                        pos: [10, 7465],
+                    },
                     {
                         id: "17340804816779075098",
                         type: "TalkNode",
@@ -47702,12 +48699,21 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["172844423166912492404", "17340804816779075098"],
             },
             {
                 id: 11010810,
                 name: "Escape the Fortress through the sewers",
                 desc: "You've found Daphne. Despite her panic, she does her best to stay calm and fulfil her duties as a medic.\nThe Fortress is no longer safe. Escape with her through the sewers.",
                 nodes: [
+                    {
+                        id: "172844424841812674421",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                        srId: 102102,
+                        pos: [0, 4170],
+                    },
                     {
                         id: "1732509715704653",
                         type: "TalkNode",
@@ -48048,6 +49054,16 @@ export const questData_en: QuestStory[] = [
                 id: 11010813,
                 name: "Escape the Fortress through the sewers",
                 desc: "Retrieve the key",
+                nodes: [
+                    {
+                        id: "172844426683612856495",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                        srId: 102102,
+                        pos: [10, -6190],
+                    },
+                ],
             },
             {
                 id: 11010814,
@@ -48055,17 +49071,12 @@ export const questData_en: QuestStory[] = [
                 desc: "Retrieve the key",
                 nodes: [
                     {
-                        id: "172535469512314776889",
-                        type: "TalkNode",
-                        name: "黑屏去下水道",
+                        id: "172844428541713038520",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
                         srId: 102102,
                         pos: [3950, -8050],
-                        dialogues: [
-                            {
-                                id: 11017409,
-                                voice: "story/1002/110174/1B94B7AA",
-                            },
-                        ],
                     },
                 ],
             },
@@ -48334,9 +49345,16 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17295869358111903759",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
+                    },
+                    {
                         id: "174228506548822424423",
                         type: "TalkNode",
                         name: "马尔科对话",
+                        next: ["17476541889811582"],
                         dialogues: [
                             {
                                 id: 11015601,
@@ -48368,6 +49386,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17476541889811582",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放 传送门效果音",
+                        resource: "portal1",
                     },
                     {
                         id: "17446922066821622956",
@@ -48542,6 +49566,12 @@ export const questData_en: QuestStory[] = [
                 name: '"Inferno"',
                 desc: "Endure the Warden's fiery trial to prove your innocence.",
                 nodes: [
+                    {
+                        id: "17295874506191906119",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0055_combat_boss_haier",
+                    },
                     {
                         id: "17271690062773511993",
                         type: "TalkNode",
@@ -49115,6 +50145,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17483342890804211",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0067_story_daphnis_theme_piano",
+                    },
+                    {
                         id: "17290492796331765754",
                         type: "TalkNode",
                         name: "对话节点",
@@ -49194,7 +50230,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17290485968531764750",
+                        type: "VideoNode",
+                        name: "视频节点",
+                        resource: "EX01_SC018",
+                    },
                 ],
+                startIds: ["1724136079053183530", "17483342890804211", "17290485968531764750"],
             },
             {
                 id: 11010906,
@@ -49205,7 +50248,7 @@ export const questData_en: QuestStory[] = [
                         id: "1726817872489186580",
                         type: "TalkNode",
                         name: "FixSimple_28走不出这里",
-                        next: ["17241358294468275"],
+                        next: ["17241358294468275", "17483344492462595699"],
                         dialogues: [
                             {
                                 id: 11016901,
@@ -49413,6 +50456,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17483344492462595699",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0073_story_virgil_theme",
+                    },
                 ],
             },
             {
@@ -49504,6 +50553,7 @@ export const questData_en: QuestStory[] = [
                         name: "审问",
                         next: [
                             "17550098526492617",
+                            "17476542294431151309",
                             "174229348655233380293",
                             "17443545450111101211",
                             "174229358447233902763",
@@ -49557,6 +50607,12 @@ export const questData_en: QuestStory[] = [
                                     "You find yourself plunging into an abyss of darkness — and you begin to wonder, if only your resolve had been firmer, would things have ended differently?",
                             },
                         ],
+                    },
+                    {
+                        id: "17476542294431151309",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放 传送门效果音",
+                        resource: "portal1",
                     },
                     {
                         id: "174229348655233380293",
@@ -50063,6 +51119,7 @@ export const questData_en: QuestStory[] = [
                         id: "17851555172566669159",
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_02】和伯纳德对话",
+                        next: ["17879138468782237814"],
                         dialogues: [
                             {
                                 id: 11100201,
@@ -50397,6 +51454,12 @@ export const questData_en: QuestStory[] = [
                                 speakerName: "\"'The Chariot' Victor\"",
                             },
                         ],
+                    },
+                    {
+                        id: "17879138468782237814",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0033_story_humour",
                     },
                     {
                         id: "1780315440331371",
@@ -50770,6 +51833,12 @@ export const questData_en: QuestStory[] = [
                 name: "Ruined Amusement Park",
                 desc: "Following Ada, you reach the ruins outside Arcano. Catch your breath, then carry on to the heart of Arcano.",
                 nodes: [
+                    {
+                        id: "17879144202635591143",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0183_scene_park",
+                    },
                     {
                         id: "1780920816035374",
                         type: "TalkNode",
@@ -51517,6 +52586,12 @@ export const questData_en: QuestStory[] = [
                 desc: "After spending some time with Ada at the ruined amusement park, you hear gunfire from deep within. Follow the sound — but tread carefully.",
                 nodes: [
                     {
+                        id: "17882754818631137018",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0184_story_curse_echoes",
+                    },
+                    {
                         id: "17815218418292099598",
                         type: "TalkNode",
                         name: "对话节点",
@@ -51615,6 +52690,12 @@ export const questData_en: QuestStory[] = [
                 name: "Beneath the Rift",
                 desc: "You track the gunfire to its source, only to walk into an ambush and plunge into the valley. Who set the trap?",
                 nodes: [
+                    {
+                        id: "178791623328912301854",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0184_story_curse_echoes",
+                    },
                     {
                         id: "17815778711223149814",
                         type: "TalkNode",
@@ -51837,6 +52918,7 @@ export const questData_en: QuestStory[] = [
                         id: "178304776717511888499",
                         type: "TalkNode",
                         name: "对话节点",
+                        next: ["17884366014902252429"],
                         dialogues: [
                             {
                                 id: 11102901,
@@ -51917,6 +52999,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 111001,
                             },
                         ],
+                    },
+                    {
+                        id: "17884366014902252429",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
                     },
                     {
                         id: "1781531329392563",
@@ -52172,13 +53260,19 @@ export const questData_en: QuestStory[] = [
                         id: "17842588072105549278",
                         type: "TalkNode",
                         name: "阅读物ui界面",
-                        next: ["178471151588814402229", "178471153317614402595", "17842692488716667604", "178168140058312614716"],
+                        next: [
+                            "178471151588814402229",
+                            "178471153317614402595",
+                            "17842692488716667604",
+                            "178791638100313419147",
+                            "178168140058312614716",
+                        ],
                     },
                     {
                         id: "178471151588814402229",
                         type: "TalkNode",
                         name: "对话节点",
-                        next: ["17842692488716667604", "178471153317614402595", "178168140058312614716"],
+                        next: ["17842692488716667604", "178791638100313419147", "178471153317614402595", "178168140058312614716"],
                         dialogues: [
                             {
                                 id: 11125101,
@@ -52190,7 +53284,7 @@ export const questData_en: QuestStory[] = [
                         id: "178471153317614402595",
                         type: "TalkNode",
                         name: "对话节点",
-                        next: ["17842692488716667604", "178168140058312614716"],
+                        next: ["17842692488716667604", "178791638100313419147", "178168140058312614716"],
                         dialogues: [
                             {
                                 id: 11125101,
@@ -52232,6 +53326,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 111110,
                             },
                         ],
+                    },
+                    {
+                        id: "178791638100313419147",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
                     },
                     {
                         id: "178299821273412997318",
@@ -52613,6 +53713,12 @@ export const questData_en: QuestStory[] = [
                 name: "Escape...?",
                 desc: "Falsi falls into the lake while crossing on the tracks. You can't afford to lose a crucial witness, so you dive in after her anyway. You remember reaching her and bringing her back to shore. After that…",
                 nodes: [
+                    {
+                        id: "178791732498220129344",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0176_story_horror",
+                    },
                     {
                         id: "1781686084680531",
                         type: "TalkNode",
@@ -54265,7 +55371,7 @@ export const questData_en: QuestStory[] = [
                         id: "1782291976792705",
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_C1_01】玩具兵",
-                        next: ["1786872443222987", "17822920767321809"],
+                        next: ["17884422879004486477", "1786872443222987", "17822920767321809"],
                         dialogues: [
                             {
                                 id: 11106601,
@@ -54349,6 +55455,12 @@ export const questData_en: QuestStory[] = [
                                 speakerName: "???",
                             },
                         ],
+                    },
+                    {
+                        id: "17884422879004486477",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
                     },
                     {
                         id: "1786872443222987",
@@ -54569,6 +55681,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 111126,
                             },
                         ],
+                    },
+                    {
+                        id: "17881611859534473325",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0182_jingle_scared",
                     },
                     {
                         id: "17829042439722162841",
@@ -58145,6 +59263,13 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "178805923415329077655",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
+                        next: ["1783433088942130", "1783433088942134"],
+                    },
+                    {
                         id: "1783433088942130",
                         type: "TalkNode",
                         name: "对话节点",
@@ -58321,7 +59446,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17821958639931120", "17821959800092931", "17832561435317176", "17850576730676670317"],
+                startIds: ["17821958639931120", "17821959800092931", "17832561435317176", "178805923415329077655", "17850576730676670317"],
             },
             {
                 id: 11022102,
@@ -58329,6 +59454,13 @@ export const questData_en: QuestStory[] = [
                 desc: "You and Falsi still need to investigate the rest of the valley today. Cross the drawbridge and search the woods beyond.",
                 nodes: [
                     {
+                        id: "178805923415329077655",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
+                        next: ["1783433088942130", "1783433088942134"],
+                    },
+                    {
                         id: "1783433088942130",
                         type: "TalkNode",
                         name: "对话节点",
@@ -58505,6 +59637,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["178805923415329077655", "17850576730676670317"],
             },
             {
                 id: 11022103,
@@ -58531,6 +59664,12 @@ export const questData_en: QuestStory[] = [
                 name: "Gather supplies",
                 desc: "With Fulvis still out there, you'll need supplies. Search the old battlefield ruins for anything useful.",
                 nodes: [
+                    {
+                        id: "178805945679632429592",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
+                    },
                     {
                         id: "17822716431658133",
                         type: "TalkNode",
@@ -58565,6 +59704,12 @@ export const questData_en: QuestStory[] = [
                 name: "Escape the blast zone",
                 desc: "Lonza Fortress was under the Narwhals' control when an explosion suddenly tore through it. Get clear of the blast zone and find your squadmates to learn what happened.",
                 nodes: [
+                    {
+                        id: "178805982701435786622",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
                     {
                         id: "17872811041401471",
                         type: "TalkNode",
@@ -58738,7 +59883,7 @@ export const questData_en: QuestStory[] = [
                         id: "17822892397504936",
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_C7_03】富尔维斯",
-                        next: ["17834228359272193060", "17822901740956196"],
+                        next: ["178805982701435786622", "17834228359272193060", "17822901740956196"],
                         dialogues: [
                             {
                                 id: 11113601,
@@ -59073,6 +60218,7 @@ export const questData_en: QuestStory[] = [
                         id: "17811856045637236",
                         type: "TalkNode",
                         name: "对话节点",
+                        next: ["17881637006036717005"],
                         dialogues: [
                             {
                                 id: 11114201,
@@ -59169,6 +60315,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 111125,
                             },
                         ],
+                    },
+                    {
+                        id: "17881637006036717005",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0176_story_horror",
                     },
                     {
                         id: "17811943098016146066",
@@ -60234,6 +61386,7 @@ export const questData_en: QuestStory[] = [
                         id: "178332436985225003484",
                         type: "TalkNode",
                         name: "对话节点",
+                        next: ["178816522223011190354"],
                         dialogues: [
                             {
                                 id: 11115520,
@@ -60279,6 +61432,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 111127,
                             },
                         ],
+                    },
+                    {
+                        id: "178816522223011190354",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
                     },
                 ],
             },
@@ -60648,7 +61807,7 @@ export const questData_en: QuestStory[] = [
                         id: "178159535807910534456",
                         type: "TalkNode",
                         name: "开车对话节点",
-                        next: ["17814407914931063417"],
+                        next: ["17884438480115610761", "17814407914931063417"],
                         dialogues: [
                             {
                                 id: 11117101,
@@ -60671,6 +61830,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 111127,
                             },
                         ],
+                    },
+                    {
+                        id: "17884438480115610761",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0176_story_horror",
                     },
                     {
                         id: "17814407914931063417",
@@ -61136,6 +62301,12 @@ export const questData_en: QuestStory[] = [
                 desc: "The village chief reveals the truth about Arcano. Fulvis — forced to believe he is Joy — is shot while covering your escape. As everything spirals out of control, your first priority is getting the gravely wounded Falsi out of Arcano. She is a vital witness. You cannot let her die here.",
                 nodes: [
                     {
+                        id: "178816670599623496873",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0184_story_curse_echoes",
+                    },
+                    {
                         id: "17821180686671072380",
                         type: "TalkNode",
                         name: "对话节点",
@@ -61324,6 +62495,7 @@ export const questData_en: QuestStory[] = [
                         id: "17821359497585359094",
                         type: "TalkNode",
                         name: "对话节点",
+                        next: ["178817214795045880206"],
                         dialogues: [
                             {
                                 id: 11117801,
@@ -61544,6 +62716,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "178817214795045880206",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0189_cs_eve_defend_on_bridge",
+                    },
                 ],
             },
             {
@@ -61551,6 +62729,12 @@ export const questData_en: QuestStory[] = [
                 name: "Get Falsi to safety",
                 desc: "With Ada's help, you've crossed the drawbridge and escaped Arcano. Once Falsi is safe, head back to tie up the remaining loose ends.",
                 nodes: [
+                    {
+                        id: "178816685404624616503",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0184_story_curse_echoes",
+                    },
                     {
                         id: "17849871835811277",
                         type: "TalkNode",
@@ -61596,6 +62780,20 @@ export const questData_en: QuestStory[] = [
                 name: "End the nightmare",
                 desc: "It's time to bring Arcano's nightmare to an end.",
                 nodes: [
+                    {
+                        id: "17884494733591623",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0176_story_horror",
+                        srId: 107001,
+                        pos: [-17434, -80917],
+                    },
+                    {
+                        id: "17884450101388974479",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0176_story_horror",
+                    },
                     {
                         id: "17823026824922155381",
                         type: "TalkNode",
@@ -62181,6 +63379,20 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17823850660962171603",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17823850875872172012"],
+                        dialogues: [
+                            {
+                                id: 11118801,
+                                content: "Is that all you've got?",
+                                voice: "story/1102/111096/1BD5B24A",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
                         id: "17860344698155576507",
                         type: "TalkNode",
                         name: "对话节点",
@@ -62198,33 +63410,6 @@ export const questData_en: QuestStory[] = [
                                 content: "See that it never happens again.",
                                 voice: "story/1102/111096/1BD58238",
                                 npc: 111169,
-                            },
-                        ],
-                    },
-                    {
-                        id: "17823850660962171603",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        next: ["17823850875872172012"],
-                        dialogues: [
-                            {
-                                id: 11118801,
-                                content: "Is that all you've got?",
-                                voice: "story/1102/111096/1BD5B24A",
-                                npc: 110022,
-                            },
-                        ],
-                    },
-                    {
-                        id: "178603505889610034545",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        dialogues: [
-                            {
-                                id: 11118509,
-                                content: "Come, Ada. Return to your true home.",
-                                voice: "story/1102/111096/1BD58262",
-                                npc: 111125,
                             },
                         ],
                     },
@@ -62290,6 +63475,19 @@ export const questData_en: QuestStory[] = [
                                     "If the bunnies won't behave anymore, we'll simply replace them. Think of it as another cleansing... another destruction and rebirth of Paradise.",
                                 voice: "story/1102/111096/1BD5C3D8",
                                 npc: 111123,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178603505889610034545",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118509,
+                                content: "Come, Ada. Return to your true home.",
+                                voice: "story/1102/111096/1BD58262",
+                                npc: 111125,
                             },
                         ],
                     },
@@ -62528,6 +63726,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17884494733591623", "17884450101388974479"],
             },
             {
                 id: 11023202,
@@ -62535,10 +63734,16 @@ export const questData_en: QuestStory[] = [
                 desc: "It's time to bring Arcano's nightmare to an end.",
                 nodes: [
                     {
+                        id: "178817238201650360433",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0191_boss_aida_stage_1",
+                    },
+                    {
                         id: "17857738455844453424",
                         type: "TalkNode",
                         name: "对话节点",
-                        next: ["17857741454785568441"],
+                        next: ["178817241514951478719", "17857741454785568441"],
                         dialogues: [
                             {
                                 id: 11119801,
@@ -62562,6 +63767,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 111123,
                             },
                         ],
+                    },
+                    {
+                        id: "178817241514951478719",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0192_boss_aida_stage_2",
                     },
                     {
                         id: "17857741454785568441",
@@ -62644,6 +63855,13 @@ export const questData_en: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "178817222085747000699",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0190_story_aida_dream_land",
+                        next: ["17861020334603351118", "17862055158821671"],
                     },
                     {
                         id: "17861020334603351118",
@@ -62777,6 +63995,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17884364063825102",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0059_scene_ex01_encounter",
                     },
                     {
                         id: "17863769875776700126",
@@ -63233,6 +64457,14 @@ export const questData_en: QuestStory[] = [
                 id: 11023204,
                 name: "Defeat Fulvis",
                 desc: "You have only just ended Arcano's nightmare when Fulvis comes charging in. It turns out he had been using Arcano's rules to his advantage all along. At least he's still the same Fulvis you remember. Defeat him and put a stop to his scheme.",
+                nodes: [
+                    {
+                        id: "178816922932830216504",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0187_boss_fuerweisi",
+                    },
+                ],
             },
             {
                 id: 11023205,
@@ -63920,6 +65152,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 111124,
                             },
                         ],
+                    },
+                    {
+                        id: "178817036069341401355",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0073_story_virgil_theme",
                     },
                     {
                         id: "17853967676851339",
@@ -65952,7 +67190,7 @@ export const questData_en: QuestStory[] = [
                         name: "站桩-黑商继续",
                         srId: 101901,
                         pos: [20502, 7070],
-                        next: ["173652471869954031925"],
+                        next: ["17489373296329494", "173652471869954031925"],
                         dialogues: [
                             {
                                 id: 12001348,
@@ -66063,6 +67301,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 220018,
                             },
                         ],
+                    },
+                    {
+                        id: "17489373296329494",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0051_story_danger",
+                        srId: 101901,
+                        pos: [20502, 7070],
                     },
                     {
                         id: "173652471869954031925",
@@ -66678,6 +67924,13 @@ export const questData_en: QuestStory[] = [
                 desc: "Whether it's truly from Berry or not, you need to find out.\nOnce night descends, head to the red phone booth as instructed in the message.",
                 nodes: [
                     {
+                        id: "17625896173367921",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放暂停音乐",
+                        resource: "0016_judian",
+                        next: ["17297514826724188018"],
+                    },
+                    {
                         id: "17297514826724188018",
                         type: "TalkNode",
                         name: "站桩 - 小白 Fixsimple11",
@@ -66929,6 +68182,15 @@ export const questData_en: QuestStory[] = [
                 desc: "Could that white-haired figure really be Berry?\nThe girl you've been searching for may be just steps away — approach with caution.",
                 nodes: [
                     {
+                        id: "17626006756111988301",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放音乐",
+                        resource: "0035_atomos_thrill",
+                        next: ["173686186326616400265"],
+                        srId: 101101,
+                        pos: [-4224, -320],
+                    },
+                    {
                         id: "173686186326616400265",
                         type: "TalkNode",
                         name: "过场动画-走近电话亭 Fixsimple11",
@@ -66994,13 +68256,22 @@ export const questData_en: QuestStory[] = [
                         name: "黑幕说白走了",
                         srId: 101101,
                         pos: [-4224, -320],
-                        next: ["17360696807954131645"],
+                        next: ["17626024816852979685"],
                         dialogues: [
                             {
                                 id: 12001785,
                                 content: "Snow stormed off in a huff.",
                             },
                         ],
+                    },
+                    {
+                        id: "17626024816852979685",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放音乐",
+                        resource: "0043_story_empire",
+                        next: ["17360696807954131645"],
+                        srId: 101101,
+                        pos: [-4224, -320],
                     },
                     {
                         id: "17360696807954131645",
@@ -67164,122 +68435,12 @@ export const questData_en: QuestStory[] = [
                 desc: "You've avoided the worst — but the Legion is now on high alert.\nMove quickly and slip away before the patrols catch on.",
                 nodes: [
                     {
-                        id: "172975680630317151254",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        srId: 104109,
-                        pos: [-14623, 6400],
-                        dialogues: [
-                            {
-                                id: 12013201,
-                                content: "Hey—! What's wrong, Miss Fushu!?",
-                                voice: "story/1201/120132/1E12E3CA",
-                                npc: 200002,
-                                next: 12013202,
-                            },
-                            {
-                                id: 12013202,
-                                content: "...It's nothing.",
-                                voice: "story/1201/120132/1E12E3F4",
-                                npc: 210013,
-                                next: 12013203,
-                            },
-                            {
-                                id: 12013203,
-                                content:
-                                    "To perform the Art of <H>Ephemerality</> is to draw upon one's own essence, pulling forth the miasma of pain and corruption from another's body.",
-                                voice: "story/1201/120132/1E12E41E",
-                                npc: 210013,
-                                next: 12013204,
-                            },
-                            {
-                                id: 12013204,
-                                content:
-                                    "Since the resurgence of the Scourge of Zhuyin, those in need have only grown more numerous. I have used this technique each day; the strain has left my energy unbalanced — hence this brief faltering. Please... be not alarmed.",
-                                voice: "story/1201/120132/1E12E448",
-                                npc: 210013,
-                                next: 12013205,
-                            },
-                            {
-                                id: 12013205,
-                                content: "One's own essence? What does that mean, Little Minion?",
-                                voice: "story/1201/120132/1E12E472",
-                                npc: 200002,
-                                next: 12013206,
-                            },
-                            {
-                                id: 12013206,
-                                content: "Fushu... Are you saying that this technique trades your life for theirs?",
-                                voice: "story/1201/120132/1E12E49C",
-                                npc: 100001,
-                                next: 12013207,
-                            },
-                            {
-                                id: 12013207,
-                                content: "What about your family? Aren't they worried about you?",
-                                voice: "story/1201/120132/1E12E4C6",
-                                npc: 100001,
-                                next: 12013208,
-                            },
-                            {
-                                id: 12013208,
-                                content: "...",
-                                voice: "story/1201/120132/1E12E4F0",
-                                npc: 210013,
-                                next: 12013209,
-                            },
-                            {
-                                id: 12013209,
-                                content:
-                                    "My family passed down a secret method of purification and renewal. A brief rest, and I shall be restored.",
-                                voice: "story/1201/120132/1E12E51A",
-                                npc: 210013,
-                                next: 12013210,
-                            },
-                            {
-                                id: 12013210,
-                                content:
-                                    "Ugh! This is so frustrating! She's just like that Yuming guy — why do all the Charons of Huaxu act like their own health doesn't matter!?",
-                                voice: "story/1201/120132/1E12E544",
-                                npc: 200002,
-                                next: 12013211,
-                            },
-                            {
-                                id: 12013211,
-                                content:
-                                    "Life waxes and wanes, like the moon in its cycle. To remove another's suffering is to take it into oneself. Such is the price.",
-                                voice: "story/1201/120132/1E12E56E",
-                                npc: 210013,
-                                next: 12013212,
-                            },
-                            {
-                                id: 12013212,
-                                content: "...",
-                                voice: "story/1201/120132/1E12E598",
-                                npc: 100001,
-                                next: 12013213,
-                            },
-                            {
-                                id: 12013213,
-                                content:
-                                    "I must depart at once to seek a remedy for this young lady. Forgive my abrupt leave-taking. Pray, continue on your path — and should you wish to see her again, you will find me at the Hall of Ephemerality, in the northern apricot grove.",
-                                voice: "story/1201/120132/1E12E5C2",
-                                npc: 210013,
-                            },
-                        ],
-                    },
-                    {
-                        id: "173686318436023151262",
-                        type: "TalkNode",
-                        name: "假装潜行任务",
+                        id: "17626026015272981524",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放潜行音乐",
+                        resource: "combat01_state1_r01",
                         srId: 101101,
                         pos: [-5299, -1074],
-                        dialogues: [
-                            {
-                                id: 12002100,
-                                content: "假装潜行玩法",
-                            },
-                        ],
                     },
                     {
                         id: "1740019309790524",
@@ -67341,7 +68502,6 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["172975680630317151254", "173686318436023151262"],
             },
             {
                 id: 12000308,
@@ -67354,7 +68514,7 @@ export const questData_en: QuestStory[] = [
                         name: "站桩 - 和止流聊天 Fixsimple17",
                         srId: 101101,
                         pos: [-8250, -1317],
-                        next: ["17519720925528386"],
+                        next: ["17626034802882983132"],
                         dialogues: [
                             {
                                 id: 12001753,
@@ -67424,6 +68584,15 @@ export const questData_en: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "17626034802882983132",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放音乐",
+                        resource: "0043_story_empire",
+                        next: ["17519720925528386"],
+                        srId: 101101,
+                        pos: [-8250, -1317],
                     },
                     {
                         id: "17519720925528386",
@@ -67733,6 +68902,13 @@ export const questData_en: QuestStory[] = [
                 name: "Speak with Zhiliu",
                 desc: "After a long voyage across distant seas, you've finally arrived in Huaxu.\nThe graceful scenery unfurling before you is a quiet reminder — you are far from home. Speak with Zhiliu to learn more about this place.",
                 nodes: [
+                    {
+                        id: "17640010261263104",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0096_cs_dongguo_opening",
+                        next: ["17569774987172977"],
+                    },
                     {
                         id: "17569774987172977",
                         type: "TalkNode",
@@ -68396,7 +69572,7 @@ export const questData_en: QuestStory[] = [
                         name: "【05】 遇到绑匪 ",
                         srId: 104108,
                         pos: [32863, 50415],
-                        next: ["17367673639968835808"],
+                        next: ["17648540448499562275"],
                         dialogues: [
                             {
                                 id: 12010215,
@@ -68470,6 +69646,15 @@ export const questData_en: QuestStory[] = [
                                 npc: 210004,
                             },
                         ],
+                    },
+                    {
+                        id: "17648540448499562275",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0132_cs_baibianchegnjiejiefei",
+                        next: ["17367673639968835808"],
+                        srId: 104108,
+                        pos: [32863, 50415],
                     },
                     {
                         id: "17367673639968835808",
@@ -69181,6 +70366,18 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17640019010627035",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0102_story_dafengjiuzhang",
+                    },
+                    {
+                        id: "17640019568117385",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0103_cs_dafengjiuzhang_expand",
+                    },
                 ],
             },
             {
@@ -69218,6 +70415,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 210003,
                             },
                         ],
+                    },
+                    {
+                        id: "1764002133915695333",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0101_story_zhuyinzhizai_low",
                     },
                     {
                         id: "1736851364283721227",
@@ -69267,6 +70470,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17618219394201029300", "1764002133915695333"],
             },
             {
                 id: 12010111,
@@ -70501,7 +71705,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17654451375861481",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
+                    },
                 ],
+                startIds: ["173968224552714631398", "17654451375861481"],
             },
             {
                 id: 12010211,
@@ -70822,6 +72033,16 @@ export const questData_en: QuestStory[] = [
                 id: 12010251,
                 name: "Check on the Magistrate of Yingtian",
                 desc: "After escorting you to the cavern's exit, the Magistrate departs alone.\nYour path lies ahead, but ominous sounds behind you set you on edge.\nYou may have only just met — but he did help you. Go check if he's alright.",
+                nodes: [
+                    {
+                        id: "17651813091839080",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
+                        srId: 104103,
+                        pos: [-5403, 21034],
+                    },
+                ],
             },
             {
                 id: 12010252,
@@ -71310,7 +72531,7 @@ export const questData_en: QuestStory[] = [
                         name: "【22】黑市争吵",
                         srId: 104109,
                         pos: [-16391, 10293],
-                        next: ["17627890394154362789", "17627890394154362797"],
+                        next: ["17627890394154362789", "17648545616524788594"],
                         dialogues: [
                             {
                                 id: 12012301,
@@ -71541,6 +72762,15 @@ export const questData_en: QuestStory[] = [
                                 npc: 200002,
                             },
                         ],
+                    },
+                    {
+                        id: "17648545616524788594",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0131_story_bangfeibangjia",
+                        next: ["17627890394154362797"],
+                        srId: 104109,
+                        pos: [-16391, 10293],
                     },
                     {
                         id: "17627890394154362797",
@@ -71802,7 +73032,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1764035741860687954",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0131_story_bangfeibangjia",
+                    },
                 ],
+                startIds: ["17627890394154362802", "17627890394154362804", "17627890394154362803", "1764035741860687954"],
             },
             {
                 id: 12010306,
@@ -72664,6 +73901,14 @@ export const questData_en: QuestStory[] = [
                 desc: "After clearing up a comical mix-up — Master Gongshang mistook you for apprentice hopefuls — you've learned to operate the Mechanical Nexus to neutralise the Gritblight, earning the title of honorary learners of the Jishu Sect.\nHead into the heights of the Gritblight Expanse and harvest three Zhuyin Scales for Zhiliu.",
                 nodes: [
                     {
+                        id: "17649251390831283627",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                        srId: 104105,
+                        pos: [-18890, -28610],
+                    },
+                    {
                         id: "17627890394154362900",
                         type: "TalkNode",
                         name: "【30】对话节点",
@@ -72726,6 +73971,7 @@ export const questData_en: QuestStory[] = [
                         name: "2D演出",
                         srId: 104105,
                         pos: [-18890, -28610],
+                        next: ["17640368479004130963"],
                         dialogues: [
                             {
                                 id: 12013444,
@@ -72740,6 +73986,15 @@ export const questData_en: QuestStory[] = [
                                 speakerName: "???",
                             },
                         ],
+                    },
+                    {
+                        id: "17640368479004130963",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
+                        next: ["17627890394154362901"],
+                        srId: 104105,
+                        pos: [-18890, -28610],
                     },
                     {
                         id: "17627890394154362901",
@@ -72817,6 +74072,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17640366323033441364",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0102_story_dafengjiuzhang",
+                    },
+                    {
                         id: "176338106841420159943",
                         type: "TalkNode",
                         name: "对话节点",
@@ -72866,7 +74127,13 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17627890394154362900", "17627890394154362902", "17627890394154362901"],
+                startIds: [
+                    "17649251390831283627",
+                    "17627890394154362900",
+                    "17627890394154362902",
+                    "17640368479004130963",
+                    "17627890394154362901",
+                ],
             },
             {
                 id: 12010313,
@@ -72919,6 +74186,13 @@ export const questData_en: QuestStory[] = [
                                 npc: 210014,
                             },
                         ],
+                    },
+                    {
+                        id: "1764933025563984",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                        next: ["1763198015066673585", "1763198043794674175", "1763198043794674169"],
                     },
                     {
                         id: "1763198015066673585",
@@ -73079,6 +74353,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17627890394154362763", "1764933025563984"],
             },
             {
                 id: 12010314,
@@ -73412,6 +74687,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1765976903507642269",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                    },
+                    {
                         id: "17632945730403355818",
                         type: "TalkNode",
                         name: "对话节点",
@@ -73432,7 +74713,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["176329331883620172", "176329331883620173"],
+                startIds: ["176329331883620172", "176329331883620173", "1765976903507642269"],
             },
             {
                 id: 12010315,
@@ -73973,6 +75254,23 @@ export const questData_en: QuestStory[] = [
                 id: 12010320,
                 name: "Help repel the Sable Bi'an",
                 desc: "Your fears proved true. Join the EverSpring staff and drive back the Sable Bi'an.",
+                nodes: [
+                    {
+                        id: "17640378444115161739",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0112_cs_white_loong_kill_black_wolf",
+                        srId: 104110,
+                        pos: [29641, -8135],
+                    },
+                    {
+                        id: "17659769233961282451",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                    },
+                ],
+                startIds: ["17640378444115161739", "17659769233961282451"],
             },
             {
                 id: 12010322,
@@ -75294,6 +76592,15 @@ export const questData_en: QuestStory[] = [
                 name: "Speak with the Elder Wishen",
                 desc: "With help from the three young Wishen, you've arrived at the true Spring of Yu — a place where this world and the next converge.\nAsk the Elder Wishen where to find the herb Wangyou.",
                 nodes: [
+                    {
+                        id: "17640380368527223477",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0110_story_fushu_theme",
+                        next: ["17302568818361168471"],
+                        srId: 104104,
+                        pos: [3260, -3220],
+                    },
                     {
                         id: "17302568818361168471",
                         type: "TalkNode",
@@ -76954,6 +78261,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17640381320348255324",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0116_cs_fushuhuanjing",
+                    },
                 ],
             },
             {
@@ -77464,6 +78777,7 @@ export const questData_en: QuestStory[] = [
                         name: "站桩 - 和小弟对话",
                         srId: 104102,
                         pos: [-52592, 3018],
+                        next: ["17640391235938943900"],
                         dialogues: [
                             {
                                 id: 12018601,
@@ -77621,6 +78935,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17640391235938943900",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0118_cs_bad_guy_trigger_gear",
+                        srId: 104102,
+                        pos: [-52592, 3018],
+                    },
                 ],
             },
             {
@@ -77634,6 +78956,7 @@ export const questData_en: QuestStory[] = [
                         name: "站桩 - 逮捕煜明",
                         srId: 104102,
                         pos: [-59359, 5440],
+                        next: ["176485570582710842403"],
                         dialogues: [
                             {
                                 id: 12019901,
@@ -77746,6 +79069,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "176485570582710842403",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0128_cs_qiusir_attack_player",
+                        srId: 104102,
+                        pos: [-59359, 5440],
+                    },
                 ],
             },
             {
@@ -77773,7 +79104,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "176485663052812753084",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                    },
                 ],
+                startIds: ["1757161939118646405", "176485663052812753084"],
             },
             {
                 id: 12010515,
@@ -78153,6 +79491,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 210012,
                             },
                         ],
+                    },
+                    {
+                        id: "17640392180849975096",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0098_scene_ancient_battlefield_intro",
                     },
                     {
                         id: "17630384760342357018",
@@ -78624,6 +79968,12 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17648555587659567244",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0123_boss_juque",
+                    },
                 ],
             },
         ],
@@ -78636,6 +79986,15 @@ export const questData_en: QuestStory[] = [
                 name: "Return to EverSpring",
                 desc: "It's been a while since you delivered the Zhuyin Scales. You wonder how Zhiliu is faring with the preparations.\nHead back to EverSpring and see if there's anything you can do to help.",
                 nodes: [
+                    {
+                        id: "17649384290081280098",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                        next: ["17660601326541603644"],
+                        srId: 104110,
+                        pos: [29922, -9314],
+                    },
                     {
                         id: "17308116617621217963",
                         type: "TalkNode",
@@ -78657,6 +80016,15 @@ export const questData_en: QuestStory[] = [
                                 npc: 200002,
                             },
                         ],
+                    },
+                    {
+                        id: "17660601326541603644",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0101_story_zhuyinzhizai_low",
+                        next: ["17308127132391624296"],
+                        srId: 104110,
+                        pos: [29922, -9314],
                     },
                     {
                         id: "17308127132391624296",
@@ -78759,6 +80127,16 @@ export const questData_en: QuestStory[] = [
                 id: 12010602,
                 name: "Go to the Zhuyin Altar",
                 desc: "Ominous tremors roll from the direction of the altar. According to Wangchun, Zhiliu has begun the sealing ritual.\nYou decide to go to her aid — in times like these, every bit of help counts.",
+                nodes: [
+                    {
+                        id: "17649387978011282818",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                        srId: 104105,
+                        pos: [-18596, -30247],
+                    },
+                ],
             },
             {
                 id: 12010603,
@@ -78770,6 +80148,14 @@ export const questData_en: QuestStory[] = [
                 name: "Help Zhiliu stabilise the seal",
                 desc: "You arrive just in time to find Zhuyin barely contained.\nOne segment of the seal falters, and Zhiliu cannot leave her post. You volunteer to inspect and stabilise it.",
                 nodes: [
+                    {
+                        id: "17650088884693198453",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0126_cs_reach_heilongjitan",
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
                     {
                         id: "17615536903041003005",
                         type: "TalkNode",
@@ -78944,12 +80330,31 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17650088884693198453", "17615536903041003005"],
             },
             {
                 id: 12010605,
                 name: "Help Zhiliu stabilise the seal",
                 desc: "You arrive just in time to find Zhuyin barely contained.\nOne segment of the seal falters, and Zhiliu cannot leave her post. You volunteer to inspect and stabilise it.",
                 nodes: [
+                    {
+                        id: "17650089714863199556",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0130_cs_heilongjitan_parkour",
+                        next: ["17650090048573199985"],
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
+                    {
+                        id: "17650090048573199985",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0102_story_dafengjiuzhang",
+                        next: ["17616406875047976769"],
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
                     {
                         id: "17616406875047976769",
                         type: "TalkNode",
@@ -79099,6 +80504,23 @@ export const questData_en: QuestStory[] = [
                 id: 12010606,
                 name: "Defeat Zhuyin",
                 desc: "As you approach, a faint, mournful cry rises from deep within Zhuyin.\nThe seal fails — Zhuyin breaks free. In the split second before disaster, you press Zhiliu's coin to their brow, drawing on the last vestiges of sealing power to bring them crashing down. For a heartbeat, fragments of their memories flood your mind.\nNo time to dwell — the real battle begins now.",
+                nodes: [
+                    {
+                        id: "17650090489933200749",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0122_boss_heilong_intro",
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
+                    {
+                        id: "176485712838513392067",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0121_boss_heilong",
+                    },
+                ],
+                startIds: ["17650090489933200749", "176485712838513392067"],
             },
             {
                 id: 12010607,
@@ -79106,12 +80528,21 @@ export const questData_en: QuestStory[] = [
                 desc: "Zhiliu turns on you without warning, binding you in place — the sealing was a ruse. She came to absorb Zhuyin's power, and your unexpected presence nearly spoiled her plan.\nFushu and Kezhou arrive moments too late. With her goal achieved, Zhiliu withdraws, leaving you amid the wreckage.\nConfer with them on what comes next.",
                 nodes: [
                     {
+                        id: "176485781597114667965",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        next: ["1749035653238924174"],
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
+                    {
                         id: "1749035653238924174",
                         type: "TalkNode",
                         name: "【57】 和止流交流",
                         srId: 105701,
                         pos: [22901, -85028],
-                        next: ["1749035641134923908"],
+                        next: ["176485785246814668438"],
                         dialogues: [
                             {
                                 id: 12022201,
@@ -79172,12 +80603,30 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "176485785246814668438",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0127_cs_zhiliuqiujinwanjia",
+                        next: ["176485788879914669276"],
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
+                    {
+                        id: "176485788879914669276",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        next: ["1749035641134923908"],
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
+                    {
                         id: "1749035641134923908",
                         type: "TalkNode",
                         name: "【58】 和止流交流",
                         srId: 105701,
                         pos: [22901, -85028],
-                        next: ["17645175349987296423"],
+                        next: ["176485797485514670014"],
                         dialogues: [
                             {
                                 id: 12022209,
@@ -79243,6 +80692,15 @@ export const questData_en: QuestStory[] = [
                                 npc: 210004,
                             },
                         ],
+                    },
+                    {
+                        id: "176485797485514670014",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0124_cs_zhiliuxishouheilong",
+                        next: ["17645175349987296423"],
+                        srId: 105701,
+                        pos: [22901, -85028],
                     },
                     {
                         id: "17645175349987296423",
@@ -82932,6 +84390,7 @@ export const questData_en: QuestStory[] = [
                         name: "【36b】菲娜关心塞维欧",
                         srId: 101103,
                         pos: [-45815, 29078],
+                        next: ["17599126388786257"],
                         dialogues: [
                             {
                                 id: 12033803,
@@ -82961,6 +84420,20 @@ export const questData_en: QuestStory[] = [
                                 npc: 211001,
                             },
                         ],
+                    },
+                    {
+                        id: "17599126388786257",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM-Play",
+                        resource: "0092_feina_activity_cs_02",
+                        srId: 101103,
+                        pos: [-45815, 29078],
+                    },
+                    {
+                        id: "1759912722017637",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0060_boss_ex01_lizhanzhe_loop",
                     },
                     {
                         id: "17573134789504521",
@@ -82997,6 +84470,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17561943317184130385", "17599126388786257"],
             },
             {
                 id: 12011409,
@@ -84172,6 +85646,16 @@ export const questData_en: QuestStory[] = [
                 id: 12011414,
                 name: "A Rainbow-coloured Dream",
                 desc: 'Open your spellbook and complete "Onto the Blooming Fields" to learn to summon the Little Nightingale.',
+                nodes: [
+                    {
+                        id: "1759913775428938085",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0091_feina_activity_cs_01",
+                        srId: 101105,
+                        pos: [160, 20441],
+                    },
+                ],
             },
             {
                 id: 12011415,
@@ -85814,6 +87298,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1764002133915695333",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0101_story_zhuyinzhizai_low",
+                    },
+                    {
                         id: "1736851364283721227",
                         type: "TalkNode",
                         name: "开车- 战斗前",
@@ -85861,7 +87351,13 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17428928965942446103", "174971850902016906685", "174971850887716906678", "17428929789682446437"],
+                startIds: [
+                    "17428928965942446103",
+                    "174971850902016906685",
+                    "174971850887716906678",
+                    "17428929789682446437",
+                    "1764002133915695333",
+                ],
             },
             {
                 id: 12020111,
@@ -86555,6 +88051,12 @@ export const questData_en: QuestStory[] = [
                 desc: "Not long ago, on a rain-soaked night, Kezhou faced Bi'an alone...",
                 nodes: [
                     {
+                        id: "17741812707862526841",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0101_story_zhuyinzhizai_low",
+                    },
+                    {
                         id: "1767944727334743",
                         type: "TalkNode",
                         name: "我都杀腻了！",
@@ -87235,6 +88737,22 @@ export const questData_en: QuestStory[] = [
                 desc: "With no time to think, you step in and fend off Lord Argent's strike.\nIn the split second before the blow lands, your power erupts without warning — and Lord Argent is wounded. With a pained cry, Lord Argent takes flight.\nBefore you can make sense of it, a blockade descends from above. Break through before you're surrounded.",
                 nodes: [
                     {
+                        id: "17741818497442528816",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0136_cs_bailong_god_appear",
+                        srId: 104506,
+                        pos: [31600, -109780],
+                    },
+                    {
+                        id: "17741819193542529724",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0137_story_kezhou_meet_bailong",
+                        srId: 104506,
+                        pos: [31600, -109780],
+                    },
+                    {
                         id: "17734793256387212",
                         type: "TalkNode",
                         name: "【East02_FixSimple_24】刻舟VS太皓",
@@ -87387,6 +88905,14 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17741820011962530587",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0138_cs_kezhou_attack_bailong",
+                        srId: 104506,
+                        pos: [31600, -109780],
+                    },
+                    {
                         id: "17735667478145910120",
                         type: "TalkNode",
                         name: "对话节点",
@@ -87419,6 +88945,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 200002,
                             },
                         ],
+                    },
+                    {
+                        id: "1774182188541628",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                     },
                     {
                         id: "17735671418006754384",
@@ -87473,7 +89005,14 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17734793256387212", "17735667478145910120"],
+                startIds: [
+                    "17741818497442528816",
+                    "17741819193542529724",
+                    "17734793256387212",
+                    "17741820011962530587",
+                    "17735667478145910120",
+                    "1774182188541628",
+                ],
             },
             {
                 id: 12020211,
@@ -87530,6 +89069,14 @@ export const questData_en: QuestStory[] = [
                 name: "Escape the pursuers",
                 desc: "Thanks to your actions, the city is now on high alert. Bi'an and the Magistrates of Yingtian are patrolling the streets.\nYou're running out of options. Just then, Xiaoyao appears, and offers to lead you out.",
                 nodes: [
+                    {
+                        id: "17741823080955059703",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 104503,
+                        pos: [29196, -91324],
+                    },
                     {
                         id: "177358157512311375",
                         type: "TalkNode",
@@ -87672,7 +89219,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["177358157512311375", "177356806094210130640"],
+                startIds: ["17741823080955059703", "177358157512311375", "177356806094210130640"],
             },
             {
                 id: 12020213,
@@ -88648,6 +90195,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1774182557582630",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                    },
+                    {
                         id: "17633681300011705",
                         type: "TalkNode",
                         name: "【East02_FixSimple_30】止流幻境，看止流开卦（上）",
@@ -88829,7 +90382,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["1742891256134715244", "1765889325964492"],
+                startIds: ["1742891256134715244", "1765889325964492", "1774182557582630"],
             },
             {
                 id: 12020306,
@@ -91138,6 +92691,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "177418279453510115810",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0101_story_zhuyinzhizai_full",
+                        srId: 105201,
+                        pos: [13130, -2310],
+                    },
                 ],
             },
             {
@@ -91145,6 +92706,14 @@ export const questData_en: QuestStory[] = [
                 name: "Defeat the Magistrates of Yingtian",
                 desc: "The Outer Peaks' location has been exposed. The Magistrates of Yingtian are at the gates, and the Drifters are in danger.\nThere's no time to waste — help repel the first wave.",
                 nodes: [
+                    {
+                        id: "177505383225812783754",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
+                        srId: 105201,
+                        pos: [7839, -3170],
+                    },
                     {
                         id: "17742800687082538984",
                         type: "TalkNode",
@@ -91378,6 +92947,14 @@ export const questData_en: QuestStory[] = [
                 desc: "The Outer Peaks' location has been exposed. The Magistrates of Yingtian are at the gates — and their leader is Yuming, an old acquaintance of the Drifters.\nHe seems reluctant to turn his blade on old comrades, but Kezhou's attempt to reason with him only makes things worse. With weapons drawn, there's no choice but to fight.",
                 nodes: [
                     {
+                        id: "177418302136811379965",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 105201,
+                        pos: [7839, -3170],
+                    },
+                    {
                         id: "17742799291441693538",
                         type: "TalkNode",
                         name: "对话节点",
@@ -91417,6 +92994,16 @@ export const questData_en: QuestStory[] = [
                 id: 12020405,
                 name: "Defeat Yuming",
                 desc: "The Outer Peaks' location has been exposed. The Magistrates of Yingtian are at the gates — and their leader is Yuming, an old acquaintance of the Drifters.\nHe seems reluctant to turn his blade on old comrades, but Kezhou's attempt to reason with him only makes things worse. With weapons drawn, there's no choice but to fight.",
+                nodes: [
+                    {
+                        id: "17742597041042120",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0139_cs_kezhou_vs_yuming",
+                        srId: 105201,
+                        pos: [7839, -3170],
+                    },
+                ],
             },
             {
                 id: 12020406,
@@ -91673,6 +93260,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 240026,
                             },
                         ],
+                    },
+                    {
+                        id: "17741838339411247",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0123_boss_juque",
                     },
                     {
                         id: "177356944462516040868",
@@ -92286,6 +93879,13 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17750547808862575726",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0123_boss_juque",
+                        next: ["17735828291564229823"],
+                    },
+                    {
                         id: "17735828291564229823",
                         type: "TalkNode",
                         name: "对话节点",
@@ -92376,12 +93976,30 @@ export const questData_en: QuestStory[] = [
                 id: 12020409,
                 name: "Join the battle",
                 desc: "Deep within the Labyrinth of Yanyin, you uncover an ancient secret — and the means to activate the Heavenwrought Cannon.\nWith that advantage in hand, return to the fight and swing the battle back in your favour.",
+                nodes: [
+                    {
+                        id: "17742597812081268483",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0140_cs_suyi_fly_with_player",
+                        srId: 105201,
+                        pos: [7839, -3170],
+                    },
+                ],
             },
             {
                 id: 12020410,
                 name: "Defeat the Sentinels of Juntian with the Heavenwrought Cannon",
                 desc: "Deep within the Labyrinth of Yanyin, you uncover an ancient secret — and the means to activate the Heavenwrought Cannon.\nWith that advantage in hand, return to the fight and swing the battle back in your favour.",
                 nodes: [
+                    {
+                        id: "177505423970316632112",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 105201,
+                        pos: [7754, -3170],
+                    },
                     {
                         id: "177357147481021949000",
                         type: "TalkNode",
@@ -92452,6 +94070,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["177505423970316632112", "177357147481021949000"],
             },
             {
                 id: 12020411,
@@ -92788,6 +94407,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17741844011671687130",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                    },
+                    {
                         id: "1769845067925760707",
                         type: "TalkNode",
                         name: "【East02_FixSimple_50】进止流幻境，止流说自己要弑神",
@@ -92946,7 +94571,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["176346309107213168971", "176725631734141817486"],
+                startIds: ["176346309107213168971", "176725631734141817486", "17741844011671687130"],
             },
             {
                 id: 12020414,
@@ -92954,9 +94579,17 @@ export const questData_en: QuestStory[] = [
                 desc: "She used you to wound Taihao and draw the Sentinels of Juntian away. It was all part of Zhiliu's design.\nThe board is almost set, waiting only for the pieces to fall into position. Meanwhile, atop the Hall of Adjudication, Zhiliu is plotting with Zhuyin...",
                 nodes: [
                     {
+                        id: "17750545519561718005",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0141_story_zhiliu_climp",
+                        next: ["1770194740182383848"],
+                    },
+                    {
                         id: "1770194740182383848",
                         type: "TalkNode",
                         name: "【East02_FixSimple_51】执律阁顶，止流准备登阶",
+                        next: ["17741845701761130"],
                         dialogues: [
                             {
                                 id: 12045201,
@@ -93099,6 +94732,12 @@ export const questData_en: QuestStory[] = [
                                 npc: 240001,
                             },
                         ],
+                    },
+                    {
+                        id: "17741845701761130",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0141_story_zhiliu_climp",
                     },
                 ],
             },
@@ -94941,7 +96580,7 @@ export const questData_en: QuestStory[] = [
                         name: "【East02_FixSimple_58】去椒兰村与静渊对话，接2DCG",
                         srId: 104504,
                         pos: [-21230, -57470],
-                        next: ["176250715858522831274"],
+                        next: ["177418524152418964879"],
                         dialogues: [
                             {
                                 id: 12046201,
@@ -95002,6 +96641,15 @@ export const questData_en: QuestStory[] = [
                                 npc: 240040,
                             },
                         ],
+                    },
+                    {
+                        id: "177418524152418964879",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0142_story_zhiliu_memory",
+                        next: ["176250715858522831274"],
+                        srId: 104504,
+                        pos: [-21230, -57470],
                     },
                     {
                         id: "176250715858522831274",
@@ -95685,6 +97333,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1774185807400515",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                    },
+                    {
                         id: "17698459273514558762",
                         type: "TalkNode",
                         name: "【East02_FixSimple_60】止流幻境，揭露真相，止流抛硬币",
@@ -95942,7 +97596,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["176250735113723809549", "176250738010723809956", "17698459273514558763"],
+                startIds: ["176250735113723809549", "176250738010723809956", "17698459273514558763", "1774185807400515"],
             },
             {
                 id: 12020513,
@@ -96130,6 +97784,13 @@ export const questData_en: QuestStory[] = [
                                 voice: "story/1204/120466/12046615",
                             },
                         ],
+                    },
+                    {
+                        id: "177505557280120485899",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        next: ["1770346423085673"],
                     },
                     {
                         id: "1770346423085673",
@@ -96494,17 +98155,35 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17677003017639776777", "176346835001814197221", "176346849046114199943"],
+                startIds: ["17677003017639776777", "176346835001814197221", "176346849046114199943", "177505557280120485899"],
             },
             {
                 id: 12020516,
                 name: "Press deeper into the Taixu Mausoleum",
                 desc: "The stage is set. Deep within the Taixu Mausoleum, the High Chancellor of Loongyuan nears her end...",
+                nodes: [
+                    {
+                        id: "17742599025442537755",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0144_cs_zhiliu_combat_with_bailong",
+                    },
+                ],
             },
             {
                 id: 12020517,
                 name: "A storm is coming",
                 desc: "Zhiliu's design to slay a god is already in motion. The fallout from Taihao and Zhuyin's clash is plunging Haojing into chaos.",
+                nodes: [
+                    {
+                        id: "177418639623522762896",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0145_cs_two_lonng_bite",
+                        srId: 104503,
+                        pos: [31470, -43630],
+                    },
+                ],
             },
         ],
     },
@@ -96516,6 +98195,15 @@ export const questData_en: QuestStory[] = [
                 name: "A storm is coming",
                 desc: "Zhiliu's design to slay a god is already in motion. The fallout from Taihao and Zhuyin's clash is plunging Haojing into chaos.",
                 nodes: [
+                    {
+                        id: "17741864821922534564",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
+                        next: ["176251735161126752346"],
+                        srId: 104504,
+                        pos: [-28310, -43050],
+                    },
                     {
                         id: "176251735161126752346",
                         type: "TalkNode",
@@ -96767,11 +98455,18 @@ export const questData_en: QuestStory[] = [
                 desc: "Zhiliu's design to slay a god is already in motion. The fallout from Taihao and Zhuyin's clash is plunging Haojing into chaos.",
                 nodes: [
                     {
-                        id: "176347349261815226372",
-                        type: "TalkNode",
-                        name: "【East02_FixSimple_66】苏乙视角，狴犴冲向小孩",
+                        id: "17741865928403799026",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
                         srId: 104501,
                         pos: [45700, -25750],
+                    },
+                    {
+                        id: "17724328722381498259",
+                        type: "TalkNode",
+                        name: "【East02_FixSimple_66】苏乙视角，狴犴冲向小孩",
+                        next: ["1774186924195692"],
                         dialogues: [
                             {
                                 id: 12047001,
@@ -96861,96 +98556,10 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
-                        id: "17724328722381498259",
-                        type: "TalkNode",
-                        name: "【East02_FixSimple_66】苏乙视角，狴犴冲向小孩",
-                        dialogues: [
-                            {
-                                id: 12047001,
-                                content: "Help—!",
-                                voice: "story/1204/120470/1E288D1A",
-                                npc: 240041,
-                                next: 12047002,
-                            },
-                            {
-                                id: 12047002,
-                                content: "Lord Argent, shelter us within Your grace...",
-                                voice: "story/1204/120470/1E288D44",
-                                npc: 240042,
-                                next: 12047003,
-                            },
-                            {
-                                id: 12047003,
-                                content: "Grandpa, I've been good... why does the big white wolf want to eat me?",
-                                voice: "story/1204/120470/1E288D6E",
-                                npc: 240043,
-                                next: 12047004,
-                            },
-                            {
-                                id: 12047004,
-                                content:
-                                    "Sweetheart, this is Lord Argent's test for us. Only with a steadfast heart can we endure this calamity...",
-                                voice: "story/1204/120470/1E288D98",
-                                npc: 240042,
-                                next: 12047005,
-                            },
-                            {
-                                id: 12047005,
-                                content: "Run, Father! My baby—!",
-                                voice: "story/1204/120470/1E288DC2",
-                                npc: 240044,
-                                next: 12047006,
-                            },
-                            {
-                                id: 12047006,
-                                content:
-                                    "The whole city's in chaos! Argent and sable Bi'an are attacking everyone — and you're still praying!?",
-                                voice: "story/1204/120470/1E288DEC",
-                                npc: 240044,
-                                next: 12047007,
-                            },
-                            {
-                                id: 12047007,
-                                content: "There's no one left to protect us — take her and run!",
-                                voice: "story/1204/120470/1E288E16",
-                                npc: 240044,
-                                next: 12047008,
-                            },
-                            {
-                                id: 12047008,
-                                content: "Silence! No disrespect to the Bi'an!",
-                                voice: "story/1204/120470/1E288E40",
-                                npc: 240042,
-                                next: 12047009,
-                            },
-                            {
-                                id: 12047009,
-                                content: "Lord Argent, forgive the child's heedless tongue...",
-                                voice: "story/1204/120470/1E288E6A",
-                                npc: 240042,
-                                next: 12047010,
-                            },
-                            {
-                                id: 12047010,
-                                content: "ROAAAAAR—!",
-                                voice: "story/1204/120470/1E288E94",
-                                npc: 240045,
-                                next: 12047011,
-                            },
-                            {
-                                id: 12047011,
-                                content: "Ahhh!!",
-                                voice: "story/1204/120470/1E288EBE",
-                                npc: 240043,
-                                next: 12047012,
-                            },
-                            {
-                                id: 12047012,
-                                content: "Move—!",
-                                voice: "story/1204/120470/1E288EE8",
-                                npc: 240026,
-                            },
-                        ],
+                        id: "1774186924195692",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                     },
                 ],
             },
@@ -96960,119 +98569,12 @@ export const questData_en: QuestStory[] = [
                 desc: "Haojing is in chaos. Bi'an and Sable Bi'an have fallen into a frenzy, lashing out at civilians. A little girl is almost caught in the attack — until Su Yi arrives just in time to intervene.",
                 nodes: [
                     {
-                        id: "17673470031976443671",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17741869745853800144",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                         srId: 104501,
                         pos: [45700, -25750],
-                        dialogues: [
-                            {
-                                id: 12047101,
-                                content: "Hey there, are you alright?",
-                                voice: "story/1204/120471/1E289D82",
-                                npc: 240026,
-                                next: 12047102,
-                            },
-                            {
-                                id: 12047102,
-                                content: "Thank you, miss — I'm fine!",
-                                voice: "story/1204/120471/1E289DAC",
-                                npc: 240043,
-                                next: 12047103,
-                            },
-                            {
-                                id: 12047103,
-                                content: "My baby—! Thank Heaven you're safe...",
-                                voice: "story/1204/120471/1E289DD6",
-                                npc: 240044,
-                                next: 12047104,
-                            },
-                            {
-                                id: 12047104,
-                                content: "Didn't expect the city to be in such chaos already... good thing we got here when we did.",
-                                voice: "story/1204/120471/1E289E00",
-                                npc: 240035,
-                                next: 12047105,
-                            },
-                            {
-                                id: 12047105,
-                                content: "Miss, were you sent by Heaven to save us?",
-                                voice: "story/1204/120471/1E289E2A",
-                                npc: 240043,
-                                next: 12047106,
-                            },
-                            {
-                                id: 12047106,
-                                content: "Heaven? You're mistaken — we're...",
-                                voice: "story/1204/120471/1E289E54",
-                                npc: 240026,
-                                next: 12047107,
-                            },
-                            {
-                                id: 12047107,
-                                content:
-                                    "...Get away from her! I know your kind — you're Drifters! Nothing good ever comes of crossing paths with your lot!",
-                                voice: "story/1204/120471/1E289E7E",
-                                npc: 240042,
-                                next: 12047108,
-                            },
-                            {
-                                id: 12047108,
-                                content: "You blasphemers — unhand my granddaughter, now!",
-                                voice: "story/1204/120471/1E289EA8",
-                                npc: 240042,
-                                next: 12047109,
-                            },
-                            {
-                                id: 12047109,
-                                content: "Father, for Heaven's sake — this isn't the time! Please shut up!",
-                                voice: "story/1204/120471/1E289ED2",
-                                npc: 240044,
-                                next: 12047110,
-                            },
-                            {
-                                id: 12047110,
-                                content: "Our lot...? Heh — you might have that backwards.",
-                                voice: "story/1204/120471/1E289EFC",
-                                npc: 240034,
-                                next: 12047111,
-                            },
-                            {
-                                id: 12047111,
-                                content:
-                                    'We "blasphemers" just saved your life. As for the god you pray to — who knows where They are now?',
-                                voice: "story/1204/120471/1E289F26",
-                                npc: 240034,
-                                next: 12047112,
-                            },
-                            {
-                                id: 12047112,
-                                content: "Everything's coming undone... the very sky of Huaxu is about to come crashing down!",
-                                voice: "story/1204/120471/1E289F50",
-                                npc: 240042,
-                                next: 12047113,
-                            },
-                            {
-                                id: 12047113,
-                                content: "Help—! Please, anyone!",
-                                voice: "story/1204/120471/1E289F7A",
-                                npc: 240041,
-                                next: 12047114,
-                            },
-                            {
-                                id: 12047114,
-                                content: "Pu, save your breath. Right now, saving more lives matters most.",
-                                voice: "story/1204/120471/1E289FA4",
-                                npc: 240026,
-                                next: 12047115,
-                            },
-                            {
-                                id: 12047115,
-                                content: "Got it — let's move.",
-                                voice: "story/1204/120471/1E289FCE",
-                                npc: 240034,
-                            },
-                        ],
                     },
                     {
                         id: "1772421556083793745",
@@ -97193,6 +98695,16 @@ export const questData_en: QuestStory[] = [
                 id: 12020605,
                 name: "Repel the Bi'an and protect the civilians",
                 desc: "Haojing is in chaos. Bi'an and Sable Bi'an have fallen into a frenzy, lashing out at civilians. Repel them and protect the civilians.",
+                nodes: [
+                    {
+                        id: "17750568955692574695",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 104501,
+                        pos: [45730, -31830],
+                    },
+                ],
             },
             {
                 id: 12020606,
@@ -97200,102 +98712,12 @@ export const questData_en: QuestStory[] = [
                 desc: "Haojing is in chaos. Bi'an and Sable Bi'an are still rampaging through the streets. This can't go on. Work out a plan.",
                 nodes: [
                     {
-                        id: "17673471571087517271",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17741869997913800708",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                         srId: 104503,
                         pos: [34410, -42980],
-                        dialogues: [
-                            {
-                                id: 12047201,
-                                content:
-                                    "We've driven off these Bi'an for now — but the next wave could strike at any moment. What in the world has happened to the Nine Chapters?",
-                                voice: "story/1204/120472/1E28ADEA",
-                                npc: 240034,
-                                next: 12047202,
-                            },
-                            {
-                                id: 12047202,
-                                content:
-                                    "Once we regroup, the truth will come to light. Let's have faith — together, we can end this crisis.",
-                                voice: "story/1204/120472/1E28AE14",
-                                npc: 240026,
-                                next: 12047203,
-                            },
-                            {
-                                id: 12047203,
-                                content:
-                                    "Speak of the devil. Mm... looks like they're bound for the Hall of Adjudication. Let's go lend them our strength.",
-                                voice: "story/1204/120472/1E28AE3E",
-                                npc: 240026,
-                                next: 12047204,
-                            },
-                            {
-                                id: 12047204,
-                                content: "What about the folks here...?",
-                                voice: "story/1204/120472/1E28AE68",
-                                npc: 240035,
-                                next: 12047205,
-                            },
-                            {
-                                id: 12047205,
-                                content:
-                                    "Do not worry — I've made provisions. Sun Yu, Zhao Cheng — you'll remain here to guard against any more rampaging Bi'an that break into the area.",
-                                voice: "story/1204/120472/1E28AE92",
-                                npc: 240026,
-                                next: 12047206,
-                            },
-                            {
-                                id: 12047206,
-                                content: "Also, help me hand out the spare weapons we brought — so the townsfolk can defend themselves.",
-                                voice: "story/1204/120472/1E28AEBC",
-                                npc: 240026,
-                                next: 12047207,
-                            },
-                            {
-                                id: 12047207,
-                                content: "You mean arm them and have them fight? Will that really work?",
-                                voice: "story/1204/120472/1E28AEE6",
-                                npc: 240035,
-                                next: 12047208,
-                            },
-                            {
-                                id: 12047208,
-                                content:
-                                    "Even if they had the strength, they have lived their whole lives under the Nine Chapters' strictures — they'd sooner never lay a hand on a weapon.",
-                                voice: "story/1204/120472/1E28AF10",
-                                npc: 240036,
-                                next: 12047209,
-                            },
-                            {
-                                id: 12047209,
-                                content:
-                                    "More likely we'll earn nothing but cold stares for our trouble. Sister Yi, do we really have to do this?",
-                                voice: "story/1204/120472/1E28AF3A",
-                                npc: 240034,
-                                next: 12047210,
-                            },
-                            {
-                                id: 12047210,
-                                content: "You never know unless you try.",
-                                voice: "story/1204/120472/1E28AF64",
-                                npc: 240026,
-                                next: 12047211,
-                            },
-                            {
-                                id: 12047211,
-                                content: "Giving up without even trying — that's not the Drifters' way. Please, give it a try.",
-                                voice: "story/1204/120472/1E28AF8E",
-                                npc: 240026,
-                                next: 12047212,
-                            },
-                            {
-                                id: 12047212,
-                                content: "...If you insist.",
-                                voice: "story/1204/120472/1E28AFB8",
-                                npc: 240036,
-                            },
-                        ],
                     },
                     {
                         id: "17724221886932378797",
@@ -97401,7 +98823,15 @@ export const questData_en: QuestStory[] = [
                 desc: "Su Yi receives a message from {nickname} and prepares to rush to their aid. Before she leaves, she insists on handing out the spare weapons she brought, so the residents can defend themselves.",
                 nodes: [
                     {
-                        id: "176743070506913957323",
+                        id: "17750569191502575385",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 104503,
+                        pos: [28924, -43916],
+                    },
+                    {
+                        id: "17724330598334753424",
                         type: "TalkNode",
                         name: "对话节点",
                         srId: 104503,
@@ -97412,37 +98842,6 @@ export const questData_en: QuestStory[] = [
                                 content: "To take up arms is to violate the Admonitions — I shouldn't be doing this!",
                                 voice: "story/1204/120484/1E29731E",
                                 npc: 240066,
-                            },
-                        ],
-                    },
-                    {
-                        id: "176743072361413957606",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        srId: 104503,
-                        pos: [28924, -43916],
-                        dialogues: [
-                            {
-                                id: 12048401,
-                                content: "What is this ill-omened thing? Take it away!",
-                                voice: "story/1204/120484/1E2972CA",
-                                npc: 240067,
-                            },
-                        ],
-                    },
-                    {
-                        id: "176743072419613957628",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        srId: 104503,
-                        pos: [28924, -43916],
-                        dialogues: [
-                            {
-                                id: 12048402,
-                                content:
-                                    "I—I've never killed anything... not even a chicken... let alone taken up a weapon to fight an enemy...",
-                                voice: "story/1204/120484/1E2972F4",
-                                npc: 240068,
                             },
                         ],
                     },
@@ -97478,7 +98877,6 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["176743070506913957323", "176743072361413957606", "176743072419613957628"],
             },
             {
                 id: 12020608,
@@ -97486,7 +98884,15 @@ export const questData_en: QuestStory[] = [
                 desc: "The Drifters' efforts to distribute weapons meet resistance at every turn, but Su Yi refuses to give up.",
                 nodes: [
                     {
-                        id: "176347421683515231412",
+                        id: "17750569268172575617",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 104503,
+                        pos: [31727, -46057],
+                    },
+                    {
+                        id: "17724338985675546977",
                         type: "TalkNode",
                         name: "与朱朴对话",
                         srId: 104503,
@@ -97693,6 +99099,15 @@ export const questData_en: QuestStory[] = [
                 desc: "With Hermit Jingyuan's help, you learn the full extent of Zhiliu's plan — and how to stop her.\nHurry to the Hall of Adjudication before it's too late.",
                 nodes: [
                     {
+                        id: "17750569880033858663",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        next: ["177228575025223735000"],
+                        srId: 104503,
+                        pos: [28318, -42672],
+                    },
+                    {
                         id: "177228575025223735000",
                         type: "TalkNode",
                         name: "【East02_FixSimple_70】回玩家视角，回到城区广场，与苏乙汇合",
@@ -97814,27 +99229,12 @@ export const questData_en: QuestStory[] = [
                 desc: "With Hermit Jingyuan's help, you learn the full extent of Zhiliu's plan — and how to stop her.\nOn the road, you meet Su Yi. She offers to cover the rest so you can stay focused. Hurry to the Hall of Adjudication before it's too late.",
                 nodes: [
                     {
-                        id: "17737313161805009246",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17750570365063859426",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                         srId: 104503,
                         pos: [31467, -47468],
-                        dialogues: [
-                            {
-                                id: 12048748,
-                                content:
-                                    "L-Little Minion, the sky's as red as if the world's ending... I have a really bad feeling about this...",
-                                voice: "story/1204/120487/1E29ABB8",
-                                npc: 200002,
-                                next: 12048749,
-                            },
-                            {
-                                id: 12048749,
-                                content: "We must move faster... We can still make it in time!",
-                                voice: "story/1204/120487/1E29ABE2",
-                                npc: 100001,
-                            },
-                        ],
                     },
                     {
                         id: "1774335012883845667",
@@ -97863,6 +99263,16 @@ export const questData_en: QuestStory[] = [
                 id: 12020612,
                 name: "Enter the Taixu Mausoleum",
                 desc: "With Hermit Jingyuan's help, you learn the full extent of Zhiliu's plan — and how to stop her.\nThere's still time. Press on towards the depths of the Taixu Mausoleum.",
+                nodes: [
+                    {
+                        id: "17741870269413801488",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0146_enter_zhilvge",
+                        srId: 104506,
+                        pos: [31495, -109835],
+                    },
+                ],
             },
             {
                 id: 12020613,
@@ -97890,6 +99300,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "17741874131936330224",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        srId: 105301,
+                        pos: [28912, 23396],
                     },
                     {
                         id: "176347434626815232437",
@@ -97972,6 +99390,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17734798455233599", "17741874131936330224"],
             },
             {
                 id: 12020614,
@@ -97979,63 +99398,12 @@ export const questData_en: QuestStory[] = [
                 desc: "Taihao and Zhuyin's clash is coming to a head. In the depths of the Taixu Mausoleum, you find Zhiliu at her breaking point.\nDesperate to die, she asks you to plunge your blade into her chest and complete the final sacrifice.",
                 nodes: [
                     {
-                        id: "177496944840919541",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17741874687536331113",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0148_theme_song_hyb_story_cut1",
                         srId: 105301,
                         pos: [41943, 23394],
-                        dialogues: [
-                            {
-                                id: 12047504,
-                                content: "{nickname}, go on ahead — don't waste time here.",
-                                voice: "story/1204/120475/1E28DFA0",
-                                npc: 240013,
-                                next: 12047505,
-                            },
-                            {
-                                id: 12047505,
-                                content: "All right.",
-                                voice: "story/1204/120475/1E28DFCA",
-                                npc: 100001,
-                                next: 12047506,
-                            },
-                            {
-                                id: 12047506,
-                                content: "Draw your blade, shixiong. Holding you here is my duty too!",
-                                voice: "story/1204/120475/1E28DFF4",
-                                npc: 240013,
-                                next: 12047507,
-                            },
-                            {
-                                id: 12047507,
-                                content: "I wavered before... but not anymore!",
-                                voice: "story/1204/120475/1E28E01E",
-                                npc: 240013,
-                                next: 12047508,
-                            },
-                            {
-                                id: 12047508,
-                                content:
-                                    "That question you asked me — now I have my answer! Who says you must choose between tearing things down and holding things together? I'll do both!",
-                                voice: "story/1204/120475/1E28E048",
-                                npc: 240013,
-                                next: 12047509,
-                            },
-                            {
-                                id: 12047509,
-                                content:
-                                    "And who says a man must fight only for others? If everyone took up arms in self-defence and stood as one, forget Deterioration — nothing could withstand us! I'll prove such a future can be made real!",
-                                voice: "story/1204/120475/1E28E072",
-                                npc: 240013,
-                                next: 12047510,
-                            },
-                            {
-                                id: 12047510,
-                                content: "...",
-                                voice: "story/1204/120475/1E28E09C",
-                                npc: 210007,
-                            },
-                        ],
                     },
                 ],
             },
@@ -98044,6 +99412,14 @@ export const questData_en: QuestStory[] = [
                 name: "Defeat the two Loong gods",
                 desc: "Zhiliu begs you to end her life, but you refuse. You're here to prove that people can always forge a new path.\nThrough Resonance, you draw into yourself the power the Covenant of Souls granted her.\nSensing the intrusion, Taihao and Zhuyin, already on the brink of madness, turn on you as one. Defeat them, and prove your resolve.",
                 nodes: [
+                    {
+                        id: "17741875792037595691",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0147_boss_two_dragon",
+                        srId: 105301,
+                        pos: [43387, 23321],
+                    },
                     {
                         id: "17750471556272568585",
                         type: "TalkNode",
@@ -98064,6 +99440,14 @@ export const questData_en: QuestStory[] = [
                 name: "Defeat the two Loong gods",
                 desc: "Zhiliu begs you to end her life, but you refuse. You're here to prove that people can always forge a new path.\nThrough Resonance, you briefly draw into yourself the power the Covenant of Souls granted her.\nSensing the intrusion, Taihao and Zhuyin, already on the brink of madness, turn on you as one. Defeat them, and prove your resolve.",
                 nodes: [
+                    {
+                        id: "17741876947728861054",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0148_theme_song_hyb_story_cut2",
+                        srId: 104503,
+                        pos: [32054, -51515],
+                    },
                     {
                         id: "177244362992811946867",
                         type: "TalkNode",
@@ -98124,6 +99508,16 @@ export const questData_en: QuestStory[] = [
                 id: 12020619,
                 name: "Defeat the two Loong gods",
                 desc: "Zhiliu begs you to end her life, but you refuse. You're here to prove that people can always forge a new path.\nThrough Resonance, you briefly draw into yourself the power the Covenant of Souls granted her.\nSensing the intrusion, Taihao and Zhuyin, already on the brink of madness, turn on you as one. Defeat them, and prove your resolve.",
+                nodes: [
+                    {
+                        id: "177418776017510125182",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0148_theme_song_hyb_story_cut3",
+                        srId: 105301,
+                        pos: [35812, 23467],
+                    },
+                ],
             },
             {
                 id: 12020620,
@@ -98452,6 +99846,16 @@ export const questData_en: QuestStory[] = [
                 id: 12020623,
                 name: "???",
                 desc: "After you defeat the two Loong gods, the Jade of Equilibrium flares with blinding light, swallowing everything and carrying you into a hazy, unreal realm.",
+                nodes: [
+                    {
+                        id: "177418794350012655233",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放暂停音乐",
+                        resource: "0149_cs_two_lonng_merge",
+                        srId: 104506,
+                        pos: [31509, -108737],
+                    },
+                ],
             },
             {
                 id: 12020624,
@@ -99516,6 +100920,22 @@ export const questData_en: QuestStory[] = [
                 name: "Catch the thief",
                 desc: "Drawn by the commotion, you and Snow head over to investigate and run into an old acquaintance, Su Yi, just as a prospective teammate turns her down. You learn from her that the Incense Proving is about to begin.\nIn the middle of your conversation, Su Yi's prized creation, Qingluan Type Ⅱ, is snatched by a thief right under your noses. Hurry and catch her!",
                 nodes: [
+                    {
+                        id: "17745058711591683",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0109_combat_black_market",
+                        srId: 104501,
+                        pos: [50415, -22540],
+                    },
+                    {
+                        id: "17745059280611273907",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0151_story_east_humour",
+                        srId: 104501,
+                        pos: [50415, -22540],
+                    },
                     {
                         id: "17667324358671066674",
                         type: "TalkNode",
@@ -103401,7 +104821,7 @@ export const questData_en: QuestStory[] = [
                         name: "对话节点",
                         srId: 104503,
                         pos: [24938, -80278],
-                        next: ["17654406995785335"],
+                        next: ["17654406995785335", "17745062001375091627"],
                         dialogues: [
                             {
                                 id: 12063011,
@@ -103521,6 +104941,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 250015,
                             },
                         ],
+                    },
+                    {
+                        id: "17745062001375091627",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        srId: 104503,
+                        pos: [24938, -80278],
                     },
                 ],
             },
@@ -104937,7 +106365,7 @@ export const questData_en: QuestStory[] = [
                         name: "对话节点",
                         srId: 104503,
                         pos: [17487, -78810],
-                        next: ["17689882726793262"],
+                        next: ["17689882726793262", "177450653693911453504"],
                         dialogues: [
                             {
                                 id: 12062638,
@@ -105023,6 +106451,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "177450653693911453504",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0152_story_jiaolancun_piano",
+                        srId: 104503,
+                        pos: [17487, -78810],
                     },
                 ],
             },
@@ -106228,158 +107664,12 @@ export const questData_en: QuestStory[] = [
                 desc: "Su Yi and An manage to convince Xiaoxiang, and you obtain the key to the dungeon. Enter the dungeon and rescue Yuming.",
                 nodes: [
                     {
-                        id: "17638160596627562105",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "177450689582617815327",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                         srId: 104504,
                         pos: [8298, -72761],
-                        dialogues: [
-                            {
-                                id: 12063401,
-                                content: "Little Minion! You're finally back! Everyone saw you guys in there — everything you did!",
-                                voice: "story/1206/120634/1E330FBA",
-                                npc: 200002,
-                                next: 12063402,
-                            },
-                            {
-                                id: 12063402,
-                                content: "Now they know who the good guys are! And who the baddies are! They're all talking about you!",
-                                voice: "story/1206/120634/1E330FE4",
-                                npc: 200002,
-                                next: 12063403,
-                            },
-                            {
-                                id: 12063403,
-                                content:
-                                    "It's just... the arena's a total mess now. Even if they let us do a replay, it'll take forever...",
-                                voice: "story/1206/120634/1E33100E",
-                                npc: 200002,
-                                next: 12063404,
-                            },
-                            {
-                                id: 12063404,
-                                content: "By then, we probably won't even be in Huaxu anymore.",
-                                voice: "story/1206/120634/1E331038",
-                                npc: 100001,
-                                next: 12063405,
-                            },
-                            {
-                                id: 12063405,
-                                content: "Tabethe, Yuming... I guess we'll have to leave things here to you two.",
-                                voice: "story/1206/120634/1E331062",
-                                npc: 100001,
-                                next: 12063406,
-                            },
-                            {
-                                id: 12063406,
-                                content: "Put your minds at ease.",
-                                voice: "story/1206/120634/1E33108C",
-                                npc: 250004,
-                                next: 12063407,
-                            },
-                            {
-                                id: 12063407,
-                                content:
-                                    "Whether through your excellent showing in the arena, or through the resolve you showed beyond it, you are, without question, among the finest teams I have ever seen.",
-                                voice: "story/1206/120634/1E3310B6",
-                                npc: 250004,
-                                next: 12063408,
-                            },
-                            {
-                                id: 12063408,
-                                content:
-                                    "More importantly... when crisis struck without warning, your team did not falter. That takes courage few can match.",
-                                voice: "story/1206/120634/1E3310E0",
-                                npc: 250004,
-                                next: 12063409,
-                            },
-                            {
-                                id: 12063409,
-                                content: "With deeds such as these, the Stewards' Council has no cause to call for a replay.",
-                                voice: "story/1206/120634/1E33110A",
-                                npc: 250004,
-                                next: 12063410,
-                            },
-                            {
-                                id: 12063410,
-                                content: "Wait... so you mean...?",
-                                voice: "story/1206/120634/1E331134",
-                                npc: 200002,
-                                next: 12063411,
-                            },
-                            {
-                                id: 12063411,
-                                content:
-                                    "Team \"The Incensehunters\" — after due deliberation by the Stewards' Council, you are hereby confirmed as the champions of this year's Incense Proving. Go to the Hall of Adjudication and celebrate to your hearts' content. Your victory is beyond question.",
-                                voice: "story/1206/120634/1E33115E",
-                                npc: 250004,
-                                next: 12063412,
-                            },
-                            {
-                                id: 12063412,
-                                content: "We won!?",
-                                voice: "story/1206/120634/1E331188",
-                                npc: 200002,
-                                next: 12063413,
-                            },
-                            {
-                                id: 12063413,
-                                content: "Yes. We won, Su Yi... Wait—?",
-                                voice: "story/1206/120634/1E3311B2",
-                                npc: 100001,
-                            },
-                        ],
-                    },
-                    {
-                        id: "17664894462939556455",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        srId: 104504,
-                        pos: [8298, -72761],
-                        dialogues: [
-                            {
-                                id: 12063318,
-                                content: "Phew... it's over at last.",
-                                voice: "story/1206/120633/1E33021C",
-                                npc: 250003,
-                                next: 12063319,
-                            },
-                            {
-                                id: 12063319,
-                                content: "(Enthusiastic applause)",
-                                voice: "story/1206/120633/1E330246",
-                                next: 12063320,
-                            },
-                            {
-                                id: 12063320,
-                                content: "Whoa—! What's going on? Why are there so many people?",
-                                voice: "story/1206/120633/1E330270",
-                                npc: 250006,
-                                next: 12063321,
-                            },
-                            {
-                                id: 12063321,
-                                content: "It's that young hero! {nickname}!",
-                                voice: "story/1206/120633/1E33029A",
-                                speakerName: "Buzz from the Crowd",
-                                next: 12063322,
-                            },
-                            {
-                                id: 12063322,
-                                content:
-                                    "And that Drifter! See? I told you — the stories make them out to be green-faced monsters with fangs, but they're nothing like that. That girl with the two long braids is actually adorable.",
-                                voice: "story/1206/120633/1E3302C4",
-                                speakerName: "Buzz from the Crowd",
-                                next: 12063323,
-                            },
-                            {
-                                id: 12063323,
-                                content:
-                                    "I've never seen a Drifter in person before. Maybe they're just ordinary people like us. They get lost... then they pick themselves up and keep going.",
-                                voice: "story/1206/120633/1E3302EE",
-                                speakerName: "Buzz from the Crowd",
-                            },
-                        ],
                     },
                     {
                         id: "17724345355635542958",
@@ -106408,8 +107698,13 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1774423736524482",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0123_boss_juque",
+                    },
                 ],
-                startIds: ["17638160596627562105", "17664894462939556455"],
             },
             {
                 id: 12030706,
@@ -106863,6 +108158,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "177450703157419088850",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0135_login_theme",
+                        srId: 104506,
+                        pos: [31501, -107674],
+                    },
                 ],
             },
             {
@@ -106870,6 +108173,14 @@ export const questData_en: QuestStory[] = [
                 name: "Go to An's home",
                 desc: "Su Yi stayed up through the night to finish a special gift for An. Go to his home and deliver it to him in person.",
                 nodes: [
+                    {
+                        id: "177450673281013999337",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0153_cs_juque_on_stage",
+                        srId: 104503,
+                        pos: [22541, -77131],
+                    },
                     {
                         id: "17738247162919129334",
                         type: "TalkNode",
@@ -106957,6 +108268,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 250003,
                             },
                         ],
+                    },
+                    {
+                        id: "177450675651013999718",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 104503,
+                        pos: [22541, -77131],
                     },
                 ],
             },
@@ -108470,6 +109789,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1748933879119883582",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默音乐",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-5213, 6670],
+                    },
                 ],
             },
             {
@@ -108483,7 +109810,7 @@ export const questData_en: QuestStory[] = [
                         name: "野猪呢？",
                         srId: 101103,
                         pos: [-34151, 31390],
-                        next: ["174687696102513401004", "17455115606202746224"],
+                        next: ["174687696102513401004", "17455115606202746224", "17489343539003509289"],
                         dialogues: [
                             {
                                 id: 20005001,
@@ -108522,6 +109849,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 200002,
                             },
                         ],
+                    },
+                    {
+                        id: "17489343539003509289",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默音乐",
+                        resource: "0033_story_humour",
+                        srId: 101103,
+                        pos: [-34151, 31390],
                     },
                     {
                         id: "174687696102513401004",
@@ -108909,6 +110244,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 200074,
                             },
                         ],
+                    },
+                    {
+                        id: "17489344984583511337",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默音乐",
+                        resource: "0033_story_humour",
+                        srId: 101103,
+                        pos: [-32456, 34166],
                     },
                 ],
             },
@@ -121751,6 +123094,14 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17600061625596531944",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-7659, 7174],
+                    },
+                    {
                         id: "17501283182784547",
                         type: "UnlockDetectiveQuestionNode",
                         name: "开启推理问题",
@@ -121856,6 +123207,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17600065919608394228",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-9415, -6605],
+                    },
                 ],
             },
             {
@@ -121907,6 +123266,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "17600066558329325511",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-9265, -6835],
                     },
                     {
                         id: "17448049117431652729",
@@ -122116,7 +123483,16 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17600066899369326656",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-9265, -6835],
+                    },
                 ],
+                startIds: ["17447211024331642191", "17600066899369326656"],
             },
             {
                 id: 20023007,
@@ -124292,6 +125668,14 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17600102202512817",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0043_story_empire",
+                        srId: 101107,
+                        pos: [-225, -11296],
+                    },
+                    {
                         id: "17501298868055680754",
                         type: "UnlockDetectiveQuestionNode",
                         name: "开启推理问题",
@@ -124365,12 +125749,20 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17600103648751840",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        srId: 101101,
+                        pos: [-2500, -2065],
+                    },
+                    {
                         id: "17457393991669682995",
                         type: "UnlockDetectiveQuestionNode",
                         name: "开启推理问题",
                         srId: 101101,
                         pos: [-2500, -2065],
-                        next: ["17457393991669682998"],
+                        next: ["17457393991669682998", "17600103648751840"],
                         questions: [
                             {
                                 id: 2002,
@@ -124408,6 +125800,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17457393991669682997", "17600103648751840"],
             },
             {
                 id: 20023302,
@@ -124671,6 +126064,14 @@ export const questData_en: QuestStory[] = [
                                     "(If no one stops her, that dagger will silence the finest voice in Icelake. Whatever the truth... you can't just stand by and watch someone commit murder.)",
                             },
                         ],
+                    },
+                    {
+                        id: "1760010486230935268",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0043_story_empire",
+                        srId: 101103,
+                        pos: [-15162, 10495],
                     },
                     {
                         id: "175031962027625556903",
@@ -125094,7 +126495,7 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17457393991729683022", "175031962027625556903"],
+                startIds: ["17457393991729683022", "1760010486230935268", "175031962027625556903"],
             },
             {
                 id: 20023304,
@@ -125508,6 +126909,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 700300,
                             },
                         ],
+                    },
+                    {
+                        id: "17600107038051867283",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0036_story_renweidaozu",
+                        srId: 101101,
+                        pos: [-3580, -11570],
                     },
                 ],
             },
@@ -133328,6 +134737,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17677836599642664",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放潜行音乐",
+                        resource: "0111_scene_wuhuizhidi",
+                    },
+                    {
                         id: "17658722095622118004",
                         type: "TalkNode",
                         name: "对话节点",
@@ -138881,7 +140296,7 @@ export const questData_en: QuestStory[] = [
                         name: "对话节点",
                         srId: 104501,
                         pos: [36900, -34420],
-                        next: ["17726066180633637092"],
+                        next: ["177313446494136299267"],
                         dialogues: [
                             {
                                 id: 51175201,
@@ -138913,6 +140328,15 @@ export const questData_en: QuestStory[] = [
                                     "(As chaos spreads across Haojing under Zhiliu's scheme, somewhere unseen, a Zhuyou makes a silent choice.)",
                             },
                         ],
+                    },
+                    {
+                        id: "177313446494136299267",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        next: ["17726066180633637092"],
+                        srId: 104501,
+                        pos: [36900, -34420],
                     },
                     {
                         id: "17726066180633637092",
@@ -139178,6 +140602,12 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17748664206292213",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0106_scene_cave_near_sea",
+                    },
+                    {
                         id: "1773295971015727",
                         type: "TalkNode",
                         name: "对话节点",
@@ -139357,13 +140787,22 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["1770278966032389765", "1770279070734391456", "1770279138866392190"],
+                startIds: ["1770278966032389765", "1770279070734391456", "1770279138866392190", "17748664206292213"],
             },
             {
                 id: 20031805,
                 name: "???",
                 desc: "Fushu does all she can to tend to the wounded, but with the Nine Chapters of Dafeng in disarray and no longer lending her their power, the effort leaves her badly weakened.\nAs consciousness slips from her grasp, she falls into a memory of the past...",
                 nodes: [
+                    {
+                        id: "17748664896837243856",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0106_scene_cave_near_sea",
+                        next: ["1770281427083396372"],
+                        srId: 104503,
+                        pos: [35975, -42746],
+                    },
                     {
                         id: "1770281427083396372",
                         type: "TalkNode",
@@ -139557,6 +140996,13 @@ export const questData_en: QuestStory[] = [
                 name: "Search for the Oblivion Rift",
                 desc: "Fushu comes to. There is little time left — she must reach the River of Forgetting before the Nine Chapters of Dafeng completely unravel.",
                 nodes: [
+                    {
+                        id: "1774866566119855714",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0106_scene_cave_near_sea",
+                        next: ["1773296529860493"],
+                    },
                     {
                         id: "1773296529860493",
                         type: "TalkNode",
@@ -157578,6 +159024,14 @@ export const questData_en: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17647611270281325",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0041_story_jiaojiao_tiejiang",
+                        srId: 210101,
+                        pos: [-383, 2829],
+                    },
                 ],
             },
             {
@@ -157803,6 +159257,14 @@ export const questData_en: QuestStory[] = [
                                 npc: 700352,
                             },
                         ],
+                    },
+                    {
+                        id: "17648358565963813392",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-3610, 560],
                     },
                 ],
             },

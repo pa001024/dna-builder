@@ -4,12 +4,13 @@ import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reac
 import { charMap, LeveledCharHelper } from "@/data"
 import { npcMap } from "@/data/d/npc.data"
 import type { PartyTopic } from "@/data/d/partytopic.data"
-import { type Dialogue, type DialogueOption } from "@/data/d/quest.data"
+import { type Dialogue, type DialogueOption, type StoryMediaMarker } from "@/data/d/quest.data"
 import { questChainMap } from "@/data/d/questchain.data"
 import { resourceMap } from "@/data/d/resource.data"
 import { useSettingStore } from "@/store/setting"
 import { getDialogueDisplayContent } from "@/utils/dialogue"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
+import { buildQuestBgmUrl } from "@/utils/quest-bgm"
 import { getImprType, getRegionType } from "@/utils/quest-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
@@ -44,6 +45,9 @@ const selectedOptionMap = reactive<Record<string, number>>({})
 const currentVoiceKey = ref<string | null>(null)
 const isVoicePlaying = ref(false)
 const dialogueAudioRef = ref<HTMLAudioElement | null>(null)
+const bgmAudioRef = ref<HTMLAudioElement | null>(null)
+const currentBgmMarkerId = ref<string | null>(null)
+const isBgmPlaying = ref(false)
 const autoPlayEnabled = ref(false)
 const autoPlayCurrentIndex = ref(-1)
 const dialogueElementMap = new Map<number, HTMLElement>()
@@ -97,10 +101,34 @@ const consumeEntries = computed<ConsumeEntry[]>(() => {
 })
 
 /**
+ * 判断对话行是否为媒体控制标记（BGM/音效等）。
+ * @param row 对话数组中的行数据
+ * @returns 是否为媒体标记
+ */
+function isMediaMarker(row: Dialogue | StoryMediaMarker): row is StoryMediaMarker {
+    return "type" in row && typeof row.type === "string"
+}
+
+/**
+ * 当前光阴集原始对话行：普通对话与媒体标记的混合数组。
+ */
+const partyTopicDialogueRows = computed<(Dialogue | StoryMediaMarker)[]>(() => props.partyTopic.dialogues ?? [])
+
+/**
+ * 仅含普通对话的行数组（供语音链与逐句渲染使用）。
+ */
+const dialogueRows = computed<Dialogue[]>(() => partyTopicDialogueRows.value.filter((row): row is Dialogue => !isMediaMarker(row)))
+
+/**
+ * 媒体标记行数组（BGM/音效控制）。
+ */
+const mediaMarkerRows = computed<StoryMediaMarker[]>(() => partyTopicDialogueRows.value.filter(isMediaMarker))
+
+/**
  * 构建当前光阴集可展示的对话链。
  */
 const dialogueChain = computed(() => {
-    return buildDialogueChain(props.partyTopic.dialogues ?? [], getPartyTopicScopeKey(props.partyTopic.id))
+    return buildDialogueChain(dialogueRows.value, getPartyTopicScopeKey(props.partyTopic.id))
 })
 const hasPlayableDialogue = computed(() => {
     return dialogueChain.value.some(item => {
@@ -776,6 +804,96 @@ function handleDialogueVoiceError(): void {
 }
 
 /**
+ * 获取媒体标记 BGM 资源的可播放地址。
+ * @param marker 媒体标记
+ * @returns BGM 音频 URL；不可播放时返回空字符串
+ */
+function getMarkerBgmUrl(marker: StoryMediaMarker): string {
+    if (!marker.resource) {
+        return ""
+    }
+
+    return buildQuestBgmUrl(marker.resource)
+}
+
+/**
+ * 判断媒体标记 BGM 资源是否为无声/停止类控制键。
+ * @param marker 媒体标记
+ * @returns 是否为无声控制键
+ */
+function isMarkerBgmMute(marker: StoryMediaMarker): boolean {
+    const resource = marker.resource?.trim() ?? ""
+    return resource === "" || resource === "mute" || resource.startsWith("mute_") || resource.startsWith("0_1_mute")
+}
+
+/**
+ * 停止当前 BGM 试听并重置状态。
+ */
+function stopBgmPlayback(): void {
+    const audio = bgmAudioRef.value
+    if (!audio) {
+        return
+    }
+    audio.pause()
+    audio.removeAttribute("src")
+    audio.load()
+    currentBgmMarkerId.value = null
+    isBgmPlaying.value = false
+}
+
+/**
+ * 切换媒体标记 BGM 试听播放状态（一次仅试听一个）。
+ * @param marker 媒体标记
+ */
+function toggleMarkerBgm(marker: StoryMediaMarker): void {
+    const audio = bgmAudioRef.value
+    if (!audio) {
+        return
+    }
+
+    // 再次点击正在播放的标记 → 停止
+    if (currentBgmMarkerId.value === marker.id && isBgmPlaying.value) {
+        stopBgmPlayback()
+        return
+    }
+
+    const bgmUrl = getMarkerBgmUrl(marker)
+    if (!bgmUrl) {
+        return
+    }
+
+    stopBgmPlayback()
+    audio.src = bgmUrl
+
+    audio
+        .play()
+        .then(() => {
+            currentBgmMarkerId.value = marker.id
+            isBgmPlaying.value = true
+        })
+        .catch(error => {
+            currentBgmMarkerId.value = null
+            isBgmPlaying.value = false
+            console.error("光阴集 BGM 试听播放失败:", error)
+        })
+}
+
+/**
+ * BGM 试听结束事件回调。
+ */
+function handleBgmEnded(): void {
+    isBgmPlaying.value = false
+    currentBgmMarkerId.value = null
+}
+
+/**
+ * BGM 试听暂停事件回调。
+ */
+function handleBgmPause(): void {
+    isBgmPlaying.value = false
+}
+
+/**
  * 提取选项中的印象变化条目。
  * @param option 对话选项
  * @returns 印象条目列表
@@ -838,6 +956,7 @@ watch(
     () => {
         stopAutoPlay()
         stopDialogueVoicePlayback()
+        stopBgmPlayback()
     }
 )
 
@@ -864,6 +983,7 @@ onBeforeUnmount(() => {
     document.removeEventListener("pointerdown", handleVoiceSettingsPointerDown)
     stopAutoPlay()
     stopDialogueVoicePlayback()
+    stopBgmPlayback()
     dialogueElementMap.clear()
     clearPreloadedDialogueVoices()
 })
@@ -999,8 +1119,8 @@ onBeforeUnmount(() => {
         </section>
 
         <!-- 剧情对话 -->
-        <section v-if="partyTopic.dialogues?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="DIALOGUE" :title="`剧情对话 (${partyTopic.dialogues.length} 条)`">
+        <section v-if="partyTopicDialogueRows.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="DIALOGUE" :title="`剧情对话 (${dialogueRows.length} 条)`">
                 <template #trailing>
                     <label class="flex select-none items-center gap-2 text-xs text-base-content/70">
                         <span>自动播放</span>
@@ -1129,7 +1249,47 @@ onBeforeUnmount(() => {
                 </div>
             </TransitionGroup>
 
-            <div v-else class="text-sm text-base-content/60">暂无可展示的对话链</div>
+            <div v-if="!dialogueChain.length" class="text-sm text-base-content/60">
+                {{ dialogueRows.length ? "暂无可展示的对话链" : "暂无对话内容" }}
+            </div>
+
+            <!-- 剧情媒体标记：BGM 试听 -->
+            <div v-if="mediaMarkerRows.length" class="mt-2 space-y-2">
+                <div class="text-[11px] font-semibold tracking-wide text-accent">BGM / 音效</div>
+                <div
+                    v-for="marker in mediaMarkerRows"
+                    :key="marker.id"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
+                    <div class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-base-content/70">
+                        <span class="min-w-0 truncate font-medium text-base-content/85">{{ formatStoryText(marker.name) }}</span>
+                        <span class="text-base-content/45">·</span>
+                        <span class="truncate text-[11px] text-accent">{{ marker.type }}</span>
+                        <code
+                            v-if="marker.resource"
+                            class="rounded-xs border border-base-content/15 bg-base-100/60 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-base-content/80"
+                        >
+                            {{ marker.resource }}
+                        </code>
+                        <span v-if="isMarkerBgmMute(marker)" class="text-base-content/40">（无声/停止控制，无试听）</span>
+                        <button
+                            v-else-if="getMarkerBgmUrl(marker)"
+                            type="button"
+                            class="cursor-pointer rounded-xs border px-1.5 py-0.5 text-[11px] transition-colors duration-150"
+                            :class="
+                                currentBgmMarkerId === marker.id && isBgmPlaying
+                                    ? 'border-primary/60 bg-primary/10 font-semibold text-primary'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/50 hover:text-primary'
+                            "
+                            @click="toggleMarkerBgm(marker)"
+                        >
+                            {{ currentBgmMarkerId === marker.id && isBgmPlaying ? "停止试听" : "试听" }}
+                        </button>
+                        <span v-else class="text-base-content/40">（暂未收录 CDN 音频）</span>
+                    </div>
+                </div>
+            </div>
+
             <audio
                 ref="dialogueAudioRef"
                 class="hidden"
@@ -1139,6 +1299,7 @@ onBeforeUnmount(() => {
                 @pause="handleDialogueVoicePause"
                 @play="handleDialogueVoicePlay"
             />
+            <audio ref="bgmAudioRef" class="hidden" preload="none" @ended="handleBgmEnded" @pause="handleBgmPause" />
         </section>
     </div>
 </template>

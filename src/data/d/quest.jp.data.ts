@@ -27,6 +27,14 @@ export const questData_jp: QuestStory[] = [
             {
                 id: 10010102,
                 name: "？？？",
+                nodes: [
+                    {
+                        id: "174782280482333956126",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "char_pick",
+                    },
+                ],
             },
             {
                 id: 10010103,
@@ -59,6 +67,31 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "quest_16940528724831102",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - start",
+                        resource: "0002_story_shahai",
+                        next: ["quest_16939946055681077"],
+                    },
+                    {
+                        id: "quest_16940525957161093",
+                        type: "PlayOrStopBGMNode",
+                        name: "noise - state 1 - start",
+                        resource: "SC002",
+                    },
+                    {
+                        id: "quest_16939946055681077",
+                        type: "PlayOrStopBGMNode",
+                        name: "noise - state 0 - start",
+                        resource: "SC002",
+                    },
+                    {
+                        id: "quest_16940691773581109",
+                        type: "PlayOrStopBGMNode",
+                        name: "noise - state 2 - start",
+                        resource: "Cine00_SC002",
+                    },
                 ],
             },
             {
@@ -69,7 +102,7 @@ export const questData_jp: QuestStory[] = [
                         id: "17096430398514460",
                         type: "TalkNode",
                         name: "黑屏-100257-净界岛",
-                        next: ["17047805518314946"],
+                        next: ["170928206780818056", "17047805518314946"],
                         dialogues: [
                             {
                                 id: 10025701,
@@ -91,10 +124,16 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "170928206780818056",
+                        type: "PlayOrStopBGMNode",
+                        name: "noise - state 2 - start",
+                        resource: "SC002",
+                    },
+                    {
                         id: "17047805518314946",
                         type: "TalkNode",
                         name: "黑屏-100257-秽兽撕碎",
-                        next: ["quest_1688640351446845"],
+                        next: ["quest_1688640351446845", "quest_16940815139431509"],
                         dialogues: [
                             {
                                 id: 10025704,
@@ -115,6 +154,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100003,
                             },
                         ],
+                    },
+                    {
+                        id: "quest_16940815139431509",
+                        type: "PlayOrStopBGMNode",
+                        name: "出山洞过渡音效 - start",
+                        resource: "connect_01_cave_sfx",
                     },
                 ],
             },
@@ -172,6 +217,14 @@ export const questData_jp: QuestStory[] = [
             {
                 id: 10010106,
                 name: "山麓の村に向かう",
+                nodes: [
+                    {
+                        id: "quest_1685600508920400",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - cunzhuang - start",
+                        resource: "0003_story_cunzhuang",
+                    },
+                ],
             },
             {
                 id: 10010107,
@@ -245,6 +298,16 @@ export const questData_jp: QuestStory[] = [
             {
                 id: 10010108,
                 name: "迫り来る穢獣を撃退する",
+                nodes: [
+                    {
+                        id: "1706007306143137059",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - huishou - start",
+                        resource: "0004_atmos_huishou",
+                        srId: 100101,
+                        pos: [2362, 2664],
+                    },
+                ],
             },
             {
                 id: 10010109,
@@ -466,6 +529,16 @@ export const questData_jp: QuestStory[] = [
             {
                 id: 10010203,
                 name: "山上の遺跡へ向かう",
+                nodes: [
+                    {
+                        id: "quest_16940700911492987",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - nvshenxiang - start",
+                        resource: "0005_story_nvshenxiang",
+                        srId: 100101,
+                        pos: [10111, -3793],
+                    },
+                ],
             },
             {
                 id: 10010204,
@@ -513,6 +586,16 @@ export const questData_jp: QuestStory[] = [
             {
                 id: 10010206,
                 name: "扉を開ける",
+                nodes: [
+                    {
+                        id: "quest_1694142034518804",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - shendianyiji - start",
+                        resource: "0006_atmos_shendianyiji",
+                        srId: 100102,
+                        pos: [18714, -3998],
+                    },
+                ],
             },
             {
                 id: 10010207,
@@ -660,6 +743,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "quest_16940703816133006",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 07- start",
+                        resource: "07",
+                        srId: 100102,
+                        pos: [16281, 8965],
+                    },
                 ],
             },
         ],
@@ -670,6 +761,25 @@ export const questData_jp: QuestStory[] = [
             {
                 id: 10010301,
                 name: "引き続き飛行船を探す",
+                nodes: [
+                    {
+                        id: "quest_1685947271598238",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - _zaoyudiguojun  - start",
+                        resource: "0007_story_zaoyudiguojun",
+                        srId: 100103,
+                        pos: [22268, 19929],
+                    },
+                    {
+                        id: "1708484335215205339",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - shendianyiji上层 - Play",
+                        resource: "0029_atmos_shendianshangceng",
+                        srId: 100103,
+                        pos: [22268, 19929],
+                    },
+                ],
+                startIds: ["quest_1685947271598238", "1708484335215205339"],
             },
             {
                 id: 10010302,
@@ -743,10 +853,30 @@ export const questData_jp: QuestStory[] = [
             {
                 id: 10010304,
                 name: "兵士たちの包囲を突破する",
+                nodes: [
+                    {
+                        id: "quest_16940706250363385",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - zhuizhuzhan  - start",
+                        resource: "0008_combat_zhuizhuzhan",
+                        srId: 100103,
+                        pos: [25358, 22091],
+                    },
+                ],
             },
             {
                 id: 10010305,
                 name: "ここから脱出する",
+                nodes: [
+                    {
+                        id: "169935322288426436",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - xibi_p1  - start",
+                        resource: "0009_combat_xibi_p1",
+                        srId: 100103,
+                        pos: [36189, 23535],
+                    },
+                ],
             },
             {
                 id: 10010306,
@@ -785,6 +915,12 @@ export const questData_jp: QuestStory[] = [
                                 content: "……",
                             },
                         ],
+                    },
+                    {
+                        id: "quest_16940707345323398",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - xibi p2  - start",
+                        resource: "0011_combat_xibi_p2",
                     },
                     {
                         id: "quest_1686818656143291",
@@ -834,13 +970,32 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1730293403920418558",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - tiaoya  - start",
+                        resource: "0012_story_tiaoya",
+                    },
                 ],
-                startIds: ["quest_16926743134633260", "quest_16941646614348815", "quest_1686818656143291"],
+                startIds: [
+                    "quest_16926743134633260",
+                    "quest_16941646614348815",
+                    "quest_16940707345323398",
+                    "quest_1686818656143291",
+                    "1730293403920418558",
+                ],
             },
             {
                 id: 10010307,
                 name: "？？？",
                 nodes: [
+                    {
+                        id: "170970524420825041",
+                        type: "PlayOrStopBGMNode",
+                        name: "prologue_void_2d - noise - Play",
+                        resource: "prologue_void_2d",
+                        next: ["1708484399604207504"],
+                    },
                     {
                         id: "1708484399604207502",
                         type: "TalkNode",
@@ -912,6 +1067,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1708484399604207504",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 沙海2 - Play",
+                        resource: "0028_story_shahai_part2",
+                    },
                 ],
             },
             {
@@ -934,6 +1095,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100005,
                             },
                         ],
+                    },
+                    {
+                        id: "173028002823318208",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - xibi p2  - start",
+                        resource: "0011_combat_xibi_p2",
                     },
                     {
                         id: "173028002823318202",
@@ -983,6 +1150,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1730293403920418558",
+                        type: "PlayOrStopBGMNode",
+                        name: "bgm - tiaoya  - start",
+                        resource: "0012_story_tiaoya",
+                    },
                 ],
             },
             {
@@ -990,25 +1163,28 @@ export const questData_jp: QuestStory[] = [
                 name: "遺跡を探索し、飛行船を探す",
                 nodes: [
                     {
-                        id: "17468608271436328",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17467774050433073",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 07- end",
+                        resource: "07",
                         srId: 100102,
                         pos: [19977, 11262],
-                        dialogues: [
-                            {
-                                id: 10010101,
-                                content: "{性别:ベレ、僕は……|ベレ、私は……}",
-                                voice: "story/1001/100101/190F2A32",
-                                npc: 100001,
-                            },
-                        ],
                     },
                 ],
             },
             {
                 id: 10010312,
                 name: "遺跡を探索し、飛行船を探す",
+                nodes: [
+                    {
+                        id: "17468601216233220",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM - 07- end",
+                        resource: "07",
+                        srId: 100102,
+                        pos: [22410, 15735],
+                    },
+                ],
             },
         ],
     },
@@ -2017,6 +2193,13 @@ export const questData_jp: QuestStory[] = [
                 desc: "カミラから「ヒュプノスの家」に宿泊するよう勧められた。\nその宿屋には恐ろしいうわさ話があるらしいが、あなたはその真相を確かめてみることにした……",
                 nodes: [
                     {
+                        id: "170912107815515005",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放疗养院剧情音乐",
+                        resource: "0020_story_sanatorium",
+                        next: ["17371907445847875041"],
+                    },
+                    {
                         id: "17371907445847875041",
                         type: "TalkNode",
                         name: "【印象对话】女主敲门",
@@ -3017,6 +3200,13 @@ export const questData_jp: QuestStory[] = [
                 name: "マギーが何に困っているか聞いてみよう",
                 desc: "廃品回収で生計を立てる少女、マギーが困っているようだ。\n話を聞いてみよう。",
                 nodes: [
+                    {
+                        id: "170912272639927108",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放酒馆剧情音乐",
+                        resource: "0024_story_pub",
+                        next: ["1703162571823213439"],
+                    },
                     {
                         id: "1703162571823213439",
                         type: "TalkNode",
@@ -4111,6 +4301,13 @@ export const questData_jp: QuestStory[] = [
                 name: "依頼掲示板を確認する",
                 desc: "月狩り人への依頼は「アスフォデロス」の掲示板に貼り出される。確認してみよう。",
                 nodes: [
+                    {
+                        id: "17181605173287021",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放酒馆剧情音乐",
+                        resource: "0024_story_pub",
+                        next: ["17406612041766353"],
+                    },
                     {
                         id: "17406612041766353",
                         type: "TalkNode",
@@ -5394,6 +5591,13 @@ export const questData_jp: QuestStory[] = [
                 desc: "あなたたちの到着で、廃坑の奥に潜んでいた巨大な穢獣が目を覚ました。\nこうなったからには、まずはヤツを倒さなければならない。",
                 nodes: [
                     {
+                        id: "17184248768162029924",
+                        type: "PlayOrStopBGMNode",
+                        name: "开启声音",
+                        resource: "0032_combat_shijingzhe",
+                        next: ["17241238357881232873"],
+                    },
+                    {
                         id: "17241238357881232873",
                         type: "TalkNode",
                         name: "赛琪道歉",
@@ -5870,6 +6074,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 200021,
                             },
                         ],
+                    },
+                    {
+                        id: "1717642566949173641",
+                        type: "PlayOrStopBGMNode",
+                        name: "开启幽默音乐",
+                        resource: "0033_story_humour",
+                        srId: 101304,
+                        pos: [16189, 30813],
                     },
                 ],
             },
@@ -8076,6 +8288,14 @@ export const questData_jp: QuestStory[] = [
                 desc: "アウトサイダーの言う通り、近づいてくる穢獣を撃破し、戦闘技術の訓練を完了しよう。",
                 nodes: [
                     {
+                        id: "17289734866038503",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放训练bgm",
+                        resource: "combat01_state1_r01",
+                        srId: 101103,
+                        pos: [-28000, -9451],
+                    },
+                    {
                         id: "1719560298979297148",
                         type: "TalkNode",
                         name: "地上这些是",
@@ -8146,6 +8366,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "17582680876436601",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放训练bgm",
+                        resource: "combat01_state1_r01",
+                        srId: 101103,
+                        pos: [-32982, -3359],
                     },
                     {
                         id: "174282395557227023049",
@@ -8440,6 +8668,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17305368913881073",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放训练bgm",
+                        resource: "combat01_state1_r01",
+                    },
+                    {
                         id: "17421242991512880432",
                         type: "TalkNode",
                         name: "碎了！",
@@ -8460,7 +8694,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["1717643155721700430", "1717643155721700434", "1717643155722700436", "1717643155722700441"],
+                startIds: ["1717643155721700430", "1717643155721700434", "1717643155722700436", "1717643155722700441", "17305368913881073"],
             },
             {
                 id: 10020507,
@@ -9000,6 +9234,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17491238392664102804",
+                        type: "PlayOrStopBGMNode",
+                        name: "停止播放站桩bgm",
+                        resource: "0050_story_saiqi_grow_flower",
+                    },
+                    {
                         id: "174228308433410206522",
                         type: "TalkNode",
                         name: "是你。",
@@ -9152,6 +9392,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 200006,
                             },
                         ],
+                    },
+                    {
+                        id: "17441070471244931503",
+                        type: "PlayOrStopBGMNode",
+                        name: "放Bgm",
+                        resource: "0039_story_saiqi_see_flower",
+                        srId: 101103,
+                        pos: [-29128, 12608],
                     },
                     {
                         id: "17437437824491316483",
@@ -9553,6 +9801,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17441070471244931502", "17441070471244931503"],
             },
             {
                 id: 10020611,
@@ -11426,6 +11675,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "サイキを待っていると、突然「ヒュプノスの家」の方向からスノウの悲鳴が聞こえた。\n嫌な予感がする。「ヒュプノスの家」で何が起こっているのか確かめに行こう。",
                 nodes: [
                     {
+                        id: "1729666715845568782",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放站桩bgm",
+                        resource: "0051_story_danger",
+                    },
+                    {
                         id: "1725459527481552476",
                         type: "TalkNode",
                         name: "你们终于来了",
@@ -11511,6 +11766,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "スノウによると、サイキの穢蝕が始まってしまったらしい……。その時、「ヒュプノスの家」に住む少年がヘンリックを助けてくれと頼んできた。\n少年と「ヒュプノスの家」に入り、状況を確認しよう。",
                 nodes: [
                     {
+                        id: "17296685922142047194",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放站桩bgm",
+                        resource: "0051_story_danger",
+                    },
+                    {
                         id: "171161181907811033",
                         type: "TalkNode",
                         name: "拜托了，请跟我来！",
@@ -11545,6 +11806,12 @@ export const questData_jp: QuestStory[] = [
                 name: "ヘンリックの事務室に向かう",
                 desc: "「ヒュプノスの家」の下の階にある、普段は閉まっている事務室の扉が開いている。ヘンリックの事務室で何かが起きたらしい。",
                 nodes: [
+                    {
+                        id: "17296677862101491667",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放站桩bgm",
+                        resource: "0051_story_danger",
+                    },
                     {
                         id: "1711011247473162271",
                         type: "TalkNode",
@@ -12151,6 +12418,14 @@ export const questData_jp: QuestStory[] = [
                 desc: "チョウに導かれるまま、ダクリ湖の近くまで来ると、吹き荒れる嵐があなたの行く手を阻む。\n幸いここの風には一定の法則性があるようだ。慎重に凍った湖を渡ろう。",
                 nodes: [
                     {
+                        id: "17815073625007744",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放站桩Bgm",
+                        resource: "0042_story_find_saiqi",
+                        srId: 101103,
+                        pos: [-30270, 8943],
+                    },
+                    {
                         id: "17289895830894995",
                         type: "TalkNode",
                         name: "别担心",
@@ -12207,12 +12482,21 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17815073625007744", "17289895830894995"],
             },
             {
                 id: 10020708,
                 name: "サイキを起こす",
                 desc: "サイキの穢蝕は深まり、彼女を見つけたときには、すでに穢獣「羽化せし者」と化していた。\n「羽化せし者」を倒して、その奥深くで眠っているサイキを呼び覚まそう。",
                 nodes: [
+                    {
+                        id: "1715756785354969639",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放声音",
+                        resource: "0032_combat_shijingzhe",
+                        srId: 101103,
+                        pos: [-8918, 37856],
+                    },
                     {
                         id: "1715756785354969659",
                         type: "TalkNode",
@@ -12279,6 +12563,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17442139067709240929",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放声音",
+                        resource: "0047_combat_saiqi_p1",
+                    },
+                    {
                         id: "17442139067719240933",
                         type: "TalkNode",
                         name: "赛琪，听得见我的声音吗？",
@@ -12341,7 +12631,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17442139067719240962",
+                        type: "PlayOrStopBGMNode",
+                        name: "播bgm",
+                        resource: "0042_story_find_saiqi",
+                    },
                 ],
+                startIds: ["1715756785354969639", "1715756785354969659", "17442139067719240962"],
             },
             {
                 id: 10020709,
@@ -12354,75 +12651,24 @@ export const questData_jp: QuestStory[] = [
                 desc: "サイキが去った方向にまるで道を示すようにチョウの大群が現れた。\nチョウを追ってサイキの足跡を探そう。",
                 nodes: [
                     {
-                        id: "17442870280653025516",
-                        type: "TalkNode",
-                        name: "赛琪，听得见我的声音吗？",
+                        id: "17442870280663025531",
+                        type: "PlayOrStopBGMNode",
+                        name: "开始播放站桩bgm",
+                        resource: "0042_story_find_saiqi",
                         srId: 101103,
                         pos: [-8918, 37856],
-                        dialogues: [
-                            {
-                                id: 10111101,
-                                content: "サイキ、{性别:僕|私}の声が聞こえる？",
-                                voice: "story/1002/101111/194FE482",
-                                npc: 100001,
-                                next: 10111102,
-                            },
-                            {
-                                id: 10111102,
-                                content: "答えて……",
-                                voice: "story/1002/101111/194FE4AC",
-                                npc: 100001,
-                                next: 10111103,
-                            },
-                            {
-                                id: 10111103,
-                                content: "言っていたじゃない{性别:か|の}……まだやりたいこと、たくさんある{性别:って|んでしょ}……？",
-                                voice: "story/1002/101111/194FE4D6",
-                                npc: 100001,
-                                next: 10111104,
-                            },
-                            {
-                                id: 10111104,
-                                content: "ここを離れて、まだ見たことのない場所に行こうよ――",
-                                voice: "story/1002/101111/194FE500",
-                                npc: 100001,
-                                next: 10111105,
-                            },
-                            {
-                                id: 10111105,
-                                content: "小さな島で……小さな家を建てて……",
-                                voice: "story/1002/101111/194FE52A",
-                                npc: 100001,
-                                next: 10111106,
-                            },
-                            {
-                                id: 10111106,
-                                content: "家の周りにたくさんの白い花を植えて……",
-                                voice: "story/1002/101111/194FE554",
-                                npc: 100001,
-                                next: 10111107,
-                            },
-                            {
-                                id: 10111107,
-                                content:
-                                    "太陽の下で日よけの帽子をかぶって……アイスレイク城の雪が恋しいなって、友達とおしゃべりする{性别:んだ|の}……",
-                                voice: "story/1002/101111/194FE57E",
-                                npc: 100001,
-                                next: 10111108,
-                            },
-                            {
-                                id: 10111108,
-                                content: "ねえ……答えて{性别:くれ|}よ……",
-                                voice: "story/1002/101111/194FE5A8",
-                                npc: 100001,
-                            },
-                        ],
                     },
                     {
                         id: "17247499176511946",
                         type: "TalkNode",
                         name: "看风暴顺便切女主",
                         next: ["174524051291634693153"],
+                    },
+                    {
+                        id: "17296873159381488469",
+                        type: "PlayOrStopBGMNode",
+                        name: "播风暴音效",
+                        resource: "storm",
                     },
                     {
                         id: "174524051291634693153",
@@ -12444,7 +12690,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17321974593475231515",
+                        type: "PlayOrStopBGMNode",
+                        name: "播bgm",
+                        resource: "0042_story_find_saiqi",
+                    },
                 ],
+                startIds: ["17442870280663025531", "17321974593475231515"],
             },
         ],
     },
@@ -12498,6 +12751,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17253485743162756940",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幻境bgm",
+                        resource: "0049_combat_saiqi_memory",
+                    },
+                    {
                         id: "17182738991682003306",
                         type: "TalkNode",
                         name: "这是我家",
@@ -12536,6 +12795,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 200006,
                             },
                         ],
+                    },
+                    {
+                        id: "174800614085416893",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放 积木效果音",
+                        resource: "woodblockfall",
                     },
                     {
                         id: "17452243953059266116",
@@ -12933,6 +13198,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17266278147504676",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放 传送门效果音",
+                        resource: "portal1",
+                    },
+                    {
                         id: "174522755786114725048",
                         type: "TalkNode",
                         name: "开车",
@@ -12975,7 +13246,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17586165531244413", "17233704523623771", "17247600117205632559"],
+                startIds: ["17586165531244413", "17233704523623771", "17247600117205632559", "17253485743162756940"],
             },
             {
                 id: 10020802,
@@ -13010,7 +13281,20 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17253486084042757490",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幻境bgm",
+                        resource: "0049_combat_saiqi_memory",
+                    },
+                    {
+                        id: "1748006422260594157",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放 传送门效果音",
+                        resource: "portal1",
+                    },
                 ],
+                startIds: ["1723444322797832601", "17253645968161098414", "17253486084042757490"],
             },
             {
                 id: 10020803,
@@ -13049,7 +13333,7 @@ export const questData_jp: QuestStory[] = [
                         id: "1722527552047487765",
                         type: "TalkNode",
                         name: "看到自己的一生",
-                        next: ["17184319496412590176"],
+                        next: ["17253488456182758722", "17184319496412590176"],
                         dialogues: [
                             {
                                 id: 10112101,
@@ -13107,6 +13391,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17253488456182758722",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0048_combat_saiqi_p2",
+                    },
+                    {
                         id: "17184319496412590176",
                         type: "TalkNode",
                         name: "成为野兽吧",
@@ -13156,6 +13446,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1725360950241785",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放bgm",
+                        resource: "0054_combat_saiqi_p3",
+                    },
+                    {
                         id: "17184325923652866005",
                         type: "TalkNode",
                         name: "你在做什么？！",
@@ -13190,10 +13486,16 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17268145457014179",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放bgm",
+                        resource: "0056_story_saiqi_fly_to_sun",
+                    },
+                    {
                         id: "17214660590632549",
                         type: "TalkNode",
                         name: "胜利结算",
-                        next: ["172595089212717610"],
+                        next: ["17268145457014179", "172595089212717610"],
                         dialogues: [
                             {
                                 id: 10113401,
@@ -15296,6 +15598,13 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1756978090241967878",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["1756978090241967878"],
+                    },
+                    {
                         id: "174575163271510499",
                         type: "UnlockDetectiveAnswerNode",
                         name: "开启推理线索",
@@ -15585,13 +15894,27 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17485135772303487435",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                    },
                 ],
+                startIds: ["17358100632406816", "17485135772303487435"],
             },
             {
                 id: 10030107,
                 name: "事件現場を調べる",
                 desc: "話し合いの末、あなたはリズムと協力し、カロン狩り事件の調査にあたることにした。次の行動は、現場を調べて犯人に繋がる手がかりを見つけ、調査の方針を定めることだ。",
                 nodes: [
+                    {
+                        id: "17569849459422877933",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["17569849459422877933"],
+                    },
                     {
                         id: "173934612267415556",
                         type: "TalkNode",
@@ -15968,6 +16291,12 @@ export const questData_jp: QuestStory[] = [
                                 icon: "InformtIcon",
                             },
                         ],
+                    },
+                    {
+                        id: "17485137736544361469",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
                     },
                 ],
             },
@@ -16395,6 +16724,13 @@ export const questData_jp: QuestStory[] = [
                 desc: "団員たちには犯行当時のアリバイがあり、動機はない。どうやら彼らは事件とは無関係のようだ。劇場に有力な手がかりはなさそうなので、ひとまずここを離れ、工場を調べているリズムの方へ向かおう。",
                 nodes: [
                     {
+                        id: "17485141117565241874",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["173278031895721846"],
+                    },
+                    {
                         id: "173278031895721846",
                         type: "TalkNode",
                         name: "对话节点",
@@ -16787,6 +17123,13 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100314,
                             },
                         ],
+                    },
+                    {
+                        id: "17485141466885243290",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["173278046099127774"],
                     },
                     {
                         id: "173278046099127774",
@@ -17324,6 +17667,15 @@ export const questData_jp: QuestStory[] = [
                 desc: "あなたは「カロン狩り」と関わりのある手がかりをいくつか発見した。単体では意味がつかめなくても、複数を組み合わせれば新たな発見に繋がるかもしれない。",
                 nodes: [
                     {
+                        id: "17569849790292879155",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["17569849790292879155"],
+                        srId: 101101,
+                        pos: [-9617, -4083],
+                    },
+                    {
                         id: "17473096152385189",
                         type: "TalkNode",
                         name: "对话节点",
@@ -17520,6 +17872,15 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100304,
                             },
                         ],
+                    },
+                    {
+                        id: "17569849524302878190",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["17569849524302878190"],
+                        srId: 101101,
+                        pos: [-9617, -4083],
                     },
                     {
                         id: "17459174708204377",
@@ -17835,6 +18196,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17485143570986987157",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "combat01_state2_r01",
+                    },
+                    {
                         id: "1735872857075698526",
                         type: "TalkNode",
                         name: "对话节点",
@@ -18046,6 +18413,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100304,
                             },
                         ],
+                    },
+                    {
+                        id: "17485144742537568794",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "combat01_state2_r01",
                     },
                     {
                         id: "1739519063115783217",
@@ -18474,6 +18847,13 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17485210385975016",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0074_story_encounter_with_blues",
+                        next: ["17308902087824166012", "17485146243129308614"],
+                    },
+                    {
                         id: "17308902087824166012",
                         type: "TalkNode",
                         name: "对话节点",
@@ -18500,6 +18880,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100344,
                             },
                         ],
+                    },
+                    {
+                        id: "17485146243129308614",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0060_boss_ex01_lizhanzhe_loop",
                     },
                     {
                         id: "17308903579024168935",
@@ -18608,7 +18994,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["173313073996623541", "173313073996623542"],
+                startIds: ["173313073996623541", "173313073996623542", "17485210385975016"],
             },
             {
                 id: 10030214,
@@ -18723,6 +19109,13 @@ export const questData_jp: QuestStory[] = [
                 name: "軍立病院へ向かう",
                 desc: "リズムの秘密基地で、あなたたちは彼女の印鑑だけでなく、過去の思い出が詰まった小さな品々もいくつか発見した。一つひとつに目を通すうち、あなたは少しだけリズムという人物を理解できた気がした。もしかすると、最初からあなたたちは、決して相容れない存在というわけではなかったのかもしれない。この印鑑を持ち帰り、ついでに彼女の話も聞いてみよう。",
                 nodes: [
+                    {
+                        id: "174851558636215115484",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0071_lise_secret",
+                        next: ["1730701647488815970"],
+                    },
                     {
                         id: "1730701647488815970",
                         type: "TalkNode",
@@ -19412,6 +19805,15 @@ export const questData_jp: QuestStory[] = [
                 name: "軍立病院へ向かう",
                 desc: "下水道の出口で見たのは、惨劇そのものだった。兵士たちの遺体には、あってはならない毒の痕跡が──カロン狩りに新たな影を落とす出来事だった。この場の報告はアウトサイダーに任せ、あなたとスノウは予定通り、リズムの様子を見に軍立病院へ向かうことにした。",
                 nodes: [
+                    {
+                        id: "17503156862002873807",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0071_lise_secret",
+                        next: ["17503156861962873791"],
+                        srId: 101110,
+                        pos: [4668, 1173],
+                    },
                     {
                         id: "17503156861962873791",
                         type: "TalkNode",
@@ -20485,7 +20887,7 @@ export const questData_jp: QuestStory[] = [
                         name: "开启推理线索",
                         srId: 101101,
                         pos: [-3270, -5180],
-                        next: ["17320110260813252"],
+                        next: ["174851693411720345331"],
                         answers: [
                             {
                                 id: 100501,
@@ -20502,6 +20904,15 @@ export const questData_jp: QuestStory[] = [
                                 icon: "VoiceIcon",
                             },
                         ],
+                    },
+                    {
+                        id: "174851693411720345331",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        next: ["17320110260813252"],
+                        srId: 101101,
+                        pos: [-3270, -5180],
                     },
                     {
                         id: "17320110260813252",
@@ -20626,10 +21037,17 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17482426816602665",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "clue_cd1",
+                        next: ["17367606070361918123"],
+                    },
+                    {
                         id: "17367606070361918123",
                         type: "TalkNode",
                         name: "调频后开车",
-                        next: ["17406417410512353775"],
+                        next: ["17482427161512948"],
                         dialogues: [
                             {
                                 id: 10035303,
@@ -20640,10 +21058,17 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17482427161512948",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "clue_cd2",
+                        next: ["17406417410512353775"],
+                    },
+                    {
                         id: "17406417410512353775",
                         type: "TalkNode",
                         name: "调频后开车",
-                        next: ["17406417461232353972"],
+                        next: ["17482427196483163"],
                         dialogues: [
                             {
                                 id: 10035304,
@@ -20652,6 +21077,13 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "17482427196483163",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "clue_cd3",
+                        next: ["17406417461232353972"],
                     },
                     {
                         id: "17406417461232353972",
@@ -20919,6 +21351,13 @@ export const questData_jp: QuestStory[] = [
                 desc: "リズムが口ずさんだ旋律は、あの夜に犯人が歌っていたものと酷似していた。それは歌劇『雪国の幼子』の一節だという。この証拠を逆手に罠を張るつもりだったが、なんと犯人のほうから現れた……",
                 nodes: [
                     {
+                        id: "174851716764521218491",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0071_lise_secret",
+                        next: ["17410579739793624"],
+                    },
+                    {
                         id: "17410579739793624",
                         type: "TalkNode",
                         name: "站桩",
@@ -21109,8 +21548,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1758013775481962685",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
                 ],
-                startIds: ["17410579739793624", "1750150983705388"],
+                startIds: ["174851716764521218491", "17410579739793624", "1750150983705388", "1758013775481962685"],
             },
             {
                 id: 10030498,
@@ -22277,6 +22722,18 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17570423189393040",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0074_story_encounter_with_blues",
+                    },
+                    {
+                        id: "17496318501493969",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0060_boss_ex01_lizhanzhe_loop",
+                    },
+                    {
                         id: "17483503991223351",
                         type: "TalkNode",
                         name: "对话节点",
@@ -22492,6 +22949,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "174851589174118308519",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "combat01_state2_r01",
+                    },
+                    {
                         id: "1740033517474519887",
                         type: "TalkNode",
                         name: "对话节点",
@@ -22520,7 +22983,7 @@ export const questData_jp: QuestStory[] = [
                         id: "1733734212424597771",
                         type: "TalkNode",
                         name: "黑屏剧情+过场",
-                        next: ["1733734212424597775"],
+                        next: ["17485746346556744"],
                         dialogues: [
                             {
                                 id: 10035501,
@@ -22549,6 +23012,13 @@ export const questData_jp: QuestStory[] = [
                                 speakerName: "ブルース",
                             },
                         ],
+                    },
+                    {
+                        id: "17485746346556744",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0081_scene_alchemyacademy",
+                        next: ["1733734212424597775"],
                     },
                     {
                         id: "1733734212424597775",
@@ -23225,6 +23695,7 @@ export const questData_jp: QuestStory[] = [
                         id: "17339128118721345209",
                         type: "TalkNode",
                         name: "站桩",
+                        next: ["17485753485211757557"],
                         dialogues: [
                             {
                                 id: 10036001,
@@ -23486,6 +23957,19 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17485753485211757557",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0079_story_escape_from_lab_cs",
+                        next: ["17485231754334936731"],
+                    },
+                    {
+                        id: "17485231754334936731",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0075_story_escape_from_lab",
+                    },
                 ],
             },
             {
@@ -23694,6 +24178,15 @@ export const questData_jp: QuestStory[] = [
                 name: "リズムと話す",
                 desc: "「桂冠カロン」なんて称号は、全部でっち上げだった。こんな嘘のために帝国軍に残るなんてリズムにとって残酷すぎる。錬金術院で見たすべてを彼女に伝えたうえで──最後の一歩を踏み出そう。",
                 nodes: [
+                    {
+                        id: "17503164627055761930",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0071_lise_secret",
+                        next: ["17503164627045761924"],
+                        srId: 101103,
+                        pos: [-39720, 4650],
+                    },
                     {
                         id: "17503164627045761924",
                         type: "TalkNode",
@@ -24089,6 +24582,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "銀燭祭りに向けた公演が、ガレア劇場で進行中だ。仮面をかぶり、奇抜な衣装をまとった人々が行き交うこの場所は、化け物の姿を隠すにはうってつけの環境だ。さあ、約束した相手に会いに行こう。",
                 nodes: [
                     {
+                        id: "17496457592087833",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
+                    {
                         id: "173459408267631729",
                         type: "TalkNode",
                         name: "开车",
@@ -24189,7 +24688,7 @@ export const questData_jp: QuestStory[] = [
                         name: "站桩",
                         srId: 101901,
                         pos: [18230, -410],
-                        next: ["174083203793914499"],
+                        next: ["174083203793914499", "17496457592087833"],
                         dialogues: [
                             {
                                 id: 10036308,
@@ -24271,6 +24770,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17580230240234936",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0086_cs_thea_fight",
+                    },
                 ],
             },
             {
@@ -24278,6 +24783,12 @@ export const questData_jp: QuestStory[] = [
                 name: "ガレア劇場へ向かう",
                 desc: "銀燭祭りに向けた公演が、ガレア劇場で進行中だ。仮面をかぶり、奇抜な衣装をまとった人々が行き交うこの場所は、化け物の姿を隠すにはうってつけの環境だ。さあ、約束した相手に会いに行こう。",
                 nodes: [
+                    {
+                        id: "17503190879501855467",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
                     {
                         id: "17503190879501855435",
                         type: "TalkNode",
@@ -24319,7 +24830,7 @@ export const questData_jp: QuestStory[] = [
                         id: "17503190879501855436",
                         type: "TalkNode",
                         name: "站桩",
-                        next: ["17503190879501855437", "17503190879501855439"],
+                        next: ["17503190879501855467", "17503190879501855437", "17503190879501855439"],
                         dialogues: [
                             {
                                 id: 10036501,
@@ -28304,6 +28815,14 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1779520323568669",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0163_combat_jazz_01",
+                        srId: 106301,
+                        pos: [-15620, 4980],
+                    },
+                    {
                         id: "177816111617563890722",
                         type: "TalkNode",
                         name: "对话节点",
@@ -28415,6 +28934,14 @@ export const questData_jp: QuestStory[] = [
                 name: "鍛鉄工場の奥へ進む",
                 desc: "鍛鉄工場のラインに沿って、さらに進もう。",
                 nodes: [
+                    {
+                        id: "1779718823633504",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0162_story_jazz_sneak_into",
+                        srId: 106001,
+                        pos: [-16870, 4860],
+                    },
                     {
                         id: "177796908032114036388",
                         type: "TalkNode",
@@ -28821,6 +29348,14 @@ export const questData_jp: QuestStory[] = [
                 name: "駅の頂上ルートに沿って進む",
                 desc: "フラワー駅の上部に到着した。鉄骨の上を進み、地上へ降りられるルートを探そう。",
                 nodes: [
+                    {
+                        id: "17797124105732838",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0162_story_jazz_sneak_into",
+                        srId: 106001,
+                        pos: [-16870, 4860],
+                    },
                     {
                         id: "17782485231261432511",
                         type: "TalkNode",
@@ -29644,6 +30179,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17830648152597543",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0166_story_danger",
+                    },
+                    {
                         id: "177892286027192226921",
                         type: "TalkNode",
                         name: "对话节点",
@@ -29672,6 +30213,7 @@ export const questData_jp: QuestStory[] = [
                         id: "177763204613266981140",
                         type: "TalkNode",
                         name: "站长出场 ",
+                        next: ["17797130795419200613"],
                         dialogues: [
                             {
                                 id: 10042401,
@@ -29766,6 +30308,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17797130795419200613",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0163_combat_jazz_01",
+                    },
                 ],
             },
             {
@@ -29773,6 +30321,14 @@ export const questData_jp: QuestStory[] = [
                 name: "ヒルダについて進む",
                 desc: "昇降機の前に到着したところで、フラワー駅の駅長アイゼンバーンと遭遇し、爆発の首謀者だと疑われてしまった。\n その時、先ほどカラス号の屋根で出会ったヒルダが現れ、アイゼンバーンの包囲を阻んでくれた。ヒルダについていこう。",
                 nodes: [
+                    {
+                        id: "177978411478316956143",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0165_story_xier_theme",
+                        srId: 106001,
+                        pos: [-17343, 4858],
+                    },
                     {
                         id: "177763808527098680864",
                         type: "TalkNode",
@@ -29813,9 +30369,27 @@ export const questData_jp: QuestStory[] = [
                 desc: "昇降機の前に到着したところで、フラワー駅の駅長アイゼンバーンと遭遇し、爆発の首謀者だと疑われてしまった。\n その時、先ほどカラス号の屋根で出会ったヒルダが現れ、アイゼンバーンの包囲を阻んでくれた。ヒルダについていこう。",
                 nodes: [
                     {
+                        id: "17797131316471940065",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0164_cs_xier_show",
+                        next: ["177763795417816773252"],
+                        srId: 106001,
+                        pos: [-16550, 100],
+                    },
+                    {
                         id: "177763795417816773252",
                         type: "TalkNode",
                         name: "希尔妲救场",
+                        srId: 106001,
+                        pos: [-16550, 100],
+                        next: ["17800554634351458143"],
+                    },
+                    {
+                        id: "17800554634351458143",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0165_story_xier_theme",
                         srId: 106001,
                         pos: [-16550, 100],
                     },
@@ -30136,7 +30710,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["177763795417816773252", "177780108292048558302"],
+                startIds: ["17797131316471940065", "177763795417816773252", "17800554634351458143", "177780108292048558302"],
             },
             {
                 id: 10040207,
@@ -31213,6 +31787,12 @@ export const questData_jp: QuestStory[] = [
                         next: ["177847399602678", "177847399602354"],
                     },
                     {
+                        id: "1779520549383969223",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0162_story_jazz_sneak_into",
+                    },
+                    {
                         id: "177847399602678",
                         type: "TalkNode",
                         name: "对话节点",
@@ -31296,12 +31876,21 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["177847399602986", "1779520549383969223"],
             },
             {
                 id: 10040213,
                 name: "混乱を起こす準備をする",
                 desc: "ヒルダと名乗る女性が行く手を阻み、警告してきた。やむを得ずいったん撤退するしかないが、離れる前に、ステファンが言っていた駅の管理室を調査してみよう。",
                 nodes: [
+                    {
+                        id: "177969493425927101363",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0164_cs_xier_show",
+                        srId: 106001,
+                        pos: [-39010, -2730],
+                    },
                     {
                         id: "177763838346920967014",
                         type: "TalkNode",
@@ -31444,6 +32033,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100403,
                             },
                         ],
+                    },
+                    {
+                        id: "17797127232322907865",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0165_story_xier_theme",
+                        srId: 106001,
+                        pos: [-39010, -2730],
                     },
                     {
                         id: "177763838346920967016",
@@ -33275,7 +33872,7 @@ export const questData_jp: QuestStory[] = [
                         name: "boss战前战斗",
                         srId: 106001,
                         pos: [-87180, -10870],
-                        next: ["17782435125899548989"],
+                        next: ["17795206183041936545", "17782435125899548989"],
                         dialogues: [
                             {
                                 id: 10044501,
@@ -33336,6 +33933,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100444,
                             },
                         ],
+                    },
+                    {
+                        id: "17795206183041936545",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0168_boss_haluoji",
+                        srId: 106001,
+                        pos: [-87180, -10870],
                     },
                     {
                         id: "17782435125899548989",
@@ -33611,7 +34216,7 @@ export const questData_jp: QuestStory[] = [
                         name: "站长又出场",
                         srId: 106001,
                         pos: [-20650, -4950],
-                        next: ["177824401290211462364"],
+                        next: ["177824401290211462364", "177969555969913542774"],
                         dialogues: [
                             {
                                 id: 10044901,
@@ -33796,6 +34401,14 @@ export const questData_jp: QuestStory[] = [
                                 speakerName: "フロレンティア姫",
                             },
                         ],
+                    },
+                    {
+                        id: "177969555969913542774",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0167_story_fuluo_theme",
+                        srId: 106001,
+                        pos: [-20650, -4950],
                     },
                     {
                         id: "177824401290211462366",
@@ -35229,6 +35842,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "これから脱出計画を実行するところだが、フローラお嬢様はまだ絵に集中している。\n 彼女のためにお茶と菓子を用意しよう。",
                 nodes: [
                     {
+                        id: "17795207159622903847",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0167_story_fuluo_theme",
+                    },
+                    {
                         id: "17787400372049740479",
                         type: "TalkNode",
                         name: "与芙罗拉交谈开车",
@@ -35516,6 +36135,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "177969628728015478056",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0165_story_xier_theme",
+                    },
                 ],
             },
             {
@@ -35746,6 +36371,14 @@ export const questData_jp: QuestStory[] = [
                 name: "ステファンと一緒に一般車両へ向かう",
                 desc: "一般車両に到着した。乗客たちはにぎやかで、とても活気がある。彼らと話して、少し気分を落ち着けよう。",
                 nodes: [
+                    {
+                        id: "177969673256533392057",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0161_scene_train_station",
+                        srId: 106101,
+                        pos: [255430, -10960],
+                    },
                     {
                         id: "177874559521014606165",
                         type: "TalkNode",
@@ -36664,6 +37297,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1779696794706404",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0162_story_jazz_sneak_into",
+                    },
                 ],
             },
             {
@@ -37429,6 +38068,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1779697034679969208",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0170_story_fuluo_play_piano",
+                    },
                 ],
             },
             {
@@ -37498,6 +38143,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100438,
                             },
                         ],
+                    },
+                    {
+                        id: "17796972200011936342",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0166_story_danger",
                     },
                 ],
             },
@@ -38112,12 +38763,31 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17795207468333872443",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0167_story_fuluo_theme",
+                        srId: 106101,
+                        pos: [255430, -10960],
+                    },
                 ],
+                startIds: ["17733852121786481894", "17795207468333872443"],
             },
             {
                 id: 10040424,
                 name: "フローラを救出する準備をする",
                 desc: "フローラを連れてカラス号を離れ、自由へ飛び出そう！",
+                nodes: [
+                    {
+                        id: "177980054136812121858",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0169_cs_tiaoche",
+                        srId: 106101,
+                        pos: [255430, -10960],
+                    },
+                ],
             },
             {
                 id: 10040426,
@@ -38130,7 +38800,7 @@ export const questData_jp: QuestStory[] = [
                         name: "飞艇出场",
                         srId: 106101,
                         pos: [255430, -10960],
-                        next: ["177364906021122135839"],
+                        next: ["177364906021122135839", "17834256782697945545"],
                     },
                     {
                         id: "177364906021122135839",
@@ -38258,6 +38928,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100413,
                             },
                         ],
+                    },
+                    {
+                        id: "17834256782697945545",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0008_combat_zhuizhuzhan",
+                        srId: 106101,
+                        pos: [255430, -10960],
                     },
                 ],
             },
@@ -38957,12 +39635,29 @@ export const questData_jp: QuestStory[] = [
                 id: 10040501,
                 name: "砲台を操作し、飛空艇の攻撃を防ぐ",
                 desc: "カーチャを止めることには成功したが、車掌が死の間際に発した信号により、帝国軍が操る飛空艇が呼び寄せられてしまった。列車ごとフォーセイクン同盟を消し去るつもりだ。\n 列車の砲台を操作し、飛空艇を阻止しよう。",
+                nodes: [
+                    {
+                        id: "17797874344247271808",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0008_combat_zhuizhuzhan",
+                        srId: 106101,
+                        pos: [256340, 13040],
+                    },
+                ],
             },
             {
                 id: 10040502,
                 name: "フローラの考えを聞く",
                 desc: "飛空艇の動きが止まった。",
                 nodes: [
+                    {
+                        id: "17798724048563879013",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0008_combat_zhuizhuzhan",
+                        next: ["177772041576114019395"],
+                    },
                     {
                         id: "177772041576114019395",
                         type: "TalkNode",
@@ -39394,10 +40089,16 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1779520994099968656",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0168_boss_haluoji",
+                    },
+                    {
                         id: "177772041577114019461",
                         type: "TalkNode",
                         name: "击败哈洛吉",
-                        next: ["177772041577114019460"],
+                        next: ["177969828211040647726"],
                         dialogues: [
                             {
                                 id: 10048501,
@@ -39481,6 +40182,13 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "177969828211040647726",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0080_story_the_abandoned_theme",
+                        next: ["177772041577114019460"],
+                    },
+                    {
                         id: "177772041577114019460",
                         type: "TalkNode",
                         name: "卡嘉击坠飞艇后 ",
@@ -39559,9 +40267,16 @@ export const questData_jp: QuestStory[] = [
                 desc: "カーチャが列車砲を操作し、飛空艇への攻撃を始めた。彼女を止めなければならない。\n オーロラ号の主砲を撃破しよう。",
                 nodes: [
                     {
+                        id: "1779787486825797",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0080_story_the_abandoned_theme",
+                    },
+                    {
                         id: "177772045534914953121",
                         type: "TalkNode",
                         name: "对话节点",
+                        next: ["177969834552341616074"],
                         dialogues: [
                             {
                                 id: 10048611,
@@ -39612,6 +40327,19 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "177969834552341616074",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0171_combat_lieche_intro",
+                        next: ["17795210722591935845"],
+                    },
+                    {
+                        id: "17795210722591935845",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0171_combat_lieche_loop",
+                    },
                 ],
             },
             {
@@ -39623,7 +40351,7 @@ export const questData_jp: QuestStory[] = [
                         id: "177772053087715887760",
                         type: "TalkNode",
                         name: "boss战一阶段结束对话",
-                        next: ["17788440692621930548"],
+                        next: ["17795211629842903298", "17788440692621930548"],
                         dialogues: [
                             {
                                 id: 10048701,
@@ -39662,6 +40390,18 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "177969863473044520369",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0080_story_the_abandoned_theme",
+                    },
+                    {
+                        id: "17795211629842903298",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0171_combat_lieche_loop",
                     },
                     {
                         id: "17788440692621930548",
@@ -40548,6 +41288,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "177969907659952263446",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0043_story_empire",
+                        srId: 106101,
+                        pos: [256340, 12660],
+                    },
                 ],
             },
             {
@@ -40664,6 +41412,16 @@ export const questData_jp: QuestStory[] = [
                 id: 10040512,
                 name: "ここはどこだ……？",
                 desc: "ここはどこだ……ニヴルヘイムか？周囲を探索してみよう。",
+                nodes: [
+                    {
+                        id: "177969881698146457301",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0172_story_counter_attack",
+                        srId: 106101,
+                        pos: [256340, 12660],
+                    },
+                ],
             },
             {
                 id: 10040514,
@@ -40763,6 +41521,12 @@ export const questData_jp: QuestStory[] = [
                 name: "穢獣を撃破する",
                 desc: "あなたの小隊は強力な穢獣に襲われた。穢獣を倒してから、隊員たちと合流しよう。",
                 nodes: [
+                    {
+                        id: "17283896795166504",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0060_boss_ex01_lizhanzhe_loop",
+                    },
                     {
                         id: "173010246588627112540",
                         type: "TalkNode",
@@ -40946,7 +41710,7 @@ export const questData_jp: QuestStory[] = [
                         id: "17193902221801415",
                         type: "TalkNode",
                         name: "因鲜血而震颤",
-                        next: ["17193902221801416"],
+                        next: ["17193902221801416", "1728390134697194412"],
                         dialogues: [
                             {
                                 id: 11010207,
@@ -41010,6 +41774,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "1728390134697194412",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
                     },
                     {
                         id: "17537756449062114",
@@ -41270,6 +42040,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1728390768716196045",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                    },
+                    {
                         id: "1718864280999136821",
                         type: "TalkNode",
                         name: "开车-达芙涅求助",
@@ -41383,6 +42159,15 @@ export const questData_jp: QuestStory[] = [
                 name: "ダフネと話す",
                 desc: "アヴァールと共に穢獣を撃退して臨時救護所に戻り、次の行動計画を検討しよう。",
                 nodes: [
+                    {
+                        id: "1728391611239201164",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
+                        next: ["1728391598499200670"],
+                        srId: 102101,
+                        pos: [29180, -36070],
+                    },
                     {
                         id: "1723793345850530559",
                         type: "TalkNode",
@@ -41786,6 +42571,7 @@ export const questData_jp: QuestStory[] = [
                     },
                 ],
                 startIds: [
+                    "1728391611239201164",
                     "1723793345850530559",
                     "1723793345854530570",
                     "1723793345855530571",
@@ -41804,6 +42590,14 @@ export const questData_jp: QuestStory[] = [
                 name: "要塞内部へ進む",
                 desc: "アヴァールはダフネと負傷者たちに「白狼」小隊の迎えを待つよう指示した。あなたは彼と一緒に要塞内部に侵入し、任務を続行することにした。",
                 nodes: [
+                    {
+                        id: "1728391958638568742",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102101,
+                        pos: [20409, -42328],
+                    },
                     {
                         id: "1722414724009163501",
                         type: "TalkNode",
@@ -42028,6 +42822,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17314987663599959662",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                    },
+                    {
                         id: "17314987663559959648",
                         type: "TalkNode",
                         name: "那些髓动轮",
@@ -42165,13 +42965,21 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["1735196316056240910", "17563841613355289"],
+                startIds: ["1735196316056240910", "17563841613355289", "17314987663599959662"],
             },
             {
                 id: 11010306,
                 name: "イコルキャビンの状態を確認する",
                 desc: "3か所の動力源を遮断すると、機関室ホールのイコルキャビンから警報音が鳴り響いた……",
                 nodes: [
+                    {
+                        id: "17601019900401742",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                        srId: 102101,
+                        pos: [1011, -38089],
+                    },
                     {
                         id: "17601019900401743",
                         type: "TalkNode",
@@ -42370,8 +43178,15 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17552626061712131505",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
                 ],
                 startIds: [
+                    "17601019900401742",
                     "17601019900401743",
                     "17253323291847833643",
                     "17253323177727833260",
@@ -43107,6 +43922,16 @@ export const questData_jp: QuestStory[] = [
                 id: 11010309,
                 name: "機関室から脱出する",
                 desc: "ヴィックは犠牲になったが、戦場は無情で、悲しむ暇さえない。任務を続行しなければならない。\nアヴァールと協力し、機関室のトラップを破壊しよう。周囲を徘徊する穢獣に警戒を怠るな。",
+                nodes: [
+                    {
+                        id: "17346895450532728966",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
+                        srId: 102101,
+                        pos: [-2516, -33328],
+                    },
+                ],
             },
             {
                 id: 11010311,
@@ -43268,6 +44093,15 @@ export const questData_jp: QuestStory[] = [
                 desc: "フルヴィス総司令官は突撃作戦の続行を要請している。しかし、現在の戦況では、無謀な攻撃は全滅を意味するだろう。\nアヴァールの判断を信じ、まずは「グリフォン」分隊の戦友を救援しよう。",
                 nodes: [
                     {
+                        id: "17283928471781846317",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        next: ["17364998973465905300"],
+                        srId: 102101,
+                        pos: [-9791, -41953],
+                    },
+                    {
                         id: "17364998973465905300",
                         type: "TalkNode",
                         name: "对话节点",
@@ -43281,6 +44115,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17346900009364774201",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102101,
+                        pos: [-9791, -41953],
                     },
                 ],
             },
@@ -43449,13 +44291,30 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17346901796314778328",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [-5951, -20611],
+                    },
                 ],
+                startIds: ["17371841728019834760", "17346901796314778328"],
             },
             {
                 id: 11010509,
                 name: "閉じ込められた隊員と合流する",
                 desc: "穢獣を倒した。仲間たちのところへ行こう。",
                 nodes: [
+                    {
+                        id: "172844402509811394203",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [-10970, -21730],
+                    },
                     {
                         id: "17371840620838853254",
                         type: "TalkNode",
@@ -43810,6 +44669,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["172844402509811394203", "17371840620838853254"],
             },
             {
                 id: 11010510,
@@ -43897,6 +44757,14 @@ export const questData_jp: QuestStory[] = [
                 desc: "砲台が軌道に沿って移動し始めた。 その間、アヴァールと共に迫り来る穢獣を迎撃し、砲台を守ろう。",
                 nodes: [
                     {
+                        id: "172844407937311940011",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [-17100, -980],
+                    },
+                    {
                         id: "172466334872716973514",
                         type: "TalkNode",
                         name: "站桩 - 阿瓦尔 - 找到燃料了",
@@ -43925,6 +44793,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17283936245673679378",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0059_scene_ex01_encounter",
+                    },
+                    {
                         id: "17203249441934033964",
                         type: "TalkNode",
                         name: "推车开车对话",
@@ -43951,7 +44825,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["172466334872716973514", "172597340089719500774"],
+                startIds: ["172844407937311940011", "172466334872716973514", "172597340089719500774", "17283936245673679378"],
             },
             {
                 id: 11010513,
@@ -43972,6 +44846,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17284429951917373268",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0059_scene_ex01_encounter",
                     },
                     {
                         id: "17212737371581673097",
@@ -44149,7 +45029,16 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17283936453023683366",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [4799, 6952],
+                    },
                 ],
+                startIds: ["17237965473031049370", "17283936453023683366"],
             },
             {
                 id: 11010515,
@@ -44162,7 +45051,7 @@ export const questData_jp: QuestStory[] = [
                         name: "黑屏",
                         srId: 102102,
                         pos: [1145, 7280],
-                        next: ["17484420387791169527"],
+                        next: ["17283938260834414078", "17484420387791169527"],
                         dialogues: [
                             {
                                 id: 11019201,
@@ -44192,6 +45081,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 110034,
                             },
                         ],
+                    },
+                    {
+                        id: "17283938260834414078",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
+                        srId: 102102,
+                        pos: [1145, 7280],
                     },
                     {
                         id: "17484420387791169527",
@@ -44771,6 +45668,14 @@ export const questData_jp: QuestStory[] = [
                 desc: "結局、一足遅かった。シモンを救うことはできなかったが、彼の最期の言葉から、軌道エリアにまだ閉じ込められた隊員がいることがわかった。\n今は生存者を救出することに全力を尽くそう。",
                 nodes: [
                     {
+                        id: "1735894963114941906",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102101,
+                        pos: [-42, -39244],
+                    },
+                    {
                         id: "17392630798972537295",
                         type: "TalkNode",
                         name: "开车- 打给达芙涅",
@@ -44805,6 +45710,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["1735894963114941906", "17392630798972537295"],
             },
             {
                 id: 11010519,
@@ -45005,6 +45911,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17358952675115599136",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102101,
+                        pos: [-56, -28328],
+                    },
                 ],
             },
             {
@@ -45126,6 +46040,14 @@ export const questData_jp: QuestStory[] = [
                 name: "アヴァールと合流する",
                 desc: "チームは2人のカロンと出会った。少女の方は「同盟に捕らえられて労働を強いられていた無実の町民」だと説明し、年配の男は近道を案内してくれると申し出た。2人の素性は今のところ確認できないが、アヴァールとの合流を急ぐため、警戒をしつつ老人の示す方向へ進もう。",
                 nodes: [
+                    {
+                        id: "173633192837710583603",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [-17755, -670],
+                    },
                     {
                         id: "173633192837710583605",
                         type: "TalkNode",
@@ -45397,6 +46319,21 @@ export const questData_jp: QuestStory[] = [
                 desc: "アヴァールは単独で中央制御室に向かうつもりだったが、戦友たちは彼ひとりに危険を背負わせることを拒否した。あなたの説得により、アヴァールは最終的に仲間と共に行動することに同意した。",
                 nodes: [
                     {
+                        id: "172854286752423290978",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
+                        srId: 102102,
+                        pos: [0, 9850],
+                    },
+                    {
+                        id: "17283942605365339857",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0060_boss_ex01_lizhanzhe_loop",
+                        next: ["17229280300911386820"],
+                    },
+                    {
                         id: "17229280300911386820",
                         type: "TalkNode",
                         name: "阿瓦尔说小心点",
@@ -45513,7 +46450,7 @@ export const questData_jp: QuestStory[] = [
                         name: "阿瓦尔在楼上",
                         srId: 102102,
                         pos: [-10, 17587],
-                        next: ["17272521340302785298"],
+                        next: ["17272521340302785298", "17283943979645526499"],
                         dialogues: [
                             {
                                 id: 11013409,
@@ -45899,6 +46836,14 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17283943979645526499",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0043_story_empire",
+                        srId: 102102,
+                        pos: [-10, 17587],
+                    },
+                    {
                         id: "17272521340302785296",
                         type: "TalkNode",
                         name: "对话节点",
@@ -45968,6 +46913,14 @@ export const questData_jp: QuestStory[] = [
                 name: "中央制御室へ向かう",
                 desc: "強力な穢獣を倒した。引き続き先へ進もう。",
                 nodes: [
+                    {
+                        id: "17349231817402736518",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0058_scene_ex01_action",
+                        srId: 102102,
+                        pos: [-10, 17587],
+                    },
                     {
                         id: "17349231817402736519",
                         type: "TalkNode",
@@ -46363,6 +47316,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17349231817402736518", "17349231817402736519"],
             },
             {
                 id: 11010706,
@@ -46383,10 +47337,16 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17344912306295971",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
+                    {
                         id: "17253450193859109322",
                         type: "TalkNode",
                         name: "黑屏 - 醒来",
-                        next: ["17424592240842094065", "17253450193859109326", "174219548213613269307"],
+                        next: ["17283945330285897420", "17424592240842094065", "17253450193859109326", "174219548213613269307"],
                         dialogues: [
                             {
                                 id: 11013801,
@@ -46409,6 +47369,12 @@ export const questData_jp: QuestStory[] = [
                                 speakerName: "？？？",
                             },
                         ],
+                    },
+                    {
+                        id: "17283945330285897420",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
                     },
                     {
                         id: "17424592240842094065",
@@ -46592,8 +47558,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1733380183841608",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
                 ],
-                startIds: ["1722421160212347710", "1725013293956559677"],
+                startIds: ["1722421160212347710", "1725013293956559677", "1733380183841608"],
             },
             {
                 id: 11010802,
@@ -46610,6 +47582,12 @@ export const questData_jp: QuestStory[] = [
                                 voice: "story/1002/110174/1B94B65A",
                             },
                         ],
+                    },
+                    {
+                        id: "173165997827929022663",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
                     },
                     {
                         id: "1752833494727974",
@@ -46710,6 +47688,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17250135336031463503", "173165997827929022663"],
             },
             {
                 id: 11010804,
@@ -47203,12 +48182,30 @@ export const questData_jp: QuestStory[] = [
                 id: 11010808,
                 name: "現れた「一角鯨（ナーファル）」兵士を倒す",
                 desc: "ダフネを見つけた。彼女は明らかに動揺しているが、それでも冷静さを保ち、衛生兵としての職責を果たした。\nこの要塞にこれ以上とどまることは危険だ。彼女と共に下水道から脱出しよう。",
+                nodes: [
+                    {
+                        id: "17344913204799605",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                        srId: 102102,
+                        pos: [-750, 12320],
+                    },
+                ],
             },
             {
                 id: 11010809,
                 name: "制御装置を使って扉を開ける",
                 desc: "ダフネを見つけた。彼女は明らかに動揺しているが、それでも冷静さを保ち、衛生兵としての職責を果たした。\nこの要塞にこれ以上とどまることは危険だ。彼女と共に下水道から脱出しよう。",
                 nodes: [
+                    {
+                        id: "172844423166912492404",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                        srId: 102102,
+                        pos: [10, 7465],
+                    },
                     {
                         id: "17340804816779075098",
                         type: "TalkNode",
@@ -47377,12 +48374,21 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["172844423166912492404", "17340804816779075098"],
             },
             {
                 id: 11010810,
                 name: "下水道を利用して要塞から脱出する",
                 desc: "ダフネを見つけた。彼女は明らかに動揺しているが、それでも冷静さを保ち、衛生兵としての職責を果たした。\nこの要塞にこれ以上とどまることは危険だ。彼女と共に下水道から脱出しよう。",
                 nodes: [
+                    {
+                        id: "172844424841812674421",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                        srId: 102102,
+                        pos: [0, 4170],
+                    },
                     {
                         id: "1732509715704653",
                         type: "TalkNode",
@@ -47722,6 +48728,16 @@ export const questData_jp: QuestStory[] = [
                 id: 11010813,
                 name: "下水道を利用して要塞から脱出する",
                 desc: "鍵ーを奪う",
+                nodes: [
+                    {
+                        id: "172844426683612856495",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                        srId: 102102,
+                        pos: [10, -6190],
+                    },
+                ],
             },
             {
                 id: 11010814,
@@ -47729,17 +48745,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "鍵ーを奪う",
                 nodes: [
                     {
-                        id: "172535469512314776889",
-                        type: "TalkNode",
-                        name: "黑屏去下水道",
+                        id: "172844428541713038520",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
                         srId: 102102,
                         pos: [3950, -8050],
-                        dialogues: [
-                            {
-                                id: 11017409,
-                                voice: "story/1002/110174/1B94B7AA",
-                            },
-                        ],
                     },
                 ],
             },
@@ -48007,9 +49018,16 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17295869358111903759",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0057_scene_ex01_prepare",
+                    },
+                    {
                         id: "174228506548822424423",
                         type: "TalkNode",
                         name: "马尔科对话",
+                        next: ["17476541889811582"],
                         dialogues: [
                             {
                                 id: 11015601,
@@ -48041,6 +49059,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17476541889811582",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放 传送门效果音",
+                        resource: "portal1",
                     },
                     {
                         id: "17446922066821622956",
@@ -48213,6 +49237,12 @@ export const questData_jp: QuestStory[] = [
                 name: "「煉火の典獄」",
                 desc: "典獄の烈火に立ち向かい、自らの無実を証明しよう。",
                 nodes: [
+                    {
+                        id: "17295874506191906119",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0055_combat_boss_haier",
+                    },
                     {
                         id: "17271690062773511993",
                         type: "TalkNode",
@@ -48788,6 +49818,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17483342890804211",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0067_story_daphnis_theme_piano",
+                    },
+                    {
                         id: "17290492796331765754",
                         type: "TalkNode",
                         name: "对话节点",
@@ -48867,7 +49903,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17290485968531764750",
+                        type: "VideoNode",
+                        name: "视频节点",
+                        resource: "EX01_SC018",
+                    },
                 ],
+                startIds: ["1724136079053183530", "17483342890804211", "17290485968531764750"],
             },
             {
                 id: 11010906,
@@ -48878,7 +49921,7 @@ export const questData_jp: QuestStory[] = [
                         id: "1726817872489186580",
                         type: "TalkNode",
                         name: "FixSimple_28走不出这里",
-                        next: ["17241358294468275"],
+                        next: ["17241358294468275", "17483344492462595699"],
                         dialogues: [
                             {
                                 id: 11016901,
@@ -49085,6 +50128,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17483344492462595699",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0073_story_virgil_theme",
+                    },
                 ],
             },
             {
@@ -49175,6 +50224,7 @@ export const questData_jp: QuestStory[] = [
                         name: "审问",
                         next: [
                             "17550098526492617",
+                            "17476542294431151309",
                             "174229348655233380293",
                             "17443545450111101211",
                             "174229358447233902763",
@@ -49227,6 +50277,12 @@ export const questData_jp: QuestStory[] = [
                                     "奈落の闇へと沈んでいく時、あなたは考え始めた。もしあの頃は、覚悟がもう少し強かったなら、結末は違っていたのだろうか、と。",
                             },
                         ],
+                    },
+                    {
+                        id: "17476542294431151309",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放 传送门效果音",
+                        resource: "portal1",
                     },
                     {
                         id: "174229348655233380293",
@@ -49734,6 +50790,7 @@ export const questData_jp: QuestStory[] = [
                         id: "17851555172566669159",
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_02】和伯纳德对话",
+                        next: ["17879138468782237814"],
                         dialogues: [
                             {
                                 id: 11100201,
@@ -50065,6 +51122,12 @@ export const questData_jp: QuestStory[] = [
                                 speakerName: "「戦車」ヴィクター？",
                             },
                         ],
+                    },
+                    {
+                        id: "17879138468782237814",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0033_story_humour",
                     },
                     {
                         id: "1780315440331371",
@@ -50438,6 +51501,12 @@ export const questData_jp: QuestStory[] = [
                 name: "廃墟の遊園地",
                 desc: "エイダについてアルカノの町の廃墟にやってきた。少し休んだら、町に向かって進もう。",
                 nodes: [
+                    {
+                        id: "17879144202635591143",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0183_scene_park",
+                    },
                     {
                         id: "1780920816035374",
                         type: "TalkNode",
@@ -51179,6 +52248,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "エイダと廃墟の遊園地でしばらく遊んでいると、廃墟の奥から銃声が聞こえてきた。銃声のする方へ慎重に進もう。",
                 nodes: [
                     {
+                        id: "17882754818631137018",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0184_story_curse_echoes",
+                    },
+                    {
                         id: "17815218418292099598",
                         type: "TalkNode",
                         name: "对话节点",
@@ -51278,6 +52353,12 @@ export const questData_jp: QuestStory[] = [
                 name: "裂け目の下",
                 desc: "銃声のした場所まで追いついたが、待ち伏せに遭い崖下へ落とされてしまった。いったい誰があなたたちを襲ったのか？",
                 nodes: [
+                    {
+                        id: "178791623328912301854",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0184_story_curse_echoes",
+                    },
                     {
                         id: "17815778711223149814",
                         type: "TalkNode",
@@ -51501,6 +52582,7 @@ export const questData_jp: QuestStory[] = [
                         id: "178304776717511888499",
                         type: "TalkNode",
                         name: "对话节点",
+                        next: ["17884366014902252429"],
                         dialogues: [
                             {
                                 id: 11102901,
@@ -51581,6 +52663,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 111001,
                             },
                         ],
+                    },
+                    {
+                        id: "17884366014902252429",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
                     },
                     {
                         id: "1781531329392563",
@@ -51836,13 +52924,19 @@ export const questData_jp: QuestStory[] = [
                         id: "17842588072105549278",
                         type: "TalkNode",
                         name: "阅读物ui界面",
-                        next: ["178471151588814402229", "178471153317614402595", "17842692488716667604", "178168140058312614716"],
+                        next: [
+                            "178471151588814402229",
+                            "178471153317614402595",
+                            "17842692488716667604",
+                            "178791638100313419147",
+                            "178168140058312614716",
+                        ],
                     },
                     {
                         id: "178471151588814402229",
                         type: "TalkNode",
                         name: "对话节点",
-                        next: ["17842692488716667604", "178471153317614402595", "178168140058312614716"],
+                        next: ["17842692488716667604", "178791638100313419147", "178471153317614402595", "178168140058312614716"],
                         dialogues: [
                             {
                                 id: 11125101,
@@ -51854,7 +52948,7 @@ export const questData_jp: QuestStory[] = [
                         id: "178471153317614402595",
                         type: "TalkNode",
                         name: "对话节点",
-                        next: ["17842692488716667604", "178168140058312614716"],
+                        next: ["17842692488716667604", "178791638100313419147", "178168140058312614716"],
                         dialogues: [
                             {
                                 id: 11125101,
@@ -51896,6 +52990,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 111110,
                             },
                         ],
+                    },
+                    {
+                        id: "178791638100313419147",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
                     },
                     {
                         id: "178299821273412997318",
@@ -52275,6 +53375,12 @@ export const questData_jp: QuestStory[] = [
                 name: "九死に一生？",
                 desc: "フォルスは湖を渡る途中で誤って落ちてしまった。重要な証人である彼女を救うため、危険を冒して飛び込まざるを得なかった。確かに彼女を助け、岸へ泳いだはずだが、そのあと……",
                 nodes: [
+                    {
+                        id: "178791732498220129344",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0176_story_horror",
+                    },
                     {
                         id: "1781686084680531",
                         type: "TalkNode",
@@ -53932,7 +55038,7 @@ export const questData_jp: QuestStory[] = [
                         id: "1782291976792705",
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_C1_01】玩具兵",
-                        next: ["1786872443222987", "17822920767321809"],
+                        next: ["17884422879004486477", "1786872443222987", "17822920767321809"],
                         dialogues: [
                             {
                                 id: 11106601,
@@ -54016,6 +55122,12 @@ export const questData_jp: QuestStory[] = [
                                 speakerName: "？？？",
                             },
                         ],
+                    },
+                    {
+                        id: "17884422879004486477",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
                     },
                     {
                         id: "1786872443222987",
@@ -54238,6 +55350,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 111126,
                             },
                         ],
+                    },
+                    {
+                        id: "17881611859534473325",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0182_jingle_scared",
                     },
                     {
                         id: "17829042439722162841",
@@ -57805,6 +58923,13 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "178805923415329077655",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
+                        next: ["1783433088942130", "1783433088942134"],
+                    },
+                    {
                         id: "1783433088942130",
                         type: "TalkNode",
                         name: "对话节点",
@@ -57980,7 +59105,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17821958639931120", "17821959800092931", "17832561435317176", "17850576730676670317"],
+                startIds: ["17821958639931120", "17821959800092931", "17832561435317176", "178805923415329077655", "17850576730676670317"],
             },
             {
                 id: 11022102,
@@ -57988,6 +59113,13 @@ export const questData_jp: QuestStory[] = [
                 desc: "今日はフォルスと谷の残りの区域を調べる。まずは吊り橋を渡り、向こう側の山林を調べよう。",
                 nodes: [
                     {
+                        id: "178805923415329077655",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
+                        next: ["1783433088942130", "1783433088942134"],
+                    },
+                    {
                         id: "1783433088942130",
                         type: "TalkNode",
                         name: "对话节点",
@@ -58163,6 +59295,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["178805923415329077655", "17850576730676670317"],
             },
             {
                 id: 11022103,
@@ -58189,6 +59322,12 @@ export const questData_jp: QuestStory[] = [
                 name: "物資を探す",
                 desc: "闇に潜むフルヴィスに対抗するには、物資を補充する必要がある。かつての戦場跡へ向かい、使えそうなものを探そう。",
                 nodes: [
+                    {
+                        id: "178805945679632429592",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
+                    },
                     {
                         id: "17822716431658133",
                         type: "TalkNode",
@@ -58223,6 +59362,12 @@ export const questData_jp: QuestStory[] = [
                 name: "爆発区域から脱出する",
                 desc: "一角鯨隊に完全制圧されたロンザ要塞が、なぜか爆発した。まずはここを離れ、仲間から状況を聞こう。",
                 nodes: [
+                    {
+                        id: "178805982701435786622",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0061_scene_ex01_escape",
+                    },
                     {
                         id: "17872811041401471",
                         type: "TalkNode",
@@ -58394,7 +59539,7 @@ export const questData_jp: QuestStory[] = [
                         id: "17822892397504936",
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_C7_03】富尔维斯",
-                        next: ["17834228359272193060", "17822901740956196"],
+                        next: ["178805982701435786622", "17834228359272193060", "17822901740956196"],
                         dialogues: [
                             {
                                 id: 11113601,
@@ -58727,6 +59872,7 @@ export const questData_jp: QuestStory[] = [
                         id: "17811856045637236",
                         type: "TalkNode",
                         name: "对话节点",
+                        next: ["17881637006036717005"],
                         dialogues: [
                             {
                                 id: 11114201,
@@ -58823,6 +59969,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 111125,
                             },
                         ],
+                    },
+                    {
+                        id: "17881637006036717005",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0176_story_horror",
                     },
                     {
                         id: "17811943098016146066",
@@ -59885,6 +61037,7 @@ export const questData_jp: QuestStory[] = [
                         id: "178332436985225003484",
                         type: "TalkNode",
                         name: "对话节点",
+                        next: ["178816522223011190354"],
                         dialogues: [
                             {
                                 id: 11115520,
@@ -59929,6 +61082,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 111127,
                             },
                         ],
+                    },
+                    {
+                        id: "178816522223011190354",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0177_story_investigate",
                     },
                 ],
             },
@@ -60298,7 +61457,7 @@ export const questData_jp: QuestStory[] = [
                         id: "178159535807910534456",
                         type: "TalkNode",
                         name: "开车对话节点",
-                        next: ["17814407914931063417"],
+                        next: ["17884438480115610761", "17814407914931063417"],
                         dialogues: [
                             {
                                 id: 11117101,
@@ -60321,6 +61480,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 111127,
                             },
                         ],
+                    },
+                    {
+                        id: "17884438480115610761",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0176_story_horror",
                     },
                     {
                         id: "17814407914931063417",
@@ -60782,6 +61947,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "町長の口からアルカノの町の真実を知った。ジョイとして洗脳されたフルヴィスは、あなたをかばって銃弾を受け、倒れた。思いがけない出来事が次々と起こるが、今最優先すべきは、重傷を負ったフォルスをアルカノの町から連れ出すことだ。彼女は重要な証人であり、ここで死なせるわけにはいかない。",
                 nodes: [
                     {
+                        id: "178816670599623496873",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0184_story_curse_echoes",
+                    },
+                    {
                         id: "17821180686671072380",
                         type: "TalkNode",
                         name: "对话节点",
@@ -60976,6 +62147,7 @@ export const questData_jp: QuestStory[] = [
                         id: "17821359497585359094",
                         type: "TalkNode",
                         name: "对话节点",
+                        next: ["178817214795045880206"],
                         dialogues: [
                             {
                                 id: 11117801,
@@ -61196,6 +62368,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "178817214795045880206",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0189_cs_eve_defend_on_bridge",
+                    },
                 ],
             },
             {
@@ -61203,6 +62381,12 @@ export const questData_jp: QuestStory[] = [
                 name: "フォルスを安全な場所へ運ぶ",
                 desc: "エイダの助けで吊り橋を渡り、アルカノの町から無事に脱出した。フォルスを安全な場所へ運んだら、残りの後始末をしよう。",
                 nodes: [
+                    {
+                        id: "178816685404624616503",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0184_story_curse_echoes",
+                    },
                     {
                         id: "17849871835811277",
                         type: "TalkNode",
@@ -61248,6 +62432,20 @@ export const questData_jp: QuestStory[] = [
                 name: "すべてを終わらせる",
                 desc: "アルカノの町を覆う悪夢を終わらせる時だ。",
                 nodes: [
+                    {
+                        id: "17884494733591623",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0176_story_horror",
+                        srId: 107001,
+                        pos: [-17434, -80917],
+                    },
+                    {
+                        id: "17884450101388974479",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0176_story_horror",
+                    },
                     {
                         id: "17823026824922155381",
                         type: "TalkNode",
@@ -61834,6 +63032,20 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17823850660962171603",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17823850875872172012"],
+                        dialogues: [
+                            {
+                                id: 11118801,
+                                content: "この程度か？",
+                                voice: "story/1102/111096/1BD5B24A",
+                                npc: 110022,
+                            },
+                        ],
+                    },
+                    {
                         id: "17860344698155576507",
                         type: "TalkNode",
                         name: "对话节点",
@@ -61850,33 +63062,6 @@ export const questData_jp: QuestStory[] = [
                                 content: "次はない。二度と繰り返すな。",
                                 voice: "story/1102/111096/1BD58238",
                                 npc: 111169,
-                            },
-                        ],
-                    },
-                    {
-                        id: "17823850660962171603",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        next: ["17823850875872172012"],
-                        dialogues: [
-                            {
-                                id: 11118801,
-                                content: "この程度か？",
-                                voice: "story/1102/111096/1BD5B24A",
-                                npc: 110022,
-                            },
-                        ],
-                    },
-                    {
-                        id: "178603505889610034545",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        dialogues: [
-                            {
-                                id: 11118509,
-                                content: "来なさい、エイダ。本当の家へ戻るんだ。",
-                                voice: "story/1102/111096/1BD58262",
-                                npc: 111125,
                             },
                         ],
                     },
@@ -61941,6 +63126,19 @@ export const questData_jp: QuestStory[] = [
                                     "小ウサギたちが言うことを聞かないなら、また別の子を飼えばいい。楽園の清掃、破壊、そして再構築。それだけのことよ。",
                                 voice: "story/1102/111096/1BD5C3D8",
                                 npc: 111123,
+                            },
+                        ],
+                    },
+                    {
+                        id: "178603505889610034545",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        dialogues: [
+                            {
+                                id: 11118509,
+                                content: "来なさい、エイダ。本当の家へ戻るんだ。",
+                                voice: "story/1102/111096/1BD58262",
+                                npc: 111125,
                             },
                         ],
                     },
@@ -62180,6 +63378,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17884494733591623", "17884450101388974479"],
             },
             {
                 id: 11023202,
@@ -62187,10 +63386,16 @@ export const questData_jp: QuestStory[] = [
                 desc: "アルカノの町を覆う悪夢を終わらせる時だ。",
                 nodes: [
                     {
+                        id: "178817238201650360433",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0191_boss_aida_stage_1",
+                    },
+                    {
                         id: "17857738455844453424",
                         type: "TalkNode",
                         name: "对话节点",
-                        next: ["17857741454785568441"],
+                        next: ["178817241514951478719", "17857741454785568441"],
                         dialogues: [
                             {
                                 id: 11119801,
@@ -62214,6 +63419,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 111123,
                             },
                         ],
+                    },
+                    {
+                        id: "178817241514951478719",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0192_boss_aida_stage_2",
                     },
                     {
                         id: "17857741454785568441",
@@ -62296,6 +63507,13 @@ export const questData_jp: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "178817222085747000699",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0190_story_aida_dream_land",
+                        next: ["17861020334603351118", "17862055158821671"],
                     },
                     {
                         id: "17861020334603351118",
@@ -62427,6 +63645,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17884364063825102",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0059_scene_ex01_encounter",
                     },
                     {
                         id: "17863769875776700126",
@@ -62877,6 +64101,14 @@ export const questData_jp: QuestStory[] = [
                 id: 11023204,
                 name: "フルヴィスを撃破する",
                 desc: "アルカノの町を覆っていた悪夢を終わらせると、フルヴィスが突然飛び出してきた。すべては彼が周到に仕組んだ陰謀だった。幸いにも、彼はやはりあなたの知るあのろくでなしだ。彼を倒し、その陰謀を打ち砕こう。",
+                nodes: [
+                    {
+                        id: "178816922932830216504",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0187_boss_fuerweisi",
+                    },
+                ],
             },
             {
                 id: 11023205,
@@ -63564,6 +64796,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 111124,
                             },
                         ],
+                    },
+                    {
+                        id: "178817036069341401355",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0073_story_virgil_theme",
                     },
                     {
                         id: "17853967676851339",
@@ -65583,7 +66821,7 @@ export const questData_jp: QuestStory[] = [
                         name: "站桩-黑商继续",
                         srId: 101901,
                         pos: [20502, 7070],
-                        next: ["173652471869954031925"],
+                        next: ["17489373296329494", "173652471869954031925"],
                         dialogues: [
                             {
                                 id: 12001348,
@@ -65693,6 +66931,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 220018,
                             },
                         ],
+                    },
+                    {
+                        id: "17489373296329494",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0051_story_danger",
+                        srId: 101901,
+                        pos: [20502, 7070],
                     },
                     {
                         id: "173652471869954031925",
@@ -66304,6 +67550,13 @@ export const questData_jp: QuestStory[] = [
                 desc: "ベレからと思われる情報が現れた。真偽はともかく、必ず確かめなければならない。\n夜更けの静寂の中、約束にある赤い電話ボックスへ向かおう。",
                 nodes: [
                     {
+                        id: "17625896173367921",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放暂停音乐",
+                        resource: "0016_judian",
+                        next: ["17297514826724188018"],
+                    },
+                    {
                         id: "17297514826724188018",
                         type: "TalkNode",
                         name: "站桩 - 小白 Fixsimple11",
@@ -66555,6 +67808,15 @@ export const questData_jp: QuestStory[] = [
                 desc: "あの白い影は、ベレなのか？\n昼夜探し続けた人物が、すぐそこにいるかもしれない。慎重に近づいて確認しよう。",
                 nodes: [
                     {
+                        id: "17626006756111988301",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放音乐",
+                        resource: "0035_atomos_thrill",
+                        next: ["173686186326616400265"],
+                        srId: 101101,
+                        pos: [-4224, -320],
+                    },
+                    {
                         id: "173686186326616400265",
                         type: "TalkNode",
                         name: "过场动画-走近电话亭 Fixsimple11",
@@ -66620,13 +67882,22 @@ export const questData_jp: QuestStory[] = [
                         name: "黑幕说白走了",
                         srId: 101101,
                         pos: [-4224, -320],
-                        next: ["17360696807954131645"],
+                        next: ["17626024816852979685"],
                         dialogues: [
                             {
                                 id: 12001785,
                                 content: "スノウはプンプンしながら走り去った。",
                             },
                         ],
+                    },
+                    {
+                        id: "17626024816852979685",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放音乐",
+                        resource: "0043_story_empire",
+                        next: ["17360696807954131645"],
+                        srId: 101101,
+                        pos: [-4224, -320],
                     },
                     {
                         id: "17360696807954131645",
@@ -66788,121 +68059,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "最悪の事態は避けられたが、探索によって帝国軍の警戒を煽ってしまった。\nパトロールと警備は強化されている。\n見つかる前に、素早くこの地を離れよう。",
                 nodes: [
                     {
-                        id: "172975680630317151254",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        srId: 104109,
-                        pos: [-14623, 6400],
-                        dialogues: [
-                            {
-                                id: 12013201,
-                                content: "なっ……ど、どうしたんだ！？",
-                                voice: "story/1201/120132/1E12E3CA",
-                                npc: 200002,
-                                next: 12013202,
-                            },
-                            {
-                                id: 12013202,
-                                content: "……いえ、問題ありません。",
-                                voice: "story/1201/120132/1E12E3F4",
-                                npc: 210013,
-                                next: 12013203,
-                            },
-                            {
-                                id: 12013203,
-                                content:
-                                    '己の気血を甘露となして巡らせ、患者の内に積もる病と痛みの穢れを引き取り、外へと流し去る――これが<Default note="text:こえい">枯栄</>です。',
-                                voice: "story/1201/120132/1E12E41E",
-                                npc: 210013,
-                                next: 12013204,
-                            },
-                            {
-                                id: 12013204,
-                                content:
-                                    '<Default note="text:しょくいん">燭陰</>の禍以来、負傷者が後を絶たず、私は連日<Default note="text:こえい">枯栄</>の術を用いてまいりました。気血の巡りが乱れたまま無理を重ねたせいで、やや体調を崩してしまったようで……どうか、お気になさらないでください。',
-                                voice: "story/1201/120132/1E12E448",
-                                npc: 210013,
-                                next: 12013205,
-                            },
-                            {
-                                id: 12013205,
-                                content: "おのれのきけつ……ぐぬぬ、難しい！！",
-                                voice: "story/1201/120132/1E12E472",
-                                npc: 200002,
-                                next: 12013206,
-                            },
-                            {
-                                id: 12013206,
-                                content: 'つまり……その<Default note="text:こえい">枯栄</>の術って、命を削って、命を救うってこと？',
-                                voice: "story/1201/120132/1E12E49C",
-                                npc: 100001,
-                                next: 12013207,
-                            },
-                            {
-                                id: 12013207,
-                                content: "ご家族は……心配しないの？",
-                                voice: "story/1201/120132/1E12E4C6",
-                                npc: 100001,
-                                next: 12013208,
-                            },
-                            {
-                                id: 12013208,
-                                content: "……",
-                                voice: "story/1201/120132/1E12E4F0",
-                                npc: 210013,
-                                next: 12013209,
-                            },
-                            {
-                                id: 12013209,
-                                content: "我が家には、穢れを祓い清める秘法が代々伝わっております。少し休めば、すぐに元どおりになりますよ。",
-                                voice: "story/1201/120132/1E12E51A",
-                                npc: 210013,
-                                next: 12013210,
-                            },
-                            {
-                                id: 12013210,
-                                content:
-                                    'も～う、ほんっと腹立つ！あのユーミンってやつもそうだし、<Default note="text:カショ">華胥</>のカロンって、なんで自分の身体を大事にしないの！？まるで同じ型で作ったみたい！',
-                                voice: "story/1201/120132/1E12E544",
-                                npc: 200002,
-                                next: 12013211,
-                            },
-                            {
-                                id: 12013211,
-                                content:
-                                    "枯れては栄え、満ちた月はやがて欠ける――それが巡りの理。病を祓えば、その分の代価を払うのもまた然り。",
-                                voice: "story/1201/120132/1E12E56E",
-                                npc: 210013,
-                                next: 12013212,
-                            },
-                            {
-                                id: 12013212,
-                                content: "…………",
-                                voice: "story/1201/120132/1E12E598",
-                                npc: 100001,
-                                next: 12013213,
-                            },
-                            {
-                                id: 12013213,
-                                content:
-                                    'この方を癒す術を探すため、すぐに出発せねばなりません。さて、どうぞ、おふたりもご自身のなすべきことを。彼女の容態が気になりましたら、北の杏林にある「<Default note="text:こえい">枯栄</>閣」までお越しください。私はそこにおりますから。',
-                                voice: "story/1201/120132/1E12E5C2",
-                                npc: 210013,
-                            },
-                        ],
-                    },
-                    {
-                        id: "173686318436023151262",
-                        type: "TalkNode",
-                        name: "假装潜行任务",
+                        id: "17626026015272981524",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放潜行音乐",
+                        resource: "combat01_state1_r01",
                         srId: 101101,
                         pos: [-5299, -1074],
-                        dialogues: [
-                            {
-                                id: 12002100,
-                                content: "假装潜行玩法",
-                            },
-                        ],
                     },
                     {
                         id: "1740019309790524",
@@ -66964,7 +68126,6 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["172975680630317151254", "173686318436023151262"],
             },
             {
                 id: 12000308,
@@ -66977,7 +68138,7 @@ export const questData_jp: QuestStory[] = [
                         name: "站桩 - 和止流聊天 Fixsimple17",
                         srId: 101101,
                         pos: [-8250, -1317],
-                        next: ["17519720925528386"],
+                        next: ["17626034802882983132"],
                         dialogues: [
                             {
                                 id: 12001753,
@@ -67044,6 +68205,15 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "17626034802882983132",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放音乐",
+                        resource: "0043_story_empire",
+                        next: ["17519720925528386"],
+                        srId: 101101,
+                        pos: [-8250, -1317],
                     },
                     {
                         id: "17519720925528386",
@@ -67345,6 +68515,13 @@ export const questData_jp: QuestStory[] = [
                 name: "シリュウと話す",
                 desc: "長旅の末、ついに華胥という国へたどり着いた。\n 見渡す景色の美しさが、ここが異国であることを思い出させる。シリュウと話し、華胥についてもっと知ろう。",
                 nodes: [
+                    {
+                        id: "17640010261263104",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0096_cs_dongguo_opening",
+                        next: ["17569774987172977"],
+                    },
                     {
                         id: "17569774987172977",
                         type: "TalkNode",
@@ -68003,7 +69180,7 @@ export const questData_jp: QuestStory[] = [
                         name: "【05】 遇到绑匪 ",
                         srId: 104108,
                         pos: [32863, 50415],
-                        next: ["17367673639968835808"],
+                        next: ["17648540448499562275"],
                         dialogues: [
                             {
                                 id: 12010215,
@@ -68078,6 +69255,15 @@ export const questData_jp: QuestStory[] = [
                                 npc: 210004,
                             },
                         ],
+                    },
+                    {
+                        id: "17648540448499562275",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0132_cs_baibianchegnjiejiefei",
+                        next: ["17367673639968835808"],
+                        srId: 104108,
+                        pos: [32863, 50415],
                     },
                     {
                         id: "17367673639968835808",
@@ -68775,6 +69961,18 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17640019010627035",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0102_story_dafengjiuzhang",
+                    },
+                    {
+                        id: "17640019568117385",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0103_cs_dafengjiuzhang_expand",
+                    },
                 ],
             },
             {
@@ -68812,6 +70010,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 210003,
                             },
                         ],
+                    },
+                    {
+                        id: "1764002133915695333",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0101_story_zhuyinzhizai_low",
                     },
                     {
                         id: "1736851364283721227",
@@ -68861,6 +70065,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17618219394201029300", "1764002133915695333"],
             },
             {
                 id: 12010111,
@@ -70078,7 +71283,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17654451375861481",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
+                    },
                 ],
+                startIds: ["173968224552714631398", "17654451375861481"],
             },
             {
                 id: 12010211,
@@ -70393,6 +71605,16 @@ export const questData_jp: QuestStory[] = [
                 id: 12010251,
                 name: "応天尉の安否を確認する",
                 desc: "洞穴の出口まで送り届けると、応天尉は先に去っていった。\n 目的地はすぐそこだが、背後から聞こえる不穏な気配が気にかかる。\n せっかく知り合ったのだ、応天尉の安否を確かめに戻ろう。",
+                nodes: [
+                    {
+                        id: "17651813091839080",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
+                        srId: 104103,
+                        pos: [-5403, 21034],
+                    },
+                ],
             },
             {
                 id: 12010252,
@@ -70878,7 +72100,7 @@ export const questData_jp: QuestStory[] = [
                         name: "【22】黑市争吵",
                         srId: 104109,
                         pos: [-16391, 10293],
-                        next: ["17627890394154362789", "17627890394154362797"],
+                        next: ["17627890394154362789", "17648545616524788594"],
                         dialogues: [
                             {
                                 id: 12012301,
@@ -71105,6 +72327,15 @@ export const questData_jp: QuestStory[] = [
                                 npc: 200002,
                             },
                         ],
+                    },
+                    {
+                        id: "17648545616524788594",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0131_story_bangfeibangjia",
+                        next: ["17627890394154362797"],
+                        srId: 104109,
+                        pos: [-16391, 10293],
                     },
                     {
                         id: "17627890394154362797",
@@ -71361,7 +72592,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1764035741860687954",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0131_story_bangfeibangjia",
+                    },
                 ],
+                startIds: ["17627890394154362802", "17627890394154362804", "17627890394154362803", "1764035741860687954"],
             },
             {
                 id: 12010306,
@@ -72221,6 +73459,14 @@ export const questData_jp: QuestStory[] = [
                 desc: "弟子入り騒動の末、君たちは機巧制御盤を使って砂塵を吸収する術を身につけ、機枢派の名誉見習いの称号を得た。\n 次は塵砂の荒海の高地へ向かい、シリュウが必要とする燭陰の鱗を三枚採ろう。",
                 nodes: [
                     {
+                        id: "17649251390831283627",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                        srId: 104105,
+                        pos: [-18890, -28610],
+                    },
+                    {
                         id: "17627890394154362900",
                         type: "TalkNode",
                         name: "【30】对话节点",
@@ -72282,6 +73528,7 @@ export const questData_jp: QuestStory[] = [
                         name: "2D演出",
                         srId: 104105,
                         pos: [-18890, -28610],
+                        next: ["17640368479004130963"],
                         dialogues: [
                             {
                                 id: 12013444,
@@ -72296,6 +73543,15 @@ export const questData_jp: QuestStory[] = [
                                 speakerName: "？？？",
                             },
                         ],
+                    },
+                    {
+                        id: "17640368479004130963",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
+                        next: ["17627890394154362901"],
+                        srId: 104105,
+                        pos: [-18890, -28610],
                     },
                     {
                         id: "17627890394154362901",
@@ -72370,6 +73626,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17640366323033441364",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0102_story_dafengjiuzhang",
+                    },
+                    {
                         id: "176338106841420159943",
                         type: "TalkNode",
                         name: "对话节点",
@@ -72417,7 +73679,13 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17627890394154362900", "17627890394154362902", "17627890394154362901"],
+                startIds: [
+                    "17649251390831283627",
+                    "17627890394154362900",
+                    "17627890394154362902",
+                    "17640368479004130963",
+                    "17627890394154362901",
+                ],
             },
             {
                 id: 12010313,
@@ -72470,6 +73738,13 @@ export const questData_jp: QuestStory[] = [
                                 npc: 210014,
                             },
                         ],
+                    },
+                    {
+                        id: "1764933025563984",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                        next: ["1763198015066673585", "1763198043794674175", "1763198043794674169"],
                     },
                     {
                         id: "1763198015066673585",
@@ -72629,6 +73904,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17627890394154362763", "1764933025563984"],
             },
             {
                 id: 12010314,
@@ -72959,6 +74235,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1765976903507642269",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                    },
+                    {
                         id: "17632945730403355818",
                         type: "TalkNode",
                         name: "对话节点",
@@ -72979,7 +74261,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["176329331883620172", "176329331883620173"],
+                startIds: ["176329331883620172", "176329331883620173", "1765976903507642269"],
             },
             {
                 id: 12010315,
@@ -73518,6 +74800,23 @@ export const questData_jp: QuestStory[] = [
                 id: 12010320,
                 name: "皆と共に玄狴を撃退する",
                 desc: "不吉な予感が現実になった。百年春の人々を助け、迫り来る玄狴を退けよう。",
+                nodes: [
+                    {
+                        id: "17640378444115161739",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0112_cs_white_loong_kill_black_wolf",
+                        srId: 104110,
+                        pos: [29641, -8135],
+                    },
+                    {
+                        id: "17659769233961282451",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                    },
+                ],
+                startIds: ["17640378444115161739", "17659769233961282451"],
             },
             {
                 id: 12010322,
@@ -74824,6 +76123,15 @@ export const questData_jp: QuestStory[] = [
                 name: "ムユウセイの長老と話す",
                 desc: "三体のムユウセイの助けを得て、君たちはついに真の虞泉――この世とあの世が交わる地に辿り着いた。\n ムユウセイの長老に忘れ草の在り処を尋ねよう。",
                 nodes: [
+                    {
+                        id: "17640380368527223477",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0110_story_fushu_theme",
+                        next: ["17302568818361168471"],
+                        srId: 104104,
+                        pos: [3260, -3220],
+                    },
                     {
                         id: "17302568818361168471",
                         type: "TalkNode",
@@ -76472,6 +77780,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17640381320348255324",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0116_cs_fushuhuanjing",
+                    },
                 ],
             },
             {
@@ -76974,6 +78288,7 @@ export const questData_jp: QuestStory[] = [
                         name: "站桩 - 和小弟对话",
                         srId: 104102,
                         pos: [-52592, 3018],
+                        next: ["17640391235938943900"],
                         dialogues: [
                             {
                                 id: 12018601,
@@ -77127,6 +78442,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17640391235938943900",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0118_cs_bad_guy_trigger_gear",
+                        srId: 104102,
+                        pos: [-52592, 3018],
+                    },
                 ],
             },
             {
@@ -77140,6 +78463,7 @@ export const questData_jp: QuestStory[] = [
                         name: "站桩 - 逮捕煜明",
                         srId: 104102,
                         pos: [-59359, 5440],
+                        next: ["176485570582710842403"],
                         dialogues: [
                             {
                                 id: 12019901,
@@ -77250,6 +78574,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "176485570582710842403",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0128_cs_qiusir_attack_player",
+                        srId: 104102,
+                        pos: [-59359, 5440],
+                    },
                 ],
             },
             {
@@ -77277,7 +78609,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "176485663052812753084",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                    },
                 ],
+                startIds: ["1757161939118646405", "176485663052812753084"],
             },
             {
                 id: 12010515,
@@ -77651,6 +78990,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 210012,
                             },
                         ],
+                    },
+                    {
+                        id: "17640392180849975096",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0098_scene_ancient_battlefield_intro",
                     },
                     {
                         id: "17630384760342357018",
@@ -78115,6 +79460,12 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17648555587659567244",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0123_boss_juque",
+                    },
                 ],
             },
         ],
@@ -78127,6 +79478,15 @@ export const questData_jp: QuestStory[] = [
                 name: "百年春に戻る",
                 desc: "君たちが燭陰の鱗を渡してから、しばらくの時が過ぎた。シリュウの準備はどこまで進んでいるのだろう？\n 百年春へ戻り、手伝えることがないか見てみよう。",
                 nodes: [
+                    {
+                        id: "17649384290081280098",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                        next: ["17660601326541603644"],
+                        srId: 104110,
+                        pos: [29922, -9314],
+                    },
                     {
                         id: "17308116617621217963",
                         type: "TalkNode",
@@ -78148,6 +79508,15 @@ export const questData_jp: QuestStory[] = [
                                 npc: 200002,
                             },
                         ],
+                    },
+                    {
+                        id: "17660601326541603644",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0101_story_zhuyinzhizai_low",
+                        next: ["17308127132391624296"],
+                        srId: 104110,
+                        pos: [29922, -9314],
                     },
                     {
                         id: "17308127132391624296",
@@ -78248,6 +79617,16 @@ export const questData_jp: QuestStory[] = [
                 id: 12010602,
                 name: "燭陰祭壇に向かう",
                 desc: "燭陰祭壇から不穏な気配が伝わってきた。ボウシュンによれば、シリュウが燭陰の封印を始めているらしい。\n この危機の時こそ、少しでも力になれるはずだ。祭壇へ急ごう。",
+                nodes: [
+                    {
+                        id: "17649387978011282818",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点音效",
+                        resource: "pad_noise_rain_plain_heavy",
+                        srId: 104105,
+                        pos: [-18596, -30247],
+                    },
+                ],
             },
             {
                 id: 12010603,
@@ -78259,6 +79638,14 @@ export const questData_jp: QuestStory[] = [
                 name: "シリュウを手伝い、封印を安定させる",
                 desc: "燭陰祭壇に駆けつけた時、ちょうど燭陰が辛うじて封じられる場面を目撃した。\n だが一部の封印は未だ不安定で、シリュウは動けない。君たちは進み出て、封印の確認を買って出た。",
                 nodes: [
+                    {
+                        id: "17650088884693198453",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0126_cs_reach_heilongjitan",
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
                     {
                         id: "17615536903041003005",
                         type: "TalkNode",
@@ -78430,12 +79817,31 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17650088884693198453", "17615536903041003005"],
             },
             {
                 id: 12010605,
                 name: "シリュウを手伝い、封印を安定させる",
                 desc: "燭陰祭壇に駆けつけた時、ちょうど燭陰が辛うじて封じられる場面を目撃した。\n だが一部の封印は未だ不安定で、シリュウは動けない。君たちは進み出て、封印の確認を買って出た。",
                 nodes: [
+                    {
+                        id: "17650089714863199556",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0130_cs_heilongjitan_parkour",
+                        next: ["17650090048573199985"],
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
+                    {
+                        id: "17650090048573199985",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0102_story_dafengjiuzhang",
+                        next: ["17616406875047976769"],
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
                     {
                         id: "17616406875047976769",
                         type: "TalkNode",
@@ -78587,6 +79993,23 @@ export const questData_jp: QuestStory[] = [
                 id: 12010606,
                 name: "燭陰を倒す",
                 desc: "燭陰に近づくと、かすかな嘆きが心に響いてきた。\n 封印を破った燭陰が暴れ出す。間一髪、君はシリュウの銅銭を燭陰の額に押し当て、封印の力を借りて撃ち落とした。\n その瞬間、燭陰の記憶の断片が垣間見えた。\n 立ち止まって考える暇はない――決戦はすぐそこだ。",
+                nodes: [
+                    {
+                        id: "17650090489933200749",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0122_boss_heilong_intro",
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
+                    {
+                        id: "176485712838513392067",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0121_boss_heilong",
+                    },
+                ],
+                startIds: ["17650090489933200749", "176485712838513392067"],
             },
             {
                 id: 12010607,
@@ -78594,12 +80017,21 @@ export const questData_jp: QuestStory[] = [
                 desc: "突如シリュウが裏切り、君を拘束した。封印はただの口実で、真の目的は燭陰の力を取り込むことだった。君の不意の登場に、彼女の計画は危うく頓挫しかけた。\n 駆けつけたフーシュとカシュウも一歩遅く、阻止することはできなかった。シリュウは余計な争いを避けるため撤退し、君たちを残して去っていった。\n 荒れ果てた戦場で、二人と今後の策を話し合おう。",
                 nodes: [
                     {
+                        id: "176485781597114667965",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        next: ["1749035653238924174"],
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
+                    {
                         id: "1749035653238924174",
                         type: "TalkNode",
                         name: "【57】 和止流交流",
                         srId: 105701,
                         pos: [22901, -85028],
-                        next: ["1749035641134923908"],
+                        next: ["176485785246814668438"],
                         dialogues: [
                             {
                                 id: 12022201,
@@ -78661,12 +80093,30 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "176485785246814668438",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0127_cs_zhiliuqiujinwanjia",
+                        next: ["176485788879914669276"],
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
+                    {
+                        id: "176485788879914669276",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        next: ["1749035641134923908"],
+                        srId: 105701,
+                        pos: [22901, -85028],
+                    },
+                    {
                         id: "1749035641134923908",
                         type: "TalkNode",
                         name: "【58】 和止流交流",
                         srId: 105701,
                         pos: [22901, -85028],
-                        next: ["17645175349987296423"],
+                        next: ["176485797485514670014"],
                         dialogues: [
                             {
                                 id: 12022209,
@@ -78732,6 +80182,15 @@ export const questData_jp: QuestStory[] = [
                                 npc: 210004,
                             },
                         ],
+                    },
+                    {
+                        id: "176485797485514670014",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0124_cs_zhiliuxishouheilong",
+                        next: ["17645175349987296423"],
+                        srId: 105701,
+                        pos: [22901, -85028],
                     },
                     {
                         id: "17645175349987296423",
@@ -82391,6 +83850,7 @@ export const questData_jp: QuestStory[] = [
                         name: "【36b】菲娜关心塞维欧",
                         srId: 101103,
                         pos: [-45815, 29078],
+                        next: ["17599126388786257"],
                         dialogues: [
                             {
                                 id: 12033803,
@@ -82420,6 +83880,20 @@ export const questData_jp: QuestStory[] = [
                                 npc: 211001,
                             },
                         ],
+                    },
+                    {
+                        id: "17599126388786257",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM-Play",
+                        resource: "0092_feina_activity_cs_02",
+                        srId: 101103,
+                        pos: [-45815, 29078],
+                    },
+                    {
+                        id: "1759912722017637",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0060_boss_ex01_lizhanzhe_loop",
                     },
                     {
                         id: "17573134789504521",
@@ -82456,6 +83930,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17561943317184130385", "17599126388786257"],
             },
             {
                 id: 12011409,
@@ -83624,6 +85099,16 @@ export const questData_jp: QuestStory[] = [
                 id: 12011414,
                 name: "ナイチンゲールと虹色の夢",
                 desc: "魔導書を開き、物語「香る草原へ」を完結させ、小さなナイチンゲールを召喚する魔法を学ぶ。",
+                nodes: [
+                    {
+                        id: "1759913775428938085",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0091_feina_activity_cs_01",
+                        srId: 101105,
+                        pos: [160, 20441],
+                    },
+                ],
             },
             {
                 id: 12011415,
@@ -85241,6 +86726,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1764002133915695333",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0101_story_zhuyinzhizai_low",
+                    },
+                    {
                         id: "1736851364283721227",
                         type: "TalkNode",
                         name: "开车- 战斗前",
@@ -85288,7 +86779,13 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17428928965942446103", "174971850902016906685", "174971850887716906678", "17428929789682446437"],
+                startIds: [
+                    "17428928965942446103",
+                    "174971850902016906685",
+                    "174971850887716906678",
+                    "17428929789682446437",
+                    "1764002133915695333",
+                ],
             },
             {
                 id: 12020111,
@@ -85967,6 +87464,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "少し前のこと。ある雨の夜、カシュウはたった一人で狴犴と激戦を繰り広げていた……",
                 nodes: [
                     {
+                        id: "17741812707862526841",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0101_story_zhuyinzhizai_low",
+                    },
+                    {
                         id: "1767944727334743",
                         type: "TalkNode",
                         name: "我都杀腻了！",
@@ -86635,6 +88138,22 @@ export const questData_jp: QuestStory[] = [
                 desc: "危急の瞬間、身を守るため、あなたはやむなく龍神の攻勢を受け止めた。\n 攻防が最も拮抗した刹那、あなたの力が制御不能のまま噴き出し、龍神は傷を負って悲鳴とともに飛び去った。\n 何が起きたのか考える暇もなく、封鎖が天から降り注ぐ。包囲が完成する前に、ここを突破しなければならない。",
                 nodes: [
                     {
+                        id: "17741818497442528816",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0136_cs_bailong_god_appear",
+                        srId: 104506,
+                        pos: [31600, -109780],
+                    },
+                    {
+                        id: "17741819193542529724",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0137_story_kezhou_meet_bailong",
+                        srId: 104506,
+                        pos: [31600, -109780],
+                    },
+                    {
                         id: "17734793256387212",
                         type: "TalkNode",
                         name: "【East02_FixSimple_24】刻舟VS太皓",
@@ -86783,6 +88302,14 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17741820011962530587",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0138_cs_kezhou_attack_bailong",
+                        srId: 104506,
+                        pos: [31600, -109780],
+                    },
+                    {
                         id: "17735667478145910120",
                         type: "TalkNode",
                         name: "对话节点",
@@ -86817,6 +88344,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 200002,
                             },
                         ],
+                    },
+                    {
+                        id: "1774182188541628",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                     },
                     {
                         id: "17735671418006754384",
@@ -86872,7 +88405,14 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17734793256387212", "17735667478145910120"],
+                startIds: [
+                    "17741818497442528816",
+                    "17741819193542529724",
+                    "17734793256387212",
+                    "17741820011962530587",
+                    "17735667478145910120",
+                    "1774182188541628",
+                ],
             },
             {
                 id: 12020211,
@@ -86929,6 +88469,14 @@ export const questData_jp: QuestStory[] = [
                 name: "追っ手を振り切る",
                 desc: "あなたたちの行動により、城はすでに警戒態勢に入っている。狴犴と応天尉が巡回中だ。\n 追い詰められたその時、ショウヨウセイが突如目の前に現れ、脱出を手助けすると約束した。",
                 nodes: [
+                    {
+                        id: "17741823080955059703",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 104503,
+                        pos: [29196, -91324],
+                    },
                     {
                         id: "177358157512311375",
                         type: "TalkNode",
@@ -87070,7 +88618,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["177358157512311375", "177356806094210130640"],
+                startIds: ["17741823080955059703", "177358157512311375", "177356806094210130640"],
             },
             {
                 id: 12020213,
@@ -88030,6 +89578,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1774182557582630",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                    },
+                    {
                         id: "17633681300011705",
                         type: "TalkNode",
                         name: "【East02_FixSimple_30】止流幻境，看止流开卦（上）",
@@ -88211,7 +89765,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["1742891256134715244", "1765889325964492"],
+                startIds: ["1742891256134715244", "1765889325964492", "1774182557582630"],
             },
             {
                 id: 12020306,
@@ -90469,6 +92023,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "177418279453510115810",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0101_story_zhuyinzhizai_full",
+                        srId: 105201,
+                        pos: [13130, -2310],
+                    },
                 ],
             },
             {
@@ -90476,6 +92038,14 @@ export const questData_jp: QuestStory[] = [
                 name: "応天尉を撃退する",
                 desc: "山外山の所在が露見し、応天尉が攻め込んできた。皆が危険にさらされている。\n 事態は切迫している。流れ者を助け、応天尉の第一波を撃退しよう。",
                 nodes: [
+                    {
+                        id: "177505383225812783754",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
+                        srId: 105201,
+                        pos: [7839, -3170],
+                    },
                     {
                         id: "17742800687082538984",
                         type: "TalkNode",
@@ -90706,6 +92276,14 @@ export const questData_jp: QuestStory[] = [
                 desc: "山外山の所在が露見し、応天尉が攻め込んできた。先頭に立つのは、山外山と旧知の仲であるユーミンだった。\n かつての仲間に刃を向けることに、ユーミンは迷いを抱いているようだ。だがカシュウの説得は逆効果だった。相手はすでに武器を構えている。迎え撃つしかない。",
                 nodes: [
                     {
+                        id: "177418302136811379965",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 105201,
+                        pos: [7839, -3170],
+                    },
+                    {
                         id: "17742799291441693538",
                         type: "TalkNode",
                         name: "对话节点",
@@ -90745,6 +92323,16 @@ export const questData_jp: QuestStory[] = [
                 id: 12020405,
                 name: "ユーミンを倒す",
                 desc: "山外山の所在が露見し、応天尉が攻め込んできた。先頭に立つのは、山外山と旧知の仲であるユーミンだった。\n かつての仲間に刃を向けることに、ユーミンは迷いを抱いているようだ。だがカシュウの説得は逆効果だった。相手はすでに武器を構えている。迎え撃つしかない。",
+                nodes: [
+                    {
+                        id: "17742597041042120",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0139_cs_kezhou_vs_yuming",
+                        srId: 105201,
+                        pos: [7839, -3170],
+                    },
+                ],
             },
             {
                 id: 12020406,
@@ -90999,6 +92587,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 240026,
                             },
                         ],
+                    },
+                    {
+                        id: "17741838339411247",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0123_boss_juque",
                     },
                     {
                         id: "177356944462516040868",
@@ -91600,6 +93194,13 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17750547808862575726",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0123_boss_juque",
+                        next: ["17735828291564229823"],
+                    },
+                    {
                         id: "17735828291564229823",
                         type: "TalkNode",
                         name: "对话节点",
@@ -91687,12 +93288,30 @@ export const questData_jp: QuestStory[] = [
                 id: 12020409,
                 name: "戦闘に参加する",
                 desc: "偃隠宮の奥で、あなたたちは偶然にも上古の秘事を解き明かし、そして勝機となる切り札——神機銃の起動方法を手に入れた。\n いま手にした切り札を携え、戦局を覆しに行こう。",
+                nodes: [
+                    {
+                        id: "17742597812081268483",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0140_cs_suyi_fly_with_player",
+                        srId: 105201,
+                        pos: [7839, -3170],
+                    },
+                ],
             },
             {
                 id: 12020410,
                 name: "神機銃で天衡の鉄衛を撃退する",
                 desc: "偃隠宮の奥で、あなたたちは偶然にも上古の秘事を解き明かし、そして勝機となる切り札——神機銃の起動方法を手に入れた。\n いま手にした切り札を携え、戦局を覆しに行こう。",
                 nodes: [
+                    {
+                        id: "177505423970316632112",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 105201,
+                        pos: [7754, -3170],
+                    },
                     {
                         id: "177357147481021949000",
                         type: "TalkNode",
@@ -91764,6 +93383,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["177505423970316632112", "177357147481021949000"],
             },
             {
                 id: 12020411,
@@ -92095,6 +93715,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17741844011671687130",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                    },
+                    {
                         id: "1769845067925760707",
                         type: "TalkNode",
                         name: "【East02_FixSimple_50】进止流幻境，止流说自己要弑神",
@@ -92249,7 +93875,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["176346309107213168971", "176725631734141817486"],
+                startIds: ["176346309107213168971", "176725631734141817486", "17741844011671687130"],
             },
             {
                 id: 12020414,
@@ -92257,9 +93883,17 @@ export const questData_jp: QuestStory[] = [
                 desc: "太皓を重傷に追い込み、天衡の鉄衛を引き離したのも、すべてシリュウの策のうちだった。\n 布石は徐々に形を成し、あとは駒が盤上に入るのを待つのみ。同時に、執律閣の頂で、シリュウは燭陰と密談を交わしていた……",
                 nodes: [
                     {
+                        id: "17750545519561718005",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0141_story_zhiliu_climp",
+                        next: ["1770194740182383848"],
+                    },
+                    {
                         id: "1770194740182383848",
                         type: "TalkNode",
                         name: "【East02_FixSimple_51】执律阁顶，止流准备登阶",
+                        next: ["17741845701761130"],
                         dialogues: [
                             {
                                 id: 12045201,
@@ -92397,6 +94031,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 240001,
                             },
                         ],
+                    },
+                    {
+                        id: "17741845701761130",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0141_story_zhiliu_climp",
                     },
                 ],
             },
@@ -94224,7 +95864,7 @@ export const questData_jp: QuestStory[] = [
                         name: "【East02_FixSimple_58】去椒兰村与静渊对话，接2DCG",
                         srId: 104504,
                         pos: [-21230, -57470],
-                        next: ["176250715858522831274"],
+                        next: ["177418524152418964879"],
                         dialogues: [
                             {
                                 id: 12046201,
@@ -94283,6 +95923,15 @@ export const questData_jp: QuestStory[] = [
                                 npc: 240040,
                             },
                         ],
+                    },
+                    {
+                        id: "177418524152418964879",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0142_story_zhiliu_memory",
+                        next: ["176250715858522831274"],
+                        srId: 104504,
+                        pos: [-21230, -57470],
                     },
                     {
                         id: "176250715858522831274",
@@ -94951,6 +96600,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "1774185807400515",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                    },
+                    {
                         id: "17698459273514558762",
                         type: "TalkNode",
                         name: "【East02_FixSimple_60】止流幻境，揭露真相，止流抛硬币",
@@ -95204,7 +96859,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["176250735113723809549", "176250738010723809956", "17698459273514558763"],
+                startIds: ["176250735113723809549", "176250738010723809956", "17698459273514558763", "1774185807400515"],
             },
             {
                 id: 12020513,
@@ -95390,6 +97045,13 @@ export const questData_jp: QuestStory[] = [
                                 voice: "story/1204/120466/12046615",
                             },
                         ],
+                    },
+                    {
+                        id: "177505557280120485899",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        next: ["1770346423085673"],
                     },
                     {
                         id: "1770346423085673",
@@ -95753,17 +97415,35 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17677003017639776777", "176346835001814197221", "176346849046114199943"],
+                startIds: ["17677003017639776777", "176346835001814197221", "176346849046114199943", "177505557280120485899"],
             },
             {
                 id: 12020516,
                 name: "太虚陵の奥へ進む",
                 desc: "すべてが終わった。いま太虚陵では、ある龍淵の上卿が自らの命の最期へと歩みを進めていた……",
+                nodes: [
+                    {
+                        id: "17742599025442537755",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0144_cs_zhiliu_combat_with_bailong",
+                    },
+                ],
             },
             {
                 id: 12020517,
                 name: "大乱、起こる",
                 desc: "シリュウの神殺し計画は動き出した。太皓と燭陰の激突の余波が、皓京の街全体を巻き込んでいく。",
+                nodes: [
+                    {
+                        id: "177418639623522762896",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0145_cs_two_lonng_bite",
+                        srId: 104503,
+                        pos: [31470, -43630],
+                    },
+                ],
             },
         ],
     },
@@ -95775,6 +97455,15 @@ export const questData_jp: QuestStory[] = [
                 name: "大乱、起こる",
                 desc: "シリュウの神殺し計画は動き出した。太皓と燭陰の激突の余波が、皓京の街全体を巻き込んでいく。",
                 nodes: [
+                    {
+                        id: "17741864821922534564",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
+                        next: ["176251735161126752346"],
+                        srId: 104504,
+                        pos: [-28310, -43050],
+                    },
                     {
                         id: "176251735161126752346",
                         type: "TalkNode",
@@ -96021,11 +97710,18 @@ export const questData_jp: QuestStory[] = [
                 desc: "シリュウの神殺し計画は動き出した。太皓と燭陰の激突の余波が、皓京の街全体を巻き込んでいく。",
                 nodes: [
                     {
-                        id: "176347349261815226372",
-                        type: "TalkNode",
-                        name: "【East02_FixSimple_66】苏乙视角，狴犴冲向小孩",
+                        id: "17741865928403799026",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0107_story_zhuyinzhizai_full",
                         srId: 104501,
                         pos: [45700, -25750],
+                    },
+                    {
+                        id: "17724328722381498259",
+                        type: "TalkNode",
+                        name: "【East02_FixSimple_66】苏乙视角，狴犴冲向小孩",
+                        next: ["1774186924195692"],
                         dialogues: [
                             {
                                 id: 12047001,
@@ -96114,95 +97810,10 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
-                        id: "17724328722381498259",
-                        type: "TalkNode",
-                        name: "【East02_FixSimple_66】苏乙视角，狴犴冲向小孩",
-                        dialogues: [
-                            {
-                                id: 12047001,
-                                content: "誰か……助けてくれぇ！",
-                                voice: "story/1204/120470/1E288D1A",
-                                npc: 240041,
-                                next: 12047002,
-                            },
-                            {
-                                id: 12047002,
-                                content: "白龍様……どうか御守り下さい……",
-                                voice: "story/1204/120470/1E288D44",
-                                npc: 240042,
-                                next: 12047003,
-                            },
-                            {
-                                id: 12047003,
-                                content: "おじいちゃん、私いい子にしてたのに、どうしてあの狼、襲ってくるの？",
-                                voice: "story/1204/120470/1E288D6E",
-                                npc: 240043,
-                                next: 12047004,
-                            },
-                            {
-                                id: 12047004,
-                                content: "これは神の試練だ。心を強く持て。白龍様がお前を見守ってくださる……信じるのだ……",
-                                voice: "story/1204/120470/1E288D98",
-                                npc: 240042,
-                                next: 12047005,
-                            },
-                            {
-                                id: 12047005,
-                                content: "父さん、ナナ！はやく逃げて！！",
-                                voice: "story/1204/120470/1E288DC2",
-                                npc: 240044,
-                                next: 12047006,
-                            },
-                            {
-                                id: 12047006,
-                                content:
-                                    '街はもう滅茶苦茶よ、<Default note="text:ビーアン">狴犴</>と<Default note="text:ゲンビー">玄狴</>が人に襲いかかってる！祈ってる場合じゃないわ！',
-                                voice: "story/1204/120470/1E288DEC",
-                                npc: 240044,
-                                next: 12047007,
-                            },
-                            {
-                                id: 12047007,
-                                content: "もう私たちを守ってくれるものなんてないの！はやくナナを連れて逃げて！！",
-                                voice: "story/1204/120470/1E288E16",
-                                npc: 240044,
-                                next: 12047008,
-                            },
-                            {
-                                id: 12047008,
-                                content: '黙れ！<Default note="text:ビーアン">狴犴</>様を侮辱する気か！',
-                                voice: "story/1204/120470/1E288E40",
-                                npc: 240042,
-                                next: 12047009,
-                            },
-                            {
-                                id: 12047009,
-                                content: "白龍様……どうか、娘の無礼をお許しください……",
-                                voice: "story/1204/120470/1E288E6A",
-                                npc: 240042,
-                                next: 12047010,
-                            },
-                            {
-                                id: 12047010,
-                                content: "グオォォォ……！",
-                                voice: "story/1204/120470/1E288E94",
-                                npc: 240045,
-                                next: 12047011,
-                            },
-                            {
-                                id: 12047011,
-                                content: "きゃあっ！！",
-                                voice: "story/1204/120470/1E288EBE",
-                                npc: 240043,
-                                next: 12047012,
-                            },
-                            {
-                                id: 12047012,
-                                content: "どいて！",
-                                voice: "story/1204/120470/1E288EE8",
-                                npc: 240026,
-                            },
-                        ],
+                        id: "1774186924195692",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                     },
                 ],
             },
@@ -96212,117 +97823,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "皓京は大乱に陥った。狴犴と玄狴が暴走し、無差別に民衆を襲い始める。少女が狴犴に傷つけられかけたその時、スーイーが間一髪で駆けつけた。",
                 nodes: [
                     {
-                        id: "17673470031976443671",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17741869745853800144",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                         srId: 104501,
                         pos: [45700, -25750],
-                        dialogues: [
-                            {
-                                id: 12047101,
-                                content: "大丈夫？怪我してない？",
-                                voice: "story/1204/120471/1E289D82",
-                                npc: 240026,
-                                next: 12047102,
-                            },
-                            {
-                                id: 12047102,
-                                content: "ありがとう！大丈夫だよ！",
-                                voice: "story/1204/120471/1E289DAC",
-                                npc: 240043,
-                                next: 12047103,
-                            },
-                            {
-                                id: 12047103,
-                                content: "ああ、ナナ――無事でよかった……！",
-                                voice: "story/1204/120471/1E289DD6",
-                                npc: 240044,
-                                next: 12047104,
-                            },
-                            {
-                                id: 12047104,
-                                content: "街の中がここまで混乱しているとは……間一髪だったな。",
-                                voice: "story/1204/120471/1E289E00",
-                                npc: 240035,
-                                next: 12047105,
-                            },
-                            {
-                                id: 12047105,
-                                content: "お姉さん……もしかして、龍神様の使者なの？",
-                                voice: "story/1204/120471/1E289E2A",
-                                npc: 240043,
-                                next: 12047106,
-                            },
-                            {
-                                id: 12047106,
-                                content: "龍神？いいえ、私たちは……",
-                                voice: "story/1204/120471/1E289E54",
-                                npc: 240026,
-                                next: 12047107,
-                            },
-                            {
-                                id: 12047107,
-                                content: "……ナナから離れろ！お前たち、「流れ者」だろう！関われば不幸を招くぞ！！",
-                                voice: "story/1204/120471/1E289E7E",
-                                npc: 240042,
-                                next: 12047108,
-                            },
-                            {
-                                id: 12047108,
-                                content: "お前たちみたいな不届き者が、ナナに触れるな！",
-                                voice: "story/1204/120471/1E289EA8",
-                                npc: 240042,
-                                next: 12047109,
-                            },
-                            {
-                                id: 12047109,
-                                content: "父さん、今はそんなこと言ってる場合じゃないでしょ！",
-                                voice: "story/1204/120471/1E289ED2",
-                                npc: 240044,
-                                next: 12047110,
-                            },
-                            {
-                                id: 12047110,
-                                content: "「不幸になる」か……ハハハ、勘違いも大概にしろよ。",
-                                voice: "story/1204/120471/1E289EFC",
-                                npc: 240034,
-                                next: 12047111,
-                            },
-                            {
-                                id: 12047111,
-                                content: "お前が今生きてるのは、その流れ者に救われたからだ。お前が拝んでた神とやらは、現れたのか？",
-                                voice: "story/1204/120471/1E289F26",
-                                npc: 240034,
-                                next: 12047112,
-                            },
-                            {
-                                id: 12047112,
-                                content: "もう……終わりだ……世も末だ……",
-                                voice: "story/1204/120471/1E289F50",
-                                npc: 240042,
-                                next: 12047113,
-                            },
-                            {
-                                id: 12047113,
-                                content: "誰かっ！誰でもいい！助けてくれ——！",
-                                voice: "story/1204/120471/1E289F7A",
-                                npc: 240041,
-                                next: 12047114,
-                            },
-                            {
-                                id: 12047114,
-                                content: "シュ、議論してる暇はないわ。人助けが先よ。",
-                                voice: "story/1204/120471/1E289FA4",
-                                npc: 240026,
-                                next: 12047115,
-                            },
-                            {
-                                id: 12047115,
-                                content: "わかってる。行こう。",
-                                voice: "story/1204/120471/1E289FCE",
-                                npc: 240034,
-                            },
-                        ],
                     },
                     {
                         id: "1772421556083793745",
@@ -96441,6 +97947,16 @@ export const questData_jp: QuestStory[] = [
                 id: 12020605,
                 name: "狴犴を撃退し、民衆を守る",
                 desc: "皓京は大乱に陥った。狴犴と玄狴が暴走し、無差別に民衆を襲い始める。城内の狴犴を撃退し、脅威を減らそう。",
+                nodes: [
+                    {
+                        id: "17750568955692574695",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 104501,
+                        pos: [45730, -31830],
+                    },
+                ],
             },
             {
                 id: 12020606,
@@ -96448,99 +97964,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "皓京は大乱に陥った。狴犴と玄狴が暴走し、無差別に民衆を襲い始める。このまま戦い続けても埒が明かない。対策を相談しよう。",
                 nodes: [
                     {
-                        id: "17673471571087517271",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17741869997913800708",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                         srId: 104503,
                         pos: [34410, -42980],
-                        dialogues: [
-                            {
-                                id: 12047201,
-                                content:
-                                    'この街の<Default note="text:ビーアン">狴犴</>は一時的に退けたが、次にいつ襲いかかってくるかわからない……\n 一体、大風九章に何が起きているんだ？',
-                                voice: "story/1204/120472/1E28ADEA",
-                                npc: 240034,
-                                next: 12047202,
-                            },
-                            {
-                                id: 12047202,
-                                content: "{nickname}と合流できれば、わかるはずよ。皆で力を合わせれば、きっとこの危機を乗り越えられるわ。",
-                                voice: "story/1204/120472/1E28AE14",
-                                npc: 240026,
-                                next: 12047203,
-                            },
-                            {
-                                id: 12047203,
-                                content: "……噂をすれば、ってとこね。{nickname}たちは執律閣へ向かってるみたい。私たちも行くわよ。",
-                                voice: "story/1204/120472/1E28AE3E",
-                                npc: 240026,
-                                next: 12047204,
-                            },
-                            {
-                                id: 12047204,
-                                content: "でも、ここは……",
-                                voice: "story/1204/120472/1E28AE68",
-                                npc: 240035,
-                                next: 12047205,
-                            },
-                            {
-                                id: 12047205,
-                                content:
-                                    '大丈夫、ちゃんと手を打ってある。ソンユ、チョウジョウ、ふたりはここに残って、<Default note="text:ビーアン">狴犴</>の再侵入に備えて。',
-                                voice: "story/1204/120472/1E28AE92",
-                                npc: 240026,
-                                next: 12047206,
-                            },
-                            {
-                                id: 12047206,
-                                content:
-                                    "それから、ほかのみんなは私について、持ってきた武器をここの住民に配って。自分の身を自分で守れるようにね。",
-                                voice: "story/1204/120472/1E28AEBC",
-                                npc: 240026,
-                                next: 12047207,
-                            },
-                            {
-                                id: 12047207,
-                                content: "彼らに……武器を持たせて戦えと？しかし……",
-                                voice: "story/1204/120472/1E28AEE6",
-                                npc: 240035,
-                                next: 12047208,
-                            },
-                            {
-                                id: 12047208,
-                                content: "規律に縛られてきた人たちだぞ？ 武器にすら触れたことない連中が……",
-                                voice: "story/1204/120472/1E28AF10",
-                                npc: 240036,
-                                next: 12047209,
-                            },
-                            {
-                                id: 12047209,
-                                content: "民からは煙たがられ、敵からも恨まれ、こんなことに何の意味があるんだ……",
-                                voice: "story/1204/120472/1E28AF3A",
-                                npc: 240034,
-                                next: 12047210,
-                            },
-                            {
-                                id: 12047210,
-                                content: "やってみなきゃ、わからないでしょ？",
-                                voice: "story/1204/120472/1E28AF64",
-                                npc: 240026,
-                                next: 12047211,
-                            },
-                            {
-                                id: 12047211,
-                                content: "私たちの辞書に諦めるって単語はないわ。お願いよ。",
-                                voice: "story/1204/120472/1E28AF8E",
-                                npc: 240026,
-                                next: 12047212,
-                            },
-                            {
-                                id: 12047212,
-                                content: "スーがそこまで言うなら……",
-                                voice: "story/1204/120472/1E28AFB8",
-                                npc: 240036,
-                            },
-                        ],
                     },
                     {
                         id: "17724221886932378797",
@@ -96643,7 +98072,15 @@ export const questData_jp: QuestStory[] = [
                 desc: "スーイーは{nickname}からの連絡を受け、支援に向かう準備をした。だがその前に、持参した予備武器を住民に配り、彼らにも自衛の力を持たせることを譲らなかった。",
                 nodes: [
                     {
-                        id: "176743070506913957323",
+                        id: "17750569191502575385",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 104503,
+                        pos: [28924, -43916],
+                    },
+                    {
+                        id: "17724330598334753424",
                         type: "TalkNode",
                         name: "对话节点",
                         srId: 104503,
@@ -96654,36 +98091,6 @@ export const questData_jp: QuestStory[] = [
                                 content: "武器を手に取るなんて……天律に触れるぞ！絶対に受け取れん！",
                                 voice: "story/1204/120484/1E29731E",
                                 npc: 240066,
-                            },
-                        ],
-                    },
-                    {
-                        id: "176743072361413957606",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        srId: 104503,
-                        pos: [28924, -43916],
-                        dialogues: [
-                            {
-                                id: 12048401,
-                                content: "そ、そんな不吉な物を近づけるな！早く持って行け！",
-                                voice: "story/1204/120484/1E2972CA",
-                                npc: 240067,
-                            },
-                        ],
-                    },
-                    {
-                        id: "176743072419613957628",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        srId: 104503,
-                        pos: [28924, -43916],
-                        dialogues: [
-                            {
-                                id: 12048402,
-                                content: "わ、私……鶏一羽殺したことがないのよ……武器なんて……とてもじゃないけど無理……",
-                                voice: "story/1204/120484/1E2972F4",
-                                npc: 240068,
                             },
                         ],
                     },
@@ -96718,7 +98125,6 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["176743070506913957323", "176743072361413957606", "176743072419613957628"],
             },
             {
                 id: 12020608,
@@ -96726,7 +98132,15 @@ export const questData_jp: QuestStory[] = [
                 desc: "流れ者たちの武器配りは各所で拒められ難航したが、スーイーはそれでも諦めなかった……",
                 nodes: [
                     {
-                        id: "176347421683515231412",
+                        id: "17750569268172575617",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 104503,
+                        pos: [31727, -46057],
+                    },
+                    {
+                        id: "17724338985675546977",
                         type: "TalkNode",
                         name: "与朱朴对话",
                         srId: 104503,
@@ -96932,6 +98346,15 @@ export const questData_jp: QuestStory[] = [
                 desc: "静淵居士の助けで、あなたたちはシリュウの完全な計画を知り、彼女を止める打開策も見つけた。\n まだ間に合う。すべてが既成事実になる前に、急いで執律閣へ向かおう。",
                 nodes: [
                     {
+                        id: "17750569880033858663",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        next: ["177228575025223735000"],
+                        srId: 104503,
+                        pos: [28318, -42672],
+                    },
+                    {
                         id: "177228575025223735000",
                         type: "TalkNode",
                         name: "【East02_FixSimple_70】回玩家视角，回到城区广场，与苏乙汇合",
@@ -97051,27 +98474,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "静淵居士の助けで、あなたたちはシリュウの計画の全貌を知り、彼女を止める打開策も見つけた。\n 途中でスーイーと合流し、彼女が面倒ごとを引き受けてくれた。すべてが既成事実になる前に、急いで執律閣へ向かおう。",
                 nodes: [
                     {
-                        id: "17737313161805009246",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17750570365063859426",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                         srId: 104503,
                         pos: [31467, -47468],
-                        dialogues: [
-                            {
-                                id: 12048748,
-                                content:
-                                    "わっ、我が下僕よ。見て、そ、空が赤く燃えているよ！まるで、終末みたいで、なんだか嫌な予感がするね……",
-                                voice: "story/1204/120487/1E29ABB8",
-                                npc: 200002,
-                                next: 12048749,
-                            },
-                            {
-                                id: 12048749,
-                                content: "いそごう……まだ間に合うはず！",
-                                voice: "story/1204/120487/1E29ABE2",
-                                npc: 100001,
-                            },
-                        ],
                     },
                     {
                         id: "1774335012883845667",
@@ -97100,6 +98508,16 @@ export const questData_jp: QuestStory[] = [
                 id: 12020612,
                 name: "太虚陵へ入る",
                 desc: "静淵居士の助けで、あなたたちはシリュウの計画の全貌を知り、彼女を止める打開策も見つけた。\n まだ間に合う。すべてが既成事実になる前に、急いで太虚陵の最奥へ向かおう。",
+                nodes: [
+                    {
+                        id: "17741870269413801488",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0146_enter_zhilvge",
+                        srId: 104506,
+                        pos: [31495, -109835],
+                    },
+                ],
             },
             {
                 id: 12020613,
@@ -97127,6 +98545,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "17741874131936330224",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        srId: 105301,
+                        pos: [28912, 23396],
                     },
                     {
                         id: "176347434626815232437",
@@ -97208,6 +98634,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17734798455233599", "17741874131936330224"],
             },
             {
                 id: 12020614,
@@ -97215,62 +98642,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "太皓と燭陰の死闘は最高潮へと突き進んでいた。太虚陵の最奥で、あなたはすでに限界を迎えたシリュウの姿を見た。\n 死を望む彼女は、あなたに剣で胸を貫き、最後の儀式を完成させてほしいと乞う。",
                 nodes: [
                     {
-                        id: "177496944840919541",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "17741874687536331113",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0148_theme_song_hyb_story_cut1",
                         srId: 105301,
                         pos: [41943, 23394],
-                        dialogues: [
-                            {
-                                id: 12047504,
-                                content: "{nickname}、あんたらは先に行け。ここは俺に任せろ！",
-                                voice: "story/1204/120475/1E28DFA0",
-                                npc: 240013,
-                                next: 12047505,
-                            },
-                            {
-                                id: 12047505,
-                                content: "わかった。",
-                                voice: "story/1204/120475/1E28DFCA",
-                                npc: 100001,
-                                next: 12047506,
-                            },
-                            {
-                                id: 12047506,
-                                content: "そういうことで、お前をここで食い止めるのも、俺の「使命」だ。",
-                                voice: "story/1204/120475/1E28DFF4",
-                                npc: 240013,
-                                next: 12047507,
-                            },
-                            {
-                                id: 12047507,
-                                content: "以前は迷いもあった。だが、今は違う！",
-                                voice: "story/1204/120475/1E28E01E",
-                                npc: 240013,
-                                next: 12047508,
-                            },
-                            {
-                                id: 12047508,
-                                content: "「二兎を追う者は一兎も得ず」なんて、誰が決めた？俺は全部、手に入れる！",
-                                voice: "story/1204/120475/1E28E048",
-                                npc: 240013,
-                                next: 12047509,
-                            },
-                            {
-                                id: 12047509,
-                                content:
-                                    "「誰かのために戦え」？そんな縛りなどいらん。皆が自分の意志で武器を取れば、たかが穢蝕ごとき、敵ではならん！そんな未来を、俺が必ず証明してやる！",
-                                voice: "story/1204/120475/1E28E072",
-                                npc: 240013,
-                                next: 12047510,
-                            },
-                            {
-                                id: 12047510,
-                                content: "……",
-                                voice: "story/1204/120475/1E28E09C",
-                                npc: 210007,
-                            },
-                        ],
                     },
                 ],
             },
@@ -97279,6 +98656,14 @@ export const questData_jp: QuestStory[] = [
                 name: "双龍を倒す",
                 desc: "あなたはシリュウの死の願いを拒んだ——あなたは彼女に、人はいつだって新たな選択肢を切り拓けるのだと示しに来たのだから。\n レゾナンスで、シリュウの魂の契の力をあなた自身へ移し替えた。\n 狂乱へ傾いた太皓と燭陰は、侵入者の介入に気づき、一斉にこちらへ向いた。奴らを打ち倒し、自らの意志を証明せよ。",
                 nodes: [
+                    {
+                        id: "17741875792037595691",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0147_boss_two_dragon",
+                        srId: 105301,
+                        pos: [43387, 23321],
+                    },
                     {
                         id: "17750471556272568585",
                         type: "TalkNode",
@@ -97299,6 +98684,14 @@ export const questData_jp: QuestStory[] = [
                 name: "双龍を倒す",
                 desc: "あなたはシリュウの死の願いを拒んだ——あなたは彼女に、人はいつだって新たな選択肢を切り拓けるのだと示しに来たのだから。\n レゾナンスで、シリュウの魂の契の力をあなた自身へ移し替えた。\n 狂乱へ傾いた太皓と燭陰は、侵入者の介入に気づき、一斉にこちらへ向いた。奴らを打ち倒し、自らの意志を証明せよ。",
                 nodes: [
+                    {
+                        id: "17741876947728861054",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0148_theme_song_hyb_story_cut2",
+                        srId: 104503,
+                        pos: [32054, -51515],
+                    },
                     {
                         id: "177244362992811946867",
                         type: "TalkNode",
@@ -97359,6 +98752,16 @@ export const questData_jp: QuestStory[] = [
                 id: 12020619,
                 name: "双龍を倒す",
                 desc: "あなたはシリュウの死の願いを拒んだ——あなたは彼女に、人はいつだって新たな選択肢を切り拓けるのだと示しに来たのだから。\n レゾナンスで、シリュウの魂の契の力をあなた自身へ移し替えた。\n 狂乱へ傾いた太皓と燭陰は、侵入者の介入に気づき、一斉にこちらへ向いた。奴らを打ち倒し、自らの意志を証明せよ。",
+                nodes: [
+                    {
+                        id: "177418776017510125182",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0148_theme_song_hyb_story_cut3",
+                        srId: 105301,
+                        pos: [35812, 23467],
+                    },
+                ],
             },
             {
                 id: 12020620,
@@ -97690,6 +99093,16 @@ export const questData_jp: QuestStory[] = [
                 id: 12020623,
                 name: "？？？",
                 desc: "双龍を撃破すると、均天玉律が灼熱の光を放ってすべてを呑み込み、あなたたちを幻のような空間へ連れていった……",
+                nodes: [
+                    {
+                        id: "177418794350012655233",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放暂停音乐",
+                        resource: "0149_cs_two_lonng_merge",
+                        srId: 104506,
+                        pos: [31509, -108737],
+                    },
+                ],
             },
             {
                 id: 12020624,
@@ -98748,6 +100161,22 @@ export const questData_jp: QuestStory[] = [
                 name: "泥棒を追いかける",
                 desc: "あなたたちは野次馬気分で声のする方へ向かうと、顔なじみのスーイーが仲間に断られている場面に出くわした。話を聞くと、奉香英雄大会がまもなく開催されるという。\n 会話の最中、スーイーの自信作「青鳳二型」が目の前で泥棒に盗まれてしまった。急いで追いかけよう！",
                 nodes: [
+                    {
+                        id: "17745058711591683",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0109_combat_black_market",
+                        srId: 104501,
+                        pos: [50415, -22540],
+                    },
+                    {
+                        id: "17745059280611273907",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0151_story_east_humour",
+                        srId: 104501,
+                        pos: [50415, -22540],
+                    },
                     {
                         id: "17667324358671066674",
                         type: "TalkNode",
@@ -102605,7 +104034,7 @@ export const questData_jp: QuestStory[] = [
                         name: "对话节点",
                         srId: 104503,
                         pos: [24938, -80278],
-                        next: ["17654406995785335"],
+                        next: ["17654406995785335", "17745062001375091627"],
                         dialogues: [
                             {
                                 id: 12063011,
@@ -102726,6 +104155,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 250015,
                             },
                         ],
+                    },
+                    {
+                        id: "17745062001375091627",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        srId: 104503,
+                        pos: [24938, -80278],
                     },
                 ],
             },
@@ -104122,7 +105559,7 @@ export const questData_jp: QuestStory[] = [
                         name: "对话节点",
                         srId: 104503,
                         pos: [17487, -78810],
-                        next: ["17689882726793262"],
+                        next: ["17689882726793262", "177450653693911453504"],
                         dialogues: [
                             {
                                 id: 12062638,
@@ -104208,6 +105645,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "177450653693911453504",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0152_story_jiaolancun_piano",
+                        srId: 104503,
+                        pos: [17487, -78810],
                     },
                 ],
             },
@@ -105405,158 +106850,12 @@ export const questData_jp: QuestStory[] = [
                 desc: "スーイーとアンはショウの説得に成功し、地下宮殿の鍵を手に入れた。地下宮殿へ入り、ユーミンを救出しよう！",
                 nodes: [
                     {
-                        id: "17638160596627562105",
-                        type: "TalkNode",
-                        name: "对话节点",
+                        id: "177450689582617815327",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
                         srId: 104504,
                         pos: [8298, -72761],
-                        dialogues: [
-                            {
-                                id: 12063401,
-                                content: "やっと来たか～！あんたたちが戦ってたあいだ、ここにいたみんな、ぜーんぶ見てたよ。",
-                                voice: "story/1206/120634/1E330FBA",
-                                npc: 200002,
-                                next: 12063402,
-                            },
-                            {
-                                id: 12063402,
-                                content: "誰が正義で誰がそうじゃないか……ようやくはっきりしたね！",
-                                voice: "story/1206/120634/1E330FE4",
-                                npc: 200002,
-                                next: 12063403,
-                            },
-                            {
-                                id: 12063403,
-                                content: "まぁ……会場は完全にめちゃくちゃになってるけどね。次の大会は、相当先になるかも。",
-                                voice: "story/1206/120634/1E33100E",
-                                npc: 200002,
-                                next: 12063404,
-                            },
-                            {
-                                id: 12063404,
-                                content: "その頃には、{性别:もう僕たちは華胥にはいないかもしれないな。|もう私たちは華胥にはいないかもね。}",
-                                voice: "story/1206/120634/1E331038",
-                                npc: 100001,
-                                next: 12063405,
-                            },
-                            {
-                                id: 12063405,
-                                content: "タビテ、ユーミン。あとは……{性别:君たち|あなたたち}に任せるよ。",
-                                voice: "story/1206/120634/1E331062",
-                                npc: 100001,
-                                next: 12063406,
-                            },
-                            {
-                                id: 12063406,
-                                content: "その必要はありません。",
-                                voice: "story/1206/120634/1E33108C",
-                                npc: 250004,
-                                next: 12063407,
-                            },
-                            {
-                                id: 12063407,
-                                content:
-                                    "あなたたちの戦いぶりも、そして戦場の外で見せたその決意も……すべてを通して、私はあなたたちを「最も優れたチーム」と呼ぶに相応しいと確信しました。",
-                                voice: "story/1206/120634/1E3310B6",
-                                npc: 250004,
-                                next: 12063408,
-                            },
-                            {
-                                id: 12063408,
-                                content:
-                                    "でもそれ以上に、突然の危機に際して示した勇気――他者のために、恐れず立ち向かうその姿勢こそ、何より尊い。",
-                                voice: "story/1206/120634/1E3310E0",
-                                npc: 250004,
-                                next: 12063409,
-                            },
-                            {
-                                id: 12063409,
-                                content:
-                                    'このような働きを目の当たりにして、<Default note="text:しきじしんぱんかい ">職事審判会</>が再試合を求める理由など、どこにもありません。',
-                                voice: "story/1206/120634/1E33110A",
-                                npc: 250004,
-                                next: 12063410,
-                            },
-                            {
-                                id: 12063410,
-                                content: "えっ……じゃあ、それって……！",
-                                voice: "story/1206/120634/1E331134",
-                                npc: 200002,
-                                next: 12063411,
-                            },
-                            {
-                                id: 12063411,
-                                content:
-                                    '香狩りチーム、あなたたちは<Default note="text:ほうこうえいゆうたいかい">奉香英雄大会</>かくにて、その勝利を大いに祝ってください。――その栄光に、一片の疑いもありません。',
-                                voice: "story/1206/120634/1E33115E",
-                                npc: 250004,
-                                next: 12063412,
-                            },
-                            {
-                                id: 12063412,
-                                content: "やった！……私たち、勝ったんだ！！",
-                                voice: "story/1206/120634/1E331188",
-                                npc: 200002,
-                                next: 12063413,
-                            },
-                            {
-                                id: 12063413,
-                                content: "うん、勝ったんだよ、スーイー……あれ？",
-                                voice: "story/1206/120634/1E3311B2",
-                                npc: 100001,
-                            },
-                        ],
-                    },
-                    {
-                        id: "17664894462939556455",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        srId: 104504,
-                        pos: [8298, -72761],
-                        dialogues: [
-                            {
-                                id: 12063318,
-                                content: "ふぅ、これで……本当に、終わったのね。",
-                                voice: "story/1206/120633/1E33021C",
-                                npc: 250003,
-                                next: 12063319,
-                            },
-                            {
-                                id: 12063319,
-                                content: "拍手喝采",
-                                voice: "story/1206/120633/1E330246",
-                                next: 12063320,
-                            },
-                            {
-                                id: 12063320,
-                                content: "う、うわっ！？な、なにこれ！？なんでこんな人いんだ！？ ちょっとぉ、いま何が起こってんだよ！",
-                                voice: "story/1206/120633/1E330270",
-                                npc: 250006,
-                                next: 12063321,
-                            },
-                            {
-                                id: 12063321,
-                                content: "見て、またあの子だ！{nickname}殿だ！",
-                                voice: "story/1206/120633/1E33029A",
-                                speakerName: "観衆がざわつく",
-                                next: 12063322,
-                            },
-                            {
-                                id: 12063322,
-                                content:
-                                    "それに、あの流れ者の娘もね！だから言ったじゃん、流れ者って別に鬼みたいな連中じゃないって！あのツインテの子、けっこう可愛いし！",
-                                voice: "story/1206/120633/1E3302C4",
-                                speakerName: "観衆がざわつく",
-                                next: 12063323,
-                            },
-                            {
-                                id: 12063323,
-                                content:
-                                    "本物の流れ者を見るのは初めてだけど……たぶん、僕らと同じなんだよ。迷うし、傷つく、それでも前に進もうとしてる。",
-                                voice: "story/1206/120633/1E3302EE",
-                                speakerName: "観衆がざわつく",
-                            },
-                        ],
                     },
                     {
                         id: "17724345355635542958",
@@ -105585,8 +106884,13 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1774423736524482",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0123_boss_juque",
+                    },
                 ],
-                startIds: ["17638160596627562105", "17664894462939556455"],
             },
             {
                 id: 12030706,
@@ -106041,6 +107345,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "177450703157419088850",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0135_login_theme",
+                        srId: 104506,
+                        pos: [31501, -107674],
+                    },
                 ],
             },
             {
@@ -106048,6 +107360,14 @@ export const questData_jp: QuestStory[] = [
                 name: "アンの家へ向かう",
                 desc: "スーイーはアンのために何かの「贈り物」を急いで用意した。アンの家へ向かい、この重い想いを届けよう。",
                 nodes: [
+                    {
+                        id: "177450673281013999337",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0153_cs_juque_on_stage",
+                        srId: 104503,
+                        pos: [22541, -77131],
+                    },
                     {
                         id: "17738247162919129334",
                         type: "TalkNode",
@@ -106136,6 +107456,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 250003,
                             },
                         ],
+                    },
+                    {
+                        id: "177450675651013999718",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0129_boss_yuming",
+                        srId: 104503,
+                        pos: [22541, -77131],
                     },
                 ],
             },
@@ -107637,6 +108965,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "1748933879119883582",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默音乐",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-5213, 6670],
+                    },
                 ],
             },
             {
@@ -107650,7 +108986,7 @@ export const questData_jp: QuestStory[] = [
                         name: "野猪呢？",
                         srId: 101103,
                         pos: [-34151, 31390],
-                        next: ["174687696102513401004", "17455115606202746224"],
+                        next: ["174687696102513401004", "17455115606202746224", "17489343539003509289"],
                         dialogues: [
                             {
                                 id: 20005001,
@@ -107688,6 +109024,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 200002,
                             },
                         ],
+                    },
+                    {
+                        id: "17489343539003509289",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默音乐",
+                        resource: "0033_story_humour",
+                        srId: 101103,
+                        pos: [-34151, 31390],
                     },
                     {
                         id: "174687696102513401004",
@@ -108068,6 +109412,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 200074,
                             },
                         ],
+                    },
+                    {
+                        id: "17489344984583511337",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默音乐",
+                        resource: "0033_story_humour",
+                        srId: 101103,
+                        pos: [-32456, 34166],
                     },
                 ],
             },
@@ -120809,6 +122161,14 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17600061625596531944",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-7659, 7174],
+                    },
+                    {
                         id: "17501283182784547",
                         type: "UnlockDetectiveQuestionNode",
                         name: "开启推理问题",
@@ -120916,6 +122276,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17600065919608394228",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-9415, -6605],
+                    },
                 ],
             },
             {
@@ -120967,6 +122335,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 100001,
                             },
                         ],
+                    },
+                    {
+                        id: "17600066558329325511",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-9265, -6835],
                     },
                     {
                         id: "17448049117431652729",
@@ -121175,7 +122551,16 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17600066899369326656",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放幽默",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-9265, -6835],
+                    },
                 ],
+                startIds: ["17447211024331642191", "17600066899369326656"],
             },
             {
                 id: 20023007,
@@ -123337,6 +124722,14 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17600102202512817",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0043_story_empire",
+                        srId: 101107,
+                        pos: [-225, -11296],
+                    },
+                    {
                         id: "17501298868055680754",
                         type: "UnlockDetectiveQuestionNode",
                         name: "开启推理问题",
@@ -123408,12 +124801,20 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17600103648751840",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0072_story_reasoning",
+                        srId: 101101,
+                        pos: [-2500, -2065],
+                    },
+                    {
                         id: "17457393991669682995",
                         type: "UnlockDetectiveQuestionNode",
                         name: "开启推理问题",
                         srId: 101101,
                         pos: [-2500, -2065],
-                        next: ["17457393991669682998"],
+                        next: ["17457393991669682998", "17600103648751840"],
                         questions: [
                             {
                                 id: 2002,
@@ -123451,6 +124852,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
+                startIds: ["17457393991669682997", "17600103648751840"],
             },
             {
                 id: 20023302,
@@ -123706,6 +125108,14 @@ export const questData_jp: QuestStory[] = [
                                     "このままでは――ヴィオレッタの喉を裂く血の一閃が、次の瞬間に訪れるだろう。誰もが望まない惨劇が、すぐそこにあった。",
                             },
                         ],
+                    },
+                    {
+                        id: "1760010486230935268",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0043_story_empire",
+                        srId: 101103,
+                        pos: [-15162, 10495],
                     },
                     {
                         id: "175031962027625556903",
@@ -124121,7 +125531,7 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17457393991729683022", "175031962027625556903"],
+                startIds: ["17457393991729683022", "1760010486230935268", "175031962027625556903"],
             },
             {
                 id: 20023304,
@@ -124531,6 +125941,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 700300,
                             },
                         ],
+                    },
+                    {
+                        id: "17600107038051867283",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0036_story_renweidaozu",
+                        srId: 101101,
+                        pos: [-3580, -11570],
                     },
                 ],
             },
@@ -132232,6 +133650,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17677836599642664",
+                        type: "PlayOrStopBGMNode",
+                        name: "播放潜行音乐",
+                        resource: "0111_scene_wuhuizhidi",
+                    },
+                    {
                         id: "17658722095622118004",
                         type: "TalkNode",
                         name: "对话节点",
@@ -137744,7 +139168,7 @@ export const questData_jp: QuestStory[] = [
                         name: "对话节点",
                         srId: 104501,
                         pos: [36900, -34420],
-                        next: ["17726066180633637092"],
+                        next: ["177313446494136299267"],
                         dialogues: [
                             {
                                 id: 51175201,
@@ -137777,6 +139201,15 @@ export const questData_jp: QuestStory[] = [
                                     "皓京がシリュウの企てによって前代未聞の混乱に呑まれていたその裏で、誰にも知られぬ場所にて、一人の祝由はひそかに決意を固めていた。",
                             },
                         ],
+                    },
+                    {
+                        id: "177313446494136299267",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0125_story_zhiliu_betray",
+                        next: ["17726066180633637092"],
+                        srId: 104501,
+                        pos: [36900, -34420],
                     },
                     {
                         id: "17726066180633637092",
@@ -138040,6 +139473,12 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "17748664206292213",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0106_scene_cave_near_sea",
+                    },
+                    {
                         id: "1773295971015727",
                         type: "TalkNode",
                         name: "对话节点",
@@ -138219,13 +139658,22 @@ export const questData_jp: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["1770278966032389765", "1770279070734391456", "1770279138866392190"],
+                startIds: ["1770278966032389765", "1770279070734391456", "1770279138866392190", "17748664206292213"],
             },
             {
                 id: 20031805,
                 name: "？？？",
                 desc: "フーシュはできる限りの力で負傷者を救ったが、大風九章の乱れの影響もあり、自らもひどく消耗してしまった。\n 意識を失ったフーシュは、過ぎ去った日の記憶へと沈んでいった……",
                 nodes: [
+                    {
+                        id: "17748664896837243856",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0106_scene_cave_near_sea",
+                        next: ["1770281427083396372"],
+                        srId: 104503,
+                        pos: [35975, -42746],
+                    },
                     {
                         id: "1770281427083396372",
                         type: "TalkNode",
@@ -138420,6 +139868,13 @@ export const questData_jp: QuestStory[] = [
                 name: "裂け目を探す",
                 desc: "フーシュは昏睡から目を覚ました。残された時間はもうわずかだ。大風九章が終わる前に、三途川へ向かわなければならない。",
                 nodes: [
+                    {
+                        id: "1774866566119855714",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0106_scene_cave_near_sea",
+                        next: ["1773296529860493"],
+                    },
                     {
                         id: "1773296529860493",
                         type: "TalkNode",
@@ -156354,6 +157809,14 @@ export const questData_jp: QuestStory[] = [
                             },
                         ],
                     },
+                    {
+                        id: "17647611270281325",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0041_story_jiaojiao_tiejiang",
+                        srId: 210101,
+                        pos: [-383, 2829],
+                    },
                 ],
             },
             {
@@ -156574,6 +158037,14 @@ export const questData_jp: QuestStory[] = [
                                 npc: 700352,
                             },
                         ],
+                    },
+                    {
+                        id: "17648358565963813392",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0033_story_humour",
+                        srId: 101101,
+                        pos: [-3610, 560],
                     },
                 ],
             },
