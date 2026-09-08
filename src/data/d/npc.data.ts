@@ -3644,6 +3644,7 @@ export const npcData: NPC[] = [
         camp: "NPC",
         charId: 3104,
         type: "Show",
+        icon: "Falu",
         talks: [
             {
                 id: 90300001,

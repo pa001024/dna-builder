@@ -6417,6 +6417,13 @@ export const skinData: SkinItem[] = [
                     num: 1,
                 },
             ],
+            HeadSculpture: [
+                {
+                    id: 20016,
+                    name: "UI_PlayerHead_Name_20016",
+                    num: 1,
+                },
+            ],
         },
         upgrade: [
             {

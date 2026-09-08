@@ -289,6 +289,12 @@ export const headSculptureData: HeadSculpture[] = [
         icon: "T_Head_Falu01",
     },
     {
+        id: 20016,
+        name: "UI_PlayerHead_Name_20016",
+        desc: "适用于头像。",
+        icon: "T_Head_Shuimu02",
+    },
+    {
         id: 30001,
         name: "恍惚",
         desc: "适用于头像。",
