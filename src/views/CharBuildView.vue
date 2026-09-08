@@ -1682,9 +1682,9 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         <!-- 顶部操作栏（含合并的 header 内容：角色名 + 属性 + 等级） -->
         <div
             data-tour="top-actions"
-            class="sticky top-0 z-1 m-1 sm:m-2 rounded-xs border border-base-content/10 bg-base-100/70 p-2 shadow-lg backdrop-blur-sm sm:p-3"
+            class="sticky top-0 z-1 m-1 sm:m-2 rounded-xs border border-base-content/10 bg-base-100/70 p-1.5 shadow-lg backdrop-blur-sm sm:p-3"
         >
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-2">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2">
                 <div class="flex min-w-0 items-center gap-2.5 px-1">
                     <h1 class="font-orbitron text-base font-bold leading-none tracking-tight text-base-content truncate sm:text-lg">
                         {{ $t(selectedChar) || $t("char-build.title") }}
@@ -1696,38 +1696,38 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     </span>
                     <span class="shrink-0 text-xs text-base-content/60 tabular-nums sm:text-sm">Lv. {{ charSettings.charLevel }}</span>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:ml-auto">
-                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" data-tour="tour-button" @click="tour?.startTour()">
-                        <Icon icon="ri:question-line" class="w-4 h-4" />
+                <!-- 移动端：按钮等宽铺满整行（flex-1 平分整行宽度，不换行、超宽可横向滚动），避免保存/重置独占整行 -->
+                <div class="flex flex-nowrap items-stretch gap-1 w-full overflow-x-auto sm:w-auto sm:flex-wrap sm:gap-2 sm:ml-auto sm:overflow-visible">
+                    <button class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" data-tour="tour-button" @click="tour?.startTour()">
+                        <Icon icon="ri:question-line" class="size-5 sm:size-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.tour") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" @click="openShareModal">
-                        <Icon icon="ri:share-line" class="w-4 h-4" />
+                    <button class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="openShareModal">
+                        <Icon icon="ri:share-line" class="size-5 sm:size-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.share") }}</span>
                     </button>
                     <button
                         v-if="['黎瑟', '赛琪'].includes(selectedChar)"
-                        class="btn btn-sm btn-ghost flex-1 sm:flex-none"
+                        class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
                         @click="simulator_model_show = true"
                     >
-                        <Icon icon="ri:game-line" class="w-4 h-4" />
+                        <Icon icon="ri:game-line" class="size-5 sm:size-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.simulator") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-secondary flex-1 sm:flex-none" @click="autobuild_model_show = true">
-                        <Icon icon="ri:robot-2-line" class="w-4 h-4" />
+                    <button class="btn btn-sm btn-secondary h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="autobuild_model_show = true">
+                        <Icon icon="ri:robot-2-line" class="size-5 sm:size-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.auto_build") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-success flex-1 sm:flex-none" @click="$router.push('/char-build-compare')">
-                        <Icon icon="ri:bar-chart-line" class="w-4 h-4" />
+                    <button class="btn btn-sm btn-success h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="$router.push('/char-build-compare')">
+                        <Icon icon="ri:bar-chart-line" class="size-5 sm:size-4" />
                         <span class="hidden sm:inline">{{ $t("build-compare.title") }}</span>
                     </button>
-                    <div class="dropdown dropdown-end w-full sm:w-auto">
-                        <div tabindex="0" role="button" class="btn btn-sm btn-primary w-full sm:w-auto flex-1 sm:flex-none">
-                            <Icon icon="ri:save-fill" class="w-4 h-4" />
+                    <div class="dropdown dropdown-end flex-1 min-w-0 sm:flex-none">
+                        <div tabindex="0" role="button" class="btn btn-sm btn-primary h-9 flex-1 min-w-0 w-full px-0 sm:h-8 sm:flex-none sm:w-auto sm:px-3">
+                            <Icon icon="ri:save-fill" class="size-5 sm:size-4" />
                             <span class="hidden sm:inline">{{ $t("char-build.save_project") }}</span>
-                            <span class="sm:hidden">{{ $t("char-build.save") }}</span>
                         </div>
-                        <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-96 shadow-sm">
+                        <div tabindex="0" class="card card-sm dropdown-content bg-base-100 rounded-box z-1 w-80 sm:w-96 shadow-sm">
                             <div class="card-body space-y-2">
                                 <ul v-if="charProject.projects.length > 0" class="max-h-[60vh] overflow-y-auto">
                                     <li
@@ -1793,8 +1793,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             </div>
                         </div>
                     </div>
-                    <button class="btn btn-sm btn-ghost flex-1 sm:flex-none" @click="resetConfig">
-                        <Icon icon="ri:refresh-line" class="w-4 h-4" />
+                    <button class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="resetConfig">
+                        <Icon icon="ri:refresh-line" class="size-5 sm:size-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.reset_config") }}</span>
                     </button>
                 </div>
