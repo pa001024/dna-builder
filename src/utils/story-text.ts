@@ -17,6 +17,12 @@ export interface SearchTextSegment {
     highlighted: boolean
 }
 
+export interface SearchableStoryTextSegment {
+    text: string
+    tone: StoryTextSegment["tone"]
+    highlighted: boolean
+}
+
 export const DEFAULT_STORY_TEXT_CONFIG: StoryTextConfig = {
     nickname: "维塔",
     nickname2: "墨斯",
@@ -43,6 +49,82 @@ export function replaceStoryPlaceholders(input: string, config: StoryTextConfig)
             const selectedGender = key === "性别2" ? config.gender2 : config.gender
             return selectedGender === "male" ? maleText : femaleText
         })
+}
+
+/** 剧情文本中的字符区间（半开区间，start 含、end 不含） */
+export interface StoryTextRange {
+    start: number
+    end: number
+}
+
+/** 与 replaceStoryPlaceholders 完全一致的占位符匹配模式（含 CJK 竖线兼容） */
+const STORY_PLACEHOLDER_PATTERN = /\{nickname2\}|\{nickname\}|\{(性别2?)[:：]([^|丨{}]*)[|丨]([^|丨{}]*)\}/g
+
+/**
+ * 计算占位符替换前后的区间映射：把「去标签、未替换占位符」文本上的区间
+ * 映射到「占位符已按配置替换」后的展示文本区间。
+ * 命中区间落入占位符内部时自动扩到整个占位符，避免半截高亮。
+ * @param input 含占位符的原始文本（应已去除样式标签，与搜索索引文本同源）
+ * @param config 文本替换配置
+ * @param range 原始文本上的区间
+ * @returns 替换后文本上的区间
+ */
+export function mapStoryRangeAcrossPlaceholders(input: string, config: StoryTextConfig, range: StoryTextRange): StoryTextRange {
+    const matches: Array<{ start: number; rawLength: number; delta: number }> = []
+    STORY_PLACEHOLDER_PATTERN.lastIndex = 0
+    let match: RegExpExecArray | null
+    while ((match = STORY_PLACEHOLDER_PATTERN.exec(input)) !== null) {
+        const rawText = match[0]
+        let replacement = ""
+        if (rawText === "{nickname2}") {
+            replacement = config.nickname2
+        } else if (rawText === "{nickname}") {
+            replacement = config.nickname
+        } else {
+            const key = match[1]
+            const maleText = match[2] ?? ""
+            const femaleText = match[3] ?? ""
+            const selectedGender = key === "性别2" ? config.gender2 : config.gender
+            replacement = selectedGender === "male" ? maleText : femaleText
+        }
+
+        matches.push({
+            start: match.index,
+            rawLength: rawText.length,
+            delta: replacement.length - rawText.length,
+        })
+    }
+
+    const inputLength = input.length
+    let start = Math.min(Math.max(range.start, 0), inputLength)
+    let end = Math.min(Math.max(range.end, 0), inputLength)
+
+    // 边界落在占位符内部时，扩到占位符的完整边界
+    for (const placeholder of matches) {
+        const placeholderEnd = placeholder.start + placeholder.rawLength
+        if (start > placeholder.start && start < placeholderEnd) {
+            start = placeholder.start
+        }
+        if (end > placeholder.start && end < placeholderEnd) {
+            end = placeholderEnd
+        }
+    }
+
+    // 输出偏移 = 输入偏移 + 起始位置之前所有占位符的长度变化
+    const toOutputOffset = (offset: number): number => {
+        let output = offset
+        for (const placeholder of matches) {
+            if (placeholder.start + placeholder.rawLength <= offset) {
+                output += placeholder.delta
+            }
+        }
+        return output
+    }
+
+    return {
+        start: toOutputOffset(start),
+        end: toOutputOffset(end),
+    }
 }
 
 /**
@@ -206,4 +288,73 @@ export function buildSearchTextSegments(input: string, keyword: string): SearchT
                   highlighted: false,
               },
           ]
+}
+
+/**
+ * 在保留剧情样式标签解析（H/W/Title/blue 等语调）的同时，按关键词切分可渲染片段，
+ * 供全文搜索命中场景替代纯文本高亮使用，避免高亮模式下标签丢失。
+ * @param input 原始剧情文本（含占位符与样式标签）
+ * @param keyword 搜索关键词，为空时仅做标签解析
+ * @param config 文本替换配置
+ * @returns 带语调与命中标记的渲染片段
+ */
+export function buildSearchStorySegments(input: string, keyword: string, config: StoryTextConfig): SearchableStoryTextSegment[] {
+    const storySegments = parseStoryTextSegments(input, config)
+    if (!storySegments.length) {
+        return []
+    }
+
+    const normalizedKeyword = keyword.trim()
+    if (!normalizedKeyword) {
+        return storySegments.map(segment => ({
+            text: segment.text,
+            tone: segment.tone,
+            highlighted: false,
+        }))
+    }
+
+    const segments: SearchableStoryTextSegment[] = []
+    for (const segment of storySegments) {
+        if (!segment.text.includes(normalizedKeyword)) {
+            segments.push({
+                text: segment.text,
+                tone: segment.tone,
+                highlighted: false,
+            })
+            continue
+        }
+
+        let cursor = 0
+        while (cursor < segment.text.length) {
+            const matchIndex = segment.text.indexOf(normalizedKeyword, cursor)
+            if (matchIndex === -1) {
+                break
+            }
+
+            if (matchIndex > cursor) {
+                segments.push({
+                    text: segment.text.slice(cursor, matchIndex),
+                    tone: segment.tone,
+                    highlighted: false,
+                })
+            }
+
+            segments.push({
+                text: segment.text.slice(matchIndex, matchIndex + normalizedKeyword.length),
+                tone: segment.tone,
+                highlighted: true,
+            })
+            cursor = matchIndex + normalizedKeyword.length
+        }
+
+        if (cursor < segment.text.length) {
+            segments.push({
+                text: segment.text.slice(cursor),
+                tone: segment.tone,
+                highlighted: false,
+            })
+        }
+    }
+
+    return segments.filter(segment => segment.text !== "")
 }

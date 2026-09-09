@@ -350,7 +350,9 @@ function getPriceIcon(name: string) {
                                 </div>
                             </div>
                         </template>
-                        <span class="ml-auto max-w-full min-w-0 shrink border border-base-content/25 bg-base-100/60 px-1 py-px text-[10px] break-words">
+                        <span
+                            class="ml-auto max-w-full min-w-0 shrink border border-base-content/25 bg-base-100/60 px-1 py-px text-[10px] break-words"
+                        >
                             {{ payInfo.currency }} {{ payInfo.amount }}
                         </span>
                     </FullTooltip>
@@ -394,7 +396,7 @@ function getPriceIcon(name: string) {
                         {{ item.priceName }} {{ currentPrice }}
                     </span>
                 </div>
-                <div class="flex gap-2 items-center mt-1">
+                <div class="flex flex-wrap gap-2 items-center mt-1">
                     <div v-if="item.lv || item.cond" class="flex gap-2 text-xs text-base-content/45">
                         <span v-if="item.lv">Lv.{{ item.lv }}</span>
                         <span v-if="item.cond">解锁条件: {{ item.cond }}</span>

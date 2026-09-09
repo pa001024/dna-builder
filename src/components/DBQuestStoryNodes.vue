@@ -6,7 +6,14 @@ import { useSettingStore } from "@/store/setting"
 import { getDialogueDisplayContent } from "@/utils/dialogue"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
 import { buildQuestBgmUrl } from "@/utils/quest-bgm"
-import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
+import { buildQuestVideoUrl } from "@/utils/quest-video"
+import {
+    mapStoryRangeAcrossPlaceholders,
+    replaceStoryPlaceholders,
+    type StoryTextConfig,
+    type StoryTextRange,
+    stripStoryTextTags,
+} from "@/utils/story-text"
 
 interface DialogueChainItem {
     dialogue: Dialogue
@@ -26,6 +33,8 @@ interface DialogueSearchTarget {
     nodeId: string
     dialogueId: number
     optionId?: number
+    /** Fuse 命中的字符区间（相对去标签、去首尾空白的原始文本），用于跳转后原位高亮 */
+    matchRange?: StoryTextRange
 }
 
 const props = defineProps<{
@@ -62,6 +71,22 @@ const nicknameNpcIds = [...npcMap.entries()].filter(([, npc]) => npc.name === "{
 
 const questNodeElementMap = new Map<string, HTMLElement>()
 const nodeHighlightTimerMap = new Map<string, ReturnType<typeof setTimeout>>()
+
+/**
+ * 将模板 ref 解析为真实元素。
+ * 组件实例可能尚未挂载完成（$el 为注释/文本节点）或处于过渡中，
+ * 此时返回 null，避免把非 Element 值存入定位映射导致 querySelector 崩溃。
+ * @param refValue 模板 ref 值
+ * @returns 解析后的 HTMLElement；无法解析时返回 null
+ */
+function resolveRefElement(refValue: Element | ComponentPublicInstance | null): HTMLElement | null {
+    if (!refValue) {
+        return null
+    }
+
+    const candidate = refValue instanceof Element ? refValue : (refValue as ComponentPublicInstance).$el
+    return candidate instanceof HTMLElement ? candidate : null
+}
 
 /**
  * 获取当前剧情文本替换配置。
@@ -114,18 +139,13 @@ function getOptionStateKey(scopeKey: string, dialogueId: number): string {
  * @param element 节点元素
  */
 function setQuestNodeElement(nodeKey: string, element: Element | ComponentPublicInstance | null) {
-    if (!element) {
-        questNodeElementMap.delete(nodeKey)
-        return
-    }
-
-    const targetElement = element instanceof Element ? element : (element.$el as Element | null)
+    const targetElement = resolveRefElement(element)
     if (!targetElement) {
         questNodeElementMap.delete(nodeKey)
         return
     }
 
-    questNodeElementMap.set(nodeKey, targetElement as HTMLElement)
+    questNodeElementMap.set(nodeKey, targetElement)
 }
 
 /**
@@ -139,23 +159,18 @@ function getQuestDialogueKey(nodeId: string, dialogue: Dialogue): string {
 }
 
 /**
- * 注册对话卡片 DOM 引用，供自动播放滚动定位使用。
+ * 注册对话卡片 DOM 引用，供自动播放/搜索跳转定位使用。
  * @param dialogueKey 对话唯一键
  * @param element 对话卡片元素
  */
 function setDialogueElement(dialogueKey: string, element: Element | ComponentPublicInstance | null) {
-    if (!element) {
-        dialogueElementMap.delete(dialogueKey)
-        return
-    }
-
-    const targetElement = element instanceof Element ? element : (element.$el as Element | null)
+    const targetElement = resolveRefElement(element)
     if (!targetElement) {
         dialogueElementMap.delete(dialogueKey)
         return
     }
 
-    dialogueElementMap.set(dialogueKey, targetElement as HTMLElement)
+    dialogueElementMap.set(dialogueKey, targetElement)
 }
 
 /**
@@ -175,29 +190,45 @@ function scrollToDialogue(dialogueKey: string): void {
 
 /**
  * 获取搜索命中的对话正文或选项元素。
+ * 优先使用卡片缓存；缓存缺失/失效时回退到节点卡片内按 ID 属性查找，
+ * 避免组件 $el 处于过渡中（注释节点）导致取值异常。
  * @param dialogueKey 对话唯一键
- * @param optionId 选项 ID
- * @returns 搜索目标元素
+ * @param nodeId 所属节点 ID
+ * @param dialogueId 对话 ID
+ * @param optionId 命中选项 ID
+ * @returns 搜索目标元素；找不到返回 null
  */
-function getDialogueSearchElement(dialogueKey: string, optionId?: number): HTMLElement | null {
-    const dialogueElement = dialogueElementMap.get(dialogueKey)
-    if (!dialogueElement) {
+function getDialogueSearchElement(dialogueKey: string, nodeId: string, dialogueId: number, optionId?: number): HTMLElement | null {
+    const cachedElement = dialogueElementMap.get(dialogueKey)
+    if (cachedElement instanceof HTMLElement) {
+        return cachedElement
+    }
+
+    const nodeScopeKey = getQuestNodeScopeKey(props.questId, nodeId)
+    const nodeElement = questNodeElementMap.get(nodeScopeKey)
+    if (!nodeElement) {
+        return null
+    }
+
+    const cardElement = nodeElement.querySelector<HTMLElement>(`[data-quest-dialogue-id="${dialogueId}"]`)
+    if (!cardElement) {
         return null
     }
 
     if (optionId === undefined) {
-        return dialogueElement.querySelector<HTMLElement>("[data-dialogue-content='true']")
+        return cardElement.querySelector<HTMLElement>("[data-dialogue-content='true']") ?? cardElement
     }
 
     return (
-        Array.from(dialogueElement.querySelectorAll<HTMLElement>("[data-dialogue-option-id]")).find(
+        Array.from(cardElement.querySelectorAll<HTMLElement>("[data-dialogue-option-id]")).find(
             element => element.dataset.dialogueOptionId === String(optionId)
         ) ?? null
     )
 }
 
 /**
- * 滚动到搜索命中的具体对话内容。
+ * 滚动到搜索命中的具体对话内容，并对 Fuse 命中区间做原位高亮。
+ * 若对话卡片暂不可定位（过渡/未挂载完成），回退到滚动其所在节点卡片。
  * @param target 对话搜索目标
  */
 function scrollToSearchTarget(target: DialogueSearchTarget): void {
@@ -209,14 +240,125 @@ function scrollToSearchTarget(target: DialogueSearchTarget): void {
         }
 
         const dialogueKey = getQuestDialogueKey(target.nodeId, dialogueItem.dialogue)
-        const targetElement = getDialogueSearchElement(dialogueKey, target.optionId)
-        const scrollElement = targetElement ?? dialogueElementMap.get(dialogueKey)
-        if (!scrollElement) {
+        const targetElement = getDialogueSearchElement(dialogueKey, target.nodeId, target.dialogueId, target.optionId)
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: "smooth", block: "center" })
+
+            // 模糊命中（Fuse 区间）时在对应文字上做与列表一致的原位高亮
+            if (target.matchRange) {
+                const matchedOption =
+                    target.optionId === undefined
+                        ? undefined
+                        : dialogueItem.dialogue.options?.find(option => option.id === target.optionId)
+                const rawContent = matchedOption?.content ?? dialogueItem.dialogue.content ?? ""
+                const textRoot = targetElement.querySelector<HTMLElement>(".whitespace-pre-wrap")
+                const renderedRange = mapRenderedRangeFromRaw(rawContent, target.matchRange)
+                if (textRoot && renderedRange) {
+                    applyStoryTextRangeHighlight(textRoot, renderedRange.start, renderedRange.end)
+                }
+            }
             return
         }
 
-        scrollElement.scrollIntoView({ behavior: "smooth", block: "center" })
+        const nodeKey = getQuestNodeScopeKey(props.questId, target.nodeId)
+        const nodeElement = questNodeElementMap.get(nodeKey)
+        if (nodeElement) {
+            const scrollContainer = getScrollableContainer(nodeElement)
+            if (isNodeHigherThanContainer(nodeElement, scrollContainer)) {
+                scrollNodeToTop(nodeElement, scrollContainer)
+            } else {
+                nodeElement.scrollIntoView({ behavior: "smooth", block: "center" })
+            }
+            triggerQuestNodeHighlight(nodeKey)
+        }
     })
+}
+
+/**
+ * 将「去标签、去首尾空白的原始文本」上的 Fuse 区间映射为「占位符替换后」的展示文本区间。
+ * @param rawContent 对话/选项原始文本
+ * @param range 原始文本区间
+ * @returns 展示文本区间
+ */
+function mapRenderedRangeFromRaw(rawContent: string, range: StoryTextRange): StoryTextRange | null {
+    const plain = stripStoryTextTags(rawContent)
+    if (!plain) {
+        return null
+    }
+
+    const leadingTrimLength = plain.length - plain.trimStart().length
+    return mapStoryRangeAcrossPlaceholders(plain, storyTextConfig.value, {
+        start: leadingTrimLength + range.start,
+        end: leadingTrimLength + range.end,
+    })
+}
+
+/** 当前常驻高亮标记（跳转到其它目标或组件卸载时移除） */
+const storyRangeMarks: HTMLElement[] = []
+
+/**
+ * 移除上一次搜索跳转留下的文字高亮。
+ */
+function clearStoryRangeMarks(): void {
+    for (const mark of storyRangeMarks) {
+        if (mark.isConnected) {
+            mark.replaceWith(...Array.from(mark.childNodes))
+        }
+    }
+    storyRangeMarks.length = 0
+}
+
+/**
+ * 在容器文本上按字符区间打常驻高亮。
+ * 高亮持续保留，直到跳转到下一个搜索目标或组件卸载。
+ * @param container 文本容器
+ * @param start 起始字符偏移（含）
+ * @param end 结束字符偏移（不含）
+ */
+function applyStoryTextRangeHighlight(container: HTMLElement, start: number, end: number): void {
+    clearStoryRangeMarks()
+    if (start >= end || typeof document === "undefined" || typeof NodeFilter === "undefined") {
+        return
+    }
+
+    const textNodes: Text[] = []
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT)
+    let textNode: Text | null
+    while ((textNode = walker.nextNode() as Text | null) !== null) {
+        if (textNode.data.length > 0) {
+            textNodes.push(textNode)
+        }
+    }
+
+    let cursor = 0
+    for (const text of textNodes) {
+        const length = text.data.length
+        if (cursor + length <= start) {
+            cursor += length
+            continue
+        }
+        if (cursor >= end) {
+            break
+        }
+
+        const from = Math.max(0, start - cursor)
+        const to = Math.min(length, end - cursor)
+        if (to > from) {
+            try {
+                const range = document.createRange()
+                range.setStart(text, from)
+                range.setEnd(text, to)
+                const mark = document.createElement("mark")
+                mark.className =
+                    "rounded-xs bg-primary/20 px-0.5 font-semibold text-base-content underline decoration-primary/80 decoration-2 underline-offset-2"
+                range.surroundContents(mark)
+                storyRangeMarks.push(mark)
+            } catch {
+                /* 单个文本片段包裹失败不影响跳转 */
+            }
+        }
+        cursor += length
+    }
 }
 
 /**
@@ -349,6 +491,7 @@ onBeforeUnmount(() => {
     nodeHighlightTimerMap.clear()
     questNodeElementMap.clear()
     dialogueElementMap.clear()
+    clearStoryRangeMarks()
     stopAutoPlay()
     stopDialogueVoicePlayback()
     stopBgmPlayback()
@@ -1245,7 +1388,7 @@ watch(flattenedDialogueChain, () => {
                 </div>
 
                 <!-- 剧情内嵌视频 -->
-                <StoryVideoPlayer v-if="node.video" :src="node.video" :title="formatStoryText(node.name)" />
+                <StoryVideoPlayer v-if="node.video" :src="buildQuestVideoUrl(node.video)" :title="formatStoryText(node.name)" />
             </div>
 
             <TransitionGroup

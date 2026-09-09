@@ -919,6 +919,13 @@ export const questData_fr: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "quest_1686818628614267",
+                        type: "TalkNode",
+                        name: "过场-100186-合体-SC10",
+                        next: ["quest_16940707345323398"],
+                        video: "SQ_OBT0100_SC010",
+                    },
+                    {
                         id: "quest_16940707345323398",
                         type: "PlayOrStopBGMNode",
                         name: "bgm - xibi p2  - start",
@@ -975,6 +982,13 @@ export const questData_fr: QuestStory[] = [
                         ],
                     },
                     {
+                        id: "173028002823218199",
+                        type: "TalkNode",
+                        name: "过场-100186-合体-SC10",
+                        next: ["quest_16940707345323398", "quest_1686818656143291"],
+                        video: "SQ_OBT0100_SC010",
+                    },
+                    {
                         id: "1730293403920418558",
                         type: "PlayOrStopBGMNode",
                         name: "bgm - tiaoya  - start",
@@ -984,6 +998,7 @@ export const questData_fr: QuestStory[] = [
                 startIds: [
                     "quest_16926743134633260",
                     "quest_16941646614348815",
+                    "quest_1686818628614267",
                     "quest_16940707345323398",
                     "quest_1686818656143291",
                     "1730293403920418558",
@@ -1100,6 +1115,13 @@ export const questData_fr: QuestStory[] = [
                                 npc: 100005,
                             },
                         ],
+                    },
+                    {
+                        id: "173028002823218199",
+                        type: "TalkNode",
+                        name: "过场-100186-合体-SC10",
+                        next: ["173028002823318208", "173028002823318202"],
+                        video: "SQ_OBT0100_SC010",
                     },
                     {
                         id: "173028002823318208",
@@ -41411,6 +41433,15 @@ export const questData_fr: QuestStory[] = [
                 desc: "Quel est cet endroit... ? La Mer du Silence ? Explorez les environs.",
                 nodes: [
                     {
+                        id: "177855473077213147715",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 106201,
+                        pos: [-60, 30],
+                        next: ["17739990786883938430"],
+                        video: "Ver0104_SC026",
+                    },
+                    {
                         id: "17739990786883938430",
                         type: "TalkNode",
                         name: "对话节点",
@@ -50302,7 +50333,7 @@ export const questData_fr: QuestStory[] = [
                         id: "1724136079053183530",
                         type: "TalkNode",
                         name: "FixSimple_27达芙涅进场",
-                        next: ["17290492796331765754"],
+                        next: ["17470542648655710487"],
                         dialogues: [
                             {
                                 id: 11016801,
@@ -50484,6 +50515,13 @@ export const questData_fr: QuestStory[] = [
                         type: "PlayOrStopBGMNode",
                         name: "BGM节点",
                         resource: "0067_story_daphnis_theme_piano",
+                    },
+                    {
+                        id: "17470542648655710487",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        next: ["17290492796331765754"],
+                        video: "SQ_OBT0102_SC020",
                     },
                     {
                         id: "17290492796331765754",
@@ -51382,6 +51420,7 @@ export const questData_fr: QuestStory[] = [
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_01】上半",
                         next: ["17878172730435714"],
+                        video: "SQ_Ex02_FixSimple_01",
                         dialogues: [
                             {
                                 id: 11100001,
@@ -51444,6 +51483,7 @@ export const questData_fr: QuestStory[] = [
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_01】下半",
                         next: ["17804009481207050409", "17851555172566669159"],
+                        video: "SQ_Ex02_FixSimple_01",
                     },
                     {
                         id: "17804009481207050409",
@@ -60675,7 +60715,7 @@ export const questData_fr: QuestStory[] = [
                         id: "17811856045637236",
                         type: "TalkNode",
                         name: "对话节点",
-                        next: ["17881637006036717005"],
+                        next: ["17859171300142976", "17881637006036717005"],
                         dialogues: [
                             {
                                 id: 11114201,
@@ -60773,6 +60813,12 @@ export const questData_fr: QuestStory[] = [
                                 npc: 111125,
                             },
                         ],
+                    },
+                    {
+                        id: "17859171300142976",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        video: "SQ_Ver0105_SC033",
                     },
                     {
                         id: "17881637006036717005",
@@ -64283,7 +64329,7 @@ export const questData_fr: QuestStory[] = [
                         id: "17857741454785568441",
                         type: "TalkNode",
                         name: "对话节点",
-                        next: ["17857743811715572241", "17857744086435572963"],
+                        next: ["17857743811715572241", "17857744086435572963", "17839443189324407582"],
                         dialogues: [
                             {
                                 id: 11119901,
@@ -64361,6 +64407,12 @@ export const questData_fr: QuestStory[] = [
                                 npc: 110022,
                             },
                         ],
+                    },
+                    {
+                        id: "17839443189324407582",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        video: "SQ_Ver0105_SC013",
                     },
                     {
                         id: "178817222085747000699",
@@ -80952,6 +81004,7 @@ export const questData_fr: QuestStory[] = [
                         srId: 105701,
                         pos: [22901, -85028],
                         next: ["1749034619046916371"],
+                        video: "SQ_Ver0101_SC021",
                         dialogues: [
                             {
                                 id: 12022001,
@@ -86433,6 +86486,13 @@ export const questData_fr: QuestStory[] = [
                         pos: [175, -590],
                     },
                     {
+                        id: "17621726816923025235",
+                        type: "TalkNode",
+                        name: "过场 - 小黑屋",
+                        next: ["17621726816923025236"],
+                        video: "SQ_Ver0102_SC001",
+                    },
+                    {
                         id: "17621726816923025236",
                         type: "TalkNode",
                         name: "【East02_FixSimple_01】主角与止流在止流幻境争执",
@@ -86491,7 +86551,7 @@ export const questData_fr: QuestStory[] = [
                         ],
                     },
                 ],
-                startIds: ["17428991219553149567", "17428991219553149568"],
+                startIds: ["17428991219553149567", "17428991219553149568", "17621726816923025235"],
             },
             {
                 id: 12020102,
@@ -100550,8 +100610,17 @@ export const questData_fr: QuestStory[] = [
                         type: "PlayOrStopBGMNode",
                         name: "播放暂停音乐",
                         resource: "0149_cs_two_lonng_merge",
+                        next: ["17675829024551092776"],
                         srId: 104506,
                         pos: [31509, -108737],
+                    },
+                    {
+                        id: "17675829024551092776",
+                        type: "TalkNode",
+                        name: "阴阳合一",
+                        srId: 104506,
+                        pos: [31509, -108737],
+                        video: "Ver0102_SC019",
                     },
                 ],
             },
@@ -108878,6 +108947,15 @@ export const questData_fr: QuestStory[] = [
                 name: "Chercher Su Yi",
                 desc: "La crise est résolue. Et plus encore : tous ont été témoins de vos actions. Peu à peu, l’opinion des habitants envers les Vagabonds commence à changer.\nZhiliu annonce alors que les Chasseurs d’Encens ont remporté la première place et la victoire finale.\nMais au cœur des célébrations, une personne manque à l’appel... Trouvez Su Yi et voyez ce qu’elle fait.",
                 nodes: [
+                    {
+                        id: "17722608748192011",
+                        type: "TalkNode",
+                        name: "对话节点",
+                        srId: 104506,
+                        pos: [31501, -107674],
+                        next: ["17722608748192006", "177450703157419088850"],
+                        video: "Ver0103_SC003",
+                    },
                     {
                         id: "17722608748192006",
                         type: "TalkNode",

@@ -4,7 +4,7 @@ import type { Dialogue, DialogueOption } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
 import { getDialogueDisplayContent } from "@/utils/dialogue"
 import { getImprType, getRegionType } from "@/utils/quest-utils"
-import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
+import type { StoryTextConfig } from "@/utils/story-text"
 
 const props = defineProps<{
     dialogue: Dialogue
@@ -26,7 +26,6 @@ const emit = defineEmits<{
 const settingStore = useSettingStore()
 const normalizedSearchKeyword = computed(() => props.searchKeyword?.trim() || "")
 const dialogueContent = computed(() => getDialogueDisplayContent(props.dialogue))
-const formattedDialogueContent = computed(() => formatStoryText(dialogueContent.value))
 
 /**
  * 获取当前剧情文本替换配置。
@@ -39,19 +38,6 @@ const storyTextConfig = computed<StoryTextConfig>(() => {
         gender2: settingStore.protagonistGender2,
     }
 })
-
-/**
- * 解析剧情文本中的占位符。
- * @param text 原始文本
- * @returns 替换后的文本
- */
-function formatStoryText(text: string | undefined): string {
-    if (!text) {
-        return ""
-    }
-
-    return replaceStoryPlaceholders(text, storyTextConfig.value)
-}
 
 /**
  * 提取条目中的印象变化条目。
@@ -107,6 +93,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
 <template>
     <!-- 内层小卡：hover 轻浮起；播放中切换 primary 强调态 -->
     <div
+        :data-quest-dialogue-id="dialogue.id"
         class="space-y-1 rounded-xs border bg-base-content/3 p-2.5 transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-px hover:shadow-[0_0_6px_color-mix(in_srgb,var(--color-base-content)_8%,transparent)]"
         :class="playing ? 'border-primary/60 bg-primary/8 shadow-lg shadow-primary/20' : 'border-base-content/10'"
     >
@@ -129,13 +116,14 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                 </button>
             </div>
             <div v-if="dialogueContent" data-dialogue-content="true" class="w-full">
-                <HighlightText
+                <HighlightStoryText
                     v-if="normalizedSearchKeyword"
-                    :text="formattedDialogueContent"
+                    :text="dialogueContent"
                     :keyword="normalizedSearchKeyword"
+                    :story-config="storyTextConfig"
                     class="block w-full"
                 />
-                <TypewriterText v-else :text="formattedDialogueContent" :trigger-key="triggerKey" />
+                <TypewriterText v-else :text="dialogueContent" :trigger-key="triggerKey" />
             </div>
             <div v-if="getImpressionEntries(dialogue).length" class="mt-1 flex flex-wrap gap-1.5">
                 <span
@@ -179,15 +167,12 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                     </span>
 
                     <div class="min-w-0 flex-1 flex items-center gap-1.5 flex-wrap">
-                        <HighlightText
-                            v-if="normalizedSearchKeyword"
-                            :text="formatStoryText(option.content)"
+                        <HighlightStoryText
+                            :text="option.content || ''"
                             :keyword="normalizedSearchKeyword"
+                            :story-config="storyTextConfig"
                             class="leading-4 text-base-content/90 whitespace-normal"
                         />
-                        <span v-else class="leading-4 text-base-content/90 whitespace-normal">
-                            {{ formatStoryText(option.content) }}
-                        </span>
 
                         <span
                             v-for="impression in getImpressionEntries(option)"

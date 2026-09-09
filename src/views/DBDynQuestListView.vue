@@ -17,6 +17,7 @@ import { regionMap } from "@/data/d/region.data"
 import { subRegionMap } from "@/data/d/subregion.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
+import { stripStoryTextTags } from "@/utils/story-text"
 
 interface DynQuestSnippetSegment {
     text: string
@@ -235,8 +236,8 @@ function cleanSnippets(snippets: string[]): string[] {
 function collectDynQuestSnippets(quest: DynQuest): string[] {
     const snippets: string[] = []
 
-    snippets.push(quest.name)
-    snippets.push(quest.desc)
+    snippets.push(stripStoryTextTags(quest.name))
+    snippets.push(stripStoryTextTags(quest.desc))
     snippets.push(getDynQuestTypeLabel(quest.type))
     snippets.push(getRegionName(quest.regionId))
     snippets.push(getSubRegionName(quest.subRegionId))
@@ -259,36 +260,36 @@ function collectDynQuestSnippets(quest: DynQuest): string[] {
 
     for (const node of quest.nodes ?? []) {
         if (node.name) {
-            snippets.push(node.name)
+            snippets.push(stripStoryTextTags(node.name))
         }
 
         for (const dialogue of node.dialogues ?? []) {
             if (dialogue.content) {
-                snippets.push(dialogue.content)
+                snippets.push(stripStoryTextTags(dialogue.content))
             }
 
             for (const option of dialogue.options ?? []) {
                 if (option.content) {
-                    snippets.push(option.content)
+                    snippets.push(stripStoryTextTags(option.content))
                 }
             }
         }
 
         for (const question of node.questions ?? []) {
             if (question.name) {
-                snippets.push(question.name)
+                snippets.push(stripStoryTextTags(question.name))
             }
             if (question.tips) {
-                snippets.push(question.tips)
+                snippets.push(stripStoryTextTags(question.tips))
             }
         }
 
         for (const answer of node.answers ?? []) {
             if (answer.name) {
-                snippets.push(answer.name)
+                snippets.push(stripStoryTextTags(answer.name))
             }
             if (answer.desc) {
-                snippets.push(answer.desc)
+                snippets.push(stripStoryTextTags(answer.desc))
             }
         }
     }

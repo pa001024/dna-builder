@@ -10,6 +10,7 @@ import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import { useSettingStore } from "@/store/setting"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getQuestTypeDisplay } from "@/utils/quest-utils"
+import { stripStoryTextTags } from "@/utils/story-text"
 
 interface QuestChainSnippetSegment {
     text: string
@@ -22,9 +23,17 @@ interface QuestChainSearchSnippet {
     segments: QuestChainSnippetSegment[]
 }
 
+/** 传给详情组件的 Fuse 命中上下文（用于无精确命中时定位模糊命中内容） */
+interface QuestChainFuseHit {
+    key: string
+    value: string
+    indices: Array<[number, number]>
+}
+
 interface QuestChainSearchResult {
     questChain: QuestChain
     snippet: QuestChainSearchSnippet | null
+    fuseMatches: QuestChainFuseHit[]
 }
 
 interface QuestChainFullTextEntry {
@@ -112,6 +121,7 @@ function cleanSnippets(snippets: string[]): string[] {
 
 /**
  * 收集任务链可用于全文搜索的文本片段。
+ * 摘要文本需移除剧情样式标签（<H>/<W> 等），保证关键词高亮命中区间与展示文本一致。
  * @param questChain 任务链
  * @param itemMap 任务详情映射
  * @returns 文本片段
@@ -126,25 +136,25 @@ function collectQuestChainSnippets(questChain: QuestChain, itemMap: Map<number, 
         }
 
         if (questItem.name) {
-            snippets.push(questItem.name)
+            snippets.push(stripStoryTextTags(questItem.name))
         }
         if (questItem.desc) {
-            snippets.push(questItem.desc)
+            snippets.push(stripStoryTextTags(questItem.desc))
         }
 
         for (const node of questItem.nodes ?? []) {
             if (node.name) {
-                snippets.push(node.name)
+                snippets.push(stripStoryTextTags(node.name))
             }
 
             for (const dialogue of node.dialogues ?? []) {
                 if (dialogue.content) {
-                    snippets.push(dialogue.content)
+                    snippets.push(stripStoryTextTags(dialogue.content))
                 }
 
                 for (const option of dialogue.options ?? []) {
                     if (option.content) {
-                        snippets.push(option.content)
+                        snippets.push(stripStoryTextTags(option.content))
                     }
                 }
             }
@@ -368,6 +378,13 @@ const selectedQuestChain = computed(() => {
 })
 
 /**
+ * 获取当前选中任务链的搜索结果（含 Fuse 命中上下文）。
+ */
+const selectedQuestChainResult = computed(() => {
+    return filteredQuestChains.value.find(result => result.questChain.id === selectedQuestChainId.value) ?? null
+})
+
+/**
  * 判断任务链是否包含印象检定。
  * @param questChainId 任务链 ID
  * @returns 是否包含印象检定
@@ -587,6 +604,28 @@ function getQuestChainFuzzySnippet(matches: readonly FuseResultMatch[] | undefin
 }
 
 /**
+ * 提取 Fuse 命中的精简上下文（key + 命中文本），供详情组件定位模糊命中内容。
+ * @param matches Fuse 匹配信息
+ * @returns 精简命中上下文
+ */
+function toQuestChainFuseHits(matches: readonly FuseResultMatch[] | undefined): QuestChainFuseHit[] {
+    if (!matches) {
+        return []
+    }
+
+    return matches
+        .filter(
+            (match): match is FuseResultMatch & { key: string; value: string } =>
+                !!match.key && typeof match.value === "string" && match.value.trim() !== ""
+        )
+        .map(match => ({
+            key: match.key,
+            value: match.value,
+            indices: match.indices.map(([start, end]) => [start, end]),
+        }))
+}
+
+/**
  * 按关键词与筛选条件过滤任务链。
  */
 const filteredQuestChains = computed<QuestChainSearchResult[]>(() => {
@@ -596,6 +635,7 @@ const filteredQuestChains = computed<QuestChainSearchResult[]>(() => {
             return questChainData.filter(passesQuestChainSwitchFilters).map(questChain => ({
                 questChain,
                 snippet: null,
+                fuseMatches: [],
             }))
         }
 
@@ -607,12 +647,14 @@ const filteredQuestChains = computed<QuestChainSearchResult[]>(() => {
             .map(result => ({
                 questChain: result.item.questChain,
                 snippet: getQuestChainSearchSnippet(result.item.snippets, keyword) ?? getQuestChainFuzzySnippet(result.matches),
+                fuseMatches: toQuestChainFuseHits(result.matches),
             }))
         const fuzzyResults = reorderedResults
             .filter(result => !result.item.searchText.includes(keyword))
             .map(result => ({
                 questChain: result.item.questChain,
                 snippet: getQuestChainFuzzySnippet(result.matches),
+                fuseMatches: toQuestChainFuseHits(result.matches),
             }))
 
         return [...exactResults, ...fuzzyResults]
@@ -638,6 +680,7 @@ const filteredQuestChains = computed<QuestChainSearchResult[]>(() => {
         .map(questChain => ({
             questChain,
             snippet: null,
+            fuseMatches: [],
         }))
 })
 
@@ -952,7 +995,12 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
 
             <!-- 右侧详情面板 -->
             <ScrollArea v-if="selectedQuestChain" :key="selectedQuestChain.id" class="min-w-0 flex-2">
-                <DBQuestDetailItem :key="selectedQuestChainId" :quest-chain="selectedQuestChain" :search-keyword="showFullTextSearch ? searchKeyword.trim() : ''" />
+                <DBQuestDetailItem
+                    :key="selectedQuestChainId"
+                    :quest-chain="selectedQuestChain"
+                    :search-keyword="showFullTextSearch ? searchKeyword.trim() : ''"
+                    :search-fuse-matches="selectedQuestChainResult?.fuseMatches ?? []"
+                />
             </ScrollArea>
         </div>
     </div>

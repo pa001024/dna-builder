@@ -9,6 +9,7 @@ import { eventData } from "@/data"
 import { getVersionByTime } from "@/data/time.data"
 import { getCurrentVersionLimit } from "@/data/versionGate"
 import { matchPinyin } from "@/utils/pinyin-utils"
+import { stripStoryTextTags } from "@/utils/story-text"
 import { formatDateTime, formatTimeRange } from "@/utils/time"
 
 const searchKeyword = useSearchParam<string>("kw", "")
@@ -351,10 +352,10 @@ function collectEventSnippets(item: (typeof eventData)[number]): string[] {
     const snippets: string[] = []
 
     snippets.push(item.name)
-    snippets.push(item.desc)
+    snippets.push(stripStoryTextTags(item.desc))
 
     if (item.rule) {
-        snippets.push(item.rule)
+        snippets.push(stripStoryTextTags(item.rule))
     }
 
     return cleanEventSnippets(snippets)

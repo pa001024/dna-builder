@@ -8,7 +8,7 @@ import { storySummaryData } from "@/data/d/storysummary.data"
 import { useSettingStore } from "@/store/setting"
 import { getQuestTypeDisplay } from "@/utils/quest-utils"
 import { getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
-import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
+import { replaceStoryPlaceholders, type StoryTextConfig, stripStoryTextTags } from "@/utils/story-text"
 
 interface QuestNextOption {
     condition: string
@@ -20,6 +20,8 @@ interface QuestSearchTarget {
     nodeId: string
     dialogueId: number
     optionId?: number
+    /** Fuse 命中的字符区间（相对去标签、去首尾空白后的文本），用于跳转后原位高亮 */
+    matchRange?: { start: number; end: number }
 }
 
 interface QuestSearchMatch {
@@ -42,6 +44,8 @@ const props = defineProps<{
     questChain: QuestChain
     focusQuestId?: number
     searchKeyword?: string
+    /** 列表页 Fuse 命中上下文，用于无精确命中时定位模糊命中内容 */
+    searchFuseMatches?: Array<{ key?: string; value?: string; indices?: Array<[number, number]> }>
 }>()
 
 const settingStore = useSettingStore()
@@ -251,6 +255,10 @@ function jumpToMatchedQuest(nextIndex: number) {
 }
 
 onBeforeUnmount(() => {
+    if (initialJumpTimer) {
+        clearTimeout(initialJumpTimer)
+        initialJumpTimer = null
+    }
     document.removeEventListener("pointerdown", handleVoiceSettingsPointerDown)
     for (const timer of questHighlightTimerMap.values()) {
         clearTimeout(timer)
@@ -345,12 +353,14 @@ const questDetails = computed<QuestDetailItem[]>(() => {
     })
 })
 
-const matchedQuestTargets = computed<QuestSearchMatch[]>(() => {
-    const keyword = normalizedSearchKeyword.value
-    if (!keyword) {
-        return []
-    }
+const searchFuseMatches = computed(() => props.searchFuseMatches ?? [])
 
+/**
+ * 精确命中：命中对话正文/选项，或整条任务的 searchText。
+ * @param keyword 搜索关键词
+ * @returns 精确命中列表
+ */
+function buildExactQuestMatches(keyword: string): QuestSearchMatch[] {
     return questDetails.value.flatMap(quest => {
         const dialogueMatches = (quest.details?.nodes ?? []).flatMap(node => {
             return (node.dialogues ?? []).flatMap(dialogue => {
@@ -388,12 +398,153 @@ const matchedQuestTargets = computed<QuestSearchMatch[]>(() => {
 
         return quest.searchText.includes(keyword) ? [{ questId: quest.id }] : []
     })
+}
+
+/**
+ * 无精确命中时的兜底：复用列表页 Fuse 的命中上下文。
+ * 将 Fuse 命中的 snippet 文本与当前链中的对话/选项文本比对（清洗规则与列表索引一致：
+ * 去样式标签 + 去首尾空白），定位到具体对话，实现模糊命中的跳转与原位高亮。
+ * @returns 基于 Fuse 命中定位的搜索目标
+ */
+function buildFuseFallbackQuestMatches(): QuestSearchMatch[] {
+    const matches: QuestSearchMatch[] = []
+
+    // 先按清洗后文本建立索引，避免逐条 Fuse 命中重复全量扫描
+    const textTargetMap = new Map<string, Array<{ questId: number; target: QuestSearchTarget }>>()
+    for (const quest of questDetails.value) {
+        for (const node of quest.details?.nodes ?? []) {
+            for (const dialogue of node.dialogues ?? []) {
+                const contentKey = stripStoryTextTags(dialogue.content || "").trim()
+                if (contentKey) {
+                    const targets = textTargetMap.get(contentKey) ?? []
+                    targets.push({
+                        questId: quest.id,
+                        target: {
+                            nodeId: node.id,
+                            dialogueId: dialogue.id,
+                        },
+                    })
+                    textTargetMap.set(contentKey, targets)
+                }
+
+                for (const option of dialogue.options ?? []) {
+                    const optionKey = stripStoryTextTags(option.content || "").trim()
+                    if (optionKey) {
+                        const targets = textTargetMap.get(optionKey) ?? []
+                        targets.push({
+                            questId: quest.id,
+                            target: {
+                                nodeId: node.id,
+                                dialogueId: dialogue.id,
+                                optionId: option.id,
+                            },
+                        })
+                        textTargetMap.set(optionKey, targets)
+                    }
+                }
+            }
+        }
+    }
+
+    const visitedValues = new Set<string>()
+    for (const fuseMatch of searchFuseMatches.value) {
+        if (fuseMatch.key !== "snippets" || !fuseMatch.value) {
+            continue
+        }
+
+        const matchedText = fuseMatch.value.trim()
+        if (!matchedText || visitedValues.has(matchedText)) {
+            continue
+        }
+        visitedValues.add(matchedText)
+
+        // Fuse 区间为闭区间 [start, end]，转换为半开区间供高亮使用
+        const firstHit = fuseMatch.indices?.[0]
+        const matchRange =
+            firstHit && Number.isInteger(firstHit[0]) && Number.isInteger(firstHit[1]) && firstHit[1] >= firstHit[0]
+                ? { start: firstHit[0], end: firstHit[1] + 1 }
+                : undefined
+
+        for (const target of textTargetMap.get(matchedText) ?? []) {
+            matches.push({
+                questId: target.questId,
+                target: {
+                    nodeId: target.target.nodeId,
+                    dialogueId: target.target.dialogueId,
+                    optionId: target.target.optionId,
+                    matchRange,
+                },
+            })
+        }
+    }
+
+    return matches
+}
+
+const matchedQuestTargets = computed<QuestSearchMatch[]>(() => {
+    const keyword = normalizedSearchKeyword.value
+    if (!keyword) {
+        return []
+    }
+
+    // 精确命中优先；再并入列表页 Fuse 命中的内容（覆盖模糊命中场景），并去重
+    const exactMatches = buildExactQuestMatches(keyword)
+    const fuseMatches = buildFuseFallbackQuestMatches()
+
+    if (!exactMatches.length) {
+        return fuseMatches
+    }
+    if (!fuseMatches.length) {
+        return exactMatches
+    }
+
+    const seenKeys = new Set<string>()
+    const merged: QuestSearchMatch[] = []
+    for (const match of [...exactMatches, ...fuseMatches]) {
+        const optionKey = match.target ? `${match.target.nodeId}-${match.target.dialogueId}-${match.target.optionId ?? ""}` : `quest-${match.questId}`
+        const key = `${match.questId}|${optionKey}`
+        if (seenKeys.has(key)) {
+            continue
+        }
+        seenKeys.add(key)
+        merged.push(match)
+    }
+    return merged
 })
 
 const activeMatchIndex = ref(0)
 const activeSearchMatch = computed(() => matchedQuestTargets.value[activeMatchIndex.value])
 const activeSearchTarget = computed(() => activeSearchMatch.value?.target)
 const activeSearchQuestId = computed(() => activeSearchMatch.value?.questId)
+
+// 自动跳转到首个搜索命中的节流定时器与已跳转标记
+let initialJumpTimer: ReturnType<typeof setTimeout> | null = null
+const autoJumpedTargetKey = ref("")
+
+/**
+ * 从列表页点选任务链进入详情 / 关键词变化时，自动跳转到首个命中的对话。
+ * 每个 (任务链, 关键词) 组合只自动跳转一次，避免干扰用户通过 1/N 浮层手动切换。
+ */
+watch(
+    () => [props.questChain?.id, normalizedSearchKeyword.value, matchedQuestTargets.value.length],
+    () => {
+        const token = `${props.questChain?.id ?? 0}|${normalizedSearchKeyword.value}`
+        if (!matchedQuestTargets.value.length || autoJumpedTargetKey.value === token) {
+            return
+        }
+
+        if (initialJumpTimer) {
+            clearTimeout(initialJumpTimer)
+        }
+
+        initialJumpTimer = setTimeout(() => {
+            autoJumpedTargetKey.value = token
+            activeMatchIndex.value = 0
+            jumpToMatchedQuest(0)
+        }, 120)
+    },
+    { immediate: true }
+)
 
 /**
  * 获取任务链版本号。
@@ -580,7 +731,12 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                     :class="{ 'border-primary ring-4 ring-primary/10': highlightedQuestMap[quest.id] }"
                 >
                     <div class="flex items-center gap-2 text-sm">
-                        任务: <HighlightText :text="formatStoryText(quest.details?.name || '?')" :keyword="normalizedSearchKeyword" />
+                        任务:
+                        <HighlightStoryText
+                            :text="quest.details?.name || '?'"
+                            :keyword="normalizedSearchKeyword"
+                            :story-config="storyTextConfig"
+                        />
                         <CopyID :id="quest.id" />
                         <div class="flex-1"></div>
                         <span v-if="quest.sr" class="ml-2 inline-flex items-center gap-1 text-xs text-base-content/70">
@@ -590,7 +746,11 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                     </div>
 
                     <div v-if="quest.details?.desc" class="text-sm leading-relaxed text-base-content/70">
-                        <HighlightText :text="formatStoryText(quest.details.desc)" :keyword="normalizedSearchKeyword" />
+                        <HighlightStoryText
+                            :text="quest.details.desc"
+                            :keyword="normalizedSearchKeyword"
+                            :story-config="storyTextConfig"
+                        />
                     </div>
 
                     <div v-if="shouldShowQuestNextOptions(quest)" class="flex flex-wrap items-center gap-1.5 text-xs">

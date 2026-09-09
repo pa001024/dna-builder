@@ -6,6 +6,7 @@ import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledCharHelper } from "@/data"
 import npcData, { type NPC, npcMap } from "@/data/d/npc.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
+import { stripStoryTextTags } from "@/utils/story-text"
 
 interface NpcSnippetSegment {
     text: string
@@ -71,6 +72,7 @@ function hasNpcDialogue(npc: NPC): boolean {
 
 /**
  * 收集 NPC 可用于全文搜索的文本片段。
+ * 对话摘要需移除剧情样式标签（<H>/<W> 等），保证关键词高亮命中区间与展示文本一致。
  * @param npc NPC 数据
  * @returns 搜索片段
  */
@@ -79,12 +81,12 @@ function collectNpcSnippets(npc: NPC): string[] {
 
     for (const dialogue of npc.talks ?? []) {
         if (dialogue.content?.trim()) {
-            snippets.add(dialogue.content.trim())
+            snippets.add(stripStoryTextTags(dialogue.content.trim()))
         }
 
         for (const option of dialogue.options ?? []) {
             if (option.content?.trim()) {
-                snippets.add(option.content.trim())
+                snippets.add(stripStoryTextTags(option.content.trim()))
             }
         }
     }
