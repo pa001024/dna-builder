@@ -6,6 +6,7 @@ import { normalizeCharSettings } from "@/composables/useCharSettings"
 import { charMap, LeveledChar } from "@/data"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import { useInvStore } from "@/store/inv"
+import { format100 } from "@/util"
 import { formatDateTime } from "@/utils/time"
 
 type RankedItem = {
@@ -31,13 +32,33 @@ const ranking = ref<RankingList | null>(null)
 const loading = ref(false)
 const switching = ref(false)
 const rankedItems = ref<RankedItem[]>([])
+/** 敌人抗性可选值（与构筑页保持一致）：0 = 无抗，0.5 = 正抗（强抗），-4 = 负抗（弱抗） */
+const enemyResistanceOptions = [0, 0.5, -4]
+/** 敌人抗性覆盖：null = 沿用构筑自身的敌人抗性，其余值 = 覆盖到榜单全部构筑的敌人抗性 */
+const resistanceOverride = ref<number | null>(null)
+/** 是否正在按覆盖后的抗性重算榜单 DPS */
+const computing = ref(false)
+/** 榜单条目的服务端原始数据：抗性覆盖后基于它重新计算，无需重复请求 */
+const rawItems = ref<RankingListItem[]>([])
+/** 重算任务令牌：覆盖值被再次修改时用于丢弃过期的重算任务 */
+let recomputeToken = 0
 
 const rankingId = computed(() => String(route.params.id || ""))
 
-function calcBuildDps(build: RankingListItem["build"]) {
+/**
+ * 计算构筑 DPS；传入抗性覆盖值时，先将构筑中的敌人抗性字段替换为所选值再计算。
+ * @param build 榜单条目关联的构筑
+ * @param resistanceValue 抗性覆盖值（null 表示沿用构筑自身敌人抗性）
+ * @returns 基础信息与计算出的 DPS
+ */
+function calcBuildDps(build: RankingListItem["build"], resistanceValue: number | null) {
     if (!build) return
     try {
         const settings = normalizeCharSettings(JSON.parse(build.charSettings))
+        // 抗性覆盖：覆盖构筑中的敌人抗性字段后重新计算 DPS
+        if (resistanceValue !== null) {
+            settings.enemyResistance = resistanceValue
+        }
         const charBuild = createCharBuildFromSettings(build.charId, settings, inv)
         const result = charBuild.calculate()
         return {
@@ -51,13 +72,23 @@ function calcBuildDps(build: RankingListItem["build"]) {
     }
 }
 
-function mapRanking(result: RankingList | null) {
-    ranking.value = result || null
-    rankedItems.value = (result?.items || [])
-        .map(item => {
-            const r = calcBuildDps(item.build)
+/**
+ * 按当前抗性覆盖值重算全部条目 DPS 并重新排序。
+ * 分批让出主线程执行，避免条目较多时重算长时间阻塞界面。
+ */
+async function rebuildRankedItems() {
+    const token = ++recomputeToken
+    computing.value = true
+    try {
+        const next: RankedItem[] = []
+        const source = rawItems.value
+        for (let index = 0; index < source.length; index++) {
+            // 覆盖值在重算过程中被再次修改时，丢弃本次过期结果
+            if (token !== recomputeToken) return
+            const item = source[index]
+            const r = calcBuildDps(item.build, resistanceOverride.value)
             const char = charMap.get(item.charId)
-            return {
+            next.push({
                 id: item.id,
                 charId: item.charId,
                 buildId: item.buildId,
@@ -70,9 +101,38 @@ function mapRanking(result: RankingList | null) {
                 targetFunction: r?.targetFunction || "-",
                 dps: r?.dps || 0,
                 updateAt: item.build?.updateAt || item.updateAt,
-            } satisfies RankedItem
-        })
-        .sort((a, b) => b.dps - a.dps)
+            } satisfies RankedItem)
+            // 每处理三条让出主线程，保证界面能刷新“计算中”状态并及时响应后续点击
+            if ((index + 1) % 3 === 0) {
+                await new Promise<void>(resolve => setTimeout(resolve))
+            }
+        }
+        if (token !== recomputeToken) return
+        next.sort((a, b) => b.dps - a.dps)
+        rankedItems.value = next
+    } finally {
+        if (token === recomputeToken) {
+            computing.value = false
+        }
+    }
+}
+
+async function mapRanking(result: RankingList | null) {
+    ranking.value = result || null
+    rawItems.value = result?.items || []
+    await rebuildRankedItems()
+}
+
+/**
+ * 切换抗性覆盖值；null 表示恢复为各构筑默认的敌人抗性，切换后立即按新抗性重算榜单。
+ * @param value 抗性覆盖值
+ */
+function setResistanceOverride(value: number | null) {
+    if (resistanceOverride.value === value) return
+    resistanceOverride.value = value
+    if (rawItems.value.length > 0) {
+        void rebuildRankedItems()
+    }
 }
 
 async function loadRankingList() {
@@ -92,11 +152,11 @@ async function loadRanking() {
                 await router.replace(`/ranking/${first.id}`)
                 return
             }
-            mapRanking(null)
+            await mapRanking(null)
             return
         }
         const result = await rankingListQuery({ id: rankingId.value }, { requestPolicy: "network-only" })
-        mapRanking(result || null)
+        await mapRanking(result || null)
     } finally {
         loading.value = false
     }
@@ -158,12 +218,12 @@ onMounted(async () => {
                             <span
                                 class="inline-flex h-6 shrink-0 items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
                                 :class="
-                                    loading || switching
+                                    loading || switching || computing
                                         ? 'border-primary/40 bg-primary/10 font-semibold text-primary'
                                         : 'border-base-content/15 text-base-content/50'
                                 "
                             >
-                                {{ loading ? "计算中" : switching ? "切换中" : "就绪" }}
+                                {{ loading || computing ? "计算中" : switching ? "切换中" : "就绪" }}
                             </span>
                         </div>
 
@@ -186,6 +246,40 @@ onMounted(async () => {
                                 </button>
                             </div>
                         </ScrollArea>
+
+                        <!-- 敌人抗性覆盖：选择抗性后覆盖榜单构筑中的敌人抗性字段并重算 DPS -->
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-base-content/8 pt-3">
+                            <span class="mr-1 shrink-0 text-xs text-base-content/55">敌人抗性覆盖:</span>
+                            <button
+                                type="button"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    resistanceOverride === null
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="setResistanceOverride(null)"
+                            >
+                                默认
+                            </button>
+                            <button
+                                v-for="res in enemyResistanceOptions"
+                                :key="res"
+                                type="button"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 font-mono text-xs tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    resistanceOverride === res
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="setResistanceOverride(res)"
+                            >
+                                {{ format100(res) }}
+                            </button>
+                            <span class="text-[11px] tabular-nums text-base-content/40">
+                                {{ resistanceOverride === null ? "使用默认抗性" : `抗性统一为 ${format100(resistanceOverride)}` }}
+                            </span>
+                        </div>
                     </div>
                 </section>
 
