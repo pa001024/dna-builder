@@ -727,10 +727,16 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
 
 <template>
     <div class="h-full flex flex-col">
-        <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
+        <SplitView
+            :desktop-ratio="1 / 3"
+            :detail-open="Boolean(selectedQuest)"
+            @collapse="selectQuest(null)"
+        >
+            <template #master>
+
             <!-- 左侧列表面板 -->
             <div
-                class="flex-1 flex flex-col overflow-hidden min-w-0"
+                class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
                 :class="{ 'sm:border-r border-base-content/10': selectedQuest }"
             >
                 <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
@@ -993,21 +999,15 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                 </div>
             </div>
 
-            <!-- 收起详情手柄 -->
-            <button
-                v-if="selectedQuest"
-                type="button"
-                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
-                title="收起详情"
-                @click="selectQuest(null)"
-            >
-                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
-            </button>
+                        </template>
+            <template #detail>
+
 
             <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedQuest" class="min-w-0 flex-2">
+            <ScrollArea v-if="selectedQuest" class="min-h-0 min-w-0 flex-2">
                 <DBDynQuestDetailItem :key="selectedQuestId" :quest="selectedQuest" />
             </ScrollArea>
-        </div>
+            </template>
+        </SplitView>
     </div>
 </template>

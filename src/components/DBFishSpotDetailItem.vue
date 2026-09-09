@@ -312,9 +312,14 @@ function clearHistory() {
 
 <template>
     <div class="h-full flex flex-col">
-        <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
+        <SplitView
+            :desktop-ratio="1 / 2"
+            :detail-open="Boolean(selectedFish)"
+            @collapse="selectedFish = null"
+        >
+            <template #master>
             <!-- 左侧：池子信息 + 鱼列表 -->
-            <div class="flex-1 flex flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedFish }">
+            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedFish }">
                 <ScrollArea class="flex-1">
                     <div class="stagger-rise space-y-3 p-3 sm:p-4">
                         <!-- 池子信息 -->
@@ -578,21 +583,14 @@ function clearHistory() {
                 </ScrollArea>
             </div>
 
-            <!-- 收起详情手柄 -->
-            <button
-                v-if="selectedFish"
-                type="button"
-                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
-                title="收起详情"
-                @click="selectedFish = null"
-            >
-                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
-            </button>
+            </template>
+            <template #detail>
 
             <!-- 右侧：鱼详情 -->
-            <ScrollArea v-if="selectedFish" class="min-w-0 flex-1">
+            <ScrollArea v-if="selectedFish" class="min-h-0 min-w-0 flex-1">
                 <DBFishDetailItem :fish="selectedFish" />
             </ScrollArea>
-        </div>
+            </template>
+        </SplitView>
     </div>
 </template>

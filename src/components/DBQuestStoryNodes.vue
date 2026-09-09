@@ -1325,13 +1325,15 @@ watch(flattenedDialogueChain, () => {
             </button>
         </div>
 
-        <!-- 剧情节点卡 -->
+        <!-- 剧情节点卡（无边框无内边距，直接平铺在任务卡内） -->
         <div
             v-for="node in questNodeChains"
             :key="node.id"
             :ref="element => setQuestNodeElement(getQuestNodeScopeKey(questId, node.id), element)"
-            class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-all duration-300"
-            :class="{ 'border-primary ring-4 ring-primary/10': highlightedQuestNodeMap[getQuestNodeScopeKey(questId, node.id)] }"
+            class="space-y-2 transition-all duration-300"
+            :class="{
+                'rounded-xs border border-primary/60 ring-4 ring-primary/10': highlightedQuestNodeMap[getQuestNodeScopeKey(questId, node.id)],
+            }"
         >
             <div class="text-xs text-base-content/70 space-y-1">
                 <div v-if="node.srId || node.pos" class="flex flex-wrap items-center gap-2">

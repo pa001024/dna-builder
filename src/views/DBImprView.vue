@@ -548,9 +548,15 @@ useInitialScrollToSelectedItem({
 
 <template>
     <div class="h-full flex flex-col">
-        <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
+        <SplitView
+            :desktop-ratio="1 / 2"
+            :detail-open="Boolean(selectedEntry)"
+            @collapse="selectedEntry = null"
+        >
+            <template #master>
+
             <!-- 左侧列表面板 -->
-            <div class="flex-1 flex flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedEntry }">
+            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedEntry }">
                 <!-- 检索带：下划线搜索 + OCR + 过滤器开关方章 -->
                 <div class="flex-none space-y-3 border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
                     <!-- 下划线搜索框 + OCR -->
@@ -832,22 +838,16 @@ useInitialScrollToSelectedItem({
                 </div>
             </div>
 
-            <!-- 收起详情手柄 -->
-            <button
-                v-if="selectedEntry"
-                type="button"
-                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
-                title="收起详情"
-                @click="selectedEntry = null"
-            >
-                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
-            </button>
+                        </template>
+            <template #detail>
 
-            <div v-if="selectedEntry" class="flex-1 overflow-hidden">
+
+            <div v-if="selectedEntry" class="min-h-0 flex-1 overflow-hidden">
                 <ScrollArea class="h-full">
                     <DBImprDetailItem :key="selectedEntryKey" :entry="selectedEntry" />
                 </ScrollArea>
             </div>
-        </div>
+            </template>
+        </SplitView>
     </div>
 </template>

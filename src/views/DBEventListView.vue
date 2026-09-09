@@ -1210,8 +1210,14 @@ onUnmounted(() => {
 
 <template>
     <div class="h-full flex flex-col">
-        <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
-            <div class="flex-1 flex flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedEvent }">
+        <SplitView
+            :desktop-ratio="1 / 3"
+            :detail-open="Boolean(selectedEvent)"
+            @collapse="closeSelectedEvent"
+        >
+            <template #master>
+
+            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedEvent }">
                 <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
                 <div
                     class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
@@ -1470,21 +1476,15 @@ onUnmounted(() => {
                 </template>
             </div>
 
-            <!-- 收起详情手柄 -->
-            <button
-                v-if="selectedEvent"
-                type="button"
-                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
-                title="收起详情"
-                @click="closeSelectedEvent"
-            >
-                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
-            </button>
+                        </template>
+            <template #detail>
+
 
             <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedEvent" class="min-w-0 flex-2">
+            <ScrollArea v-if="selectedEvent" class="min-h-0 min-w-0 flex-2">
                 <DBEventDetailItem :key="selectedEventId" :event="selectedEvent" />
             </ScrollArea>
-        </div>
+            </template>
+        </SplitView>
     </div>
 </template>

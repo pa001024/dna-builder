@@ -85,17 +85,27 @@ function selectFish(fishId: number) {
     selectedFishId.value = fishId
 }
 
+/**
+ * 收起详情：清空钓鱼点与鱼的选择（保留当前列表类型）。
+ */
+function closeFishDetail(): void {
+    selectedSpotId.value = 0
+    selectedFishId.value = 0
+}
+
 useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
 </script>
 
 <template>
     <div class="h-full flex flex-col">
-        <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
+        <SplitView
+            :desktop-ratio="selectedSpot ? 1 / 3 : 1 / 2"
+            :detail-open="Boolean(selectedSpot) || Boolean(selectedFish)"
+            @collapse="closeFishDetail"
+        >
+            <template #master>
             <!-- 左侧列表面板 -->
-            <div
-                class="flex-1 flex flex-col overflow-hidden min-w-0"
-                :class="{ 'sm:border-r border-base-content/10': selectedSpot || selectedFish }"
-            >
+            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedSpot || selectedFish }">
                 <!-- 检索带：下划线搜索 + 计数 + 列表类型方章 -->
                 <div
                     class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
@@ -242,26 +252,19 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                 </div>
             </div>
 
-            <!-- 收起详情手柄 -->
-            <button
-                v-if="selectedSpot"
-                type="button"
-                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
-                title="收起详情"
-                @click="selectedSpotId = 0"
-            >
-                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
-            </button>
+            </template>
+            <template #detail>
 
             <!-- 右侧：钓鱼池详情 -->
-            <div v-if="selectedSpot" class="min-w-0 flex-2 overflow-hidden">
+            <div v-if="selectedSpot" class="min-h-0 min-w-0 flex-2 overflow-hidden">
                 <DBFishSpotDetailItem :key="selectedSpotId" :spot="selectedSpot" />
             </div>
 
             <!-- 右侧：鱼详情 -->
-            <ScrollArea v-if="selectedFish" class="min-w-0 flex-1">
+            <ScrollArea v-if="selectedFish" class="min-h-0 min-w-0 flex-1">
                 <DBFishDetailItem :key="selectedFishId" :fish="selectedFish" />
             </ScrollArea>
-        </div>
+            </template>
+        </SplitView>
     </div>
 </template>

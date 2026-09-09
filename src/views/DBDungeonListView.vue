@@ -124,9 +124,15 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
 
 <template>
     <div class="h-full flex flex-col">
-        <div class="flex-1 flex min-h-0 flex-col sm:flex-row">
+        <SplitView
+            :desktop-ratio="1 / 2"
+            :detail-open="Boolean(selectedDungeon)"
+            @collapse="selectDungeon(null)"
+        >
+            <template #master>
+
             <!-- 左侧列表面板 -->
-            <div class="flex-1 flex flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedDungeon }">
+            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedDungeon }">
                 <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
                 <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
                     <div class="relative">
@@ -331,21 +337,15 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                 </div>
             </div>
 
-            <!-- 收起详情手柄 -->
-            <button
-                v-if="selectedDungeon"
-                type="button"
-                class="flex-none flex w-full cursor-pointer items-center justify-center border-base-content/15 py-1.5 text-base-content/40 transition-colors duration-150 hover:bg-base-content/5 hover:text-primary sm:w-9 sm:py-0 sm:border-l"
-                title="收起详情"
-                @click="selectDungeon(null)"
-            >
-                <Icon icon="tabler:arrow-bar-to-right" class="h-6 w-6 rotate-90 sm:rotate-0" />
-            </button>
+                        </template>
+            <template #detail>
+
 
             <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedDungeon" class="min-w-0 flex-1">
+            <ScrollArea v-if="selectedDungeon" class="min-h-0 min-w-0 flex-1">
                 <DBDungeonDetailItem :key="selectedDungeonId" :dungeon="selectedDungeon" />
             </ScrollArea>
-        </div>
+            </template>
+        </SplitView>
     </div>
 </template>
