@@ -5884,8 +5884,8 @@ export const skinData: SkinItem[] = [
         defaultItem: {
             HeadSculpture: [
                 {
-                    id: 10021,
-                    name: "一体双生的肖像",
+                    id: 10033,
+                    name: "复仇者的肖像",
                     num: 1,
                 },
             ],

@@ -60346,7 +60346,7 @@ export const questData_jp: QuestStory[] = [
                         id: "178126096830321794247",
                         type: "TalkNode",
                         name: "对话节点",
-                        next: ["178126190350721796997"],
+                        next: ["178126190350721796997", "17884419268883366169"],
                         dialogues: [
                             {
                                 id: 11115001,
@@ -60854,6 +60854,12 @@ export const questData_jp: QuestStory[] = [
                                 npc: 111125,
                             },
                         ],
+                    },
+                    {
+                        id: "17884419268883366169",
+                        type: "PlayOrStopBGMNode",
+                        name: "BGM节点",
+                        resource: "0184_story_curse_echoes",
                     },
                     {
                         id: "178127103721032264098",
