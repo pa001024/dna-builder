@@ -74,8 +74,29 @@ function getWeaponAttackLabelPrefix(key: string) {
                 >
             </div>
             <div class="flex gap-4 flex-wrap">
-                <BuildWeaponCard :weapon="charBuild.meleeWeapon" class="flex-1" />
-                <BuildWeaponCard :weapon="charBuild.rangedWeapon" class="flex-1" />
+                <template v-for="slot in [{ key: 'melee', label: '近战' }, { key: 'ranged', label: '远程' }]" :key="slot.key">
+                    <BuildWeaponCard
+                        v-if="!charBuild[`${slot.key}Weapon`].isEmpty"
+                        :weapon="charBuild[`${slot.key}Weapon`]"
+                        class="flex-1"
+                    />
+                    <div
+                        v-else
+                        class="flex-1 flex items-center gap-4 rounded-xs p-2 backdrop-blur-sm bg-linear-to-r from-base-content/5 to-transparent border border-dashed border-base-content/20"
+                    >
+                        <div
+                            class="grid size-12 shrink-0 place-items-center rounded-xs border border-dashed border-base-content/25 text-base-content/35"
+                        >
+                            <Icon icon="ri:add-line" class="size-5" />
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm text-base-content/55">
+                                {{ $t(slot.label) }} · {{ $t("char-build.weapon_slot_not_equipped") }}
+                            </div>
+                            <p class="text-xs text-base-content/40">{{ $t("char-build.weapon_slot_empty_desc") }}</p>
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
     </div>

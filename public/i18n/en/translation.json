@@ -6396,6 +6396,7 @@
         "enemy_type": "Type",
         "enter_description": "Please enter description",
         "enter_title": "Please enter title",
+        "equip_weapon": "Equip {{slot}} weapon",
         "equipment_preview": "Equipment Preview",
         "export_code": "Copy code",
         "extra_mastery_clear": "Clear extra proficiency",
@@ -6421,6 +6422,7 @@
         "melee": "Melee",
         "melee_weapon": "Melee Weapon",
         "melee_weapon_mod_config": "Melee Weapon MOD Configuration",
+        "mods_need_weapon": "Equip a {{slot}} weapon first to configure Mods for this slot.",
         "new_project": "New project",
         "no_saved_projects": "No saved projects yet",
         "other": "Other",
@@ -6457,7 +6459,9 @@
         "skill": "Consonance",
         "skill_level": "Skill Level",
         "skill_weapon": "Skill/Weapon",
+        "skill_weapon_empty_desc": "This Resonance weapon inherits from the {{slot}} weapon; equip one first.",
         "skill_weapon_mod_config": "Resonance Weapon MOD Configuration",
+        "skill_weapon_mods_hint": "The inherited weapon slot is empty, so Mods cannot be configured yet.",
         "small": "Small",
         "special_effect_config": "Special effects configuration",
         "stance": "Posture",
@@ -6478,7 +6482,9 @@
         "weapon": "Weapon",
         "weapon_attack_converted_from": "Converted from {{dmg}} ATK",
         "weapon_attack_label": "{{dmg}} ATK",
-        "weapon_attributes": "Weapon Attributes"
+        "weapon_attributes": "Weapon Attributes",
+        "weapon_slot_empty_desc": "An empty slot provides no weapon stats, skills, or Mod bonuses.",
+        "weapon_slot_not_equipped": "Not equipped"
     },
     "char-build-list": {
         "title": "Character List"
@@ -8251,6 +8257,7 @@
         "noResults": "No matching weapons found",
         "searchPlaceholder": "Search weapon names or types (supports pinyin)...",
         "sortByIncome": "Sort by income: high to low",
-        "title": "Weapons list"
+        "title": "Weapons list",
+        "unequipSlot": "Unequip"
     }
 }

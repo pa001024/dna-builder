@@ -634,12 +634,13 @@ export class CharBuild {
 
     /**
      * 将 inherit 型同律武器的伤害类型同步为当前继承武器的伤害类型。
+     * 继承槽位为空武器（未装备）时不进行同步，避免将空占位属性写入同律武器。
      */
     private syncInheritedSkillWeapon() {
         if (!this.skillWeapon?.inherit) return
 
         const inheritedWeapon = this.skillWeapon.inherit === "melee" ? this.meleeWeapon : this.rangedWeapon
-        if (!inheritedWeapon) return
+        if (!inheritedWeapon || inheritedWeapon.isEmpty) return
 
         this.skillWeapon.伤害类型 = inheritedWeapon.伤害类型
     }
@@ -949,11 +950,18 @@ export class CharBuild {
     }
 
     /**
-     * 统计“melee + ranged + skill + 队友”武器类别数量，供条件MOD计算动态倍率
+     * 统计“melee + ranged + skill + 队友”武器类别数量，供条件MOD计算动态倍率。
+     * 空武器槽位（未装备）不参与类别计数。
      */
     private getConditionValues() {
         const conditionValues: Record<string, number> = {}
-        const weapons: (LeveledWeapon | LeveledSkillWeapon)[] = [this.meleeWeapon, this.rangedWeapon]
+        const weapons: (LeveledWeapon | LeveledSkillWeapon)[] = []
+        if (!this.meleeWeapon.isEmpty) {
+            weapons.push(this.meleeWeapon)
+        }
+        if (!this.rangedWeapon.isEmpty) {
+            weapons.push(this.rangedWeapon)
+        }
         /**
          * 同律武器存在继承关系时，不应在武器类别计数中额外算作一个独立武器。
          */
@@ -973,11 +981,17 @@ export class CharBuild {
 
     /**
      * 获取参与充盈威力汇总的武器集合（近战/远程/同律非继承）。
-     * 同律武器继承近战/远程时复用被继承武器面板，不重复计入。
+     * 同律武器继承近战/远程时复用被继承武器面板，不重复计入；空武器槽位（未装备）不参与汇总。
      * @returns 武器集合
      */
     private getAllFullnessWeapons(): (LeveledWeapon | LeveledSkillWeapon)[] {
-        const weapons: (LeveledWeapon | LeveledSkillWeapon)[] = [this.meleeWeapon, this.rangedWeapon]
+        const weapons: (LeveledWeapon | LeveledSkillWeapon)[] = []
+        if (!this.meleeWeapon.isEmpty) {
+            weapons.push(this.meleeWeapon)
+        }
+        if (!this.rangedWeapon.isEmpty) {
+            weapons.push(this.rangedWeapon)
+        }
         if (this.skillWeapon && !this.skillWeapon.inherit) {
             weapons.push(this.skillWeapon)
         }
@@ -1173,7 +1187,8 @@ export class CharBuild {
         attrs.充盈威力 = (attrs.充盈威力 || 0) + totalFullness
         // 召唤物转化（角色属性）汇总，仿充盈转化范式：转化词条在武器作用域，转化结果计入角色属性。
         // 召唤物绑定近战武器，攻速转化以近战武器攻速全额为来源（如攻速 1.75 × 转化 0.495）；范围转化以角色技能范围为来源（由 LeveledSkill 公式应用技能范围）。
-        if (this.meleeWeapon) {
+        // 近战槽位为空武器（未装备）时不存在攻速来源，跳过转化避免空占位（射速兜底 1）产生虚假加成。
+        if (this.meleeWeapon && !this.meleeWeapon.isEmpty) {
             const { attackSpeed, conversionRate } = this.getWeaponSummonSpeed(this.meleeWeapon)
             attrs.召唤物攻击速度 = (attrs.召唤物攻击速度 || 0) + Math.max(0, attackSpeed) * conversionRate
             attrs.召唤物范围 = (attrs.召唤物范围 || 0) + this.getTotalBonus("召唤物范围转化", "近战")

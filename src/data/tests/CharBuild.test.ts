@@ -2769,3 +2769,50 @@ describe("CharBuild类测试", () => {
         })
     })
 })
+
+describe("空武器（近战/远程不装备）", () => {
+    // 基础构筑：近战/远程均用空武器占位（id 为 0），验证“未装备”语义
+    function createEmptyWeaponBuild() {
+        return new CharBuild({
+            char: new LeveledChar("黎瑟"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            melee: LeveledWeapon.emptyWeapon,
+            ranged: LeveledWeapon.emptyWeapon,
+            baseName: "快速出击",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0,
+            targetFunction: "伤害",
+        })
+    }
+
+    it("LeveledWeapon.emptyWeapon 为空占位且无技能/属性加成", () => {
+        const weapon = LeveledWeapon.emptyWeapon
+        expect(weapon.isEmpty).toBe(true)
+        expect(weapon.id).toBe(0)
+        expect(weapon.技能).toEqual([])
+        expect(weapon.addAttr).toEqual({})
+    })
+
+    it("空武器构筑不提供任何武器技能", () => {
+        const charBuild = createEmptyWeaponBuild()
+        expect(charBuild.meleeWeapon.isEmpty).toBe(true)
+        expect(charBuild.rangedWeapon.isEmpty).toBe(true)
+        expect(charBuild.meleeWeaponSkills).toHaveLength(0)
+        expect(charBuild.rangedWeaponSkills).toHaveLength(0)
+        expect(charBuild.isMeleeWeapon).toBe(false)
+        expect(charBuild.isRangedWeapon).toBe(false)
+        expect(charBuild.selectedWeapon).toBeUndefined()
+    })
+
+    it("近战/远程均为空武器时仍可正常计算角色技能伤害", () => {
+        const charBuild = createEmptyWeaponBuild()
+        // 空武器不应抛错，伤害结果为有限数值
+        const damage = charBuild.calculate()
+        expect(damage).toBeTypeOf("number")
+        expect(Number.isFinite(damage)).toBe(true)
+        expect(damage).toBeGreaterThanOrEqual(0)
+    })
+})

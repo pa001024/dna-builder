@@ -6401,6 +6401,7 @@
         "enemy_type": "Type",
         "enter_description": "Veuillez entrer une description",
         "enter_title": "Veuillez saisir un titre",
+        "equip_weapon": "Équiper l'arme {{slot}}",
         "equipment_preview": "Aperçu de l'équipement",
         "exclude_default_buff": "Exclure les BUFF par défaut",
         "export_build": "Exporter la construction",
@@ -6438,6 +6439,7 @@
         "melee_weapon": "Arme de corps à corps",
         "melee_weapon_mod_config": "Configuration MOD d'arme de corps à corps",
         "mod_list": "Liste de MOD",
+        "mods_need_weapon": "Équipez d'abord une arme {{slot}} pour configurer les Mods de cet emplacement.",
         "new_project": "Nouveau projet",
         "no_char_selected": "Veuillez d'abord sélectionner un personnage",
         "no_saved_projects": "Aucun projet enregistre pour le moment",
@@ -6484,7 +6486,9 @@
         "skill": "Consonance",
         "skill_level": "Niveau de compétence",
         "skill_weapon": "Compétence/Arme",
+        "skill_weapon_empty_desc": "Cette arme de Résonance hérite de l'arme {{slot}} ; équipez-en une d'abord.",
         "skill_weapon_mod_config": "Configuration MOD d'arme de compétence",
+        "skill_weapon_mods_hint": "L'emplacement d'arme hérité est vide, les Mods ne peuvent pas encore être configurés.",
         "small": "Petit",
         "special_effect_config": "Configuration d'effets spéciaux",
         "stance": "Posture",
@@ -6512,6 +6516,8 @@
         "weapon_attack_label": "ATQ {{dmg}}",
         "weapon_attributes": "Attributs de l'arme",
         "weapon_skills": "Compétences d'arme",
+        "weapon_slot_empty_desc": "Un emplacement vide ne fournit aucun attribut d'arme, compétence ou bonus de Mod.",
+        "weapon_slot_not_equipped": "Non équipé",
         "weapon_type": "Type d'arme"
     },
     "char-build-list": {
@@ -8286,6 +8292,7 @@
         "noResults": "Aucune arme correspondante trouvee",
         "searchPlaceholder": "Rechercher par nom ou type d'arme (prise en charge du pinyin)...",
         "sortByIncome": "Trier par gain : décroissant",
-        "title": "Liste des armes"
+        "title": "Liste des armes",
+        "unequipSlot": "Déséquiper"
     }
 }

@@ -1334,7 +1334,7 @@ const buffOptions = computed(() => {
     const ctx = createBuffSelectContext({
         charElm: charBuild.value.char.属性,
         mainIds: [selectedCharId.value, charBuild.value.meleeWeapon?.id, charBuild.value.rangedWeapon?.id].filter(
-            (id): id is number => typeof id === "number"
+            (id): id is number => typeof id === "number" && id > 0
         ),
         phantomIds: [
             charMap.get(charSettings.value.team1)?.id,

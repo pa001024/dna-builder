@@ -6396,6 +6396,7 @@
         "enemy_type": "타입",
         "enter_description": "설명을 입력해주세요",
         "enter_title": "제목을 입력해주세요",
+        "equip_weapon": "{{slot}} 무기 장착",
         "equipment_preview": "장비 미리보기",
         "export_code": "코드 복사",
         "extra_mastery_clear": "추가 숙련 해제",
@@ -6421,6 +6422,7 @@
         "melee": "근접",
         "melee_weapon": "근접 무기",
         "melee_weapon_mod_config": "근접 무기 MOD 설정",
+        "mods_need_weapon": "{{slot}} 무기를 먼저 장착해야 해당 슬롯의 마의 쐐기를 구성할 수 있습니다.",
         "new_project": "새 프로젝트",
         "no_saved_projects": "저장된 프로젝트가 아직 없습니다",
         "other": "기타",
@@ -6457,7 +6459,9 @@
         "skill": "동조",
         "skill_level": "스킬 레벨",
         "skill_weapon": "스킬/무기",
+        "skill_weapon_empty_desc": "이 동률 무기는 {{slot}} 무기 속성을 상속합니다. 먼저 해당 무기를 장착하세요.",
         "skill_weapon_mod_config": "동률 무기 MOD 설정",
+        "skill_weapon_mods_hint": "동률 무기가 상속하는 무기 슬롯이 미장착이므로 마의 쐐기를 구성할 수 없습니다.",
         "small": "소형",
         "special_effect_config": "특수효과 구성",
         "stance": "전투 자세",
@@ -6478,7 +6482,9 @@
         "weapon": "무기",
         "weapon_attack_converted_from": "{{dmg}} 공격에서 전환",
         "weapon_attack_label": "{{dmg}} 공격",
-        "weapon_attributes": "무기 속성"
+        "weapon_attributes": "무기 속성",
+        "weapon_slot_empty_desc": "미장착 슬롯은 무기 속성·스킬·마의 쐐기 보너스를 제공하지 않습니다.",
+        "weapon_slot_not_equipped": "미장착"
     },
     "char-build-list": {
         "title": "캐릭터 목록"
@@ -8247,6 +8253,7 @@
         "noResults": "일치하는 무기를 찾을 수 없습니다",
         "searchPlaceholder": "무기 이름 또는 유형 검색(병음 지원)...",
         "sortByIncome": "수익 순: 높음→낮음",
-        "title": "무기 목록"
+        "title": "무기 목록",
+        "unequipSlot": "장착 해제"
     }
 }

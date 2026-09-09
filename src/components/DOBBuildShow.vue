@@ -7,6 +7,7 @@ import {
     buildsWithCountQuery,
     deleteBuildMutation,
     likeBuildMutation,
+    recommendBuildMutation,
     unlikeBuildMutation,
     updateBuildMutation,
 } from "@/api/graphql"
@@ -42,6 +43,7 @@ const edit_title = ref("")
 const edit_desc = ref("")
 const updatingBuild = ref<string | null>(null)
 const deletingBuild = ref<string | null>(null)
+const recommendingBuild = ref<string | null>(null)
 const expandedBuildIds = ref<Record<string, boolean>>({})
 const DESCRIPTION_COLLAPSE_THRESHOLD = 40
 
@@ -189,6 +191,39 @@ async function confirmEdit() {
         edit_model_show.value = false
         editingBuildId.value = null
         editingBuild.value = null
+    }
+}
+
+// 切换构筑的推荐状态（仅管理员，后端也会校验权限）
+/**
+ * 切换当前编辑构筑的推荐状态，成功后同步更新弹窗与列表中对应构筑的标记。
+ * @returns Promise<void>
+ */
+async function toggleRecommend() {
+    if (!editingBuildId.value || !editingBuild.value) return
+    // 权限检查：推荐操作仅管理员可见、可用
+    if (!userStore.isAdmin) return
+
+    // 预先捕获构筑引用，避免弹窗关闭后 editingBuild 已被置空
+    const editingBuildIdVal = editingBuildId.value
+    const editingBuildVal = editingBuild.value
+    recommendingBuild.value = editingBuildIdVal
+    try {
+        const result = await recommendBuildMutation({
+            id: editingBuildIdVal,
+            recommended: !editingBuildVal.isRecommended,
+        })
+
+        if (result) {
+            const recommended = result.isRecommended ?? false
+            // editingBuild 与列表项为同一对象引用，更新后卡片角标同步刷新
+            editingBuildVal.isRecommended = recommended
+            ui.showSuccessMessage(recommended ? "构筑已推荐" : "构筑已取消推荐")
+        }
+    } catch (error) {
+        ui.showErrorMessage("推荐操作失败:", error instanceof Error ? error.message : "未知错误")
+    } finally {
+        recommendingBuild.value = null
     }
 }
 
@@ -486,6 +521,31 @@ defineExpose({
                     rows="3"
                     maxlength="800"
                 ></textarea>
+            </div>
+            <!-- 推荐状态（仅管理员可见） -->
+            <div v-if="userStore.isAdmin" class="flex items-center justify-between gap-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
+                <div class="flex min-w-0 items-center gap-2">
+                    <Icon
+                        :icon="editingBuild?.isRecommended ? 'ri:star-fill' : 'ri:star-line'"
+                        class="size-4 shrink-0"
+                        :class="editingBuild?.isRecommended ? 'text-warning' : 'text-base-content/40'"
+                    />
+                    <div class="min-w-0">
+                        <div class="text-sm font-medium">{{ $t("推荐") }}</div>
+                        <div class="text-xs text-base-content/60">{{ $t("推荐后将在首页推荐区域展示该构筑") }}</div>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    class="btn btn-sm shrink-0"
+                    :class="editingBuild?.isRecommended ? 'btn-warning' : 'btn-ghost border border-base-content/20'"
+                    :disabled="recommendingBuild === editingBuildId"
+                    @click="toggleRecommend"
+                >
+                    <span v-if="recommendingBuild === editingBuildId" class="loading loading-spinner loading-sm" />
+                    <Icon v-else :icon="editingBuild?.isRecommended ? 'ri:star-fill' : 'ri:star-line'" class="w-4 h-4" />
+                    {{ editingBuild?.isRecommended ? $t("已推荐") : $t("推荐") }}
+                </button>
             </div>
         </div>
         <template #action>

@@ -37,6 +37,24 @@ const selectedMelee = ref(props.melee || 0)
 const selectedRanged = ref(props.ranged || 0)
 const sortByIncome = ref(true)
 
+// 分类方章 → 装备槽位映射（弹窗中只允许卸下“当前浏览槽位”已装备的武器）
+const meleeTypeTabs = new Set(["近战", "单手剑", "长柄", "重剑", "双刀", "鞭刃", "太刀"])
+const rangedTypeTabs = new Set(["远程", "手枪", "双枪", "榴炮", "霰弹枪", "突击枪", "弓"])
+
+/** 当前浏览的分类对应装备槽位（全部等无槽位时返回 undefined） */
+const currentSlot = computed<"melee" | "ranged" | undefined>(() => {
+    if (meleeTypeTabs.has(activeTab.value)) return "melee"
+    if (rangedTypeTabs.has(activeTab.value)) return "ranged"
+    return undefined
+})
+
+/** 当前浏览槽位是否已装备武器（仅已装备时提供卸下按钮） */
+const canUnequipCurrentWeapon = computed(
+    () =>
+        (currentSlot.value === "melee" && selectedMelee.value > 0) ||
+        (currentSlot.value === "ranged" && selectedRanged.value > 0)
+)
+
 // 武器大类颜色映射（悬停渐变）
 const elementColors: Record<string, string> = {
     近战: "from-yellow-400 to-yellow-600",
@@ -163,6 +181,22 @@ function selectWeapon(weapon: Weapon) {
     }
     emits("change", selectedMelee.value, selectedRanged.value)
 }
+
+/**
+ * 卸下当前浏览槽位已装备的武器（置为空武器 id 0）。
+ * 只作用于当前槽位（近战/远程由 activeTab 决定），槽位未装备时不提供此操作。
+ * 与选中武器一致：提交后由调用方关闭弹窗并生效。
+ */
+function unequipCurrentWeapon() {
+    if (currentSlot.value === "melee") {
+        selectedMelee.value = 0
+    } else if (currentSlot.value === "ranged") {
+        selectedRanged.value = 0
+    } else {
+        return
+    }
+    emits("change", selectedMelee.value, selectedRanged.value)
+}
 </script>
 
 <template>
@@ -205,6 +239,17 @@ function selectWeapon(weapon: Weapon) {
                             >
                                 <Icon icon="ri:sort-number-asc" class="h-3.5 w-3.5" />
                                 {{ sortByIncome ? $t("weapon-list.sortByIncome") : $t("weapon-list.defaultOrder") }}
+                            </button>
+
+                            <!-- 卸下当前浏览槽位已装备的武器（单一入口，无附加说明） -->
+                            <button
+                                v-if="canUnequipCurrentWeapon"
+                                type="button"
+                                class="inline-flex h-6 shrink-0 cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/55 transition-colors duration-150 hover:border-error/60 hover:bg-error/10 hover:text-error"
+                                @click="unequipCurrentWeapon"
+                            >
+                                <Icon icon="ri:close-line" class="h-3.5 w-3.5" />
+                                {{ $t("weapon-list.unequipSlot") }}
                             </button>
                         </div>
 

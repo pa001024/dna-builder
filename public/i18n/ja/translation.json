@@ -6310,6 +6310,7 @@
         "enemy_type": "タイプ",
         "enter_description": "説明を入力してください",
         "enter_title": "タイトルを入力してください",
+        "equip_weapon": "{{slot}}武器を装備",
         "equipment_preview": "装備プレビュー",
         "export_code": "コードをコピーする",
         "extra_mastery_clear": "追加熟練を解除",
@@ -6335,6 +6336,7 @@
         "melee": "近接",
         "melee_weapon": "近接武器",
         "melee_weapon_mod_config": "近接武器MOD設定",
+        "mods_need_weapon": "{{slot}}武器を装備しないと、このスロットの楔を設定できません。",
         "new_project": "新規プロジェクト",
         "no_saved_projects": "保存済みプロジェクトはまだありません",
         "other": "その他",
@@ -6371,7 +6373,9 @@
         "skill": "同律",
         "skill_level": "スキルレベル",
         "skill_weapon": "スキル/武器",
+        "skill_weapon_empty_desc": "この同律武器は{{slot}}武器のステータスを継承します。先に対応武器を装備してください。",
         "skill_weapon_mod_config": "同律武器MOD設定",
+        "skill_weapon_mods_hint": "同律武器が継承する武器スロットが未装備のため、楔を設定できません。",
         "small": "小型",
         "special_effect_config": "特殊効果の構成",
         "stance": "戦姿",
@@ -6392,7 +6396,9 @@
         "weapon": "武器",
         "weapon_attack_converted_from": "{{dmg}}攻撃から変換",
         "weapon_attack_label": "{{dmg}}攻撃",
-        "weapon_attributes": "武器属性"
+        "weapon_attributes": "武器属性",
+        "weapon_slot_empty_desc": "未装備のスロットは武器ステータス・スキル・楔の効果を一切提供しません。",
+        "weapon_slot_not_equipped": "未装備"
     },
     "char-build-list": {
         "title": "キャラクター一覧"
@@ -8161,6 +8167,7 @@
         "noResults": "一致する武器が見つかりません",
         "searchPlaceholder": "武器名または種類を検索（ピンイン対応）...",
         "sortByIncome": "収益順：高→低",
-        "title": "武器リスト"
+        "title": "武器リスト",
+        "unequipSlot": "外す"
     }
 }

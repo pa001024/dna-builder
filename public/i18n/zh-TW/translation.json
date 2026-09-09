@@ -5515,6 +5515,7 @@
         "enemy_type": "類型",
         "enter_description": "請輸入描述",
         "enter_title": "請輸入標題",
+        "equip_weapon": "裝備{{slot}}武器",
         "equipment_preview": "裝配預覽",
         "export_code": "複製代碼",
         "extra_mastery_clear": "清除額外精通",
@@ -5540,6 +5541,7 @@
         "melee": "近戰",
         "melee_weapon": "近戰武器",
         "melee_weapon_mod_config": "近戰武器MOD配置",
+        "mods_need_weapon": "未裝備{{slot}}武器，暫無法配置該槽位的魔之楔。",
         "new_project": "新增項目",
         "no_saved_projects": "暫無已保存項目",
         "other": "其他",
@@ -5576,7 +5578,9 @@
         "skill": "同律",
         "skill_level": "技能等級",
         "skill_weapon": "技能/武器",
+        "skill_weapon_empty_desc": "該同律武器繼承{{slot}}武器的屬性，請先裝備對應武器後使用。",
         "skill_weapon_mod_config": "同律武器MOD配置",
+        "skill_weapon_mods_hint": "同律武器繼承的武器槽位尚未裝備，暫無法配置魔之楔。",
         "small": "小型",
         "special_effect_config": "特殊效果配置",
         "stance": "戰姿",
@@ -5597,7 +5601,9 @@
         "weapon": "武器",
         "weapon_attack_converted_from": "由{{dmg}}攻擊轉換",
         "weapon_attack_label": "{{dmg}}攻擊",
-        "weapon_attributes": "武器屬性"
+        "weapon_attributes": "武器屬性",
+        "weapon_slot_empty_desc": "未裝備時該槽位不提供任何武器屬性、技能與魔之楔加成。",
+        "weapon_slot_not_equipped": "未裝備"
     },
     "char-build-list": {
         "title": "角色列表"
@@ -7365,6 +7371,7 @@
         "noResults": "沒有找到符合的武器",
         "searchPlaceholder": "搜尋武器名稱、類型（支援拼音）...",
         "sortByIncome": "收益排序：高→低",
-        "title": "武器列表"
+        "title": "武器列表",
+        "unequipSlot": "卸下"
     }
 }

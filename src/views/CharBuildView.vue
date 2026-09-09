@@ -82,8 +82,8 @@ function createEmptyCharBuild() {
             精通: [],
             url: "",
         },
-        meleeWeapon: { url: "", _originalWeaponData: { icon: "" } },
-        rangedWeapon: { url: "", _originalWeaponData: { icon: "" } },
+        meleeWeapon: { url: "", _originalWeaponData: { icon: "" }, isEmpty: true },
+        rangedWeapon: { url: "", _originalWeaponData: { icon: "" }, isEmpty: true },
         skillWeapon: undefined,
         skillWeaponSkills: [],
         selectedSkillType: "角色",
@@ -184,7 +184,7 @@ const buffOptions = computed(() => {
     const ctx = createBuffSelectContext({
         charElm: charBuild.value.char.属性,
         mainIds: [selectedCharId.value, charBuild.value.meleeWeapon?.id, charBuild.value.rangedWeapon?.id].filter(
-            (id): id is number => typeof id === "number"
+            (id): id is number => typeof id === "number" && id > 0
         ),
         phantomIds: [
             charMap.get(charSettings.value.team1)?.id,
@@ -367,23 +367,29 @@ const charBuild = computed(() => {
 /**
  * 侧边栏页签展示数据。
  * 同律页签优先使用同律伤害技能图标，并通过 mask 适配不同主题。
+ * 近战/远程武器槽位为空武器（未装备）时保留页签并标记 isEmpty，用于展示未装备空态。
  */
 const charTabs = computed(() => {
+    const meleeWeapon = charBuild.value.meleeWeapon
+    const rangedWeapon = charBuild.value.rangedWeapon
     const tabs = [
         {
             name: "角色",
             url: charBuild.value.char.url,
             skillMaskUrl: "",
+            isEmpty: false,
         },
         {
             name: "近战",
-            url: charBuild.value.meleeWeapon.url,
+            url: meleeWeapon.isEmpty ? "" : meleeWeapon.url,
             skillMaskUrl: "",
+            isEmpty: meleeWeapon.isEmpty,
         },
         {
             name: "远程",
-            url: charBuild.value.rangedWeapon.url,
+            url: rangedWeapon.isEmpty ? "" : rangedWeapon.url,
             skillMaskUrl: "",
+            isEmpty: rangedWeapon.isEmpty,
         },
     ]
 
@@ -396,6 +402,7 @@ const charTabs = computed(() => {
             skillMaskUrl: hasRealSkillWeaponIcon
                 ? ""
                 : charBuild.value.skillWeaponSkills[0]?.url || charBuild.value.skillWeapon.技能?.[0]?.url || "",
+            isEmpty: false,
         })
     }
 
@@ -411,6 +418,8 @@ type WeaponTooltipData = {
     propEntries: [string, number | string][]
     effdesc?: string
     ineffectiveProps?: Set<string>
+    /** 槽位是否为空武器（未装备） */
+    isEmpty?: boolean
 }
 
 /**
@@ -476,8 +485,20 @@ function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTool
                 ? charBuild.value.skillWeapon
                 : undefined
 
-    if (!weapon) {
+    if (!weapon || (weapon instanceof LeveledWeapon && weapon.isEmpty)) {
         return undefined
+    }
+    // 同律武器继承近战/远程时，被继承槽位为空武器（未装备）则无面板可展示
+    if (weapon.inherit) {
+        const inheritedEmpty =
+            weapon.inherit === "melee"
+                ? charBuild.value.meleeWeapon.isEmpty
+                : weapon.inherit === "ranged"
+                  ? charBuild.value.rangedWeapon.isEmpty
+                  : false
+        if (inheritedEmpty) {
+            return undefined
+        }
     }
 
     const weaponData = weapon._originalWeaponData as Weapon | SkillWeapon
@@ -512,6 +533,7 @@ const charTabTooltipMap = computed<Record<string, WeaponTooltipData>>(() =>
             title: tab.name,
             props: {},
             propEntries: [],
+            isEmpty: tab.isEmpty,
         }
         return map
     }, {})
@@ -1348,16 +1370,76 @@ const customVariableExpend = ref(true)
 const weapon_select_model_show = ref(false)
 const weaponDefaultTab = ref("近战")
 const newWeaponSelection = ref({ melee: 0, ranged: 0 })
-function handleWeaponSelection(melee: number, ranged: number) {
+
+/**
+ * 近战/远程武器槽位是否为“未装备”空态（空武器 id 为 0）。
+ */
+const meleeWeaponEmpty = computed(() => charBuild.value.meleeWeapon?.isEmpty ?? true)
+const rangedWeaponEmpty = computed(() => charBuild.value.rangedWeapon?.isEmpty ?? true)
+
+/**
+ * 同律武器是否为 inherit 型且其继承槽位未装备（此时同律面板无属性可展示）。
+ */
+const skillWeaponInheritBaseEmpty = computed(() => {
+    const skillWeapon = charBuild.value.skillWeapon
+    if (!skillWeapon?.inherit) return false
+    return skillWeapon.inherit === "melee" ? meleeWeaponEmpty.value : rangedWeaponEmpty.value
+})
+
+/**
+ * 提交武器槽位选择（含卸下装备：id 为 0）。
+ * 卸下某槽位武器时同步处理：
+ * 1. 清空该槽位已装备的武器魔之楔（未装备的武器不承载魔之楔）；
+ * 2. 若当前技能属于被卸下的武器，回退到角色主技能，避免残留失效技能。
+ * @param melee 近战武器 id（0 表示卸下）
+ * @param ranged 远程武器 id（0 表示卸下）
+ * @param closeModal 是否同时关闭武器选择弹窗
+ */
+function commitWeaponSelection(melee: number, ranged: number, closeModal = true) {
+    const prevMelee = charSettings.value.meleeWeapon
+    const prevRanged = charSettings.value.rangedWeapon
+    const prevBaseName = charSettings.value.baseName
+    const currentBuild = charBuild.value
+    const droppingMelee = melee === 0 && prevMelee !== 0
+    const droppingRanged = ranged === 0 && prevRanged !== 0
+
     newWeaponSelection.value = { melee, ranged }
-    charSettings.value.meleeWeapon = newWeaponSelection.value.melee
-    charSettings.value.rangedWeapon = newWeaponSelection.value.ranged
-    weapon_select_model_show.value = false
+    charSettings.value.meleeWeapon = melee
+    charSettings.value.rangedWeapon = ranged
+
+    if (droppingMelee || droppingRanged) {
+        if (droppingMelee) {
+            charSettings.value.meleeMods = Array(8).fill(null)
+        }
+        if (droppingRanged) {
+            charSettings.value.rangedMods = Array(8).fill(null)
+        }
+        // 在 charBuild 缓存失效前判断当前技能归属（成员判断基于变更前的武器技能列表）
+        const wasMeleeSkill = droppingMelee && currentBuild.meleeWeaponSkills.some(skill => skill.名称 === prevBaseName)
+        const wasRangedSkill = droppingRanged && currentBuild.rangedWeaponSkills.some(skill => skill.名称 === prevBaseName)
+        if (wasMeleeSkill || wasRangedSkill) {
+            charSettings.value.baseName = currentBuild.char.技能[0]?.名称 || ""
+        }
+    }
+    if (closeModal) {
+        weapon_select_model_show.value = false
+    }
+}
+
+function handleWeaponSelection(melee: number, ranged: number) {
+    commitWeaponSelection(melee, ranged)
 }
 function applyWeaponSelection() {
-    charSettings.value.meleeWeapon = newWeaponSelection.value.melee
-    charSettings.value.rangedWeapon = newWeaponSelection.value.ranged
-    weapon_select_model_show.value = false
+    commitWeaponSelection(newWeaponSelection.value.melee, newWeaponSelection.value.ranged)
+}
+
+/**
+ * 打开武器选择弹窗并定位到指定槽位类型。
+ * @param tab 槽位类型（近战/远程）
+ */
+function openWeaponSelectForSlot(tab: "近战" | "远程") {
+    weaponDefaultTab.value = tab
+    weapon_select_model_show.value = true
 }
 
 const ast_help_model_show = ref(false)
@@ -1817,6 +1899,12 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                 {{ charTabTooltipMap[tab.name].type }}
                                             </div>
                                         </div>
+                                        <div
+                                            v-if="charTabTooltipMap[tab.name].isEmpty"
+                                            class="text-[11px] text-base-content/50 whitespace-nowrap"
+                                        >
+                                            {{ $t("char-build.weapon_slot_not_equipped") }}
+                                        </div>
                                         <div v-if="charTabTooltipMap[tab.name].effdesc" class="ml-auto text-xs text-neutral-500">
                                             {{ charTabTooltipMap[tab.name].effdesc }}
                                         </div>
@@ -1851,17 +1939,28 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 </template>
                                 <div
                                     class="flex-none cursor-pointer size-10 sm:size-12 relative rounded-full overflow-hidden border-2 border-base-100 aspect-square"
-                                    :class="{ 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name }"
+                                    :class="[
+                                        { 'border-primary! shadow-lg shadow-primary/40': charTab === tab.name },
+                                        tab.isEmpty && charTab !== tab.name ? 'border-dashed opacity-80' : '',
+                                    ]"
                                     @click="charTab = tab.name"
                                 >
-                                    <ImageFallback
-                                        v-if="!tab.skillMaskUrl"
-                                        :src="tab.url"
-                                        alt="角色头像"
-                                        class="w-full h-full object-cover object-top"
-                                    >
-                                        <Icon icon="kezhou" class="w-full h-full" />
-                                    </ImageFallback>
+                                    <template v-if="!tab.skillMaskUrl">
+                                        <ImageFallback
+                                            v-if="!tab.isEmpty"
+                                            :src="tab.url"
+                                            alt="角色头像"
+                                            class="w-full h-full object-cover object-top"
+                                        >
+                                            <Icon icon="kezhou" class="w-full h-full" />
+                                        </ImageFallback>
+                                        <div
+                                            v-else
+                                            class="flex h-full w-full items-center justify-center bg-base-100/50 text-base-content/40"
+                                        >
+                                            <Icon :icon="tab.name === '近战' ? 'ri:sword-line' : 'ri:crosshair-line'" class="size-4 sm:size-5" />
+                                        </div>
+                                    </template>
                                     <div
                                         v-else
                                         alt="技能图标"
@@ -1973,7 +2072,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
                     <!-- 武器 -->
                     <WeaponTab
-                        v-if="charTab === '近战'"
+                        v-if="charTab === '近战' && !meleeWeaponEmpty"
                         v-model:model-show="weapon_select_model_show"
                         @open-weapon-select="weaponDefaultTab = '近战'"
                         wkey="melee"
@@ -1981,8 +2080,27 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         :attributes="attributes"
                         @add-skill="addSkill($event)"
                     />
+                    <!-- 近战武器空槽：与已装备卡片一致的“点击名称+切换图标”换装入口 -->
+                    <div
+                        v-else-if="charTab === '近战'"
+                        class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
+                    >
+                        <SectionHeader no-animate compact>
+                            <template #title>
+                                <div
+                                    class="flex min-w-0 cursor-pointer items-center gap-1.5 text-[17px] font-semibold text-base-content/70 transition-colors duration-150 hover:text-primary"
+                                    :title="$t('char-build.equip_weapon', { slot: $t('近战') })"
+                                    @click="openWeaponSelectForSlot('近战')"
+                                >
+                                    <span class="truncate">{{ $t("近战") }} · {{ $t("char-build.weapon_slot_not_equipped") }}</span>
+                                    <Icon icon="ri:exchange-line" class="h-4 w-4 shrink-0 text-primary" />
+                                </div>
+                            </template>
+                        </SectionHeader>
+                        <p class="text-xs text-base-content/50">{{ $t("char-build.weapon_slot_empty_desc") }}</p>
+                    </div>
                     <WeaponTab
-                        v-if="charTab === '远程'"
+                        v-if="charTab === '远程' && !rangedWeaponEmpty"
                         v-model:model-show="weapon_select_model_show"
                         @open-weapon-select="weaponDefaultTab = '远程'"
                         wkey="ranged"
@@ -1990,13 +2108,61 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         :attributes="attributes"
                         @add-skill="addSkill($event)"
                     />
+                    <!-- 远程武器空槽：与已装备卡片一致的“点击名称+切换图标”换装入口 -->
+                    <div
+                        v-else-if="charTab === '远程'"
+                        class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
+                    >
+                        <SectionHeader no-animate compact>
+                            <template #title>
+                                <div
+                                    class="flex min-w-0 cursor-pointer items-center gap-1.5 text-[17px] font-semibold text-base-content/70 transition-colors duration-150 hover:text-primary"
+                                    :title="$t('char-build.equip_weapon', { slot: $t('远程') })"
+                                    @click="openWeaponSelectForSlot('远程')"
+                                >
+                                    <span class="truncate">{{ $t("远程") }} · {{ $t("char-build.weapon_slot_not_equipped") }}</span>
+                                    <Icon icon="ri:exchange-line" class="h-4 w-4 shrink-0 text-primary" />
+                                </div>
+                            </template>
+                        </SectionHeader>
+                        <p class="text-xs text-base-content/50">{{ $t("char-build.weapon_slot_empty_desc") }}</p>
+                    </div>
                     <WeaponTab
-                        v-if="charTab === '同律'"
+                        v-if="charTab === '同律' && !skillWeaponInheritBaseEmpty"
                         wkey="skill"
                         :char-build="charBuild"
                         :attributes="attributes"
                         @add-skill="addSkill($event)"
                     />
+                    <!-- 同律武器继承槽位为空：保持同卡片头部点击切换继承武器 -->
+                    <div
+                        v-else-if="charTab === '同律'"
+                        class="rounded-xs border border-dashed border-base-content/25 bg-base-100/40 backdrop-blur-sm shadow-sm p-3 space-y-3"
+                    >
+                        <SectionHeader no-animate compact>
+                            <template #title>
+                                <div
+                                    class="flex min-w-0 cursor-pointer items-center gap-1.5 text-[17px] font-semibold text-base-content/70 transition-colors duration-150 hover:text-primary"
+                                    :title="
+                                        charBuild.skillWeapon?.inherit
+                                            ? $t('char-build.equip_weapon', {
+                                                  slot: $t(charBuild.skillWeapon.inherit === 'melee' ? '近战' : '远程'),
+                                              })
+                                            : undefined
+                                    "
+                                    @click="
+                                        charBuild.skillWeapon?.inherit
+                                            ? openWeaponSelectForSlot(charBuild.skillWeapon.inherit === 'melee' ? '近战' : '远程')
+                                            : undefined
+                                    "
+                                >
+                                    <span class="truncate">{{ $t("同律") }} · {{ $t("char-build.weapon_slot_not_equipped") }}</span>
+                                    <Icon v-if="charBuild.skillWeapon?.inherit" icon="ri:exchange-line" class="h-4 w-4 shrink-0 text-primary" />
+                                </div>
+                            </template>
+                        </SectionHeader>
+                        <p class="text-xs text-base-content/50">{{ $t("char-build.skill_weapon_empty_desc") }}</p>
+                    </div>
 
                     <!-- 目标函数 -->
                     <div
@@ -2372,7 +2538,10 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
                             <!-- 近战武器MOD -->
                             <ModEditer
-                                v-if="charTab === '近战' || (charTab === '同律' && charBuild.skillWeapon?.inherit === 'melee')"
+                                v-if="
+                                    (charTab === '近战' || (charTab === '同律' && charBuild.skillWeapon?.inherit === 'melee')) &&
+                                    !meleeWeaponEmpty
+                                "
                                 :mods="selectedMeleeMods"
                                 :mod-options="
                                     modOptions.filter(
@@ -2396,7 +2565,10 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
                             <!-- 远程武器MOD -->
                             <ModEditer
-                                v-if="charTab === '远程' || (charTab === '同律' && charBuild.skillWeapon?.inherit === 'ranged')"
+                                v-if="
+                                    (charTab === '远程' || (charTab === '同律' && charBuild.skillWeapon?.inherit === 'ranged')) &&
+                                    !rangedWeaponEmpty
+                                "
                                 :mods="selectedRangedMods"
                                 :mod-options="
                                     modOptions.filter(
@@ -2441,6 +2613,25 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 @sync="syncModFromGame(charBuild.char.id, false, true)"
                                 
                             />
+                            <!-- 未装备武器时的MOD提示 -->
+                            <p
+                                v-if="charTab === '近战' && meleeWeaponEmpty"
+                                class="rounded-xs border border-dashed border-base-content/15 px-3 py-2.5 text-xs text-base-content/50"
+                            >
+                                {{ $t("char-build.mods_need_weapon", { slot: $t("近战") }) }}
+                            </p>
+                            <p
+                                v-if="charTab === '远程' && rangedWeaponEmpty"
+                                class="rounded-xs border border-dashed border-base-content/15 px-3 py-2.5 text-xs text-base-content/50"
+                            >
+                                {{ $t("char-build.mods_need_weapon", { slot: $t("远程") }) }}
+                            </p>
+                            <p
+                                v-if="charTab === '同律' && skillWeaponInheritBaseEmpty"
+                                class="rounded-xs border border-dashed border-base-content/15 px-3 py-2.5 text-xs text-base-content/50"
+                            >
+                                {{ $t("char-build.skill_weapon_mods_hint") }}
+                            </p>
                         </div>
                     </CollapsibleSection>
 

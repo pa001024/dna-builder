@@ -147,6 +147,10 @@ export class LeveledModHelper {
  */
 export class LeveledWeaponHelper {
     static fromId(id: number | string, refine?: number, level?: number, effectLv?: number) {
+        // id 为 0 表示“未装备”武器槽位，返回零属性空武器占位，避免查表抛错。
+        if (typeof id === "number" && id === 0) {
+            return LeveledWeapon.emptyWeapon
+        }
         const weaponData = typeof id === "number" ? weaponMap.get(id) : weaponNameMap.get(id)
         if (!weaponData) {
             throw new Error(`武器 "${id}" 未在静态表中找到`)

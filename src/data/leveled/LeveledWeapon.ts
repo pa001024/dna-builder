@@ -71,6 +71,14 @@ export class LeveledWeapon {
     }
 
     /**
+     * 是否为“未装备”的空武器占位（id 为 0）。
+     * 空武器不提供任何属性/技能/特效，且不应计入武器类别等“已装备”语义。
+     */
+    get isEmpty(): boolean {
+        return this.id === 0
+    }
+
+    /**
      * 判断技能字段中是否包含射线伤害字段
      * @param fields 技能字段（数组）
      * @returns 是否包含射线伤害
