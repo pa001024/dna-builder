@@ -622,207 +622,215 @@ async function startNameEdit() {
             <p>DNA Builder 账号用于访问社区功能、分享构建方案等</p>
         </div>
 
-        <!-- 登录模态框 -->
-        <div class="modal" :class="{ 'modal-open': loginForm.open }">
-            <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
-                <div class="p-6">
-                    <!-- 登录表单 -->
-                    <form class="space-y-4" @submit.prevent="handleLogin">
-                        <div class="text-center mb-6">
-                            <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
-                                <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
+        <!--
+            账号相关弹窗统一 Teleport 到 body：
+            设置页的账号卡片带有 animate-ef-rise（fill 模式保留 transform）与 backdrop-blur-sm，
+            二者都会让该卡片成为 position: fixed 后代的包含块，
+            导致 daisyUI 的 .modal 按卡片尺寸定位/裁剪，出现弹窗显示不全的问题。
+        -->
+        <Teleport to="body">
+            <!-- 登录模态框 -->
+            <div class="modal" :class="{ 'modal-open': loginForm.open }">
+                <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
+                    <div class="p-6">
+                        <!-- 登录表单 -->
+                        <form class="space-y-4" @submit.prevent="handleLogin">
+                            <div class="text-center mb-6">
+                                <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
+                                    <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
+                                </div>
+                                <span class="text-lg font-bold">用户登录</span>
                             </div>
-                            <span class="text-lg font-bold">用户登录</span>
-                        </div>
-                        <label class="input input-bordered flex items-center gap-2 w-full">
-                            <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="loginForm.email" type="text" class="grow" placeholder="邮箱" />
-                        </label>
-                        <label class="input input-bordered flex items-center gap-2 w-full">
-                            <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="loginForm.password" type="password" class="grow" placeholder="密码" />
-                        </label>
-                        <!-- 登录按钮 -->
-                        <button type="submit" class="btn btn-primary w-full" :disabled="loading">
-                            <span v-if="loading" class="loading loading-spinner loading-xs" />
-                            <span>{{ loading ? "登录中..." : "登录" }}</span>
-                        </button>
-                        <!-- 忘记密码链接 -->
-                        <div class="text-center">
-                            <button
-                                type="button"
-                                class="text-sm link link-primary transition-colors duration-200"
-                                @click="openResetPasswordModal"
-                            >
-                                忘记密码？
+                            <label class="input input-bordered flex items-center gap-2 w-full">
+                                <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
+                                <input v-model="loginForm.email" type="text" class="grow" placeholder="邮箱" />
+                            </label>
+                            <label class="input input-bordered flex items-center gap-2 w-full">
+                                <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
+                                <input v-model="loginForm.password" type="password" class="grow" placeholder="密码" />
+                            </label>
+                            <!-- 登录按钮 -->
+                            <button type="submit" class="btn btn-primary w-full" :disabled="loading">
+                                <span v-if="loading" class="loading loading-spinner loading-xs" />
+                                <span>{{ loading ? "登录中..." : "登录" }}</span>
                             </button>
+                            <!-- 忘记密码链接 -->
+                            <div class="text-center">
+                                <button
+                                    type="button"
+                                    class="text-sm link link-primary transition-colors duration-200"
+                                    @click="openResetPasswordModal"
+                                >
+                                    忘记密码？
+                                </button>
+                            </div>
+                        </form>
+                        <!-- 额外信息 -->
+                        <div class="text-center mt-4 text-sm text-base-content/60">
+                            <p>登录后即可使用社区功能</p>
                         </div>
-                    </form>
-                    <!-- 额外信息 -->
-                    <div class="text-center mt-4 text-sm text-base-content/60">
-                        <p>登录后即可使用社区功能</p>
                     </div>
                 </div>
+
+                <!-- 模态框背景 -->
+                <div class="modal-backdrop" @click="loginForm.open = false" />
             </div>
-
-            <!-- 模态框背景 -->
-            <div class="modal-backdrop" @click="loginForm.open = false" />
-        </div>
-        <!-- 注册模态框 -->
-        <div class="modal" :class="{ 'modal-open': registerForm.open }">
-            <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
-                <div class="p-6">
-                    <!-- 注册表单 -->
-                    <form class="space-y-4" @submit.prevent="handleRegister">
-                        <div class="text-center mb-6">
-                            <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
-                                <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
+            <!-- 注册模态框 -->
+            <div class="modal" :class="{ 'modal-open': registerForm.open }">
+                <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
+                    <div class="p-6">
+                        <!-- 注册表单 -->
+                        <form class="space-y-4" @submit.prevent="handleRegister">
+                            <div class="text-center mb-6">
+                                <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
+                                    <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
+                                </div>
+                                <span class="text-lg font-bold">用户注册</span>
                             </div>
-                            <span class="text-lg font-bold">用户注册</span>
-                        </div>
-                        <label class="input input-bordered flex items-center gap-2 w-full">
-                            <Icon icon="ri:user-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="registerForm.name" type="text" class="grow" placeholder="昵称" />
-                        </label>
-                        <label class="input input-bordered flex items-center gap-2 w-full">
-                            <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="registerForm.email" type="text" class="grow" placeholder="邮箱" />
-                        </label>
-                        <label class="input input-bordered flex items-center gap-2 w-full">
-                            <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="registerForm.password" type="password" class="grow" placeholder="密码" />
-                        </label>
-                        <label class="input input-bordered flex items-center gap-2 w-full">
-                            <Icon icon="ri:qq-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="registerForm.qq" type="text" class="grow" placeholder="QQ" />
-                        </label>
-                        <LocalQQ
-                            @select="
-                                qq => {
-                                    registerForm.qq = String(qq.uin)
-                                    registerForm.name = qq.nickname
-                                }
-                            "
-                        />
-                        <!-- 登录按钮 -->
-                        <button type="submit" class="btn btn-primary w-full" :disabled="loading">
-                            <span v-if="loading" class="loading loading-spinner loading-xs" />
-                            <span>{{ loading ? "注册中..." : "注册" }}</span>
-                        </button>
-                    </form>
-                    <!-- 额外信息 -->
-                    <div class="text-center mt-4 text-sm text-base-content/60">
-                        <label class="label cursor-pointer">
-                            <span>*QQ号仅用于显示头像 无其他用途</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 模态框背景 -->
-            <div class="modal-backdrop" @click="registerForm.open = false" />
-        </div>
-
-        <!-- 密码重置模态框 -->
-        <div class="modal" :class="{ 'modal-open': resetPasswordForm.open }">
-            <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
-                <div class="p-6">
-                    <!-- 密码重置表单 -->
-                    <div class="space-y-4">
-                        <div class="text-center mb-6">
-                            <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
-                                <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
-                            </div>
-                            <span class="text-lg font-bold">密码重置</span>
-                        </div>
-
-                        <!-- 步骤1: 输入邮箱 -->
-                        <div v-if="resetPasswordForm.step === 1">
-                            <div class="space-y-4">
-                                <div>
-                                    <p class="text-sm text-base-content/60 mb-2">请输入您的邮箱，我们将发送验证码到您的邮箱</p>
-                                    <label class="input input-bordered flex items-center gap-2 w-full">
-                                        <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                                        <input v-model="resetPasswordForm.email" type="text" class="grow" placeholder="邮箱" />
-                                    </label>
-                                </div>
-
-                                <div class="flex gap-2">
-                                    <button
-                                        type="button"
-                                        class="btn btn-primary w-full"
-                                        :disabled="loading"
-                                        @click="sendResetCode"
-                                    >
-                                        <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                        <span>{{ loading ? "发送中..." : "发送验证码" }}</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 步骤2: 输入验证码和新密码 -->
-                        <div v-else-if="resetPasswordForm.step === 2">
-                            <div class="space-y-4">
-                                <div>
-                                    <p class="text-sm text-base-content/60 mb-2">请输入邮箱中的6位验证码</p>
-                                    <label class="input input-bordered flex items-center gap-2 w-full">
-                                        <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                                        <input
-                                            v-model="resetPasswordForm.code"
-                                            type="text"
-                                            class="grow"
-                                            placeholder="6位验证码"
-                                            maxlength="6"
-                                        />
-                                    </label>
-                                </div>
-
-                                <div>
-                                    <p class="text-sm text-base-content/60 mb-2">请输入新密码</p>
-                                    <label class="input input-bordered flex items-center gap-2 w-full">
-                                        <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                                        <input v-model="resetPasswordForm.newPassword" type="password" class="grow" placeholder="新密码" />
-                                    </label>
-                                </div>
-
-                                <div class="flex gap-2">
-                                    <button
-                                        type="button"
-                                        class="btn w-1/3"
-                                        @click="resetPasswordForm.step = 1"
-                                    >
-                                        上一步
-                                    </button>
-                                    <button
-                                        type="button"
-                                        class="btn btn-primary flex-1"
-                                        :disabled="loading"
-                                        @click="handleResetPassword"
-                                    >
-                                        <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                        <span>{{ loading ? "重置中..." : "重置密码" }}</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 关闭按钮 -->
-                        <div class="text-center mt-4">
-                            <button
-                                type="button"
-                                class="text-sm text-base-content/60 hover:text-base-content transition-colors duration-200"
-                                @click="closeResetPasswordModal"
-                            >
-                                返回登录
+                            <label class="input input-bordered flex items-center gap-2 w-full">
+                                <Icon icon="ri:user-line" class="w-4 h-4 opacity-70" />
+                                <input v-model="registerForm.name" type="text" class="grow" placeholder="昵称" />
+                            </label>
+                            <label class="input input-bordered flex items-center gap-2 w-full">
+                                <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
+                                <input v-model="registerForm.email" type="text" class="grow" placeholder="邮箱" />
+                            </label>
+                            <label class="input input-bordered flex items-center gap-2 w-full">
+                                <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
+                                <input v-model="registerForm.password" type="password" class="grow" placeholder="密码" />
+                            </label>
+                            <label class="input input-bordered flex items-center gap-2 w-full">
+                                <Icon icon="ri:qq-line" class="w-4 h-4 opacity-70" />
+                                <input v-model="registerForm.qq" type="text" class="grow" placeholder="QQ" />
+                            </label>
+                            <LocalQQ
+                                @select="
+                                    qq => {
+                                        registerForm.qq = String(qq.uin)
+                                        registerForm.name = qq.nickname
+                                    }
+                                "
+                            />
+                            <!-- 登录按钮 -->
+                            <button type="submit" class="btn btn-primary w-full" :disabled="loading">
+                                <span v-if="loading" class="loading loading-spinner loading-xs" />
+                                <span>{{ loading ? "注册中..." : "注册" }}</span>
                             </button>
+                        </form>
+                        <!-- 额外信息 -->
+                        <div class="text-center mt-4 text-sm text-base-content/60">
+                            <label class="label cursor-pointer">
+                                <span>*QQ号仅用于显示头像 无其他用途</span>
+                            </label>
                         </div>
                     </div>
                 </div>
+
+                <!-- 模态框背景 -->
+                <div class="modal-backdrop" @click="registerForm.open = false" />
             </div>
 
-            <!-- 模态框背景 -->
-            <div class="modal-backdrop" @click="closeResetPasswordModal" />
-        </div>
+            <!-- 密码重置模态框 -->
+            <div class="modal" :class="{ 'modal-open': resetPasswordForm.open }">
+                <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
+                    <div class="p-6">
+                        <!-- 密码重置表单 -->
+                        <div class="space-y-4">
+                            <div class="text-center mb-6">
+                                <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
+                                    <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
+                                </div>
+                                <span class="text-lg font-bold">密码重置</span>
+                            </div>
+
+                            <!-- 步骤1: 输入邮箱 -->
+                            <div v-if="resetPasswordForm.step === 1">
+                                <div class="space-y-4">
+                                    <div>
+                                        <p class="text-sm text-base-content/60 mb-2">请输入您的邮箱，我们将发送验证码到您的邮箱</p>
+                                        <label class="input input-bordered flex items-center gap-2 w-full">
+                                            <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
+                                            <input v-model="resetPasswordForm.email" type="text" class="grow" placeholder="邮箱" />
+                                        </label>
+                                    </div>
+
+                                    <div class="flex gap-2">
+                                        <button
+                                            type="button"
+                                            class="btn btn-primary w-full"
+                                            :disabled="loading"
+                                            @click="sendResetCode"
+                                        >
+                                            <span v-if="loading" class="loading loading-spinner loading-xs" />
+                                            <span>{{ loading ? "发送中..." : "发送验证码" }}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 步骤2: 输入验证码和新密码 -->
+                            <div v-else-if="resetPasswordForm.step === 2">
+                                <div class="space-y-4">
+                                    <div>
+                                        <p class="text-sm text-base-content/60 mb-2">请输入邮箱中的6位验证码</p>
+                                        <label class="input input-bordered flex items-center gap-2 w-full">
+                                            <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
+                                            <input
+                                                v-model="resetPasswordForm.code"
+                                                type="text"
+                                                class="grow"
+                                                placeholder="6位验证码"
+                                                maxlength="6"
+                                            />
+                                        </label>
+                                    </div>
+
+                                    <div>
+                                        <p class="text-sm text-base-content/60 mb-2">请输入新密码</p>
+                                        <label class="input input-bordered flex items-center gap-2 w-full">
+                                            <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
+                                            <input v-model="resetPasswordForm.newPassword" type="password" class="grow" placeholder="新密码" />
+                                        </label>
+                                    </div>
+
+                                    <div class="flex gap-2">
+                                        <button
+                                            type="button"
+                                            class="btn w-1/3"
+                                            @click="resetPasswordForm.step = 1"
+                                        >
+                                            上一步
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="btn btn-primary flex-1"
+                                            :disabled="loading"
+                                            @click="handleResetPassword"
+                                        >
+                                            <span v-if="loading" class="loading loading-spinner loading-xs" />
+                                            <span>{{ loading ? "重置中..." : "重置密码" }}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 关闭按钮 -->
+                            <div class="text-center mt-4">
+                                <button
+                                    type="button"
+                                    class="text-sm text-base-content/60 hover:text-base-content transition-colors duration-200"
+                                    @click="closeResetPasswordModal"
+                                >
+                                    返回登录
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模态框背景 -->
+                <div class="modal-backdrop" @click="closeResetPasswordModal" />
+            </div>
+        </Teleport>
     </div>
 </template>

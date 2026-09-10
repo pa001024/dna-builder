@@ -1008,6 +1008,10 @@
         "type": "类型"
     },
     "errorBoundary": {
+        "backupTip": "重置前请务必备份数据：重置会清空本地设置与缓存（不影响云端数据），可解决约 99% 的报错问题。",
+        "desc": "页面渲染时发生异常，可先点击「重试」；若反复出现，前往设置重置即可解决绝大多数问题。",
+        "gotoSetting": "前往设置重置",
+        "messageLabel": "错误详情",
         "retry": "重试",
         "title": "组件渲染出错"
     },
@@ -2112,7 +2116,7 @@
         "resetConfirm": "确认重置所有设置吗？",
         "resetTheme": "重置主题",
         "resetThemeConfirm": "确定要恢复默认自定义主题吗？",
-        "resetTip": "如果页面出错可以尝试重置",
+        "resetTip": "重置会清空本地设置与缓存，操作前请先备份数据；可解决约 99% 的报错问题",
         "safeMode": "安全模式",
         "safeModeAnswerWrong": "回答错误，安全模式仍保持开启",
         "safeModeHint": "你知道的太多了",

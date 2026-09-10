@@ -6904,6 +6904,10 @@
         "type": "Type"
     },
     "errorBoundary": {
+        "backupTip": "Sauvegardez vos données avant de réinitialiser : la réinitialisation efface les paramètres et caches locaux (les données cloud ne sont pas affectées) et résout environ 99 % des erreurs.",
+        "desc": "Une erreur est survenue pendant le rendu de cette page. Essayez d'abord « Réessayer » ; si le problème persiste, une réinitialisation dans les Réglages résout la grande majorité des erreurs.",
+        "gotoSetting": "Ouvrir les Réglages pour réinitialiser",
+        "messageLabel": "Détails de l'erreur",
         "retry": "Réessayer",
         "title": "Erreur de rendu du composant"
     },
@@ -8010,7 +8014,7 @@
         "resetConfirm": "Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?",
         "resetTheme": "Réinitialiser le thème",
         "resetThemeConfirm": "Réinitialiser le thème personnalisé par défaut ?",
-        "resetTip": "Si une erreur apparaît sur la page, essayez de la réinitialiser.",
+        "resetTip": "La réinitialisation efface les paramètres et caches locaux — sauvegardez vos données au préalable. Elle résout environ 99 % des erreurs.",
         "safeMode": "Mode sécurisé",
         "safeModeAnswerWrong": "Mauvaise réponse, le mode sécurisé reste activé",
         "safeModeHint": "Vous en savez trop",

@@ -5989,6 +5989,10 @@
         "type": "類型"
     },
     "errorBoundary": {
+        "backupTip": "重置前請務必備份資料：重置會清空本機設定與快取（不影響雲端資料），可解決約 99% 的報錯問題。",
+        "desc": "頁面渲染時發生異常，可先點擊「重試」；若反覆出現，前往設定重置即可解決絕大多數問題。",
+        "gotoSetting": "前往設定重置",
+        "messageLabel": "錯誤詳情",
         "retry": "重試",
         "title": "組件渲染出錯"
     },
@@ -7095,7 +7099,7 @@
         "resetConfirm": "確認重置所有設置嗎？",
         "resetTheme": "重置主題",
         "resetThemeConfirm": "確定要恢復預設自訂主題嗎？",
-        "resetTip": "如果頁面出錯可以嘗試重置",
+        "resetTip": "重置會清空本機設定與快取，操作前請先備份資料；可解決約 99% 的報錯問題",
         "safeMode": "安全模式",
         "safeModeAnswerWrong": "回答錯誤，安全模式仍保持開啟",
         "safeModeHint": "你知道得太多了",

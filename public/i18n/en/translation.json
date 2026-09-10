@@ -6870,6 +6870,10 @@
         "type": "Type"
     },
     "errorBoundary": {
+        "backupTip": "Back up your data before resetting: resetting clears local settings and caches (cloud data is unaffected) and fixes about 99% of errors.",
+        "desc": "Something went wrong while rendering this page. Try \"Retry\" first; if it keeps happening, resetting in Settings fixes the vast majority of errors.",
+        "gotoSetting": "Go to Settings to reset",
+        "messageLabel": "Error details",
         "retry": "Retry",
         "title": "Component Rendering Error"
     },
@@ -7975,7 +7979,7 @@
         "resetConfirm": "Are you sure to reset all settings?",
         "resetTheme": "Reset theme",
         "resetThemeConfirm": "Reset the custom theme to its default?",
-        "resetTip": "If there is an error on the page, try resetting it.",
+        "resetTip": "Resetting clears local settings and caches — back up your data first. It fixes about 99% of errors.",
         "safeMode": "Safe mode",
         "safeModeAnswerWrong": "Wrong answer, safe mode remains enabled",
         "safeModeHint": "You know too much",

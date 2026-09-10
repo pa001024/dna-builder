@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { t } from "i18next"
-import { computed, onMounted, ref, watch } from "vue"
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import type { FloatWindowConfig } from "@/api/app"
 import { FLOAT_WINDOW_DEFAULTS, floatWindowDisable, floatWindowSet, floatWindowState, MATERIALS } from "@/api/app"
 import SafeModeQuizDialog from "@/components/SafeModeQuizDialog.vue"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { clearAllDataPackOpfs, getInstalledDataPackVersions, getMergedDataPackVersions } from "@/data/data-pack"
 import { deleteImgsCache, imgsDownloadState } from "@/data/imgs-runtime"
 import { closeSafeMode, openSafeMode } from "@/data/versionGate"
@@ -30,6 +31,38 @@ const isApplyingSourceUpdate = ref(false)
 const isClearingDataPackOpfs = ref(false)
 const formatSize = new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 1 })
 const dataPackLoadingRemoteVersions = ref(false)
+
+/** 错误页跳转标记：带 reset=1 进入设置页时，滚动并高亮「重置所有设置」卡片 */
+const resetHighlightTarget = useSearchParam<boolean>("reset", false)
+/** 重置卡片是否处于高亮态（跳转后的短暂提示） */
+const resetHighlighted = ref(false)
+/** 「重置所有设置」卡片行的 DOM 引用，用于跳转后滚动定位 */
+const resetSectionRef = ref<HTMLElement | null>(null)
+/** 高亮态自动消退的定时器句柄 */
+let resetHighlightTimer: number | null = null
+
+/**
+ * 处理错误页带来的 reset=1 跳转：滚动到「重置所有设置」卡片并短暂高亮，
+ * 随后清除该 URL 参数，避免刷新后重复触发。
+ */
+async function focusResetSection() {
+    if (!resetHighlightTarget.value) {
+        return
+    }
+
+    await nextTick()
+    resetSectionRef.value?.scrollIntoView({ behavior: "smooth", block: "center" })
+    resetHighlighted.value = true
+    resetHighlightTarget.value = false
+
+    if (resetHighlightTimer !== null) {
+        window.clearTimeout(resetHighlightTimer)
+    }
+    resetHighlightTimer = window.setTimeout(() => {
+        resetHighlighted.value = false
+        resetHighlightTimer = null
+    }, 3000)
+}
 
 const imgsDownloadSummary = computed(() => {
     const state = imgsDownloadState.value
@@ -695,6 +728,16 @@ onMounted(() => {
     // 懒加载系统字体列表（桌面端读注册表；Web 端需要用户手势授权，失败时可手动刷新重试）
     void setting.loadSystemFonts()
     void syncSkillCdOverlayOnMount()
+    // 错误页「前往设置重置」跳转过来时，定位并高亮重置卡片
+    void focusResetSection()
+})
+
+onUnmounted(() => {
+    // 清理高亮定时器，避免组件销毁后回调仍触发
+    if (resetHighlightTimer !== null) {
+        window.clearTimeout(resetHighlightTimer)
+        resetHighlightTimer = null
+    }
 })
 </script>
 
@@ -1377,7 +1420,11 @@ onMounted(() => {
                     :style="{ animationDelay: '0.2s' }"
                 >
                     <div
-                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        ref="resetSectionRef"
+                        class="flex items-center justify-between gap-2 rounded-xs border px-2.5 py-2 transition-colors duration-300"
+                        :class="
+                            resetHighlighted ? 'border-primary/70 bg-primary/10' : 'border-base-content/10 bg-base-content/3'
+                        "
                     >
                         <span class="label-text">
                             {{ $t("setting.reset") }}

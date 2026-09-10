@@ -13,6 +13,8 @@
  */
 
 import { WebView } from "bun"
+// 注意：Bun 1.4 未提供 Bun.mkdir，目录创建统一使用 node:fs/promises
+import { mkdir } from "node:fs/promises"
 
 // ---------------------------------------------------------------------------
 // 类型
@@ -126,7 +128,7 @@ export async function expectNoConsoleErrors(): Promise<void> {
 
 /** 截图并保存到 screenshots/ 目录，返回文件路径 */
 export async function snapshot(ctx: TestContext, name: string, format: "png" | "jpeg" | "webp" = "png"): Promise<string> {
-    await Bun.mkdir("screenshots", { recursive: true })
+    await mkdir("screenshots", { recursive: true })
     const file = `screenshots/${name}.${format}`
     await Bun.write(file, await ctx.view.screenshot({ format }))
     return file
@@ -157,7 +159,7 @@ function slug(s: string): string {
 export async function run(config: RunConfig = {}): Promise<void> {
     const baseUrl = resolveBaseUrl(config)
     consoleErrors = []
-    await Bun.mkdir("screenshots", { recursive: true })
+    await mkdir("screenshots", { recursive: true })
 
     const passed: string[] = []
     const failed: { name: string; error: string }[] = []
