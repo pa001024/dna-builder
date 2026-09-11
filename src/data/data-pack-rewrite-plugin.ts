@@ -50,6 +50,7 @@ const DATA_PACK_MODULES = new Set([
     "solotreasure.data.ts",
     "subregion.data.ts",
     "title.data.ts",
+    "titleframe.data.ts",
     "pet.data.ts",
     "monstertag.data.ts",
     "mount.data.ts",

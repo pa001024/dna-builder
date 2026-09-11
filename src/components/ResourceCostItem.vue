@@ -224,7 +224,15 @@ function getDraftByIdOrProductId(draftId: number | string): Draft | undefined {
     return draftMap.get(normalizedId) ?? [...draftMap.values()].find(draft => draft.p === normalizedId)
 }
 
-type FashionCostType = "CharAccessory" | "WeaponAccessory" | "WeaponSkin" | "Skin" | "HeadSculpture" | "HeadFrame" | "Hair"
+type FashionCostType =
+    | "CharAccessory"
+    | "WeaponAccessory"
+    | "WeaponSkin"
+    | "Skin"
+    | "HeadSculpture"
+    | "HeadFrame"
+    | "Hair"
+    | "TitleFrame"
 
 interface FashionCostMeta {
     icon: string
@@ -382,6 +390,9 @@ function getFashionLink(type: FashionCostType, id: number | string): string {
     }
     if (type === "WeaponSkin") {
         return `/db/accessory/weaponskin/${normalizedId}`
+    }
+    if (type === "TitleFrame") {
+        return `/db/accessory/titleframe/${normalizedId}`
     }
 
     return ""

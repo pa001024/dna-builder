@@ -160,6 +160,9 @@ function getRewardLink(item: RewardItemType) {
     if (["CharAccessory", "WeaponAccessory"].includes(item.t)) {
         return `/db/accessory/${item.t === "CharAccessory" ? "char" : "weapon"}/${item.id}`
     }
+    if (item.t === "TitleFrame") {
+        return `/db/accessory/titleframe/${item.id}`
+    }
     if (item.t === "Walnut") {
         return `/db/walnut/${item.id}`
     }

@@ -3,8 +3,10 @@ import { computed } from "vue"
 import { useRoute } from "vue-router"
 import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
+import { titleFrameData } from "@/data/d/titleframe.data"
+import { titleFrameIdToKey } from "@/data/generated/title-frame.generated"
 
-type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head" | "titleframe"
 type AccessoryDetailItem =
     | ((typeof charAccessoryData)[number] & { accessoryType: "char" })
     | ((typeof weaponAccessoryData)[number] & { accessoryType: "weapon" })
@@ -13,6 +15,7 @@ type AccessoryDetailItem =
     | ((typeof hairData)[number] & { accessoryType: "hair" })
     | ((typeof headFrameData)[number] & { accessoryType: "headframe" })
     | ((typeof headSculptureData)[number] & { accessoryType: "head" })
+    | ((typeof titleFrameData)[number] & { accessoryType: "titleframe"; frame: string })
 
 const route = useRoute()
 
@@ -36,6 +39,9 @@ const accessoryType = computed(() => {
     if (value === "hair") {
         return "hair"
     }
+    if (value === "titleframe") {
+        return "titleframe"
+    }
     return value === "skin" ? "skin" : "char"
 })
 
@@ -48,6 +54,11 @@ const accessoryId = computed(() => Number(route.params.accessoryId))
  * 根据类型和 ID 获取饰品详情。
  */
 const accessory = computed(() => {
+    // 称号框的数据结构与外观看不同（框面 key 单独查），单独分支
+    if (accessoryType.value === "titleframe") {
+        const item = titleFrameData.find(v => v.id === accessoryId.value)
+        return item ? { ...item, accessoryType: "titleframe" as const, frame: titleFrameIdToKey[item.id] ?? "" } : null
+    }
     const sourceMap = {
         char: charAccessoryData,
         weapon: weaponAccessoryData,

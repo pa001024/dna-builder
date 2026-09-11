@@ -5,12 +5,13 @@ import { charData } from "@/data"
 import type { Accessory, HairItem, HeadFrameItem, HeadSculptureItem, SkinItem } from "@/data/d/accessory.data"
 import draftData, { type Draft } from "@/data/d/draft.data"
 import shopData from "@/data/d/shop.data"
+import type { TitleFrame } from "@/data/d/titleframe.data"
 import { getWanhuaSkinUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import type { ResourceDraftSourceInfo } from "@/utils/draft-source"
 import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
 
-type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head" | "titleframe" | "titleframe"
 
 type CharAccessoryItem = Accessory & {
     accessoryType: "char"
@@ -40,6 +41,12 @@ type HeadAccessoryItem = HeadSculptureItem & {
     accessoryType: "head"
 }
 
+/** 称号框：数据来自上游 TitleFrame 表（与称号表无关），frame 是渲染用的框面资源 key */
+type TitleFrameAccessoryItem = TitleFrame & {
+    accessoryType: "titleframe"
+    frame: string
+}
+
 type DetailAccessoryItem =
     | CharAccessoryItem
     | WeaponAccessoryItem
@@ -48,6 +55,7 @@ type DetailAccessoryItem =
     | HairAccessoryItem
     | HeadFrameAccessoryItem
     | HeadAccessoryItem
+    | TitleFrameAccessoryItem
 
 const props = defineProps<{
     accessory: DetailAccessoryItem
@@ -99,12 +107,23 @@ function isHeadAccessory(accessory: DetailAccessoryItem): accessory is HeadAcces
 }
 
 /**
+ * 判断是否为称号框。
+ * @param accessory 详情数据
+ * @returns 是否为称号框
+ */
+function isTitleFrameAccessory(accessory: DetailAccessoryItem): accessory is TitleFrameAccessoryItem {
+    return accessory.accessoryType === "titleframe"
+}
+
+/**
  * 判断是否为不显示稀有度的饰品。
  * @param accessory 详情数据
  * @returns 是否为不显示稀有度的饰品
  */
-function isNoRarityAccessory(accessory: DetailAccessoryItem): accessory is HeadFrameAccessoryItem | HeadAccessoryItem {
-    return accessory.accessoryType === "headframe" || accessory.accessoryType === "head"
+function isNoRarityAccessory(
+    accessory: DetailAccessoryItem
+): accessory is HeadFrameAccessoryItem | HeadAccessoryItem | TitleFrameAccessoryItem {
+    return accessory.accessoryType === "headframe" || accessory.accessoryType === "head" || accessory.accessoryType === "titleframe"
 }
 
 /**
@@ -166,6 +185,9 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
     }
     if (accessoryType === "hair") {
         return "accessory.typeHair"
+    }
+    if (accessoryType === "titleframe") {
+        return "accessory.typeTitleFrame"
     }
     return "accessory.typeSkin"
 }
@@ -259,6 +281,7 @@ const relatedShopSources = computed<ShopSourceInfo[]>(() => {
         hair: "Hair",
         headframe: "HeadFrame",
         head: "HeadSculpture",
+        titleframe: "TitleFrame",
     } as const
     const targetItemType = itemTypeMap[props.accessory.accessoryType]
     if (!targetItemType) {
@@ -335,6 +358,10 @@ const displayShopSources = computed<ShopSourceInfo[]>(() => {
  * 详情页标题图标地址。
  */
 const accessoryIcon = computed(() => {
+    if (isTitleFrameAccessory(props.accessory)) {
+        // 头部用图鉴图标；框面渲染只放在详情页的预览块里
+        return props.accessory.icon ? `/imgs/webp/${props.accessory.icon}.webp` : "/imgs/webp/T_Icon_Random_TitleFrame.webp"
+    }
     if (isHeadFrameAccessory(props.accessory)) {
         return getHeadFrameIcon(props.accessory.icon)
     }
@@ -380,6 +407,9 @@ const accessoryDetailLink = computed(() => {
     if (props.accessory.accessoryType === "head") {
         return `/db/accessory/head/${props.accessory.id}`
     }
+    if (isTitleFrameAccessory(props.accessory)) {
+        return `/db/accessory/titleframe/${props.accessory.id}`
+    }
     return ""
 })
 
@@ -417,6 +447,10 @@ const accessoryUnlock = computed(() => {
     }
     if (isHairAccessory(props.accessory)) {
         return "-"
+    }
+    if (isTitleFrameAccessory(props.accessory)) {
+        // 称号框只有「解锁条件」文案（access），不是外观那套解锁方式枚举
+        return props.accessory.access ? t(props.accessory.access) : "-"
     }
     return props.accessory.unlock ? t(props.accessory.unlock) : "-"
 })
@@ -483,6 +517,17 @@ const accessoryUnlock = computed(() => {
                 </div>
             </div>
         </header>
+
+        <!--
+            称号框预览：按游戏内 WBP 数据实时渲染（图层位置、材质、动画都来自 pak）。
+            组件以设计画布 236×34 为基准缩放，给任意宽度都能保持实机比例。
+        -->
+        <section v-if="isTitleFrameAccessory(accessory)" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="TITLE FRAME" :title="$t('accessory.titleFramePreview')" />
+            <div class="mt-3 flex justify-center overflow-hidden rounded-xs bg-base-300/40 px-3 py-6">
+                <TitleFrameRender class="w-full max-w-90" :frame="accessory.frame" :title="$t(accessoryName)" />
+            </div>
+        </section>
 
         <!-- 基本信息 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">

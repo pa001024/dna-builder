@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <title>TitleFrame 预览</title>
+        <!--
+            称号框渲染的对照工具：在 Vite dev server 下打开
+            http://localhost:1420/tools/title-frame-preview.html
+
+            顶部按钮切换固定播放时间（组件 timeMs 属性），用于逐帧核对布局与动画；
+            地址栏可用 ?frames=07_1,09_1 只渲染指定称号框，便于聚焦排查。
+        -->
+        <style>
+            body {
+                margin: 0;
+                padding: 12px;
+                background: #14161c;
+                color: #cfd3dc;
+                font: 12px/1.4 system-ui, sans-serif;
+            }
+            .toolbar {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding-bottom: 10px;
+                background: #14161c;
+            }
+            button {
+                cursor: pointer;
+                border: 1px solid #3a3f4b;
+                border-radius: 3px;
+                background: #22262f;
+                color: inherit;
+                padding: 3px 8px;
+                font: inherit;
+            }
+            button[data-active="1"] {
+                border-color: #7aa2ff;
+                color: #cfe0ff;
+            }
+            .row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                border-top: 1px solid #262a33;
+                padding: 5px 0;
+            }
+            .label {
+                width: 220px;
+                flex: none;
+                font-family: ui-monospace, monospace;
+                color: #8e97a8;
+            }
+            .demo {
+                width: var(--demo-width, 460px);
+                flex: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+        <style>
+    /* 与 src/style.css 里的声明保持一致：预览页不加载全局样式表，这里补一份游戏内字体 */
+    @font-face {
+        font-family: "TitleBlod";
+        src: url("/fonts/blod.ttf") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+    }
+</style>
+<script type="module">
+            import { createApp, h, ref } from "vue"
+            import TitleFrameRender from "/src/components/TitleFrameRender.vue"
+            import { titleFrames } from "/src/data/generated/title-frame.generated.ts"
+
+            /** 采样时间点（毫秒）：覆盖 In 结束后的整个 Loop 周期 */
+            const TIMES = [0, 300, 1000, 2500, 4000, 5500, 6500]
+            const current = ref(2500)
+
+            const params = new URLSearchParams(location.search)
+            const filter = (params.get("frames") ?? "").split(",").filter(Boolean)
+            const keys = Object.keys(titleFrames).filter(key => filter.length === 0 || filter.includes(key))
+            /** ?w=384 固定框体像素宽度，便于与实机截图按同一比例对齐比较 */
+            const demoWidth = Number(params.get("w") ?? 460)
+            /** ?title=xxx 覆盖示例文字（多个框用 | 分隔） */
+            const demoTitles = (params.get("title") ?? "测试称号").split("|")
+            /** ?gl=1 使用移植后的材质着色器渲染（WebGL），默认走 DOM 合成 */
+            const glMode = params.get("gl") === "1"
+            /** ?time=2500 直接固定播放时间（同时隐藏时间按钮栏） */
+            const fixedTime = params.get("time")
+            if (fixedTime !== null) {
+                current.value = Number(fixedTime)
+                document.querySelector(".toolbar")?.remove()
+            }
+            document.body.style.setProperty("--demo-width", `${demoWidth}px`)
+
+            /**
+             * ?only=Img_bg,bg_vx_03 / ?hide=VX_01,VX_glow 按图层名过滤。
+             * 排查单个图层对画面的贡献时非常有用。
+             */
+            const onlyLayers = (params.get("only") ?? "").split(",").filter(Boolean)
+            const hideLayers = (params.get("hide") ?? "").split(",").filter(Boolean)
+            const filterFrame = frame => {
+                let layers = frame.layers
+                if (onlyLayers.length) layers = layers.filter(layer => onlyLayers.includes(layer.key))
+                if (hideLayers.length) layers = layers.filter(layer => !hideLayers.includes(layer.key))
+                return layers === frame.layers ? frame : { ...frame, layers }
+            }
+
+            const App = {
+                setup() {
+                    return () =>
+                        h("div", [
+                            h(
+                                "div",
+                                { class: "toolbar" },
+                                TIMES.map(time =>
+                                    h(
+                                        "button",
+                                        {
+                                            "data-active": current.value === time ? "1" : "0",
+                                            onClick: () => {
+                                                current.value = time
+                                            },
+                                        },
+                                        `${time}ms`
+                                    )
+                                )
+                            ),
+                            ...keys.map((key, index) => {
+                                const frame = titleFrames[key]
+                                return h("div", { class: "row" }, [
+                                    h("div", { class: "label" }, `${key}  id=${frame.ids.join("/")}  ${frame.width}×${frame.height}`),
+                                    h("div", { class: "demo" }, [
+                                        h(TitleFrameRender, {
+                                            frame: filterFrame(frame),
+                                            timeMs: current.value,
+                                            title: demoTitles[index] ?? demoTitles[0] ?? "测试称号",
+                                            renderer: glMode ? "webgl" : "dom",
+                                        }),
+                                    ]),
+                                ])
+                            }),
+                        ])
+                },
+            }
+            createApp(App).mount("#app")
+        </script>
+    </body>
+</html>

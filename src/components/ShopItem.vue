@@ -276,6 +276,7 @@ const itemDetail = computed(() => {
             return {
                 type: props.item.itemType,
                 icon: `/imgs/webp/T_Icon_Random_TitleFrame.webp`,
+                link: `/db/accessory/titleframe/${props.item.typeId}`,
             }
         case "Reward":
             const rewardDetail = rewardMap.get(props.item.typeId)
@@ -351,7 +352,7 @@ function getPriceIcon(name: string) {
                             </div>
                         </template>
                         <span
-                            class="ml-auto max-w-full min-w-0 shrink border border-base-content/25 bg-base-100/60 px-1 py-px text-[10px] break-words"
+                            class="ml-auto max-w-full min-w-0 shrink border border-base-content/25 bg-base-100/60 px-1 py-px text-[10px] wrap-break-word"
                         >
                             {{ payInfo.currency }} {{ payInfo.amount }}
                         </span>
@@ -381,7 +382,7 @@ function getPriceIcon(name: string) {
                             </div>
                         </template>
                         <span
-                            class="ml-auto flex max-w-full min-w-0 shrink items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs break-words"
+                            class="ml-auto flex max-w-full min-w-0 shrink items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs wrap-break-word"
                         >
                             <img :src="getPriceIcon(item.priceName)" class="size-3 object-cover rounded" :alt="item.priceName" />
                             {{ currentPrice }}
@@ -390,7 +391,7 @@ function getPriceIcon(name: string) {
                     </FullTooltip>
                     <span
                         v-else
-                        class="ml-auto flex max-w-full min-w-0 shrink items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs break-words"
+                        class="ml-auto flex max-w-full min-w-0 shrink items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs wrap-break-word"
                     >
                         <img :src="getPriceIcon(item.priceName)" class="size-3 object-cover rounded" :alt="item.priceName" />
                         {{ item.priceName }} {{ currentPrice }}

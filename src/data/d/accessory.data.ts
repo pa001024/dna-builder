@@ -6420,7 +6420,7 @@ export const skinData: SkinItem[] = [
             HeadSculpture: [
                 {
                     id: 20016,
-                    name: "UI_PlayerHead_Name_20016",
+                    name: "谋爱之人的肖像·誓约",
                     num: 1,
                 },
             ],

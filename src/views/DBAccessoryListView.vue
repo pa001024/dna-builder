@@ -17,11 +17,13 @@ import {
     weaponSkinData,
 } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
+import { type TitleFrame, titleFrameData } from "@/data/d/titleframe.data"
+import { titleFrameIdToKey } from "@/data/generated/title-frame.generated"
 import { getAccessoryUnlockLabelKey, getWanhuaSkinUnlock, normalizeAccessoryUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityBadgeClass, getRarityGradientClass, getRarityName } from "@/utils/rarity-utils"
 
-type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head"
+type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head" | "titleframe"
 
 type CharAccessoryItem = Accessory & { accessoryType: "char" }
 type WeaponAccessoryItem = Accessory & { accessoryType: "weapon" }
@@ -30,6 +32,8 @@ type SkinAccessoryItem = SkinItem & { accessoryType: "skin"; unlock?: string }
 type HairAccessoryItem = HairItem & { accessoryType: "hair" }
 type HeadFrameAccessoryItem = HeadFrameItem & { accessoryType: "headframe" }
 type HeadAccessoryItem = HeadSculptureItem & { accessoryType: "head" }
+/** 称号框：数据来自上游 TitleFrame 表（与称号表无关），frame 是渲染用的框面资源 key */
+type TitleFrameAccessoryItem = TitleFrame & { accessoryType: "titleframe"; frame: string }
 type AccessoryItem =
     | CharAccessoryItem
     | WeaponAccessoryItem
@@ -38,6 +42,7 @@ type AccessoryItem =
     | HairAccessoryItem
     | HeadFrameAccessoryItem
     | HeadAccessoryItem
+    | TitleFrameAccessoryItem
 
 /**
  * 判断当前饰品是否包含获取方式字段。
@@ -102,7 +107,22 @@ const allAccessories = computed<AccessoryItem[]>(() => {
     const hairItems: HairAccessoryItem[] = hairData.map(item => ({ ...item, accessoryType: "hair" }))
     const headFrameItems: HeadFrameAccessoryItem[] = headFrameData.map(item => ({ ...item, accessoryType: "headframe" }))
     const headItems: HeadAccessoryItem[] = headSculptureData.map(item => ({ ...item, accessoryType: "head" }))
-    return [...charItems, ...weaponItems, ...skinItems, ...weaponSkinItems, ...hairItems, ...headFrameItems, ...headItems]
+    const titleFrameItems: TitleFrameAccessoryItem[] = titleFrameData.map(item => ({
+        ...item,
+        accessoryType: "titleframe",
+        // 框面资源 key 来自渲染数据（TitleFrame.lua → WBP），查不到就只显示图标
+        frame: titleFrameIdToKey[item.id] ?? "",
+    }))
+    return [
+        ...charItems,
+        ...weaponItems,
+        ...skinItems,
+        ...weaponSkinItems,
+        ...hairItems,
+        ...headFrameItems,
+        ...headItems,
+        ...titleFrameItems,
+    ]
 })
 
 /**
@@ -135,7 +155,7 @@ const allUnlockMethods = computed(() => {
 const allRarities = computed(() => {
     const raritySet = new Set<number>()
     for (const accessory of allAccessories.value) {
-        if (accessory.accessoryType === "headframe" || accessory.accessoryType === "head") {
+        if (accessory.accessoryType === "headframe" || accessory.accessoryType === "head" || accessory.accessoryType === "titleframe") {
             continue
         }
         if (!hasAccessoryRarity(accessory)) {
@@ -150,7 +170,7 @@ const allRarities = computed(() => {
 })
 
 /** 类型筛选方章的展示顺序。 */
-const accessoryTypes = ["char", "weapon", "skin", "weaponskin", "hair", "headframe", "head"] as const
+const accessoryTypes = ["char", "weapon", "skin", "weaponskin", "hair", "headframe", "head", "titleframe"] as const
 
 /**
  * 过滤饰品列表，支持类型/稀有度/获取方式筛选和拼音搜索。
@@ -161,7 +181,7 @@ const filteredAccessories = computed(() => {
             return false
         }
 
-        if (item.accessoryType === "headframe" || item.accessoryType === "head") {
+        if (item.accessoryType === "headframe" || item.accessoryType === "head" || item.accessoryType === "titleframe") {
             if (selectedRarity.value !== -1) {
                 return false
             }
@@ -175,6 +195,11 @@ const filteredAccessories = computed(() => {
                 return false
             }
         } else if (selectedRarity.value !== -1 && rarity !== selectedRarity.value) {
+            return false
+        }
+
+        // 称号框没有「解锁方式」这一维度
+        if (item.accessoryType === "titleframe" && selectedUnlock.value !== "all") {
             return false
         }
 
@@ -222,6 +247,10 @@ function selectAccessory(accessory: AccessoryItem | null) {
  * @returns 图标 URL
  */
 function getAccessoryIcon(accessory: AccessoryItem): string {
+    if (accessory.accessoryType === "titleframe") {
+        // 列表用图鉴图标；框面渲染只放在详情页的预览块里
+        return accessory.icon ? `/imgs/webp/${accessory.icon}.webp` : "/imgs/webp/T_Icon_Random_TitleFrame.webp"
+    }
     if (accessory.accessoryType === "weaponskin") {
         return resolveSkinIconUrl(accessory.icon)
     }
@@ -263,6 +292,9 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
     }
     if (accessoryType === "head") {
         return "accessory.typeAvatar"
+    }
+    if (accessoryType === "titleframe") {
+        return "accessory.typeTitleFrame"
     }
     return "accessory.typeSkin"
 }

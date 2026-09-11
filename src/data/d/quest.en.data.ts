@@ -65701,7 +65701,7 @@ export const questData_en: QuestStory[] = [
                             {
                                 id: 11123823,
                                 content:
-                                    "H—How is this possible...? Why would our own artillery fire on an Imperial village? Had Arcano already fallen...?",
+                                    "H—How is this possible...? Why would our own artillery fire on an Imperial village? Had the village already fallen...?",
                                 npc: 700637,
                                 next: 11123824,
                             },

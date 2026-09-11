@@ -2,6 +2,7 @@
 import { computed, ref } from "vue"
 import type { CharSettings } from "@/composables/useCharSettings"
 import { CharBuild, LeveledWeapon, weaponData } from "@/data"
+import { calcWeaponReplacementIncomes } from "@/data/CharBuildHelper"
 import type { Weapon } from "@/data/data-types"
 import { getWBuffLvFromSetting } from "@/data/effectLv"
 import { useInvStore } from "@/store/inv"
@@ -101,36 +102,14 @@ const filteredWeapons = computed(() => {
 /**
  * 各武器的真实替换收益：在克隆构筑上把对应槽位替换为目标武器后重算，
  * 以「替换后总伤害 / 当前总伤害 - 1」度量实际更换武器带来的收益变化，
- * 避免 `calcIncome` 在槽位类型与构筑不匹配时把武器当作附加 MOD 处理而算错。
+ * 候选武器由 `calcWeaponReplacementIncomes` 按目标特效等级完整构造（含武器特效），
+ * 避免漏配特效导致已装备武器收益为负。
  * 收益只依赖配装上下文与武器数据，不随筛选变化，故一次性缓存供排序与展示复用。
  */
 const weaponIncomes = computed(() => {
     const charBuild = props.charBuild
-    const map = new Map<number, number>()
-    if (!charBuild) return map
-
-    // 全程在克隆构筑上替换并重算，避免污染实时构筑
-    const clone = charBuild.clone()
-    const currentTotal = clone.calculate()
-
-    for (const weapon of weaponData) {
-        const effectLv = getWBuffLv(weapon.id, charBuild.char.属性)
-        const candidate = new LeveledWeapon(weapon, undefined, undefined, effectLv)
-        let newTotal: number
-        if (weapon.类型[0] === "近战") {
-            const old = clone.meleeWeapon
-            clone.meleeWeapon = candidate
-            newTotal = clone.calculate()
-            clone.meleeWeapon = old
-        } else {
-            const old = clone.rangedWeapon
-            clone.rangedWeapon = candidate
-            newTotal = clone.calculate()
-            clone.rangedWeapon = old
-        }
-        map.set(weapon.id, !currentTotal ? 0 : newTotal / currentTotal - 1)
-    }
-    return map
+    if (!charBuild) return new Map<number, number>()
+    return calcWeaponReplacementIncomes(charBuild, weaponData, weapon => getWBuffLv(weapon.id, charBuild.char.属性))
 })
 
 /**

@@ -221,7 +221,7 @@ async function removeAccount(account: GameAccount) {
                 >
                     <!-- 选中态主色竖条 -->
                     <span
-                        class="absolute inset-y-0 left-0 w-[3px] bg-primary transition-opacity duration-200"
+                        class="absolute inset-y-0 left-0 w-0.75 bg-primary transition-opacity duration-200"
                         :class="account.id === Number(currentAccountId) ? 'opacity-100' : 'opacity-0'"
                         aria-hidden="true"
                     />

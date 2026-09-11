@@ -1788,7 +1788,7 @@ const launchGame = async () => {
                     <div class="relative h-2.5 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/10">
                         <!-- 动态条纹背景 -->
                         <div
-                            class="absolute inset-0 w-full h-full opacity-10 bg-size-[20px_20px] bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,color-mix(in oklab,var(--color-base-content) 60%,transparent)_10px,color-mix(in oklab,var(--color-base-content) 60%,transparent)_20px)] animate-[move-bg_1s_linear_infinite]"
+                            class="absolute inset-0 w-full h-full opacity-10 bg-size-[20px_20px] bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,color-mix(in oklab,var(--color-base-content) 60%,transparent)_10px,color-mix(in 60%,transparent)_20px)] animate-[move-bg_1s_linear_infinite]"
                         ></div>
                         <div
                             class="h-full bg-linear-to-r from-primary via-secondary to-primary bg-size-[200%_100%] animate-[shimmer_2s_linear_infinite] transition-all duration-300 ease-out"

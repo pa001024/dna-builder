@@ -478,8 +478,9 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                 <div class="modal-backdrop" @click="mod_model_show = false" />
             </dialog>
         </Teleport>
-        <div class="flex items-center gap-2 mb-3">
-            <div class="ml-auto flex items-center gap-2">
+        <!-- 顶部操作区：外层允许换行，移动端放不下时整组下移，避免按钮被挤出屏幕 -->
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+            <div class="ml-auto flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
                 <!-- 养成开销估算：点击展开/收起副本开销估算面板（默认隐藏） -->
                 <div
                     class="btn btn-sm border"
@@ -521,14 +522,20 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                         </span>
                     </div>
                 </ShowProps>
-                <div v-if="type !== '同律'" class="btn btn-secondary btn-sm" @click="$emit('sync')">
-                    {{ $t("char-build.sync_game") }}
-                </div>
-                <div class="btn btn-ghost btn-sm border border-base-content/15" @click="handleImportCode()">
-                    {{ $t("char-build.import_code") }}
-                </div>
-                <div class="btn btn-ghost btn-sm border border-base-content/15" @click="copyText(charBuild.getCode(type))">
-                    {{ $t("char-build.export_code") }}
+                <!-- 导入/导出代码的三个按钮：作为整体换行（移动端整组独占一行并等宽铺满，桌面端保持同行右对齐） -->
+                <div class="flex w-full items-center gap-2 sm:w-auto">
+                    <div v-if="type !== '同律'" class="btn btn-secondary btn-sm flex-1 min-w-0 sm:flex-none" @click="$emit('sync')">
+                        {{ $t("char-build.sync_game") }}
+                    </div>
+                    <div class="btn btn-ghost btn-sm border border-base-content/15 flex-1 min-w-0 sm:flex-none" @click="handleImportCode()">
+                        {{ $t("char-build.import_code") }}
+                    </div>
+                    <div
+                        class="btn btn-ghost btn-sm border border-base-content/15 flex-1 min-w-0 sm:flex-none"
+                        @click="copyText(charBuild.getCode(type))"
+                    >
+                        {{ $t("char-build.export_code") }}
+                    </div>
                 </div>
             </div>
         </div>

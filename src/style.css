@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/*
+ * 称号框文字用的游戏内字体：从 pak 里的 FontFace 资源导出（EM/Content/UI/UI_PNG/01Font/Blod.ufont），
+ * 就是 WBP_PersonalInfo_Title_* 里 TextBlock 指定的 Blod_Font（Runtime 缓存 + Blod 字体面）。
+ * 用同一种字体才能让字数不同的称号与实机的字宽、字重完全对上。
+ */
+@font-face {
+    font-family: "TitleBlod";
+    src: url("/fonts/blod.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
 @plugin "daisyui" {
     themes: all;
     exclude: properties;

@@ -290,7 +290,7 @@ export const headSculptureData: HeadSculpture[] = [
     },
     {
         id: 20016,
-        name: "UI_PlayerHead_Name_20016",
+        name: "谋爱之人的肖像·誓约",
         desc: "适用于头像。",
         icon: "T_Head_Shuimu02",
     },

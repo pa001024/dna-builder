@@ -11,6 +11,7 @@ import {
     RaidDungeon,
     RaidSeason,
 } from "@/data/d/raid.data"
+import { titleFrameIdToKey } from "@/data/generated/title-frame.generated"
 import { getDropModeText } from "@/utils/i18n-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
 
@@ -310,7 +311,20 @@ interface RankDataItem {
     reward: PreRaidRankRewardItem
 }
 
-const supportedTitleFrameIds = new Set([10021, 10022, 10023, 10024, 10025, 10028, 10029, 10030, 10031, 10032])
+/**
+ * 取排名奖励对应的称号框 ID。
+ *
+ * 可渲染性由生成的 `titleFrameIdToKey` 决定（来源：游戏 TitleFrame.lua），
+ * 不再维护手写白名单，赛季更新后重新生成数据即可自动生效。
+ *
+ * @param reward 名次奖励
+ * @returns 称号框 ID，无对应称号框时 undefined
+ */
+function getTitleFrameId(reward: PreRaidRankRewardItem) {
+    const titleFrameId = reward.child?.[0]?.id
+    if (!titleFrameId || !titleFrameIdToKey[titleFrameId]) return undefined
+    return titleFrameId
+}
 
 const rankData = computed<RankDataItem[]>(() => {
     const data = PreRaidRank[selectedSeason.value]
@@ -329,12 +343,6 @@ const rankData = computed<RankDataItem[]>(() => {
         ]
     })
 })
-
-function getTitleFrameId(reward: PreRaidRankRewardItem) {
-    const titleFrameId = reward.child?.[0]?.id
-    if (!titleFrameId || !supportedTitleFrameIds.has(titleFrameId)) return undefined
-    return titleFrameId
-}
 
 function getDungeonName(dungeonId: number) {
     return dungeonMap.get(dungeonId)?.n || `${dungeonId}`
@@ -553,14 +561,20 @@ function isTopThreeRank(index: number): boolean {
                             <p class="mt-0.5 text-[11px] text-base-content/50">排名前{{ item.percent }}%的玩家获得</p>
                         </div>
                     </div>
-                    <div class="relative mt-3 inline-flex">
+                    <!--
+                        称号框给固定尺寸（210×64）。宽度按实机截图反推：截图里
+                        「卑鄙的异乡人」六个字共 80px，中日韩字形的步进是 1.0em，
+                        即字号 15 单位 → 每字 13.3px，实机缩放约 0.89 像素/设计单位，
+                        对应设计画布 236 单位 → 210px。组件内部按设计画布定比例，
+                        与各框贴图的实际大小无关，所以所有赛季的文字像素大小一致。
+                    -->
+                    <div class="relative mt-3 inline-flex w-52.5 max-w-full">
                         <TitleFrameRender
                             v-if="getTitleFrameId(item.reward)"
-                            class="h-12 w-48 max-w-full shrink-0"
+                            class="h-16 w-full shrink-0"
                             :title-frame-id="getTitleFrameId(item.reward)"
-                        >
-                            <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>
-                        </TitleFrameRender>
+                            :title="$t(item.reward.child?.[0].n || '')"
+                        />
                         <img v-else class="h-12" :src="`/imgs/rank/${selectedSeason}_${item.rank}.webp`" :alt="item.rank" />
                         <div v-if="!getTitleFrameId(item.reward)" class="absolute inset-0 flex items-center justify-center">
                             <p class="text-sm font-bold text-white">{{ $t(item.reward.child?.[0].n || "") }}</p>

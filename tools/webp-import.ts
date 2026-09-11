@@ -12,8 +12,11 @@ import { pathToFileURL } from "node:url"
  * 引用来源有两种，两者合并即为“真实引用集合”：
  *   1. 文本扫描：src/data 里出现的 /imgs/** 字符串字面量（精确引用，如 rank 目录、占位图等）。
  *   2. 数据评估：导入实际数据层，调用 Leveled* 的 URL 生成器，
- *      枚举全部角色/武器/模组/怪物/宠物/钓鱼/读物/技能等真实取值。
+ *      枚举全部角色/武器/模组/怪物/宠物/钓鱼/读物/乐谱专辑/技能等真实取值。
  *      不再用 `${icon}` 模板对源目录做通配展开，避免导入从未使用的贴图。
+ *
+ * 注意：形如 `/imgs/music/${icon}.webp` 的“全通配”模板无法从文本推导 basename，
+ * 必须在 evaluateDataUrls 中枚举对应数据源；遗漏时脚本会按目录告警，不会静默跳过。
  *
  * PNG→WebP 使用 Bun 内置的 Bun.Image，不依赖 sharp/cwebp 等外部库。
  * res/ 目录下的图片按 maxHeight（默认 128）等比缩小：高度超出则缩小、不放大。
@@ -38,6 +41,12 @@ type ImageRef = {
     name?: string
     /** 模板引用（含 ${...}）推导出的 basename 骨架正则，如 /^T_Head_.*$/ */
     pattern?: RegExp
+    /**
+     * 全通配模板（占位符之外没有静态文本，如 `/imgs/music/${icon}.webp`）：
+     * 既得不到精确 basename，也得不到有意义的骨架正则，只能按目标目录纳入覆盖率校验，
+     * 提醒 evaluateDataUrls 必须枚举对应数据源（如乐谱专辑）。
+     */
+    wildcard?: boolean
     /** 引用来源描述（文件:行号） */
     source: string
 }
@@ -97,6 +106,13 @@ const RES_MAX_HEIGHT = Number(getArgValue("--res-max-height") ?? process.env.WEB
 const dataDir = getArgValue("--data") ?? process.env.WEBP_IMPORT_DATA_DIR ?? path.join(rootDir, "src", "data")
 const publicImgsDir = getArgValue("--out") ?? process.env.WEBP_IMPORT_OUT ?? path.join(rootDir, "public", "imgs")
 const sourceRoot = resolveSourceRoot(getArgValue("--source") ?? process.env.WEBP_IMPORT_SOURCE)
+/**
+ * 称号框贴图清单（webp 文件名 → 游戏内包路径），由 tools/import-title-frame.ts 生成。
+ *
+ * 称号框贴图遇到同名冲突会改写成带父目录前缀的名字，basename 与源 PNG 对不上，
+ * 必须靠这份清单按“包路径”去导出目录里定位，否则会被报成 349 条缺失里的 73 条。
+ */
+const TITLE_FRAME_MANIFEST = path.join(rootDir, "src", "data", "generated", "title-frame-textures.json")
 
 /**
  * 探测 FModel 纹理导出目录：优先 DNA 解包目录（dna-unpack），兼顾用户给定路径与常见拼写变体。
@@ -191,10 +207,13 @@ function parseRef(raw: string): Omit<ImageRef, "source"> | null {
         return { dir, name: basenamePart }
     }
 
-    // 去掉 ${...} 占位符后的静态文本；为空表示全通配（如 ${icon}.webp），无枚举意义
+    // 去掉 ${...} 占位符后的静态文本；为空表示全通配（如 ${icon}.webp）
     const staticText = basenamePart.replace(/\$\{[^}]*\}/g, "")
     if (!staticText) {
-        return null
+        // 全通配无法从文本推导 basename，精确引用只能由 evaluateDataUrls 枚举数据得到；
+        // 这里仍保留目标目录，用于后续“该目录是否被数据评估覆盖”的校验，
+        // 避免像 /imgs/music/${icon}.webp（乐谱封面）那样被静默丢弃、永远不产生任务。
+        return { dir, wildcard: true }
     }
 
     // 把 ${...} 占位符替换成 .*，静态片段转义，得到 basename 骨架正则（忽略大小写以匹配源文件名）
@@ -213,7 +232,8 @@ function parseRef(raw: string): Omit<ImageRef, "source"> | null {
 function collectRefs(dirPath: string): ImageRef[] {
     const refs: ImageRef[] = []
     const imgRefRegex = /\/imgs\/[A-Za-z0-9_./${}[\]:-]+?\.webp/g
-    const dataFiles = walkFiles(dirPath, [".ts", ".js", ".mjs", ".vue"])
+    // 测试文件里的引用是构造出来的夹具（如 /imgs/titleframe/fake.webp），不是运行时引用
+    const dataFiles = walkFiles(dirPath, [".ts", ".js", ".mjs", ".vue"]).filter(filePath => !/\.test\.ts$/.test(filePath))
 
     for (const filePath of dataFiles) {
         const lines = fs.readFileSync(filePath, "utf8").split(/\r?\n/)
@@ -297,6 +317,7 @@ async function evaluateDataUrls(): Promise<Set<string>> {
     const { subRegionData } = await loadModule<{ subRegionData: IconItem[] }>("d/subregion.data.ts")
     const { extractionTreasureData } = await loadModule<{ extractionTreasureData: IconItem[] }>("d/solotreasure.data.ts")
     const { skinGachaTabs } = await loadModule<{ skinGachaTabs: IconItem[] }>("d/skingacha.data.ts")
+    const { musicScoreData } = await loadModule<{ musicScoreData: IconItem[] }>("d/music.data.ts")
 
     const { LeveledChar } = await loadModule<{ LeveledChar: LeveledCharLike }>("leveled/LeveledChar.ts")
     const { LeveledWeapon } = await loadModule<{ LeveledWeapon: LeveledWeaponLike }>("leveled/LeveledWeapon.ts")
@@ -482,6 +503,16 @@ async function evaluateDataUrls(): Promise<Set<string>> {
         }
     }
 
+    // 乐谱专辑封面: 视图（DBMusicListView / DBMusicDetailItem / DBResourceDetailItem 的乐谱卡片）
+    // 统一按 `/imgs/music/${icon}.webp` 引用（icon 已是完整 T_Piano_Music* 贴图名）。
+    // 该引用在视图里是 ${icon} 全通配模板，文本扫描既得不到精确 basename 也得不到骨架正则，
+    // 必须在此枚举专辑数据才能生成真实任务。
+    for (const album of musicScoreData) {
+        if (album.icon) {
+            urls.add(`/imgs/music/${album.icon}.webp`)
+        }
+    }
+
     // 万华（皮肤抽卡）页签 Banner: 视图（SkinGachaView 万华模拟页面）左侧卡池列表与
     // 背景回退大图统一按 `/imgs/webp/${tab.icon}.webp` 直接引用（icon 已是完整 T_Gacha_PoolBanner_* 名）。
     // 该引用在视图里是 ${icon} 模板，文本扫描只能得到骨架正则，必须在此枚举页签数据才能生成真实任务。
@@ -523,6 +554,48 @@ function buildSourceIndex(sourceRoot: string): Map<string, SourceFile[]> {
 }
 
 /**
+ * 去掉文件扩展名。
+ * @param relPath 相对路径
+ * @returns 去掉扩展名后的路径
+ */
+function stripExtension(relPath: string): string {
+    const dot = relPath.lastIndexOf(".")
+    return dot >= 0 ? relPath.slice(0, dot) : relPath
+}
+
+/**
+ * 从纹理导出目录反推导出根目录。
+ *
+ * sourceRoot 形如 <导出根>/EM/Content/UI/Texture，而称号框贴图有一部分落在
+ * EM/Content/UI/WBP/... 下（VX 的 Mask/Noise/Flare），不在 sourceRoot 内。
+ * 有了导出根就能按包路径直接拼出这些文件的位置。
+ *
+ * @param sourceRoot 纹理导出目录
+ * @returns 导出根目录
+ */
+function resolveExportRoot(sourceRoot: string): string {
+    const normalized = toPosix(sourceRoot).toLowerCase()
+    const marker = normalized.lastIndexOf("/em/content/")
+    return marker >= 0 ? sourceRoot.slice(0, marker) : sourceRoot
+}
+
+/**
+ * 读取称号框贴图清单（webp 文件名 → 游戏内包路径）；文件不存在时返回空表。
+ * @returns 文件名 → 包路径
+ */
+function loadTitleFrameManifest(): Record<string, string> {
+    if (!fs.existsSync(TITLE_FRAME_MANIFEST)) {
+        return {}
+    }
+    try {
+        return JSON.parse(fs.readFileSync(TITLE_FRAME_MANIFEST, "utf8")) as Record<string, string>
+    } catch (error) {
+        console.warn(`⚠️  读取称号框贴图清单失败: ${error instanceof Error ? error.message : String(error)}`)
+        return {}
+    }
+}
+
+/**
  * 从同名源文件列表里挑选最优者：优先路径层级最浅（FModel 默认导出层级），层级相同取字典序更靠前的。
  * @param entries 同名源文件列表
  * @returns 选中的源文件；列表为空时返回 null
@@ -548,14 +621,38 @@ function pickSource(entries: SourceFile[]): SourceFile | null {
  * @param index basename 源索引
  * @returns 任务列表与缺失引用
  */
-function buildTasks(refs: ImageRef[], urls: Set<string>, index: Map<string, SourceFile[]>): { tasks: ConvertTask[]; missing: ImageRef[] } {
+function buildTasks(
+    refs: ImageRef[],
+    urls: Set<string>,
+    index: Map<string, SourceFile[]>,
+    titleFrameTextures: Record<string, string>,
+    exportRoot: string
+): { tasks: ConvertTask[]; missing: ImageRef[] } {
     const tasksByTarget = new Map<string, ConvertTask>()
     const missing: ImageRef[] = []
 
     const resolveTask = (dir: string, name: string, referencedFrom: string): void => {
         const targetRelPath = path.posix.join(dir, `${name}.webp`)
-        const sourceEntries = index.get(name.toLowerCase())
-        const source = pickSource(sourceEntries ?? [])
+        // 称号框贴图名可能带父目录前缀（同名冲突改写），basename 对不上源 PNG，
+        // 改用手里的清单按「包路径后缀」在候选里挑：导出目录 = 包路径去掉 Content 前缀，
+        // 所以相对路径一定是包路径的后缀。
+        const mappedPackage = dir === "titleframe" ? titleFrameTextures[`${name}.webp`] : undefined
+        let source: SourceFile | null
+        if (mappedPackage) {
+            // 先按「导出根 + 包路径」直接定位（能覆盖 sourceRoot 之外的 WBP 贴图），
+            // 找不到再退回按 basename 在索引里挑。
+            const directPath = path.join(exportRoot, `${mappedPackage}.png`)
+            if (fs.existsSync(directPath)) {
+                source = { absPath: directPath, relPath: toPosix(path.relative(exportRoot, directPath)) }
+            } else {
+                const candidates = index.get(path.posix.basename(mappedPackage).toLowerCase()) ?? []
+                const packageKey = mappedPackage.toLowerCase()
+                source =
+                    candidates.find(entry => packageKey.endsWith(stripExtension(entry.relPath).toLowerCase())) ?? pickSource(candidates)
+            }
+        } else {
+            source = pickSource(index.get(name.toLowerCase()) ?? [])
+        }
         if (!source) {
             missing.push({ dir, name, source: referencedFrom })
             return
@@ -697,7 +794,8 @@ async function main(): Promise<void> {
     const refs = (dataDir !== path.join(rootDir, "src", "data") ? [dataDir] : defaultScanDirs).flatMap(dir => collectRefs(dir))
     const exactRefs = refs.filter(ref => Boolean(ref.name))
     const templateRefs = refs.filter(ref => Boolean(ref.pattern))
-    console.log(`文本引用 ${refs.length} 处（精确 ${exactRefs.length}，模板 ${templateRefs.length}）`)
+    const wildcardRefs = refs.filter(ref => ref.wildcard)
+    console.log(`文本引用 ${refs.length} 处（精确 ${exactRefs.length}，模板 ${templateRefs.length}，全通配 ${wildcardRefs.length}）`)
 
     const urls = await evaluateDataUrls()
     console.log(`数据评估引用 ${urls.size} 个 URL`)
@@ -713,10 +811,34 @@ async function main(): Promise<void> {
         }
     }
 
+    // 校验全通配模板所在目录是否被数据评估覆盖。
+    // 这类引用（如 /imgs/music/${icon}.webp 乐谱封面）无法从文本推导 basename，
+    // 一旦 evaluateDataUrls 漏枚举对应数据源，就会完全没有任务且毫无提示，因此按目录校验。
+    const coveredDirs = new Set<string>()
+    for (const url of urls) {
+        coveredDirs.add(url.slice("/imgs/".length, url.lastIndexOf("/")))
+    }
+    const warnedWildcardDirs = new Set<string>()
+    for (const ref of wildcardRefs) {
+        // 目录名本身含 ${...}（如 `/imgs/${targetDir}/${icon}.webp`）时无法确定真实目录，跳过校验
+        if (ref.dir.includes("${")) {
+            continue
+        }
+        if (!coveredDirs.has(ref.dir) && !warnedWildcardDirs.has(ref.dir)) {
+            warnedWildcardDirs.add(ref.dir)
+            console.warn(`⚠️  目录 ${ref.dir}/ 只有全通配模板引用，但数据评估未产生该目录下任何 URL，可能漏了对应数据源 (${ref.source})`)
+        }
+    }
+
     const index = buildSourceIndex(sourceRoot)
     console.log(`索引到源 PNG ${index.size} 个`)
 
-    const { tasks, missing } = buildTasks(refs, urls, index)
+    const titleFrameTextures = loadTitleFrameManifest()
+    if (Object.keys(titleFrameTextures).length) {
+        console.log(`称号框贴图清单 ${Object.keys(titleFrameTextures).length} 条`)
+    }
+
+    const { tasks, missing } = buildTasks(refs, urls, index, titleFrameTextures, resolveExportRoot(sourceRoot))
     console.log(`待处理任务 ${tasks.length} 个`)
 
     if (missing.length) {

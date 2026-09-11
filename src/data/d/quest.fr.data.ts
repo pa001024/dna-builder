@@ -61698,7 +61698,7 @@ export const questData_fr: QuestStory[] = [
                             },
                             {
                                 id: 11115214,
-                                content: "Heureusement que Maman Lapin est là.\n C’est bien vrai.\n Joy, tu n’es pas blessé au moins ?",
+                                content: "Heureusement que Maman Lapin est là.\nC’est bien vrai.\nJoy, tu n’es pas blessé au moins ?",
                                 voice: "story/1102/111096/1BD365CC",
                                 speakerName: "Voix des villageois",
                                 next: 11115215,
@@ -61733,7 +61733,7 @@ export const questData_fr: QuestStory[] = [
                             {
                                 id: 11115301,
                                 content:
-                                    "♪ Qu’il est beau, notre Paradis, notre Paradis, notre Paradis... ♪\n ♪ Les petits lapins main dans la main, courent en tous sens... ♪",
+                                    "♪ Qu’il est beau, notre Paradis, notre Paradis, notre Paradis... ♪\n♪ Les petits lapins main dans la main, courent en tous sens... ♪",
                                 voice: "story/1102/111096/1BD37412",
                                 speakerName: "Foule en chœur",
                             },

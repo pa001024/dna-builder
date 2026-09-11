@@ -11402,7 +11402,7 @@ export const partyTopicData_kr: PartyTopic[] = [
             },
             {
                 id: 80270137,
-                content: "그래, 계속 「사신」 역할을 맡을 수 있도록... <H>허락해 줄게</>.",
+                content: "그래, 계속 「사신」 역할을 맡을 수 있도록... <H>지금은 허락해 줄게</>.",
                 npc: 790093,
                 next: 80270138,
             },

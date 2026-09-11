@@ -160,6 +160,14 @@ public/i18n/         # Translation files
 - **i18n**: `bun tools/i18n-tool.ts export|import` — export missing translations, import completed ones
 - **Icons**: `bun tools/icon-tool.ts add|check|clean|list` — manage icons in `src/components/Icon.vue` use when lint error on icon not found
 - **API gen**: `pnpm gen` — generate API calls from tools/generate-api-calls.ts
+- **Title frames**: `pnpm itf` (`bun tools/import-title-frame.ts`) — regenerate 称号框 render data by
+  reading the game pak through fmodel-cli; outputs `src/data/generated/title-frame.generated.ts`,
+  `src/data/generated/title-frame-textures.json`（webp 文件名 → 游戏内包路径的清单）and
+  `public/imgs/titleframe/*.webp`. Preview any frame with `tools/title-frame-preview.html` on the dev
+  server (`?frames=07_1,09_1` to narrow down).
+  - 称号框贴图遇到同名冲突会改写成带父目录前缀的名字（如 `13_T_PersonalInfo_Title_13_08.webp`），
+    basename 与源 PNG 对不上；`tools/webp-import.ts` 读上面那份清单，按包路径把它们补齐，
+    所以 `bun tools/webp-import.ts` 也能覆盖这些贴图，不会再把它们报成缺失。
 
 ## Git Hooks (Husky)
 

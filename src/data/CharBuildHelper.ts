@@ -1,5 +1,6 @@
 import type { CharSettings } from "../composables/useCharSettings"
 import { CharBuild, CharBuildTimeline } from "./CharBuild"
+import type { Weapon } from "./data-types"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "./effectLv"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import {
@@ -81,6 +82,50 @@ export function createCharBuildFromSettings(
             .filter((weapon): weapon is number => typeof weapon === "number")
             .map(weapon => LeveledWeaponHelper.getCategory(weapon)),
     })
+}
+
+/**
+ * 计算候选武器逐把替换进对应槽位后的收益（替换后总伤害 / 当前总伤害 - 1）。
+ * 与 `CharBuild.calcIncome` 的差别有两点：
+ * 1. 候选武器一律整槽替换后重算，避免槽位类型与当前技能不匹配时被当作附加 MOD 处理；
+ * 2. 候选武器经 `LeveledWeaponHelper.fromData` 构造并同步熔炼潜能生效判定，
+ *    确保武器特效与潜能被真实计入，避免已装备武器因漏配特效而算出负收益。
+ * 候选武器的精炼/等级沿用列表既有语义（默认最大值），不读取槽位当前值。
+ * @param charBuild 当前构筑（不会被修改）
+ * @param weapons 候选武器数据列表
+ * @param getEffectLv 读取单把武器特效等级的回调
+ * @returns 武器 id → 收益；当前总伤害为 0 时全部返回 0
+ */
+export function calcWeaponReplacementIncomes(
+    charBuild: CharBuild,
+    weapons: Weapon[],
+    getEffectLv: (weapon: Weapon) => number
+): Map<number, number> {
+    const incomes = new Map<number, number>()
+    if (!weapons.length) return incomes
+
+    // 全程在克隆构筑上替换并重算，避免污染实时构筑
+    const clone = charBuild.clone()
+    const currentTotal = clone.calculate()
+    if (!currentTotal) {
+        weapons.forEach(weapon => incomes.set(weapon.id, 0))
+        return incomes
+    }
+
+    for (const weapon of weapons) {
+        const candidate = LeveledWeaponHelper.fromData(weapon, undefined, undefined, getEffectLv(weapon))
+        // 与构筑内保持一致的熔炼潜能生效判定：角色未精通该武器类别时潜能与特效均不生效
+        candidate.setForgeEffective(charBuild.isWeaponCategoryMastered(candidate))
+        const isMelee = weapon.类型[0] === "近战"
+        const previous = isMelee ? clone.meleeWeapon : clone.rangedWeapon
+        if (isMelee) clone.meleeWeapon = candidate
+        else clone.rangedWeapon = candidate
+        const newTotal = clone.calculate()
+        if (isMelee) clone.meleeWeapon = previous
+        else clone.rangedWeapon = previous
+        incomes.set(weapon.id, newTotal / currentTotal - 1)
+    }
+    return incomes
 }
 
 /**
