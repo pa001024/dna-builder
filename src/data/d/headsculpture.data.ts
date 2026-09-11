@@ -189,13 +189,13 @@ export const headSculptureData: HeadSculpture[] = [
     {
         id: 10032,
         name: "白兔的肖像",
-        desc: "UI_PlayerHead_Des_10031",
+        desc: "UI_PlayerHead_Des_10032",
         icon: "T_Head_Eve",
     },
     {
         id: 10033,
         name: "复仇者的肖像",
-        desc: "UI_PlayerHead_Des_10031",
+        desc: "UI_PlayerHead_Des_10033",
         icon: "T_Head_Falu",
     },
     {

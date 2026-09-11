@@ -16866,6 +16866,71 @@ const t: import("../data-types").Reward[] = [
         ],
     },
     {
+        id: 12236,
+        m: "Fixed",
+        icon: "T_Pack_Char_Kami_5",
+        child: [
+            {
+                id: 1003202,
+                t: "Resource",
+                c: 5,
+                n: "思绪片段·卡米拉",
+            },
+        ],
+    },
+    {
+        id: 12237,
+        m: "Fixed",
+        icon: "T_Pack_Char_Kami_5",
+        child: [
+            {
+                id: 1003202,
+                t: "Resource",
+                c: 5,
+                n: "思绪片段·卡米拉",
+            },
+        ],
+    },
+    {
+        id: 12238,
+        m: "Fixed",
+        icon: "T_Pack_Char_Kami",
+        child: [
+            {
+                id: 1003202,
+                t: "Resource",
+                c: 10,
+                n: "思绪片段·卡米拉",
+            },
+        ],
+    },
+    {
+        id: 12239,
+        m: "Fixed",
+        icon: "T_Pack_Char_Kami",
+        child: [
+            {
+                id: 1003202,
+                t: "Resource",
+                c: 10,
+                n: "思绪片段·卡米拉",
+            },
+        ],
+    },
+    {
+        id: 12240,
+        m: "Fixed",
+        icon: "T_Pack_Char_Kami_15",
+        child: [
+            {
+                id: 1003202,
+                t: "Resource",
+                c: 15,
+                n: "思绪片段·卡米拉",
+            },
+        ],
+    },
+    {
         id: 20000,
         m: "Fixed",
         child: [
