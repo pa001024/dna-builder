@@ -298,10 +298,10 @@ function getPriceIcon(name: string) {
 </script>
 
 <template>
-    <div class="space-y-3">
+    <div class="min-w-0 space-y-3">
         <!-- 商品项内容 -->
         <div
-            class="group flex w-full items-center gap-2.5 border border-base-content/15 bg-base-content/3 p-2 transition-colors duration-200 hover:border-primary/60"
+            class="group flex w-full min-w-0 items-center gap-2 border border-base-content/15 bg-base-content/3 p-2 transition-colors duration-200 hover:border-primary/60 sm:gap-2.5"
         >
             <div class="relative size-11 shrink-0 overflow-hidden rounded bg-base-200/40">
                 <img
@@ -320,7 +320,7 @@ function getPriceIcon(name: string) {
                         {{ item.diffState === "added" ? "+" : "-" }}
                     </span>
                     <h4
-                        class="min-w-0 flex-1 truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
+                        class="order-first w-full min-w-0 shrink-0 truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary sm:order-none sm:w-auto sm:flex-1 sm:shrink"
                     >
                         <SRouterLink
                             v-if="itemDetail?.link"
@@ -427,7 +427,7 @@ function getPriceIcon(name: string) {
         <!-- 递归渲染子项（同层子卡 grid autofill 并排） -->
         <div
             v-if="item.children && item.children.length"
-            class="ml-6 grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-2 border-l border-base-content/10 pl-3"
+            class="ml-2 grid min-w-0 grid-cols-[repeat(auto-fill,minmax(min(100%,400px),1fr))] gap-2 border-l border-base-content/10 pl-2 sm:ml-6 sm:pl-3"
         >
             <ShopItem v-for="child in item.children" :key="child.id" :item="child" />
         </div>

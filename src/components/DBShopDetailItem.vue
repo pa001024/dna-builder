@@ -604,7 +604,7 @@ function formatShopTimeShort(timestamp: number): string {
                 <!-- 商品列表 - 树形结构（同层商品卡 grid autofill 并排） -->
                 <div
                     v-if="diffOnlyEnabled ? subTab.changedItemCount > 0 : subTab.activeVisibleItemCount > 0"
-                    class="grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-2"
+                    class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,400px),1fr))] gap-2"
                 >
                     <!-- 使用 ShopItem 组件递归渲染商品树 -->
                     <ShopItem v-for="item in buildItemTree(subTab.visibleItems)" :key="item.id" :item="item" />
