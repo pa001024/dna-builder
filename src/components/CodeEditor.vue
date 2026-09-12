@@ -15,6 +15,7 @@ import { EditorView, highlightActiveLineGutter, keymap, lineNumbers } from "@cod
 import { tags as t } from "@lezer/highlight"
 import { onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { astLanguageExtension } from "./ast-language"
+import fieldDeleteCommand from "./expr-field-delete"
 
 type Command = (view: EditorView) => boolean
 
@@ -33,6 +34,8 @@ const props = defineProps<{
     language?: "js" | "ast"
     /** language="ast" 时的内置宏名集合（词法阶段会被替换，编辑器中按宏高亮） */
     astMacros?: Set<string>
+    /** language="ast" 时启用整字段删除：Ctrl/Alt + 退格一次删掉整个字段（如 近战::攻击!） */
+    fieldDelete?: boolean
 }>()
 
 const model = defineModel<string>()
@@ -167,6 +170,14 @@ const cutLineWhenNoSelection: Command = view => {
  */
 function createKeymapExtension(): Extension {
     return keymap.of([
+        // AST 模式下提供整字段删除，需排在 defaultKeymap 之前才能覆盖默认的按词删除
+        //（Mod 在 mac 上为 Cmd；mac 上 Alt-退格 与 Cmd-退格 都指向本命令，避免重复绑定同一按键）
+        ...(props.language === "ast" && props.fieldDelete
+            ? [
+                    { key: "Mod-Backspace", mac: "Alt-Backspace", run: fieldDeleteCommand, preventDefault: true },
+                    { mac: "Mod-Backspace", run: fieldDeleteCommand, preventDefault: true },
+                ]
+            : []),
         { key: "Ctrl-/", mac: "Cmd-/", run: toggleComment },
         { key: "Ctrl-x", mac: "Cmd-x", run: cutLineWhenNoSelection },
         { key: "Alt-ArrowUp", run: moveLineUp },

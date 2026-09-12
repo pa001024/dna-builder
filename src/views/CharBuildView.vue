@@ -7,6 +7,7 @@ import { cloneDeep, debounce, groupBy, isEqual } from "lodash-es"
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
+import ExprInput from "@/components/ExprInput.vue"
 import {
     CharSettings,
     createDefaultCharSettings,
@@ -1201,6 +1202,7 @@ function addSkill(skill: string | { fieldName: string; skill: LeveledSkill }) {
 /** 表达式字段拖拽状态：属性、技能行抓起字段，表达式与自定义变量输入框作为放置目标 */
 const {
     payload: exprDragPayload,
+    floatingPayload: exprFloatingPayload,
     dragging: exprDragging,
     ghostPosition: exprGhostPosition,
     hoveredDropKey,
@@ -1209,16 +1211,47 @@ const {
     registerExprDropHandler,
 } = useExprDrag()
 
+/** 表达式输入控件（基于 CodeMirror 的单行表达式编辑器）实例的对外能力 */
+type ExprInputInstance = { getCursor: () => number; insertAtCursor: (text: string) => number }
+/** 表达式编辑器的宏高亮表（词法阶段会被替换，与 ASTHelp 编辑器一致） */
+const exprMacros = new Set(Object.keys(CharBuild.macros))
+/** 目标函数表达式输入控件 */
+const targetFunctionInputRef = ref<ExprInputInstance | null>(null)
+/** 自定义变量行表达式输入控件：key 为行下标（ref 回调在每次渲染后刷新，行增删时自动更新） */
+const customVariableInputRefs = ref<Record<number, ExprInputInstance>>({})
+
 /**
- * 把抓起的字段写入目标表达式输入框（鼠标拖动放置与触控点击放置共用）。
- * 输入框已聚焦时按光标位置插入，否则追加到末尾。
+ * 按放置目标 key 取对应的表达式输入控件。
  * @param targetKey 放置目标 key（data-expr-drop 的取值）
- * @param field 抓起的字段
- * @param input 触发放置的输入框（触控点击时有值，用于读取光标位置）
+ * @returns 控件实例；不存在时返回 null
+ */
+function getExprInput(targetKey: string): ExprInputInstance | null {
+    if (targetKey === "target-function") return targetFunctionInputRef.value
+    if (!targetKey.startsWith("custom-variable:")) return null
+    return customVariableInputRefs.value[Number(targetKey.slice("custom-variable:".length))] ?? null
+}
+
+/**
+ * 记录 / 移除自定义变量行的表达式输入控件引用（ref 回调在组件卸载时会传 null）。
+ * @param index 变量行下标
+ * @param instance 控件实例；卸载时为 null
  * @returns void
  */
-function applyExprDrop(targetKey: string, field: ExprDragPayload, input?: HTMLInputElement | null) {
-    const caret = input && document.activeElement === input && input.selectionStart != null ? input.selectionStart : undefined
+function setCustomVariableInputRef(index: number, instance: ExprInputInstance | null) {
+    if (instance) customVariableInputRefs.value[index] = instance
+    else delete customVariableInputRefs.value[index]
+}
+
+/**
+ * 把抓起的字段写入目标表达式输入框（鼠标拖动放置与触控点击放置共用）。
+ * 按编辑器当前光标位置插入：编辑器持有光标，未聚焦时即文本末尾，与原生输入框行为一致。
+ * @param targetKey 放置目标 key（data-expr-drop 的取值）
+ * @param field 抓起的字段
+ * @param input 触发放置的表达式编辑器（触控点击时有值，用于读取光标位置）
+ * @returns void
+ */
+function applyExprDrop(targetKey: string, field: ExprDragPayload, input?: ExprInputInstance | null) {
+    const caret = input?.getCursor()
     if (targetKey === "target-function") {
         targetFunction.value = joinExprText(targetFunction.value, field.expr, caret)
         return
@@ -1233,13 +1266,12 @@ function applyExprDrop(targetKey: string, field: ExprDragPayload, input?: HTMLIn
 /**
  * 触控点击放置：已抓起字段时点击表达式输入框即写入字段并结束抓起状态。
  * @param targetKey 放置目标 key
- * @param event 点击事件（currentTarget 为表达式输入框）
  * @returns void
  */
-function handleExprDropClick(targetKey: string, event: MouseEvent) {
+function handleExprDropClick(targetKey: string) {
     const field = exprDragPayload.value
     if (!field || exprDragging.value) return
-    applyExprDrop(targetKey, field, event.currentTarget as HTMLInputElement)
+    applyExprDrop(targetKey, field, getExprInput(targetKey))
     clearExprDrag()
 }
 
@@ -1642,17 +1674,19 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         @on-tour-end="tourStore.markTourCompleted('char-build')"
     />
 
-    <!-- 表达式字段拖拽 / 放置：拖动幽灵 + 触控抓起提示条（挂到 body，避免被滚动容器裁剪） -->
+    <!-- 表达式字段拖拽 / 放置：浮动标签（内容 = 将要插入的字符串，跟随指针）+ 触控抓起的提示条（挂到 body，避免被滚动容器裁剪） -->
     <Teleport to="body">
         <div
-            v-if="exprDragging && exprDragPayload"
-            class="pointer-events-none fixed z-10000 -translate-x-1/2 -translate-y-1/2 rounded-xs border border-primary/50 bg-base-100/95 px-2 py-1 text-xs font-semibold text-primary shadow-lg"
-            :style="{ left: `${exprGhostPosition.x}px`, top: `${exprGhostPosition.y}px` }"
+            v-if="exprFloatingPayload"
+            data-expr-float
+            class="pointer-events-none fixed z-10000 rounded-xs border border-primary/50 bg-base-100/95 px-2 py-1 text-xs font-semibold whitespace-nowrap text-primary shadow-lg"
+            :style="{ left: `${exprGhostPosition.x + 14}px`, top: `${exprGhostPosition.y + 16}px` }"
         >
-            {{ exprDragPayload.label }}
+            {{ exprFloatingPayload.expr }}
         </div>
         <div
-            v-else-if="exprDragPayload"
+            v-if="exprDragPayload && !exprDragging"
+            data-expr-armed-hint
             class="fixed bottom-4 left-1/2 z-10000 flex -translate-x-1/2 items-center gap-2 rounded-xs border border-primary/40 bg-base-100/95 px-3 py-1.5 text-xs text-base-content shadow-lg"
         >
             <Icon icon="ri:drag-move-line" class="size-3.5 shrink-0 text-primary" />
@@ -2315,14 +2349,18 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                         </div>
                                                     </div>
                                                 </template>
-                                                <input
+                                                <ExprInput
+                                                    :ref="el => setCustomVariableInputRef(index, el as ExprInputInstance | null)"
                                                     v-model="variable[1]"
-                                                    type="text"
-                                                    class="min-w-0 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                                    class="min-w-0 flex-1"
+                                                    variant="underline"
+                                                    font-size="13px"
+                                                    line-height="19.5px"
+                                                    :macros="exprMacros"
                                                     placeholder="表达式"
                                                     :data-expr-drop="`custom-variable:${index}`"
                                                     :class="dropTargetClass(`custom-variable:${index}`)"
-                                                    @click="handleExprDropClick(`custom-variable:${index}`, $event)"
+                                                    @click="handleExprDropClick(`custom-variable:${index}`)"
                                                 />
                                             </FullTooltip>
                                             <button
@@ -2404,13 +2442,16 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     class="input input-sm input-primary text-sm flex justify-between"
                                     :class="dropTargetClass('target-function')"
                                 >
-                                    <input
+                                    <ExprInput
+                                        ref="targetFunctionInputRef"
                                         v-model="targetFunction"
-                                        type="text"
-                                        :placeholder="$t('char-build.damage')"
                                         class="grow"
+                                        font-size="14px"
+                                        line-height="20px"
+                                        :macros="exprMacros"
+                                        :placeholder="$t('char-build.damage')"
                                         data-expr-drop="target-function"
-                                        @click="handleExprDropClick('target-function', $event)"
+                                        @click="handleExprDropClick('target-function')"
                                     />
                                     <div
                                         v-if="targetFunction"

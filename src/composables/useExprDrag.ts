@@ -2,9 +2,9 @@ import { computed, onScopeDispose, ref } from "vue"
 
 /** 抓起的字段负载 */
 export interface ExprDragPayload {
-    /** 插入表达式时写入的文本（已含命名空间与强制属性后缀） */
+    /** 插入表达式时写入的文本（已含命名空间与强制属性后缀），同时也是浮动标签的显示内容 */
     expr: string
-    /** 展示名，用于拖动幽灵与提示文案 */
+    /** 展示名，用于触控抓起的提示文案 */
     label: string
 }
 
@@ -20,16 +20,24 @@ const DROP_TARGET_SELECTOR = "[data-expr-drop]"
 /** click 吞掉窗口（ms）：覆盖 pointerup 到 click 之间的间隔 */
 const CLICK_SWALLOW_MS = 350
 
+/** 鼠标点击插入后浮动标签的保留时长（ms） */
+const CLICK_FLASH_MS = 700
+
 /** 已抓起的字段（拖动中，或触控点击抓起后等待放置） */
 const payload = ref<ExprDragPayload | null>(null)
+/** 鼠标点击插入后的短暂浮动反馈：内容为刚刚写入表达式的字符串 */
+const clickFlash = ref<ExprDragPayload | null>(null)
 /** 是否处于指针拖动中（鼠标按下并超过位移阈值） */
 const dragging = ref(false)
 /** 是否由触控点击抓起（触控不支持拖动，改为「点击抓起 → 点击放置」） */
 const touchPicked = ref(false)
-/** 拖动幽灵的视口坐标 */
+/** 浮动标签的视口坐标 */
 const ghostPosition = ref({ x: 0, y: 0 })
 /** 当前指针悬停的放置目标 key（拖动中实时更新） */
 const hoveredDropKey = ref<string | null>(null)
+
+/** 浮动标签内容：拾取中的字段优先，其次是鼠标点击后的短暂反馈 */
+const floatingPayload = computed(() => payload.value ?? clickFlash.value)
 
 /** 指针按下但尚未判定为拖动 / 点击的字段 */
 let pressedPayload: ExprDragPayload | null = null
@@ -43,6 +51,8 @@ let swallowClickUntil = 0
 let dropHandler: ExprDropHandler | null = null
 /** 全局指针监听是否已挂载 */
 let listening = false
+/** 鼠标点击浮动反馈的定时器 */
+let flashTimer: number | undefined
 
 /**
  * 查找指针位置下方的放置目标。
@@ -56,7 +66,7 @@ function findDropTarget(x: number, y: number): string | null {
     return target?.dataset.exprDrop ?? null
 }
 
-/** 挂载全局指针监听（拖动期间需要跨元素追踪指针） */
+/** 挂载全局指针监听（拖动、抓起与点击反馈期间都需要跨元素追踪指针以驱动浮动标签） */
 function listen() {
     if (listening) return
     listening = true
@@ -74,8 +84,38 @@ function unlisten() {
     window.removeEventListener("pointercancel", onPointerCancel)
 }
 
+/** 按当前状态挂载 / 卸载全局指针监听：仅在手势中、已抓起或点击反馈期间需要 */
+function syncListening() {
+    if (pressedPayload || payload.value || clickFlash.value) listen()
+    else unlisten()
+}
+
+/** 清空鼠标点击的浮动反馈（含定时器） */
+function clearClickFlash() {
+    if (flashTimer !== undefined) {
+        window.clearTimeout(flashTimer)
+        flashTimer = undefined
+    }
+    clickFlash.value = null
+}
+
 /**
- * 清空抓起状态。
+ * 鼠标点击插入后的短暂浮动反馈：浮动标签继续跟随指针，显示刚写入表达式的字符串。
+ * @param field 已插入的字段
+ */
+function showClickFlash(field: ExprDragPayload) {
+    clearClickFlash()
+    clickFlash.value = field
+    flashTimer = window.setTimeout(() => {
+        flashTimer = undefined
+        clickFlash.value = null
+        syncListening()
+    }, CLICK_FLASH_MS)
+    syncListening()
+}
+
+/**
+ * 清空抓取状态。
  * @param swallowClick 是否一并吞掉本次手势随后的 click
  */
 function reset(swallowClick = false) {
@@ -85,16 +125,20 @@ function reset(swallowClick = false) {
     dragging.value = false
     touchPicked.value = false
     hoveredDropKey.value = null
-    unlisten()
+    syncListening()
 }
 
 /**
- * 指针移动：超过阈值后进入拖动状态，并实时更新幽灵坐标与悬停目标。
+ * 指针移动：浮动标签始终跟随指针；按住时超过阈值进入拖动状态并实时更新悬停目标。
  * @param event 指针移动事件
  */
 function onPointerMove(event: PointerEvent) {
-    if (!pressedPayload) return
-    // 触控不参与拖动：拖动日志会与列表滚动冲突，触控改用「点击抓起 → 点击放置」
+    if (!pressedPayload) {
+        // 触控抓起或点击反馈期间：只更新浮动标签位置
+        if (payload.value || clickFlash.value) ghostPosition.value = { x: event.clientX, y: event.clientY }
+        return
+    }
+    // 触控不参与拖动：拖动会与列表滚动冲突，触控改用「点击抓起 → 点击放置」
     if (pointerType === "touch") return
     if (!dragging.value) {
         if (Math.hypot(event.clientX - startX, event.clientY - startY) < DRAG_THRESHOLD) return
@@ -106,7 +150,8 @@ function onPointerMove(event: PointerEvent) {
 }
 
 /**
- * 指针抬起：拖动命中放置目标则写入字段；触控点击则转为「已抓起」等待点击放置；鼠标点击保留源行原有行为。
+ * 指针抬起：拖动命中放置目标则写入字段；触控点击转为「已抓起」等待点击放置；
+ * 鼠标点击保留源行原有的追加行为，并给出跟随指针的浮动反馈。
  * @param event 指针抬起事件
  */
 function onPointerUp(event: PointerEvent) {
@@ -124,12 +169,13 @@ function onPointerUp(event: PointerEvent) {
         touchPicked.value = true
         ghostPosition.value = { x: event.clientX, y: event.clientY }
         pressedPayload = null
-        unlisten()
         swallowClickUntil = performance.now() + CLICK_SWALLOW_MS
+        syncListening()
         return
     }
-    // 鼠标点击：交给源行自身的点击逻辑（追加到目标函数）
+    // 鼠标点击：先清空按下状态，再展示「刚插入的字符串」浮动反馈
     reset()
+    showClickFlash(pressed)
 }
 
 /** 指针被系统取消（如触控转为滚动）：直接丢弃本次手势 */
@@ -150,6 +196,7 @@ export function startExprDrag(field: ExprDragPayload, event: PointerEvent) {
         reset(true)
         return
     }
+    clearClickFlash()
     pressedPayload = field
     pointerType = event.pointerType
     startX = event.clientX
@@ -157,7 +204,7 @@ export function startExprDrag(field: ExprDragPayload, event: PointerEvent) {
     ghostPosition.value = { x: event.clientX, y: event.clientY }
     dragging.value = false
     swallowClickUntil = 0
-    listen()
+    syncListening()
 }
 
 /**
@@ -170,8 +217,9 @@ export function consumeExprDragClick(): boolean {
     return true
 }
 
-/** 清除当前抓起的字段（提示条的取消按钮调用） */
+/** 清除当前抓起的字段与点击浮动反馈（提示条的取消按钮、组件卸载时调用） */
 export function clearExprDrag() {
+    clearClickFlash()
     reset()
 }
 
@@ -194,14 +242,16 @@ export function registerExprDropHandler(handler: ExprDropHandler) {
  */
 export function useExprDrag() {
     return {
-        /** 已抓起的字段 */
+        /** 已抓起的字段（拖动中或触控抓起后） */
         payload,
+        /** 浮动标签内容（已抓起的字段，或鼠标点击后的短暂反馈） */
+        floatingPayload,
+        /** 浮动标签坐标 */
+        ghostPosition,
         /** 是否处于指针拖动中 */
         dragging,
         /** 是否由触控点击抓起 */
         touchPicked,
-        /** 拖动幽灵坐标 */
-        ghostPosition,
         /** 当前悬停的放置目标 key */
         hoveredDropKey,
         /** 是否处于可放置状态（拖动中或触控已抓起） */

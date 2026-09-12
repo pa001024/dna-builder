@@ -65,6 +65,8 @@ export enum TokenType {
     LBRACE, // {
     RBRACE, // }
     BANG, // ! (强制属性运算符，后缀)
+    /** 空白片段：仅位置扫描（如按字段删除）会返回，语法分析不会看到 */
+    WHITESPACE,
     EOF,
 }
 
@@ -476,4 +478,25 @@ export function parseAST(input: string, macros?: Record<string, string> | MacroM
 
     const parser = new Parser(input, macrosMap)
     return parser.parse()
+}
+
+/**
+ * 按 AST 词法规则扫描表达式,返回保留原始下标与空白的 token 序列。
+ * 与 parseAST 共用同一个 Tokenizer,保证位置扫描(如 Ctrl+退格整字段删除)与语法分析看到完全一致的词法边界。
+ * 宏名原样返回(不做替换),因为调用方通常针对用户实际输入的文本做区间操作。
+ * @param input 待扫描的表达式
+ * @param maxLength 只扫描 position 小于该下标的 token,可提前结束;省略时扫描全文
+ * @returns token 序列(不含终止的 EOF token)
+ * @throws 遇到词法错误字符时抛出错误,由调用方决定回退策略
+ */
+export function tokenizeAST(input: string, maxLength?: number): Token[] {
+    const limit = maxLength ?? Number.POSITIVE_INFINITY
+    const tokenizer = new Tokenizer(input, new Map())
+    const tokens: Token[] = []
+    while (true) {
+        const token = tokenizer.getNextToken()
+        if (token.type === TokenType.EOF || token.position >= limit) break
+        tokens.push(token)
+    }
+    return tokens
 }

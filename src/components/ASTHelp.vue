@@ -740,12 +740,13 @@ const badgeColors: Record<string, string> = {
                         <Icon icon="ri:pencil-line" class="h-4 w-4 text-primary" />
                         {{ $t("ast-help.inputLabel") }}
                     </label>
-                    <!-- CodeMirror 编辑器：AST 专用上色器，点击插入不丢失光标，光标事件驱动上下文提示 -->
+                    <!-- CodeMirror 编辑器：AST 专用上色器，点击插入不丢失光标，光标事件驱动上下文提示；Ctrl/退格按字段整段删除 -->
                     <div class="h-44 shrink-0 overflow-hidden rounded-xs border border-base-content/15 bg-base-content/3">
                         <CodeEditor
                             ref="codeEditorRef"
                             v-model="inputExpression"
                             language="ast"
+                            field-delete
                             :ast-macros="astMacros"
                             class="h-full w-full"
                             @cursor="cursorPos = $event"

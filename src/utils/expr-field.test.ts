@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest"
-import { joinExprText, resolveCharFieldExpression, resolveSkillFieldNamespace } from "./expr-field"
+import { findFieldDeleteRange, joinExprText, resolveCharFieldExpression, resolveSkillFieldNamespace } from "./expr-field"
+
+/**
+ * 按 findFieldDeleteRange 的返回区间执行一次删除，便于用「删除后的表达式」断言行为。
+ * @param expression 表达式文本
+ * @param caret 光标位置
+ * @returns 删除后的表达式；未命中整字段删除时返回 null
+ */
+function deleteAt(expression: string, caret: number): string | null {
+    const range = findFieldDeleteRange(expression, caret)
+    if (!range) return null
+    return expression.slice(0, range.start) + expression.slice(range.end)
+}
 
 describe("joinExprText", () => {
     it("空表达式直接写入字段", () => {
@@ -60,5 +72,65 @@ describe("resolveCharFieldExpression", () => {
             skills: [{ 名称: "技能一", safeName: "skill1" }],
         } as never
         expect(resolveCharFieldExpression(charBuild, "防御")).toBe("角色::防御!")
+    })
+})
+
+describe("findFieldDeleteRange", () => {
+    it("一次删除命名空间 + 字段 + ! 后缀", () => {
+        expect(deleteAt("近战::攻击!", 7)).toBe("")
+        expect(deleteAt("角色::攻击!", 7)).toBe("")
+    })
+
+    it("只删除光标左侧的字段，右侧内容保持原样", () => {
+        expect(deleteAt("近战::攻击! + 防御", 7)).toBe(" + 防御")
+        expect(deleteAt("攻击 + 远程::暴击!", 12)).toBe("攻击 + ")
+    })
+
+    it("字段中间的光标按整段删除（不拆开 :: 与 !）", () => {
+        expect(deleteAt("近战::攻击!", 4)).toBe("")
+        expect(deleteAt("近战::攻击!", 6)).toBe("")
+    })
+
+    it("成员访问与临时属性链并入同一个字段", () => {
+        expect(deleteAt("[攻击]{增伤:0.1}.暴击", 16)).toBe("")
+        expect(deleteAt("近战::攻击!.暴击", 9)).toBe("")
+        expect(deleteAt("攻击{增伤:0.1}", 10)).toBe("")
+        expect(deleteAt("攻击.暴击", 5)).toBe("")
+    })
+
+    it("删除后保留运算符等其它片段之间的原有文本", () => {
+        expect(deleteAt("攻击 + 近战::攻击! * 2", 12)).toBe("攻击 +  * 2")
+    })
+
+    it("光标前的空白不计入删除区间", () => {
+        expect(deleteAt("近战::攻击!  ", 9)).toBe("  ")
+    })
+
+    it("光标左侧不是完整字段时回退到默认删除", () => {
+        expect(findFieldDeleteRange("", 0)).toBeUndefined()
+        expect(findFieldDeleteRange("攻击 + 防御", 0)).toBeUndefined()
+        expect(findFieldDeleteRange("攻击 + ", 5)).toBeUndefined()
+        expect(findFieldDeleteRange("攻击 +", 4)).toBeUndefined()
+        expect(findFieldDeleteRange("近战::攻击! +", 9)).toBeUndefined()
+        expect(findFieldDeleteRange("攻击.", 3)).toBeUndefined()
+        expect(findFieldDeleteRange("近战::攻击! @", 9)).toBeUndefined()
+    })
+
+    it("括号分组结尾时不整段删除", () => {
+        expect(findFieldDeleteRange("(攻击+防御)", 7)).toBeUndefined()
+        expect(findFieldDeleteRange("max(攻击, 防御)", 11)).toBeUndefined()
+    })
+
+    it("独立的临时属性块整体删除", () => {
+        expect(deleteAt("{增伤:1}", 7)).toBe("")
+    })
+
+    it("整段删除括号分组及其成员访问后缀", () => {
+        expect(deleteAt("(攻击+防御).暴击", 11)).toBe("")
+    })
+
+    it("光标位于字段起始处时回退到默认删除", () => {
+        expect(deleteAt("近战::攻击!", 0)).toBeNull()
+        expect(deleteAt("攻击+防御", 3)).toBeNull()
     })
 })

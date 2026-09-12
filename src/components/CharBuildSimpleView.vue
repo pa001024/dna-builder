@@ -220,23 +220,12 @@ function tickParallax() {
     rafId = requestAnimationFrame(tickParallax)
 }
 
-/** 关闭视差操作提示：用户一旦真的操作（移动指针/滚动）就不再显示 */
-function dismissHint() {
-    if (!showHint.value) return
-    showHint.value = false
-    if (hintTimer) {
-        window.clearTimeout(hintTimer)
-        hintTimer = 0
-    }
-}
-
 /**
  * 指针/手指移动：把视口坐标归一化到 [-1, 1] 后写入目标视差量。
  * @param event 指针事件
  */
 function onPointerMove(event: PointerEvent) {
     if (reducedMotion) return
-    dismissHint()
     const rect = rootEl.value?.getBoundingClientRect()
     if (!rect?.width || !rect.height) return
     targetPx = clamp(((event.clientX - rect.left) / rect.width) * 2 - 1, -1, 1)
@@ -781,7 +770,6 @@ const mobileTabs = computed<{ key: string; label: string; icon: IconTypes }[]>((
  * 同时关闭视差操作提示——用户已经在滚动了，提示没有存在意义。
  */
 function onBodyScroll() {
-    dismissHint()
     const el = bodyEl.value
     if (!el) return
     const line = el.scrollTop + el.clientHeight * 0.3
@@ -798,7 +786,6 @@ function onBodyScroll() {
  * @param key 区块标识
  */
 function scrollToSection(key: string) {
-    dismissHint()
     const el = bodyEl.value
     const section = el?.querySelector<HTMLElement>(`[data-section="${key}"]`)
     if (!el || !section) return
@@ -822,27 +809,19 @@ function onUseSharedBuild(settings: CharSettings) {
 }
 //#endregion
 
-/** 视差操作提示：进入页面时短暂显示后自动隐藏 */
-const showHint = ref(true)
-let hintTimer = 0
-
 onMounted(() => {
     reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    hintTimer = window.setTimeout(() => {
-        showHint.value = false
-    }, 7000)
 })
 
 onBeforeUnmount(() => {
     if (rafId) cancelAnimationFrame(rafId)
-    if (hintTimer) window.clearTimeout(hintTimer)
 })
 </script>
 
 <template>
     <!--
         简洁模式的全部外观都由 Tailwind 工具类表达，本组件不再保留任何自定义 CSS
-        （仅有的两条自定义动画 mote-rise / hint-fade 放在全局 style.css 的 @theme 里）。
+        （仅有的自定义动画 mote-rise 放在全局 style.css 的 @theme 里）。
         需要运行时注入的只有三样东西：
         1) 根节点上的 --sc-* 调色板与元素强调色（供任意值写法 var(--sc-*) 消费）；
         2) 视差变量 --sc-px / --sc-py（由指针驱动的归一化 -1..1）；
@@ -987,7 +966,7 @@ onBeforeUnmount(() => {
             <span class="sc-boot-text text-[11px] tracking-[0.3em] text-(--sc-text-dim) uppercase">{{ $t("char-build.simple_loading") }}</span>
         </div>
 
-        <div v-else ref="bodyEl" class="sc-body relative z-2 grid min-h-0 flex-1 content-start gap-2.5 overflow-y-auto overscroll-contain px-3.5 pt-2.5 pb-24 [grid-template-areas:'stage'_'identity'_'mods'_'stats'_'output'] auto-rows-min lg:grid-cols-[minmax(230px,0.86fr)_minmax(0,1.7fr)_minmax(280px,1fr)] lg:content-stretch lg:gap-3.5 lg:px-4 lg:pt-3.5 lg:pb-4 lg:auto-rows-auto lg:[grid-template-areas:'identity_stage_mods'_'stats_stage_mods'_'output_output_mods']" @scroll.passive="onBodyScroll">
+        <div v-else ref="bodyEl" class="sc-body relative z-2 grid min-h-0 flex-1 content-start gap-2.5 overflow-y-auto overscroll-contain px-3.5 pt-2.5 pb-24 grid-cols-[minmax(0,1fr)] [grid-template-areas:'stage'_'identity'_'mods'_'stats'_'output'] auto-rows-min lg:grid-cols-[minmax(230px,0.86fr)_minmax(0,1.7fr)_minmax(280px,1fr)] lg:content-stretch lg:gap-3.5 lg:px-4 lg:pt-3.5 lg:pb-4 lg:auto-rows-auto lg:[grid-template-areas:'identity_stage_mods'_'stats_stage_mods'_'output_output_mods']" @scroll.passive="onBodyScroll">
             <!-- 装配舞台 -->
             <section class="sc-stage relative flex min-h-85 flex-col overflow-hidden border border-(--sc-line) bg-[radial-gradient(78%_58%_at_50%_42%,var(--sc-accent-14),transparent_70%),linear-gradient(180deg,rgba(10,16,30,0.55),rgba(4,6,12,0.2))] [clip-path:polygon(14px_0,100%_0,100%_calc(100%-14px),calc(100%-14px)_100%,0_100%,0_14px)] [grid-area:stage] lg:min-h-110" data-section="stage">
                 <div class="sc-deck grid flex-[1_1_auto] place-items-center px-1.5 pt-13.5 pb-5 perspective-distant lg:px-2.5 lg:pt-16 lg:pb-6.5">
@@ -1250,7 +1229,7 @@ onBeforeUnmount(() => {
             </button>
         </nav>
 
-        <div v-if="ready && showHint" class="sc-hint absolute left-1/2 z-4 w-max max-w-[calc(100%-24px)] -translate-x-1/2 border border-(--sc-line) bg-[rgba(4,6,12,0.72)] px-3 py-1.25 text-[10px] tracking-[0.16em] text-(--sc-text-dim) animate-hint-fade pointer-events-none bottom-21 motion-reduce:animate-none lg:bottom-4.5">{{ $t("char-build.simple_hint") }}</div>
+
 
         <!-- 协战构筑弹窗：展示该协战角色关联构筑的魔之楔（teleport 到 body，渲染位置不影响版面） -->
         <TeamBuildDialog v-model="teamBuildShow" :build-id="teamBuildId" :char-name="teamBuildCharName" :focus="teamBuildFocus" />
