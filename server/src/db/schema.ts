@@ -1138,7 +1138,11 @@ export const gameMods = sqliteTable(
             .notNull()
             .$default(() => false),
         createdAt: integer("created_at").$default(now),
-        updateAt: integer("update_at").$onUpdate(now),
+        /**
+         * 内容最后更新时间，仅在发布/版本/元数据等实质变更时显式写入 schema.now()（与 builds 一致）。
+         * 刻意不使用 $onUpdate：下载计数、浏览量等计数器自增不属于内容更新，不应把 MOD 顶到「最近更新」列表最前。
+         */
+        updateAt: integer("update_at"),
     },
     gameMods => [
         index("game_mods_category_idx").on(gameMods.category),

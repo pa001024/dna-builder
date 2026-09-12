@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { env } from "@/env"
+// unplugin-vue-components 只扫描 src/components，views 目录下的页面不会自动注册：
+// 这里必须显式 import，否则 <ModsListView> 解析失败、web 端整页空白
+import ModsListView from "@/views/ModsListView.vue"
 </script>
 
 <template>

@@ -332,6 +332,7 @@ export const resolvers = {
             if (!row) {
                 throw createGraphQLError("MOD 不存在")
             }
+            // 仅递增浏览量，不触碰 updateAt（浏览不属于内容更新，避免把 MOD 顶到「最近更新」最前）
             await db
                 .update(schema.gameMods)
                 .set({ views: sql`${schema.gameMods.views} + 1` })

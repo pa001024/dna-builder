@@ -176,6 +176,7 @@ function canManageMod(row: typeof schema.gameMods.$inferSelect, user: JWTUser): 
 
 /**
  * @description 从 OSS 读取指定版本的压缩包字节并递增下载计数（版本与发布各 +1）。
+ * 仅更新计数列，不触碰 updateAt：下载不算内容更新，不应影响「最近更新」排序。
  * @param versionId 版本 id。
  * @returns 版本行 + 字节；不存在时返回 null。
  */
@@ -359,6 +360,7 @@ export function modApiPlugin() {
                         source,
                         userId: user.id,
                         status: "pending",
+                        updateAt: schema.now(),
                     })
                     .returning()
                 if (!row) {

@@ -6,6 +6,7 @@ import { computed, onMounted, ref, watch } from "vue"
 import { gameModQuery } from "@/api/gen/api-queries"
 import type { GameMod } from "@/api/gen/api-types"
 import { useModInstall } from "@/composables/useModInstall"
+import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 
@@ -45,6 +46,8 @@ const { installing, installSharedMod, installSharedVersion } = useModInstall(() 
 const coverPreviewRef = ref<InstanceType<typeof ImagePreview> | null>(null)
 
 const isLoggedIn = computed(() => !!user.jwtToken)
+/** 下载安装依赖本地游戏目录，仅桌面客户端可用；web 端只保留分享浏览。 */
+const isApp = env.isApp
 
 /** markdown 渲染器（与指南详情页一致：禁 HTML、允许链接化）。 */
 const md = MarkdownIt({
@@ -276,7 +279,7 @@ watch(
                                 <div v-if="version.changelog" class="text-xs opacity-70 line-clamp-2">{{ version.changelog }}</div>
                             </div>
                             <button
-                                v-if="isLoggedIn"
+                                v-if="isApp && isLoggedIn"
                                 class="btn btn-sm btn-ghost btn-square"
                                 :class="{ 'btn-disabled': installing === `${mod.id}:${version.id}` }"
                                 :data-tip="$t('game-launcher.download')"
@@ -288,20 +291,30 @@ watch(
                         </div>
                     </div>
 
-                    <button
-                        v-if="isLoggedIn"
-                        class="btn btn-primary"
-                        :class="{ 'btn-disabled': installing === mod.id }"
-                        @click="installSharedMod(mod)"
+                    <!-- 下载安装属桌面端管理功能：web 端仅提示，不提供入口 -->
+                    <template v-if="isApp">
+                        <button
+                            v-if="isLoggedIn"
+                            class="btn btn-primary"
+                            :class="{ 'btn-disabled': installing === mod.id }"
+                            @click="installSharedMod(mod)"
+                        >
+                            <span v-if="installing === mod.id" class="loading loading-spinner loading-xs"></span>
+                            <Icon v-else icon="ri:download-2-line" class="size-4" />
+                            {{ installing === mod.id ? $t("game-launcher.installing") : $t("game-launcher.downloadLatest") }}
+                        </button>
+                        <button v-else class="btn btn-ghost" disabled>
+                            <Icon icon="ri:lock-line" class="size-4" />
+                            {{ $t("game-launcher.loginToDownload") }}
+                        </button>
+                    </template>
+                    <div
+                        v-else
+                        class="flex items-center justify-center gap-2 rounded-xs border border-dashed border-base-content/20 px-3 py-2.5 text-xs text-base-content/50"
                     >
-                        <span v-if="installing === mod.id" class="loading loading-spinner loading-xs"></span>
-                        <Icon v-else icon="ri:download-2-line" class="size-4" />
-                        {{ installing === mod.id ? $t("game-launcher.installing") : $t("game-launcher.downloadLatest") }}
-                    </button>
-                    <button v-else class="btn btn-ghost" disabled>
-                        <Icon icon="ri:lock-line" class="size-4" />
-                        {{ $t("game-launcher.loginToDownload") }}
-                    </button>
+                        <Icon icon="ri:windows-fill" class="size-4 flex-none" />
+                        {{ $t("game-launcher.appOnlyDownload") }}
+                    </div>
                 </div>
             </ScrollArea>
         </template>
