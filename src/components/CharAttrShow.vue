@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import { computed } from "vue"
 import { useAttrI18n } from "@/composables/useAttrI18n"
 import { useCharSettings } from "@/composables/useCharSettings"
+import { useExprDrag } from "@/composables/useExprDrag"
 import { CharAttr, CharBuild, LeveledChar, LeveledMod } from "@/data"
 import { format100r } from "@/util"
+import { resolveCharFieldExpression } from "@/utils/expr-field"
 
 const props = withDefaults(
     defineProps<{
@@ -45,9 +48,39 @@ const attrDescMap = computed<Record<string, string>>(() => {
     return map
 })
 
-defineEmits<{
+const emit = defineEmits<{
     addSkill: [skill: string]
 }>()
+
+const { startExprDrag, consumeExprDragClick } = useExprDrag()
+
+/**
+ * 角色属性行对应的表达式字段文本（如 角色::攻击!）。
+ * 与 CharBuildView.addSkill 共用 resolveCharFieldExpression，保证点击追加与拖拽放置写入同一片段。
+ * @param key 属性键名
+ * @returns 表达式字段文本
+ */
+function attrExpression(key: string): string {
+    return resolveCharFieldExpression(props.charBuild, key)
+}
+
+/**
+ * 指针按下时抓起属性字段：鼠标可拖到表达式 / 自定义变量输入框放置，触控为「点击抓起 → 点击放置」。
+ * @param key 属性键名
+ * @param event 指针按下事件
+ */
+function startFieldDrag(key: string, event: PointerEvent) {
+    startExprDrag({ expr: attrExpression(key), label: t(attrName(key)) }, event)
+}
+
+/**
+ * 点击属性行：拖动 / 触控抓起已接管时忽略，否则保持原行为追加到目标函数。
+ * @param key 属性键名
+ */
+function handleFieldClick(key: string) {
+    if (consumeExprDragClick()) return
+    emit("addSkill", key)
+}
 
 interface DynamicAttrSource {
     sourceName: string
@@ -286,13 +319,15 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
             </div>
         </template>
         <div
-            class="cursor-pointer flex justify-between items-center p-1 px-2 rounded-xs transition-all duration-200 hover:bg-base-100 hover:shadow-sm"
+            class="cursor-grab active:cursor-grabbing flex justify-between items-center p-1 px-2 rounded-xs transition-all duration-200 select-none hover:bg-base-100 hover:shadow-sm"
+            :title="$t('char-build.drag_field_hint')"
             :class="{
                 'shadow-md shadow-primary/50 text-shadow-sm outline outline-primary': charBuild
                     .getIdentifierNames(charBuild.targetFunction)
                     .includes(key),
             }"
-            @click="$emit('addSkill', key)"
+            @pointerdown="startFieldDrag(key, $event)"
+            @click="handleFieldClick(key)"
         >
             <div class="text-sm text-base-content/80">{{ $t(attrName(key)) }}</div>
             <div class="text-primary font-bold text-sm font-orbitron">

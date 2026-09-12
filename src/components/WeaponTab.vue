@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import { computed } from "vue"
 import { useAttrI18n } from "@/composables/useAttrI18n"
 import { useCharSettings } from "@/composables/useCharSettings"
+import { useExprDrag } from "@/composables/useExprDrag"
 import { CharAttr, CharBuild, LeveledMod, type LeveledSkill, LeveledWeapon } from "@/data"
 import { format100, format100r, formatWeaponProp } from "@/util"
 
@@ -30,11 +32,40 @@ function getWeaponNamespace() {
 }
 
 /**
+ * 武器属性行对应的表达式字段文本（如 近战::攻击!）。
+ * @param key 武器属性键名
+ * @returns 表达式字段文本
+ */
+function weaponAttrExpression(key: string) {
+    return `${getWeaponNamespace()}::${key}!`
+}
+
+/**
  * 将点击的武器属性插入目标函数。
  * @param key 武器属性键名
  */
 function addWeaponAttribute(key: string) {
-    emit("addSkill", `${getWeaponNamespace()}::${key}!`)
+    emit("addSkill", weaponAttrExpression(key))
+}
+
+const { startExprDrag, consumeExprDragClick } = useExprDrag()
+
+/**
+ * 指针按下时抓起武器属性字段：鼠标可拖到表达式 / 自定义变量输入框放置，触控为「点击抓起 → 点击放置」。
+ * @param key 武器属性键名
+ * @param event 指针按下事件
+ */
+function startWeaponAttrDrag(key: string, event: PointerEvent) {
+    startExprDrag({ expr: weaponAttrExpression(key), label: t(attrName(key)) }, event)
+}
+
+/**
+ * 点击武器属性行：拖动 / 触控抓起已接管时忽略，否则保持原行为追加到目标函数。
+ * @param key 武器属性键名
+ */
+function handleWeaponAttrClick(key: string) {
+    if (consumeExprDragClick()) return
+    addWeaponAttribute(key)
 }
 
 const baseWeapon = computed(() => {
@@ -462,8 +493,10 @@ const weaponAttrDescMap = computed<Record<string, string>>(() => {
                     </div>
                 </template>
                 <div
-                    class="cursor-pointer flex justify-between items-center p-1 px-2 transition-all duration-200 hover:bg-base-100 hover:shadow-md rounded-md"
-                    @click="addWeaponAttribute(key)"
+                    class="cursor-grab active:cursor-grabbing flex justify-between items-center p-1 px-2 transition-all duration-200 select-none hover:bg-base-100 hover:shadow-md rounded-md"
+                    :title="$t('char-build.drag_field_hint')"
+                    @pointerdown="startWeaponAttrDrag(key, $event)"
+                    @click="handleWeaponAttrClick(key)"
                 >
                     <div class="flex items-center gap-1 text-sm text-base-content/80">
                         <span>{{ $t(attrName(key)) }}</span>

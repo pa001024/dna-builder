@@ -95,8 +95,12 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
         customBuff: [] as [string, number][],
         team1: "-" as number | "-",
         team1Weapon: "-" as number | "-",
+        /** 1 号协战角色关联的服务器构筑 id（"-" 表示未关联，简洁模式据此弹窗展示其魔之楔） */
+        team1Build: "-",
         team2: "-" as number | "-",
         team2Weapon: "-" as number | "-",
+        /** 2 号协战角色关联的服务器构筑 id（"-" 表示未关联） */
+        team2Build: "-",
         timelineDPS: false,
         /** 是否使用全局背包特效等级（true 时忽略 effectConfig，行为同旧版） */
         useGlobal: false,
@@ -200,6 +204,13 @@ export function normalizeCharSettings(settings?: Partial<CharSettings> | null): 
             // 查不到时保留原值，避免旧存档丢失
             normalized[key] = (weapon?.id ?? value) as CharSettings[typeof key]
         }
+    }
+
+    // 协战构筑 id 只接受非空且非 "-" 的字符串（服务器构筑 id 为字符串，"-" 是未关联的占位值）
+    for (const key of ["team1Build", "team2Build"] as const) {
+        const value = settings[key]
+        const trimmed = typeof value === "string" ? value.trim() : ""
+        normalized[key] = trimmed && trimmed !== "-" ? trimmed : "-"
     }
 
     return normalized

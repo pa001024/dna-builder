@@ -306,42 +306,31 @@ watchEffect(() => {
                 <!-- 模态框背景 -->
                 <div class="modal-backdrop" @click="ui.cancelDialog" />
             </dialog>
-            <transition name="slide-right">
-                <div
-                    v-if="ui.errorMessage"
-                    role="alert"
-                    class="alert alert-error absolute bottom-8 right-8 cursor-pointer z-10000"
-                    @click="ui.errorMessage = ''"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                    </svg>
-                    <span>{{ ui.errorMessage }}</span>
-                </div>
-            </transition>
-            <transition name="slide-right">
-                <div
-                    v-if="ui.successMessage"
-                    role="alert"
-                    class="alert alert-success absolute bottom-8 right-8 cursor-pointer z-10000"
-                    @click="ui.successMessage = ''"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                    </svg>
-                    <span>{{ ui.successMessage }}</span>
-                </div>
-            </transition>
+            <!-- 全局提示（ui store 的 errorMessage / successMessage 驱动）：右下角堆叠，直角细边框 + 半透明毛玻璃 -->
+            <div class="pointer-events-none absolute right-8 bottom-8 z-10000 flex flex-col items-end gap-2">
+                <transition name="slide-right">
+                    <div
+                        v-if="ui.errorMessage"
+                        role="alert"
+                        class="pointer-events-auto flex max-w-96 cursor-pointer items-start gap-2 rounded-xs border border-error/40 bg-base-100/60 px-3 py-2 shadow-lg backdrop-blur-lg hover:border-error/70"
+                        @click="ui.errorMessage = ''"
+                    >
+                        <Icon icon="ri:error-warning-line" class="mt-0.5 size-4 shrink-0 text-error" />
+                        <span class="text-left text-xs leading-snug text-base-content/85">{{ ui.errorMessage }}</span>
+                    </div>
+                </transition>
+                <transition name="slide-right">
+                    <div
+                        v-if="ui.successMessage"
+                        role="alert"
+                        class="pointer-events-auto flex max-w-96 cursor-pointer items-start gap-2 rounded-xs border border-success/40 bg-base-100/60 px-3 py-2 shadow-lg backdrop-blur-lg hover:border-success/70"
+                        @click="ui.successMessage = ''"
+                    >
+                        <Icon icon="ri:checkbox-circle-line" class="mt-0.5 size-4 shrink-0 text-success" />
+                        <span class="text-left text-xs leading-snug text-base-content/85">{{ ui.successMessage }}</span>
+                    </div>
+                </transition>
+            </div>
         </div>
     </div>
 </template>

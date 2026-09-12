@@ -7,7 +7,6 @@ import { cloneDeep, debounce, groupBy, isEqual } from "lodash-es"
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
-import FullTooltip from "@/components/FullTooltip.vue"
 import {
     CharSettings,
     createDefaultCharSettings,
@@ -16,6 +15,7 @@ import {
     serializeCharSettings,
     useCharSettings,
 } from "@/composables/useCharSettings"
+import { type ExprDragPayload, useExprDrag } from "@/composables/useExprDrag"
 import {
     buffData,
     buffMap,
@@ -52,6 +52,7 @@ import { useTourStore } from "@/store/tour"
 import { useUIStore } from "@/store/ui"
 import { copyText, formatBigNumber, formatProp, pasteText, roundBuffValue } from "@/util"
 import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
+import { joinExprText, resolveCharFieldExpression } from "@/utils/expr-field"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 
 //#region 角色
@@ -1076,9 +1077,7 @@ function dedupeBuffs(buffs: [string, number, number?][]): [string, number, numbe
             uniqueBuffs.set(name, nextCoverage === undefined ? [level] : [level, nextCoverage])
         }
     })
-    return [...uniqueBuffs.entries()].map(([name, [level, coverage]]) =>
-        coverage === undefined ? [name, level] : [name, level, coverage]
-    )
+    return [...uniqueBuffs.entries()].map(([name, [level, coverage]]) => (coverage === undefined ? [name, level] : [name, level, coverage]))
 }
 
 function updateTeamBuff(newValue: string | number, oldValue: string | number) {
@@ -1140,8 +1139,9 @@ onMounted(async () => {
     ui.title = t("char-build.title1", { charName: t(selectedChar.value) })
 
     // Tour 启动逻辑：检查是否已完成
+    // 新手引导的锚点全部在专业模式的界面上，简洁模式下不启动，避免引导找不到目标元素
     const tourKey = `char-build`
-    if (!tourStore.isTourCompleted(tourKey)) {
+    if (buildViewMode.value === "pro" && !tourStore.isTourCompleted(tourKey)) {
         // 延迟 1 秒后启动，等待组件完全渲染
         setTimeout(() => {
             tour.value?.startTour()
@@ -1151,6 +1151,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     commitCustomVariableInputs.flush()
+    clearExprDrag()
     ui.title = ""
 })
 
@@ -1172,43 +1173,90 @@ function toggleSection(section: keyof typeof collapsedSections.value) {
 
 const charTab = ref(charBuild.value.selectedSkillType)
 
+/**
+ * 构筑页展示模式：
+ * - simple：简洁模式（全屏 HUD 装配总览，只读，见 CharBuildSimpleView）
+ * - pro：专业模式（原有的三栏编辑器）
+ * 默认简洁模式，选择结果持久化，刷新后保持用户偏好。
+ */
+const buildViewMode = useLocalStorage<"simple" | "pro">("char-build-view-mode", "simple")
+
+/**
+ * 将属性 / 技能字段追加到目标函数表达式。
+ * 追加时自动判断是否需要补 "+" 连接符（空表达式、紧跟运算符/左括号/逗号时不补），
+ * 与拖拽放置共用 joinExprText，保证两种写入方式结果一致。
+ * @param skill 字段文本；对象形式表示带技能实例的技能字段
+ * @returns void
+ */
 function addSkill(skill: string | { fieldName: string; skill: LeveledSkill }) {
     if (typeof skill !== "string") {
-        targetFunction.value += `${skill.skill.safeName}::${skill.fieldName}`
+        targetFunction.value = joinExprText(targetFunction.value, `${skill.skill.safeName}::${skill.fieldName}`)
         return
     }
-    const cleaned = skill.replace(/\//g, "_")
-    // 已带命名空间的字段（如 近战::攻击）直接追加
-    if (skill.includes("::")) {
-        targetFunction.value += cleaned
+    // 已带命名空间的字段（如 近战::攻击）与角色属性/技能字段共用同一解析逻辑
+    targetFunction.value = joinExprText(targetFunction.value, resolveCharFieldExpression(charBuild.value, skill))
+}
+
+//#region 表达式字段拖拽 / 放置
+/** 表达式字段拖拽状态：属性、技能行抓起字段，表达式与自定义变量输入框作为放置目标 */
+const {
+    payload: exprDragPayload,
+    dragging: exprDragging,
+    ghostPosition: exprGhostPosition,
+    hoveredDropKey,
+    dropReady: exprDropReady,
+    clearExprDrag,
+    registerExprDropHandler,
+} = useExprDrag()
+
+/**
+ * 把抓起的字段写入目标表达式输入框（鼠标拖动放置与触控点击放置共用）。
+ * 输入框已聚焦时按光标位置插入，否则追加到末尾。
+ * @param targetKey 放置目标 key（data-expr-drop 的取值）
+ * @param field 抓起的字段
+ * @param input 触发放置的输入框（触控点击时有值，用于读取光标位置）
+ * @returns void
+ */
+function applyExprDrop(targetKey: string, field: ExprDragPayload, input?: HTMLInputElement | null) {
+    const caret = input && document.activeElement === input && input.selectionStart != null ? input.selectionStart : undefined
+    if (targetKey === "target-function") {
+        targetFunction.value = joinExprText(targetFunction.value, field.expr, caret)
         return
     }
-    // 未带命名空间的技能字段自动补全对应命名空间（角色主技能 e/q/p，其余按技能 safeName）
-    const ns = getSkillFieldNamespace(skill)
-    if (ns) {
-        targetFunction.value += `${ns}::${cleaned}`
-        return
-    }
-    // 角色属性：补全 角色:: 命名空间并以 ! 强制按属性解析（如 角色::攻击!）
-    targetFunction.value += `角色::${cleaned}!`
+    if (!targetKey.startsWith("custom-variable:")) return
+    const index = Number(targetKey.slice("custom-variable:".length))
+    const variable = customVariableInputs.value[index]
+    if (!variable) return
+    variable[1] = joinExprText(variable[1], field.expr, caret)
 }
 
 /**
- * 获取当前选中技能字段对应的 AST 命名空间。
- * 角色主技能按 e/q/p 映射；其余技能（含武器技能）按技能 safeName 映射，
- * 与 evaluateAST 的 skillAttrs 键一致（skillAttrs 仅按技能名与 e/q/p 建立索引）。
- * @param skillName 技能字段名
- * @returns 命名空间；非技能字段（如角色属性）返回空字符串
+ * 触控点击放置：已抓起字段时点击表达式输入框即写入字段并结束抓起状态。
+ * @param targetKey 放置目标 key
+ * @param event 点击事件（currentTarget 为表达式输入框）
+ * @returns void
  */
-function getSkillFieldNamespace(skillName: string): string {
-    const skill = charBuild.value.selectedSkill
-    if (!skill) return ""
-    const isField = skill.字段.some(field => field.名称 === skillName || field.safeName === skillName)
-    if (!isField) return ""
-    const index = charBuild.value.skills.findIndex(s => s.名称 === skill.名称)
-    if (index >= 0) return ["e", "q", "p"][index] || skill.safeName
-    return skill.safeName
+function handleExprDropClick(targetKey: string, event: MouseEvent) {
+    const field = exprDragPayload.value
+    if (!field || exprDragging.value) return
+    applyExprDrop(targetKey, field, event.currentTarget as HTMLInputElement)
+    clearExprDrag()
 }
+
+/**
+ * 表达式输入框在抓起 / 拖动状态下的高亮样式。
+ * 使用 ring（box-shadow）而非 outline，避免与输入框自身的 outline-none 相互覆盖。
+ * @param targetKey 放置目标 key
+ * @returns 需要追加的 class
+ */
+function dropTargetClass(targetKey: string) {
+    if (hoveredDropKey.value === targetKey) return "ring-2 ring-primary"
+    if (exprDropReady.value) return "ring-1 ring-primary/50"
+    return ""
+}
+
+registerExprDropHandler((targetKey, field) => applyExprDrop(targetKey, field))
+//#endregion
 
 //#region 额外精通武器
 const extraMasteryModalShow = ref(false)
@@ -1594,6 +1642,27 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         @on-tour-end="tourStore.markTourCompleted('char-build')"
     />
 
+    <!-- 表达式字段拖拽 / 放置：拖动幽灵 + 触控抓起提示条（挂到 body，避免被滚动容器裁剪） -->
+    <Teleport to="body">
+        <div
+            v-if="exprDragging && exprDragPayload"
+            class="pointer-events-none fixed z-10000 -translate-x-1/2 -translate-y-1/2 rounded-xs border border-primary/50 bg-base-100/95 px-2 py-1 text-xs font-semibold text-primary shadow-lg"
+            :style="{ left: `${exprGhostPosition.x}px`, top: `${exprGhostPosition.y}px` }"
+        >
+            {{ exprDragPayload.label }}
+        </div>
+        <div
+            v-else-if="exprDragPayload"
+            class="fixed bottom-4 left-1/2 z-10000 flex -translate-x-1/2 items-center gap-2 rounded-xs border border-primary/40 bg-base-100/95 px-3 py-1.5 text-xs text-base-content shadow-lg"
+        >
+            <Icon icon="ri:drag-move-line" class="size-3.5 shrink-0 text-primary" />
+            <span>{{ $t("char-build.drag_field_armed", { name: exprDragPayload.label }) }}</span>
+            <button type="button" class="cursor-pointer font-semibold text-primary hover:underline" @click="clearExprDrag">
+                {{ $t("取消") }}
+            </button>
+        </div>
+    </Teleport>
+
     <dialog class="modal" :class="{ 'modal-open': simulator_model_show }">
         <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
             <GameSimulator v-if="simulator_model_show" :char-build="charBuild" />
@@ -1666,42 +1735,42 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
     <!-- 额外精通武器选择弹窗 -->
     <DialogModel v-model="extraMasteryModalShow" class="bg-base-300 w-11/12 max-w-3xl">
-            <h3 class="text-lg font-bold mb-1">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</h3>
-            <p class="text-xs text-base-content/60 mb-4">{{ $t("char-build.extra_mastery_desc") }}</p>
-            <div class="grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,1fr))]">
-                <button
-                    v-for="item in extraMasteryOptions"
-                    :key="item.id"
-                    type="button"
-                    class="flex flex-col items-center gap-1.5 rounded-xs border p-2.5 cursor-pointer transition-colors duration-150 active:scale-[0.97]"
-                    :class="
-                        pendingExtraMastery === item.名称
-                            ? 'border-primary bg-primary/10 text-primary shadow-sm'
-                            : 'border-base-content/20 text-base-content/70 hover:border-primary/60 hover:text-primary'
-                    "
-                    @click="selectExtraMastery(item.名称)"
-                >
-                    <img :src="LeveledWeapon.typeUrl(item.名称)" alt="" class="size-9 object-contain" />
-                    <span class="text-xs">{{ $t(item.名称) }}</span>
-                </button>
-            </div>
-            <div v-if="pendingExtraMasteryItem" class="mt-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
-                <div class="flex items-center justify-between gap-2 mb-1">
-                    <div class="text-sm font-semibold">{{ $t(pendingExtraMasteryItem.名称) }}</div>
-                    <div class="shrink-0 font-mono text-[10px] tracking-[0.2em] text-base-content/40 uppercase">
-                        {{ pendingExtraMasteryItem.id }}
-                    </div>
-                </div>
-                <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t("UI_Armory_ExtraExcelResource") }}</div>
-                <div class="grid gap-1.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
-                    <ResourceCostItem
-                        v-for="[resourceId, count] in Object.entries(pendingExtraMasteryItem.消耗)"
-                        :key="resourceId"
-                        :name="getExtraMasteryResourceName(Number(resourceId))"
-                        :value="count"
-                    />
+        <h3 class="text-lg font-bold mb-1">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</h3>
+        <p class="text-xs text-base-content/60 mb-4">{{ $t("char-build.extra_mastery_desc") }}</p>
+        <div class="grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,1fr))]">
+            <button
+                v-for="item in extraMasteryOptions"
+                :key="item.id"
+                type="button"
+                class="flex flex-col items-center gap-1.5 rounded-xs border p-2.5 cursor-pointer transition-colors duration-150 active:scale-[0.97]"
+                :class="
+                    pendingExtraMastery === item.名称
+                        ? 'border-primary bg-primary/10 text-primary shadow-sm'
+                        : 'border-base-content/20 text-base-content/70 hover:border-primary/60 hover:text-primary'
+                "
+                @click="selectExtraMastery(item.名称)"
+            >
+                <img :src="LeveledWeapon.typeUrl(item.名称)" alt="" class="size-9 object-contain" />
+                <span class="text-xs">{{ $t(item.名称) }}</span>
+            </button>
+        </div>
+        <div v-if="pendingExtraMasteryItem" class="mt-4 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
+            <div class="flex items-center justify-between gap-2 mb-1">
+                <div class="text-sm font-semibold">{{ $t(pendingExtraMasteryItem.名称) }}</div>
+                <div class="shrink-0 font-mono text-[10px] tracking-[0.2em] text-base-content/40 uppercase">
+                    {{ pendingExtraMasteryItem.id }}
                 </div>
             </div>
+            <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t("UI_Armory_ExtraExcelResource") }}</div>
+            <div class="grid gap-1.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+                <ResourceCostItem
+                    v-for="[resourceId, count] in Object.entries(pendingExtraMasteryItem.消耗)"
+                    :key="resourceId"
+                    :name="getExtraMasteryResourceName(Number(resourceId))"
+                    :value="count"
+                />
+            </div>
+        </div>
         <template #action>
             <div class="flex w-full justify-between gap-2">
                 <button v-if="pendingExtraMastery" type="button" class="btn btn-sm btn-error btn-outline" @click="clearExtraMastery">
@@ -1751,12 +1820,22 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             </div>
         </div>
     </DialogModel>
-    <div class="h-full flex flex-col relative">
+    <!-- 简洁模式：独立的全屏 HUD 装配总览（默认），与专业模式互斥渲染 -->
+    <CharBuildSimpleView
+        v-if="buildViewMode === 'simple'"
+        :char-build="charBuild"
+        :attributes="attributes"
+        :char-settings="charSettings"
+        :char-name="selectedChar"
+        @switch-mode="buildViewMode = 'pro'"
+        @use-build="applyLoadedSettings"
+    />
+    <div v-else class="h-full flex flex-col relative">
         <!-- 背景图 -->
         <div
             class="inset-0 absolute opacity-40"
             :style="{
-                backgroundImage: `url(${charBuild.char.bg})`,
+                backgroundImage: `url(${charBuild.char.bustUrl})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
             }"
@@ -1779,8 +1858,22 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     <span class="shrink-0 text-xs text-base-content/60 tabular-nums sm:text-sm">Lv. {{ charSettings.charLevel }}</span>
                 </div>
                 <!-- 移动端：按钮等宽铺满整行（flex-1 平分整行宽度，不换行、超宽可横向滚动），避免保存/重置独占整行 -->
-                <div class="flex flex-nowrap items-stretch gap-1 w-full overflow-x-auto sm:w-auto sm:flex-wrap sm:gap-2 sm:ml-auto sm:overflow-visible">
-                    <button class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" data-tour="tour-button" @click="tour?.startTour()">
+                <div
+                    class="flex flex-nowrap items-stretch gap-1 w-full overflow-x-auto sm:w-auto sm:flex-wrap sm:gap-2 sm:ml-auto sm:overflow-visible"
+                >
+                    <button
+                        class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                        :title="$t('char-build.switch_to_simple')"
+                        @click="buildViewMode = 'simple'"
+                    >
+                        <Icon icon="ri:focus-3-line" class="size-5 sm:size-4" />
+                        <span class="hidden sm:inline">{{ $t("char-build.simple_mode") }}</span>
+                    </button>
+                    <button
+                        class="btn btn-sm btn-ghost h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                        data-tour="tour-button"
+                        @click="tour?.startTour()"
+                    >
                         <Icon icon="ri:question-line" class="size-5 sm:size-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.tour") }}</span>
                     </button>
@@ -1796,16 +1889,26 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         <Icon icon="ri:game-line" class="size-5 sm:size-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.simulator") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-secondary h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="autobuild_model_show = true">
+                    <button
+                        class="btn btn-sm btn-secondary h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                        @click="autobuild_model_show = true"
+                    >
                         <Icon icon="ri:robot-2-line" class="size-5 sm:size-4" />
                         <span class="hidden sm:inline">{{ $t("char-build.auto_build") }}</span>
                     </button>
-                    <button class="btn btn-sm btn-success h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3" @click="$router.push('/char-build-compare')">
+                    <button
+                        class="btn btn-sm btn-success h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
+                        @click="$router.push('/char-build-compare')"
+                    >
                         <Icon icon="ri:bar-chart-line" class="size-5 sm:size-4" />
                         <span class="hidden sm:inline">{{ $t("build-compare.title") }}</span>
                     </button>
                     <div class="dropdown dropdown-end flex-1 min-w-0 sm:flex-none">
-                        <div tabindex="0" role="button" class="btn btn-sm btn-primary h-9 flex-1 min-w-0 w-full px-0 sm:h-8 sm:flex-none sm:w-auto sm:px-3">
+                        <div
+                            tabindex="0"
+                            role="button"
+                            class="btn btn-sm btn-primary h-9 flex-1 min-w-0 w-full px-0 sm:h-8 sm:flex-none sm:w-auto sm:px-3"
+                        >
                             <Icon icon="ri:save-fill" class="size-5 sm:size-4" />
                             <span class="hidden sm:inline">{{ $t("char-build.save_project") }}</span>
                         </div>
@@ -1958,7 +2061,10 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             v-else
                                             class="flex h-full w-full items-center justify-center bg-base-100/50 text-base-content/40"
                                         >
-                                            <Icon :icon="tab.name === '近战' ? 'ri:sword-line' : 'ri:crosshair-line'" class="size-4 sm:size-5" />
+                                            <Icon
+                                                :icon="tab.name === '近战' ? 'ri:sword-line' : 'ri:crosshair-line'"
+                                                class="size-4 sm:size-5"
+                                            />
                                         </div>
                                     </template>
                                     <div
@@ -2157,7 +2263,11 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     "
                                 >
                                     <span class="truncate">{{ $t("同律") }} · {{ $t("char-build.weapon_slot_not_equipped") }}</span>
-                                    <Icon v-if="charBuild.skillWeapon?.inherit" icon="ri:exchange-line" class="h-4 w-4 shrink-0 text-primary" />
+                                    <Icon
+                                        v-if="charBuild.skillWeapon?.inherit"
+                                        icon="ri:exchange-line"
+                                        class="h-4 w-4 shrink-0 text-primary"
+                                    />
                                 </div>
                             </template>
                         </SectionHeader>
@@ -2186,11 +2296,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 <div class="collapse" :class="{ 'collapse-open': customVariableExpend }">
                                     <div class="space-y-1.5 collapse-content p-0">
                                         <!-- 变量行：变量名 = 表达式（下划线输入，不加外框） -->
-                                        <div
-                                            v-for="(variable, index) in customVariableInputs"
-                                            :key="index"
-                                            class="flex items-center gap-2"
-                                        >
+                                        <div v-for="(variable, index) in customVariableInputs" :key="index" class="flex items-center gap-2">
                                             <input
                                                 v-model="variable[0]"
                                                 type="text"
@@ -2204,7 +2310,9 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                         <div class="max-w-60 break-all text-xs text-base-content/80">
                                                             {{ variable[0] }} = {{ variable[1] }}
                                                         </div>
-                                                        <div class="text-xs text-primary tabular-nums">{{ getCustomVariableResult(variable) }}</div>
+                                                        <div class="text-xs text-primary tabular-nums">
+                                                            {{ getCustomVariableResult(variable) }}
+                                                        </div>
                                                     </div>
                                                 </template>
                                                 <input
@@ -2212,6 +2320,9 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                     type="text"
                                                     class="min-w-0 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                                     placeholder="表达式"
+                                                    :data-expr-drop="`custom-variable:${index}`"
+                                                    :class="dropTargetClass(`custom-variable:${index}`)"
+                                                    @click="handleExprDropClick(`custom-variable:${index}`, $event)"
                                                 />
                                             </FullTooltip>
                                             <button
@@ -2254,7 +2365,9 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         <template v-for="(variable, index) in customVariableInputs" :key="`variable-error-${index}`">
                                             <div
                                                 v-if="
-                                                    variable[0] || variable[1] ? charBuild.validateCustomVariable(variable[0], variable[1]) : false
+                                                    variable[0] || variable[1]
+                                                        ? charBuild.validateCustomVariable(variable[0], variable[1])
+                                                        : false
                                                 "
                                                 class="flex text-xs items-center text-red-500"
                                             >
@@ -2268,10 +2381,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     class="flex justify-center items-center cursor-pointer p-2 hover:bg-base-100/60 transition-all duration-200"
                                     @click="customVariableExpend = !customVariableExpend"
                                 >
-                                    <Icon
-                                        icon="radix-icons:chevron-down"
-                                        :class="{ 'rotate-180': customVariableExpend }"
-                                    />
+                                    <Icon icon="radix-icons:chevron-down" :class="{ 'rotate-180': customVariableExpend }" />
                                 </div>
                                 <!-- DOT伤害：显示每秒DOT伤害（样式保持原样，仅移到表达式输入框之前），点击打开详情弹窗 -->
                                 <div
@@ -2290,8 +2400,18 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         <Icon icon="ri:settings-3-line" class="size-3.5 opacity-60" />
                                     </div>
                                 </div>
-                                <label class="input input-sm input-primary text-sm flex justify-between">
-                                    <input v-model="targetFunction" type="text" :placeholder="$t('char-build.damage')" class="grow" />
+                                <label
+                                    class="input input-sm input-primary text-sm flex justify-between"
+                                    :class="dropTargetClass('target-function')"
+                                >
+                                    <input
+                                        v-model="targetFunction"
+                                        type="text"
+                                        :placeholder="$t('char-build.damage')"
+                                        class="grow"
+                                        data-expr-drop="target-function"
+                                        @click="handleExprDropClick('target-function', $event)"
+                                    />
                                     <div
                                         v-if="targetFunction"
                                         class="flex items-center cursor-pointer hover:text-primary"
@@ -2533,7 +2653,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 @select-aura-mod="charSettings.auraMod = $event"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
                                 @sync="syncModFromGame(charBuild.char.id, false)"
-                                
                             />
 
                             <!-- 近战武器MOD -->
@@ -2560,7 +2679,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
                                 @sync="syncModFromGame(charBuild.meleeWeapon.id, true)"
-                                
                             />
 
                             <!-- 远程武器MOD -->
@@ -2587,7 +2705,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
                                 @sync="syncModFromGame(charBuild.rangedWeapon.id, true)"
-                                
                             />
 
                             <!-- 同律武器MOD -->
@@ -2611,7 +2728,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
                                 @sync="syncModFromGame(charBuild.char.id, false, true)"
-                                
                             />
                             <!-- 未装备武器时的MOD提示 -->
                             <p
@@ -2667,57 +2783,15 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         lazy
                         @toggle="toggleSection('buffs')"
                     >
-                        <!-- 协战选择 -->
-                        <div class="flex flex-wrap items-center gap-4 my-2 p-3 rounded-xs border border-base-content/10 bg-base-200/40">
-                            <span class="text-[13px] font-semibold text-base-content/80">{{ $t("char-build.team") }}</span>
-                            <Select v-model="charSettings.team1" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
-                                <template v-for="charWithElm in groupedTeam1Options" :key="charWithElm[0].elm">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ $t(charWithElm[0].elm + "属性") }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
-                                            {{ $t(char.label) }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
-                            <Select v-model="charSettings.team1Weapon" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
-                                <template v-for="weaponWithType in groupedTeamWeaponOptions" :key="weaponWithType[0].type">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ $t(weaponWithType[0].type) }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
-                                            {{ $t(char.label) }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
-                            <Select v-model="charSettings.team2" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
-                                <template v-for="charWithElm in groupedTeam2Options" :key="charWithElm[0].elm">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ $t(charWithElm[0].elm + "属性") }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="char in charWithElm" :key="char.value" :value="char.value">
-                                            {{ $t(char.label) }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
-                            <Select v-model="charSettings.team2Weapon" class="input input-bordered input-sm w-32" @change="updateTeamBuff">
-                                <template v-for="weaponWithType in groupedTeamWeaponOptions" :key="weaponWithType[0].type">
-                                    <SelectLabel class="p-2 text-sm font-semibold text-primary">
-                                        {{ $t(weaponWithType[0].type) }}
-                                    </SelectLabel>
-                                    <SelectGroup>
-                                        <SelectItem v-for="char in weaponWithType" :key="char.value" :value="char.value">
-                                            {{ $t(char.label) }}
-                                        </SelectItem>
-                                    </SelectGroup>
-                                </template>
-                            </Select>
+                        <!-- 协战选择：图标化展示队友/队友武器，并可关联该角色的服务器构筑（简洁模式据此弹窗查看其魔之楔） -->
+                        <div class="my-2">
+                            <TeamEditor
+                                :char-settings="charSettings"
+                                :team1-options="groupedTeam1Options"
+                                :team2-options="groupedTeam2Options"
+                                :weapon-options="groupedTeamWeaponOptions"
+                                @team-change="updateTeamBuff"
+                            />
                         </div>
                         <BuffEditer
                             :buff-options="buffOptions"

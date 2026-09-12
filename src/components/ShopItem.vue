@@ -320,7 +320,7 @@ function getPriceIcon(name: string) {
                         {{ item.diffState === "added" ? "+" : "-" }}
                     </span>
                     <h4
-                        class="order-first w-full min-w-0 shrink-0 truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary sm:order-none sm:w-auto sm:flex-1 sm:shrink"
+                        class="order-first w-full min-w-0 shrink-0 truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary sm:order-0 sm:w-auto sm:flex-1 sm:shrink"
                     >
                         <SRouterLink
                             v-if="itemDetail?.link"

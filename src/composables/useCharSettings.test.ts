@@ -97,4 +97,22 @@ describe("useCharSettings helpers", () => {
         expect(nullSignature.meleeWeapon).toBe(10206)
         expect(nullSignature.rangedWeapon).toBe(20102)
     })
+
+    it("默认角色配置的协战构筑id为未关联占位值", () => {
+        const settings = createDefaultCharSettings()
+
+        expect(settings.team1Build).toBe("-")
+        expect(settings.team2Build).toBe("-")
+    })
+
+    it("标准化时应保留协战构筑id并清理非法值", () => {
+        const settings = normalizeCharSettings({
+            team1Build: " abc123 ",
+            // 旧存档或脏数据里的非法值一律视为未关联
+            team2Build: 0 as unknown as string,
+        })
+
+        expect(settings.team1Build).toBe("abc123")
+        expect(settings.team2Build).toBe("-")
+    })
 })

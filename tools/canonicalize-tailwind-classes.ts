@@ -6,6 +6,14 @@ import { glob } from "glob"
 
 const ROOT = process.cwd()
 const STATIC_CLASS_ATTRIBUTE_PATTERN = /(?<![:\w-])(class(?:Name)?\s*=\s*)(["'])([\s\S]*?)\2/g
+/**
+ * 动态 class 绑定：`:class="..."` / `v-bind:class="..."`。
+ * 值是 JS 表达式，class 只出现在其中的字符串字面量里（对象键、三元分支、数组元素），
+ * 所以外层先把整个表达式连同引号取出来，再逐个字面量规范化，表达式本身原样保留。
+ */
+const DYNAMIC_CLASS_ATTRIBUTE_PATTERN = /(\s(?:v-bind)?:class\s*=\s*)(["'])((?:\\.|(?!\2)[\s\S])*?)\2/g
+/** 表达式里的字符串字面量；不处理反引号模板串，避免碰到 `${}` 插值 */
+const STRING_LITERAL_PATTERN = /(["'])((?:\\.|(?!\1)[\s\S])*?)\1/g
 // 只处理 Vue 单文件组件，避免误改测试文件、配置与其他 .ts 源码
 const DEFAULT_FILE_PATTERNS = ["**/*.vue", "**/*.tsx", "**/*.html"]
 const DEFAULT_IGNORE_PATTERNS = [
@@ -298,15 +306,51 @@ function canonicalizeClassValue(designSystem: any, rawValue: string): string {
 }
 
 /**
- * 在单个源码文件中改写静态 class/className 属性。
+ * 规范化动态 class 绑定表达式里的字符串字面量。
+ *
+ * 只有字面量按空白切分成 candidate 处理，变量名/运算符/函数调用等表达式内容不动；
+ * 含插值或转义的字面量直接跳过，避免在格式化阶段误改源码。
+ *
+ * @param {any} designSystem Tailwind 设计系统
+ * @param {string} expression 绑定表达式
+ * @returns {string}
+ */
+function canonicalizeDynamicClassExpression(designSystem: any, expression: string): string {
+    return expression.replace(STRING_LITERAL_PATTERN, (fullMatch, quote: string, body: string) => {
+        if (body.includes("{{") || body.includes("\\")) {
+            return fullMatch
+        }
+
+        const nextBody = canonicalizeClassValue(designSystem, body)
+
+        if (nextBody === body) {
+            return fullMatch
+        }
+
+        return `${quote}${nextBody}${quote}`
+    })
+}
+
+/**
+ * 在单个源码文件中改写静态 class/className 属性与动态 :class 绑定。
  *
  * @param {any} designSystem Tailwind 设计系统
  * @param {string} source 源码文本
  * @returns {string}
  */
 function canonicalizeSource(designSystem: any, source: string): string {
-    return source.replace(STATIC_CLASS_ATTRIBUTE_PATTERN, (fullMatch, prefix, quote, value) => {
+    const staticCanonicalized = source.replace(STATIC_CLASS_ATTRIBUTE_PATTERN, (fullMatch, prefix, quote, value) => {
         const nextValue = canonicalizeClassValue(designSystem, value)
+
+        if (nextValue === value) {
+            return fullMatch
+        }
+
+        return `${prefix}${quote}${nextValue}${quote}`
+    })
+
+    return staticCanonicalized.replace(DYNAMIC_CLASS_ATTRIBUTE_PATTERN, (fullMatch, prefix, quote, value) => {
+        const nextValue = canonicalizeDynamicClassExpression(designSystem, value)
 
         if (nextValue === value) {
             return fullMatch

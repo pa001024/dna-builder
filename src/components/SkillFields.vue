@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
+import { useExprDrag } from "@/composables/useExprDrag"
 import type { CharAttr, CharBuild, LeveledSkill, LeveledSkillField, SkillField } from "@/data"
 import { formatSkillProp } from "@/util"
 
@@ -15,6 +17,9 @@ const props = defineProps<{
 const emit = defineEmits<{
     addSkill: [selection: { fieldName: string; skill: LeveledSkill }]
 }>()
+
+// 表达式字段拖拽 / 放置：技能字段行抓起后可放入表达式或自定义变量
+const { startExprDrag, consumeExprDragClick } = useExprDrag()
 
 // 计算技能字段列表
 const skillFields = computed(() => {
@@ -124,11 +129,23 @@ function syncTouchExpandMode() {
 /**
  * 处理字段点击事件。
  * 将当前技能实例随字段一起传出，调用方无需再按字段名反查技能命名空间。
+ * 拖动 / 触控抓起已接管本次手势时忽略点击。
  * @param field 技能字段。
  */
 function handleFieldClick(field: LeveledSkillField) {
+    if (consumeExprDragClick()) return
     if (!props.skill) return
     emit("addSkill", { fieldName: field.safeName, skill: props.skill })
+}
+
+/**
+ * 指针按下时抓起技能字段：鼠标可拖到表达式 / 自定义变量输入框放置，触控为「点击抓起 → 点击放置」。
+ * @param field 技能字段。
+ * @param event 指针按下事件。
+ */
+function startFieldDrag(field: LeveledSkillField, event: PointerEvent) {
+    if (!props.skill) return
+    startExprDrag({ expr: `${props.skill.safeName}::${field.safeName}`, label: t(field.名称) }, event)
 }
 
 /**
@@ -162,11 +179,12 @@ onBeforeUnmount(() => {
         <div
             v-for="(field, index) in skillFields"
             :key="index"
-            class="flex flex-col group hover:bg-base-200/40 rounded-xs p-2"
+            class="flex flex-col group cursor-grab active:cursor-grabbing select-none hover:bg-base-200/40 rounded-xs p-2"
+            :title="$t('char-build.drag_field_hint')"
             :class="{
-                'cursor-pointer': selectedIdentifiers,
                 'shadow-md shadow-primary/50 outline-2 outline-primary/60': isIdentifierUsed(field.名称),
             }"
+            @pointerdown="startFieldDrag(field, $event)"
             @click="handleFieldClick(field)"
             @touchstart="handleFieldTouchStart(field, index)"
         >

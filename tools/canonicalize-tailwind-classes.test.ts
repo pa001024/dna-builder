@@ -78,9 +78,33 @@ describe("canonicalizeSource", () => {
         expect(canonicalizeSource(designSystem, src)).toBe(`<div class="border-base-content/1 p-2">x</div>`)
     })
 
-    it("不改写 :class 绑定", () => {
-        const src = `<div :class="p-[8px]">x</div>`
-        expect(canonicalizeSource(designSystem, src)).toBe(src)
+    it("改写 :class / v-bind:class 绑定里的 class 字面量", () => {
+        expect(canonicalizeSource(designSystem, `<div :class="'p-[8px] mt-[6px]'">x</div>`)).toBe(`<div :class="'p-2 mt-1.5'">x</div>`)
+        expect(canonicalizeSource(designSystem, `<div :class="{ 'p-[8px]': on }">x</div>`)).toBe(`<div :class="{ 'p-2': on }">x</div>`)
+        expect(canonicalizeSource(designSystem, `<div :class="on ? 'p-[8px]' : 'mt-[6px]'">x</div>`)).toBe(
+            `<div :class="on ? 'p-2' : 'mt-1.5'">x</div>`
+        )
+        expect(canonicalizeSource(designSystem, `<div v-bind:class="'p-[8px]'">x</div>`)).toBe(`<div v-bind:class="'p-2'">x</div>`)
+    })
+
+    it("把纯变量引用的 arbitrary 值改写成 v4 简写（静态与 :class 都生效）", () => {
+        expect(canonicalizeClassValue(designSystem, "border-[var(--sc-line)]")).toBe("border-(--sc-line)")
+        expect(canonicalizeClassValue(designSystem, "bg-[image:var(--sc-illust)]")).toBe("bg-(image:--sc-illust)")
+        expect(canonicalizeSource(designSystem, `<div class="border-[var(--sc-line)]">x</div>`)).toBe(
+            `<div class="border-(--sc-line)">x</div>`
+        )
+        expect(canonicalizeSource(designSystem, `<div :class="'border-[var(--sc-line)]'">x</div>`)).toBe(
+            `<div :class="'border-(--sc-line)'">x</div>`
+        )
+    })
+
+    it(":class 表达式本身与未知类保持原样", () => {
+        expect(canonicalizeSource(designSystem, `<div :class="someVar ? 'is-on stagger-rise' : 'mt-[6px]'">x</div>`)).toBe(
+            `<div :class="someVar ? 'is-on stagger-rise' : 'mt-1.5'">x</div>`
+        )
+        // 含插值/转义的字面量不动
+        const escaped = `<div :class="'mt-\\[6px\\]'">x</div>`
+        expect(canonicalizeSource(designSystem, escaped)).toBe(escaped)
     })
 
     it("同时改写 className 属性", () => {

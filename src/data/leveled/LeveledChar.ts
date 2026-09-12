@@ -165,8 +165,19 @@ export class LeveledChar {
         return `/imgs/webp/T_Armory_${map[element]}.webp`
     }
 
-    get bg() {
-        return `https://herobox-img.yingxiong.com/role/config/character/illustration_1/${bgMap[this.名称]}`
+    /**
+     * 角色立绘（半身大图）地址。
+     * 与角色详情页（DBCharDetailItem / SkinGachaView）保持同一规则，直接取 CDN 上的成品立绘，
+     * 因此这里不再需要「角色名 → 官网图片文件名」的映射表。
+     */
+    get bustUrl() {
+        return LeveledChar.bustUrl(this.icon)
+    }
+    static bustUrl(icon?: string) {
+        if (!icon) return ""
+        // 角色 icon 是裸名（如 Heitao），皮肤 icon 可能已带 T_Head_ 前缀，两种都兼容
+        const base = icon.startsWith("T_Head_") ? icon.slice("T_Head_".length) : icon
+        return `${CHAR_BUST_CDN_BASE}/T_Bust_${base}.webp`
     }
 
     public clone() {
@@ -174,29 +185,5 @@ export class LeveledChar {
     }
 }
 
-const bgMap = {
-    妮弗尔夫人: "nifuerfuren.png",
-    莉兹贝尔: "lizibeier.png",
-    丽蓓卡: "libeika.png",
-    扶疏: "fushu.png",
-    琳恩: "linen.png",
-    黎瑟: "lise.png",
-    赛琪: "saiqi.png",
-    菲娜: "feina.png",
-    松露与榛子: "songlu.png",
-    贝蕾妮卡: "beileinika.png",
-    幻景: "huanjing.png",
-    "女主-光": "nvzhuguang.png",
-    塔比瑟: "tabise.png",
-    玛尔洁: "maerjie.png",
-    兰迪: "landi.png",
-    西比尔: "xibier.png",
-    奥特赛德: "aotesaide.png",
-    达芙涅: "dafunie.png",
-    耶尔与奥利弗: "yeer.png",
-    海尔法: "haierfa.png",
-    止流: "zhiliu.png",
-    煜明: "yuming.png",
-    芙罗拉: "fuluola.png",
-    伊薇: "yiwei.png",
-} as Record<string, string>
+/** 立绘 CDN 基址（与角色详情页使用的一致） */
+const CHAR_BUST_CDN_BASE = "https://cdn.dna-builder.cn/img/res"
