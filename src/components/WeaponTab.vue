@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useAttrI18n } from "@/composables/useAttrI18n"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { CharAttr, CharBuild, LeveledMod, type LeveledSkill, LeveledWeapon } from "@/data"
 import { format100, format100r, formatWeaponProp } from "@/util"
@@ -12,6 +13,7 @@ const props = defineProps<{
 
 const charIdRef = computed(() => props.charBuild?.char?.id || 0)
 const charSettings = useCharSettings(charIdRef)
+const { getAttrName, getAttrDesc } = useAttrI18n()
 const weaponAttrs = computed(() => props.charBuild.calculateWeaponAttributes(props.charBuild[`${props.wkey}Weapon`]).weapon!)
 
 const emit = defineEmits<{
@@ -254,6 +256,30 @@ const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
 
     return sourceMap
 })
+
+/**
+ * 武器属性行的展示名：攻击行带武器伤害类型（或同律继承的角色元素）前缀，其余属性原样。
+ * 该名字既是翻译键（上游成品译名，如「Pyro ATK」「Slash ATK」），也是上游属性说明的查找键。
+ * @param key 武器属性键名
+ * @returns 属性的 zh-CN 展示名
+ */
+function attrName(key: string): string {
+    return getAttrName(key, getWeaponAttackLabelPrefix(key))
+}
+
+/**
+ * 各武器属性行的上游属性说明（AttrConfig.AttrDesc 导入的文案），仅保留确实配置了说明的属性。
+ */
+const weaponAttrDescMap = computed<Record<string, string>>(() => {
+    const map: Record<string, string> = {}
+    for (const key of Object.keys(weaponAttrs.value)) {
+        const desc = getAttrDesc(attrName(key))
+        if (desc) {
+            map[key] = desc
+        }
+    }
+    return map
+})
 </script>
 <template>
     <!-- 武器 -->
@@ -325,7 +351,10 @@ const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
             >
                 <template #tooltip>
                     <div class="flex flex-col gap-2">
-                        <div class="text-base-content/50 text-xs">{{ $t(key) }}</div>
+                        <div class="text-base-content/50 text-xs">{{ $t(attrName(key)) }}</div>
+                        <div v-if="weaponAttrDescMap[key]" class="max-w-75 text-xs text-base-content/60 whitespace-pre-line">
+                            {{ weaponAttrDescMap[key] }}
+                        </div>
                         <ul class="space-y-1">
                             <li v-if="'基础' + key in baseWeapon" class="flex justify-between gap-8 text-sm text-primary">
                                 <div class="text-base-content/80">
@@ -437,9 +466,7 @@ const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
                     @click="addWeaponAttribute(key)"
                 >
                     <div class="flex items-center gap-1 text-sm text-base-content/80">
-                        <span>{{
-                            key === "攻击" ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) }) : $t(key)
-                        }}</span>
+                        <span>{{ $t(attrName(key)) }}</span>
                         <FullTooltip v-if="isInheritedAttackLabel(key)" side="top">
                             <template #tooltip>
                                 <div class="text-sm text-base-content">

@@ -215,6 +215,13 @@ function skipAppUpdate(): void {
 
 // ---------- 数据包 ----------
 async function checkDataPack(): Promise<void> {
+    // hideUpdateInfo=1 时禁用数据包安装/更新弹窗：
+    // 无头冒烟测试（bun-webview-test）等场景没有数据包，弹窗会挡住页面导致无法断言 DOM。
+    if (hideUpdateInfo) {
+        dataPackChecked.value = true
+        return
+    }
+
     if (dataPack.isBootstrapping) {
         return
     }
@@ -332,9 +339,9 @@ onMounted(async () => {
 })
 
 // 数据包启动加载完成后，若应用更新流程已结束，则继续数据包流程。
-// requireData = false 的页面（如脚本页面）不检查数据包。
+// requireData = false 的页面（如脚本页面）不检查数据包；hideUpdateInfo=1 时数据包弹窗整体禁用。
 watch(dataPackBootstrapLoading, loading => {
-    if (loading || !appUpdateChecked.value || dataPackChecked.value || !dataRequired.value) {
+    if (loading || !appUpdateChecked.value || dataPackChecked.value || !dataRequired.value || hideUpdateInfo) {
         return
     }
     void checkDataPack()

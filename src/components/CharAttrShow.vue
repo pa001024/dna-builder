@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useAttrI18n } from "@/composables/useAttrI18n"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { CharAttr, CharBuild, LeveledChar, LeveledMod } from "@/data"
 import { format100r } from "@/util"
@@ -17,6 +18,32 @@ const props = withDefaults(
 )
 const charIdRef = computed(() => props.charBuild?.char?.id || 0)
 const charSettings = useCharSettings(charIdRef)
+const { getAttrName, getAttrDesc } = useAttrI18n()
+
+/**
+ * 属性行的展示名：攻击行带角色元素前缀（火 → 火属性攻击），其余属性原样。
+ * 该名字既是翻译键（可拿到上游成品译名，避免「Pyro」+「ATK」这类拼接在部分语言下缺空格），
+ * 也是上游属性说明（attrDesc）的查找键。
+ * @param key 属性键名
+ * @returns 属性的 zh-CN 展示名
+ */
+function attrName(key: string): string {
+    return getAttrName(key, `${props.charBuild.char.属性}属性`)
+}
+
+/**
+ * 各属性行的上游属性说明（AttrConfig.AttrDesc 导入的文案），仅保留确实配置了说明的属性。
+ */
+const attrDescMap = computed<Record<string, string>>(() => {
+    const map: Record<string, string> = {}
+    for (const key of Object.keys(props.attributes)) {
+        const desc = getAttrDesc(attrName(key))
+        if (desc) {
+            map[key] = desc
+        }
+    }
+    return map
+})
 
 defineEmits<{
     addSkill: [skill: string]
@@ -135,7 +162,10 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
         <template #tooltip>
             <div class="flex flex-col gap-2">
                 <div class="text-base-content/50 text-xs">
-                    {{ $t(key) }}
+                    {{ $t(attrName(key)) }}
+                </div>
+                <div v-if="attrDescMap[key]" class="max-w-75 text-xs text-base-content/60 whitespace-pre-line">
+                    {{ attrDescMap[key] }}
                 </div>
                 <div v-if="key === '有效生命'" class="text-sm text-primary">(生命 / (1 - 防御 / (300 + 防御)) + 护盾) / (1 - 减伤)</div>
                 <ul class="space-y-1">
@@ -264,7 +294,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
             }"
             @click="$emit('addSkill', key)"
         >
-            <div class="text-sm text-base-content/80">{{ key === "攻击" ? $t(`${charBuild.char.属性}属性`) : "" }}{{ $t(key) }}</div>
+            <div class="text-sm text-base-content/80">{{ $t(attrName(key)) }}</div>
             <div class="text-primary font-bold text-sm font-orbitron">
                 {{
                     ["攻击", "生命", "护盾", "防御", "神智", "有效生命"].includes(key)

@@ -168,6 +168,15 @@ public/i18n/         # Translation files
   - 称号框贴图遇到同名冲突会改写成带父目录前缀的名字（如 `13_T_PersonalInfo_Title_13_08.webp`），
     basename 与源 PNG 对不上；`tools/webp-import.ts` 读上面那份清单，按包路径把它们补齐，
     所以 `bun tools/webp-import.ts` 也能覆盖这些贴图，不会再把它们报成缺失。
+- **Attribute i18n**: `pnpm iattr` (`bun tools/import-attr-i18n.ts`) — 把上游
+  `out/AttrConfig.json` + `out/TextMap_I18n.json` 里的属性名（`Attr_*_Name`，如 `Attr_ATK_Fire_Name`）
+  与属性说明（`ATTR_DESC_*`，如 `ATTR_DESC_ATK_Fire`）导入 `public/i18n/*/translation.json`。
+  属性名补进根命名空间，只补缺失键、不覆盖已有译文；属性说明写入 `attrDesc` 命名空间。
+  键均为属性在 zh-CN 下的展示名（攻击行按元素/伤害类型区分，如 `火属性攻击`、`切割攻击`），
+  读取入口为 `src/composables/useAttrI18n.ts`，展示在角色属性面板（`CharAttrShow.vue`）、武器面板
+  （`WeaponTab.vue`）的属性来源 tooltip 标题与说明里。上游目录默认取同级 `DuetNightAbyssData2`，
+  缺失时回退 `D:/dev/DuetNightAbyssData2`，可用 `--upstream <dir>` 或 `DNA_UPSTREAM` 覆盖，
+  `--check` 只比对不落盘。
 
 ## Git Hooks (Husky)
 

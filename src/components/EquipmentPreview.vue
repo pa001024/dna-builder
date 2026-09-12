@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
+import { useAttrI18n } from "@/composables/useAttrI18n"
 import type { CharSettings } from "@/composables/useCharSettings"
 import type { CharAttr, CharBuild } from "@/data"
 import { formatSkillProp } from "@/util"
@@ -10,6 +11,8 @@ const props = defineProps<{
     charName: string
     charSettings: CharSettings // readonly
 }>()
+
+const { getAttrName } = useAttrI18n()
 
 // 计算武器属性
 const weaponAttrs = computed(() => (props.charBuild.selectedWeapon ? props.charBuild.calculateWeaponAttributes().weapon : null))
@@ -50,6 +53,16 @@ function getWeaponAttackLabelPrefix(key: string) {
         return `${props.charBuild.char.属性}属性`
     }
     return props.charBuild.selectedWeapon?.伤害类型 || ""
+}
+
+/**
+ * 属性行的展示名：攻击行带元素/伤害类型前缀，其余属性原样。
+ * 与角色属性面板、武器面板共用上游导入的属性名，避免各面板译名不一致。
+ * @param key 属性键名
+ * @returns 属性的 zh-CN 展示名
+ */
+function attrName(key: string): string {
+    return getAttrName(key, getWeaponAttackLabelPrefix(key))
 }
 </script>
 <template>
@@ -136,7 +149,7 @@ function getWeaponAttackLabelPrefix(key: string) {
                     class="rounded-xs bg-linear-to-br from-secondary/10 to-secondary/5 border border-secondary/20 hover:border-secondary/40 p-3 transition-colors duration-200"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
-                        {{ key === "攻击" ? $t(getWeaponAttackLabelPrefix(key)) : "" }}{{ $t(key) }}
+                        {{ $t(attrName(key)) }}
                     </div>
                     <div class="text-secondary font-bold text-lg font-orbitron">
                         {{
@@ -183,7 +196,7 @@ function getWeaponAttackLabelPrefix(key: string) {
                     class="rounded-xs bg-linear-to-br from-secondary/10 to-secondary/5 border border-secondary/20 p-3"
                 >
                     <div class="text-xs text-base-content/60 mb-1">
-                        {{ key === "攻击" ? $t("char-build.weapon_attack_label", { dmg: $t(getWeaponAttackLabelPrefix(key)) }) : $t(key) }}
+                        {{ $t(attrName(key)) }}
                     </div>
                     <div class="text-secondary font-bold text-lg font-orbitron">
                         {{ ["攻击", "攻速", "多重", "弹匣", "装填"].includes(key) ? `${+val.toFixed(2)}` : `${+(val * 100).toFixed(2)}%` }}

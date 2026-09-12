@@ -29,14 +29,34 @@ description: 使用 Bun 1.4 内置的 Bun.WebView 无头浏览器对前端页面
 
 ### Quick Start（复用框架跑测试）
 
-1. 确认开发服务器运行中：`pnpm dev`（保持 http://localhost:1420 可访问）。
-2. 运行内置示例冒烟测试：
+1. 确认开发服务器运行中：`pnpm dev` / `pnpm dd2`（保持 http://localhost:1420 可访问）。
+2. **务必带 `?hideUpdateInfo=1` 打开页面**（见下方「启动弹窗」），否则会被数据包弹窗挡住。
+3. 运行内置示例冒烟测试：
     ```bash
-    bun .workbuddy/skills/bun-webview-test/scripts/example.test.ts
+    bun .agents/skills/bun-webview-test/scripts/example.test.ts
     # 或指定地址
-    bun .workbuddy/skills/bun-webview-test/scripts/example.test.ts --url http://localhost:1420
+    bun .agents/skills/bun-webview-test/scripts/example.test.ts --url http://localhost:1420
     ```
-3. 失败用例会自动在 `screenshots/<用例名>.png` 留图，通过 `screenshots/home.png` 查看首屏。
+4. 失败用例会自动留图（见 Guidelines 的 `.tmp` 约定），通过 `screenshots/home.png` 查看首屏。
+
+### 启动弹窗：一律加 `?hideUpdateInfo=1`
+
+应用启动时会按顺序弹「应用更新 → 数据包安装/更新 → 更新日志」，无头环境里没有数据包，`安装数据包`
+弹窗会直接盖住页面，DOM 断言全部拿不到内容。**统一用 `?hideUpdateInfo=1` 打开页面**即可禁用这一整套
+启动弹窗（`src/components/StartupModal.vue`：该参数在启动时读取一次，随后应用更新、更新日志与
+`checkDataPack()` 全部跳过；仅首次完整加载生效，SPA 路由内部跳转不会重新计算）：
+
+```ts
+await view.navigate(`${baseUrl}/char/3101?hideUpdateInfo=1`)
+```
+
+注意点：
+
+- 参数必须在**首次导航**的 URL 上；先打开无参数地址再 `router.push` 加参数不会生效。
+- 该参数只关弹窗，**不会安装数据包**：依赖游戏数据的页面（如 `/char/:id` 构筑页）依然会因为
+  `charBuild.calculateWeaponAttributes is not a function` 之类报错渲染失败。这类页面要在
+  已装数据包的浏览器里人工验证，或给 `WebView` 传 `dataStore: "./profile"` 复用已装数据包的 profile。
+- 判断弹窗是否还在：`document.querySelector("dialog.modal.modal-open")` 非空即被挡住。
 
 ### 编写新的测试文件
 
@@ -72,7 +92,7 @@ run()
 2. **真实用户交互**：`click`/`type`/`press`/`scroll` 派发原生事件（`isTrusted === true`），选择器方法自动等待可操作。
 3. **页面求值与状态读取**：`evaluate(expr)` 在页面上下文执行 JS 字符串并返回反序列化结果；`evalExpr` 封装了 `undefined` 安全处理。
 4. **声明式断言**：文本 / 可见性 / 数量 / 任意表达式 / 控制台错误，断言失败即截图留证。
-5. **截图归档**：`snapshot(ctx, name, format)` 保存到 `screenshots/`，供人工或更严格的回归对比。
+5. **截图归档**：`snapshot(ctx, name, format)` 保存到 `screenshots/`（相对 `process.cwd()`，建议以 `.tmp` 为工作目录），供人工或更严格的回归对比。
 
 ## Guidelines
 
@@ -80,6 +100,9 @@ run()
 - `console` 选项必须是**函数**（`console: (level, ...a) => {...}`），传 `true` 会抛 `ERR_INVALID_ARG_TYPE`。
 - 断言失败不要靠"肉眼看截图"判断；优先用 `evaluate` 读取 DOM/状态做代码级断言，截图仅作人工辅助。
 - 需要登录态跨用例保留时，给 `WebView` 传 `dataStore: "./profile"`。
+- **导航 URL 一律追加 `?hideUpdateInfo=1`**，否则启动期的数据包弹窗会盖住页面（详见上方「启动弹窗」）。
+- 截图与临时脚本放 `.tmp/`：框架按 `process.cwd()` 写 `screenshots/`，所以**以 `.tmp` 为工作目录运行**
+  （`workdir: <repo>/.tmp`）即可让产物落在 `.tmp/screenshots/`，不要在仓库根留下 `screenshots/`。
 - 每次变更前端后，建议把关键路由的冒烟测试纳入验证（配合 `pnpm lint` / `pnpm test`）。
 
 ## Resources

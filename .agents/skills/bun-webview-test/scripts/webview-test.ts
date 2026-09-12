@@ -116,9 +116,12 @@ export async function expectEval(ctx: TestContext, expr: string, expected: unkno
 }
 
 /** 断言本轮运行中浏览器控制台没有 error / warning */
-export async function expectNoConsoleErrors(): Promise<void> {
-    if (consoleErrors.length > 0) {
-        throw new Error(`存在 ${consoleErrors.length} 条浏览器控制台错误:\n  ${consoleErrors.join("\n  ")}`)
+export async function expectNoConsoleErrors(options: { ignore?: (RegExp | string)[] } = {}): Promise<void> {
+    // 忽略已知无害的输出（如无头 profile 没有自定义底图时的「读取自定义底图失败」warning）
+    const ignore = options.ignore ?? []
+    const hits = consoleErrors.filter(line => !ignore.some(pattern => (typeof pattern === "string" ? line.includes(pattern) : pattern.test(line))))
+    if (hits.length > 0) {
+        throw new Error(`存在 ${hits.length} 条浏览器控制台错误:\n  ${hits.join("\n  ")}`)
     }
 }
 

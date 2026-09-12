@@ -35,6 +35,7 @@
         "deploy": "bun server/deploy.ts",
         "icon": "bun run tools/icon-tool.ts",
         "importdata": "bun run tools/import-i18n-data.ts",
+        "iattr": "bun tools/import-attr-i18n.ts",
         "imgs-upload": "bun tools/imgs-upload.ts",
         "wi": "bun tools/webp-import.ts",
         "itf": "bun tools/import-title-frame.ts",
