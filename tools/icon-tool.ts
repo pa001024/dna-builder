@@ -1,19 +1,37 @@
 #!/usr/bin/env bun
 
-import { readdir, readFile, writeFile } from "node:fs/promises"
-import { join } from "node:path"
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises"
+import { join, relative } from "node:path"
 import { format } from "prettier"
 
 const ICON_FILE = "src/components/Icon.vue"
 const REMIXICON_GLYPH_FILE = "node_modules/remixicon/fonts/remixicon.glyph.json"
 const PROJECT_DIR = "src"
 const IGNORE_LIST_FILE = "tools/.icon_ignore"
+// radix 图标缓存目录（被 .gitignore 忽略，丢失时由本工具自动重建）
+const RADIX_ICONS_DIR = join(__dirname, "radix-icons")
+const RADIX_ICON_PREFIX = "radix-icons:"
+// radix-icons 的 viewBox 与 Icon.vue 中登记的 size 均为 15
+const RADIX_ICON_SIZE = 15
+// radix 图标上游数据源：iconify 的 radix-icons 集合。锁 1.2.1 —— 该版几何与 Icon.vue 中已有 radix 图标同源
+// （例如 chevron-down 的 d 完全一致），上游 1.4 重绘过图标，不锁定会让新老图标风格不一致
+const RADIX_ICONS_URLS = [
+    "https://unpkg.com/@iconify-json/radix-icons@1.2.1/icons.json",
+    "https://cdn.jsdelivr.net/npm/@iconify-json/radix-icons@1.2.1/icons.json",
+]
 
 type IconData = {
     path: string[]
     unicode: string
     glyph: string
     horizAdvX: string
+}
+
+type IconifyCollection = {
+    width?: number
+    height?: number
+    icons?: Record<string, { body?: string }>
+    aliases?: Record<string, { parent?: string }>
 }
 
 // type IconDataEntry = [string, number] | [string, number, Record<string, any>]
@@ -82,12 +100,202 @@ async function saveIconVueData(data: Record<string, any>): Promise<void> {
     await writeFile(ICON_FILE, formattedContent, "utf-8")
 }
 
+/** 上游 radix 图标集合的内存缓存，避免同一次运行内重复下载 */
+let radixCollectionCache: IconifyCollection | null = null
+
+/**
+ * 归一化图标名：只保留小写字母与数字，用于兼容 cross2 / cross-2 / Cross2Icon 等不同书写方式。
+ * @param name 图标名
+ * @returns 归一化后的名称
+ */
+function normalizeIconName(name: string): string {
+    return name.toLowerCase().replace(/[^a-z0-9]/g, "")
+}
+
+/**
+ * 从 SVG 文本中提取全部 path 的 d 数据并拼接成一条。
+ * Icon.vue 只渲染单个 <path fill-rule="evenodd">，多段子路径拼接后渲染结果与原始多 path 一致。
+ * @param svgContent SVG 文件内容
+ * @returns 拼接后的 path 数据；未找到 path 时返回 null
+ */
+function extractSvgPathData(svgContent: string): string | null {
+    const paths = [...svgContent.matchAll(/<path\b[^>]*?\bd="([^"]*)"/g)].map(match => match[1])
+    if (paths.length === 0) {
+        return null
+    }
+    return paths.join("")
+}
+
+/**
+ * 在缓存目录中按归一化名称查找已缓存的 SVG 文件（兼容 cross2.svg / cross-2.svg / Cross2Icon.svg 等命名）。
+ * @param radixIconName 图标名（不含 radix-icons: 前缀）
+ * @returns 命中的 SVG 内容与文件绝对路径；未命中返回 null
+ */
+async function readCachedRadixIcon(radixIconName: string): Promise<{ svg: string; file: string } | null> {
+    let entries: string[]
+    try {
+        entries = await readdir(RADIX_ICONS_DIR)
+    } catch {
+        return null
+    }
+
+    const target = normalizeIconName(radixIconName)
+    const hit = entries.find(entry => entry.toLowerCase().endsWith(".svg") && normalizeIconName(entry.slice(0, -4)) === target)
+    if (!hit) {
+        return null
+    }
+
+    const file = join(RADIX_ICONS_DIR, hit)
+    return { svg: await readFile(file, "utf-8"), file }
+}
+
+/**
+ * 下载并解析 iconify 的 radix-icons 集合（多镜像依次尝试，结果在进程内缓存）。
+ * @returns iconify 的 radix-icons 集合数据
+ * @throws 所有镜像都不可用时抛出错误
+ */
+async function loadRadixCollection(): Promise<IconifyCollection> {
+    if (radixCollectionCache) {
+        return radixCollectionCache
+    }
+
+    const errors: string[] = []
+    for (const url of RADIX_ICONS_URLS) {
+        try {
+            const response = await fetch(url, { signal: AbortSignal.timeout(30_000) })
+            if (!response.ok) {
+                errors.push(`${url} -> HTTP ${response.status}`)
+                continue
+            }
+            radixCollectionCache = (await response.json()) as IconifyCollection
+            return radixCollectionCache
+        } catch (error) {
+            errors.push(`${url} -> ${error instanceof Error ? error.message : String(error)}`)
+        }
+    }
+
+    throw new Error(`无法下载 radix 图标数据（需要网络）：\n  ${errors.join("\n  ")}`)
+}
+
+/**
+ * 在 iconify 集合中解析图标名：支持精确名、别名与归一化名称（如 cross2 → cross-2）。
+ * @param collection iconify 集合数据
+ * @param radixIconName 待解析的图标名
+ * @returns 集合中登记的名字与 path body；未找到返回 null
+ */
+function resolveRadixIcon(collection: IconifyCollection, radixIconName: string): { name: string; body: string } | null {
+    const icons = collection.icons ?? {}
+    const aliases = collection.aliases ?? {}
+    const target = normalizeIconName(radixIconName)
+
+    let resolved: string | undefined = icons[radixIconName] ? radixIconName : aliases[radixIconName]?.parent
+    if (!resolved) {
+        resolved = Object.keys(icons).find(name => normalizeIconName(name) === target)
+    }
+    if (!resolved) {
+        const aliasHit = Object.keys(aliases).find(name => normalizeIconName(name) === target)
+        resolved = aliasHit ? aliases[aliasHit]?.parent : undefined
+    }
+    if (!resolved) {
+        return null
+    }
+
+    // 跟随别名链（当前上游只有一级，仍做环形保护）
+    const visited = new Set<string>()
+    while (!icons[resolved] && aliases[resolved]?.parent && !visited.has(resolved)) {
+        visited.add(resolved)
+        resolved = aliases[resolved]?.parent as string
+    }
+
+    const body = icons[resolved]?.body
+    return body ? { name: resolved, body } : null
+}
+
+/**
+ * 获取 radix 图标 SVG：优先读本地缓存 tools/radix-icons/，缺失时从 iconify 下载并写入缓存（目录会自动创建）。
+ * @param radixIconName 图标名（不含 radix-icons: 前缀）
+ * @returns SVG 内容
+ * @throws 图标名不存在或下载失败时抛出错误
+ */
+async function loadRadixIconSvg(radixIconName: string): Promise<string> {
+    const cached = await readCachedRadixIcon(radixIconName)
+    if (cached) {
+        console.log(`📦 使用缓存图标: ${relative(process.cwd(), cached.file)}`)
+        return cached.svg
+    }
+
+    const collection = await loadRadixCollection()
+    const icon = resolveRadixIcon(collection, radixIconName)
+    if (!icon) {
+        const target = normalizeIconName(radixIconName)
+        const suggestions = Object.keys(collection.icons ?? {})
+            .filter(name => normalizeIconName(name).includes(target))
+            .slice(0, 10)
+        const hint = suggestions.length > 0 ? `\n  相近的图标: ${suggestions.join(", ")}` : ""
+        throw new Error(`iconify 的 radix-icons 集合中不存在图标 "${radixIconName}"${hint}`)
+    }
+
+    const width = collection.width ?? RADIX_ICON_SIZE
+    const height = collection.height ?? width
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${icon.body}</svg>\n`
+
+    await mkdir(RADIX_ICONS_DIR, { recursive: true })
+    const file = join(RADIX_ICONS_DIR, `${icon.name}.svg`)
+    await writeFile(file, svg, "utf-8")
+    console.log(`⬇️  已下载并缓存 radix 图标: ${relative(process.cwd(), file)}`)
+    return svg
+}
+
+/**
+ * 补齐 radix 图标缓存目录：把 Icon.vue 中已登记的 radix 图标（外加命令行指定的名字）下载到 tools/radix-icons/。
+ * 目录被清理或全新克隆后可随时用它重建。
+ * @param extraNames 额外需要缓存的图标名（可带 radix-icons: 前缀）
+ */
+async function syncRadixCache(extraNames: string[]): Promise<void> {
+    console.log("正在补齐 radix 图标缓存...")
+
+    const iconVueData = await loadIconVueData()
+    const names = new Set<string>(
+        Object.keys(iconVueData)
+            .filter(key => key.startsWith(RADIX_ICON_PREFIX))
+            .map(key => key.slice(RADIX_ICON_PREFIX.length))
+    )
+    for (const name of extraNames) {
+        names.add(name.startsWith(RADIX_ICON_PREFIX) ? name.slice(RADIX_ICON_PREFIX.length) : name)
+    }
+
+    let ok = 0
+    let failed = 0
+    for (const name of [...names].sort()) {
+        const cached = await readCachedRadixIcon(name)
+        if (cached) {
+            console.log(`✔️  已有缓存: ${relative(process.cwd(), cached.file)}`)
+            ok++
+            continue
+        }
+        try {
+            await loadRadixIconSvg(name)
+            ok++
+        } catch (error) {
+            failed++
+            console.error(`❌ ${name}: ${error instanceof Error ? error.message : error}`)
+        }
+    }
+
+    console.log(
+        `\n共 ${names.size} 个 radix 图标，可用 ${ok} 个，失败 ${failed} 个（缓存目录: ${relative(process.cwd(), RADIX_ICONS_DIR)}）`
+    )
+    if (failed > 0) {
+        process.exitCode = 1
+    }
+}
+
 async function addIcon(iconName: string): Promise<void> {
     console.log(`正在添加图标: ${iconName}`)
 
-    // 处理 radix-icons 前缀
-    if (iconName.startsWith("radix-icons:")) {
-        const radixIconName = iconName.replace("radix-icons:", "")
+    // 处理 radix-icons 前缀：SVG 来自 iconify，tools/radix-icons/ 仅作本地缓存
+    if (iconName.startsWith(RADIX_ICON_PREFIX)) {
+        const radixIconName = iconName.slice(RADIX_ICON_PREFIX.length)
         const iconVueData = await loadIconVueData()
 
         // 检查图标是否已存在
@@ -96,29 +304,23 @@ async function addIcon(iconName: string): Promise<void> {
             return
         }
 
-        // 从 radix-icons 目录读取 SVG 文件
-        const svgPath = join(__dirname, "radix-icons", `${radixIconName}.svg`)
-
         try {
-            const svgContent = await readFile(svgPath, "utf-8")
+            const svgContent = await loadRadixIconSvg(radixIconName)
 
             // 提取 path 数据
-            const pathMatch = svgContent.match(/<path[^>]*d="([^"]*)"[^>]*>/)
-            if (!pathMatch) {
-                console.error(`❌ 无法从 ${svgPath} 中提取 path 数据`)
+            const pathData = extractSvgPathData(svgContent)
+            if (!pathData) {
+                console.error(`❌ 无法从 radix 图标中提取 path 数据: ${radixIconName}`)
                 return
             }
 
-            const pathData = pathMatch[1]
-            // radix-icons 的 size 固定为 15
-            iconVueData[iconName] = [pathData, 15]
+            iconVueData[iconName] = [pathData, RADIX_ICON_SIZE]
             await saveIconVueData(iconVueData)
 
             console.log(`✅ 成功添加图标: ${iconName}`)
         } catch (error) {
-            console.error(`❌ 无法读取 radix-icons 文件: ${svgPath}`)
-            console.error(error)
-            return
+            console.error(`❌ 无法获取 radix-icons 图标: ${radixIconName}`)
+            console.error(error instanceof Error ? error.message : error)
         }
         return
     }
@@ -591,7 +793,7 @@ async function main(): Promise<void> {
 
     if (!command || command === "help") {
         console.log("图标管理工具 - 用法:")
-        console.log("  bun tools/icon-tool.ts add <icon-name> [icon-name ...] - 添加 Remixicon 图标到 Icon.vue")
+        console.log("  bun tools/icon-tool.ts add <icon-name> [icon-name ...] - 添加图标到 Icon.vue（remixicon 名或 radix-icons:xxx）")
         console.log("  bun tools/icon-tool.ts check             - 检查图标使用情况，标记未使用的图标")
         console.log("  bun tools/icon-tool.ts clean             - 删除 Icon.vue 中未使用的图标")
         console.log("  bun tools/icon-tool.ts ignore <icon>     - 将图标添加到忽略列表（不清除）")
@@ -599,14 +801,17 @@ async function main(): Promise<void> {
         console.log("  bun tools/icon-tool.ts ignored            - 列出所有被忽略的图标")
         console.log("  bun tools/icon-tool.ts list [pattern]     - 列出可用的 Remixicon 图标")
         console.log("  bun tools/icon-tool.ts use [pattern]     - 查询当前使用的图标")
+        console.log("  bun tools/icon-tool.ts radix-sync [icon ...] - 补齐 tools/radix-icons/ 缓存（目录丢失/全新克隆后重建）")
         console.log("")
         console.log("示例:")
         console.log("  bun tools/icon-tool.ts add subtract-line user-line  # 添加多个图标")
+        console.log("  bun tools/icon-tool.ts add radix-icons:check        # 添加 radix 图标（缓存缺失时自动从 iconify 下载）")
         console.log("  bun tools/icon-tool.ts check              # 检查使用情况")
         console.log("  bun tools/icon-tool.ts clean              # 清理未使用的图标")
         console.log("  bun tools/icon-tool.ts ignore ri:user-line  # 忽略 user-line 图标")
         console.log("  bun tools/icon-tool.ts list subtract     # 搜索包含 subtract 的图标")
         console.log("  bun tools/icon-tool.ts use subtract      # 查询当前使用的包含 subtract 的图标")
+        console.log("  bun tools/icon-tool.ts radix-sync        # 重新下载 tools/radix-icons/ 里已用到的图标")
         process.exit(0)
     }
 
@@ -647,6 +852,8 @@ async function main(): Promise<void> {
             await listAvailableIcons(args[1])
         } else if (command === "use") {
             await useIcon(args[1])
+        } else if (command === "radix-sync") {
+            await syncRadixCache(args.slice(1))
         } else {
             console.error(`❌ 未知命令: ${command}`)
             console.log("使用 help 查看帮助信息")

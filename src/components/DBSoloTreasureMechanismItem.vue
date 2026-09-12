@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { ExtractionTreasureMechanism } from "@/data/d/solotreasure.data"
+import { format100 } from "@/util"
 import { getRarityName } from "@/utils/rarity-utils"
 
 defineProps<{
@@ -37,7 +38,7 @@ defineProps<{
             <p class="mt-1 text-[11px] tabular-nums leading-relaxed text-base-content/70">
                 {{
                     Object.entries(mechanism.itemLevelWeight)
-                        .map(([lv, weight]) => `${getRarityName(+lv)}:${weight * 100}%`)
+                        .map(([lv, weight]) => `${getRarityName(+lv)}:${format100(weight, 1)}`)
                         .join(" / ")
                 }}
             </p>

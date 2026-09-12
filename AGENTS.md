@@ -9,12 +9,19 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 ```bash
 pnpm dev                              # Development server (http://localhost:1420/)
 pnpm build                            # Production build
-pnpm lint                             # Biome lint --fix + vue-tsc type checking
+pnpm lint                             # 增量 lint：Biome + vue-tsc 只处理改动过的文件
+pnpm lint:full                        # 全量检查（旧行为，约 2.5 分钟）
 pnpm test                             # Run all tests (vitest run)
 pnpm test src/data/tests/foo.test.ts  # Run single test file
 pnpm coverage                         # Tests with coverage
 pnpm format                           # Format with Biome
 ```
+
+### Incremental lint (`pnpm lint`)
+
+`pnpm lint` = `bun tools/incremental-lint.ts`：无改动直接跳过；有改动时 Biome 只跑改动文件，vue-tsc 只查
+改动文件 + 依赖它们的文件 + 环境声明文件（mtime 指纹缓存在 `.tmp/lint-cache.json`，仅检查通过才写入）。
+首次运行 / 缓存失效 / 环境声明变更 / 影响面过半时自动退回全量。需要完整检查用 `pnpm lint:full`。
 
 ### Desktop App (Tauri + Rust)
 

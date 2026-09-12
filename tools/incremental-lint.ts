@@ -127,10 +127,8 @@ interface LintCache {
     version: number
     /** 工具链指纹：tsconfig / 依赖清单 / 本脚本语义变化时整体失效 */
     fingerprint: string
-    /** 上次「全量」vue-tsc 通过的时间（ISO），null 表示还没有干净基线 */
-    tsFullCleanAt: string | null
-    /** 上次「全量」Biome 通过的时间（ISO），null 表示还没有干净基线 */
-    biomeFullCleanAt: string | null
+    /** 上次检查通过的时间（ISO），仅供参考 */
+    lastRunAt: string | null
     /** TS 工程文件的 mtime/size 指纹 */
     tsStamps: Record<string, FileStamp>
     /** TS 文件之间的依赖图 */
@@ -619,16 +617,22 @@ function computeRoots(changes: ChangeSet, graphs: Record<string, GraphNode>[], e
 
 /**
  * 生成临时 tsconfig：继承根 tsconfig 的编译选项，只把根文件限制为本次要检查的集合。
+ * 写盘前再确认一次文件还在（编辑器 / 其它工具可能在检查过程中删掉刚改动的文件，
+ * 此时 vue-tsc 会直接报 TS6053）。
  *
  * @param roots 根文件列表（相对工程根）
  * @returns 临时 tsconfig 的绝对路径
  */
 async function writeTempTsconfig(roots: string[]): Promise<string> {
+    const alive: string[] = []
+    for (const rel of roots) {
+        if (await statSafe(path.join(PROJECT_ROOT, rel))) alive.push(rel)
+    }
     const config = {
         // 相对路径基于本文件所在目录（.tmp/）解析
         extends: "../tsconfig.json",
         include: [],
-        files: roots.map(rel => `../${rel}`),
+        files: alive.map(rel => `../${rel}`),
     }
     await mkdir(TMP_DIR, { recursive: true })
     await writeFile(TEMP_TSCONFIG, `${JSON.stringify(config, null, 4)}\n`, "utf8")

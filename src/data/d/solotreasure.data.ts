@@ -76,6 +76,14 @@ export interface ExtractionTreasureMechanism {
     shape: number[]
 }
 
+/** 秘宝容器实体（机关表超集：额外带实体外形与爆率），撤离与单人寻宝共用 */
+export interface ExtractionTreasureContainer extends ExtractionTreasureMechanism {
+    /** 容器实体蓝图名，取自 Mechanism.UnitBPPath */
+    bp: string
+    /** 掉落爆率，全库只存在于 SoloTreasureDrop.BoxDropRate；未被该表引用的容器无此字段 */
+    dropRate?: number
+}
+
 export interface ExtractionTreasure {
     icon: string
     id: number
@@ -234,11 +242,12 @@ export interface TreasureHuntStoryDungeon {
     unlockCondition: number
 }
 
-/** 提取玩法机制表，由 importdata 自动写入。 */
-export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
+/** 提取玩法容器实体表，由 importdata 自动写入。 */
+export const extractionTreasureContainerData: ExtractionTreasureContainer[] = [
     {
         id: 131059,
         name: "藏珍竹筐",
+        bp: "BP_Container_Small1",
         itemLevelLimit: {
             "3": 1,
             "6": 1,
@@ -255,6 +264,7 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131060,
         name: "小型竹篓",
+        bp: "BP_Container_Small2",
         itemLevelLimit: {
             "3": 1,
             "6": 1,
@@ -271,6 +281,8 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131061,
         name: "妙妙葫芦",
+        dropRate: 0.03,
+        bp: "BP_Container_Small3",
         itemLevelLimit: {
             "3": 1,
             "6": 1,
@@ -287,6 +299,7 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131062,
         name: "藏珍兜娄",
+        bp: "BP_Container_Medium1",
         itemLevelLimit: {
             "4": 1,
             "6": 1,
@@ -303,6 +316,7 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131063,
         name: "妙妙箱",
+        bp: "BP_Container_Medium2",
         itemLevelLimit: {
             "4": 1,
             "6": 1,
@@ -319,6 +333,8 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131064,
         name: "中型竹篓",
+        dropRate: 0.3,
+        bp: "BP_Container_Medium3",
         itemLevelLimit: {
             "4": 1,
             "6": 1,
@@ -335,42 +351,68 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131065,
         name: "特制藏宝炉",
+        dropRate: 1,
+        bp: "BP_Container_Big",
         itemLevelLimit: {
             "4": 1,
             "5": 1,
             "6": 1,
         },
-        itemLevelWeight: {},
+        itemLevelWeight: {
+            "1": 0.17,
+            "2": 0.4,
+            "3": 0.3,
+            "4": 0.02,
+            "5": 0.01,
+            "6": 0.1,
+        },
         itemNumRange: [3, 4],
         shape: [8, 6],
     },
     {
         id: 131066,
         name: "三连卣",
+        bp: "BP_Container_Big2",
         itemLevelLimit: {
             "4": 1,
             "5": 1,
             "6": 1,
         },
-        itemLevelWeight: {},
+        itemLevelWeight: {
+            "1": 0.17,
+            "2": 0.4,
+            "3": 0.3,
+            "4": 0.02,
+            "5": 0.01,
+            "6": 0.1,
+        },
         itemNumRange: [3, 5],
         shape: [8, 6],
     },
     {
         id: 131072,
         name: "特制藏宝炉",
+        bp: "BP_Container_Big",
         itemLevelLimit: {
             "4": 1,
             "5": 1,
             "6": 1,
         },
-        itemLevelWeight: {},
+        itemLevelWeight: {
+            "1": 0.15,
+            "2": 0.2,
+            "3": 0.3,
+            "4": 0.2,
+            "5": 0.05,
+            "6": 0.1,
+        },
         itemNumRange: [3, 5],
         shape: [8, 6],
     },
     {
         id: 131074,
         name: "藏珍竹筐",
+        bp: "BP_Container_Small1",
         itemLevelLimit: {
             "3": 1,
             "6": 1,
@@ -387,6 +429,7 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131075,
         name: "小型竹篓",
+        bp: "BP_Container_Small2",
         itemLevelLimit: {
             "3": 1,
             "6": 1,
@@ -403,6 +446,8 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131076,
         name: "妙妙葫芦",
+        dropRate: 0.03,
+        bp: "BP_Container_Small3",
         itemLevelLimit: {
             "3": 1,
             "6": 1,
@@ -419,6 +464,7 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131077,
         name: "藏珍兜娄",
+        bp: "BP_Container_Medium1",
         itemLevelLimit: {
             "3": 1,
             "4": 1,
@@ -437,6 +483,7 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131078,
         name: "妙妙箱",
+        bp: "BP_Container_Medium2",
         itemLevelLimit: {
             "3": 1,
             "4": 1,
@@ -455,6 +502,8 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131079,
         name: "中型竹篓",
+        dropRate: 0.3,
+        bp: "BP_Container_Medium3",
         itemLevelLimit: {
             "3": 1,
             "4": 1,
@@ -473,30 +522,48 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131080,
         name: "特制藏宝炉",
+        dropRate: 1,
+        bp: "BP_Container_Big",
         itemLevelLimit: {
             "4": 1,
             "5": 1,
             "6": 1,
         },
-        itemLevelWeight: {},
+        itemLevelWeight: {
+            "1": 0.15,
+            "2": 0.2,
+            "3": 0.3,
+            "4": 0.2,
+            "5": 0.05,
+            "6": 0.1,
+        },
         itemNumRange: [3, 4],
         shape: [8, 6],
     },
     {
         id: 131081,
         name: "三连卣",
+        bp: "BP_Container_Big2",
         itemLevelLimit: {
             "4": 1,
             "5": 1,
             "6": 1,
         },
-        itemLevelWeight: {},
+        itemLevelWeight: {
+            "1": 0.15,
+            "2": 0.2,
+            "3": 0.3,
+            "4": 0.2,
+            "5": 0.05,
+            "6": 0.1,
+        },
         itemNumRange: [3, 5],
         shape: [8, 6],
     },
     {
         id: 131084,
         name: "藏珍竹筐",
+        bp: "BP_Container_Small1",
         itemLevelLimit: {
             "3": 1,
             "4": 1,
@@ -515,6 +582,7 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131085,
         name: "小型竹篓",
+        bp: "BP_Container_Small2",
         itemLevelLimit: {
             "3": 1,
             "4": 1,
@@ -533,24 +601,40 @@ export const extractionTreasureMechanismData: ExtractionTreasureMechanism[] = [
     {
         id: 131086,
         name: "中型竹篓",
+        bp: "BP_Container_Medium3",
         itemLevelLimit: {
             "4": 1,
             "5": 1,
             "6": 1,
         },
-        itemLevelWeight: {},
+        itemLevelWeight: {
+            "1": 0.15,
+            "2": 0.2,
+            "3": 0.3,
+            "4": 0.2,
+            "5": 0.05,
+            "6": 0.1,
+        },
         itemNumRange: [3, 4],
         shape: [8, 6],
     },
     {
         id: 131087,
         name: "藏珍兜娄",
+        bp: "BP_Container_Medium1",
         itemLevelLimit: {
             "4": 1,
             "5": 1,
             "6": 1,
         },
-        itemLevelWeight: {},
+        itemLevelWeight: {
+            "1": 0.15,
+            "2": 0.2,
+            "3": 0.3,
+            "4": 0.2,
+            "5": 0.05,
+            "6": 0.1,
+        },
         itemNumRange: [2, 5],
         shape: [8, 6],
     },

@@ -43,14 +43,20 @@ function toggle() {
         class="collapse overflow-hidden rounded-xs border border-base-content/10 bg-base-100/50 shadow-sm backdrop-blur-sm"
         :class="collapseClass"
     >
-        <div class="flex cursor-pointer items-center gap-3.5 px-4 py-3 transition-colors duration-200 hover:bg-primary/5" @click="toggle">
+        <!-- 头部行自身即容器（@container）：kicker 的显隐按「本行的实际宽度」判断，
+             与视口断点无关 —— 本组件经常被放进只占屏幕一部分的面板里 -->
+        <div
+            class="@container flex cursor-pointer items-center gap-3.5 px-4 py-3 transition-colors duration-200 hover:bg-primary/5"
+            @click="toggle"
+        >
             <span
                 v-if="number"
                 class="inline-flex h-9 min-w-9 items-center justify-center rounded-xs bg-primary px-2 font-orbitron text-sm font-semibold tracking-wide text-primary-content tabular-nums"
             >
                 {{ number }}
             </span>
-            <span v-if="kicker" class="hidden text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase sm:inline">
+            <!-- kicker 是装饰性英文小标：本行放不下时优先让位给标题（容器宽度 < @md 448px 时隐藏） -->
+            <span v-if="kicker" class="hidden text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase @md:inline">
                 {{ kicker }}
             </span>
             <h2 class="text-[17px] font-semibold text-base-content">

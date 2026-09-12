@@ -2,8 +2,8 @@
 import { computed } from "vue"
 import { monsterMap } from "@/data"
 import {
+    extractionTreasureContainerData,
     extractionTreasureGuardData,
-    extractionTreasureMechanismData,
     type SoloTreasureDropEntry,
     type SoloTreasureGamePlay,
     soloTreasureDropData,
@@ -52,7 +52,7 @@ const typeTwoExtraMonsters = computed(() => {
 })
 
 const mechanismMap = computed(() => {
-    return new Map(extractionTreasureMechanismData.map(mechanism => [mechanism.id, mechanism]))
+    return new Map(extractionTreasureContainerData.map(mechanism => [mechanism.id, mechanism]))
 })
 
 const guardMap = computed(() => {

@@ -302,6 +302,28 @@ function isBuildPicked(buildId: string) {
 }
 
 /**
+ * 构筑候选项的互斥状态样式（理由同 pickCardClass）。
+ * @param on 是否为当前已关联的构筑
+ * @returns class 绑定
+ */
+function pickRowClass(on: boolean): string {
+    return on ? "border-primary bg-primary/10 text-primary" : "border-base-content/16 hover:border-primary/60"
+}
+
+/**
+ * 角色/武器候选项的互斥状态样式：选中与未选中各自成串。
+ * 两组的 border-color / text-color 若同时挂在元素上，最终生效的是样式表顺序而不是 class 顺序，
+ * 所以状态色必须互斥，不能靠覆盖。
+ * @param on 是否为当前选中项
+ * @returns class 绑定
+ */
+function pickCardClass(on: boolean): string {
+    return on
+        ? "border-primary bg-primary/10 text-primary"
+        : "border-base-content/20 text-base-content/70 hover:border-primary/60 hover:text-primary"
+}
+
+/**
  * 提交角色/武器选择：先取旧值（用于父级增删助战 BUFF），写入后若确有变更再通知父级。
  * @param value 选中的角色或武器 id
  */
@@ -343,54 +365,93 @@ watch(
             <span class="text-xs text-base-content/50">{{ $t("char-build.team_pick_hint") }}</span>
         </div>
 
-        <div v-for="slot in SLOTS" :key="slot" class="flex flex-col gap-1.5">
-            <!-- 预览行：与简洁模式协战区同构；未选择时保持空位虚线框 + 「—」 -->
-            <div class="grid grid-cols-2 gap-1.5">
-                <button type="button" class="team-cell" :title="$t('char-build.team_char_pick')" @click="openPicker('char', slot)">
-                    <span class="team-frame" :data-empty="charInfo(teamChar(slot)).name ? '' : '1'">
-                        <img v-if="charInfo(teamChar(slot)).icon" :src="charInfo(teamChar(slot)).icon" :alt="$t(charInfo(teamChar(slot)).name)" />
-                        <Icon v-else icon="ri:user-line" class="team-placeholder" />
-                    </span>
-                    <span class="team-text">
-                        <span class="team-name">{{ charInfo(teamChar(slot)).name ? $t(charInfo(teamChar(slot)).name) : "—" }}</span>
-                        <span v-if="charInfo(teamChar(slot)).element" class="team-sub">
-                            {{ $t(`${charInfo(teamChar(slot)).element}属性`) }}
+        <!-- 两个协战槽位：面板够宽时并排，放不下（单槽不足 280px）时才换行，不再固定各占一行 -->
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-2.5">
+            <div v-for="slot in SLOTS" :key="slot" class="flex min-w-0 flex-col gap-1.5">
+                <!-- 预览行：与简洁模式协战区同构；未选择时保持空位虚线框 + 「—」 -->
+                <!-- 列宽用 minmax(0,1fr)：槽位并排后单格变窄，靠 ellipsis 截断而不是撑破网格 -->
+                <div class="grid grid-cols-2 gap-1.5">
+                    <!-- 预览格：28px 图标框 + 名/元素 + 14px 交换图标；hover / 键盘聚焦时才描边并提亮交换图标 -->
+                    <button
+                        type="button"
+                        class="group grid grid-cols-[28px_minmax(0,1fr)_14px] items-center gap-1.5 rounded-xs border border-transparent px-1.25 py-0.75 text-left transition-[border-color,background-color] duration-150 ease-[ease] hover:border-primary/55 hover:bg-primary/8 focus-visible:border-primary/55 focus-visible:bg-primary/8"
+                        :title="$t('char-build.team_char_pick')"
+                        @click="openPicker('char', slot)"
+                    >
+                        <span
+                            class="grid size-7 place-items-center overflow-hidden border border-base-content/28 bg-base-content/6 data-[empty=1]:border-dashed data-[empty=1]:opacity-60"
+                            :data-empty="charInfo(teamChar(slot)).name ? '' : '1'"
+                        >
+                            <img
+                                v-if="charInfo(teamChar(slot)).icon"
+                                class="size-full object-cover object-top"
+                                :src="charInfo(teamChar(slot)).icon"
+                                :alt="$t(charInfo(teamChar(slot)).name)"
+                            />
+                            <Icon v-else icon="ri:user-line" class="size-3.5 opacity-45" />
                         </span>
-                    </span>
-                    <Icon icon="ri:exchange-line" class="team-swap" />
-                </button>
-
-                <button type="button" class="team-cell" :title="$t('char-build.team_weapon_pick')" @click="openPicker('weapon', slot)">
-                    <span class="team-frame team-frame--weapon" :data-empty="weaponInfo(teamWeapon(slot)).name ? '' : '1'">
-                        <img
-                            v-if="weaponInfo(teamWeapon(slot)).icon"
-                            :src="weaponInfo(teamWeapon(slot)).icon"
-                            :alt="$t(weaponInfo(teamWeapon(slot)).name)"
+                        <span class="flex min-w-0 flex-col">
+                            <span class="truncate text-xs font-semibold">{{
+                                charInfo(teamChar(slot)).name ? $t(charInfo(teamChar(slot)).name) : "—"
+                            }}</span>
+                            <span v-if="charInfo(teamChar(slot)).element" class="truncate text-[10px] text-base-content/55">
+                                {{ $t(`${charInfo(teamChar(slot)).element}属性`) }}
+                            </span>
+                        </span>
+                        <Icon
+                            icon="ri:exchange-line"
+                            class="size-3.5 opacity-25 transition-opacity duration-150 ease-[ease] group-hover:text-primary group-hover:opacity-85 group-focus-visible:text-primary group-focus-visible:opacity-85"
                         />
-                        <Icon v-else icon="ri:sword-line" class="team-placeholder" />
-                    </span>
-                    <span class="team-text">
-                        <span class="team-name">{{ weaponInfo(teamWeapon(slot)).name ? $t(weaponInfo(teamWeapon(slot)).name) : "—" }}</span>
-                        <span v-if="weaponInfo(teamWeapon(slot)).type" class="team-sub">
-                            {{ $t(weaponInfo(teamWeapon(slot)).type) }}
+                    </button>
+
+                    <button
+                        type="button"
+                        class="group grid grid-cols-[28px_minmax(0,1fr)_14px] items-center gap-1.5 rounded-xs border border-transparent px-1.25 py-0.75 text-left transition-[border-color,background-color] duration-150 ease-[ease] hover:border-primary/55 hover:bg-primary/8 focus-visible:border-primary/55 focus-visible:bg-primary/8"
+                        :title="$t('char-build.team_weapon_pick')"
+                        @click="openPicker('weapon', slot)"
+                    >
+                        <!-- 队友武器框沿用简洁模式的虚线样式，与角色框区分 -->
+                        <span
+                            class="grid size-7 place-items-center overflow-hidden border border-dashed border-base-content/28 bg-base-content/6 data-[empty=1]:opacity-60"
+                            :data-empty="weaponInfo(teamWeapon(slot)).name ? '' : '1'"
+                        >
+                            <img
+                                v-if="weaponInfo(teamWeapon(slot)).icon"
+                                class="size-full object-cover object-top"
+                                :src="weaponInfo(teamWeapon(slot)).icon"
+                                :alt="$t(weaponInfo(teamWeapon(slot)).name)"
+                            />
+                            <Icon v-else icon="ri:sword-line" class="size-3.5 opacity-45" />
                         </span>
-                    </span>
-                    <Icon icon="ri:exchange-line" class="team-swap" />
+                        <span class="flex min-w-0 flex-col">
+                            <span class="truncate text-xs font-semibold">{{
+                                weaponInfo(teamWeapon(slot)).name ? $t(weaponInfo(teamWeapon(slot)).name) : "—"
+                            }}</span>
+                            <span v-if="weaponInfo(teamWeapon(slot)).type" class="truncate text-[10px] text-base-content/55">
+                                {{ $t(weaponInfo(teamWeapon(slot)).type) }}
+                            </span>
+                        </span>
+                        <Icon
+                            icon="ri:exchange-line"
+                            class="size-3.5 opacity-25 transition-opacity duration-150 ease-[ease] group-hover:text-primary group-hover:opacity-85 group-focus-visible:text-primary group-focus-visible:opacity-85"
+                        />
+                    </button>
+                </div>
+
+                <!-- 协战构筑：可选的服务器构筑关联，简洁模式据此弹窗展示该队友的魔之楔；未选队友时禁用 -->
+                <button
+                    type="button"
+                    class="flex items-center gap-1.5 rounded-xs border border-dashed border-base-content/20 px-1.5 py-1 text-left text-[11px] text-base-content/60 transition-[border-color,color] duration-150 ease-[ease] enabled:hover:border-primary/55 enabled:hover:text-primary focus-visible:border-primary/55 focus-visible:text-primary disabled:cursor-not-allowed disabled:opacity-45"
+                    :disabled="typeof teamChar(slot) !== 'number'"
+                    :title="$t('char-build.team_build_hint')"
+                    @click="openPicker('build', slot)"
+                >
+                    <Icon icon="ri:external-link-line" class="size-3.5 shrink-0" />
+                    <!-- min-w-0：槽位并排变窄后长构筑名要能被 truncate 收缩，而不是把整行撑出按钮 -->
+                    <span class="min-w-0 truncate">{{ buildTitle(slot) || $t("char-build.team_build_none") }}</span>
+                    <Icon icon="ri:arrow-right-line" class="ml-auto size-4 shrink-0 opacity-60" />
                 </button>
             </div>
-
-            <!-- 协战构筑：可选的服务器构筑关联，简洁模式据此弹窗展示该队友的魔之楔 -->
-            <button
-                type="button"
-                class="team-build"
-                :disabled="typeof teamChar(slot) !== 'number'"
-                :title="$t('char-build.team_build_hint')"
-                @click="openPicker('build', slot)"
-            >
-                <Icon icon="ri:external-link-line" class="size-3.5 shrink-0" />
-                <span class="truncate">{{ buildTitle(slot) || $t("char-build.team_build_none") }}</span>
-                <Icon icon="ri:arrow-right-line" class="ml-auto size-4 shrink-0 opacity-60" />
-            </button>
         </div>
 
         <!-- 选择器：卡片网格，选中即写入并关闭（与额外精通/武器选择弹窗同一套交互） -->
@@ -410,8 +471,8 @@ watch(
                         <div v-else class="flex flex-col gap-1.5">
                             <button
                                 type="button"
-                                class="pick-row"
-                                :class="{ 'is-on': isBuildPicked(EMPTY_VALUE) }"
+                                class="flex items-center gap-2 rounded-xs border px-2.5 py-2 text-left text-[13px] transition-[border-color,background-color] duration-150 ease-[ease]"
+                                :class="pickRowClass(isBuildPicked(EMPTY_VALUE))"
                                 @click="commitBuild(EMPTY_VALUE)"
                             >
                                 <span class="min-w-0 truncate">{{ $t("char-build.team_build_none") }}</span>
@@ -420,8 +481,8 @@ watch(
                                 v-for="build in pickerBuilds"
                                 :key="build.id"
                                 type="button"
-                                class="pick-row"
-                                :class="{ 'is-on': isBuildPicked(build.id) }"
+                                class="flex items-center gap-2 rounded-xs border px-2.5 py-2 text-left text-[13px] transition-[border-color,background-color] duration-150 ease-[ease]"
+                                :class="pickRowClass(isBuildPicked(build.id))"
                                 @click="commitBuild(build.id)"
                             >
                                 <span class="min-w-0 truncate">{{ build.title }}</span>
@@ -442,19 +503,27 @@ watch(
                                     v-for="option in group.options"
                                     :key="String(option.value)"
                                     type="button"
-                                    class="pick-card"
-                                    :class="{ 'is-on': isPicked(option) }"
+                                    class="flex flex-col items-center gap-1.5 rounded-xs border px-1.5 py-2 transition-[border-color,color,transform,scale] duration-150 ease-[ease] active:scale-[0.97]"
+                                    :class="pickCardClass(isPicked(option))"
                                     @click="commitTeamOption(option.value)"
                                 >
-                                    <span class="pick-frame" :data-empty="option.value === EMPTY_VALUE ? '1' : ''">
-                                        <img v-if="option.value !== EMPTY_VALUE && option.icon" :src="option.icon" alt="" />
+                                    <span
+                                        class="grid size-9 place-items-center overflow-hidden border border-base-content/22 bg-base-content/6 data-[empty=1]:border-dashed data-[empty=1]:opacity-60"
+                                        :data-empty="option.value === EMPTY_VALUE ? '1' : ''"
+                                    >
+                                        <img
+                                            v-if="option.value !== EMPTY_VALUE && option.icon"
+                                            class="size-full object-cover object-top"
+                                            :src="option.icon"
+                                            alt=""
+                                        />
                                         <Icon
                                             v-else
                                             :icon="picker?.kind === 'char' ? 'ri:user-line' : 'ri:sword-line'"
                                             class="size-5 opacity-45"
                                         />
                                     </span>
-                                    <span class="pick-name">{{ $t(option.label) }}</span>
+                                    <span class="max-w-full truncate text-[11px]">{{ $t(option.label) }}</span>
                                 </button>
                             </div>
                         </div>
@@ -465,209 +534,3 @@ watch(
         </Teleport>
     </div>
 </template>
-
-<style scoped>
-/* 预览卡片：与简洁模式协战区的「图标 + 名/元素」排版一致，仅换成本地主题色 */
-.team-cell {
-    display: grid;
-    align-items: center;
-    gap: 6px;
-    grid-template-columns: 28px minmax(0, 1fr) 14px;
-    padding: 3px 5px;
-    border: 1px solid transparent;
-    border-radius: 2px;
-    text-align: left;
-    transition:
-        border-color 0.15s ease,
-        background-color 0.15s ease;
-}
-
-.team-cell:hover,
-.team-cell:focus-visible {
-    border-color: color-mix(in oklab, var(--color-primary) 55%, transparent);
-    background: color-mix(in oklab, var(--color-primary) 8%, transparent);
-}
-
-/* 交换图标：平时很淡，hover 时才明显，避免抢预览的视觉 */
-.team-swap {
-    width: 14px;
-    height: 14px;
-    opacity: 0.25;
-    transition: opacity 0.15s ease;
-}
-
-.team-cell:hover .team-swap,
-.team-cell:focus-visible .team-swap {
-    opacity: 0.85;
-    color: var(--color-primary);
-}
-
-.team-frame {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    overflow: hidden;
-    border: 1px solid var(--color-base-content);
-    border-color: color-mix(in oklab, var(--color-base-content) 28%, transparent);
-    background: color-mix(in oklab, var(--color-base-content) 6%, transparent);
-}
-
-/* 队友武器框沿用简洁模式的虚线样式，与角色框区分 */
-.team-frame--weapon {
-    border-style: dashed;
-}
-
-.team-frame[data-empty="1"] {
-    border-style: dashed;
-    opacity: 0.6;
-}
-
-.team-frame img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top;
-}
-
-.team-placeholder {
-    width: 14px;
-    height: 14px;
-    opacity: 0.45;
-}
-
-.team-text {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-}
-
-.team-name {
-    overflow: hidden;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.team-sub {
-    overflow: hidden;
-    font-size: 10px;
-    color: color-mix(in oklab, var(--color-base-content) 55%, transparent);
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-/* 协战构筑：一条细长条，未关联时显示为虚线态 */
-.team-build {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 6px;
-    border: 1px dashed color-mix(in oklab, var(--color-base-content) 20%, transparent);
-    border-radius: 2px;
-    font-size: 11px;
-    color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
-    text-align: left;
-    transition:
-        border-color 0.15s ease,
-        color 0.15s ease;
-}
-
-.team-build:not(:disabled):hover,
-.team-build:not(:disabled):focus-visible {
-    border-color: color-mix(in oklab, var(--color-primary) 55%, transparent);
-    color: var(--color-primary);
-}
-
-.team-build:disabled {
-    cursor: not-allowed;
-    opacity: 0.45;
-}
-
-/* 构筑挑选：整行列表，比卡片网格更适合长标题 */
-.pick-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    border: 1px solid color-mix(in oklab, var(--color-base-content) 16%, transparent);
-    border-radius: 2px;
-    font-size: 13px;
-    text-align: left;
-    transition:
-        border-color 0.15s ease,
-        background-color 0.15s ease;
-}
-
-.pick-row:hover {
-    border-color: color-mix(in oklab, var(--color-primary) 60%, transparent);
-}
-
-.pick-row.is-on {
-    border-color: var(--color-primary);
-    background: color-mix(in oklab, var(--color-primary) 10%, transparent);
-    color: var(--color-primary);
-}
-
-/* 角色/武器挑选：与额外精通弹窗一致的卡片网格 */
-.pick-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 6px;
-    border: 1px solid color-mix(in oklab, var(--color-base-content) 20%, transparent);
-    border-radius: 2px;
-    color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
-    transition:
-        border-color 0.15s ease,
-        color 0.15s ease,
-        transform 0.1s ease;
-}
-
-.pick-card:hover {
-    border-color: color-mix(in oklab, var(--color-primary) 60%, transparent);
-    color: var(--color-primary);
-}
-
-.pick-card:active {
-    transform: scale(0.97);
-}
-
-.pick-card.is-on {
-    border-color: var(--color-primary);
-    background: color-mix(in oklab, var(--color-primary) 10%, transparent);
-    color: var(--color-primary);
-}
-
-.pick-frame {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    overflow: hidden;
-    border: 1px solid color-mix(in oklab, var(--color-base-content) 22%, transparent);
-    background: color-mix(in oklab, var(--color-base-content) 6%, transparent);
-}
-
-.pick-frame[data-empty="1"] {
-    border-style: dashed;
-    opacity: 0.6;
-}
-
-.pick-frame img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top;
-}
-
-.pick-name {
-    max-width: 100%;
-    overflow: hidden;
-    font-size: 11px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-</style>

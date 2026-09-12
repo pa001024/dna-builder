@@ -18,8 +18,10 @@ defineProps<{
 </script>
 
 <template>
+    <!-- 头部行自身即容器（@container）：kicker 的显隐按「本行的实际宽度」判断，
+         与视口断点无关 —— 本组件经常出现在只占屏幕一部分的面板/网格列里 -->
     <div
-        class="flex items-center gap-3.5"
+        class="@container flex items-center gap-3.5"
         :class="[noAnimate ? '' : 'animate-ef-rise motion-reduce:animate-none', compact ? 'mb-2' : 'mb-4']"
     >
         <span
@@ -28,7 +30,11 @@ defineProps<{
         >
             {{ number }}
         </span>
-        <span v-if="kicker" class="shrink-0 whitespace-nowrap text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">
+        <!-- kicker 是装饰性英文小标：本行放不下时优先让位给标题（容器宽度 < @md 448px 时隐藏） -->
+        <span
+            v-if="kicker"
+            class="hidden shrink-0 whitespace-nowrap text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase @md:inline"
+        >
             {{ kicker }}
         </span>
         <h2 v-if="title" class="shrink-0 text-[17px] font-semibold text-base-content">{{ title }}</h2>

@@ -3,32 +3,38 @@ import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import {
+    type ExtractionTreasureContainer,
     extractionTreasureBagData,
+    extractionTreasureContainerData,
     extractionTreasureData,
     soloTreasureRarityData,
     treasureHuntRepeatDungeonData,
     treasureHuntStoryDungeonData,
 } from "@/data/d/solotreasure.data"
+import { format100 } from "@/util"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 
-type SoloTreasureType = "story" | "repeat" | "treasure" | "bag"
+type SoloTreasureType = "story" | "repeat" | "treasure" | "bag" | "container"
 type SoloTreasureListItem =
     | { kind: "story"; id: number; title: string; desc: string; meta: string }
     | { kind: "repeat"; id: number; title: string; desc: string; meta: string }
     | { kind: "treasure"; id: number; title: string; desc: string; treasure: (typeof extractionTreasureData)[number] }
     | { kind: "bag"; id: number; title: string; desc: string; meta: string }
+    | { kind: "container"; id: number; title: string; desc: string; meta: string }
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDungeonId = useSearchParam<number>("id", 0)
 const selectedTreasureId = useSearchParam<number>("tid", 0)
 const selectedBagId = useSearchParam<number>("bid", 0)
+const selectedContainerId = useSearchParam<number>("cid", 0)
 const selectedType = useSearchParam<SoloTreasureType>("tp", "story")
 
 const typeTabs = [
     { key: "story" as const, label: "剧情副本" },
     { key: "repeat" as const, label: "常驻副本" },
     { key: "treasure" as const, label: "宝物" },
+    { key: "container" as const, label: "容器" },
     { key: "bag" as const, label: "百宝囊" },
 ]
 
@@ -77,6 +83,16 @@ function getListItems(type: SoloTreasureType): SoloTreasureListItem[] {
         }))
     }
 
+    if (type === "container") {
+        return extractionTreasureContainerData.map(item => ({
+            kind: "container",
+            id: item.id,
+            title: item.name,
+            desc: `${item.name} ${item.bp}`,
+            meta: `蓝图 ${item.bp} · 形状 ${item.shape.join("x")} · 爆率 ${getDropRateText(item)}`,
+        }))
+    }
+
     return extractionTreasureBagData.map(item => ({
         kind: "bag",
         id: item.id,
@@ -98,6 +114,15 @@ function matchesKeyword(values: Array<string | number | undefined>, keyword: str
 
         return typeof value === "string" && matchPinyin(value, keyword).match
     })
+}
+
+/**
+ * 获取容器爆率文本。
+ * @param container 容器数据。
+ * @returns 爆率百分比文本；未被 SoloTreasureDrop 引用的容器返回占位符。
+ */
+function getDropRateText(container: ExtractionTreasureContainer): string {
+    return container.dropRate === undefined ? "—" : format100(container.dropRate, 1)
 }
 
 /**
@@ -125,6 +150,37 @@ function selectBag(id: number): void {
 }
 
 /**
+ * 选择容器。
+ * @param id 容器 ID。
+ */
+function selectContainer(id: number): void {
+    selectedContainerId.value = id
+}
+
+/**
+ * 按条目类型写入对应的选中项。
+ * @param item 列表条目。
+ */
+function selectListItem(item: SoloTreasureListItem): void {
+    if (item.kind === "story" || item.kind === "repeat") {
+        selectDungeon(item.id)
+        return
+    }
+
+    if (item.kind === "treasure") {
+        selectTreasure(item.id)
+        return
+    }
+
+    if (item.kind === "container") {
+        selectContainer(item.id)
+        return
+    }
+
+    selectBag(item.id)
+}
+
+/**
  * 清空当前类型的选中项。
  */
 function clearSelectedDetail(): void {
@@ -135,6 +191,11 @@ function clearSelectedDetail(): void {
 
     if (selectedType.value === "treasure") {
         selectedTreasureId.value = 0
+        return
+    }
+
+    if (selectedType.value === "container") {
+        selectedContainerId.value = 0
         return
     }
 
@@ -186,6 +247,17 @@ const selectedBag = computed(() => {
 })
 
 /**
+ * 获取当前选中的容器。
+ */
+const selectedContainer = computed(() => {
+    if (selectedType.value !== "container") {
+        return null
+    }
+
+    return extractionTreasureContainerData.find(item => item.id === selectedContainerId.value) || null
+})
+
+/**
  * 获取当前选中的详情项。
  */
 const selectedDetailKind = computed(() => {
@@ -195,6 +267,10 @@ const selectedDetailKind = computed(() => {
 
     if (selectedTreasure.value) {
         return "treasure"
+    }
+
+    if (selectedContainer.value) {
+        return "container"
     }
 
     if (selectedBag.value) {
@@ -215,6 +291,10 @@ function isItemSelected(item: SoloTreasureListItem): boolean {
 
     if (item.kind === "treasure") {
         return selectedType.value === item.kind && selectedTreasureId.value === item.id
+    }
+
+    if (item.kind === "container") {
+        return selectedType.value === item.kind && selectedContainerId.value === item.id
     }
 
     return selectedType.value === item.kind && selectedBagId.value === item.id
@@ -332,7 +412,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbst-item-active" })
                                         : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
                                 "
                                 :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                                @click="item.kind === 'story' || item.kind === 'repeat' ? selectDungeon(item.id) : selectBag(item.id)"
+                                @click="selectListItem(item)"
                             >
                                 <!-- 左侧主色强调条：选中时显现 -->
                                 <span
@@ -378,10 +458,23 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbst-item-active" })
 
             <ScrollArea v-if="selectedDetailKind" class="min-h-0 min-w-0 flex-1">
                 <div class="space-y-3 p-3 sm:p-4">
-                    <DBSoloTreasureDungeonItem v-if="selectedStoryDungeon" :dungeon="selectedStoryDungeon" />
-                    <DBSoloTreasureDungeonItem v-else-if="selectedRepeatDungeon" :dungeon="selectedRepeatDungeon" />
-                    <DBSoloTreasureEntryItem v-else-if="selectedTreasure" :treasure="selectedTreasure" />
-                    <DBSoloTreasureBagItem v-else-if="selectedBag" :bag="selectedBag" />
+                    <DBSoloTreasureDungeonItem
+                        v-if="selectedStoryDungeon"
+                        :key="`story-${selectedStoryDungeon.id}`"
+                        :dungeon="selectedStoryDungeon"
+                    />
+                    <DBSoloTreasureDungeonItem
+                        v-else-if="selectedRepeatDungeon"
+                        :key="`repeat-${selectedRepeatDungeon.id}`"
+                        :dungeon="selectedRepeatDungeon"
+                    />
+                    <DBSoloTreasureEntryItem v-else-if="selectedTreasure" :key="selectedTreasure.id" :treasure="selectedTreasure" />
+                    <DBSoloTreasureContainerItem
+                        v-else-if="selectedContainer"
+                        :key="selectedContainer.id"
+                        :container="selectedContainer"
+                    />
+                    <DBSoloTreasureBagItem v-else-if="selectedBag" :key="selectedBag.id" :bag="selectedBag" />
                 </div>
             </ScrollArea>
             </template>

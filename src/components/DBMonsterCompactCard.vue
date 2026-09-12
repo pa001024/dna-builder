@@ -5,7 +5,7 @@ import type { RouteLocationRaw } from "vue-router"
 import { useRouter } from "vue-router"
 import { LeveledMonsterHelper } from "@/data"
 import type { Monster } from "@/data/d/monster.data"
-import { type ExtractionTreasureMechanism, extractionTreasureMechanismData, type SoloTreasureDropEntry } from "@/data/d/solotreasure.data"
+import { type ExtractionTreasureContainer, extractionTreasureContainerData, type SoloTreasureDropEntry } from "@/data/d/solotreasure.data"
 import { Faction } from "@/data/game-const"
 import { LeveledMonster } from "@/data/leveled/LeveledMonster"
 import { formatBigNumber } from "@/util"
@@ -134,14 +134,14 @@ const soloTreasureRewards = computed(() => {
 })
 
 const dropMechanisms = computed(() => {
-    const mechanisms = new Map<number, ExtractionTreasureMechanism>()
+    const mechanisms = new Map<number, ExtractionTreasureContainer>()
 
     soloTreasureRewards.value.forEach(reward => {
         if (reward.DropMechanismId === undefined) {
             return
         }
 
-        const mechanism = extractionTreasureMechanismData.find(item => item.id === reward.DropMechanismId)
+        const mechanism = extractionTreasureContainerData.find(item => item.id === reward.DropMechanismId)
         if (mechanism) {
             mechanisms.set(mechanism.id, mechanism)
         }

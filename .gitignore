@@ -65,3 +65,4 @@ test-results/
 tools/*.json
 tools/*.sh
 tools/radix-icons/
+screenshots/

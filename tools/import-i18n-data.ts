@@ -139,7 +139,8 @@ const MAPPINGS: Mapping[] = [
     { source: "MusicScore", targetStem: "music", targetVar: "musicScoreData", locales: ["cn"] },
     { source: "Npc", targetStem: "npc", targetVar: "npcData", locales: ["cn"] },
     { source: "OptReward", targetStem: "optreward", targetVar: "optRewardData", locales: ["cn"] },
-    { source: "ExtractionTreasureMechanism", targetStem: "solotreasure", targetVar: "extractionTreasureMechanismData", locales: ["cn"] },
+    // 容器实体表：ExtractionTreasureMechanism 的超集（额外带 UnitBPPath 外形与 SoloTreasureDrop 爆率），故取代前者
+    { source: "ExtractionTreasureContainer", targetStem: "solotreasure", targetVar: "extractionTreasureContainerData", locales: ["cn"] },
     { source: "ExtractionTreasure", targetStem: "solotreasure", targetVar: "extractionTreasureData", locales: ["cn"] },
     { source: "ExtractionTreasureBag", targetStem: "solotreasure", targetVar: "extractionTreasureBagData", locales: ["cn"] },
     { source: "SoloTreasure", targetStem: "solotreasure", targetVar: "soloTreasureData", locales: ["cn"] },
@@ -775,7 +776,8 @@ type RewardRow = {
     Type: string[]
 }
 
-const SKIPPED_SOURCES = ["RegionPoint", "RewardView", "translation"]
+/** 未映射到任何 data 文件的上游源表（ExtractionTreasureMechanism 已被容器实体表取代） */
+const SKIPPED_SOURCES = ["ExtractionTreasureMechanism", "RegionPoint", "RewardView", "translation"]
 
 /**
  * 判断属性名是否可以直接作为标识符输出。

@@ -85,8 +85,6 @@ const accentStyle = computed(() => {
     const theme = ELEMENT_ACCENTS[props.charBuild.char.属性] ?? DEFAULT_ACCENT
     const illustration = props.charBuild.char.bustUrl
     const style: Record<string, string> = {
-        "--sc-bg-0": "#04060c",
-        "--sc-bg-1": "#0a1120",
         "--sc-line": "rgba(255, 255, 255, 0.1)",
         "--sc-line-strong": "rgba(255, 255, 255, 0.22)",
         "--sc-text": "rgba(236, 243, 255, 0.94)",
@@ -308,22 +306,34 @@ const charAttrRows = computed<AttrRow[]>(() => {
     return pickAttrRows(props.attributes, CHAR_ATTR_KEYS, `${props.charBuild.char.属性}属性`, FLAT_CHAR_ATTRS, true)
 })
 
-/** 技能槽位类型到短标签翻译键的映射（避免直接使用「角色/近战」这类长译名） */
-const SKILL_TYPE_KEYS: Record<string, string> = {
-    角色: "char-build.char",
-    近战: "char-build.melee",
-    远程: "char-build.ranged",
-    同律: "char-build.skill",
-}
-
-/** 当前选中技能所属的槽位标签 */
-const skillTypeLabel = computed(() => t(SKILL_TYPE_KEYS[props.charBuild.selectedSkillType] ?? "char-build.char"))
-
 /** 当前选中技能名 */
 const skillName = computed(() => props.charSettings.baseName)
 
 /** 当前技能等级 */
 const skillLevel = computed(() => props.charSettings.charSkillLevel)
+
+/** 武器精通展示项 */
+interface MasteryItem {
+    /** 武器类型名（同时是翻译键） */
+    name: string
+    /** 是否为额外精通解锁的武器类型（模板据此高亮，与自带精通区分） */
+    extra: boolean
+}
+
+/**
+ * 角色武器精通列表：角色自带精通 + 已解锁的额外精通武器。
+ * 与专业模式侧栏 tooltip（CharBuildView.getCharTabTooltipData）同一口径；
+ * 配置里选中的额外精通武器在 CharBuild 构造时已校验过是否属于角色「额外精通」，这里可直接使用。
+ * @returns 精通展示项；数据未就绪时为空数组
+ */
+const masteryItems = computed<MasteryItem[]>(() => {
+    if (!ready.value) return []
+    const items: MasteryItem[] = (props.charBuild.char.精通 ?? []).map(name => ({ name, extra: false }))
+    const extra = props.charBuild.extraMastery
+    // 额外精通与自带精通理论上互斥，仍做一次去重，避免数据异常时重复展示
+    if (extra && !items.some(item => item.name === extra)) items.push({ name: extra, extra: true })
+    return items
+})
 
 /** 当前技能是否为召唤物技能（有召唤物时输出行额外标注召唤物名） */
 const summonName = computed(() => (ready.value ? (props.charBuild.selectedSkill?.召唤物?.名称 ?? "") : ""))
@@ -829,7 +839,7 @@ onBeforeUnmount(() => {
     -->
     <div
         ref="rootEl"
-        class="sc relative isolate flex h-full w-full flex-col overflow-hidden bg-(--sc-bg-0) text-(--sc-text)"
+        class="sc relative isolate flex h-full w-full flex-col overflow-hidden bg-transparent text-(--sc-text)"
         :style="accentStyle"
         @pointermove="onPointerMove"
         @pointerleave="onPointerLeave"
@@ -837,7 +847,7 @@ onBeforeUnmount(() => {
     >
         <!-- 场景层：立绘 / 地面网格 / 辉光 / 尘埃 / 扫描线 / 暗角，全部纯装饰 -->
         <div
-            class="sc-scene pointer-events-none absolute inset-0 z-0 overflow-hidden bg-[radial-gradient(120%_90%_at_50%_6%,var(--sc-accent-12),transparent_62%),linear-gradient(180deg,var(--sc-bg-1),var(--sc-bg-0)_68%)]"
+            class="sc-scene pointer-events-none absolute inset-0 z-0 overflow-hidden bg-[radial-gradient(120%_90%_at_50%_6%,var(--sc-accent-18),transparent_62%)]"
             aria-hidden="true"
         >
             <!-- 角色立绘（CDN 大图）：视差幅度最小，读作「远处的战场」 -->
@@ -845,7 +855,7 @@ onBeforeUnmount(() => {
                 class="sc-illust absolute top-[-6%] right-[-4%] bottom-[-6%] left-[18%] bg-(image:--sc-illust) bg-position-[center_22%] bg-cover opacity-42 will-change-transform mask-[linear-gradient(90deg,transparent,#000_26%,#000_74%,transparent)] filter-[saturate(0.92)_contrast(1.04)] transform-[translate3d(calc(var(--sc-px,0)*-16px),calc(var(--sc-py,0)*-10px),0)_scale(1.04)] motion-reduce:transform-none"
             />
             <!-- 立绘底部渐隐，避免与地面网格硬接 -->
-            <div class="absolute inset-0 bg-[linear-gradient(180deg,transparent_34%,rgba(4,6,12,0.72)_78%,var(--sc-bg-0))]" />
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,transparent_52%,rgba(4,6,12,0.32))]" />
             <!-- 透视地面网格：科幻 HUD 的空间基准面 -->
             <div
                 class="absolute bottom-[-18%] left-1/2 ml-[-95%] h-[62%] w-[190%] bg-[repeating-linear-gradient(90deg,var(--sc-accent-42)_0_1px,transparent_1px_72px),repeating-linear-gradient(0deg,var(--sc-accent-30)_0_1px,transparent_1px_56px)] opacity-34 mask-[radial-gradient(120%_86%_at_50%_100%,#000_12%,transparent_72%)] transform-[perspective(560px)_rotateX(70deg)] origin-[50%_100%]"
@@ -868,12 +878,12 @@ onBeforeUnmount(() => {
                 class="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.06)_0_1px,transparent_1px_3px)] opacity-16 mix-blend-overlay"
             />
             <!-- 暗角：把视觉焦点收进中央 -->
-            <div class="absolute inset-0 bg-[radial-gradient(120%_88%_at_50%_46%,transparent_42%,rgba(0,0,0,0.62)_100%)]" />
+            <div class="absolute inset-0 bg-[radial-gradient(120%_88%_at_50%_46%,transparent_58%,rgba(0,0,0,0.3)_100%)]" />
         </div>
 
         <!-- 顶部 HUD：身份 + 浏览分享 + 模式切换 -->
         <header
-            class="sc-head relative z-3 flex flex-wrap items-center gap-2.5 border-b border-(--sc-line) bg-[linear-gradient(180deg,rgba(6,10,20,0.86),rgba(6,10,20,0.32))] px-4 pt-3.5 pb-2"
+            class="sc-head relative z-3 flex flex-wrap items-center gap-2.5 border-b border-(--sc-line) bg-[linear-gradient(180deg,rgba(6,10,20,0.72),rgba(6,10,20,0.24))] px-4 pt-3.5 pb-2 backdrop-blur-md"
         >
             <div class="sc-head-id flex min-w-0 flex-[1_1_auto] items-center gap-2.5">
                 <span
@@ -940,7 +950,7 @@ onBeforeUnmount(() => {
         </header>
 
         <!-- 浏览构筑分享：复用专业模式「配装分享」的列表组件，本组件本身不写构筑数据 -->
-        <DialogModel v-model="browseBuildsShow" class="bg-base-300 w-11/12 max-w-5xl">
+        <DialogModel v-model="browseBuildsShow" class="w-11/12 max-w-5xl bg-base-100/85 backdrop-blur-md">
             <div class="flex h-[68vh] min-h-72 flex-col">
                 <div class="flex flex-none items-center gap-2 border-b border-base-content/10 pb-3">
                     <Icon icon="ri:file-list-line" class="size-4 shrink-0 text-primary" />
@@ -968,7 +978,7 @@ onBeforeUnmount(() => {
 
         <div v-else ref="bodyEl" class="sc-body relative z-2 grid min-h-0 flex-1 content-start gap-2.5 overflow-y-auto overscroll-contain px-3.5 pt-2.5 pb-24 grid-cols-[minmax(0,1fr)] [grid-template-areas:'stage'_'identity'_'mods'_'stats'_'output'] auto-rows-min lg:grid-cols-[minmax(230px,0.86fr)_minmax(0,1.7fr)_minmax(280px,1fr)] lg:content-stretch lg:gap-3.5 lg:px-4 lg:pt-3.5 lg:pb-4 lg:auto-rows-auto lg:[grid-template-areas:'identity_stage_mods'_'stats_stage_mods'_'output_output_mods']" @scroll.passive="onBodyScroll">
             <!-- 装配舞台 -->
-            <section class="sc-stage relative flex min-h-85 flex-col overflow-hidden border border-(--sc-line) bg-[radial-gradient(78%_58%_at_50%_42%,var(--sc-accent-14),transparent_70%),linear-gradient(180deg,rgba(10,16,30,0.55),rgba(4,6,12,0.2))] [clip-path:polygon(14px_0,100%_0,100%_calc(100%-14px),calc(100%-14px)_100%,0_100%,0_14px)] [grid-area:stage] lg:min-h-110" data-section="stage">
+            <section class="sc-stage relative flex min-h-85 flex-col overflow-hidden border border-(--sc-line) bg-[radial-gradient(78%_58%_at_50%_42%,var(--sc-accent-14),transparent_70%),linear-gradient(180deg,rgba(10,16,30,0.62),rgba(4,6,12,0.34))] backdrop-blur-sm [clip-path:polygon(14px_0,100%_0,100%_calc(100%-14px),calc(100%-14px)_100%,0_100%,0_14px)] [grid-area:stage] lg:min-h-110" data-section="stage">
                 <div class="sc-deck grid flex-[1_1_auto] place-items-center px-1.5 pt-13.5 pb-5 perspective-distant lg:px-2.5 lg:pt-16 lg:pb-6.5">
                     <div class="sc-deck-inner flex w-full rotate-x-[calc(var(--sc-py,0)*-6deg)] rotate-y-[calc(var(--sc-px,0)*7deg)] flex-col items-center gap-6 transform-3d will-change-transform motion-reduce:transform-none lg:gap-8.5">
                         <div class="sc-core relative flex translate-z-16 flex-col items-center gap-2.5">
@@ -980,7 +990,23 @@ onBeforeUnmount(() => {
                             </div>
                             <div class="sc-core-meta relative z-1 text-center">
                                 <div class="sc-core-name text-base font-bold tracking-[0.08em]">{{ $t(charName) }}</div>
-                                <div class="sc-core-sub mt-0.5 font-orbitron text-[10px] tracking-[0.22em] text-(--sc-accent-soft) uppercase">{{ skillTypeLabel }} · Lv.{{ skillLevel }}</div>
+                                <!-- 头像下方：武器精通（自带精通 + 已解锁的额外精通武器，额外项描边强调色以区分） -->
+                                <div
+                                    v-if="masteryItems.length"
+                                    class="sc-core-sub mt-1 flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-1 text-[10px] leading-[1.4] tracking-[0.1em] text-(--sc-accent-soft)"
+                                    :title="$t('武器精通')"
+                                >
+                                    <template v-for="(item, index) in masteryItems" :key="item.name">
+                                        <span v-if="index > 0" class="text-(--sc-text-dim)">、</span>
+                                        <span
+                                            v-if="item.extra"
+                                            class="border border-(--sc-accent-45) bg-(--sc-accent-12) px-1 text-(--sc-accent)"
+                                            :title="$t('UI_Armory_ExtraExcelWeponTitle')"
+                                            >{{ $t(item.name) }}</span
+                                        >
+                                        <span v-else>{{ $t(item.name) }}</span>
+                                    </template>
+                                </div>
                             </div>
                         </div>
 
@@ -1037,7 +1063,7 @@ onBeforeUnmount(() => {
             </section>
 
             <!-- 角色身份 -->
-            <section class="sc-panel sc-identity flex flex-col gap-2.5 border border-(--sc-line) bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:identity]" data-section="identity">
+            <section class="sc-panel sc-identity flex flex-col gap-2.5 border border-(--sc-line) bg-[rgba(6,10,20,0.6)] bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 backdrop-blur-sm [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:identity]" data-section="identity">
                 <div class="sc-panel-head flex items-baseline gap-2 border-b border-(--sc-line) pb-2">
                     <span class="sc-panel-num font-orbitron text-[11px] font-bold text-(--sc-accent)">01</span>
                     <span class="sc-panel-title text-[12px] tracking-[0.18em]">{{ $t("char-build.char_info") }}</span>
@@ -1099,7 +1125,7 @@ onBeforeUnmount(() => {
             </section>
 
             <!-- 魔之楔装配 -->
-            <section class="sc-panel sc-mods flex flex-col gap-2.5 border border-(--sc-line) bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:mods]" data-section="mods">
+            <section class="sc-panel sc-mods flex flex-col gap-2.5 border border-(--sc-line) bg-[rgba(6,10,20,0.6)] bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 backdrop-blur-sm [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:mods]" data-section="mods">
                 <div class="sc-panel-head flex items-baseline gap-2 border-b border-(--sc-line) pb-2">
                     <span class="sc-panel-num font-orbitron text-[11px] font-bold text-(--sc-accent)">02</span>
                     <span class="sc-panel-title text-[12px] tracking-[0.18em]">{{ $t("魔之楔") }}</span>
@@ -1124,7 +1150,7 @@ onBeforeUnmount(() => {
                         <div v-for="(mod, index) in activeModSlots" :key="index" class="sc-mod flex items-center gap-1.75 border border-l-2 border-(--sc-line) border-l-(--sc-quality) px-1.75 py-1.25 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]" :style="qualityStyle(mod?.品质)">
                             <span class="sc-mod-icon grid size-7.5 flex-none place-items-center overflow-hidden border border-(--sc-line) bg-black/42">
                                 <img v-if="mod" :src="mod.url" :alt="$t(mod.名称)" class="size-full object-cover" />
-                                <span v-else class="sc-mod-index font-orbitron text-[11px] text-white/24">{{ index + 1 }}</span>
+                                <span v-else class="sc-mod-index font-orbitron text-[11px] text-base-content/25">{{ index + 1 }}</span>
                             </span>
                             <span class="sc-mod-text flex min-w-0 flex-1 flex-col">
                                 <span class="sc-mod-name truncate text-[12px] font-semibold">{{ mod ? $t(mod.名称) : $t("char-build.simple_empty_slot") }}</span>
@@ -1182,7 +1208,7 @@ onBeforeUnmount(() => {
             </section>
 
             <!-- 核心属性 -->
-            <section class="sc-panel sc-stats flex flex-col gap-2.5 border border-(--sc-line) bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:stats]" data-section="stats">
+            <section class="sc-panel sc-stats flex flex-col gap-2.5 border border-(--sc-line) bg-[rgba(6,10,20,0.6)] bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 backdrop-blur-sm [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:stats]" data-section="stats">
                 <div class="sc-panel-head flex items-baseline gap-2 border-b border-(--sc-line) pb-2">
                     <span class="sc-panel-num font-orbitron text-[11px] font-bold text-(--sc-accent)">03</span>
                     <span class="sc-panel-title text-[12px] tracking-[0.18em]">{{ $t("char-build.simple_key_stats") }}</span>
@@ -1197,7 +1223,7 @@ onBeforeUnmount(() => {
             </section>
 
             <!-- 伤害输出：标题取目标函数、数值取整按千分位，与榜单页面保持一致 -->
-            <section class="sc-output flex flex-wrap items-center gap-3.5 border border-(--sc-accent-34) bg-[radial-gradient(90%_160%_at_6%_50%,var(--sc-accent-18),transparent_70%),linear-gradient(120deg,rgba(255,255,255,0.05),rgba(255,255,255,0.01))] px-3.5 py-3 [clip-path:polygon(16px_0,100%_0,100%_calc(100%-16px),calc(100%-16px)_100%,0_100%,0_16px)] [grid-area:output]" data-section="output">
+            <section class="sc-output flex flex-wrap items-center gap-3.5 border border-(--sc-accent-34) bg-[rgba(6,10,20,0.6)] bg-[radial-gradient(90%_160%_at_6%_50%,var(--sc-accent-18),transparent_70%),linear-gradient(120deg,rgba(255,255,255,0.05),rgba(255,255,255,0.01))] backdrop-blur-sm px-3.5 py-3 [clip-path:polygon(16px_0,100%_0,100%_calc(100%-16px),calc(100%-16px)_100%,0_100%,0_16px)] [grid-area:output]" data-section="output">
                 <div class="sc-output-main min-w-40 flex-[1_1_200px]">
                     <div
                         class="sc-output-label text-[10px] tracking-[0.28em] text-(--sc-text-dim) uppercase"
@@ -1215,7 +1241,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 移动端底部页签 -->
-        <nav v-if="ready" class="sc-tabs absolute right-0 bottom-0 left-0 z-4 flex border-t border-(--sc-line) bg-[linear-gradient(0deg,rgba(4,6,12,0.96),rgba(4,6,12,0.78))] px-2 pt-1.5 pb-[calc(6px+env(safe-area-inset-bottom,0px))] lg:hidden">
+        <nav v-if="ready" class="sc-tabs absolute right-0 bottom-0 left-0 z-4 flex border-t border-(--sc-line) bg-[linear-gradient(0deg,rgba(4,6,12,0.86),rgba(4,6,12,0.6))] px-2 pt-1.5 backdrop-blur-md pb-[calc(6px+env(safe-area-inset-bottom,0px))] lg:hidden">
             <button
                 v-for="tab in mobileTabs"
                 :key="tab.key"

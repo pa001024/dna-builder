@@ -2842,14 +2842,17 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             @set-buff-lv="setBuffLv"
                             @set-buff-coverage="setBuffCoverage"
                         />
+                        <!-- 自定义BUFF：选中该 BUFF 后才出现的编辑区，跟随 BUFF 章节一起折叠 -->
+                        <template v-if="selectedBuffs.some(v => v.名称 === '自定义BUFF')">
+                            <div class="mt-4 mb-2 flex items-center gap-3">
+                                <span class="text-[11px] font-semibold tracking-[0.3em] text-base-content/55 uppercase">
+                                    {{ $t("char-build.custom_buff") }}
+                                </span>
+                                <span class="h-px flex-1 bg-base-content/10" aria-hidden="true" />
+                            </div>
+                            <CustomBuffEditor :buffs="charSettings.customBuff" @submit="charSettings.customBuff = $event" />
+                        </template>
                     </CollapsibleSection>
-
-                    <!-- 自定义BUFF -->
-                    <CustomBuffEditor
-                        v-if="selectedBuffs.some(v => v.名称 === '自定义BUFF')"
-                        :buffs="charSettings.customBuff"
-                        @submit="charSettings.customBuff = $event"
-                    />
 
                     <!-- 动作序列 -->
                     <CollapsibleSection
