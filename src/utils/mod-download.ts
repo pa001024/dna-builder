@@ -20,6 +20,22 @@ export function modTaskKey(modId: string, versionId?: string | null) {
     return versionId ? `${modId}:${versionId}` : modId
 }
 
+/** 分享 MOD 临时压缩包在系统临时目录下的子目录名。 */
+export const MOD_TEMP_DIR_NAME = "dna-builder-mods"
+
+/**
+ * @description 构造分享 MOD 临时压缩包的文件名（不含目录）。
+ * 文件名带上时间戳，避免「先取消再重下」等场景复用到同一个路径（Rust 侧同一路径不允许并发下载）。
+ * @param modId 发布 id。
+ * @param stamp 时间戳（毫秒）。
+ * @returns 临时文件名。
+ */
+export function buildModTempFileName(modId: string, stamp: number) {
+    // 文件名会直接交给 Rust 写盘，这里只保留安全字符，防止发布 id 里的异常字符影响路径
+    const safeId = modId.replace(/[^0-9A-Za-z_-]/g, "_")
+    return `${safeId}-${stamp}.zip`
+}
+
 /**
  * @description 计算下载百分比（0-100）。
  * @param loaded 已接收字节数。

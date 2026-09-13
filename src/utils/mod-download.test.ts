@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import type { GameMod } from "@/api/gen/api-types"
 import type { InstalledShareMod, Mod } from "@/store/db"
 import {
+    buildModTempFileName,
     computeDownloadProgress,
     findInstalledLocalMod,
     isVersionInstalled,
@@ -62,6 +63,18 @@ describe("modTaskKey", () => {
     })
 })
 
+describe("buildModTempFileName", () => {
+    it("生成带时间戳的 zip 文件名，区分同一次运行内的多次下载", () => {
+        expect(buildModTempFileName("mod-1", 1700000000000)).toBe("mod-1-1700000000000.zip")
+        expect(buildModTempFileName("mod-1", 1700000000001)).not.toBe(buildModTempFileName("mod-1", 1700000000000))
+    })
+
+    it("过滤发布 id 中的路径分隔符等异常字符，避免写到临时目录之外", () => {
+        // 路径分隔符与点号全部替换为下划线，文件名无法跳出临时目录
+        expect(buildModTempFileName("../../evil/id", 1)).toBe("______evil_id-1.zip")
+    })
+})
+
 describe("computeDownloadProgress", () => {
     it("按已下载字节数换算百分比并四舍五入", () => {
         expect(computeDownloadProgress(0, 200)).toBe(0)
@@ -94,7 +107,7 @@ describe("resolveModInstallState", () => {
     })
 
     it("缺版本信息时用发布更新时间兜底判断", () => {
-        const noVersions = makeMod({ latestVersion: null })
+        const noVersions = makeMod({ latestVersion: undefined })
         expect(resolveModInstallState(makeRecord({ versionId: "", modUpdateAt: 100 }), noVersions)).toBe("installed")
         expect(resolveModInstallState(makeRecord({ versionId: "", modUpdateAt: 99 }), noVersions)).toBe("outdated")
     })
@@ -117,7 +130,7 @@ describe("isVersionInstalled", () => {
 describe("latestVersionLabel", () => {
     it("返回最新版本号标签，缺失时为 undefined", () => {
         expect(latestVersionLabel(makeMod())).toBe("1.1.0")
-        expect(latestVersionLabel(makeMod({ latestVersion: null }))).toBeUndefined()
+        expect(latestVersionLabel(makeMod({ latestVersion: undefined }))).toBeUndefined()
     })
 })
 

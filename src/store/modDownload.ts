@@ -1,19 +1,25 @@
+import { join, tempDir } from "@tauri-apps/api/path"
 import { useObservable } from "@vueuse/rxjs"
 import { liveQuery } from "dexie"
 import { t } from "i18next"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
+import { deleteFile, downloadFile } from "@/api/app"
 import type { GameMod, GameModVersion } from "@/api/gen/api-types"
-import { downloadGameMod, downloadGameModVersion, isDownloadAbortedError } from "@/api/modShare"
+import { modDownloadUrl, modVersionDownloadUrl } from "@/api/modShare"
 import { env } from "@/env"
-import { computeDownloadProgress, findInstalledLocalMod, modTaskKey } from "@/utils/mod-download"
+import { isDownloadPausedError, pauseDownload } from "@/utils/game-download"
+import { buildModTempFileName, computeDownloadProgress, findInstalledLocalMod, MOD_TEMP_DIR_NAME, modTaskKey } from "@/utils/mod-download"
 import { db, type InstalledShareMod, STANDALONE_ENTITY } from "./db"
 import { useGameStore } from "./game"
 import { useUIStore } from "./ui"
 import { useUserStore } from "./user"
 
 /**
- * 分享 MOD 的下载队列 Store：串行下载 + 进度上报 + 下载完自动安装。
+ * 分享 MOD 的下载队列 Store：串行下载 + 进度上报 + 下载完自动解压安装。
+ * 下载走桌面端 Rust 下载器（download_file，绕过浏览器 CORS，可直接下载「接口 302 到 OSS/CDN」的地址），
+ * 落盘的临时 zip 再复用已有的路径式导入（import_mod 从本地目录解压）安装到游戏 MOD 目录。
+ * 临时包写在系统临时目录（而非工作目录：应用可能装在 Program Files，工作目录不可写）。
  * 队列为全局单例，切页面/关弹窗都不会中断下载；已完成的任务短暂保留后自动移出，
  * 失败的任务保留到用户重试或清除。安装成功后写入 installedShareMods，
  * 商店卡片据此显示「已下载 / 可更新」。
@@ -37,7 +43,7 @@ export interface ModDownloadRequest {
     version?: string
     /** 压缩包文件名。 */
     fileName: string
-    /** 压缩包大小（字节），Content-Length 缺失时作为进度基准。 */
+    /** 压缩包大小（字节），响应头缺失时作为进度基准。 */
     fileSize: number
     /** 该发布当前 updateAt，写入安装记录用于更新判定。 */
     modUpdateAt: number
@@ -57,6 +63,8 @@ export interface ModDownloadTask extends ModDownloadRequest {
     error?: string
     /** 安装到的本地实体（用于完成后刷新对应列表）。 */
     entity?: string
+    /** 本次下载落盘的临时压缩包路径（相对工作目录），下载结束/取消后删除。 */
+    tempPath?: string
     createdAt: number
 }
 
@@ -81,8 +89,6 @@ export const useModDownloadStore = defineStore("modDownload", () => {
     const installTick = ref(0)
     /** 最近一次安装的目标实体，供外部刷新对应分类。 */
     const lastInstalledEntity = ref("")
-    /** 正在执行任务的取消控制器（key → controller）。 */
-    const controllers = new Map<string, AbortController>()
     /** 已完成任务的移出定时器。 */
     const removeTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
@@ -179,7 +185,7 @@ export const useModDownloadStore = defineStore("modDownload", () => {
     }
 
     /**
-     * @description 从队列移除任务；正在下载/安装的任务会先中止请求。
+     * @description 从队列移除任务记录（不负责中止下载与清理文件，由执行体收尾）。
      * @param key 任务 key。
      */
     function removeTask(key: string) {
@@ -188,14 +194,25 @@ export const useModDownloadStore = defineStore("modDownload", () => {
             clearTimeout(timer)
             removeTimers.delete(key)
         }
-        controllers.get(key)?.abort()
-        controllers.delete(key)
         const index = tasks.value.findIndex(task => task.key === key)
         if (index >= 0) tasks.value.splice(index, 1)
     }
 
     /**
-     * @description 取消任务：等待中的直接移出，执行中的先中止网络请求。
+     * @description 删除任务下载落的临时压缩包（取消/失败/完成安装后调用）。
+     * @param task 队列任务。
+     */
+    function cleanupTempFile(task: ModDownloadTask) {
+        const tempPath = task.tempPath
+        if (!tempPath) return
+        task.tempPath = undefined
+        void deleteFile(tempPath, true).catch(error => {
+            console.error("删除 MOD 临时压缩包失败:", error)
+        })
+    }
+
+    /**
+     * @description 取消任务：等待中的直接移出；下载中的按文件名通知 Rust 侧停止，随后由执行体收尾。
      * @param key 任务 key。
      */
     function cancelTask(key: string) {
@@ -205,8 +222,12 @@ export const useModDownloadStore = defineStore("modDownload", () => {
             removeTask(key)
             return
         }
-        // 执行中：中止请求，runTask 捕获后把任务移出队列
-        controllers.get(key)?.abort()
+        if (task.status === "downloading" && task.tempPath) {
+            // Rust 下载循环轮询该标记后返回 download_paused，runTask 据此把任务移出队列并清理临时包
+            void pauseDownload(task.tempPath).catch(error => {
+                console.error("暂停 MOD 下载失败:", error)
+            })
+        }
     }
 
     /**
@@ -224,10 +245,11 @@ export const useModDownloadStore = defineStore("modDownload", () => {
     }
 
     /**
-     * @description 清空所有任务（执行中的先中止）。
+     * @description 清空所有任务：下载中的先通知 Rust 侧停止（临时包与状态由 runTask 收尾）。
      */
     function clearTasks() {
         for (const task of [...tasks.value]) {
+            cancelTask(task.key)
             removeTask(task.key)
         }
     }
@@ -261,38 +283,35 @@ export const useModDownloadStore = defineStore("modDownload", () => {
     }
 
     /**
-     * @description 执行单个任务：下载（含进度）→ 安装 → 记录已安装版本。
+     * @description 执行单个任务：下载到临时包（含进度）→ 从本地目录解压安装 → 记录已安装版本。
      * 任何失败都落在任务状态上，不向调用方抛出，避免打断后续任务。
      * @param task 队列任务。
      */
     async function runTask(task: ModDownloadTask) {
-        const controller = new AbortController()
-        controllers.set(task.key, controller)
-
-        const onProgress = ({ loaded, total }: { loaded: number; total: number }) => {
-            task.loaded = loaded
-            task.progress = computeDownloadProgress(loaded, total)
-        }
-
         try {
             task.status = "downloading"
             task.error = undefined
-            const bytes = task.versionId
-                ? await downloadGameModVersion(task.modId, task.versionId, user.jwtToken, {
-                      totalBytes: task.fileSize,
-                      onProgress,
-                      signal: controller.signal,
-                  })
-                : await downloadGameMod(task.modId, user.jwtToken, {
-                      totalBytes: task.fileSize,
-                      onProgress,
-                      signal: controller.signal,
-                  })
+            // 临时包放系统临时目录：应用可能装在 Program Files，工作目录不可写
+            const tempPath = await join(await tempDir(), MOD_TEMP_DIR_NAME, buildModTempFileName(task.modId, Date.now()))
+            task.tempPath = tempPath
+            const url = task.versionId ? modVersionDownloadUrl(task.modId, task.versionId) : modDownloadUrl(task.modId)
+            await downloadFile(url, tempPath, {
+                headers: { token: user.jwtToken },
+                // MOD 包走「接口 302 到 CDN」：分块下载会对同一地址重复发 Range 请求，强制单流
+                singleStream: true,
+                onProgress: event => {
+                    task.loaded = event.downloaded
+                    // 响应头没给出总大小时用发布元数据兜底，避免进度条一直停在 0%
+                    const total = event.total > 0 ? event.total : task.fileSize
+                    const percent = computeDownloadProgress(event.downloaded, total)
+                    // 续传/重试可能让后端报出更小的字节数，这里只允许进度前进，保证进度条不回退
+                    if (percent !== null) task.progress = Math.max(task.progress ?? 0, percent)
+                },
+            })
 
             task.status = "installing"
-            task.loaded = bytes.byteLength
             task.progress = 100
-            const entity = await installTask(task, bytes)
+            const entity = await installTask(task, tempPath)
             task.entity = entity
             task.status = "done"
             installTick.value += 1
@@ -304,8 +323,9 @@ export const useModDownloadStore = defineStore("modDownload", () => {
                 setTimeout(() => removeTask(task.key), DONE_TASK_VISIBLE_MS)
             )
         } catch (error) {
-            if (isDownloadAbortedError(error)) {
+            if (isDownloadPausedError(error)) {
                 // 用户主动取消：静默移出队列
+                cleanupTempFile(task)
                 removeTask(task.key)
                 return
             }
@@ -314,18 +334,19 @@ export const useModDownloadStore = defineStore("modDownload", () => {
             task.error = error instanceof Error ? error.message : String(error)
             ui.showErrorMessage(t("game-launcher.modDownloadFailed", { error: task.error }))
         } finally {
-            controllers.delete(task.key)
+            // 压缩包已解压进 MOD 目录（或本次下载已失败/取消），临时包不再需要
+            cleanupTempFile(task)
         }
     }
 
     /**
-     * @description 把已下载的压缩包安装到对应分类，并写入已安装记录。
-     * 若该发布此前已安装过，先移除旧的本地 MOD（更新场景不残留旧版本）。
+     * @description 把已下载到本地临时包的压缩包安装到对应分类，并写入已安装记录。
+     * 复用已有的路径式导入（import_mod 从本地目录解压），若该发布此前已安装过，先移除旧的本地 MOD。
      * @param task 队列任务（携带发布快照）。
-     * @param bytes 压缩包字节。
+     * @param tempPath 临时压缩包路径。
      * @returns 安装到的本地实体名。
      */
-    async function installTask(task: ModDownloadTask, bytes: ArrayBuffer): Promise<string> {
+    async function installTask(task: ModDownloadTask, tempPath: string): Promise<string> {
         if (!game.path) throw new Error(t("game-launcher.selectGameFileFirst"))
 
         // 其他（自定义）分类：本地不存在该自定义实体时自动创建，保证一键安装后可见可用
@@ -348,8 +369,7 @@ export const useModDownloadStore = defineStore("modDownload", () => {
         }
 
         const localName = task.version ? `${task.name} v${task.version}` : task.name
-        const file = new File([bytes], task.fileName, { type: "application/zip" })
-        const ok = await game.importModToEntity([file], targetEntity, {
+        const ok = await game.importModPaths([tempPath], targetEntity, {
             name: localName,
             pic: task.coverUrl || "",
         })

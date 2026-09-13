@@ -1183,7 +1183,10 @@ fn import_mod_files(gamebase: String, files: Vec<ModImportFile>) -> Result<Strin
 /// 禁用（mode = "disable"）：把 .pak 改名为 .kap —— UE 只挂载 .pak 后缀，
 /// 改名后即使文件仍留在 Paks 目录内也不会被游戏加载；
 /// 启用（mode = "enable"）：把 .kap 还原为 .pak。
-/// 缺失的源文件会被跳过并记录日志，避免历史脏数据导致整个操作失败。
+/// 每个文件名都会尝试两种扩展名形态，因此对已经是目标形态的文件重复调用是幂等的，
+/// 记录与实际文件形态不一致时（外挂导入改名、重新导入回落到禁用态等）也能修正回来。
+/// 部分文件缺失会被跳过并记录日志，避免历史脏数据导致整个操作失败；
+/// 但一条记录的文件全都找不到时说明记录已与磁盘脱节，此时返回错误给前端提示，而不是「假启用」。
 #[tauri::command]
 fn enable_mod(basedir: String, files: Vec<String>, mode: String) -> String {
     let base_path = PathBuf::from(&basedir);
@@ -1192,13 +1195,24 @@ fn enable_mod(basedir: String, files: Vec<String>, mode: String) -> String {
         return format!("Failed to prepare moddir: {err}");
     }
     let disable_mode = mode != "enable";
+    let total = files.len();
+    let mut missing: Vec<String> = Vec::new();
     for file in files {
-        // 源文件候选：优先按「另一种形态」的扩展名查找，再兜底调用方传入的原名
-        let src_candidates: Vec<String> = if disable_mode {
-            vec![to_enabled_file_name(&file), file.clone()]
+        // 源文件候选：先试「另一种形态」的扩展名，再试原名对应的两种形态，最后兜底调用方传入的原名
+        let mut src_candidates: Vec<String> = Vec::new();
+        let candidates = if disable_mode {
+            [to_enabled_file_name(&file), to_disabled_file_name(&file)]
         } else {
-            vec![to_disabled_file_name(&file), file.clone()]
+            [to_disabled_file_name(&file), to_enabled_file_name(&file)]
         };
+        for candidate in candidates {
+            if !src_candidates.contains(&candidate) {
+                src_candidates.push(candidate);
+            }
+        }
+        if !src_candidates.contains(&file) {
+            src_candidates.push(file.clone());
+        }
         let mut handled = false;
         for candidate in src_candidates {
             let src = base_path.join(&candidate);
@@ -1225,7 +1239,11 @@ fn enable_mod(basedir: String, files: Vec<String>, mode: String) -> String {
         }
         if !handled {
             eprintln!("Skip missing mod file: {file}");
+            missing.push(file);
         }
+    }
+    if total > 0 && missing.len() == total {
+        return format!("MOD 文件不存在：{}", missing.join("、"));
     }
     "".to_string()
 }
@@ -2054,35 +2072,162 @@ fn build_download_progress(
 }
 
 #[cfg(test)]
-mod mod_import_tmp_tests {
-    use super::import_mod;
+mod mod_file_tests {
+    use super::{enable_mod, import_mod};
+    use std::fs;
+    use std::io::Write;
+    use std::path::{Path, PathBuf};
+    use zip::write::FileOptions;
 
-    /// 临时验证：真实分享包能否解压进 MOD 目录。
-    #[test]
-    fn import_real_share_zips() {
-        let base = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../.tmp");
-        for name in ["mod-0.zip", "mod-1.zip"] {
-            let src = base.join(name);
-            if !src.exists() {
-                eprintln!("skip missing fixture: {src:?}");
-                continue;
-            }
-            let target = std::env::temp_dir().join(format!("dna-mod-import-test-{name}"));
-            let _ = std::fs::remove_dir_all(&target);
-            let out = import_mod(
-                target.to_string_lossy().to_string(),
-                vec![src.to_string_lossy().to_string()],
-            );
-            eprintln!("[{name}] result = {out}");
-            let mut listed = Vec::new();
-            if let Ok(entries) = std::fs::read_dir(&target) {
-                for entry in entries.flatten() {
-                    listed.push(entry.file_name().to_string_lossy().to_string());
-                }
-            }
-            eprintln!("[{name}] files in target = {listed:?}");
-            let _ = std::fs::remove_dir_all(&target);
+    /// 建立隔离的临时目录（按用例名区分，重复运行前先清空）。
+    fn temp_dir(name: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("dna-mod-test-{name}"));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).expect("创建测试目录失败");
+        dir
+    }
+
+    /// 目录路径的字符串形式（命令参数用）。
+    fn basedir(dir: &Path) -> String {
+        dir.to_string_lossy().to_string()
+    }
+
+    /// 目录内的文件名（排序后便于断言）。
+    fn file_names(dir: &Path) -> Vec<String> {
+        let mut names: Vec<String> = fs::read_dir(dir)
+            .expect("读取目录失败")
+            .flatten()
+            .map(|entry| entry.file_name().to_string_lossy().to_string())
+            .collect();
+        names.sort();
+        names
+    }
+
+    /// 打包一个含指定条目的 zip，模拟上传/下载得到的 MOD 压缩包。
+    fn write_zip(path: &Path, entries: &[(&str, &[u8])]) {
+        let file = fs::File::create(path).expect("创建 zip 失败");
+        let mut writer = zip::ZipWriter::new(file);
+        let options = FileOptions::default().compression_method(zip::CompressionMethod::Stored);
+        for (name, data) in entries {
+            writer
+                .start_file(*name, options)
+                .expect("写入 zip 条目失败");
+            writer.write_all(data).expect("写入 zip 内容失败");
         }
+        writer.finish().expect("完成 zip 失败");
+    }
+
+    /// 下载得到的压缩包应被解压进游戏 MOD 目录，并就地改成游戏不加载的 .kap 禁用态。
+    #[test]
+    fn import_extracts_zip_into_mod_dir_as_disabled() {
+        let work = temp_dir("import");
+        let zip_path = work.join("EveToAida_P.zip");
+        write_zip(
+            &zip_path,
+            &[("EveToAida_P.pak", b"pak-bytes"), ("mod.json", b"{}")],
+        );
+        let mod_dir = work.join("~mods");
+        fs::create_dir_all(&mod_dir).unwrap();
+
+        let output = import_mod(
+            basedir(&mod_dir),
+            vec![zip_path.to_string_lossy().to_string()],
+        );
+
+        assert!(
+            output.contains("EveToAida_P.kap"),
+            "导入结果应报告禁用态文件名: {output}"
+        );
+        // 压缩包内的 pak 落到 MOD 目录并处于禁用态，mod.json 等非 pak 文件不导入
+        assert_eq!(file_names(&mod_dir), vec!["EveToAida_P.kap"]);
+    }
+
+    /// 启用把 .kap 还原为 .pak，且对已经处于启用态的文件重复调用是幂等的。
+    #[test]
+    fn enable_restores_pak_and_is_idempotent() {
+        let mod_dir = temp_dir("enable");
+        fs::write(mod_dir.join("A_P.kap"), b"x").unwrap();
+
+        assert_eq!(
+            enable_mod(
+                basedir(&mod_dir),
+                vec!["A_P.kap".to_string()],
+                "enable".to_string()
+            ),
+            ""
+        );
+        assert_eq!(file_names(&mod_dir), vec!["A_P.pak"]);
+
+        // 记录仍是 .kap 而磁盘已是 .pak（例如外部改过名）：再启用一次不能报错，也不能改坏状态
+        assert_eq!(
+            enable_mod(
+                basedir(&mod_dir),
+                vec!["A_P.kap".to_string()],
+                "enable".to_string()
+            ),
+            ""
+        );
+        assert_eq!(file_names(&mod_dir), vec!["A_P.pak"]);
+    }
+
+    /// 禁用同样兼容两种形态：磁盘上仍是 .kap 时视为已经禁用成功。
+    #[test]
+    fn disable_handles_both_extensions() {
+        let mod_dir = temp_dir("disable");
+        fs::write(mod_dir.join("A_P.pak"), b"x").unwrap();
+        assert_eq!(
+            enable_mod(
+                basedir(&mod_dir),
+                vec!["A_P.kap".to_string()],
+                "disable".to_string()
+            ),
+            ""
+        );
+        assert_eq!(file_names(&mod_dir), vec!["A_P.kap"]);
+
+        // 已经处于禁用态：重复禁用应成功且不改名
+        assert_eq!(
+            enable_mod(
+                basedir(&mod_dir),
+                vec!["A_P.kap".to_string()],
+                "disable".to_string()
+            ),
+            ""
+        );
+        assert_eq!(file_names(&mod_dir), vec!["A_P.kap"]);
+    }
+
+    /// 一条记录的文件全都找不到时返回错误，避免前端把「什么都没做」当成启用成功。
+    #[test]
+    fn enable_fails_when_every_file_is_missing() {
+        let mod_dir = temp_dir("missing");
+
+        let error = enable_mod(
+            basedir(&mod_dir),
+            vec!["Ghost_P.kap".to_string()],
+            "enable".to_string(),
+        );
+
+        assert!(
+            error.contains("MOD 文件不存在") && error.contains("Ghost_P.kap"),
+            "应返回文件缺失错误: {error}"
+        );
+    }
+
+    /// 只有部分文件缺失时保持宽容：已存在的文件正常处理，不整体失败。
+    #[test]
+    fn enable_tolerates_partially_missing_files() {
+        let mod_dir = temp_dir("partial");
+        fs::write(mod_dir.join("A_P.kap"), b"x").unwrap();
+
+        let error = enable_mod(
+            basedir(&mod_dir),
+            vec!["A_P.kap".to_string(), "Missing_P.kap".to_string()],
+            "enable".to_string(),
+        );
+
+        assert_eq!(error, "");
+        assert_eq!(file_names(&mod_dir), vec!["A_P.pak"]);
     }
 }
 
@@ -2286,6 +2431,7 @@ async fn download_chunk(
     filename: &str,
     event_progress: Arc<std::sync::atomic::AtomicU64>,
     progress_emitter: Arc<DownloadProgressEmitter>,
+    extra_headers: &[(String, String)],
 ) -> Result<u64, String> {
     const MAX_RETRIES: u32 = 3; // 最大重试次数
     const RETRY_DELAY_MS: u64 = 1000; // 重试延迟（毫秒）
@@ -2310,13 +2456,16 @@ async fn download_chunk(
         }
 
         // 发送 Range 请求
-        let response = client
-            .get(url)
-            .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
-            .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip")
-            .header("Range", range_header.clone())
-            .send()
-            .await;
+        let response = with_extra_headers(
+            client
+                .get(url)
+                .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
+                .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip")
+                .header("Range", range_header.clone()),
+            extra_headers,
+        )
+        .send()
+        .await;
 
         match response {
             Ok(resp) => {
@@ -2417,6 +2566,7 @@ async fn download_file_multithreaded(
     total_size: u64,
     filename: &str,
     concurrent_threads: usize,
+    extra_headers: &[(String, String)],
 ) -> Result<String, String> {
     // 计算分块数量
     let num_chunks = total_size.div_ceil(DOWNLOAD_CHUNK_SIZE) as usize;
@@ -2467,6 +2617,8 @@ async fn download_file_multithreaded(
 
     // 创建任务列表
     let mut tasks = Vec::with_capacity(num_chunks);
+    // 分块任务在 tokio 里要求 'static，请求头需要在每个任务内各自持有
+    let headers = extra_headers.to_vec();
 
     for i in 0..num_chunks {
         let chunk_info = &progress_info.chunks[i];
@@ -2487,6 +2639,7 @@ async fn download_file_multithreaded(
         let progress_emitter_clone = progress_emitter.clone();
         let progress_store_clone = progress_store.clone();
         let semaphore_clone = semaphore.clone();
+        let headers_clone = headers.clone();
 
         let task = tokio::spawn(async move {
             // 获取信号量许可
@@ -2506,6 +2659,7 @@ async fn download_file_multithreaded(
                 &filename_clone,
                 event_progress_clone,
                 progress_emitter_clone,
+                &headers_clone,
             )
             .await?;
 
@@ -2559,25 +2713,42 @@ async fn download_file_multithreaded(
 
 /// 从指定URL下载文件到本地，并通过事件系统发送进度更新
 /// 对于大于 10MB 的文件使用 Range 多线程下载，否则使用单线程下载
+/// 把调用方附加的请求头套到请求构建器上（如 MOD 下载需要的鉴权 token）。
+/// reqwest 跟随重定向时会保留这些自定义头，因此接口 302 到 CDN 后依然可用。
+fn with_extra_headers(
+    builder: reqwest::RequestBuilder,
+    headers: &[(String, String)],
+) -> reqwest::RequestBuilder {
+    headers.iter().fold(builder, |builder, (name, value)| {
+        builder.header(name.as_str(), value.as_str())
+    })
+}
+
 #[tauri::command]
 async fn download_file(
     app_handle: tauri::AppHandle,
     url: String,
     filename: String,
     concurrent_threads: usize,
+    headers: Option<Vec<(String, String)>>,
+    single_stream: Option<bool>,
 ) -> Result<String, String> {
     let download_key = get_download_state_key(&filename)?;
     let _active_download_guard = ActiveDownloadGuard::try_new(&download_key)?;
     clear_download_paused(&filename);
     let client = HTTP_CLIENT.clone();
+    let extra_headers = headers.unwrap_or_default();
 
     // 发送 HEAD 请求获取文件信息和 Range 支持
-    let head_response = client
-        .head(&url)
-        .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
-        .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip")
-        .send()
-        .await;
+    let head_response = with_extra_headers(
+        client
+            .head(&url)
+            .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
+            .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip"),
+        &extra_headers,
+    )
+    .send()
+    .await;
 
     let (total_size, accept_ranges) = match head_response {
         Ok(response) => {
@@ -2599,13 +2770,16 @@ async fn download_file(
                 (length, ranges)
             } else {
                 // HEAD 请求失败，使用 GET 请求
-                let get_response = client
-                    .get(&url)
-                    .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
-                    .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip")
-                    .send()
-                    .await
-                    .map_err(|e| format!("Failed to send GET request: {}", e))?;
+                let get_response = with_extra_headers(
+                    client
+                        .get(&url)
+                        .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
+                        .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip"),
+                    &extra_headers,
+                )
+                .send()
+                .await
+                .map_err(|e| format!("Failed to send GET request: {}", e))?;
 
                 if !get_response.status().is_success() {
                     return Err(format!(
@@ -2681,7 +2855,10 @@ async fn download_file(
         }
     }
 
-    if total_size > MULTITHREAD_THRESHOLD && accept_ranges == "bytes" {
+    // single_stream 用于必须「一次 GET 拿完」的场景（如 MOD 包走服务端 302 转 CDN 的接口）：
+    // 分块下载会对同一个地址重复发 Range 请求，既重复触发服务端计数，也依赖重定向后的 Range 支持。
+    let allow_multithreaded = !single_stream.unwrap_or(false);
+    if allow_multithreaded && total_size > MULTITHREAD_THRESHOLD && accept_ranges == "bytes" {
         println!(
             "文件大小: {} bytes ({} MB)，启用多线程下载",
             total_size,
@@ -2695,18 +2872,22 @@ async fn download_file(
             total_size,
             &filename,
             concurrent_threads,
+            &extra_headers,
         )
         .await;
     }
 
     // 单线程下载
-    let response = client
-        .get(&url)
-        .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
-        .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip")
-        .send()
-        .await
-        .map_err(|e| format!("Failed to send request: {}", e))?;
+    let response = with_extra_headers(
+        client
+            .get(&url)
+            .header(reqwest::header::USER_AGENT, GAME_LAUNCHER_USER_AGENT)
+            .header(reqwest::header::ACCEPT_ENCODING, "deflate, gzip"),
+        &extra_headers,
+    )
+    .send()
+    .await
+    .map_err(|e| format!("Failed to send request: {}", e))?;
 
     // 检查响应状态
     if !response.status().is_success() {

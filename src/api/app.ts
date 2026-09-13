@@ -393,6 +393,67 @@ export async function deleteFile(filePath: string, force?: boolean) {
     return await invoke<string>("delete_file", { filePath, force })
 }
 
+/** download_progress 事件载荷（字段与后端 DownloadProgressEmitter 一致）。 */
+export interface DownloadProgressEvent {
+    /** 下载目标文件，即调用 downloadFile 时传入的 filename 原样字符串。 */
+    filename: string
+    /** 已下载百分比（0-100）。 */
+    progress: number
+    /** 已下载字节数。 */
+    downloaded: number
+    /** 总字节数，未知时为 0。 */
+    total: number
+}
+
+/** 桌面端下载器选项。 */
+export interface DownloadFileOptions {
+    /** 附加请求头（如 MOD 下载接口要求的 token）。 */
+    headers?: Record<string, string>
+    /** 并发分块数，缺省 8。 */
+    concurrentThreads?: number
+    /** 强制单流下载：目标接口会 302 到 CDN 时避免分块重复请求（MOD 包使用）。 */
+    singleStream?: boolean
+    /** 进度回调：已按 filename 过滤、已由后端节流（250ms），且保证不回退。 */
+    onProgress?: (progress: DownloadProgressEvent) => void
+}
+
+/**
+ * @description 用桌面端 Rust 下载器把 URL 保存到 filename（相对当前工作目录，父目录自动创建），
+ * 期间通过 download_progress 事件上报进度。请求由 Rust 侧发出，不受浏览器 CORS 限制，
+ * 因此可以直接下载「接口 302 到 OSS/CDN」的地址。
+ * @param url 下载地址。
+ * @param filename 目标文件路径（相对工作目录）。
+ * @param options 请求头、并发与进度选项。
+ * @returns Rust 返回的下载结果描述。
+ */
+export async function downloadFile(url: string, filename: string, options: DownloadFileOptions = {}) {
+    const onProgress = options.onProgress
+    let unlistenFn: UnlistenFn | undefined
+
+    try {
+        if (onProgress) {
+            // 断点续传/分块重试可能让后端报出更小的已下载字节数，这里只放行递增的进度，保证进度条不回退
+            let maxDownloaded = 0
+            unlistenFn = await listen<DownloadProgressEvent>("download_progress", event => {
+                if (event.payload.filename !== filename) return
+                if (event.payload.downloaded < maxDownloaded) return
+                maxDownloaded = event.payload.downloaded
+                onProgress(event.payload)
+            })
+        }
+
+        return await invoke<string>("download_file", {
+            url,
+            filename,
+            concurrentThreads: options.concurrentThreads ?? 8,
+            headers: options.headers ? Object.entries(options.headers) : undefined,
+            singleStream: options.singleStream ?? false,
+        })
+    } finally {
+        unlistenFn?.()
+    }
+}
+
 /**
  * 监听文件变化
  * @param filePath 文件路径
