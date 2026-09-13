@@ -4,9 +4,10 @@ import { computed, onMounted, ref, watch } from "vue"
 import { gameModsCountQuery, gameModsQuery } from "@/api/gen/api-queries"
 import type { GameMod } from "@/api/gen/api-types"
 import { uploadGameMod, uploadGameModVersion } from "@/api/modShare"
-import { useModInstall } from "@/composables/useModInstall"
+import { useModDownloadStore } from "@/store/modDownload"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { latestVersionLabel, resolveModInstallState } from "@/utils/mod-download"
 
 /**
  * 在线 MOD 商店（分享列表 + 上传/新版本弹窗）。
@@ -23,12 +24,11 @@ const props = withDefaults(
 
 const emit = defineEmits<{
     openDetail: [mod: GameMod]
-    /** 安装完成通知（参数为目标实体名，供外部刷新本地列表）。 */
-    installed: [targetEntity: string]
 }>()
 
 const ui = useUIStore()
 const user = useUserStore()
+const download = useModDownloadStore()
 
 const isLoggedIn = computed(() => !!user.jwtToken)
 
@@ -54,10 +54,45 @@ const shareCategoryOptions = [
 
 const shareFiltered = computed(() => shareMods.value.filter(mod => mod.isActive !== false))
 
-/** 分享卡片上的快速安装（详情页内的安装由 GameModDetail 处理）。 */
-const { installing: cardInstalling, installSharedMod: installCardMod } = useModInstall(targetEntity =>
-    emit("installed", targetEntity)
-)
+//#region 卡片下载状态（队列进度 + 已下载/可更新）
+/**
+ * @description 取卡片当前占用的活跃任务（等待/下载/安装中）。
+ * @param mod 分享 MOD。
+ * @returns 活跃任务，没有时返回 undefined。
+ */
+function cardTask(mod: GameMod) {
+    return download.getActiveTask(mod.id)
+}
+
+/**
+ * @description 判定卡片相对本地安装记录的状态（未安装 / 已下载 / 可更新）。
+ * @param mod 分享 MOD。
+ * @returns 安装状态。
+ */
+function cardInstallState(mod: GameMod) {
+    return resolveModInstallState(download.getInstalledRecord(mod.id), mod)
+}
+
+/**
+ * @description 已下载按钮文案（带已安装的版本号）。
+ * @param mod 分享 MOD。
+ * @returns 按钮文案。
+ */
+function installedLabel(mod: GameMod) {
+    const version = download.getInstalledRecord(mod.id)?.version
+    return version ? t("game-launcher.installedVersion", { version }) : t("game-launcher.installed")
+}
+
+/**
+ * @description 更新按钮文案（带远端最新版本号）。
+ * @param mod 分享 MOD。
+ * @returns 按钮文案。
+ */
+function updateLabel(mod: GameMod) {
+    const version = latestVersionLabel(mod)
+    return version ? t("game-launcher.updateTo", { version }) : t("game-launcher.updateAvailable")
+}
+//#endregion
 
 let shareLoadTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -511,6 +546,21 @@ async function submitVersion() {
                         >
                             {{ mod.status === "pending" ? $t("game-launcher.statusPending") : $t("game-launcher.statusRejected") }}
                         </span>
+                        <!-- 本地安装状态（已下载 / 可更新） -->
+                        <span
+                            v-if="cardInstallState(mod) === 'installed'"
+                            class="absolute top-4 left-4 badge badge-sm gap-1 border-0 bg-success/85 text-base-100"
+                        >
+                            <Icon icon="ri:check-line" class="size-3" />
+                            {{ $t("game-launcher.installed") }}
+                        </span>
+                        <span
+                            v-else-if="cardInstallState(mod) === 'outdated'"
+                            class="absolute top-4 left-4 badge badge-sm gap-1 border-0 bg-warning/90 text-base-100"
+                        >
+                            <Icon icon="ri:refresh-line" class="size-3" />
+                            {{ $t("game-launcher.updateAvailable") }}
+                        </span>
                     </figure>
                     <div class="flex flex-1 flex-col p-4">
                         <!-- 标题和标签 -->
@@ -566,7 +616,7 @@ async function submitVersion() {
                         </div>
 
                         <!-- 操作按钮 -->
-                        <div class="card-actions justify-end mt-2 flex gap-2">
+                        <div class="card-actions mt-2 flex gap-2">
                             <button
                                 v-if="routeMode"
                                 class="btn btn-primary btn-sm flex-1"
@@ -575,20 +625,69 @@ async function submitVersion() {
                                 <Icon icon="ri:eye-line" class="size-4" />
                                 {{ $t("mods-list.viewDetail") }}
                             </button>
+                            <!-- 未登录：仅提示，不提供下载入口 -->
+                            <button v-else-if="!isLoggedIn" class="btn btn-sm btn-ghost flex-1" disabled>
+                                <Icon icon="ri:lock-line" class="size-4" />
+                                {{ $t("game-launcher.loginToDownload") }}
+                            </button>
+                            <!-- 队列中：进度条 + 取消 -->
+                            <div v-else-if="cardTask(mod)" class="flex min-w-0 flex-1 flex-col gap-1">
+                                <div class="flex items-center gap-1.5 text-xs">
+                                    <span v-if="cardTask(mod)?.status === 'pending'" class="flex items-center gap-1 opacity-70">
+                                        <Icon icon="ri:time-line" class="size-3.5" />
+                                        {{ $t("game-launcher.queuePending") }}
+                                    </span>
+                                    <span v-else class="flex items-center gap-1 text-primary">
+                                        <Icon
+                                            :icon="cardTask(mod)?.status === 'installing' ? 'ri:download-cloud-2-line' : 'ri:download-2-line'"
+                                            class="size-3.5"
+                                        />
+                                        {{
+                                            cardTask(mod)?.status === "installing"
+                                                ? $t("game-launcher.installing")
+                                                : $t("game-launcher.queueDownloading")
+                                        }}
+                                    </span>
+                                    <span class="ml-auto font-orbitron tabular-nums">
+                                        {{ cardTask(mod)?.progress === null ? "—" : `${cardTask(mod)?.progress}%` }}
+                                    </span>
+                                    <button
+                                        class="btn btn-square btn-ghost btn-xs"
+                                        :data-tip="$t('game-launcher.queueCancel')"
+                                        @click.stop="download.cancelTask(cardTask(mod)?.key || '')"
+                                    >
+                                        <Icon icon="ri:close-line" class="size-3.5" />
+                                    </button>
+                                </div>
+                                <progress
+                                    class="progress progress-primary h-1.5 w-full"
+                                    :value="cardTask(mod)?.progress ?? 0"
+                                    max="100"
+                                />
+                            </div>
                             <template v-else>
+                                <!-- 已下载：与远端最新版本一致，点击可重新下载 -->
                                 <button
-                                    v-if="isLoggedIn"
-                                    class="btn btn-primary btn-sm flex-1"
-                                    :class="{ 'btn-disabled': cardInstalling === mod.id }"
-                                    @click.stop="installCardMod(mod)"
+                                    v-if="cardInstallState(mod) === 'installed'"
+                                    class="btn btn-sm btn-outline flex-1 tooltip tooltip-top"
+                                    :data-tip="$t('game-launcher.reinstall')"
+                                    @click.stop="download.enqueue(mod)"
                                 >
-                                    <span v-if="cardInstalling === mod.id" class="loading loading-spinner loading-xs"></span>
-                                    <Icon v-else icon="ri:download-2-line" class="size-4" />
-                                    {{ cardInstalling === mod.id ? $t("game-launcher.installing") : $t("game-launcher.download") }}
+                                    <Icon icon="ri:check-line" class="size-4 text-success" />
+                                    {{ installedLabel(mod) }}
                                 </button>
-                                <button v-else class="btn btn-sm btn-ghost flex-1" disabled>
-                                    <Icon icon="ri:lock-line" class="size-4" />
-                                    {{ $t("game-launcher.loginToDownload") }}
+                                <!-- 可更新：直接更新到远端最新版本 -->
+                                <button
+                                    v-else-if="cardInstallState(mod) === 'outdated'"
+                                    class="btn btn-sm btn-warning flex-1"
+                                    @click.stop="download.enqueue(mod)"
+                                >
+                                    <Icon icon="ri:refresh-line" class="size-4" />
+                                    {{ updateLabel(mod) }}
+                                </button>
+                                <button v-else class="btn btn-primary btn-sm flex-1" @click.stop="download.enqueue(mod)">
+                                    <Icon icon="ri:download-2-line" class="size-4" />
+                                    {{ $t("game-launcher.download") }}
                                 </button>
                             </template>
                             <button

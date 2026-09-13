@@ -4,11 +4,12 @@ import { t } from "i18next"
 import MarkdownIt from "markdown-it"
 import { computed, onMounted, ref, watch } from "vue"
 import { gameModQuery } from "@/api/gen/api-queries"
-import type { GameMod } from "@/api/gen/api-types"
-import { useModInstall } from "@/composables/useModInstall"
+import type { GameMod, GameModVersion } from "@/api/gen/api-types"
 import { env } from "@/env"
+import { useModDownloadStore } from "@/store/modDownload"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
+import { isVersionInstalled, latestVersionLabel, modTaskKey, resolveModInstallState } from "@/utils/mod-download"
 
 /**
  * MOD 详情页组件（弹窗与独立路由共用）：
@@ -30,17 +31,53 @@ const props = withDefaults(
 
 const emit = defineEmits<{
     close: []
-    /** 安装成功后通知外部刷新本地列表。 */
-    installed: []
 }>()
 
 const ui = useUIStore()
 const user = useUserStore()
+const download = useModDownloadStore()
 
 const mod = ref<GameMod | null>(props.initialMod)
 const loading = ref(false)
-/** 一键下载安装（详情页共用逻辑）。 */
-const { installing, installSharedMod, installSharedVersion } = useModInstall(() => emit("installed"))
+
+/** 本地已安装记录（未安装时 undefined）。 */
+const installedRecord = computed(() => (mod.value ? download.getInstalledRecord(mod.value.id) : undefined))
+/** 相对远端最新版本的安装状态。 */
+const installState = computed(() => (mod.value ? resolveModInstallState(installedRecord.value, mod.value) : "new"))
+/** 下载最新版本按钮对应的活跃任务。 */
+const latestTask = computed(() => (mod.value ? download.getActiveTask(mod.value.id) : undefined))
+
+/**
+ * @description 取某个版本行对应的活跃任务（最新版行同时匹配主按钮发起的任务）。
+ * @param version 版本。
+ * @returns 活跃任务，没有时返回 undefined。
+ */
+function versionTask(version: GameModVersion) {
+    if (!mod.value) return undefined
+    return (
+        download.getActiveTaskByKey(modTaskKey(mod.value.id, version.id)) ??
+        (mod.value.latestVersion?.id === version.id ? download.getActiveTask(mod.value.id) : undefined)
+    )
+}
+
+/**
+ * @description 已下载按钮文案（带已安装的版本号）。
+ * @returns 按钮文案。
+ */
+function installedLabel() {
+    const version = installedRecord.value?.version
+    return version ? t("game-launcher.installedVersion", { version }) : t("game-launcher.installed")
+}
+
+/**
+ * @description 更新按钮文案（带远端最新版本号）。
+ * @param target 远端发布。
+ * @returns 按钮文案。
+ */
+function updateLabel(target: GameMod) {
+    const version = latestVersionLabel(target)
+    return version ? t("game-launcher.updateTo", { version }) : t("game-launcher.updateAvailable")
+}
 
 /** 封面大图预览实例（点击放大）。 */
 const coverPreviewRef = ref<InstanceType<typeof ImagePreview> | null>(null)
@@ -271,6 +308,21 @@ watch(
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <span class="text-sm font-medium">{{ version.version }}</span>
                                     <span v-if="index === 0" class="badge badge-xs badge-primary">{{ $t("game-launcher.latest") }}</span>
+                                    <!-- 本地安装状态：该版本即本地已安装版本，或本地安装版本落后于最新版 -->
+                                    <span
+                                        v-if="isVersionInstalled(installedRecord, version.id)"
+                                        class="badge badge-xs badge-success gap-1"
+                                    >
+                                        <Icon icon="ri:check-line" class="size-3" />
+                                        {{ $t("game-launcher.installed") }}
+                                    </span>
+                                    <span
+                                        v-else-if="index === 0 && installState === 'outdated'"
+                                        class="badge badge-xs badge-warning gap-1"
+                                    >
+                                        <Icon icon="ri:refresh-line" class="size-3" />
+                                        {{ $t("game-launcher.updateAvailable") }}
+                                    </span>
                                     <span class="text-[11px] opacity-50">
                                         {{ new Date(version.createdAt).toLocaleString() }} ·
                                         {{ (version.fileSize / 1024 / 1024).toFixed(2) }} MB · {{ version.downloads }} 下载
@@ -278,31 +330,90 @@ watch(
                                 </div>
                                 <div v-if="version.changelog" class="text-xs opacity-70 line-clamp-2">{{ version.changelog }}</div>
                             </div>
-                            <button
-                                v-if="isApp && isLoggedIn"
-                                class="btn btn-sm btn-ghost btn-square"
-                                :class="{ 'btn-disabled': installing === `${mod.id}:${version.id}` }"
-                                :data-tip="$t('game-launcher.download')"
-                                @click="installSharedVersion(mod, version)"
-                            >
-                                <span v-if="installing === `${mod.id}:${version.id}`" class="loading loading-spinner loading-xs"></span>
-                                <Icon v-else icon="ri:download-2-line" class="size-4" />
-                            </button>
+                            <!-- 队列中：显示该版本的进度，点击可取消 -->
+                            <div v-if="versionTask(version)" class="flex items-center gap-1.5 flex-none">
+                                <span class="loading loading-spinner loading-xs"></span>
+                                <span class="text-xs font-orbitron tabular-nums">
+                                    {{ versionTask(version)?.progress === null ? "…" : `${versionTask(version)?.progress}%` }}
+                                </span>
+                                <button
+                                    class="btn btn-sm btn-ghost btn-square"
+                                    :data-tip="$t('game-launcher.queueCancel')"
+                                    @click="download.cancelTask(versionTask(version)?.key || '')"
+                                >
+                                    <Icon icon="ri:close-line" class="size-4" />
+                                </button>
+                            </div>
+                            <template v-else-if="isApp && isLoggedIn">
+                                <!-- 已安装该版本：点击可重新下载 -->
+                                <button
+                                    v-if="isVersionInstalled(installedRecord, version.id)"
+                                    class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
+                                    :data-tip="$t('game-launcher.reinstall')"
+                                    @click="download.enqueue(mod, version)"
+                                >
+                                    <Icon icon="ri:check-line" class="size-4 text-success" />
+                                </button>
+                                <button
+                                    v-else
+                                    class="btn btn-sm btn-ghost btn-square tooltip tooltip-left"
+                                    :data-tip="$t('game-launcher.download')"
+                                    @click="download.enqueue(mod, version)"
+                                >
+                                    <Icon icon="ri:download-2-line" class="size-4" />
+                                </button>
+                            </template>
                         </div>
                     </div>
 
                     <!-- 下载安装属桌面端管理功能：web 端仅提示，不提供入口 -->
                     <template v-if="isApp">
-                        <button
-                            v-if="isLoggedIn"
-                            class="btn btn-primary"
-                            :class="{ 'btn-disabled': installing === mod.id }"
-                            @click="installSharedMod(mod)"
-                        >
-                            <span v-if="installing === mod.id" class="loading loading-spinner loading-xs"></span>
-                            <Icon v-else icon="ri:download-2-line" class="size-4" />
-                            {{ installing === mod.id ? $t("game-launcher.installing") : $t("game-launcher.downloadLatest") }}
-                        </button>
+                        <!-- 队列中：最新版整体进度 -->
+                        <div v-if="latestTask" class="flex flex-col gap-1.5 rounded-xs border border-primary/40 bg-primary/5 px-3 py-2.5">
+                            <div class="flex items-center gap-2 text-sm">
+                                <span v-if="latestTask.status === 'pending'" class="flex items-center gap-1.5 opacity-70">
+                                    <Icon icon="ri:time-line" class="size-4" />
+                                    {{ $t("game-launcher.queuePending") }}
+                                </span>
+                                <span v-else class="flex items-center gap-1.5 text-primary">
+                                    <span class="loading loading-spinner loading-xs"></span>
+                                    {{
+                                        latestTask.status === "installing"
+                                            ? $t("game-launcher.installing")
+                                            : $t("game-launcher.queueDownloading")
+                                    }}
+                                </span>
+                                <span class="ml-auto font-orbitron tabular-nums">
+                                    {{ latestTask.progress === null ? "—" : `${latestTask.progress}%` }}
+                                </span>
+                                <button class="btn btn-xs btn-ghost" @click="download.cancelTask(latestTask.key)">
+                                    <Icon icon="ri:close-line" class="size-3.5" />
+                                    {{ $t("game-launcher.queueCancel") }}
+                                </button>
+                            </div>
+                            <progress class="progress progress-primary h-1.5 w-full" :value="latestTask.progress ?? 0" max="100" />
+                        </div>
+                        <template v-else-if="isLoggedIn">
+                            <!-- 已下载：与远端最新版一致，点击可重新下载 -->
+                            <button
+                                v-if="installState === 'installed'"
+                                class="btn btn-outline tooltip tooltip-top"
+                                :data-tip="$t('game-launcher.reinstall')"
+                                @click="download.enqueue(mod)"
+                            >
+                                <Icon icon="ri:check-line" class="size-4 text-success" />
+                                {{ installedLabel() }}
+                            </button>
+                            <!-- 可更新：直接更新到远端最新版 -->
+                            <button v-else-if="installState === 'outdated'" class="btn btn-warning" @click="download.enqueue(mod)">
+                                <Icon icon="ri:refresh-line" class="size-4" />
+                                {{ updateLabel(mod) }}
+                            </button>
+                            <button v-else class="btn btn-primary" @click="download.enqueue(mod)">
+                                <Icon icon="ri:download-2-line" class="size-4" />
+                                {{ $t("game-launcher.downloadLatest") }}
+                            </button>
+                        </template>
                         <button v-else class="btn btn-ghost" disabled>
                             <Icon icon="ri:lock-line" class="size-4" />
                             {{ $t("game-launcher.loginToDownload") }}

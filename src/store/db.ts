@@ -81,6 +81,31 @@ export interface EntityModMulti {
 
 export type UEntityModMulti = Omit<EntityModMulti, "id">
 
+/**
+ * 已下载的分享 MOD 记录：把在线商店的发布与本地导入的 MOD 关联起来，
+ * 供商店卡片显示「已下载 / 可更新」状态，并在更新时先移除旧版本再导入新版本。
+ * 主键即分享发布的 id（GameMod.id），一个发布只保留一条记录（记录最近一次安装的版本）。
+ */
+export interface InstalledShareMod {
+    id: string
+    /** 安装时的版本 id（对应 GameModVersion.id）。 */
+    versionId: string
+    /** 安装时的版本号标签（展示用，如 1.0.0）。 */
+    version: string
+    /** 安装时的压缩包大小（字节），版本信息缺失时用于兜底判断更新。 */
+    fileSize: number
+    /** 安装时该发布的 updateAt，远端重新上传后与当前值不一致即视为有新版本。 */
+    modUpdateAt: number
+    /** 安装时写入本地 MOD 列表的名称。 */
+    localName: string
+    /** 本地 MOD 所属实体/分类（独立分类为 STANDALONE_ENTITY）。 */
+    entity: string
+    /** 安装时间戳。 */
+    installedAt: number
+}
+
+export type UInstalledShareMod = Omit<InstalledShareMod, "id">
+
 /** 独立（standalone）分类使用的固定实体名称。 */
 export const STANDALONE_ENTITY = "独立"
 
@@ -216,6 +241,7 @@ interface DB {
     customEntitys: CustomEntity
     entityMods: EntityMod
     entityModsMulti: EntityModMulti
+    installedShareMods: InstalledShareMod
     conversations: Conversation
     messages: Message
     buildAgentChats: BuildAgentChat
@@ -233,6 +259,7 @@ db.version(1).stores({
     customEntitys: "++id, &name",
     entityMods: "++id, entity, modid",
     entityModsMulti: "++id, entity, modid",
+    installedShareMods: "&id, installedAt",
     conversations: "++id, createdAt, updatedAt",
     messages: "++id, conversationId, createdAt",
     buildAgentChats: "&id, charName, updatedAt",

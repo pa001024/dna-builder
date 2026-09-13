@@ -92,22 +92,6 @@ export async function uploadModFile(bytes: Uint8Array, ext: string): Promise<str
 }
 
 /**
- * @description 读取 MOD 压缩包字节（下载代理用），对象不存在时返回 null。
- * @param ossKey OSS 对象 key。
- * @returns 文件字节。
- */
-export async function readModZip(ossKey: string): Promise<Uint8Array | null> {
-    if (!isSafeModKey(ossKey)) return null
-    try {
-        const result = await getOssClient().get(ossKey)
-        return new Uint8Array(result.content)
-    } catch (error) {
-        if (isObjectNotFoundError(error)) return null
-        throw error
-    }
-}
-
-/**
  * @description 判断 OSS key 是否安全（仅允许服务端生成的标准路径，防止路径穿越）。
  * @param key OSS 对象 key。
  * @returns 是否安全。

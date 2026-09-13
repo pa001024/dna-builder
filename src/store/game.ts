@@ -270,6 +270,9 @@ export const useGameStore = defineStore("game", {
                 await db.entityModsMulti.where({ entity: mod.entity, modid: mod.id }).delete()
             }
             await db.mods.delete(mod.id)
+
+            // 分享 MOD 的安装记录：本地 MOD 已被删除，商店卡片不应再显示「已下载」
+            await db.installedShareMods.filter(record => record.localName === mod.name && record.entity === mod.entity).delete()
         },
         /**
          * 添加自定义实体类型。

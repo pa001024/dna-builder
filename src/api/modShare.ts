@@ -8,11 +8,98 @@ import { env } from "../env"
 
 /**
  * @description 生成 MOD 下载地址（需登录后携带 token 访问）。
+ * 服务端只做鉴权与计数，随后 302 到 OSS/CDN 直链；重定向跨域时会丢弃自定义 token 头，
+ * 字节由客户端直连 CDN 拉取（fetch 默认自动跟随重定向）。
  * @param id MOD id。
  * @returns 下载 URL。
  */
 export function modDownloadUrl(id: string) {
     return `${env.apiEndpoint}/api/mods/${id}/download`
+}
+
+/**
+ * @description 生成指定版本的 MOD 下载地址（需登录后携带 token 访问）。
+ * @param modId 发布 id。
+ * @param versionId 版本 id。
+ * @returns 下载 URL。
+ */
+export function modVersionDownloadUrl(modId: string, versionId: string) {
+    return `${env.apiEndpoint}/api/mods/${modId}/versions/${versionId}/download`
+}
+
+/** MOD 压缩包下载进度。 */
+export interface ModDownloadProgress {
+    /** 已接收字节数。 */
+    loaded: number
+    /** 总字节数；远端未给出 Content-Length 且调用方未提供元数据时为 0（表示总量未知）。 */
+    total: number
+}
+
+/** 流式下载选项。 */
+export interface ModDownloadOptions {
+    /** 发布元数据里的压缩包大小，作为 Content-Length 缺失时的进度基准。 */
+    totalBytes?: number
+    /** 进度回调，随每个数据块触发。 */
+    onProgress?: (progress: ModDownloadProgress) => void
+    /** 取消信号，用于中止请求（队列中取消任务时使用）。 */
+    signal?: AbortSignal
+}
+
+/**
+ * @description 流式下载压缩包并回调进度（需登录；服务端 302 到 OSS/CDN 直链，由 fetch 自动跟随）。
+ * 跨域直链的 Content-Length 属 CORS 安全响应头，可直接读取；缺失时退化为调用方给出的元数据大小。
+ * 环境不支持响应流（或直链返回不可读的不透明响应）时退化为一次性读取，此时只在结束时回调一次进度。
+ * @param url 下载地址（服务端重定向接口）。
+ * @param token 登录令牌。
+ * @param options 进度与取消选项。
+ * @returns 压缩包字节。
+ */
+async function streamModDownload(url: string, token: string, options: ModDownloadOptions = {}): Promise<ArrayBuffer> {
+    const response = await fetch(url, {
+        headers: { token },
+        signal: options.signal,
+    })
+    if (!response.ok) {
+        let message = "下载失败"
+        try {
+            const data = await response.json()
+            message = data?.error || message
+        } catch {}
+        throw new Error(message)
+    }
+
+    // 直链的 Content-Length 优先（真实字节数），跨域未暴露时用发布元数据兜底
+    const headerLength = Number(response.headers.get("content-length") || 0)
+    const total = headerLength > 0 ? headerLength : options.totalBytes || 0
+
+    const body = response.body
+    if (!body) {
+        const buffer = await response.arrayBuffer()
+        options.onProgress?.({ loaded: buffer.byteLength, total: total || buffer.byteLength })
+        return buffer
+    }
+
+    const reader = body.getReader()
+    const chunks: Uint8Array[] = []
+    let loaded = 0
+    options.onProgress?.({ loaded: 0, total })
+    for (;;) {
+        const { done, value } = await reader.read()
+        if (done) break
+        if (!value) continue
+        chunks.push(value)
+        loaded += value.byteLength
+        options.onProgress?.({ loaded, total })
+    }
+
+    // 合并数据块，保持与一次性读取一致的 ArrayBuffer 返回值
+    const merged = new Uint8Array(loaded)
+    let offset = 0
+    for (const chunk of chunks) {
+        merged.set(chunk, offset)
+        offset += chunk.byteLength
+    }
+    return merged.buffer
 }
 
 /** 上传 MOD 的载荷。 */
@@ -97,44 +184,33 @@ export async function uploadGameModVersion(modId: string, payload: { file: File;
 }
 
 /**
- * @description 下载 MOD 压缩包字节（需登录）。
+ * @description 下载 MOD 压缩包字节（需登录；服务端 302 到 OSS/CDN 直链，由 fetch 自动跟随）。
  * @param id MOD id。
  * @param token 登录令牌。
+ * @param options 进度与取消选项。
  * @returns 压缩包字节。
  */
-export async function downloadGameMod(id: string, token: string) {
-    const response = await fetch(modDownloadUrl(id), {
-        headers: { token },
-    })
-    if (!response.ok) {
-        let message = "下载失败"
-        try {
-            const data = await response.json()
-            message = data?.error || message
-        } catch {}
-        throw new Error(message)
-    }
-    return await response.arrayBuffer()
+export async function downloadGameMod(id: string, token: string, options?: ModDownloadOptions) {
+    return await streamModDownload(modDownloadUrl(id), token, options)
 }
 
 /**
- * @description 下载指定版本的 MOD 压缩包字节（需登录）。
+ * @description 下载指定版本的 MOD 压缩包字节（需登录；服务端 302 到 OSS/CDN 直链，由 fetch 自动跟随）。
  * @param modId 发布 id。
  * @param versionId 版本 id。
  * @param token 登录令牌。
+ * @param options 进度与取消选项。
  * @returns 压缩包字节。
  */
-export async function downloadGameModVersion(modId: string, versionId: string, token: string) {
-    const response = await fetch(`${env.apiEndpoint}/api/mods/${modId}/versions/${versionId}/download`, {
-        headers: { token },
-    })
-    if (!response.ok) {
-        let message = "下载失败"
-        try {
-            const data = await response.json()
-            message = data?.error || message
-        } catch {}
-        throw new Error(message)
-    }
-    return await response.arrayBuffer()
+export async function downloadGameModVersion(modId: string, versionId: string, token: string, options?: ModDownloadOptions) {
+    return await streamModDownload(modVersionDownloadUrl(modId, versionId), token, options)
+}
+
+/**
+ * @description 判断错误是否为取消下载（AbortController 中止）导致。
+ * @param error 捕获到的错误。
+ * @returns 是否为取消。
+ */
+export function isDownloadAbortedError(error: unknown) {
+    return error instanceof Error && (error.name === "AbortError" || error.message.includes("aborted"))
 }

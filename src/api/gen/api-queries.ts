@@ -968,6 +968,10 @@ export const gameModsQuery = typedQuery(
                 isPinned
                 createdAt
                 updateAt
+                latestVersion {
+                    id
+                    version
+                }
                 user {
                     id
                     name
@@ -1025,6 +1029,19 @@ export const gameModQuery = typedQuery(
                 createdAt
                 updateAt
                 images
+                latestVersion {
+                    id
+                    version
+                }
+                versions {
+                    id
+                    version
+                    changelog
+                    fileName
+                    fileSize
+                    downloads
+                    createdAt
+                }
                 user {
                     id
                     name

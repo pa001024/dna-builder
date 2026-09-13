@@ -371,6 +371,8 @@ onBeforeUnmount(() => {
     />
     <StartupModal />
     <ScriptRuntimeFloatingBar v-if="isMainWindow" />
+    <!-- 分享 MOD 下载队列（后台串行下载 + 安装，切页面不中断） -->
+    <ModDownloadPanel />
     <ResizeableWindow
         id="main-window"
         :title="

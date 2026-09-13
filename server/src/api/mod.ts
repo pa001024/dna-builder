@@ -6,7 +6,7 @@ import { machineIdSync } from "node-machine-id"
 import { db, schema } from "../db"
 import type { JWTUser } from "../db/yoga"
 import { sendModUploadNotification } from "../util/email"
-import { deleteModFiles, getModFileUrl, isSafeModKey, readModZip, uploadModFile } from "../util/mod-storage"
+import { deleteModFiles, getModFileUrl, isSafeModKey, uploadModFile } from "../util/mod-storage"
 import {
     coverExtFromMime,
     type GameModManifest,
@@ -175,24 +175,17 @@ function canManageMod(row: typeof schema.gameMods.$inferSelect, user: JWTUser): 
 }
 
 /**
- * @description 从 OSS 读取指定版本的压缩包字节并递增下载计数（版本与发布各 +1）。
+ * @description 解析指定版本的压缩包直链并递增下载计数（版本与发布各 +1）。
+ * 字节由客户端直连 OSS/CDN 拉取（302 重定向），服务端只做鉴权、计数与地址解析，不再中转文件内容。
  * 仅更新计数列，不触碰 updateAt：下载不算内容更新，不应影响「最近更新」排序。
  * @param versionId 版本 id。
- * @returns 版本行 + 字节；不存在时返回 null。
+ * @returns 版本行 + 直链地址；版本不存在或文件记录不合法时返回 null。
  */
-async function loadVersionFile(versionId: string) {
+async function resolveVersionDownload(versionId: string) {
     const version = await db.query.gameModVersions.findFirst({
         where: (table, { eq }) => eq(table.id, versionId),
     })
     if (!version || !isSafeModKey(version.fileKey)) return null
-    let bytes: Uint8Array | null
-    try {
-        bytes = await readModZip(version.fileKey)
-    } catch (error) {
-        console.error("从 OSS 读取 MOD 失败:", error)
-        return null
-    }
-    if (!bytes) return null
 
     await db
         .update(schema.gameModVersions)
@@ -202,11 +195,11 @@ async function loadVersionFile(versionId: string) {
         .update(schema.gameMods)
         .set({ downloads: sql`${schema.gameMods.downloads} + 1` })
         .where(eq(schema.gameMods.id, version.modId))
-    return { version, bytes }
+    return { version, fileUrl: getModFileUrl(version.fileKey) }
 }
 
 /**
- * @description 游戏补丁 MOD 分享的 REST 插件：上传发布/多版本上传、下载（需登录）、封面展示。
+ * @description 游戏补丁 MOD 分享的 REST 插件：上传发布/多版本上传、下载（需登录，302 到 OSS/CDN 直链）、封面展示。
  * 同一发布（game_mods）可挂多个版本（game_mod_versions），文件一律存 OSS 且以内容哈希命名。
  * @returns Elysia 插件实例。
  */
@@ -498,6 +491,7 @@ export function modApiPlugin() {
 
     /**
      * 下载 MOD 最新版本（需登录，且仅限已审核通过或本人/管理员的 MOD）。版本与发布下载次数均 +1。
+     * 302 重定向到 OSS/CDN 直链，文件字节不经过 API 中转（客户端 fetch 会自动跟随重定向）。
      */
     app.get("/:id/download", async ({ params, headers, set }) => {
         const user = verifyModToken(headers.token)
@@ -526,19 +520,22 @@ export function modApiPlugin() {
             set.status = 404
             return { success: false, error: "MOD 暂无可用版本" }
         }
-        const loaded = await loadVersionFile(latest.id)
-        if (!loaded) {
+        const resolved = await resolveVersionDownload(latest.id)
+        if (!resolved) {
             set.status = 404
             return { success: false, error: "MOD 文件不存在" }
         }
 
-        set.headers["Content-Type"] = "application/zip"
-        set.headers["Content-Disposition"] = `attachment; filename="${encodeURIComponent(loaded.version.fileName)}"`
-        return new Response(loaded.bytes as any, { status: 200 })
+        set.status = 302
+        set.headers.Location = resolved.fileUrl
+        // 直链按内容哈希命名（内容不变则地址不变），但下载计数要求每次请求都到达服务端，故不允许缓存重定向
+        set.headers["Cache-Control"] = "no-store"
+        return new Response(null, { status: 302 })
     })
 
     /**
      * 下载指定版本的 MOD 压缩包（需登录，且仅限已审核通过或本人/管理员的 MOD）。版本与发布下载次数均 +1。
+     * 302 重定向到 OSS/CDN 直链，文件字节不经过 API 中转（客户端 fetch 会自动跟随重定向）。
      */
     app.get("/:id/versions/:versionId/download", async ({ params, headers, set }) => {
         const user = verifyModToken(headers.token)
@@ -566,15 +563,17 @@ export function modApiPlugin() {
             set.status = 404
             return { success: false, error: "版本不存在" }
         }
-        const loaded = await loadVersionFile(version.id)
-        if (!loaded) {
+        const resolved = await resolveVersionDownload(version.id)
+        if (!resolved) {
             set.status = 404
             return { success: false, error: "MOD 文件不存在" }
         }
 
-        set.headers["Content-Type"] = "application/zip"
-        set.headers["Content-Disposition"] = `attachment; filename="${encodeURIComponent(loaded.version.fileName)}"`
-        return new Response(loaded.bytes as any, { status: 200 })
+        set.status = 302
+        set.headers.Location = resolved.fileUrl
+        // 直链按内容哈希命名（内容不变则地址不变），但下载计数要求每次请求都到达服务端，故不允许缓存重定向
+        set.headers["Cache-Control"] = "no-store"
+        return new Response(null, { status: 302 })
     })
 
     /**

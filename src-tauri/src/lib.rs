@@ -2054,6 +2054,39 @@ fn build_download_progress(
 }
 
 #[cfg(test)]
+mod mod_import_tmp_tests {
+    use super::import_mod;
+
+    /// 临时验证：真实分享包能否解压进 MOD 目录。
+    #[test]
+    fn import_real_share_zips() {
+        let base = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../.tmp");
+        for name in ["mod-0.zip", "mod-1.zip"] {
+            let src = base.join(name);
+            if !src.exists() {
+                eprintln!("skip missing fixture: {src:?}");
+                continue;
+            }
+            let target = std::env::temp_dir().join(format!("dna-mod-import-test-{name}"));
+            let _ = std::fs::remove_dir_all(&target);
+            let out = import_mod(
+                target.to_string_lossy().to_string(),
+                vec![src.to_string_lossy().to_string()],
+            );
+            eprintln!("[{name}] result = {out}");
+            let mut listed = Vec::new();
+            if let Ok(entries) = std::fs::read_dir(&target) {
+                for entry in entries.flatten() {
+                    listed.push(entry.file_name().to_string_lossy().to_string());
+                }
+            }
+            eprintln!("[{name}] files in target = {listed:?}");
+            let _ = std::fs::remove_dir_all(&target);
+        }
+    }
+}
+
+#[cfg(test)]
 mod download_progress_tests {
     use super::{
         build_download_progress, decode_progress_file, encode_progress_file, progress_mask_size,

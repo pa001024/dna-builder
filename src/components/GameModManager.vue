@@ -9,6 +9,7 @@ import { env } from "@/env"
 import type { CustomEntity, Mod } from "@/store/db"
 import { STANDALONE_ENTITY } from "@/store/db"
 import { useGameStore } from "@/store/game"
+import { useModDownloadStore } from "@/store/modDownload"
 import { useUIStore } from "@/store/ui"
 import type { IconTypes } from "./Icon.vue"
 
@@ -556,6 +557,13 @@ function refreshLocalMods() {
         void updateEntityMod()
     }
 }
+
+// 下载队列在后台完成安装（可能已切换页签甚至关闭详情弹窗），完成后由队列状态通知刷新本地列表
+const download = useModDownloadStore()
+watch(
+    () => download.installTick,
+    () => refreshLocalMods()
+)
 //#endregion
 
 onMounted(() => {
@@ -866,12 +874,7 @@ onMounted(() => {
         </div>
 
         <!-- 分享（在线 MOD 商店）：复用独立组件 GameModStore，弹窗模式点击卡片弹详情 -->
-        <GameModStore
-            v-if="modType === 'share'"
-            class="flex-1 min-h-0"
-            @open-detail="openDetail"
-            @installed="refreshLocalMods"
-        />
+        <GameModStore v-if="modType === 'share'" class="flex-1 min-h-0" @open-detail="openDetail" />
 
         <!-- MOD 详情弹窗（内容复用独立组件 GameModDetail，ScrollArea 滚动容器在组件内部） -->
         <dialog class="modal" :class="{ 'modal-open': !!detailMod }">
@@ -885,7 +888,6 @@ onMounted(() => {
                     closable
                     class="flex-1 min-h-0"
                     @close="detailMod = null"
-                    @installed="refreshLocalMods"
                 />
             </div>
             <div class="modal-backdrop" @click="detailMod = null" />
