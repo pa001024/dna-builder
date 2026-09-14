@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useTranslation } from "i18next-vue"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { LeveledChar, LeveledSkillWeapon } from "@/data"
 import { type SkinItem, skinData } from "@/data/d/accessory.data"
@@ -19,6 +20,7 @@ const props = defineProps<{
     char: Char
 }>()
 const setting = useSettingStore()
+const { t } = useTranslation()
 
 // 当前角色等级
 const currentLevel = ref(80) // 默认80级
@@ -135,6 +137,155 @@ function getSkillWeaponAttrs(leveledWeapon: LeveledSkillWeapon): { name: string;
         { name: "暴伤", value: formatProp("基础暴伤", leveledWeapon._originalWeaponData.暴伤) },
         { name: "触发", value: formatProp("基础触发", leveledWeapon._originalWeaponData.触发) },
     ]
+}
+
+/** 派遣标签的配色分组（对应游戏 UIUtils.GetDispathchColorNameByType 的返回值） */
+type DispatchColorGroup = "Red" | "Blue" | "Green" | "Special"
+
+/** 特质图标的配色（底板 / 字 / 流光） */
+interface TraitColorStyle {
+    /** 底板：非 Special 组为纯色，Special 组为金色贴图对应的渐变 */
+    plate: string
+    /** 图标字色（图标贴图是白色带 alpha 的形状，靠遮罩着色） */
+    glyph: string
+    /** 流光色（仅 Special 组有，对应控件的 VX_Glow 金色流光） */
+    glow?: string
+}
+
+/**
+ * 派遣标签 → 配色分组。
+ * 游戏里颜色不来自数据表，而是界面按标签的功能分组硬编码（Script/Utils/UIUtils.lua 的
+ * GetDispathchColorNameByType）；这里镜像同一张表，Special 组正好是 CharDispatchTag 里 IsBuff = 1
+ * （带百分比增益效果）的四个标签。
+ */
+const DISPATCH_TAG_COLOR_GROUP: Record<string, DispatchColorGroup> = {
+    Battle: "Red",
+    Collect: "Blue",
+    Mine: "Blue",
+    Fish: "Blue",
+    Pet: "Blue",
+    Benefit: "Green",
+    Morality: "Green",
+    Wisdom: "Green",
+    Empathy: "Green",
+    Chaos: "Green",
+    Workaholic: "Special",
+    Rigorous: "Special",
+    Skilled: "Special",
+    Lucky: "Special",
+}
+
+/**
+ * 各配色分组的实际取值。
+ * 取自游戏控件 WBP_Map_Ability_L 的动画首帧：非 Special 组的底板是 Color_BG_Red/Blue/Green，
+ * 字统一白色；Special 组底板改用金色贴图（BG_Actived）、字用深棕 #66351f，另有 #ffddaf 的金色流光。
+ */
+const DISPATCH_GROUP_STYLE: Record<DispatchColorGroup, TraitColorStyle> = {
+    Red: { plate: "#dd5871", glyph: "#ffffff" },
+    Blue: { plate: "#6f93f5", glyph: "#ffffff" },
+    Green: { plate: "#27a16e", glyph: "#ffffff" },
+    Special: { plate: "linear-gradient(150deg, #fbe3b0, #fdf5dc)", glyph: "#66351f", glow: "#ffddaf" },
+}
+
+/** 标签表里查不到时的兜底配色：保持中性，避免误显示成某个分组 */
+const DISPATCH_FALLBACK_STYLE: TraitColorStyle = {
+    plate: "color-mix(in oklab, var(--color-base-content) 22%, transparent)",
+    glyph: "#ffffff",
+}
+
+/**
+ * 各突破阶段所需的角色等级（与游戏 CharBreak 表的 CharBreakLevel 20/30/40/50/60/70 对齐），
+ * 下标即突破阶段；等级滑块取值达到某阶段门槛即视为已完成该阶段突破。
+ */
+const BREAKTHROUGH_LEVELS = [0, 20, 30, 40, 50, 60, 70]
+
+/** 特质单个等级的解锁信息 */
+interface TraitLevelView {
+    /** 等级（1 起；同名特质占多个派遣槽位时逐级提高） */
+    level: number
+    /** 该等级所需的突破阶段（0 表示初始解锁） */
+    stage: number
+    /** 当前突破阶段是否已达该等级要求 */
+    unlocked: boolean
+}
+
+/** 特质卡片的展示数据 */
+interface TraitView {
+    /** 特质名 */
+    名称: string
+    /** 特质说明 */
+    描述: string
+    /** 等级：该特质占用的派遣槽位数（1 起，同名叠加） */
+    等级: number
+    /** 图标地址 */
+    iconUrl: string
+    /** 底板 / 字 / 流光配色 */
+    style: TraitColorStyle
+    /** 各级解锁信息（与 解锁 数组一一对应） */
+    levels: TraitLevelView[]
+    /** 是否至少有一个等级已解锁：未解锁整体降到 30% 不透明度（游戏 No_Active 动画） */
+    active: boolean
+}
+
+/**
+ * 当前突破阶段（0-6）。
+ * 游戏里派遣槽位的解锁条件是 EnhanceLevel ≥ DispatchUnlock[i]
+ * （见 Character:GetCurrentUnlockDispatchTag 与 WBP_Armory_Record_Base_C 的 UpdateDispatchList），
+ * 这里用等级滑块取值反推可达到的突破阶段。
+ */
+const currentEnhanceLevel = computed(() => {
+    let stage = 0
+    for (let index = 0; index < BREAKTHROUGH_LEVELS.length; index++) {
+        if (currentLevel.value >= BREAKTHROUGH_LEVELS[index]) {
+            stage = index
+        }
+    }
+    return stage
+})
+
+/** 角色特质（游戏内「特质」，即派遣标签）：无数据时板块整体不展示 */
+const charTraits = computed<TraitView[]>(() =>
+    (props.char.特质 ?? []).map(trait => {
+        const group = DISPATCH_TAG_COLOR_GROUP[trait.标签]
+        const levels: TraitLevelView[] = trait.解锁.map((stage, index) => ({
+            level: index + 1,
+            stage,
+            unlocked: currentEnhanceLevel.value >= stage,
+        }))
+        return {
+            名称: trait.名称,
+            描述: trait.描述,
+            等级: trait.等级,
+            iconUrl: getTraitIconUrl(trait.icon),
+            style: group ? DISPATCH_GROUP_STYLE[group] : DISPATCH_FALLBACK_STYLE,
+            levels,
+            active: levels.some(level => level.unlocked),
+        }
+    })
+)
+
+/**
+ * 特质图标地址（icon 已是完整贴图名，如 T_Dispatch_A09）。
+ * @param icon 图标贴图名
+ * @returns 图标地址
+ */
+function getTraitIconUrl(icon: string): string {
+    return `/imgs/webp/${icon}.webp`
+}
+
+/**
+ * 格式化特质单级的解锁条件。
+ * @param level 等级解锁信息
+ * @param levelCount 该特质的总等级数：大于 1 时前缀「Lv.N·」以分清是第几级
+ * @returns 展示文本，如「Lv.2·突破至 4 阶后解锁」
+ */
+function formatTraitLevel(level: TraitLevelView, levelCount: number): string {
+    const levelPrefix = levelCount > 1 ? `Lv.${level.level}·` : ""
+    if (level.stage === 0) {
+        return `${levelPrefix}${t("初始解锁")}`
+    }
+    // 文案沿用游戏 UI_Armory_Dispatch_Locked（「突破至%s阶后解锁」），%s 替换为突破阶段
+    return `${levelPrefix}${t("突破至%s阶后解锁").replace("%s", String(level.stage))}`
 }
 
 /**
@@ -679,6 +830,63 @@ onBeforeUnmount(() => {
                     :name="resourceMap.get(cost[0])?.name || String(cost[0])"
                     :value="cost[1]"
                 />
+            </div>
+        </section>
+
+        <!-- 特质（派遣标签）：图标按标签分组着色，未达突破阶段的等级整体变暗并标注解锁条件 -->
+        <section v-if="charTraits.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="TRAITS" :title="$t('特质')" />
+            <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+                <div
+                    v-for="trait in charTraits"
+                    :key="trait.名称"
+                    class="flex items-start gap-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
+                    <!-- 图标底板：与游戏一致——非 Special 组为纯色底 + 白字，Special 组为金底 + 深棕字 + 金色流光 -->
+                    <div
+                        class="relative size-10 shrink-0 overflow-hidden rounded-xs"
+                        :class="trait.active ? '' : 'opacity-30'"
+                        :style="{ background: trait.style.plate }"
+                    >
+                        <span
+                            class="absolute inset-0"
+                            :style="{ backgroundColor: trait.style.glyph, mask: `url(${trait.iconUrl}) no-repeat center/64%` }"
+                            aria-hidden="true"
+                        />
+                        <span
+                            v-if="trait.style.glow && trait.active"
+                            class="pointer-events-none absolute inset-0 animate-pulse motion-reduce:animate-none"
+                            :style="{ background: `radial-gradient(circle at 50% 45%, ${trait.style.glow}, transparent 72%)` }"
+                            aria-hidden="true"
+                        />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="truncate text-sm font-semibold">{{ $t(trait.名称) }}</span>
+                            <span
+                                class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                            >
+                                Lv.{{ trait.等级 }}
+                            </span>
+                        </div>
+                        <div class="mt-1 text-sm leading-relaxed text-base-content/85">{{ $t(trait.描述) }}</div>
+                        <div class="mt-1.5 flex flex-wrap items-center gap-1">
+                            <span
+                                v-for="level in trait.levels"
+                                :key="level.level"
+                                class="inline-flex items-center gap-1 rounded-xs border px-1.5 py-0.5 text-[11px] tabular-nums"
+                                :class="
+                                    level.unlocked
+                                        ? 'border-base-content/15 text-base-content/60'
+                                        : 'border-base-content/10 text-base-content/35'
+                                "
+                            >
+                                <Icon v-if="!level.unlocked" icon="ri:lock-line" class="h-3 w-3 shrink-0" />
+                                {{ formatTraitLevel(level, trait.levels.length) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 

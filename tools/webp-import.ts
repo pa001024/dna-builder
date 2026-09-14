@@ -74,6 +74,8 @@ type CharLike = IconItem & {
     属性?: string
     技能?: IconItem[]
     同律武器?: (IconItem & { 技能?: IconItem[] })[]
+    /** 特质（派遣标签）：icon 已是完整 T_Dispatch_* 贴图名 */
+    特质?: IconItem[]
 }
 type WeaponLike = IconItem & {
     类型?: string[]
@@ -324,6 +326,8 @@ async function evaluateDataUrls(): Promise<Set<string>> {
     const { LeveledMod } = await loadModule<{ LeveledMod: UrlBuilder }>("leveled/LeveledMod.ts")
     const { LeveledMonster } = await loadModule<{ LeveledMonster: UrlBuilder }>("leveled/LeveledMonster.ts")
     const { LeveledPet } = await loadModule<{ LeveledPet: UrlBuilder }>("leveled/LeveledPet.ts")
+    // 魔灵潜质（特质）目录：条目自带图标地址（traitIconUrl），无需在视图里拼模板
+    const { petTraits } = await loadModule<{ petTraits: { name: string; url: string }[] }>("petTrait.ts")
     const { LeveledSkill } = await loadModule<{ LeveledSkill: UrlBuilder }>("leveled/LeveledSkill.ts")
     const { LeveledSkillWeapon } = await loadModule<{ LeveledSkillWeapon: UrlBuilder }>("leveled/LeveledSkillWeapon.ts")
 
@@ -343,6 +347,13 @@ async function evaluateDataUrls(): Promise<Set<string>> {
         for (const skillWeapon of char.同律武器 ?? []) {
             if (skillWeapon.icon) {
                 urls.add(LeveledSkillWeapon.url(skillWeapon.icon))
+            }
+        }
+        // 特质（派遣标签）: 视图（DBCharDetailItem 特质板块）按 `/imgs/webp/${icon}.webp` 直接引用
+        // （icon 已是完整 T_Dispatch_* 贴图名）
+        for (const trait of char.特质 ?? []) {
+            if (trait.icon) {
+                urls.add(`/imgs/webp/${trait.icon}.webp`)
             }
         }
     }
@@ -372,6 +383,14 @@ async function evaluateDataUrls(): Promise<Set<string>> {
         if (pet.icon) {
             urls.add(LeveledPet.url(pet.icon))
         }
+    }
+
+    // 魔灵潜质（特质）: 视图（DBPetDetailItem「魔灵潜质来源」、DBPetListView 潜质页签）与
+    // petTrait.traitIconUrl 统一按 `/imgs/webp/T_Armory_Pet_Attr_${icon}.webp` 引用。
+    // 该引用在视图里是 ${icon} 全通配模板，文本扫描既得不到精确 basename 也得不到骨架正则，
+    // 必须在此枚举特质数据才能生成真实任务（否则整批潜质图标不会导入）。
+    for (const trait of petTraits) {
+        urls.add(trait.url)
     }
 
     // 技能: 按来源区分两种渲染方式

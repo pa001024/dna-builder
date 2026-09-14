@@ -55,6 +55,31 @@ export interface CommonAttr {
     [key: string]: number | undefined
 }
 
+/**
+ * 角色特质（游戏内「特质」，即派遣标签）。
+ *
+ * 一个特质占一个派遣槽位，同名特质可占多个槽位（`等级` 即已占槽位数，如 2 级表示占 2 个槽位），
+ * 每个槽位在角色突破到 `解锁` 里对应阶段后生效（阶段 0 表示初始即解锁）。
+ */
+export interface CharTrait {
+    /** 特质名（如「冒险家」） */
+    名称: string
+    /** 特质说明（派遣玩法效果文案，如「擅长战斗。」） */
+    描述: string
+    /** 图标贴图名（T_Dispatch_*），图标地址为 `/imgs/webp/${icon}.webp` */
+    icon: string
+    /**
+     * 标签 key（Battle / Collect / Mine / Fish / Pet / Benefit / Morality / Wisdom / Empathy / Chaos /
+     * Workaholic / Rigorous / Skilled / Lucky，由上游按 Char.DispatchTag 原样导出）；
+     * 与角色自身的 `标签`（定位标签）无关，界面按 UIUtils.GetDispathchColorNameByType 用它决定配色分组。
+     */
+    标签: string
+    /** 等级：该特质占用的派遣槽位数（1 起，同名叠加） */
+    等级: number
+    /** 各级解锁所需的突破阶段（0..5，对应 `突破` 数组的第 N+1 段；0 表示初始解锁） */
+    解锁: number[]
+}
+
 export interface Char {
     id: number
     icon?: string
@@ -74,6 +99,8 @@ export interface Char {
     精通: string[]
     额外精通?: string[]
     标签?: string[]
+    /** 特质（派遣标签）：突破到对应阶段后生效，见 CharTrait */
+    特质?: CharTrait[]
     基础攻击: number
     基础生命: number
     基础护盾: number
