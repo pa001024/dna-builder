@@ -4039,12 +4039,51 @@ export class CharBuild {
         return { ok: plan.ok, reason: plan.reason }
     }
 
+    /**
+     * 取指定MOD类型的槽位数组（下标即槽位顺序，空槽为 null）。
+     * @param type MOD类型（角色/近战/远程/同律）
+     * @returns 槽位数组，未知类型返回空数组
+     */
+    private getModSlotList(type: string): (LeveledMod | null | undefined)[] {
+        switch (type) {
+            case "角色":
+                return this.charMods
+            case "近战":
+                return this.meleeMods
+            case "远程":
+                return this.rangedMods
+            case "同律":
+                return this.skillMods
+            default:
+                return []
+        }
+    }
+
+    /**
+     * 按槽位顺序取指定MOD类型各槽位上的 id（空槽为 0），槽位数不足时补 0。
+     * 中枢（光环）不属于普通槽位，由 getCode 单独编码，不在此处返回。
+     * @param type MOD类型（角色/近战/远程/同律）
+     * @param slots 槽位数量
+     * @returns 长度等于槽位数量的 id 数组
+     */
+    private getModSlotIds(type: string, slots: number) {
+        const list = this.getModSlotList(type)
+        return Array.from({ length: slots }, (_, index) => list[index]?.id || 0)
+    }
+
+    /**
+     * 生成构筑代码。
+     * MOD 严格按槽位顺序编码（空槽为 0），中枢只占末尾分组，因此导入时按同样顺序回填即可原地还原。
+     * 这里不能取 this.mods：它已过滤空槽，会把中枢连同后续MOD一起顶到前面的空槽里。
+     * @param type MOD类型（继承型同律会重定向到被继承的近战/远程槽位）
+     * @returns 构筑代码字符串
+     */
     getCode(type = "角色") {
         if (type === "同律" && this.skillWeapon?.inherit) {
             type = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
         }
         const slots = type === "同律" ? 4 : 8
-        const ids = this.mods.filter(v => v.类型 === type).map(v => v.id)
+        const ids = this.getModSlotIds(type, slots)
         const mods = this.codeSwapR(ids, slots)
             .map(base36Pad)
             .join("")
@@ -4064,6 +4103,14 @@ export class CharBuild {
         // 交换顺序
         return ids.map((_, i) => ids[[1, 3, 4, 2, 5, 7, 8, 6][i] - 1])
     }
+    /**
+     * 解析构筑代码为各槽位MOD id与中枢（光环）id，按槽位顺序一一对应。
+     * 旧版本导出时空槽会被跳过，中枢被顶进普通槽位编码；中枢不占普通槽位，
+     * 因此普通槽位里与中枢相同的 id 一律视为旧代码残留并清除，避免粘贴后多出一个中枢。
+     * @param charCode 构筑代码
+     * @param type MOD类型（继承型同律会重定向到被继承的近战/远程槽位）
+     * @returns 各槽位MOD id（空槽为 0）与中枢 id，格式错误时返回空方案
+     */
     importCode(charCode: string, type = "角色") {
         if (type === "同律" && this.skillWeapon?.inherit) {
             type = this.skillWeapon.inherit === "melee" ? "近战" : "远程"
@@ -4079,7 +4126,11 @@ export class CharBuild {
                     console.warn("导入代码格式错误")
                     return { mods: Array(8).fill(0), auraMod: 0 }
                 }
-                return { mods: this.codeSwap(modIds.slice(0, 8)), auraMod: modIds[8] }
+                const mods = this.codeSwap(modIds.slice(0, 8))
+                const auraMod = modIds[8]
+                const leakedAuraIndex = auraMod ? mods.indexOf(auraMod) : -1
+                if (leakedAuraIndex !== -1) mods[leakedAuraIndex] = 0
+                return { mods, auraMod }
             } else {
                 if (modIds.length < 4) {
                     console.warn("导入代码格式错误")
