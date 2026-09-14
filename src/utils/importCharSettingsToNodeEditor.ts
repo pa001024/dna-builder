@@ -1,6 +1,7 @@
 import type { Edge, Node } from "@vue-flow/core"
 import { nanoid } from "nanoid"
-import type { CharSettings } from "@/composables/useCharSettings"
+import type { CharSettings, ModSlotType } from "@/composables/useCharSettings"
+import { getModVariantSlots } from "@/composables/useCharSettings"
 import { NodeType, useNodeEditorStore } from "@/store/nodeEditor"
 
 /**
@@ -77,9 +78,9 @@ export function importCharSettingsToNodeEditor(charName: string, settings: CharS
     store.addNode(rangedWeaponNode)
     nodeIds.rangedWeapon = rangedWeaponNode.id
 
-    const allmods = [settings.charMods, settings.meleeMods, settings.rangedMods, settings.skillWeaponMods].flatMap(mods =>
-        mods.filter(mod => mod !== null)
-    )
+    // MOD 取当前激活的变体（A/B/C），保证导出的节点图与构筑页展示的配置一致
+    const modTypes: ModSlotType[] = ["角色", "近战", "远程", "同律"]
+    const allmods = modTypes.flatMap(type => getModVariantSlots(settings, type)).filter((mod): mod is [number, number] => mod !== null)
     // 创建MOD节点
     const modNode: Node = {
         id: `mod-${nanoid(6)}`,

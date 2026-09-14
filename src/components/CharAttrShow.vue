@@ -24,7 +24,7 @@ const charSettings = useCharSettings(charIdRef)
 const { getAttrName, getAttrDesc } = useAttrI18n()
 
 /**
- * 属性行的展示名：攻击行带角色元素前缀（火 → 火属性攻击），其余属性原样。
+ * 属性行的展示名（攻击行带角色元素前缀）（火 → 火属性攻击），其余属性原样。
  * 该名字既是翻译键（可拿到上游成品译名，避免「Pyro」+「ATK」这类拼接在部分语言下缺空格），
  * 也是上游属性说明（attrDesc）的查找键。
  * @param key 属性键名

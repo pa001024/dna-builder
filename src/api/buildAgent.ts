@@ -8,6 +8,7 @@ import { z } from "zod"
 import { renderBuildAgentSystemPrompt } from "@/shared/buildAgentSystemPrompt"
 import type { useInvStore } from "@/store/inv"
 import type { CharSettings, useCharSettings } from "../composables/useCharSettings"
+import { getModVariantSlots, MOD_SLOT_COUNTS } from "../composables/useCharSettings"
 import {
     buffData,
     charData,
@@ -828,24 +829,13 @@ export class BuildAgent {
             return `MOD ${modId} 无效`
         }
 
-        const typeKeyMap = {
-            角色: "charMods",
-            近战: "meleeMods",
-            远程: "rangedMods",
-            同律: "skillWeaponMods",
-        } as const
-
-        const typeKey = typeKeyMap[modType]
-        if (!typeKey) {
-            return `无效的MOD类型: ${modType}`
-        }
-
-        const maxSlots = modType === "同律" ? 4 : 8
+        const maxSlots = MOD_SLOT_COUNTS[modType]
         if (slotIndex < 0 || slotIndex >= maxSlots) {
             return `无效的槽位索引: ${slotIndex}（范围: 0-${maxSlots - 1}）`
         }
 
-        this.charSettings.value[typeKey][slotIndex] = [mod.id, level || 1]
+        // 写入当前激活的 MOD 变体，保证与用户在构筑页看到的配置一致
+        getModVariantSlots(this.charSettings.value, modType)[slotIndex] = [mod.id, level || 1]
         return `已在${modType}槽位${slotIndex}设置MOD: ${mod.名称}${level ? ` (等级${level})` : ""}`
     }
 
@@ -1455,6 +1445,11 @@ export class BuildAgent {
         const targetFunction = this.charSettings.value.targetFunction || "伤害"
         const targetFunctionError = build.validateAST(targetFunction)
         const targetPreview = build.calculateTargetFunction(build.calculateWeaponAttributes())
+        // MOD 一律按当前激活的变体（A/B/C）汇报，与构筑页展示、计算保持一致
+        const describeMods = (type: "角色" | "近战" | "远程" | "同律") =>
+            getModVariantSlots(this.charSettings.value, type)
+                .filter(m => m !== null)
+                .map(m => LeveledModHelper.fromId(m[0], m[1]).toString())
         const rst = {
             角色: this.selectedChar.value,
             等级: this.charSettings.value.charLevel,
@@ -1464,12 +1459,10 @@ export class BuildAgent {
             目标函数标识符: build.getIdentifierNames(targetFunction),
             目标函数预估值: Number.isFinite(targetPreview) ? Number(targetPreview.toFixed(4)) : targetPreview,
             可用技能: build.allSkills.map(skill => skill.名称),
-            角色MOD: this.charSettings.value.charMods.filter(m => m !== null).map(m => LeveledModHelper.fromId(m[0], m[1]).toString()),
-            近战MOD: this.charSettings.value.meleeMods.filter(m => m !== null).map(m => LeveledModHelper.fromId(m[0], m[1]).toString()),
-            远程MOD: this.charSettings.value.rangedMods.filter(m => m !== null).map(m => LeveledModHelper.fromId(m[0], m[1]).toString()),
-            同律MOD: this.charSettings.value.skillWeaponMods
-                .filter(m => m !== null)
-                .map(m => LeveledModHelper.fromId(m[0], m[1]).toString()),
+            角色MOD: describeMods("角色"),
+            近战MOD: describeMods("近战"),
+            远程MOD: describeMods("远程"),
+            同律MOD: describeMods("同律"),
             BUFF列表: this.charSettings.value.buffs.map(b => b[0]),
         }
         return JSON.stringify(rst, null, 2)
@@ -1523,12 +1516,26 @@ export class BuildAgent {
         const { newBuild, log, iter } = build.autoBuild(final)
         if (apply) {
             console.log("apply", newBuild)
+            // 自动构建结果写进当前激活的 MOD 变体，避免覆盖用户正在查看的另一份配置
+            const modsByType = [
+                ["角色", newBuild.charMods],
+                ["近战", newBuild.meleeMods],
+                ["远程", newBuild.rangedMods],
+                ["同律", newBuild.skillMods],
+            ] as const
+            modsByType.forEach(([type, mods]) => {
+                const slots = getModVariantSlots(this.charSettings.value, type)
+                slots.splice(
+                    0,
+                    slots.length,
+                    ...Array.from({ length: MOD_SLOT_COUNTS[type] }, (_, index) => {
+                        const mod = mods[index]
+                        return mod ? ([mod.modId, mod.level] as [number, number]) : null
+                    })
+                )
+            })
             this.charSettings.value = {
                 ...this.charSettings.value,
-                charMods: newBuild.charMods.map(m => (m !== null ? [m.modId, m.level] : null)),
-                meleeMods: newBuild.meleeMods.map(m => (m !== null ? [m.modId, m.level] : null)),
-                rangedMods: newBuild.rangedMods.map(m => (m !== null ? [m.modId, m.level] : null)),
-                skillWeaponMods: newBuild.skillMods.map(m => (m !== null ? [m.modId, m.level] : null)),
                 meleeWeapon: newBuild.meleeWeapon.id,
                 meleeWeaponLevel: newBuild.meleeWeapon.等级,
                 meleeWeaponRefine: newBuild.meleeWeapon.精炼,

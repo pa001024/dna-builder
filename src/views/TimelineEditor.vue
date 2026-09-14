@@ -1250,7 +1250,7 @@ const resetView = () => {
 //#region 游戏
 import { useLocalStorage } from "@vueuse/core"
 import { groupBy } from "lodash-es"
-import { useCharSettings } from "@/composables/useCharSettings"
+import { getModVariantAura, getModVariantSlots, useCharSettings } from "@/composables/useCharSettings"
 import {
     buffData,
     CharBuild,
@@ -1296,13 +1296,18 @@ const charBuild = computed(() => {
             : getWBuffLvFromSetting(charSettings.value.effectConfig, weaponId, char.属性)
     return new CharBuild({
         char,
-        auraMod: LeveledModHelper.fromId(charSettings.value.auraMod),
-        charMods: charSettings.value.charMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
-        meleeMods: charSettings.value.meleeMods.filter(mod => mod !== null).map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
-        rangedMods: charSettings.value.rangedMods
+        // MOD（含中枢）一律取当前激活的变体，与构筑页展示的配置保持一致
+        auraMod: LeveledModHelper.fromId(getModVariantAura(charSettings.value)),
+        charMods: getModVariantSlots(charSettings.value, "角色")
             .filter(mod => mod !== null)
             .map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
-        skillMods: charSettings.value.skillWeaponMods
+        meleeMods: getModVariantSlots(charSettings.value, "近战")
+            .filter(mod => mod !== null)
+            .map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
+        rangedMods: getModVariantSlots(charSettings.value, "远程")
+            .filter(mod => mod !== null)
+            .map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
+        skillMods: getModVariantSlots(charSettings.value, "同律")
             .filter(mod => mod !== null)
             .map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
         skillLevel: charSettings.value.charSkillLevel,

@@ -6,7 +6,7 @@ import { type CharBuild, LeveledPet, LeveledPetHelper, petMap } from "@/data"
 import type { Pet } from "@/data/d/pet.data"
 import { PET_BREAKTHROUGH_MAX_LEVEL } from "@/data/leveled/LeveledPet"
 import { getPetActiveDuration, getPetBuffData, PET_SKILL_LEVEL_OFFSET, resolvePetCoverage } from "@/data/petTrait"
-import { format1, format100, format100r } from "@/util"
+import { format1, format100, format100r, formatProp } from "@/util"
 
 /**
  * 魔灵面板——专业模式 BUFF 面板顶部的魔灵（活力魔灵）配置。
@@ -172,7 +172,24 @@ function selectPet(id: number) {
 }
 
 /**
- * 设置魔灵突破等级（数据源为 0-4 档）。
+ * 读取当前构筑里生效的魔灵技能 BUFF（按名称从构筑取，用于主动/被动描述的 tooltip 词条）。
+ * @param active 是否取主动技（否则取被动）
+ * @returns 生效的 BUFF；未选择魔灵或该技能未登记 BUFF 时为 undefined
+ */
+function getAppliedPetBuff(active: boolean) {
+    const pet = selectedPet.value
+    if (!pet) return undefined
+    const name = active ? `${pet.名称}(主动)` : pet.名称
+    return (props.charBuild?.buffs ?? []).find(buff => buff.名称 === name)
+}
+
+/** 主动技生效 BUFF（tooltip 展示该 BUFF 的词条） */
+const activeBuff = computed(() => getAppliedPetBuff(true))
+/** 被动生效 BUFF（tooltip 展示该 BUFF 的词条） */
+const passiveBuff = computed(() => getAppliedPetBuff(false))
+
+/**
+ * 设置魔灵突破等级（0-3；与潜质加成叠加后为技能数值索引，上限 4）。
  * @param level 突破等级
  */
 function setPetLevel(level: number) {
@@ -272,7 +289,7 @@ function setPetCoverage(coverage: number) {
         <div v-if="selectedPet" class="flex flex-col gap-1.5">
             <div v-if="selectedPet.主动" class="flex flex-col gap-0.5">
                 <div class="flex items-baseline gap-1.5">
-                    <span class="text-[11px] font-semibold tracking-[0.2em] text-base-content/45 uppercase">
+                    <span class="text-[11px] font-semibold text-base-content/45 uppercase">
                         {{ $t("pet_detail.active_skill") }}
                     </span>
                     <span class="font-orbitron text-[11px] font-bold text-base-content/80 tabular-nums">
@@ -285,11 +302,31 @@ function setPetCoverage(coverage: number) {
                         {{ format100r(activeIncome, 1) }}
                     </span>
                 </div>
-                <p class="text-xs whitespace-pre-line text-base-content/70">{{ selectedPet.主动.描述 }}</p>
+                <FullTooltip side="bottom">
+                    <template #tooltip>
+                        <div class="flex flex-col gap-2">
+                            <div class="text-sm font-bold">{{ selectedPet.名称 }}</div>
+                            <div v-if="activeBuff?.等级 !== undefined" class="text-xs text-base-content/50">
+                                Lv.{{ activeBuff.等级 + PET_SKILL_LEVEL_OFFSET }}
+                            </div>
+                            <ul class="space-y-1">
+                                <li
+                                    v-for="[prop, value] in Object.entries(activeBuff?.getProperties() ?? {})"
+                                    :key="prop"
+                                    class="flex justify-between gap-8 text-sm text-primary"
+                                >
+                                    <div class="text-base-content/80">{{ $t(prop) }}</div>
+                                    {{ formatProp(prop, value) }}
+                                </li>
+                            </ul>
+                        </div>
+                    </template>
+                    <p class="text-xs whitespace-pre-line text-base-content/70">{{ selectedPet.主动.描述 }}</p>
+                </FullTooltip>
             </div>
             <div v-if="selectedPet.被动" class="flex flex-col gap-0.5">
                 <div class="flex items-baseline gap-1.5">
-                    <span class="text-[11px] font-semibold tracking-[0.2em] text-base-content/45 uppercase">
+                    <span class="text-[11px] font-semibold text-base-content/45 uppercase">
                         {{ $t("pet_detail.passive_skill") }}
                     </span>
                     <span class="font-orbitron text-[11px] font-bold text-base-content/80 tabular-nums">
@@ -302,7 +339,27 @@ function setPetCoverage(coverage: number) {
                         {{ format100r(passiveIncome, 1) }}
                     </span>
                 </div>
-                <p class="text-xs whitespace-pre-line text-base-content/70">{{ selectedPet.被动.描述 }}</p>
+                <FullTooltip side="bottom">
+                    <template #tooltip>
+                        <div class="flex flex-col gap-2">
+                            <div class="text-sm font-bold">{{ selectedPet.名称 }}</div>
+                            <div v-if="passiveBuff?.等级 !== undefined" class="text-xs text-base-content/50">
+                                Lv.{{ passiveBuff.等级 + PET_SKILL_LEVEL_OFFSET }}
+                            </div>
+                            <ul class="space-y-1">
+                                <li
+                                    v-for="[prop, value] in Object.entries(passiveBuff?.getProperties() ?? {})"
+                                    :key="prop"
+                                    class="flex justify-between gap-8 text-sm text-primary"
+                                >
+                                    <div class="text-base-content/80">{{ $t(prop) }}</div>
+                                    {{ formatProp(prop, value) }}
+                                </li>
+                            </ul>
+                        </div>
+                    </template>
+                    <p class="text-xs whitespace-pre-line text-base-content/70">{{ selectedPet.被动.描述 }}</p>
+                </FullTooltip>
             </div>
         </div>
 

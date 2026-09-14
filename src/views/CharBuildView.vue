@@ -9,11 +9,20 @@ import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
 import ExprInput from "@/components/ExprInput.vue"
 import {
+    addModVariant,
     CharSettings,
     createDefaultCharSettings,
+    getModVariantAura,
+    getModVariantCount,
+    getModVariantSlots,
+    MOD_SLOT_COUNTS,
+    MOD_SLOT_TYPES,
+    type ModSlotType,
     normalizeCharSettings,
+    removeLastModVariant,
     type SignatureWeapon,
     serializeCharSettings,
+    setModVariantAura,
     useCharSettings,
 } from "@/composables/useCharSettings"
 import { type ExprDragPayload, useExprDrag } from "@/composables/useExprDrag"
@@ -261,22 +270,36 @@ const effectConfig = () => charSettings.value.effectConfig || {}
 const getBuffLv = (modId: number) => (useGlobalEffects() ? inv.getBuffLv(modId) : getModBuffLvFromSetting(effectConfig(), modId))
 const getWBuffLv = (weaponId: number, elm: string) =>
     useGlobalEffects() ? inv.getWBuffLv(weaponId, elm) : getWBuffLvFromSetting(effectConfig(), weaponId, elm)
-const selectedCharMods = computed(() => {
+/**
+ * 读取当前激活的 MOD 变体槽位（可直接写入）。
+ * 变体 A 即 charMods 等既有字段，变体 B/C 存放在 charSettings.modVariants 中。
+ * @param type 槽位类型
+ * @returns 该类型的槽位数组
+ */
+function activeModSlots(type: ModSlotType) {
+    return getModVariantSlots(charSettings.value, type)
+}
+
+/**
+ * 把 MOD 变体的槽位实例化为可展示的魔之楔列表。
+ * @param type 槽位类型
+ * @returns 与槽位等长的魔之楔列表（空槽为 null）
+ */
+function readActiveMods(type: ModSlotType) {
     dataPackTick.value
-    return charSettings.value.charMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], getBuffLv(v[0])) : null))
-})
-const selectedMeleeMods = computed(() => {
-    dataPackTick.value
-    return charSettings.value.meleeMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], getBuffLv(v[0])) : null))
-})
-const selectedRangedMods = computed(() => {
-    dataPackTick.value
-    return charSettings.value.rangedMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], getBuffLv(v[0])) : null))
-})
-const selectedSkillWeaponMods = computed(() => {
-    dataPackTick.value
-    return charSettings.value.skillWeaponMods.map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], getBuffLv(v[0])) : null))
-})
+    return activeModSlots(type).map(v => (v ? LeveledModHelper.optionalFromId(v[0], v[1], getBuffLv(v[0])) : null))
+}
+
+const selectedCharMods = computed(() => readActiveMods("角色"))
+const selectedMeleeMods = computed(() => readActiveMods("近战"))
+const selectedRangedMods = computed(() => readActiveMods("远程"))
+const selectedSkillWeaponMods = computed(() => readActiveMods("同律"))
+/** 当前激活的 MOD 变体索引（0/1/2 ↔ 配置 A/B/C），四个 MOD 编辑器共用同一份变体 */
+const activeModVariant = computed(() => charSettings.value.modVariantIndex)
+/** 已有 MOD 变体数量（1-3） */
+const modVariantCount = computed(() => getModVariantCount(charSettings.value))
+/** 当前激活变体的中枢魔之楔（光环）id：中枢随 MOD 配置一起切换 */
+const activeAuraMod = computed(() => getModVariantAura(charSettings.value))
 const selectedBuffs = computed(() => {
     dataPackTick.value
     return charSettings.value.buffs
@@ -374,7 +397,7 @@ const charBuild = computed(() => {
         )
         const b = new CharBuild({
             char,
-            auraMod: LeveledModHelper.fromId(charSettings.value.auraMod),
+            auraMod: LeveledModHelper.fromId(getModVariantAura(charSettings.value)),
             charMods: selectedCharMods.value,
             meleeMods: selectedMeleeMods.value,
             rangedMods: selectedRangedMods.value,
@@ -583,51 +606,87 @@ const charTabTooltipMap = computed<Record<string, WeaponTooltipData>>(() =>
     }, {})
 )
 
+/**
+ * 把 MOD 槽位类型归一化为变体支持的槽位类型。
+ * @param type 槽位类型文本
+ * @returns 槽位类型；非 MOD 槽位类型返回 null
+ */
+function toModSlotType(type: string): ModSlotType | null {
+    return MOD_SLOT_TYPES.includes(type as ModSlotType) ? (type as ModSlotType) : null
+}
+
 function selectMod(type: string, slotIndex: number, modId: number, lv: number) {
-    if (type === "角色") {
-        charSettings.value.charMods[slotIndex] = [modId, lv]
-    } else if (type === "近战") {
-        charSettings.value.meleeMods[slotIndex] = [modId, lv]
-    } else if (type === "远程") {
-        charSettings.value.rangedMods[slotIndex] = [modId, lv]
-    } else if (type === "同律") {
-        charSettings.value.skillWeaponMods[slotIndex] = [modId, lv]
+    const slotType = toModSlotType(type)
+    if (slotType) {
+        activeModSlots(slotType)[slotIndex] = [modId, lv]
     }
     updateCharBuild()
 }
 
 function removeMod(slotIndex: number, type: string) {
-    if (type === "角色") {
-        charSettings.value.charMods[slotIndex] = null
-    } else if (type === "近战") {
-        charSettings.value.meleeMods[slotIndex] = null
-    } else if (type === "远程") {
-        charSettings.value.rangedMods[slotIndex] = null
-    } else if (type === "同律") {
-        charSettings.value.skillWeaponMods[slotIndex] = null
+    const slotType = toModSlotType(type)
+    if (slotType) {
+        activeModSlots(slotType)[slotIndex] = null
     }
     updateCharBuild()
 }
 
 // 交换MOD位置
 function swapMods(fromIndex: number, toIndex: number, type: string) {
-    if (type === "角色") {
-        const temp = charSettings.value.charMods[fromIndex]
-        charSettings.value.charMods[fromIndex] = charSettings.value.charMods[toIndex]
-        charSettings.value.charMods[toIndex] = temp
-    } else if (type === "近战") {
-        const temp = charSettings.value.meleeMods[fromIndex]
-        charSettings.value.meleeMods[fromIndex] = charSettings.value.meleeMods[toIndex]
-        charSettings.value.meleeMods[toIndex] = temp
-    } else if (type === "远程") {
-        const temp = charSettings.value.rangedMods[fromIndex]
-        charSettings.value.rangedMods[fromIndex] = charSettings.value.rangedMods[toIndex]
-        charSettings.value.rangedMods[toIndex] = temp
-    } else if (type === "同律") {
-        const temp = charSettings.value.skillWeaponMods[fromIndex]
-        charSettings.value.skillWeaponMods[fromIndex] = charSettings.value.skillWeaponMods[toIndex]
-        charSettings.value.skillWeaponMods[toIndex] = temp
+    const slotType = toModSlotType(type)
+    if (slotType) {
+        const slots = activeModSlots(slotType)
+        const temp = slots[fromIndex]
+        slots[fromIndex] = slots[toIndex]
+        slots[toIndex] = temp
     }
+    updateCharBuild()
+}
+
+/**
+ * 修改当前激活变体中某个槽位的魔之楔等级。
+ * @param type 槽位类型
+ * @param slotIndex 槽位索引
+ * @param lv 新等级
+ */
+function setModLevel(type: ModSlotType, slotIndex: number, lv: number) {
+    const slot = activeModSlots(type)[slotIndex]
+    if (!slot) return
+    slot[1] = lv
+}
+
+/**
+ * 切换激活的 MOD 变体（四个 MOD 编辑器共用同一份变体）。
+ * @param variantIndex 变体索引（0/1/2 ↔ A/B/C）
+ */
+function selectModVariant(variantIndex: number) {
+    if (variantIndex === charSettings.value.modVariantIndex) return
+    charSettings.value.modVariantIndex = variantIndex
+    updateCharBuild()
+}
+
+/**
+ * 写入当前激活变体的中枢魔之楔（光环）。
+ * @param auraMod 中枢魔之楔 id
+ */
+function setActiveAuraMod(auraMod: number) {
+    setModVariantAura(charSettings.value, auraMod)
+    updateCharBuild()
+}
+
+/**
+ * 追加一份 MOD 变体配置：以当前激活的变体为模板，并自动切换过去（A → A B → A B C）。
+ */
+function appendModVariant() {
+    if (addModVariant(charSettings.value) === -1) return
+    updateCharBuild()
+}
+
+/**
+ * 移除末尾的 MOD 变体配置（仅当它是当前激活的变体时允许）。
+ */
+function dropModVariant() {
+    if (!removeLastModVariant(charSettings.value)) return
     updateCharBuild()
 }
 
@@ -879,32 +938,24 @@ function applyAutobuild() {
     charSettings.value.rangedWeapon = newBuild.rangedWeapon.id
     charSettings.value.rangedWeaponLevel = newBuild.rangedWeapon.等级
     charSettings.value.rangedWeaponRefine = newBuild.rangedWeapon.精炼
-    charSettings.value.charMods = pad(
-        newBuild.charMods.filter(v => v !== null).map(v => [v.id, v.等级]),
-        8,
-        null
+    // 自动构建结果写入当前激活的变体，避免覆盖用户正在查看的另一份配置
+    replaceActiveModSlots(
+        "角色",
+        newBuild.charMods.filter(v => v !== null).map(v => [v.id, v.等级])
     )
-    charSettings.value.meleeMods = pad(
-        newBuild.meleeMods.filter(v => v !== null).map(v => [v.id, v.等级]),
-        8,
-        null
+    replaceActiveModSlots(
+        "近战",
+        newBuild.meleeMods.filter(v => v !== null).map(v => [v.id, v.等级])
     )
-    charSettings.value.rangedMods = pad(
-        newBuild.rangedMods.filter(v => v !== null).map(v => [v.id, v.等级]),
-        8,
-        null
+    replaceActiveModSlots(
+        "远程",
+        newBuild.rangedMods.filter(v => v !== null).map(v => [v.id, v.等级])
     )
-    charSettings.value.skillWeaponMods = pad(
-        newBuild.skillMods.filter(v => v !== null).map(v => [v.id, v.等级]),
-        4,
-        null
+    replaceActiveModSlots(
+        "同律",
+        newBuild.skillMods.filter(v => v !== null).map(v => [v.id, v.等级])
     )
-    function pad<T>(arr: T[], length: number, value: T) {
-        while (arr.length < length) {
-            arr.push(value)
-        }
-        return arr
-    }
+    updateCharBuild()
 }
 //#endregion
 //#region 配装分享弹窗
@@ -957,6 +1008,14 @@ function updateCharBuild() {
     pad(charSettings.value.meleeMods, 8, null)
     pad(charSettings.value.rangedMods, 8, null)
     pad(charSettings.value.skillWeaponMods, 4, null)
+    // MOD 变体（B/C）与配置 A 保持同一套槽位结构，槽位索引才不会漂移
+    charSettings.value.modVariants.forEach(variant => {
+        MOD_SLOT_TYPES.forEach(type => {
+            const slots = variant[type] ?? []
+            pad(slots, MOD_SLOT_COUNTS[type], null)
+            variant[type] = slots
+        })
+    })
     pad(charSettings.value.traits, TRAIT_SLOT_COUNT, null)
     charSettings.value.customVariables = charSettings.value.customVariables.filter(
         variable => Array.isArray(variable) && typeof variable[0] === "string" && typeof variable[1] === "string"
@@ -1748,18 +1807,33 @@ async function fetchGameMods(id: number, isWeapon: boolean, isConWeapon: boolean
 }
 
 /**
- * 从游戏同步魔之楔到当前构筑（第一套）。
+ * 用整份槽位替换当前激活变体在指定类型下的槽位（长度补齐到该类型的固定槽位数）。
+ * @param type 槽位类型
+ * @param slots 新的槽位列表
+ */
+function replaceActiveModSlots(type: ModSlotType, slots: ([number, number] | null)[]) {
+    const target = activeModSlots(type)
+    const padded = Array.from({ length: MOD_SLOT_COUNTS[type] }, (_, index) => slots[index] ?? null)
+    target.splice(0, target.length, ...padded)
+}
+
+/**
+ * 从游戏同步魔之楔到当前构筑（写入当前激活的变体）。
+ * @param id 角色或武器 id
+ * @param isWeapon 是否武器
+ * @param isConWeapon 是否同律武器
  */
 async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boolean = false) {
     const data = await fetchGameMods(id, isWeapon, isConWeapon)
     if (!data) return
     if (isWeapon || isConWeapon) {
-        if (data.weaponType === "近战") charSettings.value.meleeMods = data.mods
-        else if (data.weaponType === "远程") charSettings.value.rangedMods = data.mods
+        if (data.weaponType === "近战") replaceActiveModSlots("近战", data.mods)
+        else if (data.weaponType === "远程") replaceActiveModSlots("远程", data.mods)
     } else {
-        charSettings.value.charMods = data.mods
-        if (data.auraMod) charSettings.value.auraMod = data.auraMod
+        replaceActiveModSlots("角色", data.mods)
+        if (data.auraMod) setActiveAuraMod(data.auraMod)
     }
+    updateCharBuild()
     localStorage.setItem(`build.${selectedCharId.value}`, serializeCharSettings(charSettings.value))
     ui.showSuccessMessage(t("char-build.sync_success"))
 }
@@ -2789,14 +2863,19 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     )
                                 "
                                 :char-build="charBuild"
-                                :aura-mod="charSettings.auraMod"
+                                :aura-mod="activeAuraMod"
                                 type="角色"
                                 :polset="charBuild.getModCostTransfer(charTab)"
+                                :variant-index="activeModVariant"
+                                :variant-count="modVariantCount"
                                 @remove-mod="removeMod($event, '角色')"
                                 @select-mod="selectMod('角色', $event[0], $event[1], $event[2])"
-                                @level-change="charSettings.charMods[$event[0]]![1] = $event[1]"
-                                @select-aura-mod="charSettings.auraMod = $event"
+                                @level-change="setModLevel('角色', $event[0], $event[1])"
+                                @select-aura-mod="setActiveAuraMod($event)"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '角色')"
+                                @variant-select="selectModVariant"
+                                @variant-add="appendModVariant"
+                                @variant-remove="dropModVariant"
                                 @sync="syncModFromGame(charBuild.char.id, false)"
                             />
 
@@ -2819,10 +2898,15 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 :char-build="charBuild"
                                 type="近战"
                                 :polset="charBuild.getModCostTransfer(charTab)"
+                                :variant-index="activeModVariant"
+                                :variant-count="modVariantCount"
                                 @remove-mod="removeMod($event, '近战')"
                                 @select-mod="selectMod('近战', $event[0], $event[1], $event[2])"
-                                @level-change="charSettings.meleeMods[$event[0]]![1] = $event[1]"
+                                @level-change="setModLevel('近战', $event[0], $event[1])"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '近战')"
+                                @variant-select="selectModVariant"
+                                @variant-add="appendModVariant"
+                                @variant-remove="dropModVariant"
                                 @sync="syncModFromGame(charBuild.meleeWeapon.id, true)"
                             />
 
@@ -2845,10 +2929,15 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 :char-build="charBuild"
                                 type="远程"
                                 :polset="charBuild.getModCostTransfer(charTab)"
+                                :variant-index="activeModVariant"
+                                :variant-count="modVariantCount"
                                 @remove-mod="removeMod($event, '远程')"
                                 @select-mod="selectMod('远程', $event[0], $event[1], $event[2])"
-                                @level-change="charSettings.rangedMods[$event[0]]![1] = $event[1]"
+                                @level-change="setModLevel('远程', $event[0], $event[1])"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '远程')"
+                                @variant-select="selectModVariant"
+                                @variant-add="appendModVariant"
+                                @variant-remove="dropModVariant"
                                 @sync="syncModFromGame(charBuild.rangedWeapon.id, true)"
                             />
 
@@ -2868,10 +2957,15 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 :char-build="charBuild"
                                 type="同律"
                                 :polset="charBuild.getModCostTransfer(charTab)"
+                                :variant-index="activeModVariant"
+                                :variant-count="modVariantCount"
                                 @remove-mod="removeMod($event, '同律')"
                                 @select-mod="selectMod('同律', $event[0], $event[1], $event[2])"
-                                @level-change="charSettings.skillWeaponMods[$event[0]]![1] = $event[1]"
+                                @level-change="setModLevel('同律', $event[0], $event[1])"
                                 @swap-mods="(index1, index2) => swapMods(index1, index2, '同律')"
+                                @variant-select="selectModVariant"
+                                @variant-add="appendModVariant"
+                                @variant-remove="dropModVariant"
                                 @sync="syncModFromGame(charBuild.char.id, false, true)"
                             />
                             <!-- 未装备武器时的MOD提示 -->

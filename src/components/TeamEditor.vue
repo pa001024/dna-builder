@@ -2,7 +2,7 @@
 import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { buildsQuery } from "@/api/graphql"
-import type { CharSettings } from "@/composables/useCharSettings"
+import { type CharSettings, getModVariantIndex, MOD_VARIANT_LETTERS, type ModVariantLetter } from "@/composables/useCharSettings"
 import { charMap, LeveledChar, LeveledWeapon, weaponMap } from "@/data"
 
 /**
@@ -15,6 +15,7 @@ import { charMap, LeveledChar, LeveledWeapon, weaponMap } from "@/data"
  *
  * 「协战构筑」是可选的服务器构筑关联：写入 charSettings.teamNBuild（"-" 表示未关联），
  * 简洁模式点击该协战角色或武器即可弹窗查看其魔之楔。
+ * 关联时还可以指定查看该构筑的哪一份 MOD 配置（A/B/C）：目标构筑没有所选配置时降级为 A。
  */
 
 /** 协战下拉选项（角色按元素分组 / 武器按类型分组后由父级传入） */
@@ -69,6 +70,9 @@ const SLOTS: readonly TeamSlot[] = [1, 2]
 /** 当前打开的挑选器（null 表示未打开） */
 const picker = ref<{ kind: PickerKind; slot: TeamSlot } | null>(null)
 
+/** 构筑挑选器里待提交的 MOD 配置变体（A/B/C）：打开挑选器时同步为当前已关联的变体 */
+const pickerVariant = ref<ModVariantLetter>("A")
+
 /** 每个协战角色可选的构筑列表（按角色 id 缓存，仅缓存成功结果） */
 const buildOptions = ref<Record<number, BuildChoice[]>>({})
 /** 正在拉取构筑列表的角色 id，避免重复请求 */
@@ -102,6 +106,26 @@ function teamBuild(slot: TeamSlot) {
 }
 
 /**
+ * 读取槽位关联构筑使用的 MOD 配置变体（A/B/C）。
+ * @param slot 槽位序号
+ * @returns 变体字母
+ */
+function teamBuildVariant(slot: TeamSlot): ModVariantLetter {
+    const value = slot === 1 ? props.charSettings.team1BuildVariant : props.charSettings.team2BuildVariant
+    return MOD_VARIANT_LETTERS[getModVariantIndex(value)]
+}
+
+/**
+ * 写入槽位关联构筑使用的 MOD 配置变体。
+ * @param slot 槽位序号
+ * @param letter 变体字母
+ */
+function setTeamBuildVariant(slot: TeamSlot, letter: ModVariantLetter) {
+    if (slot === 1) props.charSettings.team1BuildVariant = letter
+    else props.charSettings.team2BuildVariant = letter
+}
+
+/**
  * 写入协战角色：切换队友时清空原先关联的构筑 id，避免留下不属于该队友的脏引用。
  * @param slot 槽位序号
  * @param value 队友角色 id
@@ -112,10 +136,12 @@ function setTeamChar(slot: TeamSlot, value: number | "-") {
         if (props.charSettings.team1 === value) return false
         props.charSettings.team1 = value
         props.charSettings.team1Build = EMPTY_VALUE
+        props.charSettings.team1BuildVariant = "A"
     } else {
         if (props.charSettings.team2 === value) return false
         props.charSettings.team2 = value
         props.charSettings.team2Build = EMPTY_VALUE
+        props.charSettings.team2BuildVariant = "A"
     }
     return true
 }
@@ -223,7 +249,11 @@ function buildTitle(slot: TeamSlot) {
  */
 function openPicker(kind: PickerKind, slot: TeamSlot) {
     picker.value = { kind, slot }
-    if (kind === "build") void loadBuildOptions(teamChar(slot))
+    if (kind === "build") {
+        // 以当前已关联的变体作为起点，用户只改想改的部分
+        pickerVariant.value = teamBuildVariant(slot)
+        void loadBuildOptions(teamChar(slot))
+    }
 }
 
 /** 关闭挑选器 */
@@ -337,13 +367,15 @@ function commitTeamOption(value: number | "-") {
 }
 
 /**
- * 提交协战构筑关联（"-" 表示取消关联）。
+ * 提交协战构筑关联（"-" 表示取消关联），同时写入要查看的 MOD 配置变体。
  * @param buildId 服务器构筑 id
  */
 function commitBuild(buildId: string) {
     const current = picker.value
     if (!current) return
     setTeamBuild(current.slot, buildId)
+    // 取消关联时变体回到配置 A，避免留下指向不存在构筑的配置字母
+    setTeamBuildVariant(current.slot, buildId === EMPTY_VALUE ? "A" : pickerVariant.value)
     closePicker()
 }
 
@@ -449,7 +481,17 @@ watch(
                     <Icon icon="ri:external-link-line" class="size-3.5 shrink-0" />
                     <!-- min-w-0：槽位并排变窄后长构筑名要能被 truncate 收缩，而不是把整行撑出按钮 -->
                     <span class="min-w-0 truncate">{{ buildTitle(slot) || $t("char-build.team_build_none") }}</span>
-                    <Icon icon="ri:arrow-right-line" class="ml-auto size-4 shrink-0 opacity-60" />
+                    <span class="ml-auto flex shrink-0 items-center gap-1.5">
+                        <!-- 已关联时标出查看的是哪一份 MOD 配置（A/B/C） -->
+                        <span
+                            v-if="teamBuild(slot) !== EMPTY_VALUE"
+                            class="rounded-xs border border-primary/40 px-1 text-[10px] leading-4 text-primary/85"
+                            :title="$t('char-build.team_build_variant')"
+                        >
+                            {{ teamBuildVariant(slot) }}
+                        </span>
+                        <Icon icon="ri:arrow-right-line" class="size-4 opacity-60" />
+                    </span>
                 </button>
             </div>
         </div>
@@ -467,6 +509,25 @@ watch(
 
                     <!-- 协战构筑：列表选择 -->
                     <template v-if="picker?.kind === 'build'">
+                        <!-- MOD 配置变体：查看该构筑的哪一份 MOD 配置（A/B/C）；目标构筑没有所选配置时降级为 A -->
+                        <div class="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-xs border border-base-content/12 bg-base-content/5 px-2.5 py-2">
+                            <span class="flex items-center gap-1">
+                                <button
+                                    v-for="letter in MOD_VARIANT_LETTERS"
+                                    :key="letter"
+                                    type="button"
+                                    class="btn btn-xs h-6 min-h-0 w-6 p-0"
+                                    :class="
+                                        pickerVariant === letter ? 'btn-secondary' : 'btn-ghost border border-base-content/20 text-base-content/70'
+                                    "
+                                    :title="$t('char-build.mod_variant_switch', { letter })"
+                                    @click="pickerVariant = letter"
+                                >
+                                    {{ letter }}
+                                </button>
+                            </span>
+                            <span class="text-[11px] text-base-content/45">{{ $t("char-build.team_build_variant_hint") }}</span>
+                        </div>
                         <p v-if="pickerBuildsLoading" class="py-4 text-sm text-base-content/60">{{ $t("char-build.team_build_loading") }}</p>
                         <div v-else class="flex flex-col gap-1.5">
                             <button

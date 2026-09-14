@@ -2913,7 +2913,10 @@ function handlePointerMove(event: PointerEvent) {
         const metrics = getPinchMetrics()
         if (!pinchGestureState || !metrics) return
 
-        const nextZoom = Math.max(minZoom, Math.min(maxZoom, pinchGestureState.initialZoom * (metrics.distance / pinchGestureState.initialDistance)))
+        const nextZoom = Math.max(
+            minZoom,
+            Math.min(maxZoom, pinchGestureState.initialZoom * (metrics.distance / pinchGestureState.initialDistance))
+        )
         zoom.value = nextZoom
         panOffset.value = {
             x: metrics.midpoint.x - pinchGestureState.mapPointAtMidpoint.x * nextZoom,
@@ -3147,396 +3150,403 @@ onUnmounted(() => {
                 class="pointer-events-auto h-full shrink-0 overflow-hidden rounded-xs border border-base-content/15 bg-base-100/85 shadow-lg backdrop-blur-md transition-all duration-200 ease-in-out"
                 :class="isSidebarCollapsed ? 'w-0 border-transparent opacity-0 pointer-events-none' : 'w-80 max-w-[46vw]'"
             >
-            <ScrollArea class="h-full">
-                <div class="flex flex-col gap-4 p-3">
-                    <!-- 当前地图点（路由传入） -->
-                    <div v-if="currentMapPointInfo" class="rounded-xs border border-base-content/15 bg-base-100 p-2.5 text-xs space-y-1.5">
-                        <div class="flex items-center justify-between gap-2">
-                            <div class="font-medium text-base-content">当前地图点</div>
-                            <button
-                                class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-xs border border-base-content/15 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
-                                type="button"
-                                @click="clearRouteMapPoint"
-                            >
-                                <Icon icon="ri:close-line" class="size-3" />
-                                清除
-                            </button>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <img
-                                v-if="currentMapPointInfo.iconUrl"
-                                :src="currentMapPointInfo.iconUrl"
-                                :alt="currentMapPointInfo.name"
-                                class="size-5 shrink-0"
-                            />
-                            <span class="truncate">{{ currentMapPointInfo.name }}</span>
-                        </div>
-                        <div class="font-mono text-[11px] opacity-60">
-                            World: {{ currentMapPointInfo.worldX.toFixed(2) }}, {{ currentMapPointInfo.worldY.toFixed(2) }}
-                        </div>
-                    </div>
-
-                    <!-- 区域 -->
-                    <div class="space-y-1.5">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">区域</span>
-                            <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
-                        </div>
-                        <select
-                            :value="selectedRegionId"
-                            class="select select-bordered select-sm w-full rounded-xs"
-                            @change="handleRegionChange"
-                        >
-                            <option v-for="region in regionOptions" :key="region.id" :value="region.id">
-                                {{ region.id }} - {{ region.name }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- 图层（可折叠） -->
-                    <div class="space-y-1.5">
-                        <button
-                            type="button"
-                            class="flex w-full cursor-pointer items-center gap-2"
-                            :aria-expanded="!isLayerSectionCollapsed"
-                            @click="isLayerSectionCollapsed = !isLayerSectionCollapsed"
-                        >
-                            <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">图层</span>
-                            <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
-                            <Icon
-                                :icon="isLayerSectionCollapsed ? 'ri:arrow-down-s-line' : 'ri:arrow-up-s-line'"
-                                class="size-3.5 text-base-content/40"
-                            />
-                        </button>
-                        <template v-if="!isLayerSectionCollapsed">
-                            <div
-                                v-for="group in layerGroups"
-                                :key="group.id"
-                                class="rounded-xs border border-base-content/15 bg-base-100/70 p-2 space-y-1.5"
-                            >
-                                <div class="flex items-center gap-1.5 text-sm font-medium text-base-content/80">
-                                    <Icon icon="ri:stack-line" class="size-3.5 text-base-content/40" />
-                                    {{ group.name }}
-                                </div>
-                                <div class="space-y-0.5">
-                                    <label
-                                        v-for="layer in group.layers"
-                                        :key="layer.id"
-                                        class="flex cursor-pointer items-center gap-2 rounded-xs px-1.5 py-1 text-sm transition-colors duration-150 hover:bg-base-content/5"
-                                    >
-                                        <input
-                                            v-if="group.selectMode === 'single'"
-                                            :checked="isSingleLayerSelected(group.id, layer.id)"
-                                            type="radio"
-                                            :name="`layer-group-${group.id}`"
-                                            class="radio radio-xs"
-                                            @change="selectSingleLayer(group.id, layer.id)"
-                                        />
-                                        <input
-                                            v-else
-                                            :checked="isLayerActive(layer.id)"
-                                            type="checkbox"
-                                            class="checkbox checkbox-xs"
-                                            @change="toggleMultiLayer(layer.id, ($event.target as HTMLInputElement).checked)"
-                                        />
-                                        <span class="truncate">{{ layer.name }}</span>
-                                        <span class="ml-auto shrink-0 font-mono text-[10px] opacity-50">z{{ layer.slot.zOrder }}</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- 魔灵筛选（通用筛选卡片：整行折叠 + 全选图标 + 显示开关） -->
-                    <MapFilterCard
-                        title="魔灵"
-                        :collapsed="isPetSectionCollapsed"
-                        :visible="showPetPoints"
-                        :all-active="isPetFilterActive"
-                        show-all-toggle
-                        @toggle-collapse="isPetSectionCollapsed = !isPetSectionCollapsed"
-                        @toggle-all="handlePetFiltersAllChange(!isPetFilterActive)"
-                        @toggle-visibility="showPetPoints = !showPetPoints"
-                    >
-                        <div class="grid max-h-40 grid-cols-1 gap-1 overflow-y-auto">
-                            <button
-                                v-for="option in petFilterOptions"
-                                :key="option.id"
-                                class="inline-flex min-w-0 cursor-pointer items-center gap-1.5 rounded-xs border px-2 py-1 text-xs leading-tight whitespace-nowrap transition-colors duration-150 justify-start"
-                                :class="
-                                    selectedPetFilterIds.has(option.id)
-                                        ? 'border-primary/60 bg-primary/10 font-medium text-primary hover:border-primary/60'
-                                        : 'border-transparent bg-transparent text-base-content/70 hover:border-primary/40 hover:text-primary'
-                                "
-                                :title="option.label"
-                                @click="togglePetFilter(option.id, !selectedPetFilterIds.has(option.id))"
-                            >
-                                <img v-if="option.iconUrl" :src="option.iconUrl" :alt="option.label" class="size-4 shrink-0" />
-                                <Icon v-else icon="ri:star-line" class="size-3.5 shrink-0 text-base-content/40" />
-                                <span class="truncate">{{ option.label }}</span>
-                            </button>
-                            <div v-if="petFilterOptions.length === 0" class="px-1 py-0.5 text-xs opacity-60">当前区域没有可筛选的魔灵</div>
-                        </div>
-                    </MapFilterCard>
-
-                    <!-- 传送点筛选（通用筛选卡片：整行折叠 + 全选图标 + 显示开关） -->
-                    <MapFilterCard
-                        v-if="teleportIconOptions.length > 0"
-                        title="传送点"
-                        :collapsed="isTeleportSectionCollapsed"
-                        :visible="showTeleportPoints"
-                        :all-active="isTeleportPointFilterActive"
-                        show-all-toggle
-                        @toggle-collapse="isTeleportSectionCollapsed = !isTeleportSectionCollapsed"
-                        @toggle-all="handleTeleportPointsAllChange(!isTeleportPointFilterActive)"
-                        @toggle-visibility="showTeleportPoints = !showTeleportPoints"
-                    >
-                        <div class="grid max-h-36 grid-cols-4 gap-1 overflow-y-auto">
-                            <button
-                                v-for="option in teleportIconOptions"
-                                :key="option.icon"
-                                class="inline-flex min-w-0 cursor-pointer items-center gap-1.5 rounded-xs border px-2 py-1 text-xs leading-tight whitespace-nowrap transition-colors duration-150 justify-center"
-                                :class="
-                                    showTeleportPoints && selectedTeleportIcons.has(option.icon)
-                                        ? 'border-primary/60 bg-primary/10 font-medium text-primary hover:border-primary/60'
-                                        : 'border-transparent bg-transparent text-base-content/70 hover:border-primary/40 hover:text-primary'
-                                "
-                                :title="option.icon"
-                                @click="toggleTeleportIcon(option.icon, !selectedTeleportIcons.has(option.icon))"
-                            >
-                                <img :src="resolveTeleportPointIconUrl(option.icon)" :alt="option.icon" class="size-4 shrink-0" />
-                            </button>
-                        </div>
-                    </MapFilterCard>
-
-                    <!-- 资源筛选（通用筛选卡片：整行折叠 + 全选图标 + 显示开关） -->
-                    <MapFilterCard
-                        v-if="resourceOptions.length > 0"
-                        title="资源"
-                        :collapsed="isResourceSectionCollapsed"
-                        :visible="showResourcePoints"
-                        :all-active="isResourceFilterActive"
-                        show-all-toggle
-                        @toggle-collapse="isResourceSectionCollapsed = !isResourceSectionCollapsed"
-                        @toggle-all="handleResourceFiltersAllChange(!isResourceFilterActive)"
-                        @toggle-visibility="showResourcePoints = !showResourcePoints"
-                    >
-                        <div class="grid max-h-36 grid-cols-2 gap-1 overflow-y-auto">
-                            <button
-                                v-for="option in resourceOptions"
-                                :key="option.id"
-                                class="inline-flex min-w-0 cursor-pointer items-center gap-1.5 rounded-xs border px-2 py-1 text-xs leading-tight whitespace-nowrap transition-colors duration-150 justify-start"
-                                :class="
-                                    selectedResourceIds.has(option.id)
-                                        ? 'border-primary/60 bg-primary/10 font-medium text-primary hover:border-primary/60'
-                                        : 'border-transparent bg-transparent text-base-content/70 hover:border-primary/40 hover:text-primary'
-                                "
-                                :title="option.name"
-                                @click="toggleResourceFilter(option.id, !selectedResourceIds.has(option.id))"
-                            >
-                                <img
-                                    :src="option.icon ? `/imgs/res/${option.icon}.webp` : '/imgs/webp/T_Head_Empty.webp'"
-                                    :alt="option.name"
-                                    class="size-4 shrink-0"
-                                />
-                                <span class="truncate">{{ $t(option.name) }}</span>
-                            </button>
-                        </div>
-                    </MapFilterCard>
-
-                    <!-- 子区域（可折叠） -->
-                    <div class="space-y-1.5">
-                        <button
-                            type="button"
-                            class="flex w-full cursor-pointer items-center gap-2"
-                            :aria-expanded="!isSubRegionSectionCollapsed"
-                            @click="isSubRegionSectionCollapsed = !isSubRegionSectionCollapsed"
-                        >
-                            <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">子区域</span>
-                            <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
-                            <Icon
-                                :icon="isSubRegionSectionCollapsed ? 'ri:arrow-down-s-line' : 'ri:arrow-up-s-line'"
-                                class="size-3.5 text-base-content/40"
-                            />
-                        </button>
-                        <template v-if="!isSubRegionSectionCollapsed">
-                            <div class="overflow-y-auto rounded-xs border border-base-content/15 bg-base-100/70 max-h-[36vh]">
-                                <div
-                                    class="flex items-center justify-between gap-3 border-b border-base-content/10 px-2 py-1.5 text-sm hover:bg-base-content/5"
-                                >
-                                    <label class="flex cursor-pointer items-center gap-2">
-                                        <input
-                                            :checked="isAllSubRegionsSelected"
-                                            type="checkbox"
-                                            class="checkbox checkbox-xs"
-                                            @change="handleSubRegionAllChange(($event.target as HTMLInputElement).checked)"
-                                        />
-                                        <span>全部</span>
-                                    </label>
-                                    <label
-                                        class="flex cursor-pointer items-center gap-2"
-                                        :title="highlightedRcPoints.length === 0 ? '请先选择包含魔灵点位的子区域' : ''"
-                                    >
-                                        <input
-                                            :checked="showRcShortestTraversal"
-                                            :disabled="highlightedRcPoints.length === 0"
-                                            type="checkbox"
-                                            class="checkbox checkbox-xs"
-                                            @change="showRcShortestTraversal = ($event.target as HTMLInputElement).checked"
-                                        />
-                                        <span>最短图遍历</span>
-                                    </label>
-                                </div>
-                                <button
-                                    v-for="point in projectedSubRegions"
-                                    :key="point.id"
-                                    class="block w-full border-b border-base-content/10 px-2 py-2 text-left text-sm transition-colors duration-150 hover:bg-base-content/5 last:border-b-0"
-                                    :class="{
-                                        'bg-primary/10 text-primary': isSubRegionSelected(point.id),
-                                        'bg-warning/15': hoveredSubRegionId === point.id,
-                                    }"
-                                    @mouseenter="hoveredSubRegionId = point.id"
-                                    @mouseleave="hoveredSubRegionId = null"
-                                    @click="focusSubRegion(point.id)"
-                                >
-                                    <div class="font-medium">{{ $t(point.name) }}</div>
-                                </button>
-                                <div v-if="projectedSubRegions.length === 0" class="p-3 text-sm opacity-60">
-                                    当前区域没有可显示的 subregion 坐标
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- 选中子区域详情 -->
-                    <div
-                        v-if="selectedSubRegion"
-                        class="mt-auto rounded-xs border border-base-content/15 bg-base-100/90 p-3 text-sm shadow-sm"
-                    >
-                        <div class="font-medium text-base-content">{{ $t(selectedSubRegion.name) }}</div>
-
-                        <div class="mt-2 border-t border-base-content/10 pt-2">
-                            <div class="mb-1 text-[11px] font-semibold tracking-[0.2em] text-base-content/45 uppercase">
-                                RC 列表（点击可查看详情）
-                            </div>
-                            <div class="flex max-h-28 flex-wrap gap-1 overflow-y-auto">
-                                <button
-                                    v-for="rcInfo in selectedSubRegion.rcInfos"
-                                    :key="`${selectedSubRegion.id}-${rcInfo.rcId}-${rcInfo.rcIndex}`"
-                                    class="rounded-xs border border-base-content/15 px-2 py-1 text-xs transition-colors duration-150 hover:bg-base-content/5"
-                                    :class="{
-                                        'border-primary/60 bg-primary/10 text-primary':
-                                            selectedRcState?.subRegionId === selectedSubRegion.id &&
-                                            selectedRcState?.rcId === rcInfo.rcId &&
-                                            selectedRcState?.rcIndex === rcInfo.rcIndex,
-                                    }"
-                                    @click="selectRc(selectedSubRegion.id, rcInfo.rcId, rcInfo.rcIndex)"
-                                >
-                                    RC {{ rcInfo.rcId }}
-                                </button>
-                                <div v-if="selectedSubRegion.rcInfos.length === 0" class="w-full text-xs opacity-60">
-                                    当前子区域无 RC 配置
-                                </div>
-                            </div>
-                        </div>
-
+                <ScrollArea class="h-full">
+                    <div class="flex flex-col gap-4 p-3">
+                        <!-- 当前地图点（路由传入） -->
                         <div
-                            v-if="selectedRcInfo"
-                            class="mt-2 space-y-1 rounded-xs border border-base-content/15 bg-base-100/85 p-2 text-xs"
+                            v-if="currentMapPointInfo"
+                            class="rounded-xs border border-base-content/15 bg-base-100 p-2.5 text-xs space-y-1.5"
                         >
-                            <div class="font-medium"><CopyID :id="selectedRcInfo.rcId" />详情</div>
-                            <div class="opacity-70">刷新数量 {{ selectedRcInfo.count }} | 点位 {{ selectedRcInfo.points.length }}</div>
-                            <div v-if="selectedRcInfo.rarestPet" class="opacity-70">
-                                最稀有魔灵: {{ selectedRcInfo.rarestPet.petName }} ({{
-                                    (selectedRcInfo.rarestPet.ratio * 100).toFixed(2)
-                                }}%)
-                            </div>
-                            <div class="pt-1 opacity-70">魔灵概率：</div>
-                            <div class="space-y-1.5">
-                                <!-- 每行：魔灵图标 + 名称 + 概率（虚线下划线提示 tooltip），底部为按比例填充的矩形条 -->
-                                <FullTooltip
-                                    v-for="petRate in selectedRcInfo.petRates"
-                                    :key="`${selectedRcInfo.rcId}-${petRate.petId}`"
-                                    side="top"
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="font-medium text-base-content">当前地图点</div>
+                                <button
+                                    class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-xs border border-base-content/15 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                                    type="button"
+                                    @click="clearRouteMapPoint"
                                 >
-                                    <div class="cursor-help rounded-xs px-1 py-0.5 transition-colors duration-150 hover:bg-base-content/5">
-                                        <div class="flex items-center gap-1.5">
-                                            <img :src="petRate.petIconUrl" :alt="petRate.petName" class="size-4 shrink-0" />
-                                            <span class="min-w-0 truncate">{{ petRate.petName }}</span>
-                                            <span class="flex-1" />
-                                            <span
-                                                class="shrink-0 underline decoration-dashed decoration-base-content/40 underline-offset-2 tabular-nums"
-                                            >
-                                                {{ (petRate.ratio * 100).toFixed(2) }}%
-                                            </span>
-                                        </div>
-                                        <div class="mt-0.5 h-1 w-full bg-base-content/10">
-                                            <div
-                                                class="h-full"
-                                                :class="petRate.petId === selectedRcInfo.rarestPet?.petId ? 'bg-warning' : 'bg-primary/70'"
-                                                :style="{ width: `${Math.min(100, Math.max(0, petRate.ratio * 100))}%` }"
-                                            />
-                                        </div>
-                                    </div>
-                                    <template #tooltip>
-                                        <div class="flex flex-col gap-1 text-xs leading-5">
-                                            <div class="flex items-center gap-1.5 font-medium">
-                                                <img :src="petRate.petIconUrl" :alt="petRate.petName" class="size-4 shrink-0" />
-                                                <span>{{ petRate.petName }}</span>
-                                            </div>
-                                            <div class="opacity-75">权重 {{ petRate.weight }} / {{ petRate.totalWeight }}</div>
-                                            <div class="opacity-75">概率 {{ (petRate.ratio * 100).toFixed(2) }}%</div>
-                                        </div>
-                                    </template>
-                                </FullTooltip>
-                                <div v-if="selectedRcInfo.petRates.length === 0" class="opacity-70">无 pet.data 可识别魔灵</div>
+                                    <Icon icon="ri:close-line" class="size-3" />
+                                    清除
+                                </button>
                             </div>
-                            <div v-if="selectedRcInfo.unknownRates.length > 0" class="pt-1">
-                                <div class="opacity-70">未识别实体：</div>
+                            <div class="flex items-center gap-2">
+                                <img
+                                    v-if="currentMapPointInfo.iconUrl"
+                                    :src="currentMapPointInfo.iconUrl"
+                                    :alt="currentMapPointInfo.name"
+                                    class="size-5 shrink-0"
+                                />
+                                <span class="truncate">{{ currentMapPointInfo.name }}</span>
+                            </div>
+                            <div class="font-mono text-[11px] opacity-60">
+                                World: {{ currentMapPointInfo.worldX.toFixed(2) }}, {{ currentMapPointInfo.worldY.toFixed(2) }}
+                            </div>
+                        </div>
+
+                        <!-- 区域 -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">区域</span>
+                                <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
+                            </div>
+                            <select
+                                :value="selectedRegionId"
+                                class="select select-bordered select-sm w-full rounded-xs"
+                                @change="handleRegionChange"
+                            >
+                                <option v-for="region in regionOptions" :key="region.id" :value="region.id">
+                                    {{ region.id }} - {{ region.name }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- 图层（可折叠） -->
+                        <div class="space-y-1.5">
+                            <button
+                                type="button"
+                                class="flex w-full cursor-pointer items-center gap-2"
+                                :aria-expanded="!isLayerSectionCollapsed"
+                                @click="isLayerSectionCollapsed = !isLayerSectionCollapsed"
+                            >
+                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">图层</span>
+                                <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
+                                <Icon
+                                    :icon="isLayerSectionCollapsed ? 'ri:arrow-down-s-line' : 'ri:arrow-up-s-line'"
+                                    class="size-3.5 text-base-content/40"
+                                />
+                            </button>
+                            <template v-if="!isLayerSectionCollapsed">
                                 <div
-                                    v-for="unknownRate in selectedRcInfo.unknownRates"
-                                    :key="`${selectedRcInfo.rcId}-${unknownRate.entityId}`"
-                                    class="opacity-80"
+                                    v-for="group in layerGroups"
+                                    :key="group.id"
+                                    class="rounded-xs border border-base-content/15 bg-base-100/70 p-2 space-y-1.5"
                                 >
-                                    ID {{ unknownRate.entityId }}: {{ unknownRate.weight }}/{{ unknownRate.totalWeight }} ({{
-                                        (unknownRate.ratio * 100).toFixed(2)
+                                    <div class="flex items-center gap-1.5 text-sm font-medium text-base-content/80">
+                                        <Icon icon="ri:stack-line" class="size-3.5 text-base-content/40" />
+                                        {{ group.name }}
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <label
+                                            v-for="layer in group.layers"
+                                            :key="layer.id"
+                                            class="flex cursor-pointer items-center gap-2 rounded-xs px-1.5 py-1 text-sm transition-colors duration-150 hover:bg-base-content/5"
+                                        >
+                                            <input
+                                                v-if="group.selectMode === 'single'"
+                                                :checked="isSingleLayerSelected(group.id, layer.id)"
+                                                type="radio"
+                                                :name="`layer-group-${group.id}`"
+                                                class="radio radio-xs"
+                                                @change="selectSingleLayer(group.id, layer.id)"
+                                            />
+                                            <input
+                                                v-else
+                                                :checked="isLayerActive(layer.id)"
+                                                type="checkbox"
+                                                class="checkbox checkbox-xs"
+                                                @change="toggleMultiLayer(layer.id, ($event.target as HTMLInputElement).checked)"
+                                            />
+                                            <span class="truncate">{{ layer.name }}</span>
+                                            <span class="ml-auto shrink-0 font-mono text-[10px] opacity-50">z{{ layer.slot.zOrder }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- 魔灵筛选（通用筛选卡片：整行折叠 + 全选图标 + 显示开关） -->
+                        <MapFilterCard
+                            title="魔灵"
+                            :collapsed="isPetSectionCollapsed"
+                            :visible="showPetPoints"
+                            :all-active="isPetFilterActive"
+                            show-all-toggle
+                            @toggle-collapse="isPetSectionCollapsed = !isPetSectionCollapsed"
+                            @toggle-all="handlePetFiltersAllChange(!isPetFilterActive)"
+                            @toggle-visibility="showPetPoints = !showPetPoints"
+                        >
+                            <div class="grid max-h-40 grid-cols-1 gap-1 overflow-y-auto">
+                                <button
+                                    v-for="option in petFilterOptions"
+                                    :key="option.id"
+                                    class="inline-flex min-w-0 cursor-pointer items-center gap-1.5 rounded-xs border px-2 py-1 text-xs leading-tight whitespace-nowrap transition-colors duration-150 justify-start"
+                                    :class="
+                                        selectedPetFilterIds.has(option.id)
+                                            ? 'border-primary/60 bg-primary/10 font-medium text-primary hover:border-primary/60'
+                                            : 'border-transparent bg-transparent text-base-content/70 hover:border-primary/40 hover:text-primary'
+                                    "
+                                    :title="option.label"
+                                    @click="togglePetFilter(option.id, !selectedPetFilterIds.has(option.id))"
+                                >
+                                    <img v-if="option.iconUrl" :src="option.iconUrl" :alt="option.label" class="size-4 shrink-0" />
+                                    <Icon v-else icon="ri:star-line" class="size-3.5 shrink-0 text-base-content/40" />
+                                    <span class="truncate">{{ option.label }}</span>
+                                </button>
+                                <div v-if="petFilterOptions.length === 0" class="px-1 py-0.5 text-xs opacity-60">
+                                    当前区域没有可筛选的魔灵
+                                </div>
+                            </div>
+                        </MapFilterCard>
+
+                        <!-- 传送点筛选（通用筛选卡片：整行折叠 + 全选图标 + 显示开关） -->
+                        <MapFilterCard
+                            v-if="teleportIconOptions.length > 0"
+                            title="传送点"
+                            :collapsed="isTeleportSectionCollapsed"
+                            :visible="showTeleportPoints"
+                            :all-active="isTeleportPointFilterActive"
+                            show-all-toggle
+                            @toggle-collapse="isTeleportSectionCollapsed = !isTeleportSectionCollapsed"
+                            @toggle-all="handleTeleportPointsAllChange(!isTeleportPointFilterActive)"
+                            @toggle-visibility="showTeleportPoints = !showTeleportPoints"
+                        >
+                            <div class="grid max-h-36 grid-cols-4 gap-1 overflow-y-auto">
+                                <button
+                                    v-for="option in teleportIconOptions"
+                                    :key="option.icon"
+                                    class="inline-flex min-w-0 cursor-pointer items-center gap-1.5 rounded-xs border px-2 py-1 text-xs leading-tight whitespace-nowrap transition-colors duration-150 justify-center"
+                                    :class="
+                                        showTeleportPoints && selectedTeleportIcons.has(option.icon)
+                                            ? 'border-primary/60 bg-primary/10 font-medium text-primary hover:border-primary/60'
+                                            : 'border-transparent bg-transparent text-base-content/70 hover:border-primary/40 hover:text-primary'
+                                    "
+                                    :title="option.icon"
+                                    @click="toggleTeleportIcon(option.icon, !selectedTeleportIcons.has(option.icon))"
+                                >
+                                    <img :src="resolveTeleportPointIconUrl(option.icon)" :alt="option.icon" class="size-4 shrink-0" />
+                                </button>
+                            </div>
+                        </MapFilterCard>
+
+                        <!-- 资源筛选（通用筛选卡片：整行折叠 + 全选图标 + 显示开关） -->
+                        <MapFilterCard
+                            v-if="resourceOptions.length > 0"
+                            title="资源"
+                            :collapsed="isResourceSectionCollapsed"
+                            :visible="showResourcePoints"
+                            :all-active="isResourceFilterActive"
+                            show-all-toggle
+                            @toggle-collapse="isResourceSectionCollapsed = !isResourceSectionCollapsed"
+                            @toggle-all="handleResourceFiltersAllChange(!isResourceFilterActive)"
+                            @toggle-visibility="showResourcePoints = !showResourcePoints"
+                        >
+                            <div class="grid max-h-36 grid-cols-2 gap-1 overflow-y-auto">
+                                <button
+                                    v-for="option in resourceOptions"
+                                    :key="option.id"
+                                    class="inline-flex min-w-0 cursor-pointer items-center gap-1.5 rounded-xs border px-2 py-1 text-xs leading-tight whitespace-nowrap transition-colors duration-150 justify-start"
+                                    :class="
+                                        selectedResourceIds.has(option.id)
+                                            ? 'border-primary/60 bg-primary/10 font-medium text-primary hover:border-primary/60'
+                                            : 'border-transparent bg-transparent text-base-content/70 hover:border-primary/40 hover:text-primary'
+                                    "
+                                    :title="option.name"
+                                    @click="toggleResourceFilter(option.id, !selectedResourceIds.has(option.id))"
+                                >
+                                    <img
+                                        :src="option.icon ? `/imgs/res/${option.icon}.webp` : '/imgs/webp/T_Head_Empty.webp'"
+                                        :alt="option.name"
+                                        class="size-4 shrink-0"
+                                    />
+                                    <span class="truncate">{{ $t(option.name) }}</span>
+                                </button>
+                            </div>
+                        </MapFilterCard>
+
+                        <!-- 子区域（可折叠） -->
+                        <div class="space-y-1.5">
+                            <button
+                                type="button"
+                                class="flex w-full cursor-pointer items-center gap-2"
+                                :aria-expanded="!isSubRegionSectionCollapsed"
+                                @click="isSubRegionSectionCollapsed = !isSubRegionSectionCollapsed"
+                            >
+                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">子区域</span>
+                                <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
+                                <Icon
+                                    :icon="isSubRegionSectionCollapsed ? 'ri:arrow-down-s-line' : 'ri:arrow-up-s-line'"
+                                    class="size-3.5 text-base-content/40"
+                                />
+                            </button>
+                            <template v-if="!isSubRegionSectionCollapsed">
+                                <div class="overflow-y-auto rounded-xs border border-base-content/15 bg-base-100/70 max-h-[36vh]">
+                                    <div
+                                        class="flex items-center justify-between gap-3 border-b border-base-content/10 px-2 py-1.5 text-sm hover:bg-base-content/5"
+                                    >
+                                        <label class="flex cursor-pointer items-center gap-2">
+                                            <input
+                                                :checked="isAllSubRegionsSelected"
+                                                type="checkbox"
+                                                class="checkbox checkbox-xs"
+                                                @change="handleSubRegionAllChange(($event.target as HTMLInputElement).checked)"
+                                            />
+                                            <span>全部</span>
+                                        </label>
+                                        <label
+                                            class="flex cursor-pointer items-center gap-2"
+                                            :title="highlightedRcPoints.length === 0 ? '请先选择包含魔灵点位的子区域' : ''"
+                                        >
+                                            <input
+                                                :checked="showRcShortestTraversal"
+                                                :disabled="highlightedRcPoints.length === 0"
+                                                type="checkbox"
+                                                class="checkbox checkbox-xs"
+                                                @change="showRcShortestTraversal = ($event.target as HTMLInputElement).checked"
+                                            />
+                                            <span>最短图遍历</span>
+                                        </label>
+                                    </div>
+                                    <button
+                                        v-for="point in projectedSubRegions"
+                                        :key="point.id"
+                                        class="block w-full border-b border-base-content/10 px-2 py-2 text-left text-sm transition-colors duration-150 hover:bg-base-content/5 last:border-b-0"
+                                        :class="{
+                                            'bg-primary/10 text-primary': isSubRegionSelected(point.id),
+                                            'bg-warning/15': hoveredSubRegionId === point.id,
+                                        }"
+                                        @mouseenter="hoveredSubRegionId = point.id"
+                                        @mouseleave="hoveredSubRegionId = null"
+                                        @click="focusSubRegion(point.id)"
+                                    >
+                                        <div class="font-medium">{{ $t(point.name) }}</div>
+                                    </button>
+                                    <div v-if="projectedSubRegions.length === 0" class="p-3 text-sm opacity-60">
+                                        当前区域没有可显示的 subregion 坐标
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- 选中子区域详情 -->
+                        <div
+                            v-if="selectedSubRegion"
+                            class="mt-auto rounded-xs border border-base-content/15 bg-base-100/90 p-3 text-sm shadow-sm"
+                        >
+                            <div class="font-medium text-base-content">{{ $t(selectedSubRegion.name) }}</div>
+
+                            <div class="mt-2 border-t border-base-content/10 pt-2">
+                                <div class="mb-1 text-[11px] font-semibold text-base-content/45 uppercase">RC 列表（点击可查看详情）</div>
+                                <div class="flex max-h-28 flex-wrap gap-1 overflow-y-auto">
+                                    <button
+                                        v-for="rcInfo in selectedSubRegion.rcInfos"
+                                        :key="`${selectedSubRegion.id}-${rcInfo.rcId}-${rcInfo.rcIndex}`"
+                                        class="rounded-xs border border-base-content/15 px-2 py-1 text-xs transition-colors duration-150 hover:bg-base-content/5"
+                                        :class="{
+                                            'border-primary/60 bg-primary/10 text-primary':
+                                                selectedRcState?.subRegionId === selectedSubRegion.id &&
+                                                selectedRcState?.rcId === rcInfo.rcId &&
+                                                selectedRcState?.rcIndex === rcInfo.rcIndex,
+                                        }"
+                                        @click="selectRc(selectedSubRegion.id, rcInfo.rcId, rcInfo.rcIndex)"
+                                    >
+                                        RC {{ rcInfo.rcId }}
+                                    </button>
+                                    <div v-if="selectedSubRegion.rcInfos.length === 0" class="w-full text-xs opacity-60">
+                                        当前子区域无 RC 配置
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="selectedRcInfo"
+                                class="mt-2 space-y-1 rounded-xs border border-base-content/15 bg-base-100/85 p-2 text-xs"
+                            >
+                                <div class="font-medium"><CopyID :id="selectedRcInfo.rcId" />详情</div>
+                                <div class="opacity-70">刷新数量 {{ selectedRcInfo.count }} | 点位 {{ selectedRcInfo.points.length }}</div>
+                                <div v-if="selectedRcInfo.rarestPet" class="opacity-70">
+                                    最稀有魔灵: {{ selectedRcInfo.rarestPet.petName }} ({{
+                                        (selectedRcInfo.rarestPet.ratio * 100).toFixed(2)
                                     }}%)
                                 </div>
-                            </div>
-                        </div>
-
-                        <div
-                            v-if="selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint)).length > 0"
-                            class="mt-2 space-y-1 rounded-xs border border-base-content/15 bg-base-100/85 p-2 text-xs"
-                        >
-                            <div class="font-medium">TP 点位</div>
-                            <div class="grid gap-1">
-                                <div
-                                    v-for="tpPoint in selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint))"
-                                    :key="tpPoint.id"
-                                    class="flex items-center gap-2 opacity-90"
-                                >
-                                    <button
-                                        type="button"
-                                        class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-xs px-1 py-0.5 text-left transition-colors duration-150 hover:bg-base-content/5"
-                                        @mouseenter="hoverTeleportPoint(selectedSubRegion.id, tpPoint.id)"
-                                        @mouseleave="clearHoveredTeleportPoint"
-                                        @click="focusTeleportPoint(selectedSubRegion.id, tpPoint)"
+                                <div class="pt-1 opacity-70">魔灵概率：</div>
+                                <div class="space-y-1.5">
+                                    <!-- 每行：魔灵图标 + 名称 + 概率（虚线下划线提示 tooltip），底部为按比例填充的矩形条 -->
+                                    <FullTooltip
+                                        v-for="petRate in selectedRcInfo.petRates"
+                                        :key="`${selectedRcInfo.rcId}-${petRate.petId}`"
+                                        side="top"
                                     >
-                                        <img
-                                            :src="resolveTeleportPointIconUrl(tpPoint.icon)"
-                                            :alt="tpPoint.name"
-                                            class="inline-block size-6 shrink-0"
-                                        />
-                                        <span class="min-w-0 truncate">{{ tpPoint.name }}</span>
-                                    </button>
+                                        <div
+                                            class="cursor-help rounded-xs px-1 py-0.5 transition-colors duration-150 hover:bg-base-content/5"
+                                        >
+                                            <div class="flex items-center gap-1.5">
+                                                <img :src="petRate.petIconUrl" :alt="petRate.petName" class="size-4 shrink-0" />
+                                                <span class="min-w-0 truncate">{{ petRate.petName }}</span>
+                                                <span class="flex-1" />
+                                                <span
+                                                    class="shrink-0 underline decoration-dashed decoration-base-content/40 underline-offset-2 tabular-nums"
+                                                >
+                                                    {{ (petRate.ratio * 100).toFixed(2) }}%
+                                                </span>
+                                            </div>
+                                            <div class="mt-0.5 h-1 w-full bg-base-content/10">
+                                                <div
+                                                    class="h-full"
+                                                    :class="
+                                                        petRate.petId === selectedRcInfo.rarestPet?.petId ? 'bg-warning' : 'bg-primary/70'
+                                                    "
+                                                    :style="{ width: `${Math.min(100, Math.max(0, petRate.ratio * 100))}%` }"
+                                                />
+                                            </div>
+                                        </div>
+                                        <template #tooltip>
+                                            <div class="flex flex-col gap-1 text-xs leading-5">
+                                                <div class="flex items-center gap-1.5 font-medium">
+                                                    <img :src="petRate.petIconUrl" :alt="petRate.petName" class="size-4 shrink-0" />
+                                                    <span>{{ petRate.petName }}</span>
+                                                </div>
+                                                <div class="opacity-75">权重 {{ petRate.weight }} / {{ petRate.totalWeight }}</div>
+                                                <div class="opacity-75">概率 {{ (petRate.ratio * 100).toFixed(2) }}%</div>
+                                            </div>
+                                        </template>
+                                    </FullTooltip>
+                                    <div v-if="selectedRcInfo.petRates.length === 0" class="opacity-70">无 pet.data 可识别魔灵</div>
+                                </div>
+                                <div v-if="selectedRcInfo.unknownRates.length > 0" class="pt-1">
+                                    <div class="opacity-70">未识别实体：</div>
+                                    <div
+                                        v-for="unknownRate in selectedRcInfo.unknownRates"
+                                        :key="`${selectedRcInfo.rcId}-${unknownRate.entityId}`"
+                                        class="opacity-80"
+                                    >
+                                        ID {{ unknownRate.entityId }}: {{ unknownRate.weight }}/{{ unknownRate.totalWeight }} ({{
+                                            (unknownRate.ratio * 100).toFixed(2)
+                                        }}%)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint)).length > 0"
+                                class="mt-2 space-y-1 rounded-xs border border-base-content/15 bg-base-100/85 p-2 text-xs"
+                            >
+                                <div class="font-medium">TP 点位</div>
+                                <div class="grid gap-1">
+                                    <div
+                                        v-for="tpPoint in selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint))"
+                                        :key="tpPoint.id"
+                                        class="flex items-center gap-2 opacity-90"
+                                    >
+                                        <button
+                                            type="button"
+                                            class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-xs px-1 py-0.5 text-left transition-colors duration-150 hover:bg-base-content/5"
+                                            @mouseenter="hoverTeleportPoint(selectedSubRegion.id, tpPoint.id)"
+                                            @mouseleave="clearHoveredTeleportPoint"
+                                            @click="focusTeleportPoint(selectedSubRegion.id, tpPoint)"
+                                        >
+                                            <img
+                                                :src="resolveTeleportPointIconUrl(tpPoint.icon)"
+                                                :alt="tpPoint.name"
+                                                class="inline-block size-6 shrink-0"
+                                            />
+                                            <span class="min-w-0 truncate">{{ tpPoint.name }}</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </ScrollArea>
-        </aside>
+                </ScrollArea>
+            </aside>
 
             <!-- 左上角：折叠侧栏 + 缩放控制（首页风格小按钮）；位于侧栏右缘，保持原先的相对位置 -->
             <div class="pointer-events-auto ml-3 flex shrink-0 flex-col gap-1.5">

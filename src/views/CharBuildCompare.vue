@@ -2,7 +2,15 @@
 import { useLocalStorage } from "@vueuse/core"
 import { cloneDeep } from "lodash-es"
 import { computed, reactive, ref } from "vue"
-import { type CharSettings, normalizeCharSettings, useCharSettings } from "@/composables/useCharSettings"
+import {
+    type CharSettings,
+    getModVariantAura,
+    getModVariantSlots,
+    MOD_SLOT_COUNTS,
+    type ModSlotType,
+    normalizeCharSettings,
+    useCharSettings,
+} from "@/composables/useCharSettings"
 import {
     Buff,
     buffData,
@@ -34,6 +42,19 @@ const getSettingsBuffLv = (settings: CharSettings, modId: number) =>
     settings.useGlobal ? inv.getBuffLv(modId) : getModBuffLvFromSetting(settings.effectConfig, modId)
 const getSettingsWBuffLv = (settings: CharSettings, weaponId: number, elm: string) =>
     settings.useGlobal ? inv.getWBuffLv(weaponId, elm) : getWBuffLvFromSetting(settings.effectConfig, weaponId, elm)
+
+/** MOD 槽位类型 → 槽位索引（与 additionalMods 的排列一致） */
+const MOD_TYPE_ORDER: ModSlotType[] = ["角色", "近战", "远程", "同律"]
+
+/**
+ * 读取指定配置在某个槽位类型下已装备的 MOD（取当前激活的变体，变体 A 即既有字段）。
+ * @param settings 角色配置
+ * @param typeIndex 槽位类型索引（0-3）
+ * @returns 已装备的槽位列表
+ */
+function getSettingsMods(settings: CharSettings, typeIndex: number) {
+    return getModVariantSlots(settings, MOD_TYPE_ORDER[typeIndex]) ?? []
+}
 
 // MOD options (same as CharBuildView)
 const modOptions = modData
@@ -110,11 +131,11 @@ function createConfig(name: string, char?: string): BuildConfiguration {
     // Clone charSettings value
     const charSettings = normalizeCharSettings(cloneDeep(charSettingsRef.value))
 
-    // Calculate available slots by subtracting existing non-null mods
-    const charModSlots = Math.max(0, 8 - charSettings.charMods.filter((m: any) => m !== null).length)
-    const meleeModSlots = Math.max(0, 8 - charSettings.meleeMods.filter((m: any) => m !== null).length)
-    const rangedModSlots = Math.max(0, 8 - charSettings.rangedMods.filter((m: any) => m !== null).length)
-    const skillWeaponModSlots = Math.max(0, 4 - charSettings.skillWeaponMods.filter((m: any) => m !== null).length)
+    // Calculate available slots by subtracting existing non-null mods（按当前激活的 MOD 变体统计）
+    const charModSlots = Math.max(0, MOD_SLOT_COUNTS.角色 - getSettingsMods(charSettings, 0).filter(m => m !== null).length)
+    const meleeModSlots = Math.max(0, MOD_SLOT_COUNTS.近战 - getSettingsMods(charSettings, 1).filter(m => m !== null).length)
+    const rangedModSlots = Math.max(0, MOD_SLOT_COUNTS.远程 - getSettingsMods(charSettings, 2).filter(m => m !== null).length)
+    const skillWeaponModSlots = Math.max(0, MOD_SLOT_COUNTS.同律 - getSettingsMods(charSettings, 3).filter(m => m !== null).length)
 
     // Get projects from localStorage
     const savedProjects = useLocalStorage(`project.${selectedChar}`, {
@@ -231,21 +252,18 @@ const baseCharBuilds = computed(() => {
         const char = LeveledCharHelper.fromId(config.selectedChar, settings.charLevel)
         const getBuffLv = (modId: number) => getSettingsBuffLv(settings, modId)
         const getWBuffLv = (weaponId: number) => getSettingsWBuffLv(settings, weaponId, char.属性)
+        // MOD 取当前激活的变体（A/B/C），与构筑页保持一致
+        const readMods = (typeIndex: number) =>
+            getSettingsMods(settings, typeIndex)
+                .map(v => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
+                .filter((m): m is LeveledMod => m !== null)
         return new CharBuild({
             char,
-            auraMod: LeveledModHelper.fromId(settings.auraMod),
-            charMods: settings.charMods
-                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
-                .filter((m: any): m is LeveledMod => m !== null),
-            meleeMods: settings.meleeMods
-                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
-                .filter((m: any): m is LeveledMod => m !== null),
-            rangedMods: settings.rangedMods
-                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
-                .filter((m: any): m is LeveledMod => m !== null),
-            skillMods: settings.skillWeaponMods
-                .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
-                .filter((m: any): m is LeveledMod => m !== null),
+            auraMod: LeveledModHelper.fromId(getModVariantAura(settings)),
+            charMods: readMods(0),
+            meleeMods: readMods(1),
+            rangedMods: readMods(2),
+            skillMods: readMods(3),
             skillLevel: settings.charSkillLevel,
             // 魔灵与潜质与构筑页一致地附加在 BUFF 之后，保证对比数值与构筑页同源
             buffs: [
@@ -407,10 +425,10 @@ function getModSlotCounts(configIndex: number) {
 
     const settings = project.charSettings
     return [
-        Math.max(0, 8 - settings.charMods.filter((m: any) => m !== null).length),
-        Math.max(0, 8 - settings.meleeMods.filter((m: any) => m !== null).length),
-        Math.max(0, 8 - settings.rangedMods.filter((m: any) => m !== null).length),
-        Math.max(0, 4 - settings.skillWeaponMods.filter((m: any) => m !== null).length),
+        Math.max(0, MOD_SLOT_COUNTS.角色 - getSettingsMods(settings, 0).filter(m => m !== null).length),
+        Math.max(0, MOD_SLOT_COUNTS.近战 - getSettingsMods(settings, 1).filter(m => m !== null).length),
+        Math.max(0, MOD_SLOT_COUNTS.远程 - getSettingsMods(settings, 2).filter(m => m !== null).length),
+        Math.max(0, MOD_SLOT_COUNTS.同律 - getSettingsMods(settings, 3).filter(m => m !== null).length),
     ]
 }
 
@@ -598,7 +616,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 <ModEditer
                                     :title="$t('char-build.char_mod_config')"
                                     :mods="config.additionalMods[0].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
-                                    :other-mods="config.charSettings.charMods.map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
+                                    :other-mods="getSettingsMods(config.charSettings, 0).map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             m =>
@@ -628,7 +646,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 <ModEditer
                                     :title="$t('char-build.melee_weapon_mod_config')"
                                     :mods="config.additionalMods[1].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
-                                    :other-mods="config.charSettings.meleeMods.map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
+                                    :other-mods="getSettingsMods(config.charSettings, 1).map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             m =>
@@ -653,7 +671,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 <ModEditer
                                     :title="$t('char-build.ranged_weapon_mod_config')"
                                     :mods="config.additionalMods[2].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
-                                    :other-mods="config.charSettings.rangedMods.map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
+                                    :other-mods="getSettingsMods(config.charSettings, 2).map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :mod-options="
                                         modOptions.filter(
                                             m =>
@@ -679,7 +697,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                     :title="$t('char-build.skill_weapon_mod_config')"
                                     :mods="config.additionalMods[3].map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))"
                                     :other-mods="
-                                        config.charSettings.skillWeaponMods.map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))
+                                        getSettingsMods(config.charSettings, 3).map(m => (m ? LeveledModHelper.fromId(m[0], m[1]) : null))
                                     "
                                     :mod-options="
                                         modOptions.filter(

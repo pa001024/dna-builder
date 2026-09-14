@@ -2158,6 +2158,11 @@ describe("CharBuild类测试", () => {
                 petId: 0,
                 petLevel: 3,
                 petCoverage: 1,
+                petAutoCoverage: true,
+                modVariantIndex: 0,
+                modVariants: [],
+                team1BuildVariant: "A" as const,
+                team2BuildVariant: "A" as const,
                 traits: Array(4).fill(null) as ([number, number] | null)[],
             }
             const suyiBuild = createCharBuildFromSettings(1504, suyiSettings)
@@ -2436,6 +2441,11 @@ describe("CharBuild类测试", () => {
                 petId: 0,
                 petLevel: 3,
                 petCoverage: 1,
+                petAutoCoverage: true,
+                modVariantIndex: 0,
+                modVariants: [],
+                team1BuildVariant: "A" as const,
+                team2BuildVariant: "A" as const,
                 traits: Array(4).fill(null) as ([number, number] | null)[],
             })
             const cloned = build.clone()

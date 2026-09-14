@@ -1,5 +1,18 @@
 import { describe, expect, it } from "vitest"
-import { createDefaultCharSettings, normalizeCharSettings, serializeCharSettings } from "./useCharSettings"
+import {
+    addModVariant,
+    createDefaultCharSettings,
+    getModVariantAura,
+    getModVariantCount,
+    getModVariantSlots,
+    MOD_SLOT_COUNTS,
+    MOD_VARIANT_MAX_COUNT,
+    normalizeCharSettings,
+    removeLastModVariant,
+    resolveModVariantLetter,
+    serializeCharSettings,
+    setModVariantAura,
+} from "./useCharSettings"
 
 describe("useCharSettings helpers", () => {
     it("默认角色配置应包含自定义BUFF列表", () => {
@@ -208,5 +221,126 @@ describe("useCharSettings helpers", () => {
         expect(serialized.petLevel).toBe(3)
         expect(serialized.petCoverage).toBe(0.5)
         expect(serialized.traits).toEqual([[1010, 3], null, null, null])
+    })
+
+    it("默认只有一份MOD配置（变体 A）", () => {
+        const settings = createDefaultCharSettings()
+
+        expect(settings.modVariantIndex).toBe(0)
+        expect(settings.modVariants).toEqual([])
+        expect(getModVariantCount(settings)).toBe(1)
+        expect(getModVariantSlots(settings, "角色")).toHaveLength(MOD_SLOT_COUNTS.角色)
+        // 中枢（光环）不在 8 个普通槽位里，单独随变体保存
+        expect(getModVariantAura(settings)).toBe(settings.auraMod)
+    })
+
+    it("追加变体时以当前激活的变体为模板，并自动切换过去", () => {
+        const settings = createDefaultCharSettings()
+        settings.charMods[0] = [31524, 10]
+        settings.skillWeaponMods[3] = [40001, 5]
+
+        expect(addModVariant(settings)).toBe(1)
+        expect(settings.modVariantIndex).toBe(1)
+        expect(getModVariantCount(settings)).toBe(2)
+        // 变体 B 是配置 A 的副本，且与 A 不共享数组
+        expect(getModVariantSlots(settings, "角色")[0]).toEqual([31524, 10])
+        expect(getModVariantSlots(settings, "同律")[3]).toEqual([40001, 5])
+        getModVariantSlots(settings, "角色")[0] = [99999, 1]
+        expect(settings.charMods[0]).toEqual([31524, 10])
+
+        // 中枢（光环）同样按变体各自持有：改变体 B 的中枢不影响配置 A
+        setModVariantAura(settings, 51746)
+        expect(settings.auraMod).toBe(31524)
+        expect(getModVariantAura(settings, 1)).toBe(51746)
+
+        // 变体 C：再追加一份，达到上限后不再增加（继承当前激活变体 B 的中枢）
+        expect(addModVariant(settings)).toBe(2)
+        expect(getModVariantAura(settings)).toBe(51746)
+        expect(getModVariantCount(settings)).toBe(MOD_VARIANT_MAX_COUNT)
+        expect(addModVariant(settings)).toBe(-1)
+        expect(settings.modVariants).toHaveLength(MOD_VARIANT_MAX_COUNT - 1)
+    })
+
+    it("只能移除末尾且处于激活状态的变体", () => {
+        const settings = createDefaultCharSettings()
+        addModVariant(settings)
+        addModVariant(settings)
+
+        // 激活的是 B（非末尾）→ 不可移除，避免删除后变体字母错位
+        settings.modVariantIndex = 1
+        expect(removeLastModVariant(settings)).toBe(false)
+        expect(settings.modVariants).toHaveLength(2)
+
+        // 激活的是 C（末尾）→ 可移除，并回到前一份变体
+        settings.modVariantIndex = 2
+        expect(removeLastModVariant(settings)).toBe(true)
+        expect(settings.modVariantIndex).toBe(1)
+        expect(settings.modVariants).toHaveLength(1)
+
+        // 继续移除 B
+        expect(removeLastModVariant(settings)).toBe(true)
+        expect(settings.modVariantIndex).toBe(0)
+        expect(settings.modVariants).toEqual([])
+        // 配置 A 不可移除
+        expect(removeLastModVariant(settings)).toBe(false)
+    })
+
+    it("协战构筑的变体在目标构筑缺少该配置时降级为配置 A", () => {
+        const settings = createDefaultCharSettings()
+        addModVariant(settings)
+
+        expect(resolveModVariantLetter(settings, "A")).toBe("A")
+        expect(resolveModVariantLetter(settings, "B")).toBe("B")
+        // 目标构筑只有 A/B → C 降级为 A
+        expect(resolveModVariantLetter(settings, "C")).toBe("A")
+        // 非法值与旧存档缺省值同样降级
+        expect(resolveModVariantLetter(settings, undefined)).toBe("A")
+        expect(resolveModVariantLetter(settings, "x")).toBe("A")
+
+        const noVariant = createDefaultCharSettings()
+        expect(resolveModVariantLetter(noVariant, "B")).toBe("A")
+    })
+
+    it("标准化时补齐变体结构并钳制激活索引", () => {
+        const settings = normalizeCharSettings({
+            modVariantIndex: 9,
+            modVariants: [
+                { 角色: [[31524, 10]], 同律: [[40001, 5]] },
+                // 脏数据：非对象条目补成空变体，保证变体字母与下标一一对应
+                null as never,
+                { 角色: [] }, // 超出上限的第三份变体（索引 3）应被丢弃
+            ] as never,
+            team1BuildVariant: " c " as never,
+            team2BuildVariant: 3 as never,
+        })
+
+        expect(settings.modVariants).toHaveLength(MOD_VARIANT_MAX_COUNT - 1)
+        expect(settings.modVariants[0].角色[0]).toEqual([31524, 10])
+        expect(settings.modVariants[0].角色).toHaveLength(MOD_SLOT_COUNTS.角色)
+        expect(settings.modVariants[0].近战).toEqual(Array(MOD_SLOT_COUNTS.近战).fill(null))
+        expect(settings.modVariants[1].角色).toEqual(Array(MOD_SLOT_COUNTS.角色).fill(null))
+        // 中枢只接受合法 id，非法值记 0（读取时沿用配置 A 的中枢）
+        expect(settings.modVariants[0].中枢).toBe(0)
+        expect(getModVariantAura(settings, 1)).toBe(settings.auraMod)
+        // 激活索引钳制到已有变体范围内（0-2）
+        expect(settings.modVariantIndex).toBe(2)
+        expect(settings.team1BuildVariant).toBe("C")
+        expect(settings.team2BuildVariant).toBe("A")
+    })
+
+    it("序列化时保留MOD变体与协战关联的配置字母", () => {
+        const settings = createDefaultCharSettings()
+        settings.charMods[0] = [31524, 10]
+        addModVariant(settings)
+        getModVariantSlots(settings, "角色")[0] = [31525, 8]
+        settings.team1Build = "abc123"
+        settings.team1BuildVariant = "B"
+
+        const serialized = JSON.parse(serializeCharSettings(settings))
+
+        expect(serialized.modVariantIndex).toBe(1)
+        expect(serialized.charMods[0]).toEqual([31524, 10])
+        expect(serialized.modVariants[0].角色[0]).toEqual([31525, 8])
+        expect(serialized.team1BuildVariant).toBe("B")
     })
 })

@@ -18,7 +18,7 @@ import type { Router } from "vue-router"
 let appRouter: Router | null = null
 
 /**
- * 注册 App 端图片服务工作线程。
+ * 注册 App 端图片服务工作线程（启动时注册，用于 /imgs 缓存）。
  */
 async function registerImgsServiceWorker(): Promise<void> {
     if (typeof navigator === "undefined" || !navigator.serviceWorker) {

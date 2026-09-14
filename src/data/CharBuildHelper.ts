@@ -1,4 +1,5 @@
 import type { CharSettings } from "../composables/useCharSettings"
+import { getModVariantAura, getModVariantSlots } from "../composables/useCharSettings"
 import { CharBuild, CharBuildTimeline } from "./CharBuild"
 import type { Weapon } from "./data-types"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "./effectLv"
@@ -37,11 +38,20 @@ export function createCharBuildFromSettings(
         useGlobal ? getWBuffLvFromSnapshot(inv, weaponId, char.属性) : getWBuffLvFromSetting(effectConfig, weaponId, char.属性)
     return new CharBuild({
         char,
-        auraMod: LeveledModHelper.fromId(charSettings.auraMod),
-        charMods: charSettings.charMods.filter(mod => mod !== null).map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
-        meleeMods: charSettings.meleeMods.filter(mod => mod !== null).map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
-        rangedMods: charSettings.rangedMods.filter(mod => mod !== null).map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
-        skillMods: charSettings.skillWeaponMods.filter(mod => mod !== null).map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
+        auraMod: LeveledModHelper.fromId(getModVariantAura(charSettings)),
+        // MOD 一律取当前激活的变体（A/B/C）：分享构筑时上传的多份配置各自独立
+        charMods: getModVariantSlots(charSettings, "角色")
+            .filter(mod => mod !== null)
+            .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
+        meleeMods: getModVariantSlots(charSettings, "近战")
+            .filter(mod => mod !== null)
+            .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
+        rangedMods: getModVariantSlots(charSettings, "远程")
+            .filter(mod => mod !== null)
+            .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
+        skillMods: getModVariantSlots(charSettings, "同律")
+            .filter(mod => mod !== null)
+            .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
         skillLevel: charSettings.charSkillLevel,
         // 魔灵与魔灵潜质以 BUFF 形式附加：与 BUFF 列表共用同一套加成汇总、收益与来源展示逻辑
         buffs: [

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { t } from "i18next"
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
+import { MOD_VARIANT_LETTERS } from "@/composables/useCharSettings"
 import { LeveledMod, LeveledModHelper } from "@/data"
 import { CharBuild } from "@/data/CharBuild"
 import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
@@ -28,9 +29,13 @@ interface Props {
     type: string
     auraMod?: number
     polset?: number[]
+    /** 当前激活的 MOD 变体索引（0/1/2 ↔ 配置 A/B/C） */
+    variantIndex?: number
+    /** 已有变体数量（1-3）；不传则不展示变体切换（如构筑对比页的追加MOD区域） */
+    variantCount?: number
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { variantIndex: 0, variantCount: 0 })
 const inv = useInvStore()
 
 const sortByIncome = ref(true)
@@ -260,6 +265,12 @@ const emit = defineEmits<{
     selectMod: [indexAndId: [number, number, number]]
     swapMods: [index1: number, index2: number]
     levelChange: [indexAndLevel: [number, number]]
+    /** 切换激活的 MOD 变体（0/1/2 ↔ A/B/C） */
+    variantSelect: [variantIndex: number]
+    /** 追加一份 MOD 变体配置（按 A → B → C 顺序） */
+    variantAdd: []
+    /** 移除末尾的 MOD 变体配置 */
+    variantRemove: []
     sync: []
 }>()
 
@@ -480,6 +491,40 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
         </Teleport>
         <!-- 顶部操作区：外层允许换行，移动端放不下时整组下移，避免按钮被挤出屏幕 -->
         <div class="flex flex-wrap items-center gap-2 mb-3">
+            <!-- MOD变体切换（左上角）：同一构筑可保存多份MOD配置（A/B/C），加号按顺序追加下一份；右侧中枢（光环）随变体一起切换 -->
+            <div v-if="variantCount > 0" class="flex flex-wrap items-center gap-1.5" :title="$t('char-build.mod_variant')">
+                <button
+                    v-for="(letter, index) in MOD_VARIANT_LETTERS.slice(0, variantCount)"
+                    :key="letter"
+                    type="button"
+                    class="btn btn-sm h-7 min-h-0 w-7 p-0"
+                    :class="index === variantIndex ? 'btn-secondary' : 'btn-ghost border border-base-content/15'"
+                    :title="$t('char-build.mod_variant_switch', { letter })"
+                    @click="emit('variantSelect', index)"
+                >
+                    {{ letter }}
+                </button>
+                <!-- 加号：A → A B → A B C，最多三份配置 -->
+                <button
+                    v-if="variantCount < MOD_VARIANT_LETTERS.length"
+                    type="button"
+                    class="btn btn-ghost btn-sm h-7 min-h-0 w-7 border border-dashed border-base-content/30 p-0 text-base-content/60"
+                    :title="$t('char-build.mod_variant_add')"
+                    @click="emit('variantAdd')"
+                >
+                    <Icon icon="ri:add-line" class="size-4" />
+                </button>
+                <!-- 移除：仅在激活的变体是最后一份（且非配置 A）时可用，避免误建变体后无法回退 -->
+                <button
+                    v-if="variantIndex > 0 && variantIndex === variantCount - 1"
+                    type="button"
+                    class="btn btn-ghost btn-sm h-7 min-h-0 w-7 border border-base-content/15 p-0 text-base-content/45"
+                    :title="$t('char-build.mod_variant_remove')"
+                    @click="emit('variantRemove')"
+                >
+                    <Icon icon="ri:close-line" class="size-4" />
+                </button>
+            </div>
             <div class="ml-auto flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
                 <!-- 养成开销估算：点击展开/收起副本开销估算面板（默认隐藏） -->
                 <div

@@ -3,7 +3,7 @@ import { useTranslation } from "i18next-vue"
 import { type CSSProperties, computed, onBeforeUnmount, onMounted, ref } from "vue"
 import type { IconTypes } from "@/components/Icon.vue"
 import { useAttrI18n } from "@/composables/useAttrI18n"
-import type { CharSettings } from "@/composables/useCharSettings"
+import { type CharSettings, getModVariantIndex, MOD_VARIANT_LETTERS, type ModVariantLetter } from "@/composables/useCharSettings"
 import {
     type CharAttr,
     type CharBuild,
@@ -457,6 +457,8 @@ interface TeamMember {
     weaponType: string
     /** 该队友在专业模式里关联的服务器构筑 id（未关联为空串，此时不可点击） */
     buildId: string
+    /** 关联构筑要展示的 MOD 配置变体（A/B/C，目标构筑没有该配置时降级为 A） */
+    buildVariant: ModVariantLetter
 }
 
 /**
@@ -469,7 +471,13 @@ interface TeamMember {
  * @param buildId 队友关联的服务器构筑 id（"-" 表示未关联）
  * @returns 该槽位的展示数据
  */
-function readTeamMember(slot: number, charId: number | "-", weaponId: number | "-", buildId: string): TeamMember {
+function readTeamMember(
+    slot: number,
+    charId: number | "-",
+    weaponId: number | "-",
+    buildId: string,
+    buildVariant: string | undefined
+): TeamMember {
     const char = typeof charId === "number" ? charMap.get(charId) : undefined
     const weapon = typeof weaponId === "number" ? weaponMap.get(weaponId) : undefined
     return {
@@ -481,6 +489,7 @@ function readTeamMember(slot: number, charId: number | "-", weaponId: number | "
         weaponIcon: weapon ? LeveledWeapon.url(weapon.icon) : "",
         weaponType: weapon?.类型[0] ?? "",
         buildId: buildId && buildId !== "-" ? buildId : "",
+        buildVariant: MOD_VARIANT_LETTERS[getModVariantIndex(buildVariant)],
     }
 }
 
@@ -492,8 +501,8 @@ const teamMembers = computed<TeamMember[]>(() => {
     if (!ready.value) return []
     const settings = props.charSettings
     return [
-        readTeamMember(1, settings.team1, settings.team1Weapon, settings.team1Build ?? "-"),
-        readTeamMember(2, settings.team2, settings.team2Weapon, settings.team2Build ?? "-"),
+        readTeamMember(1, settings.team1, settings.team1Weapon, settings.team1Build ?? "-", settings.team1BuildVariant),
+        readTeamMember(2, settings.team2, settings.team2Weapon, settings.team2Build ?? "-", settings.team2BuildVariant),
     ]
 })
 
@@ -505,6 +514,8 @@ const hasTeam = computed(() => teamMembers.value.some(member => member.charName 
 const teamBuildShow = ref(false)
 /** 弹窗展示的构筑 id（空串表示该队友未关联构筑） */
 const teamBuildId = ref("")
+/** 弹窗展示的 MOD 配置变体（A/B/C） */
+const teamBuildVariant = ref<ModVariantLetter>("A")
 /** 弹窗标题里的队友名（构筑拉取完成前占位） */
 const teamBuildCharName = ref("")
 /** 本次点击来源：角色 / 武器，用于打开后定位到对应区块 */
@@ -517,6 +528,7 @@ const teamBuildFocus = ref<"char" | "weapon">("char")
  */
 function openTeamBuild(member: TeamMember, focus: "char" | "weapon") {
     teamBuildId.value = member.buildId
+    teamBuildVariant.value = member.buildVariant
     teamBuildCharName.value = member.charName
     teamBuildFocus.value = focus
     teamBuildShow.value = true
@@ -1258,6 +1270,12 @@ onBeforeUnmount(() => {
 
 
         <!-- 协战构筑弹窗：展示该协战角色关联构筑的魔之楔（teleport 到 body，渲染位置不影响版面） -->
-        <TeamBuildDialog v-model="teamBuildShow" :build-id="teamBuildId" :char-name="teamBuildCharName" :focus="teamBuildFocus" />
+        <TeamBuildDialog
+            v-model="teamBuildShow"
+            :build-id="teamBuildId"
+            :char-name="teamBuildCharName"
+            :focus="teamBuildFocus"
+            :variant="teamBuildVariant"
+        />
     </div>
 </template>

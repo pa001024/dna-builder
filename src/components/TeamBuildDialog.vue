@@ -2,7 +2,16 @@
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { buildQuery } from "@/api/graphql"
-import { type CharSettings, normalizeCharSettings } from "@/composables/useCharSettings"
+import {
+    type CharSettings,
+    getModVariantAura,
+    getModVariantIndex,
+    getModVariantSlots,
+    type ModSlotType,
+    type ModVariantLetter,
+    normalizeCharSettings,
+    resolveModVariantLetter,
+} from "@/composables/useCharSettings"
 import { charMap, LeveledChar, LeveledMod, LeveledModHelper, LeveledWeapon, weaponMap } from "@/data"
 
 /**
@@ -10,6 +19,8 @@ import { charMap, LeveledChar, LeveledMod, LeveledModHelper, LeveledWeapon, weap
  *
  * 数据来源是专业模式里为该协战角色关联的服务器分享构筑 id（charSettings.teamNBuild）：
  * 打开时按 id 拉取构筑快照，再按「角色魔之楔 + 各武器槽位魔之楔」分组展示。
+ * 展示的 MOD 取关联时选定的配置变体（charSettings.teamNBuildVariant，A/B/C）；
+ * 关联的构筑没有该变体时降级为配置 A（默认配置），并在标题栏标注实际展示的配置。
  * 本组件只读，不修改任何构筑数据。
  *
  * 弹窗以 Teleport 挂到 body 上：简洁模式根节点是 overflow:hidden 的定高容器，
@@ -50,6 +61,10 @@ interface DialogView {
     skillName: string
     /** 技能等级 */
     skillLevel: number
+    /** 实际展示的 MOD 配置变体（A/B/C） */
+    variant: ModVariantLetter
+    /** 期望的配置变体在目标构筑里不存在，已降级为配置 A */
+    variantFallenBack: boolean
     /** 魔之楔分组 */
     groups: ModGroup[]
 }
@@ -62,8 +77,10 @@ const props = withDefaults(
         charName: string
         /** 点击来源：角色 / 武器，打开后自动定位到对应区块 */
         focus?: "char" | "weapon"
+        /** 关联时选定的 MOD 配置变体（A/B/C），目标构筑没有该配置时降级为 A */
+        variant?: ModVariantLetter
     }>(),
-    { focus: "char" }
+    { focus: "char", variant: "A" }
 )
 
 /** 弹窗开关（父级 v-model） */
@@ -98,11 +115,15 @@ const focusKey = computed(() => {
 /**
  * 读取普通槽位的魔之楔实例。
  * 静态表查不到（数据包未更新）的槽位退化为空槽，避免整块弹窗失败。
- * @param slots 配置中的槽位数组（[id, 等级] 或 null）
- * @returns 与配置等长的魔之楔数组
+ * @param settings 已标准化的角色配置
+ * @param type 槽位类型
+ * @param variantIndex 要展示的 MOD 配置变体索引（0/1/2 ↔ A/B/C）
+ * @returns 该槽位类型的魔之楔数组
  */
-function readMods(slots: ([number, number] | null)[] | undefined): (LeveledMod | null)[] {
-    return (slots ?? []).map(slot => (slot ? LeveledModHelper.optionalFromId(slot[0], slot[1]) : null))
+function readMods(settings: CharSettings, type: ModSlotType, variantIndex: number): (LeveledMod | null)[] {
+    return getModVariantSlots(settings, type, variantIndex).map(slot =>
+        slot ? LeveledModHelper.optionalFromId(slot[0], slot[1]) : null
+    )
 }
 
 /**
@@ -128,12 +149,17 @@ function readWeapon(weaponId: number, level: number, refine: number) {
  * @param charId 构筑所属角色 id
  * @param settings 已标准化的角色配置
  * @param title 服务器上的构筑标题
+ * @param requestedVariant 关联时选定的配置变体（A/B/C）
  * @returns 弹窗展示数据
  */
-function createView(charId: number, settings: CharSettings, title: string): DialogView {
+function createView(charId: number, settings: CharSettings, title: string, requestedVariant: ModVariantLetter): DialogView {
     const char = charMap.get(charId)
-    // 中枢魔之楔在配置里只存 id（无等级字段），与构筑页一致按品质满级展示
-    const auraQuality = LeveledModHelper.getQuality(settings.auraMod)
+    // 目标构筑没有所选变体（旧构筑、或作者只传了配置 A）时降级为配置 A
+    const variant = resolveModVariantLetter(settings, requestedVariant)
+    const variantIndex = getModVariantIndex(variant)
+    // 中枢魔之楔在该变体里只存 id（无等级字段），与构筑页一致按品质满级展示
+    const auraModId = getModVariantAura(settings, variantIndex)
+    const auraQuality = LeveledModHelper.getQuality(auraModId)
     const groups: ModGroup[] = [
         {
             key: "char",
@@ -141,8 +167,8 @@ function createView(charId: number, settings: CharSettings, title: string): Dial
             weaponName: "",
             weaponIcon: "",
             weaponMeta: "",
-            mods: readMods(settings.charMods),
-            aura: LeveledModHelper.optionalFromId(settings.auraMod, LeveledMod.getMaxLevel(auraQuality)),
+            mods: readMods(settings, "角色", variantIndex),
+            aura: LeveledModHelper.optionalFromId(auraModId, LeveledMod.getMaxLevel(auraQuality)),
         },
     ]
 
@@ -154,7 +180,7 @@ function createView(charId: number, settings: CharSettings, title: string): Dial
             weaponName: melee.name,
             weaponIcon: melee.icon,
             weaponMeta: melee.meta,
-            mods: readMods(settings.meleeMods),
+            mods: readMods(settings, "近战", variantIndex),
             aura: null,
         })
     }
@@ -167,7 +193,7 @@ function createView(charId: number, settings: CharSettings, title: string): Dial
             weaponName: ranged.name,
             weaponIcon: ranged.icon,
             weaponMeta: ranged.meta,
-            mods: readMods(settings.rangedMods),
+            mods: readMods(settings, "远程", variantIndex),
             aura: null,
         })
     }
@@ -180,7 +206,7 @@ function createView(charId: number, settings: CharSettings, title: string): Dial
             weaponName: skillWeapon.名称,
             weaponIcon: skillWeapon.icon ? LeveledWeapon.url(skillWeapon.icon) : "",
             weaponMeta: "",
-            mods: readMods(settings.skillWeaponMods),
+            mods: readMods(settings, "同律", variantIndex),
             aura: null,
         })
     }
@@ -193,6 +219,8 @@ function createView(charId: number, settings: CharSettings, title: string): Dial
         element: char?.属性 ? t(`${char.属性}属性`) : "",
         skillName: settings.baseName,
         skillLevel: settings.charSkillLevel,
+        variant,
+        variantFallenBack: variant !== requestedVariant,
         groups,
     }
 }
@@ -214,7 +242,7 @@ async function load() {
             throw new Error(t("char-build.team_build_empty"))
         }
         const settings = normalizeCharSettings(JSON.parse(build.charSettings) as Partial<CharSettings>)
-        view.value = createView(build.charId, settings, build.title)
+        view.value = createView(build.charId, settings, build.title, props.variant ?? "A")
     } catch (err) {
         error.value = err instanceof Error ? err.message : String(err)
         console.error("加载协战构筑失败", err)
@@ -249,7 +277,7 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 watch(
-    () => [open.value, resolvedBuildId.value] as const,
+    () => [open.value, resolvedBuildId.value, props.variant] as const,
     ([isOpen]) => {
         if (isOpen) {
             void load().then(scrollToFocus)
@@ -282,6 +310,22 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown))
                             <span v-if="view?.charLevel">Lv.{{ view.charLevel }}</span>
                             <span v-if="view?.element">{{ view.element }}</span>
                             <span v-if="view?.skillName">{{ $t(view.skillName) }} Lv.{{ view.skillLevel }}</span>
+                            <!-- 当前展示的 MOD 配置（A/B/C）：关联时选了目标构筑没有的配置会降级为 A -->
+                            <span
+                                v-if="view"
+                                class="tb-variant"
+                                :class="{ 'is-fallback': view.variantFallenBack }"
+                                :title="
+                                    view.variantFallenBack
+                                        ? $t('char-build.team_build_variant_fallback', { letter: variant ?? 'A' })
+                                        : $t('char-build.team_build_variant_hint')
+                                "
+                            >
+                                {{ view.variant }}
+                                <template v-if="view.variantFallenBack">
+                                    （{{ $t("char-build.team_build_variant_missing", { letter: variant ?? "A" }) }}）
+                                </template>
+                            </span>
                         </div>
                     </div>
                     <button type="button" class="tb-close" :title="$t('char-build.simple_close')" @click="close">
@@ -477,6 +521,18 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown))
     gap: 8px;
     font-size: 11px;
     color: var(--tb-text-dim);
+}
+
+/* MOD 配置标识（A/B/C）：降级展示配置 A 时用警示色标出来 */
+.tb-variant {
+    padding: 0 4px;
+    border: 1px solid color-mix(in srgb, var(--tb-accent) 45%, transparent);
+    color: color-mix(in srgb, var(--tb-accent) 78%, white);
+}
+
+.tb-variant.is-fallback {
+    border-color: rgba(255, 196, 120, 0.5);
+    color: rgba(255, 205, 140, 0.92);
 }
 
 .tb-close {
