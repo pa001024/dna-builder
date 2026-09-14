@@ -51622,19 +51622,6 @@ export const questData_kr: QuestStory[] = [
                         ],
                     },
                     {
-                        id: "17809929683563081293",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        dialogues: [
-                            {
-                                id: 11101201,
-                                content: "이쪽으로 와 봐, 이쪽! 이거 하면 긴장이 확 풀려.",
-                                voice: "story/1102/111012/1BCA6ACA",
-                                npc: 111001,
-                            },
-                        ],
-                    },
-                    {
                         id: "17868745995587814066",
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_06】打靶",

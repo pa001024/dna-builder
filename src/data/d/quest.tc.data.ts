@@ -50621,19 +50621,6 @@ export const questData_tc: QuestStory[] = [
                         ],
                     },
                     {
-                        id: "17809929683563081293",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        dialogues: [
-                            {
-                                id: 11101201,
-                                content: "來這邊來這邊，這個玩起來可放鬆了。",
-                                voice: "story/1102/111012/1BCA6ACA",
-                                npc: 111001,
-                            },
-                        ],
-                    },
-                    {
                         id: "17868745995587814066",
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_06】打靶",

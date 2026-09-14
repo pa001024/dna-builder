@@ -9503,7 +9503,7 @@ export const hairData: HairItem[] = [
         id: 310491,
         name: "缄默猎手",
         icon: "T_Fashion_Falu_01",
-        rarity: 0,
+        rarity: 5,
         charId: 3104,
     },
     {

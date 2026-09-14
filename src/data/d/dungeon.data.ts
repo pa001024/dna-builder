@@ -56691,7 +56691,7 @@ export const dungeonsData: Dungeon[] = [
                 },
             ],
         ],
-        r: [300173],
+        r: [300170],
         win: 2,
     },
 ]

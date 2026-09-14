@@ -51986,19 +51986,6 @@ export const questData_en: QuestStory[] = [
                         ],
                     },
                     {
-                        id: "17809929683563081293",
-                        type: "TalkNode",
-                        name: "对话节点",
-                        dialogues: [
-                            {
-                                id: 11101201,
-                                content: "Over here! This one's perfect when you need to unwind.",
-                                voice: "story/1102/111012/1BCA6ACA",
-                                npc: 111001,
-                            },
-                        ],
-                    },
-                    {
                         id: "17868745995587814066",
                         type: "TalkNode",
                         name: "【Ex02_FixSimple_06】打靶",
