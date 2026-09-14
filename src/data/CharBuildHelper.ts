@@ -12,6 +12,7 @@ import {
     LeveledModHelper,
     LeveledWeaponHelper,
 } from "./leveled/LeveledHelpers"
+import { collectPetBuffs, collectTraitBuffs, getEffectivePetLevel, getPetBaseCd, resolvePetCoverage } from "./petTrait"
 
 /**
  * 按角色配置构建 CharBuild，查表逻辑集中在 Helper 侧以保持 CharBuild 计算类可用于 worker。
@@ -42,17 +43,34 @@ export function createCharBuildFromSettings(
         rangedMods: charSettings.rangedMods.filter(mod => mod !== null).map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
         skillMods: charSettings.skillWeaponMods.filter(mod => mod !== null).map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
         skillLevel: charSettings.charSkillLevel,
-        buffs: charSettings.buffs
-            .map(v => {
-                try {
-                    return createBuffFromSettings(v[0], v[1], charSettings.customBuff, v[2])
-                } catch (error) {
-                    console.error(error)
-                    return null
-                }
-            })
-            .filter(b => b !== null),
+        // 魔灵与魔灵潜质以 BUFF 形式附加：与 BUFF 列表共用同一套加成汇总、收益与来源展示逻辑
+        buffs: [
+            ...charSettings.buffs
+                .map(v => {
+                    try {
+                        return createBuffFromSettings(v[0], v[1], charSettings.customBuff, v[2])
+                    } catch (error) {
+                        console.error(error)
+                        return null
+                    }
+                })
+                .filter((b): b is LeveledBuff => b !== null),
+            ...collectTraitBuffs(charSettings.traits),
+            ...collectPetBuffs(
+                charSettings.petId,
+                getEffectivePetLevel(charSettings.petLevel, charSettings.traits),
+                resolvePetCoverage(
+                    charSettings.petId,
+                    getEffectivePetLevel(charSettings.petLevel, charSettings.traits),
+                    charSettings.traits,
+                    charSettings.petCoverage,
+                    charSettings.petAutoCoverage
+                )
+            ),
+        ],
         customBuff: charSettings.customBuff,
+        // 角色属性「魔灵CD」按所选魔灵主动技的原始冷却折算成秒
+        petBaseCd: getPetBaseCd(charSettings.petId),
         melee: LeveledWeaponHelper.fromId(
             charSettings.meleeWeapon,
             charSettings.meleeWeaponRefine,

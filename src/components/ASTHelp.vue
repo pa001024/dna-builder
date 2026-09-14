@@ -180,6 +180,7 @@ const attributeGroups: { key: string; title: string; items: string[] }[] = [
             "昂扬",
             "背水",
             "减伤",
+            "魔灵CD缩减",
         ],
     },
     {

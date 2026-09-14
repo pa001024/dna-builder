@@ -1,6 +1,8 @@
 import { useLocalStorage } from "@vueuse/core"
 import { computed, type Ref } from "vue"
-import { charMap, weaponNameMap } from "@/data/d"
+import { charMap, petMap, weaponNameMap } from "@/data/d"
+import { PET_BREAKTHROUGH_MAX_LEVEL } from "@/data/leveled/LeveledPet"
+import { normalizeTraitSlots, resolvePetBuffName, TRAIT_MAX_LEVEL, type TraitSlot } from "@/data/petTrait"
 import { roundBuffValue } from "@/util"
 
 const LEGACY_CUSTOM_BUFF_STORAGE_KEY = "customBuff"
@@ -93,6 +95,16 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
         skillWeaponMods: Array(4).fill(null) as ([number, number] | null)[],
         buffs: [] as [string, number, number?][],
         customBuff: [] as [string, number][],
+        /** 已选魔灵 id（0 表示未选择）：魔灵面板据此展示主动/被动与冷却，并把魔灵 BUFF 计入构筑 */
+        petId: 0,
+        /** 魔灵突破等级（0-3，默认满突破 3）：与潜质加成（如「老道」+1）叠加后得到技能数值索引（上限 4 = Lv.5） */
+        petLevel: 3,
+        /** 魔灵主动技覆盖率（0-1）：主动 BUFF 按该覆盖率缩放后计入构筑（手动模式用值） */
+        petCoverage: 1,
+        /** 魔灵主动技覆盖率是否自动计算（按效果持续时间 / 实际冷却） */
+        petAutoCoverage: true,
+        /** 魔灵潜质槽位（4 个，互不相同，存 [基础潜质 id, 等级]；null 表示空槽） */
+        traits: Array(4).fill(null) as TraitSlot[],
         team1: "-" as number | "-",
         team1Weapon: "-" as number | "-",
         /** 1 号协战角色关联的服务器构筑 id（"-" 表示未关联，简洁模式据此弹窗展示其魔之楔） */
@@ -193,6 +205,23 @@ export function normalizeCharSettings(settings?: Partial<CharSettings> | null): 
     // 归一化自定义BUFF数值精度，清理旧存档中的浮点尾差（如 0.23499999），保持向前兼容
     normalized.customBuff = normalized.customBuff.map(([property, value]) => [property, roundBuffValue(value)])
 
+    // 归一化潜质槽位：固定 4 槽，剔除重复（同一潜质只保留一槽）与已下线的潜质档位，并压紧到前几槽。
+    // 早期版本曾把「潜质条目 id」直接存成数字，形状不对的槽位一律丢弃（存档脏数据不能让页面初始化抛错）。
+    normalized.traits = normalizeTraitSlots(normalized.traits)
+
+    // 旧存档迁移：把 BUFF 列表里勾选的魔灵内容搬进魔灵/潜质字段（潜质 → 潜质槽，魔灵被动/主动 → 魔灵选择）
+    migrateLegacyPetBuffs(normalized)
+
+    // 归一化魔灵：数据更新后已不存在的魔灵 id 回退为未选择，突破等级与主动技覆盖率钳制到合法区间
+    if (!Number.isFinite(normalized.petId) || !petMap.has(normalized.petId)) {
+        normalized.petId = 0
+    }
+    normalized.petLevel = Number.isFinite(normalized.petLevel)
+        ? Math.max(0, Math.min(PET_BREAKTHROUGH_MAX_LEVEL, Math.round(normalized.petLevel)))
+        : PET_BREAKTHROUGH_MAX_LEVEL
+    normalized.petCoverage = Number.isFinite(normalized.petCoverage) ? Math.max(0, Math.min(1, roundBuffValue(normalized.petCoverage))) : 1
+    normalized.petAutoCoverage = normalized.petAutoCoverage !== false
+
     // team1Weapon/team2Weapon 兼容旧格式（武器名）与新格式（武器 id）：统一归一化为武器 id
     for (const key of ["team1Weapon", "team2Weapon"] as const) {
         const value = settings[key]
@@ -214,6 +243,69 @@ export function normalizeCharSettings(settings?: Partial<CharSettings> | null): 
     }
 
     return normalized
+}
+
+/**
+ * 旧存档迁移：把 BUFF 列表里勾选的魔灵内容搬进魔灵/潜质字段。
+ *
+ * 历史版本把魔灵潜质与魔灵被动/主动技当成普通 BUFF 勾选（BUFF 列表现已不再展示它们），
+ * 因此载入时按名称识别并迁移，避免同一效果既留在 BUFF 列表、又出现在新面板里被重复计算：
+ * - `魔灵潜质:<潜质名>` → 潜质槽 `[基础潜质 id, 等级]`（等级沿用勾选的 BUFF 等级）；
+ * - 魔灵名 → 该魔灵的被动物；`魔灵名(主动)` → 该魔灵的主动技，并沿用勾选的覆盖率；
+ * - 迁移后从 BUFF 列表移除；无法识别归属的魔灵相关 BUFF 一并移除（否则会变成隐藏但仍在生效的幽灵 BUFF）。
+ * @param settings 已补齐字段的角色配置（原地修改）
+ */
+function migrateLegacyPetBuffs(settings: CharSettings): void {
+    const buffs = settings.buffs
+    if (!buffs.length) return
+
+    const traits = normalizeTraitSlots(settings.traits)
+    const usedBids = new Set(traits.filter((slot): slot is [number, number] => slot !== null).map(slot => slot[0]))
+    // 新字段已有魔灵选择时不再被旧 BUFF 覆盖（只搬还没搬过的内容）
+    const hadPet = Boolean(settings.petId)
+    let petId = settings.petId
+    let petCoverage = settings.petCoverage
+    let petLevel = settings.petLevel
+    let petLevelTaken = hadPet
+    const remaining: typeof buffs = []
+    let migrated = false
+
+    for (const buff of buffs) {
+        const [name, level, coverage] = buff
+        const origin = resolvePetBuffName(name)
+        if (!origin) {
+            remaining.push(buff)
+            continue
+        }
+        migrated = true
+        if (origin.kind === "trait") {
+            const { trait } = origin
+            // 同一潜质只占一槽；等级取档位对应的等级（BUFF 等级与潜质等级一一对应）
+            const level0 = Math.max(1, Math.min(TRAIT_MAX_LEVEL, Math.round(level)))
+            if (!usedBids.has(trait.bid)) {
+                const slotIndex = traits.findIndex(slot => slot === null)
+                if (slotIndex !== -1) {
+                    traits[slotIndex] = [trait.bid, level0]
+                    usedBids.add(trait.bid)
+                }
+            }
+            continue
+        }
+        if (!petId) petId = origin.petId
+        // 主动技的覆盖率与突破等级只在「本次迁移才选上魔灵」时沿用旧 BUFF 的值
+        if (!hadPet && origin.active && typeof coverage === "number") petCoverage = coverage
+        if (!petLevelTaken && Number.isFinite(level)) {
+            petLevel = Math.max(0, Math.min(PET_BREAKTHROUGH_MAX_LEVEL, Math.round(level)))
+            petLevelTaken = true
+        }
+    }
+
+    if (!migrated) return
+    settings.buffs = remaining
+    settings.traits = traits
+    settings.petId = petId
+    settings.petLevel = petLevel
+    settings.petCoverage = petCoverage
 }
 
 /**

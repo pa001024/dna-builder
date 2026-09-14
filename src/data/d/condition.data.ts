@@ -10172,6 +10172,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "琴声支线探索组完成条件",
     },
+    "7086048": {
+        id: 7086048,
+        logic: "AND",
+        map: {
+            ExploreGroup: [7086048],
+        },
+        remark: "1.6打靶完成",
+    },
     "10007126": {
         id: 10007126,
         logic: "AND",
@@ -10315,6 +10323,15 @@ export const conditionsMap: Record<number, ConditionItem> = {
             QuestChain: [100405],
         },
         remark: "ex02_完成第三章任务",
+    },
+    "10040502": {
+        id: 10040502,
+        logic: "OR",
+        map: {
+            Quest: [11020101],
+            QuestChain: [100405],
+        },
+        remark: "ex02_完成第三章任务或者完成新任务的第一个任务",
     },
     "10100101": {
         id: 10100101,

@@ -44,6 +44,19 @@ import { resourceMap } from "@/data/d/resource.data"
 import { dataPackHydrationKey, isDataPackHydrated } from "@/data/data-pack-bridge"
 import type { SkillWeapon, Weapon } from "@/data/data-types"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
+import {
+    collectPetBuffs,
+    collectTraitBuffs,
+    getEffectivePetLevel,
+    getPetBaseCd,
+    getPetTraitByLevel,
+    getTraitPetLevelBonus,
+    isPetRelatedBuffName,
+    normalizeTraitSlots,
+    resolvePetCoverage,
+    TRAIT_SLOT_COUNT,
+    type TraitSlot,
+} from "@/data/petTrait"
 import { env } from "@/env"
 import { waitForInitialLoad } from "@/i18n"
 import { useInvStore } from "@/store/inv"
@@ -195,23 +208,28 @@ const buffOptions = computed(() => {
             charSettings.value.team2Weapon,
         ].filter((id): id is number => typeof id === "number"),
     })
-    return _buffOptions
-        .filter(v => isBuffSelectable(v.buff, ctx))
-        .map(v => {
-            const b = charSettings.value.buffs.find(b => b[0] === v.label)
-            const lv = b?.[1] ?? v.value.等级
-            const coverage = b?.[2] ?? 1
-            const value = createBuffFromSettings(v.label, lv, charSettings.value.customBuff, coverage)
-            return {
-                value,
-                label: v.label,
-                limit: v.limit,
-                description: v.description,
-                lv,
-                coverage,
-                buff: v.buff,
-            }
-        })
+    return (
+        _buffOptions
+            // 魔灵相关 BUFF（魔灵潜质 / 魔灵被动物 / 魔灵主动技）由魔灵面板与潜质槽位接管：
+            // 从 BUFF 列表中移除，避免同一潜质或同一魔灵技能被重复叠加
+            .filter(v => !isPetRelatedBuffName(v.label))
+            .filter(v => isBuffSelectable(v.buff, ctx))
+            .map(v => {
+                const b = charSettings.value.buffs.find(b => b[0] === v.label)
+                const lv = b?.[1] ?? v.value.等级
+                const coverage = b?.[2] ?? 1
+                const value = createBuffFromSettings(v.label, lv, charSettings.value.customBuff, coverage)
+                return {
+                    value,
+                    label: v.label,
+                    limit: v.limit,
+                    description: v.description,
+                    lv,
+                    coverage,
+                    buff: v.buff,
+                }
+            })
+    )
 })
 // 近战和远程武器选项（team1/team2 助战武器，值统一为武器 id）
 const meleeWeaponOptions = computed(() => {
@@ -314,6 +332,26 @@ const getInlineActions = () => {
     return CharBuildTimeline.fromRaw(raw)
 }
 
+//#region 魔灵与潜质
+/** 潜质槽位对应的魔灵潜质 BUFF：与 BUFF 列表共用同一套加成汇总、收益与来源展示逻辑 */
+const traitBuffs = computed(() => collectTraitBuffs(charSettings.value.traits))
+/** 所选魔灵生效的被动物 / 主动技 BUFF（等级含潜质加成，主动按覆盖率缩放） */
+const petBuffs = computed(() => collectPetBuffs(charSettings.value.petId, effectivePetLevel.value, effectivePetCoverage.value))
+/** 魔灵生效技能等级（技能数值索引）= 突破等级 + 潜质加成（如「老道」+1） */
+const effectivePetLevel = computed(() => getEffectivePetLevel(charSettings.value.petLevel, charSettings.value.traits))
+/** 魔灵主动技生效覆盖率：自动按「持续时间 / 实际冷却」折算，手动用设置值 */
+const effectivePetCoverage = computed(() =>
+    resolvePetCoverage(
+        charSettings.value.petId,
+        effectivePetLevel.value,
+        charSettings.value.traits,
+        charSettings.value.petCoverage,
+        charSettings.value.petAutoCoverage
+    )
+)
+/** 潜质带来的魔灵技能等级加成（用于魔灵面板标注等级来源） */
+const petLevelBonus = computed(() => getTraitPetLevelBonus(charSettings.value.traits))
+
 // 创建CharBuild实例
 const charBuild = computed(() => {
     dataPackTick.value
@@ -342,7 +380,10 @@ const charBuild = computed(() => {
             rangedMods: selectedRangedMods.value,
             skillMods: selectedSkillWeaponMods.value,
             skillLevel: charSettings.value.charSkillLevel,
-            buffs: selectedBuffs.value,
+            // 魔灵（被动物 / 主动技）与魔灵潜质以 BUFF 形式附加在 BUFF 列表之后，共用加成汇总与来源展示
+            buffs: [...selectedBuffs.value, ...traitBuffs.value, ...petBuffs.value],
+            // 角色属性「魔灵CD」按所选魔灵主动技的原始冷却折算成秒
+            petBaseCd: getPetBaseCd(charSettings.value.petId),
             melee,
             ranged,
             baseName: charSettings.value.baseName,
@@ -360,7 +401,8 @@ const charBuild = computed(() => {
             dotSettings: charSettings.value.dotSettings,
         })
         return b
-    } catch {
+    } catch (e) {
+        console.error(e)
         localStorage.removeItem(`build.${selectedCharId.value}`)
         return createEmptyCharBuild()
     }
@@ -915,6 +957,7 @@ function updateCharBuild() {
     pad(charSettings.value.meleeMods, 8, null)
     pad(charSettings.value.rangedMods, 8, null)
     pad(charSettings.value.skillWeaponMods, 4, null)
+    pad(charSettings.value.traits, TRAIT_SLOT_COUNT, null)
     charSettings.value.customVariables = charSettings.value.customVariables.filter(
         variable => Array.isArray(variable) && typeof variable[0] === "string" && typeof variable[1] === "string"
     )
@@ -942,6 +985,67 @@ watch(
 // 计算属性（含武器作用域）：充盈威力、召唤物攻击速度/范围/独立增伤等依赖武器转化词条，
 // 需与伤害结算一致使用 calculateWeaponAttributes，否则召唤物独立增伤等会漏算转化部分
 const attributes = computed(() => charBuild.value.calculateWeaponAttributes())
+
+//#region 魔灵与潜质（槽位操作）
+/**
+ * 复制并补齐/裁剪潜质槽位为 TRAIT_SLOT_COUNT 个（空槽为 null），保证槽位索引稳定。
+ * @param traits 待处理的槽位
+ * @returns 长度固定的槽位副本
+ */
+function copyTraitSlots(traits: readonly TraitSlot[]): TraitSlot[] {
+    // 逐槽走一次归一化：顺手丢弃历史版本写入的非法槽位（如早期把潜质条目 id 直接存成数字）
+    return Array.from({ length: TRAIT_SLOT_COUNT }, (_, index) => normalizeTraitSlots([traits[index]])[0])
+}
+
+/**
+ * 选择潜质写入槽位：同一基础潜质已占其它槽位时先把那个槽位清空，
+ * 保证四个槽位互不相同（同一潜质的两个等级档位共用同一条 BUFF，重复装备会让收益计算互相干扰）。
+ * 槽位索引保持稳定（不压缩空槽），与魔之楔槽位一致，便于继续拖拽互换。
+ * @param index 槽位索引
+ * @param bid 基础潜质 id
+ * @param level 潜质等级（1/2/3）
+ */
+function selectTrait(index: number, bid: number, level: number) {
+    if (!getPetTraitByLevel(bid, level)) return
+    charSettings.value.traits = copyTraitSlots(charSettings.value.traits).map((slot, slotIndex) => {
+        if (slotIndex === index) return [bid, level] as TraitSlot
+        return slot && slot[0] === bid ? null : slot
+    })
+    updateCharBuild()
+}
+
+/**
+ * 移除槽位潜质（保留空槽，不压缩其它槽位）。
+ * @param index 槽位索引
+ */
+function removeTrait(index: number) {
+    const traits = copyTraitSlots(charSettings.value.traits)
+    traits[index] = null
+    charSettings.value.traits = traits
+    updateCharBuild()
+}
+
+/**
+ * 交换两个潜质槽位。
+ * @param fromIndex 来源槽位索引
+ * @param toIndex 目标槽位索引
+ */
+function swapTraits(fromIndex: number, toIndex: number) {
+    const traits = copyTraitSlots(charSettings.value.traits)
+    const temp = traits[fromIndex]
+    traits[fromIndex] = traits[toIndex]
+    traits[toIndex] = temp
+    charSettings.value.traits = traits
+    updateCharBuild()
+}
+
+/**
+ * 魔灵或主动技覆盖率变更：刷新构筑（魔灵被动物 / 主动技 BUFF 随之进入加成汇总）。
+ */
+function handlePetChange() {
+    updateCharBuild()
+}
+//#endregion
 
 //#region DOT计算
 /** DOT 设置弹窗显隐 */
@@ -2832,6 +2936,33 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 :team2-options="groupedTeam2Options"
                                 :weapon-options="groupedTeamWeaponOptions"
                                 @team-change="updateTeamBuff"
+                            />
+                        </div>
+                        <!-- 魔灵：选择活力魔灵，展示被动/主动收益与冷却，并按魔灵CD给出实际冷却 -->
+                        <div class="my-2">
+                            <PetEditor
+                                :char-settings="charSettings"
+                                :char-build="charBuild"
+                                :pet-cd="attributes.魔灵CD"
+                                :pet-cd-reduce="attributes.魔灵CD缩减"
+                                :pet-level="effectivePetLevel"
+                                :pet-level-bonus="petLevelBonus"
+                                @pet-change="handlePetChange"
+                                @add-skill="addSkill"
+                            />
+                        </div>
+                        <!-- 魔灵潜质：4 个互不相同的潜质槽位，可更换/拖动互换/移除，并显示收益 -->
+                        <div class="my-2">
+                            <TraitEditer
+                                :traits="charSettings.traits"
+                                :char-build="charBuild"
+                                :pet-level="charSettings.petLevel"
+                                :pet-id="charSettings.petId"
+                                :pet-coverage="charSettings.petCoverage"
+                                :pet-auto-coverage="charSettings.petAutoCoverage"
+                                @select-trait="selectTrait"
+                                @remove-trait="removeTrait"
+                                @swap-traits="swapTraits"
                             />
                         </div>
                         <BuffEditer

@@ -2155,6 +2155,10 @@ describe("CharBuild类测试", () => {
                 actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
                 extraMastery: "",
                 dotSettings: { skill: 0, melee: 0, ranged: 0, skillweapon: 0 },
+                petId: 0,
+                petLevel: 3,
+                petCoverage: 1,
+                traits: Array(4).fill(null) as ([number, number] | null)[],
             }
             const suyiBuild = createCharBuildFromSettings(1504, suyiSettings)
             const suyiResult = suyiBuild.autoBuild({
@@ -2429,6 +2433,10 @@ describe("CharBuild类测试", () => {
                 actions: { enable: false, i: [], b: [], hp: [], bgs: [] },
                 extraMastery: "",
                 dotSettings: { skill: 0, melee: 0, ranged: 0, skillweapon: 0 },
+                petId: 0,
+                petLevel: 3,
+                petCoverage: 1,
+                traits: Array(4).fill(null) as ([number, number] | null)[],
             })
             const cloned = build.clone()
             expect(build.calculate()).toBe(cloned.calculate())

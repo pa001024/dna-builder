@@ -69,6 +69,15 @@ export interface CharAttr {
     技能触发: number
     /** 异常数量（角色属性，去重后元素种数）：武器伤害附加元素种数的来源（如 菲娜Q 追加 4；非光暗角色自身属性与附加异常重叠 1 种 → n=4，光暗角色 n=5） */
     异常数量: number
+    /**
+     * 魔灵CD（角色属性，单位秒）：所选魔灵支援技能（魔灵主动技）的实际冷却。
+     * = 魔灵主动技原始冷却 × (1 - 魔灵CD缩减)；未选择魔灵时为 0。
+     */
+    魔灵CD: number
+    /**
+     * 魔灵CD缩减（角色属性，0 起始的比例）：魔灵支援技能的冷却缩减，来源为魔灵潜质（如 敏锐 r5 → 24%）。
+     */
+    魔灵CD缩减: number
 }
 
 export interface WeaponAttr {
@@ -240,6 +249,7 @@ const characterBonusAttributes = [
     "充盈威力",
     "技能触发",
     "异常数量",
+    "魔灵CD缩减",
 ] as const
 
 const characterBonusIndex = Object.fromEntries(characterBonusAttributes.map((attribute, index) => [attribute, index])) as Record<
@@ -334,6 +344,8 @@ export interface CharBuildOptions {
     extraMastery?: string
     /** DOT 频率设置（每种来源每秒造成伤害的次数） */
     dotSettings?: Partial<DotFrequencySettings>
+    /** 所选魔灵主动技的原始冷却（秒，未选魔灵为 0）：用于折算角色属性「魔灵CD」 */
+    petBaseCd?: number
 }
 
 export class CharBuild {
@@ -552,6 +564,8 @@ export class CharBuild {
     public extraMastery = ""
     /** DOT 频率设置（每种来源每秒造成伤害的次数） */
     public dotSettings: DotFrequencySettings = { ...defaultDotFrequencySettings }
+    /** 所选魔灵主动技的原始冷却（秒）：角色属性「魔灵CD」= 该值 × (1 - 魔灵CD缩减) */
+    public petBaseCd = 0
 
     get baseWithTarget() {
         return `${this.baseName}::${this.targetFunction}`
@@ -613,6 +627,7 @@ export class CharBuild {
         this.timelineDPS = options.timelineDPS || false
         this.teamWeaponCategories = options.teamWeaponCategories || []
         this.dotSettings = { ...defaultDotFrequencySettings, ...(options.dotSettings || {}) }
+        this.petBaseCd = options.petBaseCd || 0
     }
 
     /**
@@ -775,6 +790,8 @@ export class CharBuild {
         const skillTrigger = bonuses[characterBonusIndex.技能触发]
         // 异常数量（0 起始增量）：武器伤害附加元素种数，如 菲娜Q 追加 4（去重见 attrs.异常数量 赋值处）
         const anomalyCountBonus = bonuses[characterBonusIndex.异常数量]
+        // 魔灵CD缩减（0 起始）：魔灵支援技能冷却缩减比例，由魔灵潜质（如 敏锐）等提供
+        const petCdReduce = bonuses[characterBonusIndex.魔灵CD缩减]
 
         // 应用MOD属性加成
         const modAttributeBonus = this.getTotalBonus(`${this.char.属性}MOD属性`)
@@ -881,6 +898,10 @@ export class CharBuild {
             // 附加异常（如 菲娜Q 追加 4）为水/火/雷/风四种非光暗元素：光/暗角色不重叠 → n = 1 + 追加；
             // 非光暗角色自身属性与其中一种重叠 → n = 追加（至少 1，如 黎瑟雷 + 菲娜Q → 4）
             异常数量: ["光", "暗"].includes(this.char.属性) ? 1 + anomalyCountBonus : Math.max(1, anomalyCountBonus),
+            // 魔灵CD：按所选魔灵主动技原始冷却折算成秒（未选魔灵时为 0），缩减上限 100% 避免负冷却
+            魔灵CD: Math.max(0, this.petBaseCd * (1 - Math.max(0, Math.min(1, petCdReduce)))),
+            // 魔灵CD缩减：缩减比例本身（钳制在 [0,1]）
+            魔灵CD缩减: Math.max(0, Math.min(1, petCdReduce)),
         }
         // 应用MOD条件 如果有变化就再计算一次
         const condMods = this.charModsWithAura.filter(mod => mod.生效?.条件)
@@ -3689,6 +3710,7 @@ export class CharBuild {
             teamWeaponCategories: [...this.teamWeaponCategories],
             extraMastery: this.extraMastery,
             dotSettings: { ...this.dotSettings },
+            petBaseCd: this.petBaseCd,
         })
         return cloned
     }

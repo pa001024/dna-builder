@@ -21,6 +21,7 @@ import {
 } from "@/data"
 import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
+import { collectPetBuffs, collectTraitBuffs, getEffectivePetLevel, getPetBaseCd, normalizeTraitSlots, resolvePetCoverage } from "@/data/petTrait"
 import { useInvStore } from "@/store/inv"
 import { useTimeline } from "@/store/timeline"
 import { roundBuffValue } from "@/util"
@@ -246,7 +247,23 @@ const baseCharBuilds = computed(() => {
                 .map((v: any) => (v ? LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0])) : null))
                 .filter((m: any): m is LeveledMod => m !== null),
             skillLevel: settings.charSkillLevel,
-            buffs: settings.buffs.map((v: any) => createLeveledBuff(v[0], v[1], settings.customBuff, v[2])),
+            // 魔灵与潜质与构筑页一致地附加在 BUFF 之后，保证对比数值与构筑页同源
+            buffs: [
+                ...settings.buffs.map((v: any) => createLeveledBuff(v[0], v[1], settings.customBuff, v[2])),
+                ...collectTraitBuffs(normalizeTraitSlots(settings.traits)),
+                ...collectPetBuffs(
+                    settings.petId ?? 0,
+                    getEffectivePetLevel(settings.petLevel ?? 3, normalizeTraitSlots(settings.traits)),
+                    resolvePetCoverage(
+                        settings.petId ?? 0,
+                        getEffectivePetLevel(settings.petLevel ?? 3, normalizeTraitSlots(settings.traits)),
+                        normalizeTraitSlots(settings.traits),
+                        settings.petCoverage ?? 1,
+                        settings.petAutoCoverage !== false
+                    )
+                ),
+            ],
+            petBaseCd: getPetBaseCd(settings.petId ?? 0),
             melee: LeveledWeaponHelper.fromId(
                 settings.meleeWeapon,
                 settings.meleeWeaponRefine,

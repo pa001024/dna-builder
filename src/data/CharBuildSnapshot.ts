@@ -63,6 +63,8 @@ export interface CharBuildWorkerSnapshot {
     extraMastery: string
     /** DOT 频率设置（每种来源每秒造成伤害的次数） */
     dotSettings: DotFrequencySettings
+    /** 所选魔灵主动技的原始冷却（秒）：角色属性「魔灵CD」的基数 */
+    petBaseCd?: number
 }
 
 /**
@@ -173,6 +175,7 @@ export function createBuildFromSnapshot(snapshot: CharBuildWorkerSnapshot) {
         teamWeaponCategories: snapshot.teamWeaponCategories,
         extraMastery: snapshot.extraMastery,
         dotSettings: snapshot.dotSettings,
+        petBaseCd: snapshot.petBaseCd,
     }
     return new CharBuild(options)
 }

@@ -163,6 +163,21 @@ const MAPPINGS: Mapping[] = [
     },
     { source: "Pet", targetStem: "pet", targetVar: "t", locales: ["cn"] },
     { source: "PetEntry", targetStem: "pet", targetVar: "petEntrys", locales: ["cn"] },
+    {
+        source: async () => {
+            // 魔灵潜质抽取权重表只存在于 out 的导出表（PetToEntry），非 i18n 源，故用函数源读取
+            const petToEntryText = await readFile(path.join(OUT_ROOT, "PetToEntry.json"), "utf8")
+
+            return [
+                {
+                    targetVar: "petToEntey",
+                    value: JSON.parse(petToEntryText),
+                },
+            ]
+        },
+        targetStem: "pet",
+        targetVar: "petToEntey",
+    },
     { source: "QuestChain", targetStem: "questchain", targetVar: "questChainDataRaw", locales: ["cn"] },
     {
         source: "QuestStory",

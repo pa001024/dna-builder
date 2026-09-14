@@ -1,7 +1,14 @@
 import type { PetSkill } from "../d/pet.data"
 import type { Pet } from "../data-types"
 
-const PET_BREAKTHROUGH_MAX_LEVEL = 4
+/** 魔灵突破等级上限（突破 0-3，共 4 档） */
+export const PET_BREAKTHROUGH_MAX_LEVEL = 3
+
+/**
+ * 魔灵技能数值索引上限（0-4，共 5 档，对应 pet.data.ts 每项技能 5 个数值）。
+ * 突破等级（0-3）即该索引，潜质加成（如「老道」+1）可把索引顶到 4，对应游戏内 Lv.5。
+ */
+export const PET_SKILL_LEVEL_INDEX_MAX = 4
 
 export type LeveledPetResolver = (id: number) => Pet | undefined
 
@@ -48,7 +55,7 @@ export class LeveledPet implements Pet {
         this.异化 = petData.异化
         this.描述 = petData.描述
 
-        this._等级 = level !== undefined ? Math.max(0, Math.min(PET_BREAKTHROUGH_MAX_LEVEL, level)) : 0
+        this._等级 = level !== undefined ? Math.max(0, Math.min(PET_SKILL_LEVEL_INDEX_MAX, level)) : 0
 
         this.updateProperties()
     }
@@ -58,7 +65,7 @@ export class LeveledPet implements Pet {
     }
 
     set 等级(value: number) {
-        this._等级 = Math.max(0, Math.min(PET_BREAKTHROUGH_MAX_LEVEL, value))
+        this._等级 = Math.max(0, Math.min(PET_SKILL_LEVEL_INDEX_MAX, value))
         this.updateProperties()
     }
 

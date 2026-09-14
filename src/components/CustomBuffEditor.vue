@@ -68,6 +68,7 @@ const properties = [
     "普攻独立增伤",
     "蓄力独立增伤",
     "下落独立增伤",
+    "魔灵CD缩减",
 ]
 const props = defineProps<{
     buffs: [string, number][]

@@ -1256,6 +1256,7 @@ import {
     CharBuild,
     charData,
     charMap,
+    LeveledBuff,
     LeveledBuffHelper,
     LeveledChar,
     LeveledCharHelper,
@@ -1264,6 +1265,7 @@ import {
 } from "@/data"
 import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
+import { collectPetBuffs, collectTraitBuffs, getEffectivePetLevel, getPetBaseCd, resolvePetCoverage } from "@/data/petTrait"
 import { useInvStore } from "@/store/inv"
 import { useTimeline } from "@/store/timeline"
 import { formatProp, formatSkillProp } from "@/util"
@@ -1277,6 +1279,15 @@ const baseName = ref(charSettings.value.baseName)
 const targetFunction = ref("")
 const charBuild = computed(() => {
     const char = LeveledCharHelper.fromId(selectedChar.value, charSettings.value.charLevel)
+    // 魔灵：生效技能等级 = 突破 + 潜质加成；覆盖率默认按「持续时间 / 实际冷却」自动折算
+    const petLevel = getEffectivePetLevel(charSettings.value.petLevel, charSettings.value.traits)
+    const petCoverage = resolvePetCoverage(
+        charSettings.value.petId,
+        petLevel,
+        charSettings.value.traits,
+        charSettings.value.petCoverage,
+        charSettings.value.petAutoCoverage
+    )
     const getBuffLv = (modId: number) =>
         charSettings.value.useGlobal ? inv.getBuffLv(modId) : getModBuffLvFromSetting(charSettings.value.effectConfig, modId)
     const getWBuffLv = (weaponId: number) =>
@@ -1295,18 +1306,25 @@ const charBuild = computed(() => {
             .filter(mod => mod !== null)
             .map(m => LeveledModHelper.fromId(m[0], m[1], getBuffLv(m[0]))),
         skillLevel: charSettings.value.charSkillLevel,
-        buffs: charSettings.value.buffs
-            .map(v => {
-                try {
-                    const b = LeveledBuffHelper.fromName(v[0], v[1])
-                    return b
-                } catch (error) {
-                    console.error(error)
-                    charSettings.value.buffs = charSettings.value.buffs.filter(b => b[0] !== v[0])
-                    return null
-                }
-            })
-            .filter(b => b !== null),
+        // 魔灵与潜质与构筑页一致地附加在 BUFF 之后，保证时间线结算与构筑页同源
+        buffs: [
+            ...charSettings.value.buffs
+                .map(v => {
+                    try {
+                        const b = LeveledBuffHelper.fromName(v[0], v[1])
+                        return b
+                    } catch (error) {
+                        console.error(error)
+                        charSettings.value.buffs = charSettings.value.buffs.filter(b => b[0] !== v[0])
+                        return null
+                    }
+                })
+                .filter((b): b is LeveledBuff => b !== null),
+            ...collectTraitBuffs(charSettings.value.traits),
+            ...collectPetBuffs(charSettings.value.petId, petLevel, petCoverage),
+        ],
+        // 角色属性「魔灵CD」按所选魔灵主动技的原始冷却折算成秒
+        petBaseCd: getPetBaseCd(charSettings.value.petId),
         melee: LeveledWeaponHelper.fromId(
             charSettings.value.meleeWeapon,
             charSettings.value.meleeWeaponRefine,
