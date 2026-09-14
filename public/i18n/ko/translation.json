@@ -7450,6 +7450,19 @@
         "loadFailed": "MOD 상세 정보를 불러오지 못했습니다",
         "title": "MOD 상세"
     },
+    "mods-guide": {
+        "close": "닫기",
+        "confirm": "확인",
+        "dontShowAgain": "다시 자동으로 표시하지 않기",
+        "imageAlt": "게임 런처 - 게임 설정의 「MOD 활성화」 항목",
+        "imageFailed": "이미지를 불러오지 못했습니다",
+        "imageHint": "클릭하여 확대",
+        "step1Desc": "다운로드만으로는 적용되지 않습니다. 「MOD 관리」의 해당 탭에서 활성화하세요. 캐릭터 MOD는 「캐릭터」 탭, 무기 MOD는 「무기」 탭, 기타 / 독립 MOD도 같은 방식입니다.",
+        "step1Title": "해당 페이지에서 MOD 활성화",
+        "step2Desc": "「게임 런처 → 게임 설정」을 열고 「MOD 활성화」를 체크하면 다음 게임 실행부터 적용됩니다.",
+        "step2Title": "게임 런처에서 「MOD 활성화」 체크",
+        "title": "MOD 사용 안내"
+    },
     "mods-list": {
         "title": "MOD 공유 스토어",
         "viewDetail": "자세히 보기"

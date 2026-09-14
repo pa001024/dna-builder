@@ -52,14 +52,9 @@ export const useUIStore = defineStore("ui", {
                     icon: "ri:hammer-line",
                 },
                 {
-                    name: "inventory",
-                    path: "/inventory",
-                    icon: "ri:box-1-line",
-                },
-                {
-                    name: "achievement",
-                    path: "/achievement",
-                    icon: "ri:trophy-line",
+                    name: "map-local",
+                    path: "/map-local",
+                    icon: "ri:map-2-line",
                 },
                 {
                     name: "database",

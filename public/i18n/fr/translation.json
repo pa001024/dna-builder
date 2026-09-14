@@ -7482,6 +7482,19 @@
         "loadFailed": "Échec du chargement des détails du MOD",
         "title": "Détail du MOD"
     },
+    "mods-guide": {
+        "close": "Fermer",
+        "confirm": "Compris",
+        "dontShowAgain": "Ne plus afficher automatiquement",
+        "imageAlt": "L'option « Activer le MOD » dans Lanceur de jeu - Paramètres du jeu",
+        "imageFailed": "Échec du chargement de l'image",
+        "imageHint": "Cliquer pour agrandir",
+        "step1Desc": "Le téléchargement ne fait que stocker le MOD en local. Activez-le dans l'onglet correspondant de « Gestion des MODs » : les MODs de personnage dans l'onglet « Personnage », les MODs d'arme dans l'onglet « Arme », idem pour les autres / indépendants.",
+        "step1Title": "Activez le MOD sur la page correspondante",
+        "step2Desc": "Ouvrez « Lanceur de jeu → Paramètres du jeu » et cochez « Activer le MOD » ; les MODs prendront effet au prochain lancement du jeu.",
+        "step2Title": "Cochez « Activer le MOD » dans le lanceur de jeu",
+        "title": "Comment utiliser les MODs"
+    },
     "mods-list": {
         "title": "Boutique de partage de MOD",
         "viewDetail": "Voir les détails"

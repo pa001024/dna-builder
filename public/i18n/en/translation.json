@@ -7465,6 +7465,19 @@
         "loadFailed": "Failed to load MOD details",
         "title": "MOD Detail"
     },
+    "mods-guide": {
+        "close": "Close",
+        "confirm": "Got it",
+        "dontShowAgain": "Do not show again",
+        "imageAlt": "The \"Enable MOD\" option in Game Launcher - Game Settings",
+        "imageFailed": "Image failed to load",
+        "imageHint": "Click to zoom",
+        "step1Desc": "Downloading only stores the MOD locally. Enable it under the matching tab of \"MOD Management\": character MODs in the \"Character\" tab, weapon MODs in the \"Weapon\" tab, and likewise for other / standalone MODs.",
+        "step1Title": "Enable the MOD on the matching page",
+        "step2Desc": "Open \"Game Launcher → Game Settings\" and tick \"Enable MOD\"; the MODs take effect the next time you start the game.",
+        "step2Title": "Tick \"Enable MOD\" in the game launcher",
+        "title": "How to use MODs"
+    },
     "mods-list": {
         "title": "MOD Share Store",
         "viewDetail": "View Details"

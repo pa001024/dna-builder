@@ -6568,6 +6568,19 @@
         "loadFailed": "MOD 詳情載入失敗",
         "title": "MOD 詳情"
     },
+    "mods-guide": {
+        "close": "關閉",
+        "confirm": "知道了",
+        "dontShowAgain": "不再自動彈出",
+        "imageAlt": "遊戲啟動器 - 遊戲設定中的「啟用MOD」選項",
+        "imageFailed": "配圖載入失敗",
+        "imageHint": "點擊放大",
+        "step1Desc": "下載只是把 MOD 裝進本機，還需要在「MOD管理」的對應頁籤中啟用：角色類 MOD 在「角色」頁籤啟用，武器類在「武器」頁籤，其他 / 獨立類同理。",
+        "step1Title": "在對應頁面啟用 MOD",
+        "step2Desc": "開啟「遊戲啟動器 → 遊戲設定」，勾選「啟用MOD」，之後再啟動遊戲即可生效。",
+        "step2Title": "在遊戲啟動器中勾選「啟用MOD」",
+        "title": "MOD 使用教學"
+    },
     "mods-list": {
         "title": "MOD 分享商店",
         "viewDetail": "查看詳情"

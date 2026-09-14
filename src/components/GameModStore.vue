@@ -4,6 +4,8 @@ import { computed, onMounted, ref, watch } from "vue"
 import { gameModsCountQuery, gameModsQuery } from "@/api/gen/api-queries"
 import type { GameMod } from "@/api/gen/api-types"
 import { uploadGameMod, uploadGameModVersion } from "@/api/modShare"
+// 显式 import：首次进入的教程弹窗由本组件承载，避免依赖自动注册的时机
+import ModUsageGuideDialog from "@/components/ModUsageGuideDialog.vue"
 import { useModDownloadStore } from "@/store/modDownload"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
@@ -31,6 +33,9 @@ const user = useUserStore()
 const download = useModDownloadStore()
 
 const isLoggedIn = computed(() => !!user.jwtToken)
+
+/** 使用教程弹窗开关：首次进入分享页由弹窗自身弹出，工具栏帮助按钮可随时重新打开 */
+const guideOpen = ref(false)
 
 const shareMods = ref<GameMod[]>([])
 const shareLoading = ref(false)
@@ -483,6 +488,15 @@ async function submitVersion() {
                 {{ $t("game-launcher.myMods") }}
             </label>
             <div class="ml-auto flex items-center gap-2">
+                <!-- 使用教程入口：关闭自动弹出后可从这里再次查看 -->
+                <button
+                    type="button"
+                    class="btn btn-square btn-ghost btn-sm tooltip tooltip-bottom"
+                    :data-tip="$t('mods-guide.title')"
+                    @click="guideOpen = true"
+                >
+                    <Icon icon="ri:question-line" class="size-4" />
+                </button>
                 <span v-if="!isLoggedIn" class="text-xs opacity-60 flex items-center gap-1">
                     <Icon icon="ri:lock-line" class="size-4" />
                     {{ $t("game-launcher.loginToDownload") }}
@@ -947,5 +961,8 @@ async function submitVersion() {
             </div>
             <div class="modal-backdrop" @click="versionOpen = false" />
         </dialog>
+
+        <!-- 使用教程弹窗（首次进入分享页自动弹出，关闭后由工具栏帮助入口再次打开） -->
+        <ModUsageGuideDialog v-model="guideOpen" />
     </div>
 </template>

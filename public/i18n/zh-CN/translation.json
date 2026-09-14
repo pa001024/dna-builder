@@ -1563,6 +1563,19 @@
         "loadFailed": "MOD 详情加载失败",
         "title": "MOD 详情"
     },
+    "mods-guide": {
+        "close": "关闭",
+        "confirm": "知道了",
+        "dontShowAgain": "不再自动弹出",
+        "imageAlt": "游戏启动器 - 游戏设置中的「启用MOD」选项",
+        "imageFailed": "配图加载失败",
+        "imageHint": "点击放大",
+        "step1Desc": "下载只是把 MOD 装进本地，还需要在「MOD管理」的对应页签中启用：角色类 MOD 在「角色」页签启用，武器类在「武器」页签，其他 / 独立类同理。",
+        "step1Title": "在对应页面启用 MOD",
+        "step2Desc": "打开「游戏启动器 → 游戏设置」，勾选「启用MOD」，之后再启动游戏即可生效。",
+        "step2Title": "在游戏启动器中勾选「启用MOD」",
+        "title": "MOD 使用教程"
+    },
     "mods-list": {
         "title": "MOD 分享商店",
         "viewDetail": "查看详情"

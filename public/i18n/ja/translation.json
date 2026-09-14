@@ -7364,6 +7364,19 @@
         "loadFailed": "MOD 詳細の読み込みに失敗しました",
         "title": "MOD 詳細"
     },
+    "mods-guide": {
+        "close": "閉じる",
+        "confirm": "了解",
+        "dontShowAgain": "次回から自動表示しない",
+        "imageAlt": "ゲームランチャー - ゲーム設定の「MODを有効化」項目",
+        "imageFailed": "画像を読み込めませんでした",
+        "imageHint": "クリックで拡大",
+        "step1Desc": "ダウンロードしただけでは反映されません。「MOD管理」の該当タブで有効化してください。キャラクター MOD は「キャラクター」タブ、武器 MOD は「武器」タブ、その他 / 独立 MOD も同様です。",
+        "step1Title": "対応するページで MOD を有効化",
+        "step2Desc": "「ゲームランチャー → ゲーム設定」を開き、「MODを有効化」にチェックを入れると、次回のゲーム起動から反映されます。",
+        "step2Title": "ゲームランチャーで「MODを有効化」にチェック",
+        "title": "MOD の使い方"
+    },
     "mods-list": {
         "title": "MOD 共有ストア",
         "viewDetail": "詳細を見る"
