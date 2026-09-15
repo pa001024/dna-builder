@@ -16,10 +16,6 @@ export const CDN_LIST = [
         url: "https://pan01-1-eo.shyxhy.com",
     },
     {
-        name: "海外",
-        url: "https://pan01-pack2.dna-panstudio.com",
-    },
-    {
         name: "AWS",
         url: "https://pan01-cdn-aws-jp.dna-panstudio.com",
     },
@@ -39,6 +35,29 @@ export interface FullPackageInfo extends GameVersionManifest {
     size: number
     newSize: number
     downloadUrl: string
+}
+
+/**
+ * 差分包信息（Packages/{server}/WindowsNoEditor/{channel}/{版本目录}/{目标版本}/v{旧版本}_to_v{新版本}）。
+ * 与完整包的区别：hdiff 只包含旧版本到新版本的差异数据，应用时需要把本地旧版本目录作为 hpatchz 的 oldPath。
+ */
+export interface DiffPackageInfo {
+    /** hdiff 文件名（如 v15001_to_v16001.hdiff）。 */
+    fileName: string
+    /** hdiff 的 MD5 哈希。 */
+    md5: string
+    /** hdiff 文件大小，即实际下载量。 */
+    size: number
+    /** 应用后新版本目录的总大小。 */
+    newSize: number
+    /** hdiff 下载地址。 */
+    downloadUrl: string
+    /** 差分包目录名（v15001_to_v16001）。 */
+    diffDir: string
+    /** 本地旧版本号，应用时作为 hpatchz oldPath 对应的版本。 */
+    fromVersion: number
+    /** 目标新版本号。 */
+    toVersion: number
 }
 
 interface RawGameVersionManifest {
@@ -304,13 +323,93 @@ export async function getPreFullPackageInfo(cdn: string, channel: string) {
 }
 
 /**
- * 下载新版完整游戏包。
- * @param packageInfo 完整包信息
+ * 拼接差分包目录名。
+ * @param fromVersion 本地旧版本号
+ * @param toVersion 目标新版本号
+ * @returns 差分包目录名（如 v15001_to_v16001）
+ */
+export function buildDiffPackageDir(fromVersion: number, toVersion: number) {
+    return `v${fromVersion}_to_v${toVersion}`
+}
+
+/**
+ * 判断本地版本能否使用差分包：本地版本有效、与目标版本不同，且不低于 min_supported_version。
+ * min_supported_version 缺失或非法时不加下限约束（远端未提供对应差分包时会请求失败并回退完整包）。
+ * @param localVersion 本地版本号（DNA Game/GameVersion.json）
+ * @param toVersion 目标新版本号
+ * @param minSupportedVersion 最小支持版本（完整包清单字段，字符串）
+ * @returns 是否可用差分包
+ */
+export function isDiffPackageApplicable(localVersion: number, toVersion: string, minSupportedVersion?: string) {
+    const targetVersion = Number(toVersion)
+    if (!Number.isSafeInteger(targetVersion) || targetVersion <= 0) return false
+    if (!Number.isSafeInteger(localVersion) || localVersion <= 0) return false
+    if (localVersion === targetVersion) return false
+    const minVersion = Number(minSupportedVersion)
+    if (minSupportedVersion === undefined || !Number.isSafeInteger(minVersion) || minVersion <= 0) return true
+    return localVersion >= minVersion
+}
+
+/**
+ * 获取本地版本到目标版本的差分包信息。
+ * 本地版本不符合 min_supported_version、与目标版本相同，或远端未提供对应差分包时返回 null
+ * （调用方据此回退完整包）。
+ * @param cdn CDN 地址
+ * @param channel 渠道
+ * @param packageInfo 完整包信息（提供目标版本号与 min_supported_version）
+ * @param localVersion 本地版本号
+ * @returns 差分包信息或 null
+ */
+export async function getDiffPackageInfo(
+    cdn: string,
+    channel: string,
+    packageInfo: Pick<FullPackageInfo, "latestVersion" | "latestVersionNumber" | "minSupportedVersion">,
+    localVersion: number
+): Promise<DiffPackageInfo | null> {
+    const toVersion = Number(packageInfo.latestVersion)
+    if (!isDiffPackageApplicable(localVersion, packageInfo.latestVersion, packageInfo.minSupportedVersion)) return null
+    const server = channel.match(/(Global)_Pub/)?.[1] || "CN"
+    const diffDir = buildDiffPackageDir(localVersion, toVersion)
+    const packageDir = `${VERSION_URL_PUB(server)}${channel}/${packageInfo.latestVersionNumber}/${packageInfo.latestVersion}/${diffDir}`
+    try {
+        const response = await tauriFetch(`${cdn}${packageDir}/HPatchDiffMd5.json`)
+        if (!response.ok) {
+            console.warn(`远端未提供差分包: ${packageDir}`)
+            return null
+        }
+        const patchInfo = (await response.json()) as RawHPatchDiffMd5
+        const fileName = patchInfo.hdiff_file?.name
+        const md5 = patchInfo.hdiff_file?.md5
+        const size = patchInfo.hdiff_file?.size
+        const newSize = patchInfo.new_size
+        if (typeof fileName !== "string" || typeof md5 !== "string" || typeof size !== "number" || typeof newSize !== "number") {
+            console.warn(`Invalid diff package manifest: ${packageDir}`, patchInfo)
+            return null
+        }
+        return {
+            fileName,
+            md5,
+            size,
+            newSize,
+            diffDir,
+            fromVersion: localVersion,
+            toVersion,
+            downloadUrl: `${cdn}${packageDir}/${fileName}`,
+        }
+    } catch (error) {
+        console.warn("获取差分包信息失败:", error)
+        return null
+    }
+}
+
+/**
+ * 下载新版完整游戏包或差分包文件。
+ * @param packageInfo 基础包信息（完整包 / 差分包，仅使用下载地址）
  * @param filename 本地目标路径
  * @param concurrentThreads 并发线程数
  * @returns 下载结果消息
  */
-export async function downloadFullPackage(packageInfo: FullPackageInfo, filename: string, concurrentThreads = 10) {
+export async function downloadFullPackage(packageInfo: Pick<FullPackageInfo, "downloadUrl">, filename: string, concurrentThreads = 10) {
     return await invoke<string>("download_file", {
         url: packageInfo.downloadUrl,
         filename,

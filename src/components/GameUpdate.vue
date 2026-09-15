@@ -21,6 +21,7 @@ import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import {
     compareGameVersions,
+    type DiffPackageInfo,
     type DownloadProgress,
     downloadAssets,
     downloadFullPackage,
@@ -28,6 +29,7 @@ import {
     type FullPackageInfo,
     type GameVersionListWithPre,
     getBaseVersion,
+    getDiffPackageInfo,
     getDownloadProgress,
     getHotUpdatePakFilesInfo,
     getPreFullPackageInfo,
@@ -79,6 +81,8 @@ const {
 const versionList = ref<GameVersionListWithPre | null>(null)
 const fullPackageInfo = ref<FullPackageInfo | null>(null)
 const preFullPackageInfo = ref<FullPackageInfo | null>(null)
+/** 当前可用的差分包（本地版本符合 min_supported_version 且远端提供时非空，否则回退完整包）。 */
+const diffPackageInfo = ref<DiffPackageInfo | null>(null)
 const isLoading = ref(false)
 const isExtracting = ref(false)
 
@@ -192,6 +196,56 @@ const displayDownloadFileCount = computed(() => {
 })
 const displayOverallProgressPercent = computed(() => Math.min(100, Math.max(0, Math.floor(overallProgress.value * 100))))
 
+/**
+ * 本次基础包更新实际下载的目标：本地版本适配差分包（符合 min_supported_version）时用差分包，否则用完整包。
+ */
+interface ActiveBasePackage {
+    /** hdiff 文件名。 */
+    fileName: string
+    /** 下载量（字节）。 */
+    size: number
+    /** hdiff 下载地址。 */
+    downloadUrl: string
+    /** 是否为差分包。 */
+    isDiff: boolean
+    /** 差分包来源版本号（完整包为 null）。 */
+    fromVersion: number | null
+    /** 目标版本号，应用成功后写入 GameVersion.json。 */
+    targetVersion: string
+}
+
+/**
+ * 把完整包信息转换为统一的基础包更新目标。
+ * @param info 完整包信息
+ * @returns 基础包更新目标
+ */
+function toActiveFullPackage(info: FullPackageInfo): ActiveBasePackage {
+    return {
+        fileName: info.fileName,
+        size: info.size,
+        downloadUrl: info.downloadUrl,
+        isDiff: false,
+        fromVersion: null,
+        targetVersion: info.latestVersion,
+    }
+}
+
+/** 当前基础包更新目标（差分包优先，无差分包时用完整包）。 */
+const activeBasePackage = computed<ActiveBasePackage | null>(() => {
+    const diff = diffPackageInfo.value
+    if (diff) {
+        return {
+            fileName: diff.fileName,
+            size: diff.size,
+            downloadUrl: diff.downloadUrl,
+            isDiff: true,
+            fromVersion: diff.fromVersion,
+            targetVersion: String(diff.toVersion),
+        }
+    }
+    return fullPackageInfo.value ? toActiveFullPackage(fullPackageInfo.value) : null
+})
+
 // 是否需要预下载
 const needPreDownload = ref(false)
 
@@ -247,6 +301,7 @@ watch([() => gameUpdateStore.selectedChannel, () => gameUpdateStore.customChanne
         versionList.value = null
         fullPackageInfo.value = null
         preFullPackageInfo.value = null
+        diffPackageInfo.value = null
         needUpdate.value = false
         updateSize.value = 0
         needPreDownload.value = false
@@ -599,10 +654,44 @@ function getGameAssetUrl(filename: string, channel: string, subVersion: string) 
 }
 
 /**
+ * 按当前下载动作执行整条流程：已下载完成的文件会被内部跳过，随后进入下载后的下一步
+ * （应用完整包补丁 / 解压资源 / 安装语音包），保证不会只下载而不收尾。
+ * 「继续」按钮与「后台下载完成后自动接手」两条路径共用同一入口。
+ */
+async function continueActiveDownload() {
+    const action = activeDownloadAction.value
+    if (action === "game") {
+        await downloadAllFiles()
+    } else if (action === "pre") {
+        await preDownloadAllFiles()
+    } else if (action === "hot") {
+        await downloadHotUpdateAndRefresh()
+    } else if (action === "optional" && activeOptionalSign.value) {
+        await downloadOptionalPackTask(activeOptionalSign.value)
+    }
+}
+
+/**
+ * 后台下载（刷新页面后恢复 / 被「已有下载任务」挡回）跑到 100% 后接手后续流程。
+ * 进度事件可能早于文件落盘与进度文件清理到达，这里先轮询后端确认下载任务确实结束，
+ * 再接着执行下载后的下一步（应用补丁、解压资源），避免续跑时又撞上 download_already_active 被挡回。
+ * @param filePath 已完成的后台下载目标文件路径
+ */
+async function continueAfterBackgroundDownload(filePath: string) {
+    // 用户已请求暂停（进度恰好停在 100%）时不自动接手，交由用户点「继续」决定
+    if (isPauseRequested.value) return
+    for (let attempt = 0; attempt < 240; attempt++) {
+        const progress = await getDownloadProgress(filePath).catch(() => null)
+        if (!progress || !progress.active) break
+        await new Promise(resolve => window.setTimeout(resolve, 500))
+    }
+    await continueActiveDownload()
+}
+
+/**
  * 从暂停位置继续当前下载。
  */
 async function resumeCurrentDownload() {
-    const action = activeDownloadAction.value
     if (currentDownloadPath.value) {
         const progress = await getDownloadProgress(currentDownloadPath.value)
         if (progress.active) {
@@ -615,15 +704,7 @@ async function resumeCurrentDownload() {
     }
     isPauseRequested.value = false
     isDownloadPaused.value = false
-    if (action === "game") {
-        await downloadAllFiles()
-    } else if (action === "pre") {
-        await preDownloadAllFiles()
-    } else if (action === "hot") {
-        await downloadHotUpdateAndRefresh()
-    } else if (action === "optional" && activeOptionalSign.value) {
-        await downloadOptionalPackTask(activeOptionalSign.value)
-    }
+    await continueActiveDownload()
 }
 
 /**
@@ -640,6 +721,7 @@ async function fetchVersionList() {
         versionList.value = null
         fullPackageInfo.value = null
         preFullPackageInfo.value = null
+        diffPackageInfo.value = null
         needUpdate.value = false
         updateSize.value = 0
         needPreDownload.value = false
@@ -655,6 +737,7 @@ async function fetchVersionList() {
     versionList.value = null
     fullPackageInfo.value = null
     preFullPackageInfo.value = null
+    diffPackageInfo.value = null
     try {
         const [fullPackage, preFullPackage] = await Promise.all([
             gameUpdateStore.getFullPackageInfoForActiveChannel(),
@@ -773,7 +856,16 @@ async function checkForUpdates() {
             const localContent = await readTextFile(gameVersionPath.value)
             const localVersion = resolveGameVersion(localContent)
             needUpdate.value = String(localVersion) !== fullPackageInfo.value.latestVersion
-            updateSize.value = needUpdate.value ? fullPackageInfo.value.size : 0
+            // 本地版本符合 min_supported_version 时优先走差分包；远端未提供差分包时回退完整包
+            diffPackageInfo.value = needUpdate.value
+                ? await getDiffPackageInfo(
+                      gameUpdateStore.selectedCDN,
+                      activeChannel,
+                      fullPackageInfo.value,
+                      localVersion ?? 0
+                  )
+                : null
+            updateSize.value = needUpdate.value ? (diffPackageInfo.value?.size ?? fullPackageInfo.value.size) : 0
             await checkPreDownloadStatus()
             await gameUpdateStore.checkHotUpdateStatus()
             await syncDownloadProgressAfterRefresh()
@@ -796,6 +888,8 @@ async function checkForUpdates() {
     } catch (err) {
         needUpdate.value = true
         updateSize.value = totalSize.value
+        // 本地版本（GameVersion.json）不可读或格式异常时无法判断差分适用性，直接回退完整包
+        diffPackageInfo.value = null
         console.error("检查更新时出错:", err)
     }
     await checkPreDownloadStatus()
@@ -810,17 +904,18 @@ async function syncDownloadProgressAfterRefresh() {
     if (!gamePath.value) return
     const activeChannel = gameUpdateStore.getActiveChannel()
     if (!activeChannel) return
-    if (needUpdate.value && fullPackageInfo.value) {
-        const fullFilePath = `${fullPackageDownloadDir.value}${fullPackageInfo.value.fileName}`
-        const progress = await getDownloadProgress(fullFilePath)
+    const activePackage = activeBasePackage.value
+    if (needUpdate.value && activePackage) {
+        const packageFilePath = `${fullPackageDownloadDir.value}${activePackage.fileName}`
+        const progress = await getDownloadProgress(packageFilePath)
         if (progress.hasProgressFile) {
             await gameUpdateStore.prepareCurrentDownloadFile(
-                fullFilePath,
-                fullPackageInfo.value.fileName,
-                fullPackageInfo.value.size,
+                packageFilePath,
+                activePackage.fileName,
+                activePackage.size,
                 0,
-                fullPackageInfo.value.size,
-                fullPackageInfo.value.downloadUrl
+                activePackage.size,
+                activePackage.downloadUrl
             )
             isDownloading.value = progress.active
             isPauseRequested.value = progress.active && progress.paused
@@ -1014,80 +1109,99 @@ async function selectGameDir() {
 }
 
 /**
- * 下载、校验并应用新版完整 hdiff 游戏包。
+ * 下载、校验并应用基础包（差分包或完整包）。
+ * 本地版本适配差分包时优先下载差分包（体积远小于完整包），差分包应用失败（本地旧文件被改动、
+ * 校验不通过等）时清理差分文件并自动回退完整包，保证更新不会卡在半成品状态。
+ * 差分包以本地安装目录作为 hpatchz 的 oldPath，与输出目录相同即可原地更新。
  */
-async function downloadAndApplyFullPackage() {
-    const packageInfo = fullPackageInfo.value
-    if (!packageInfo || !gamePath.value) return
+async function downloadAndApplyBasePackage() {
+    const activePackage = activeBasePackage.value
+    const fullPackage = fullPackageInfo.value
+    if (!activePackage || !gamePath.value) return
+    // 回退顺序：先差分包，再完整包（无差分包时只跑完整包）
+    const candidates: ActiveBasePackage[] = activePackage.isDiff
+        ? [activePackage, ...(fullPackage ? [toActiveFullPackage(fullPackage)] : [])]
+        : [activePackage]
 
-    const fullFilePath = `${fullPackageDownloadDir.value}${packageInfo.fileName}`
-    const progressFilePath = `${fullFilePath}.progress`
-    isDownloading.value = true
-    activeDownloadAction.value = "game"
-    activeOptionalSign.value = ""
-    isRecoveredActiveDownload.value = false
-    isDownloadPaused.value = false
-    isPauseRequested.value = false
-    currentDownloaded.value = 0
-    overallProgress.value = 0
-    downloadSpeed.value = ""
-    gameUpdateStore.resetSpeedBaseline()
-
-    try {
-        await gameUpdateStore.prepareCurrentDownloadFile(
-            fullFilePath,
-            packageInfo.fileName,
-            packageInfo.size,
-            0,
-            packageInfo.size,
-            packageInfo.downloadUrl
-        )
-        const isPackageComplete = await gameUpdateStore.canSkipBeforeHashCheck(fullFilePath, progressFilePath, packageInfo.size)
-        if (!isPackageComplete) {
-            await downloadFullPackage(packageInfo, fullFilePath, concurrentThreads.value)
-        }
-        gameUpdateStore.throwIfPauseRequested()
-
-        isDownloading.value = false
-        isExtracting.value = true
-        startExtractionProgress()
-        currentFile.value = packageInfo.fileName
-        currentFileUrl.value = packageInfo.downloadUrl
-        currentDownloaded.value = packageInfo.size
+    for (const [index, packageInfo] of candidates.entries()) {
+        const packageFilePath = `${fullPackageDownloadDir.value}${packageInfo.fileName}`
+        const progressFilePath = `${packageFilePath}.progress`
+        isDownloading.value = true
+        activeDownloadAction.value = "game"
+        activeOptionalSign.value = ""
+        isRecoveredActiveDownload.value = false
+        isDownloadPaused.value = false
+        isPauseRequested.value = false
+        currentDownloaded.value = 0
+        overallProgress.value = 0
         downloadSpeed.value = ""
-        await applyGamePatch(fullFilePath, extractDir.value)
-        stopExtractionProgress(true)
-        const gameVersion = Number(packageInfo.latestVersion)
-        if (!Number.isSafeInteger(gameVersion) || gameVersion <= 0) {
-            throw new Error(`Invalid game version: ${packageInfo.latestVersion}`)
-        }
-        await writeTextFile(gameVersionPath.value, JSON.stringify({ version: gameVersion }, null, 2))
-        await deleteFile(fullFilePath, true)
+        gameUpdateStore.resetSpeedBaseline()
 
-        currentFile.value = ""
-        currentFileUrl.value = ""
-        currentDownloadPath.value = ""
-        await refreshGameInstalled()
-        ui.showSuccessMessage(t("game-update.download_complete", { size: gameUpdateStore.formatSize(packageInfo.size) }))
-        await checkForUpdates()
-        resetExtractionState()
-        if (needHotUpdate.value && hotUpdatePendingVersions.value.length) {
-            await downloadHotUpdateAndRefresh()
-        }
-    } catch (err) {
-        resetExtractionState()
-        if (isDownloadPausedError(err)) {
-            gameUpdateStore.markDownloadPaused()
+        try {
+            await gameUpdateStore.prepareCurrentDownloadFile(
+                packageFilePath,
+                packageInfo.fileName,
+                packageInfo.size,
+                0,
+                packageInfo.size,
+                packageInfo.downloadUrl
+            )
+            const isPackageComplete = await gameUpdateStore.canSkipBeforeHashCheck(packageFilePath, progressFilePath, packageInfo.size)
+            if (!isPackageComplete) {
+                await downloadFullPackage(packageInfo, packageFilePath, concurrentThreads.value)
+            }
+            gameUpdateStore.throwIfPauseRequested()
+
+            isDownloading.value = false
+            isExtracting.value = true
+            startExtractionProgress()
+            currentFile.value = packageInfo.fileName
+            currentFileUrl.value = packageInfo.downloadUrl
+            currentDownloaded.value = packageInfo.size
+            downloadSpeed.value = ""
+            await applyGamePatch(packageFilePath, extractDir.value, packageInfo.isDiff ? extractDir.value : undefined)
+            stopExtractionProgress(true)
+            const gameVersion = Number(packageInfo.targetVersion)
+            if (!Number.isSafeInteger(gameVersion) || gameVersion <= 0) {
+                throw new Error(`Invalid game version: ${packageInfo.targetVersion}`)
+            }
+            await writeTextFile(gameVersionPath.value, JSON.stringify({ version: gameVersion }, null, 2))
+            await deleteFile(packageFilePath, true)
+
+            currentFile.value = ""
+            currentFileUrl.value = ""
+            currentDownloadPath.value = ""
+            await refreshGameInstalled()
+            ui.showSuccessMessage(t("game-update.download_complete", { size: gameUpdateStore.formatSize(packageInfo.size) }))
+            await checkForUpdates()
+            resetExtractionState()
+            if (needHotUpdate.value && hotUpdatePendingVersions.value.length) {
+                await downloadHotUpdateAndRefresh()
+            }
+            return
+        } catch (err) {
+            resetExtractionState()
+            if (isDownloadPausedError(err)) {
+                gameUpdateStore.markDownloadPaused()
+                return
+            }
+            if (isDownloadAlreadyActiveError(err)) {
+                gameUpdateStore.markDownloadAlreadyActive()
+                return
+            }
+            // 还有回退目标（完整包）时清理当前包并继续，避免差分应用失败后整个更新中断
+            if (index < candidates.length - 1) {
+                console.error(`应用${packageInfo.isDiff ? "差分" : "完整"}包失败，回退完整包:`, err)
+                await deleteFile(packageFilePath, true).catch(() => undefined)
+                diffPackageInfo.value = null
+                continue
+            }
+            ui.showErrorMessage(t("game-update.download_failed", { error: err instanceof Error ? err.message : String(err) }))
+            console.error("基础包下载或应用失败:", err)
+            isDownloading.value = false
+            downloadSpeed.value = ""
             return
         }
-        if (isDownloadAlreadyActiveError(err)) {
-            gameUpdateStore.markDownloadAlreadyActive()
-            return
-        }
-        ui.showErrorMessage(t("game-update.download_failed", { error: err instanceof Error ? err.message : String(err) }))
-        console.error("完整包下载或应用失败:", err)
-        isDownloading.value = false
-        downloadSpeed.value = ""
     }
 }
 
@@ -1102,7 +1216,7 @@ async function downloadAllFiles() {
         return
     }
     if (fullPackageInfo.value) {
-        await downloadAndApplyFullPackage()
+        await downloadAndApplyBasePackage()
         return
     }
     const currentVersionList = versionList.value
@@ -1484,9 +1598,14 @@ onMounted(async () => {
         overallProgress.value = activeDownloadTotal.value > 0 ? totalDownloaded / activeDownloadTotal.value : 0
         downloadSpeed.value = gameUpdateStore.calculateDownloadSpeed(totalDownloaded)
         if (progress.total > 0 && progress.downloaded >= progress.total && isRecoveredActiveDownload.value) {
+            const finishedPath = currentDownloadPath.value
             isDownloading.value = false
             isRecoveredActiveDownload.value = false
-            void checkForUpdates()
+            // 后台下载（刷新页面恢复 / 被已有任务挡回）完成后必须接手下载后的下一步，
+            // 否则流程只会停在「补丁包下载完成」，不会继续应用补丁与解压资源
+            void continueAfterBackgroundDownload(finishedPath).catch(error => {
+                console.error("后台下载完成后继续执行失败:", error)
+            })
         }
     })
     const unlisten = await listen("extract_progress", event => {
@@ -1673,6 +1792,14 @@ const launchGame = async () => {
                             }}</span>
                             <span class="text-xs opacity-80 mb-1.5">{{ displayDownloadFileCount }} {{ t("game-update.files") }}</span>
                         </div>
+                        <!-- 差分包提示：本地版本符合 min_supported_version 时只下载差分数据 -->
+                        <span
+                            v-if="needUpdate && diffPackageInfo"
+                            class="mt-1 truncate text-[11px] text-primary/80"
+                            :title="`差分更新 v${diffPackageInfo.fromVersion} → v${diffPackageInfo.toVersion}`"
+                        >
+                            差分 v{{ diffPackageInfo.fromVersion }} → v{{ diffPackageInfo.toVersion }}
+                        </span>
                     </div>
                 </div>
 
@@ -1784,16 +1911,42 @@ const launchGame = async () => {
                         </div>
                     </div>
 
-                    <!-- 总进度条 -->
-                    <div class="relative h-2.5 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/10">
-                        <!-- 动态条纹背景 -->
-                        <div
-                            class="absolute inset-0 w-full h-full opacity-10 bg-size-[20px_20px] bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,color-mix(in oklab,var(--color-base-content) 60%,transparent)_10px,color-mix(in 60%,transparent)_20px)] animate-[move-bg_1s_linear_infinite]"
-                        ></div>
-                        <div
-                            class="h-full bg-linear-to-r from-primary via-secondary to-primary bg-size-[200%_100%] animate-[shimmer_2s_linear_infinite] transition-all duration-300 ease-out"
-                            :style="{ width: `${overallProgress * 100}%` }"
-                        ></div>
+                    <!-- 总进度条 + 暂停/继续方形图标按钮（等高） -->
+                    <div class="flex items-center gap-2">
+                        <div class="relative h-6 flex-1 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/10">
+                            <!-- 动态条纹背景 -->
+                            <div
+                                class="absolute inset-0 w-full h-full opacity-10 bg-size-[20px_20px] bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,color-mix(in oklab,var(--color-base-content) 60%,transparent)_10px,color-mix(in 60%,transparent)_20px)] animate-[move-bg_1s_linear_infinite]"
+                            ></div>
+                            <div
+                                class="h-full bg-linear-to-r from-primary via-secondary to-primary bg-size-[200%_100%] animate-[shimmer_2s_linear_infinite] transition-all duration-300 ease-out"
+                                :style="{ width: `${overallProgress * 100}%` }"
+                            ></div>
+                        </div>
+                        <button
+                            v-if="isDownloading && !isPauseRequested"
+                            @click="gameUpdateStore.pauseCurrentDownload()"
+                            title="暂停下载"
+                            class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-xs bg-warning text-warning-content transition-colors duration-150 hover:bg-warning/90"
+                        >
+                            <Icon icon="ri:pause-fill" class="size-3.5" />
+                        </button>
+                        <button
+                            v-else-if="isDownloading && isPauseRequested"
+                            disabled
+                            title="暂停中"
+                            class="flex size-6 shrink-0 cursor-not-allowed items-center justify-center rounded-xs bg-warning/60 text-warning-content/70"
+                        >
+                            <Icon icon="ri:pause-fill" class="size-3.5 animate-pulse" />
+                        </button>
+                        <button
+                            v-else-if="isDownloadPaused"
+                            @click="resumeCurrentDownload()"
+                            title="继续下载"
+                            class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-xs bg-primary text-primary-content transition-colors duration-150 hover:bg-primary/90"
+                        >
+                            <Icon icon="ri:play-fill" class="size-3.5" />
+                        </button>
                     </div>
 
                     <!-- 详细数据行 -->
@@ -1808,29 +1961,6 @@ const launchGame = async () => {
                         <span v-if="isDownloading || isDownloadPaused">
                             {{ currentFileDownloaded }} / {{ currentFileTotal }} ({{ t("game-update.current_file") }})
                         </span>
-                    </div>
-                    <div v-if="isDownloading || isDownloadPaused" class="flex justify-end gap-2">
-                        <button
-                            v-if="isDownloading && !isPauseRequested"
-                            @click="gameUpdateStore.pauseCurrentDownload()"
-                            class="cursor-pointer whitespace-nowrap rounded-xs bg-warning px-4 py-1.5 text-xs font-semibold text-warning-content transition-colors duration-150 hover:bg-warning/90"
-                        >
-                            暂停
-                        </button>
-                        <button
-                            v-else-if="isDownloading && isPauseRequested"
-                            disabled
-                            class="cursor-not-allowed whitespace-nowrap rounded-xs bg-warning px-4 py-1.5 text-xs font-semibold text-warning-content opacity-60"
-                        >
-                            暂停中
-                        </button>
-                        <button
-                            v-else
-                            @click="resumeCurrentDownload()"
-                            class="cursor-pointer whitespace-nowrap rounded-xs bg-primary px-4 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90"
-                        >
-                            继续
-                        </button>
                     </div>
                 </div>
 

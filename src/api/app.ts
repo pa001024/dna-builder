@@ -364,13 +364,14 @@ export async function extractGameAssets(zipPath: string, targetDir: string) {
 }
 
 /**
- * 使用应用内嵌的 hpatchz 应用完整游戏包。
+ * 使用应用内嵌的 hpatchz 应用 hdiff 包。
  * @param diffPath hdiff 文件路径
- * @param targetDir 游戏安装目录
+ * @param targetDir 游戏安装目录（应用结果输出目录）
+ * @param oldPath 差分包的旧文件/目录路径（差分包必传，完整包不传）
  * @returns 成功消息
  */
-export async function applyGamePatch(diffPath: string, targetDir: string) {
-    return await invoke<string>("apply_game_patch", { diffPath, targetDir })
+export async function applyGamePatch(diffPath: string, targetDir: string, oldPath?: string) {
+    return await invoke<string>("apply_game_patch", { diffPath, targetDir, oldPath: oldPath ?? null })
 }
 
 /**

@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { tauriFetch } from "@/api/app"
 import {
+    buildDiffPackageDir,
+    getDiffPackageInfo,
     getHotUpdateVersionList,
     getPreFullPackageInfo,
+    isDiffPackageApplicable,
     normalizeFullPackageInfo,
     normalizeHotUpdatePakFilesInfo,
     normalizeOptionalPatchSigns,
@@ -236,6 +239,129 @@ describe("getPreFullPackageInfo", () => {
         const result = await getPreFullPackageInfo("https://cdn.example.com", "PC_OBT_CN_Pub")
 
         expect(result).toBeNull()
+    })
+})
+
+describe("buildDiffPackageDir", () => {
+    it("应该拼接为 v{旧版本}_to_v{新版本}", () => {
+        expect(buildDiffPackageDir(15001, 16001)).toBe("v15001_to_v16001")
+    })
+})
+
+describe("isDiffPackageApplicable", () => {
+    it("本地版本不低于 min_supported_version 时可用", () => {
+        expect(isDiffPackageApplicable(15001, "16001", "15001")).toBe(true)
+        expect(isDiffPackageApplicable(15500, "16001", "15001")).toBe(true)
+    })
+
+    it("本地版本低于 min_supported_version 时不可用", () => {
+        expect(isDiffPackageApplicable(14001, "16001", "15001")).toBe(false)
+    })
+
+    it("本地版本与目标版本相同或无效时不可用", () => {
+        expect(isDiffPackageApplicable(16001, "16001", "15001")).toBe(false)
+        expect(isDiffPackageApplicable(0, "16001", "15001")).toBe(false)
+        expect(isDiffPackageApplicable(15001, "invalid", "15001")).toBe(false)
+    })
+
+    it("清单缺少 min_supported_version 时不限制下限", () => {
+        expect(isDiffPackageApplicable(15001, "16001", undefined)).toBe(true)
+    })
+})
+
+describe("getDiffPackageInfo", () => {
+    const cdn = "https://pan01-1-eo.shyxhy.com"
+    const fullPackage = {
+        latestVersion: "16001",
+        latestVersionNumber: "1.6",
+        minSupportedVersion: "15001",
+    }
+
+    beforeEach(() => {
+        vi.mocked(tauriFetch).mockReset()
+    })
+
+    it("应该按 v{本地版本}_to_v{目标版本} 拼接差分包地址并返回清单", async () => {
+        vi.mocked(tauriFetch).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                hdiff_file: {
+                    name: "v15001_to_v16001.hdiff",
+                    md5: "a2de2a78bdb22a836154bf5f30339427",
+                    size: 7205572177,
+                },
+                new_size: 32637146647,
+            }),
+        } as Response)
+
+        const result = await getDiffPackageInfo(cdn, "PC_OBT_CN_Pub", fullPackage, 15001)
+
+        expect(vi.mocked(tauriFetch)).toHaveBeenCalledWith(
+            "https://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/1.6/16001/v15001_to_v16001/HPatchDiffMd5.json"
+        )
+        expect(result).toEqual({
+            fileName: "v15001_to_v16001.hdiff",
+            md5: "a2de2a78bdb22a836154bf5f30339427",
+            size: 7205572177,
+            newSize: 32637146647,
+            downloadUrl:
+                "https://pan01-1-eo.shyxhy.com/Packages/CN/WindowsNoEditor/PC_OBT_CN_Pub/1.6/16001/v15001_to_v16001/v15001_to_v16001.hdiff",
+            diffDir: "v15001_to_v16001",
+            fromVersion: 15001,
+            toVersion: 16001,
+        })
+    })
+
+    it("海外渠道应该使用 Global 资源目录", async () => {
+        vi.mocked(tauriFetch).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ hdiff_file: { name: "v15001_to_v16001.hdiff", md5: "abc", size: 1 }, new_size: 2 }),
+        } as Response)
+
+        await getDiffPackageInfo(cdn, "PC_OBT_Global_Pub", fullPackage, 15001)
+
+        expect(vi.mocked(tauriFetch).mock.calls[0][0]).toBe(
+            "https://pan01-1-eo.shyxhy.com/Packages/Global/WindowsNoEditor/PC_OBT_Global_Pub/1.6/16001/v15001_to_v16001/HPatchDiffMd5.json"
+        )
+    })
+
+    it("本地版本低于 min_supported_version 时不应该请求差分包", async () => {
+        const result = await getDiffPackageInfo(cdn, "PC_OBT_CN_Pub", fullPackage, 14001)
+
+        expect(result).toBeNull()
+        expect(vi.mocked(tauriFetch)).not.toHaveBeenCalled()
+    })
+
+    it("本地版本已是目标版本时不应该请求差分包", async () => {
+        const result = await getDiffPackageInfo(cdn, "PC_OBT_CN_Pub", fullPackage, 16001)
+
+        expect(result).toBeNull()
+        expect(vi.mocked(tauriFetch)).not.toHaveBeenCalled()
+    })
+
+    it("本地版本不可读（0）时不应该请求差分包", async () => {
+        const result = await getDiffPackageInfo(cdn, "PC_OBT_CN_Pub", fullPackage, 0)
+
+        expect(result).toBeNull()
+        expect(vi.mocked(tauriFetch)).not.toHaveBeenCalled()
+    })
+
+    it("远端未提供差分包（非 2xx）时应该返回 null", async () => {
+        vi.mocked(tauriFetch).mockResolvedValueOnce({ ok: false, status: 404 } as Response)
+
+        expect(await getDiffPackageInfo(cdn, "PC_OBT_CN_Pub", fullPackage, 15001)).toBeNull()
+    })
+
+    it("清单字段不完整时应该返回 null", async () => {
+        vi.mocked(tauriFetch).mockResolvedValueOnce({ ok: true, json: async () => ({}) } as Response)
+
+        expect(await getDiffPackageInfo(cdn, "PC_OBT_CN_Pub", fullPackage, 15001)).toBeNull()
+    })
+
+    it("请求异常时应该返回 null 而不是抛出", async () => {
+        vi.mocked(tauriFetch).mockRejectedValueOnce(new Error("network error"))
+
+        expect(await getDiffPackageInfo(cdn, "PC_OBT_CN_Pub", fullPackage, 15001)).toBeNull()
     })
 })
 

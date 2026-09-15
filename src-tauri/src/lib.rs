@@ -2978,9 +2978,17 @@ async fn extract_game_assets(
     ))
 }
 
-/// 使用内嵌的 hpatchz 将完整 hdiff 包应用到游戏目录。
+/// 使用内嵌的 hpatchz 应用 hdiff 包。
+///
+/// `old_path` 为空（`None` 或空串）时按完整包处理：hdiff 内含全部新数据，hpatchz 的 oldPath 传空串。
+/// 非空时按差分包处理：hpatchz 以该路径（旧文件或旧目录）为 oldPath 读取旧数据，
+/// 目录差分包可传入同一个旧安装目录，`-f` 会先写临时文件再覆盖。
 #[tauri::command]
-async fn apply_game_patch(diff_path: String, target_dir: String) -> Result<String, String> {
+async fn apply_game_patch(
+    diff_path: String,
+    target_dir: String,
+    old_path: Option<String>,
+) -> Result<String, String> {
     tokio::task::spawn_blocking(move || {
         let diff_path = PathBuf::from(&diff_path);
         if !diff_path.is_file() {
@@ -2989,6 +2997,13 @@ async fn apply_game_patch(diff_path: String, target_dir: String) -> Result<Strin
 
         let target_dir = PathBuf::from(&target_dir);
         fs::create_dir_all(&target_dir).map_err(|e| format!("创建游戏目录失败: {}", e))?;
+
+        // 差分包的旧数据来源；空串表示完整包（hdiff 内含全部新数据）
+        let old_path = old_path.unwrap_or_default();
+        let old_path = old_path.trim();
+        if !old_path.is_empty() && !Path::new(old_path).exists() {
+            return Err(format!("差分包的旧文件/目录不存在: {}", old_path));
+        }
 
         let unique = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -3011,7 +3026,7 @@ async fn apply_game_patch(diff_path: String, target_dir: String) -> Result<Strin
         }
         let result = command
             .arg("-f")
-            .arg("")
+            .arg(old_path)
             .arg(&diff_path)
             .arg(&target_dir)
             .output();
@@ -3021,10 +3036,28 @@ async fn apply_game_patch(diff_path: String, target_dir: String) -> Result<Strin
             let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
             let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
             let detail = if stderr.is_empty() { stdout } else { stderr };
-            return Err(format!("hpatchz 执行失败 ({}): {}", output.status, detail));
+            return Err(format!(
+                "hpatchz 执行失败 ({}), oldPath: {}, diffFile: {}: {}",
+                output.status,
+                if old_path.is_empty() {
+                    "\"\""
+                } else {
+                    old_path
+                },
+                diff_path.display(),
+                detail
+            ));
         }
 
-        Ok(format!("完整包已应用到 {}", target_dir.display()))
+        if old_path.is_empty() {
+            Ok(format!("完整包已应用到 {}", target_dir.display()))
+        } else {
+            Ok(format!(
+                "差分包已应用到 {}（旧数据来源: {}）",
+                target_dir.display(),
+                old_path
+            ))
+        }
     })
     .await
     .map_err(|e| format!("hpatchz 任务执行失败: {}", e))?

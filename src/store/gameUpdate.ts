@@ -70,7 +70,7 @@ export const useGameUpdateStore = defineStore("gameUpdate", () => {
      */
     function isOverseasCDN(cdnUrl: string) {
         const cdn = CDN_LIST.find(item => item.url === cdnUrl)
-        return cdn?.name === "海外" || cdn?.name === "AWS"
+        return cdn?.name === "AWS"
     }
 
     /**
