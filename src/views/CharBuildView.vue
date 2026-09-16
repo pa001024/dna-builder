@@ -1949,12 +1949,13 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
     <DialogModel v-model="extraMasteryModalShow" class="bg-base-300 w-11/12 max-w-3xl">
         <h3 class="text-lg font-bold mb-1">{{ $t("UI_Armory_ExtraExcelWeponTitle") }}</h3>
         <p class="text-xs text-base-content/60 mb-4">{{ $t("char-build.extra_mastery_desc") }}</p>
-        <div class="grid gap-2 grid-cols-[repeat(auto-fill,minmax(96px,1fr))]">
+        <!-- 卡片网格：auto-fit 让空轨道塌陷，条目少时整组居中；轨道上限 128px 避免卡片被拉伸 -->
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(96px,128px))] justify-center gap-2">
             <button
                 v-for="item in extraMasteryOptions"
                 :key="item.id"
                 type="button"
-                class="flex flex-col items-center gap-1.5 rounded-xs border p-2.5 cursor-pointer transition-colors duration-150 active:scale-[0.97]"
+                class="flex flex-col items-center justify-center gap-1.5 rounded-xs border p-2.5 cursor-pointer transition-colors duration-150 active:scale-[0.97]"
                 :class="
                     pendingExtraMastery === item.名称
                         ? 'border-primary bg-primary/10 text-primary shadow-sm'
@@ -1962,7 +1963,12 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 "
                 @click="selectExtraMastery(item.名称)"
             >
-                <img :src="LeveledWeapon.typeUrl(item.名称)" alt="" class="size-9 object-contain" />
+                <!-- 图标走 mask 上色：原图是白色字形，直接显示在浅色主题下不可见；mask 取 currentColor 随选中态变化 -->
+                <div
+                    alt="额外精通武器图标"
+                    class="size-9 shrink-0 bg-current"
+                    :style="{ mask: `url(${LeveledWeapon.typeUrl(item.名称)}) no-repeat center/contain` }"
+                />
                 <span class="text-xs">{{ $t(item.名称) }}</span>
             </button>
         </div>
@@ -2310,11 +2316,12 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     "
                                     @click="openExtraMasteryModal"
                                 >
-                                    <img
+                                    <!-- 图标走 mask 上色，与同律页签的技能图标一致；居中自适应容器尺寸 -->
+                                    <div
                                         v-if="selectedExtraMastery"
-                                        :src="LeveledWeapon.typeUrl(selectedExtraMastery.名称)"
-                                        alt=""
-                                        class="w-full h-full object-cover object-top"
+                                        alt="额外精通武器图标"
+                                        class="flex h-full w-full items-center justify-center bg-current"
+                                        :style="{ mask: `url(${LeveledWeapon.typeUrl(selectedExtraMastery.名称)}) no-repeat center/contain` }"
                                     />
                                     <Icon v-else icon="ri:add-line" class="size-5" />
                                     <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
