@@ -9,6 +9,7 @@ import { env } from "@/env"
 import { type BuildAgentChatMessage, db } from "@/store/db"
 import { useInvStore } from "@/store/inv"
 import { useSettingStore } from "@/store/setting"
+import { useUserStore } from "@/store/user"
 
 const props = defineProps<{
     charBuild: CharBuild
@@ -253,25 +254,29 @@ async function initAgent() {
         }
     }
 
-    // 如果用户没有配置API密钥，尝试使用服务端代理
-    try {
-        const proxyConfig = {
-            base_url: env.apiEndpoint + "/api/v1",
-            api_key: "proxy",
-            default_model: settingStore.aiModelName || "glm-4.6v-flash",
-            default_temperature: settingStore.aiTemperature || 0.6,
-            default_max_tokens: settingStore.aiMaxTokens || 1024,
-            timeout: 30000,
-            max_retries: 3,
-            system_prompt: "", // BuildAgent会设置
-            mcp_server_url: "",
-            mcp_server_port: 0,
+    // 如果用户没有配置API密钥，尝试使用服务端代理（该接口按登录账号计费，凭证就是登录令牌）
+    const userStore = useUserStore()
+    if (userStore.jwtToken) {
+        try {
+            const proxyConfig = {
+                base_url: `${env.apiEndpoint}/api/v1`,
+                // OpenAI SDK 会把它发成 Authorization: Bearer <jwtToken>，服务端据此识别账号并扣额度
+                api_key: userStore.jwtToken,
+                default_model: "deepseek-flash",
+                default_temperature: settingStore.aiTemperature || 0.6,
+                default_max_tokens: settingStore.aiMaxTokens || 1024,
+                timeout: 30000,
+                max_retries: 3,
+                system_prompt: "", // BuildAgent会设置
+                mcp_server_url: "",
+                mcp_server_port: 0,
+            }
+            agent = new BuildAgent(proxyConfig, charSettings, selectedChar, inv)
+            console.log("使用服务端代理初始化AI Agent")
+            return
+        } catch (error) {
+            console.error("使用代理初始化AI Agent失败:", error)
         }
-        agent = new BuildAgent(proxyConfig, charSettings, selectedChar, inv)
-        console.log("使用服务端代理初始化AI Agent")
-        return
-    } catch (error) {
-        console.error("使用代理初始化AI Agent失败:", error)
     }
 
     // 都没有配置

@@ -119,6 +119,25 @@ export interface Conversation {
 
 export type UConversation = Omit<Conversation, "id">
 
+/**
+ * 资料检索 Agent 在单条回复中发起的工具调用记录。
+ * 与 src/api/dbAgent.ts 的 DBAgentToolTrace 结构保持一致（结构化类型可直接赋值）。
+ */
+export interface MessageToolTrace {
+    /** 工具调用 ID */
+    id: string
+    /** 工具名 */
+    name: string
+    /** 工具展示名 */
+    label: string
+    /** 调用参数 */
+    args: Record<string, unknown>
+    /** 结果摘要 */
+    summary: string
+    /** 执行状态 */
+    status: "running" | "done" | "error"
+}
+
 export interface Message {
     id: number
     conversationId: number
@@ -126,6 +145,8 @@ export interface Message {
     content: string
     renderedContent?: string
     imageUrl?: string
+    /** 该条回复过程中的资料检索工具调用（仅资料检索 Agent 使用） */
+    toolTraces?: MessageToolTrace[]
     createdAt: number
 }
 

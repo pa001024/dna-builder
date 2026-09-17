@@ -392,6 +392,7 @@ export class LeveledMod implements Mod {
             技能触发: 0,
             异常数量: 1,
             魔灵CD: 0,
+            魔灵CD缩减: 0,
         }
         Object.keys(this.getProperties()).forEach(prop => {
             if (prop in attrs) attrs[prop as keyof CharAttr] += this[prop]

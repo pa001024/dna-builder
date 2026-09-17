@@ -1,6 +1,7 @@
 import { createPinia, setActivePinia } from "pinia"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ref } from "vue"
+import type { DownloadFileOptions } from "@/api/app"
 import type { GameMod } from "@/api/gen/api-types"
 import type { InstalledShareMod, Mod } from "@/store/db"
 import { useModDownloadStore } from "./modDownload"
@@ -69,11 +70,7 @@ vi.mock("@/api/app", () => ({
         h.deleted.push(filePath)
         return ""
     },
-    downloadFile: (
-        url: string,
-        filename: string,
-        options: { onProgress?: (event: { filename: string; progress: number; downloaded: number; total: number }) => void }
-    ) => startDownload(url, filename, options),
+    downloadFile: (url: string, filename: string, options?: DownloadFileOptions) => startDownload(url, filename, options),
 }))
 
 vi.mock("@/utils/game-download", () => ({
@@ -131,12 +128,14 @@ vi.mock("@/store/user", () => ({ useUserStore: () => ({ jwtToken: h.jwtToken }) 
 
 /**
  * @description 发起一次可控下载（记录请求顺序，挂起等待测试推进进度或结束）。
+ * 桩内部把测试侧的「已下载 / 总量」两参数进度换算成 Rust 侧 download_progress 事件载荷，
+ * 与真实 downloadFile 的回调形状保持一致。
  * @param url 下载地址。
  * @param filename 目标临时包路径。
- * @param options 进度选项。
+ * @param options 进度选项（与真实 downloadFile 一致）。
  * @returns 下载完成的 Promise。
  */
-function startDownload(url: string, filename: string, options?: { onProgress?: PendingDownload["progress"] }) {
+function startDownload(url: string, filename: string, options?: DownloadFileOptions) {
     h.requested.push(url)
     return new Promise<void>((resolve, reject) => {
         h.pending.set(filename, {

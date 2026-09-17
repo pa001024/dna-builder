@@ -2,10 +2,22 @@
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { type DBLatestItem } from "./DBLatestItemCard.vue"
 
-const props = defineProps<{
-    label: string
-    version: string
-    entries: DBLatestItem[]
+const props = withDefaults(
+    defineProps<{
+        label: string
+        version: string
+        entries: DBLatestItem[]
+        /** 固定列数：用于紧凑行布局，传入后不再按视口宽度计算列数 */
+        columns?: number
+    }>(),
+    {
+        columns: 0,
+    }
+)
+
+const emit = defineEmits<{
+    /** 展开状态变化：父级据此让展开中的分组占满整行 */
+    "expanded-change": [expanded: boolean]
 }>()
 
 /** 视口宽度断点 → 每行列数（卡片等比例缩小，列数较常规翻倍） */
@@ -58,9 +70,14 @@ function entryKey(entry: DBLatestItem) {
 }
 
 /**
- * 计算视口宽度对应的每行列数。
+ * 计算视口宽度对应的每行列数；固定列数（紧凑布局）优先。
  */
 function updateCols() {
+    if (props.columns) {
+        cols.value = props.columns
+        return
+    }
+
     const width = window.innerWidth
     cols.value = COLS_BREAKPOINTS.find(bp => width >= bp.minWidth)?.cols || 2
 }
@@ -181,6 +198,8 @@ async function expand() {
 
     const fromRects = layerEls.value.filter(Boolean).map(el => el!.getBoundingClientRect())
 
+    // 先通知父级：父级会同步把本分组撑满整行，与展开动画在同一次渲染里生效
+    emit("expanded-change", true)
     isExpanded.value = true
     await nextTick()
     await waitTwoFrames()
@@ -270,6 +289,8 @@ async function collapse() {
         el.getBoundingClientRect()
     )
 
+    // 先通知父级收回整行占用，父级与本组件在同一次渲染里一起回到紧凑列布局
+    emit("expanded-change", false)
     isExpanded.value = false
     await nextTick()
     await waitTwoFrames()
@@ -469,7 +490,6 @@ onBeforeUnmount(() => {
         <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
             <div class="flex items-baseline gap-3">
                 <p class="inline-flex items-center gap-2 text-[10px] font-semibold text-base-content/60">
-                    <span class="h-px w-6 bg-primary" aria-hidden="true" />
                     {{ label }}
                 </p>
                 <span class="font-mono text-xs tabular-nums text-base-content/40">v{{ version }} · {{ entries.length }}</span>
@@ -488,7 +508,12 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 卡片网格（收起态仅第一行；列数翻倍，卡片等比例缩小） -->
-        <ul ref="gridEl" class="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10">
+        <ul
+            ref="gridEl"
+            class="mt-3 grid gap-2"
+            :class="props.columns ? '' : 'grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10'"
+            :style="props.columns ? { gridTemplateColumns: `repeat(${props.columns}, minmax(0, 1fr))` } : undefined"
+        >
             <li
                 v-for="(entry, index) in gridEntries"
                 :key="entryKey(entry)"

@@ -137,7 +137,6 @@ const routes: readonly RouteRecordRaw[] = [
         component: () => import("./views/LevelUpCalculatorView.vue"),
         beforeEnter: () => setMinSize(360, 430),
     },
-    // { name: "ai", path: "/ai", component: () => import("./views/AIAgent.vue"), beforeEnter: () =>setMinSize(360, 430) },
     { name: "help", path: "/help", component: () => import("./views/Help.vue"), beforeEnter: () => setMinSize(360, 430) },
     {
         name: "chat",

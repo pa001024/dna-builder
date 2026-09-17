@@ -5,6 +5,7 @@ import {
     type AnySQLiteColumn,
     index,
     integer,
+    primaryKey,
     SQLiteColumn,
     type SQLiteTableWithColumns,
     sqliteTable,
@@ -1193,4 +1194,52 @@ export const gameModsRelations = relations(gameMods, ({ one, many }) => ({
 
 export const gameModVersionsRelations = relations(gameModVersions, ({ one }) => ({
     mod: one(gameMods, { fields: [gameModVersions.modId], references: [gameMods.id] }),
+}))
+
+/**
+ * AI 中转接口的每日用量与费用（按「用户 + 北京自然日」聚合）。
+ *
+ * 用途：`/api/v1/chat/completions` 代理改为登录账号计费后，
+ * 每次请求前按本表当日累计费用判断是否还在每日额度内，请求完成后把本次用量原子累加进来。
+ *
+ * 费用用「微元」整数存储（1 元 = 1_000_000 微元）而不是浮点数：
+ * DeepSeek 单价是「元 / 百万 tokens」，数值上恰好等于「微元 / token」，
+ * 于是 `费用(微元) = tokens × 单价` 是整数乘法，避免浮点累加误差。
+ */
+export const aiUsageDaily = sqliteTable(
+    "ai_usage_daily",
+    {
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        /** 北京时间自然日 YYYY-MM-DD（额度按北京时间的自然日重置，与 DeepSeek 峰谷时段同一时区）。 */
+        day: text("day").notNull(),
+        /** 输入 tokens 中命中上下文缓存的部分（单价最低）。 */
+        cacheHitTokens: integer("cache_hit_tokens")
+            .notNull()
+            .$default(() => 0),
+        /** 输入 tokens 中未命中缓存的部分。 */
+        cacheMissTokens: integer("cache_miss_tokens")
+            .notNull()
+            .$default(() => 0),
+        /** 输出 tokens。 */
+        outputTokens: integer("output_tokens")
+            .notNull()
+            .$default(() => 0),
+        /** 当日累计费用（微元，1 元 = 1_000_000 微元）。 */
+        costMicros: integer("cost_micros")
+            .notNull()
+            .$default(() => 0),
+        /** 当日成功发起并记账的请求次数。 */
+        requests: integer("requests")
+            .notNull()
+            .$default(() => 0),
+        createdAt: integer("created_at").$default(now),
+        updateAt: integer("update_at"),
+    },
+    table => [primaryKey({ columns: [table.userId, table.day] })]
+)
+
+export const aiUsageDailyRelations = relations(aiUsageDaily, ({ one }) => ({
+    user: one(users, { fields: [aiUsageDaily.userId], references: [users.id] }),
 }))

@@ -110,36 +110,9 @@ AI: 我来帮你分析赛琪带扶疏的最优配置。让我先查询相关信�
 用户确认 -> [调用autoBuild将apply设为true或setMod设置MOD]`
 
 /**
- * 统一提示词文本格式，避免换行符差异导致误判
- * @param text 原始文本
- * @returns 归一化后的文本
- */
-export function normalizeBuildAgentSystemPrompt(text: string): string {
-    return text.replaceAll("\r\n", "\n").trim()
-}
-
-/**
  * 渲染 BuildAgent 系统提示词
  * @returns 渲染后的系统提示词
  */
 export function renderBuildAgentSystemPrompt(): string {
     return BUILD_AGENT_SYSTEM_PROMPT_TEMPLATE
-}
-
-/**
- * 转义正则字面量中的特殊字符
- * @param source 原始字符串
- * @returns 转义后的字符串
- */
-function escapeRegexLiteral(source: string): string {
-    return source.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-}
-
-/**
- * 构建系统提示词严格匹配规则（仅允许模板变量变化）
- * @returns 系统提示词正则
- */
-export function buildBuildAgentSystemPromptPattern(): RegExp {
-    const pattern = escapeRegexLiteral(normalizeBuildAgentSystemPrompt(BUILD_AGENT_SYSTEM_PROMPT_TEMPLATE))
-    return new RegExp(`^${pattern}$`, "u")
 }

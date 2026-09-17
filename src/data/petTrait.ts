@@ -340,7 +340,7 @@ export function getTraitCdReduce(slots: readonly unknown[] | undefined | null): 
         const [bid, level] = slot as unknown[]
         if (typeof bid !== "number" || typeof level !== "number") continue
         const buff = createTraitBuff(getPetTraitByLevel(bid, level))
-        const value = buff?.["魔灵CD缩减"]
+        const value = buff?.魔灵CD缩减
         if (typeof value === "number") reduce += value
     }
     return Math.max(0, Math.min(1, reduce))

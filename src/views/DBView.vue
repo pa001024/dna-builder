@@ -1,16 +1,32 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
-import { computed, ref } from "vue"
+import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { type DBLatestItem } from "@/components/DBLatestItemCard.vue"
+import { useDBChat } from "@/composables/useDBChat"
 import charData from "@/data/d/char.data"
 import modData from "@/data/d/mod.data"
 import weaponData from "@/data/d/weapon.data"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
+import type { Conversation } from "@/store/db"
+import { useUIStore } from "@/store/ui"
 import { type DBGlobalSearchOption, GlobalSearchService } from "@/utils/global-search"
 
 const router = useRouter()
 const { t } = useTranslation()
+const ui = useUIStore()
+
+/** 结果面板内直接展示的结果条数，超出的部分只提示数量 */
+const MAX_VISIBLE_RESULTS = 6
+
+/** “本期新增”一行内的总格数（桌面端） */
+const LATEST_ROW_COLUMNS = 8
+/** 窄屏时每个模块内部展示的卡片列数（模块之间纵向堆叠） */
+const LATEST_STACK_COLUMNS = 4
+/** 每个模块至少分到的格数：条目数暴涨时，后面的模块不会被挤成单列 */
+const LATEST_ROW_MIN_SPAN = 2
+/** 窄屏断点（px）：低于该宽度时“本期新增”改为堆叠并通过容器内部滚动查看 */
+const LATEST_STACK_WIDTH = 768
 
 /**
  * 跳转到指定资料库页面。
@@ -20,184 +36,70 @@ function navigateTo(path: string) {
     router.push(path)
 }
 
-/**
- * 将章节下标格式化为两位数字（0 → "01"），用作索引序号。
- * @param index 章节下标
- * @returns 两位补零的序号字符串
- */
-function formatIndex(index: number) {
-    return String(index + 1).padStart(2, "0")
-}
-
 const searchKeyword = ref("")
+/** 对话模式：进入后上段展示消息流、左栏展示会话记录，直到用户返回资料库 */
+const chatMode = ref(false)
+/** “本期新增”是否处于宽屏单行布局 */
+const isWideLatestRow = ref(true)
 
+/**
+ * 资料库对话状态（会话列表 + 消息流 + 资料检索 Agent）。
+ * 这里解构使用，便于模板直接读写（会话与消息持久化在 Dexie）。
+ */
+const {
+    conversations: chatConversations,
+    activeConversationId,
+    messages: chatMessages,
+    isBusy: chatBusy,
+    liveReasoning,
+    startNewConversation,
+    selectConversation,
+    removeConversation,
+    send: sendChat,
+    interrupt: interruptChat,
+} = useDBChat()
+
+/** 是否处于输入态：输入非空即进入提问/检索态 */
+const isComposing = computed(() => searchKeyword.value.trim().length > 0)
+/** 检索范围条是否展示：输入态（本地检索）与对话态（资料检索）都需要 */
+const showScopeChips = computed(() => chatMode.value || isComposing.value)
+
+/** 模块入口：icon 为 Icon.vue 中登记的字形名（as const 保留字面量类型，供 Icon 组件校验） */
 const databaseItems = [
-    {
-        name: "database.char",
-        path: "/db/char",
-        desc: "database.char_desc",
-    },
-    {
-        name: "database.weapon",
-        path: "/db/weapon",
-        desc: "database.weapon_desc",
-    },
-    {
-        name: "database.resource",
-        path: "/db/resource",
-        desc: "database.resource_desc",
-    },
-    {
-        name: "database.ironTicket",
-        path: "/db/iron-ticket",
-        desc: "database.ironTicket_desc",
-    },
-    {
-        name: "database.mod",
-        path: "/db/mod",
-        desc: "database.mod_desc",
-    },
-    {
-        name: "database.forge",
-        path: "/db/forge",
-        desc: "database.forge_desc",
-    },
-    {
-        name: "database.damage",
-        path: "/db/damage",
-        desc: "database.damage_desc",
-    },
-    {
-        name: "database.draft",
-        path: "/db/draft",
-        desc: "database.draft_desc",
-    },
-    {
-        name: "database.pet",
-        path: "/db/pet",
-        desc: "database.pet_desc",
-    },
-    {
-        name: "database.dungeon",
-        path: "/db/dungeon",
-        desc: "database.dungeon_desc",
-    },
-    {
-        name: "database.appearance",
-        path: "/db/accessory",
-        desc: "database.appearance_desc",
-    },
-    {
-        name: "database.abyss_dungeon",
-        path: "/db/abyss",
-        desc: "database.abyss_dungeon_desc",
-    },
-    {
-        name: "database.reputation",
-        path: "/db/reputation",
-        desc: "database.reputation_desc",
-    },
-    {
-        name: "database.rank",
-        path: "/db/rank",
-        desc: "database.rank_desc",
-    },
-    {
-        name: "database.monster",
-        path: "/db/monster",
-        desc: "database.monster_desc",
-    },
-    {
-        name: "database.map",
-        path: "/db/map",
-        desc: "database.map_desc",
-    },
-    {
-        name: "database.event",
-        path: "/db/event",
-        desc: "database.event_desc",
-    },
-    {
-        name: "database.solotreasure",
-        path: "/db/solotreasure",
-        desc: "database.solotreasure_desc",
-    },
-    {
-        name: "database.mapLocal",
-        path: "/db/map-local",
-        desc: "database.mapLocal_desc",
-    },
-    {
-        name: "database.walnut",
-        path: "/db/walnut",
-        desc: "database.walnut_desc",
-    },
-    {
-        name: "database.title_data",
-        path: "/db/title",
-        desc: "database.title_data_desc",
-    },
-    {
-        name: "database.book",
-        path: "/db/book",
-        desc: "database.book_desc",
-    },
-    {
-        name: "database.music",
-        path: "/db/music",
-        desc: "database.music_desc",
-    },
-    {
-        name: "database.fish",
-        path: "/db/fish",
-        desc: "database.fish_desc",
-    },
-    {
-        name: "database.shop",
-        path: "/db/shop",
-        desc: "database.shop_desc",
-    },
-    {
-        name: "database.dynquest",
-        path: "/db/dynquest",
-        desc: "database.dynquest_desc",
-    },
-    {
-        name: "database.rouge",
-        path: "/db/rouge",
-        desc: "database.rouge_desc",
-    },
-    {
-        name: "database.hardboss",
-        path: "/db/hardboss",
-        desc: "database.hardboss_desc",
-    },
-    {
-        name: "database.questchain",
-        path: "/db/questchain",
-        desc: "database.questchain_desc",
-    },
-    {
-        name: "database.partytopic",
-        path: "/db/partytopic",
-        desc: "database.partytopic_desc",
-    },
-    {
-        name: "database.achievement",
-        path: "/db/achievement",
-        desc: "database.achievement_desc",
-    },
-    {
-        name: "database.npc",
-        path: "/db/npc",
-        desc: "database.npc_desc",
-    },
-    {
-        name: "database.impr",
-        path: "/db/impr",
-        desc: "database.impr_desc",
-    },
-]
+    { name: "database.char", path: "/db/char", desc: "database.char_desc", icon: "ri:user-line" },
+    { name: "database.weapon", path: "/db/weapon", desc: "database.weapon_desc", icon: "ri:sword-line" },
+    { name: "database.resource", path: "/db/resource", desc: "database.resource_desc", icon: "ri:stack-line" },
+    { name: "database.ironTicket", path: "/db/iron-ticket", desc: "database.ironTicket_desc", icon: "ri:compass-3-line" },
+    { name: "database.mod", path: "/db/mod", desc: "database.mod_desc", icon: "ri:puzzle-line" },
+    { name: "database.forge", path: "/db/forge", desc: "database.forge_desc", icon: "ri:hammer-line" },
+    { name: "database.damage", path: "/db/damage", desc: "database.damage_desc", icon: "ri:bar-chart-grouped-line" },
+    { name: "database.draft", path: "/db/draft", desc: "database.draft_desc", icon: "ri:clipboard-line" },
+    { name: "database.pet", path: "/db/pet", desc: "database.pet_desc", icon: "ri:sparkling-line" },
+    { name: "database.dungeon", path: "/db/dungeon", desc: "database.dungeon_desc", icon: "ri:gamepad-line" },
+    { name: "database.appearance", path: "/db/accessory", desc: "database.appearance_desc", icon: "ri:palette-line" },
+    { name: "database.abyss_dungeon", path: "/db/abyss", desc: "database.abyss_dungeon_desc", icon: "ri:skull-line" },
+    { name: "database.reputation", path: "/db/reputation", desc: "database.reputation_desc", icon: "ri:medal-line" },
+    { name: "database.rank", path: "/db/rank", desc: "database.rank_desc", icon: "ri:trophy-line" },
+    { name: "database.monster", path: "/db/monster", desc: "database.monster_desc", icon: "ri:crosshair-line" },
+    { name: "database.map", path: "/db/map", desc: "database.map_desc", icon: "ri:map-2-line" },
+    { name: "database.event", path: "/db/event", desc: "database.event_desc", icon: "ri:calendar-event-line" },
+    { name: "database.solotreasure", path: "/db/solotreasure", desc: "database.solotreasure_desc", icon: "ri:gift-line" },
+    { name: "database.mapLocal", path: "/db/map-local", desc: "database.mapLocal_desc", icon: "ri:focus-3-line" },
+    { name: "database.walnut", path: "/db/walnut", desc: "database.walnut_desc", icon: "ri:mail-line" },
+    { name: "database.title_data", path: "/db/title", desc: "database.title_data_desc", icon: "ri:bookmark-line" },
+    { name: "database.book", path: "/db/book", desc: "database.book_desc", icon: "ri:book-open-line" },
+    { name: "database.music", path: "/db/music", desc: "database.music_desc", icon: "ri:music-2-line" },
+    { name: "database.fish", path: "/db/fish", desc: "database.fish_desc", icon: "ri:anchor-line" },
+    { name: "database.shop", path: "/db/shop", desc: "database.shop_desc", icon: "ri:shopping-bag-4-line" },
+    { name: "database.dynquest", path: "/db/dynquest", desc: "database.dynquest_desc", icon: "ri:task-line" },
+    { name: "database.rouge", path: "/db/rouge", desc: "database.rouge_desc", icon: "ri:dice-5-line" },
+    { name: "database.hardboss", path: "/db/hardboss", desc: "database.hardboss_desc", icon: "ri:ghost-2-line" },
+    { name: "database.questchain", path: "/db/questchain", desc: "database.questchain_desc", icon: "ri:quill-pen-line" },
+    { name: "database.partytopic", path: "/db/partytopic", desc: "database.partytopic_desc", icon: "ri:chat-thread-line" },
+    { name: "database.achievement", path: "/db/achievement", desc: "database.achievement_desc", icon: "ri:award-line" },
+    { name: "database.npc", path: "/db/npc", desc: "database.npc_desc", icon: "ri:group-line" },
+    { name: "database.impr", path: "/db/impr", desc: "database.impr_desc", icon: "ri:image-2-line" },
+] as const
 
 type DatabaseItem = (typeof databaseItems)[number]
 
@@ -216,6 +118,7 @@ type SearchScopeOption = {
 
 const globalSearchService = new GlobalSearchService()
 
+/** 推荐模块：平铺时排在最前 */
 const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/db/map-local", "/db/questchain", "/db/dungeon", "/db/resource"]
 
 const databaseSectionConfigs: DatabaseSectionConfig[] = [
@@ -259,6 +162,16 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
 const databaseItemMap = new Map<string, DatabaseItem>(databaseItems.map(item => [item.path, item]))
 
 const selectedSearchSectionIds = ref(databaseSectionConfigs.map(section => section.id))
+
+/**
+ * 平铺的模块卡片顺序：推荐模块在前，其余保持原有顺序。
+ */
+const moduleCards = computed<DatabaseItem[]>(() => {
+    const featuredSet = new Set(featuredPaths)
+    const featured = featuredPaths.map(path => databaseItemMap.get(path)).filter((item): item is DatabaseItem => item !== undefined)
+
+    return [...featured, ...databaseItems.filter(item => !featuredSet.has(item.path))]
+})
 
 const searchScopeOptions = computed<SearchScopeOption[]>(() => {
     return [
@@ -307,6 +220,12 @@ const searchOptions = computed<DBGlobalSearchOption[]>(() => {
     return options.filter(option => selectedSearchPaths.value?.has(option.path))
 })
 
+/** 结果面板中实际渲染的结果 */
+const visibleSearchOptions = computed(() => searchOptions.value.slice(0, MAX_VISIBLE_RESULTS))
+
+/** 结果面板中未渲染、仅做数量提示的结果数 */
+const hiddenResultCount = computed(() => Math.max(searchOptions.value.length - MAX_VISIBLE_RESULTS, 0))
+
 /**
  * 生成搜索状态提示文案，兼顾空状态、命中状态与无结果状态。
  */
@@ -327,19 +246,15 @@ const searchStatusText = computed(() => {
 })
 
 /**
- * 生成快速访问的推荐入口，优先展示高频使用的核心资料。
+ * 单行模块条数据：全部 + 各分区，以及该分区覆盖的入口数量。
  */
-const featuredItems = computed(() => {
-    return featuredPaths.map(path => databaseItemMap.get(path)).filter((item): item is DatabaseItem => item !== undefined)
-})
-
-/**
- * 将扁平入口重组为页面分区，形成更清晰的信息架构。
- */
-const databaseSections = computed(() => {
-    return databaseSectionConfigs.map(section => ({
-        ...section,
-        items: section.paths.map(path => databaseItemMap.get(path)).filter((item): item is DatabaseItem => item !== undefined),
+const moduleChips = computed(() => {
+    return searchScopeOptions.value.map(scope => ({
+        ...scope,
+        count:
+            scope.id === "all"
+                ? databaseItems.length
+                : (databaseSectionConfigs.find(section => section.id === scope.id)?.paths.length ?? 0),
     }))
 })
 
@@ -349,9 +264,9 @@ const databaseSections = computed(() => {
  */
 const latestGroups = computed(() => {
     const definitions = [
-        { kind: "char", label: t("database.char"), source: charData },
-        { kind: "weapon", label: t("database.weapon"), source: weaponData },
-        { kind: "mod", label: t("database.mod"), source: modData },
+        { kind: "char", label: t("database.char"), source: charData, path: "/db/char" },
+        { kind: "weapon", label: t("database.weapon"), source: weaponData, path: "/db/weapon" },
+        { kind: "mod", label: t("database.mod"), source: modData, path: "/db/mod" },
     ] as const
 
     return definitions.flatMap(def => {
@@ -364,12 +279,89 @@ const latestGroups = computed(() => {
             {
                 kind: def.kind,
                 label: def.label,
+                path: def.path,
                 version: String(DNA_SAFE_VERSION_LIMIT),
                 entries: items.map(item => ({ kind: def.kind, item })) as DBLatestItem[],
             },
         ]
     })
 })
+
+/**
+ * 本期新增的行内布局：每个模块按自身条目数占格，先到先得，剩余格子留给后面的模块。
+ * 例：共 8 格时，角色 2 格 + 武器 3 格 + 魔之楔 3 格，而不是各占 4 格留空位。
+ */
+const latestRowGroups = computed(() => {
+    // 窄屏：各模块独占一行（会换行），卡片内部保持固定列数，由容器内部滚动承载
+    if (!isWideLatestRow.value) {
+        return latestGroups.value.map(group => ({ ...group, span: 1, cardColumns: LATEST_STACK_COLUMNS }))
+    }
+
+    const groups = latestGroups.value
+    let remaining = LATEST_ROW_COLUMNS
+
+    return groups.map((group, index) => {
+        // 先给后面的模块留出最低格数，避免前面的模块把整行吃光
+        const reserved = (groups.length - index - 1) * LATEST_ROW_MIN_SPAN
+        const available = Math.max(remaining - reserved, 1)
+        const span = Math.max(Math.min(group.entries.length, available), 1)
+        remaining = Math.max(remaining - span, 0)
+
+        return { ...group, span, cardColumns: span }
+    })
+})
+
+/** 本期新增容器的总格数：窄屏退化为单列，各模块纵向堆叠 */
+const latestRowColumns = computed(() => (isWideLatestRow.value ? LATEST_ROW_COLUMNS : 1))
+
+/** 当前展开中的“本期新增”分组：展开态由该分组独占整行，同一时刻最多一个 */
+const expandedLatestKind = ref<string | null>(null)
+
+/**
+ * 行内布局最终结果：展开中的分组独占整行，其余分组维持按条目数分好的格数。
+ * 展开态同时把分组内部网格列数放大到整行格数，超出上限的卡片自然换到下一行。
+ * 展开的分组会被排到首位：三组都从同一行起排，所以它的位置原地不动（只是横向铺满），
+ * 不会因为换行下移而脱离鼠标，从而避免“展开→离开→收起→再展开”的抖动。
+ */
+const latestRowLayout = computed(() => {
+    const groups = latestRowGroups.value
+
+    if (!expandedLatestKind.value) {
+        return groups
+    }
+
+    const expandedGroup = groups.find(group => group.kind === expandedLatestKind.value)
+
+    if (!expandedGroup) {
+        return groups
+    }
+
+    return [
+        {
+            ...expandedGroup,
+            span: latestRowColumns.value,
+            // 窄屏容器的总格数是 1，展开时不能拿它当列数（会退化成每行一张卡），取两者较大值
+            cardColumns: Math.max(latestRowColumns.value, LATEST_STACK_COLUMNS),
+        },
+        ...groups.filter(group => group.kind !== expandedLatestKind.value),
+    ]
+})
+
+/**
+ * 同步分组的展开状态：展开时让本分组独占整行，收起时释放。
+ * @param kind 分组标识
+ * @param expanded 是否展开
+ */
+function handleLatestExpandedChange(kind: string, expanded: boolean) {
+    if (expanded) {
+        expandedLatestKind.value = kind
+        return
+    }
+
+    if (expandedLatestKind.value === kind) {
+        expandedLatestKind.value = null
+    }
+}
 
 /**
  * 将路由片段转换为更适合展示的短标签。
@@ -428,142 +420,291 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
     searchKeyword.value = ""
     navigateTo(option.path)
 }
+
+/**
+ * 提交提问：交给资料检索 Agent，并把界面切到对话态。
+ * @param query 输入框内容
+ */
+function handleSubmit(query: string) {
+    const text = query.trim()
+
+    if (!text || chatBusy.value) {
+        return
+    }
+
+    chatMode.value = true
+    searchKeyword.value = ""
+    void sendChat(text)
+}
+
+/**
+ * 新建对话。
+ */
+function handleNewChat() {
+    chatMode.value = true
+    void startNewConversation()
+}
+
+/**
+ * 切换到历史对话。
+ * @param conversation 目标会话
+ */
+function handleSelectConversation(conversation: Conversation) {
+    chatMode.value = true
+    void selectConversation(conversation)
+}
+
+/**
+ * 删除对话（先确认，避免误删历史检索记录）。
+ * @param conversation 目标会话
+ */
+async function handleRemoveConversation(conversation: Conversation) {
+    const confirmed = await ui.showDialog("删除对话", `确定删除「${conversation.name}」？该对话的消息记录会一并删除。`)
+
+    if (confirmed) {
+        await removeConversation(conversation)
+    }
+}
+
+/**
+ * 退出对话，回到资料库浏览态。
+ */
+function handleExitChat() {
+    if (chatBusy.value) {
+        return
+    }
+
+    chatMode.value = false
+    searchKeyword.value = ""
+}
+
+/**
+ * 订阅媒体查询（兼容新旧 MediaQueryList API），并立即回调一次当前状态。
+ * @param mediaQuery 媒体查询字符串
+ * @param handler 状态回调
+ * @returns 取消订阅函数
+ */
+function bindMediaQuery(mediaQuery: string, handler: (matches: boolean) => void) {
+    const query = window.matchMedia(mediaQuery)
+    handler(query.matches)
+
+    const handleMediaChange = (event: MediaQueryListEvent) => {
+        handler(event.matches)
+    }
+
+    if (typeof query.addEventListener === "function") {
+        query.addEventListener("change", handleMediaChange)
+    } else {
+        query.addListener(handleMediaChange)
+    }
+
+    return () => {
+        if (typeof query.removeEventListener === "function") {
+            query.removeEventListener("change", handleMediaChange)
+        } else {
+            query.removeListener(handleMediaChange)
+        }
+    }
+}
+
+const unbindMediaQueries: Array<() => void> = []
+
+onMounted(() => {
+    unbindMediaQueries.push(
+        bindMediaQuery(`(min-width: ${LATEST_STACK_WIDTH}px)`, matches => {
+            isWideLatestRow.value = matches
+        })
+    )
+})
+
+onBeforeUnmount(() => {
+    unbindMediaQueries.forEach(unbind => unbind())
+    unbindMediaQueries.length = 0
+})
 </script>
 
 <template>
-    <ScrollArea class="h-full">
-        <div class="mx-auto flex min-h-full w-full max-w-7xl flex-col px-4 md:px-6 lg:px-8">
-            <!-- 检索带：下划线输入 + 搜索范围方章 -->
-            <section class="db-rise relative z-40 border-b border-base-content/15 py-8" style="animation-delay: 0.06s">
-                <div class="flex flex-col gap-4">
-                    <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:gap-10">
-                        <DBGlobalSearchAutocomplete
-                            v-model="searchKeyword"
-                            :options="searchOptions"
-                            :placeholder="$t('view.placeholder')"
-                            :empty-text="$t('view.noResultEntries')"
-                            :max-visible="14"
-                            class="w-full flex-1"
-                            input-class="db-search-input"
-                            panel-class="db-search-panel"
-                            option-class="db-search-option"
-                            @select="handleSelectSearchOption"
-                        />
+    <!-- 页面整屏不滚动，也不画背景与分隔线：上段 / 中段（输入框）/ 下段各自管理内部滚动 -->
+    <div class="flex h-full min-h-0">
+        <!-- 左栏：对话记录，仅在进入对话（提交提问）后出现，贯穿整页高度（窄屏隐藏，避免挤压输入区） -->
+        <div v-if="chatMode" class="db-rise hidden h-full shrink-0 pt-6 pl-4 md:flex md:pl-6 lg:pl-8">
+            <DBConversationList
+                :conversations="chatConversations"
+                :active-id="activeConversationId"
+                :busy="chatBusy"
+                @new-chat="handleNewChat"
+                @select="handleSelectConversation"
+                @remove="handleRemoveConversation"
+                @exit="handleExitChat"
+            />
+        </div>
 
-                        <div class="flex flex-wrap gap-2">
-                            <button
-                                v-for="scope in searchScopeOptions"
-                                :key="scope.id"
-                                type="button"
-                                class="cursor-pointer border px-3.5 py-1.5 text-xs transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97]"
-                                :class="
-                                    isSearchScopeSelected(scope.id)
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="toggleSearchScope(scope.id)"
-                            >
-                                {{ scope.label }}
-                            </button>
-                        </div>
-                    </div>
+        <div class="flex min-w-0 flex-1 flex-col">
+            <!-- 上段：内容贴住输入框（靠下显示），超出时内部滚动 -->
+            <section class="flex min-h-0 flex-1 flex-col">
+                <!-- 对话态：消息流 -->
+                <DBChatMessages
+                    v-if="chatMode"
+                    :messages="chatMessages"
+                    :busy="chatBusy"
+                    :reasoning="liveReasoning"
+                    class="px-4 md:px-6 lg:px-8"
+                />
 
-                    <p class="text-xs tracking-wide text-base-content/45">{{ searchStatusText }}</p>
-                </div>
-            </section>
+                <!-- 输入态（未进入对话）：本地检索结果，贴住输入框 -->
+                <div v-else-if="isComposing" class="db-scroll min-h-0 flex-1 overflow-y-auto">
+                    <div class="flex min-h-full flex-col justify-end">
+                        <div class="mx-auto w-full max-w-7xl px-4 pb-4 md:px-6 lg:px-8">
+                            <div class="db-ask-panel">
+                                <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-1 pb-2">
+                                    <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-base-content/45">Search Results</p>
+                                    <p class="text-xs text-base-content/45">{{ searchStatusText }}</p>
+                                </div>
 
-            <!-- 快速访问：内联文字链接条 -->
-            <div
-                class="db-rise flex flex-wrap items-center gap-x-2 gap-y-2.5 border-b border-base-content/15 py-6"
-                style="animation-delay: 0.12s"
-            >
-                <span class="mr-2 text-xs font-semibold text-base-content/45">{{ $t("view.featuredEntry") }}</span>
-                <template v-for="(item, index) in featuredItems" :key="item.path">
-                    <span v-if="index" class="select-none text-base-content/25">·</span>
-                    <button
-                        type="button"
-                        class="group inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-base-content/80 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
-                        @click="navigateTo(item.path)"
-                    >
-                        {{ $t(item.name) }}
-                        <Icon
-                            icon="ri:arrow-right-line"
-                            class="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
-                        />
-                    </button>
-                </template>
-            </div>
+                                <!-- 命中结果 -->
+                                <ul v-if="visibleSearchOptions.length" class="db-scroll max-h-[min(40vh,18rem)] overflow-y-auto">
+                                    <li v-for="option in visibleSearchOptions" :key="option.id">
+                                        <button
+                                            type="button"
+                                            class="db-ask-result cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+                                            @click="handleSelectSearchOption(option)"
+                                        >
+                                            <span class="min-w-0 flex-1">
+                                                <span class="block truncate text-sm font-medium">{{ option.title }}</span>
+                                                <span v-if="option.subtitle" class="mt-0.5 block truncate text-xs text-base-content/55">
+                                                    {{ option.subtitle }}
+                                                </span>
+                                            </span>
+                                            <span class="db-ask-result-path">{{ getItemPathLabel(option.path) }}</span>
+                                            <span
+                                                class="shrink-0 border border-base-content/15 px-1.5 py-0.5 text-[10px] text-base-content/55"
+                                            >
+                                                {{ option.typeLabel }}
+                                            </span>
+                                        </button>
+                                    </li>
+                                </ul>
 
-            <!-- 本期新增：最后版本新增的角色/武器/魔之楔 -->
-            <section class="db-rise border-b border-base-content/15 py-9 md:py-11" style="animation-delay: 0.16s">
-                <div class="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
-                    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                        <h2 class="text-xl font-bold tracking-tight text-base-content md:text-2xl">{{ $t("view.latestItems") }}</h2>
-                        <p class="font-mono text-[10px] uppercase tracking-[0.35em] text-base-content/45">
-                            New In v{{ DNA_SAFE_VERSION_LIMIT }}
-                        </p>
-                    </div>
-                </div>
+                                <p v-else class="px-1 py-4 text-sm text-base-content/55">
+                                    {{ $t("view.noResultEntries") }}
+                                    <span class="mt-1.5 block text-xs text-base-content/40">Enter 转交资料检索 · Shift + Enter 换行</span>
+                                </p>
 
-                <div v-for="group in latestGroups" :key="group.kind" class="mt-8">
-                    <DBLatestGroup :label="group.label" :version="group.version" :entries="group.entries" />
-                </div>
-            </section>
-
-            <!-- 章节索引：01–04 幽灵序号横带 -->
-            <main class="flex-1">
-                <section
-                    v-for="(section, index) in databaseSections"
-                    :key="section.id"
-                    class="db-rise border-b border-base-content/15"
-                    :style="{ animationDelay: `${0.18 + 0.07 * index}s` }"
-                >
-                    <div class="grid gap-x-12 gap-y-6 py-9 md:py-11 xl:grid-cols-[7.5rem_minmax(0,1fr)]">
-                        <div class="flex items-baseline gap-4 xl:block">
-                            <span class="db-numeral">{{ formatIndex(index) }}</span>
-                            <span class="db-badge xl:mt-3 xl:block">{{ section.badge }}</span>
-                        </div>
-
-                        <div class="min-w-0">
-                            <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-                                <h2 class="text-xl font-bold tracking-tight text-base-content md:text-2xl">{{ section.title }}</h2>
-                                <span class="text-xs tabular-nums text-base-content/40">
-                                    <span class="font-mono">{{ section.items.length }}</span> {{ $t("view.databaseEntryCount") }}
-                                </span>
+                                <p v-if="hiddenResultCount" class="db-ask-more">还有 {{ hiddenResultCount }} 条，继续输入可缩小范围</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <p class="mt-2.5 max-w-2xl text-sm leading-6 text-base-content/55">{{ section.description }}</p>
-
-                            <ul class="mt-5 grid grid-cols-1 gap-x-12 sm:grid-cols-2 lg:grid-cols-4">
-                                <li v-for="item in section.items" :key="item.path">
+                <!-- 浏览态：全部模块平铺小卡片（推荐模块排在最前） -->
+                <div v-else class="db-scroll min-h-0 flex-1 overflow-y-auto">
+                    <div class="flex min-h-full flex-col justify-end">
+                        <div class="db-rise mx-auto w-full max-w-7xl px-4 pb-4 pt-6 md:px-6 lg:px-8">
+                            <ul class="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2">
+                                <li v-for="item in moduleCards" :key="item.path">
                                     <button
                                         type="button"
-                                        class="db-entry focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                        class="group flex w-full cursor-pointer items-center gap-2.5 border border-base-content/12 px-3 py-2.5 text-left text-sm text-base-content/80 transition-all duration-200 hover:-translate-y-px hover:border-primary/50 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
                                         @click="navigateTo(item.path)"
                                     >
-                                        <span class="truncate">{{ $t(item.name) }}</span>
-                                        <span class="db-leader" aria-hidden="true" />
-                                        <span class="db-entry-path">{{ getItemPathLabel(item.path) }}</span>
-                                        <Icon icon="ri:arrow-right-line" class="db-entry-arrow" />
+                                        <Icon
+                                            :icon="item.icon"
+                                            class="h-4.5 w-4.5 shrink-0 text-base-content/45 transition-colors duration-200 group-hover:text-primary"
+                                        />
+                                        <span class="min-w-0 flex-1 truncate">{{ $t(item.name) }}</span>
+                                        <Icon
+                                            icon="ri:arrow-right-line"
+                                            class="h-3.5 w-3.5 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+                                        />
                                     </button>
                                 </li>
                             </ul>
                         </div>
                     </div>
-                </section>
-            </main>
+                </div>
+            </section>
 
-            <!-- 版权页：授权说明小字 -->
-            <footer
-                class="db-rise py-9 text-xs leading-6 text-base-content/45"
-                :style="{ animationDelay: `${0.18 + 0.07 * databaseSections.length}s` }"
-            >
-                <p class="font-semibold text-base-content/70">{{ $t("view.contentAuthorizationTitle") }}</p>
-                <p class="mt-2">{{ $t("view.contentAuthorizationDesc") }}</p>
-                <p class="mt-1.5">{{ $t("view.contentAuthorizationDesc2") }}</p>
-            </footer>
+            <!-- 中段：输入框（flex-none，始终位于页面正中） -->
+            <section class="shrink-0 px-4 py-5 md:px-6 lg:px-8">
+                <div class="mx-auto w-full max-w-7xl">
+                    <DBAskBox
+                        v-model="searchKeyword"
+                        :busy="chatBusy"
+                        placeholder="今天想查点什么？输入关键词检索资料库，或直接向 AI 提问"
+                        hint="Enter 转交资料检索 · Shift + Enter 换行"
+                        submit-label="转交资料检索"
+                        @submit="handleSubmit"
+                        @stop="interruptChat"
+                    />
+                </div>
+            </section>
+
+            <!-- 下段：内容贴住页面底部（靠下显示） -->
+            <section class="flex min-h-0 flex-1 flex-col">
+                <!-- 输入态 / 对话态：检索范围（单行不换行） -->
+                <div v-if="showScopeChips" class="db-scroll min-h-0 flex-1 overflow-y-auto">
+                    <div class="flex min-h-full flex-col justify-end">
+                        <div class="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 pb-5 pt-3 md:px-6 lg:px-8">
+                            <!-- 窄屏隐藏会话侧栏，这里保留退出对话的入口 -->
+                            <button
+                                v-if="chatMode"
+                                type="button"
+                                class="inline-flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-base-content/45 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:hidden"
+                                title="返回资料库"
+                                @click="handleExitChat"
+                            >
+                                <Icon icon="ri:arrow-left-line" class="h-3.5 w-3.5" />
+                                资料库
+                            </button>
+
+                            <p class="hidden shrink-0 font-mono text-[10px] uppercase tracking-[0.28em] text-base-content/40 sm:block">
+                                Modules
+                            </p>
+                            <div class="db-chip-row flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
+                                <button
+                                    v-for="chip in moduleChips"
+                                    :key="chip.id"
+                                    type="button"
+                                    class="shrink-0 cursor-pointer border px-3 py-1.5 text-xs transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97]"
+                                    :class="
+                                        isSearchScopeSelected(chip.id)
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    @click="toggleSearchScope(chip.id)"
+                                >
+                                    {{ chip.label }}
+                                    <span class="ml-1.5 font-mono text-[10px] tabular-nums opacity-60">{{ chip.count }}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 浏览态：本期新增（展开时高度在段内撑开，不影响输入框位置） -->
+                <div v-else class="db-scroll db-latest-scroll min-h-0 flex-1 overflow-y-auto">
+                    <div class="flex min-h-full flex-col justify-end">
+                        <div class="db-rise mx-auto w-full max-w-7xl px-4 pb-5 pt-4 md:px-6 lg:px-8">
+                            <div
+                                class="grid gap-x-6 gap-y-5"
+                                :style="{ gridTemplateColumns: `repeat(${latestRowColumns}, minmax(0, 1fr))` }"
+                            >
+                                <div v-for="group in latestRowLayout" :key="group.kind" :style="{ gridColumn: `span ${group.span}` }">
+                                    <DBLatestGroup
+                                        :label="group.label"
+                                        :version="group.version"
+                                        :entries="group.entries"
+                                        :columns="group.cardColumns"
+                                        @expanded-change="handleLatestExpandedChange(group.kind, $event)"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
-    </ScrollArea>
+    </div>
 </template>
 
 <style scoped>
@@ -584,57 +725,32 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
     }
 }
 
-/* 章节幽灵数字：超大号低对比数字，作为索引主锚点 */
-.db-numeral {
-    font-size: clamp(2.75rem, 5vw, 4.5rem);
-    line-height: 0.95;
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--color-base-content) 13%, transparent);
+/* 结果区：无底色、无外框，仅用留白与 hairline 区分条目 */
+.db-ask-panel {
+    border-top: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent);
 }
 
-/* 章节英文徽记：等宽小号字距大写 */
-.db-badge {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    font-size: 0.625rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--color-base-content) 45%, transparent);
-}
-
-/* 索引条目行：名称 + 虚线引导线 + 路径标签 + 箭头，模仿目录条目 */
-.db-entry {
+/* 结果条目：名称 + 路径 + 类型徽章，与目录条目同构 */
+.db-ask-result {
     display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.75rem;
     width: 100%;
-    padding: 0.45rem 0;
-    cursor: pointer;
+    padding: 0.6rem 0.25rem;
     text-align: left;
-    color: color-mix(in srgb, var(--color-base-content) 82%, transparent);
-    transition: color 0.2s ease;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent);
+    transition: background-color 0.2s ease;
 }
 
-.db-entry:hover {
-    color: var(--color-primary);
+.db-ask-result:last-child {
+    border-bottom: 0;
 }
 
-/* 目录点线：悬停时跟随强调色 */
-.db-leader {
-    flex: 1 1 auto;
-    min-width: 1.25rem;
-    border-bottom: 1px dotted color-mix(in srgb, var(--color-base-content) 30%, transparent);
-    transform: translateY(-0.28em);
-    transition: border-color 0.2s ease;
+.db-ask-result:hover {
+    background-color: color-mix(in srgb, var(--color-base-content) 5%, transparent);
 }
 
-.db-entry:hover .db-leader {
-    border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
-}
-
-/* 条目路径标签：等宽小号大写 */
-.db-entry-path {
+.db-ask-result-path {
     flex-shrink: 0;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
     font-size: 0.625rem;
@@ -644,55 +760,50 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
     transition: color 0.2s ease;
 }
 
-.db-entry:hover .db-entry-path {
+.db-ask-result:hover .db-ask-result-path {
     color: color-mix(in srgb, var(--color-primary) 70%, transparent);
 }
 
-/* 条目箭头：悬停时滑入显现 */
-.db-entry-arrow {
-    flex-shrink: 0;
-    width: 0.875rem;
-    height: 0.875rem;
-    opacity: 0;
-    transform: translateX(-0.4rem);
-    transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
+/* 结果截断提示：等宽小号大写 */
+.db-ask-more {
+    border-top: 1px solid color-mix(in srgb, var(--color-base-content) 10%, transparent);
+    padding: 0.5rem 0.25rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-base-content) 40%, transparent);
 }
 
-.db-entry:hover .db-entry-arrow {
-    opacity: 1;
-    transform: translateX(0);
+/* 单行模块条：横向滚动不换行，隐藏滚动条保持杂志式排布 */
+.db-chip-row {
+    scrollbar-width: none;
 }
 
-.db-entry:active {
-    transform: scale(0.985);
+.db-chip-row::-webkit-scrollbar {
+    display: none;
 }
 
-/* 检索框：下划线式输入，聚焦时以主题色强调 */
-:deep(.db-search-input) {
-    border: 0 !important;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-base-content) 25%, transparent) !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    transition: border-color 0.2s ease;
+/* 段内滚动容器：细滚动条，贴近应用内 ScrollArea 的观感 */
+.db-scroll,
+.db-latest-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-base-content) 25%, transparent) transparent;
 }
 
-:deep(.db-search-input:focus) {
-    border-bottom-color: var(--color-primary) !important;
+.db-scroll::-webkit-scrollbar,
+.db-latest-scroll::-webkit-scrollbar {
+    width: 8px;
 }
 
-/* 检索面板：直角细边框，保持索引页的平面感 */
-:deep(.db-search-panel) {
-    border-radius: 0 !important;
-    border: 1px solid color-mix(in srgb, var(--color-base-content) 18%, transparent) !important;
-    box-shadow: 0 12px 32px color-mix(in srgb, var(--color-base-content) 14%, transparent) !important;
+.db-scroll::-webkit-scrollbar-thumb,
+.db-latest-scroll::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-base-content) 22%, transparent);
 }
 
-/* 面板内类型徽章改直角，统一造型语言 */
-:deep(.db-search-option .badge) {
-    border-radius: 0 !important;
+.db-scroll::-webkit-scrollbar-track,
+.db-latest-scroll::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 /* 减少动态偏好：关闭入场动画 */

@@ -549,7 +549,7 @@ function migrateLegacyPetBuffs(settings: CharSettings): void {
             // 同一潜质只占一槽；等级取档位对应的等级（BUFF 等级与潜质等级一一对应）
             const level0 = Math.max(1, Math.min(TRAIT_MAX_LEVEL, Math.round(level)))
             if (!usedBids.has(trait.bid)) {
-                const slotIndex = traits.findIndex(slot => slot === null)
+                const slotIndex = traits.indexOf(null)
                 if (slotIndex !== -1) {
                     traits[slotIndex] = [trait.bid, level0]
                     usedBids.add(trait.bid)
