@@ -7276,6 +7276,10 @@
     "shop-list": {
         "title": "商店"
     },
+    "skill-cd-overlay": {
+        "desc": "置頂浮窗顯示按鍵冷卻倒計時",
+        "title": "技能CD指示器"
+    },
     "skin-colorize": {
         "desc": "預覽及分享角色皮膚染色",
         "title": "染色方案"

@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core"
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import { DNAAPI } from "dna-api"
+import type { FloatWindowConfig, FloatWindowState } from "@/utils/skill-cd-overlay"
 import { env } from "../env"
 
 export const MATERIALS = ["None", "Blur", "Acrylic", "Mica", "Mica_Dark", "Mica_Tabbed", "Mica_Tabbed_Dark"] as const
@@ -883,62 +884,20 @@ export async function cleanupTempDir(tempDir: string) {
 
 /**
  * 通用倒计时浮窗配置(对应后端 float_window::FloatWindowConfig,字段 camelCase)。
- * 用于 E 技能 CD 倒计时浮窗;x/y 为浮窗左上角屏幕坐标(物理像素)。
+ *
+ * 位置是"相对游戏窗口客户区的百分比"(`anchorXPercent` / `anchorYPercent` 指浮窗左上角),
+ * 触发键为任意多条绑定(`keys`)。类型定义与默认值统一放在 `@/utils/skill-cd-overlay`,
+ * 这里只做转发,避免前后端字段散落两处。
  */
-export interface FloatWindowConfig {
-    x: number
-    y: number
-    scale: number
-    hideWhenReady: boolean
-    triggerKey: number
-    triggerCdSeconds: number
-    gameOnlyTrigger: boolean
-    ringColor: number
-    progressColor: number
-    readyColor: number
-    textColor: number
-    labelColor: number
-    discColor: number
-}
-
-/** 浮窗内单个计时器(如 E/Q 技能)。 */
-export interface FloatyTimer {
-    id: string
-    label: string
-    total: number
-    remaining: number
-}
-
-/** 倒计时浮窗状态快照。 */
-export interface FloatWindowState {
-    enabled: boolean
-    visible: boolean
-    x: number
-    y: number
-    scale: number
-    hideWhenReady: boolean
-    triggerKey: number
-    triggerCdSeconds: number
-    gameOnlyTrigger: boolean
-    timers: FloatyTimer[]
-}
-
-/** 倒计时浮窗默认配色与 E 技能默认完整 CD(与后端 Rust 默认值保持一致)。 */
-export const FLOAT_WINDOW_DEFAULTS = {
-    x: 1480,
-    y: 560,
-    scale: 1,
-    cdSeconds: 8,
-    ringColor: 0x3f4a5c,
-    progressColor: 0xf59e0b,
-    readyColor: 0x22c55e,
-    textColor: 0xf8fafc,
-    labelColor: 0x9aa4b2,
-    discColor: 0x161b22,
-} as const
+export type {
+    FloatWindowConfig,
+    FloatWindowKeyBinding,
+    FloatWindowState,
+    FloatyTimer,
+} from "@/utils/skill-cd-overlay"
 
 /**
- * 启动/更新通用倒计时浮窗(E 技能 CD;可配置按键、完整 CD、位置与颜色)。
+ * 启动/更新通用倒计时浮窗(多按键 CD;位置按游戏客户区百分比)。
  * @param config 完整配置
  */
 export async function floatWindowSet(config: FloatWindowConfig) {
@@ -953,8 +912,9 @@ export async function floatWindowDisable() {
 }
 
 /**
- * 通用入口:推送/重设一个倒计时条目(如 Q 技能、道具 CD)。
- * @param id 唯一标识(与后端计时器对齐)
+ * 通用入口:推送/重设一个倒计时条目(如 Q 技能、道具 CD);
+ * `id` 与某条按键绑定时会重设该行倒计时,常用于设置页"试触发"。
+ * @param id 唯一标识(与后端计时器/绑定 id 对齐)
  * @param label 显示标签
  * @param totalSeconds 完整冷却秒数
  */
@@ -963,7 +923,7 @@ export async function floatWindowTrigger(id: string, label: string, totalSeconds
 }
 
 /**
- * 查询倒计时浮窗当前状态。
+ * 查询倒计时浮窗当前状态(含游戏客户区与解析后的位置,供设置页预览)。
  */
 export async function floatWindowState() {
     return await invoke<FloatWindowState>("float_window_state", {})

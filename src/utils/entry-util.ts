@@ -45,6 +45,8 @@ export function getMoreItems(envs: MoreItemEnv): MoreItem[] {
         { name: "ranking", path: "/ranking", icon: "ri:sort-number-asc" },
         { name: "setting", path: "/setting", icon: "ri:settings-3-line" },
         { name: "game-launcher", path: "/game-launcher", icon: "ri:rocket-2-line" },
+        // 技能 CD 浮窗依赖 Tauri 后端（原生置顶浮窗），网页端不显示。
+        { name: "skill-cd-overlay", path: "/skill-cd-overlay", icon: "ri:timer-flash-line", show: isApp },
         { name: "mod-manager", path: "/mods", icon: "ri:puzzle-line" },
         { name: "chat", path: "/chat", icon: "ri:chat-3-line" },
         { name: "flow", path: "/flow", icon: "ri:node-tree" },

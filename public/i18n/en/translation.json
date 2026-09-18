@@ -8173,6 +8173,10 @@
     "shop-list": {
         "title": "Shop"
     },
+    "skill-cd-overlay": {
+        "desc": "Always-on-top overlay for key cooldowns",
+        "title": "Skill CD Indicator"
+    },
     "skin-colorize": {
         "desc": "Preview and share character skin dyes",
         "title": "Dye Plans"

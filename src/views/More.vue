@@ -97,6 +97,7 @@ const TILE_THEMES: Record<string, string> = {
     ranking: "#f83600",
     setting: "#12c2e9",
     "game-launcher": "#00c6ff",
+    "skill-cd-overlay": "#30cfd0",
     "mod-manager": "#7f00ff",
     chat: "#4facfe",
     flow: "#fc466b",

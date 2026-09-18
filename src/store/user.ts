@@ -25,7 +25,7 @@ export const useUserStore = defineStore("user", {
             // 身份验证
             jwtToken: useLocalStorage("jwt_token", ""),
             roomReadedCount: useLocalStorage("room_readed_count", {} as { [roomId: string]: number }),
-            profile: useLocalStorage("user_profile", null as User | null),
+            profile: useLocalStorage("user_profile", {} as User | null),
         }
     },
     getters: {

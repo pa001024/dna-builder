@@ -8072,6 +8072,10 @@
     "shop-list": {
         "title": "ショップ"
     },
+    "skill-cd-overlay": {
+        "desc": "キー冷却を常時最前面に表示",
+        "title": "スキルCDインジケーター"
+    },
     "skin-colorize": {
         "desc": "キャラクタースキンの染色をプレビューして共有",
         "title": "染色プラン"

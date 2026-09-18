@@ -25,6 +25,13 @@ import {
     removeCustomFont as removeCustomFontFromOpfs,
     saveCustomFont,
 } from "@/utils/font-storage"
+import {
+    createDefaultSkillCdOverlaySettings,
+    type FloatWindowKeyBinding,
+    normalizeKeyBindings,
+    SKILL_CD_OVERLAY_STORAGE_KEY,
+    type SkillCdOverlayStoredSettings,
+} from "@/utils/skill-cd-overlay"
 import { readCustomWallpaper, removeCustomWallpaper, writeCustomWallpaper } from "@/utils/wallpaper-storage"
 import { db } from "./db"
 
@@ -85,20 +92,14 @@ export const useSettingStore = defineStore("setting", {
             // 系统已安装字体列表（懒加载缓存）
             systemFonts: [] as string[],
             systemFontsLoading: false,
-            // ===== 游戏技能 CD 倒计时浮窗 =====
-            // 是否启用 E 技能 CD 倒计时浮窗
-            skillCdOverlayEnabled: useLocalStorage("setting_skill_cd_overlay_enabled", false),
-            // 浮窗左上角 X/Y(物理像素,默认近右下角)
-            skillCdOverlayX: useLocalStorage("setting_skill_cd_overlay_x", 1480),
-            skillCdOverlayY: useLocalStorage("setting_skill_cd_overlay_y", 560),
-            // 浮窗缩放系数(0.5~3)
-            skillCdOverlayScale: useLocalStorage("setting_skill_cd_overlay_scale", 1),
-            // E 技能完整冷却秒数
-            skillCdOverlayCdSeconds: useLocalStorage("setting_skill_cd_overlay_cd_seconds", 8),
-            // 冷却归零(就绪)后隐藏浮窗条目
-            skillCdOverlayHideWhenReady: useLocalStorage("setting_skill_cd_overlay_hide_when_ready", false),
-            // 仅游戏窗口在前台时才响应按键触发
-            skillCdOverlayGameOnly: useLocalStorage("setting_skill_cd_overlay_game_only", true),
+            // ===== 游戏技能 CD 倒计时浮窗(独立设置页:src/views/SkillCdOverlayView.vue) =====
+            // 整组配置统一持久化在单个 localStorage 键里(一个大对象),字段与后端
+            // float_window_set 的载荷一一对应;mergeDefaults 让后续新增字段在旧数据上自动取默认值。
+            skillCdOverlay: useLocalStorage<SkillCdOverlayStoredSettings>(
+                SKILL_CD_OVERLAY_STORAGE_KEY,
+                createDefaultSkillCdOverlaySettings(),
+                { mergeDefaults: true }
+            ),
             // 后端浮窗实际运行状态(会话内瞬态,不持久化)
             skillCdOverlayRunning: false,
         }
@@ -112,6 +113,21 @@ export const useSettingStore = defineStore("setting", {
         },
         setTheme(theme: string) {
             this.theme = theme
+        },
+        /**
+         * 归一化技能 CD 浮窗的按键绑定,并写回同一个持久化对象。
+         *
+         * 空列表会补一条默认的 E 键绑定;同时剔除非法键码/重复键、钳制 CD 秒数,
+         * 保证设置页与后端拿到的都是干净数据。
+         * @returns 归一化后的按键绑定列表
+         */
+        ensureSkillCdOverlayKeys(): FloatWindowKeyBinding[] {
+            const current = this.skillCdOverlay.keys
+            const normalized = normalizeKeyBindings(current)
+            if (JSON.stringify(normalized) !== JSON.stringify(current)) {
+                this.skillCdOverlay.keys = normalized
+            }
+            return normalized
         },
         /**
          * 整体替换自定义主题（用于重置/导入）。

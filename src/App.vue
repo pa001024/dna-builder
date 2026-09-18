@@ -4,6 +4,7 @@ import { provideClient } from "@urql/vue"
 import { onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
+import { restoreSkillCdOverlay } from "./composables/useSkillCdOverlay"
 import { dataPackBootstrapLoading, isDataPackHydrated } from "./data/data-pack-bridge"
 import { env } from "./env"
 import { useMihanNotify } from "./store/mihan"
@@ -340,6 +341,8 @@ onMounted(async () => {
     // 从 OPFS 加载自定义底图与自定义字体，不阻塞启动流程
     void setting.initCustomWallpaper()
     void setting.initAppFont()
+    // 后端浮窗不随应用自启：上次开启过就按持久化设置恢复（不阻塞启动）
+    void restoreSkillCdOverlay()
     ui.setLoginState(setting.dnaUserId !== 0)
     ui.startTimer()
     reportVisitorCount()

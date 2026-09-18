@@ -33,6 +33,14 @@ const routes: readonly RouteRecordRaw[] = [
     { name: "counter", path: "/counter", component: CounterView, beforeEnter: () => setMinSize(360, 430), meta: { requireData: false } },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(360, 430) },
     {
+        // 技能 CD 浮窗搬到独立页面:设置页只保留总开关与入口
+        name: "skill-cd-overlay",
+        path: "/skill-cd-overlay",
+        component: () => import("./views/SkillCdOverlayView.vue"),
+        beforeEnter: () => setMinSize(360, 430),
+        meta: { requireData: false },
+    },
+    {
         name: "points-mall",
         path: "/points-mall",
         component: () => import("./views/PointsMall.vue"),

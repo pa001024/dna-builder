@@ -8158,6 +8158,10 @@
     "shop-list": {
         "title": "상점"
     },
+    "skill-cd-overlay": {
+        "desc": "키 쿨다운을 항상 위에 표시",
+        "title": "스킬 CD 인디케이터"
+    },
     "skin-colorize": {
         "desc": "캐릭터 스킨 염색 미리보기 및 공유",
         "title": "염색 플랜"

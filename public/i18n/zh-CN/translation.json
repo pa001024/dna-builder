@@ -2270,6 +2270,10 @@
     "shop-list": {
         "title": "商店"
     },
+    "skill-cd-overlay": {
+        "desc": "置顶浮窗显示按键冷却倒计时",
+        "title": "技能CD指示器"
+    },
     "skin-colorize": {
         "desc": "预览和分享角色皮肤染色",
         "title": "染色方案"

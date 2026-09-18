@@ -8189,6 +8189,10 @@
     "shop-list": {
         "title": "Boutique"
     },
+    "skill-cd-overlay": {
+        "desc": "Superposition des temps de recharge, toujours au premier plan",
+        "title": "Indicateur de CD"
+    },
     "skin-colorize": {
         "desc": "Previsualiser et partager les teintures de skin",
         "title": "Plans de teinture"
