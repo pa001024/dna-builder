@@ -3,8 +3,12 @@ import { type CSSProperties, computed, nextTick, onBeforeUnmount, onMounted, ref
 import { titleFrameIdToKey, titleFrames } from "@/data/generated/title-frame.generated"
 import {
     computeLayerRect,
+    flipBookCellAt,
+    flipBookFpsCurve,
     resolveAnimation,
+    resolveFlipBook,
     sampleCurve,
+    TITLE_FONT_LINE_RATIO,
     type TitleFrameDef,
     type TitleFrameLayer,
     type TitleFrameLayerTrack,
@@ -186,6 +190,9 @@ onMounted(() => {
             draw()
         })
         if (rootRef.value) resizeObserver.observe(rootRef.value)
+        // 文字自适应缩放要量字宽，字体是异步加载的，加载完成后需要重新量一次
+        updateTextScale()
+        void document.fonts?.ready.then(() => updateTextScale())
         // 尊重「减少动态效果」：停在起始帧（In 的第 0 毫秒，即完整静态构图）
         if (props.playing && props.timeMs === undefined && !prefersReducedMotion()) startClock()
     })
@@ -218,8 +225,14 @@ watch(frame, () => {
     void nextTick(() => {
         updateScale()
         draw()
+        updateTextScale()
     })
 })
+
+watch(
+    () => props.title,
+    () => void nextTick(() => updateTextScale())
+)
 
 /** 当前动画与其中的时间。 */
 const sample = computed(() => {
@@ -352,34 +365,94 @@ function layerStyle(layer: TitleFrameLayer): CSSProperties {
 }
 
 /**
+ * 序列帧图层当前格的裁剪参数。
+ *
+ * 图集按 rows×columns 铺满控件后，只需把「图片的 p% 点」对齐到「容器的 p% 点」即可
+ * 正好露出第 n 格（CSS 的背景/遮罩定位就是这个语义），所以百分比按格数取等分点。
+ *
+ * @param layer 图层
+ * @returns 裁剪参数，非序列帧图层返回 null
+ */
+function flipBookCrop(layer: TitleFrameLayer): { size: string; position: string } | null {
+    const book = resolveFlipBook(layer)
+    if (!book) return null
+    const state = sample.value
+    const { row, column } = flipBookCellAt(book, state.timeMs, flipBookFpsCurve(state.animation, layer.key))
+    const at = (value: number, count: number) => (count <= 1 ? 0 : (value / (count - 1)) * 100)
+    return {
+        size: `${book.columns * 100}% ${book.rows * 100}%`,
+        position: `${at(column, book.columns)}% ${at(row, book.rows)}%`,
+    }
+}
+
+/**
+ * 序列帧图层的主贴图样式。
+ *
+ * 纯色着色时主贴图要当背景画出来（等价于普通图层的 `<img>`），这里把裁好的那一格
+ * 作为背景图放进去；遮罩仍然挂在 mask-image 上。
+ *
+ * @param layer 图层
+ * @returns CSS 样式
+ */
+function layerFlipBookStyle(layer: TitleFrameLayer): CSSProperties {
+    const crop = flipBookCrop(layer)
+    return {
+        ...(crop
+            ? {
+                  backgroundImage: `url("${layer.src}")`,
+                  backgroundSize: crop.size,
+                  backgroundPosition: crop.position,
+                  backgroundRepeat: "no-repeat",
+              }
+            : {}),
+        ...layerMaskStyle(layer, false),
+    }
+}
+
+/**
+ * 图层是否走序列帧裁剪（模板里分流用）。
+ * @param layer 图层
+ * @returns 是否为序列帧图集图层
+ */
+function isFlipBook(layer: TitleFrameLayer): boolean {
+    return resolveFlipBook(layer) !== null
+}
+
+/**
  * 生成元素上的遮罩样式。
  *
  * 材质里 `MainTex` 只提供颜色、真正的形状来自 `Mask` / `Mask2`，因此把主贴图
  * （纯色着色时）和各个遮罩贴图都挂到同一个元素的 `mask-image` 上，用
  * `mask-composite: intersect` 逐层相乘，等价于 UE 材质里连乘 alpha。
  *
+ * 主贴图若是序列帧图集，遮罩层也要裁到同一格，否则遮罩位置与画出来的那一格对不上。
+ *
  * @param layer 图层
  * @param includeSource 是否把主贴图本身也当作遮罩（纯色着色时使用）
  * @returns CSS 样式
  */
 function layerMaskStyle(layer: TitleFrameLayer, includeSource: boolean): CSSProperties {
-    const urls = [...(includeSource ? [layer.src] : []), ...layer.masks].map(src => `url("${src}")`)
-    if (urls.length === 0) return {}
+    const entries: { url: string; crop: { size: string; position: string } | null }[] = []
+    if (includeSource) entries.push({ url: layer.src, crop: flipBookCrop(layer) })
+    for (const mask of layer.masks) entries.push({ url: mask, crop: null })
+    if (entries.length === 0) return {}
     return {
-        maskImage: urls.join(", "),
-        WebkitMaskImage: urls.join(", "),
-        maskSize: urls.map(() => "100% 100%").join(", "),
-        WebkitMaskSize: urls.map(() => "100% 100%").join(", "),
-        maskRepeat: urls.map(() => "no-repeat").join(", "),
-        WebkitMaskRepeat: urls.map(() => "no-repeat").join(", "),
+        maskImage: entries.map(entry => `url("${entry.url}")`).join(", "),
+        WebkitMaskImage: entries.map(entry => `url("${entry.url}")`).join(", "),
+        maskSize: entries.map(entry => entry.crop?.size ?? "100% 100%").join(", "),
+        WebkitMaskSize: entries.map(entry => entry.crop?.size ?? "100% 100%").join(", "),
+        maskPosition: entries.map(entry => entry.crop?.position ?? "0% 0%").join(", "),
+        WebkitMaskPosition: entries.map(entry => entry.crop?.position ?? "0% 0%").join(", "),
+        maskRepeat: entries.map(() => "no-repeat").join(", "),
+        WebkitMaskRepeat: entries.map(() => "no-repeat").join(", "),
         // UE 里遮罩是按 R 通道（或灰度）取的，而 CSS 默认按 alpha 通道取。
         // VX_T_Mask_* 这类遮罩是不透明的灰度图，按 alpha 取等于「全通过」——
         // 效果层于是铺满整块框面，把主体糊掉。改成按亮度取才与着色器一致。
-        maskMode: urls.map(() => "luminance").join(", "),
+        maskMode: entries.map(() => "luminance").join(", "),
         // 只写标准属性：`-webkit-mask-composite` 不接受列表，写成
         // "source-in, source-in" 会让整条声明失效，多张遮罩就退化成并集（union），
         // 效果层的可见范围被放大一大圈，主体被糊住。
-        maskComposite: urls.map(() => "intersect").join(", "),
+        maskComposite: entries.map(() => "intersect").join(", "),
     }
 }
 
@@ -406,7 +479,39 @@ function tintTextColor(color: string): string {
     return "#" + tinted.map(channel => channel.toString(16).padStart(2, "0")).join("")
 }
 
-/** 文字样式。 */
+/** 文字自适应缩放（对应 UMG ScaleBox 的 ScaleToFit + DownOnly）。 */
+const textScale = ref(1)
+const textInnerRef = ref<HTMLElement | null>(null)
+
+/**
+ * 量取文字自然宽度并算出缩放系数：超出布局框时整体缩小，绝不放大。
+ *
+ * 游戏里 TextBlock 外面套的是 ScaleBox（Stretch=ScaleToFit、StretchDirection=DownOnly），
+ * 所以长标题是「整块缩小」而不是截断。用 `overflow: hidden` 截断会把文字的外发光一起
+ * 切掉——被切平的那圈辉光正是看起来「边缘很硬」的原因，所以这里改成缩字号之外的缩放。
+ *
+ * 缩放只作用于文字本身，控件盒宽不变（盒子尺寸由 UMG 布局决定，不随文字变化）。
+ */
+function updateTextScale() {
+    const inner = textInnerRef.value
+    if (!inner) return
+    const text = frame.value.text
+    if (!text) return
+    const maxWidth = text.wrapAt > 0 ? Math.min(text.wrapAt, text.width) : text.width
+    // offsetWidth 是布局宽度，不含 transform，因此拿到的是未缩放的自然宽度
+    const natural = inner.offsetWidth
+    textScale.value = natural > 0 && maxWidth > 0 ? Math.min(1, maxWidth / natural) : 1
+}
+
+/**
+ * 文字样式。
+ *
+ * 落点完全取自游戏控件（`text.x/y/width/height`）：WBP 里文字挂在 Overlay 的
+ * `HAlign_Fill / VAlign_Center` 槽上，`y` 已经是「ScaleBox 期望高度在 34 高画布内居中」
+ * 之后的位置，因此这里不再做任何垂直居中/位移补偿——多算一层就会让所有称号的文字整体偏
+ * 1~2px。行盒高度用字体的真实行高（见 TITLE_FONT_LINE_RATIO），字形才会正好填满 TextBlock
+ * 的盒子，基线与游戏一致。
+ */
 const textStyle = computed(() => {
     const text = frame.value.text
     if (!text) return null
@@ -417,9 +522,7 @@ const textStyle = computed(() => {
         width: `${maxWidth}px`,
         height: `${text.height}px`,
         fontSize: `${text.fontSize}px`,
-        lineHeight: "1",
-        // UE 里 TextBlock 的 Margin.Bottom 为负值，等价于把整块文字向上顶一点点
-        transform: text.marginBottom ? `translateY(${text.marginBottom / 2}px)` : undefined,
+        lineHeight: `${text.fontSize * TITLE_FONT_LINE_RATIO}px`,
         color: tintTextColor(text.color),
         textAlign: text.justify,
     }
@@ -441,8 +544,14 @@ const textStyle = computed(() => {
                 class="title-frame__layer"
                 :style="{ ...layerStyle(layer), zIndex: index + 1 }"
             >
+                <!-- 序列帧图集：只裁出当前那一格，整张贴图铺进去会变成一片重复的小图 -->
+                <div
+                    v-if="isFlipBook(layer)"
+                    class="title-frame__image"
+                    :style="layerFlipBookStyle(layer)"
+                />
                 <img
-                    v-if="layerTint(layer).plain"
+                    v-else-if="layerTint(layer).plain"
                     class="title-frame__image"
                     :src="layer.src"
                     :style="layerMaskStyle(layer, false)"
@@ -457,7 +566,7 @@ const textStyle = computed(() => {
             </div>
             </template>
             <div v-if="textStyle" class="title-frame__text" :style="textStyle">
-                <span class="title-frame__text-inner">
+                <span ref="textInnerRef" class="title-frame__text-inner" :style="{ transform: `scale(${textScale})` }">
                     <slot>{{ title }}</slot>
                 </span>
             </div>
@@ -507,6 +616,12 @@ const textStyle = computed(() => {
 
 .title-frame__text {
     position: absolute;
+    /*
+     * 盒子就是游戏控件给的位置与尺寸（脚本里的 left/top/width/height），这里只做两件事：
+     * 1. 行盒高度 = 字体真实行高（脚本内联 line-height），字形正好填满盒子，不再有
+     *    「行盒矮于字形 → 浏览器把字形上移」那 2px 的偏差；
+     * 2. 居中：长标题整体缩小（transform: scale）时，缩小点是盒子中心，文字才不会跑偏。
+     */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -514,18 +629,22 @@ const textStyle = computed(() => {
     /* 游戏内 TextBlock 指定的是 Blod_Font，用同一个字体面才能对上字宽/字重 */
     font-family: "TitleBlod", "Microsoft YaHei", sans-serif;
     font-weight: 700;
-    /* 颜色由脚本按材质算出（见 TEXT_MATERIAL_TINT），这里只负责外发光 */
+    /* 颜色由脚本按材质算出（见 TEXT_MATERIAL_TINT），这里只负责外发光。
+       材质里的文字是「自发光 + 泛光」，没有描边：单层「小半径 + 高透明度」的写法会在
+       字外糊出一圈边界分明的琥珀色轮廓（边缘很硬），换成半径递增、透明度递减的几档
+       叠起来，衰减才是连续的；深色投影只留一层很淡的，用来把字从亮底板上托起来。 */
     text-shadow:
-        0 0 5px rgba(255, 226, 150, 0.55),
-        0 0 14px rgba(255, 196, 110, 0.3),
-        0 1px 1px rgba(0, 0, 0, 0.6);
+        0 0 4px rgba(255, 242, 208, 0.28),
+        0 0 10px rgba(255, 226, 160, 0.18),
+        0 0 20px rgba(255, 198, 120, 0.1),
+        0 1px 4px rgba(0, 0, 0, 0.28);
     pointer-events: none;
 }
 
 .title-frame__text-inner {
-    max-width: 100%;
-    overflow: hidden;
+    /* 不截断：截断用的 overflow: hidden 会把外发光一起切掉，留下硬边 */
+    display: inline-block;
     white-space: nowrap;
-    text-overflow: ellipsis;
+    transform-origin: center center;
 }
 </style>

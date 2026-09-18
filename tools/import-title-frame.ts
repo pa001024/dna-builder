@@ -41,7 +41,7 @@ import type {
     TitleFrameTextStyle,
     TitleFrameTransformCurves,
 } from "../src/data/title-frame"
-import { unionBounds } from "../src/data/title-frame"
+import { TITLE_FONT_LINE_RATIO, unionBounds } from "../src/data/title-frame"
 
 const ROOT_DIR = path.resolve(import.meta.dir, "..")
 const CLI = process.env.FMODEL_CLI ?? "D:/dev/fmodel-mcp/Cli/bin/publish/fmodel-cli.exe"
@@ -425,6 +425,14 @@ function readBrush(node: WidgetNode): BrushRef {
 const textureSizes = new Map<string, { width: number; height: number }>()
 
 /**
+ * 期望尺寸覆写表：控件 → 修正后的期望尺寸。
+ *
+ * 少数 WBP 漏勾了 `bUsing4KImageDesign`（见 `fixMissing4KFlag`），需要在布局前把尺寸改对，
+ * 否则父级 measure 与图层矩形都会按错误尺寸算。
+ */
+const brushSizeOverrides = new WeakMap<WidgetNode, { width: number; height: number }>()
+
+/**
  * 读取贴图尺寸（带缓存）。纹理包很小，`read` 比 `export-tex` 快得多且不落盘。
  * @param pkg 贴图包路径
  * @returns 尺寸，读取失败时 null
@@ -453,10 +461,14 @@ function readTextureSize(pkg: string): { width: number; height: number } | null 
  * 是 120，截图中在 UI 缩放 1.7 下约 100px，即 60 个设计单位，正好是一半。
  * 不做这步换算时 12_x/13_x 的底图会被当成 512×128 绘制，比其他赛季明显大一倍。
  *
+ * 漏勾开关的控件由 `fixMissing4KFlag` 单独修正，这里先查覆写表。
+ *
  * @param node Image 控件
  * @returns 期望尺寸（已换算到实际设计单位）
  */
 function readBrushSize(node: WidgetNode): { width: number; height: number } {
+    const overridden = brushSizeOverrides.get(node)
+    if (overridden) return overridden
     const size = node.props.Brush?.ImageSize
     const width = Number(size?.X ?? 0)
     const height = Number(size?.Y ?? 0)
@@ -468,6 +480,62 @@ function readBrushSize(node: WidgetNode): { width: number; height: number } {
         width: (width || natural?.width || 32) * scale,
         height: (height || natural?.height || 32) * scale,
     }
+}
+
+/**
+ * 修正漏勾 `bUsing4KImageDesign` 的整框光效层尺寸。
+ *
+ * 12_1 / 12_2 / 13_1 / 13_2 的 `VX_BgGlow` 与底图共用同一个 OverlaySlot（同 Padding、
+ * 同 `HAlign_Center`），遮罩也是一张与底图轮廓完全重合的剪影
+ * （`T_PersonalInfo_Title_13_09`，512×128 的 SSS／剑／鹫剪影）。但它的 `Brush.ImageSize`
+ * 写的是遮罩的像素尺寸（512×128）且没勾 4K 开关，于是被当成 512×128 设计单位绘制——
+ * 正好是底图（256×64）的两倍：剪影轮廓整片飘到框外，右侧只剩一团糊影，SSS 的光晕
+ * 也偏到框外左侧。
+ *
+ * 判据（三重，避免误伤）：同 WBP 存在勾了 4K 的底图 → 该控件未勾 4K → 期望尺寸恰好是
+ * 底图的两倍 → 且它引用的遮罩长宽比与控件一致（说明是覆盖整幅底图的剪影，而非局部装饰）。
+ * 命中后按底图的一半修正，光效就与底图对齐了。
+ *
+ * @param tree 控件树根节点
+ * @param materials 材质摘要表
+ * @returns 修正的图层数
+ */
+function fixMissing4KFlag(tree: WidgetNode, materials: Map<string, MaterialSummary>): number {
+    const images = collectImages(tree)
+
+    // 底图 = 勾了 4K 的图层里期望面积最大的那个（各赛季都是主横幅）
+    let art: { width: number; height: number } | null = null
+    for (const image of images) {
+        if (image.props.bUsing4KImageDesign !== true) continue
+        const size = readBrushSize(image)
+        if (!art || size.width * size.height > art.width * art.height) art = size
+    }
+    if (!art) return 0
+
+    let fixed = 0
+    for (const image of images) {
+        if (image.props.bUsing4KImageDesign === true) continue
+        const size = readBrushSize(image)
+        if (Math.abs(size.width - art.width * 2) > 1 || Math.abs(size.height - art.height * 2) > 1) continue
+        const brush = readBrush(image)
+        if (brush.kind !== "material") continue
+        const material = materials.get(brush.pkg)
+        if (!material) continue
+        const choice = chooseTexture(material, size)
+        if (!choice) continue
+        const aspect = size.width / size.height
+        const hasSilhouetteMask = choice.masks.some(pkg => {
+            const texture = textureSizes.get(pkg)
+            return Boolean(texture && texture.height > 0 && Math.abs(texture.width / texture.height / aspect - 1) < 0.05)
+        })
+        if (!hasSilhouetteMask) continue
+
+        const corrected = { width: size.width / 2, height: size.height / 2 }
+        brushSizeOverrides.set(image, corrected)
+        console.log(`  ~ 补 4K 换算：${image.name} ${size.width}×${size.height} → ${corrected.width}×${corrected.height}`)
+        fixed += 1
+    }
+    return fixed
 }
 
 // ---------------------------------------------------------------------------
@@ -517,9 +585,11 @@ function measure(node: WidgetNode, parentWidth: number, parentHeight: number): {
         case "Image":
             return readBrushSize(node)
         case "TextBlock": {
-            // 文字控件的实际尺寸由文本内容决定，这里用换行宽度与字号给出一个稳定近似值
+            // UMG 里 TextBlock 的期望尺寸 = 一行的字高，由字体的 (ascender - descender) 决定，
+            // 与字号无关的 1.4 倍行距只是「看着差不多」的近似值：15px 下的真值是 18.99px，
+            // 用 1.4 倍会多出 2px，文字框整体下移，画面上文字就偏了。这里按真实字体度量来量。
             const fontSize = Number(node.props.Font?.Size ?? 15) || 15
-            return { width: Number(node.props.WrapTextAt ?? 0) || 0, height: Math.ceil(fontSize * 1.4) }
+            return { width: Number(node.props.WrapTextAt ?? 0) || 0, height: Math.ceil(fontSize * TITLE_FONT_LINE_RATIO) }
         }
         case "ScaleBox": {
             const child = node.slots[0]?.content
@@ -662,6 +732,8 @@ function layout(node: WidgetNode, slot: WidgetSlot | null, rect: Rect, ctx: Layo
         case "TextBlock": {
             const color = node.props.ColorAndOpacity?.SpecifiedColor
             const toByte = (value: number) => Math.round(Math.min(1, Math.max(0, Number(value ?? 1))) * 255)
+            // 文字落点只由所属 Slot 的对齐/内边距决定（见 measure/layout），TextBlock 自己的
+            // Margin 只是记录在案：Slate 的 STextBlock 不消费它，不能拿它做位移补偿。
             ctx.text = {
                 x: rect.left,
                 y: rect.top,
@@ -1311,6 +1383,8 @@ async function main(): Promise<void> {
     const animationByWidget = new Map<string, Record<string, TitleFrameAnimation>>()
 
     for (const draft of drafts) {
+        // 少数 WBP 漏勾 4K 开关，光效层尺寸会整体翻倍，必须在布局前修正
+        fixMissing4KFlag(draft.tree, materials)
         const stage = findStageSize(draft.tree) ?? measure(draft.tree, 0, 0)
         const ctx: LayoutContext = { layers: [], text: null, order: 0 }
         layout(draft.tree, null, { left: 0, top: 0, width: stage.width, height: stage.height }, ctx)

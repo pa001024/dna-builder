@@ -600,7 +600,7 @@ onBeforeUnmount(() => {
                 <div v-else class="db-scroll min-h-0 flex-1 overflow-y-auto">
                     <div class="flex min-h-full flex-col justify-end">
                         <div class="db-rise mx-auto w-full max-w-7xl px-4 pb-4 pt-6 md:px-6 lg:px-8">
-                            <ul class="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-2">
+                            <ul class="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-2">
                                 <li v-for="item in moduleCards" :key="item.path">
                                     <button
                                         type="button"

@@ -30,6 +30,7 @@ uniform vec2 uTranslation;   // RenderTransform.Translation
 uniform vec2 uScale;         // RenderTransform.Scale
 uniform vec2 uShear;         // RenderTransform.Shear（角度）
 uniform float uRotation;     // RenderTransform.Angle（角度）
+uniform vec4 uUvRect;        // 序列帧图集裁剪：(offsetX, offsetY, scaleX, scaleY)，普通图层为 (0,0,1,1)
 
 varying vec2 vUv;
 
@@ -51,7 +52,8 @@ void main() {
     vec2 design = uCenter + local;
     vec2 clip = (design / uStage) * 2.0 - 1.0;
     gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
-    vUv = aCorner;
+    // 序列帧材质（M_FlipBook）只采样图集里的一格，靠 uUvRect 把 0..1 映射到那一格
+    vUv = uUvRect.xy + aCorner * uUvRect.zw;
 }
 `
 

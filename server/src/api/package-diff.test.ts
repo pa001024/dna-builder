@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test"
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { apiPlugin } from "../api"
@@ -113,6 +113,70 @@ describe("ZIP 差分下载 API", () => {
         expect(response.status).toBe(302)
         expect(response.headers.get("X-Download-Mode")).toBe("full")
         expect(response.headers.get("Location")).toBe("https://official.example.com/packages/v1.2.zip")
+        // 过大的差分不再留在磁盘上，只保留 0 字节占位。
+        expect((await stat(join(cacheDir, "patches", "v1.1-v1.2.hdiff"))).size).toBe(0)
+    })
+
+    it("命中 0 字节占位差分时直接回退完整包且不重新生成", async () => {
+        const cacheDir = await createCacheDir()
+        let createCount = 0
+        const app = apiPlugin({
+            cacheDir,
+            dataPackageBaseUrl: "https://official.example.com/packages/",
+            fetch: createOfficialFetch({
+                "v1.1.zip": "old",
+                "v1.2.zip": "new",
+            }),
+            createDiff: async (_oldFile, _newFile, patchFile) => {
+                createCount += 1
+                await writeFile(patchFile, "patch")
+            },
+        })
+        const placeholderDir = join(cacheDir, "patches")
+        await mkdir(placeholderDir, { recursive: true })
+        await writeFile(join(placeholderDir, "v1.1-v1.2.hdiff"), "")
+
+        const response = await app.handle(
+            new Request("http://localhost/api/download/diff", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ old: "v1.1.zip", new: "v1.2.zip" }),
+                redirect: "manual",
+            })
+        )
+
+        expect(response.status).toBe(302)
+        expect(response.headers.get("X-Download-Mode")).toBe("full")
+        expect(createCount).toBe(0)
+        expect((await stat(join(placeholderDir, "v1.1-v1.2.hdiff"))).size).toBe(0)
+    })
+
+    it("回收历史遗留的超大差分缓存", async () => {
+        const cacheDir = await createCacheDir()
+        const app = apiPlugin({
+            cacheDir,
+            dataPackageBaseUrl: "https://official.example.com/packages/",
+            fetch: createOfficialFetch({
+                "v1.1.zip": "old",
+                "v1.2.zip": "new",
+            }),
+            createDiff: async (_oldFile, _newFile, patchFile) => writeFile(patchFile, "patch"),
+        })
+        const patchFile = join(cacheDir, "patches", "v1.1-v1.2.hdiff")
+        await Bun.write(patchFile, Buffer.alloc(packageDiffMaxSize + 1))
+
+        const response = await app.handle(
+            new Request("http://localhost/api/download/diff", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ old: "v1.1.zip", new: "v1.2.zip" }),
+                redirect: "manual",
+            })
+        )
+
+        expect(response.status).toBe(302)
+        expect(response.headers.get("X-Download-Mode")).toBe("full")
+        expect((await stat(patchFile)).size).toBe(0)
     })
 
     it("拒绝路径穿越与非 ZIP 包名", async () => {

@@ -110,7 +110,7 @@ export interface TitleFrameLayer {
     readonly material?: string
 }
 
-/** 文字样式（TextBlock + 所在 ScaleBox）。 */
+/** 文字区域（TextBlock + 所在 ScaleBox）的布局与配色。 */
 export interface TitleFrameTextStyle {
     /** 文字区域在舞台坐标系中的位置与尺寸 */
     readonly x: number
@@ -120,10 +120,26 @@ export interface TitleFrameTextStyle {
     readonly fontSize: number
     /** WrapTextAt，0 表示不换行 */
     readonly wrapAt: number
+    /**
+     * TextBlock.Margin.Bottom（保留原值供排查）。
+     *
+     * 注意：这不是 Slate 的布局内边距——TextBlock 的几何完全由所属 Slot 决定，
+     * 渲染端不再用它做位移（游戏里的落点由 `y` + `height` 唯一确定）。
+     */
     readonly marginBottom: number
     readonly justify: "left" | "center" | "right"
     readonly color: string
 }
+
+/**
+ * 游戏字体 TitleBlod（`public/fonts/blod.ttf`，与游戏内 `Blod.ufont` 字节一致）的行高比例。
+ *
+ * 取 `(hhea.ascender - hhea.descender) / unitsPerEm = (962 + 304) / 1000`：FreeType 与
+ * Chrome 用的都是这组度量，所以 `fontSize × 该比例` 就是 UE 里 TextBlock 的期望高度
+ * （15px 字号 → 18.99px），也是 CSS 行盒应有的高度。文字框按这个高度测量与渲染，
+ * 字形才会正好填满盒子、与游戏落在同一条基线上。
+ */
+export const TITLE_FONT_LINE_RATIO = 1.266
 
 /** 舞台坐标系中的一个矩形。 */
 export interface TitleFrameRect {
@@ -264,6 +280,127 @@ export function computeLayerRect(layer: TitleFrameLayer, parentWidth: number, pa
     }
 
     return { left, top, width, height }
+}
+
+/** 序列帧图集（M_FlipBook）的分格参数。 */
+export interface TitleFrameFlipBook {
+    /** 图集行数（材质参数 `row`） */
+    readonly rows: number
+    /** 图集列数（材质参数 `column`） */
+    readonly columns: number
+    /** 每秒推进的格数（材质参数 `FPS`） */
+    readonly fps: number
+    /** 是否倒序播放（材质参数 `Flip` 为负） */
+    readonly reverse: boolean
+}
+
+/**
+ * 取出图层的序列帧分格参数。
+ *
+ * M_FlipBook 把 `Tex_Sequence` 当成一张 `row × column` 的图集，每帧只采样其中一格：
+ * 直接把整张贴图铺进控件的话，16 格的图集会被压成 16 只小眼睛（1.4 灾厄使者右上角
+ * 的眼部贴图就是这个症状）。因此渲染端必须按下标裁出一格再拉伸到控件尺寸。
+ *
+ * 只有材质名里带 `FlipBook` 且图集确实分格时才返回参数，其余图层按普通贴图处理。
+ *
+ * @param layer 图层
+ * @returns 分格参数，非序列帧图层返回 null
+ */
+export function resolveFlipBook(layer: TitleFrameLayer): TitleFrameFlipBook | null {
+    const name = layer.material?.split("/").pop() ?? ""
+    if (!/flipbook/i.test(name)) return null
+
+    const params = layer.params ?? {}
+    const rows = Math.round(Number(params.row ?? 1))
+    const columns = Math.round(Number(params.column ?? 1))
+    if (!Number.isFinite(rows) || !Number.isFinite(columns) || rows < 1 || columns < 1) return null
+    // 1×1 的「图集」就是一整张图，不必走裁剪分支
+    if (rows === 1 && columns === 1) return null
+
+    const fps = Number(params.FPS ?? 1)
+    return {
+        rows,
+        columns,
+        fps: Number.isFinite(fps) && fps > 0 ? fps : 1,
+        reverse: Number(params.Flip ?? 1) < 0,
+    }
+}
+
+/**
+ * 对一条曲线在 `[0, timeMs]` 上求积分，单位是「值·秒」。
+ *
+ * 序列帧的速度参数（`FPS`）会被 UMG 动画曲线驱动（1.4 灾厄使者的 `eye_1` 就是
+ * `1 → 16 → 1 → 1 → 16 → 1` 的两段快放），这时「已经推进了多少格」只能由速度沿时间
+ * 累加得到；直接乘当前值会让画面随关键帧跳变，且永远播不完整个图集。
+ *
+ * 常量插值（阶跃）取区间左值，其余按线性（梯形）近似，与 `sampleCurve` 保持一致。
+ *
+ * @param curve 曲线数据
+ * @param timeMs 积分上限（毫秒）
+ * @returns 积分值（值 × 秒）
+ */
+export function integrateCurve(curve: TitleFrameCurve | undefined, timeMs: number): number {
+    if (!curve || curve.times.length === 0) return 0
+    const end = Math.max(0, timeMs)
+    if (end <= 0) return 0
+
+    const { times, values } = curve
+    // 第一个关键帧之前的区间按常量外推取值
+    if (end <= times[0]) return ((values[0] ?? 0) * end) / 1000
+
+    let area = 0
+    for (let index = 0; index < times.length; index += 1) {
+        const start = times[index]
+        if (start >= end) break
+        const nextStart = index + 1 < times.length ? times[index + 1] : Number.POSITIVE_INFINITY
+        const span = Math.min(end, nextStart) - start
+        if (span <= 0) continue
+        const left = values[index] ?? 0
+        // 常量插值在区间内保持左值；最后一个关键帧之后按常量外推
+        const stepped = (curve.interp?.[index] ?? INTERP_LINEAR) === INTERP_CONSTANT
+        if (stepped || !Number.isFinite(nextStart)) {
+            area += left * span
+            continue
+        }
+        // 线性段取「积分区间末端」的值做梯形，而不是下一个关键帧的值：
+        // 只积到区间中途时用后者会把面积算大
+        const target = values[index + 1] ?? left
+        const ratio = (Math.min(end, nextStart) - start) / (nextStart - start)
+        area += ((left + left + (target - left) * ratio) / 2) * span
+    }
+    return area / 1000
+}
+
+/**
+ * 取出驱动某个序列帧图层速度的 `FPS` 参数曲线。
+ *
+ * @param animation 当前播放的动画段
+ * @param layerKey 图层名（与动画轨道 key 一致）
+ * @returns FPS 曲线，未动画时 undefined
+ */
+export function flipBookFpsCurve(animation: TitleFrameAnimation | null | undefined, layerKey: string): TitleFrameCurve | undefined {
+    return animation?.tracks?.[layerKey]?.scalars?.FPS
+}
+
+/**
+ * 计算某一时刻应当显示的是图集里的哪一格。
+ *
+ * 材质里的 `FPS` 是「每秒推进多少格」（16 格图集配 FPS=16 正好一秒一轮），`Flip = -1`
+ * 表示倒序播放；时间轴起点与控件出现时刻对齐，因此 0 秒时正序显示第 0 格、倒序显示最后
+ * 一格。传入 `fpsCurve` 时按速度积分推进——FPS 被动画驱动时只有积分才是真实格数。
+ *
+ * @param flipBook 分格参数
+ * @param timeMs 播放时间（毫秒）
+ * @param fpsCurve 覆盖 `FPS` 的动画曲线
+ * @returns 单元格坐标（0 起）
+ */
+export function flipBookCellAt(flipBook: TitleFrameFlipBook, timeMs: number, fpsCurve?: TitleFrameCurve): { row: number; column: number } {
+    const total = flipBook.rows * flipBook.columns
+    const cells = fpsCurve ? integrateCurve(fpsCurve, timeMs) : (Math.max(0, timeMs) / 1000) * flipBook.fps
+    const step = Math.floor(cells)
+    const forward = ((step % total) + total) % total
+    const index = flipBook.reverse ? total - 1 - forward : forward
+    return { row: Math.floor(index / flipBook.columns), column: index % flipBook.columns }
 }
 
 /**

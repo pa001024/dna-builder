@@ -14,11 +14,14 @@
 
 import {
     computeLayerRect,
+    flipBookCellAt,
     resolveAnimation,
+    resolveFlipBook,
     sampleCurve,
     type TitleFrameDef,
     type TitleFrameLayer,
     type TitleFrameLayerTrack,
+    type TitleFrameSampleState,
 } from "@/data/title-frame"
 import {
     BIRD_FRAGMENT_SHADER,
@@ -180,7 +183,7 @@ export class FrameRenderer {
             gl.useProgram(program)
 
             const track = sample.animation?.tracks[layer.key]
-            this.setGeometry(program, layer, input, track)
+            this.setGeometry(program, layer, input, track, sample)
             this.setTint(program, layer)
             this.bindTexture(program, "uMaskA", layer.masks[0] ?? "")
             this.bindTexture(program, "uMaskB", layer.masks[1] ?? "")
@@ -211,16 +214,19 @@ export class FrameRenderer {
      * @param layer 图层
      * @param input 帧输入
      * @param track 该图层在当前动画里的轨道
+     * @param sample 当前动画段与段内时间（循环播放时是折叠后的时间）
      */
     private setGeometry(
         program: WebGLProgram,
         layer: TitleFrameLayer,
         input: FrameRenderInput,
-        track: TitleFrameLayerTrack | undefined
+        track: TitleFrameLayerTrack | undefined,
+        sample: TitleFrameSampleState
     ): void {
         const rect = computeLayerRect(layer, input.frame.width, input.frame.height)
         const transform = track?.transform
-        const time = input.elapsedMs
+        // 用动画段内时间：循环播放时 elapsedMs 会一路增长，曲线采样与序列帧都必须按段内时间
+        const time = sample.timeMs
         const pick = (curve: { times: readonly number[]; values: readonly number[] } | undefined, fallback: number) =>
             curve ? sampleCurve(curve, time, fallback) : fallback
 
@@ -239,6 +245,34 @@ export class FrameRenderer {
         this.uniform2f(program, "uScale", pick(transform?.scaleX, layer.scale[0]), pick(transform?.scaleY, layer.scale[1]))
         this.uniform2f(program, "uShear", pick(transform?.shearX, layer.shear[0]), pick(transform?.shearY, layer.shear[1]))
         this.uniform1f(program, "uRotation", pick(transform?.rotation, layer.rotation))
+        this.setUvRect(program, layer, sample, track)
+    }
+
+    /**
+     * 设置 UV 采样矩形。
+     *
+     * 序列帧材质（M_FlipBook）的 `Tex_Sequence` 是一张 row×column 的图集，着色器每帧只许
+     * 采样其中一格；不裁剪的话 16 格的图集会被整张贴进控件，看起来就是一片重复的小图。
+     * 普通图层保持整张贴图。
+     *
+     * @param program 目标程序
+     * @param layer 图层
+     * @param sample 当前动画段与段内时间
+     * @param track 该图层在当前动画里的轨道（`FPS` 参数动画在这里）
+     */
+    private setUvRect(
+        program: WebGLProgram,
+        layer: TitleFrameLayer,
+        sample: TitleFrameSampleState,
+        track: TitleFrameLayerTrack | undefined
+    ): void {
+        const book = resolveFlipBook(layer)
+        if (!book) {
+            this.uniform4f(program, "uUvRect", 0, 0, 1, 1)
+            return
+        }
+        const cell = flipBookCellAt(book, sample.timeMs, track?.scalars?.FPS)
+        this.uniform4f(program, "uUvRect", cell.column / book.columns, cell.row / book.rows, 1 / book.columns, 1 / book.rows)
     }
 
     /** 设置控件级色调。 */

@@ -1,8 +1,10 @@
 import { createHash } from "node:crypto"
-import { mkdir, readFile, stat, writeFile } from "node:fs/promises"
+import { mkdir, readFile, stat, truncate, writeFile } from "node:fs/promises"
 import { basename, join, parse, resolve } from "node:path"
 
 const MAX_PATCH_SIZE = 2 * 1024 * 1024
+/** 已放弃发送的差分占位文件大小：差分超过 MAX_PATCH_SIZE 后会被截断成 0 字节。 */
+const DISCARDED_PATCH_SIZE = 0
 const PACKAGE_FILE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._ -]*\.zip$/i
 const DEFAULT_DATA_PACKAGE_BASE_URL = "https://cdn.dna-builder.cn/data-pack/"
 
@@ -128,6 +130,29 @@ async function createHdiff(oldFile: string, newFile: string, patchFile: string, 
 }
 
 /**
+ * 判断缓存的差分文件是否值得下发给客户端。
+ * 0 字节是「差分过大、已判定不可用」的占位标记，既保留结论又不再占用磁盘。
+ * @param patchSize 差分文件字节数。
+ * @returns true 表示可以按差分下发。
+ */
+function isPatchSendable(patchSize: number) {
+    return patchSize > DISCARDED_PATCH_SIZE && patchSize <= MAX_PATCH_SIZE
+}
+
+/**
+ * 把不可下发的差分文件截断为 0 字节占位，回收磁盘占用。
+ * 占位文件在后续请求中会直接命中「回退完整包」的结论，不会重新生成差分。
+ * @param patchFile 差分文件路径。
+ */
+async function discardPatch(patchFile: string) {
+    try {
+        await truncate(patchFile, DISCARDED_PATCH_SIZE)
+    } catch (error) {
+        console.error(`回收过大差分失败: ${patchFile}`, error)
+    }
+}
+
+/**
  * 为客户端已有的旧官方数据包生成到指定新官方数据包的差分下载结果。
  * @param oldPackageName 客户端已有的旧官方数据包名。
  * @param newPackageName 目标新官方数据包名。
@@ -175,8 +200,13 @@ export async function getPackageDiff(
     const patchFile = join(cacheDir, "patches", patchName)
     try {
         const patchSize = (await stat(patchFile)).size
-        if (patchSize <= MAX_PATCH_SIZE) {
+        if (isPatchSendable(patchSize)) {
             return { mode: "patch", patchFile, patchName, targetPackageName, targetSha256: targetFeature.sha256 }
+        }
+        // 0 字节占位表示已判定不可用，无需重新生成；历史遗留的超大差分顺手截断回收。
+        if (patchSize > MAX_PATCH_SIZE) {
+            console.log(`${timestamp()} 回收过大差分缓存 - ${patchName}, 原本大小: ${patchSize} 字节`)
+            await discardPatch(patchFile)
         }
         return { mode: "full", targetPackageName, targetUrl, targetSha256: targetFeature.sha256 }
     } catch {}
@@ -189,12 +219,13 @@ export async function getPackageDiff(
     console.log(`${timestamp()} 开始生成差分 - ${sourcePackageName} -> ${targetPackageName}`)
     await createDiff(sourceFile, targetFile, patchFile)
     const newPatchSize = (await stat(patchFile)).size
-    console.log(`${timestamp()} 差分生成完成 - ${patchName}, 大小: ${newPatchSize} 字节`)
-    if (newPatchSize > MAX_PATCH_SIZE) {
-        console.log(`${timestamp()} 新差分过大回退完整包 - ${patchName}, 大小: ${newPatchSize} 字节`)
-        return { mode: "full", targetPackageName, targetUrl, targetSha256: targetFeature.sha256 }
+    if (isPatchSendable(newPatchSize)) {
+        console.log(`${timestamp()} 差分生成完成 - ${patchName}, 大小: ${newPatchSize} 字节`)
+        return { mode: "patch", patchFile, patchName, targetPackageName, targetSha256: targetFeature.sha256 }
     }
-    return { mode: "patch", patchFile, patchName, targetPackageName, targetSha256: targetFeature.sha256 }
+    console.log(`${timestamp()} 差分不可用回退完整包并改写为 0 字节占位 - ${patchName}, 大小: ${newPatchSize} 字节`)
+    await discardPatch(patchFile)
+    return { mode: "full", targetPackageName, targetUrl, targetSha256: targetFeature.sha256 }
 }
 
 export const packageDiffMaxSize = MAX_PATCH_SIZE

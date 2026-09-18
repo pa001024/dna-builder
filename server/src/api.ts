@@ -158,7 +158,8 @@ export const apiPlugin = (packageDiffConfig: PackageDiffConfig = {}) => {
 
     /**
      * 下载客户端旧官方数据包到指定新官方数据包的 HDiffPatch 差分。
-     * 差分大于 2 MB 时重定向到官方完整包，避免无收益的客户端补丁。
+     * 差分大于 2 MB 时重定向到官方完整包，避免无收益的客户端补丁；
+     * 过大的差分会被截断为 0 字节占位，只在磁盘上保留「不可用」这一结论。
      */
     app.post(
         "/download/diff",
