@@ -22,6 +22,7 @@ import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
 import { getDungeonName, getDungeonType } from "@/utils/dungeon-utils"
 import { GlobalSearchService } from "@/utils/global-search"
 import { matchPinyin } from "@/utils/pinyin-utils"
+import { getQuestName } from "@/utils/quest-utils"
 import { DEFAULT_STORY_TEXT_CONFIG, replaceStoryPlaceholders, stripStoryTextTags } from "@/utils/story-text"
 
 /**
@@ -62,6 +63,37 @@ export interface DBEntrySummary {
     version?: string
     /** 详情页路由 */
     path: string
+    /**
+     * 该条目在各筛选项上的取值（key 为筛选项 id，value 为该条目命中的取值集合）。
+     *
+     * 取值集合统一用数组表达，是为了让「一个条目同时属于多个分类」（如武器同时是
+     * 近战 / 单手剑）与「数值区间命中」（如品质 3 命中 `ql:3`）走同一套匹配逻辑。
+     */
+    facets?: Record<string, string[]>
+}
+
+/** 筛选项可选值的单项 */
+export interface DBFacetValue {
+    /** 取值（过滤时传这个字符串） */
+    value: string
+    /** 展示名 */
+    label: string
+    /** 该取值下的条目数 */
+    count: number
+}
+
+/** 某个模块可用的一个筛选项（对应列表页上的一行筛选按钮） */
+export interface DBFacetDefinition {
+    /** 筛选项 id，作为过滤参数的键 */
+    id: string
+    /** 展示名，例如「分类」「品质」 */
+    label: string
+    /** 类型：枚举（离散取值）/ 数值区间（按品质或等级过滤）/ 布尔开关（如「仅看有印象检定的」） */
+    kind: "enum" | "range" | "boolean"
+    /** 可选值（kind 为 enum / range 时有意义） */
+    values: DBFacetValue[]
+    /** bool 类型的说明，例如「只保留包含印象检定的任务链」 */
+    description?: string
 }
 
 /** 剧情检索命中的对话片段 */
@@ -84,6 +116,12 @@ export interface DBStoryHit {
     chapter: string
     episode: string
     version?: string
+    /** 任务类型展示名（主线任务 / 支线任务 / 限时任务 / 活动任务） */
+    questType?: string
+    /** 是否包含印象检定选项 */
+    imprCheck?: boolean
+    /** 是否包含印象增加选项 */
+    imprIncrease?: boolean
     /** 命中的对话片段 */
     snippets: DBStorySnippet[]
     /** 该任务链在资料库中的详情路由 */
@@ -106,7 +144,8 @@ interface DBModuleAdapter {
     labelKey: string
     path: string
     versioned: boolean
-    /** 详情页路由构造 */
+    /** 本模块可用的筛选项定义（对应列表页上的筛选行） */
+    facets?: DBFacetDefinition[]
     /** 模块条目清单（懒执行，避免无用开销） */
     list: () => DBEntrySummary[]
 }
@@ -128,6 +167,115 @@ const MONSTER_TYPE_LABELS: Record<string, string> = {
     Rescue_Elite_Monster: "救援精英",
 }
 
+/** 模块筛选取值的前缀，保证不同模块的同名分类不会互相干扰 */
+const FACET_PREFIX = "f:"
+
+/**
+ * 把筛选取值编码成给模型看的字符串。
+ *
+ * 取值一律带 `f:` 前缀，是为了和「模块本身的值」（如版本号 `1.6`）区分开：
+ * 模型在 `filters` 参数里写 `{ "type": "f:主线任务" }` 一眼能看出是筛选项而非别的含义。
+ * @param value 原始取值
+ * @returns 编码后的筛选取值
+ */
+function facetValue(value: string | number): string {
+    return `${FACET_PREFIX}${value}`
+}
+
+/** 模块级 facet 取值的 i18n 处理：直接返回原文（游戏内文案多为硬编码中文） */
+function facetLabel(value: string | number): string {
+    return `${value}`.trim()
+}
+
+/**
+ * 任务类型分组映射，与剧情列表页的 `QUEST_TYPE_GROUP_MAP` 保持一致。
+ *
+ * 游戏原始 type 有 1/2/3/4/5/6 六种，但 1 与 2 都是主线、3 与 4 都是支线，
+ * 列表页因此把它们并成同一组展示。这里复用同一口径，保证 Agent 说「主线任务」
+ * 与用户在列表页点「主线任务」得到的集合完全一致。
+ */
+const QUEST_TYPE_GROUP_MAP: Record<number, number> = {
+    1: 1,
+    2: 1,
+    3: 3,
+    4: 3,
+    5: 5,
+    6: 6,
+}
+
+/**
+ * 解析任务类型所属的筛选组。
+ * @param type 原始任务类型
+ * @returns 分组后的类型取值
+ */
+function resolveQuestTypeGroup(type: number): number {
+    return QUEST_TYPE_GROUP_MAP[type] || type
+}
+
+/**
+ * 根据分组后的类型取值统计其包含的原始类型集合。
+ * @param group 分组后的类型取值
+ * @returns 原始类型列表
+ */
+function resolveQuestRawTypes(group: number): number[] {
+    const rawTypes = Object.keys(QUEST_TYPE_GROUP_MAP)
+        .map(key => Number(key))
+        .filter(rawType => QUEST_TYPE_GROUP_MAP[rawType] === group)
+
+    return rawTypes.length ? rawTypes : [group]
+}
+
+/**
+ * 构建「枚举取值 → 条目数」的计数表。
+ * @param entries 模块条目
+ * @param facetId 筛选项 id
+ * @returns 取值计数表
+ */
+function countFacetValues(entries: DBEntrySummary[], facetId: string): Map<string, number> {
+    const counts = new Map<string, number>()
+
+    for (const entry of entries) {
+        for (const value of entry.facets?.[facetId] ?? []) {
+            counts.set(value, (counts.get(value) ?? 0) + 1)
+        }
+    }
+
+    return counts
+}
+
+/**
+ * 把计数表按字典序（数值优先）转成 facet 可选值列表。
+ * @param counts 取值计数表
+ * @param sort 排序方式
+ * @returns facet 可选值列表
+ */
+function toFacetValues(counts: Map<string, number>, sort: "numeric" | "locale" = "locale"): DBFacetValue[] {
+    const compare = (a: string, b: string) => {
+        if (sort === "numeric") {
+            const [left, right] = [Number.parseFloat(storyFacetRawValue(a)), Number.parseFloat(storyFacetRawValue(b))]
+
+            if (Number.isFinite(left) && Number.isFinite(right) && left !== right) {
+                return left - right
+            }
+        }
+
+        return storyFacetRawValue(a).localeCompare(storyFacetRawValue(b), "zh-CN", { numeric: true })
+    }
+
+    return [...counts.entries()]
+        .sort(([a], [b]) => compare(a, b))
+        .map(([value, count]) => ({ value, label: facetLabel(storyFacetRawValue(value)), count }))
+}
+
+/**
+ * 剥离筛选取值的编码前缀，得到可读原文。
+ * @param value 编码后的筛选取值
+ * @returns 原始取值
+ */
+function storyFacetRawValue(value: string): string {
+    return value.startsWith(FACET_PREFIX) ? value.slice(FACET_PREFIX.length) : value
+}
+
 /**
  * 资料库模块适配器清单。
  * 只登记能给出结构化字段（名称/版本/分类）的模块；其余模块仍可通过全库检索命中。
@@ -138,6 +286,13 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.char",
         path: "/db/char",
         versioned: true,
+        /** 与角色列表页一致：元素 / 标签 / 精通 / 势力 */
+        facets: [
+            { id: "element", label: "属性", kind: "enum", values: [] },
+            { id: "tag", label: "标签", kind: "enum", values: [] },
+            { id: "proficiency", label: "精通", kind: "enum", values: [] },
+            { id: "faction", label: "阵营", kind: "enum", values: [] },
+        ],
         list: () =>
             charData.map(item => ({
                 id: item.id,
@@ -145,6 +300,12 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
                 subtitle: joinParts([item.属性, item.精通?.[0]]),
                 version: item.版本,
                 path: `/db/char/${item.id}`,
+                facets: {
+                    element: [facetValue(item.属性)].filter(() => !!item.属性),
+                    tag: (item.标签 ?? []).map(tag => facetValue(tag)),
+                    proficiency: (item.精通 ?? []).map(prof => facetValue(prof)),
+                    faction: item.阵营 ? [facetValue(item.阵营)] : [],
+                },
             })),
     },
     {
@@ -152,6 +313,11 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.weapon",
         path: "/db/weapon",
         versioned: true,
+        /** 与武器列表页一致：分类 / 伤害类型 */
+        facets: [
+            { id: "category", label: "分类", kind: "enum", values: [] },
+            { id: "damageType", label: "伤害类型", kind: "enum", values: [] },
+        ],
         list: () =>
             weaponData.map(item => ({
                 id: item.id,
@@ -159,6 +325,10 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
                 subtitle: joinParts([item.类型?.[0], item.伤害类型]),
                 version: item.版本,
                 path: `/db/weapon/${item.id}`,
+                facets: {
+                    category: (item.类型 ?? []).map(category => facetValue(category)),
+                    damageType: item.伤害类型 ? [facetValue(item.伤害类型)] : [],
+                },
             })),
     },
     {
@@ -166,6 +336,12 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.mod",
         path: "/db/mod",
         versioned: true,
+        /** 与魔之楔列表页一致：类型 / 系列 / 品质 / 元素 */
+        facets: [
+            { id: "type", label: "类型", kind: "enum", values: [] },
+            { id: "series", label: "系列", kind: "enum", values: [] },
+            { id: "quality", label: "品质", kind: "enum", values: [] },
+        ],
         list: () =>
             modData.map(item => ({
                 id: item.id,
@@ -173,6 +349,11 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
                 subtitle: joinParts([item.系列, item.类型, item.品质]),
                 version: item.版本,
                 path: `/db/mod/${item.id}`,
+                facets: {
+                    type: item.类型 ? [facetValue(item.类型)] : [],
+                    series: item.系列 ? [facetValue(item.系列)] : [],
+                    quality: item.品质 ? [facetValue(item.品质)] : [],
+                },
             })),
     },
     {
@@ -180,6 +361,11 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.achievement",
         path: "/db/achievement",
         versioned: true,
+        /** 与成就列表页一致：分类 / 品质 */
+        facets: [
+            { id: "category", label: "分类", kind: "enum", values: [] },
+            { id: "quality", label: "品质", kind: "range", values: [] },
+        ],
         list: () =>
             achievementData.map(item => ({
                 id: item.id,
@@ -187,6 +373,10 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
                 subtitle: joinParts([item.分类, item.描述]),
                 version: item.版本,
                 path: `/db/achievement/${item.id}`,
+                facets: {
+                    category: item.分类 ? [facetValue(item.分类)] : [],
+                    quality: item.品质 === undefined ? [] : [facetValue(item.品质)],
+                },
             })),
     },
     {
@@ -194,13 +384,32 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.questchain",
         path: "/db/questchain",
         versioned: true,
+        /**
+         * 与剧情列表页一致：任务类型 / 印象检定 / 印象增加。
+         *
+         * 类型按分组口径给出（主线 / 支线 / 限时 / 活动），章节不做成筛选项——
+         * 章节名是 3 个固定值，用关键词检索就够，做成 facet 反而占满取值空间。
+         */
+        facets: [
+            { id: "type", label: "任务类型", kind: "enum", values: [] },
+            { id: "imprCheck", label: "印象检定", kind: "boolean", values: [], description: "只保留含印象检定选项的任务链" },
+            { id: "imprIncrease", label: "印象增加", kind: "boolean", values: [], description: "只保留含印象增加选项的任务链" },
+        ],
         list: () =>
             questChainData.map(item => ({
                 id: item.id,
                 name: item.name,
-                subtitle: joinParts([`${item.chapterName} ${item.chapterNumber || ""}`, item.episode]),
+                subtitle: joinParts([
+                    `${item.chapterName} ${item.chapterNumber || ""}`,
+                    item.episode,
+                    getQuestName(resolveQuestTypeGroup(item.type)),
+                ]),
                 version: getQuestChainVersion(item),
                 path: `/db/questchain/${item.id}`,
+                facets: {
+                    type: [facetValue(getQuestName(resolveQuestTypeGroup(item.type)))],
+                    main: item.main === undefined ? [] : [facetValue(item.main)],
+                },
             })),
     },
     {
@@ -221,12 +430,21 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.dungeon",
         path: "/db/dungeon",
         versioned: false,
+        /** 与副本列表页一致：类型 / 等级 */
+        facets: [
+            { id: "type", label: "副本类型", kind: "enum", values: [] },
+            { id: "level", label: "等级", kind: "range", values: [] },
+        ],
         list: () =>
             dungeonsData.map(item => ({
                 id: item.id,
                 name: getDungeonName(item),
                 subtitle: joinParts([getDungeonType(item.t).label, `Lv.${item.lv}`]),
                 path: `/db/dungeon/${item.id}`,
+                facets: {
+                    type: [facetValue(getDungeonType(item.t).label)],
+                    level: [facetValue(item.lv)],
+                },
             })),
     },
     {
@@ -234,12 +452,17 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.monster",
         path: "/db/monster",
         versioned: false,
+        /** 与怪物列表页一致：类型（普通 / 精英 / 首领） */
+        facets: [{ id: "type", label: "怪物类型", kind: "enum", values: [] }],
         list: () =>
             monsterData.map(item => ({
                 id: item.id,
                 name: item.n,
                 subtitle: joinParts([item.t ? MONSTER_TYPE_LABELS[item.t] || item.t : undefined, `HP ${item.hp}`]),
                 path: `/db/monster/${item.id}`,
+                facets: {
+                    type: [facetValue(item.t ? MONSTER_TYPE_LABELS[item.t] || item.t : "普通")],
+                },
             })),
     },
     {
@@ -247,12 +470,17 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.resource",
         path: "/db/resource",
         versioned: false,
+        /** 与资源列表页一致：稀有度 */
+        facets: [{ id: "rarity", label: "稀有度", kind: "range", values: [] }],
         list: () =>
             resourceData.map(item => ({
                 id: item.id,
                 name: item.name,
                 subtitle: joinParts([`稀有度 ${item.rarity}`]),
                 path: `/db/resource/${item.id}`,
+                facets: {
+                    rarity: item.rarity === undefined ? [] : [facetValue(item.rarity)],
+                },
             })),
     },
     {
@@ -260,12 +488,21 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.pet",
         path: "/db/pet",
         versioned: false,
+        /** 与魔灵列表页一致：品质 / 类型 */
+        facets: [
+            { id: "quality", label: "品质", kind: "range", values: [] },
+            { id: "type", label: "类型", kind: "range", values: [] },
+        ],
         list: () =>
             petData.map(item => ({
                 id: item.id,
                 name: item.名称,
                 subtitle: joinParts([`品质 ${item.品质}`, item.描述]),
                 path: `/db/pet/${item.id}`,
+                facets: {
+                    quality: [facetValue(item.品质)],
+                    type: [facetValue(item.类型)],
+                },
             })),
     },
     {
@@ -273,12 +510,21 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.walnut",
         path: "/db/walnut",
         versioned: false,
+        /** 与委托密函列表页一致：类型 / 稀有度 */
+        facets: [
+            { id: "type", label: "类型", kind: "range", values: [] },
+            { id: "rarity", label: "稀有度", kind: "range", values: [] },
+        ],
         list: () =>
             walnutData.map(item => ({
                 id: item.id,
                 name: item.名称,
                 subtitle: joinParts([`稀有度 ${item.稀有度}`, item.获取途径?.join("/")]),
                 path: `/db/walnut/${item.id}`,
+                facets: {
+                    type: [facetValue(item.类型)],
+                    rarity: [facetValue(item.稀有度)],
+                },
             })),
     },
     {
@@ -325,12 +571,21 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         labelKey: "database.fish",
         path: "/db/fish",
         versioned: false,
+        /** 与钓鱼列表页一致：等级 / 稀有度 */
+        facets: [
+            { id: "level", label: "等级", kind: "range", values: [] },
+            { id: "rarity", label: "稀有度", kind: "range", values: [] },
+        ],
         list: () =>
             fishs.map(item => ({
                 id: item.id,
                 name: item.name,
                 subtitle: joinParts([`Lv.${item.level}`, `稀有度 ${item.rarity}`]),
                 path: `/db/fish/${item.id}`,
+                facets: {
+                    level: [facetValue(item.level)],
+                    rarity: [facetValue(item.rarity)],
+                },
             })),
     },
 ]
@@ -444,33 +699,111 @@ export function listModules(): DBModuleSummary[] {
 }
 
 /**
- * 判断文本是否命中关键词（支持中文包含与拼音全拼/首字母）。
- * @param text 待匹配文本
- * @param keyword 关键词
+ * 列出某个模块可用的筛选项（对应列表页上的筛选行）与各取值的条目数。
+ *
+ * 单独暴露这层是为了让模型「先查再筛」：取值的原始文案（如 `Boss` / `Elite_Monster`、
+ * 任务类型的中文名）不适合让模型凭记忆猜，查一次就能拿到准确取值。
+ *
+ * 剧情模块（questchain）走 `listStoryFilters`：印象检定 / 印象增加需要读对话选项才能统计，
+ * 而这两个值不在模块条目上，只能从剧情正文索引里算。
+ * @param moduleId 模块标识
+ * @returns 模块信息与筛选项；模块不支持筛选时 facets 为空数组
+ */
+export async function listModuleFilters(
+    moduleId: string
+): Promise<{ module?: DBModuleSummary; facets: DBFacetDefinition[]; note?: string }> {
+    const adapter = MODULE_ADAPTER_MAP.get(moduleId)
+
+    if (!adapter) {
+        return { facets: [] }
+    }
+
+    const entries = adapter.list()
+    const module: DBModuleSummary = {
+        id: adapter.id,
+        label: t(adapter.labelKey),
+        path: adapter.path,
+        versioned: adapter.versioned,
+        count: entries.length,
+    }
+
+    if (adapter.id === "questchain") {
+        const { facets, total } = await listStoryFilters()
+
+        return { module: { ...module, count: total }, facets }
+    }
+
+    if (!adapter.facets?.length) {
+        return { module, facets: [], note: `模块 ${adapter.id} 没有额外筛选项，可用关键词与版本过滤。` }
+    }
+
+    const facets = adapter.facets.map(facet => {
+        const counts = countFacetValues(entries, facet.id)
+        const sort = facet.id === "rarity" || facet.id === "quality" || facet.id === "level" ? "numeric" : "locale"
+
+        // range 类筛选项同样列出实际出现过的取值：让模型知道能填哪些数，
+        // 不必去猜「品质」到底是 1~5 还是 1~6。
+        return { ...facet, values: toFacetValues(counts, sort) }
+    })
+
+    return { module, facets }
+}
+
+/**
+ * 判断条目是否命中全部筛选条件。
+ * @param entry 模块条目
+ * @param filters 筛选条件（筛选项 id → 目标取值）
  * @returns 是否命中
  */
-function matchKeyword(text: string, keyword: string): boolean {
-    if (!text || !keyword) {
-        return false
+function matchFacetFilters(entry: DBEntrySummary, filters: Record<string, string | number | boolean>): boolean {
+    for (const [facetId, rawTarget] of Object.entries(filters)) {
+        if (rawTarget === undefined || rawTarget === null || `${rawTarget}`.trim() === "") {
+            continue
+        }
+
+        const actualValues = entry.facets?.[facetId] ?? []
+
+        // 布尔开关：true 表示「只要具备该特征的条目」，false / 缺省不参与过滤
+        if (typeof rawTarget === "boolean") {
+            if (rawTarget && actualValues.length === 0) {
+                return false
+            }
+
+            continue
+        }
+
+        const target = storyFacetRawValue(`${rawTarget}`.trim())
+        const matched = actualValues.some(value => {
+            const raw = storyFacetRawValue(value)
+
+            // 数组型取值（如武器类型「近战 / 单手剑」）允许按其中任意一个命中
+            return raw === target || raw.split(/[/、,，]/).some(part => part.trim() === target)
+        })
+
+        if (!matched) {
+            return false
+        }
     }
 
-    if (text.toLowerCase().includes(keyword.toLowerCase())) {
-        return true
-    }
-
-    return matchPinyin(text, keyword).match
+    return true
 }
 
 /**
  * 按模块查询条目明细。
  * @param moduleId 模块标识
- * @param options 查询条件：关键词、版本、条数上限
- * @returns 命中的条目（关键词缺失时返回该模块前若干条）
+ * @param options 查询条件：关键词、版本、筛选项、条数上限
+ * @returns 命中的条目（关键词与筛选项都缺失时返回该模块前若干条）
  */
 export function queryModule(
     moduleId: string,
-    options: { keyword?: string; version?: string | number; limit?: number } = {}
-): { module?: DBModuleSummary; entries: DBEntrySummary[]; total: number } {
+    options: {
+        keyword?: string
+        version?: string | number
+        limit?: number
+        /** 筛选项条件：筛选项 id → 目标取值（取值见 listModuleFilters） */
+        filters?: Record<string, string | number | boolean>
+    } = {}
+): { module?: DBModuleSummary; entries: DBEntrySummary[]; total: number; appliedFilters?: Record<string, string | number | boolean> } {
     const adapter = MODULE_ADAPTER_MAP.get(moduleId)
 
     if (!adapter) {
@@ -480,10 +813,15 @@ export function queryModule(
     const keyword = options.keyword?.trim() ?? ""
     const version = normalizeVersion(options.version)
     const limit = Math.min(Math.max(options.limit ?? 20, 1), 80)
+    const filters = options.filters ?? {}
 
     const all = adapter.list()
     const matched = all.filter(entry => {
         if (version && normalizeVersion(entry.version) !== version) {
+            return false
+        }
+
+        if (!matchFacetFilters(entry, filters)) {
             return false
         }
 
@@ -504,7 +842,26 @@ export function queryModule(
         },
         entries: matched.slice(0, limit),
         total: matched.length,
+        appliedFilters: Object.keys(filters).length ? filters : undefined,
     }
+}
+
+/**
+ * 判断文本是否命中关键词（支持中文包含与拼音全拼/首字母）。
+ * @param text 待匹配文本
+ * @param keyword 关键词
+ * @returns 是否命中
+ */
+function matchKeyword(text: string, keyword: string): boolean {
+    if (!text || !keyword) {
+        return false
+    }
+
+    if (text.toLowerCase().includes(keyword.toLowerCase())) {
+        return true
+    }
+
+    return matchPinyin(text, keyword).match
 }
 
 /**
@@ -571,6 +928,18 @@ interface StoryChainIndex {
     path: string
     lines: StoryLine[]
     searchText: string
+    /** 分组后的任务类型（1/3/5/6，对应主线 / 支线 / 限时 / 活动） */
+    questType: number
+    /** 任务类型展示名，直接给模型看 */
+    questTypeName: string
+    /** 篇章名（夜航篇 / 泊暮篇 / 世界纪游），用于按章节过滤 */
+    chapterName: string
+    /** 主线篇章编号（1 夜航篇、2 泊暮篇），无则 undefined */
+    main?: number
+    /** 任务链内是否存在印象检定选项 */
+    imprCheck: boolean
+    /** 任务链内是否存在印象增加选项 */
+    imprIncrease: boolean
 }
 
 /** 剧情索引缓存：按语言缓存，避免重复构建 */
@@ -618,24 +987,38 @@ function cleanDialogueContent(content: string | undefined): string {
 }
 
 /**
- * 收集单个任务链的全部对话行（含选项分支）。
+ * 收集单个任务链的全部对话行（含选项分支），同时记录印象检定 / 印象增加的命中情况。
+ *
+ * 印象标记的判定口径与剧情列表页完全一致：
+ * 遍历 `quests[].nodes[].dialogues[].options[]`，选项带 `imprCheck` 即算印象检定，
+ * 选项的 `impr[2] > 0` 即算印象增加；只要任务链内任意一个任务命中，整条链就标记为命中。
  * @param chain 任务链
  * @param questItemMap 任务详情映射
- * @returns 对话行列表
+ * @returns 对话行列表与印象标记
  */
-function collectChainStoryLines(chain: QuestChain, questItemMap: Map<number, QuestItem>): StoryLine[] {
+function collectChainStoryLines(
+    chain: QuestChain,
+    questItemMap: Map<number, QuestItem>
+): { lines: StoryLine[]; imprCheck: boolean; imprIncrease: boolean } {
     const lines: StoryLine[] = []
+    let imprCheck = false
+    let imprIncrease = false
 
     const pushDialogue = (questId: number, questName: string, dialogue: Dialogue) => {
         const text = cleanDialogueContent(dialogue.content)
 
-        if (!text) {
-            return
+        if (text) {
+            lines.push({ questId, questName, speaker: getDialogueSpeaker(dialogue), text })
         }
 
-        lines.push({ questId, questName, speaker: getDialogueSpeaker(dialogue), text })
-
         for (const option of dialogue.options ?? []) {
+            if (option.imprCheck) {
+                imprCheck = true
+            }
+            if (option.impr && option.impr[2] > 0) {
+                imprIncrease = true
+            }
+
             const optionText = cleanDialogueContent(option.content)
 
             if (optionText) {
@@ -660,7 +1043,7 @@ function collectChainStoryLines(chain: QuestChain, questItemMap: Map<number, Que
         }
     }
 
-    return lines
+    return { lines, imprCheck, imprIncrease }
 }
 
 /**
@@ -686,10 +1069,11 @@ async function buildStoryIndex(locale: StoryLocale): Promise<StoryChainIndex[]> 
 
     const index = questChainData.map(chain => {
         const chapter = `${chain.chapterName} ${chain.chapterNumber || ""}`.trim()
-        const lines = collectChainStoryLines(chain, questItemMap)
+        const { lines, imprCheck, imprIncrease } = collectChainStoryLines(chain, questItemMap)
         const searchText = [chain.name, chapter, chain.episode, ...lines.map(line => `${line.speaker} ${line.text}`)]
             .filter(Boolean)
             .join(" ")
+        const questType = resolveQuestTypeGroup(chain.type)
 
         return {
             chain,
@@ -701,11 +1085,172 @@ async function buildStoryIndex(locale: StoryLocale): Promise<StoryChainIndex[]> 
             path: `/db/questchain/${chain.id}`,
             lines,
             searchText,
+            questType,
+            questTypeName: getQuestName(questType),
+            chapterName: chain.chapterName,
+            main: chain.main,
+            imprCheck,
+            imprIncrease,
         }
     })
 
     storyIndexCache.set(locale, index)
     return index
+}
+
+/**
+ * 构建剧情筛选口径下的取值定义（任务类型 / 篇章 / 版本 / 印象标记）。
+ *
+ * 剧情是 Agent 里唯一「正文检索 + 列表页筛选」双向都要支持的模块：
+ * `search_story` 传 `filters` 时按这里的定义匹配，`list_filter_options` 也复用同一份取值。
+ * @param index 剧情索引
+ * @returns 筛选项定义
+ */
+function buildStoryFacets(index: StoryChainIndex[]): DBFacetDefinition[] {
+    const typeCounts = new Map<string, number>()
+    const chapterCounts = new Map<string, number>()
+    let imprCheckCount = 0
+    let imprIncreaseCount = 0
+
+    for (const entry of index) {
+        const typeValue = facetValue(entry.questTypeName)
+        typeCounts.set(typeValue, (typeCounts.get(typeValue) ?? 0) + 1)
+
+        const chapterValue = facetValue(entry.chapterName)
+        chapterCounts.set(chapterValue, (chapterCounts.get(chapterValue) ?? 0) + 1)
+
+        if (entry.imprCheck) {
+            imprCheckCount++
+        }
+        if (entry.imprIncrease) {
+            imprIncreaseCount++
+        }
+    }
+
+    const typeOrder = [1, 3, 5, 6]
+    const values = typeOrder
+        .map(group => facetValue(getQuestName(group)))
+        .filter(value => (typeCounts.get(value) ?? 0) > 0)
+        .map(value => ({ value, label: storyFacetRawValue(value), count: typeCounts.get(value) ?? 0 }))
+
+    return [
+        { id: "type", label: "任务类型", kind: "enum", values },
+        { id: "chapter", label: "篇章", kind: "enum", values: toFacetValues(chapterCounts) },
+        {
+            id: "imprCheck",
+            label: "印象检定",
+            kind: "boolean",
+            values: [],
+            description: `只保留含印象检定选项的任务链（当前共 ${imprCheckCount} 条）`,
+        },
+        {
+            id: "imprIncrease",
+            label: "印象增加",
+            kind: "boolean",
+            values: [],
+            description: `只保留含印象增加选项的任务链（当前共 ${imprIncreaseCount} 条）`,
+        },
+    ]
+}
+
+/**
+ * 判断剧情索引条目是否命中筛选条件。
+ *
+ * 取值容错做得比较宽：类型既接受「主线任务」这样的展示名，也接受 `1` / `3` 这样的原始分组号，
+ * 还接受 `1,2` 这种原始类型写法，避免模型因为口径不确定而检索失败。
+ * @param entry 剧情索引条目
+ * @param filters 筛选条件
+ * @returns 是否命中
+ */
+function matchStoryFilters(entry: StoryChainIndex, filters: Record<string, string | number | boolean>): boolean {
+    for (const [facetId, rawTarget] of Object.entries(filters)) {
+        if (rawTarget === undefined || rawTarget === null || `${rawTarget}`.trim() === "") {
+            continue
+        }
+
+        if (typeof rawTarget === "boolean") {
+            if (rawTarget && !(facetId === "imprCheck" ? entry.imprCheck : entry.imprIncrease)) {
+                return false
+            }
+
+            continue
+        }
+
+        const target = storyFacetRawValue(`${rawTarget}`.trim())
+
+        if (facetId === "type") {
+            const numeric = Number(target)
+            const asGroup = Number.isFinite(numeric) ? resolveQuestTypeGroup(numeric) : Number.NaN
+
+            const matched =
+                entry.questTypeName === target ||
+                (Number.isFinite(asGroup) && entry.questType === asGroup) ||
+                resolveQuestRawTypes(entry.questType).some(rawType => `${rawType}` === target)
+
+            if (!matched) {
+                return false
+            }
+
+            continue
+        }
+
+        if (facetId === "chapter") {
+            if (entry.chapterName !== target && entry.chapter !== target) {
+                return false
+            }
+
+            continue
+        }
+
+        if (facetId === "version") {
+            if (normalizeVersion(entry.version) !== normalizeVersion(target)) {
+                return false
+            }
+
+            continue
+        }
+
+        // 其余筛选项（main 等）一律按「条目取值等于目标」处理，取不到值即视为不命中
+        const actualValues = facetId === "main" ? (entry.main === undefined ? [] : [`${entry.main}`]) : []
+
+        if (!actualValues.includes(target)) {
+            return false
+        }
+    }
+
+    return true
+}
+
+/**
+ * 把剧情索引条目转成对外返回的命中结构。
+ * @param entry 剧情索引条目
+ * @param keywords 用于挑选片段的关键词列表（空列表表示不做片段定位）
+ * @param snippetLimit 片段数量上限
+ * @returns 剧情命中
+ */
+function toStoryHit(entry: StoryChainIndex, keywords: string[], snippetLimit: number): DBStoryHit {
+    const snippets: DBStorySnippet[] = []
+
+    for (const keyword of keywords) {
+        if (snippets.length >= snippetLimit) {
+            break
+        }
+
+        snippets.push(...pickStorySnippets(entry, keyword, snippetLimit - snippets.length))
+    }
+
+    return {
+        chainId: entry.chainId,
+        chainName: entry.chainName,
+        chapter: entry.chapter,
+        episode: entry.episode,
+        version: entry.version,
+        questType: entry.questTypeName,
+        imprCheck: entry.imprCheck,
+        imprIncrease: entry.imprIncrease,
+        snippets,
+        path: entry.path,
+    }
 }
 
 /**
@@ -730,25 +1275,62 @@ function pickStorySnippets(entry: StoryChainIndex, keyword: string, limit: numbe
 }
 
 /**
- * 剧情全文检索：先按任务链标题/章节/对话正文做模糊检索，再在命中任务链中定位相关对话行。
- * @param keyword 关键词（人名、事件、地点等）
- * @param options 查询条件：返回任务链数量、每个任务链的片段数量
+ * 剧情检索：按任务链标题/章节/对话正文做模糊检索，再在命中任务链中定位相关对话行。
+ *
+ * 支持两种调用形态：
+ * - 有关键词：按关键词检索，命中后挑选相关台词片段；
+ * - 无关键词但带 filters（或只按类型列举）：退化为「按列表页筛选规则列举任务链」，
+ *   例如「主线任务有哪些」，此时不返回台词片段。
+ * @param keyword 关键词（人名、事件、地点等），可为空串
+ * @param options 查询条件：返回任务链数量、每个任务链的片段数量、筛选项条件
  * @returns 命中的任务链与对话片段
  */
 export async function searchStory(
     keyword: string,
-    options: { limit?: number; snippetLimit?: number } = {}
-): Promise<{ hits: DBStoryHit[]; note: string }> {
+    options: {
+        limit?: number
+        snippetLimit?: number
+        /** 筛选项条件：筛选项 id → 目标取值，取值见 listModuleFilters("questchain") */
+        filters?: Record<string, string | number | boolean>
+    } = {}
+): Promise<{ hits: DBStoryHit[]; total: number; note: string }> {
     const trimmed = keyword.trim()
+    const filters = options.filters ?? {}
+    const hasFilters = Object.keys(filters).length > 0
 
-    if (!trimmed) {
-        return { hits: [], note: "关键词为空。" }
+    if (!trimmed && !hasFilters) {
+        return { hits: [], total: 0, note: "关键词与筛选条件都为空，请至少给出关键词或一个筛选项（如 type=主线任务）。" }
     }
 
     const locale = resolveStoryLocale()
     const index = await buildStoryIndex(locale)
 
-    const fuse = new Fuse(index, {
+    const limit = Math.min(Math.max(options.limit ?? 5, 1), 12)
+    const snippetLimit = Math.min(Math.max(options.snippetLimit ?? 6, 1), 20)
+
+    // 先把筛选条件收窄成候选集，再在候选集内做关键词检索，避免「筛选后被 limit 截断」造成的漏检
+    const scoped = hasFilters ? index.filter(entry => matchStoryFilters(entry, filters)) : index
+
+    const notes: string[] = []
+
+    if (locale !== "zh") {
+        notes.push(`剧情数据语言：${locale}`)
+    }
+    if (hasFilters) {
+        notes.push(`已按筛选条件收窄：${JSON.stringify(filters)}，候选任务链 ${scoped.length} 条。`)
+    }
+
+    if (!trimmed) {
+        const picked = scoped.slice(0, limit)
+
+        return {
+            hits: picked.map(entry => toStoryHit(entry, [], snippetLimit)),
+            total: scoped.length,
+            note: notes.join(" "),
+        }
+    }
+
+    const fuse = new Fuse(scoped, {
         threshold: 0.34,
         ignoreLocation: true,
         minMatchCharLength: 1,
@@ -761,25 +1343,15 @@ export async function searchStory(
         ],
     })
 
-    const limit = Math.min(Math.max(options.limit ?? 5, 1), 12)
-    const snippetLimit = Math.min(Math.max(options.snippetLimit ?? 6, 1), 20)
-
     // 精确包含优先：先挑出对话正文里真的出现关键词的任务链，再用模糊检索补齐
-    const exact = index.filter(entry => matchKeyword(entry.searchText, trimmed))
+    const exact = scoped.filter(entry => matchKeyword(entry.searchText, trimmed))
     const fuzzy = fuse.search(trimmed, { limit }).map(result => result.item)
     const ordered = [...exact, ...fuzzy.filter(entry => !exact.includes(entry))].slice(0, limit)
 
     return {
-        hits: ordered.map(entry => ({
-            chainId: entry.chainId,
-            chainName: entry.chainName,
-            chapter: entry.chapter,
-            episode: entry.episode,
-            version: entry.version,
-            snippets: pickStorySnippets(entry, trimmed, snippetLimit),
-            path: entry.path,
-        })),
-        note: locale === "zh" ? "" : `剧情数据语言：${locale}`,
+        hits: ordered.map(entry => toStoryHit(entry, [trimmed], snippetLimit)),
+        total: exact.length + fuzzy.filter(entry => !exact.includes(entry)).length,
+        note: notes.join(" "),
     }
 }
 
@@ -811,6 +1383,9 @@ export async function readStory(
             chapter: entry.chapter,
             episode: entry.episode,
             version: entry.version,
+            questType: entry.questTypeName,
+            imprCheck: entry.imprCheck,
+            imprIncrease: entry.imprIncrease,
             path: entry.path,
         },
         lines: scoped.slice(offset, offset + limit).map(line => ({
@@ -821,4 +1396,17 @@ export async function readStory(
         })),
         total: scoped.length,
     }
+}
+
+/**
+ * 列出剧情检索可用的筛选项与取值（对应剧情列表页的筛选行）。
+ *
+ * 与 `listModuleFilters("questchain")` 的区别：这里给出的是**按剧情正文索引统计**的取值，
+ * 包含印象检定 / 印象增加这类需要读对话选项才能得出的筛选项。
+ * @returns 剧情筛选项定义
+ */
+export async function listStoryFilters(): Promise<{ facets: DBFacetDefinition[]; total: number }> {
+    const index = await buildStoryIndex(resolveStoryLocale())
+
+    return { facets: buildStoryFacets(index), total: index.length }
 }

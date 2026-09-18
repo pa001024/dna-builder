@@ -1,15 +1,18 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
-import { computed, onBeforeUnmount, onMounted, ref } from "vue"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import { type DBLatestItem } from "@/components/DBLatestItemCard.vue"
 import { useDBChat } from "@/composables/useDBChat"
+import { useSearchParam } from "@/composables/useSearchParam"
 import charData from "@/data/d/char.data"
 import modData from "@/data/d/mod.data"
 import weaponData from "@/data/d/weapon.data"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
 import type { Conversation } from "@/store/db"
 import { useUIStore } from "@/store/ui"
+import { copyText } from "@/util"
+import type { AskUserResponse } from "@/utils/db-ask-user"
 import { type DBGlobalSearchOption, GlobalSearchService } from "@/utils/global-search"
 
 const router = useRouter()
@@ -37,10 +40,58 @@ function navigateTo(path: string) {
 }
 
 const searchKeyword = ref("")
+/** 参与检索的关键词：输入停顿后才同步，避免逐字触发全库模糊检索 */
+const debouncedKeyword = ref("")
+/** 检索防抖延迟（ms）：取值需同时满足「打字时不卡」与「停顿后尽快出结果」 */
+const SEARCH_DEBOUNCE_MS = 150
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+/**
+ * 取消尚未触发的检索防抖任务。
+ */
+function cancelSearchDebounce() {
+    if (searchDebounceTimer !== null) {
+        clearTimeout(searchDebounceTimer)
+        searchDebounceTimer = null
+    }
+}
+
+/**
+ * 输入变化时重置防抖计时器：连续输入期间不做检索，停顿后一次性同步关键词。
+ */
+watch(searchKeyword, () => {
+    cancelSearchDebounce()
+    searchDebounceTimer = setTimeout(() => {
+        searchDebounceTimer = null
+        debouncedKeyword.value = searchKeyword.value
+    }, SEARCH_DEBOUNCE_MS)
+})
+
 /** 对话模式：进入后上段展示消息流、左栏展示会话记录，直到用户返回资料库 */
 const chatMode = ref(false)
 /** “本期新增”是否处于宽屏单行布局 */
 const isWideLatestRow = ref(true)
+
+/**
+ * 对话模式在 URL 中的标记（`?chat=1`）。
+ *
+ * 与 `chatSessionId` 一起构成对话态的完整 URL 状态：跳转到资料详情页后
+ * 「浏览器后退」回到的是同一个 URL，组件据此恢复到原来的对话，
+ * 而不是退回资料库浏览态。
+ */
+const chatModeParam = useSearchParam<boolean>("dbchat", false, {
+    // 序列化刻意写成 `1` / 缺省：useSearchParam 对布尔默认走 String(value)，
+    // 会产出 `dbchat=true` 这种冗长写法
+    serialize: value => (value ? "1" : undefined),
+})
+
+/**
+ * 当前对话会话 id 的 URL 同步。
+ *
+ * `0` 表示尚未建立会话（新对话），作为默认值会被自动从 URL 中移除。
+ * 会话 id 在首条提问落库后才确定，由下面的 watch 写回。
+ */
+const chatSessionId = useSearchParam<number>("chat", 0)
 
 /**
  * 资料库对话状态（会话列表 + 消息流 + 资料检索 Agent）。
@@ -48,21 +99,113 @@ const isWideLatestRow = ref(true)
  */
 const {
     conversations: chatConversations,
+    isConversationLoading,
     activeConversationId,
     messages: chatMessages,
     isBusy: chatBusy,
     liveReasoning,
+    pendingAsk: chatPendingAsk,
     startNewConversation,
     selectConversation,
     removeConversation,
+    exportConversationText,
     send: sendChat,
+    answerAsk: answerChatAsk,
+    skipAsk: skipChatAsk,
     interrupt: interruptChat,
 } = useDBChat()
 
 /** 是否处于输入态：输入非空即进入提问/检索态 */
 const isComposing = computed(() => searchKeyword.value.trim().length > 0)
-/** 检索范围条是否展示：输入态（本地检索）与对话态（资料检索）都需要 */
-const showScopeChips = computed(() => chatMode.value || isComposing.value)
+/** 模块过滤条是否展示：仅在浏览模块列表时展示（对话态与输入态都不需要） */
+const showModuleFilter = computed(() => !chatMode.value && !isComposing.value)
+
+/**
+ * 会话恢复守卫：URL 里的会话 id 只在恢复后生效，
+ * 避免「会话列表还没加载完就先建一个新会话」这类时序问题。
+ */
+const isConversationRestoring = ref(false)
+
+/**
+ * 标记 URL 中的会话已失效（被删除，或详情尚未加载完成）。
+ *
+ * 只清 URL、不清 chatMode：本次会话仍要继续，用户不该被踢回资料库。
+ */
+function clearSessionParam() {
+    isConversationRestoring.value = true
+    chatSessionId.value = 0
+    void nextTick(() => {
+        isConversationRestoring.value = false
+    })
+}
+
+/**
+ * 依据 URL 恢复对话态：`?dbchat=1` 决定是否进入对话模式，
+ * `?chat=<id>` 决定展示哪个会话。
+ *
+ * 在会话列表加载完成后调用一次即可——组件重新挂载（后退/刷新）时
+ * Dexie 里已有全部会话，直接查表切换，回到的就是用户离开前那条对话。
+ */
+async function restoreChatFromUrl() {
+    if (!chatModeParam.value) {
+        return
+    }
+
+    chatMode.value = true
+
+    const targetId = chatSessionId.value
+
+    if (!targetId) {
+        return
+    }
+
+    const conversation = chatConversations.value.find(item => item.id === targetId)
+
+    if (!conversation) {
+        clearSessionParam()
+        return
+    }
+
+    isConversationRestoring.value = true
+    try {
+        await selectConversation(conversation)
+    } finally {
+        isConversationRestoring.value = false
+    }
+}
+
+/**
+ * URL 状态 → 组件状态：`dbchat` 被外部改动（前进/后退）时同步对话模式。
+ *
+ * 从「对话态」后退到「浏览态」时，浏览器恢复的是更早的那条历史记录，
+ * 此时 `dbchat` 会变回 false，这里把 chatMode 一并退回。
+ */
+watch(chatModeParam, value => {
+    if (!value && chatMode.value) {
+        chatMode.value = false
+        resetSearchKeyword()
+        return
+    }
+
+    if (value) {
+        void restoreChatFromUrl()
+    }
+})
+
+/**
+ * 组件状态 → URL 状态：切换会话时把 id 写进 query。
+ *
+ * 会话在首条提问后才真正落库（`activeConversationId` 由 0 变为新 id），
+ * 因此新建对话时也会在这里被自动带上，无需在 send 里额外处理。
+ * 恢复过程中（`isConversationRestoring`）跳过，避免把 URL 又改回去。
+ */
+watch(activeConversationId, id => {
+    if (isConversationRestoring.value) {
+        return
+    }
+
+    chatSessionId.value = id
+})
 
 /** 模块入口：icon 为 Icon.vue 中登记的字形名（as const 保留字面量类型，供 Icon 组件校验） */
 const databaseItems = [
@@ -165,12 +308,29 @@ const selectedSearchSectionIds = ref(databaseSectionConfigs.map(section => secti
 
 /**
  * 平铺的模块卡片顺序：推荐模块在前，其余保持原有顺序。
+ * 再按选中的分区做**实时过滤**（过滤条就在列表顶部，改选立刻生效）。
  */
 const moduleCards = computed<DatabaseItem[]>(() => {
     const featuredSet = new Set(featuredPaths)
     const featured = featuredPaths.map(path => databaseItemMap.get(path)).filter((item): item is DatabaseItem => item !== undefined)
+    const ordered = [...featured, ...databaseItems.filter(item => !featuredSet.has(item.path))]
 
-    return [...featured, ...databaseItems.filter(item => !featuredSet.has(item.path))]
+    if (!selectedSearchPaths.value) {
+        return ordered
+    }
+
+    return ordered.filter(item => selectedSearchPaths.value?.has(item.path))
+})
+
+/**
+ * 当前过滤命中的模块数量提示：过滤条右上角展示，让用户知道筛掉了多少。
+ */
+const moduleFilterStatus = computed(() => {
+    if (isAllSearchSectionsSelected.value) {
+        return t("view.allModules")
+    }
+
+    return t("view.moduleCount", { count: selectedSearchSectionIds.value.length })
 })
 
 const searchScopeOptions = computed<SearchScopeOption[]>(() => {
@@ -209,9 +369,10 @@ const selectedSearchPaths = computed(() => {
 
 /**
  * 实时计算搜索候选，按融合评分返回前若干条。
+ * 使用防抖后的关键词：输入过程中不触发全库模糊检索。
  */
 const searchOptions = computed<DBGlobalSearchOption[]>(() => {
-    const options = globalSearchService.search(searchKeyword.value)
+    const options = globalSearchService.search(debouncedKeyword.value)
 
     if (!selectedSearchPaths.value) {
         return options
@@ -234,7 +395,7 @@ const searchStatusText = computed(() => {
         ? t("view.allModules")
         : t("view.moduleCount", { count: selectedSearchSectionIds.value.length })
 
-    if (!searchKeyword.value.trim()) {
+    if (!debouncedKeyword.value.trim()) {
         return t("view.searchScope", { scope: searchScopeText })
     }
 
@@ -413,16 +574,27 @@ function toggleSearchScope(scopeId: string) {
 }
 
 /**
+ * 清空输入并同步检索关键词，避免防抖延迟导致结果面板残留上一次的命中。
+ */
+function resetSearchKeyword() {
+    cancelSearchDebounce()
+    searchKeyword.value = ""
+    debouncedKeyword.value = ""
+}
+
+/**
  * 选择搜索候选并跳转，同时重置输入内容。
  * @param option 选中的搜索候选项
  */
 function handleSelectSearchOption(option: DBGlobalSearchOption) {
-    searchKeyword.value = ""
+    resetSearchKeyword()
     navigateTo(option.path)
 }
 
 /**
  * 提交提问：交给资料检索 Agent，并把界面切到对话态。
+ *
+ * 有挂起提问时不发新提问——交给输入框的文案去回答那道题（由 useDBChat 路由）。
  * @param query 输入框内容
  */
 function handleSubmit(query: string) {
@@ -432,16 +604,56 @@ function handleSubmit(query: string) {
         return
     }
 
-    chatMode.value = true
-    searchKeyword.value = ""
+    enterChatMode()
+    resetSearchKeyword()
     void sendChat(text)
+}
+
+/**
+ * 回答资料检索 Agent 的提问并继续检索。
+ * @param response 用户回答
+ */
+function handleAnswerAsk(response: AskUserResponse) {
+    if (chatBusy.value) {
+        return
+    }
+
+    void answerChatAsk(response)
+}
+
+/**
+ * 跳过 Agent 的提问，让它基于已有信息继续。
+ */
+function handleSkipAsk() {
+    if (chatBusy.value) {
+        return
+    }
+
+    void skipChatAsk()
+}
+
+/**
+ * 进入对话模式（幂等）：同步 `chatMode` 与 URL 上的 `dbchat` 标记。
+ *
+ * 单独抽出来的原因是「提交提问」与「空输入点击发送按钮」都要走这一步，
+ * 而 URL 写入必须与 chatMode 一起，否则后退时会落回浏览态。
+ */
+function enterChatMode() {
+    chatMode.value = true
+    chatModeParam.value = true
 }
 
 /**
  * 新建对话。
  */
 function handleNewChat() {
-    chatMode.value = true
+    enterChatMode()
+    // 新对话尚未落库，URL 里先不带 chat 参数（send 建立会话后由 watch 自动写回）
+    isConversationRestoring.value = true
+    chatSessionId.value = 0
+    void nextTick(() => {
+        isConversationRestoring.value = false
+    })
     void startNewConversation()
 }
 
@@ -450,7 +662,7 @@ function handleNewChat() {
  * @param conversation 目标会话
  */
 function handleSelectConversation(conversation: Conversation) {
-    chatMode.value = true
+    enterChatMode()
     void selectConversation(conversation)
 }
 
@@ -467,7 +679,42 @@ async function handleRemoveConversation(conversation: Conversation) {
 }
 
 /**
- * 退出对话，回到资料库浏览态。
+ * 复制整个对话的纯文本内容。
+ * @param conversation 目标会话
+ */
+async function handleCopyConversation(conversation: Conversation) {
+    try {
+        const text = await exportConversationText(conversation)
+
+        if (!text) {
+            ui.showErrorMessage("这条对话还没有可复制的内容")
+            return
+        }
+
+        await copyText(text)
+        ui.showSuccessMessage("对话内容已复制到剪贴板")
+    } catch (error) {
+        ui.showErrorMessage("复制对话失败", error instanceof Error ? error.message : "")
+    }
+}
+
+/**
+ * 空输入时点击发送按钮：进入对话模式。
+ *
+ * 对话模式本身不消耗额度（只是打开界面、列出历史会话），所以不拦未登录用户；
+ * 真正的拦截在首次提问时由 useDBChat 给出「请先登录」的提示。
+ */
+function handleEnterChat() {
+    if (chatBusy.value) {
+        return
+    }
+
+    enterChatMode()
+    resetSearchKeyword()
+}
+
+/**
+ * 退出对话，回到资料库浏览态，并清掉 URL 上的对话标记。
  */
 function handleExitChat() {
     if (chatBusy.value) {
@@ -475,7 +722,39 @@ function handleExitChat() {
     }
 
     chatMode.value = false
-    searchKeyword.value = ""
+    chatModeParam.value = false
+    isConversationRestoring.value = true
+    chatSessionId.value = 0
+    void nextTick(() => {
+        isConversationRestoring.value = false
+    })
+    resetSearchKeyword()
+}
+
+/**
+ * 等待条件成立（带超时兜底）。
+ *
+ * 会话列表从 Dexie 异步加载，页面挂载时可能还没落地；
+ * 用轮询等它完成比在 composable 里暴露 Promise 更简单，
+ * 且 50ms 的间隔对本地 IndexedDB 足够（实际通常一轮就命中）。
+ * @param predicate 条件判定
+ * @param timeoutMs 超时时间（ms），超时后也继续后续流程，避免卡住页面
+ */
+function until(predicate: () => boolean, timeoutMs = 2000): Promise<void> {
+    return new Promise(resolve => {
+        const startedAt = Date.now()
+
+        const tick = () => {
+            if (predicate() || Date.now() - startedAt > timeoutMs) {
+                resolve()
+                return
+            }
+
+            window.setTimeout(tick, 50)
+        }
+
+        tick()
+    })
 }
 
 /**
@@ -515,16 +794,25 @@ onMounted(() => {
             isWideLatestRow.value = matches
         })
     )
+
+    // URL 里带着对话标记时恢复对话态（浏览器后退 / 刷新回到原来的对话）。
+    // 会话列表由 useDBChat 在创建时发起异步加载，这里等它落地再查表。
+    void until(() => !isConversationLoading.value).then(() => restoreChatFromUrl())
 })
 
 onBeforeUnmount(() => {
+    cancelSearchDebounce()
     unbindMediaQueries.forEach(unbind => unbind())
     unbindMediaQueries.length = 0
 })
 </script>
 
 <template>
-    <!-- 页面整屏不滚动，也不画背景与分隔线：上段 / 中段（输入框）/ 下段各自管理内部滚动 -->
+    <!--
+      页面整屏不滚动，也不画背景与分隔线。布局分两种形态：
+      - 对话态：两段式（消息区 flex-1 撑满 + 输入框贴底），对话内容自然沉底；
+      - 浏览 / 输入态：三段式（上段内容 / 中段输入框恒居中 / 下段内容）。
+    -->
     <div class="flex h-full min-h-0">
         <!-- 左栏：对话记录，仅在进入对话（提交提问）后出现，贯穿整页高度（窄屏隐藏，避免挤压输入区） -->
         <div v-if="chatMode" class="db-rise hidden h-full shrink-0 pt-6 pl-4 md:flex md:pl-6 lg:pl-8">
@@ -535,174 +823,204 @@ onBeforeUnmount(() => {
                 @new-chat="handleNewChat"
                 @select="handleSelectConversation"
                 @remove="handleRemoveConversation"
+                @copy="handleCopyConversation"
                 @exit="handleExitChat"
             />
         </div>
 
         <div class="flex min-w-0 flex-1 flex-col">
-            <!-- 上段：内容贴住输入框（靠下显示），超出时内部滚动 -->
-            <section class="flex min-h-0 flex-1 flex-col">
-                <!-- 对话态：消息流 -->
+            <!--
+              对话态：两段式。消息区 flex-1 吃掉整屏高度（内容贴底），输入框固定在底部。
+              上半部分不再保留空白的消息区——消息区本身就是滚动容器，
+              内容少时靠 justify-end 贴住输入框，内容多时向上滚动。
+            -->
+            <template v-if="chatMode">
                 <DBChatMessages
-                    v-if="chatMode"
                     :messages="chatMessages"
                     :busy="chatBusy"
                     :reasoning="liveReasoning"
+                    :pending-ask="chatPendingAsk"
                     class="px-4 md:px-6 lg:px-8"
+                    @answer="handleAnswerAsk"
+                    @skip="handleSkipAsk"
                 />
 
-                <!-- 输入态（未进入对话）：本地检索结果，贴住输入框 -->
-                <div v-else-if="isComposing" class="db-scroll min-h-0 flex-1 overflow-y-auto">
-                    <div class="flex min-h-full flex-col justify-end">
-                        <div class="mx-auto w-full max-w-7xl px-4 pb-4 md:px-6 lg:px-8">
-                            <div class="db-ask-panel">
-                                <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-1 pb-2">
-                                    <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-base-content/45">Search Results</p>
-                                    <p class="text-xs text-base-content/45">{{ searchStatusText }}</p>
+                <!-- 窄屏隐藏会话侧栏，这里保留退出对话的入口 -->
+                <div class="mx-auto flex w-full max-w-7xl shrink-0 items-center gap-3 px-4 pt-2 md:hidden md:px-6 lg:px-8">
+                    <button
+                        type="button"
+                        class="inline-flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-base-content/45 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        title="返回资料库"
+                        @click="handleExitChat"
+                    >
+                        <Icon icon="ri:arrow-left-line" class="h-3.5 w-3.5" />
+                        资料库
+                    </button>
+                </div>
+
+                <!-- 输入框贴底：对话态下不再位于页面正中 -->
+                <section class="shrink-0 px-4 pt-3 pb-5 md:px-6 lg:px-8">
+                    <div class="mx-auto w-full max-w-7xl">
+                        <DBAskBox
+                            v-model="searchKeyword"
+                            :busy="chatBusy"
+                            :placeholder="chatPendingAsk ? '也可以直接输入内容作答' : '继续追问，或换个话题'"
+                            hint="Enter 发送 · Shift + Enter 换行"
+                            submit-label="发送"
+                            @submit="handleSubmit"
+                            @stop="interruptChat"
+                        />
+                    </div>
+                </section>
+            </template>
+
+            <!-- 浏览 / 输入态：保持三段式，中段输入框恒居中 -->
+            <template v-else>
+                <!-- 上段：内容贴住输入框（靠下显示），超出时内部滚动 -->
+                <section class="flex min-h-0 flex-1 flex-col">
+                    <!-- 输入态：本地检索结果，贴住输入框 -->
+                    <div v-if="isComposing" class="db-scroll min-h-0 flex-1 overflow-y-auto">
+                        <div class="flex min-h-full flex-col justify-end">
+                            <div class="mx-auto w-full max-w-7xl px-4 pb-4 md:px-6 lg:px-8">
+                                <div class="db-ask-panel">
+                                    <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-1 pb-2">
+                                        <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-base-content/45">Search Results</p>
+                                        <p class="text-xs text-base-content/45">{{ searchStatusText }}</p>
+                                    </div>
+
+                                    <!-- 命中结果 -->
+                                    <ul v-if="visibleSearchOptions.length" class="db-scroll max-h-[min(40vh,18rem)] overflow-y-auto">
+                                        <li v-for="option in visibleSearchOptions" :key="option.id">
+                                            <button
+                                                type="button"
+                                                class="db-ask-result cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+                                                @click="handleSelectSearchOption(option)"
+                                            >
+                                                <span class="min-w-0 flex-1">
+                                                    <span class="block truncate text-sm font-medium">{{ option.title }}</span>
+                                                    <span v-if="option.subtitle" class="mt-0.5 block truncate text-xs text-base-content/55">
+                                                        {{ option.subtitle }}
+                                                    </span>
+                                                </span>
+                                                <span class="db-ask-result-path">{{ getItemPathLabel(option.path) }}</span>
+                                                <span class="shrink-0 border border-base-content/15 px-1.5 py-0.5 text-[10px] text-base-content/55">
+                                                    {{ option.typeLabel }}
+                                                </span>
+                                            </button>
+                                        </li>
+                                    </ul>
+
+                                    <p v-else class="px-1 py-4 text-sm text-base-content/55">
+                                        {{ $t("view.noResultEntries") }}
+                                        <span class="mt-1.5 block text-xs text-base-content/40">Enter 转交资料检索 · Shift + Enter 换行</span>
+                                    </p>
+
+                                    <p v-if="hiddenResultCount" class="db-ask-more">还有 {{ hiddenResultCount }} 条，继续输入可缩小范围</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 浏览态：模块分类过滤条 + 模块卡片网格（过滤条在列表顶部，实时过滤） -->
+                    <div v-else class="db-scroll min-h-0 flex-1 overflow-y-auto">
+                        <div class="flex min-h-full flex-col justify-end">
+                            <div class="db-rise mx-auto w-full max-w-7xl px-4 pt-6 pb-4 md:px-6 lg:px-8">
+                                <!-- 模块分类过滤条：改选立刻过滤下方模块列表 -->
+                                <div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+                                    <p class="shrink-0 font-mono text-[10px] uppercase tracking-[0.28em] text-base-content/40">Modules</p>
+                                    <div class="db-chip-row flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                                        <button
+                                            v-for="chip in moduleChips"
+                                            :key="chip.id"
+                                            type="button"
+                                            class="shrink-0 cursor-pointer border px-3 py-1.5 text-xs transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97]"
+                                            :class="
+                                                isSearchScopeSelected(chip.id)
+                                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                            "
+                                            @click="toggleSearchScope(chip.id)"
+                                        >
+                                            {{ chip.label }}
+                                            <span class="ml-1.5 font-mono text-[10px] tabular-nums opacity-60">{{ chip.count }}</span>
+                                        </button>
+                                    </div>
+                                    <p class="shrink-0 text-[11px] text-base-content/40">{{ moduleFilterStatus }}</p>
                                 </div>
 
-                                <!-- 命中结果 -->
-                                <ul v-if="visibleSearchOptions.length" class="db-scroll max-h-[min(40vh,18rem)] overflow-y-auto">
-                                    <li v-for="option in visibleSearchOptions" :key="option.id">
+                                <ul class="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-2">
+                                    <li v-for="item in moduleCards" :key="item.path">
                                         <button
                                             type="button"
-                                            class="db-ask-result cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
-                                            @click="handleSelectSearchOption(option)"
+                                            class="group flex w-full cursor-pointer items-center gap-2.5 border border-base-content/12 px-3 py-2.5 text-left text-sm text-base-content/80 transition-all duration-200 hover:-translate-y-px hover:border-primary/50 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
+                                            @click="navigateTo(item.path)"
                                         >
-                                            <span class="min-w-0 flex-1">
-                                                <span class="block truncate text-sm font-medium">{{ option.title }}</span>
-                                                <span v-if="option.subtitle" class="mt-0.5 block truncate text-xs text-base-content/55">
-                                                    {{ option.subtitle }}
-                                                </span>
-                                            </span>
-                                            <span class="db-ask-result-path">{{ getItemPathLabel(option.path) }}</span>
-                                            <span
-                                                class="shrink-0 border border-base-content/15 px-1.5 py-0.5 text-[10px] text-base-content/55"
-                                            >
-                                                {{ option.typeLabel }}
-                                            </span>
+                                            <Icon
+                                                :icon="item.icon"
+                                                class="h-4.5 w-4.5 shrink-0 text-base-content/45 transition-colors duration-200 group-hover:text-primary"
+                                            />
+                                            <span class="min-w-0 flex-1 truncate">{{ $t(item.name) }}</span>
+                                            <Icon
+                                                icon="ri:arrow-right-line"
+                                                class="h-3.5 w-3.5 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+                                            />
                                         </button>
                                     </li>
                                 </ul>
 
-                                <p v-else class="px-1 py-4 text-sm text-base-content/55">
+                                <!-- 过滤后没有命中任何模块时给出提示 -->
+                                <p v-if="!moduleCards.length" class="px-1 py-4 text-sm text-base-content/55">
                                     {{ $t("view.noResultEntries") }}
-                                    <span class="mt-1.5 block text-xs text-base-content/40">Enter 转交资料检索 · Shift + Enter 换行</span>
                                 </p>
-
-                                <p v-if="hiddenResultCount" class="db-ask-more">还有 {{ hiddenResultCount }} 条，继续输入可缩小范围</p>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- 浏览态：全部模块平铺小卡片（推荐模块排在最前） -->
-                <div v-else class="db-scroll min-h-0 flex-1 overflow-y-auto">
-                    <div class="flex min-h-full flex-col justify-end">
-                        <div class="db-rise mx-auto w-full max-w-7xl px-4 pb-4 pt-6 md:px-6 lg:px-8">
-                            <ul class="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-2">
-                                <li v-for="item in moduleCards" :key="item.path">
-                                    <button
-                                        type="button"
-                                        class="group flex w-full cursor-pointer items-center gap-2.5 border border-base-content/12 px-3 py-2.5 text-left text-sm text-base-content/80 transition-all duration-200 hover:-translate-y-px hover:border-primary/50 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.98]"
-                                        @click="navigateTo(item.path)"
-                                    >
-                                        <Icon
-                                            :icon="item.icon"
-                                            class="h-4.5 w-4.5 shrink-0 text-base-content/45 transition-colors duration-200 group-hover:text-primary"
-                                        />
-                                        <span class="min-w-0 flex-1 truncate">{{ $t(item.name) }}</span>
-                                        <Icon
-                                            icon="ri:arrow-right-line"
-                                            class="h-3.5 w-3.5 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100"
-                                        />
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
+                <!-- 中段：输入框（flex-none，始终位于页面正中） -->
+                <section class="shrink-0 px-4 py-5 md:px-6 lg:px-8">
+                    <div class="mx-auto w-full max-w-7xl">
+                        <DBAskBox
+                            v-model="searchKeyword"
+                            :busy="chatBusy"
+                            placeholder="今天想查点什么？输入关键词检索资料库，或直接向 AI 提问"
+                            hint="Enter 转交资料检索 · Shift + Enter 换行"
+                            submit-label="转交资料检索"
+                            @submit="handleSubmit"
+                            @stop="interruptChat"
+                            @enter-chat="handleEnterChat"
+                        />
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- 中段：输入框（flex-none，始终位于页面正中） -->
-            <section class="shrink-0 px-4 py-5 md:px-6 lg:px-8">
-                <div class="mx-auto w-full max-w-7xl">
-                    <DBAskBox
-                        v-model="searchKeyword"
-                        :busy="chatBusy"
-                        placeholder="今天想查点什么？输入关键词检索资料库，或直接向 AI 提问"
-                        hint="Enter 转交资料检索 · Shift + Enter 换行"
-                        submit-label="转交资料检索"
-                        @submit="handleSubmit"
-                        @stop="interruptChat"
-                    />
-                </div>
-            </section>
-
-            <!-- 下段：内容贴住页面底部（靠下显示） -->
-            <section class="flex min-h-0 flex-1 flex-col">
-                <!-- 输入态 / 对话态：检索范围（单行不换行） -->
-                <div v-if="showScopeChips" class="db-scroll min-h-0 flex-1 overflow-y-auto">
-                    <div class="flex min-h-full flex-col justify-end">
-                        <div class="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 pb-5 pt-3 md:px-6 lg:px-8">
-                            <!-- 窄屏隐藏会话侧栏，这里保留退出对话的入口 -->
-                            <button
-                                v-if="chatMode"
-                                type="button"
-                                class="inline-flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-base-content/45 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:hidden"
-                                title="返回资料库"
-                                @click="handleExitChat"
-                            >
-                                <Icon icon="ri:arrow-left-line" class="h-3.5 w-3.5" />
-                                资料库
-                            </button>
-
-                            <p class="hidden shrink-0 font-mono text-[10px] uppercase tracking-[0.28em] text-base-content/40 sm:block">
-                                Modules
-                            </p>
-                            <div class="db-chip-row flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
-                                <button
-                                    v-for="chip in moduleChips"
-                                    :key="chip.id"
-                                    type="button"
-                                    class="shrink-0 cursor-pointer border px-3 py-1.5 text-xs transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97]"
-                                    :class="
-                                        isSearchScopeSelected(chip.id)
-                                            ? 'border-primary bg-primary font-semibold text-primary-content'
-                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                    "
-                                    @click="toggleSearchScope(chip.id)"
+                <!-- 下段：内容贴住页面底部（靠下显示） -->
+                <section class="flex min-h-0 flex-1 flex-col">
+                    <!-- 浏览态：本期新增（展开时高度在段内撑开，不影响输入框位置） -->
+                    <div v-if="showModuleFilter" class="db-scroll db-latest-scroll min-h-0 flex-1 overflow-y-auto">
+                        <div class="flex min-h-full flex-col justify-end">
+                            <div class="db-rise mx-auto w-full max-w-7xl px-4 pb-5 pt-4 md:px-6 lg:px-8">
+                                <div
+                                    class="grid gap-x-6 gap-y-5"
+                                    :style="{ gridTemplateColumns: `repeat(${latestRowColumns}, minmax(0, 1fr))` }"
                                 >
-                                    {{ chip.label }}
-                                    <span class="ml-1.5 font-mono text-[10px] tabular-nums opacity-60">{{ chip.count }}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 浏览态：本期新增（展开时高度在段内撑开，不影响输入框位置） -->
-                <div v-else class="db-scroll db-latest-scroll min-h-0 flex-1 overflow-y-auto">
-                    <div class="flex min-h-full flex-col justify-end">
-                        <div class="db-rise mx-auto w-full max-w-7xl px-4 pb-5 pt-4 md:px-6 lg:px-8">
-                            <div
-                                class="grid gap-x-6 gap-y-5"
-                                :style="{ gridTemplateColumns: `repeat(${latestRowColumns}, minmax(0, 1fr))` }"
-                            >
-                                <div v-for="group in latestRowLayout" :key="group.kind" :style="{ gridColumn: `span ${group.span}` }">
-                                    <DBLatestGroup
-                                        :label="group.label"
-                                        :version="group.version"
-                                        :entries="group.entries"
-                                        :columns="group.cardColumns"
-                                        @expanded-change="handleLatestExpandedChange(group.kind, $event)"
-                                    />
+                                    <div v-for="group in latestRowLayout" :key="group.kind" :style="{ gridColumn: `span ${group.span}` }">
+                                        <DBLatestGroup
+                                            :label="group.label"
+                                            :version="group.version"
+                                            :entries="group.entries"
+                                            :columns="group.cardColumns"
+                                            @expanded-change="handleLatestExpandedChange(group.kind, $event)"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+
+                    <!-- 输入态：留空（结果面板已经占据上段），保持输入框位置稳定 -->
+                    <div v-else class="db-scroll min-h-0 flex-1 overflow-y-auto" />
+                </section>
+            </template>
         </div>
     </div>
 </template>

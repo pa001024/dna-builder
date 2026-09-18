@@ -27,7 +27,8 @@
                 "useIterableCallbackReturn": "off",
                 "noAssignInExpressions": "off",
                 "noConfusingVoidType": "off",
-                "noApproximativeNumericConstant": "off"
+                "noApproximativeNumericConstant": "off",
+                "noControlCharactersInRegex": "off"
             },
             "style": {
                 "noNonNullAssertion": "off"

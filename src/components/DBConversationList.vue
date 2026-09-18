@@ -22,6 +22,8 @@ const emit = defineEmits<{
     select: [conversation: Conversation]
     /** 删除会话 */
     remove: [conversation: Conversation]
+    /** 复制会话内容到剪贴板 */
+    copy: [conversation: Conversation]
     /** 退出对话，回到资料库浏览态 */
     exit: []
 }>()
@@ -81,7 +83,7 @@ const isEmpty = computed(() => props.conversations.length === 0)
                 <li v-for="conversation in props.conversations" :key="conversation.id" class="group relative">
                     <button
                         type="button"
-                        class="w-full cursor-pointer border px-2.5 py-2 pr-7 text-left transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed"
+                        class="w-full cursor-pointer border px-2.5 py-2 text-left transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed"
                         :class="
                             conversation.id === props.activeId
                                 ? 'border-primary/60 text-primary'
@@ -91,19 +93,26 @@ const isEmpty = computed(() => props.conversations.length === 0)
                         @click="emit('select', conversation)"
                     >
                         <span class="block truncate text-xs font-medium">{{ conversation.name }}</span>
-                        <span class="mt-0.5 block font-mono text-[10px] tabular-nums text-base-content/35">
-                            {{ formatTime(conversation.updatedAt) }}
+                        <!-- 时间戳与操作区：均仅悬停/聚焦该条目时显示，静息态只留会话名 -->
+                        <span
+                            class="mt-0.5 flex h-4 items-center gap-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
+                        >
+                            <span class="font-mono text-[10px] tabular-nums text-base-content/35">
+                                {{ formatTime(conversation.updatedAt) }}
+                            </span>
+                            <Icon
+                                icon="ri:file-copy-line"
+                                class="h-3 w-3 cursor-pointer text-base-content/30 hover:text-primary"
+                                title="复制会话内容"
+                                @click.stop="emit('copy', conversation)"
+                            />
+                            <Icon
+                                icon="ri:delete-bin-line"
+                                class="h-3 w-3 cursor-pointer text-base-content/30 hover:text-error"
+                                title="删除对话"
+                                @click.stop="emit('remove', conversation)"
+                            />
                         </span>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="absolute right-1.5 top-1.5 cursor-pointer p-0.5 text-base-content/25 opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:text-error focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed"
-                        :disabled="props.busy"
-                        title="删除对话"
-                        @click="emit('remove', conversation)"
-                    >
-                        <Icon icon="ri:delete-bin-line" class="h-3 w-3" />
                     </button>
                 </li>
             </ul>

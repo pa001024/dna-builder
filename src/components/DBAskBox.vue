@@ -23,6 +23,11 @@ const emit = defineEmits<{
     submit: [value: string]
     /** 点击中断按钮：请求停止当前检索 */
     stop: []
+    /**
+     * 无输入时点击发送按钮：进入对话模式。
+     * 输入框为空说明用户还没想好问什么，直接切到对话态（含历史会话列表）比什么都不发生更有用。
+     */
+    "enter-chat": []
 }>()
 
 /** 文本域自适应高度的上限（px），约 6 行；超出后由文本域内部滚动 */
@@ -62,6 +67,38 @@ function focus() {
 function handleInput(event: Event) {
     emit("update:modelValue", (event.target as HTMLTextAreaElement).value)
 }
+
+/**
+ * 发送按钮的主行为。
+ *
+ * - 检索进行中：中断当前检索；
+ * - 有输入：提交提问；
+ * - 无输入：进入对话模式（用户还没想好问什么时，先把对话界面打开）。
+ */
+function handleAction() {
+    if (props.busy) {
+        emit("stop")
+        return
+    }
+
+    if (canSubmit.value) {
+        submit()
+        return
+    }
+
+    emit("enter-chat")
+}
+
+/**
+ * 发送按钮的悬浮提示：随按钮主行为变化。
+ */
+const actionTitle = computed(() => {
+    if (props.busy) {
+        return "停止检索"
+    }
+
+    return canSubmit.value ? props.submitLabel : "进入对话"
+})
 
 /**
  * 发出提交事件（内容为空时不提交，检索进行中也不重复提交）。
@@ -109,9 +146,7 @@ defineExpose({ focus })
 
 <template>
     <!-- 输入框：无底色，仅保留 hairline 边框，让页面保持完全透明 -->
-    <div
-        class="db-ask-box border border-base-content/15 transition-colors duration-200 focus-within:border-primary/55"
-    >
+    <div class="db-ask-box border border-base-content/15 transition-colors duration-200 focus-within:border-primary/55 backdrop-blur-sm">
         <!-- 多行输入：随内容增高，最多 6 行 -->
         <textarea
             ref="textareaRef"
@@ -131,20 +166,23 @@ defineExpose({ focus })
             <p class="min-w-0 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-base-content/40">{{ hint }}</p>
 
             <div class="flex shrink-0 items-center gap-3">
+                <!--
+                  按钮始终可用：有输入时提交、无输入时进入对话模式、检索中时中断。
+                  仅有输入为空的浏览态用弱化配色暗示「这一步只是打开对话」。
+                -->
                 <button
                     type="button"
-                    class="flex h-8 w-8 items-center justify-center border transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.96]"
+                    class="flex h-8 w-8 cursor-pointer items-center justify-center border transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.96]"
                     :class="
                         props.busy
-                            ? 'cursor-pointer border-base-content/35 text-base-content/70 hover:border-error hover:text-error'
+                            ? 'border-base-content/35 text-base-content/70 hover:border-error hover:text-error'
                             : canSubmit
-                              ? 'cursor-pointer border-primary bg-primary text-primary-content'
-                              : 'cursor-not-allowed border-base-content/20 text-base-content/30'
+                              ? 'border-primary bg-primary text-primary-content'
+                              : 'border-base-content/25 text-base-content/55 hover:border-primary hover:text-primary'
                     "
-                    :disabled="!props.busy && !canSubmit"
-                    :title="props.busy ? '停止检索' : submitLabel"
-                    :aria-label="props.busy ? '停止检索' : submitLabel"
-                    @click="props.busy ? emit('stop') : submit()"
+                    :title="actionTitle"
+                    :aria-label="actionTitle"
+                    @click="handleAction"
                 >
                     <Icon :icon="props.busy ? 'ri:stop-circle-line' : 'ri:arrow-up-line'" class="h-4 w-4" />
                 </button>

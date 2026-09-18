@@ -138,16 +138,67 @@ export interface MessageToolTrace {
     status: "running" | "done" | "error"
 }
 
+/**
+ * 资料检索 Agent 单条回复中的一段思考内容。
+ *
+ * 一次运行可能产生多段思考（多轮工具调用之间各一段），每段折叠展示，
+ * 其后的工具调用保持可见，形成「思考 → 检索 → 思考 → 检索 → 回答」的过程流。
+ * 与 src/api/dbAgent.ts 的 DBAgentReasoningSegment 结构保持一致。
+ */
+export interface MessageReasoning {
+    /** 思考内容 */
+    text: string
+    /** 该段思考后续发起的工具调用 id（用于把工具条挂到对应思考之后） */
+    toolCallIds: string[]
+}
+
 export interface Message {
     id: number
     conversationId: number
     role: "user" | "assistant" | "system"
     content: string
     renderedContent?: string
+    /**
+     * `renderedContent` 对应的源文本快照。
+     *
+     * 仅用于前端渲染缓存：内容变化（流式追加）时据此判断是否需要重新渲染，
+     * 不参与持久化。之所以不直接比较 `renderedContent`，
+     * 是因为「源文本相同」才是复用的正确条件。
+     */
+    renderedContentSource?: string
     imageUrl?: string
     /** 该条回复过程中的资料检索工具调用（仅资料检索 Agent 使用） */
     toolTraces?: MessageToolTrace[]
+    /** 该条回复过程中的分段思考内容（仅资料检索 Agent 使用） */
+    reasonings?: MessageReasoning[]
+    /**
+     * 该条回复挂起时等待用户回答的提问（仅资料检索 Agent 使用）。
+     *
+     * 落库是为了刷新/切换会话后仍能画出提问卡片；但 Agent 的内存上下文已经没了，
+     * 因此恢复出来的卡片只能把用户的选择当作**新一轮提问**发出去，
+     * 无法续跑原循环——这一区别由 useDBChat 的 `pendingAskLive` 区分。
+     */
+    pendingAsk?: MessagePendingAsk
     createdAt: number
+}
+
+/**
+ * 落库的挂起提问（AskUserRequest 的持久化副本）。
+ *
+ * 单独声明而不是直接 `AskUserRequest`，是为了让 store 层保持可独立演进：
+ * 提问结构改动时这里会显式报错，而不是悄悄把不兼容的数据写进 IndexedDB。
+ */
+export interface MessagePendingAsk {
+    id: string
+    title?: string
+    questions: Array<{
+        id: string
+        header: string
+        question?: string
+        options: Array<{ id: string; label: string; description?: string }>
+        allowCustom: boolean
+        multiple: boolean
+    }>
 }
 
 export type UMessage = Omit<Message, "id">
