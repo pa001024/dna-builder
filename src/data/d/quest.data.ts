@@ -149520,7 +149520,7 @@ export const questData: QuestStory[] = [
                         type: "TalkNode",
                         name: "对话节点",
                         srId: 106001,
-                        pos: [-31420, -5500],
+                        pos: [-12020, -3620],
                         dialogues: [
                             {
                                 id: 51213092,

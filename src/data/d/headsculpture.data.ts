@@ -183,19 +183,19 @@ export const headSculptureData: HeadSculpture[] = [
     {
         id: 10031,
         name: "机枢少女的肖像",
-        desc: "UI_PlayerHead_Des_10031",
+        desc: "可将头像更换为苏乙的形象。",
         icon: "T_Head_Suyi",
     },
     {
         id: 10032,
         name: "白兔的肖像",
-        desc: "UI_PlayerHead_Des_10032",
+        desc: "可将头像更换为伊薇的形象。",
         icon: "T_Head_Eve",
     },
     {
         id: 10033,
         name: "复仇者的肖像",
-        desc: "UI_PlayerHead_Des_10033",
+        desc: "可将头像更换为法露茜的形象。",
         icon: "T_Head_Falu",
     },
     {
