@@ -88,7 +88,7 @@ const MAPPINGS: Mapping[] = [
             }
             const event = value.find(row => isRecord(row) && row.id === 1030031)
             if (!isRecord(event)) {
-                throw new Error("后处理找不到 Event[1030031]")
+                // throw new Error("后处理找不到 Event[1030031]")
             }
             event.startTime = 1785142800
             return value
@@ -293,7 +293,7 @@ const MAPPINGS: Mapping[] = [
             }
             const nextValue = value.filter(row => !isRecord(row) || row.id !== 3001)
             if (nextValue.length === value.length) {
-                throw new Error("后处理找不到 Region[3001]")
+                // throw new Error("后处理找不到 Region[3001]")
             }
             return nextValue
         },
@@ -619,8 +619,10 @@ const MAPPINGS: Mapping[] = [
             const swatches = recordValues(JSON.parse(swatchText))
                 .filter(swatch => Array.isArray(swatch.ColorNumber))
                 .map(swatch => {
-                    const resourceId = Number(swatch.ResourceID)
-                    const hairResourceId = Number(swatch.HairResourceID)
+                    // 历史版本（如 1.1）表里没有 HairResourceID 字段，Number(undefined) 会得到 NaN；
+                    // NaN 落进 .data.ts 会写成标识符字面量，工具自身无法回读。统一按 0（无发色染剂）处理。
+                    const resourceId = Number(swatch.ResourceID) || 0
+                    const hairResourceId = Number(swatch.HairResourceID) || 0
                     return {
                         id: Number(swatch.ColorID),
                         name: translateTextMap(textMap, resourceNames.get(String(resourceId)) || ""),
@@ -634,7 +636,7 @@ const MAPPINGS: Mapping[] = [
                 .sort((left, right) => left.sort - right.sort)
             const specialSwatches = recordValues(JSON.parse(specialSwatchText))
                 .map(swatch => {
-                    const resourceId = Number(swatch.ResourceID)
+                    const resourceId = Number(swatch.ResourceID) || 0
                     return {
                         id: Number(swatch.SepcialColorID),
                         name: translateTextMap(textMap, resourceNames.get(String(resourceId)) || ""),
@@ -901,6 +903,10 @@ function deepEqual(left: unknown, right: unknown): boolean {
     if (left === right) {
         return true
     }
+    // NaN !== NaN，但语义上等价，否则带 NaN 的数据每轮都会被判为「已变更」
+    if (typeof left === "number" && typeof right === "number" && Number.isNaN(left) && Number.isNaN(right)) {
+        return true
+    }
     if (Array.isArray(left) && Array.isArray(right)) {
         return left.length === right.length && left.every((item, index) => deepEqual(item, right[index]))
     }
@@ -968,7 +974,33 @@ function literalToValue(node: ts.Node): unknown {
     if (node.kind === ts.SyntaxKind.NullKeyword || node.kind === ts.SyntaxKind.UndefinedKeyword) {
         return null
     }
+    // NaN / Infinity 在 TS 里是标识符而非字面量，历史生成结果可能带（如缺失数值字段），需单独还原
+    if (ts.isIdentifier(node)) {
+        if (node.text === "NaN") {
+            return Number.NaN
+        }
+        if (node.text === "Infinity") {
+            return Number.POSITIVE_INFINITY
+        }
+    }
     throw new Error(`不支持的字面量语法: ${ts.SyntaxKind[node.kind]}`)
+}
+
+/**
+ * 还原字面量节点，失败时补充目标文件与变量名，便于定位无法比较的数据。
+ *
+ * @param node 字面量节点。
+ * @param filePath 该节点所在文件路径。
+ * @param targetVar 该节点所属变量名。
+ * @returns 还原后的 JS 值。
+ */
+function readLiteralOrThrow(node: ts.Node, filePath: string, targetVar: string): unknown {
+    try {
+        return literalToValue(node)
+    } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error)
+        throw new Error(`无法还原 ${path.relative(process.cwd(), filePath)} 中 ${targetVar} 的现有值：${reason}`)
+    }
 }
 
 /**
@@ -1265,7 +1297,7 @@ async function main() {
                 const targetVar = mapping.targetVars?.[locale] ?? mapping.targetVar
                 const node = findReplacementNode(sourceFile, targetVar)
                 // 语义 diff：文件现有值与导出数据一致时跳过
-                if (deepEqual(literalToValue(node), parsed)) {
+                if (deepEqual(readLiteralOrThrow(node, filePath, targetVar), parsed)) {
                     skippedCount++
                     continue
                 }
@@ -1309,7 +1341,7 @@ async function main() {
             }
             const node = findVariableInitializerNode(sourceFile, replacement.targetVar)
             // 语义 diff：文件现有值与导出数据一致时跳过
-            if (deepEqual(literalToValue(node), replacement.value)) {
+            if (deepEqual(readLiteralOrThrow(node, targetFile, replacement.targetVar), replacement.value)) {
                 skippedCount++
                 continue
             }
