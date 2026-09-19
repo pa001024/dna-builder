@@ -51,6 +51,14 @@ export class LeveledBuff implements Buff {
     // 武器精炼数值
     _ratio = 1
 
+    /**
+     * BUFF 数值属性的版本号（全实例共享的单调计数）。
+     *
+     * 改写入口只有 `updatePropertiesByLevel`（等级 / ratio / coverage 变更）与 `applyAttr`（动态属性刷新），
+     * 两处都会推进本计数，供上层属性汇总表判断派生快照是否过期。
+     */
+    static propertiesRevision = 0
+
     get ratio() {
         return this._ratio
     }
@@ -221,6 +229,7 @@ export class LeveledBuff implements Buff {
                 changed = true
             }
         })
+        if (changed) LeveledBuff.propertiesRevision++
         return changed
     }
 
@@ -282,6 +291,8 @@ export class LeveledBuff implements Buff {
      * b = 1级数值/(10级数值-1级数值)*9
      */
     updatePropertiesByLevel(): void {
+        // 属性被改写：推进版本号，让上层的属性汇总表知道自己的快照已过期
+        LeveledBuff.propertiesRevision++
         const a = this.a || 1
         const b = this.b || 1
         const lx = this.lx ?? 1

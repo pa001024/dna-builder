@@ -1,11 +1,10 @@
 import { groupBy } from "lodash-es"
 import type { RawTimelineData } from "../store/timeline"
 import { type ASTNode, parseAST } from "./ast"
-import { sumCharBuildBonusContributions } from "./charbuild-simd"
 import type { AbstractMod, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import type { LeveledChar } from "./leveled/LeveledChar"
-import type { LeveledMod, LeveledModWithCount } from "./leveled/LeveledMod"
+import { LeveledMod, type LeveledModWithCount } from "./leveled/LeveledMod"
 import { type DynamicMonster, LeveledMonster } from "./leveled/LeveledMonster"
 import { LeveledSkill } from "./leveled/LeveledSkill"
 import { LeveledSkillWeapon } from "./leveled/LeveledSkillWeapon"
@@ -274,6 +273,74 @@ const temporaryFlatAttributeMap: Record<string, keyof CharAttr> = {
 type PolarityType = "A" | "D" | "V" | "O"
 /** 极性遍历顺序（用于极化方案的确定性） */
 const POLARITY_TYPES: PolarityType[] = ["V", "D", "A", "O"]
+
+/**
+ * 属性前缀 → 装备槽位作用域的缓存。
+ * `getAttributePrefixScope` 是纯字符串函数，输入集合有限（属性名与槽位前缀），
+ * 且属性汇总会以同一批属性名反复调用，故跨构筑共享缓存。
+ */
+const attributePrefixScopeCache = new Map<string, string>()
+
+/**
+ * 一次 AST 求值所需的派生数据。
+ *
+ * `evaluateAST` 每次调用都要汇总全部武器面板、技能字段与自定义变量表；
+ * 自定义变量会递归回 `evaluateAST`，若每次都重建会带来成倍的重复汇总
+ * （真实构筑下单次 `calculate()` 有 7 次求值，其中 6 次是嵌套求值）。
+ * 因此把这份派生数据抽成上下文，由根调用构造一次、嵌套调用共享。
+ */
+interface AstEvalContext {
+    /** 本次求值使用的角色 + 武器属性 */
+    attrs: ReturnType<CharBuild["calculateWeaponAttributes"]>
+    /** 武器面板键（含中英文别名与武器技能名）到武器实例 */
+    weaponsMap: ReturnType<CharBuild["getAllWeaponsByBase"]>
+    /** 武器面板键到武器属性 */
+    weaponAttrs: ReturnType<CharBuild["getAllWeaponSkillsAttrs"]>
+    /** 当前选中的武器（用于判断面板是否已被动态属性覆盖） */
+    selectedWeapon: CharBuild["selectedWeapon"]
+    /** 技能名（含 E/Q/P 与大小写别名）到结算后字段列表 */
+    skillAttrs: Map<string, ReturnType<LeveledSkill["getFieldsWithAttr"]>>
+    /** 合法的自定义变量：变量名 → 表达式 */
+    customVariableExpressions: Map<string, string>
+    /** 合法的自定义函数定义：函数名 → 形参与函数体 */
+    customFunctionDefinitions: Map<string, { params: string[]; expression: string }>
+    /** 自定义函数体的 AST 缓存 */
+    functionBodyAstCache: Map<string, ASTNode>
+    /** 本次求值内无临时属性时的伤害结果缓存 */
+    damageCache: Map<string, DamageResult>
+    /** 本次求值内按「是否武器伤害」区分的防御乘区缓存 */
+    defCache: Map<boolean, number>
+}
+
+/**
+ * 作用域属性汇总表：把构筑里全部「来源 → 属性值」一次性展开。
+ *
+ * 建表按来源遍历（来源数固定为 MOD + BUFF + 武器的数量），此后任意属性查询都只是按作用域取 Map，
+ * 与查询次数无关。各字段只承载来源自身提供的数值，不含作用域条件——条件仍在查询时判定。
+ */
+interface BonusSourceTable {
+    /** 角色自身加成（char.加成） */
+    char: Map<string, number>
+    /** 近战 / 远程武器面板自身加成 */
+    melee: Map<string, number>
+    ranged: Map<string, number>
+    /** 角色槽 MOD 的词条加成（attrType === "角色"，含 aura/temp） */
+    modsChar: Map<string, number>
+    /** 各槽位 MOD 的词条加成，键为 MOD 类型（角色/近战/远程/同律近战/同律远程） */
+    modsByScope: Map<string, Map<string, number>>
+    /** 全部 MOD 的词条加成（不分槽位，供作用域为空的查询使用） */
+    modsAll: Map<string, number>
+    /** 全部 MOD 的效果层属性（buffProps，按 BUFF 口径，不受槽位限制） */
+    modsBuffProps: Map<string, number>
+    /** 全部 BUFF 的属性 */
+    buffs: Map<string, number>
+    /** 武器效果层属性（近战 + 远程武器的 buffProps） */
+    weaponBuffProps: Map<string, number>
+    /** MOD 侧乘法聚合缓存：作用域 → 属性 → Π(1+v)（惰性，仅「独立增伤」系列使用） */
+    modsMul: Map<string, Map<string, number>>
+    /** BUFF 侧乘法聚合缓存：属性 → Π(1+v)（惰性） */
+    buffsMul: Map<string, number>
+}
 
 export class CharBuildTimeline {
     totalTime: number = 0
@@ -564,6 +631,16 @@ export class CharBuild {
     public extraMastery = ""
     /** DOT 频率设置（每种来源每秒造成伤害的次数） */
     public dotSettings: DotFrequencySettings = { ...defaultDotFrequencySettings }
+    /**
+     * 自定义变量派生表缓存（合法变量列表 + 函数定义表）。
+     * `snapshot` 保存的是构建时的**逐项浅拷贝**而不是 `customVariables` 本身——
+     * 该数组可能被原地 `push` / `splice` / 替换元素，持有同一引用就比对不出变化。
+     */
+    private customVariableTables?: {
+        snapshot: [string, string][]
+        variables: [string, string][]
+        functions: Map<string, { params: string[]; expression: string }>
+    }
     /** 所选魔灵主动技的原始冷却（秒）：角色属性「魔灵CD」= 该值 × (1 - 魔灵CD缩减) */
     public petBaseCd = 0
 
@@ -688,10 +765,284 @@ export class CharBuild {
         return !weapon.hasForge || this.isWeaponCategoryMastered(weapon)
     }
 
+    /**
+     * `mods` 派生列表缓存：由四个 MOD 槽位与 aura/temp 槽位决定。
+     * `slots` 保存的是**构建时的浅拷贝快照**而不是槽位数组本身——槽位数组会被
+     * `push` / `splice` 原地修改（如 autoBuild 的增删 MOD），持有同一引用就比对不出变化。
+     */
+    private modsCache?: {
+        slots: (LeveledMod | null)[][]
+        auraMod?: LeveledMod
+        tempMod?: LeveledMod | null
+        mods: LeveledMod[]
+        /**
+         * 按作用域（MOD 类型）切分出的参与列表缓存，键为 `prefixScope`。
+         * MOD 类型来自静态数据、实例生命周期内不变，因此该子集只由 `mods` 决定，
+         * 可与 `mods` 同生命周期缓存，避免属性汇总时反复全量遍历再逐条判类型。
+         */
+        scopedMods: Map<string, LeveledMod[]>
+    }
     get mods() {
-        return [...this.charMods, ...this.meleeMods, ...this.rangedMods, ...this.skillMods, this.auraMod, this.tempMod].filter(
-            (v): v is LeveledMod => !!v
-        )
+        const cached = this.modsCache
+        if (cached && this.isModsCacheValid(cached)) return cached.mods
+        const mods: LeveledMod[] = []
+        const charMods = this.charMods
+        const meleeMods = this.meleeMods
+        const rangedMods = this.rangedMods
+        const skillMods = this.skillMods
+        this.modsCache = {
+            slots: [[...charMods], [...meleeMods], [...rangedMods], [...skillMods]],
+            auraMod: this.auraMod,
+            tempMod: this.tempMod,
+            mods,
+            scopedMods: new Map(),
+        }
+        for (const slot of [charMods, meleeMods, rangedMods, skillMods]) {
+            for (const mod of slot) {
+                if (mod) mods.push(mod)
+            }
+        }
+        if (this.auraMod) mods.push(this.auraMod)
+        if (this.tempMod) mods.push(this.tempMod)
+        return mods
+    }
+
+    /**
+     * 取指定作用域槽位的 MOD 列表（乘法聚合用）。
+     * 判据与原「遍历全部 MOD 再逐条 `continue`」一致，把结果按作用域缓存下来：
+     * 求和路径已由作用域属性表承担，这里只服务无法用求和表表达的乘法聚合。
+     * @param prefixScope 属性作用域（角色/近战/远程/同律近战/同律远程）；为空时全部 MOD 参与
+     * @returns 参与汇总的 MOD 列表（只读，调用方不得原地修改）
+     */
+    private getScopedMods(prefixScope: string): LeveledMod[] {
+        const mods = this.mods // 先触发缓存校验/重建，再落到缓存自身的分桶表
+        const cache = this.modsCache!
+        let scoped = cache.scopedMods.get(prefixScope)
+        if (!scoped) {
+            scoped = mods.filter(mod => !(prefixScope && mod.attrType !== prefixScope))
+            cache.scopedMods.set(prefixScope, scoped)
+        }
+        return scoped
+    }
+
+    /**
+     * 作用域属性汇总表的外层缓存：把「来源 → 属性值」一次性展开，供属性查询直接取值。
+     *
+     * 原实现对每次 `getTotalBonus` 调用都完整遍历一遍 MOD 与 BUFF，而一次计算里同一属性会被
+     * 反复查询（真实构筑下单次 `calculate()` 约 250 次），遍历次数与查询次数相乘。
+     * 「按来源遍历」一次即可得到任意属性的值：来源只有 26 个 MOD + 25 条 BUFF，远少于
+     * 「查询次数 × 来源数」，因此把来源按键展开成表，查询退化为按作用域取 Map。
+     *
+     * 表只承载「来源自身提供的数值」，不含任何作用域条件（攻击/增伤在武器作用域不吃共享池、
+     * 前缀降级、MOD 穿透等）。这些条件只依赖属性名与作用域，是纯字符串判断；把它们提前烘进表
+     * 会让表与构筑状态（武器精通、forge 生效）耦合，反而扩大失效面。
+     */
+    private bonusSourceTable?: {
+        /** MOD 派生列表缓存的引用：槽位或 aura/temp 变化会替换该对象，引用不等即需重建 */
+        modsCache: NonNullable<CharBuild["modsCache"]>
+        /** 参与汇总的两把武器实例：收益试算等场景会临时换武器 */
+        weapons: [LeveledWeapon, LeveledWeapon]
+        /** 三类来源的属性版本号，任一推进即需重建 */
+        modRevision: number
+        weaponRevision: number
+        buffRevision: number
+        /** BUFF 数组的浅拷贝快照：BUFF 会被原地 push/splice/pop，必须逐项比对而非持有引用 */
+        buffs: LeveledBuff[]
+        table: BonusSourceTable
+    }
+
+    /**
+     * 取当前构筑的作用域属性汇总表，必要时重建。
+     * @returns 属性汇总表
+     */
+    private getBonusSourceTable(): BonusSourceTable {
+        const mods = this.mods // 先触发槽位快照校验：槽位变化会替换 modsCache 对象
+        const cached = this.bonusSourceTable
+        if (cached && this.isBonusSourceTableValid(cached)) return cached.table
+
+        const table = this.buildBonusSourceTable(mods)
+        this.bonusSourceTable = {
+            modsCache: this.modsCache!,
+            weapons: [this.meleeWeapon, this.rangedWeapon],
+            modRevision: LeveledMod.propertiesRevision,
+            weaponRevision: LeveledWeapon.propertiesRevision,
+            buffRevision: LeveledBuff.propertiesRevision,
+            buffs: [...this.buffs],
+            table,
+        }
+        return table
+    }
+
+    /**
+     * 判断作用域属性表是否仍然有效。
+     *
+     * 失效来源只有四条，全部可廉价判定：MOD 槽位变化（modsCache 换对象）、
+     * 三类来源改写自身数值（各自的版本号）、武器实例被替换、BUFF 数组增删换（逐项浅拷贝比对）。
+     * @param cache 已缓存的作用域属性表
+     * @returns 缓存是否有效
+     */
+    private isBonusSourceTableValid(cache: NonNullable<CharBuild["bonusSourceTable"]>): boolean {
+        if (cache.modsCache !== this.modsCache) return false
+        if (cache.modRevision !== LeveledMod.propertiesRevision) return false
+        if (cache.weaponRevision !== LeveledWeapon.propertiesRevision) return false
+        if (cache.buffRevision !== LeveledBuff.propertiesRevision) return false
+        if (cache.weapons[0] !== this.meleeWeapon || cache.weapons[1] !== this.rangedWeapon) return false
+
+        const buffs = this.buffs
+        if (cache.buffs.length !== buffs.length) return false
+        for (let index = 0; index < buffs.length; index++) {
+            if (cache.buffs[index] !== buffs[index]) return false
+        }
+        return true
+    }
+
+    /**
+     * 按来源展开属性表：遍历次数与来源数成正比，与后续查询次数无关。
+     * @param mods 当前 MOD 列表（已含四个槽位与 aura/temp）
+     * @returns 作用域属性汇总表
+     */
+    private buildBonusSourceTable(mods: LeveledMod[]): BonusSourceTable {
+        const table: BonusSourceTable = {
+            char: new Map(),
+            melee: new Map(),
+            ranged: new Map(),
+            modsChar: new Map(),
+            modsByScope: new Map(),
+            modsAll: new Map(),
+            modsBuffProps: new Map(),
+            buffs: new Map(),
+            weaponBuffProps: new Map(),
+            modsMul: new Map(),
+            buffsMul: new Map(),
+        }
+
+        /**
+         * 把一条记录的全部数值属性累加进目标表。
+         * @param target 目标表
+         * @param source 来源记录
+         * @param keys 限定遍历的键；缺省遍历来源自身的全部可枚举键
+         */
+        const accumulate = (target: Map<string, number>, source: Record<string, unknown> | undefined | null, keys?: string[]) => {
+            if (!source) return
+            for (const key of keys ?? Object.keys(source)) {
+                const value = source[key]
+                if (typeof value === "number") target.set(key, (target.get(key) ?? 0) + value)
+            }
+        }
+
+        accumulate(table.char, this.char.加成)
+        accumulate(table.melee, this.meleeWeapon as unknown as Record<string, unknown>)
+        accumulate(table.ranged, this.rangedWeapon as unknown as Record<string, unknown>)
+        accumulate(table.weaponBuffProps, this.meleeWeapon.buffProps)
+        accumulate(table.weaponBuffProps, this.rangedWeapon.buffProps)
+
+        for (const mod of mods) {
+            // 词条属性：`properties` 与 `getAddAttrValue` 的有效键判定一致（同为自有可枚举键去掉非属性键）
+            const properties = mod.properties
+            accumulate(table.modsAll, mod as unknown as Record<string, unknown>, properties)
+            let scopeBucket = table.modsByScope.get(mod.attrType)
+            if (!scopeBucket) {
+                scopeBucket = new Map()
+                table.modsByScope.set(mod.attrType, scopeBucket)
+            }
+            accumulate(scopeBucket, mod as unknown as Record<string, unknown>, properties)
+            // 角色槽 MOD 额外单列：暴击/暴伤等可穿透属性在武器作用域下也要吃到角色槽词条
+            if (mod.attrType === "角色") {
+                accumulate(table.modsChar, mod as unknown as Record<string, unknown>, properties)
+            }
+            accumulate(table.modsBuffProps, mod.buffProps)
+        }
+
+        for (const buff of this.buffs) {
+            accumulate(table.buffs, buff as unknown as Record<string, unknown>)
+        }
+
+        return table
+    }
+
+    /**
+     * 取 MOD 词条在某次属性查询下的合计，判定条件与原「遍历全部 MOD 再逐条 continue」一致。
+     * @param table 属性汇总表
+     * @param attribute 属性名
+     * @param prefixScope 属性作用域
+     * @param includeMods 是否纳入 MOD 加成
+     * @returns MOD 词条加成合计
+     */
+    private sumModsFromTable(table: BonusSourceTable, attribute: string, prefixScope: string, includeMods: boolean): number {
+        if (!includeMods) return 0
+        if (CharBuild.attrAllowCharToWeapon.has(attribute)) {
+            let bonus = table.modsChar.get(attribute) ?? 0
+            if (prefixScope !== "角色") bonus += table.modsByScope.get(prefixScope)?.get(attribute) ?? 0
+            return bonus
+        }
+        return prefixScope ? (table.modsByScope.get(prefixScope)?.get(attribute) ?? 0) : (table.modsAll.get(attribute) ?? 0)
+    }
+
+    /**
+     * 取 MOD 词条的乘法聚合（Π(1+v)），按 (作用域, 属性) 惰性计算并随表缓存。
+     * 乘法无法由求和表推出（Π(1+v) ≠ 1+Σv），且只有「独立增伤」系列属性会走到这里，命中面很小。
+     * @param table 属性汇总表
+     * @param attribute 属性名
+     * @param prefixScope 属性作用域
+     * @returns Π(1+v)
+     */
+    private getScopedModsMulBonus(table: BonusSourceTable, attribute: string, prefixScope: string): number {
+        let scopeTable = table.modsMul.get(prefixScope)
+        if (!scopeTable) {
+            scopeTable = new Map()
+            table.modsMul.set(prefixScope, scopeTable)
+        }
+        const cached = scopeTable.get(attribute)
+        if (cached !== undefined) return cached
+
+        let product = 1
+        for (const mod of this.getScopedMods(prefixScope)) {
+            const value = mod.getAddAttrValue(attribute)
+            if (value !== undefined) product *= 1 + value
+        }
+        scopeTable.set(attribute, product)
+        return product
+    }
+
+    /**
+     * 取全部 BUFF 对某属性的乘法聚合（Π(1+v)），惰性缓存。
+     * @param table 属性汇总表
+     * @param attribute 属性名
+     * @returns Π(1+v)
+     */
+    private getBuffsMulBonus(table: BonusSourceTable, attribute: string): number {
+        const cached = table.buffsMul.get(attribute)
+        if (cached !== undefined) return cached
+
+        let product = 1
+        for (const buff of this.buffs) {
+            const value = buff[attribute]
+            if (typeof value === "number") product *= 1 + value
+        }
+        table.buffsMul.set(attribute, product)
+        return product
+    }
+
+    /**
+     * 判断 `mods` 派生列表缓存是否仍然有效。
+     * `mods` 只由四个 MOD 槽位数组与 aura/temp 两个可选槽位决定，与 MOD 自身字段无关，
+     * 因此逐槽位比较「快照长度 + 逐项引用」即可完全覆盖整体替换、原地增删与替换单项的变更。
+     * @param cache 已缓存的派生列表与槽位快照
+     * @returns 缓存是否有效
+     */
+    private isModsCacheValid(cache: NonNullable<CharBuild["modsCache"]>) {
+        if (cache.auraMod !== this.auraMod || cache.tempMod !== this.tempMod) return false
+        const slots = cache.slots
+        for (let slotIndex = 0; slotIndex < slots.length; slotIndex++) {
+            const slot =
+                slotIndex === 0 ? this.charMods : slotIndex === 1 ? this.meleeMods : slotIndex === 2 ? this.rangedMods : this.skillMods
+            const snapshot = slots[slotIndex]
+            if (snapshot.length !== slot.length) return false
+            for (let index = 0; index < slot.length; index++) {
+                if (snapshot[index] !== slot[index]) return false
+            }
+        }
+        return true
     }
 
     set mods(mods: LeveledMod[]) {
@@ -1198,6 +1549,9 @@ export class CharBuild {
             }
             attrs.weapon = weaponAttrs
         }
+        // nochar 调用方（getAllWeaponsAttrs / getAllWeaponSkillsAttrs）只取 .weapon 面板，
+        // 下面的角色侧汇总（充盈威力 / 召唤物转化）会写进一个随即被丢弃的 attrs，故直接跳过。
+        if (nochar) return attrs
         // 充盈威力（角色属性）= 角色 MOD 充盈威力加成 + Σ 所有武器（近战/远程/同律非继承）溢出触发 × 该武器充盈转化。
         // 各武器的转化率只作用于该武器自身溢出的触发率，不跨武器累加转化率。
         let totalFullness = 0
@@ -1301,11 +1655,17 @@ export class CharBuild {
      * @returns 装备槽位前缀
      */
     private getAttributePrefixScope(prefix = "角色") {
-        if (prefix.startsWith("同律近战")) return "同律近战"
-        if (prefix.startsWith("同律远程")) return "同律远程"
-        if (prefix.startsWith("近战")) return "近战"
-        if (prefix.startsWith("远程")) return "远程"
-        return prefix
+        // 纯字符串映射，且输入集合有限（属性名 + 槽位前缀）：缓存后每次汇总省下数次 startsWith。
+        // 采样显示该函数占据了属性汇总相当一部分时间，而它本身没有任何构筑依赖。
+        const cached = attributePrefixScopeCache.get(prefix)
+        if (cached !== undefined) return cached
+        let scope = prefix
+        if (prefix.startsWith("同律近战")) scope = "同律近战"
+        else if (prefix.startsWith("同律远程")) scope = "同律远程"
+        else if (prefix.startsWith("近战")) scope = "近战"
+        else if (prefix.startsWith("远程")) scope = "远程"
+        attributePrefixScopeCache.set(prefix, scope)
+        return scope
     }
 
     /**
@@ -1462,14 +1822,13 @@ export class CharBuild {
      * @returns 加成值
      */
     private getModsScopeBonus(attribute: string, prefixScope: string, multiplicative = false): number {
-        let bonus = multiplicative ? 1 : 0
-        this.mods.forEach(mod => {
-            if (prefixScope && mod.attrType !== prefixScope) return
-            const value = mod.addAttr[attribute]
-            if (typeof value !== "number") return
-            bonus = multiplicative ? bonus * (1 + value) : bonus + value
-        })
-        return multiplicative ? bonus - 1 : bonus
+        const table = this.getBonusSourceTable()
+        if (!multiplicative) {
+            // 原判定 `prefixScope && mod.attrType !== prefixScope`：作用域为空时全部 MOD 参与
+            return prefixScope ? (table.modsByScope.get(prefixScope)?.get(attribute) ?? 0) : (table.modsAll.get(attribute) ?? 0)
+        }
+        // 乘法不能由求和表推出（Π(1+v) ≠ 1+Σv），走按键惰性缓存的乘积表
+        return this.getScopedModsMulBonus(table, attribute, prefixScope) - 1
     }
     // 下列属性可以从角色穿透到武器
     static attrAllowCharToWeapon = new Set(["暴击", "暴伤", "触发", "攻速", "充盈转化", "召唤物攻击速度转化", "召唤物范围转化"])
@@ -1485,120 +1844,62 @@ export class CharBuild {
      * @returns 总加成
      */
     public getTotalBonus(attribute: string, prefix = "角色", opts?: { includeMods?: boolean }): number {
-        let bonus = 0
+        const table = this.getBonusSourceTable()
         const prefixScope = this.getAttributePrefixScope(prefix)
+        let bonus = 0
 
         // 添加角色自带加成
         if (prefix === "角色" || attribute !== "攻击") {
-            bonus += this.char.加成?.[attribute] || 0
+            bonus += table.char.get(attribute) ?? 0
         }
 
         // 添加近战武器加成
-        if ((prefixScope === "角色" || (prefixScope === "近战" && attribute !== "攻击")) && this.meleeWeapon) {
-            if (this.isWeaponForgeEffective(this.meleeWeapon) && typeof this.meleeWeapon[attribute] === "number") {
-                bonus += this.meleeWeapon[attribute]
-            }
+        if (prefixScope === "角色" || (prefixScope === "近战" && attribute !== "攻击")) {
+            if (this.isWeaponForgeEffective(this.meleeWeapon)) bonus += table.melee.get(attribute) ?? 0
         }
         // 添加远程武器加成
-        if ((prefixScope === "角色" || (prefixScope === "远程" && attribute !== "攻击")) && this.rangedWeapon) {
-            if (this.isWeaponForgeEffective(this.rangedWeapon) && typeof this.rangedWeapon[attribute] === "number") {
-                bonus += this.rangedWeapon[attribute]
-            }
+        if (prefixScope === "角色" || (prefixScope === "远程" && attribute !== "攻击")) {
+            if (this.isWeaponForgeEffective(this.rangedWeapon)) bonus += table.ranged.get(attribute) ?? 0
         }
 
         // 添加MOD加成
-        if (opts?.includeMods !== false) {
-            this.mods.forEach(mod => {
-                if (
-                    CharBuild.attrAllowCharToWeapon.has(attribute)
-                        ? mod.attrType !== "角色" && mod.attrType !== prefixScope
-                        : prefixScope && mod.attrType !== prefixScope
-                )
-                    return
-                if (typeof mod.addAttr[attribute] === "number") {
-                    bonus += mod.addAttr[attribute]
-                }
-            })
-        }
+        bonus += this.sumModsFromTable(table, attribute, prefixScope, opts?.includeMods !== false)
+
+        // 作用域判定只与 (attribute, prefixScope) 有关，逐条加成重复判定会退化成每次遍历
+        const buffInScope = this.isBuffAttributeInScope(attribute, prefixScope)
+        // 近战/远程作用域下 攻击/增伤 只取该作用域自身的加成，不叠加通用 BUFF / 效果层
+        const scopeAllowsSharedPool = prefixScope === "角色" || (attribute !== "攻击" && attribute !== "增伤")
 
         // 添加BUFF加成
-        this.buffs.forEach(buff => {
-            if (!this.isBuffAttributeInScope(attribute, prefixScope)) return
-            if (prefixScope !== "角色" && ["攻击", "增伤"].includes(attribute)) return
-            if (typeof buff[attribute] === "number") {
-                bonus += buff[attribute]
-            }
-        })
+        if (buffInScope && scopeAllowsSharedPool) {
+            bonus += table.buffs.get(attribute) ?? 0
+        }
 
         // 添加MOD效果层加成（特效中以 @ 前缀声明的属性，见 LeveledMod.buffProps）：
         // 与武器效果（buffProps）同理按 BUFF 口径汇总，不受 MOD 槽位作用域限制
         // （如远程槽 MOD 的近战增伤），只按属性自身作用域判定。
-        if (this.isBuffAttributeInScope(attribute, prefixScope) && (prefixScope === "角色" || !["攻击", "增伤"].includes(attribute))) {
-            for (const mod of this.mods) {
-                const value = mod.buffProps[attribute]
-                if (typeof value === "number") bonus += value
-            }
+        if (buffInScope && scopeAllowsSharedPool) {
+            bonus += table.modsBuffProps.get(attribute) ?? 0
         }
 
-        Object.entries(this.rangedWeapon.buffProps).forEach(([key, value]) => {
-            if (prefixScope !== "角色" && ["攻击", "增伤"].includes(key)) return
-            if (attribute === key && typeof value === "number") {
-                bonus += value
-            }
-        })
-
-        Object.entries(this.meleeWeapon.buffProps).forEach(([key, value]) => {
-            if (prefixScope !== "角色" && ["攻击", "增伤"].includes(key)) return
-            if (attribute === key && typeof value === "number") {
-                bonus += value
-            }
-        })
+        // 武器效果层（buffProps）：按属性名直接取表，避免逐键遍历
+        if (scopeAllowsSharedPool) {
+            bonus += table.weaponBuffProps.get(attribute) ?? 0
+        }
 
         return bonus
     }
 
     /**
-     * 归约角色公共加成；SIMD 模块就绪后使用连续 f64 矩阵，否则严格回退到既有逐属性求和。
+     * 归约角色公共加成。
+     *
+     * 曾用「来源 × 属性」连续 f64 矩阵 + Wasm SIMD 列求和，实测在真实构筑上无收益：
+     * 矩阵构造（每来源逐属性取值并写入 f64）与跨 Wasm 内存搬运的成本远高于加法本身，
+     * 而加法只占其中极小一部分，向量化无从抵扣。改为按来源展开的属性表后，
+     * 40 个公共属性只是 40 次按作用域取表，成本低于原先任一实现（见 tools/benchmark-charbuild.ts）。
      * @returns 顺序与 characterBonusAttributes 对齐的公共属性加成向量
      */
     private getCharacterBonusVector(): Float64Array {
-        const attributeCount = characterBonusAttributes.length
-        const sourceCount = 5 + this.mods.length * 2 + this.buffs.length
-        const contributions = new Float64Array(sourceCount * attributeCount)
-        let sourceIndex = 0
-
-        /** 将一组记录的数值属性写入一行连续的 f64 贡献。 */
-        const addSource = (source: Record<string, unknown> | undefined, readKey = (attribute: string) => attribute) => {
-            if (source) {
-                for (let index = 0; index < attributeCount; index++) {
-                    const value = source[readKey(characterBonusAttributes[index])]
-                    if (typeof value === "number") {
-                        contributions[sourceIndex * attributeCount + index] = value
-                    }
-                }
-            }
-            sourceIndex++
-        }
-
-        addSource(this.char.加成)
-        addSource(this.isWeaponForgeEffective(this.meleeWeapon) ? (this.meleeWeapon as unknown as Record<string, unknown>) : undefined)
-        addSource(this.isWeaponForgeEffective(this.rangedWeapon) ? (this.rangedWeapon as unknown as Record<string, unknown>) : undefined)
-
-        for (const mod of this.mods) {
-            addSource(mod.attrType === "角色" ? mod.addAttr : undefined)
-            // MOD 效果层属性（特效中以 @ 前缀声明，见 LeveledMod.buffProps）：
-            // 与武器效果同理按 BUFF 口径计入公共属性，不受 MOD 槽位作用域限制
-            addSource(mod.buffProps)
-        }
-        for (const buff of this.buffs) {
-            addSource(buff as unknown as Record<string, unknown>)
-        }
-        addSource(this.rangedWeapon.buffProps)
-        addSource(this.meleeWeapon.buffProps)
-
-        const simdBonuses = sumCharBuildBonusContributions(contributions, sourceCount, attributeCount)
-        if (simdBonuses) return simdBonuses
-
         return Float64Array.from(characterBonusAttributes, attribute => this.getTotalBonus(attribute))
     }
 
@@ -1666,32 +1967,27 @@ export class CharBuild {
      * @returns 净增量（0 表示无加成）
      */
     private getTotalBonusMul(attribute: string, prefix = "角色", opts?: { includeMods?: boolean }): number {
-        let bonus = 1
+        const table = this.getBonusSourceTable()
         const prefixScope = this.getAttributePrefixScope(prefix)
+        let bonus = 1
 
         // 添加角色自带加成
-        if (typeof this.char.加成?.[attribute] === "number") {
-            bonus *= 1 + this.char.加成?.[attribute] || 0
+        const charValue = this.char.加成?.[attribute]
+        if (typeof charValue === "number") {
+            bonus *= 1 + charValue || 0
         }
 
-        // 添加MOD加成
+        // 添加MOD加成（乘法聚合，无法由求和表推出，走按键惰性乘积表）
         if (opts?.includeMods !== false) {
-            this.mods.forEach(mod => {
-                if (prefixScope && mod.attrType !== prefixScope) return
-                if (typeof mod.addAttr[attribute] === "number") {
-                    bonus *= 1 + mod.addAttr[attribute]
-                }
-            })
+            bonus *= this.getScopedModsMulBonus(table, attribute, prefixScope)
         }
 
         // 添加BUFF加成
-        this.buffs.forEach(buff => {
-            if (!this.isBuffAttributeInScope(attribute, prefixScope)) return
-            if (prefixScope !== "角色" && attribute === "独立增伤") return
-            if (typeof buff[attribute] === "number") {
-                bonus *= 1 + buff[attribute]
-            }
-        })
+        const buffInScope = this.isBuffAttributeInScope(attribute, prefixScope)
+        const scopeAllowsSharedPool = prefixScope === "角色" || attribute !== "独立增伤"
+        if (buffInScope && scopeAllowsSharedPool) {
+            bonus *= this.getBuffsMulBonus(table, attribute)
+        }
 
         return bonus - 1
     }
@@ -2527,9 +2823,7 @@ export class CharBuild {
      * @returns 自定义变量键值对
      */
     private getValidCustomVariables() {
-        return this.customVariables
-            .map(([key, value]) => [key.trim(), value.trim()] as [string, string])
-            .filter(([key, value]) => key && value && !this.validateCustomVariableKey(key) && !this.parseCustomFunctionDefinition(key))
+        return this.getValidCustomVariableTables().variables
     }
 
     /**
@@ -2537,6 +2831,22 @@ export class CharBuild {
      * @returns 函数名到定义的映射
      */
     private getValidCustomFunctions(): Map<string, { params: string[]; expression: string }> {
+        return this.getValidCustomVariableTables().functions
+    }
+
+    /**
+     * 汇总自定义变量与自定义函数定义（带缓存）。
+     *
+     * 合法性校验要对每个变量做正则判定与 `parseAST`（真实构筑 17 个变量约 0.2ms），
+     * 而结果只取决于 `customVariables` 的内容。缓存以「数组长度 + 逐项键值引用」为失效判据：
+     * 数组整体替换、增删条目、替换某条键或值都会命中失效；逐项比较字符串引用的代价远低于重新解析。
+     * @returns 合法变量列表与函数定义表
+     */
+    private getValidCustomVariableTables() {
+        const cached = this.customVariableTables
+        if (cached && this.isCustomVariableTableCacheValid(cached)) return cached
+
+        const variables: [string, string][] = []
         const functions = new Map<string, { params: string[]; expression: string }>()
         for (const [key, value] of this.customVariables) {
             const trimmedKey = key.trim()
@@ -2544,10 +2854,38 @@ export class CharBuild {
             if (!trimmedKey || !trimmedValue) continue
             if (this.validateCustomVariableKey(trimmedKey)) continue
             const definition = this.parseCustomFunctionDefinition(trimmedKey)
-            if (!definition) continue
-            functions.set(definition.name, { params: definition.params, expression: trimmedValue })
+            if (definition) {
+                functions.set(definition.name, { params: definition.params, expression: trimmedValue })
+            } else {
+                variables.push([trimmedKey, trimmedValue])
+            }
         }
-        return functions
+
+        const tables = {
+            snapshot: this.customVariables.map(entry => [entry[0], entry[1]] as [string, string]),
+            variables,
+            functions,
+        }
+        this.customVariableTables = tables
+        return tables
+    }
+
+    /**
+     * 判断自定义变量派生表缓存是否仍对应当前 `customVariables`。
+     * 字符串不可变，逐项比较键值引用即可判定内容未变；快照长度比较覆盖原地增删。
+     * @param cache 已缓存的派生表
+     * @returns 缓存是否有效
+     */
+    private isCustomVariableTableCacheValid(cache: NonNullable<CharBuild["customVariableTables"]>) {
+        const source = this.customVariables
+        const snapshot = cache.snapshot
+        if (snapshot.length !== source.length) return false
+        for (let index = 0; index < source.length; index++) {
+            const entry = source[index]
+            const cachedEntry = snapshot[index]
+            if (cachedEntry[0] !== entry[0] || cachedEntry[1] !== entry[1]) return false
+        }
+        return true
     }
 
     /**
@@ -2569,9 +2907,11 @@ export class CharBuild {
     /**
      * 解释AST表达式并计算结果
      * @param astInput AST表达式字符串
-     * @param damage 伤害结果对象
-     * @param attrs 武器属性对象
+     * @param inputattrs 已算好的武器属性对象；缺省时按当前构筑现算
+     * @param resolvingVariables 正在解析的自定义变量名（用于检测循环引用）
+     * @param customVariableValueCache 自定义变量取值缓存
      * @param scope 函数调用时的参数作用域（参数名到值的映射）
+     * @param context 复用的求值上下文；自定义变量递归求值时由内部透传
      * @returns 计算结果
      */
     evaluateAST(
@@ -2579,7 +2919,8 @@ export class CharBuild {
         inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>,
         resolvingVariables = new Set<string>(),
         customVariableValueCache = new Map<string, number>(),
-        scope = new Map<string, number>()
+        scope = new Map<string, number>(),
+        context?: AstEvalContext
     ) {
         if (!astInput) return 0
         let ast = this.astCache.get(astInput)
@@ -2599,10 +2940,58 @@ export class CharBuild {
             console.error("表达式命名空间错误:", e)
             return 0
         }
+        const ctx = context ?? this.createAstEvalContext(inputattrs)
+        return this.evaluateAstWithContext(ast, ctx, resolvingVariables, customVariableValueCache, scope)
+    }
+
+    /**
+     * 构造一次 AST 求值所需的派生数据（武器面板、技能字段、自定义变量表与各类缓存）。
+     * @param inputattrs 调用方已算好的武器属性；缺省时按当前构筑现算
+     * @returns 求值上下文
+     */
+    private createAstEvalContext(inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>): AstEvalContext {
         const attrs = inputattrs || this.calculateWeaponAttributes()
-        const weaponsMap = this.getAllWeaponsByBase()
-        const weaponAttrs = this.getAllWeaponSkillsAttrs()
-        const selectedWeapon = this.selectedWeapon
+        const skillAttrs = new Map<string, ReturnType<LeveledSkill["getFieldsWithAttr"]>>(
+            this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)])
+        )
+        skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
+        skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
+        skillAttrs.set("P", skillAttrs.get(this.skills[2].safeName)!)
+        // 大小写别名：玩家常输入小写 e::/q::/p::
+        skillAttrs.set("e", skillAttrs.get(this.skills[0].safeName)!)
+        skillAttrs.set("q", skillAttrs.get(this.skills[1].safeName)!)
+        skillAttrs.set("p", skillAttrs.get(this.skills[2].safeName)!)
+        return {
+            attrs,
+            weaponsMap: this.getAllWeaponsByBase(),
+            weaponAttrs: this.getAllWeaponSkillsAttrs(),
+            selectedWeapon: this.selectedWeapon,
+            skillAttrs,
+            customVariableExpressions: new Map(this.getValidCustomVariables()),
+            customFunctionDefinitions: this.getValidCustomFunctions(),
+            functionBodyAstCache: new Map<string, ASTNode>(),
+            damageCache: new Map<string, DamageResult>(),
+            defCache: new Map<boolean, number>(),
+        }
+    }
+
+    /**
+     * 在给定上下文中求值已解析的 AST。
+     * @param ast 已解析并绑定技能上下文的 AST 根节点
+     * @param ctx 求值上下文（同一次计算内可跨嵌套求值复用）
+     * @param resolvingVariables 正在解析的自定义变量名
+     * @param customVariableValueCache 自定义变量取值缓存
+     * @param scope 函数调用时的参数作用域
+     * @returns 计算结果
+     */
+    private evaluateAstWithContext(
+        ast: ASTNode,
+        ctx: AstEvalContext,
+        resolvingVariables: Set<string>,
+        customVariableValueCache: Map<string, number>,
+        scope: Map<string, number>
+    ): number {
+        const { attrs, weaponsMap, weaponAttrs, skillAttrs, selectedWeapon } = ctx
         /**
          * 优先使用当前已计算出的武器属性，避免动态属性在AST求值时被基础映射覆盖。
          */
@@ -2613,14 +3002,6 @@ export class CharBuild {
             }
             return weaponAttrs.get(key)
         }
-        const skillAttrs = new Map(this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)]))
-        skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
-        skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
-        skillAttrs.set("P", skillAttrs.get(this.skills[2].safeName)!)
-        // 大小写别名：玩家常输入小写 e::/q::/p::
-        skillAttrs.set("e", skillAttrs.get(this.skills[0].safeName)!)
-        skillAttrs.set("q", skillAttrs.get(this.skills[1].safeName)!)
-        skillAttrs.set("p", skillAttrs.get(this.skills[2].safeName)!)
         const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
         const getSkillAttr = (fieldName: string, base?: string, skillContext?: LeveledSkill) =>
             (skillContext ? skillContext.getFieldsWithAttr(attrs) : skillAttrs?.get(base || this.baseName))?.find(v =>
@@ -2885,7 +3266,7 @@ export class CharBuild {
             }
         }
 
-        const customVariableExpressions = new Map(this.getValidCustomVariables())
+        const customVariableExpressions = ctx.customVariableExpressions
         const evaluateCustomVariable = (fieldName: string) => {
             const expression = customVariableExpressions.get(fieldName)
             if (!expression) return undefined
@@ -2893,15 +3274,16 @@ export class CharBuild {
             if (resolvingVariables.has(fieldName)) return 0
 
             resolvingVariables.add(fieldName)
-            const value = this.evaluateAST(expression, attrs, resolvingVariables, customVariableValueCache)
+            // 复用同一上下文：嵌套求值的 attrs 与构筑状态均未变，无需重建武器面板/技能字段
+            const value = this.evaluateAST(expression, attrs, resolvingVariables, customVariableValueCache, undefined, ctx)
             resolvingVariables.delete(fieldName)
             const safeValue = Number.isFinite(value) ? value : 0
             customVariableValueCache.set(fieldName, safeValue)
             return safeValue
         }
 
-        const customFunctionDefinitions = this.getValidCustomFunctions()
-        const functionBodyAstCache = new Map<string, ASTNode>()
+        const customFunctionDefinitions = ctx.customFunctionDefinitions
+        const functionBodyAstCache = ctx.functionBodyAstCache
         const resolvingFunctions = new Set<string>()
         /**
          * 求值自定义函数调用：将实参绑定到形参后求值函数体。

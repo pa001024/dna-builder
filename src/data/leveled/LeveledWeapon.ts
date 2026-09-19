@@ -31,6 +31,13 @@ export class LeveledWeapon {
     buffProps: Record<string, number> = {}
     _effectiveBuffProps: Record<string, number> = {}
     forgeEffective = true
+    /**
+     * 武器数值属性的版本号（全实例共享的单调计数）。
+     *
+     * 改写入口只有 `updateProperties`（等级 / 精炼）与 `setForgeEffective`（熔炼潜能生效状态），
+     * 两处都会推进本计数，供上层属性汇总表判断派生快照是否过期。
+     */
+    static propertiesRevision = 0
     // 新增属性
     倍率 = 1
     弹片数?: number
@@ -207,6 +214,8 @@ export class LeveledWeapon {
      * 基础攻击受等级影响，其他属性受精炼影响
      */
     updateProperties(): void {
+        // 属性被改写：推进版本号，让上层的属性汇总表知道自己的快照已过期
+        LeveledWeapon.propertiesRevision++
         // 根据武器等级调整基础攻击
         const clampedLevel = Math.max(1, Math.min(80, this._等级))
         this.基础攻击 = +(this._originalWeaponData.攻击 * CommonLevelUp[clampedLevel - 1]).toFixed(2)
@@ -396,6 +405,8 @@ export class LeveledWeapon {
     setForgeEffective(effective: boolean) {
         this.forgeEffective = !this.hasForge || effective
         this.buffProps = this.forgeEffective ? this._effectiveBuffProps : {}
+        // buffProps 内容发生变化：推进版本号
+        LeveledWeapon.propertiesRevision++
         return this
     }
 

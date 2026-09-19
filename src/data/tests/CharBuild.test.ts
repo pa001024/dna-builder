@@ -5,6 +5,203 @@ import { createBuildFromSnapshot, createWorkerSnapshot } from "../CharBuildSnaps
 import { LeveledModHelper, weaponData } from "../index"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
+import { createShardBuild1, shardBuild1 } from "./fixtures/shardBuild1"
+
+// 线上真实构筑（莉兹贝尔 shardBuild1）已抽出为公共夹具，供本测试与性能基准共用：
+// 见 ./fixtures/shardBuild1.ts
+
+describe("派生缓存失效（mods / 自定义变量）", () => {
+    it("原地追加 MOD 槽位元素后，派生结果应立即生效", () => {
+        const build = createShardBuild1()
+        const before = build.calculate()
+        const beforeAttack = build.calculateAttributes().攻击
+        const beforeModCount = build.mods.length
+
+        // 原地 push：缓存以槽位快照比对失效，不能持有槽位数组引用
+        build.charMods.push(new LeveledMod(41001)) // 炽灼：攻击 +75%
+
+        const after = build.calculate()
+        const afterAttack = build.calculateAttributes().攻击
+        expect(build.mods.length).toBe(beforeModCount + 1)
+        expect(afterAttack).toBeGreaterThan(beforeAttack)
+        expect(after).toBeGreaterThan(before)
+
+        // 与「等价的新建构筑」完全一致，证明吃到的是最新槽位
+        const rebuilt = createShardBuild1()
+        rebuilt.charMods.push(new LeveledMod(41001))
+        expect(afterAttack).toBeCloseTo(rebuilt.calculateAttributes().攻击, 6)
+        expect(after).toBeCloseTo(rebuilt.calculate(), 6)
+    })
+
+    it("原地移除 MOD 槽位元素后，派生结果应立即回退", () => {
+        const build = createShardBuild1()
+        const expected = createShardBuild1()
+        expected.charMods.splice(0, 1)
+        const expectedAttack = expected.calculateAttributes().攻击
+        const beforeModCount = build.mods.length
+
+        build.charMods.splice(0, 1)
+
+        expect(build.mods.length).toBe(beforeModCount - 1)
+        expect(build.calculateAttributes().攻击).toBeCloseTo(expectedAttack, 6)
+        expect(build.calculate()).toBeCloseTo(expected.calculate(), 6)
+    })
+
+    it("原地替换 MOD 槽位元素后，派生结果应立即生效", () => {
+        const build = createShardBuild1()
+        build.charMods[0] = new LeveledMod(41001)
+
+        const reference = createShardBuild1()
+        reference.charMods[0] = new LeveledMod(41001)
+
+        expect(build.mods[0].id).toBe(41001)
+        expect(build.calculate()).toBeCloseTo(reference.calculate(), 6)
+    })
+
+    it("MOD 槽位整体替换后，派生结果应立即生效", () => {
+        const build = createShardBuild1()
+        // 注意 auraMod 的 attrType 同为「角色」，不能按 attrType 计数判断槽位是否已换
+        const replacedIds = build.charMods.map(mod => mod?.id)
+        expect(replacedIds).not.toContain(41001)
+
+        build.charMods = [new LeveledMod(41001)]
+
+        const reference = createShardBuild1()
+        reference.charMods = [new LeveledMod(41001)]
+
+        // 整槽替换后，旧角色位 MOD 必须全部从派生列表中消失
+        expect(build.mods.filter(mod => replacedIds.includes(mod.id))).toHaveLength(0)
+        expect(build.mods[0].id).toBe(41001)
+        expect(build.calculate()).toBeCloseTo(reference.calculate(), 6)
+    })
+
+    it("自定义变量原地替换后应立即生效", () => {
+        const build = createShardBuild1()
+        const baseline = build.calculate()
+
+        build.customVariables[6] = ["循环用时", "1"]
+        const changed = build.calculate()
+        expect(changed).not.toBeCloseTo(baseline, 6)
+
+        build.customVariables[6] = ["循环用时", shardBuild1.customVariables[6][1]]
+        expect(build.calculate()).toBeCloseTo(baseline, 6)
+    })
+})
+
+describe("作用域属性表失效", () => {
+    // 属性汇总表把全部来源的数值属性一次性展开（见 CharBuild.buildBonusSourceTable），
+    // 失效来源有四条：MOD 槽位变化、来源自身数值改写（版本号）、武器实例替换、BUFF 数组增删换。
+    // 这里逐条构造「原地改写后」与「等价新建构筑」的对比。
+
+    it("原地修改 MOD 等级后，属性汇总应立即生效", () => {
+        const build = createShardBuild1()
+        const reference = createShardBuild1()
+        const untouched = createShardBuild1()
+
+        // 满级 MOD 降到 1 级：数值减半，必定改变结果
+        build.charMods[0]!.等级 = 1
+        reference.charMods[0]!.等级 = 1
+
+        expect(build.calculate()).toBeCloseTo(reference.calculate(), 6)
+        expect(build.calculate()).not.toBeCloseTo(untouched.calculate(), 6)
+    })
+
+    it("原地修改 BUFF 等级后，属性汇总应立即生效", () => {
+        const build = createShardBuild1()
+        const reference = createShardBuild1()
+        const untouched = createShardBuild1()
+
+        const target = build.buffs.find(buff => buff.名称 === "色散成霓")!
+        const mirror = reference.buffs.find(buff => buff.名称 === "色散成霓")!
+        expect(target).toBeDefined()
+        target.等级 = 1
+        mirror.等级 = 1
+
+        expect(build.calculate()).toBeCloseTo(reference.calculate(), 6)
+        expect(build.calculate()).not.toBeCloseTo(untouched.calculate(), 6)
+    })
+
+    it("原地修改武器等级后，属性汇总应立即生效", () => {
+        const build = createShardBuild1()
+        const reference = createShardBuild1()
+        const untouched = createShardBuild1()
+
+        build.meleeWeapon.等级 = 1
+        reference.meleeWeapon.等级 = 1
+
+        // 熔炉武器的等级只改写「基础攻击」（词条按精炼固定），而该字段同样在属性表内，
+        // 因此用近战作用域查询它来验证表已随版本号失效，而不是靠目标函数（它只吃同律面板）。
+        const changed = build.getTotalBonus("基础攻击", "近战")
+        expect(changed).toBeCloseTo(reference.getTotalBonus("基础攻击", "近战"), 6)
+        expect(changed).not.toBeCloseTo(untouched.getTotalBonus("基础攻击", "近战"), 6)
+    })
+
+    it("切换武器熔炼生效状态后，属性汇总应立即生效", () => {
+        const build = createShardBuild1()
+        const reference = createShardBuild1()
+
+        build.meleeWeapon.setForgeEffective(false)
+        reference.meleeWeapon.setForgeEffective(false)
+        const off = build.calculate()
+        expect(off).toBeCloseTo(reference.calculate(), 6)
+
+        build.meleeWeapon.setForgeEffective(true)
+        reference.meleeWeapon.setForgeEffective(true)
+        expect(build.calculate()).toBeCloseTo(reference.calculate(), 6)
+        expect(off).not.toBeCloseTo(reference.calculate(), 6)
+    })
+
+    it("整体替换 BUFF 列表后，属性汇总应立即生效", () => {
+        const build = createShardBuild1()
+        const reference = createShardBuild1()
+        const untouched = createShardBuild1()
+
+        build.buffs = build.buffs.slice(0, 5)
+        reference.buffs = reference.buffs.slice(0, 5)
+
+        expect(build.calculate()).toBeCloseTo(reference.calculate(), 6)
+        expect(build.calculate()).not.toBeCloseTo(untouched.calculate(), 6)
+    })
+
+    it("临时 BUFF 增删（收益试算路径）后应立即回退", () => {
+        const build = createShardBuild1()
+        const baseline = build.calculate()
+
+        // calcIncome 会临时 push / pop 一条 BUFF，其间必须能查到带该 BUFF 的结果
+        const buff = new LeveledBuff("助战50攻")
+        build.buffs.push(buff)
+        const withBuff = build.calculate()
+        build.buffs.pop()
+
+        expect(withBuff).not.toBeCloseTo(baseline, 6)
+        expect(build.calculate()).toBeCloseTo(baseline, 6)
+    })
+
+    it("临时 MOD 槽位（收益试算路径）增删后应立即回退", () => {
+        const build = createShardBuild1()
+        const baseline = build.calculate()
+
+        build.tempMod = new LeveledMod(41001) // 炽灼：攻击 +75%
+        const withTemp = build.calculate()
+        build.tempMod = null
+
+        expect(withTemp).not.toBeCloseTo(baseline, 6)
+        expect(build.calculate()).toBeCloseTo(baseline, 6)
+    })
+
+    it("临时替换武器槽位（收益试算路径）后应立即回退", () => {
+        const build = createShardBuild1()
+        const baseline = build.calculate()
+
+        const original = build.meleeWeapon
+        build.meleeWeapon = new LeveledWeapon(10302)
+        const replaced = build.calculate()
+        build.meleeWeapon = original
+
+        expect(replaced).not.toBeCloseTo(baseline, 6)
+        expect(build.calculate()).toBeCloseTo(baseline, 6)
+    })
+})
 
 describe("CharBuild类测试", () => {
     // 创建测试用数据

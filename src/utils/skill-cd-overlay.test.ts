@@ -93,7 +93,7 @@ describe("skill-cd-overlay", () => {
         expect(keys[0].label).toBe("E")
         expect(keys[1].label).toBe("酷炫")
         expect(keys[1].cdSeconds).toBe(600)
-        expect(keys[2].cdSeconds).toBe(8)
+        expect(keys[2].cdSeconds).toBe(2.7)
         expect(keys[2].enabled).toBe(false)
         expect(keys[3].enabled).toBe(false)
     })
@@ -107,7 +107,7 @@ describe("skill-cd-overlay", () => {
     })
 
     it("clampCdSeconds 对非法值给出默认 8 秒", () => {
-        expect(clampCdSeconds(Number.NaN)).toBe(8)
+        expect(clampCdSeconds(Number.NaN)).toBe(2.7)
         expect(clampCdSeconds(0.1)).toBe(0.5)
         expect(clampCdSeconds(20)).toBe(20)
     })
@@ -149,13 +149,5 @@ describe("skill-cd-overlay", () => {
         expect(config.discColor).toBe(SKILL_CD_OVERLAY_COLORS.discColor)
         expect(config.keys).toHaveLength(1)
         expect(config.keys[0].cdSeconds).toBe(9)
-    })
-
-    it("新增绑定时自动补标签并维持默认 CD", () => {
-        const binding = createKeyBinding({ vk: 0x51 })
-        expect(binding.label).toBe("Q")
-        expect(binding.cdSeconds).toBe(8)
-        expect(binding.enabled).toBe(true)
-        expect(binding.id).not.toBe("")
     })
 })

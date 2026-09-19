@@ -54,6 +54,13 @@ export class LeveledMod implements Mod {
     maxLevel: number
     /** 上一次 updateProperties 由特效写入 MOD 层的属性键：重算前先清除，避免重复调用时数值自我累加 */
     private _effectAppliedKeys: string[] = []
+    /**
+     * MOD 数值属性的版本号（全实例共享的单调计数）。
+     *
+     * 改写 MOD 属性的入口只有 `updateProperties`（等级 / buffLv 变更）与 `applyCondition`（条件生效），
+     * 两处都会推进本计数。上层的属性汇总表据此判断派生快照是否过期——比逐个字段比对廉价得多。
+     */
+    static propertiesRevision = 0
 
     toString() {
         return `[${this.id}]${this.系列}之${this.名称}(${this.品质}) Lv.${this.等级}`
@@ -150,6 +157,8 @@ export class LeveledMod implements Mod {
      * 根据等级更新MOD属性
      */
     private updateProperties(): void {
+        // 属性被改写：推进版本号，让上层的属性汇总表知道自己的快照已过期
+        LeveledMod.propertiesRevision++
         // 先清除上一次特效写入的属性：等级变更等场景会重复调用本方法，
         // 特效属性是在既有值上叠加的，不清理会与上一次的结果自我累加。
         this._effectAppliedKeys.forEach(key => delete this[key])
@@ -466,6 +475,7 @@ export class LeveledMod implements Mod {
                 changed = true
             }
         })
+        if (changed) LeveledMod.propertiesRevision++
         return changed
     }
 
@@ -551,6 +561,21 @@ export class LeveledMod implements Mod {
             r[prop] = this[prop]
         })
         return r
+    }
+
+    /**
+     * 读取单个 MOD 层属性的数值，语义等价于 `addAttr[attribute]`。
+     *
+     * `addAttr` 每次访问都会枚举全部自有键并重建整张属性表（`Object.keys` + `filter` + 对象分配），
+     * 而 CharBuild 的属性汇总会在一次计算中对同一 MOD 反复取同一个词条，累计分配量极大。
+     * 本方法按同样的判定规则（自有属性且不在排除表内、值为数值）直接读取单键，避免构造整表。
+     * @param attribute 属性名
+     * @returns 属性数值；该属性不属于 MOD 层或值不是数值时返回 undefined
+     */
+    public getAddAttrValue(attribute: string): number | undefined {
+        if (LeveledMod._exclude_properties.has(attribute) || !Object.hasOwn(this, attribute)) return undefined
+        const value = this[attribute]
+        return typeof value === "number" ? value : undefined
     }
     get minusAttr() {
         const r: Record<string, any> = this.clone()
