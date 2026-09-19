@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import { CharBuild, LeveledMod } from "@/data"
+import { CharBuild, formatModName, LeveledMod } from "@/data"
 import { format100r } from "@/util"
 
 /**
@@ -186,7 +186,7 @@ function handleMouseUp(event: MouseEvent) {
             v-if="mod"
             :link="`/db/mod/${mod.id}`"
             :props="mod.getProperties()"
-            :title="`${$t(mod.系列)}${$t(mod.名称)}`"
+            :title="formatModName(mod.系列, mod.名称, $t)"
             :rarity="mod.品质"
             :polarity="mod.极性"
             :cost="mod.耐受"

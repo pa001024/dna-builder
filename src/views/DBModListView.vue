@@ -3,7 +3,7 @@ import { useLocalStorage } from "@vueuse/core"
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { LeveledMod } from "@/data"
+import { formatModName, LeveledMod } from "@/data"
 import { modMap } from "@/data/d"
 import { modConvertData } from "@/data/d/convert.data"
 import modData from "@/data/d/mod.data"
@@ -459,7 +459,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbm-item-active" })
                                                 class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
                                                 :class="{ 'text-primary': selectedModId === mod.id }"
                                             >
-                                                {{ $t(mod.系列) }}{{ $t(mod.名称) }}
+                                                {{ formatModName(mod.系列, mod.名称, $t) }}
                                             </h3>
                                             <span
                                                 v-if="isModConvertible(mod.id)"

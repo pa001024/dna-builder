@@ -5,7 +5,7 @@ import charData from "@/data/d/char.data"
 import { weaponDraftMap } from "@/data/d/index"
 import modData from "@/data/d/mod.data"
 import type { Char, Draft, Mod, Skill, SkillField, Weapon, WeaponSkill } from "@/data/data-types"
-import { LeveledMod } from "@/data/leveled/LeveledMod"
+import { formatModName, LeveledMod } from "@/data/leveled/LeveledMod"
 import { LeveledSkill } from "@/data/leveled/LeveledSkill"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 import { formatProp } from "@/util"
@@ -550,7 +550,7 @@ watch(
                         >
                             <ShowProps
                                 :props="item.mod.getProperties()"
-                                :title="`${$t(item.mod.系列)}${$t(item.mod.名称)}`"
+                                :title="formatModName(item.mod.系列, item.mod.名称, $t)"
                                 :rarity="item.mod.品质"
                                 :polarity="item.mod.极性"
                                 :cost="item.mod.耐受"
@@ -572,7 +572,7 @@ watch(
                                             :to="`/db/mod/${item.mod.id}`"
                                             class="truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
                                         >
-                                            {{ $t(item.mod.系列) }}{{ $t(item.mod.名称) }}
+                                            {{ formatModName(item.mod.系列, item.mod.名称, $t) }}
                                         </SRouterLink>
                                         <div class="mt-0.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-base-content/50">
                                             <CopyID :id="item.mod.id" />

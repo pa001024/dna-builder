@@ -44,6 +44,7 @@ import { subRegionMap } from "@/data/d/subregion.data"
 import titleData from "@/data/d/title.data"
 import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
+import { formatModName } from "@/data/leveled/LeveledMod"
 import { getAbyssDungeonGroup, getAbyssDungeonLevel, getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import { formatModLimit } from "@/utils/mod-limit"
 import { getRelatedMonstersByMonsterTagId } from "@/utils/monster-tag-utils"
@@ -256,7 +257,7 @@ export class GlobalSearchService {
                 this.buildSearchEntry(
                     {
                         id: `mod:${mod.id}`,
-                        title: `${t(mod.系列)}${t(mod.名称)}`,
+                        title: formatModName(mod.系列, mod.名称, t),
                         subtitle: `ID:${mod.id} | 类型:${mod.类型} | 品质:${mod.品质}${mod.属性 ? ` | 属性:${mod.属性}` : ""}`,
                         typeLabel: t("database.mod"),
                         path: `/db/mod/${mod.id}`,

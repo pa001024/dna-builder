@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import { LeveledChar, LeveledCharHelper, LeveledMod, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "@/data"
+import { formatModName, LeveledChar, LeveledCharHelper, LeveledMod, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "@/data"
 import { charMap, draftMap, modMap, skinMap, walnutMap, weaponMap } from "@/data/d"
 import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
@@ -463,7 +463,7 @@ function handleCardClick() {
         v-for="mod in [createLeveledMod(value[1])]"
         :key="mod.id"
         :props="mod.getProperties()"
-        :title="`${$t(mod.系列)}${$t(mod.名称)}`"
+        :title="formatModName(mod.系列, mod.名称, $t)"
         :rarity="mod.品质"
         :polarity="mod.极性"
         :cost="mod.耐受"

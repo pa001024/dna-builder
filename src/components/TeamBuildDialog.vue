@@ -12,7 +12,7 @@ import {
     normalizeCharSettings,
     resolveModVariantLetter,
 } from "@/composables/useCharSettings"
-import { charMap, LeveledChar, LeveledMod, LeveledModHelper, LeveledWeapon, weaponMap } from "@/data"
+import { charMap, formatModName, LeveledChar, LeveledMod, LeveledModHelper, LeveledWeapon, weaponMap } from "@/data"
 
 /**
  * 协战构筑弹窗——简洁模式下点击协战角色/协战武器时打开。
@@ -365,7 +365,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown))
                                         v-if="mod"
                                         :link="`/db/mod/${mod.id}`"
                                         :props="mod.getProperties()"
-                                        :title="`${$t(mod.系列)}${$t(mod.名称)}`"
+                                        :title="formatModName(mod.系列, mod.名称, $t)"
                                         :rarity="mod.品质"
                                         :polarity="mod.极性"
                                         :cost="mod.耐受"
@@ -399,7 +399,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown))
                                     v-if="group.key === 'char' && group.aura"
                                     :link="`/db/mod/${group.aura.id}`"
                                     :props="group.aura.getProperties()"
-                                    :title="`${$t(group.aura.系列)}${$t(group.aura.名称)}`"
+                                    :title="formatModName(group.aura.系列, group.aura.名称, $t)"
                                     :rarity="group.aura.品质"
                                     :polarity="group.aura.极性"
                                     :cost="group.aura.耐受"

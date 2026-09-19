@@ -2,6 +2,7 @@
 import { computed } from "vue"
 import type { CharBuild } from "@/data/CharBuild"
 import type { LeveledMod } from "@/data/leveled/LeveledMod"
+import { formatModName } from "@/data/leveled/LeveledMod"
 
 const props = defineProps<{
     mods: (LeveledMod | null)[]
@@ -180,7 +181,7 @@ const cardLayout = {
                             <ShowProps
                                 v-if="mods[index]"
                                 :props="mods[index]!.getProperties()"
-                                :title="`${$t(mods[index]!.系列)}${$t(mods[index]!.名称)}`"
+                                :title="formatModName(mods[index]!.系列, mods[index]!.名称, $t)"
                                 :rarity="mods[index]!.品质"
                                 :polarity="mods[index]!.极性"
                                 :cost="mods[index]!.耐受"
@@ -245,7 +246,7 @@ const cardLayout = {
                             <ShowProps
                                 v-if="mods[index]"
                                 :props="mods[index]!.getProperties()"
-                                :title="`${$t(mods[index]!.系列)}${$t(mods[index]!.名称)}`"
+                                :title="formatModName(mods[index]!.系列, mods[index]!.名称, $t)"
                                 :rarity="mods[index]!.品质"
                                 :polarity="mods[index]!.极性"
                                 :cost="mods[index]!.耐受"

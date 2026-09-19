@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { t } from "i18next"
 import { computed, ref, watch } from "vue"
-import { LeveledMod, LeveledWeaponHelper, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
+import { formatModName, LeveledMod, LeveledWeaponHelper, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
 import { Walnut } from "@/data/d/walnut.data"
 import { WalnutSequenceSimulator } from "@/utils/walnut-utils"
 
@@ -147,7 +147,7 @@ function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
         if (mod) {
             links.push({
                 icon: LeveledMod.url(mod.icon),
-                text: `${mod.系列}${mod.名称}`,
+                text: formatModName(mod.系列, mod.名称, t),
                 to: `/db/mod/${mod.id}`,
             })
         }

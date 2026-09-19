@@ -1,10 +1,48 @@
-import { t as translate } from "i18next"
+import i18next, { t as translate } from "i18next"
 import type { CharAttr } from "../CharBuild"
 import { type Buff, type Mod, Quality, type WeaponSkill } from "../data-types"
 import { LeveledBuff } from "./LeveledBuff"
 import { getMinusAttrValue } from "./minusAttr"
 
 export type LeveledModResolver = (id: number) => { mod: Mod; effect?: Buff } | undefined
+
+/**
+ * 系列名必须排在名称之后（限定语后置）的语言。
+ *
+ * 中/英/日/韩/繁中的系列译文自带所有格或助词后缀（"不死鸟之"、"Phoenix's "、"フェニックスの"、"불사조의 "），
+ * 天然拼在名称前面；法语则是 "du Phénix" / "de la Sirène" 这类介词短语，只能拼在名称之后，
+ * 否则会得到 "du PhénixArdeur" 这样的错误语序。
+ */
+const POSTPOSED_SERIES_LANGUAGES = ["fr"]
+
+/**
+ * 判断指定语言的 MOD 系列名是否需要排在名称之后。
+ * @param language 语言代码，缺省时取 i18next 当前语言
+ * @returns 系列名需后置返回 true
+ */
+export function isSeriesPostposed(language?: string): boolean {
+    const lang = (language ?? i18next.language ?? "").toLowerCase()
+    return POSTPOSED_SERIES_LANGUAGES.some(code => lang.startsWith(code))
+}
+
+/**
+ * 按当前语言的语序拼接 MOD 的「系列名 + 名称」。
+ *
+ * 系列名在前时直接相接（译文自带连接词/尾空格）；系列名在后时用空格分隔并去掉译文两端空白。
+ * @param series MOD 系列名（i18n 键，一般为中文原文）
+ * @param name MOD 名称（i18n 键）
+ * @param t 翻译函数，默认使用 i18next 全局 t
+ * @returns 拼接后的展示名
+ */
+export function formatModName(series: string, name: string, t: (key: string) => string = translate): string {
+    const seriesText = series ? t(series) : ""
+    const nameText = name ? t(name) : ""
+    if (isSeriesPostposed()) {
+        const tail = seriesText.trim()
+        return tail ? `${nameText} ${tail}` : nameText
+    }
+    return `${seriesText}${nameText}`
+}
 
 let leveledModResolver: LeveledModResolver | undefined
 
@@ -16,8 +54,24 @@ export function setLeveledModResolver(resolver: LeveledModResolver) {
  * LeveledMod类 - 继承Mod接口，添加等级属性和动态属性计算
  */
 export class LeveledMod implements Mod {
+    /**
+     * 拼接 MOD 完整展示名：属性前缀 + 语言相关的「系列 + 名称」+ 品质。
+     * @param mod MOD 数据
+     * @param t 翻译函数，默认使用 i18next 全局 t
+     * @returns 完整展示名
+     */
     static fullName(mod: Mod, t: (key: string) => string = translate) {
-        return `${t(mod.属性 || "")}${t(mod.系列)}${t(mod.名称)}(${mod.品质})`
+        return `${t(mod.属性 || "")}${formatModName(mod.系列, mod.名称, t)}(${mod.品质})`
+    }
+
+    /**
+     * 未翻译（原始中文）的「系列 + 名称」拼接，语序同样跟随当前语言。
+     * @param series MOD 系列名原文
+     * @param name MOD 名称原文
+     * @returns 拼接后的原始名称
+     */
+    private static rawFullName(series: string, name: string): string {
+        return isSeriesPostposed() ? `${name} ${series}` : `${series}之${name}`
     }
 
     // MOD品质对应的等级上限
@@ -63,7 +117,7 @@ export class LeveledMod implements Mod {
     static propertiesRevision = 0
 
     toString() {
-        return `[${this.id}]${this.系列}之${this.名称}(${this.品质}) Lv.${this.等级}`
+        return `[${this.id}]${LeveledMod.rawFullName(this.系列, this.名称)}(${this.品质}) Lv.${this.等级}`
     }
 
     /**
@@ -120,7 +174,7 @@ export class LeveledMod implements Mod {
     }
 
     get fullName(): string {
-        return `${this.系列}之${this.名称}`
+        return LeveledMod.rawFullName(this.系列, this.名称)
     }
 
     get originalModData() {

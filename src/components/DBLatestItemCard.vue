@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { t } from "i18next"
 import { computed } from "vue"
 import { useRouter } from "vue-router"
 import { LeveledCharHelper, LeveledMod, LeveledWeaponHelper } from "@/data"
@@ -90,12 +91,12 @@ const imageBgClass = computed(() => {
 /** 副信息：角色为“属性 · 精通”，武器为“类型 · 伤害类型”，魔之楔为“系列 · 类型” */
 const meta = computed(() => {
     if (props.entry.kind === "char") {
-        return [props.entry.item.属性, props.entry.item.精通?.[0]].filter(Boolean).join(" · ")
+        return [t(`${props.entry.item.属性}属性`, props.entry.item.属性), t(props.entry.item.精通?.[0])].filter(Boolean).join(" · ")
     }
     if (props.entry.kind === "weapon") {
-        return [props.entry.item.类型[0], props.entry.item.伤害类型].filter(Boolean).join(" · ")
+        return [t(props.entry.item.类型[0]), t(props.entry.item.伤害类型)].filter(Boolean).join(" · ")
     }
-    return [props.entry.item.系列, props.entry.item.类型].filter(Boolean).join(" · ")
+    return [t(props.entry.item.系列), t(props.entry.item.类型)].filter(Boolean).join(" · ")
 })
 
 /** 元素强调色（仅角色与魔之楔） */
@@ -151,7 +152,7 @@ const targetPath = computed(() => {
 
         <div class="flex flex-1 flex-col gap-1 p-2.5">
             <h4 class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary">
-                {{ name }}
+                {{ $t(name) }}
             </h4>
             <div class="flex items-center gap-1.5 text-[10px] text-base-content/45">
                 <span v-if="accent" class="size-1.5 shrink-0" :style="{ backgroundColor: accent }" />

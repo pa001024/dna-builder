@@ -7,7 +7,7 @@ import shopData from "@/data/d/shop.data"
 import { walnutMap } from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
 import type { Draft, Mod, WeaponSkill } from "@/data/data-types"
-import { LeveledMod } from "@/data/leveled/LeveledMod"
+import { formatModName, LeveledMod } from "@/data/leveled/LeveledMod"
 import { formatProp } from "@/util"
 import { formatModLimit } from "@/utils/mod-limit"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
@@ -309,7 +309,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                             :to="`/db/mod/${mod.id}`"
                             class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
-                            {{ $t(mod.系列) }}{{ $t(mod.名称) }}
+                            {{ formatModName(mod.系列, mod.名称, $t) }}
                         </SRouterLink>
                         <CopyID :id="mod.id" />
                         <!-- 极性 / 耐受方章 -->
