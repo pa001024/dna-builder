@@ -904,9 +904,11 @@ export async function removeInstalledDataPackVersion(version: string): Promise<v
 /**
  * 通过服务端差分接口下载新数据包字节。
  *
- * 差分接口 `POST /api/download/diff` 接收 `{ old, new }` 两个官方包名，由后端
- * 生成 HDiffPatch 补丁（超 2MB 时回退整包 302）。这里把旧包与补丁都留在浏览器内，
- * 用 hpatchz wasm 就地应用，避免把整包字节在前端与后端间搬运。
+ * 差分接口 `POST /api/download/diff` 接收 `{ old, new }` 两个官方包名，后端只回重定向：
+ * 可用差分（已镜像到 OSS 的 `data-pack/diff/`）与回退整包都是 302，前者指向 `.hdiff`、
+ * 后者指向官方 `.zip`。这里跟随重定向后按最终地址区分——补丁直接读走，整包立刻放弃，
+ * 交给下面的整包下载链路，避免白下载一遍完整包。
+ * 后端仍保留「本地差分直接下发（200 + X-Download-Mode: patch）」的过渡形态，同样兼容。
  *
  * @param targetVersion 目标版本号
  * @param targetPackageFile 目标版本对应的官方 ZIP 文件名
@@ -927,21 +929,30 @@ async function tryDownloadDataPackViaDiff(targetVersion: string, targetPackageFi
     const diffUrl = `${env.apiEndpoint.replace(/\/$/, "")}/api/download/diff`
     let response: Response
     try {
-        // redirect: manual 以便识别后端回退整包的 302；差分本身应直接返回 200。
         response = await fetch(diffUrl, {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ old: oldPackageFile, new: targetPackageFile }),
             cache: "no-store",
-            redirect: "manual",
+            redirect: "follow",
         })
     } catch {
         return null
     }
-    if (!response.ok || response.status === 302 || response.status === 303 || response.status === 307 || response.status === 308) {
+    if (!response.ok) {
         return null
     }
-    if (response.headers.get("X-Download-Mode") !== "patch") {
+
+    const finalPath = (() => {
+        try {
+            return new URL(response.url).pathname
+        } catch {
+            return ""
+        }
+    })()
+    if (!finalPath.endsWith(".hdiff") && response.headers.get("X-Download-Mode") !== "patch") {
+        // 302 指向的是整包：不消费响应体，交给整包下载链路带进度重新拉取。
+        void response.body?.cancel().catch(() => {})
         return null
     }
 

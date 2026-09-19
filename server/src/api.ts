@@ -77,28 +77,40 @@ async function getMsiDownloadUrl(): Promise<string | null> {
 
 /**
  * 根据差分结果构造 HTTP 响应。
+ * 差分与完整包都优先 302 到对象存储/CDN，应用服务器不承担文件带宽。
  * @param result 差分查询结果。
  * @param set Elysia 响应设置对象。
- * @returns 补丁文件或完整包重定向。
+ * @returns 完整包重定向、差分重定向或本地下发的补丁。
  */
 function createPackageDiffResponse(
     result: Awaited<ReturnType<typeof getPackageDiff>>,
     set: { status?: number | string; headers: Record<string, string | number> }
 ) {
+    // 目标包摘要来自缓存特征，未缓存时缺省——不为填充响应头去下载整包。
+    if (result.targetSha256) {
+        set.headers["X-Target-SHA256"] = result.targetSha256
+    }
+    set.headers["X-Target-Package"] = result.targetPackageName
+
     if (result.mode === "full") {
         set.status = 302
         set.headers.Location = result.targetUrl
         set.headers["X-Download-Mode"] = "full"
-        set.headers["X-Target-Package"] = result.targetPackageName
-        set.headers["X-Target-SHA256"] = result.targetSha256
         return new Response(null, { status: 302 })
     }
 
+    set.headers["X-Download-Mode"] = "patch"
+
+    if (result.mode === "patch") {
+        // 差分已镜像到对象存储：302 让客户端直连 CDN 拉补丁。
+        set.status = 302
+        set.headers.Location = result.patchUrl
+        return new Response(null, { status: 302 })
+    }
+
+    // 尚未镜像到对象存储的差分：由应用服务器直接下发（体积不超过 2MB）。
     set.headers["Content-Type"] = "application/octet-stream"
     set.headers["Content-Disposition"] = `attachment; filename="${result.patchName}"`
-    set.headers["X-Download-Mode"] = "patch"
-    set.headers["X-Target-Package"] = result.targetPackageName
-    set.headers["X-Target-SHA256"] = result.targetSha256
     return Bun.file(result.patchFile)
 }
 
@@ -158,8 +170,10 @@ export const apiPlugin = (packageDiffConfig: PackageDiffConfig = {}) => {
 
     /**
      * 下载客户端旧官方数据包到指定新官方数据包的 HDiffPatch 差分。
-     * 差分大于 2 MB 时重定向到官方完整包，避免无收益的客户端补丁；
-     * 过大的差分会被截断为 0 字节占位，只在磁盘上保留「不可用」这一结论。
+     *
+     * 前台只查缓存，不阻塞：差分已生成且已镜像到 OSS（`data-pack/diff/`）时 302 直连 CDN；
+     * 尚未镜像的本地差分由应用服务器直接下发（≤2MB），镜像排入后台队列；
+     * 从未生成过或差分无收益（>2MB 的 0 字节占位）时立刻 302 到官方完整包。
      */
     app.post(
         "/download/diff",
