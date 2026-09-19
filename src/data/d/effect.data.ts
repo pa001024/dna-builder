@@ -1,6 +1,20 @@
 import type { Buff } from "../data-types"
 
+/**
+ * 特效表：条目的 id 对应 MOD / 武器 id（按 id 精确索引为 modEffectMap / weaponEffectMap）。
+ *
+ * 数值键默认按「MOD 层」处理：归一化为 MOD 自身属性，受 MOD 槽位作用域限制
+ * （近战槽 MOD 的「近战攻速」只作用于近战）。
+ * 需要跨槽位生效的属性（如远程槽 MOD 提供近战增伤）用 `@` 前缀声明，剥离前缀后归属「BUFF 层」
+ * （LeveledMod.buffProps），由 CharBuild 按 BUFF 口径汇总——只按属性自身作用域判定，不受 MOD 槽位限制。
+ */
 export default [
+    {
+        id: 43342,
+        名称: "反转",
+        描述: "使用任意武器每累计造成30.0次远程武器伤害后，自身获得近战武器伤害提高{%}效果，持续18.0秒。",
+        "@近战增伤": 0.6,
+    },
     {
         id: 32301,
         名称: "倾力",

@@ -172,9 +172,9 @@ public/i18n/         # Translation files
   `src/data/generated/title-frame-textures.json`（webp 文件名 → 游戏内包路径的清单）and
   `public/imgs/titleframe/*.webp`. Preview any frame with `tools/title-frame-preview.html` on the dev
   server (`?frames=07_1,09_1` to narrow down).
-  - 称号框贴图遇到同名冲突会改写成带父目录前缀的名字（如 `13_T_PersonalInfo_Title_13_08.webp`），
-    basename 与源 PNG 对不上；`tools/webp-import.ts` 读上面那份清单，按包路径把它们补齐，
-    所以 `bun tools/webp-import.ts` 也能覆盖这些贴图，不会再把它们报成缺失。
+    - 称号框贴图遇到同名冲突会改写成带父目录前缀的名字（如 `13_T_PersonalInfo_Title_13_08.webp`），
+      basename 与源 PNG 对不上；`tools/webp-import.ts` 读上面那份清单，按包路径把它们补齐，
+      所以 `bun tools/webp-import.ts` 也能覆盖这些贴图，不会再把它们报成缺失。
 - **Attribute i18n**: `pnpm iattr` (`bun tools/import-attr-i18n.ts`) — 把上游
   `out/AttrConfig.json` + `out/TextMap_I18n.json` 里的属性名（`Attr_*_Name`，如 `Attr_ATK_Fire_Name`）
   与属性说明（`ATTR_DESC_*`，如 `ATTR_DESC_ATK_Fire`）导入 `public/i18n/*/translation.json`。
@@ -184,6 +184,7 @@ public/i18n/         # Translation files
   （`WeaponTab.vue`）的属性来源 tooltip 标题与说明里。上游目录默认取同级 `DuetNightAbyssData2`，
   缺失时回退 `D:/dev/DuetNightAbyssData2`，可用 `--upstream <dir>` 或 `DNA_UPSTREAM` 覆盖，
   `--check` 只比对不落盘。
+- e2e测试使用[bun-webview-test](.agents\skills\bun-webview-test\SKILL.md) 禁止使用Playwright
 
 ## Git Hooks (Husky)
 

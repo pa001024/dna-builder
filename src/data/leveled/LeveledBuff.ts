@@ -24,6 +24,17 @@ function normalizeDynamicAttrValue(value: number) {
 }
 
 /**
+ * 解析原始数据键对应的实例属性名。
+ * 特效数据中以 `@` 前缀声明的键表示该属性归属 BUFF 层（区别于 MOD 自身属性），
+ * 物化为 BUFF 属性时剥离前缀，否则属性名无法与任何属性查询匹配（如 `@近战增伤` → `近战增伤`）。
+ * @param property 原始数据键
+ * @returns 实例属性名
+ */
+function resolveBuffPropertyName(property: string) {
+    return property.startsWith("@") ? property.slice(1) : property
+}
+
+/**
  * LeveledBuff类 - 继承Buff接口，添加等级属性和动态属性计算
  */
 export class LeveledBuff implements Buff {
@@ -240,18 +251,28 @@ export class LeveledBuff implements Buff {
         const lx = this.lx ?? 1
         const x = 1
         let val = 0
-        this.properties.forEach(prop => {
+        // 按原始数据键遍历：实例属性名可能已剥离 `@` 前缀，不能直接用于回查原始数据
+        this.baseProperties.forEach(prop => {
             const maxValue = this._originalBuffData[prop]
             if (maxValue !== undefined && typeof maxValue === "number") {
                 // 属性值 = 满级属性/a*(1+(x-1)/b)
                 let currentValue = (maxValue / a) * (1 + (x - lx) / b)
-                if (prop === "神智回复") currentValue = Math.round(currentValue)
+                if (resolveBuffPropertyName(prop) === "神智回复") currentValue = Math.round(currentValue)
                 val = currentValue
             } else if (Array.isArray(maxValue)) {
                 val = maxValue[x - (this.lx ?? 1)]
             }
         })
         return val
+    }
+    /**
+     * 判断属性是否来自特效数据中以 `@` 前缀声明的键。
+     * 这类属性归属 BUFF 层（如远程槽 MOD 提供的近战增伤），MOD 汇总时不应归一化到自身。
+     * @param property 已剥离前缀的属性名
+     * @returns 是否来自 `@` 前缀键
+     */
+    isBuffLayerProperty(property: string) {
+        return `@${property}` in this._originalBuffData
     }
     /**
      * 根据等级更新Buff属性
@@ -269,13 +290,14 @@ export class LeveledBuff implements Buff {
         this.baseProperties.forEach(prop => {
             const maxValue = this._originalBuffData[prop]
             if (maxValue !== undefined) {
+                const property = resolveBuffPropertyName(prop)
                 if (Array.isArray(maxValue)) {
-                    this[prop] = maxValue[Math.min(x, maxValue.length) - (this.lx ?? 1)] * this._ratio * this._coverage
+                    this[property] = maxValue[Math.min(x, maxValue.length) - (this.lx ?? 1)] * this._ratio * this._coverage
                 } else if (typeof maxValue === "number") {
                     // 属性值 = 满级属性/a*(1+(x-1)/b)
                     let currentValue = (maxValue / a) * (1 + (x - lx) / b) * this._ratio * this._coverage
-                    if (prop === "神智回复") currentValue = Math.round(currentValue)
-                    this[prop] = currentValue
+                    if (property === "神智回复") currentValue = Math.round(currentValue)
+                    this[property] = currentValue
                 }
             }
         })

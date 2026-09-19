@@ -38,7 +38,13 @@ export class LeveledMod implements Mod {
     极性?: "D" | "O" | "V" | "A"
     技能替换?: Record<string, WeaponSkill>
     // MOD效果
-    buff?: LeveledBuff;
+    buff?: LeveledBuff
+    /**
+     * 效果层（BUFF 层）属性：特效表中以 `@` 前缀声明的属性，已剥离前缀。
+     * 与词条属性（addAttr，MOD 层）不同，BUFF 层属性不写入 MOD 自身，也不受 MOD 槽位作用域限制
+     * （如远程槽 MOD 可用 `@近战增伤` 提供近战增伤），由 CharBuild 按 BUFF 口径汇总。
+     */
+    buffProps: Record<string, number> = {};
     [key: string]: any
     // 等级属性
     private _等级: number
@@ -46,6 +52,8 @@ export class LeveledMod implements Mod {
     private _originalModData: Mod
     // 等级上限
     maxLevel: number
+    /** 上一次 updateProperties 由特效写入 MOD 层的属性键：重算前先清除，避免重复调用时数值自我累加 */
+    private _effectAppliedKeys: string[] = []
 
     toString() {
         return `[${this.id}]${this.系列}之${this.名称}(${this.品质}) Lv.${this.等级}`
@@ -142,6 +150,10 @@ export class LeveledMod implements Mod {
      * 根据等级更新MOD属性
      */
     private updateProperties(): void {
+        // 先清除上一次特效写入的属性：等级变更等场景会重复调用本方法，
+        // 特效属性是在既有值上叠加的，不清理会与上一次的结果自我累加。
+        this._effectAppliedKeys.forEach(key => delete this[key])
+        this._effectAppliedKeys = []
         // 属性值 = 满级属性/(等级上限+1)*(等级+1)
         // 架势MOD属性耐受等级越高越低
         if (this.id > 100000) {
@@ -203,26 +215,36 @@ export class LeveledMod implements Mod {
             }
         })
         // 效果层属性与词条基础属性使用相同的等级倍率。
+        // 带 `@` 前缀的属性归属 BUFF 层：物化属性时已剥离前缀，这里经 isBuffLayerProperty 判定后写入 buffProps，
+        // 由 CharBuild 按 BUFF 口径汇总（不受 MOD 槽位作用域限制）；其余属性仍归一化到 MOD 自身，即 MOD 层。
+        const buffProps: Record<string, number> = {}
         this.buff?.properties.forEach(prop => {
             const lv = this._等级
             const buff = this.buff!
             const maxValue = buff[prop] || 0
             let currentValue = (maxValue / (this.maxLevel + 1)) * (lv + 1)
             if (prop === "神智回复" || prop === "最大耐受") currentValue = Math.ceil(currentValue)
-            const modProperty = this.resolveEffectProperty(prop)
-            if (!modProperty) return
-            this[modProperty] = this[modProperty] ? this[modProperty] + currentValue : currentValue
+            if (buff.isBuffLayerProperty(prop)) {
+                buffProps[prop] = (buffProps[prop] || 0) + currentValue
+            } else {
+                const modProperty = this.resolveEffectProperty(prop)
+                if (!modProperty) return
+                this[modProperty] = this[modProperty] ? this[modProperty] + currentValue : currentValue
+                this._effectAppliedKeys.push(modProperty)
+            }
             if (buff.描述.includes(`{%}`)) {
                 const stackCount = buff.等级 > 0 ? buff.等级 : 1
                 const perStackValue = currentValue / stackCount
                 buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(perStackValue * 100).toFixed(1)}%`)
             }
         })
+        this.buffProps = buffProps
     }
 
     /**
-     * 将效果表中的武器作用域属性归一化为依附 MOD 的自身属性。
-     * @param property 效果表属性名。
+     * 将效果表中的武器作用域属性归一化为依附 MOD 的自身属性（MOD 层）。
+     * 带 `@` 前缀的属性不走此归一化：它们在 updateProperties 中直接进入 BUFF 层（buffProps）。
+     * @param property 效果表属性名（已剥离 `@` 前缀）。
      * @returns MOD 属性名；作用域不匹配时返回 undefined。
      */
     private resolveEffectProperty(property: string): string | undefined {
@@ -394,8 +416,11 @@ export class LeveledMod implements Mod {
             魔灵CD: 0,
             魔灵CD缩减: 0,
         }
-        Object.keys(this.getProperties()).forEach(prop => {
-            if (prop in attrs) attrs[prop as keyof CharAttr] += this[prop]
+        // 遍历与取值使用同一份属性表：效果层（`@` 属性）不在 MOD 自身的属性上，直接读 this[prop] 会得到 undefined
+        const properties = this.getProperties()
+        Object.keys(properties).forEach(prop => {
+            const value = properties[prop]
+            if (prop in attrs && typeof value === "number") attrs[prop as keyof CharAttr] += value
         })
         const isEffective: boolean = this.生效.条件.every(([attr, op, value]: [string, string, number]) => {
             if (attr === "*id") {
@@ -453,6 +478,11 @@ export class LeveledMod implements Mod {
         this.properties.forEach(prop => {
             properties[prop] = this[prop]
         })
+        // 效果层（`@` 属性）与武器效果（LeveledWeapon.buffProps）同理：不在 MOD 自身属性中，
+        // 但属于该 MOD 提供的数值，展示时与同名词条属性累加（如 薰风吐息 的词条与效果同为技能威力）。
+        for (const prop in this.buffProps) {
+            properties[prop] = (typeof properties[prop] === "number" ? properties[prop] : 0) + this.buffProps[prop]
+        }
         return properties
     }
     static _exclude_properties = new Set([
@@ -479,6 +509,8 @@ export class LeveledMod implements Mod {
         "count",
         "icon",
         "版本",
+        "buffProps",
+        "_effectAppliedKeys",
     ])
     get properties(): string[] {
         return Object.keys(this).filter(prop => !LeveledMod._exclude_properties.has(prop))

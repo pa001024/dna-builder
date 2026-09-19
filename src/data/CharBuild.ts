@@ -1530,6 +1530,16 @@ export class CharBuild {
             }
         })
 
+        // 添加MOD效果层加成（特效中以 @ 前缀声明的属性，见 LeveledMod.buffProps）：
+        // 与武器效果（buffProps）同理按 BUFF 口径汇总，不受 MOD 槽位作用域限制
+        // （如远程槽 MOD 的近战增伤），只按属性自身作用域判定。
+        if (this.isBuffAttributeInScope(attribute, prefixScope) && (prefixScope === "角色" || !["攻击", "增伤"].includes(attribute))) {
+            for (const mod of this.mods) {
+                const value = mod.buffProps[attribute]
+                if (typeof value === "number") bonus += value
+            }
+        }
+
         Object.entries(this.rangedWeapon.buffProps).forEach(([key, value]) => {
             if (prefixScope !== "角色" && ["攻击", "增伤"].includes(key)) return
             if (attribute === key && typeof value === "number") {
@@ -1553,7 +1563,7 @@ export class CharBuild {
      */
     private getCharacterBonusVector(): Float64Array {
         const attributeCount = characterBonusAttributes.length
-        const sourceCount = 5 + this.mods.length + this.buffs.length
+        const sourceCount = 5 + this.mods.length * 2 + this.buffs.length
         const contributions = new Float64Array(sourceCount * attributeCount)
         let sourceIndex = 0
 
@@ -1576,6 +1586,9 @@ export class CharBuild {
 
         for (const mod of this.mods) {
             addSource(mod.attrType === "角色" ? mod.addAttr : undefined)
+            // MOD 效果层属性（特效中以 @ 前缀声明，见 LeveledMod.buffProps）：
+            // 与武器效果同理按 BUFF 口径计入公共属性，不受 MOD 槽位作用域限制
+            addSource(mod.buffProps)
         }
         for (const buff of this.buffs) {
             addSource(buff as unknown as Record<string, unknown>)

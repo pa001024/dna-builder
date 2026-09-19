@@ -6,6 +6,7 @@ import { useCharSettings } from "@/composables/useCharSettings"
 import { useExprDrag } from "@/composables/useExprDrag"
 import { CharAttr, CharBuild, LeveledMod, type LeveledSkill, LeveledWeapon } from "@/data"
 import { format100, format100r, formatWeaponProp } from "@/util"
+import { collectWeaponAttrSources, type WeaponAttrSource } from "@/utils/weapon-attr-sources"
 
 const props = defineProps<{
     charBuild: CharBuild
@@ -76,14 +77,6 @@ const baseWeapon = computed(() => {
     return props.charBuild[`${wkey}Weapon`]!
 })
 
-const baseKey = computed(() => {
-    let wkey = props.wkey
-    if (props.wkey == "skill" && props.charBuild.skillWeapon!.inherit) {
-        wkey = props.charBuild.skillWeapon!.inherit
-    }
-    return wkey
-})
-
 /**
  * 判断当前面板是否为 inherit 型同律武器的攻击词条。
  * @param key 属性键名
@@ -135,11 +128,6 @@ interface DynamicAttrSource {
     value: number
 }
 
-interface ModAttrSource {
-    mod: LeveledMod
-    value: number
-}
-
 /**
  * 将动态 BUFF 造成的基础属性差值转换为等效 MOD 加成。
  * @param key 武器属性键名
@@ -164,28 +152,21 @@ function getDynamicBuffDisplayValue(key: string, value: number) {
 }
 
 /**
- * 获取当前武器面板对应的BUFF属性前缀。
- * @returns BUFF属性前缀
+ * 获取当前武器面板参与结算的武器作用域前缀（近战 / 远程 / 同律近战 / 同律远程）。
+ * inherit 型同律武器按被继承武器结算，与 CharBuild.calculateWeaponAttributes 的 weapon.类型 保持一致。
+ * @returns 武器作用域前缀
  */
-function getBuffWeaponPrefix() {
-    if (props.wkey === "skill") {
-        return props.charBuild.skillWeapon?.inherit === "melee"
-            ? "近战"
-            : props.charBuild.skillWeapon?.inherit === "ranged"
-              ? "远程"
-              : "同律"
-    }
-    return props.wkey === "melee" ? "近战" : "远程"
+function getWeaponScopePrefix() {
+    return baseWeapon.value.类型
 }
 
 /**
- * 记录动态BUFF对武器属性的显示来源。
- * code型BUFF用移除后重算的差值，attr型BUFF直接显示写入字段值。
+ * 记录动态BUFF（code 型）对武器属性的显示来源：移除该 BUFF 后重算，用差值作为贡献值。
+ * 静态字段与 attr 型 BUFF 的字段由 collectWeaponAttrSources 统一汇总，这里不重复处理。
  */
 const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() => {
     const sourceMap: Record<string, DynamicAttrSource[]> = {}
     const epsilon = 1e-10
-    const buffWeaponPrefix = getBuffWeaponPrefix()
 
     props.charBuild.dynamicBuffs.forEach(buff => {
         const buildWithoutBuff = props.charBuild.clone()
@@ -209,23 +190,23 @@ const dynamicWeaponAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>
         })
     })
 
-    props.charBuild.buffs
-        .filter(buff => buff.attr)
-        .forEach(buff => {
-            const preparedBuff = props.charBuild.prepareBuff(buff)
-            Object.entries(preparedBuff.getProperties()).forEach(([attrKey, attrValue]) => {
-                if (!attrKey.startsWith(buffWeaponPrefix) || typeof attrValue !== "number") return
-                const weaponAttrKey = attrKey.slice(buffWeaponPrefix.length)
-                if (!weaponAttrKey || !(weaponAttrKey in weaponAttrs.value)) return
-                if (Math.abs(attrValue) < epsilon) return
+    return sourceMap
+})
 
-                sourceMap[weaponAttrKey] ||= []
-                sourceMap[weaponAttrKey].push({
-                    sourceName: buff.名称,
-                    value: attrValue,
-                })
-            })
-        })
+/**
+ * 武器属性行的静态加成来源（角色加成 / 武器词条 / 武器效果 / MOD / BUFF）。
+ * 字段候选与作用域判定交给 collectWeaponAttrSources，覆盖「近战触发」这类带武器作用域前缀的来源，
+ * 并包含同律武器从下位作用域降级来的来源。
+ */
+const weaponAttrSourceMap = computed<Record<string, WeaponAttrSource[]>>(() => {
+    const sourceMap: Record<string, WeaponAttrSource[]> = {}
+    const scope = getWeaponScopePrefix()
+    // 先读面板值：attr 型 BUFF 的字段在 calculateWeaponAttributes 内刷新，保证汇总的是最新字段
+    const keys = Object.keys(weaponAttrs.value)
+
+    for (const key of keys) {
+        sourceMap[key] = collectWeaponAttrSources(props.charBuild, scope, key)
+    }
 
     return sourceMap
 })
@@ -240,52 +221,6 @@ const modAttributeBonusSources = computed(() => {
         return modsBySeries
     }
     return []
-})
-
-/**
- * 获取 MOD 在当前武器面板下的展示值。
- * 优先展示当前属性键，其次兼容带 scope 前缀的属性键。
- * @param mod 目标 MOD
- * @param key 当前武器属性键名
- * @returns 可展示的属性值
- */
-function getModSourceValue(mod: LeveledMod, key: string) {
-    const exactValue = mod[key]
-    if (typeof exactValue === "number") {
-        return exactValue
-    }
-
-    const scopedValue = mod[`${getBuffWeaponPrefix()}${key}`]
-    if (typeof scopedValue !== "number") {
-        return undefined
-    }
-
-    return scopedValue
-}
-
-const modSourceMap = computed<Record<string, ModAttrSource[]>>(() => {
-    const sourceMap: Record<string, ModAttrSource[]> = {}
-    const pushSource = (mod: LeveledMod, key: string) => {
-        const value = getModSourceValue(mod, key)
-        if (value === undefined) return
-
-        sourceMap[key] ||= []
-        sourceMap[key].push({ mod, value })
-    }
-
-    props.charBuild.charMods.forEach(mod => {
-        if (!mod) return
-        Object.keys(weaponAttrs.value).forEach(key => {
-            if (key !== "攻击") pushSource(mod, key)
-        })
-    })
-
-    props.charBuild[`${baseKey.value}Mods`].forEach(mod => {
-        if (!mod) return
-        Object.keys(weaponAttrs.value).forEach(key => pushSource(mod, key))
-    })
-
-    return sourceMap
 })
 
 /**
@@ -406,52 +341,14 @@ const weaponAttrDescMap = computed<Record<string, string>>(() => {
                                 <div class="text-base-content/80">{{ $t("char-build.base_attr_label", { attr: $t(key) }) }}</div>
                                 {{ formatWeaponProp("基础攻击", (baseWeapon as LeveledWeapon)["射速"] ?? 1) }}
                             </li>
-                            <!-- 角色自带加成 -->
+                            <!-- 加成来源：角色加成 / 武器词条 / 武器效果 / MOD / BUFF（含「近战触发」这类带作用域前缀的来源） -->
                             <li
-                                v-if="key != '攻击' && key in (charBuild.char.加成 || {})"
+                                v-for="(source, index) in weaponAttrSourceMap[key] || []"
+                                :key="`${source.name}-${key}-${index}`"
                                 class="flex justify-between gap-8 text-sm text-primary"
                             >
-                                <div class="text-base-content/80">{{ $t(charBuild.char.名称) }}</div>
-                                {{ format100r(charBuild.char.加成![key]!) }}
-                            </li>
-                            <!-- 武器特效自身暴击攻速等 -->
-                            <li
-                                v-if="wkey !== 'skill' && key != '攻击' && key in (baseWeapon || {})"
-                                class="flex justify-between gap-8 text-sm text-primary"
-                            >
-                                <div class="text-base-content/80">{{ $t(baseWeapon.名称) }}</div>
-                                {{ format100r((baseWeapon as LeveledWeapon)[key]!) }}
-                            </li>
-                            <!-- 武器BUFF给所有武器的加成 -->
-                            <li
-                                v-if="charBuild.meleeWeapon.buffProps && key in charBuild.meleeWeapon.buffProps"
-                                class="flex justify-between gap-8 text-sm text-primary"
-                            >
-                                <div class="text-base-content/80">{{ charBuild.meleeWeapon.名称 }}</div>
-                                {{ format100r(charBuild.meleeWeapon.buffProps[key]!) }}
-                            </li>
-                            <li
-                                v-if="charBuild.rangedWeapon.buffProps && key in charBuild.rangedWeapon.buffProps"
-                                class="flex justify-between gap-8 text-sm text-primary"
-                            >
-                                <div class="text-base-content/80">{{ charBuild.rangedWeapon.名称 }}</div>
-                                {{ format100r(charBuild.rangedWeapon.buffProps[key]!) }}
-                            </li>
-                            <li
-                                v-for="(source, index) in modSourceMap[key] || []"
-                                :key="`${source.mod.id}-${key}-${index}`"
-                                class="flex justify-between gap-8 text-sm text-primary"
-                            >
-                                <div class="text-base-content/80">{{ $t(source.mod.名称) }}</div>
+                                <div class="text-base-content/80">{{ $t(source.name) }}</div>
                                 {{ format100r(source.value) }}
-                            </li>
-                            <li
-                                v-for="(buff, index) in charBuild.buffs.filter(b => !['攻击', '增伤'].includes(key) && b[key])"
-                                :key="index"
-                                class="flex justify-between gap-8 text-sm text-primary"
-                            >
-                                <div class="text-base-content/80">{{ buff.名称 }}</div>
-                                {{ format100r(buff[key]!) }}
                             </li>
                             <li
                                 v-for="(dynamicSource, index) in dynamicWeaponAttrSourceMap[key] || []"

@@ -249,6 +249,17 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                         </div>
                         {{ format100r(mod[key]!) }}
                     </li>
+                    <!-- MOD 效果层属性（特效中以 @ 前缀声明）：与 BUFF 同理仅按属性自身作用域生效，不受 MOD 槽位限制 -->
+                    <li
+                        v-for="(mod, index) in charBuild.mods.filter(m => typeof m.buffProps[key] === 'number' && m.buffProps[key])"
+                        :key="`buff-props-${index}`"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">
+                            {{ $t(mod.名称) }}
+                        </div>
+                        {{ format100r(mod.buffProps[key]!) }}
+                    </li>
                     <template v-for="sourceField in extraAttrSourceKeys(key)" :key="sourceField">
                         <li
                             v-for="(mod, index) in [

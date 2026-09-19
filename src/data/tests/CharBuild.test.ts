@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
 import { createBuffFromSettings, createCharBuildFromSettings } from "../CharBuildHelper"
 import { createBuildFromSnapshot, createWorkerSnapshot } from "../CharBuildSnapshot"
-import { weaponData } from "../index"
+import { LeveledModHelper, weaponData } from "../index"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
 
@@ -1319,6 +1319,85 @@ describe("CharBuild类测试", () => {
             // 伤害增加应该是数字
             expect(newAttrs.增伤).toBeTypeOf("number")
             expect(originalAttrs.增伤).toBeTypeOf("number")
+        })
+
+        it("MOD效果中以 @ 声明的属性穿透到BUFF层：远程槽MOD的近战增伤作用于近战武器", () => {
+            // 反转（43342，远程槽）：效果为近战武器伤害提高 60%，以 @近战增伤 声明后按 BUFF 口径汇总
+            const 反转 = LeveledModHelper.fromId(43342, 5, 5)
+            const createBuild = (rangedMods: LeveledMod[]) =>
+                new CharBuild({
+                    char: new LeveledChar("黎瑟"),
+                    skillLevel: 10,
+                    hpPercent: 0.5,
+                    resonanceGain: 0,
+                    charMods: [],
+                    rangedMods,
+                    buffs: [],
+                    melee: new LeveledWeapon(10302),
+                    ranged: new LeveledWeapon(20601),
+                    baseName: "快速出击",
+                    enemyId: 130,
+                    enemyLevel: 80,
+                    enemyResistance: 0.5,
+                    targetFunction: "伤害",
+                })
+
+            const baseline = createBuild([])
+            const build = createBuild([反转])
+
+            // MOD 层不携带该属性，BUFF 层按属性自身作用域生效
+            expect(反转.addAttr).toEqual({})
+            expect(baseline.getTotalBonus("近战增伤", "近战")).toBe(0)
+            expect(build.getTotalBonus("近战增伤", "近战")).toBeCloseTo(0.6, 10)
+            // 近战作用域属性不影响远程面板
+            expect(build.getTotalBonus("近战增伤", "远程")).toBe(0)
+            // 同律近战经由近战作用域降级继承（BUFF 口径下降级查询不排除 BUFF）
+            expect(build.getTotalBonus("近战增伤", "近战", { includeMods: false })).toBeCloseTo(0.6, 10)
+
+            // 近战武器增伤乘区实际吃到该值
+            const baselineWeapon = baseline.calculateWeaponAttributes(baseline.meleeWeapon).weapon!
+            const meleeWeapon = build.calculateWeaponAttributes(build.meleeWeapon).weapon!
+            expect(meleeWeapon.增伤).toBeCloseTo(baselineWeapon.增伤 + 0.6, 10)
+        })
+
+        it("特效的 @ 层属性作为候选BUFF计算收益：与开关特效的真值一致", () => {
+            // BuffEditer 逐个收益把 MOD 特效的原始数据当作候选 BUFF：已选中按「移除该 BUFF」求边际收益
+            const createBuild = (effectLevel: number) => {
+                const melee = new LeveledWeapon(10302)
+                const build = new CharBuild({
+                    char: new LeveledChar("黎瑟"),
+                    skillLevel: 10,
+                    hpPercent: 0.5,
+                    resonanceGain: 0,
+                    charMods: [],
+                    rangedMods: [LeveledModHelper.fromId(43342, 5, effectLevel)],
+                    buffs: [],
+                    melee,
+                    ranged: new LeveledWeapon(20601),
+                    // 以近战武器技能为伤害目标，保证近战增伤进入伤害计算
+                    baseName: melee.技能![0].名称,
+                    enemyId: 130,
+                    enemyLevel: 80,
+                    enemyResistance: 0.5,
+                    targetFunction: "伤害",
+                })
+                return { build, effectBuff: build.rangedMods[0]!.buff! }
+            }
+
+            const on = createBuild(1)
+            const off = createBuild(0)
+            // 真值：特效开启（等级 1）相对关闭的伤害提升
+            const truth = on.build.calculate() / off.build.calculate() - 1
+            expect(truth).toBeCloseTo(0.6, 10)
+
+            // 候选 BUFF 属性名已剥离 @ 前缀，否则 BUFF 口径汇总取不到该属性、收益恒为 0
+            expect(on.effectBuff.getProperties()).toEqual({ 近战增伤: 0.6 })
+            expect(on.build.calcIncome(new LeveledBuff(on.effectBuff._originalBuffData, on.effectBuff.等级), true)).toBeCloseTo(truth, 10)
+            // 未选中态：候选 BUFF 取满级，收益为从关闭态加入后的提升
+            expect(off.build.calcIncome(new LeveledBuff(on.effectBuff._originalBuffData, on.effectBuff.mx || 1), false)).toBeCloseTo(
+                truth,
+                10
+            )
         })
     })
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { type CharAttr, CharBuild } from "../CharBuild"
-import { LeveledBuff, LeveledChar, LeveledMod, LeveledMonster, LeveledWeapon } from "../leveled"
+import { LeveledBuff, LeveledChar, LeveledMod, LeveledModHelper, LeveledMonster, LeveledWeapon } from "../leveled"
 
 // 测试LeveledMod类
 describe("LeveledMod类测试", () => {
@@ -395,6 +395,18 @@ describe("LeveledBuff类测试", () => {
         expect(cloned.攻击).toBeCloseTo(0.25, 10)
     })
 
+    it("特效数据中以 @ 前缀声明的属性物化时剥离前缀", () => {
+        // 反转（43342）的效果：@ 前缀表示该属性归属 BUFF 层，BUFF 实例上按真实属性名存放
+        const buff = new LeveledBuff({ 名称: "反转", 描述: "测试", "@近战增伤": 0.6 })
+
+        expect(buff.近战增伤).toBeCloseTo(0.6, 10)
+        expect(buff["@近战增伤"]).toBeUndefined()
+        expect(buff.getProperties()).toEqual({ 近战增伤: 0.6 })
+        // 供 MOD 层路由判断：该属性来自 @ 前缀键
+        expect(buff.isBuffLayerProperty("近战增伤")).toBe(true)
+        expect(buff.isBuffLayerProperty("攻击")).toBe(false)
+    })
+
     // 测试6：测试不存在的Buff名称
     it("测试不存在的Buff名称会抛出错误", () => {
         expect(() => {
@@ -654,6 +666,35 @@ describe("LeveledWeapon类测试", () => {
         const 暴虐mod = new LeveledMod(42311)
         expect(暴虐mod.攻速).toBeCloseTo(0.6, 10)
         expect(暴虐mod.近战攻速).toBeUndefined()
+    })
+
+    it("MOD特效中以 @ 前缀声明的属性穿透到BUFF层而非MOD层", () => {
+        // 反转（43342，远程槽）：效果为近战武器伤害提高 60%，需跨槽位作用于近战，因此以 @近战增伤 声明
+        const 反转满级 = LeveledModHelper.fromId(43342, 5, 5)
+        expect(反转满级.attrType).toBe("远程")
+        // BUFF 层：剥离 @ 前缀，不写入 MOD 自身属性（addAttr）
+        expect(反转满级.buffProps.近战增伤).toBeCloseTo(0.6, 10)
+        expect(反转满级.addAttr).toEqual({})
+        // 展示口径包含 BUFF 层属性
+        expect(反转满级.getProperties().近战增伤).toBeCloseTo(0.6, 10)
+
+        // 与词条/效果属性使用同一等级倍率：紫品质满级 5，0 级为满级的 1/6
+        expect(LeveledModHelper.fromId(43342, 0, 5).buffProps.近战增伤).toBeCloseTo(0.1, 10)
+
+        // 重复设置等级不会让 BUFF 层属性自我累加
+        反转满级.等级 = 5
+        expect(反转满级.buffProps.近战增伤).toBeCloseTo(0.6, 10)
+    })
+
+    it("同名词条与效果属性叠加，且重复设置等级不自我累加", () => {
+        // 薰风吐息（41951）：词条 技能威力 0.3 与效果 技能威力 0.84 按既有语义叠加
+        const 薰风吐息 = new LeveledMod(41951)
+        expect(薰风吐息.技能威力).toBeCloseTo(0.3 + 0.84, 10)
+
+        // 等级变更是重复调用 updateProperties 的入口：结果必须与单次计算一致
+        薰风吐息.等级 = 5
+        薰风吐息.等级 = 5
+        expect(薰风吐息.技能威力).toBeCloseTo(0.3 + 0.84, 10)
     })
 
     it("紫色MOD正确应用特效数值（特效按MOD id匹配，金色/紫色分别配置）", () => {
