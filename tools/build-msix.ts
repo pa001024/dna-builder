@@ -98,6 +98,9 @@ async function runCommand(cmd: string) {
 function generateAppxManifest(): void {
     console.log("生成AppxManifest.xml文件...")
 
+    // 必须先确保打包目录存在，否则 writeFileSync 会抛出 ENOENT
+    ensureDirExists(CONFIG.packageDir)
+
     const manifestContent = `<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
          xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
