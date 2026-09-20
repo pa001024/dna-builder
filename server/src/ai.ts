@@ -1,9 +1,24 @@
+import { randomUUID } from "node:crypto"
 import { Elysia, t } from "elysia"
 import jwt from "jsonwebtoken"
 import { chargeUsage, readDailyQuota } from "./ai-billing"
 import {
+    AI_LOG_UPSTREAM_TRACE_HEADER,
+    type AiLogAssistantMessage,
+    type AiLogError,
+    buildClientIdentity,
+    createStreamAggregator,
+    extractToolNames,
+    extractUpstreamCompletionId,
+    parseUpstreamError,
+    resolveSessionId,
+    stringifyErrorRaw,
+} from "./ai-log-format"
+import { createAiCallLogger } from "./ai-log-store"
+import {
     beijingDayKey,
     DAILY_LIMIT_MICROS,
+    finalizeOnEnd,
     formatYuan,
     isPeakPricing,
     MICROS_PER_YUAN,
@@ -11,18 +26,20 @@ import {
     PRICE_PER_MILLION_TOKENS,
     pipeWithUsage,
     resolveMaxTokens,
+    type UpstreamUsage,
 } from "./ai-pricing"
 import { type JWTUser, jwtToken } from "./db/yoga"
 
 /**
  * AI 中转路由。
  *
- * 与旧实现的区别：
- * - 不再校验「固定系统提示词模板」：该接口现在按调用方自己的提示词转发（但仍然是同一把上游 Key），
- *   只做登录与计费，不再限制只能用于配装助手场景；
- * - 改为登录账号计费：每次请求必须带登录令牌，按上游返回的真实 tokens 记费；
- * - 每人每天有额度上限，额度按北京时间的自然日重置，峰谷单价见 `ai-billing.ts`；
+ * 对外是 OpenAI 兼容的 `/api/v1/chat/completions`，按调用方自己的提示词转发到同一把上游 Key，
+ * 不做场景限制，只做登录与计费：
+ * - 必须带登录令牌（`token` 或 `Authorization: Bearer`），按上游返回的真实 tokens 记费；
+ * - 每人每天有额度上限，按北京时间自然日重置，峰谷单价见 `ai-pricing.ts`；
  * - 上游模型固定为 DeepSeek 的 deepseek-flash，计费口径与 DeepSeek 官方价目表对齐。
+ *
+ * 每次请求都会在 `server/data/ai-logs` 下留一份调用日志（元数据 + 完整对话），见 `ai-log-store.ts`。
  */
 
 /** 上游 API Key。 */
@@ -110,6 +127,44 @@ function createJsonErrorResponse(error: ProxyError, status: number): Response {
 }
 
 /**
+ * @description 把代理错误对象转成调用日志里的错误结构。
+ * @param error 代理错误对象
+ * @returns 日志错误结构
+ */
+function toLogError(error: ProxyError): AiLogError {
+    return { code: error.error.code, type: error.error.type, message: error.error.message, raw: null }
+}
+
+/**
+ * @description 取直连对端地址，作为反向代理转发头缺失时的客户端 IP 兜底。
+ * @param server Elysia 上下文里的服务器实例
+ * @param request 当前请求
+ * @returns 对端地址；取不到时为 null
+ */
+function resolveSocketAddress(server: unknown, request: Request): string | null {
+    const requestIP = (server as { requestIP?: (request: Request) => { address?: string } | null } | null | undefined)?.requestIP
+    if (typeof requestIP !== "function") return null
+    try {
+        return requestIP.call(server, request)?.address ?? null
+    } catch {
+        return null
+    }
+}
+
+/**
+ * @description 用流式聚合器解析整块响应体，让非流式与流式的日志结构保持一致。
+ * 非流式响应体的 `choices[0].message` 与流式的 `choices[0].delta` 同形，因此可以共用一套拼装逻辑。
+ * @param payload 非流式响应体
+ * @returns 助手回复与结束原因
+ */
+function aggregateResponseBody(payload: unknown): { message: AiLogAssistantMessage | null; finishReason: string | null } {
+    const aggregator = createStreamAggregator()
+    aggregator.push(payload)
+    const state = aggregator.snapshot()
+    return { message: state.message, finishReason: state.finishReason }
+}
+
+/**
  * @description 规范化工具调用消息，提升不同模型实现的兼容性。
  * 关键处理：assistant 携带 tool_calls 且 content 为空字符串时转为 null，
  * 部分上游实现仅在 content 为 null 时才会将其识别为函数调用消息。
@@ -171,30 +226,50 @@ export const aiPlugin = () =>
     new Elysia({ prefix: "/api/v1" })
         .post(
             "/chat/completions",
-            async ({ body, headers }) => {
+            async ({ body, headers, request, server }) => {
                 const stream = !!body.stream
+                const startedAt = new Date()
+                const peak = isPeakPricing(startedAt)
+                const user = resolveUser(headers)
+                const clientMessages = (body.messages ?? []) as unknown[]
+                // 会话归并由服务端推导：上游无状态，不返回任何会话级标识
+                const sessionId = resolveSessionId({ userId: user?.id, messages: clientMessages })
+
+                // 调用日志：下面每个出口（含未登录、额度不足、上游错误、流被中断）都会落一条记录
+                const logger = createAiCallLogger({
+                    requestId: randomUUID(),
+                    sessionId,
+                    startedAt,
+                    client: buildClientIdentity(user, request.headers, resolveSocketAddress(server, request)),
+                    model: AI_MODEL,
+                    stream,
+                    peak,
+                    temperature: typeof body.temperature === "number" ? body.temperature : null,
+                    maxTokensRequested: typeof body.max_tokens === "number" ? body.max_tokens : null,
+                    messages: clientMessages,
+                    toolNames: extractToolNames(body.tools),
+                })
 
                 // 验证API Key
                 if (!isApiKeyConfigured()) {
                     const errorMsg = createProxyError("AI服务未配置，请联系管理员配置API密钥", "configuration_error", "ai_not_configured")
+                    logger.finish({ status: stream ? 200 : 401, ok: false, error: toLogError(errorMsg) })
                     return stream ? createStreamErrorResponse(errorMsg) : createJsonErrorResponse(errorMsg, 401)
                 }
 
                 // 验证登录：该接口按登录账号计费，未登录不转发
-                const user = resolveUser(headers)
                 if (!user) {
                     const errorMsg = createProxyError(
                         "请先登录后再使用 AI 助手，该接口按登录账号计费",
                         "authentication_error",
                         "login_required"
                     )
+                    logger.finish({ status: 403, ok: false, error: toLogError(errorMsg) })
                     return createJsonErrorResponse(errorMsg, 403)
                 }
 
                 // 校验当日额度。查库与落库都放进 try：即使额度表迁移没跑，也只是返回可读的代理错误而不是 500
-                const requestedAt = new Date()
-                const peak = isPeakPricing(requestedAt)
-                const day = beijingDayKey(requestedAt)
+                const day = beijingDayKey(startedAt)
 
                 try {
                     const quota = await readDailyQuota(user.id, day)
@@ -204,6 +279,7 @@ export const aiPlugin = () =>
                             "insufficient_quota",
                             "daily_quota_exceeded"
                         )
+                        logger.finish({ status: 402, ok: false, error: toLogError(errorMsg) })
                         return createJsonErrorResponse(errorMsg, 402)
                     }
 
@@ -241,38 +317,86 @@ export const aiPlugin = () =>
                         body: JSON.stringify(requestBody),
                     })
 
+                    // 上游追踪 id 只出现在响应头，报错时同样有值——它是向 DeepSeek 对账 / 排查的唯一凭据
+                    const upstreamTraceId = response.headers.get(AI_LOG_UPSTREAM_TRACE_HEADER)
+
                     // 如果响应不成功，返回错误信息
                     if (!response.ok) {
                         const errorText = await response.json()
                         console.error("DeepSeek API错误:", response.status, errorText)
 
+                        const upstream = parseUpstreamError(errorText, `上游AI服务错误: ${response.status}`)
+                        const logError: AiLogError = { ...upstream, raw: stringifyErrorRaw(errorText) }
+
                         // 流式请求返回流式错误
                         if (stream) {
-                            const errorMsg = createProxyError(
-                                typeof errorText?.error?.message === "string"
-                                    ? errorText.error.message
-                                    : `上游AI服务错误: ${response.status}`,
-                                "api_error",
-                                "upstream_error"
-                            )
+                            const errorMsg = createProxyError(upstream.message, "api_error", "upstream_error")
+                            logger.finish({
+                                status: response.status,
+                                ok: false,
+                                upstreamStatus: response.status,
+                                upstreamTraceId,
+                                messages: normalizedMessages,
+                                error: logError,
+                            })
                             return createStreamErrorResponse(errorMsg, response.status)
                         }
 
+                        logger.finish({
+                            status: response.status,
+                            ok: false,
+                            upstreamStatus: response.status,
+                            upstreamTraceId,
+                            messages: normalizedMessages,
+                            error: logError,
+                        })
                         return new Response(JSON.stringify(errorText), {
                             status: response.status,
                             headers: { "Content-Type": "application/json" },
                         })
                     }
 
-                    // 处理流式响应：原样透传，同时旁路解析 usage 记账
+                    // 处理流式响应：原样透传，同时旁路解析 usage 记账、聚合增量写调用日志
                     if (stream) {
                         if (!response.body) {
                             const errorMsg = createProxyError("上游未返回响应体", "api_error", "upstream_empty_body")
+                            logger.finish({
+                                status: 200,
+                                ok: false,
+                                upstreamStatus: response.status,
+                                upstreamTraceId,
+                                error: toLogError(errorMsg),
+                            })
                             return createStreamErrorResponse(errorMsg)
                         }
 
+                        const aggregator = createStreamAggregator()
+                        let upstreamUsage: UpstreamUsage | undefined
+                        const piped = pipeWithUsage(
+                            response.body,
+                            usage => {
+                                upstreamUsage = usage
+                                void chargeUsage(user.id, day, peak, usage)
+                            },
+                            payload => aggregator.push(payload)
+                        )
+
                         return new Response(
-                            pipeWithUsage(response.body, usage => void chargeUsage(user.id, day, peak, usage)),
+                            finalizeOnEnd(piped, () => {
+                                const state = aggregator.snapshot()
+                                logger.finish({
+                                    status: 200,
+                                    ok: true,
+                                    upstreamStatus: response.status,
+                                    upstreamTraceId,
+                                    upstreamCompletionId: state.completionId,
+                                    usage: upstreamUsage,
+                                    messages: normalizedMessages,
+                                    assistant: { message: state.message, finishReason: state.finishReason },
+                                    maxTokensResolved: maxTokens,
+                                    firstTokenAt: state.firstTokenAt,
+                                })
+                            }),
                             {
                                 headers: {
                                     "Content-Type": "text/event-stream",
@@ -286,6 +410,17 @@ export const aiPlugin = () =>
                     // 非流式响应：直接用响应里的 usage 记账，再把原始结果返回
                     const data = await response.json()
                     await chargeUsage(user.id, day, peak, data?.usage)
+                    logger.finish({
+                        status: 200,
+                        ok: true,
+                        upstreamStatus: response.status,
+                        upstreamTraceId,
+                        upstreamCompletionId: extractUpstreamCompletionId(data),
+                        usage: data?.usage,
+                        messages: normalizedMessages,
+                        assistant: aggregateResponseBody(data),
+                        maxTokensResolved: maxTokens,
+                    })
                     return data
                 } catch (error) {
                     console.error("AI代理错误:", error)
@@ -294,6 +429,15 @@ export const aiPlugin = () =>
                         "proxy_error",
                         "internal_error"
                     )
+
+                    logger.finish({
+                        status: 200,
+                        ok: false,
+                        error: {
+                            ...toLogError(errorMsg),
+                            raw: stringifyErrorRaw(error instanceof Error ? (error.stack ?? error.message) : error),
+                        },
+                    })
 
                     // 流式请求返回流式错误
                     if (stream) {

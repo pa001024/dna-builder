@@ -227,6 +227,11 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "game-mod",
                 component: () => import("./admin/GameModManagement.vue"),
             },
+            {
+                name: "admin-ai-log",
+                path: "ai-log",
+                component: () => import("./admin/AiLogManagement.vue"),
+            },
         ],
     },
     {

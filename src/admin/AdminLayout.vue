@@ -78,6 +78,11 @@ const menuItems: {
         path: "/admin/game-mod",
         icon: "ri:puzzle-line",
     },
+    {
+        name: "AI 调用日志",
+        path: "/admin/ai-log",
+        icon: "ri:robot-2-line",
+    },
 ]
 
 const route = useRoute()

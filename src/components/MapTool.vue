@@ -1199,6 +1199,7 @@ function animatePointFocus(targetMapX: number, targetMapY: number) {
     if (!container || !mainCanvas || !overlayCanvas) return
 
     cancelPointFocusAnimation()
+    cancelViewTween()
     const startZoom = zoom.value
     const endZoom = Math.min(maxZoom, Math.max(startZoom * 1.6, 1.4))
     const startPan = { ...panOffset.value }
@@ -1270,6 +1271,231 @@ function animatePointFocus(targetMapX: number, targetMapY: number) {
 
     pointFocusAnimationFrameId.value = requestAnimationFrame(step)
 }
+
+// ---------- 视图缩放/平移动画 ----------
+
+/**
+ * 视图缓动动画状态。
+ * 缩放与平移共用同一条缓动进度曲线，因此过渡过程中尺寸与位置始终连续、锚点不跳动。
+ */
+interface ViewTween {
+    fromZoom: number
+    toZoom: number
+    fromPanX: number
+    fromPanY: number
+    toPanX: number
+    toPanY: number
+    /** 动画起始时间戳（performance.now） */
+    startTime: number
+    /** 动画时长（毫秒） */
+    duration: number
+    /** 起点进度斜率（针对进度 0→1 归一化后的斜率），用于重定向时继承上一段的瞬时速度 */
+    startSlope: number
+    /** 触发来源：滚轮手势期间需要按动画终点累积缩放目标 */
+    source: "wheel" | "control"
+}
+
+/** 起点斜率上限，避免高速重定向时进度过冲 */
+const VIEW_TWEEN_MAX_START_SLOPE = 2.2
+/** 进行中的视图动画（null 表示无动画） */
+let viewTween: ViewTween | null = null
+/** 视图动画 rAF 句柄（0 表示未运行） */
+let viewTweenRaf = 0
+/** 滚轮累积的目标缩放（滚轮手势期间以动画终点为基准持续累积） */
+let wheelZoomTarget = 1
+/** 系统「减少动态效果」查询对象（懒建；该偏好开启时缩放动画退化为瞬时切换） */
+let viewMotionQuery: MediaQueryList | null = null
+
+/**
+ * 系统是否开启「减少动态效果」。
+ */
+function isViewMotionReduced(): boolean {
+    viewMotionQuery ??= window.matchMedia("(prefers-reduced-motion: reduce)")
+    return viewMotionQuery.matches
+}
+
+/**
+ * 把缩放值夹取到 [minZoom, maxZoom]。
+ * @param value 原始缩放值
+ * @returns 夹取后的缩放值
+ */
+function clampZoom(value: number): number {
+    return Math.max(minZoom, Math.min(maxZoom, value))
+}
+
+/**
+ * 当前缩放目标：动画进行中取动画终点，否则取渲染值。
+ * 连续操作（连点按钮、滚轮）以目标为基准累积，避免被渲染滞后吞掉缩放幅度。
+ */
+function getZoomTarget(): number {
+    return viewTween ? viewTween.toZoom : zoom.value
+}
+
+/**
+ * 采样动画进度：三次 Hermite 插值，起点斜率可继承、终点斜率为 0。
+ * 从静止起步时退化为 smoothstep（即 ease-in-out）；连续重定向时速度连续，不会在旧动画中断处出现顿挫。
+ * @param tween 动画状态
+ * @param now 当前时间戳（performance.now）
+ * @returns 进度（0→1）、进度速度（进度/毫秒）与是否已结束
+ */
+function sampleViewTween(tween: ViewTween, now: number) {
+    const t = Math.min(1, Math.max(0, (now - tween.startTime) / tween.duration))
+    const t2 = t * t
+    const t3 = t2 * t
+    const progress = tween.startSlope * (t3 - 2 * t2 + t) + 3 * t2 - 2 * t3
+    const slope = tween.startSlope * (3 * t2 - 4 * t + 1) + 6 * (t - t2)
+    return { progress, speed: slope / tween.duration, done: t >= 1 }
+}
+
+/**
+ * 读取进行中动画的瞬时缩放速度（zoom 单位/毫秒），用于重定向时保持速度连续。
+ * @param now 当前时间戳（performance.now）
+ * @returns 瞬时缩放速度，无动画或已结束时为 0
+ */
+function readViewTweenZoomSpeed(now: number): number {
+    const tween = viewTween
+    if (!tween) return 0
+    const zoomSpan = tween.toZoom - tween.fromZoom
+    if (zoomSpan === 0) return 0
+    const { speed, done } = sampleViewTween(tween, now)
+    return done ? 0 : speed * zoomSpan
+}
+
+/**
+ * 求动画时长：按缩放的相对变化量线性增长并夹取；纯平移（缩放不变）用固定时长。
+ * @param fromZoom 起始缩放
+ * @param toZoom 目标缩放
+ * @returns 时长（毫秒），系统开启「减少动态效果」时返回 0 表示瞬时完成
+ */
+function resolveViewTweenDuration(fromZoom: number, toZoom: number): number {
+    if (isViewMotionReduced()) return 0
+    const relative = Math.abs(toZoom - fromZoom) / Math.max(fromZoom, 1e-6)
+    if (relative < 1e-4) return 200
+    return Math.min(320, Math.max(150, 150 + relative * 200))
+}
+
+/**
+ * 取消进行中的视图动画，保留当前渲染状态并立即把控制权交还给用户。
+ */
+function cancelViewTween() {
+    viewTween = null
+    if (viewTweenRaf) {
+        cancelAnimationFrame(viewTweenRaf)
+        viewTweenRaf = 0
+    }
+}
+
+/**
+ * 启动或重定向视图缓动动画。
+ * @param next 目标视图状态（起止缩放与起止平移）
+ */
+function startViewTween(next: {
+    fromZoom: number
+    toZoom: number
+    fromPanX: number
+    fromPanY: number
+    toPanX: number
+    toPanY: number
+    source: ViewTween["source"]
+}) {
+    const now = performance.now()
+    const zoomSpan = next.toZoom - next.fromZoom
+    const duration = resolveViewTweenDuration(next.fromZoom, next.toZoom)
+
+    if (duration <= 0) {
+        cancelViewTween()
+        zoom.value = next.toZoom
+        panOffset.value = { x: next.toPanX, y: next.toPanY }
+        requestDraw()
+        return
+    }
+
+    // 继承上一段动画的瞬时速度；方向反转时从静止起步，避免先反向冲出去再折回
+    const inheritedSpeed = readViewTweenZoomSpeed(now)
+    const startSlope =
+        zoomSpan === 0 || inheritedSpeed * zoomSpan <= 0
+            ? 0
+            : Math.max(-VIEW_TWEEN_MAX_START_SLOPE, Math.min(VIEW_TWEEN_MAX_START_SLOPE, (inheritedSpeed * duration) / zoomSpan))
+
+    viewTween = { ...next, startTime: now, duration, startSlope }
+    if (!viewTweenRaf) viewTweenRaf = requestAnimationFrame(stepViewTween)
+}
+
+/**
+ * 动画每帧推进：按缓动进度更新缩放与平移并重绘。
+ */
+function stepViewTween() {
+    const tween = viewTween
+    if (!tween) {
+        viewTweenRaf = 0
+        return
+    }
+
+    const { progress, done } = sampleViewTween(tween, performance.now())
+    zoom.value = tween.fromZoom + (tween.toZoom - tween.fromZoom) * progress
+    panOffset.value = {
+        x: tween.fromPanX + (tween.toPanX - tween.fromPanX) * progress,
+        y: tween.fromPanY + (tween.toPanY - tween.fromPanY) * progress,
+    }
+    drawScene()
+
+    if (done) {
+        viewTween = null
+        viewTweenRaf = 0
+        return
+    }
+    viewTweenRaf = requestAnimationFrame(stepViewTween)
+}
+
+/**
+ * 以指定屏幕点为锚点缓动缩放到目标值。
+ * 锚点处的地图坐标在过渡中保持不动，因此缩放同时表现为尺寸与位置的连续变化。
+ * @param nextZoom 目标缩放值（内部夹取到 [minZoom, maxZoom]）
+ * @param screenX 锚点横坐标（画布坐标系）
+ * @param screenY 锚点纵坐标（画布坐标系）
+ * @param source 触发来源
+ */
+function startZoomTweenAtScreenPoint(nextZoom: number, screenX: number, screenY: number, source: ViewTween["source"]) {
+    const toZoom = clampZoom(nextZoom)
+    const fromZoom = zoom.value
+    if (Math.abs(toZoom - fromZoom) < 1e-6) return
+
+    const anchorMapPoint = screenToMap(screenX, screenY)
+    startViewTween({
+        fromZoom,
+        toZoom,
+        fromPanX: panOffset.value.x,
+        fromPanY: panOffset.value.y,
+        toPanX: screenX - anchorMapPoint.x * toZoom,
+        toPanY: screenY - anchorMapPoint.y * toZoom,
+        source,
+    })
+}
+
+/**
+ * 缓动平移视图，把指定地图坐标移到可视区中心。
+ * 缩放沿用当前目标值，避免打断仍在进行的缩放动画。
+ * @param mapX 地图坐标 X
+ * @param mapY 地图坐标 Y
+ */
+function centerMapPointInViewport(mapX: number, mapY: number) {
+    const toZoom = getZoomTarget()
+    const toPanX = getMapViewportCenterX() - mapX * toZoom
+    const toPanY = getMapViewportCenterY() - mapY * toZoom
+    const panMoved = Math.abs(toPanX - panOffset.value.x) > 0.5 || Math.abs(toPanY - panOffset.value.y) > 0.5
+    if (!panMoved && Math.abs(toZoom - zoom.value) < 1e-6) return
+
+    startViewTween({
+        fromZoom: zoom.value,
+        toZoom,
+        fromPanX: panOffset.value.x,
+        fromPanY: panOffset.value.y,
+        toPanX,
+        toPanY,
+        source: "control",
+    })
+}
+
 const hoveredSubRegion = computed(() => {
     if (hoveredSubRegionId.value === null) return null
     return projectedSubRegions.value.find(item => item.id === hoveredSubRegionId.value) ?? null
@@ -1758,21 +1984,51 @@ function getMapViewportCenterY(): number {
 }
 
 /**
- * 重置视图到居中适配状态（按可视地图区域适配）。
+ * 适配视图到可视地图区域（缩放 + 居中）。
+ * @param animate 是否缓动过渡；切换地图区域时传 false 直接落位，避免新地图从上一张地图的变换滑入
  */
-function resetView() {
+function applyFitView(animate: boolean) {
     const container = containerRef.value
     if (!container) return
     cancelPointFocusAnimation()
+
     const viewportLeft = getMapViewportLeft()
     const viewportWidth = Math.max(1, container.clientWidth - viewportLeft)
-    const fitZoom = Math.min(viewportWidth / renderSize.value.width, container.clientHeight / renderSize.value.height)
-    zoom.value = Math.max(minZoom, Math.min(maxZoom, fitZoom))
-    panOffset.value = {
-        x: viewportLeft + (viewportWidth - renderSize.value.width * zoom.value) / 2,
-        y: (container.clientHeight - renderSize.value.height * zoom.value) / 2,
+    const fitZoom = clampZoom(Math.min(viewportWidth / renderSize.value.width, container.clientHeight / renderSize.value.height))
+    const fitPanX = viewportLeft + (viewportWidth - renderSize.value.width * fitZoom) / 2
+    const fitPanY = (container.clientHeight - renderSize.value.height * fitZoom) / 2
+
+    if (!animate) {
+        cancelViewTween()
+        zoom.value = fitZoom
+        panOffset.value = { x: fitPanX, y: fitPanY }
+        requestDraw()
+        return
     }
-    requestDraw()
+
+    if (
+        Math.abs(fitPanX - panOffset.value.x) < 0.5 &&
+        Math.abs(fitPanY - panOffset.value.y) < 0.5 &&
+        Math.abs(fitZoom - zoom.value) < 1e-4
+    )
+        return
+
+    startViewTween({
+        fromZoom: zoom.value,
+        toZoom: fitZoom,
+        fromPanX: panOffset.value.x,
+        fromPanY: panOffset.value.y,
+        toPanX: fitPanX,
+        toPanY: fitPanY,
+        source: "control",
+    })
+}
+
+/**
+ * 重置视图到居中适配状态（按可视地图区域适配）。
+ */
+function resetView() {
+    applyFitView(true)
 }
 
 /**
@@ -1783,16 +2039,11 @@ function focusSubRegion(subRegionId: number) {
     selectedSubRegionId.value = subRegionId
     selectedRcState.value = null
     const target = projectedSubRegions.value.find(item => item.id === subRegionId)
-    const container = containerRef.value
-    if (!target || !container) {
+    if (!target || !containerRef.value) {
         requestDraw()
         return
     }
-    panOffset.value = {
-        x: getMapViewportCenterX() - target.mapX * zoom.value,
-        y: getMapViewportCenterY() - target.mapY * zoom.value,
-    }
-    requestDraw()
+    centerMapPointInViewport(target.mapX, target.mapY)
 }
 
 /**
@@ -1820,16 +2071,11 @@ function focusTeleportPoint(subRegionId: number, tpPoint: ProjectedTeleportPoint
     selectedSubRegionId.value = subRegionId
     selectedRcState.value = null
     hoveredTeleportPointKey.value = getTeleportPointKey(subRegionId, tpPoint.id)
-    const container = containerRef.value
-    if (!container) {
+    if (!containerRef.value) {
         requestDraw()
         return
     }
-    panOffset.value = {
-        x: getMapViewportCenterX() - tpPoint.x * zoom.value,
-        y: getMapViewportCenterY() - tpPoint.y * zoom.value,
-    }
-    requestDraw()
+    centerMapPointInViewport(tpPoint.x, tpPoint.y)
 }
 
 /**
@@ -2890,6 +3136,8 @@ function beginPinchGesture() {
     const metrics = getPinchMetrics()
     if (!metrics || metrics.distance <= 0) return
 
+    // 双指手势实时驱动缩放，先结束缓动动画，避免与手势争夺视图变换
+    cancelViewTween()
     pinchGestureState = {
         initialDistance: metrics.distance,
         initialZoom: zoom.value,
@@ -2913,10 +3161,7 @@ function handlePointerMove(event: PointerEvent) {
         const metrics = getPinchMetrics()
         if (!pinchGestureState || !metrics) return
 
-        const nextZoom = Math.max(
-            minZoom,
-            Math.min(maxZoom, pinchGestureState.initialZoom * (metrics.distance / pinchGestureState.initialDistance))
-        )
+        const nextZoom = clampZoom(pinchGestureState.initialZoom * (metrics.distance / pinchGestureState.initialDistance))
         zoom.value = nextZoom
         panOffset.value = {
             x: metrics.midpoint.x - pinchGestureState.mapPointAtMidpoint.x * nextZoom,
@@ -2932,6 +3177,8 @@ function handlePointerMove(event: PointerEvent) {
     const dx = event.clientX - lastPointerPosition.value.x
     const dy = event.clientY - lastPointerPosition.value.y
     dragDistance.value += Math.abs(dx) + Math.abs(dy)
+    // 拖动接管平移：结束缓动动画，否则动画会在后续帧覆盖拖拽结果
+    cancelViewTween()
     panOffset.value = { x: panOffset.value.x + dx, y: panOffset.value.y + dy }
     lastPointerPosition.value = { x: event.clientX, y: event.clientY }
     requestDraw()
@@ -2966,7 +3213,8 @@ function handlePointerLeave() {
 }
 
 /**
- * 鼠标滚轮缩放，保持光标锚点不跳动。
+ * 鼠标滚轮缩放：先按滚轮步进累积目标缩放，再以光标为锚点缓动逼近。
+ * 连续滚轮事件只更新目标值，动画每帧从当前渲染状态重新逼近，因此缩放与滚轮实时同步、不排队也不掉帧。
  */
 function handleWheel(event: WheelEvent) {
     event.preventDefault()
@@ -2977,49 +3225,40 @@ function handleWheel(event: WheelEvent) {
     const mouseX = event.clientX - rect.left
     const mouseY = event.clientY - rect.top
 
-    const mapMouse = screenToMap(mouseX, mouseY)
+    // 滚轮手势期间以动画终点为基准累积；其它交互（按钮/重置/聚焦）之后重新从当前缩放起步
+    if (!viewTween || viewTween.source !== "wheel") wheelZoomTarget = zoom.value
     const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1
-    const nextZoom = Math.max(minZoom, Math.min(maxZoom, zoom.value * zoomFactor))
-    zoom.value = nextZoom
+    wheelZoomTarget = clampZoom(wheelZoomTarget * zoomFactor)
 
-    panOffset.value = { x: mouseX - mapMouse.x * nextZoom, y: mouseY - mapMouse.y * nextZoom }
-    requestDraw()
+    startZoomTweenAtScreenPoint(wheelZoomTarget, mouseX, mouseY, "wheel")
 }
 
 /**
- * 以可视地图区域中心为锚点调整缩放（左上角 +/- 按钮使用）。
- * 与滚轮（光标锚点）、双指（中点锚点）一致：先取锚点处的地图坐标，再反推平移量，保证中心内容不跳动。
+ * 以可视地图区域中心为锚点缓动缩放（左上角 +/- 按钮使用）。
+ * 与滚轮（光标锚点）、双指（中点锚点）一致：先取锚点处的地图坐标，再反推目标平移量，保证中心内容不跳动。
  * @param nextZoom 目标缩放值（内部会再次夹取到 [minZoom, maxZoom]）
  */
 function zoomAtViewportCenter(nextZoom: number) {
-    const container = containerRef.value
-    if (!container) return
+    if (!containerRef.value) return
 
-    const next = Math.max(minZoom, Math.min(maxZoom, nextZoom))
-    const centerX = getMapViewportCenterX()
-    const centerY = getMapViewportCenterY()
-    // 在缩放前锁定可视区域中心对应的地图坐标
-    const anchorMapPoint = screenToMap(centerX, centerY)
-    zoom.value = next
-    panOffset.value = {
-        x: centerX - anchorMapPoint.x * next,
-        y: centerY - anchorMapPoint.y * next,
-    }
-    requestDraw()
+    const next = clampZoom(nextZoom)
+    if (Math.abs(next - getZoomTarget()) < 1e-6) return
+
+    startZoomTweenAtScreenPoint(next, getMapViewportCenterX(), getMapViewportCenterY(), "control")
 }
 
 /**
  * 快捷放大（锚点为视口中心）。
  */
 function zoomIn() {
-    zoomAtViewportCenter(zoom.value + 0.2)
+    zoomAtViewportCenter(getZoomTarget() + 0.2)
 }
 
 /**
  * 快捷缩小（锚点为视口中心）。
  */
 function zoomOut() {
-    zoomAtViewportCenter(zoom.value - 0.2)
+    zoomAtViewportCenter(getZoomTarget() - 0.2)
 }
 
 /**
@@ -3070,7 +3309,7 @@ watch(
         syncResourceMapPoints()
         syncResourcePanelState()
         await nextTick()
-        resetView()
+        applyFitView(false)
         applyRouteTargetSelection()
         schedulePendingMapPointFocus()
     },
@@ -3129,6 +3368,7 @@ onMounted(() => {
 onUnmounted(() => {
     clearPendingMapPointFocusTimer()
     teardownStarfieldMotion()
+    cancelViewTween()
     if (drawRaf) {
         cancelAnimationFrame(drawRaf)
         drawRaf = 0

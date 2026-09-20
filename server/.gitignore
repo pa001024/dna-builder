@@ -42,3 +42,6 @@ package-lock.json
 **/*.bun
 **/*.db
 *.lock
+
+# AI 调用日志（运行数据，不入库）
+/data/ai-logs/

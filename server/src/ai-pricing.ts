@@ -163,9 +163,14 @@ export function resolveMaxTokens(requested: number | undefined, remainingMicros:
  * 不完整的尾行留在缓冲区里等下一个数据块补全（SSE 事件可能被分片切断）。
  * @param buffer 待解析文本
  * @param onUsage 解析出 usage 时的回调
+ * @param onEvent 解析出任意数据块时的回调（调用日志聚合用）；回调抛错不影响透传
  * @returns 尚未成行的尾部文本
  */
-export function consumeSseBuffer(buffer: string, onUsage: (usage: UpstreamUsage) => void): string {
+export function consumeSseBuffer(
+    buffer: string,
+    onUsage: (usage: UpstreamUsage) => void,
+    onEvent?: (payload: Record<string, unknown>) => void
+): string {
     const lines = buffer.split("\n")
     const rest = lines.pop() ?? ""
 
@@ -176,12 +181,23 @@ export function consumeSseBuffer(buffer: string, onUsage: (usage: UpstreamUsage)
         const payload = trimmed.slice(SSE_DATA_PREFIX.length).trim()
         if (!payload || payload === "[DONE]") continue
 
+        let parsed: { usage?: UpstreamUsage } & Record<string, unknown>
         try {
-            // 只有流末尾那个 choices 为空的数据块才带 usage，中间的数据块没有该字段
-            const parsed = JSON.parse(payload) as { usage?: UpstreamUsage }
-            if (parsed.usage) onUsage(parsed.usage)
+            parsed = JSON.parse(payload)
         } catch {
             // 心跳/注释块不是 JSON，忽略
+            continue
+        }
+
+        // 只有流末尾那个 choices 为空的数据块才带 usage，中间的数据块没有该字段
+        if (parsed.usage) onUsage(parsed.usage)
+
+        if (onEvent) {
+            try {
+                onEvent(parsed)
+            } catch {
+                // 观察者（调用日志）出错不得影响字节透传
+            }
         }
     }
 
@@ -189,13 +205,18 @@ export function consumeSseBuffer(buffer: string, onUsage: (usage: UpstreamUsage)
 }
 
 /**
- * @description 把上游 SSE 流原样透传给客户端，同时旁路解析 usage 用于记账。
+ * @description 把上游 SSE 流原样透传给客户端，同时旁路解析 usage 与数据块用于记账和记录日志。
  * 上游字节先原样下发再解析，客户端拿到的内容与直连上游完全一致。
  * @param source 上游响应体
  * @param onUsage 解析到 usage 时的回调（上游未返回 usage 时不会被调用）
+ * @param onEvent 解析到任意数据块时的回调（调用日志聚合用）
  * @returns 可直接作为响应体返回的流
  */
-export function pipeWithUsage(source: ReadableStream<Uint8Array>, onUsage: (usage: UpstreamUsage) => void): ReadableStream<Uint8Array> {
+export function pipeWithUsage(
+    source: ReadableStream<Uint8Array>,
+    onUsage: (usage: UpstreamUsage) => void,
+    onEvent?: (payload: Record<string, unknown>) => void
+): ReadableStream<Uint8Array> {
     const decoder = new TextDecoder()
     let buffer = ""
 
@@ -204,12 +225,52 @@ export function pipeWithUsage(source: ReadableStream<Uint8Array>, onUsage: (usag
             transform(chunk, controller) {
                 controller.enqueue(chunk)
                 buffer += decoder.decode(chunk, { stream: true })
-                buffer = consumeSseBuffer(buffer, onUsage)
+                buffer = consumeSseBuffer(buffer, onUsage, onEvent)
             },
             flush() {
                 buffer += decoder.decode()
-                consumeSseBuffer(buffer, onUsage)
+                consumeSseBuffer(buffer, onUsage, onEvent)
             },
         })
     )
+}
+
+/**
+ * @description 在流真正结束时执行收尾回调，覆盖「读完 / 客户端取消 / 上游报错」三种收尾。
+ * `pipeWithUsage` 的 flush 只在正常读完时触发，客户端断开与上游中断都不会；调用日志必须在这三种情况下都收尾，
+ * 所以这里按 `pull` 方式转发字节，并在结束与异常两个出口各触发一次回调（回调保证最多执行一次）。
+ * 字节内容原样传递，不做任何改写。
+ * @param source 已处理好记账与解析的下行流
+ * @param onSettled 收尾回调
+ * @returns 可直接作为响应体返回的流
+ */
+export function finalizeOnEnd(source: ReadableStream<Uint8Array>, onSettled: () => void): ReadableStream<Uint8Array> {
+    const reader = source.getReader()
+    let settled = false
+    const settle = () => {
+        if (settled) return
+        settled = true
+        onSettled()
+    }
+
+    return new ReadableStream<Uint8Array>({
+        async pull(controller) {
+            try {
+                const { done, value } = await reader.read()
+                if (done) {
+                    settle()
+                    controller.close()
+                    return
+                }
+                controller.enqueue(value)
+            } catch (error) {
+                settle()
+                controller.error(error)
+            }
+        },
+        async cancel(reason) {
+            settle()
+            await reader.cancel(reason)
+        },
+    })
 }

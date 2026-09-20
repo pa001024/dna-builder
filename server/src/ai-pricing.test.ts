@@ -5,6 +5,7 @@ import {
     consumeSseBuffer,
     DAILY_LIMIT_MICROS,
     DEFAULT_MAX_TOKENS,
+    finalizeOnEnd,
     formatYuan,
     isPeakPricing,
     MIN_REQUEST_MICROS,
@@ -237,5 +238,86 @@ describe("pipeWithUsage", () => {
         const seen: UpstreamUsage[] = []
         await new Response(pipeWithUsage(source, usage => seen.push(usage))).text()
         expect(seen).toEqual([])
+    })
+
+    it("旁路观察者能拿到每个数据块，且抛错不影响透传", async () => {
+        const chunks = [
+            `data: {"choices":[{"delta":{"content":"甲"}}]}\n\n`,
+            `data: {"choices":[{"delta":{"content":"乙"}}],"usage":{"total_tokens":1}}\n\n`,
+        ]
+        const source = new ReadableStream<Uint8Array>({
+            start(controller) {
+                for (const chunk of chunks) controller.enqueue(new TextEncoder().encode(chunk))
+                controller.close()
+            },
+        })
+
+        const events: unknown[] = []
+        const text = await new Response(
+            pipeWithUsage(
+                source,
+                () => {},
+                payload => {
+                    events.push(payload)
+                    if (events.length === 1) throw new Error("观察者出错")
+                }
+            )
+        ).text()
+
+        expect(text).toBe(chunks.join(""))
+        expect(events).toHaveLength(2)
+    })
+})
+
+describe("finalizeOnEnd", () => {
+    /** 造一个按需产出的流。 */
+    function makeSource(chunks: string[], failAfter = -1) {
+        let index = 0
+        return new ReadableStream<Uint8Array>({
+            pull(controller) {
+                if (failAfter >= 0 && index === failAfter) {
+                    controller.error(new Error("上游中断"))
+                    return
+                }
+                if (index >= chunks.length) {
+                    controller.close()
+                    return
+                }
+                controller.enqueue(new TextEncoder().encode(chunks[index++]))
+            },
+        })
+    }
+
+    it("正常读完时收尾一次，字节不变", async () => {
+        const chunks = ["a", "b", "c"]
+        let settled = 0
+        const text = await new Response(finalizeOnEnd(makeSource(chunks), () => settled++)).text()
+
+        expect(text).toBe("abc")
+        expect(settled).toBe(1)
+    })
+
+    it("客户端取消（提前关闭读取端）时同样收尾，且只收尾一次", async () => {
+        let settled = 0
+        const stream = finalizeOnEnd(makeSource(["a", "b", "c"]), () => settled++)
+        const reader = stream.getReader()
+
+        expect(new TextDecoder().decode((await reader.read()).value)).toBe("a")
+        await reader.cancel("客户端断开")
+        expect(settled).toBe(1)
+
+        reader.releaseLock()
+        await stream.cancel("再次取消")
+        expect(settled).toBe(1)
+    })
+
+    it("上游报错时先收尾再把错误抛给客户端", async () => {
+        let settled = 0
+        const stream = finalizeOnEnd(makeSource(["a"], 1), () => settled++)
+        const reader = stream.getReader()
+
+        expect(new TextDecoder().decode((await reader.read()).value)).toBe("a")
+        await expect(reader.read()).rejects.toThrow("上游中断")
+        expect(settled).toBe(1)
     })
 })

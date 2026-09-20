@@ -9,7 +9,9 @@ import { yogaPlugin } from "./db"
 
 // load env
 import "dotenv/config"
+import { scheduleAiLogRetention } from "./ai-log-store"
 import { apiPlugin } from "./api"
+import { aiLogPlugin } from "./api/ai-log"
 import { modApiPlugin } from "./api/mod"
 import { raceLotteryPlugin } from "./api/race-lottery"
 
@@ -24,6 +26,7 @@ const app = new Elysia()
     .use(modApiPlugin())
     .use(raceLotteryPlugin())
     .use(aiPlugin())
+    .use(aiLogPlugin())
     .use(
         cors({
             // origin: "*",
@@ -37,3 +40,6 @@ const app = new Elysia()
 
 app.listen(8887)
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`)
+
+// AI 调用日志的保留期清理（未配置 AI_LOG_RETENTION_DAYS 时不做任何事）
+scheduleAiLogRetention()
