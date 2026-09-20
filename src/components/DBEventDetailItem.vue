@@ -96,6 +96,32 @@ const signInDayEntries = computed<SignInDayEntry[]>(() => {
     }))
 })
 
+/** 在线时长奖励展示项 */
+interface OnlineTimeEntry {
+    target: number
+    rewardId: number
+    reward: RewardDetail | null
+}
+
+/**
+ * 解析在线时长奖励档位。
+ * @returns 按分钟数升序的展示数组
+ */
+const onlineTimeEntries = computed<OnlineTimeEntry[]>(() => {
+    const entries = props.event.onlineTime
+    if (!entries?.length) {
+        return []
+    }
+
+    return [...entries]
+        .sort((a, b) => a.target - b.target)
+        .map(entry => ({
+            target: entry.target,
+            rewardId: entry.reward,
+            reward: getRewardDetails(entry.reward),
+        }))
+})
+
 const topUpRanks = computed(() => {
     const detail = props.event.topUpDetail
     if (!detail) {
@@ -262,6 +288,25 @@ const topUpRanks = computed(() => {
             </div>
         </section>
 
+        <!-- 在线时长奖励 -->
+        <section v-if="onlineTimeEntries.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="ONLINE TIME" :title="$t('event.online_time')" />
+            <div class="mt-3 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2">
+                <div
+                    v-for="entry in onlineTimeEntries"
+                    :key="entry.rewardId"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
+                    <div class="mb-1.5 flex items-center justify-between gap-2">
+                        <span class="text-[11px] tracking-wide text-base-content/55">{{ $t('event.online_time_target', { target: entry.target }) }}</span>
+                        <Icon icon="ri:time-line" class="size-3.5 shrink-0 text-base-content/40" />
+                    </div>
+                    <RewardItem v-if="entry.reward" :reward="entry.reward" />
+                    <div v-else class="text-[11px] tabular-nums text-base-content/45">ID: {{ entry.rewardId }}</div>
+                </div>
+            </div>
+        </section>
+
         <!-- 累充返利 -->
         <section v-if="event.topUpDetail" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="TOP-UP" :title="$t(event.topUpDetail.eventDes)" />
@@ -297,8 +342,6 @@ const topUpRanks = computed(() => {
 
         <WeaponVerifyEvent v-if="event.id === 103026" />
 
-        <div v-if="event.boxDrop" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <BoxDropItem :box-drop="event.boxDrop" />
-        </div>
+        <BoxDropItem v-if="event.boxDrop" :box-drop="event.boxDrop" />
     </div>
 </template>

@@ -6188,6 +6188,10 @@
         "title": "組件渲染出錯"
     },
     "event": {
+        "box_coin": "活動代幣",
+        "box_drop_index": "禮盒 {{index}}",
+        "online_time": "線上時長獎勵",
+        "online_time_target": "累計線上 {{target}} 分鐘",
         "photo_task_index": "任務",
         "photo_task_location": "拍攝地點",
         "photo_task_quest": "關聯任務",
@@ -6198,7 +6202,8 @@
         "rule": "規則",
         "sign_in": "簽到",
         "sign_in_big": "大獎勵",
-        "sign_in_day": "第 {{day}} 天"
+        "sign_in_day": "第 {{day}} 天",
+        "top_up_score": "積分 {{score}}"
     },
     "event-detail": {
         "title": "活動詳情"
@@ -7075,6 +7080,7 @@
         "background": "背景",
         "book": "所屬讀物",
         "description": "描述",
+        "eventReward": "活動獎勵",
         "fish": "所屬魚類",
         "icon": "圖標",
         "id": "ID",

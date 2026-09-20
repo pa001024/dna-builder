@@ -7086,6 +7086,10 @@
         "title": "Component Rendering Error"
     },
     "event": {
+        "box_coin": "Event Token",
+        "box_drop_index": "Box {{index}}",
+        "online_time": "Online Time Rewards",
+        "online_time_target": "{{target}} min online",
         "photo_task_index": "Task",
         "photo_task_location": "Photo Location",
         "photo_task_quest": "Related Quest",
@@ -7096,7 +7100,8 @@
         "rule": "Rule",
         "sign_in": "Sign-In",
         "sign_in_big": "Big Reward",
-        "sign_in_day": "Day {{day}}"
+        "sign_in_day": "Day {{day}}",
+        "top_up_score": "{{score}} pts"
     },
     "event-detail": {
         "title": "Event details"
@@ -7972,6 +7977,7 @@
         "background": "Background",
         "book": "Book",
         "description": "Description",
+        "eventReward": "Event Rewards",
         "fish": "Fish",
         "icon": "Icon",
         "id": "ID",

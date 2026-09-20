@@ -8,6 +8,14 @@ export interface EventSignIn {
     bigRewardDays?: number[]
 }
 
+/** 在线时长奖励档位 */
+export interface EventOnlineTimeEntry {
+    /** 累计在线分钟数 */
+    target: number
+    /** 奖励 id */
+    reward: number
+}
+
 /** 拍照活动的任务点位 */
 export interface EventPhotoTaskLocation {
     id: number
@@ -39,6 +47,7 @@ export interface EventItem {
     rule?: string
     photoTasks?: EventPhotoTask[]
     signIn?: EventSignIn
+    onlineTime?: EventOnlineTimeEntry[]
     boxDrop?: {
         boxCoinId: number
         boxMaximum: number
@@ -876,6 +885,56 @@ export const eventData: EventItem[] = [
         desc: "活动期间累计区域联机在线时长领取赠礼",
         startTime: 1770948000,
         endTime: 1772398800,
+        onlineTime: [
+            {
+                target: 10,
+                reward: 11200101,
+            },
+            {
+                target: 20,
+                reward: 11200102,
+            },
+            {
+                target: 30,
+                reward: 11200103,
+            },
+            {
+                target: 60,
+                reward: 11200104,
+            },
+            {
+                target: 70,
+                reward: 11200105,
+            },
+            {
+                target: 80,
+                reward: 11200106,
+            },
+            {
+                target: 90,
+                reward: 11200107,
+            },
+            {
+                target: 120,
+                reward: 11200108,
+            },
+            {
+                target: 130,
+                reward: 11200109,
+            },
+            {
+                target: 140,
+                reward: 11200110,
+            },
+            {
+                target: 150,
+                reward: 11200111,
+            },
+            {
+                target: 180,
+                reward: 11200112,
+            },
+        ],
     },
     {
         id: 112002,
@@ -883,6 +942,56 @@ export const eventData: EventItem[] = [
         desc: "活动期间累计区域联机在线时长领取赠礼",
         startTime: 1778119200,
         endTime: 1779570000,
+        onlineTime: [
+            {
+                target: 10,
+                reward: 11200101,
+            },
+            {
+                target: 20,
+                reward: 11200102,
+            },
+            {
+                target: 30,
+                reward: 11200103,
+            },
+            {
+                target: 60,
+                reward: 11200104,
+            },
+            {
+                target: 70,
+                reward: 11200105,
+            },
+            {
+                target: 80,
+                reward: 11200106,
+            },
+            {
+                target: 90,
+                reward: 11200107,
+            },
+            {
+                target: 120,
+                reward: 11200108,
+            },
+            {
+                target: 130,
+                reward: 11200109,
+            },
+            {
+                target: 140,
+                reward: 11200110,
+            },
+            {
+                target: 150,
+                reward: 11200111,
+            },
+            {
+                target: 180,
+                reward: 11200112,
+            },
+        ],
     },
     {
         id: 112003,
@@ -890,6 +999,56 @@ export const eventData: EventItem[] = [
         desc: "活动期间累计区域联机在线时长领取赠礼",
         startTime: 1783562400,
         endTime: 1785142800,
+        onlineTime: [
+            {
+                target: 10,
+                reward: 11200301,
+            },
+            {
+                target: 20,
+                reward: 11200302,
+            },
+            {
+                target: 30,
+                reward: 11200303,
+            },
+            {
+                target: 60,
+                reward: 11200304,
+            },
+            {
+                target: 70,
+                reward: 11200305,
+            },
+            {
+                target: 80,
+                reward: 11200306,
+            },
+            {
+                target: 90,
+                reward: 11200307,
+            },
+            {
+                target: 120,
+                reward: 11200308,
+            },
+            {
+                target: 130,
+                reward: 11200309,
+            },
+            {
+                target: 140,
+                reward: 11200310,
+            },
+            {
+                target: 150,
+                reward: 11200311,
+            },
+            {
+                target: 180,
+                reward: 11200312,
+            },
+        ],
     },
     {
         id: 112004,
@@ -897,6 +1056,56 @@ export const eventData: EventItem[] = [
         desc: "活动期间累计区域联机在线时长领取赠礼",
         startTime: 1785981600,
         endTime: 1787518800,
+        onlineTime: [
+            {
+                target: 10,
+                reward: 11200401,
+            },
+            {
+                target: 20,
+                reward: 11200402,
+            },
+            {
+                target: 30,
+                reward: 11200403,
+            },
+            {
+                target: 60,
+                reward: 11200404,
+            },
+            {
+                target: 70,
+                reward: 11200405,
+            },
+            {
+                target: 80,
+                reward: 11200406,
+            },
+            {
+                target: 90,
+                reward: 11200407,
+            },
+            {
+                target: 120,
+                reward: 11200408,
+            },
+            {
+                target: 130,
+                reward: 11200409,
+            },
+            {
+                target: 140,
+                reward: 11200410,
+            },
+            {
+                target: 150,
+                reward: 11200411,
+            },
+            {
+                target: 180,
+                reward: 11200412,
+            },
+        ],
     },
     {
         id: 112005,
@@ -904,6 +1113,56 @@ export const eventData: EventItem[] = [
         desc: "活动期间累计区域联机在线时长领取赠礼",
         startTime: 1789610400,
         endTime: 1790715600,
+        onlineTime: [
+            {
+                target: 10,
+                reward: 11200401,
+            },
+            {
+                target: 20,
+                reward: 11200402,
+            },
+            {
+                target: 30,
+                reward: 11200403,
+            },
+            {
+                target: 60,
+                reward: 11200404,
+            },
+            {
+                target: 70,
+                reward: 11200405,
+            },
+            {
+                target: 80,
+                reward: 11200406,
+            },
+            {
+                target: 90,
+                reward: 11200407,
+            },
+            {
+                target: 120,
+                reward: 11200408,
+            },
+            {
+                target: 130,
+                reward: 11200409,
+            },
+            {
+                target: 140,
+                reward: 11200410,
+            },
+            {
+                target: 150,
+                reward: 11200411,
+            },
+            {
+                target: 180,
+                reward: 11200412,
+            },
+        ],
     },
     {
         id: 113001,

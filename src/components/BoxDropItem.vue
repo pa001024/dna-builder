@@ -250,61 +250,77 @@ watch(
 </script>
 
 <template>
-    <div class="space-y-3">
-        <div class="flex items-center justify-between">
-            <div class="text-sm font-medium">{{ t("box-drop.draw") }}</div>
-        </div>
+    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <SectionHeader no-animate compact kicker="BOX DROP" :title="t('box-drop.draw')" />
 
-        <div class="grid grid-cols-2 gap-2 text-sm">
-            <div class="rounded bg-base-300 p-2">
-                <div class="text-xs text-base-content/60">{{ t("box-drop.boxMaximum") }}</div>
-                <div class="font-medium">{{ boxDrop.boxMaximum }}</div>
+        <!-- 基础信息 -->
+        <div class="mt-3 space-y-2 text-sm">
+            <div class="grid grid-cols-2 gap-2">
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ t("box-drop.boxMaximum") }}</span>
+                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ boxDrop.boxMaximum }}</span>
+                </div>
+                <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                    <span class="text-xs text-base-content/60">{{ t("box-drop.boxPerDay") }}</span>
+                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ boxDrop.boxPerDay }}</span>
+                </div>
             </div>
-            <div class="rounded bg-base-300 p-2">
-                <div class="text-xs text-base-content/60">{{ t("box-drop.boxPerDay") }}</div>
-                <div class="font-medium">{{ boxDrop.boxPerDay }}</div>
-            </div>
-            <div class="col-span-2 rounded bg-base-300 p-2">
-                <div class="text-xs text-base-content/60">{{ t("box-drop.consume") }}</div>
+            <div>
+                <div class="mb-1 text-xs text-base-content/60">{{ t("box-drop.consume") }}</div>
                 <ResourceCostItem :name="boxDrop.boxCoinId.toString()" :value="[boxDrop.coinPerBox, boxDrop.boxCoinId, 'Resource']" />
             </div>
         </div>
 
-        <div class="space-y-2">
-            <div class="text-xs text-base-content/70">{{ t("box-drop.rewardList") }}</div>
+        <!-- 奖励列表 -->
+        <div class="mt-3">
+            <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">{{ t("box-drop.rewardList") }}</div>
             <div class="space-y-2">
                 <div
                     v-for="item in rewardItems"
                     :key="item.id"
-                    class="p-2 bg-base-200 rounded hover:bg-base-300 transition-colors duration-200"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40"
                 >
-                    <div v-if="item.reward" class="pl-2">
-                        <RewardItem :reward="item.reward" header>
-                            <div class="text-xs text-base-content/60">
-                                {{ t("box-drop.limit") }} {{ Number.isFinite(item.count) ? `${item.count}${t("box-drop.quantity")}` : "∞" }}
-                            </div>
-                        </RewardItem>
-                    </div>
+                    <RewardItem v-if="item.reward" :reward="item.reward" header>
+                        <div class="text-xs text-base-content/60">
+                            {{ t("box-drop.limit") }} {{ Number.isFinite(item.count) ? `${item.count}${t("box-drop.quantity")}` : "∞" }}
+                        </div>
+                    </RewardItem>
                 </div>
             </div>
         </div>
 
-        <div class="space-y-2">
-            <div class="text-xs text-base-content/70">{{ t("box-drop.simulation") }}</div>
-            <div class="flex flex-wrap gap-2 justify-center mb-3">
-                <button class="btn btn-primary btn-sm" @click="openOnce">{{ t("box-drop.draw1") }}</button>
-                <button class="btn btn-primary btn-sm" @click="openMany(10)">{{ t("box-drop.draw10") }}</button>
-                <button class="btn btn-error btn-sm" @click="resetSimulation">{{ t("setting.reset") }}</button>
+        <!-- 模拟 -->
+        <div class="mt-3">
+            <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">{{ t("box-drop.simulation") }}</div>
+            <div class="mb-3 flex flex-wrap justify-center gap-2">
+                <button
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-primary bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                    @click="openOnce"
+                >
+                    {{ t("box-drop.draw1") }}
+                </button>
+                <button
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-primary bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                    @click="openMany(10)"
+                >
+                    {{ t("box-drop.draw10") }}
+                </button>
+                <button
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-base-content/20 px-2 py-0.5 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error active:scale-[0.97]"
+                    @click="resetSimulation"
+                >
+                    {{ t("setting.reset") }}
+                </button>
             </div>
 
             <div class="grid grid-cols-2 gap-2">
-                <div class="rounded bg-base-300 p-2">
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                     <div class="text-xs text-base-content/60">{{ t("box-drop.simulationCount") }}</div>
-                    <div class="text-2xl p-2 font-bold">{{ openCount }}</div>
+                    <div class="mt-1 font-orbitron text-2xl font-bold tabular-nums text-primary">{{ openCount }}</div>
                 </div>
-                <div class="rounded bg-base-300 p-2">
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                     <div class="text-xs text-base-content/60">{{ t("box-drop.lastResult") }}</div>
-                    <div v-if="lastResult.length" class="space-y-1 text-sm font-medium">
+                    <div v-if="lastResult.length" class="mt-1 space-y-1">
                         <ResourceCostItem
                             v-for="item in lastResult"
                             :key="`${item.t}-${item.id}-${item.n || ''}`"
@@ -316,8 +332,8 @@ watch(
                 </div>
             </div>
 
-            <div class="space-y-2">
-                <div class="text-xs text-base-content/70">{{ t("box-drop.statistics") }}</div>
+            <div class="mt-3">
+                <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">{{ t("box-drop.statistics") }}</div>
                 <div class="grid grid-cols-2 gap-2">
                     <ResourceCostItem
                         v-for="item in sortedRewardCounts"
@@ -328,5 +344,5 @@ watch(
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </template>

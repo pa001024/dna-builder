@@ -7069,6 +7069,10 @@
         "title": "컴포넌트 렌더링 오류"
     },
     "event": {
+        "box_coin": "이벤트 화폐",
+        "box_drop_index": "상자 {{index}}",
+        "online_time": "온라인 시간 보상",
+        "online_time_target": "누적 {{target}}분 온라인",
         "photo_task_index": "임무",
         "photo_task_location": "촬영 장소",
         "photo_task_quest": "연관 임무",
@@ -7079,7 +7083,8 @@
         "rule": "규칙",
         "sign_in": "출석",
         "sign_in_big": "큰 보상",
-        "sign_in_day": "{{day}}일차"
+        "sign_in_day": "{{day}}일차",
+        "top_up_score": "{{score}}점"
     },
     "event-detail": {
         "title": "이벤트 상세"
@@ -7957,6 +7962,7 @@
         "background": "배경",
         "book": "읽을거리",
         "description": "설명",
+        "eventReward": "이벤트 보상",
         "fish": "물고기",
         "icon": "아이콘",
         "id": "ID",

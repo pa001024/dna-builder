@@ -1184,6 +1184,10 @@
         "title": "组件渲染出错"
     },
     "event": {
+        "box_coin": "活动代币",
+        "box_drop_index": "礼盒 {{index}}",
+        "online_time": "在线时长奖励",
+        "online_time_target": "累计在线 {{target}} 分钟",
         "photo_task_index": "任务",
         "photo_task_location": "拍照地点",
         "photo_task_quest": "关联任务",
@@ -1194,7 +1198,8 @@
         "rule": "规则",
         "sign_in": "签到",
         "sign_in_big": "大奖励",
-        "sign_in_day": "第 {{day}} 天"
+        "sign_in_day": "第 {{day}} 天",
+        "top_up_score": "积分 {{score}}"
     },
     "event-detail": {
         "title": "活动详情"
@@ -2070,6 +2075,7 @@
         "background": "背景",
         "book": "所属读物",
         "description": "描述",
+        "eventReward": "活动奖励",
         "fish": "所属鱼类",
         "icon": "图标",
         "id": "ID",

@@ -40,7 +40,7 @@ const LATEST_GROUPS = [
                                     <span
                                         v-for="(width, index) in CHIP_WIDTHS"
                                         :key="index"
-                                        class="db-skeleton-bar h-[30px] shrink-0"
+                                        class="db-skeleton-bar h-7.5 shrink-0"
                                         :style="{ width: `${width}px` }"
                                     />
                                 </div>
@@ -95,7 +95,7 @@ const LATEST_GROUPS = [
                                     :class="group.span === 2 ? 'md:col-span-2' : 'md:col-span-3'"
                                 >
                                     <!-- 组头行：高度对齐真实标题行的行盒（17px），hairline 与两侧文字同轴 -->
-                                    <div class="flex min-h-[17px] flex-wrap items-center gap-x-6 gap-y-2">
+                                    <div class="flex min-h-4.25 flex-wrap items-center gap-x-6 gap-y-2">
                                         <div class="flex items-baseline gap-3">
                                             <span class="db-skeleton-bar h-2.5 w-12" />
                                             <span class="db-skeleton-bar h-2.5 w-14" />

@@ -6983,6 +6983,10 @@
         "title": "コンポーネントのレンダリングエラー"
     },
     "event": {
+        "box_coin": "イベント通貨",
+        "box_drop_index": "ボックス {{index}}",
+        "online_time": "オンライン時間報酬",
+        "online_time_target": "累計 {{target}} 分オンライン",
         "photo_task_index": "任務",
         "photo_task_location": "撮影場所",
         "photo_task_quest": "関連任務",
@@ -6993,7 +6997,8 @@
         "rule": "ルール",
         "sign_in": "ログイン",
         "sign_in_big": "大報酬",
-        "sign_in_day": "第 {{day}} 日"
+        "sign_in_day": "第 {{day}} 日",
+        "top_up_score": "{{score}} ポイント"
     },
     "event-detail": {
         "title": "イベント詳細"
@@ -7871,6 +7876,7 @@
         "background": "背景",
         "book": "読物",
         "description": "説明",
+        "eventReward": "イベント報酬",
         "fish": "魚",
         "icon": "アイコン",
         "id": "ID",

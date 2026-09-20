@@ -7101,6 +7101,10 @@
         "title": "Erreur de rendu du composant"
     },
     "event": {
+        "box_coin": "Jeton d'événement",
+        "box_drop_index": "Boîte {{index}}",
+        "online_time": "Récompenses de temps en ligne",
+        "online_time_target": "{{target}} min en ligne",
         "photo_task_index": "Tâche",
         "photo_task_location": "Lieu de photo",
         "photo_task_quest": "Quête associée",
@@ -7111,7 +7115,8 @@
         "rule": "Règle",
         "sign_in": "Connexion quotidienne",
         "sign_in_big": "Grosse récompense",
-        "sign_in_day": "Jour {{day}}"
+        "sign_in_day": "Jour {{day}}",
+        "top_up_score": "{{score}} pts"
     },
     "event-detail": {
         "title": "Détails de l'événement"
@@ -7989,6 +7994,7 @@
         "background": "Contexte",
         "book": "Livre",
         "description": "Description",
+        "eventReward": "Récompenses d'événement",
         "fish": "Poisson",
         "icon": "Icône",
         "id": "ID",

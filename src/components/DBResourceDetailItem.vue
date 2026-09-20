@@ -10,6 +10,7 @@ import { collectResourceDraftSources } from "@/utils/draft-source"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import {
     collectResourceDungeonSources,
+    collectResourceEventSources,
     collectResourceHardbossSources,
     collectResourcePackSources,
     collectResourceQuestSources,
@@ -27,6 +28,7 @@ const hardbossSources = computed(() => collectResourceHardbossSources(props.reso
 const packSources = computed(() => collectResourcePackSources(props.resource))
 const questSources = computed(() => collectResourceQuestSources(props.resource))
 const shopSources = computed(() => collectResourceShopSources(props.resource))
+const eventSources = computed(() => collectResourceEventSources(props.resource))
 const bookTarget = computed(() => {
     for (const book of booksData) {
         if (!book.res.some(resource => resource.id === props.resource.id)) {
@@ -142,7 +144,8 @@ const sourceCounts = computed(
         hardbossSources.value.length +
         packSources.value.length +
         questSources.value.length +
-        shopSources.value.length
+        shopSources.value.length +
+        eventSources.value.length
 )
 function getResourceIconUrl(icon: string): string {
     return icon ? `/imgs/res/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
@@ -311,6 +314,7 @@ function getResourceIconUrl(icon: string): string {
                 packSources.length ||
                 questSources.length ||
                 shopSources.length ||
+                eventSources.length ||
                 resource.source?.length
             "
         >
@@ -322,6 +326,7 @@ function getResourceIconUrl(icon: string): string {
                 <PackSource :pack-sources="packSources" source-title="道具箱" />
                 <QuestSource :quest-sources="questSources" :resource-id="resource.id" />
                 <ShopSource :shop-sources="shopSources" />
+                <EventSource :event-sources="eventSources" />
                 <MapSource :resource="resource" />
             </div>
         </section>

@@ -1,5 +1,6 @@
 import { dungeonMap, ironSurvivalDungeonData, monsterLevelDropData, resourceMap, rewardMap } from "@/data"
 import { charMap, draftMap, modMap } from "@/data/d"
+import { eventData } from "@/data/d/event.data"
 import { getHardBossDetail, hardBossMap } from "@/data/d/hardboss.data"
 import { questChainData } from "@/data/d/questchain.data"
 import type { Resource } from "@/data/d/resource.data"
@@ -502,6 +503,124 @@ export function collectResourceShopSources(resource: Resource): ShopSourceInfo[]
             })
         })
     })
+
+    return sources
+}
+
+/** 活动奖励来源信息 */
+export interface ResourceEventSourceInfo {
+    key: string
+    eventId: number
+    eventName: string
+    startTime: number
+    endTime: number | null
+    /** 奖励来源类型：拍照任务 / 签到 / 在线时长 / 礼盒 / 活动代币 / 累充档位 */
+    kind: "photo-task" | "sign-in" | "online-time" | "box-drop" | "box-coin" | "top-up"
+    /** 序号（拍照任务第几个 / 签到第几天，从 1 开始；top-up 时为积分档位） */
+    index: number
+    /** 在线时长档位的分钟数（仅 online-time） */
+    target?: number
+    rewardId: number
+    pp?: number
+    times?: number
+    num?: number
+}
+
+/**
+ * 扫描活动表，反查资源对应的活动奖励来源（拍照任务 / 签到 / 在线时长 / 礼盒 / 活动代币 / 累充档位）。
+ * @param resource 资源数据
+ * @returns 活动来源列表
+ */
+export function collectResourceEventSources(resource: Resource): ResourceEventSourceInfo[] {
+    const sources: ResourceEventSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    /**
+     * 解析单个奖励 id，命中目标资源时记录来源。
+     * @param event 所属活动
+     * @param rewardId 奖励 id
+     * @param kind 来源类型
+     * @param index 序号
+     * @param target 在线时长分钟数
+     */
+    const pushIfMatched = (
+        event: (typeof eventData)[number],
+        rewardId: number,
+        kind: ResourceEventSourceInfo["kind"],
+        index: number,
+        target?: number
+    ) => {
+        const matched = findInRewardTree(getRewardDetails(rewardId), resource.id, "Resource")
+        if (!matched) {
+            return
+        }
+
+        const key = `event-${event.id}-${kind}-${index}-${resource.id}`
+        if (sourceKeySet.has(key)) {
+            return
+        }
+
+        sourceKeySet.add(key)
+        sources.push({
+            key,
+            eventId: event.id,
+            eventName: event.name,
+            startTime: event.startTime,
+            endTime: event.endTime,
+            kind,
+            index,
+            target,
+            rewardId,
+            pp: matched.pp,
+            times: matched.times,
+            num: matched.num,
+        })
+    }
+
+    /**
+     * 直接记录一条来源（不经过奖励树匹配，如活动代币本身）。
+     * @param event 所属活动
+     * @param kind 来源类型
+     */
+    const pushDirect = (event: (typeof eventData)[number], kind: ResourceEventSourceInfo["kind"]) => {
+        const key = `event-${event.id}-${kind}-${resource.id}`
+        if (sourceKeySet.has(key)) {
+            return
+        }
+
+        sourceKeySet.add(key)
+        sources.push({
+            key,
+            eventId: event.id,
+            eventName: event.name,
+            startTime: event.startTime,
+            endTime: event.endTime,
+            kind,
+            index: 0,
+            rewardId: resource.id,
+        })
+    }
+
+    for (const event of eventData) {
+        event.photoTasks?.forEach((task, index) => {
+            pushIfMatched(event, task.reward, "photo-task", index + 1)
+        })
+        event.signIn?.rewards.slice(0, event.signIn.duration).forEach((rewardId, index) => {
+            pushIfMatched(event, rewardId, "sign-in", index + 1)
+        })
+        event.onlineTime?.forEach(entry => {
+            pushIfMatched(event, entry.reward, "online-time", entry.target, entry.target)
+        })
+        event.boxDrop?.rewardId.forEach((rewardId, index) => {
+            pushIfMatched(event, rewardId, "box-drop", index + 1)
+        })
+        if (event.boxDrop && event.boxDrop.boxCoinId === resource.id) {
+            pushDirect(event, "box-coin")
+        }
+        Object.entries(event.topUpDetail?.scoreRankReward ?? {}).forEach(([score, rewardId]) => {
+            pushIfMatched(event, rewardId, "top-up", Number(score))
+        })
+    }
 
     return sources
 }
