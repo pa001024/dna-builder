@@ -26,7 +26,7 @@ const mapLocalLink = computed<RouteLocationRaw | null>(() => {
     }
 
     return {
-        name: "map-local",
+        name: "map-tool",
         query: {
             regionId: String(subRegion.rid),
             subRegionId: String(props.subRegionId),

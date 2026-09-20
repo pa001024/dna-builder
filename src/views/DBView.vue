@@ -13,7 +13,7 @@ import type { Conversation } from "@/store/db"
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import type { AskUserResponse } from "@/utils/db-ask-user"
-import { type DBGlobalSearchOption, GlobalSearchService } from "@/utils/global-search"
+import { type DBGlobalSearchOption, getGlobalSearchService, warmUpGlobalSearchService } from "@/utils/global-search"
 
 const router = useRouter()
 const { t } = useTranslation()
@@ -227,7 +227,7 @@ const databaseItems = [
     { name: "database.map", path: "/db/map", desc: "database.map_desc", icon: "ri:map-2-line" },
     { name: "database.event", path: "/db/event", desc: "database.event_desc", icon: "ri:calendar-event-line" },
     { name: "database.solotreasure", path: "/db/solotreasure", desc: "database.solotreasure_desc", icon: "ri:gift-line" },
-    { name: "database.mapLocal", path: "/db/map-local", desc: "database.mapLocal_desc", icon: "ri:focus-3-line" },
+    { name: "database.mapLocal", path: "/map-tool", desc: "database.mapLocal_desc", icon: "ri:focus-3-line" },
     { name: "database.walnut", path: "/db/walnut", desc: "database.walnut_desc", icon: "ri:mail-line" },
     { name: "database.title_data", path: "/db/title", desc: "database.title_data_desc", icon: "ri:bookmark-line" },
     { name: "database.book", path: "/db/book", desc: "database.book_desc", icon: "ri:book-open-line" },
@@ -259,10 +259,17 @@ type SearchScopeOption = {
     label: string
 }
 
-const globalSearchService = new GlobalSearchService()
+/**
+ * 全库检索索引是否已就绪。
+ *
+ * 索引构建集中在全库条目的拼音预计算上，是同步 CPU 开销；
+ * 若放在组件初始化阶段会把首帧一起拖住，因此改由空闲期预热，
+ * 就绪前检索结果区展示占位而不是「无结果」。
+ */
+const isSearchIndexReady = ref(false)
 
 /** 推荐模块：平铺时排在最前 */
-const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/db/map-local", "/db/questchain", "/db/dungeon", "/db/resource"]
+const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/map-tool", "/db/questchain", "/db/dungeon", "/db/resource"]
 
 const databaseSectionConfigs: DatabaseSectionConfig[] = [
     {
@@ -277,7 +284,7 @@ const databaseSectionConfigs: DatabaseSectionConfig[] = [
         title: t("view.section.explore.title"),
         description: t("view.section.explore.description"),
         badge: t("view.section.explore.badge"),
-        paths: ["/db/event", "/db/map-local", "/db/rouge", "/db/fish", "/db/dungeon", "/db/abyss", "/db/map"],
+        paths: ["/db/event", "/map-tool", "/db/rouge", "/db/fish", "/db/dungeon", "/db/abyss", "/db/map"],
     },
     {
         id: "world",
@@ -370,9 +377,14 @@ const selectedSearchPaths = computed(() => {
 /**
  * 实时计算搜索候选，按融合评分返回前若干条。
  * 使用防抖后的关键词：输入过程中不触发全库模糊检索。
+ * 索引尚未预热完成时返回空列表，由结果区展示占位。
  */
 const searchOptions = computed<DBGlobalSearchOption[]>(() => {
-    const options = globalSearchService.search(debouncedKeyword.value)
+    if (!isSearchIndexReady.value) {
+        return []
+    }
+
+    const options = getGlobalSearchService().search(debouncedKeyword.value)
 
     if (!selectedSearchPaths.value) {
         return options
@@ -389,13 +401,14 @@ const hiddenResultCount = computed(() => Math.max(searchOptions.value.length - M
 
 /**
  * 生成搜索状态提示文案，兼顾空状态、命中状态与无结果状态。
+ * 索引未就绪时只标注检索范围，不给出命中数或「无结果」，避免误报。
  */
 const searchStatusText = computed(() => {
     const searchScopeText = isAllSearchSectionsSelected.value
         ? t("view.allModules")
         : t("view.moduleCount", { count: selectedSearchSectionIds.value.length })
 
-    if (!debouncedKeyword.value.trim()) {
+    if (!isSearchIndexReady.value || !debouncedKeyword.value.trim()) {
         return t("view.searchScope", { scope: searchScopeText })
     }
 
@@ -795,6 +808,12 @@ onMounted(() => {
         })
     )
 
+    // 空闲期预热全库检索索引：模块网格与「本期新增」都不依赖它，
+    // 放到首帧之后构建，用户开始输入时索引已就绪。
+    void warmUpGlobalSearchService().then(() => {
+        isSearchIndexReady.value = true
+    })
+
     // URL 里带着对话标记时恢复对话态（浏览器后退 / 刷新回到原来的对话）。
     // 会话列表由 useDBChat 在创建时发起异步加载，这里等它落地再查表。
     void until(() => !isConversationLoading.value).then(() => restoreChatFromUrl())
@@ -879,7 +898,7 @@ onBeforeUnmount(() => {
                 <!-- 上段：内容贴住输入框（靠下显示），超出时内部滚动 -->
                 <section class="flex min-h-0 flex-1 flex-col">
                     <!-- 输入态：本地检索结果，贴住输入框 -->
-                    <div v-if="isComposing" class="db-scroll min-h-0 flex-1 overflow-y-auto">
+                    <ScrollArea v-if="isComposing" class="min-h-0 flex-1">
                         <div class="flex min-h-full flex-col justify-end">
                             <div class="mx-auto w-full max-w-7xl px-4 pb-4 md:px-6 lg:px-8">
                                 <div class="db-ask-panel">
@@ -888,8 +907,18 @@ onBeforeUnmount(() => {
                                         <p class="text-xs text-base-content/45">{{ searchStatusText }}</p>
                                     </div>
 
+                                    <!-- 索引预热中：只占位，不提前给出「无结果」 -->
+                                    <ul v-if="!isSearchIndexReady" class="db-scroll max-h-[min(40vh,18rem)] overflow-y-auto">
+                                        <li v-for="index in 3" :key="index" class="db-ask-result">
+                                            <span class="min-w-0 flex-1">
+                                                <span class="db-skeleton-bar block h-3.5 w-40" />
+                                                <span class="db-skeleton-bar mt-1.5 block h-2.5 w-24" />
+                                            </span>
+                                        </li>
+                                    </ul>
+
                                     <!-- 命中结果 -->
-                                    <ul v-if="visibleSearchOptions.length" class="db-scroll max-h-[min(40vh,18rem)] overflow-y-auto">
+                                    <ul v-else-if="visibleSearchOptions.length" class="db-scroll max-h-[min(40vh,18rem)] overflow-y-auto">
                                         <li v-for="option in visibleSearchOptions" :key="option.id">
                                             <button
                                                 type="button"
@@ -903,7 +932,9 @@ onBeforeUnmount(() => {
                                                     </span>
                                                 </span>
                                                 <span class="db-ask-result-path">{{ getItemPathLabel(option.path) }}</span>
-                                                <span class="shrink-0 border border-base-content/15 px-1.5 py-0.5 text-[10px] text-base-content/55">
+                                                <span
+                                                    class="shrink-0 border border-base-content/15 px-1.5 py-0.5 text-[10px] text-base-content/55"
+                                                >
                                                     {{ option.typeLabel }}
                                                 </span>
                                             </button>
@@ -912,17 +943,17 @@ onBeforeUnmount(() => {
 
                                     <p v-else class="px-1 py-4 text-sm text-base-content/55">
                                         {{ $t("view.noResultEntries") }}
-                                        <span class="mt-1.5 block text-xs text-base-content/40">Enter 转交资料检索 · Shift + Enter 换行</span>
+                                        <span class="mt-1.5 block text-xs text-base-content/40">Enter 询问AI · Shift + Enter 换行</span>
                                     </p>
 
                                     <p v-if="hiddenResultCount" class="db-ask-more">还有 {{ hiddenResultCount }} 条，继续输入可缩小范围</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </ScrollArea>
 
                     <!-- 浏览态：模块分类过滤条 + 模块卡片网格（过滤条在列表顶部，实时过滤） -->
-                    <div v-else class="db-scroll min-h-0 flex-1 overflow-y-auto">
+                    <ScrollArea v-else class="min-h-0 flex-1">
                         <div class="flex min-h-full flex-col justify-end">
                             <div class="db-rise mx-auto w-full max-w-7xl px-4 pt-6 pb-4 md:px-6 lg:px-8">
                                 <!-- 模块分类过滤条：改选立刻过滤下方模块列表 -->
@@ -974,7 +1005,7 @@ onBeforeUnmount(() => {
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </ScrollArea>
                 </section>
 
                 <!-- 中段：输入框（flex-none，始终位于页面正中） -->
@@ -984,8 +1015,8 @@ onBeforeUnmount(() => {
                             v-model="searchKeyword"
                             :busy="chatBusy"
                             placeholder="今天想查点什么？输入关键词检索资料库，或直接向 AI 提问"
-                            hint="Enter 转交资料检索 · Shift + Enter 换行"
-                            submit-label="转交资料检索"
+                            hint="Enter 询问AI · Shift + Enter 换行"
+                            submit-label="询问AI"
                             @submit="handleSubmit"
                             @stop="interruptChat"
                             @enter-chat="handleEnterChat"
@@ -996,7 +1027,7 @@ onBeforeUnmount(() => {
                 <!-- 下段：内容贴住页面底部（靠下显示） -->
                 <section class="flex min-h-0 flex-1 flex-col">
                     <!-- 浏览态：本期新增（展开时高度在段内撑开，不影响输入框位置） -->
-                    <div v-if="showModuleFilter" class="db-scroll db-latest-scroll min-h-0 flex-1 overflow-y-auto">
+                    <ScrollArea v-if="showModuleFilter" class="min-h-0 flex-1">
                         <div class="flex min-h-full flex-col justify-end">
                             <div class="db-rise mx-auto w-full max-w-7xl px-4 pb-5 pt-4 md:px-6 lg:px-8">
                                 <div
@@ -1015,10 +1046,10 @@ onBeforeUnmount(() => {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </ScrollArea>
 
                     <!-- 输入态：留空（结果面板已经占据上段），保持输入框位置稳定 -->
-                    <div v-else class="db-scroll min-h-0 flex-1 overflow-y-auto" />
+                    <ScrollArea v-else class="min-h-0 flex-1" />
                 </section>
             </template>
         </div>

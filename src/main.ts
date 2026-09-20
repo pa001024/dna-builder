@@ -129,6 +129,22 @@ async function bootstrap() {
     requestAnimationFrame(() => {
         void bootstrapRuntimeAssets()
     })
+
+    // 资料库外壳预热：外壳本身只有骨架屏，先把它取回来，
+    // 之后点进资料库时骨架屏才能当帧上屏，而不必先等一个 chunk 往返。
+    // 真实页（带整套游戏数据）仍在点击后才开始加载。
+    const prefetchDatabaseShell = () => {
+        void import("./views/DBViewShell.vue").catch(error => {
+            console.error("资料库外壳预热失败", error)
+        })
+    }
+
+    if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(prefetchDatabaseShell, { timeout: 3000 })
+    } else {
+        window.setTimeout(prefetchDatabaseShell, 1000)
+    }
+
     // 仅在非应用环境下注册 Service Worker
     if (!env.isApp) {
         void import("virtual:pwa-register")

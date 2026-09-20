@@ -3,8 +3,6 @@ import { useLocalStorage } from "@vueuse/core"
 import Fuse, { type FuseResultMatch } from "fuse.js"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { execScript } from "@/api/app"
-import DBImprDetailItem from "@/components/DBImprDetailItem.vue"
-import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { getImprEntryKey, getLocalizedImprEntriesByLanguage, type ImprEntry } from "@/data/d/impr"
 import { regionMap } from "@/data/d/region.data"
@@ -541,224 +539,243 @@ onBeforeUnmount(() => {
     }
 })
 
-useInitialScrollToSelectedItem({
-    selectedSelector: ".dbim-item-active",
-})
+/**
+ * 卡片行高（px）。
+ *
+ * 卡片内容固定为「来源/名称行 + 单行印象文本」，因此高度是常量；行高取桌面断点的实测值，
+ * 窄断点下卡片自然高度略矮，由列表按实测值拉平。
+ */
+const IMPR_CARD_HEIGHT = 74
+
+/** 带命中摘要时的行高（px）：主体高度 + 摘要区（mt-2 8px + 两行 39px）。 */
+const IMPR_SNIPPET_CARD_HEIGHT = 121
+
+/** 是否正在展示命中摘要；摘要只在此模式下出现，卡片也随之变高。 */
+const showsSnippet = computed(() => showFullTextSearch && searchKeyword.value.trim() !== "")
+
+/** 当前卡片行高估值。 */
+const imprCardHeight = computed(() => (showsSnippet.value ? IMPR_SNIPPET_CARD_HEIGHT : IMPR_CARD_HEIGHT))
+
+/** 选中条目在过滤结果中的下标；虚拟滚动靠它把选中项滚入视口，未选中为 -1。 */
+const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item => getImprEntryKey(item.entry) === selectedEntryKey.value))
 </script>
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 2"
-            :detail-open="Boolean(selectedEntry)"
-            @collapse="selectedEntry = null"
-        >
+        <SplitView :desktop-ratio="1 / 2" :detail-open="Boolean(selectedEntry)" @collapse="selectedEntry = null">
             <template #master>
-
-            <!-- 左侧列表面板 -->
-            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedEntry }">
-                <!-- 检索带：下划线搜索 + OCR + 过滤器开关方章 -->
-                <div class="flex-none space-y-3 border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
-                    <!-- 下划线搜索框 + OCR -->
-                    <div class="flex items-center gap-2">
-                        <div class="relative min-w-0 flex-1">
-                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                            <input
-                                v-model="searchKeyword"
-                                type="text"
-                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                                placeholder="搜索印象条目"
-                            />
-                            <span
-                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                            >
-                                {{ filteredEntries.length }}
-                            </span>
+                <!-- 左侧列表面板 -->
+                <div
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedEntry }"
+                >
+                    <!-- 检索带：下划线搜索 + OCR + 过滤器开关方章 -->
+                    <div class="flex-none space-y-3 border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <!-- 下划线搜索框 + OCR -->
+                        <div class="flex items-center gap-2">
+                            <div class="relative min-w-0 flex-1">
+                                <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                                <input
+                                    v-model="searchKeyword"
+                                    type="text"
+                                    class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                                    placeholder="搜索印象条目"
+                                />
+                                <span
+                                    class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                                >
+                                    {{ filteredEntries.length }}
+                                </span>
+                            </div>
+                            <button class="btn btn-sm btn-primary" :disabled="ocrRunning" @click="runOcrSearch">OCR</button>
+                            <label class="flex cursor-pointer select-none items-center gap-1 whitespace-nowrap">
+                                <input v-model="realtimeOcrEnabled" type="checkbox" class="toggle toggle-xs" />
+                                <span class="text-xs text-base-content/60">实时</span>
+                            </label>
                         </div>
-                        <button class="btn btn-sm btn-primary" :disabled="ocrRunning" @click="runOcrSearch">OCR</button>
-                        <label class="flex cursor-pointer select-none items-center gap-1 whitespace-nowrap">
-                            <input v-model="realtimeOcrEnabled" type="checkbox" class="toggle toggle-xs" />
-                            <span class="text-xs text-base-content/60">实时</span>
-                        </label>
+
+                        <!-- 过滤器开关方章 -->
+                        <div class="flex flex-wrap gap-1.5">
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showRegionFilter
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="toggleRegionFilterRow()"
+                            >
+                                地区
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showSourceFilter
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="toggleSourceFilterRow()"
+                            >
+                                来源
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showValueFilter
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="toggleValueFilterRow()"
+                            >
+                                五维
+                            </button>
+                        </div>
+
+                        <!-- OCR 识别结果 -->
+                        <div
+                            v-if="ocrResultText"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-xs wrap-break-word text-base-content/70"
+                        >
+                            {{ ocrResultText }}
+                        </div>
+
+                        <!-- 来源筛选 -->
+                        <div v-show="showSourceFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">来源</span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedSourceType === ''
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectSourceType('')"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="option in sourceTypeOptions"
+                                :key="option.value"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedSourceType === option.value
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectSourceType(option.value)"
+                            >
+                                {{ option.label }}
+                            </button>
+                        </div>
+
+                        <!-- 地区筛选 -->
+                        <div v-show="showRegionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">地区</span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedRegionId === ''
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectRegion('')"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="region in regionOptions"
+                                :key="region.value"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedRegionId === region.value
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectRegion(region.value)"
+                            >
+                                {{ region.label }}
+                            </button>
+                        </div>
+
+                        <!-- 子区域筛选 -->
+                        <div v-show="showRegionFilter && selectedRegionId" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">子区域</span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedSubRegionId === ''
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectSubRegion('')"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="subRegion in subRegionOptions"
+                                :key="subRegion.value"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedSubRegionId === subRegion.value
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectSubRegion(subRegion.value)"
+                            >
+                                {{ $t(subRegion.label) }}
+                            </button>
+                        </div>
+
+                        <!-- 五维筛选 -->
+                        <div v-show="showValueFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">五维</span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedValueType === ''
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectValueType('')"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="type in IMPRESSION_TYPES"
+                                :key="type"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedValueType === type
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectValueType(type)"
+                            >
+                                {{ $t(getImprType(type)) }}
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- 过滤器开关方章 -->
-                    <div class="flex flex-wrap gap-1.5">
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showRegionFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleRegionFilterRow()"
-                        >
-                            地区
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showSourceFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleSourceFilterRow()"
-                        >
-                            来源
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showValueFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleValueFilterRow()"
-                        >
-                            五维
-                        </button>
-                    </div>
-
-                    <!-- OCR 识别结果 -->
-                    <div
-                        v-if="ocrResultText"
-                        class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-xs wrap-break-word text-base-content/70"
+                    <VirtualList
+                        class="flex-1"
+                        :items="filteredEntries"
+                        :item-height="imprCardHeight"
+                        :item-key="item => getImprEntryKey(item.entry)"
+                        :active-index="selectedEntryIndex"
+                        v-slot="{ item, index, animate, rowHeight }"
                     >
-                        {{ ocrResultText }}
-                    </div>
-
-                    <!-- 来源筛选 -->
-                    <div v-show="showSourceFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">来源</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedSourceType === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectSourceType('')"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="option in sourceTypeOptions"
-                            :key="option.value"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedSourceType === option.value
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectSourceType(option.value)"
-                        >
-                            {{ option.label }}
-                        </button>
-                    </div>
-
-                    <!-- 地区筛选 -->
-                    <div v-show="showRegionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">地区</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedRegionId === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectRegion('')"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="region in regionOptions"
-                            :key="region.value"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedRegionId === region.value
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectRegion(region.value)"
-                        >
-                            {{ region.label }}
-                        </button>
-                    </div>
-
-                    <!-- 子区域筛选 -->
-                    <div v-show="showRegionFilter && selectedRegionId" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">子区域</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedSubRegionId === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectSubRegion('')"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="subRegion in subRegionOptions"
-                            :key="subRegion.value"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedSubRegionId === subRegion.value
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectSubRegion(subRegion.value)"
-                        >
-                            {{ $t(subRegion.label) }}
-                        </button>
-                    </div>
-
-                    <!-- 五维筛选 -->
-                    <div v-show="showValueFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">五维</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedValueType === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectValueType('')"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="type in IMPRESSION_TYPES"
-                            :key="type"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedValueType === type
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectValueType(type)"
-                        >
-                            {{ $t(getImprType(type)) }}
-                        </button>
-                    </div>
-                </div>
-
-                <ScrollArea class="flex-1">
-                    <div class="space-y-2 p-3">
                         <article
-                            v-for="(item, index) in filteredEntries"
-                            :key="getImprEntryKey(item.entry)"
-                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                            :class="
+                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
+                            :class="[
                                 isSelectedEntry(item.entry)
                                     ? 'dbim-item-active border-primary/70 bg-primary/10'
-                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
-                            "
-                            :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50',
+                                animate ? 'animate-ef-rise motion-reduce:animate-none' : '',
+                            ]"
+                            :style="{ minHeight: `${rowHeight}px`, animationDelay: `${Math.min(index * 30, 300)}ms` }"
                             @click="selectEntry(item.entry)"
                         >
                             <!-- 左侧主色强调条：选中时显现 -->
@@ -784,13 +801,13 @@ useInitialScrollToSelectedItem({
                                         </span>
                                         <CopyID :id="item.entry.sourceId" />
                                     </div>
-                                    <div class="mt-1.5 text-xs leading-relaxed wrap-break-word text-base-content/70">
+                                    <div class="mt-1.5 truncate text-xs leading-relaxed text-base-content/70">
                                         {{ item.entry.displayText }}
                                     </div>
                                     <!-- 搜索命中摘要 -->
                                     <div
                                         v-if="item.snippet && searchKeyword.trim() && showFullTextSearch"
-                                        class="mt-2 text-xs leading-relaxed wrap-break-word text-base-content/55"
+                                        class="mt-2 line-clamp-2 text-xs leading-relaxed wrap-break-word text-base-content/55"
                                     >
                                         <span>匹配：</span>
                                         <span v-if="item.snippet.prefixEllipsis">...</span>
@@ -827,26 +844,23 @@ useInitialScrollToSelectedItem({
                                 </div>
                             </div>
                         </article>
+                    </VirtualList>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-center text-[11px] tracking-wide text-base-content/50">
+                            共
+                            <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredEntries.length }}</b> 条印象
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredEntries.length }}</b> 条印象
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <div v-if="selectedEntry" class="min-h-0 flex-1 overflow-hidden">
-                <ScrollArea class="h-full">
-                    <DBImprDetailItem :key="selectedEntryKey" :entry="selectedEntry" />
-                </ScrollArea>
-            </div>
+                <div v-if="selectedEntry" class="min-h-0 flex-1 overflow-hidden">
+                    <ScrollArea class="h-full">
+                        <DBImprDetailItem :key="selectedEntryKey" :entry="selectedEntry" />
+                    </ScrollArea>
+                </div>
             </template>
         </SplitView>
     </div>

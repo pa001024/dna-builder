@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { charMap } from "@/data"
 import {
@@ -82,11 +81,29 @@ function getAccessoryRarity(accessory: AccessoryItem): number {
     return hasAccessoryRarity(accessory) ? accessory.rarity : 1
 }
 
+/**
+ * 列表卡片的固定主轴尺寸（px）：虚拟滚动按它切片，卡片高度必须与此一致。
+ * 必须是实测卡高的小数值——上千张卡按取整值累计会多出数百像素的滚动空白。
+ */
+const ACCESSORY_CARD_HEIGHT = 91
+
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedAccessoryKey = useSearchParam<string>("id", "")
 const selectedType = useSearchParam<"all" | AccessoryType>("tp", "all")
 const selectedRarity = useSearchParam<number>("rar", -1)
 const selectedUnlock = useSearchParam<string>("ul", "all")
+
+/**
+ * 当前选中项在过滤结果中的下标。
+ * 虚拟滚动下选中项不一定在 DOM 中，无法靠元素查询定位，改由下标驱动滚入视口。
+ */
+const selectedAccessoryIndex = computed(() => {
+    if (!selectedAccessoryKey.value) {
+        return null
+    }
+    const index = filteredAccessories.value.findIndex(item => `${item.accessoryType}:${item.id}` === selectedAccessoryKey.value)
+    return index === -1 ? null : index
+})
 
 /**
  * 合并角色饰品与武器饰品数据，并标记来源类型。
@@ -298,144 +315,142 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
     }
     return "accessory.typeSkin"
 }
-
-useInitialScrollToSelectedItem({ selectedSelector: ".dba-item-active" })
 </script>
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 2"
-            :detail-open="Boolean(selectedAccessory)"
-            @collapse="selectAccessory(null)"
-        >
+        <SplitView :desktop-ratio="1 / 2" :detail-open="Boolean(selectedAccessory)" @collapse="selectAccessory(null)">
             <template #master>
-
-            <!-- 左侧列表面板 -->
-            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedAccessory }">
-                <!-- 检索带：下划线搜索 + 计数 -->
-                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="$t('accessory.searchPlaceholder')"
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredAccessories.length }}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- 筛选条件：类型 / 稀有度 / 获取方式（方章 chip） -->
+                <!-- 左侧列表面板 -->
                 <div
-                    class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
-                    style="animation-delay: 0.05s"
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedAccessory }"
                 >
-                    <!-- 类型筛选 -->
-                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">TYPE</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedType === 'all'
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedType = 'all'"
-                        >
-                            {{ $t("accessory.typeAll") }}
-                        </button>
-                        <button
-                            v-for="accessoryType in accessoryTypes"
-                            :key="accessoryType"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedType === accessoryType
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedType = accessoryType"
-                        >
-                            {{ $t(getAccessoryTypeLabelKey(accessoryType)) }}
-                        </button>
+                    <!-- 检索带：下划线搜索 + 计数 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="$t('accessory.searchPlaceholder')"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredAccessories.length }}
+                            </span>
+                        </div>
                     </div>
 
-                    <!-- 稀有度筛选 -->
-                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">RARITY</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedRarity === -1
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedRarity = -1"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="rarity in allRarities"
-                            :key="rarity"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedRarity === rarity
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedRarity = rarity"
-                        >
-                            {{ getRarityName(rarity) }}
-                        </button>
+                    <!-- 筛选条件：类型 / 稀有度 / 获取方式（方章 chip） -->
+                    <div class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise" style="animation-delay: 0.05s">
+                        <!-- 类型筛选 -->
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">TYPE</span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedType === 'all'
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedType = 'all'"
+                            >
+                                {{ $t("accessory.typeAll") }}
+                            </button>
+                            <button
+                                v-for="accessoryType in accessoryTypes"
+                                :key="accessoryType"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedType === accessoryType
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedType = accessoryType"
+                            >
+                                {{ $t(getAccessoryTypeLabelKey(accessoryType)) }}
+                            </button>
+                        </div>
+
+                        <!-- 稀有度筛选 -->
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">RARITY</span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedRarity === -1
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedRarity = -1"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="rarity in allRarities"
+                                :key="rarity"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedRarity === rarity
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedRarity = rarity"
+                            >
+                                {{ getRarityName(rarity) }}
+                            </button>
+                        </div>
+
+                        <!-- 获取方式筛选 -->
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">UNLOCK</span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedUnlock === 'all'
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedUnlock = 'all'"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="unlockMethod in allUnlockMethods"
+                                :key="unlockMethod"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedUnlock === unlockMethod
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedUnlock = unlockMethod"
+                            >
+                                {{ $t(getAccessoryUnlockLabelKey(unlockMethod)) }}
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- 获取方式筛选 -->
-                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">UNLOCK</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedUnlock === 'all'
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedUnlock = 'all'"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="unlockMethod in allUnlockMethods"
-                            :key="unlockMethod"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedUnlock === unlockMethod
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedUnlock = unlockMethod"
-                        >
-                            {{ $t(getAccessoryUnlockLabelKey(unlockMethod)) }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 饰品列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="space-y-2 p-3">
+                    <!-- 饰品列表：卡片等高，走虚拟滚动，DOM 只保留可视区内的条目 -->
+                    <VirtualList
+                        class="flex-1"
+                        :items="filteredAccessories"
+                        :item-height="ACCESSORY_CARD_HEIGHT"
+                        :item-key="accessory => `${accessory.accessoryType}:${accessory.id}`"
+                        :active-index="selectedAccessoryIndex"
+                        v-slot="{ item: accessory, index, animate }"
+                    >
                         <article
-                            v-for="(accessory, index) in filteredAccessories"
-                            :key="`${accessory.accessoryType}:${accessory.id}`"
-                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                            :class="
+                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
+                            :class="[
                                 selectedAccessoryKey === `${accessory.accessoryType}:${accessory.id}`
                                     ? 'dba-item-active border-primary/70 bg-primary/10'
-                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
-                            "
+                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50',
+                                animate ? 'animate-ef-rise motion-reduce:animate-none' : '',
+                            ]"
                             :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
                             @click="selectAccessory(accessory)"
                         >
@@ -501,25 +516,21 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dba-item-active" })
                                 </div>
                             </div>
                         </article>
+                    </VirtualList>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5 text-center">
+                        <p class="text-[11px] tracking-wide text-base-content/50">
+                            {{ $t("accessory.totalCount", { count: filteredAccessories.length }) }}
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5 text-center">
-                    <p class="text-[11px] tracking-wide text-base-content/50">
-                        {{ $t("accessory.totalCount", { count: filteredAccessories.length }) }}
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedAccessory" class="min-h-0 min-w-0 flex-1">
-                <DBAccessoryDetailItem :key="selectedAccessoryKey" :accessory="selectedAccessory" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedAccessory" class="min-h-0 min-w-0 flex-1">
+                    <DBAccessoryDetailItem :key="selectedAccessoryKey" :accessory="selectedAccessory" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

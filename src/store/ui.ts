@@ -52,8 +52,9 @@ export const useUIStore = defineStore("ui", {
                     icon: "ri:hammer-line",
                 },
                 {
+                    // 魔灵地图是一级独立路由，不挂在 /db 下（否则 /db 与地图标签会同时高亮）
                     name: "map-local",
-                    path: "/map-local",
+                    path: "/map-tool",
                     icon: "ri:map-2-line",
                 },
                 {

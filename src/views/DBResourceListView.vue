@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { resourceData } from "@/data/d/resource.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
+
+/** 资源卡片高度的估算下界（px）：实测自然高度 130.5，首帧后由 VirtualList 按实测值校正。 */
+const RESOURCE_CARD_HEIGHT = 130
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedResourceId = useSearchParam<number>("id", 0)
@@ -28,7 +30,8 @@ const filteredResources = computed(() => {
     })
 })
 
-useInitialScrollToSelectedItem({ selectedSelector: ".dbr-item-active" })
+/** 选中资源在结果集中的下标：虚拟化后选中项不一定在 DOM 里，需由它滚入视口。 */
+const selectedResourceIndex = computed(() => filteredResources.value.findIndex(resource => resource.id === selectedResourceId.value))
 
 /**
  * 收起资源详情面板。
@@ -40,51 +43,51 @@ function closeSelectedResource(): void {
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 2"
-            :detail-open="Boolean(selectedResource)"
-            @collapse="closeSelectedResource"
-        >
+        <SplitView :desktop-ratio="1 / 2" :detail-open="Boolean(selectedResource)" @collapse="closeSelectedResource">
             <template #master>
-
-            <!-- 左侧列表面板 -->
-            <div
-                class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
-                :class="{ 'sm:border-r border-base-content/10': selectedResource }"
-            >
-                <!-- 检索带：下划线搜索 + 计数 -->
+                <!-- 左侧列表面板 -->
                 <div
-                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedResource }"
                 >
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="$t('resource.searchPlaceholder')"
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredResources.length }}
-                        </span>
+                    <!-- 检索带：下划线搜索 + 计数 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="$t('resource.searchPlaceholder')"
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredResources.length }}
+                            </span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- 资源列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2 p-3">
+                    <!-- 资源列表 -->
+                    <VirtualList
+                        class="flex-1"
+                        :items="filteredResources"
+                        :item-height="RESOURCE_CARD_HEIGHT"
+                        :item-key="resource => resource.id"
+                        :min-column-width="120"
+                        :active-index="selectedResourceIndex"
+                        columns="auto"
+                        v-slot="{ item: resource, index, animate, rowHeight }"
+                    >
                         <article
-                            v-for="(resource, index) in filteredResources"
-                            :key="resource.id"
-                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                            :class="
+                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
+                            :class="[
                                 selectedResourceId === resource.id
                                     ? 'dbr-item-active border-primary/70 bg-primary/10'
-                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
-                            "
-                            :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50',
+                                animate ? 'animate-ef-rise motion-reduce:animate-none' : '',
+                            ]"
+                            :style="{ minHeight: `${rowHeight}px`, animationDelay: `${Math.min(index * 30, 300)}ms` }"
                             @click="selectedResourceId = resource.id"
                         >
                             <!-- 左侧主色强调条：选中时显现 -->
@@ -109,29 +112,29 @@ function closeSelectedResource(): void {
                                     >
                                         {{ $t(resource.name) }}
                                     </div>
-                                    <div class="mt-1 text-[11px] tabular-nums text-base-content/45">{{ $t("resource.id") }}: {{ resource.id }}</div>
+                                    <div class="mt-1 text-[11px] tabular-nums text-base-content/45">
+                                        {{ $t("resource.id") }}: {{ resource.id }}
+                                    </div>
                                 </div>
                             </div>
                         </article>
+                    </VirtualList>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-[11px] tracking-wide text-base-content/50">
+                            共
+                            <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredResources.length }}</b>
+                            个资源
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredResources.length }}</b> 个资源
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedResource" class="min-h-0 min-w-0 flex-1">
-                <DBResourceDetailItem :key="selectedResourceId" :resource="selectedResource" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedResource" class="min-h-0 min-w-0 flex-1">
+                    <DBResourceDetailItem :key="selectedResourceId" :resource="selectedResource" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

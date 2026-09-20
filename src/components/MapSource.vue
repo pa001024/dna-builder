@@ -47,7 +47,7 @@ const mapSources = computed<ResourceSourceGroup[]>(() => {
  */
 function getMapLocalLink(regionId: number): RouteLocationRaw {
     return {
-        name: "map-local",
+        name: "map-tool",
         query: {
             regionId: String(regionId),
             rid: String(props.resource.id),

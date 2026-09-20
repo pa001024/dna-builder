@@ -72,6 +72,9 @@ export interface GlobalSearchPageItem {
 
 /**
  * 全局数据库搜索服务：负责构建索引并提供查询能力。
+ *
+ * 构造函数内部会为全库条目预计算拼音，是纯 CPU 的同步开销，
+ * 因此不要直接 `new`：一律走 {@link getGlobalSearchService} 复用同一份索引。
  */
 export class GlobalSearchService {
     private readonly fuse: Fuse<DBSearchEntry>
@@ -538,7 +541,7 @@ export class GlobalSearchService {
                     title: "魔灵地图",
                     subtitle: "地图点位与刷新查看",
                     typeLabel: t("database.map"),
-                    path: "/db/map-local",
+                    path: "/map-tool",
                 },
                 ["魔灵地图", "地图", "刷新点位", "map-local"]
             )
@@ -929,4 +932,64 @@ export class GlobalSearchService {
         }
         return typeLabel === t("database.npc") ? 1 : 0
     }
+}
+
+/** 空闲回调的最长等待时间（ms）：超时后即使不空闲也要建索引，保证首次检索可用 */
+const SEARCH_INDEX_IDLE_TIMEOUT = 1200
+/** 无 requestIdleCallback 时的预热延迟（ms）：让首帧先渲染 */
+const SEARCH_INDEX_FALLBACK_DELAY = 200
+
+/** 全库检索索引：构建开销大，进程内只建一次 */
+let sharedSearchService: GlobalSearchService | null = null
+/** 预热任务：重复调用共享同一个 Promise */
+let warmUpPromise: Promise<GlobalSearchService> | null = null
+
+/**
+ * 获取全库检索服务，首次调用时构建索引。
+ * @returns 进程内唯一的检索服务实例
+ */
+export function getGlobalSearchService(): GlobalSearchService {
+    if (!sharedSearchService) {
+        sharedSearchService = new GlobalSearchService()
+    }
+
+    return sharedSearchService
+}
+
+/**
+ * 读取已构建的检索服务，尚未构建时返回 null 且不触发构建。
+ * @returns 检索服务实例或 null
+ */
+export function peekGlobalSearchService(): GlobalSearchService | null {
+    return sharedSearchService
+}
+
+/**
+ * 在浏览器空闲期预构建检索索引，避免首次检索时同步构建阻塞输入。
+ *
+ * 入口页面在首帧渲染之后调用即可：索引构建与页面展示无关，
+ * 提前建好能让用户开始输入时检索即时可用。
+ * @returns 索引就绪后 resolve 的服务实例
+ */
+export function warmUpGlobalSearchService(): Promise<GlobalSearchService> {
+    if (sharedSearchService) {
+        return Promise.resolve(sharedSearchService)
+    }
+
+    if (!warmUpPromise) {
+        warmUpPromise = new Promise<GlobalSearchService>(resolve => {
+            const build = () => {
+                resolve(getGlobalSearchService())
+            }
+
+            if (typeof requestIdleCallback === "function") {
+                requestIdleCallback(build, { timeout: SEARCH_INDEX_IDLE_TIMEOUT })
+                return
+            }
+
+            window.setTimeout(build, SEARCH_INDEX_FALLBACK_DELAY)
+        })
+    }
+
+    return warmUpPromise
 }

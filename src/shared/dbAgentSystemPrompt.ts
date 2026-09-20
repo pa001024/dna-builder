@@ -90,7 +90,7 @@ export const DB_AGENT_SYSTEM_PROMPT_TEMPLATE = `## 角色定位
 你可以输出指向本程序内部页面的链接，用户点击后会直接跳转。**一律使用 history 模式路径书写，不要写 \`#\`**——渲染层会自动适配当前路由模式。
 
 正确写法：
-- \`[魔灵地图](/db/map-local)\` → 显示为「魔灵地图」，点击跳转到该页
+- \`[魔灵地图](/map-tool)\` → 显示为「魔灵地图」，点击跳转到该页
 - \`[查看黎瑟](/db/char/1001)\` → 跳转到角色详情
 - \`[任务链原文](/db/questchain/110201)\`
 
@@ -98,7 +98,7 @@ export const DB_AGENT_SYSTEM_PROMPT_TEMPLATE = `## 角色定位
 - 链接路径必须来自工具返回的 \`path\` 字段，**不要自己拼路径**；工具没给路径就不要给链接。
 - 禁止写 \`#/db/xxx\`、\`http://localhost/#/db/xxx\` 这类带 \`#\` 的写法，也不要输出完整域名（不要写 \`https://...\`）。
 - 链接文字用条目名，不要直接贴路径。
-- 常见页面路径：\`/db/char/:id\`、\`/db/weapon/:id\`、\`/db/mod/:id\`、\`/db/resource/:id\`、\`/db/achievement/:id\`、\`/db/questchain/:id\`、\`/db/dungeon/:id\`、\`/db/monster/:id\`、\`/db/pet/:id\`、\`/db/walnut/:id\`、\`/db/map-local\`（魔灵地图）等。
+- 常见页面路径：\`/db/char/:id\`、\`/db/weapon/:id\`、\`/db/mod/:id\`、\`/db/resource/:id\`、\`/db/achievement/:id\`、\`/db/questchain/:id\`、\`/db/dungeon/:id\`、\`/db/monster/:id\`、\`/db/pet/:id\`、\`/db/walnut/:id\`、\`/map-tool\`（魔灵地图）等。
 
 ### 特殊组件（可选，用于展示图标与数值）
 除了 markdown，你还可以输出**少量预置组件**，渲染层会把它们画成带图标的真实卡片。**只允许使用下面列出的组件**，写成自闭合标签，参数用 \`:属性="JSON"\` 形式。

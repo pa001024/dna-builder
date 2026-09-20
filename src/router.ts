@@ -247,6 +247,7 @@ const routes: readonly RouteRecordRaw[] = [
         beforeEnter: () => setMinSize(360, 430),
     },
     {
+        // 魔灵地图：一级独立路由（侧边栏「地图」标签直接指向这里）
         name: "map-tool",
         path: "/map-tool",
         component: () => import("./components/MapTool.vue"),
@@ -259,7 +260,9 @@ const routes: readonly RouteRecordRaw[] = [
             {
                 name: "database",
                 path: "",
-                component: () => import("./views/DBView.vue"),
+                // 走外壳加载：外壳依赖极轻，先绘制骨架屏，再异步载入带整套游戏数据的真实页面。
+                // 外壳 chunk 由 main.ts 在启动后空闲期预热，点进资料库时骨架屏可以当帧上屏。
+                component: () => import("./views/DBViewShell.vue"),
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
@@ -528,10 +531,9 @@ const routes: readonly RouteRecordRaw[] = [
                 beforeEnter: () => setMinSize(320, 360),
             },
             {
-                name: "map-local",
+                // 旧地址兼容：魔灵地图已独立为一级路由 /map-tool，这里重定向以保证 URL 归一化（高亮、深链参数都跟着走）
                 path: "map-local",
-                component: () => import("./views/DBMapLocalView.vue"),
-                beforeEnter: () => setMinSize(360, 430),
+                redirect: to => ({ path: "/map-tool", query: to.query, hash: to.hash }),
             },
             {
                 name: "map-detail",

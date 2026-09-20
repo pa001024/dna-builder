@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import Fuse, { type FuseResultMatch } from "fuse.js"
 import { computed } from "vue"
-import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledCharHelper } from "@/data"
 import npcData, { type NPC, npcMap } from "@/data/d/npc.data"
@@ -405,112 +404,137 @@ function selectNpc(npc: NPC | null) {
     selectedNpcId.value = npc?.id || 0
 }
 
-useInitialScrollToSelectedItem({ selectedSelector: ".dbn-item-active" })
+/**
+ * 卡片行高（px）。
+ *
+ * 卡片内容分四档（无元信息 52 / 有头像 70 / 有徽标 74），虚拟滚动要求同行等高，
+ * 因此统一拉到最高档；元信息行在卡片内被约束为单行（不换行、超出裁切），
+ * 这样卡片高度不随列表面板宽度变化，行高才能是常量。
+ */
+const NPC_CARD_HEIGHT = 74
+
+/** 全文搜索模式下的行高（px）：主体高度 + 摘要区（mt-2 8px + 两行 39px）。 */
+const NPC_FTS_CARD_HEIGHT = 121
+
+/** 是否正在展示对话摘要；摘要只在此模式下出现，卡片也随之变高。 */
+const showsSnippet = computed(() => showFullTextSearch.value && searchKeyword.value.trim() !== "")
+
+/** 当前卡片行高。 */
+const npcCardHeight = computed(() => (showsSnippet.value ? NPC_FTS_CARD_HEIGHT : NPC_CARD_HEIGHT))
+
+/** 选中 NPC 在过滤结果中的下标；虚拟滚动靠它把选中项滚入视口，未选中为 -1。 */
+const selectedNpcIndex = computed(() => filteredNpcs.value.findIndex(result => result.npc.id === selectedNpcId.value))
 </script>
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 3"
-            :detail-open="Boolean(selectedNpc)"
-            @collapse="selectNpc(null)"
-        >
+        <SplitView :desktop-ratio="1 / 3" :detail-open="Boolean(selectedNpc)" @collapse="selectNpc(null)">
             <template #master>
-
-            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedNpc }">
-                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
                 <div
-                    class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise"
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedNpc }"
                 >
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            :placeholder="showFullTextSearch ? '全文搜索 NPC/对话内容（不支持拼音）...' : '搜索 NPC ID/名称（支持拼音）...'"
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredNpcs.length }}
-                        </span>
-                    </div>
-
-                    <!-- 过滤器开关方章 -->
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showImprCheckOnly
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="showImprCheckOnly = !showImprCheckOnly"
-                        >
-                            印象检定
-                        </button>
-
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showImprIncreaseOnly
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="showImprIncreaseOnly = !showImprIncreaseOnly"
-                        >
-                            印象增加
-                        </button>
-
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showFullTextSearch
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="showFullTextSearch = !showFullTextSearch"
-                        >
-                            全文搜索
-                        </button>
-
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showDialogueOnly
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="showDialogueOnly = !showDialogueOnly"
-                        >
-                            仅对话
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="space-y-2 p-3">
-                        <!-- 空状态 -->
-                        <div v-if="filteredNpcs.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
-                            <Icon icon="ri:user-search-line" class="mb-4 h-12 w-12 opacity-40" />
-                            <p class="text-sm">未找到匹配的 NPC</p>
+                    <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                :placeholder="
+                                    showFullTextSearch ? '全文搜索 NPC/对话内容（不支持拼音）...' : '搜索 NPC ID/名称（支持拼音）...'
+                                "
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
+                            >
+                                {{ filteredNpcs.length }}
+                            </span>
                         </div>
+
+                        <!-- 过滤器开关方章 -->
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showImprCheckOnly
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="showImprCheckOnly = !showImprCheckOnly"
+                            >
+                                印象检定
+                            </button>
+
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showImprIncreaseOnly
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="showImprIncreaseOnly = !showImprIncreaseOnly"
+                            >
+                                印象增加
+                            </button>
+
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showFullTextSearch
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="showFullTextSearch = !showFullTextSearch"
+                            >
+                                全文搜索
+                            </button>
+
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showDialogueOnly
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="showDialogueOnly = !showDialogueOnly"
+                            >
+                                仅对话
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 列表 -->
+                    <div
+                        v-if="filteredNpcs.length === 0"
+                        class="flex flex-1 flex-col items-center justify-center gap-4 text-base-content/45"
+                    >
+                        <Icon icon="ri:user-search-line" class="h-12 w-12 opacity-40" />
+                        <p class="text-sm">未找到匹配的 NPC</p>
+                    </div>
+                    <VirtualList
+                        v-else
+                        class="flex-1"
+                        :items="filteredNpcs"
+                        :item-height="npcCardHeight"
+                        :item-key="result => result.npc.id"
+                        :active-index="selectedNpcIndex"
+                        v-slot="{ item: npcResult, index, animate }"
+                    >
                         <article
-                            v-for="(npcResult, index) in filteredNpcs"
-                            :key="npcResult.npc.id"
-                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                            :class="
+                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
+                            :class="[
                                 selectedNpcId === npcResult.npc.id
                                     ? 'dbn-item-active border-primary/70 bg-primary/10'
-                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
-                            "
-                            :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50',
+                                animate ? 'animate-ef-rise motion-reduce:animate-none' : '',
+                            ]"
+                            :style="{ minHeight: `${npcCardHeight}px`, animationDelay: `${Math.min(index * 30, 300)}ms` }"
                             @click="selectNpc(npcResult.npc)"
                         >
                             <!-- 左侧主色强调条：选中时显现 -->
@@ -537,7 +561,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbn-item-active" })
                                                 {{ $t(npcResult.npc.name || `NPC ${npcResult.npc.id}`) }}
                                             </div>
 
-                                            <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
+                                            <div
+                                                class="mt-1.5 flex items-center gap-x-2 overflow-hidden whitespace-nowrap text-[11px] text-base-content/55"
+                                            >
                                                 <span v-if="npcResult.npc.camp">{{ npcResult.npc.camp }}</span>
                                                 <span v-if="npcResult.npc.type">{{ npcResult.npc.type }}</span>
                                                 <span
@@ -563,13 +589,15 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbn-item-active" })
                                             >
                                                 {{ npcResult.npc.icon }}
                                             </span>
-                                            <span class="font-mono text-[10px] tabular-nums text-base-content/35">ID: {{ npcResult.npc.id }}</span>
+                                            <span class="font-mono text-[10px] tabular-nums text-base-content/35"
+                                                >ID: {{ npcResult.npc.id }}</span
+                                            >
                                         </div>
                                     </div>
 
                                     <div
-                                        v-if="showFullTextSearch && searchKeyword.trim() && npcResult.snippet"
-                                        class="mt-2 text-xs leading-relaxed text-base-content/70"
+                                        v-if="showsSnippet && npcResult.snippet"
+                                        class="mt-2 line-clamp-2 text-xs leading-relaxed text-base-content/70"
                                     >
                                         <span class="text-base-content/45">匹配：</span>
                                         <span v-if="npcResult.snippet.prefixEllipsis">...</span>
@@ -594,25 +622,21 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbn-item-active" })
                                 </div>
                             </div>
                         </article>
+                    </VirtualList>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-center text-[11px] tracking-wide text-base-content/50">
+                            共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredNpcs.length }}</b> 个 NPC
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredNpcs.length }}</b> 个 NPC
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedNpc" class="min-h-0 min-w-0 flex-2">
-                <DBNpcDetailItem :key="selectedNpc.id" :npc="selectedNpc" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedNpc" class="min-h-0 min-w-0 flex-2">
+                    <DBNpcDetailItem :key="selectedNpc.id" :npc="selectedNpc" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

@@ -9,6 +9,7 @@ describe("isInternalSitePath", () => {
     })
 
     it("应识别其它站内功能页", () => {
+        expect(isInternalSitePath("/map-tool")).toBe(true)
         expect(isInternalSitePath("/setting")).toBe(true)
         expect(isInternalSitePath("/points-mall")).toBe(true)
     })
@@ -28,6 +29,7 @@ describe("isInternalSitePath", () => {
     it("带 query 或 hash 时仍应正确识别", () => {
         expect(isInternalSitePath("/db/char?id=1")).toBe(true)
         expect(isInternalSitePath("/db/char#top")).toBe(true)
+        expect(isInternalSitePath("/map-tool?regionId=1001&subRegionId=100101")).toBe(true)
     })
 
     it("不应把前缀相似的路径误判为站内", () => {
@@ -60,10 +62,12 @@ describe("isHashHistory", () => {
 describe("toRouterHref", () => {
     it("hash 模式下应补上 # 前缀", () => {
         expect(toRouterHref("/db/map-local", true)).toBe("#/db/map-local")
+        expect(toRouterHref("/map-tool", true)).toBe("#/map-tool")
     })
 
     it("history 模式下应保持原样", () => {
         expect(toRouterHref("/db/map-local", false)).toBe("/db/map-local")
+        expect(toRouterHref("/map-tool", false)).toBe("/map-tool")
     })
 
     it("外链不应被改写", () => {
@@ -79,6 +83,7 @@ describe("parseSiteRoute", () => {
     it("应解析出站内路由路径", () => {
         expect(parseSiteRoute("/db/map-local")).toBe("/db/map-local")
         expect(parseSiteRoute("/db/char/1001")).toBe("/db/char/1001")
+        expect(parseSiteRoute("/map-tool?regionId=1001")).toBe("/map-tool?regionId=1001")
     })
 
     it("应容错模型多写的 # 前缀", () => {

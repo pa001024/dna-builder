@@ -12,6 +12,7 @@ const mobileDrawerOpen = ref(false)
 
 const UI = useUIStore()
 const [expand, setExpand] = useState(UI, "sidebarExpand")
+
 watchEffect(() => {
     if (target.value) gsap.to(target.value, { duration: 0.3, width: expand.value ? "13rem" : "3.5rem", ease: "back" })
 })

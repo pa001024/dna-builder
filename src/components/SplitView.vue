@@ -39,9 +39,22 @@ let startCoord = 0
 let startPx = 0
 let dragMoved = false
 
+/** 拖动期间待写入的列表面板像素；用 rAF 合帧，一次指针移动不落一次样式写。 */
+let pendingPx: number | null = null
+let dragFrame = 0
+
+/** 当前是否横排（桌面，水平拖动改宽度）。只在容器尺寸变化时读一次真实 flex-direction 刷新。 */
+const rowLayout = ref(true)
+
+/** 容器主轴尺寸（px）。只由 ResizeObserver 回调写入；渲染与拖动路径一律读缓存，避免强制同步布局。 */
+const mainPx = ref(0)
+
 /**
- * 当前实际布局方向：以容器的真实 flex-direction 为准（与 CSS 断点同源），
+ * 读取容器真实布局方向：以 computed flex-direction 为准（与 CSS 断点同源），
  * row = 桌面横排（水平拖动改宽度），col = 移动竖排（竖直拖动改高度）。
+ *
+ * 只在 ResizeObserver 回调里调用：方向由宽度决定，宽度一变必然触发回调，
+ * 因此无需（也不能）在渲染或指针移动路径上读 computed style——那会强制同步样式计算。
  * @returns "row" | "col"
  */
 function axis(): "row" | "col" {
@@ -50,37 +63,12 @@ function axis(): "row" | "col" {
     return getComputedStyle(root).flexDirection === "row" ? "row" : "col"
 }
 
-/** 是否横排。 */
-function isRow(): boolean {
-    return axis() === "row"
-}
-
 /**
  * 当前方向下的默认占比：桌面取 desktopRatio，移动端取 1/3（列表:详情=1:2）。
  * @returns 默认列表面板占比
  */
 function defaultMasterShare(): number {
-    return isRow() ? props.desktopRatio : MOBILE_MASTER_SHARE
-}
-
-/** 最近一次实测到的容器主轴尺寸；测量失败时用其兜底，避免面板首帧为 0。 */
-let lastMain = 0
-
-/**
- * 取容器的当前主轴长度；失败时回退最近一次实测值，再回退兜底值 700。
- * @returns 主轴像素
- */
-function mainSize(): number {
-    const root = rootRef.value
-    let main = 0
-    if (root) {
-        main = isRow() ? root.clientWidth : root.clientHeight
-    }
-    if (main > 0) {
-        lastMain = main
-        return main
-    }
-    return lastMain > 0 ? lastMain : 700
+    return rowLayout.value ? props.desktopRatio : MOBILE_MASTER_SHARE
 }
 
 /**
@@ -95,12 +83,15 @@ function shareToPx(share: number, main: number): number {
 
 /**
  * 依据方向默认占比把列表面板换算成主轴像素；展开详情或方向切换时同步调用。
- * 同步执行且带兜底尺寸，保证展开首帧列表面板即为正确像素、绝不隐形。
+ *
+ * 容器尺寸来自 ResizeObserver 缓存，首帧回调到达前 mainPx 为 0，此时不写值：
+ * masterStyle 退化为占满容器，等回调拿到真实尺寸再落位，
+ * 否则会拿错误尺寸算出占比并一直沿用。
  */
 function applyShareToPx(): void {
     if (!props.detailOpen) return
-    const main = mainSize()
-    if (main <= 0) return
+    const main = mainPx.value
+    if (!(main > 0)) return
     masterPx.value = shareToPx(defaultMasterShare(), main)
 }
 
@@ -115,53 +106,49 @@ watch(
     { immediate: true },
 )
 
-/** 列表面板主轴样式：展开时固定 px（内容不影响分隔位置），收起时占满整个容器。 */
-const masterStyle = computed(() => (props.detailOpen ? { flex: `0 0 ${Math.max(masterPx.value, MASTER_MIN_PX)}px` } : { flex: "1 1 0%" }))
+/** 列表面板主轴样式：展开且占比已落位时固定 px（内容不影响分隔位置），否则占满整个容器。 */
+const masterStyle = computed(() => (props.detailOpen && masterPx.value > 0 ? { flex: `0 0 ${masterPx.value}px` } : { flex: "1 1 0%" }))
 
 /** 详情面板始终吸收分隔条外的全部剩余空间。 */
 const detailStyle = computed(() => ({ flex: "1 1 0%" }))
 
-/** 当前是否横排（桌面，水平拖动调宽度）。随容器实际布局方向响应式更新。 */
-const rowLayout = ref(true)
+/** 用于无障碍展示的当前列表占比（百分比取整）。只读缓存尺寸，不触碰布局。 */
+const masterPercent = computed(() => (mainPx.value > 0 ? Math.round((masterPx.value / mainPx.value) * 100) : 50))
+
+/** 上一次回调观测到的横排标记；null 表示尚未收到过回调。 */
+let lastRow: boolean | null = null
 
 /**
- * 依据容器真实 flex-direction 刷新横排/竖排标记（与 CSS 断点同源）。
- */
-function refreshDirection(): void {
-    rowLayout.value = axis() === "row"
-}
-
-/** 用于无障碍展示的当前列表占比（百分比取整）。 */
-const masterPercent = computed(() => {
-    const main = mainSize()
-    return main > 0 ? Math.round((masterPx.value / main) * 100) : 50
-})
-
-let lastAxis: "row" | "col" | null = null
-let resizeTimer: ReturnType<typeof setTimeout> | null = null
-
-/**
- * 容器尺寸变化处理：
+ * 容器尺寸变化处理：先用回调自带的 contentRect 同步主轴尺寸（不读布局），再按需重算占比。
  * - 布局方向切换（row ↔ col）时按该方向默认占比重算 px；
+ * - 占比尚未落位时补算一次；
  * - 同一方向内保持当前 px（与 v-h-resize-for 语义一致，不写任何持久化存储）。
+ * @param entries ResizeObserver 回调条目；取最后一条（同一帧内多次变化以最新为准）
  */
-function handleResize(): void {
-    refreshDirection()
-    if (!props.detailOpen) return
-    const nowAxis = axis()
-    if (lastAxis !== null && nowAxis !== lastAxis) {
-        lastAxis = nowAxis
-        void applyShareToPx()
+function handleResize(entries: ResizeObserverEntry[]): void {
+    const entry = entries[entries.length - 1]
+    if (!entry) return
+    rowLayout.value = axis() === "row"
+    mainPx.value = rowLayout.value ? entry.contentRect.width : entry.contentRect.height
+
+    if (!props.detailOpen) {
+        lastRow = rowLayout.value
         return
     }
-    lastAxis = nowAxis
+    if (lastRow !== null && lastRow !== rowLayout.value) {
+        lastRow = rowLayout.value
+        applyShareToPx()
+        return
+    }
+    lastRow = rowLayout.value
+    if (masterPx.value <= 0) {
+        applyShareToPx()
+    }
 }
 
 let rootObserver: ResizeObserver | null = null
 
 onMounted(() => {
-    refreshDirection()
-    lastAxis = axis()
     if (typeof ResizeObserver !== "undefined" && rootRef.value) {
         rootObserver = new ResizeObserver(handleResize)
         rootObserver.observe(rootRef.value)
@@ -169,8 +156,8 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-    if (resizeTimer) clearTimeout(resizeTimer)
     rootObserver?.disconnect()
+    if (dragFrame) cancelAnimationFrame(dragFrame)
 })
 
 /**
@@ -180,6 +167,23 @@ function cleanupDragListeners(): void {
     window.removeEventListener("pointermove", onWindowPointerMove)
     window.removeEventListener("pointerup", onWindowPointerUp)
     window.removeEventListener("pointercancel", onWindowPointerCancel)
+}
+
+/** 把待写入的尺寸落到响应式状态（每帧最多一次）。 */
+function flushPendingPx(): void {
+    dragFrame = 0
+    if (pendingPx === null) return
+    masterPx.value = pendingPx
+    pendingPx = null
+}
+
+/** 立即落盘待写入的尺寸并取消挂起的帧；拖动结束时调用，避免最后一帧位移丢失。 */
+function commitPendingPx(): void {
+    if (dragFrame) {
+        cancelAnimationFrame(dragFrame)
+        dragFrame = 0
+    }
+    flushPendingPx()
 }
 
 /**
@@ -204,7 +208,7 @@ function onGutterPointerDown(event: PointerEvent): void {
     if (event.pointerType === "mouse" && event.button !== 0) return
     event.preventDefault()
     activePointerId = event.pointerId
-    startCoord = isRow() ? event.clientX : event.clientY
+    startCoord = rowLayout.value ? event.clientX : event.clientY
     startPx = masterPx.value
     dragMoved = false
     try {
@@ -219,18 +223,24 @@ function onGutterPointerDown(event: PointerEvent): void {
 
 /**
  * 拖动中：沿当前主轴（row=横向，col=竖向）按指针位移增减列表面板像素。
+ *
+ * 全程只读缓存尺寸，不读任何布局；尺寸变化按帧合批写入，
+ * 否则指针事件频率高于刷新率时会在一帧内反复「写样式 → 读布局」。
  * @param event 指针移动事件
  */
 function onWindowPointerMove(event: PointerEvent): void {
     if (event.pointerId !== activePointerId) return
-    const coord = isRow() ? event.clientX : event.clientY
+    const coord = rowLayout.value ? event.clientX : event.clientY
     const delta = coord - startCoord
     if (Math.abs(delta) > DRAG_THRESHOLD) {
         dragMoved = true
     }
-    const main = mainSize()
-    if (main <= 0) return
-    masterPx.value = Math.min(Math.max(startPx + delta, MASTER_MIN_PX), Math.max(main - DETAIL_MIN_PX, MASTER_MIN_PX))
+    const main = mainPx.value
+    if (!(main > 0)) return
+    pendingPx = Math.min(Math.max(startPx + delta, MASTER_MIN_PX), Math.max(main - DETAIL_MIN_PX, MASTER_MIN_PX))
+    if (!dragFrame) {
+        dragFrame = requestAnimationFrame(flushPendingPx)
+    }
 }
 
 /**
@@ -250,6 +260,7 @@ function finishDrag(event: PointerEvent, cancelled: boolean): void {
         }
     }
     activePointerId = null
+    commitPendingPx()
     suppressNextClick()
     if (cancelled) return
     if (dragMoved) {
@@ -273,20 +284,20 @@ function onWindowPointerCancel(event: PointerEvent): void {
  * @param event 键盘事件
  */
 function onGutterKeydown(event: KeyboardEvent): void {
-    const main = mainSize()
-    if (main <= 0) return
+    const main = mainPx.value
+    if (!(main > 0)) return
     const step = event.shiftKey ? 0.1 : 0.05
     let delta = 0
     switch (event.key) {
         case "ArrowRight":
         case "ArrowLeft": {
-            if (!isRow()) return
+            if (!rowLayout.value) return
             delta = (event.key === "ArrowRight" ? 1 : -1) * main * step
             break
         }
         case "ArrowDown":
         case "ArrowUp": {
-            if (isRow()) return
+            if (rowLayout.value) return
             delta = (event.key === "ArrowDown" ? 1 : -1) * main * step
             break
         }

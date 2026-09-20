@@ -20,7 +20,7 @@ import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
 import { getDungeonName, getDungeonType } from "@/utils/dungeon-utils"
-import { GlobalSearchService } from "@/utils/global-search"
+import { getGlobalSearchService } from "@/utils/global-search"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getQuestName } from "@/utils/quest-utils"
 import { DEFAULT_STORY_TEXT_CONFIG, replaceStoryPlaceholders, stripStoryTextTags } from "@/utils/story-text"
@@ -591,21 +591,6 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
 ]
 
 const MODULE_ADAPTER_MAP = new Map(MODULE_ADAPTERS.map(adapter => [adapter.id, adapter]))
-
-/** 全库检索服务：与首页共用同一份索引实现 */
-let globalSearchService: GlobalSearchService | null = null
-
-/**
- * 懒加载全库检索服务（索引构建有开销，首次调用时才创建）。
- * @returns 全局检索服务实例
- */
-function getGlobalSearchService(): GlobalSearchService {
-    if (!globalSearchService) {
-        globalSearchService = new GlobalSearchService()
-    }
-
-    return globalSearchService
-}
 
 /**
  * 格式化时间戳为 YYYY-MM-DD。

@@ -447,7 +447,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                             :key="`${location.subRegionId}-${rcWeight.rcId}-${rcWeight.rcIndex}`"
                             class="cursor-pointer rounded-xs border border-base-content/15 px-1.5 py-0.5 font-mono text-[11px] tabular-nums text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                             :to="{
-                                name: 'map-local',
+                                name: 'map-tool',
                                 query: {
                                     regionId: location.regionId,
                                     subRegionId: location.subRegionId,

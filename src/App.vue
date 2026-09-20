@@ -418,6 +418,18 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
+/*
+ * 进出场同时进行，两个页面必须叠在同一格内。
+ * 否则普通流会把新页面排到旧页面下方（视口之外），它的入场动画整段在屏幕外播完，
+ * 旧页面一移除新页面就直接「跳」出来，滑入与淡入都白做。
+ * 承载页面的是 relative 容器，绝对定位后两者共用同一尺寸的盒子，不会挤压布局。
+ */
+.slide-right-enter-active,
+.slide-right-leave-active {
+    position: absolute;
+    inset: 0;
+}
+
 .slide-right-enter-active {
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -434,5 +446,12 @@ onBeforeUnmount(() => {
 .slide-right-leave-to {
     opacity: 0;
     transform: translateX(2rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .slide-right-enter-active,
+    .slide-right-leave-active {
+        transition: none;
+    }
 }
 </style>

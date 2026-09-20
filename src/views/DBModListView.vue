@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { useLocalStorage } from "@vueuse/core"
 import { computed } from "vue"
-import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { formatModName, LeveledMod } from "@/data"
 import { modMap } from "@/data/d"
@@ -11,6 +10,16 @@ import { formatProp } from "@/util"
 import { formatModLimit } from "@/utils/mod-limit"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
+
+/**
+ * 列表卡片的固定主轴尺寸（px）：虚拟滚动按它切片。
+ * 必须是实测卡高的小数值（102.5 而非取整的 103）——585 张卡按 103 累计会多出 292px，
+ * 末尾出现一段滚不完的空白。
+ *
+ * 约 6% 的卡因为数值行只占一行而矮 16.5px，卡片上用 minHeight 兜到同一高度：
+ * 等高是虚拟滚动的前提，矮卡会让窗口内后续卡片整体上移，滚动时看起来像在跳。
+ */
+const MOD_CARD_HEIGHT = 102.5
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedModId = useSearchParam<number>("id", 0)
@@ -164,390 +173,396 @@ function toggleFilterRow(name: FilterName) {
     toggleFilter(name, visible)
 }
 
-useInitialScrollToSelectedItem({ selectedSelector: ".dbm-item-active" })
+/**
+ * 当前选中项在过滤结果中的下标。
+ * 虚拟滚动下选中项不一定在 DOM 中，无法靠元素查询定位，改由下标驱动滚入视口。
+ */
+const selectedModIndex = computed(() => {
+    if (!selectedModId.value) {
+        return null
+    }
+    const index = filteredMods.value.findIndex(mod => mod.id === selectedModId.value)
+    return index === -1 ? null : index
+})
 </script>
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 2"
-            :detail-open="Boolean(selectedMod)"
-            @collapse="selectedModId = 0"
-        >
+        <SplitView :desktop-ratio="1 / 2" :detail-open="Boolean(selectedMod)" @collapse="selectedModId = 0">
             <template #master>
-
-            <!-- 左侧列表面板 -->
-            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedMod }">
-                <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
-                <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
-                    <div class="relative">
-                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
-                        <input
-                            v-model="searchKeyword"
-                            type="text"
-                            placeholder="搜索魔之楔名称/系列（支持拼音）..."
-                            class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                        />
-                        <span
-                            class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
-                        >
-                            {{ filteredMods.length }}
-                        </span>
-                    </div>
-
-                    <!-- 过滤器开关方章 -->
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showTypeFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleFilterRow('type')"
-                        >
-                            {{ $t("char-build.enemy_type") }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showSeriesFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleFilterRow('series')"
-                        >
-                            {{ $t("char-build.series") }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showQualityFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleFilterRow('quality')"
-                        >
-                            {{ $t("char-build.quality") }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showElemFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleFilterRow('elem')"
-                        >
-                            {{ $t("char-build.elem") }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showVersionFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleFilterRow('version')"
-                        >
-                            {{ $t("char-build.version") }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 筛选条件 -->
+                <!-- 左侧列表面板 -->
                 <div
-                    v-show="showTypeFilter || showSeriesFilter || showQualityFilter || showElemFilter || showVersionFilter"
-                    class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
-                    style="animation-delay: 0.05s"
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedMod }"
                 >
-                    <!-- 类型筛选 -->
-                    <div v-show="showTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            {{ $t("char-build.enemy_type") }}
-                        </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedType === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedType = ''"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="type in types"
-                            :key="type"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedType === type
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedType = type"
-                        >
-                            {{ $t(type) }}
-                        </button>
-                    </div>
-
-                    <!-- 系列筛选 -->
-                    <div v-show="showSeriesFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            {{ $t("char-build.series") }}
-                        </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedSeries === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedSeries = ''"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="s in series"
-                            :key="s"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedSeries === s
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedSeries = s"
-                        >
-                            {{ $t(s) }}
-                        </button>
-                    </div>
-
-                    <!-- 品质筛选 -->
-                    <div v-show="showQualityFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            {{ $t("char-build.quality") }}
-                        </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedQuality === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedQuality = ''"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="quality in qualities"
-                            :key="quality"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedQuality === quality
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedQuality = quality"
-                        >
-                            {{ $t(quality) }}
-                        </button>
-                    </div>
-
-                    <!-- 元素筛选 -->
-                    <div v-show="showElemFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            {{ $t("char-build.elem") }}
-                        </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedElem === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedElem = ''"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="elem in elems"
-                            :key="elem"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedElem === elem
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedElem = elem"
-                        >
-                            {{ $t(`${elem}属性`) }}
-                        </button>
-                    </div>
-
-                    <!-- 版本筛选 -->
-                    <div v-show="showVersionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            {{ $t("char-build.version") }}
-                        </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedVersion === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedVersion = ''"
-                        >
-                            {{ $t("全部") }}
-                        </button>
-                        <button
-                            v-for="version in versions"
-                            :key="version"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedVersion === version
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedVersion = version"
-                        >
-                            {{ version }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 魔之楔列表 -->
-                <ScrollArea class="flex-1">
-                    <div class="p-3">
-                        <div class="space-y-2">
-                            <article
-                                v-for="(mod, index) in filteredMods"
-                                :key="mod.id"
-                                class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99] animate-ef-rise motion-reduce:animate-none"
-                                :class="
-                                    selectedModId === mod.id
-                                        ? 'dbm-item-active border-primary/70 bg-primary/10'
-                                        : 'border-base-content/15 bg-base-100/60 hover:border-primary/50'
-                                "
-                                :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
-                                @click="selectedModId = mod.id"
+                    <!-- 检索带：下划线搜索 + 计数 + 过滤器开关方章 -->
+                    <div class="flex-none border-b border-base-content/15 px-4 pt-4 pb-3 stagger-rise">
+                        <div class="relative">
+                            <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                            <input
+                                v-model="searchKeyword"
+                                type="text"
+                                placeholder="搜索魔之楔名称/系列（支持拼音）..."
+                                class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
+                            />
+                            <span
+                                class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
                             >
-                                <!-- 左侧主色强调条：选中时显现 -->
-                                <span
-                                    class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
-                                    :class="selectedModId === mod.id ? 'opacity-100' : 'opacity-0'"
-                                    aria-hidden="true"
+                                {{ filteredMods.length }}
+                            </span>
+                        </div>
+
+                        <!-- 过滤器开关方章 -->
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showTypeFilter
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="toggleFilterRow('type')"
+                            >
+                                {{ $t("char-build.enemy_type") }}
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showSeriesFilter
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="toggleFilterRow('series')"
+                            >
+                                {{ $t("char-build.series") }}
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showQualityFilter
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="toggleFilterRow('quality')"
+                            >
+                                {{ $t("char-build.quality") }}
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showElemFilter
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="toggleFilterRow('elem')"
+                            >
+                                {{ $t("char-build.elem") }}
+                            </button>
+                            <button
+                                type="button"
+                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                                :class="
+                                    showVersionFilter
+                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
+                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
+                                "
+                                @click="toggleFilterRow('version')"
+                            >
+                                {{ $t("char-build.version") }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 筛选条件 -->
+                    <div
+                        v-show="showTypeFilter || showSeriesFilter || showQualityFilter || showElemFilter || showVersionFilter"
+                        class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
+                        style="animation-delay: 0.05s"
+                    >
+                        <!-- 类型筛选 -->
+                        <div v-show="showTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
+                                {{ $t("char-build.enemy_type") }}
+                            </span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedType === ''
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedType = ''"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="type in types"
+                                :key="type"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedType === type
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedType = type"
+                            >
+                                {{ $t(type) }}
+                            </button>
+                        </div>
+
+                        <!-- 系列筛选 -->
+                        <div v-show="showSeriesFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
+                                {{ $t("char-build.series") }}
+                            </span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedSeries === ''
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedSeries = ''"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="s in series"
+                                :key="s"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedSeries === s
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedSeries = s"
+                            >
+                                {{ $t(s) }}
+                            </button>
+                        </div>
+
+                        <!-- 品质筛选 -->
+                        <div v-show="showQualityFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
+                                {{ $t("char-build.quality") }}
+                            </span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedQuality === ''
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedQuality = ''"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="quality in qualities"
+                                :key="quality"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedQuality === quality
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedQuality = quality"
+                            >
+                                {{ $t(quality) }}
+                            </button>
+                        </div>
+
+                        <!-- 元素筛选 -->
+                        <div v-show="showElemFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
+                                {{ $t("char-build.elem") }}
+                            </span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedElem === ''
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedElem = ''"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="elem in elems"
+                                :key="elem"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedElem === elem
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedElem = elem"
+                            >
+                                {{ $t(`${elem}属性`) }}
+                            </button>
+                        </div>
+
+                        <!-- 版本筛选 -->
+                        <div v-show="showVersionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
+                                {{ $t("char-build.version") }}
+                            </span>
+                            <button
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedVersion === ''
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedVersion = ''"
+                            >
+                                {{ $t("全部") }}
+                            </button>
+                            <button
+                                v-for="version in versions"
+                                :key="version"
+                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedVersion === version
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                @click="selectedVersion = version"
+                            >
+                                {{ version }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 魔之楔列表：卡片等高，走虚拟滚动，DOM 只保留可视区内的条目 -->
+                    <VirtualList
+                        class="flex-1"
+                        :items="filteredMods"
+                        :item-height="MOD_CARD_HEIGHT"
+                        :item-key="mod => mod.id"
+                        :active-index="selectedModIndex"
+                        v-slot="{ item: mod, index, animate }"
+                    >
+                        <article
+                            class="group relative cursor-pointer overflow-hidden rounded-xs border backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
+                            :class="[
+                                selectedModId === mod.id
+                                    ? 'dbm-item-active border-primary/70 bg-primary/10'
+                                    : 'border-base-content/15 bg-base-100/60 hover:border-primary/50',
+                                animate ? 'animate-ef-rise motion-reduce:animate-none' : '',
+                            ]"
+                            :style="{ minHeight: `${MOD_CARD_HEIGHT}px`, animationDelay: `${Math.min(index * 30, 300)}ms` }"
+                            @click="selectedModId = mod.id"
+                        >
+                            <!-- 左侧主色强调条：选中时显现 -->
+                            <span
+                                class="absolute inset-y-0 left-0 z-10 w-0.75 bg-primary transition-opacity duration-200"
+                                :class="selectedModId === mod.id ? 'opacity-100' : 'opacity-0'"
+                                aria-hidden="true"
+                            />
+                            <div class="flex items-start gap-3 p-3">
+                                <!-- 魔之楔图标（稀有度渐变底） -->
+                                <img
+                                    :src="LeveledMod.url(mod.icon)"
+                                    alt="魔之楔图标"
+                                    class="size-12 shrink-0 overflow-hidden rounded-xs object-cover bg-linear-15"
+                                    :class="getRarityGradientClass(mod.品质)"
                                 />
-                                <div class="flex items-start gap-3 p-3">
-                                    <!-- 魔之楔图标（稀有度渐变底） -->
-                                    <img
-                                        :src="LeveledMod.url(mod.icon)"
-                                        alt="魔之楔图标"
-                                        class="size-12 shrink-0 overflow-hidden rounded-xs object-cover bg-linear-15"
-                                        :class="getRarityGradientClass(mod.品质)"
-                                    />
-                                    <div class="min-w-0 flex-1">
-                                        <!-- 名称行：系列+名称 / 可转换徽记 -->
-                                        <div class="flex items-baseline gap-2">
-                                            <h3
-                                                class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                                :class="{ 'text-primary': selectedModId === mod.id }"
-                                            >
-                                                {{ formatModName(mod.系列, mod.名称, $t) }}
-                                            </h3>
-                                            <span
-                                                v-if="isModConvertible(mod.id)"
-                                                class="shrink-0 rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 font-medium text-success"
-                                            >
-                                                可转换
-                                            </span>
-                                            <span class="ml-auto shrink-0"><CopyID :id="mod.id" /></span>
-                                        </div>
-                                        <!-- 元信息行：类型 / 属性 / 限定 / 版本 / 极性耐受 -->
-                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                            <span>{{ $t(mod.类型) }}</span>
-                                            <span v-if="mod.属性">{{ $t(`${mod.属性}属性`) }}</span>
-                                            <span v-if="mod.限定">{{ $t(formatModLimit(mod.限定)) }}</span>
-                                            <span v-if="mod.版本" class="font-mono tabular-nums">v{{ mod.版本 }}</span>
-                                            <span
-                                                v-if="mod.极性 || mod.耐受"
-                                                class="inline-flex items-center gap-1 rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-0.5 font-mono tabular-nums"
-                                            >
-                                                {{ mod.耐受 }}
-                                                <Icon v-if="mod.极性" :icon="`po-${mod.极性}`" />
-                                            </span>
-                                        </div>
-                                        <!-- 数值行：基础属性 / 生效属性 / 技能替换数 -->
-                                        <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-base-content/55">
-                                            <template
-                                                v-for="[key, attr] in Object.entries(new LeveledMod(mod).getProperties()).filter(
-                                                    ([_, v]) => v
-                                                )"
-                                                :key="key"
-                                            >
-                                                <span class="inline-flex items-center gap-1">
-                                                    {{ $t(key) }}
-                                                    <span
-                                                        class="font-medium tabular-nums"
-                                                        :class="{ 'text-primary': selectedMod?.id !== mod.id }"
-                                                        >{{ formatProp(key, attr) }}</span
-                                                    >
-                                                </span>
-                                            </template>
-                                            <template v-if="mod.生效">
-                                                <span
-                                                    v-for="key in Object.keys(mod.生效).filter(key => key !== '条件')"
-                                                    :key="key"
-                                                    class="inline-flex items-center gap-1"
-                                                >
-                                                    {{ $t(key) }}
-                                                    <span
-                                                        class="font-medium tabular-nums"
-                                                        :class="{ 'text-primary': selectedMod?.id !== mod.id }"
-                                                        >{{ formatProp(key, mod.生效[key]) }}</span
-                                                    >
-                                                </span>
-                                            </template>
-                                            <span v-if="mod.技能替换" class="inline-flex items-center gap-1">
-                                                {{ $t("技能替换") }}
+                                <div class="min-w-0 flex-1">
+                                    <!-- 名称行：系列+名称 / 可转换徽记 -->
+                                    <div class="flex items-baseline gap-2">
+                                        <h3
+                                            class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                            :class="{ 'text-primary': selectedModId === mod.id }"
+                                        >
+                                            {{ formatModName(mod.系列, mod.名称, $t) }}
+                                        </h3>
+                                        <span
+                                            v-if="isModConvertible(mod.id)"
+                                            class="shrink-0 rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 font-medium text-success"
+                                        >
+                                            可转换
+                                        </span>
+                                        <span class="ml-auto shrink-0"><CopyID :id="mod.id" /></span>
+                                    </div>
+                                    <!-- 元信息行：类型 / 属性 / 限定 / 版本 / 极性耐受 -->
+                                    <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
+                                        <span>{{ $t(mod.类型) }}</span>
+                                        <span v-if="mod.属性">{{ $t(`${mod.属性}属性`) }}</span>
+                                        <span v-if="mod.限定">{{ $t(formatModLimit(mod.限定)) }}</span>
+                                        <span v-if="mod.版本" class="font-mono tabular-nums">v{{ mod.版本 }}</span>
+                                        <span
+                                            v-if="mod.极性 || mod.耐受"
+                                            class="inline-flex items-center gap-1 rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-0.5 font-mono tabular-nums"
+                                        >
+                                            {{ mod.耐受 }}
+                                            <Icon v-if="mod.极性" :icon="`po-${mod.极性}`" />
+                                        </span>
+                                    </div>
+                                    <!-- 数值行：基础属性 / 生效属性 / 技能替换数 -->
+                                    <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-base-content/55">
+                                        <template
+                                            v-for="[key, attr] in Object.entries(new LeveledMod(mod).getProperties()).filter(([_, v]) => v)"
+                                            :key="key"
+                                        >
+                                            <span class="inline-flex items-center gap-1">
+                                                {{ $t(key) }}
                                                 <span
                                                     class="font-medium tabular-nums"
                                                     :class="{ 'text-primary': selectedMod?.id !== mod.id }"
-                                                    v-for="(v, key) in mod.技能替换"
-                                                    :key="key"
-                                                    >{{ $t(v.名称) }}</span
+                                                    >{{ formatProp(key, attr) }}</span
                                                 >
                                             </span>
-                                        </div>
+                                        </template>
+                                        <template v-if="mod.生效">
+                                            <span
+                                                v-for="key in Object.keys(mod.生效).filter(key => key !== '条件')"
+                                                :key="key"
+                                                class="inline-flex items-center gap-1"
+                                            >
+                                                {{ $t(key) }}
+                                                <span
+                                                    class="font-medium tabular-nums"
+                                                    :class="{ 'text-primary': selectedMod?.id !== mod.id }"
+                                                    >{{ formatProp(key, mod.生效[key]) }}</span
+                                                >
+                                            </span>
+                                        </template>
+                                        <span v-if="mod.技能替换" class="inline-flex items-center gap-1">
+                                            {{ $t("技能替换") }}
+                                            <span
+                                                class="font-medium tabular-nums"
+                                                :class="{ 'text-primary': selectedMod?.id !== mod.id }"
+                                                v-for="(v, key) in mod.技能替换"
+                                                :key="key"
+                                                >{{ $t(v.名称) }}</span
+                                            >
+                                        </span>
                                     </div>
                                 </div>
-                            </article>
-                        </div>
+                            </div>
+                        </article>
+                    </VirtualList>
+
+                    <!-- 底部统计条 -->
+                    <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
+                        <p class="text-[11px] tracking-wide text-base-content/50">
+                            共
+                            <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredMods.length }}</b> 个魔之楔
+                        </p>
                     </div>
-                </ScrollArea>
-
-                <!-- 底部统计条 -->
-                <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
-                    <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredMods.length }}</b> 个魔之楔
-                    </p>
                 </div>
-            </div>
-
-                        </template>
+            </template>
             <template #detail>
-
-
-            <!-- 右侧详情面板 -->
-            <ScrollArea v-if="selectedMod" class="min-h-0 min-w-0 flex-1">
-                <DBModDetailItem :key="selectedModId" :mod="selectedMod" />
-            </ScrollArea>
+                <!-- 右侧详情面板 -->
+                <ScrollArea v-if="selectedMod" class="min-h-0 min-w-0 flex-1">
+                    <DBModDetailItem :key="selectedModId" :mod="selectedMod" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>
