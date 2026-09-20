@@ -3,6 +3,7 @@ import type { ChatCompletionMessageParam, ChatCompletionTool, ChatCompletionTool
 import { containsDsmlMarker, type DsmlParseResult, DsmlStreamFilter } from "@/api/dsml-tool-call"
 import type { OpenAIConfig } from "@/api/openai"
 import { renderDBAgentSystemPrompt } from "@/shared/dbAgentSystemPrompt"
+import { DEFAULT_AI_MAX_TOKENS } from "@/utils/ai-config"
 import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
 import { formatAskUserResponse, hasAskAnswer, normalizeAskUserRequest, summarizeAskUserRequest } from "@/utils/db-ask-user"
 import {
@@ -141,6 +142,22 @@ const MAX_TOOL_ROUNDS = 4
  */
 const MAX_DSML_RETRIES = 1
 
+/**
+ * 单次回答触达输出上限后允许自动续写的次数。
+ *
+ * 上游在触达 max_tokens 时会以 `finish_reason === "length"` 收流，正文停在半句上；
+ * 续写把这半句当作助手消息回灌，再要一段后续。3 次约等于三倍输出长度，
+ * 既足够收尾一份结果清单，也能在模型反复话痨时及时收敛。
+ */
+const MAX_CONTINUATIONS = 3
+
+/**
+ * 续写提示词。
+ *
+ * 必须显式要求「不重复、不重开头」：只给「继续」两字时，模型常常把已输出的段落再讲一遍。
+ */
+const CONTINUATION_PROMPT = "上一条回复因长度上限被截断。请紧接着未完成处继续输出剩余内容，不要重复已经输出过的部分，也不要重新开头。"
+
 /** 默认模型参数（设置项缺失时使用） */
 const DEFAULT_CONFIG: Pick<
     OpenAIConfig,
@@ -151,7 +168,7 @@ const DEFAULT_CONFIG: Pick<
     max_retries: 2,
     default_model: "glm-4.6v-flash",
     default_temperature: 0.4,
-    default_max_tokens: 1536,
+    default_max_tokens: DEFAULT_AI_MAX_TOKENS,
 }
 
 /** 工具展示名映射（界面用中文标注检索动作） */
@@ -880,6 +897,8 @@ export class DBAgent {
         let round = state.round
         /** 当前轮已重试次数（每轮独立计数，防止死循环） */
         let roundRetries = 0
+        /** 本次问答已自动续写的次数 */
+        let continuations = 0
 
         while (round <= MAX_TOOL_ROUNDS) {
             const isLastRound = round === MAX_TOOL_ROUNDS
@@ -894,6 +913,8 @@ export class DBAgent {
             })
 
             let content = ""
+            /** 本轮的收流原因：`length` 表示正文被输出上限截断 */
+            let roundFinishReason: string | null = null
             const callSlots = new Map<number, { id: string; name: string; args: string }>()
             /**
              * DSML 泄露过滤器。
@@ -930,6 +951,12 @@ export class DBAgent {
                 }
 
                 const delta = chunk.choices[0]?.delta
+
+                const finishReason = chunk.choices[0]?.finish_reason
+
+                if (finishReason) {
+                    roundFinishReason = finishReason
+                }
 
                 if (delta?.reasoning_content) {
                     state.reasoningText += delta.reasoning_content
@@ -1006,6 +1033,18 @@ export class DBAgent {
             }
 
             if (!calls.length) {
+                // 正文被输出上限截断时，上游以 finish_reason=length 收流，这里接着要一段续写，
+                // 否则用户看到的就是半句话。已产出的正文先作为助手消息回灌，模型才知道从哪里接。
+                if (roundFinishReason === "length" && content.trim() && continuations < MAX_CONTINUATIONS) {
+                    continuations++
+                    flushReasoning()
+                    callbacks.onReasoningEnd?.([])
+                    messages.push({ role: "assistant", content: content.trim() })
+                    messages.push({ role: "user", content: CONTINUATION_PROMPT })
+                    console.warn("[DBAgent] 回复触达输出上限，已自动续写", { continuations })
+                    continue
+                }
+
                 // 没有工具调用说明本轮就是最终回答，收束最后一段思考
                 flushReasoning()
                 callbacks.onReasoningEnd?.([])

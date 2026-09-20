@@ -15,6 +15,7 @@ import { isSafeModeClosed } from "@/data/versionGate"
 import { env } from "@/env"
 import { applyLanguageFontClass, changeLanguage } from "@/i18n"
 import { sleep } from "@/util"
+import { DEFAULT_AI_MAX_TOKENS, migrateLegacyAiMaxTokens } from "@/utils/ai-config"
 import type { CustomTheme } from "@/utils/customTheme"
 import { DEFAULT_CUSTOM_THEME } from "@/utils/customTheme"
 import type { CustomFontMeta } from "@/utils/font-storage"
@@ -39,6 +40,9 @@ let apiCache: DNAAPI | null = null
 let apiCacheKey = ""
 let signInterval: number | null = null
 let apiInitPromise: Promise<DNAAPI | undefined> | null = null
+
+// 迁移必须在建立 store 之前完成：useLocalStorage 会先把存储里的旧默认值读进 state
+migrateLegacyAiMaxTokens()
 
 export const useSettingStore = defineStore("setting", {
     state: () => {
@@ -312,7 +316,7 @@ export const useSettingStore = defineStore("setting", {
             this.aiBaseUrl = "https://open.bigmodel.cn/api/paas/v4/"
             this.aiApiKey = ""
             this.aiModelName = "glm-4.6v-flash"
-            this.aiMaxTokens = 1024
+            this.aiMaxTokens = DEFAULT_AI_MAX_TOKENS
             this.aiTemperature = 0.6
         },
         async getCurrentUser() {

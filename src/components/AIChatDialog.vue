@@ -10,6 +10,7 @@ import { type BuildAgentChatMessage, db } from "@/store/db"
 import { useInvStore } from "@/store/inv"
 import { useSettingStore } from "@/store/setting"
 import { useUserStore } from "@/store/user"
+import { DEFAULT_AI_MAX_TOKENS } from "@/utils/ai-config"
 
 const props = defineProps<{
     charBuild: CharBuild
@@ -264,7 +265,7 @@ async function initAgent() {
                 api_key: userStore.jwtToken,
                 default_model: "deepseek-flash",
                 default_temperature: settingStore.aiTemperature || 0.6,
-                default_max_tokens: settingStore.aiMaxTokens || 1024,
+                default_max_tokens: settingStore.aiMaxTokens || DEFAULT_AI_MAX_TOKENS,
                 timeout: 30000,
                 max_retries: 3,
                 system_prompt: "", // BuildAgent会设置

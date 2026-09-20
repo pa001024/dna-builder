@@ -7,6 +7,7 @@ import type {
     ChatCompletionTool,
     ChatCompletionToolMessageParam,
 } from "openai/resources/index.mjs"
+import { DEFAULT_AI_MAX_TOKENS } from "@/utils/ai-config"
 
 // 智谱AI OpenAI兼容API接口
 // 参考: https://docs.bigmodel.cn/cn/guide/develop/openai/introduction
@@ -35,7 +36,7 @@ const DEFAULT_CONFIG: OpenAIConfig = {
     max_retries: 3,
     default_model: "glm-4.6v-flash",
     default_temperature: 0.6,
-    default_max_tokens: 1024,
+    default_max_tokens: DEFAULT_AI_MAX_TOKENS,
     system_prompt: `## 角色定位
 
 你是接入《二重螺旋》游戏的自动化操作 AI Agent，需通过调用指定工具（image_grab 截图分析、run_script 执行脚本实现鼠标键盘的控制），实现游戏核心流程的自动化执行，包括但不限于跑图探索、战斗攻坚、资源收集、角色养成等场景。
