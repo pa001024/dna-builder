@@ -4,8 +4,9 @@ import { computed } from "vue"
 import { useAttrI18n } from "@/composables/useAttrI18n"
 import { useCharSettings } from "@/composables/useCharSettings"
 import { useExprDrag } from "@/composables/useExprDrag"
-import { CharAttr, CharBuild, LeveledMod, type LeveledSkill, LeveledWeapon } from "@/data"
+import { CharAttr, CharBuild, LeveledMod, LeveledWeapon } from "@/data"
 import { format100, format100r, formatWeaponProp } from "@/util"
+import { copyExprField } from "@/utils/expr-field-copy"
 import { collectWeaponAttrSources, type WeaponAttrSource } from "@/utils/weapon-attr-sources"
 
 const props = defineProps<{
@@ -20,7 +21,6 @@ const { getAttrName, getAttrDesc } = useAttrI18n()
 const weaponAttrs = computed(() => props.charBuild.calculateWeaponAttributes(props.charBuild[`${props.wkey}Weapon`]).weapon!)
 
 const emit = defineEmits<{
-    addSkill: [skill: string | { fieldName: string; skill: LeveledSkill }]
     openWeaponSelect: []
 }>()
 
@@ -41,15 +41,7 @@ function weaponAttrExpression(key: string) {
     return `${getWeaponNamespace()}::${key}!`
 }
 
-/**
- * 将点击的武器属性插入目标函数。
- * @param key 武器属性键名
- */
-function addWeaponAttribute(key: string) {
-    emit("addSkill", weaponAttrExpression(key))
-}
-
-const { startExprDrag, consumeExprDragClick } = useExprDrag()
+const { startExprDrag } = useExprDrag()
 
 /**
  * 指针按下时抓起武器属性字段：鼠标可拖到表达式 / 自定义变量输入框放置，触控为「点击抓起 → 点击放置」。
@@ -61,12 +53,11 @@ function startWeaponAttrDrag(key: string, event: PointerEvent) {
 }
 
 /**
- * 点击武器属性行：拖动 / 触控抓起已接管时忽略，否则保持原行为追加到目标函数。
+ * 双击武器属性行：把该属性的表达式字段复制到剪贴板。
  * @param key 武器属性键名
  */
-function handleWeaponAttrClick(key: string) {
-    if (consumeExprDragClick()) return
-    addWeaponAttribute(key)
+function handleWeaponAttrDblClick(key: string) {
+    void copyExprField(weaponAttrExpression(key))
 }
 
 const baseWeapon = computed(() => {
@@ -393,7 +384,7 @@ const weaponAttrDescMap = computed<Record<string, string>>(() => {
                     class="cursor-grab active:cursor-grabbing flex justify-between items-center p-1 px-2 transition-all duration-200 select-none hover:bg-base-100 hover:shadow-md rounded-md"
                     :title="$t('char-build.drag_field_hint')"
                     @pointerdown="startWeaponAttrDrag(key, $event)"
-                    @click="handleWeaponAttrClick(key)"
+                    @dblclick="handleWeaponAttrDblClick(key)"
                 >
                     <div class="flex items-center gap-1 text-sm text-base-content/80">
                         <span>{{ $t(attrName(key)) }}</span>
@@ -426,7 +417,6 @@ const weaponAttrDescMap = computed<Record<string, string>>(() => {
             :selected-identifiers="charBuild.getIdentifierNames(charBuild.targetFunction)"
             :char-build="charBuild"
             :attributes="attributes"
-            @add-skill="$emit('addSkill', $event)"
         />
         <div v-else class="flex justify-center items-center text-sm opacity-60">未选择技能</div>
     </div>

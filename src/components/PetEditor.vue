@@ -48,8 +48,6 @@ const props = defineProps<{
 const emit = defineEmits<{
     /** 魔灵或主动技覆盖率变更：父级据此刷新构筑 */
     petChange: []
-    /** 点击属性行追加字段到目标函数 */
-    addSkill: [field: string]
 }>()
 
 /** 可选魔灵：活力魔灵中的闪亮系列与艾尔芙系列；按品质降序、同品质按 id 升序，便于优先挑到高品质魔灵 */

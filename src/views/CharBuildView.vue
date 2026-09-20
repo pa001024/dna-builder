@@ -7,7 +7,6 @@ import { cloneDeep, debounce, groupBy, isEqual } from "lodash-es"
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
-import ExprInput from "@/components/ExprInput.vue"
 import {
     addModVariant,
     CharSettings,
@@ -37,7 +36,6 @@ import {
     LeveledChar,
     LeveledCharHelper,
     LeveledModHelper,
-    type LeveledSkill,
     LeveledWeapon,
     LeveledWeaponHelper,
     modData,
@@ -75,7 +73,7 @@ import { useTourStore } from "@/store/tour"
 import { useUIStore } from "@/store/ui"
 import { copyText, formatBigNumber, formatProp, pasteText, roundBuffValue } from "@/util"
 import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
-import { joinExprText, resolveCharFieldExpression } from "@/utils/expr-field"
+import { joinExprText } from "@/utils/expr-field"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 
 //#region 角色
@@ -962,7 +960,12 @@ function applyAutobuild() {
 const share_model_show = ref(false)
 const share_title = ref(``)
 const share_desc = ref(``)
-const buildShow = ref()
+/**
+ * 配装分享列表组件实例。
+ * 该组件挂在 CollapsibleSection 的 lazy 插槽里，折叠时不会渲染，
+ * 此时模板 ref 为 null，调用其方法前必须先判空。
+ */
+const buildShow = ref<InstanceType<typeof DOBBuildShow> | null>(null)
 
 function openShareModal() {
     share_title.value = `${selectedChar.value}构筑`
@@ -973,7 +976,9 @@ function openShareModal() {
 async function confirmShare() {
     share_model_show.value = false
     await shareCharBuild(share_title.value, share_desc.value)
-    buildShow.value.fetchBuilds()
+    // 分享区折叠时组件未挂载（ref 为 null），此时不刷新列表；
+    // 重新展开会重新挂载组件并由其 onMounted 自行拉取最新列表。
+    buildShow.value?.fetchBuilds()
 }
 //#endregion
 //#region 时间线
@@ -1344,22 +1349,6 @@ const charTab = ref(charBuild.value.selectedSkillType)
  * 默认简洁模式，选择结果持久化，刷新后保持用户偏好。
  */
 const buildViewMode = useLocalStorage<"simple" | "pro">("char-build-view-mode", "simple")
-
-/**
- * 将属性 / 技能字段追加到目标函数表达式。
- * 追加时自动判断是否需要补 "+" 连接符（空表达式、紧跟运算符/左括号/逗号时不补），
- * 与拖拽放置共用 joinExprText，保证两种写入方式结果一致。
- * @param skill 字段文本；对象形式表示带技能实例的技能字段
- * @returns void
- */
-function addSkill(skill: string | { fieldName: string; skill: LeveledSkill }) {
-    if (typeof skill !== "string") {
-        targetFunction.value = joinExprText(targetFunction.value, `${skill.skill.safeName}::${skill.fieldName}`)
-        return
-    }
-    // 已带命名空间的字段（如 近战::攻击）与角色属性/技能字段共用同一解析逻辑
-    targetFunction.value = joinExprText(targetFunction.value, resolveCharFieldExpression(charBuild.value, skill))
-}
 
 //#region 表达式字段拖拽 / 放置
 /** 表达式字段拖拽状态：属性、技能行抓起字段，表达式与自定义变量输入框作为放置目标 */
@@ -2321,7 +2310,9 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         v-if="selectedExtraMastery"
                                         alt="额外精通武器图标"
                                         class="flex h-full w-full items-center justify-center bg-current"
-                                        :style="{ mask: `url(${LeveledWeapon.typeUrl(selectedExtraMastery.名称)}) no-repeat center/contain` }"
+                                        :style="{
+                                            mask: `url(${LeveledWeapon.typeUrl(selectedExtraMastery.名称)}) no-repeat center/contain`,
+                                        }"
                                     />
                                     <Icon v-else icon="ri:add-line" class="size-5" />
                                     <div class="absolute inset-0 bg-linear-to-t from-yellow-500/20 via-transparent to-transparent" />
@@ -2356,7 +2347,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         <!-- 词条 -->
                         <div class="collapse p-1" :class="{ 'collapse-open': charDetailExpend }">
                             <div class="space-y-1 collapse-content p-0">
-                                <CharAttrShow :attributes="attributes" :char-build="charBuild" @add-skill="addSkill" />
+                                <CharAttrShow :attributes="attributes" :char-build="charBuild" />
                             </div>
                         </div>
                         <div
@@ -2391,7 +2382,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             :selected-identifiers="charBuild.getIdentifierNames(charBuild.targetFunction)"
                             :char-build="charBuild"
                             :attributes="attributes"
-                            @add-skill="addSkill($event)"
                         />
                     </div>
 
@@ -2403,7 +2393,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         wkey="melee"
                         :char-build="charBuild"
                         :attributes="attributes"
-                        @add-skill="addSkill($event)"
                     />
                     <!-- 近战武器空槽：与已装备卡片一致的“点击名称+切换图标”换装入口 -->
                     <div
@@ -2431,7 +2420,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         wkey="ranged"
                         :char-build="charBuild"
                         :attributes="attributes"
-                        @add-skill="addSkill($event)"
                     />
                     <!-- 远程武器空槽：与已装备卡片一致的“点击名称+切换图标”换装入口 -->
                     <div
@@ -2457,7 +2445,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         wkey="skill"
                         :char-build="charBuild"
                         :attributes="attributes"
-                        @add-skill="addSkill($event)"
                     />
                     <!-- 同律武器继承槽位为空：保持同卡片头部点击切换继承武器 -->
                     <div
@@ -2513,7 +2500,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <div v-if="!isTimeline" class="space-y-2">
                                 <!-- 自定义变量：折叠交互同「词条」charattr -->
                                 <div class="collapse" :class="{ 'collapse-open': customVariableExpend }">
-                                    <div class="space-y-1.5 collapse-content p-0">
+                                    <div class="space-y-1.5 collapse-content px-0 py-1">
                                         <!-- 变量行：变量名 = 表达式（下划线输入，不加外框） -->
                                         <div v-for="(variable, index) in customVariableInputs" :key="index" class="flex items-center gap-2">
                                             <input
@@ -3049,7 +3036,6 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 :pet-level="effectivePetLevel"
                                 :pet-level-bonus="petLevelBonus"
                                 @pet-change="handlePetChange"
-                                @add-skill="addSkill"
                             />
                         </div>
                         <!-- 魔灵潜质：4 个互不相同的潜质槽位，可更换/拖动互换/移除，并显示收益 -->

@@ -6459,7 +6459,7 @@
         "desc": "Character/Weapon/Skill Build",
         "description": "Description",
         "drag_field_armed": "Picked up {{name}}: tap an expression or custom variable to drop it in, tap the field again to cancel",
-        "drag_field_hint": "Drag into an expression or custom variable",
+        "drag_field_hint": "Drag into an expression or custom variable; double-click to copy",
         "dynamic_prop": "Dynamic Property",
         "elem": "Element",
         "enemy": "Enemy",

@@ -565,7 +565,7 @@
         "desc": "角色/武器/技能构筑",
         "description": "描述",
         "drag_field_armed": "已抓起 {{name}}：点击表达式或自定义变量放入，再次点击该字段可取消",
-        "drag_field_hint": "可拖动到表达式或自定义变量中",
+        "drag_field_hint": "可拖动到表达式或自定义变量中，双击复制",
         "dynamic_prop": "动态属性",
         "elem": "元素",
         "enemy": "敌人",

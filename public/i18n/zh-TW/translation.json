@@ -5574,7 +5574,7 @@
         "desc": "角色/武器/技能構築",
         "description": "描述",
         "drag_field_armed": "已抓起 {{name}}：點擊表達式或自訂變數放入，再次點擊該欄位可取消",
-        "drag_field_hint": "可拖曳到表達式或自訂變數中",
+        "drag_field_hint": "可拖曳到表達式或自訂變數中，雙擊複製",
         "dynamic_prop": "動態屬性",
         "elem": "元素",
         "enemy": "敵人",

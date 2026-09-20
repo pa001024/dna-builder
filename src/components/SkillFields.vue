@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue"
 import { useExprDrag } from "@/composables/useExprDrag"
 import type { CharAttr, CharBuild, LeveledSkill, LeveledSkillField, SkillField } from "@/data"
 import { formatSkillProp } from "@/util"
+import { copyExprField } from "@/utils/expr-field-copy"
 
 // 组件属性
 const props = defineProps<{
@@ -13,13 +14,8 @@ const props = defineProps<{
     attributes?: CharAttr
 }>()
 
-// 组件事件
-const emit = defineEmits<{
-    addSkill: [selection: { fieldName: string; skill: LeveledSkill }]
-}>()
-
 // 表达式字段拖拽 / 放置：技能字段行抓起后可放入表达式或自定义变量
-const { startExprDrag, consumeExprDragClick } = useExprDrag()
+const { startExprDrag } = useExprDrag()
 
 // 计算技能字段列表
 const skillFields = computed(() => {
@@ -127,25 +123,32 @@ function syncTouchExpandMode() {
 }
 
 /**
- * 处理字段点击事件。
- * 将当前技能实例随字段一起传出，调用方无需再按字段名反查技能命名空间。
- * 拖动 / 触控抓起已接管本次手势时忽略点击。
- * @param field 技能字段。
- */
-function handleFieldClick(field: LeveledSkillField) {
-    if (consumeExprDragClick()) return
-    if (!props.skill) return
-    emit("addSkill", { fieldName: field.safeName, skill: props.skill })
-}
-
-/**
  * 指针按下时抓起技能字段：鼠标可拖到表达式 / 自定义变量输入框放置，触控为「点击抓起 → 点击放置」。
  * @param field 技能字段。
  * @param event 指针按下事件。
  */
 function startFieldDrag(field: LeveledSkillField, event: PointerEvent) {
     if (!props.skill) return
-    startExprDrag({ expr: `${props.skill.safeName}::${field.safeName}`, label: t(field.名称) }, event)
+    startExprDrag({ expr: skillFieldExpression(field), label: t(field.名称) }, event)
+}
+
+/**
+ * 技能字段对应的表达式字段文本（如 残光::伤害）。
+ * 双击复制与拖拽放置共用，保证两种写法拿到同一片段。
+ * @param field 技能字段。
+ * @returns 表达式字段文本。
+ */
+function skillFieldExpression(field: LeveledSkillField): string {
+    if (!props.skill) return ""
+    return `${props.skill.safeName}::${field.safeName}`
+}
+
+/**
+ * 双击技能字段行：把该字段的表达式复制到剪贴板。
+ * @param field 技能字段。
+ */
+function handleFieldDblClick(field: LeveledSkillField) {
+    void copyExprField(skillFieldExpression(field))
 }
 
 /**
@@ -185,7 +188,7 @@ onBeforeUnmount(() => {
                 'shadow-md shadow-primary/50 outline-2 outline-primary/60': isIdentifierUsed(field.名称),
             }"
             @pointerdown="startFieldDrag(field, $event)"
-            @click="handleFieldClick(field)"
+            @dblclick="handleFieldDblClick(field)"
             @touchstart="handleFieldTouchStart(field, index)"
         >
             <div class="flex justify-between items-center gap-4">

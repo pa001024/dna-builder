@@ -6458,7 +6458,7 @@
         "dph": "DPH",
         "dps": "DPS",
         "drag_field_armed": "{{name}} saisi : touchez une expression ou une variable personnalisée pour l'insérer, touchez à nouveau le champ pour annuler",
-        "drag_field_hint": "Glissez vers une expression ou une variable personnalisée",
+        "drag_field_hint": "Glissez vers une expression ou une variable personnalisée ; double-cliquez pour copier",
         "dynamic_prop": "Propriété dynamique",
         "effective_hp": "PV effectifs",
         "elem": "Élément",

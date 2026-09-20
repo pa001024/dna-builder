@@ -7,6 +7,7 @@ import { useExprDrag } from "@/composables/useExprDrag"
 import { CharAttr, CharBuild, LeveledChar, LeveledMod } from "@/data"
 import { format100r } from "@/util"
 import { resolveCharFieldExpression } from "@/utils/expr-field"
+import { copyExprField } from "@/utils/expr-field-copy"
 
 const props = withDefaults(
     defineProps<{
@@ -48,15 +49,11 @@ const attrDescMap = computed<Record<string, string>>(() => {
     return map
 })
 
-const emit = defineEmits<{
-    addSkill: [skill: string]
-}>()
-
-const { startExprDrag, consumeExprDragClick } = useExprDrag()
+const { startExprDrag } = useExprDrag()
 
 /**
  * 角色属性行对应的表达式字段文本（如 角色::攻击!）。
- * 与 CharBuildView.addSkill 共用 resolveCharFieldExpression，保证点击追加与拖拽放置写入同一片段。
+ * 与拖拽放置共用 resolveCharFieldExpression，保证双击复制与拖拽写入的是同一片段。
  * @param key 属性键名
  * @returns 表达式字段文本
  */
@@ -74,12 +71,11 @@ function startFieldDrag(key: string, event: PointerEvent) {
 }
 
 /**
- * 点击属性行：拖动 / 触控抓起已接管时忽略，否则保持原行为追加到目标函数。
+ * 双击属性行：把该属性的表达式字段复制到剪贴板。
  * @param key 属性键名
  */
-function handleFieldClick(key: string) {
-    if (consumeExprDragClick()) return
-    emit("addSkill", key)
+function handleFieldDblClick(key: string) {
+    void copyExprField(attrExpression(key))
 }
 
 interface DynamicAttrSource {
@@ -341,7 +337,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                     .includes(key),
             }"
             @pointerdown="startFieldDrag(key, $event)"
-            @click="handleFieldClick(key)"
+            @dblclick="handleFieldDblClick(key)"
         >
             <div class="text-sm text-base-content/80">{{ $t(attrName(key)) }}</div>
             <div class="text-primary font-bold text-sm font-orbitron">
