@@ -7076,7 +7076,10 @@
         "photo_task_reward": "임무 보상",
         "photo_task_unlock": "해금 시간",
         "photo_tasks": "촬영 임무",
-        "rule": "규칙"
+        "rule": "규칙",
+        "sign_in": "출석",
+        "sign_in_big": "큰 보상",
+        "sign_in_day": "{{day}}일차"
     },
     "event-detail": {
         "title": "이벤트 상세"

@@ -1,3 +1,13 @@
+/** 签到活动配置 */
+export interface EventSignIn {
+    /** 签到天数 */
+    duration: number
+    /** 每日奖励 id（按天顺序，长度应为 duration） */
+    rewards: number[]
+    /** 大奖励日（可选，天数从 1 开始） */
+    bigRewardDays?: number[]
+}
+
 /** 拍照活动的任务点位 */
 export interface EventPhotoTaskLocation {
     id: number
@@ -28,6 +38,7 @@ export interface EventItem {
     endTime: number | null
     rule?: string
     photoTasks?: EventPhotoTask[]
+    signIn?: EventSignIn
     boxDrop?: {
         boxCoinId: number
         boxMaximum: number
@@ -54,6 +65,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1761523200,
         endTime: 1764018000,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101002,
@@ -61,6 +76,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1766437200,
         endTime: 1768856400,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101003,
@@ -68,6 +87,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1764036000,
         endTime: 1766394000,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101004,
@@ -75,6 +98,10 @@ export const eventData: EventItem[] = [
         desc: "龙神即将陨落，我将执其权柄。\n活动期间签到5日领取赠礼",
         startTime: 1770256800,
         endTime: 1771189200,
+        signIn: {
+            duration: 5,
+            rewards: [1010041, 1010042, 1010043, 1010044, 1010045],
+        },
     },
     {
         id: 101005,
@@ -82,6 +109,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1768874400,
         endTime: 1770667200,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101006,
@@ -89,6 +120,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1770602400,
         endTime: 1773090000,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101007,
@@ -96,6 +131,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1773108000,
         endTime: 1775466000,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101008,
@@ -103,6 +142,10 @@ export const eventData: EventItem[] = [
         desc: "乙鸟衔春至，愿我心无羁。\n活动期间签到5日领取赠礼",
         startTime: 1775095200,
         endTime: 1776114000,
+        signIn: {
+            duration: 5,
+            rewards: [1010041, 1010042, 1010043, 1010044, 1010045],
+        },
     },
     {
         id: 101009,
@@ -110,6 +153,10 @@ export const eventData: EventItem[] = [
         desc: "汽笛声响起，冰冷的钢铁发出炙热的咆哮，那生锈的命运齿轮再一次缓缓转动。\n活动期间签到5日可领取赠礼。",
         startTime: 1779933600,
         endTime: 1780952400,
+        signIn: {
+            duration: 5,
+            rewards: [1010041, 1010042, 1010043, 1010044, 1010045],
+        },
     },
     {
         id: 101010,
@@ -117,6 +164,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1775440800,
         endTime: 1777928400,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101011,
@@ -124,6 +175,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1777946400,
         endTime: 1780304400,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101012,
@@ -131,6 +186,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1780279200,
         endTime: 1782766800,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101013,
@@ -138,6 +197,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1782784800,
         endTime: 1785142800,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101014,
@@ -145,6 +208,14 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到14日领取赠礼",
         startTime: 1761523200,
         endTime: null,
+        signIn: {
+            duration: 14,
+            rewards: [
+                10101401, 10101402, 10101403, 10101404, 10101405, 10101406, 10101407, 10101408, 10101409, 10101410, 10101411, 10101412,
+                10101413, 10101414,
+            ],
+            bigRewardDays: [2, 3, 4, 7, 9, 11, 13, 14],
+        },
     },
     {
         id: 101015,
@@ -152,6 +223,10 @@ export const eventData: EventItem[] = [
         desc: "乐园中徘徊的少女，今天又会邂逅怎样的童话？\n活动期间签到5日可领取赠礼。",
         startTime: 1784772000,
         endTime: 1785790800,
+        signIn: {
+            duration: 5,
+            rewards: [1010041, 1010042, 1010043, 1010044, 1010045],
+        },
     },
     {
         id: 101016,
@@ -159,6 +234,10 @@ export const eventData: EventItem[] = [
         desc: "欢迎来到阿尔卡诺镇，这里即是你的来处，亦是我们永恒不灭的乐园。\n活动期间签到5日可领取赠礼。",
         startTime: 1788400800,
         endTime: 1789419600,
+        signIn: {
+            duration: 5,
+            rewards: [1010041, 1010042, 1010043, 1010044, 1010045],
+        },
     },
     {
         id: 101017,
@@ -166,6 +245,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1785117600,
         endTime: 1788771600,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101018,
@@ -173,6 +256,10 @@ export const eventData: EventItem[] = [
         desc: "活动期间签到7日领取赠礼",
         startTime: 1788746400,
         endTime: 1792400400,
+        signIn: {
+            duration: 7,
+            rewards: [1010012, 1010012, 1010013, 1010012, 1010012, 1010012, 1010014],
+        },
     },
     {
         id: 101019,
@@ -180,6 +267,10 @@ export const eventData: EventItem[] = [
         desc: "冷冽的风中，她再度点燃心中的余火，向未来致礼。\n活动期间签到5日可领取赠礼。",
         startTime: 1792029600,
         endTime: 1793048400,
+        signIn: {
+            duration: 5,
+            rewards: [1010041, 1010042, 1010043, 1010044, 1010045],
+        },
     },
     {
         id: 102001,

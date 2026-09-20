@@ -7093,7 +7093,10 @@
         "photo_task_reward": "Task Reward",
         "photo_task_unlock": "Unlock Time",
         "photo_tasks": "Photo Tasks",
-        "rule": "Rule"
+        "rule": "Rule",
+        "sign_in": "Sign-In",
+        "sign_in_big": "Big Reward",
+        "sign_in_day": "Day {{day}}"
     },
     "event-detail": {
         "title": "Event details"

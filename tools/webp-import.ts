@@ -18,8 +18,11 @@ import { pathToFileURL } from "node:url"
  * 注意：形如 `/imgs/music/${icon}.webp` 的“全通配”模板无法从文本推导 basename，
  * 必须在 evaluateDataUrls 中枚举对应数据源；遗漏时脚本会按目录告警，不会静默跳过。
  *
- * PNG→WebP 使用 Bun 内置的 Bun.Image，不依赖 sharp/cwebp 等外部库。
- * res/ 目录下的图片按 maxHeight（默认 128）等比缩小：高度超出则缩小、不放大。
+ * PNG→WebP 使用 Bun 内置的 Bun.Image，不依赖 sharp/cwebp 等外部库（有损编码，默认质量 90）。
+ * 缩放规则：
+ *   res/ 目录下的图片按 maxHeight（默认 128）等比缩小：高度超出则缩小、不放大。
+ *   命中 SCALE_RULES（按目标贴图名匹配）的图片按规则里的 scale 等比缩小、不放大，
+ *   如拍照活动大图 T_Activity_PhotoEvent_* 按 50% 缩放。
  *
  * 用法:
  *   bun tools/webp-import.ts                 # 增量导入缺失的 WebP
@@ -95,6 +98,8 @@ type ResizeInfo = {
     width: number
     /** 缩小后高 */
     height: number
+    /** 缩小原因（用于日志），如 "res" / "50%" */
+    reason: string
 }
 
 const rootDir = path.resolve(".")
@@ -104,6 +109,12 @@ const DRY_RUN = args.includes("--dry-run")
 const QUALITY = Number(getArgValue("--quality") ?? process.env.WEBP_IMPORT_QUALITY ?? "90")
 /** res 目录图片的最大高度：超出时等比缩小，不放大（默认 128） */
 const RES_MAX_HEIGHT = Number(getArgValue("--res-max-height") ?? process.env.WEBP_IMPORT_RES_MAX_HEIGHT ?? "128")
+
+/**
+ * 按目标贴图名匹配的等比缩小规则：命中者按 scale 缩小、不放大。
+ * 目前是拍照活动相机大图（2048x1024 级别展示图），50% 缩放即可。
+ */
+const SCALE_RULES: { pattern: RegExp; scale: number }[] = [{ pattern: /^T_Activity_PhotoEvent_\d+$/i, scale: 0.5 }]
 
 const dataDir = getArgValue("--data") ?? process.env.WEBP_IMPORT_DATA_DIR ?? path.join(rootDir, "src", "data")
 const publicImgsDir = getArgValue("--out") ?? process.env.WEBP_IMPORT_OUT ?? path.join(rootDir, "public", "imgs")
@@ -117,21 +128,55 @@ const sourceRoot = resolveSourceRoot(getArgValue("--source") ?? process.env.WEBP
 const TITLE_FRAME_MANIFEST = path.join(rootDir, "src", "data", "generated", "title-frame-textures.json")
 
 /**
- * 探测 FModel 纹理导出目录：优先 DNA 解包目录（dna-unpack），兼顾用户给定路径与常见拼写变体。
+ * 收集指向项目根目录的所有路径别名。
+ *
+ * bun 会把 cwd 的 junction/符号链接解析成物理路径（如 D:\dev\dna-builder → E:\dev\dna-builder），
+ * 而同级资源目录（dna-unpack）可能只存在于链接形式的盘上。
+ * 按各盘符 + 相对路径反查：realpath 回同一物理目录的路径形式都视为项目别名。
+ * @param realRoot 项目根目录（bun 解析后的物理路径）
+ * @returns 所有指向同一目录的绝对路径（含 realRoot 本身）
+ */
+function collectProjectRootAliases(realRoot: string): string[] {
+    const aliases = new Set<string>([realRoot])
+    if (process.platform !== "win32") {
+        return [...aliases]
+    }
+
+    const rel = path.relative(path.parse(realRoot).root, realRoot)
+    for (let code = 65; code <= 90; code++) {
+        const candidate = path.join(`${String.fromCharCode(code)}:\\`, rel)
+        if (candidate.toLowerCase() === realRoot.toLowerCase()) {
+            continue
+        }
+        try {
+            if (fs.realpathSync(candidate).toLowerCase() === realRoot.toLowerCase()) {
+                aliases.add(candidate)
+            }
+        } catch {
+            // 盘符不存在或不可访问，跳过
+        }
+    }
+    return [...aliases]
+}
+
+/**
+ * 探测 FModel 纹理导出目录：按项目根的所有路径别名（junction 解析前后的形式）逐一
+ * 尝试同级 dna-unpack，兼顾用户给定路径与常见拼写变体。
  * @param override 用户显式指定的目录
  * @returns 存在的源目录
  */
 function resolveSourceRoot(override?: string): string {
+    const unpackRoots = collectProjectRootAliases(rootDir).map(alias => path.join(alias, ".."))
     const candidates = [
         override,
-        path.join(rootDir, "..", "dna-unpack", "Fmodel", "Output", "Exports", "EM", "Content", "UI", "Texture"),
-        path.join(rootDir, "..", "dna-unpack", "Fmodel", "Output", "Exports", "EM", "Content", "Texture"),
-        path.join(rootDir, "..", "Fmodel", "Output", "Exports", "EM", "Conten", "U", "Texture"),
-        path.join(rootDir, "..", "Fmodel", "Output", "Exports", "EM", "Content", "UI", "Texture"),
-        path.join(rootDir, "..", "Fmodel", "Output", "Exports", "EM", "Content", "Texture"),
-    ].filter((value): value is string => Boolean(value))
+        ...unpackRoots.flatMap(unpackRoot => [
+            path.join(unpackRoot, "dna-unpack", "Fmodel", "Output", "Exports", "EM", "Content", "UI", "Texture"),
+            path.join(unpackRoot, "dna-unpack", "Fmodel", "Output", "Exports", "EM", "Content", "Texture"),
+            path.join(unpackRoot, "Fmodel", "Output", "Exports", "EM", "Conten", "U", "Texture"),
+        ]),
+    ]
 
-    const existing = candidates.find(value => fs.existsSync(value))
+    const existing = candidates.filter((value): value is string => Boolean(value)).find(value => fs.existsSync(value))
     if (existing) {
         return existing
     }
@@ -320,6 +365,7 @@ async function evaluateDataUrls(): Promise<Set<string>> {
     const { extractionTreasureData } = await loadModule<{ extractionTreasureData: IconItem[] }>("d/solotreasure.data.ts")
     const { skinGachaTabs } = await loadModule<{ skinGachaTabs: IconItem[] }>("d/skingacha.data.ts")
     const { musicScoreData } = await loadModule<{ musicScoreData: IconItem[] }>("d/music.data.ts")
+    const { eventData } = await loadModule<{ eventData: { photoTasks?: { photoView?: string }[] }[] }>("d/event.data.ts")
 
     const { LeveledChar } = await loadModule<{ LeveledChar: LeveledCharLike }>("leveled/LeveledChar.ts")
     const { LeveledWeapon } = await loadModule<{ LeveledWeapon: LeveledWeaponLike }>("leveled/LeveledWeapon.ts")
@@ -327,7 +373,8 @@ async function evaluateDataUrls(): Promise<Set<string>> {
     const { LeveledMonster } = await loadModule<{ LeveledMonster: UrlBuilder }>("leveled/LeveledMonster.ts")
     const { LeveledPet } = await loadModule<{ LeveledPet: UrlBuilder }>("leveled/LeveledPet.ts")
     // 魔灵潜质（特质）目录：条目自带图标地址（traitIconUrl），无需在视图里拼模板
-    const { petTraits } = await loadModule<{ petTraits: { name: string; url: string }[] }>("petTrait.ts")
+    const { getPetTraits } = await loadModule<{ getPetTraits: () => { name: string; url: string }[] }>("petTrait.ts")
+    const petTraits = getPetTraits()
     const { LeveledSkill } = await loadModule<{ LeveledSkill: UrlBuilder }>("leveled/LeveledSkill.ts")
     const { LeveledSkillWeapon } = await loadModule<{ LeveledSkillWeapon: UrlBuilder }>("leveled/LeveledSkillWeapon.ts")
 
@@ -541,6 +588,17 @@ async function evaluateDataUrls(): Promise<Set<string>> {
         }
     }
 
+    // 活动拍照任务目标图: 视图（DBEventDetailItem）按 `/imgs/webp/${photoView}.webp` 直接引用
+    // （photoView 已是完整 T_Activity_PhotoEvent_* 贴图名）。
+    // photoView 在数据与视图里都不含 /imgs/ 前缀，文本扫描抓不到，必须在此枚举活动数据。
+    for (const event of eventData) {
+        for (const task of event.photoTasks ?? []) {
+            if (task.photoView) {
+                urls.add(`/imgs/webp/${task.photoView}.webp`)
+            }
+        }
+    }
+
     // 过滤异常插值（数据缺陷导致的 undefined 等）
     for (const url of [...urls]) {
         if (url.includes("undefined") || url.includes("[object")) {
@@ -707,13 +765,32 @@ function buildTasks(
 }
 
 /**
- * 计算 res 目录图片的等比缩小目标尺寸（maxHeight 限制：超出缩小、不放大）。
- * 非 res 目录或高度未超限时返回 null。
+ * 计算图片的等比缩小目标尺寸（不放大）：
+ *   1. 命中 SCALE_RULES（按贴图名匹配）→ 按规则 scale 缩小；
+ *   2. res/ 目录 → maxHeight 限制（RES_MAX_HEIGHT）；
+ *   3. 都不命中 → 不缩小。
  * @param sourceAbsPath 源 PNG 路径
  * @param targetRelPath 目标相对路径（相对 public/imgs）
  * @returns 缩小信息；无需缩小返回 null
  */
 async function getResizeInfo(sourceAbsPath: string, targetRelPath: string): Promise<ResizeInfo | null> {
+    const name = path.posix.basename(targetRelPath, ".webp")
+    const scaleRule = SCALE_RULES.find(rule => rule.pattern.test(name))
+    if (scaleRule) {
+        const scale = Math.min(scaleRule.scale, 1)
+        if (scale < 1) {
+            const meta = await new Bun.Image(sourceAbsPath).metadata()
+            return {
+                originalWidth: meta.width,
+                originalHeight: meta.height,
+                width: Math.round(meta.width * scale),
+                height: Math.round(meta.height * scale),
+                reason: `${scale * 100}%`,
+            }
+        }
+        return null
+    }
+
     if (!targetRelPath.startsWith("res/")) {
         return null
     }
@@ -729,6 +806,7 @@ async function getResizeInfo(sourceAbsPath: string, targetRelPath: string): Prom
         originalHeight: meta.height,
         width: Math.round(meta.width * scale),
         height: Math.round(meta.height * scale),
+        reason: "res",
     }
 }
 
@@ -738,7 +816,7 @@ async function getResizeInfo(sourceAbsPath: string, targetRelPath: string): Prom
  * @returns 日志后缀文本
  */
 function formatResizeNote(info: ResizeInfo | null): string {
-    return info ? `  (res 缩小: ${info.originalWidth}x${info.originalHeight} -> ${info.width}x${info.height})` : ""
+    return info ? `  (缩小[${info.reason}]: ${info.originalWidth}x${info.originalHeight} -> ${info.width}x${info.height})` : ""
 }
 
 /**

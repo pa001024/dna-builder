@@ -1191,7 +1191,10 @@
         "photo_task_reward": "任务奖励",
         "photo_task_unlock": "解锁时间",
         "photo_tasks": "拍照任务",
-        "rule": "规则"
+        "rule": "规则",
+        "sign_in": "签到",
+        "sign_in_big": "大奖励",
+        "sign_in_day": "第 {{day}} 天"
     },
     "event-detail": {
         "title": "活动详情"

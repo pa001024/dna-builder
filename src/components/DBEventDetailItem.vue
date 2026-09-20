@@ -69,6 +69,33 @@ const photoTaskEntries = computed<PhotoTaskEntry[]>(() =>
     }))
 )
 
+/** 签到每日奖励展示项 */
+interface SignInDayEntry {
+    day: number
+    rewardId: number
+    reward: RewardDetail | null
+    big: boolean
+}
+
+/**
+ * 解析签到活动的每日奖励。
+ * @returns 按天排序的展示数组
+ */
+const signInDayEntries = computed<SignInDayEntry[]>(() => {
+    const signIn = props.event.signIn
+    if (!signIn) {
+        return []
+    }
+
+    const bigDays = new Set(signIn.bigRewardDays ?? [])
+    return signIn.rewards.slice(0, signIn.duration).map((rewardId, index) => ({
+        day: index + 1,
+        rewardId,
+        reward: getRewardDetails(rewardId),
+        big: bigDays.has(index + 1),
+    }))
+})
+
 const topUpRanks = computed(() => {
     const detail = props.event.topUpDetail
     if (!detail) {
@@ -201,9 +228,36 @@ const topUpRanks = computed(() => {
                             </div>
                         </div>
                     </div>
-                    <div class="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">
-                        {{ task.photoView }}
+                    <ImagePreview
+                        :thumb-url="`/imgs/webp/${task.photoView}.webp`"
+                        :full-url="`/imgs/webp/${task.photoView}.webp`"
+                        class="mt-2 block w-64 max-w-full rounded-xs border border-base-content/10"
+                    />
+                </div>
+            </div>
+        </section>
+
+        <!-- 签到 -->
+        <section v-if="signInDayEntries.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="SIGN-IN" :title="$t('event.sign_in')" />
+            <div class="mt-3 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2">
+                <div
+                    v-for="entry in signInDayEntries"
+                    :key="entry.day"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                    :class="entry.big ? 'border-primary/40 bg-primary/5' : ''"
+                >
+                    <div class="mb-1.5 flex items-center justify-between gap-2">
+                        <span class="text-[11px] tracking-wide text-base-content/55">{{ $t('event.sign_in_day', { day: entry.day }) }}</span>
+                        <span
+                            v-if="entry.big"
+                            class="rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
+                        >
+                            {{ $t('event.sign_in_big') }}
+                        </span>
                     </div>
+                    <RewardItem v-if="entry.reward" :reward="entry.reward" />
+                    <div v-else class="text-[11px] tabular-nums text-base-content/45">ID: {{ entry.rewardId }}</div>
                 </div>
             </div>
         </section>

@@ -112,6 +112,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Heitao_vo_companio_02_1",
         text: "トリュフ、あなたの……豚、触ってもいい？ちょっとでいい、逃げないように抑えていてくれる？動物は私を見ると、すぐに逃げちゃうから……",
+        companioCharId: 5101,
     },
     {
         id: 10018,
@@ -119,6 +120,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Heitao_vo_companio_02_2",
         text: "ありがとう……ああ、暖かい。ぷにぷにしていて、いい……",
+        companioCharId: 5101,
     },
     {
         id: 10019,
@@ -126,6 +128,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Heitao_vo_companio_03",
         text: "私は軍団の「No.0」じゃない、そしてあなたが好きに弄べるおもちゃでもない。さあ消えなさい、それとも、私の死体を持ち帰る？",
+        companioCharId: 4301,
     },
     {
         id: 10020,
@@ -133,6 +136,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Heitao_vo_companio_04_1",
         text: "あなたはとても料理上手だと聞いたけど、レシピを見せてもらえる？いつもあなたの料理が美味しいって、{nickname}が言っているの。社交辞令とかじゃなく、心から褒めているみたいで。",
+        companioCharId: 5102,
     },
     {
         id: 10021,
@@ -140,6 +144,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Heitao_vo_companio_04_2",
         text: "でもどうして……あなたが使っている食材も、ごく普通の食べ物じゃない？",
+        companioCharId: 5102,
     },
     {
         id: 10022,
@@ -357,6 +362,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Zhangyu_vo_companio_01",
         text: "オレを捕まえるって？ オレは悪いことしてないぞ！ちょっと盗んだだけだ、しかも泥棒のモンを……うわ、それ以上近寄るな！アツいんだよ！",
+        companioCharId: 3201,
     },
     {
         id: 10094,
@@ -364,6 +370,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Zhangyu_vo_companio_02",
         text: "アロマをくれる？いやいいよ、お前ちょっとアブないやつに見えるから、いらないいらない！待て……このアロマの匂い、何だかフワフワする……触手がシビれ、て……って、やっぱりお前、アブないやつだな！",
+        companioCharId: 2101,
     },
     {
         id: 10095,
@@ -371,6 +378,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Zhangyu_vo_companio_03",
         text: "お前が剣と話してるさまはサイコーだな！サマエル、ここが好きなの？私たちは一緒にもっとたくさんのところに行くのよ！\nあれー……？なんでそこでだんまりするんだ。余計に面白くなってきたぞキキキキキ！",
+        companioCharId: 1501,
     },
     {
         id: 10096,
@@ -581,6 +589,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Linen_vo_companio_01",
         text: "次からは任務内容だけを説明してくれ。くどくど言われても、ウゼえだけなんだ。",
+        companioCharId: 4202,
     },
     {
         id: 10126,
@@ -588,6 +597,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Linen_vo_companio_02",
         text: "こんにちは……長官殿。",
+        companioCharId: 4301,
     },
     {
         id: 10127,
@@ -595,6 +605,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Linen_vo_companio_03",
         text: "お前は優秀な兵士、そのひと言に尽きる。ああ、それと……働きまくるのはいいが、仕事以外の生活も充実させて……チッ、話はこれでおしまいだ。さっさと行けよ。",
+        companioCharId: 4101,
     },
     {
         id: 10128,
@@ -854,6 +865,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Xier_vo_companio_01",
         text: "私の大好きな花は温室でしか育ちません。たった1枚の花びらから、心安らぐナイトティーをお出しできますし、10枚もの花びらを使えば、たった一滴で目覚めぬ眠りへ誘う毒を抽出することも可能です。今でも時折その花の手入れをする夢を見たりするのですが……目覚めた後はもう手入れしなくてもいいのだと、嬉しくなるのです。",
+        companioCharId: 5301,
     },
     {
         id: 10165,
@@ -861,6 +873,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Xier_vo_companio_02",
         text: "まぁ、すごい！心の底から尊敬いたしますわ！常日頃から果てなき大志を抱き、思索に耽っていらっしゃるのですね！私のような、目の前の些事をこなすことで精いっぱいのメイドにはとてもとても！",
+        companioCharId: 1501,
     },
     {
         id: 10166,
@@ -868,6 +881,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Xier_vo_companio_03",
         text: "不要品の処分は、予てから悩みの種でした。引き取ってくださるのであれば、とても喜ばしいことでございます。ただしお部屋に入られる前に、入浴サービスを提供させていただきますので。拒否権はございません。抵抗も許しません。",
+        companioCharId: 3301,
     },
     {
         id: 10167,
@@ -1085,6 +1099,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Yuming_vo_companio_01",
         text: "お前がどんな過去と決別したのかは知らないが、少なくとも俺たちは似た気配をまとっている。だからこそお前とは距離を置きたい。悪いが俺は、同類が好きではないのだ。",
+        companioCharId: 5102,
     },
     {
         id: 10198,
@@ -1092,6 +1107,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Yuming_vo_companio_02",
         text: "俺はもう、お前の昔馴染みでもなんでもない。人との出会いは過ぎ去る風と同じ。全て忘れた方がお前にとってもいい風が吹くはずだ。",
+        companioCharId: 1503,
     },
     {
         id: 10199,
@@ -1099,6 +1115,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Yuming_vo_companio_03",
         text: "お前の揺るがない意志と、堅固な法を羨ましくも思ったが……そんな己を疑った瞬間は一度もないのか？",
+        companioCharId: 3201,
     },
     {
         id: 10200,
@@ -1379,6 +1396,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Saiqi_vo_companio_01",
         text: "アウトサイダーさんはフィーナさんの誕生日のために、ずっと前から準備をしているんだってね。言葉はちょっとキツイけど、実はとっても思いやりのある人なんでしょ？次のフィーナさんの誕生日には私も一緒にサプライズを用意したいな。",
+        companioCharId: 5102,
     },
     {
         id: 10240,
@@ -1386,6 +1404,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Saiqi_vo_companio_02",
         text: "カミラさんに会うたびに、あの酒場を思い出すんだ。騒がしいけど居心地がよくて……この何年間かでみんなと知り合うことができて、本当によかった。",
+        companioCharId: 3202,
     },
     {
         id: 10241,
@@ -1393,6 +1412,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Saiqi_vo_companio_03",
         text: "エリュシオンのお話を教えてくれるのね？ 本当にありがとう！ お礼に何かお花をプレゼントしたいのだけど、どんなお花が欲しいかな？\nえっ、一番は美味しいお花？",
+        companioCharId: 5101,
     },
     {
         id: 10242,
@@ -1659,6 +1679,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Baiheng_vo_companio_01",
         text: "ランディーさん、惰性も過ぎれば病の元ですよ。今は平気でも、いずれ体に障りかねません。この機会に、私と手合わせして少し体を動かしてみませんか？",
+        companioCharId: 4202,
     },
     {
         id: 10280,
@@ -1666,6 +1687,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Baiheng_vo_companio_02",
         text: "医師は病を癒せても、天命を変えることはできません。心を落ち着ける薬をお出しすることはできますが、病の根本を断つことはできないのです。どうか、自ら救いの道を見出してください……\n ",
+        companioCharId: 4102,
     },
     {
         id: 10281,
@@ -1673,6 +1695,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Baiheng_vo_companio_03",
         text: "時折、誰かの声が聞こえるのですか？それは……あなただけに聞こえるものですか？最近よく眠れていますか？おそらく、心に何か引っかかることがあるのかもしれませんね。心の病は厄介なものです。祝由術をもってしても手に負えないこともありますが、医師として全力を尽くしましょう。",
+        companioCharId: 3103,
     },
     {
         id: 10282,
@@ -1960,6 +1983,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Songlu_vo_companio_01",
         text: "芽が生えたジャガイモをゴミ箱で見つけたのですか？ダメです、捨てちゃダメです！畑に植えて水をあげれば、ジャガイモがたくさん採れるから！",
+        companioCharId: 3301,
     },
     {
         id: 10323,
@@ -1967,6 +1991,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Songlu_vo_companio_02",
         text: "仕事が忙しくて、お腹が空いていませんか？礼賛会に入ったら、お腹いっぱいになりますよ！",
+        companioCharId: 3101,
     },
     {
         id: 10324,
@@ -1974,6 +1999,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Songlu_vo_companio_03",
         text: "ハロハロ～、ちょっとお訊ねしますが……祈ることで魂が満たされるというけど、食べることでも満たされると思うのです。食べることと祈ること、どちらが効果的かな？",
+        companioCharId: 1501,
     },
     {
         id: 10325,
@@ -2177,6 +2203,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Landi_vo_companio_01",
         text: "お疲れさまです、長官殿。仕事の段取りを組んでおきました。何かあればいつでも指示を受けられる状態です。しかしながら今日はすでに仕事がいっぱいですので、休憩時間をしっかり確保して、ご自分に今以上の余計な負担をかけないよう、ご注意くださいね。",
+        companioCharId: 4301,
     },
     {
         id: 10354,
@@ -2184,6 +2211,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Landi_vo_companio_02",
         text: "前回の任務はご苦労さまでした。しかしですね、任務中に公共物が壊れたとクレームが寄せられているんです。はぁ……こーんなに内向的な僕があなたに代わって謝罪に行かなくてはいけないんですよ。なので……こちらの緊急任務をあなたに一任します。美しく優しいリーンさんなら絶対に断ったりしないはず……ですよね？",
+        companioCharId: 3101,
     },
     {
         id: 10355,
@@ -2191,6 +2219,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Landi_vo_companio_03",
         text: "おお…なんてことだ……やっぱり休暇が足りていないのか？存在しない人の幻覚まで見てしまうとは！あとで長官殿に労務災害の報告をして、何日か病気休暇を取らなくては、うん。",
+        companioCharId: 1101,
     },
     {
         id: 10356,
@@ -2415,6 +2444,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Xibi_vo_companio_01",
         text: "……貴方と私、そろそろ決着をつけましょう？",
+        companioCharId: 5401,
     },
     {
         id: 10390,
@@ -2702,6 +2732,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Maer_vo_companio_01",
         text: "この生地、この紋章、この革！ヒルダお姉さま、もしやあなたはマジの神様なのでしょうか！？このような「イケナイモノ」を「適切に処理」するご用向きの際は、ぜひとも私をお呼びくださいませ！安心安全きれいさっぱり処理することをお約束しますので！",
+        companioCharId: 3102,
     },
     {
         id: 10431,
@@ -2709,6 +2740,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Maer_vo_companio_02",
         text: "フィーナちゃん、おひさ～！んっ？『雪ネコ冒険者と茶トラ探偵』の続きを聞きたいって？オーケー、椅子を持ってくるから待ってて！座ってゆっくりとお話して進ぜよう！",
+        companioCharId: 1801,
     },
     {
         id: 10432,
@@ -2716,6 +2748,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Maer_vo_companio_03",
         text: "典獄様、私は根っからの善良な市民でございます！空腹を満たすべくゴミ箱から少～しばかし食べ残しなどをちょうだいしているだけで、盗んだり奪ったりはしておりません！いくら仕事熱心な典獄様でも、ゴミ箱は管轄外だと思いますです、はい。",
+        companioCharId: 3201,
     },
     {
         id: 10433,
@@ -2723,6 +2756,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その4",
         res: "char_Maer_vo_companio_04",
         text: "リーンさんの暮らしぶりってすごく……大変そう。私と一緒にゴミ拾いしよっか？少しは生活に余裕が出るかもだよ？",
+        companioCharId: 3101,
     },
     {
         id: 10434,
@@ -2730,6 +2764,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その5",
         res: "char_Maer_vo_companio_05",
         text: "超絶、アルティメット、ベストにトップで優しくお美しいカミラお姉さま。実は少しばかりトラブルが発生しちゃって、ちょびっと助けて欲しいんだけど――今回で絶対に最後！えっと「今月は」最後ね！でもきっと助けてくれるよね！信じてます！そうだよね？",
+        companioCharId: 3202,
     },
     {
         id: 10435,
@@ -2975,6 +3010,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Feina_vo_companio_01",
         text: "約束して。もう絶対に、絶対に絶対に……悪い呪い師がたくさんいる危険な場所には行かないで。いい？",
+        companioCharId: 5102,
     },
     {
         id: 10470,
@@ -2982,6 +3018,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Feina_vo_companio_02",
         text: "それは……何？ハムスターのお姉さんが飼っている妖精？不思議……きっとお姉さんを乗せて、どんなお城の壁でも飛び越えてしまうのね？",
+        companioCharId: 5101,
     },
     {
         id: 10471,
@@ -2989,6 +3026,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Feina_vo_companio_03",
         text: "ライオンのお姉さんは大剣の中に眠っている女神様を呼び覚ましたいのね？多分だけど、呪文をいっぱい唱えないといけないのかも。例えばーー「この聖剣サマエルを覚醒させし者は、エリュシオンの王となるであろう！」とか！",
+        companioCharId: 1501,
     },
     {
         id: 10473,
@@ -3227,6 +3265,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Yeer_vo_companio_01",
         text: "イェール：こ、こんにちは……君の歌声、本当にと、とても、とても美しいです。\nオリバー：ふん、哀れな虫のもう1匹か。",
+        companioCharId: 1103,
     },
     {
         id: 10507,
@@ -3234,6 +3273,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Yeer_vo_companio_02",
         text: "イェール：ヘーゼルナッツは……君の、友達ですか？僕にも、友達がいます、仲のいい。彼はヘ、ヘーゼルナッツのように、信頼できます。\nオリバー：俺のことブタと同じって言いたいのか？",
+        companioCharId: 5101,
     },
     {
         id: 10508,
@@ -3241,6 +3281,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Yeer_vo_companio_03",
         text: "イェール：あぅ……お、お、怒らないで。僕の、爆弾の実験は、せせ、セキュリティ基準を、ぜんぶ、み、満たしてますから……",
+        companioCharId: 3201,
     },
     {
         id: 10509,
@@ -3500,6 +3541,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Haier_vo_companio_01",
         text: "典獄と軍団長。どちらも帝国における「闇」の秩序の守護者だ。私たちは残酷無比と悪名が轟いているだろうが……ヒュペリアのためであれば、悪名ごときがなんだというのだ！？",
+        companioCharId: 4301,
     },
     {
         id: 10546,
@@ -3507,6 +3549,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Haier_vo_companio_02",
         text: "また、お前か。",
+        companioCharId: 2101,
     },
     {
         id: 10547,
@@ -3514,6 +3557,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Haier_vo_companio_03",
         text: "チッ、シビルの副官か……無能だとよく言われているそうだな？しかし私の目は誤魔化せんぞ！なぜ下手な演技をしてまで実力を隠している！？強さを隠して軍団長にまとわりつくとは、何が目的だ！？",
+        companioCharId: 4202,
     },
     {
         id: 10548,
@@ -3836,6 +3880,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Nifu_vo_companio_01",
         text: "人は決して自分の過去から逃れることはできません。いつか必ず、向き合わねばならない時が訪れるでしょう……その時には、立ち向かえるだけの力を身につけていることを願っています。",
+        companioCharId: 5102,
     },
     {
         id: 10594,
@@ -3843,6 +3888,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Nifu_vo_companio_02",
         text: "お嬢さん、あなたから懐かしい気配を感じます。もしかして、私と同じく旧き時代の方なのでは？",
+        companioCharId: 2401,
     },
     {
         id: 10597,
@@ -4151,6 +4197,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Lise_vo_companio_01",
         text: "無頓着なものを見ると、つい整理したくなってしまうの。でも、ヒルダさんがいる場所では、何もかもが整理整頓されていて、とても心地いいわ。",
+        companioCharId: 3102,
     },
     {
         id: 10641,
@@ -4158,6 +4205,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Lise_vo_companio_02",
         text: "この計画書、秒単位でスケジュールが立てられていて、とても素晴らしいです。すべてこなした時の達成感は想像もつきません。ただ……こんな几帳面な計画がランディー長官によるものだなんて、あまり信じられないです。",
+        companioCharId: 4202,
     },
     {
         id: 10643,
@@ -4473,6 +4521,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Tuosi_vo_companio_01",
         text: "元気にしてたか？\n ……ごめん、急に。君とは初対面だよ。ただ、友人の代わりに……聞いただけだ。",
+        companioCharId: 4101,
     },
     {
         id: 10688,
@@ -4480,6 +4529,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Tuosi_vo_companio_02",
         text: "そうか、新しい家と優しい家族ができたのか……本当によかったな。自分の檻から脱出するなんて、君は本当に勇敢な子だ。",
+        companioCharId: 1801,
     },
     {
         id: 10690,
@@ -4844,6 +4894,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Dafu_vo_companio_01",
         text: "帝都の図書館で華胥の医学書を読んだことがあります。ヒュペリアの医学論とは少し違いますが、応急処置に応用するには最適な内容でした。ただ、いくつかわからないことがありまして、お聞きしてもいいですか？",
+        companioCharId: 2401,
     },
     {
         id: 10743,
@@ -4851,6 +4902,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Dafu_vo_companio_02",
         text: "典獄さん、遅れてやってきた正義は本当に正義と呼べるのでしょうか？",
+        companioCharId: 3201,
     },
     {
         id: 10744,
@@ -4858,6 +4910,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Dafu_vo_companio_03",
         text: "お久しぶりです。錬金院を離れてから、お会いするのは随分久しぶりですね。お元気……でしたか？",
+        companioCharId: 4301,
     },
     {
         id: 10745,
@@ -4865,6 +4918,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その4",
         res: "char_Dafu_vo_companio_04",
         text: "既に縁を断ったとはいえ、サーベル錬金院が私の学びの場だった事実は払拭できません。お許しいただかなくていいので、どうか謝らせてください。",
+        companioCharId: 1103,
     },
     {
         id: 10746,
@@ -5131,6 +5185,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Kezhou_vo_companio_01",
         text: "「剣の極み」ってのはよ、いわゆる「無剣」の境地であり、一草一木ですら剣にしちまうんだ。お前、掃除用具で敵を制するんだってな。こりゃ剣術も相当なんだろ？ぜひともお手合わせ願いたいもんだ。",
+        companioCharId: 3102,
     },
     {
         id: 10784,
@@ -5138,6 +5193,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Kezhou_vo_companio_02",
         text: "お前の古い剣はしばらく俺が預かってやるよ。いつかそのしかめっ面をやめたら返してやろう。もちろん、その前に一勝負だ。もしお前が負けたら、その剣は俺のもんだってことでいいよな？",
+        companioCharId: 4201,
     },
     {
         id: 10785,
@@ -5145,6 +5201,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Kezhou_vo_companio_03",
         text: "剣は友にも、玩具にもなれる。さらには食器やてこ、ヒゲ剃りにだって使える。けどな、主になることだけは許されねぇ。お前の未来がこの剣に縛られねぇことを祈るよ。",
+        companioCharId: 1501,
     },
     {
         id: 10786,
@@ -5369,6 +5426,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Aote_vo_companio_01",
         text: "何でお前もここに？体調は大丈夫か？怪我はないか？メシは食べたか？あと……欲しいものがあれば俺に言えよ、あ、おい、用がないなら走り回るな。",
+        companioCharId: 1801,
     },
     {
         id: 10818,
@@ -5376,6 +5434,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Aote_vo_companio_02_1",
         text: "おっ、あいつと仲のいい嬢ちゃんじゃないか……体がそんなに強くないって聞いたぜ？座って楽にしてくれよ。",
+        companioCharId: 5301,
     },
     {
         id: 10819,
@@ -5383,6 +5442,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Aote_vo_companio_02_2",
         text: "遠慮なんてすんなよ。病弱な妹と暮らしてるからな、世話焼きには慣れてんのさ……もし腹が減ったり喉が渇いたりしたらなんでも言ってくれ。あいつの友達ってことは、俺の友達でもあるんだぞ？",
+        companioCharId: 5301,
     },
     {
         id: 10820,
@@ -5390,6 +5450,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Aote_vo_companio_03_1",
         text: "よぉ女将さんじゃないか。なんであんたがここに……なんか緊急の依頼か？あいつはこの間の疲れが残ってんだ、少しは休ませてくれよ……",
+        companioCharId: 3202,
     },
     {
         id: 10821,
@@ -5397,6 +5458,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Aote_vo_companio_03_2",
         text: "あ、だが報酬の割がいいってんなら話は別だ。まずは話を聞かせてくれ",
+        companioCharId: 3202,
     },
     {
         id: 10823,
@@ -5677,6 +5739,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Zhiliu_vo_companio_01",
         text: "あなたの香水の香り、濃厚で情熱的ね。そして抑えの効かない甘さを漂わせているわ。華胥でよく使われる控えめな香りとはまた違っていて、とても興味深いわ。",
+        companioCharId: 2101,
     },
     {
         id: 10865,
@@ -5684,6 +5747,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Zhiliu_vo_companio_03",
         text: "あなたに、どこか懐かしい面影を感じたわ……いえ、ただの思い過ごしよ。忘れてちょうだい。",
+        companioCharId: 3202,
     },
     {
         id: 10866,
@@ -5922,6 +5986,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Baonu_vo_companio_02",
         text: "「ペイシェンス、セブンヴァーチェスが一席……常に己を律して耐え忍ぶことで、常人に見え得ぬものを瞳に捉え、世の人々に困難な……困難な……」\nああ、もう我慢できるかぁぁ！こらチビ、これ以上あたしの真似するなら、サマエルでお前のニョロニョロをブッタ斬ってやる！九神の名に誓ってやるったらやるからなぁぁ！",
+        companioCharId: 3101,
     },
     {
         id: 10901,
@@ -6181,6 +6246,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Kami_vo_companio_02",
         text: "人にはそれぞれ違った才能があって、中には心を癒す力を持って生まれてくる子もいる。あなたのようにね……本当にいい子。",
+        companioCharId: 4102,
     },
     {
         id: 10939,
@@ -6188,6 +6254,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Kami_vo_companio_03",
         text: "ここまで足を運ぶなんて珍しいわね。さて今回のお目当ては、帝国の珍しい物資かしら？それとも、舞台の幕開けを見にきたの？",
+        companioCharId: 5102,
     },
     {
         id: 10940,
@@ -6524,6 +6591,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Suyi_vo_companio_01",
         text: "ルカの人って、そんなにオープンなの……？ 何も言わずに、いきなりハグしようとしてくるし。だ、だめっ！ こ、これ以上は――！",
+        companioCharId: 2101,
     },
     {
         id: 10988,
@@ -6531,6 +6599,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Suyi_vo_companio_02",
         text: "また新しい剣を買いたいですって！？……山外山の予算、そんなに余ってると思ってんの？ダメ！買わない！ひざまずいてお願いしても無駄！「叔母さま」って呼んでも駄目！今度こそ、ぜっっっったいに譲・ら・な・いんだからね！",
+        companioCharId: 1503,
     },
     {
         id: 10989,
@@ -6538,6 +6607,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Suyi_vo_companio_03",
         text: "あんたの翼……本当に綺麗ね。でも、私のも悪くないわ。 ねぇ、どっちの方が速いか勝負しない? ",
+        companioCharId: 5301,
     },
     {
         id: 10990,
@@ -6860,6 +6930,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Fuluo_vo_companio_01",
         text: "ヒルダ、あなたがいてくれて…ここにいてくれてよかった。このまま……もう少しだけ。一緒にいてくれるだけでいいから……",
+        companioCharId: 3102,
     },
     {
         id: 11036,
@@ -6867,6 +6938,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Fuluo_vo_companio_02",
         text: "あなたは、わたくしと同類ですわ。ふふ、どうか、「お前と俺では比べものにならない」などと、ありきたりな言葉で否定なさらないで。わたくしには見えておりますもの。あなたの胸奥に燃える炎が。たとえそれを地の底へ葬り、冷たい墓標の下に封じ込めようとも決して消えることのない、あの怒りの炎が。",
+        companioCharId: 5102,
     },
     {
         id: 11037,
@@ -6874,6 +6946,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Fuluo_vo_companio_03",
         text: "なんと哀れなこと……あの方がその手で救い上げた一匹狼が、数本の骨を食らうために今は猟犬と成り果て、彼を裏切ったカタキに尻尾を振って慈悲を乞うとは。",
+        companioCharId: 4301,
     },
     {
         id: 11038,
@@ -7217,6 +7290,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Eve_vo_companio_01",
         text: "青髪の小鳥ちゃん、お姉さんもね、「魔法のお友だち」を作れるんだよ～。ほら見てみて、猫ちゃんと、アヒルちゃんと……ひぃぅっ！？ち、違うの。聞いて聞いて、今のはわざと三枚羽にしたわけじゃなくて…ひぅぅぅ。今のは……見なかったことにしてくれる？",
+        companioCharId: 1801,
     },
     {
         id: 11087,
@@ -7224,6 +7298,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Eve_vo_companio_02",
         text: "ひぅっ♪ひぅっ♪ひぅっ♪あら本当に可愛いブタちゃんだね。なでなで…なでなで…「この世の全てのブタちゃんを統べる帽子将軍」様、この豚ちゃんに乗せていただいてもよろしいでしょうか？ちょっとだけでいいから…お願い～",
+        companioCharId: 5101,
     },
     {
         id: 11088,
@@ -7231,6 +7306,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Eve_vo_companio_03",
         text: "ひぅぅ……どこにいったの？「子猫ちゃん」。わたしも{nickname2}もあなたに会いたくて待ってるんだよ。早く戻ってきて～",
+        companioCharId: 3104,
     },
     {
         id: 11089,
@@ -7511,6 +7587,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Falu_vo_companio_01",
         text: "あなたが必要としていようと、いまいと。あなたが私を赦そうと、赦すまいと……それでも私は、謝らなければならない。あなたに。あなたの父親に……そして、あなたの戦友たちに。アヴァールの録音機を取り戻したことは、ただの始まりに過ぎない。もし命で償えと言うのなら、いつでも手を下して。私は、受け入れる覚悟はできている。",
+        companioCharId: 5401,
     },
     {
         id: 11129,
@@ -7518,6 +7595,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Falu_vo_companio_02",
         text: "……何度言わせるつもり？　いきなり近づかないで。私は接触に対して、反射的に迎撃する癖があるの。そのうち無意識に一発叩き込んでも……恨まないでよね。",
+        companioCharId: 2102,
     },
     {
         id: 11130,
@@ -7525,6 +7603,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その3",
         res: "char_Falu_vo_companio_03",
         text: "……同じ殺し屋でも、私たちは根本から違うらしい。私は、影の中を彷徨うだけの空っぽな人間だ。でも、あなたには守るべき者がいる……離したくない絆も。",
+        companioCharId: 3102,
     },
     {
         id: 11131,
@@ -7931,6 +8010,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その1",
         res: "char_Shuimu_vo_companio_01",
         text: "この乾燥する感じ、あなただと思った。お久しぶりね、また私を捕まえる気なの？えぇ！構わないわ！何回やり直しても、何回だってあなたの手から逃れるつもりよ……だから、つ・か・ま・え・て？ねぇ、ヘルファイア様。",
+        companioCharId: 3201,
     },
     {
         id: 21010029,
@@ -7938,6 +8018,7 @@ export const charVoiceData_jp: CharVoice[] = [
         name: "雑談・他者との出会い その2",
         res: "char_Shuimu_vo_companio_02",
         text: "私のことが怖いのかしら？大丈夫よ、きっと好きにしてみせるから。私の調合したアロマを嗅いでみて……いい香りでしょ？今までにない幸せに包まれる感じで……",
+        companioCharId: 2301,
     },
     {
         id: 21010031,

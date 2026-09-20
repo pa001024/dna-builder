@@ -112,6 +112,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Heitao_vo_companio_02_1",
         text: "꼬마 트러플 아가씨. 그쪽 돼지... 만져봐도 돼? 딱 한 번이면 돼. 그리고 도망갈 수도 있으니, 잠깐 잡아줄래? 동물들은 날 보면 항상 도망치거든.",
+        companioCharId: 5101,
     },
     {
         id: 10018,
@@ -119,6 +120,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Heitao_vo_companio_02_2",
         text: "고마워... 아, 따뜻하고 털이 정말 복슬복슬한 게, 기분이 좋아지네...",
+        companioCharId: 5101,
     },
     {
         id: 10019,
@@ -126,6 +128,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Heitao_vo_companio_03",
         text: "난 군단의 '제로'도 아니고, 네 장난감도 아니야. 당장 떠나든지, 아니면 내 시체와 함께 돌아가든지.",
+        companioCharId: 4301,
     },
     {
         id: 10020,
@@ -133,6 +136,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Heitao_vo_companio_04_1",
         text: "네가 뛰어난 미식가라던데 네 레시피를 좀 볼 수 있을까? 네가 한 음식은 항상 맛있다는 {nickname}의 칭찬이, 빈말은 아닌 것 같았거든.",
+        companioCharId: 5102,
     },
     {
         id: 10021,
@@ -140,6 +144,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Heitao_vo_companio_04_2",
         text: "...다 아주 평범한 식재료잖아? 그런데 어떻게...",
+        companioCharId: 5102,
     },
     {
         id: 10022,
@@ -357,6 +362,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Zhangyu_vo_companio_01",
         text: "나를 잡는다고? 난 나쁜 사람이 아니야! 그냥 좀 슬쩍한 것뿐이야. 그것도 도둑의 물건을... 우앗, 너 오지 마! 덥다고!",
+        companioCharId: 3201,
     },
     {
         id: 10094,
@@ -364,6 +370,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Zhangyu_vo_companio_02",
         text: "나에게 아로마를 준다고? 음, 넌 좀 위험해 보여서 좀 그런데... 싫어! 잠깐만... 냄새를 맡으니까 붕 뜬 기분에... 촉수도 찌릿찌릿하고... 넌 역시 위험해!",
+        companioCharId: 2101,
     },
     {
         id: 10095,
@@ -371,6 +378,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Zhangyu_vo_companio_03",
         text: "너, 그 검한테 뭐라고 중얼거리는 게 재밌어 보이더라! 사마엘, 여기가 마음에 들어? 다른 곳도 함께 가는 거야! \n응...? 왜 아무 말도 하지 않는 거야? 숨은 쉬고 있는 거야? 네가 그러면 더 재밌잖아 히힛!",
+        companioCharId: 1501,
     },
     {
         id: 10096,
@@ -581,6 +589,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Linen_vo_companio_01",
         text: "다음 임무는 그냥 바로 알려주면 안 돼? 잔소리 귀찮아 죽겠어.",
+        companioCharId: 4202,
     },
     {
         id: 10126,
@@ -588,6 +597,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Linen_vo_companio_02",
         text: "...안녕하십니까, 군단장님.",
+        companioCharId: 4301,
     },
     {
         id: 10127,
@@ -595,6 +605,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Linen_vo_companio_03",
         text: "넌 훌륭한 병사야. 그게 다야. 아, 그리고... 일을 열심히 하는 것도 좋지만 본인 생활도 챙기고... 쯧, 다 들었으면 빨리 안 가?",
+        companioCharId: 4101,
     },
     {
         id: 10128,
@@ -854,6 +865,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Xier_vo_companio_01",
         text: "제가 가장 좋아하는 꽃은 온도가 일정하게 유지되는 온실에서 자란답니다. 꽃잎 하나를 따면 마음을 진정시킬 수 있는 이브닝 티를 만들 수 있고, 꽃잎 열 개면 사람을 영원히 잠들게 하는 독 한 방울을 추출할 수 있죠. 가끔 꿈에서 그 꽃밭을 가꾸곤 하는데, 깨면 더 이상 꽃밭을 가꾸지 않아도 되어서 기뻐요.",
+        companioCharId: 5301,
     },
     {
         id: 10165,
@@ -861,6 +873,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Xier_vo_companio_02",
         text: "제 마음속 깊은 곳에서 존경심이 느껴질 정도로 대단하시네요. 당신은 매일 이렇게 중요한 일을 생각하고 계시는군요. 저 같은 메이드는 눈앞의 사소한 일만 신경 쓰는데.",
+        companioCharId: 1501,
     },
     {
         id: 10166,
@@ -868,6 +881,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Xier_vo_companio_03",
         text: "여기 쌓인 쓸모없는 잡동사니 때문에 계속 골치가 아팠는데 가져가 주신다면 당연히 대환영이죠. 다만 방에 들어가기 전에 제가 청결 서비스를 제공할 수 있게 해주시죠. 거부는 안 되니 반항하지 마세요.",
+        companioCharId: 3301,
     },
     {
         id: 10167,
@@ -1085,6 +1099,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Yuming_vo_companio_01",
         text: "네가 어떤 과거와 결별했는지는 모르겠지만, 우린 비슷한 기운이 느껴져. 서로 거리를 두자, 난 동류가 싫거든.",
+        companioCharId: 5102,
     },
     {
         id: 10198,
@@ -1092,6 +1107,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Yuming_vo_companio_02",
         text: "난 더 이상 네가 알던 그 사람이 아니야. 세상 사람들과의 만남은 바람처럼 스쳐 지나갈 뿐이야. 그만 잊어.",
+        companioCharId: 1503,
     },
     {
         id: 10199,
@@ -1099,6 +1115,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Yuming_vo_companio_03",
         text: "네 의지와 그만큼 확고한 법이 부럽군. 혹시 너도 자신을 의심했던 순간이 있었나?",
+        companioCharId: 3201,
     },
     {
         id: 10200,
@@ -1379,6 +1396,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Saiqi_vo_companio_01",
         text: "아웃사이더 씨가 피나의 생일 준비에 신경을 많이 쓰셨다고 들었어요. 평소 말은 그렇게 해도 사실 배려심이 많으신 분인 거죠? 다음 피나 생일은 저도 함께 서프라이즈를 준비해도 될까요?",
+        companioCharId: 5102,
     },
     {
         id: 10240,
@@ -1386,6 +1404,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Saiqi_vo_companio_02",
         text: "카밀라 님을 보면 늘 시끄럽지만 아늑한 그 술집이 생각나요... 이렇게 많은 사람들을 만날 수 있어서 정말 좋아요.",
+        companioCharId: 3202,
     },
     {
         id: 10241,
@@ -1393,6 +1412,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Saiqi_vo_companio_03",
         text: "엘리시안 교회 이야기를 들려준다고? 고마워! 음... 그럼 내가 답례로 무슨 꽃을 주면 좋을까...\n아, 맛있는 꽃을 좋아한다고?",
+        companioCharId: 5101,
     },
     {
         id: 10242,
@@ -1659,6 +1679,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Baiheng_vo_companio_01",
         text: "랜디 씨, 제가 봤을 땐 게으름도 질병의 증상 중 하나에요. 지금은 크게 문제가 없더라도, 언젠가 병이 드러날지도 모르죠. 그러니 저와 함께 몇 수 겨뤄보면서 몸을 좀 움직여보는 게 어떤지요?",
+        companioCharId: 4202,
     },
     {
         id: 10280,
@@ -1666,6 +1687,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Baiheng_vo_companio_02",
         text: "의사는 병을 치료하지만, 운명은 바꿀 수 없어요. 심열을 가라앉히는 처방을 내어드릴 순 있으나 그것은 질병의 근원을 제거할 수는 없어요. 부디 하늘의 뜻에 순응하여 마음의 고비를 이겨내시길 바랄게요...",
+        companioCharId: 4102,
     },
     {
         id: 10281,
@@ -1673,6 +1695,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Baiheng_vo_companio_03",
         text: "가끔 다른 사람의 말이 들린다고요? 당신한테만 들리나요? 최근 잠은 잘 주무시나요? 혹 마음의 응어리가 있는 건 아닌지요? 마음의 병이 가장 무서운 법이에요. 축유술마저도 아무 소용이 없죠. 그래도 의사로서, 반드시 최선을 다할 거예요.",
+        companioCharId: 3103,
     },
     {
         id: 10282,
@@ -1960,6 +1983,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Songlu_vo_companio_01",
         text: "쓰레기통에서 싹이 난 감자를 찾았다고? 버리지 마, 버리지 마. 땅에 심자! 흙을 잘 고른 다음에 잘 심어서 물을 잘 줘서 키우면 감자를 잔뜩 먹을 수 있다고!",
+        companioCharId: 3301,
     },
     {
         id: 10323,
@@ -1967,6 +1991,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Songlu_vo_companio_02",
         text: "일하느라 배고프지 않아? 교회에 들어오면 내가 배불리 먹여줄게!",
+        companioCharId: 3101,
     },
     {
         id: 10324,
@@ -1974,6 +1999,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Songlu_vo_companio_03",
         text: "하이하이, 궁금한 게 있는데... 기도는 사람의 영혼을 만족시킨다고 하는데 난 식사도 그럴 수 있다고 생각해. 그럼, 기도랑 식사랑 어떤 게 더 효과가 있는 거야?",
+        companioCharId: 1501,
     },
     {
         id: 10325,
@@ -2177,6 +2203,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Landi_vo_companio_01",
         text: "군단장님, 오늘 업무가 모두 준비되었습니다. 다른 요구 사항이 있으면 언제든지 지시를 내려주시길 바랍니다. 하지만 오늘 업무는 이미 포화 상태이니, 휴식을 취하시기를 바라며 더 이상의 무리는 하지 않으셨으면 좋겠습니다.",
+        companioCharId: 4301,
     },
     {
         id: 10354,
@@ -2184,6 +2211,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Landi_vo_companio_02",
         text: "지난번 임무에서 정말 수고 많았어. 하지만 네가 임무 수행 중에 공공기물을 파손했다는 민원을 받았다고. 휴, 나 엄청 내성적인 성격인 거 너도 잘 알잖아? 너 대신 내가 가서 죄송하다고 인사하고 돌아다니느라 얼마나 난처했는데. 그러니까... 이 긴급한 임무들 좀 대신해서 처리해 줘. 예쁘고 착하고 상냥한 린이라면 거절하지 않겠지?",
+        companioCharId: 3101,
     },
     {
         id: 10355,
@@ -2191,6 +2219,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Landi_vo_companio_03",
         text: "음, 네가 어떻게...? 이런, 너무 무리한 건가. 환각을 다 보다니. 존재하지 않는 사람이 보이잖아! 군단장님께 보고하고 이틀간 병가를 내야겠어.",
+        companioCharId: 1101,
     },
     {
         id: 10356,
@@ -2415,6 +2444,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Xibi_vo_companio_01",
         text: "...너와 나, 이제 끝을 내야지.",
+        companioCharId: 5401,
     },
     {
         id: 10390,
@@ -2702,6 +2732,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Maer_vo_companio_01",
         text: "이런 원단과 휘장에, 가죽까지! 힐다 언니, 혹시 신이신가요?! 또 이런 '적절한 처리'가 필요한 무법자의 물건이 있다면 절 찾아주세요. 제가 완벽하게 처리해 드릴게요!",
+        companioCharId: 3102,
     },
     {
         id: 10431,
@@ -2709,6 +2740,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Maer_vo_companio_02",
         text: "피나! 오랜만이야~ 〈설원 고양이 협객과 치즈 고양이 탐정〉의 다음 이야기를 듣고 싶니? 좋아! 잠깐 의자만 가져온 다음에 앉아서 천천히 들려줄게!",
+        companioCharId: 1801,
     },
     {
         id: 10432,
@@ -2716,6 +2748,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Maer_vo_companio_03",
         text: "교도소장님, 전 그냥 선량한 시민이에요! 훔치지도 빼앗지도 않았어요. 그저 쓰레기통에 남은 음식으로 배를 채웠을 뿐이죠. 직업 정신이 아무리 투철하셔도 쓰레기통까지 신경 쓰시는 건 아니겠죠?",
+        companioCharId: 3201,
     },
     {
         id: 10433,
@@ -2723,6 +2756,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅳ",
         res: "char_Maer_vo_companio_04",
         text: "너무 빠듯하게 사는 거 아니에요!? 이, 이런... 저랑 쓰레기라도 좀 줍는 건 어때요? 생활에 보탬이 될 수도 있는걸요?",
+        companioCharId: 3101,
     },
     {
         id: 10434,
@@ -2730,6 +2764,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅴ",
         res: "char_Maer_vo_companio_05",
         text: "세상에서 가장 착하고 아름다운 카밀라 언니. 저한테 아주 작은 문제가 생겼는데, 좀 도와주시겠어요? 이번이 진짜 마지막이에요! 그러니까, 이번 달의 마지막이요! 도와주실 거죠? 그렇죠?",
+        companioCharId: 3202,
     },
     {
         id: 10435,
@@ -2975,6 +3010,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Feina_vo_companio_01",
         text: "피나랑 약속해, 절대 절대로 다시는... 나쁜 마법사들이 가득한 위험한 곳에 가지 않을 거라고, 알았지?",
+        companioCharId: 5102,
     },
     {
         id: 10470,
@@ -2982,6 +3018,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Feina_vo_companio_02",
         text: "저게 뭐야? 햄스터 언니가 기르는 정령인가? 대단해... 그 정령만 있으면 분명히 모든 성벽을 뛰어넘을 수 있을 거야!",
+        companioCharId: 5101,
     },
     {
         id: 10471,
@@ -2989,6 +3026,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Feina_vo_companio_03",
         text: '사자 언니, 그 거대한 검 속에 잠든 요정을 깨우고 싶은 거야? 주문을 엄청 많이 외워야 할지도 몰라. 예를 들면 "성검 사마엘을 깨우는 자가 엘리시안의 왕이 될지어다!"라던가!',
+        companioCharId: 1501,
     },
     {
         id: 10473,
@@ -3227,6 +3265,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Yeer_vo_companio_01",
         text: "예일: 아, 안녕하세요... 목소리가 저, 정말 아름다워요.\n올리버: 흥, 불쌍한 벌레가 또 있었군.",
+        companioCharId: 1103,
     },
     {
         id: 10507,
@@ -3234,6 +3273,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Yeer_vo_companio_02",
         text: "예일: 헤이즐넛... 이 친구예요? 저도 좋은 친구가 있어요. 헤, 헤이즐넛처럼 듬직해요.\n올리버: 누굴 욕하는 거야?",
+        companioCharId: 5101,
     },
     {
         id: 10508,
@@ -3241,6 +3281,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Yeer_vo_companio_03",
         text: "예일: 으아... 화, 화내지 마세요. 제 폭탄 실험은 다 아! 아, 아, 아, 안전 규칙에 부합한다고요...",
+        companioCharId: 3201,
     },
     {
         id: 10509,
@@ -3500,6 +3541,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Haier_vo_companio_01",
         text: "교도소장과 군단장. 모두 제국의 '어둠'의 질서를 지키는 자들이지. 우린 잔인하기로 유명하지만, 휘페르보레아를 위해서라면 이 정도 악명쯤이야!",
+        companioCharId: 4301,
     },
     {
         id: 10546,
@@ -3507,6 +3549,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Haier_vo_companio_02",
         text: "또 너인가.",
+        companioCharId: 2101,
     },
     {
         id: 10547,
@@ -3514,6 +3557,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Haier_vo_companio_03",
         text: "쯧, 시빌라의 부관... 항상 의무에 소홀하다고 욕먹는 그놈. 맞지? 안타깝지만 너의 그 실력을 숨기려 하는 서툰 꼼수는 내 눈을 속일 수 없다! 실력을 숨기면서 군단장 옆에 있으려는 의도는 무엇이냐?!",
+        companioCharId: 4202,
     },
     {
         id: 10548,
@@ -3836,6 +3880,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Nifu_vo_companio_01",
         text: "누구도 자신의 과거에서 벗어날 수 없어. 언젠가 너도 그것들과 마주해야겠지... 그때가 되면 그들과 맞설 힘을 얻었길 바랄게.",
+        companioCharId: 5102,
     },
     {
         id: 10594,
@@ -3843,6 +3888,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Nifu_vo_companio_02",
         text: "아가씨는 어쩐지 낯익은 기운이 느껴지네. 혹 나와 같은 옛사람이 아닌가?",
+        companioCharId: 2401,
     },
     {
         id: 10597,
@@ -4151,6 +4197,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Lise_vo_companio_01",
         text: "전 삐뚤삐뚤한 것들을 볼 때마다 항상 바로잡고 싶어 참을 수 없습니다. 하지만 힐다 님과 함께 있으면 편해요. 힐다 님이 있는 곳은 항상 질서정연하니까요.",
+        companioCharId: 3102,
     },
     {
         id: 10641,
@@ -4158,6 +4205,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Lise_vo_companio_02",
         text: "이 계획서는 정말 초 단위까지 정확하게 잘 짜였군요. 이 계획들을 단계별로 완료할 수 있다면 정말 큰 만족감이 느껴질 것 같습니다. 그런데 이런 빈틈없는 계획과 랜디 님이라니... 연결짓기 어렵네요.",
+        companioCharId: 4202,
     },
     {
         id: 10643,
@@ -4473,6 +4521,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Tuosi_vo_companio_01",
         text: "잘 지내고 있나?\n...아, 미안. 내가 경솔했던 것 같아. 우린 모르는 사이니까. 그냥... 친구 대신 물어본 거야.",
+        companioCharId: 4101,
     },
     {
         id: 10688,
@@ -4480,6 +4529,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Tuosi_vo_companio_02",
         text: "그렇구나... 이제 새집도 생겼고 돌봐줄 가족도 생겼구나. 정말 잘됐어. 넌 네 감옥에서 벗어난 용감한 아이야.",
+        companioCharId: 1801,
     },
     {
         id: 10690,
@@ -4844,6 +4894,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Dafu_vo_companio_01",
         text: "수도의 도서관에서 화서의 의서를 본 적이 있어요. 휘페르보레아의 의학 이론과는 좀 다르긴 했지만 실제로 매우 효과가 좋았어요. 의서에 대해 아직 의문이 남아있는데 혹시 여쭤봐도 될까요?",
+        companioCharId: 2401,
     },
     {
         id: 10743,
@@ -4851,6 +4902,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Dafu_vo_companio_02",
         text: "교도소장님, 뒤늦은 정의도 과연 정의일까요?",
+        companioCharId: 3201,
     },
     {
         id: 10744,
@@ -4858,6 +4910,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Dafu_vo_companio_03",
         text: "오랜만이야. 연금원을 떠난 후부터 연락이 뜸해졌었지... 잘... 지내지?",
+        companioCharId: 4301,
     },
     {
         id: 10745,
@@ -4865,6 +4918,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅳ",
         res: "char_Dafu_vo_companio_04",
         text: "전 비록 이미 소드 연금원을 떠났지만, 그곳은 여전히 제가 공부했던 곳이죠. 아마 영원히 절 용서하지 않으시겠지만, 그래도 말씀드리고 싶어요. 정말 죄송합니다.",
+        companioCharId: 1103,
     },
     {
         id: 10746,
@@ -5131,6 +5185,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Kezhou_vo_companio_01",
         text: "검의 궁극은 무검이요, 모든 것이 검이 될 수 있다 했으니. 청소 도구로도 적을 물리친다 들었다. 분명 검도의 고수일 테지. 한 수 가르쳐 다오.",
+        companioCharId: 3102,
     },
     {
         id: 10784,
@@ -5138,6 +5193,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Kezhou_vo_companio_02",
         text: "당신이 쓰던 검은 내가 맡아둘게. 그 찌푸린 얼굴이랑 우울한 표정 좀 풀릴 때까지만이야. 물론 그 전에 먼저 한판 붙어봐야겠지. 만약 내가 이기면 이 검은 내가 가져가는 걸로 하고.",
+        companioCharId: 4201,
     },
     {
         id: 10785,
@@ -5145,6 +5201,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Kezhou_vo_companio_03",
         text: "검은 친구일 수도 있고, 장난감일 수도 있지. 심지어 식기나 지렛대, 면도칼이 될 수도 있어. 하지만 절대로, 검이 네 주인이 되게 두어선 안 돼. 네가 가는 길이 그 검에 가로막히지 않길 바라마.",
+        companioCharId: 1501,
     },
     {
         id: 10786,
@@ -5369,6 +5426,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Aote_vo_companio_01",
         text: "왜 여기 있어? 몸은 괜찮아? 병은 나았고? 밥은? 휴... 필요한 거 있으면 나한테 말해. 아무 데나 돌아다니지 말고.",
+        companioCharId: 1801,
     },
     {
         id: 10818,
@@ -5376,6 +5434,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Aote_vo_companio_02_1",
         text: "{nickname}, 그 녀석과 친하다는 그 여자아이구나... 몸이 약하다고 들었어. 앉아 좀 쉬고 있어.",
+        companioCharId: 5301,
     },
     {
         id: 10819,
@@ -5383,6 +5442,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Aote_vo_companio_02_2",
         text: "예의 차릴 거 없어. 나도 아픈 여동생이 있어서 누굴 돌보는 데 익숙하거든... 배고프거나 목마르면 내게 말해. {nickname}의 친구는 곧 내 친구니까.",
+        companioCharId: 5301,
     },
     {
         id: 10820,
@@ -5390,6 +5450,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Aote_vo_companio_03_1",
         text: "아, 사장님. 사장님도 여기 계시네요... 설마 긴급 의뢰라도 있는 건가요? 이 친구가 요즘 고생을 많이 해서 몸 상태가 영 아닌 것 같아요. 조금은 쉬게 해주세요...",
+        companioCharId: 3202,
     },
     {
         id: 10821,
@@ -5397,6 +5458,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Aote_vo_companio_03_2",
         text: "어, 그래도 돈을 많이 주는 거면, 일단 들어는 볼게요.",
+        companioCharId: 3202,
     },
     {
         id: 10823,
@@ -5677,6 +5739,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Zhiliu_vo_companio_01",
         text: "너한테서 나는 향수는 진하고 강렬하며, 절제되지 않은 달콤함이 느껴져. 화서에서 흔히 쓰는 은은한 향과는 확실히 다르네. 흥미로워.",
+        companioCharId: 2101,
     },
     {
         id: 10865,
@@ -5684,6 +5747,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Zhiliu_vo_companio_03",
         text: "너한테서는 옛 지인의 모습이 겹쳐 보여... 아니다, 내가 괜한 말을 했네.",
+        companioCharId: 3202,
     },
     {
         id: 10866,
@@ -5922,6 +5986,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Baonu_vo_companio_02",
         text: "인내, 세븐 버튜스 중 하나... 항상 마음속에 인내를 가지고 있으면 일반인이 볼 수 없는 것을 볼 수 있고, 세상 사람들이 못... 못...\n아아아 도저히 못 참겠어! 꼬맹이 너 또 이 몸을 흉내 내면 이 몸이 사마엘로 오징어인지 문어인지 같은 모습을 베어버릴 거야. 아홉 신의 이름으로 맹세하는데, 정말 베어버릴 거라고!!",
+        companioCharId: 3101,
     },
     {
         id: 10901,
@@ -6181,6 +6246,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Kami_vo_companio_02",
         text: "사람마다 타고난 재능이 달라서, 어떤 사람은 마음을 치유하는 능력이 있어. 바로 너처럼 말이야.",
+        companioCharId: 4102,
     },
     {
         id: 10939,
@@ -6188,6 +6254,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Kami_vo_companio_03",
         text: "이 먼 아이스레이크 시티까지 찾아오다니, 이번엔 제국 특산품이 목적이야? 아니면 공연을 보러 온 건가?",
+        companioCharId: 5102,
     },
     {
         id: 10940,
@@ -6524,6 +6591,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Suyi_vo_companio_01",
         text: "루카 공화국 사람들은 다 그렇게 개방적이야? 말 몇 마디 했다고 덥석 껴안으려고 하다니. 아, 안 돼! 아직은 안 된다니까!",
+        companioCharId: 2101,
     },
     {
         id: 10988,
@@ -6531,6 +6599,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Suyi_vo_companio_02",
         text: "검을 또 사겠다고?! ...우리 산외산에 예산이 남아나는 줄 알아? 안 돼! 무릎 꿇어도 소용없어! 고모할머니라고 불러도 안 사 줄 거야! 이번엔 절대 안 넘어가!",
+        companioCharId: 1503,
     },
     {
         id: 10989,
@@ -6538,6 +6607,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Suyi_vo_companio_03",
         text: "날개... 예쁘다. 근데 내 날개도 꽤 멋져. 우리 누가 더 빨리 나는지 시합해 볼래?",
+        companioCharId: 5301,
     },
     {
         id: 10990,
@@ -6860,6 +6930,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Fuluo_vo_companio_01",
         text: "힐다, 네가 있어서 다행이야. 네가 여기 있어서 정말 다행이야. 나랑 조금만 더 같이 있어줘. 그거면... 충분해.",
+        companioCharId: 3102,
     },
     {
         id: 11036,
@@ -6867,6 +6938,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Fuluo_vo_companio_02",
         text: "당신은 저와 같은 사람이군요. 어떻게 당신과 같을 수 있겠냐는 말로 황급하게 부정할 필요 없어요. 제겐 당신 마음속 깊은 곳의 불꽃이 보여요. 아무리 땅에 묻으려고 해도, 차가운 무덤 속에서도 끝내 꺼지지 않는 분노의 불 말이에요.",
+        companioCharId: 5102,
     },
     {
         id: 11037,
@@ -6874,6 +6946,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Fuluo_vo_companio_03",
         text: "슬프군요... 그분 덕분에 목숨을 부지한 오갈 곳 없던 늑대가, 고작 뼈다귀 몇 개 때문에 그분을 배신한 원수의 사냥개가 되어, 꼬리를 흔들며 동정을 구하는 꼴이라니.",
+        companioCharId: 4301,
     },
     {
         id: 11038,
@@ -7217,6 +7290,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Eve_vo_companio_01",
         text: "파란 머리 새 친구야, 나도 '마법 친구' 만들 줄 알아. 자~ 이건 회색 고양이고, 이건 노란 오리... 이휴?! 아, 아니야! 일부러 날개를 3개 만들려던 건 아니었어! 힝... 저기, 방금 본 건 잊어 주면 안 될까?",
+        companioCharId: 1801,
     },
     {
         id: 11087,
@@ -7224,6 +7298,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Eve_vo_companio_02",
         text: "이휴이휴이휴~ 착하지, 꿀꿀아. 쓰담쓰담, 쓰담쓰담... '돼지 부대를 이끄는 꽃모자 장군님', 나 이 돼지 한 번만 타게 해 주면 안 될까? 딱 한 번만! 제발~",
+        companioCharId: 5101,
     },
     {
         id: 11088,
@@ -7231,6 +7306,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Eve_vo_companio_03",
         text: "이휴, 고양아~ 어디 있어? {nickname2}하고 내가 너 엄청 기다리고 있으니까, 얼른 돌아와~",
+        companioCharId: 3104,
     },
     {
         id: 11089,
@@ -7511,6 +7587,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Falu_vo_companio_01",
         text: "네가 원하든 원하지 않든, 날 용서하든 말든, 난 너와 네 아버지, 그리고 전우들에게 사죄할 거야. 아바르 중령님의 녹음기를 회수한 건 그 시작일 뿐이지. 내가 목숨으로 죗값을 치르길 바란다면, 언제든 그렇게 해.",
+        companioCharId: 5401,
     },
     {
         id: 11129,
@@ -7518,6 +7595,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Falu_vo_companio_02",
         text: "몇 번이나 말했잖아, 가까이 오면 무의식적으로 반격하게 되니까, 불쑥 다가오지 말라고. 어느 날 갑자기 널 향해 주먹이 날아가도, 원망하지 마.",
+        companioCharId: 2102,
     },
     {
         id: 11130,
@@ -7525,6 +7603,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅲ",
         res: "char_Falu_vo_companio_03",
         text: "같은 킬러라도 너하고 난 본질적으로 다른 게 있네. 난 그림자 속을 떠도는 빈털터리지만, 넌 아직 지켜야 할 사람도, 놓치지 말아야 할 인연도 가지고 있으니까.",
+        companioCharId: 3102,
     },
     {
         id: 11131,
@@ -7931,6 +8010,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅰ",
         res: "char_Shuimu_vo_companio_01",
         text: "...이 건조한 기운은, 당신이군요. 오랜만이네요. 아직도 제게 수갑을 채우려는 건가요? 네! 괜찮아요. 결국 몇 번을 되풀이해도, 전 당신의 손아귀에서 벗어날 수 있으니까요... 믿 겨 지 시 나 요? 헬파이어 님.",
+        companioCharId: 3201,
     },
     {
         id: 21010029,
@@ -7938,6 +8018,7 @@ export const charVoiceData_kr: CharVoice[] = [
         name: "잡담·우연한 만남 Ⅱ",
         res: "char_Shuimu_vo_companio_02",
         text: "제가 두려운 건가요? 그럼, 제가 만든 달콤한 아로마로 저를 좋아하게 만들 수밖에 없겠네요. 전에 없던 행복을 느낄 수 있을 거예요.",
+        companioCharId: 2301,
     },
     {
         id: 21010031,

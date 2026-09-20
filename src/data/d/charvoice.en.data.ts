@@ -112,6 +112,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Heitao_vo_companio_02_1",
         text: "Miss Truffle, may I... pet your pig? Just one stroke will do. Please hold her still for me; I'm afraid she might run off... Little animals always seem to flee from me.",
+        companioCharId: 5101,
     },
     {
         id: 10018,
@@ -119,6 +120,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Heitao_vo_companio_02_2",
         text: "Thank you... Ah, it's so warm and soft. How nice...",
+        companioCharId: 5101,
     },
     {
         id: 10019,
@@ -126,6 +128,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Heitao_vo_companio_03",
         text: 'I\'m not that "No.0" from the Legion, nor am I your stooge. Leave, as I will never leave with you alive.',
+        companioCharId: 4301,
     },
     {
         id: 10020,
@@ -133,6 +136,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Heitao_vo_companio_04_1",
         text: "I heard you're quite the gourmet. Could you show me some of your recipes? {nickname} always raves about your cooking, and it was genuine, not just flattery.",
+        companioCharId: 5102,
     },
     {
         id: 10021,
@@ -140,6 +144,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Heitao_vo_companio_04_2",
         text: "Wait, is that all? Then why... What's your secret?",
+        companioCharId: 5102,
     },
     {
         id: 10022,
@@ -357,6 +362,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Zhangyu_vo_companio_01",
         text: "You wanna catch me? Why? I'm not a bad girl! I only steal from other thieves. It's no big deal... Hey, stay away from me! Ow! That burnt!",
+        companioCharId: 3201,
     },
     {
         id: 10094,
@@ -364,6 +370,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Zhangyu_vo_companio_02",
         text: "This is for me? Hmm, but you look pretty dangerous, so you'd better keep it. Wait... this scent is making me feel light-headed... My tentacles are going numb... You really are dangerous!",
+        companioCharId: 2101,
     },
     {
         id: 10095,
@@ -371,6 +378,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Zhangyu_vo_companio_03",
         text: "I love the way you talk to your sword! \"Samael, do you like this place? Let's explore more places together!\"\nHey, what's up with you, getting all riled up? Haha, you're a proper laugh!",
+        companioCharId: 1501,
     },
     {
         id: 10096,
@@ -581,6 +589,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Linen_vo_companio_01",
         text: "Keep it short and cut to the chase next time, will you? All this unnecessary mumbling is getting on my nerves.",
+        companioCharId: 4202,
     },
     {
         id: 10126,
@@ -588,6 +597,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Linen_vo_companio_02",
         text: "Good day, ma'am...",
+        companioCharId: 4301,
     },
     {
         id: 10127,
@@ -595,6 +605,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Linen_vo_companio_03",
         text: "You're a top soldier. That's all I've got to say. Also... make sure you look after yourself in your downtime. Chop-chop, you've heard enough, now get out of here.",
+        companioCharId: 4101,
     },
     {
         id: 10128,
@@ -854,6 +865,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Xier_vo_companio_01",
         text: "My favourite flower grows under a dome of eternal warmth. One petal distilled in the evening tea, brings a restful slumber. Yet ten petals are poisonous and have the power to induce eternal sleep. In my dreams, I prune this flower, and upon waking, I am grateful that I will never have to tend to it again.",
+        companioCharId: 5301,
     },
     {
         id: 10165,
@@ -861,6 +873,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Xier_vo_companio_02",
         text: "Marvellous. It amazes me that you are constantly pondering such profound matters. As for myself, I am but a humble servant, concerned only with the minutiae of daily life.",
+        companioCharId: 1501,
     },
     {
         id: 10166,
@@ -868,6 +881,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Xier_vo_companio_03",
         text: "These piles of clutter have long been an eyesore. I'd be delighted if you could take them away. But, before you step into the room, I must insist on a proper cleanup — no objections, and certainly no squirming.",
+        companioCharId: 3301,
     },
     {
         id: 10167,
@@ -1085,6 +1099,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Yuming_vo_companio_01",
         text: "I know not of the history you've forsaken, but our scents are alike. Keep your distance - I find little comfort in my own kind.",
+        companioCharId: 5102,
     },
     {
         id: 10198,
@@ -1092,6 +1107,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Yuming_vo_companio_02",
         text: "We are no longer comrades of old. Like the fleeting wind, people drift by. Best leave yesteryear behind.",
+        companioCharId: 1503,
     },
     {
         id: 10199,
@@ -1099,6 +1115,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Yuming_vo_companio_03",
         text: "Your resolve and adherence to law command my respect. Do moments of doubt ever cloud your certitude?",
+        companioCharId: 3201,
     },
     {
         id: 10200,
@@ -1379,6 +1396,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Saiqi_vo_companio_01",
         text: "I heard you planned a great birthday celebration for Fina. I know that you possess a considerate heart, despite your sharp tongue. Can I join you next time when you prepare a big birthday surprise for her?",
+        companioCharId: 5102,
     },
     {
         id: 10240,
@@ -1386,6 +1404,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Saiqi_vo_companio_02",
         text: "Camilla, you remind me of your noisy yet homey tavern. I'm so blessed to have friends like you guys.",
+        companioCharId: 3202,
     },
     {
         id: 10241,
@@ -1393,6 +1412,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Saiqi_vo_companio_03",
         text: "Are you gonna tell me the story of Elysium? Thank you so much! I wonder what kind of flowers you'd like in return?\nDelicious ones, you say?",
+        companioCharId: 5101,
     },
     {
         id: 10242,
@@ -1659,6 +1679,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Baiheng_vo_companio_01",
         text: "Mr. Randy, in my humble opinion, lethargy and laxity are no less symptoms of illness. They may not trouble you now, but they sow the seeds of future ailments. Perhaps we could engage in some light sparring? A touch of exercise might do you good.",
+        companioCharId: 4202,
     },
     {
         id: 10280,
@@ -1666,6 +1687,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Baiheng_vo_companio_02",
         text: "While a healer may ease affliction, defying fate is beyond us. I can offer a remedy to cool the heart's heat, yet the root of your troubles lies beyond my grasp. It is best to accept and adapt to the flow of time to find your own path to solace...\n ",
+        companioCharId: 4102,
     },
     {
         id: 10281,
@@ -1673,6 +1695,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Baiheng_vo_companio_03",
         text: "You often hear another voice speaking to you? Can others hear it too? How has your slumber been? Has something been weighing on your heart? The mind's afflictions are the most elusive to heal, even with the aid of Zhuyou techniques. But as a healer, I will spare no effort.",
+        companioCharId: 3103,
     },
     {
         id: 10282,
@@ -1960,6 +1983,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Songlu_vo_companio_01",
         text: "You found sprouting potatoes in the bin? Don't throw them away — let's plant them! With a little digging and watering, we'll have lots of potatoes for everyone soon enough!",
+        companioCharId: 3301,
     },
     {
         id: 10323,
@@ -1967,6 +1991,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Songlu_vo_companio_02",
         text: "You're always working so hard. Don't you get hungry? Why not join the Church? I'm sure I'll make your tummy full!",
+        companioCharId: 3101,
     },
     {
         id: 10324,
@@ -1974,6 +1999,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Songlu_vo_companio_03",
         text: "Helloooo! I heard that praying can make one's soul feel uplifted. Personally, I think that a good meal does the same thing. But which one works better, praying or dining?",
+        companioCharId: 1501,
     },
     {
         id: 10325,
@@ -2177,6 +2203,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Landi_vo_companio_01",
         text: "Reporting, Chief Sibylle. Today's tasks have been arranged. If you have any additional orders, I'm ready to carry them out. However, today was quite demanding, so you should take some rest to avoid burning out.",
+        companioCharId: 4301,
     },
     {
         id: 10354,
@@ -2184,6 +2211,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Landi_vo_companio_02",
         text: "Great job on the last mission, but I've received some complaints about damage to public property... I find it kinda awkward to apologise to people on your behalf... After all, I'm a bit shy. Soooo, lovely and kind-hearted Miss Lynn, could you handle these urgent tasks for me? Pretty please with a cherry on top!",
+        companioCharId: 3101,
     },
     {
         id: 10355,
@@ -2191,6 +2219,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Landi_vo_companio_03",
         text: "Wha... How can this be? Maybe I'm just so tired that I'm seeing things now. Might as well file for a work-related injury and take a few more days off.",
+        companioCharId: 1101,
     },
     {
         id: 10356,
@@ -2415,6 +2444,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Xibi_vo_companio_01",
         text: "...It's time we resolve our differences.",
+        companioCharId: 5401,
     },
     {
         id: 10390,
@@ -2702,6 +2732,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Maer_vo_companio_01",
         text: "Look at the fabric, the badge, and the leather! Ms Hilda, you are my angel! If you've got more of these ill-gotten goods that need \"proper disposal\", I'm your girl! You can count on me to take good care of them!",
+        companioCharId: 3102,
     },
     {
         id: 10431,
@@ -2709,6 +2740,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Maer_vo_companio_02",
         text: 'Little Fina! It\'s been ages~ Wanna hear the next chapter of "Snowball the Cat Ranger & Ginger the Cat Detective"? No problem! Let me just grab a stool and settle in for a good tale!',
+        companioCharId: 1801,
     },
     {
         id: 10432,
@@ -2716,6 +2748,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Maer_vo_companio_03",
         text: "I assure you I'm an upstanding citizen, Ms Warden! Never pilfered or plundered, merely collecting some scraps from the bins to quiet my stomach. Even your dedication doesn't extend to rubbish, does it?",
+        companioCharId: 3201,
     },
     {
         id: 10433,
@@ -2723,6 +2756,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅳ",
         res: "char_Maer_vo_companio_04",
         text: "You're living hand to mouth, aren't you...? That's really tough. Would you like to join me in scavenging? Might make things a bit easier...",
+        companioCharId: 3101,
     },
     {
         id: 10434,
@@ -2730,6 +2764,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅴ",
         res: "char_Maer_vo_companio_05",
         text: "Ms Camilla! The kindest and most beautiful lady in Icelake! Could you maybe help me out of a tiny spot of bother... I promise this is the last time! Er, well, the last this month! You wouldn't have the heart to say no, right?",
+        companioCharId: 3202,
     },
     {
         id: 10435,
@@ -2975,6 +3010,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Feina_vo_companio_01",
         text: "Promise me that you'll never, ever, ever... go to that scary place with lots and lots of bad sorcerers, okay?",
+        companioCharId: 5102,
     },
     {
         id: 10470,
@@ -2982,6 +3018,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Feina_vo_companio_02",
         text: "What's that? Is it your elf pet, Miss Hamster? Wow, unbelievable... It must be able to carry you as it flies over the walls of castles.",
+        companioCharId: 5101,
     },
     {
         id: 10471,
@@ -2989,6 +3026,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Feina_vo_companio_03",
         text: 'Miss Lioness, are you trying to wake up the fairy inside the giant sword? Perhaps you need to chant a lot of incantations, like, "O chosen one who awoke the sacred greatsword Samael, destined to be the king of Elysium!"',
+        companioCharId: 1501,
     },
     {
         id: 10473,
@@ -3227,6 +3265,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Yeer_vo_companio_01",
         text: "Yale: H-hello... Your singing is really b-beautiful.\nOliver: Hmph, just another victim.",
+        companioCharId: 1103,
     },
     {
         id: 10507,
@@ -3234,6 +3273,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Yeer_vo_companio_02",
         text: "Yale: Is Filbert... your friend? I have a good friend too. He's as r-reliable as F-Filbert.\nOliver: Wait, seriously?",
+        companioCharId: 5101,
     },
     {
         id: 10508,
@@ -3241,6 +3281,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Yeer_vo_companio_03",
         text: "Yale: Uh... p-please don't be mad, a-all my bomb experiments are up to s-s-s-safety s-standards...",
+        companioCharId: 3201,
     },
     {
         id: 10509,
@@ -3500,6 +3541,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Haier_vo_companio_01",
         text: "I'm the warden and you're the Legion's chief. Together, we're the merciless keepers of the dark order that is the Empire. Their hatred of us means nothing, as long as we serve Hyperborea!",
+        companioCharId: 4301,
     },
     {
         id: 10546,
@@ -3507,6 +3549,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Haier_vo_companio_02",
         text: "We meet again.",
+        companioCharId: 2101,
     },
     {
         id: 10547,
@@ -3514,6 +3557,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Haier_vo_companio_03",
         text: "Tsk, you're Sibylle's adjutant... the one who's always being accused of failing your duties, huh? I can tell that you're hiding your prowess and ambition just so you can stand alongside Sibylle. So what are your ulterior motives.",
+        companioCharId: 4202,
     },
     {
         id: 10548,
@@ -3836,6 +3880,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Nifu_vo_companio_01",
         text: "No soul can outrun its past forever. In time, you will have to confront yours. May you have the strength to face it when that moment arrives.",
+        companioCharId: 5102,
     },
     {
         id: 10594,
@@ -3843,6 +3888,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Nifu_vo_companio_02",
         text: "My dear, you carry an aura I find quite familiar. Could it be that you, like me, hail from bygone days?",
+        companioCharId: 2401,
     },
     {
         id: 10597,
@@ -4151,6 +4197,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Lise_vo_companio_01",
         text: "I can't seem to ignore things that are out of place — I always feel the urge to tidy them up. But your place, Miss Hilda, is an exception. Everything's perfectly in order, and I find that truly admirable.",
+        companioCharId: 3102,
     },
     {
         id: 10641,
@@ -4158,6 +4205,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Lise_vo_companio_02",
         text: "This proposal is remarkably detailed, down to every second accounted for. Following it through must be immensely satisfying. It's just... hard to believe something like this was put together by Lieutenant Colonel Randy.",
+        companioCharId: 4202,
     },
     {
         id: 10643,
@@ -4473,6 +4521,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Tuosi_vo_companio_01",
         text: "How have you been lately?\n...Apologies for the abruptness. We don't actually know each other. I was... merely enquiring for a friend.",
+        companioCharId: 4101,
     },
     {
         id: 10688,
@@ -4480,6 +4529,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Tuosi_vo_companio_02",
         text: "Is that so? You've found a new home and a family who cares for you... That's wonderful. You've broken free of your cage — what a brave soul you are.",
+        companioCharId: 1801,
     },
     {
         id: 10690,
@@ -4844,6 +4894,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Dafu_vo_companio_01",
         text: "I once read medical texts from Huaxu in the capital's library. While their theories differ from those of Hyperborea's medical traditions, they've proven remarkably effective in treatment. There are still parts I don't fully understand — would you mind helping me with them?",
+        companioCharId: 2401,
     },
     {
         id: 10743,
@@ -4851,6 +4902,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Dafu_vo_companio_02",
         text: "Madam Warden, I wonder — does justice that arrives late still deserve to be called justice?",
+        companioCharId: 3201,
     },
     {
         id: 10744,
@@ -4858,6 +4910,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Dafu_vo_companio_03",
         text: "It's been so long. Since I left the Spathatoi, we've barely spoken. How... have you been?",
+        companioCharId: 4301,
     },
     {
         id: 10745,
@@ -4865,6 +4918,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅳ",
         res: "char_Dafu_vo_companio_04",
         text: "Even though I've left the Spathatoi, it remains a place that shaped me. I know forgiveness might be too much to hope for, but I still want to say — I'm sorry.",
+        companioCharId: 1103,
     },
     {
         id: 10746,
@@ -5131,6 +5185,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Kezhou_vo_companio_01",
         text: "They say the best swordsman doesn't even need a sword — anything, a blade of grass, a twig, can become a weapon. I heard you fight with cleaning tools. Guess that makes you a master of the blade too, huh? Mind showing me a trick or two?",
+        companioCharId: 3102,
     },
     {
         id: 10784,
@@ -5138,6 +5193,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Kezhou_vo_companio_02",
         text: "I'm holding onto your old sword for now. When you stop moping around with that gloomy face, I'll give it back — but only if you beat me in a duel. Lose, and it's mine for good.",
+        companioCharId: 4201,
     },
     {
         id: 10785,
@@ -5145,6 +5201,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Kezhou_vo_companio_03",
         text: "A sword can be a friend, a toy, or even a tool for all sorts of things — cutting, prying, shaving. But it should never be your master. Don't let that blade hold you back.",
+        companioCharId: 1501,
     },
     {
         id: 10786,
@@ -5369,6 +5426,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Aote_vo_companio_01",
         text: "Why are you here? Are you alright? How do you feel? You should get some kip. Let me know if you need anything, okay?",
+        companioCharId: 1801,
     },
     {
         id: 10818,
@@ -5376,6 +5434,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Aote_vo_companio_02_1",
         text: "You're the girl who's very close to {nickname}, right? I heard you've been feeling unwell. Do you want to sit down and have a rest?",
+        companioCharId: 5301,
     },
     {
         id: 10819,
@@ -5383,6 +5442,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Aote_vo_companio_02_2",
         text: "If you're hungry, thirsty, or need anything, just say the word. It's no bother — I look after my sickly sister back home all the time. A friend of {nickname}'s is a friend of mine.",
+        companioCharId: 5301,
     },
     {
         id: 10820,
@@ -5390,6 +5450,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Aote_vo_companio_03_1",
         text: "Ms Camilla! What brings you here? Not another urgent request, I hope? We've been worn out lately and could really use a breather...",
+        companioCharId: 3202,
     },
     {
         id: 10821,
@@ -5397,6 +5458,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Aote_vo_companio_03_2",
         text: "Though, if the pay is good, I'm all ears.",
+        companioCharId: 3202,
     },
     {
         id: 10823,
@@ -5677,6 +5739,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Zhiliu_vo_companio_01",
         text: "Your perfume carries a bold, intoxicating sweetness — unrestrained, unapologetic. A striking contrast to the subtle fragrances of Huaxu. I'm intrigued.",
+        companioCharId: 2101,
     },
     {
         id: 10865,
@@ -5684,6 +5747,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Zhiliu_vo_companio_03",
         text: "I saw a trace of someone I once knew in you... No, I must be mistaken. Pay me no mind.",
+        companioCharId: 3202,
     },
     {
         id: 10866,
@@ -5922,6 +5986,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Baonu_vo_companio_02",
         text: "\"Patience is one of the Seven Virtues. Those gifted with patience can discover hidden secrets and accomplish extraordinary... feats...\"\nI can't take it anymore! Don't imitate me dwarf in the name of the Nine Gods I'll cut you in half with Samel if you do that one more time!",
+        companioCharId: 3101,
     },
     {
         id: 10901,
@@ -6181,6 +6246,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Kami_vo_companio_02",
         text: "Everyone's gifted in their own way. Some are born with a knack for comforting others... like you.",
+        companioCharId: 4102,
     },
     {
         id: 10939,
@@ -6188,6 +6254,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Kami_vo_companio_03",
         text: "You don't often make the journey to Icelake. So — what is it this time? After some local specialities? Or just here to catch a show?",
+        companioCharId: 5102,
     },
     {
         id: 10940,
@@ -6524,6 +6591,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Suyi_vo_companio_01",
         text: "Are people from Luca always this forward? We've only just started talking and you're already going in for a hug... N—No! Not yet!",
+        companioCharId: 2101,
     },
     {
         id: 10988,
@@ -6531,6 +6599,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Suyi_vo_companio_02",
         text: "Another new sword!? Do you think we're made of money!? Uh-uh. Begging on your knees won't work. And calling me \"Great-Auntie\" won't save you, either! Not. This. Time.",
+        companioCharId: 1503,
     },
     {
         id: 10989,
@@ -6538,6 +6607,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Suyi_vo_companio_03",
         text: "Your wings... wow. They're gorgeous. But mine aren't bad either. Wanna race?",
+        companioCharId: 5301,
     },
     {
         id: 10990,
@@ -6860,6 +6930,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Fuluo_vo_companio_01",
         text: "Hilda, it offers me great comfort to know that you're by my side. Please... just stay a while longer.",
+        companioCharId: 3102,
     },
     {
         id: 11036,
@@ -6867,6 +6938,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Fuluo_vo_companio_02",
         text: "I know we're the same. There's no need to deny it. I can perceive the blazing fire within you. No matter how hard you try to hide it, I know it's there. The flame of anger that's never extinguished, burning deep inside you.",
+        companioCharId: 5102,
     },
     {
         id: 11037,
@@ -6874,6 +6946,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Fuluo_vo_companio_03",
         text: "What a disappointment... Once a lone wolf rescued by his hand, now reduced to a cringing hound, begging mercy at his betrayer's feet.",
+        companioCharId: 4301,
     },
     {
         id: 11038,
@@ -7217,6 +7290,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Eve_vo_companio_01",
         text: "Look, Miss Blue Birdie~ I can make magical friends too. See? A grey kitty, a little yellow duck... Yeewee!? W—Wait, ducks aren't supposed to have three wings! Shh, little birdie... could you pretend you didn't see that?",
+        companioCharId: 1801,
     },
     {
         id: 11087,
@@ -7224,6 +7298,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Eve_vo_companio_02",
         text: "Yeewee, yeewee! What a cute little piggy. There, there... Great Flower-Hatted General, Commander of All Piggies, could I ride your piggy for just one teeny-tiny moment? Pretty please~?",
+        companioCharId: 5101,
     },
     {
         id: 11088,
@@ -7231,6 +7306,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Eve_vo_companio_03",
         text: "Yeewee... Kitty? Where are you? We miss you so much. Come back soon~",
+        companioCharId: 3104,
     },
     {
         id: 11089,
@@ -7511,6 +7587,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Falu_vo_companio_01",
         text: "Whether you want it or not, whether you can forgive me or not, I owe you, your father, and your comrades an apology. Recovering Avar's recording device is only the beginning. If you want revenge, you can take my life whenever you choose.",
+        companioCharId: 5401,
     },
     {
         id: 11129,
@@ -7518,6 +7595,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Falu_vo_companio_02",
         text: "How many times have I told you not to show up beside me without warning? I react badly to sudden contact. If I punch you on reflex one day, don't blame me.",
+        companioCharId: 2102,
     },
     {
         id: 11130,
@@ -7525,6 +7603,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅲ",
         res: "char_Falu_vo_companio_03",
         text: "It seems even killers are not all the same. I am only a shadow wandering in the dark. But you... you have someone to protect, and a bond you refuse to let go of.",
+        companioCharId: 3102,
     },
     {
         id: 11131,
@@ -7931,6 +8010,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅰ",
         res: "char_Shuimu_vo_companio_01",
         text: "That dry scent... Oh, it's you. Long time no see. Still planning to take me away in handcuffs? That sounds like a fun idea...\nAfter all, even if I gave you a thousand chances, I would still escape from your grasp... Wouldn't you agree, Ms. Warden?",
+        companioCharId: 3201,
     },
     {
         id: 21010029,
@@ -7938,6 +8018,7 @@ export const charVoiceData_en: CharVoice[] = [
         name: "Chitchat: Chance Encounter Ⅱ",
         res: "char_Shuimu_vo_companio_02",
         text: "You're scared of me? Don't worry. I'll make you love me eventually. Come, have a whiff of the perfume I've blended. It smells very sweet, and I believe you'll love it.",
+        companioCharId: 2301,
     },
     {
         id: 21010031,

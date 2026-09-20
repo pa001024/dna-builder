@@ -282,6 +282,35 @@ watch(
     { immediate: true }
 )
 
+/**
+ * 磁贴底图列表：/imgs/webp/ 下全部 T_Activity_PhotoEvent_*.webp（写死清单，新增图片需手动补录）。
+ */
+const TILE_IMAGES = [
+    "/imgs/webp/T_Activity_PhotoEvent_1.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_2.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_3.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_4.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_5.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_6.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_7.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_8.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_9.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_10.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_11.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_12.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_13.webp",
+    "/imgs/webp/T_Activity_PhotoEvent_14.webp",
+]
+
+/**
+ * 取第 index 个磁贴的底图：底图按磁贴位置循环分配（磁贴多于图片时从头复用）。
+ * @param index 磁贴在 tileList 中的位置
+ * @returns 底图 URL；清单为空时返回 undefined（退回纯渐变底）
+ */
+function tileImageAt(index: number): string | undefined {
+    return TILE_IMAGES.length ? TILE_IMAGES[index % TILE_IMAGES.length] : undefined
+}
+
 /** 长按触发拖拽的时长（毫秒）。 */
 const LONG_PRESS_MS = 380
 /** 长按等待期内允许的指针位移（px，超出视为滚动/滑动意图而取消长按）。 */
@@ -464,6 +493,9 @@ function onGridContextMenu(event: MouseEvent) {
 /** 幽灵卡片的渲染数据：当前拖拽的磁贴项。 */
 const ghostTile = computed(() => tileList.value.find(tile => tile.name === dragState.name) ?? null)
 
+/** 幽灵卡片对应磁贴在 tileList 中的位置（用于取与原磁贴相同的底图）。 */
+const ghostIndex = computed(() => tileList.value.findIndex(tile => tile.name === dragState.name))
+
 /** 幽灵卡片样式：外层仅做定位（以抓取点为锚跟随指针），缩放/倾斜交给内层卡片动画。 */
 const ghostStyle = computed(() => ({
     width: `${dragState.w}px`,
@@ -584,6 +616,7 @@ onBeforeUnmount(() => {
                         :description="$t(`${item.name}.desc`)"
                         :gradient="item.gradient"
                         :glow="item.glow"
+                        :image="tileImageAt(index)"
                     />
                     <template #menu>
                         <!-- 切换颜色：弹出调色板子菜单 -->
@@ -667,6 +700,7 @@ onBeforeUnmount(() => {
                         :description="$t(`${ghostTile.name}.desc`)"
                         :gradient="ghostTile.gradient"
                         :glow="ghostTile.glow"
+                        :image="ghostIndex >= 0 ? tileImageAt(ghostIndex) : undefined"
                         :tilt="false"
                     />
                 </div>

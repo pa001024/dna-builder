@@ -6990,7 +6990,10 @@
         "photo_task_reward": "任務報酬",
         "photo_task_unlock": "解放時間",
         "photo_tasks": "撮影任務",
-        "rule": "ルール"
+        "rule": "ルール",
+        "sign_in": "ログイン",
+        "sign_in_big": "大報酬",
+        "sign_in_day": "第 {{day}} 日"
     },
     "event-detail": {
         "title": "イベント詳細"

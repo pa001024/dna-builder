@@ -29,6 +29,8 @@ const props = withDefaults(
         gradient?: string
         /** 辉光强调色（悬停光晕与描边） */
         glow?: string
+        /** 磁贴底图 URL（铺满内框，位于渐变底之上、全息特效与内容之下） */
+        image?: string
         /** 是否启用 3D 倾斜跟随（默认开启，prefers-reduced-motion 时自动关闭） */
         tilt?: boolean
     }>(),
@@ -222,6 +224,13 @@ const foilStyle = computed(() => ({
             <span class="po-card__bg">
                 <!-- 中心内框：留边距 rounded-sm p-3，承载内容与全息特效（非全卡） -->
                 <span class="po-card__panel">
+                    <!-- 底图层：半透明背景图，透出下层渐变底色 -->
+                    <span
+                        v-if="image"
+                        class="po-card__img"
+                        :style="{ backgroundImage: `url('${image}')` }"
+                        aria-hidden="true"
+                    />
                     <span class="po-card__holo" :style="holoStyle" aria-hidden="true" />
                     <span v-if="size === 'large'" class="po-card__foil" :style="foilStyle" aria-hidden="true" />
                     <span class="po-card__panel-content">
@@ -328,6 +337,17 @@ const foilStyle = computed(() => ({
     justify-content: flex-start;
     gap: 0.85rem;
     text-align: left;
+}
+
+/* 底图层：cover 铺满内框，半透明以透出渐变底色，z-index 0 压在全息/箔/内容之下 */
+.po-card__img {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.45;
 }
 
 /* 稀有全息层：

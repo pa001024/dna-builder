@@ -7108,7 +7108,10 @@
         "photo_task_reward": "Récompense",
         "photo_task_unlock": "Déblocage",
         "photo_tasks": "Tâches photo",
-        "rule": "Règle"
+        "rule": "Règle",
+        "sign_in": "Connexion quotidienne",
+        "sign_in_big": "Grosse récompense",
+        "sign_in_day": "Jour {{day}}"
     },
     "event-detail": {
         "title": "Détails de l'événement"
