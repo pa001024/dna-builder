@@ -3,7 +3,7 @@ use crate::submodules::script::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicIsize, Ordering};
 use std::sync::{Arc, LazyLock, Mutex, RwLock};
 use std::time::{Duration, Instant};
 use tauri::Emitter;
@@ -178,6 +178,16 @@ const HID_USAGE_GENERIC_KEYBOARD: u16 = 0x06;
 const RI_KEY_E0: u16 = 0x02;
 #[cfg(target_os = "windows")]
 const RI_KEY_E1: u16 = 0x04;
+
+/// 键盘 Raw Input 的目标窗口句柄(0 表示热键钩子尚未启动),供重新注册时使用。
+#[cfg(target_os = "windows")]
+static RAW_INPUT_WINDOW: AtomicIsize = AtomicIsize::new(0);
+
+/// 读取热键监听窗口的原始句柄(0 表示尚未创建)。
+#[cfg(target_os = "windows")]
+fn _raw_input_window_handle() -> isize {
+    RAW_INPUT_WINDOW.load(Ordering::Acquire)
+}
 
 /// 解析 AHK 风格热键（支持 `^ ! + #` 与基础按键名）。
 fn _parse_ahk_hotkey(raw: &str) -> Result<ParsedHotkey, String> {
@@ -1462,7 +1472,9 @@ fn _create_raw_input_window(
 }
 
 #[cfg(target_os = "windows")]
-/// 注册键盘 Raw Input 设备，让后台线程在前后台都收到键盘输入。
+/// 把「键盘」这个 Raw Input 设备类的目标窗口设为给定窗口。
+///
+/// 同一设备类在进程内只有一个目标窗口,且以最后一次调用为准,调用方需要对时序负责。
 fn _register_keyboard_raw_input(hwnd: HWND) -> Result<(), String> {
     let devices = [RAWINPUTDEVICE {
         usUsagePage: HID_USAGE_PAGE_GENERIC,
@@ -1473,6 +1485,29 @@ fn _register_keyboard_raw_input(hwnd: HWND) -> Result<(), String> {
 
     unsafe { RegisterRawInputDevices(&devices, std::mem::size_of::<RAWINPUTDEVICE>() as u32) }
         .map_err(|error| format!("注册键盘 Raw Input 失败: {error}"))
+}
+
+/// 把键盘 Raw Input 的目标窗口重新注册为脚本热键的监听窗口。
+///
+/// 同一设备类在进程内只认最后一次注册的目标窗口,别的事件循环(如浮窗的 winit)会把目标改成
+/// 自己的消息窗口,所以凡是有可能发生这种改动的时机都要调用本函数把目标改回来。
+/// 钩子尚未启动时不做任何事(那种情况下热键窗口稍后注册时天然是最后一份)。
+///
+/// # 返回
+/// 重新注册失败时返回错误描述;钩子未启动时返回 `Ok(())`。
+pub fn reclaim_script_hotkey_raw_input() -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        let raw = _raw_input_window_handle();
+        if raw == 0 {
+            return Ok(());
+        }
+        _register_keyboard_raw_input(HWND(raw as *mut _))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(())
+    }
 }
 
 #[cfg(target_os = "windows")]
@@ -1581,7 +1616,9 @@ unsafe extern "system" fn _low_level_mouse_proc(
 #[cfg(target_os = "windows")]
 fn _ensure_hook_thread_started() -> Result<(), String> {
     if _hotkey_state().hook_started.load(Ordering::Acquire) {
-        return Ok(());
+        // 钩子已在运行:仍要重新注册一次键盘的目标窗口(随时可能被别的事件循环改走)。
+        // 调用廉价且幂等,所以每次同步热键配置都做一遍。
+        return reclaim_script_hotkey_raw_input();
     }
 
     let (ready_tx, ready_rx) = std::sync::mpsc::channel::<Result<(), String>>();
@@ -1603,6 +1640,8 @@ fn _ensure_hook_thread_started() -> Result<(), String> {
                     return;
                 }
             };
+            // 记下目标窗口句柄,供重新注册时使用。
+            RAW_INPUT_WINDOW.store(raw_input_window.0 as isize, Ordering::Release);
 
             if let Err(error) = _register_keyboard_raw_input(raw_input_window) {
                 let _ = ready_tx.send(Err(error));
@@ -1908,6 +1947,39 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(_raw_keyboard_to_vk(&raw), Some(VK_RCONTROL.0 as u32));
+    }
+
+    /// 键盘 Raw Input 的目标窗口被改成别的窗口后,`reclaim_script_hotkey_raw_input` 能改回来。
+    #[test]
+    fn reclaim_raw_input_keyboard_restores_target() {
+        if _ensure_hook_thread_started().is_err() {
+            // 无真实桌面/无窗口会话(CI、服务账号)时跳过:本用例依赖真实的 Win32 消息窗口。
+            return;
+        }
+        let handle = _raw_input_window_handle();
+        assert_ne!(handle, 0, "钩子启动后应记下 Raw Input 目标窗口句柄");
+
+        // 把键盘设备类指向 NULL(前台窗口),模拟目标窗口被其他事件循环改走。
+        let stolen = [RAWINPUTDEVICE {
+            usUsagePage: HID_USAGE_PAGE_GENERIC,
+            usUsage: HID_USAGE_GENERIC_KEYBOARD,
+            dwFlags: RIDEV_DEVNOTIFY,
+            hwndTarget: HWND::default(),
+        }];
+        let stolen_result = unsafe {
+            RegisterRawInputDevices(&stolen, std::mem::size_of::<RAWINPUTDEVICE>() as u32)
+        };
+        assert!(
+            stolen_result.is_ok(),
+            "改写目标窗口应成功: {stolen_result:?}"
+        );
+
+        reclaim_script_hotkey_raw_input().expect("应能重新注册回热键监听窗口");
+        assert_eq!(
+            _raw_input_window_handle(),
+            handle,
+            "重新注册后目标窗口句柄不应变化"
+        );
     }
 
     #[test]

@@ -5,7 +5,7 @@ use std::time::{Duration, Instant};
 
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use serde::{Deserialize, Serialize};
-use windows::Win32::Foundation::{COLORREF, HWND, LPARAM, POINT, RECT, SIZE};
+use windows::Win32::Foundation::{COLORREF, CloseHandle, HWND, LPARAM, POINT, RECT, SIZE};
 use windows::Win32::Graphics::Gdi::{
     AC_SRC_ALPHA, AC_SRC_OVER, ANTIALIASED_QUALITY, BI_RGB, BITMAPINFO, BITMAPINFOHEADER,
     BLENDFUNCTION, CLIP_DEFAULT_PRECIS, ClientToScreen, CreateCompatibleDC, CreateDIBSection,
@@ -27,6 +27,8 @@ use windows::Win32::UI::WindowsAndMessaging::{
 };
 use windows::core::{BOOL, PCWSTR};
 
+use crate::submodules::hotkey::reclaim_script_hotkey_raw_input;
+
 use winit::application::ApplicationHandler;
 use winit::dpi::LogicalSize;
 use winit::event::WindowEvent;
@@ -37,20 +39,16 @@ use winit::window::{Window, WindowId, WindowLevel};
 // ---------------------------------------------------------------------------
 // 通用 Win32 游戏浮窗(技能 CD 倒计时)。
 //
-// 相对于最初版本的四点演进:
-//
-// 1. 坐标改为"相对游戏窗口客户区的百分比"
+// 1. 坐标:相对游戏窗口客户区的百分比。
 //    运行时定位游戏窗口(进程白名单,默认 EM-Win64-Shipping.exe / EM.exe)的客户区,
 //    再按 anchorXPercent / anchorYPercent(浮窗左上角)换算成屏幕物理像素。游戏窗口移动、
 //    分辨率或窗口尺寸变化时浮窗自动跟随;同时钳制在客户区内,避免锚点 100% 时飘出屏幕。
 //
-// 2. 触发键改为"任意多条按键绑定"
+// 2. 触发键:任意多条按键绑定。
 //    config.keys 是 KeyBinding 列表(虚拟键码 + 标签 + 完整 CD + 是否启用),后台逐键轮询
 //    上升沿(带防抖),每条绑定对应浮窗里的一行,互不干扰;改设置即时生效且不打断进行中的倒计时。
 //
-// 3. 绘制改为"超采样 + 逐像素 alpha 分层窗口"
-//    旧实现直接往窗口 DC 画并靠 LWA_COLORKEY 把黑色当透明,圆形/文字是硬边且每次 SetWindowPos
-//    都会闪。现在分三步:
+// 3. 绘制:超采样 + 逐像素 alpha 分层窗口,分三步:
 //      a. 在 SUPERSAMPLE 倍尺寸的离屏 DIB 上画两遍完全相同的几何:
 //         颜色层(颜色按各自不透明度预乘)与覆盖度层(不透明度写为灰度);
 //      b. 盒式降采样成 32bpp 预乘 ARGB:alpha = 覆盖度均值,颜色 = 颜色均值(已预乘),
@@ -58,27 +56,22 @@ use winit::window::{Window, WindowId, WindowLevel};
 //      c. UpdateLayeredWindow 一次性提交位置/尺寸/像素,双缓冲无闪烁,位置改动实时生效。
 //    所有 GDI 资源(字体/画刷/离屏位图)跨帧复用,内容与位置都没变时跳过重绘。
 //
-// 4. 窗口改为交给 winit 事件循环管理(见下)
-//    之前是"手写 CreateWindowExW + 自己拿 sleep 轮询"的野路子:工作线程没有消息循环,
-//    凡是"投递型"的窗口请求(典型是 ShowWindowAsync)都只会躺在队列里永不执行,浮窗隐藏不掉;
-//    系统广播消息(WM_DISPLAYCHANGE / WM_SETTINGCHANGE …)也会一直积压。当时只能靠一个
-//    每帧 PeekMessageW 的手写消息泵打补丁。
-//    现在浮窗线程直接跑一个 winit EventLoop:
-//      - 窗口由 winit 创建/持有,显隐走 Window::set_visible —— winit 内部对同线程调用是
-//        内联执行,且用的是同步 ShowWindow(SW_SHOWNOACTIVATE / SW_HIDE)(既不抢焦点也不会丢请求);
-//      - 全部 WM_* 由 winit 派发,不再需要任何手写消息泵;
-//      - 帧节拍改用 ControlFlow::WaitUntil(+ EventLoopProxy 唤醒),不再是 sleep 轮询。
-//    Tauri(tao)已占用主线程,所以这里必须用 EventLoopBuilderExtWindows::any_thread(true)
-//    在浮窗线程上建循环;另加 with_dpi_aware(false),进程 DPI 感知由 Tauri 决定,浮窗不该去动
-//    这个全局设置(绘制本来就全程走物理像素)。
-//    **注意 winit 的 EventLoop 每进程只能创建一次**(重复调用直接报 RecreationAttempt),
-//    所以"停用就退出循环、下次启用再建"是行不通的:循环与窗口在首次启用时建好后常驻,
-//    停用只是隐藏窗口并把节拍降到 IDLE_TICK_INTERVAL。
-//    另注意 winit 管的是"窗口生命周期与消息",**像素仍然是 UpdateLayeredWindow 提交的**:
-//    winit 在 Windows 上的 transparent 走的是 DwmEnableBlurBehindWindow 模糊穿透,拿不到
-//    逐像素 alpha,所以浮窗的 WS_EX_LAYERED 由 set_cursor_hittest(false) 打开
-//    (winit 的 WindowFlags::IGNORE_CURSOR_EVENT 会同时置上 WS_EX_TRANSPARENT),
-//    WS_EX_NOACTIVATE / WS_EX_TOOLWINDOW 则自己补(见 apply_overlay_ex_style)。
+// 4. 窗口:浮窗线程跑一个 winit EventLoop(窗口创建/持有/显隐与 WM_* 派发都归它)。
+//    - 显隐走 Window::set_visible:winit 对同线程调用内联执行,内部是同步
+//      ShowWindow(SW_SHOWNOACTIVATE / SW_HIDE),既不抢焦点也不会丢请求;
+//    - 帧节拍用 ControlFlow::WaitUntil(+ EventLoopProxy 唤醒)。
+//    - Tauri(tao)已占用主线程,所以用 EventLoopBuilderExtWindows::any_thread(true)
+//      在浮窗线程上建循环;另加 with_dpi_aware(false),进程 DPI 感知由 Tauri 决定,
+//      浮窗不该去动这个全局设置(绘制本来就全程走物理像素)。
+//    - **EventLoop 每进程只能创建一次**(重复调用直接报 RecreationAttempt),所以循环与窗口
+//      在首次启用时建好后常驻,停用只是隐藏窗口并把节拍降到 IDLE_TICK_INTERVAL。
+//    - winit 管的是"窗口生命周期与消息",**像素仍然是 UpdateLayeredWindow 提交的**:
+//      winit 在 Windows 上的 transparent 走的是 DwmEnableBlurBehindWindow 模糊穿透,拿不到
+//      逐像素 alpha,所以浮窗的 WS_EX_LAYERED 由 set_cursor_hittest(false) 打开
+//      (winit 的 WindowFlags::IGNORE_CURSOR_EVENT 会同时置上 WS_EX_TRANSPARENT),
+//      WS_EX_NOACTIVATE / WS_EX_TOOLWINDOW 则自己补(见 apply_overlay_ex_style)。
+//    - EventLoop 创建时 winit 会把鼠标/键盘 Raw Input 注册到自己的消息窗口,键盘要重新注册
+//      回脚本热键的监听窗口(见 reclaim_script_hotkey_raw_input)。
 //
 // 说明:仓库的 Windows FFI 统一走 windows crate,不引入旧版 winapi;
 // winit Window 与 HWND 都只归浮窗线程所有,跨线程只通过 Mutex + EventLoopProxy 交互。
@@ -345,6 +338,8 @@ fn collect_game_pids(process_names: &[String]) -> Vec<u32> {
                 }
             }
         }
+        // 快照必须显式关闭:`GameTracker::sync` 每秒调用本函数一次,漏掉就是每秒泄漏一个内核句柄。
+        let _ = CloseHandle(snapshot);
     }
     result
 }
@@ -1500,15 +1495,14 @@ fn hide_overlay(core: &mut FloatyCore, window: &Window) {
 
 /// 浮窗应用:一拍完成"推进 CD → 检测按键 → 渲染 → 维护窗口生命周期"。
 ///
-/// 生命周期与"每次 enable 起线程"的旧实现不同:事件循环进程内只能创建一次,所以窗口与循环都在
-/// **首次启用**时建好后一直留着。`disable()` 只是把窗口藏起来并降到慢速探测,`set()` 再把它唤醒,
-/// 全程不需要重建任何窗口/线程。
+/// 事件循环进程内只能创建一次,所以窗口与循环都在**首次启用**时建好后一直留着:
+/// `disable()` 只是把窗口藏起来并降到慢速探测,`set()` 再把它唤醒,全程不重建任何窗口/线程。
 struct OverlayApp {
     /// 与 Tauri 命令线程共享的内核状态。
     core: Arc<Mutex<FloatyCore>>,
     /// 浮窗窗口(由 winit 持有;None 表示尚未创建)。
     window: Option<Window>,
-    /// 下一次渲染的时刻(由 `ControlFlow::WaitUntil` 驱动,不再是 sleep 轮询)。
+    /// 下一次渲染的时刻(由 `ControlFlow::WaitUntil` 驱动)。
     next_tick: Instant,
 }
 
@@ -1619,19 +1613,14 @@ impl ApplicationHandler<OverlayEvent> for OverlayApp {
 
 /// 浮窗线程入口:在**本线程**上建一个 winit 事件循环,并一直跑到进程结束。
 ///
-/// 三处不得不这样写的约束:
-///
-/// 1. Tauri(tao)已经占用主线程,所以只能用 `EventLoopBuilderExtWindows::any_thread(true)`
-///    把循环建在浮窗线程上 —— winit 在非主线程建循环会直接 panic,而 panic 信息本身就把
-///    `any_thread` 列为官方逃生口(「If you absolutely need to create an EventLoop on a
-///    different thread」)。代价是该线程创建的窗口绑定在这个线程上(线程结束即随之销毁),
-///    由第 3 条可知这条线程本来也不会结束。
+/// 1. Tauri(tao)已占用主线程,所以用 `EventLoopBuilderExtWindows::any_thread(true)` 把循环
+///    建在浮窗线程上(winit 在非主线程建循环会 panic)。该线程创建的窗口绑定在本线程上,
+///    而本线程常驻到进程结束。
 /// 2. 关掉 winit 的 DPI 设置:进程级 DPI 感知由 Tauri 决定,浮窗全程按物理像素绘制,
 ///    不该去动这个全局设置。
 /// 3. **`EventLoopBuilder::build()` 每个进程只能成功一次**(winit 内部用 `EVENT_LOOP_CREATED`
-///    这个全局标记做了 `swap`,重复调用直接返回 `EventLoopError::RecreationAttempt`,非 web 平台
-///    没有重置入口)。所以这里绝对不能"停用时退出循环、下次启用再建一个" —— 那样浮窗只能工作
-///    一轮。循环建好后常驻,停用只是隐藏窗口并放慢节拍。
+///    全局标记做 `swap`,重复调用返回 `EventLoopError::RecreationAttempt`,非 web 平台没有
+///    重置入口)。循环建好后常驻,停用只是隐藏窗口并放慢节拍。
 ///
 /// 线程本身也就是进程生命周期的;`SESSION` 因此在首次启用后一直保留(停用时 `enabled=false`)。
 fn overlay_loop(core_arc: Arc<Mutex<FloatyCore>>) {
@@ -1645,6 +1634,12 @@ fn overlay_loop(core_arc: Arc<Mutex<FloatyCore>>) {
             return;
         }
     };
+
+    // winit 建 EventLoop 时会把「鼠标 + 键盘」两个 Raw Input 设备类注册到自己的消息窗口,
+    // 而同一设备类在进程内只认最后一次注册的目标窗口;这里再注册一次,把键盘指向热键监听窗口。
+    if let Err(error) = reclaim_script_hotkey_raw_input() {
+        eprintln!("恢复脚本热键的键盘 Raw Input 注册失败: {error}");
+    }
 
     // 回填 proxy,让 Tauri 命令线程可以立刻唤醒事件循环(而不是等下一拍)。
     // 这一步必须在 run_app 之前完成:循环一旦进入等待,就只能靠这个 proxy 被唤醒了。
@@ -2373,7 +2368,6 @@ mod tests {
 //     / WS_EX_TRANSPARENT(点击穿透)/ WS_EX_NOACTIVATE / WS_EX_TOOLWINDOW;
 //   - disable() 之后窗口被隐藏(但窗口与会话保留,因为 winit 的 EventLoop 进程内不能重建);
 //   - 反复开关多轮仍然正常,且复用同一个窗口句柄(不泄漏窗口)。
-// 这几条正是之前手写消息泵那版最容易出错的地方,所以留成可重复执行的检查。
 // ---------------------------------------------------------------------------
 #[cfg(test)]
 mod smoke {
@@ -2485,8 +2479,7 @@ mod smoke {
 
     /// 反复开关。
     ///
-    /// winit 的 `EventLoop` 每进程只能创建一次,所以"停用就退出循环、下次再建一个"会直接失败
-    /// (`EventLoop can't be recreated`)。这个用例确认多轮开关都能正常显示/隐藏,
+    /// `EventLoop` 每进程只能创建一次。这个用例确认多轮开关都能正常显示/隐藏,
     /// 而且复用同一个窗口句柄(既没有重建、也没有泄漏窗口)。
     #[test]
     #[ignore = "需要真实 Windows 桌面,手动运行"]
