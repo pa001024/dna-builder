@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, ref, watch } from "vue"
 
 const props = withDefaults(
@@ -29,6 +30,8 @@ const emit = defineEmits<{
      */
     "enter-chat": []
 }>()
+
+const { t } = useTranslation()
 
 /** 文本域自适应高度的上限（px），约 6 行；超出后由文本域内部滚动 */
 const MAX_TEXTAREA_HEIGHT = 168
@@ -94,10 +97,10 @@ function handleAction() {
  */
 const actionTitle = computed(() => {
     if (props.busy) {
-        return "停止检索"
+        return t("dbAgent.ui.stopSearch")
     }
 
-    return canSubmit.value ? props.submitLabel : "进入对话"
+    return canSubmit.value ? props.submitLabel : t("dbAgent.ui.enterChat")
 })
 
 /**

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, ref } from "vue"
 import type { AskUserAnswer, AskUserQuestion, AskUserRequest } from "@/utils/db-ask-user"
 
@@ -27,6 +28,8 @@ const emit = defineEmits<{
     /** 用户跳过整张卡片 */
     skip: []
 }>()
+
+const { t } = useTranslation()
 
 /** 题号 → 已选选项 id */
 const selected = ref<Record<string, string[]>>({})
@@ -175,7 +178,7 @@ const hasMultipleQuestion = computed(() => props.request.questions.some(question
         <div class="flex items-baseline gap-2">
             <Icon icon="ri:questionnaire-line" class="h-3.5 w-3.5 shrink-0 translate-y-0.5 text-primary" />
             <p class="text-[10px] uppercase tracking-[0.2em] text-primary/70">
-                {{ request.title || "请选择后再继续检索" }}
+                {{ request.title || $t("dbAgent.ui.askDefaultTitle") }}
             </p>
         </div>
 
@@ -214,7 +217,7 @@ const hasMultipleQuestion = computed(() => props.request.questions.some(question
                     type="text"
                     spellcheck="false"
                     class="w-full border border-base-content/15 bg-transparent px-2 py-1.5 text-xs leading-5 text-base-content outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary/55 disabled:opacity-50"
-                    :placeholder="question.options.length ? '或自己输入…' : '输入内容…'"
+                    :placeholder="question.options.length ? $t('dbAgent.ui.askCustomPlaceholder') : $t('dbAgent.ui.askInputPlaceholder')"
                     :disabled="props.busy"
                     @input="handleCustomInput(question.id, $event)"
                     @keydown="handleKeydown(question, $event)"
@@ -232,7 +235,7 @@ const hasMultipleQuestion = computed(() => props.request.questions.some(question
                 :disabled="props.busy"
                 @click="emit('skip')"
             >
-                跳过，直接检索
+                {{ $t("dbAgent.ui.askSkip") }}
             </button>
 
             <button
@@ -247,7 +250,7 @@ const hasMultipleQuestion = computed(() => props.request.questions.some(question
                 :disabled="props.busy || !hasAnyAnswer"
                 @click="submitAll"
             >
-                {{ props.busy ? "检索中…" : "提交选择" }}
+                {{ props.busy ? $t("dbAgent.ui.askSubmitting") : $t("dbAgent.ui.askSubmit") }}
             </button>
         </div>
     </div>

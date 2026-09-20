@@ -168,4 +168,8 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 - 注释一律中文 JSDoc（遵循 AGENTS.md）。
 - 图标只能用已注册的（见 `src/components/Icon.vue`）；需要新图标时**不要自行运行 icon_tool**，在结果报告中列出所需图标名（如 `ri:sword-line`），由主会话统一添加。
 - 不要运行 `pnpm lint` / `pnpm test` / `pnpm dev`，由主会话统一验证。
-- 已完成改造的参考页：DBCharListView、DBCharDetailView、DBCharDetailItem、CharSkillShow、AniTabs、ResourceCostItem、SourceDetailDialog、MonsterItem、WeaponItem（与 ModItem 同构）、DBView（db-rise 风格，可对照但不必改动）。
+- 已完成改造的参考页：DBCharListView、DBCharDetailView、DBCharDetailItem、CharSkillShow、AniTabs、ResourceCostItem、SourceDetailDialog、MonsterItem、WeaponItem（与 ModItem 同构）、DBEventDetailItem、LimitedPrizeSimulator、DBView（db-rise 风格，可对照但不必改动）。
+- 内嵌在已迁移页面里的小组件（活动页的模拟/解谜类）同样按「外层区块卡 + SectionHeader(no-animate compact) + 内层小卡/属性格」改造，
+  根元素用 `<section>`，交给宿主的 `.stagger-rise` 做入场，自己不加 `animate-ef-rise`。
+- 动作按钮（抽卡/重置这类非筛选操作）也走方章，不要用 daisyUI `btn`；禁用态用 `disabled:cursor-not-allowed disabled:opacity-40`
+  并在 `:class` 里同时降级边框与文字色（原生 disabled 仍会命中 `:hover`）。

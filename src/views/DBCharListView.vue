@@ -124,29 +124,46 @@ const factions = computed(() => {
     return Array.from(factionSet).sort()
 })
 
+/**
+ * 关键词命中程度，数值越小越靠前。
+ * @param char 角色
+ * @param q 已去除首尾空白的关键词
+ * @returns 0=ID 完全相等，1=ID 前缀命中，2=其余命中
+ */
+function keywordRank(char: (typeof charData)[number], q: string): number {
+    if (!q) {
+        return 2
+    }
+
+    const id = String(char.id)
+    if (id === q) {
+        return 0
+    }
+
+    return id.startsWith(q) ? 1 : 2
+}
+
 // 过滤角色列表
 const filteredChars = computed(() => {
-    return charData.filter(char => {
+    const q = searchKeyword.value.trim()
+
+    const matched = charData.filter(char => {
         // 搜索筛选
         let matchKeyword = false
-        if (searchKeyword.value === "") {
+        if (q === "") {
+            matchKeyword = true
+        } else if (String(char.id).includes(q)) {
+            // ID 匹配：角色 ID 为纯数字，支持完整或部分匹配
+            matchKeyword = true
+        } else if (char.名称.includes(q)) {
+            // 直接中文匹配
+            matchKeyword = true
+        } else if (matchPinyin(char.名称, q).match) {
+            // 拼音匹配（全拼/首字母）
             matchKeyword = true
         } else {
-            const q = searchKeyword.value
-            // 直接中文匹配
-            if (char.名称.includes(q)) {
-                matchKeyword = true
-            } else {
-                // 拼音匹配（全拼/首字母）
-                const nameMatch = matchPinyin(char.名称, q).match
-                if (nameMatch) {
-                    matchKeyword = true
-                } else {
-                    // 尝试匹配别名
-                    const aliasMatch = char.别名 && matchPinyin(char.别名, q).match
-                    matchKeyword = Boolean(aliasMatch)
-                }
-            }
+            // 尝试匹配别名
+            matchKeyword = Boolean(char.别名 && matchPinyin(char.别名, q).match)
         }
 
         const matchElem = selectedElem.value === "" || char.属性 === selectedElem.value
@@ -156,6 +173,9 @@ const filteredChars = computed(() => {
         const matchFaction = selectedFaction.value === "" || char.阵营 === selectedFaction.value
         return matchKeyword && matchElem && matchVersion && matchTag && matchProficiency && matchFaction
     })
+
+    // 按 ID 输入的关键词把精确命中排在最前，便于按 ID 定位角色
+    return q === "" ? matched : matched.slice().sort((a, b) => keywordRank(a, q) - keywordRank(b, q))
 })
 
 useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
@@ -179,7 +199,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索角色名称/别名（支持拼音）..."
+                            placeholder="搜索角色名称/别名/ID（支持拼音）..."
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span

@@ -50,7 +50,14 @@ import { formatModLimit } from "@/utils/mod-limit"
 import { getRelatedMonstersByMonsterTagId } from "@/utils/monster-tag-utils"
 import { getPinyin, getPinyinFirst } from "@/utils/pinyin-utils"
 
+/** 纯数字查询的判定式：命中后才走 ID 精确/包含检索 */
+const ID_QUERY_PATTERN = /^\d+$/
+/** 启用 ID 包含匹配的最短位数：更短的数字命中过广，只保留精确匹配 */
+const ID_PARTIAL_MIN_LENGTH = 3
+
 interface DBSearchEntry extends DBGlobalSearchOption {
+    /** 条目的纯数字 ID（取自 id 冒号后段，非数字为空串），供 ID 精确检索 */
+    idText: string
     searchText: string
     pinyinFull: string
     pinyinFirst: string
@@ -78,14 +85,20 @@ export interface GlobalSearchPageItem {
  */
 export class GlobalSearchService {
     private readonly fuse: Fuse<DBSearchEntry>
+    /** 带数字 ID 的条目：数字查询时先在这里做精确/包含命中 */
+    private readonly idEntries: DBSearchEntry[]
 
     constructor() {
         const entries = this.buildSearchEntries()
         this.fuse = this.createFuse(entries)
+        this.idEntries = entries.filter(entry => entry.idText !== "")
     }
 
     /**
      * 执行全局检索并返回排序后的候选项。
+     *
+     * 纯数字查询先按 ID 精确命中、再按 ID 包含命中，最后才补模糊结果：
+     * 模糊检索对同号段的长 ID 噪声极多，否则目标条目会被挤出结果集。
      */
     search(query: string, limit = 50): DBGlobalSearchOption[] {
         const keyword = query.trim()
@@ -93,8 +106,45 @@ export class GlobalSearchService {
             return []
         }
 
-        return this.fuse
-            .search(keyword, { limit })
+        const seen = new Set<string>()
+        const idMatched: DBGlobalSearchOption[] = []
+
+        /** 收集候选项，已收录的条目跳过 */
+        const collect = (entry: DBSearchEntry): boolean => {
+            if (seen.has(entry.id)) {
+                return false
+            }
+            seen.add(entry.id)
+            idMatched.push({
+                id: entry.id,
+                title: entry.title,
+                subtitle: entry.subtitle,
+                typeLabel: entry.typeLabel,
+                path: entry.path,
+            })
+            return true
+        }
+
+        if (ID_QUERY_PATTERN.test(keyword)) {
+            for (const entry of this.idEntries) {
+                if (entry.idText === keyword) {
+                    collect(entry)
+                }
+            }
+
+            if (keyword.length >= ID_PARTIAL_MIN_LENGTH) {
+                for (const entry of this.idEntries) {
+                    if (entry.idText !== keyword && entry.idText.includes(keyword)) {
+                        collect(entry)
+                    }
+                }
+            }
+
+            idMatched.sort((a, b) => this.getTypePriority(a.typeLabel) - this.getTypePriority(b.typeLabel))
+        }
+
+        const fuzzyMatched = this.fuse
+            .search(keyword, { limit: limit + idMatched.length })
             .map((result, index) => ({
                 id: result.item.id,
                 title: result.item.title,
@@ -105,6 +155,15 @@ export class GlobalSearchService {
             }))
             .sort((a, b) => this.getTypePriority(a.typeLabel) - this.getTypePriority(b.typeLabel) || a.index - b.index)
             .map(({ index: _index, ...option }) => option)
+            .filter(option => {
+                if (seen.has(option.id)) {
+                    return false
+                }
+                seen.add(option.id)
+                return true
+            })
+
+        return [...idMatched, ...fuzzyMatched].slice(0, limit)
     }
 
     /**
@@ -120,9 +179,11 @@ export class GlobalSearchService {
     private buildSearchEntry(option: DBGlobalSearchOption, extraParts: Array<string | number | undefined | null>): DBSearchEntry {
         const parts = this.cleanParts([option.title, option.subtitle, ...extraParts])
         const searchText = parts.join(" ")
+        const rawId = option.id.slice(option.id.indexOf(":") + 1)
 
         return {
             ...option,
+            idText: ID_QUERY_PATTERN.test(rawId) ? rawId : "",
             searchText,
             pinyinFull: getPinyin(searchText),
             pinyinFirst: getPinyinFirst(searchText),
@@ -911,6 +972,7 @@ export class GlobalSearchService {
             ignoreLocation: true,
             minMatchCharLength: 1,
             keys: [
+                { name: "idText", weight: 3.0 },
                 { name: "title", weight: 2.4 },
                 { name: "subtitle", weight: 1.2 },
                 { name: "searchText", weight: 1.6 },
@@ -924,7 +986,8 @@ export class GlobalSearchService {
      * 调整候选优先级：NPC始终置于最后，避免压过角色条目。
      */
     private getTypePriority(typeLabel: string): number {
-        if (typeLabel === t("database.weapon") || typeLabel === t("database.mod") || typeLabel === t("database.role")) {
+        const highPriority = [t("database.weapon"), t("database.mod"), t("database.role"), t("database.char")]
+        if (highPriority.includes(typeLabel)) {
             return -1
         }
         if (typeLabel === t("database.draft")) {

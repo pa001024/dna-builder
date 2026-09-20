@@ -6,9 +6,26 @@ import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weapon
 import type { Draft } from "@/data/d/draft.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { iconticketMap } from "@/data/d/iconticket.data"
+import { titleData } from "@/data/d/title.data"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
+
+/** 称号 id → 称号数据 */
+const titleMap = new Map(titleData.map(title => [title.id, title]))
+
+/**
+ * 获取称号条目信息。
+ * @param titleId 称号ID
+ * @returns 称号数据
+ */
+function getTitleById(titleId: number | string) {
+    const normalizedId = Number(titleId)
+    if (!Number.isFinite(normalizedId)) {
+        return undefined
+    }
+    return titleMap.get(normalizedId)
+}
 
 defineOptions({ inheritAttrs: false })
 const props = defineProps<{
@@ -33,6 +50,7 @@ const props = defineProps<{
                   | "HeadSculpture"
                   | "HeadFrame"
                   | "Hair"
+                  | "Title"
                   | "WeaponSkin"
               ),
           ]
@@ -653,6 +671,30 @@ function handleCardClick() {
             <SRouterLink v-if="!mini" :to="`/db/iron-ticket/${value[1]}`" stop class="hover:underline">
                 {{ iconticketMap.get(Number(value[1]))?.name || name }}
             </SRouterLink>
+        </span>
+        <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
+    </div>
+    <div
+        v-else-if="Array.isArray(value) && value[2] === 'Title' && getTitleById(value[1])"
+        :class="
+            mini
+                ? 'flex items-center transition-colors duration-200'
+                : 'flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40'
+        "
+        v-bind="$attrs"
+        @click="$emit('click')"
+    >
+        <span class="font-medium truncate">
+            <img
+                src="/imgs/webp/T_Icon_Random_Title.webp"
+                alt=""
+                class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
+                :class="getRarityGradientClass(4)"
+            />
+            <SRouterLink v-if="!mini" :to="`/db/title/${value[1]}`" stop class="hover:underline">
+                {{ getTitleById(value[1])?.name }}
+            </SRouterLink>
+            <span v-else>{{ getTitleById(value[1])?.name }}</span>
         </span>
         <span v-if="!mini" class="ml-auto shrink-0 pl-2 font-orbitron text-sm font-bold tabular-nums text-primary">{{ value[0] }}</span>
     </div>

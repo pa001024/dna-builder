@@ -6613,6 +6613,7 @@
         "title": "Character List"
     },
     "char-detail": {
+        "companio_char": "Encounter Character",
         "title": "Character Details"
     },
     "char-list": {
@@ -6829,6 +6830,90 @@
         "desc": "Break down CharBuild damage formulas step by step with manual overrides",
         "title": "Damage Breakdown"
     },
+    "dbAgent": {
+        "conversation": {
+            "defaultName": "New chat",
+            "listEmpty": "No conversations yet. Your questions will be saved here."
+        },
+        "error": {
+            "clientNotInit": "AI client is not initialized",
+            "failed": "Retrieval failed: {{message}}",
+            "needAnswer": "Please pick at least one option or type an answer",
+            "noApiKey": "AI API key is not configured. Please fill it in Settings",
+            "noConfig": "Please log in to use data retrieval, or fill in your own AI key in Settings",
+            "noPendingAsk": "There is no question waiting for an answer",
+            "unknown": "Unknown error"
+        },
+        "summary": {
+            "answered": "Answer received",
+            "askInvalid": "Invalid question format",
+            "done": "Done",
+            "facets": "{{prefix}}{{count}} facet group(s)",
+            "modulesTotal": "{{count}} searchable modules in total",
+            "noFacets": "No extra facets for this module",
+            "questionFallback": "Question {{index}}",
+            "questionsPending": "{{count}} question(s) pending",
+            "searchHits": "{{prefix}}{{count}} hit(s)",
+            "skipped": "Skipped by user",
+            "storyHits": "{{count}} quest chain(s) matched",
+            "storyLines": "Returned {{count}} dialogue line(s)",
+            "toolError": "Tool execution failed",
+            "versionAdditions": "Version {{version}} adds {{count}} entries",
+            "waitingChoice": "Waiting for choice: {{question}}",
+            "waitingUser": "Waiting for your choice"
+        },
+        "tool": {
+            "ask_user": "Ask user",
+            "list_data_modules": "Module list",
+            "list_filter_options": "Filter options",
+            "list_version_additions": "Version additions",
+            "query_module_entries": "Module entries",
+            "read_story": "Story text",
+            "search_data": "Global search",
+            "search_story": "Story search"
+        },
+        "ui": {
+            "askCustomPlaceholder": "Or type your own…",
+            "askDefaultTitle": "Make a choice to continue the retrieval",
+            "askInputPlaceholder": "Type here…",
+            "askSkip": "Skip and search directly",
+            "askSubmit": "Submit choices",
+            "askSubmitting": "Searching…",
+            "backToDatabase": "Back to database",
+            "browseHint": "Enter to ask AI · Shift + Enter for a new line",
+            "browseMoreResults": "{{count}} more. Keep typing to narrow down",
+            "browsePlaceholder": "What are you looking for today? Search the database, or ask the AI directly",
+            "browseSubmit": "Ask AI",
+            "chatEmptyTip": "Hand your question to data retrieval. Try these:",
+            "chatHint": "Enter to send · Shift + Enter for a new line",
+            "chatPlaceholderAnswer": "You can also type your answer here",
+            "chatPlaceholderIdle": "Keep asking, or start a new topic",
+            "chatSubmit": "Send",
+            "copyAssistantTitle": "Copy this reply",
+            "copyConversationFailed": "Failed to copy conversation",
+            "copyConversationTitle": "Copy conversation",
+            "copyEmpty": "This conversation has nothing to copy yet",
+            "copyFailed": "Copy failed",
+            "copySuccess": "Conversation copied to clipboard",
+            "copyUserTitle": "Copy this question",
+            "database": "Database",
+            "dialogDeleteBody": "Delete \"{{name}}\"? Its message history will be removed as well.",
+            "dialogDeleteTitle": "Delete conversation",
+            "enterChat": "Open chat",
+            "example1": "What did the characters do in the story?",
+            "example2": "Which achievements were added in version 1.6?",
+            "example3": "What does the Mod \"Plenty · Dexterity\" do?",
+            "exportAgent": "Data Retrieval",
+            "exportMe": "Me",
+            "newConversation": "New chat",
+            "searching": "Searching the database…",
+            "stopSearch": "Stop retrieval",
+            "thinking": "Thinking",
+            "thinkingLive": "Thinking",
+            "traceCollapse": "Hide retrieval details",
+            "traceExpand": "Retrieval details"
+        }
+    },
     "dna-announcement": {
         "empty": "No announcement data yet",
         "fetch_failed": "Failed to fetch announcements",
@@ -7001,6 +7086,13 @@
         "title": "Component Rendering Error"
     },
     "event": {
+        "photo_task_index": "Task",
+        "photo_task_location": "Photo Location",
+        "photo_task_quest": "Related Quest",
+        "photo_task_region": "Region",
+        "photo_task_reward": "Task Reward",
+        "photo_task_unlock": "Unlock Time",
+        "photo_tasks": "Photo Tasks",
         "rule": "Rule"
     },
     "event-detail": {

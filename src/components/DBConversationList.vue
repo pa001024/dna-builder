@@ -58,11 +58,11 @@ const isEmpty = computed(() => props.conversations.length === 0)
                 type="button"
                 class="inline-flex cursor-pointer items-center gap-1 text-[11px] text-base-content/45 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40"
                 :disabled="busy"
-                title="返回资料库"
+                :title="$t('dbAgent.ui.backToDatabase')"
                 @click="emit('exit')"
             >
                 <Icon icon="ri:arrow-left-line" class="h-3.5 w-3.5" />
-                资料库
+                {{ $t("dbAgent.ui.database") }}
             </button>
         </div>
 
@@ -73,10 +73,10 @@ const isEmpty = computed(() => props.conversations.length === 0)
             @click="emit('new-chat')"
         >
             <Icon icon="ri:add-line" class="h-3.5 w-3.5" />
-            新对话
+            {{ $t("dbAgent.ui.newConversation") }}
         </button>
 
-        <p v-if="isEmpty" class="px-1 text-[11px] leading-5 text-base-content/35">还没有对话记录，提问后会保存在这里。</p>
+        <p v-if="isEmpty" class="px-1 text-[11px] leading-5 text-base-content/35">{{ $t("dbAgent.conversation.listEmpty") }}</p>
 
         <div v-else class="db-chat-scroll min-h-0 flex-1 overflow-y-auto pr-1">
             <ul class="flex flex-col gap-1">
@@ -103,13 +103,13 @@ const isEmpty = computed(() => props.conversations.length === 0)
                             <Icon
                                 icon="ri:file-copy-line"
                                 class="h-3 w-3 cursor-pointer text-base-content/30 hover:text-primary"
-                                title="复制会话内容"
+                                :title="$t('dbAgent.ui.copyConversationTitle')"
                                 @click.stop="emit('copy', conversation)"
                             />
                             <Icon
                                 icon="ri:delete-bin-line"
                                 class="h-3 w-3 cursor-pointer text-base-content/30 hover:text-error"
-                                title="删除对话"
+                                :title="$t('dbAgent.ui.dialogDeleteTitle')"
                                 @click.stop="emit('remove', conversation)"
                             />
                         </span>

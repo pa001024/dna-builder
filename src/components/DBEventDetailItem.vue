@@ -2,9 +2,10 @@
 import { computed } from "vue"
 import type { EventItem } from "@/data/d/event.data"
 import { limitedPrizePools } from "@/data/d/limitedprize.data"
-import { getRewardDetails } from "@/utils/reward-utils"
+import { questChainMap } from "@/data/d/questchain.data"
+import { getRewardDetails, type RewardItem as RewardDetail } from "@/utils/reward-utils"
 import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments, type StoryTextSegment } from "@/utils/story-text"
-import { formatTimeRange } from "@/utils/time"
+import { formatDateTime, formatTimeRange } from "@/utils/time"
 
 const props = defineProps<{
     event: EventItem
@@ -35,6 +36,39 @@ function getStoryToneClass(tone: StoryTextSegment["tone"]): string {
  * 累充返利积分档位列表（按积分升序），并解析各档位对应的奖励组。
  * @returns 积分档位展示数组
  */
+/** 拍照任务的展示项：把点位、任务链、奖励等 id 解析成可渲染内容 */
+interface PhotoTaskEntry {
+    id: number
+    startTime: number
+    endTime: number
+    photoView: string
+    questChain: number
+    questChainName: string
+    subRegionId: number
+    locationName: string
+    pos: [number, number]
+    reward: RewardDetail | null
+}
+
+/**
+ * 解析活动的拍照任务列表（逐日解锁）。
+ * @returns 拍照任务展示数组
+ */
+const photoTaskEntries = computed<PhotoTaskEntry[]>(() =>
+    (props.event.photoTasks ?? []).map(task => ({
+        id: task.id,
+        startTime: task.startTime,
+        endTime: task.endTime,
+        photoView: task.photoView,
+        questChain: task.questChain,
+        questChainName: questChainMap.get(task.questChain)?.name ?? "",
+        subRegionId: task.location.subRegion,
+        locationName: task.location.name,
+        pos: task.location.pos,
+        reward: getRewardDetails(task.reward),
+    }))
+)
+
 const topUpRanks = computed(() => {
     const detail = props.event.topUpDetail
     if (!detail) {
@@ -108,6 +142,69 @@ const topUpRanks = computed(() => {
                 <template v-for="(segment, index) in parseEventText(event.rule)" :key="`rule-${index}-${segment.tone}`">
                     <span :class="getStoryToneClass(segment.tone)">{{ segment.text }}</span>
                 </template>
+            </div>
+        </section>
+
+        <!-- 拍照任务 -->
+        <section v-if="photoTaskEntries.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="PHOTO TASKS" :title="$t('event.photo_tasks')" />
+            <div class="mt-3 space-y-2">
+                <div
+                    v-for="task in photoTaskEntries"
+                    :key="task.id"
+                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                >
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-9 shrink-0">
+                            <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                {{ String(task.id).padStart(2, "0") }}
+                            </div>
+                            <div class="text-[10px] tracking-wide text-base-content/45">{{ $t("event.photo_task_index") }}</div>
+                        </div>
+                        <div class="min-w-0 grow space-y-1.5">
+                            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("event.photo_task_unlock") }}</span>
+                                <span class="text-[13px] tabular-nums text-base-content/85">
+                                    {{ formatDateTime(task.startTime) }}
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("event.photo_task_location") }}</span>
+                                <span class="text-[13px] text-base-content/85">{{ $t(task.locationName) }}</span>
+                                <MapPosLink
+                                    :sub-region-id="task.subRegionId"
+                                    :point="task.pos"
+                                    :point-name="$t(task.locationName)"
+                                    point-icon="T_Gp_MainMission"
+                                />
+                            </div>
+                            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("event.photo_task_region") }}</span>
+                                <SubRegionLink :sub-region-id="task.subRegionId" />
+                            </div>
+                            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("event.photo_task_quest") }}</span>
+                                <SRouterLink
+                                    v-if="task.questChainName"
+                                    :to="`/db/questchain/${task.questChain}`"
+                                    class="link link-primary"
+                                >
+                                    {{ task.questChainName }}
+                                </SRouterLink>
+                                <span v-else class="font-orbitron text-[13px] tabular-nums text-base-content/60">
+                                    {{ task.questChain }}
+                                </span>
+                            </div>
+                            <div v-if="task.reward" class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("event.photo_task_reward") }}</span>
+                                <RewardItem :reward="task.reward" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">
+                        {{ task.photoView }}
+                    </div>
+                </div>
             </div>
         </section>
 

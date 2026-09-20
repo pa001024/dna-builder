@@ -6510,6 +6510,7 @@
         "title": "キャラクター一覧"
     },
     "char-detail": {
+        "companio_char": "出会いキャラ",
         "title": "キャラクター詳細"
     },
     "char-list": {
@@ -6726,6 +6727,90 @@
         "desc": "CharBuild のダメージ式を段階的に分解し、手動上書きに対応",
         "title": "ダメージ分解"
     },
+    "dbAgent": {
+        "conversation": {
+            "defaultName": "新しい会話",
+            "listEmpty": "まだ会話記録がありません。質問するとここに保存されます。"
+        },
+        "error": {
+            "clientNotInit": "AI クライアントが初期化されていません",
+            "failed": "検索に失敗しました：{{message}}",
+            "needAnswer": "選択するか、内容を入力してください",
+            "noApiKey": "AI キーが未設定です。設定画面で入力してください",
+            "noConfig": "データ検索を使うにはログインするか、設定で自分の AI キーを入力してください",
+            "noPendingAsk": "回答待ちの質問はありません",
+            "unknown": "不明なエラー"
+        },
+        "summary": {
+            "answered": "回答を受け取りました",
+            "askInvalid": "質問の形式を解析できません",
+            "done": "完了",
+            "facets": "{{prefix}}絞り込み {{count}} 件",
+            "modulesTotal": "検索可能なモジュールは全 {{count}} 件",
+            "noFacets": "このモジュールには追加の絞り込み項目がありません",
+            "questionFallback": "質問 {{index}}",
+            "questionsPending": "{{count}} 件の質問が未回答",
+            "searchHits": "{{prefix}}{{count}} 件ヒット",
+            "skipped": "ユーザーがスキップしました",
+            "storyHits": "{{count}} 件のクエストチェーンがヒット",
+            "storyLines": "{{count}} 行のセリフを返しました",
+            "toolError": "ツールの実行に失敗しました",
+            "versionAdditions": "バージョン {{version}} の追加 {{count}} 件",
+            "waitingChoice": "選択待ち：{{question}}",
+            "waitingUser": "ユーザーの選択待ち"
+        },
+        "tool": {
+            "ask_user": "ユーザーに質問",
+            "list_data_modules": "モジュール一覧",
+            "list_filter_options": "絞り込み条件",
+            "list_version_additions": "バージョン追加",
+            "query_module_entries": "モジュール明細",
+            "read_story": "ストーリー本文",
+            "search_data": "全体検索",
+            "search_story": "ストーリー検索"
+        },
+        "ui": {
+            "askCustomPlaceholder": "自分で入力する…",
+            "askDefaultTitle": "選択してから検索を続けます",
+            "askInputPlaceholder": "入力してください…",
+            "askSkip": "スキップして検索",
+            "askSubmit": "選択を送信",
+            "askSubmitting": "検索中…",
+            "backToDatabase": "データベースへ戻る",
+            "browseHint": "Enter で AI に質問 · Shift + Enter で改行",
+            "browseMoreResults": "他に {{count}} 件。入力を続けると絞り込めます",
+            "browsePlaceholder": "今日は何を調べますか？キーワードで検索するか、AI に直接質問してください",
+            "browseSubmit": "AI に質問",
+            "chatEmptyTip": "データ検索に質問してみましょう。例：",
+            "chatHint": "Enter で送信 · Shift + Enter で改行",
+            "chatPlaceholderAnswer": "ここに直接入力して回答できます",
+            "chatPlaceholderIdle": "続けて質問するか、話題を変えてください",
+            "chatSubmit": "送信",
+            "copyAssistantTitle": "この返信をコピー",
+            "copyConversationFailed": "会話のコピーに失敗しました",
+            "copyConversationTitle": "会話をコピー",
+            "copyEmpty": "この会話にはコピーできる内容がまだありません",
+            "copyFailed": "コピーに失敗しました",
+            "copySuccess": "会話内容をクリップボードにコピーしました",
+            "copyUserTitle": "この質問をコピー",
+            "database": "データベース",
+            "dialogDeleteBody": "「{{name}}」を削除しますか？この会話のメッセージ記録も一緒に削除されます。",
+            "dialogDeleteTitle": "会話を削除",
+            "enterChat": "会話を開く",
+            "example1": "キャラクターがストーリーで何をしたか調べる",
+            "example2": "バージョン 1.6 で追加された実績を調べる",
+            "example3": "モッド「充盈・巧力」の効果を調べる",
+            "exportAgent": "データ検索",
+            "exportMe": "自分",
+            "newConversation": "新しい会話",
+            "searching": "データベースを検索中…",
+            "stopSearch": "検索を停止",
+            "thinking": "思考",
+            "thinkingLive": "思考中",
+            "traceCollapse": "検索詳細を閉じる",
+            "traceExpand": "検索詳細"
+        }
+    },
     "dna-announcement": {
         "empty": "お知らせはまだありません",
         "fetch_failed": "お知らせの取得に失敗しました",
@@ -6898,6 +6983,13 @@
         "title": "コンポーネントのレンダリングエラー"
     },
     "event": {
+        "photo_task_index": "任務",
+        "photo_task_location": "撮影場所",
+        "photo_task_quest": "関連任務",
+        "photo_task_region": "エリア",
+        "photo_task_reward": "任務報酬",
+        "photo_task_unlock": "解放時間",
+        "photo_tasks": "撮影任務",
         "rule": "ルール"
     },
     "event-detail": {

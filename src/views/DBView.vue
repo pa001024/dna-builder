@@ -271,47 +271,32 @@ const isSearchIndexReady = ref(false)
 /** 推荐模块：平铺时排在最前 */
 const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/map-tool", "/db/questchain", "/db/dungeon", "/db/resource"]
 
-const databaseSectionConfigs: DatabaseSectionConfig[] = [
-    {
-        id: "build",
-        title: t("view.section.build.title"),
-        description: t("view.section.build.description"),
-        badge: t("view.section.build.badge"),
-        paths: ["/db/char", "/db/weapon", "/db/mod", "/db/forge", "/db/damage", "/db/pet", "/db/draft", "/db/resource"],
-    },
-    {
-        id: "explore",
-        title: t("view.section.explore.title"),
-        description: t("view.section.explore.description"),
-        badge: t("view.section.explore.badge"),
-        paths: ["/db/event", "/map-tool", "/db/rouge", "/db/fish", "/db/dungeon", "/db/abyss", "/db/map"],
-    },
-    {
-        id: "world",
-        title: t("view.section.world.title"),
-        description: t("view.section.world.description"),
-        badge: t("view.section.world.badge"),
-        paths: ["/db/questchain", "/db/partytopic", "/db/shop", "/db/impr", "/db/npc", "/db/reputation", "/db/dynquest"],
-    },
-    {
-        id: "challenge",
-        title: t("view.section.challenge.title"),
-        description: t("view.section.challenge.description"),
-        badge: t("view.section.challenge.badge"),
-        paths: ["/db/rank", "/db/monster", "/db/hardboss", "/db/solotreasure", "/db/iron-ticket"],
-    },
-    {
-        id: "collect",
-        title: t("view.section.collect.title"),
-        description: t("view.section.collect.description"),
-        badge: t("view.section.collect.badge"),
-        paths: ["/db/achievement", "/db/title", "/db/music", "/db/book", "/db/walnut", "/db/accessory"],
-    },
-]
+/** 分区静态结构：只有 id 与路径，文案由 databaseSectionConfigs 按当前语言实时翻译 */
+const databaseSectionMeta = [
+    { id: "build", paths: ["/db/char", "/db/weapon", "/db/mod", "/db/forge", "/db/damage", "/db/pet", "/db/draft", "/db/resource"] },
+    { id: "explore", paths: ["/db/event", "/map-tool", "/db/rouge", "/db/fish", "/db/dungeon", "/db/abyss", "/db/map"] },
+    { id: "world", paths: ["/db/questchain", "/db/partytopic", "/db/shop", "/db/impr", "/db/npc", "/db/reputation", "/db/dynquest"] },
+    { id: "challenge", paths: ["/db/rank", "/db/monster", "/db/hardboss", "/db/solotreasure", "/db/iron-ticket"] },
+    { id: "collect", paths: ["/db/achievement", "/db/title", "/db/music", "/db/book", "/db/walnut", "/db/accessory"] },
+] as const
+
+/**
+ * 分区配置（响应式）：title/description/badge 走 t()，i18next-vue 的 t 在 computed 内
+ * 会追踪语言变化，切换语言时无需刷新页面即可更新。
+ */
+const databaseSectionConfigs = computed<DatabaseSectionConfig[]>(() => {
+    return databaseSectionMeta.map(section => ({
+        id: section.id,
+        title: t(`view.section.${section.id}.title`),
+        description: t(`view.section.${section.id}.description`),
+        badge: t(`view.section.${section.id}.badge`),
+        paths: [...section.paths],
+    }))
+})
 
 const databaseItemMap = new Map<string, DatabaseItem>(databaseItems.map(item => [item.path, item]))
 
-const selectedSearchSectionIds = ref(databaseSectionConfigs.map(section => section.id))
+const selectedSearchSectionIds = ref<string[]>(databaseSectionMeta.map(section => section.id))
 
 /**
  * 平铺的模块卡片顺序：推荐模块在前，其余保持原有顺序。
@@ -343,7 +328,7 @@ const moduleFilterStatus = computed(() => {
 const searchScopeOptions = computed<SearchScopeOption[]>(() => {
     return [
         { id: "all", label: t("view.all") },
-        ...databaseSectionConfigs.map(section => ({
+        ...databaseSectionConfigs.value.map(section => ({
             id: section.id,
             label: section.title,
         })),
@@ -351,7 +336,7 @@ const searchScopeOptions = computed<SearchScopeOption[]>(() => {
 })
 
 const isAllSearchSectionsSelected = computed(() => {
-    return selectedSearchSectionIds.value.length === databaseSectionConfigs.length
+    return selectedSearchSectionIds.value.length === databaseSectionConfigs.value.length
 })
 
 const selectedSearchPaths = computed(() => {
@@ -361,7 +346,7 @@ const selectedSearchPaths = computed(() => {
 
     const pathSet = new Set<string>()
 
-    for (const section of databaseSectionConfigs) {
+    for (const section of databaseSectionConfigs.value) {
         if (!selectedSearchSectionIds.value.includes(section.id)) {
             continue
         }
@@ -428,7 +413,7 @@ const moduleChips = computed(() => {
         count:
             scope.id === "all"
                 ? databaseItems.length
-                : (databaseSectionConfigs.find(section => section.id === scope.id)?.paths.length ?? 0),
+                : (databaseSectionConfigs.value.find(section => section.id === scope.id)?.paths.length ?? 0),
     }))
 })
 
@@ -562,7 +547,7 @@ function isSearchScopeSelected(scopeId: string) {
  * 一键切换为搜索全部模块。
  */
 function selectAllSearchScopes() {
-    selectedSearchSectionIds.value = databaseSectionConfigs.map(section => section.id)
+    selectedSearchSectionIds.value = databaseSectionConfigs.value.map(section => section.id)
 }
 
 /**
@@ -579,7 +564,7 @@ function toggleSearchScope(scopeId: string) {
 
     if (isSelected) {
         const nextSectionIds = selectedSearchSectionIds.value.filter(id => id !== scopeId)
-        selectedSearchSectionIds.value = nextSectionIds.length ? nextSectionIds : databaseSectionConfigs.map(section => section.id)
+        selectedSearchSectionIds.value = nextSectionIds.length ? nextSectionIds : databaseSectionConfigs.value.map(section => section.id)
         return
     }
 
@@ -684,7 +669,10 @@ function handleSelectConversation(conversation: Conversation) {
  * @param conversation 目标会话
  */
 async function handleRemoveConversation(conversation: Conversation) {
-    const confirmed = await ui.showDialog("删除对话", `确定删除「${conversation.name}」？该对话的消息记录会一并删除。`)
+    const confirmed = await ui.showDialog(
+        t("dbAgent.ui.dialogDeleteTitle"),
+        t("dbAgent.ui.dialogDeleteBody", { name: conversation.name })
+    )
 
     if (confirmed) {
         await removeConversation(conversation)
@@ -700,14 +688,14 @@ async function handleCopyConversation(conversation: Conversation) {
         const text = await exportConversationText(conversation)
 
         if (!text) {
-            ui.showErrorMessage("这条对话还没有可复制的内容")
+            ui.showErrorMessage(t("dbAgent.ui.copyEmpty"))
             return
         }
 
         await copyText(text)
-        ui.showSuccessMessage("对话内容已复制到剪贴板")
+        ui.showSuccessMessage(t("dbAgent.ui.copySuccess"))
     } catch (error) {
-        ui.showErrorMessage("复制对话失败", error instanceof Error ? error.message : "")
+        ui.showErrorMessage(t("dbAgent.ui.copyConversationFailed"), error instanceof Error ? error.message : "")
     }
 }
 
@@ -869,11 +857,11 @@ onBeforeUnmount(() => {
                     <button
                         type="button"
                         class="inline-flex shrink-0 cursor-pointer items-center gap-1 text-[11px] text-base-content/45 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                        title="返回资料库"
+                        :title="$t('dbAgent.ui.backToDatabase')"
                         @click="handleExitChat"
                     >
                         <Icon icon="ri:arrow-left-line" class="h-3.5 w-3.5" />
-                        资料库
+                        {{ $t("dbAgent.ui.database") }}
                     </button>
                 </div>
 
@@ -883,9 +871,9 @@ onBeforeUnmount(() => {
                         <DBAskBox
                             v-model="searchKeyword"
                             :busy="chatBusy"
-                            :placeholder="chatPendingAsk ? '也可以直接输入内容作答' : '继续追问，或换个话题'"
-                            hint="Enter 发送 · Shift + Enter 换行"
-                            submit-label="发送"
+                            :placeholder="chatPendingAsk ? $t('dbAgent.ui.chatPlaceholderAnswer') : $t('dbAgent.ui.chatPlaceholderIdle')"
+                            :hint="$t('dbAgent.ui.chatHint')"
+                            :submit-label="$t('dbAgent.ui.chatSubmit')"
                             @submit="handleSubmit"
                             @stop="interruptChat"
                         />
@@ -943,10 +931,10 @@ onBeforeUnmount(() => {
 
                                     <p v-else class="px-1 py-4 text-sm text-base-content/55">
                                         {{ $t("view.noResultEntries") }}
-                                        <span class="mt-1.5 block text-xs text-base-content/40">Enter 询问AI · Shift + Enter 换行</span>
+                                        <span class="mt-1.5 block text-xs text-base-content/40">{{ $t("dbAgent.ui.browseHint") }}</span>
                                     </p>
 
-                                    <p v-if="hiddenResultCount" class="db-ask-more">还有 {{ hiddenResultCount }} 条，继续输入可缩小范围</p>
+                                    <p v-if="hiddenResultCount" class="db-ask-more">{{ $t("dbAgent.ui.browseMoreResults", { count: hiddenResultCount }) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -1014,9 +1002,9 @@ onBeforeUnmount(() => {
                         <DBAskBox
                             v-model="searchKeyword"
                             :busy="chatBusy"
-                            placeholder="今天想查点什么？输入关键词检索资料库，或直接向 AI 提问"
-                            hint="Enter 询问AI · Shift + Enter 换行"
-                            submit-label="询问AI"
+                            :placeholder="$t('dbAgent.ui.browsePlaceholder')"
+                            :hint="$t('dbAgent.ui.browseHint')"
+                            :submit-label="$t('dbAgent.ui.browseSubmit')"
                             @submit="handleSubmit"
                             @stop="interruptChat"
                             @enter-chat="handleEnterChat"

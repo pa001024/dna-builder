@@ -5715,6 +5715,7 @@
         "title": "角色列表"
     },
     "char-detail": {
+        "companio_char": "偶遇角色",
         "title": "角色詳情"
     },
     "char-list": {
@@ -5931,6 +5932,90 @@
         "desc": "逐步拆解 CharBuild 傷害公式並支援手動覆蓋",
         "title": "傷害拆解"
     },
+    "dbAgent": {
+        "conversation": {
+            "defaultName": "新對話",
+            "listEmpty": "還沒有對話記錄，提問後會保存在這裡。"
+        },
+        "error": {
+            "clientNotInit": "AI 用戶端未初始化",
+            "failed": "檢索失敗：{{message}}",
+            "needAnswer": "請至少選擇一項或輸入內容",
+            "noApiKey": "尚未設定 AI 金鑰，請先在設定中填寫",
+            "noConfig": "請先登入後再使用資料檢索，或在設定中填寫自己的 AI 金鑰",
+            "noPendingAsk": "目前沒有等待回答的提問",
+            "unknown": "未知錯誤"
+        },
+        "summary": {
+            "answered": "已收到回答",
+            "askInvalid": "提問格式無效",
+            "done": "已完成",
+            "facets": "{{prefix}}{{count}} 組篩選項",
+            "modulesTotal": "共 {{count}} 個可檢索模組",
+            "noFacets": "該模組無額外篩選項",
+            "questionFallback": "問題 {{index}}",
+            "questionsPending": "{{count}} 個問題待選擇",
+            "searchHits": "{{prefix}}命中 {{count}} 條",
+            "skipped": "使用者已跳過",
+            "storyHits": "命中 {{count}} 個任務鏈",
+            "storyLines": "返回 {{count}} 行對話",
+            "toolError": "工具執行失敗",
+            "versionAdditions": "版本 {{version}} 新增 {{count}} 條",
+            "waitingChoice": "等待選擇：{{question}}",
+            "waitingUser": "等待使用者選擇"
+        },
+        "tool": {
+            "ask_user": "詢問使用者",
+            "list_data_modules": "模組清單",
+            "list_filter_options": "篩選條件",
+            "list_version_additions": "版本新增",
+            "query_module_entries": "模組明細",
+            "read_story": "劇情原文",
+            "search_data": "全庫檢索",
+            "search_story": "劇情檢索"
+        },
+        "ui": {
+            "askCustomPlaceholder": "或自己輸入…",
+            "askDefaultTitle": "請選擇後再繼續檢索",
+            "askInputPlaceholder": "輸入內容…",
+            "askSkip": "跳過，直接檢索",
+            "askSubmit": "提交選擇",
+            "askSubmitting": "檢索中…",
+            "backToDatabase": "返回資料庫",
+            "browseHint": "Enter 詢問AI · Shift + Enter 換行",
+            "browseMoreResults": "還有 {{count}} 條，繼續輸入可縮小範圍",
+            "browsePlaceholder": "今天想查點什麼？輸入關鍵字檢索資料庫，或直接向 AI 提問",
+            "browseSubmit": "詢問AI",
+            "chatEmptyTip": "把問題交給資料檢索，試試這些：",
+            "chatHint": "Enter 傳送 · Shift + Enter 換行",
+            "chatPlaceholderAnswer": "也可以直接輸入內容作答",
+            "chatPlaceholderIdle": "繼續追問，或換個話題",
+            "chatSubmit": "傳送",
+            "copyAssistantTitle": "複製這條回覆",
+            "copyConversationFailed": "複製對話失敗",
+            "copyConversationTitle": "複製會話內容",
+            "copyEmpty": "這條對話還沒有可複製的內容",
+            "copyFailed": "複製失敗",
+            "copySuccess": "對話內容已複製到剪貼簿",
+            "copyUserTitle": "複製這條提問",
+            "database": "資料庫",
+            "dialogDeleteBody": "確定刪除「{{name}}」？該對話的訊息記錄會一併刪除。",
+            "dialogDeleteTitle": "刪除對話",
+            "enterChat": "進入對話",
+            "example1": "黎瑟在劇情裡做了什麼？",
+            "example2": "1.6 版本新增了哪些成就？",
+            "example3": "魔之楔「充盈·巧力」是什麼效果？",
+            "exportAgent": "資料檢索",
+            "exportMe": "我",
+            "newConversation": "新對話",
+            "searching": "正在檢索資料庫…",
+            "stopSearch": "停止檢索",
+            "thinking": "思考",
+            "thinkingLive": "思考中",
+            "traceCollapse": "收起檢索詳情",
+            "traceExpand": "檢索詳情"
+        }
+    },
     "dna-announcement": {
         "empty": "暫無公告資料",
         "fetch_failed": "取得公告失敗",
@@ -6103,6 +6188,13 @@
         "title": "組件渲染出錯"
     },
     "event": {
+        "photo_task_index": "任務",
+        "photo_task_location": "拍攝地點",
+        "photo_task_quest": "關聯任務",
+        "photo_task_region": "所在區域",
+        "photo_task_reward": "任務獎勵",
+        "photo_task_unlock": "解鎖時間",
+        "photo_tasks": "拍照任務",
         "rule": "規則"
     },
     "event-detail": {

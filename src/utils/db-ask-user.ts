@@ -12,6 +12,8 @@
  * - 题目与选项都由模型生成，因此取值一律做长度与数量裁剪，防止超长文本撑爆界面。
  */
 
+import i18next from "i18next"
+
 /** 单道题的单个可选项 */
 export interface AskUserOption {
     /** 选项 id（回填给模型时用它，语义比下标稳定） */
@@ -197,7 +199,7 @@ export function normalizeAskUserRequest(raw: unknown): AskUserRequest | null {
 
         questions.push({
             id: clampText(question.id, 64) || `q_${index}`,
-            header: header || `问题 ${index}`,
+            header: header || i18next.t("dbAgent.summary.questionFallback", { defaultValue: "问题 {{index}}", index }),
             question: clampText(question.question, MAX_TEXT_LENGTH) || undefined,
             options,
             // 默认允许自由输入：模型无法把用户锁死在给定选项里
@@ -292,8 +294,10 @@ export function summarizeAskUserRequest(request: AskUserRequest): string {
     const first = request.questions[0]
 
     if (!first) {
-        return "等待用户选择"
+        return i18next.t("dbAgent.summary.waitingUser", { defaultValue: "等待用户选择" })
     }
 
-    return request.questions.length > 1 ? `${request.questions.length} 个问题待选择` : `等待选择：${first.header}`
+    return request.questions.length > 1
+        ? i18next.t("dbAgent.summary.questionsPending", { defaultValue: "{{count}} 个问题待选择", count: request.questions.length })
+        : i18next.t("dbAgent.summary.waitingChoice", { defaultValue: "等待选择：{{question}}", question: first.header })
 }

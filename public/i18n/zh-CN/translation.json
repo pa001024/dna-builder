@@ -719,6 +719,7 @@
         "title": "角色列表"
     },
     "char-detail": {
+        "companio_char": "偶遇角色",
         "title": "角色详情"
     },
     "char-list": {
@@ -931,6 +932,90 @@
         "weapon": "武器",
         "weapon_desc": "查看武器信息和属性"
     },
+    "dbAgent": {
+        "conversation": {
+            "defaultName": "新对话",
+            "listEmpty": "还没有对话记录，提问后会保存在这里。"
+        },
+        "error": {
+            "clientNotInit": "AI 客户端未初始化",
+            "failed": "检索失败：{{message}}",
+            "needAnswer": "请至少选择一项或输入内容",
+            "noApiKey": "尚未配置 AI 密钥，请先在设置中填写",
+            "noConfig": "请先登录后再使用资料检索，或在设置中填写自己的 AI 密钥",
+            "noPendingAsk": "当前没有等待回答的提问",
+            "unknown": "未知错误"
+        },
+        "summary": {
+            "answered": "已收到回答",
+            "askInvalid": "提问格式无效",
+            "done": "已完成",
+            "facets": "{{prefix}}{{count}} 组筛选项",
+            "modulesTotal": "共 {{count}} 个可检索模块",
+            "noFacets": "该模块无额外筛选项",
+            "questionFallback": "问题 {{index}}",
+            "questionsPending": "{{count}} 个问题待选择",
+            "searchHits": "{{prefix}}命中 {{count}} 条",
+            "skipped": "用户已跳过",
+            "storyHits": "命中 {{count}} 个任务链",
+            "storyLines": "返回 {{count}} 行对话",
+            "toolError": "工具执行失败",
+            "versionAdditions": "版本 {{version}} 新增 {{count}} 条",
+            "waitingChoice": "等待选择：{{question}}",
+            "waitingUser": "等待用户选择"
+        },
+        "tool": {
+            "ask_user": "询问用户",
+            "list_data_modules": "模块清单",
+            "list_filter_options": "筛选条件",
+            "list_version_additions": "版本新增",
+            "query_module_entries": "模块明细",
+            "read_story": "剧情原文",
+            "search_data": "全库检索",
+            "search_story": "剧情检索"
+        },
+        "ui": {
+            "askCustomPlaceholder": "或自己输入…",
+            "askDefaultTitle": "请选择后再继续检索",
+            "askInputPlaceholder": "输入内容…",
+            "askSkip": "跳过，直接检索",
+            "askSubmit": "提交选择",
+            "askSubmitting": "检索中…",
+            "backToDatabase": "返回资料库",
+            "browseHint": "Enter 询问AI · Shift + Enter 换行",
+            "browseMoreResults": "还有 {{count}} 条，继续输入可缩小范围",
+            "browsePlaceholder": "今天想查点什么？输入关键词检索资料库，或直接向 AI 提问",
+            "browseSubmit": "询问AI",
+            "chatEmptyTip": "把问题交给资料检索，试试这些：",
+            "chatHint": "Enter 发送 · Shift + Enter 换行",
+            "chatPlaceholderAnswer": "也可以直接输入内容作答",
+            "chatPlaceholderIdle": "继续追问，或换个话题",
+            "chatSubmit": "发送",
+            "copyAssistantTitle": "复制这条回复",
+            "copyConversationFailed": "复制对话失败",
+            "copyConversationTitle": "复制会话内容",
+            "copyEmpty": "这条对话还没有可复制的内容",
+            "copyFailed": "复制失败",
+            "copySuccess": "对话内容已复制到剪贴板",
+            "copyUserTitle": "复制这条提问",
+            "database": "资料库",
+            "dialogDeleteBody": "确定删除「{{name}}」？该对话的消息记录会一并删除。",
+            "dialogDeleteTitle": "删除对话",
+            "enterChat": "进入对话",
+            "example1": "黎瑟在剧情里做了什么？",
+            "example2": "1.6 版本新增了哪些成就？",
+            "example3": "魔之楔「充盈·巧力」是什么效果？",
+            "exportAgent": "资料检索",
+            "exportMe": "我",
+            "newConversation": "新对话",
+            "searching": "正在检索资料库…",
+            "stopSearch": "停止检索",
+            "thinking": "思考",
+            "thinkingLive": "思考中",
+            "traceCollapse": "收起检索详情",
+            "traceExpand": "检索详情"
+        }
+    },
     "dna-announcement": {
         "empty": "暂无公告数据",
         "fetch_failed": "获取公告失败",
@@ -1099,6 +1184,13 @@
         "title": "组件渲染出错"
     },
     "event": {
+        "photo_task_index": "任务",
+        "photo_task_location": "拍照地点",
+        "photo_task_quest": "关联任务",
+        "photo_task_region": "所在区域",
+        "photo_task_reward": "任务奖励",
+        "photo_task_unlock": "解锁时间",
+        "photo_tasks": "拍照任务",
         "rule": "规则"
     },
     "event-detail": {

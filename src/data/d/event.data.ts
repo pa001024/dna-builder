@@ -1,3 +1,25 @@
+/** 拍照活动的任务点位 */
+export interface EventPhotoTaskLocation {
+    id: number
+    name: string
+    pos: [number, number]
+    /** 所属子区域 id */
+    subRegion: number
+}
+
+/** 拍照活动的每日任务（逐日解锁） */
+export interface EventPhotoTask {
+    id: number
+    startTime: number
+    endTime: number
+    /** 拍照目标贴图名 */
+    photoView: string
+    questChain: number
+    reward: number
+    rewardView: number
+    location: EventPhotoTaskLocation
+}
+
 export interface EventItem {
     id: number
     name: string
@@ -5,6 +27,7 @@ export interface EventItem {
     startTime: number
     endTime: number | null
     rule?: string
+    photoTasks?: EventPhotoTask[]
     boxDrop?: {
         boxCoinId: number
         boxMaximum: number
@@ -302,6 +325,113 @@ export const eventData: EventItem[] = [
         startTime: 1775700000,
         endTime: 1776718800,
         rule: "1、活动期间，每日可解锁新的拍照任务\n2、完成任务后，需前往活动界面进行领奖",
+        photoTasks: [
+            {
+                id: 1,
+                startTime: 1775682000,
+                endTime: 1776718800,
+                photoView: "T_Activity_PhotoEvent_7",
+                questChain: 400121,
+                reward: 112001,
+                rewardView: 1030113,
+                location: {
+                    id: 2830,
+                    name: "秽兽肆虐的村庄",
+                    pos: [1970, 3670],
+                    subRegion: 100101,
+                },
+            },
+            {
+                id: 2,
+                startTime: 1775768400,
+                endTime: 1776718800,
+                photoView: "T_Activity_PhotoEvent_3",
+                questChain: 400122,
+                reward: 112002,
+                rewardView: 1030114,
+                location: {
+                    id: 2831,
+                    name: "修普诺斯之家",
+                    pos: [-3300, 11840],
+                    subRegion: 101101,
+                },
+            },
+            {
+                id: 3,
+                startTime: 1775854800,
+                endTime: 1776718800,
+                photoView: "T_Activity_PhotoEvent_4",
+                questChain: 400123,
+                reward: 112003,
+                rewardView: 1030115,
+                location: {
+                    id: 2832,
+                    name: "泪湖湖畔",
+                    pos: [-9460, 44930],
+                    subRegion: 100103,
+                },
+            },
+            {
+                id: 4,
+                startTime: 1775941200,
+                endTime: 1776718800,
+                photoView: "T_Activity_PhotoEvent_5",
+                questChain: 400124,
+                reward: 112004,
+                rewardView: 1030116,
+                location: {
+                    id: 2833,
+                    name: "冰湖城下水道深处",
+                    pos: [-6590, -11350],
+                    subRegion: 101703,
+                },
+            },
+            {
+                id: 5,
+                startTime: 1776027600,
+                endTime: 1776718800,
+                photoView: "T_Activity_PhotoEvent_2",
+                questChain: 400125,
+                reward: 112005,
+                rewardView: 1030117,
+                location: {
+                    id: 2834,
+                    name: "盖雷亚剧院",
+                    pos: [20510, 900],
+                    subRegion: 101901,
+                },
+            },
+            {
+                id: 6,
+                startTime: 1776114000,
+                endTime: 1776718800,
+                photoView: "T_Activity_PhotoEvent_1",
+                questChain: 400126,
+                reward: 112006,
+                rewardView: 1030118,
+                location: {
+                    id: 2835,
+                    name: "百年春",
+                    pos: [37080, 6230],
+                    subRegion: 104110,
+                },
+            },
+            {
+                id: 7,
+                startTime: 1776200400,
+                endTime: 1776718800,
+                photoView: "T_Activity_PhotoEvent_6",
+                questChain: 400127,
+                reward: 112007,
+                rewardView: 1030119,
+                location: {
+                    id: 2836,
+                    name: "九章坪",
+                    pos: [32830, -103270],
+                    subRegion: 104506,
+                },
+            },
+        ],
     },
     {
         id: 103018,
@@ -402,6 +532,113 @@ export const eventData: EventItem[] = [
         startTime: 1789005600,
         endTime: 1790629200,
         rule: "1、活动期间，每日可解锁新的拍照任务\n2、完成任务后，需前往活动界面进行领奖",
+        photoTasks: [
+            {
+                id: 1,
+                startTime: 1788987600,
+                endTime: 1790629200,
+                photoView: "T_Activity_PhotoEvent_8",
+                questChain: 400130,
+                reward: 112001,
+                rewardView: 1030113,
+                location: {
+                    id: 2858,
+                    name: "站前穹顶",
+                    pos: [-4552, 15],
+                    subRegion: 106001,
+                },
+            },
+            {
+                id: 2,
+                startTime: 1789074000,
+                endTime: 1790629200,
+                photoView: "T_Activity_PhotoEvent_9",
+                questChain: 400131,
+                reward: 112002,
+                rewardView: 1030114,
+                location: {
+                    id: 2859,
+                    name: "站外空地",
+                    pos: [-42679, -1136],
+                    subRegion: 106001,
+                },
+            },
+            {
+                id: 3,
+                startTime: 1789160400,
+                endTime: 1790629200,
+                photoView: "T_Activity_PhotoEvent_10",
+                questChain: 400132,
+                reward: 112003,
+                rewardView: 1030115,
+                location: {
+                    id: 2860,
+                    name: "锻铁厂",
+                    pos: [-13366, 8034],
+                    subRegion: 106301,
+                },
+            },
+            {
+                id: 4,
+                startTime: 1789246800,
+                endTime: 1790629200,
+                photoView: "T_Activity_PhotoEvent_11",
+                questChain: 400133,
+                reward: 112004,
+                rewardView: 1030116,
+                location: {
+                    id: 2861,
+                    name: "废墟游乐场",
+                    pos: [-25203, -29482],
+                    subRegion: 107101,
+                },
+            },
+            {
+                id: 5,
+                startTime: 1789333200,
+                endTime: 1790629200,
+                photoView: "T_Activity_PhotoEvent_12",
+                questChain: 400134,
+                reward: 112005,
+                rewardView: 1030117,
+                location: {
+                    id: 2862,
+                    name: "乐园镇",
+                    pos: [-11900, -74820],
+                    subRegion: 107001,
+                },
+            },
+            {
+                id: 6,
+                startTime: 1789419600,
+                endTime: 1790629200,
+                photoView: "T_Activity_PhotoEvent_13",
+                questChain: 400135,
+                reward: 112006,
+                rewardView: 1030118,
+                location: {
+                    id: 2863,
+                    name: "乐园镇",
+                    pos: [-21510, -76030],
+                    subRegion: 107001,
+                },
+            },
+            {
+                id: 7,
+                startTime: 1789506000,
+                endTime: 1790629200,
+                photoView: "T_Activity_PhotoEvent_14",
+                questChain: 400136,
+                reward: 112007,
+                rewardView: 1030119,
+                location: {
+                    id: 2864,
+                    name: "山谷裂隙",
+                    pos: [-33280, -12150],
+                    subRegion: 107201,
+                },
+            },
+        ],
     },
     {
         id: 103031,

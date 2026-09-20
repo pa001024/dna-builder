@@ -1,3 +1,4 @@
+import i18next from "i18next"
 import OpenAI from "openai"
 import type { ChatCompletionMessageParam, ChatCompletionTool, ChatCompletionToolMessageParam } from "openai/resources/index.mjs"
 import { containsDsmlMarker, type DsmlParseResult, DsmlStreamFilter } from "@/api/dsml-tool-call"
@@ -34,7 +35,7 @@ export interface DBAgentToolTrace {
     id: string
     /** 工具名（英文，模型可见） */
     name: string
-    /** 工具展示名（中文，界面展示） */
+    /** 工具展示名（界面展示，随界面语言切换） */
     label: string
     /** 调用参数 */
     args: Record<string, unknown>
@@ -173,14 +174,26 @@ const DEFAULT_CONFIG: Pick<
 
 /** 工具展示名映射（界面用中文标注检索动作） */
 const TOOL_LABELS: Record<string, string> = {
-    list_data_modules: "模块清单",
-    list_filter_options: "筛选条件",
-    search_data: "全库检索",
-    query_module_entries: "模块明细",
-    list_version_additions: "版本新增",
-    search_story: "剧情检索",
-    read_story: "剧情原文",
-    ask_user: "询问用户",
+    list_data_modules: "dbAgent.tool.list_data_modules",
+    list_filter_options: "dbAgent.tool.list_filter_options",
+    search_data: "dbAgent.tool.search_data",
+    query_module_entries: "dbAgent.tool.query_module_entries",
+    list_version_additions: "dbAgent.tool.list_version_additions",
+    search_story: "dbAgent.tool.search_story",
+    read_story: "dbAgent.tool.read_story",
+    ask_user: "dbAgent.tool.ask_user",
+}
+
+/**
+ * 取工具的展示名：已登记的工具走 i18n（带中文 defaultValue 兜底，
+ * 保证 i18next 未初始化的环境如单测也能拿到可读文案），未登记的工具直接展示原始名。
+ * @param name 工具名（模型可见的英文 id）
+ * @returns 界面展示名
+ */
+function toolLabel(name: string): string {
+    const key = TOOL_LABELS[name]
+
+    return key ? i18next.t(key, { defaultValue: name }) : name
 }
 
 /**
@@ -465,34 +478,36 @@ function summarizeToolResult(name: string, payload: unknown): string {
 
     switch (name) {
         case "list_data_modules":
-            return `共 ${(data.modules as unknown[])?.length ?? 0} 个可检索模块`
+            return i18next.t("dbAgent.summary.modulesTotal", { count: (data.modules as unknown[])?.length ?? 0 })
         case "list_filter_options": {
             const facets = (data.facets as unknown[] | undefined) ?? []
-            return facets.length ? `${data.module ? `${data.module}.` : ""}${facets.length} 组筛选项` : "该模块无额外筛选项"
+            return facets.length
+                ? i18next.t("dbAgent.summary.facets", { prefix: data.module ? `${data.module}.` : "", count: facets.length })
+                : i18next.t("dbAgent.summary.noFacets")
         }
         case "search_data": {
             const results = data.results as unknown[] | undefined
-            return `命中 ${results?.length ?? 0} 条`
+            return i18next.t("dbAgent.summary.searchHits", { prefix: "", count: results?.length ?? 0 })
         }
         case "query_module_entries":
-            return `${data.module ? `${data.module}.` : ""}命中 ${data.total ?? 0} 条`
+            return i18next.t("dbAgent.summary.searchHits", { prefix: data.module ? `${data.module}.` : "", count: data.total ?? 0 })
         case "list_version_additions": {
             const modules = (data.modules as Array<{ count: number }> | undefined) ?? []
             const total = modules.reduce((sum, item) => sum + item.count, 0)
-            return `版本 ${data.version} 新增 ${total} 条`
+            return i18next.t("dbAgent.summary.versionAdditions", { version: data.version, count: total })
         }
         case "search_story": {
             const hits = (data.hits as unknown[] | undefined) ?? []
-            return `命中 ${hits.length} 个任务链`
+            return i18next.t("dbAgent.summary.storyHits", { count: hits.length })
         }
         case "read_story":
-            return `返回 ${(data.lines as unknown[])?.length ?? 0} 行对话`
+            return i18next.t("dbAgent.summary.storyLines", { count: (data.lines as unknown[])?.length ?? 0 })
         case "ask_user": {
             const request = data.request as AskUserRequest | undefined
-            return request ? summarizeAskUserRequest(request) : "等待用户选择"
+            return request ? summarizeAskUserRequest(request) : i18next.t("dbAgent.summary.waitingUser")
         }
         default:
-            return "已完成"
+            return i18next.t("dbAgent.summary.done")
     }
 }
 
@@ -761,11 +776,11 @@ export class DBAgent {
      */
     public async run(history: DBAgentHistoryMessage[], callbacks: DBAgentCallbacks = {}): Promise<DBAgentRunResult> {
         if (!this.client) {
-            throw new Error("AI 客户端未初始化")
+            throw new Error(i18next.t("dbAgent.error.clientNotInit"))
         }
 
         if (!this.config.api_key) {
-            throw new Error("尚未配置 AI 密钥，请先在设置中填写")
+            throw new Error(i18next.t("dbAgent.error.noApiKey"))
         }
 
         this.interrupted = false
@@ -792,7 +807,7 @@ export class DBAgent {
         const state = this.pending
 
         if (!state) {
-            throw new Error("当前没有等待回答的提问")
+            throw new Error(i18next.t("dbAgent.error.noPendingAsk"))
         }
 
         return this.resolvePending(state, response, callbacks)
@@ -807,7 +822,7 @@ export class DBAgent {
         const state = this.pending
 
         if (!state) {
-            throw new Error("当前没有等待回答的提问")
+            throw new Error(i18next.t("dbAgent.error.noPendingAsk"))
         }
 
         return this.resolvePending(state, { requestId: state.ask.requestId, answers: [], skipped: true }, callbacks)
@@ -846,7 +861,7 @@ export class DBAgent {
 
         // 回答为空且不是主动跳过时，不推进循环，让界面继续等待用户作答
         if (!response.skipped && !hasAskAnswer(request, response)) {
-            throw new Error("请至少选择一项或输入内容")
+            throw new Error(i18next.t("dbAgent.error.needAnswer"))
         }
 
         this.pending = null
@@ -862,7 +877,7 @@ export class DBAgent {
 
         if (trace) {
             trace.status = "done"
-            trace.summary = response.skipped ? "用户已跳过" : "已收到回答"
+            trace.summary = response.skipped ? i18next.t("dbAgent.summary.skipped") : i18next.t("dbAgent.summary.answered")
             callbacks.onToolTrace?.({ ...trace })
         }
 
@@ -1084,7 +1099,7 @@ export class DBAgent {
                 const trace: DBAgentToolTrace = {
                     id,
                     name: call.name,
-                    label: TOOL_LABELS[call.name] ?? call.name,
+                    label: toolLabel(call.name),
                     args,
                     summary: "",
                     status: "running",
@@ -1102,7 +1117,7 @@ export class DBAgent {
                     trace.status = "done"
                 } catch (error) {
                     trace.status = "error"
-                    trace.summary = error instanceof Error ? error.message : "工具执行失败"
+                    trace.summary = error instanceof Error ? error.message : i18next.t("dbAgent.summary.toolError")
                     toolContent = JSON.stringify({ error: trace.summary })
                 }
 
@@ -1126,9 +1141,9 @@ export class DBAgent {
                     const trace: DBAgentToolTrace = {
                         id,
                         name: askCall.name,
-                        label: TOOL_LABELS.ask_user,
+                        label: toolLabel(askCall.name),
                         args: parseToolArguments(askCall.args),
-                        summary: "提问格式无效",
+                        summary: i18next.t("dbAgent.summary.askInvalid"),
                         status: "error",
                     }
 
@@ -1151,7 +1166,7 @@ export class DBAgent {
                 const trace: DBAgentToolTrace = {
                     id,
                     name: askCall.name,
-                    label: TOOL_LABELS.ask_user,
+                    label: toolLabel(askCall.name),
                     args: parseToolArguments(askCall.args),
                     summary: summarizeAskUserRequest(request),
                     // 停在 running：这一步的完成与否取决于用户，不取决于模型

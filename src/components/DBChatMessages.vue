@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, createApp, h, nextTick, onBeforeUnmount, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import type { Message, MessageReasoning, MessageToolTrace } from "@/store/db"
@@ -46,6 +47,7 @@ const emit = defineEmits<{
 
 const ui = useUIStore()
 const router = useRouter()
+const { t } = useTranslation()
 
 /** 消息滚动容器 */
 const scrollerRef = ref<HTMLElement | null>(null)
@@ -300,7 +302,7 @@ async function copyMessage(message: Message, element?: HTMLElement | null) {
             copiedId.value = 0
         }, 1200)
     } catch (error) {
-        ui.showErrorMessage("复制失败", error instanceof Error ? error.message : "")
+        ui.showErrorMessage(t("dbAgent.ui.copyFailed"), error instanceof Error ? error.message : "")
     }
 }
 
@@ -478,8 +480,8 @@ function liveReasoningOf(message: Message): string | undefined {
     return isLiveMessage(message) && props.reasoning ? props.reasoning : undefined
 }
 
-/** 空状态下的示例提问：直接点出两类高频检索场景 */
-const exampleQuestions = ["黎瑟在剧情里做了什么？", "1.6 版本新增了哪些成就？", "魔之楔「充盈·巧力」是什么效果？"]
+/** 空状态下的示例提问：直接点出两类高频检索场景（响应式随语言切换） */
+const exampleQuestions = computed(() => [t("dbAgent.ui.example1"), t("dbAgent.ui.example2"), t("dbAgent.ui.example3")])
 
 /**
  * 跟随信号：消息条数、最后一条内容长度或思考增量变化时触发滚动。
@@ -519,7 +521,7 @@ onBeforeUnmount(() => {
                 <!-- 空状态：给出可直接照抄的检索示例 -->
                 <div v-if="!props.messages.length" class="py-2">
                     <p class="text-[11px] uppercase tracking-[0.28em] text-base-content/35">Data Retrieval</p>
-                    <p class="mt-2 text-sm text-base-content/60">把问题交给资料检索，试试这些：</p>
+                    <p class="mt-2 text-sm text-base-content/60">{{ $t("dbAgent.ui.chatEmptyTip") }}</p>
                     <ul class="mt-3 flex flex-col gap-1.5">
                         <li v-for="question in exampleQuestions" :key="question" class="text-xs text-base-content/45">· {{ question }}</li>
                     </ul>
@@ -545,8 +547,8 @@ onBeforeUnmount(() => {
                                 <button
                                     type="button"
                                     class="grid size-4 cursor-pointer place-items-center text-base-content/35 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                                    title="复制这条提问"
-                                    aria-label="复制这条提问"
+                                    :title="$t('dbAgent.ui.copyUserTitle')"
+                                    :aria-label="$t('dbAgent.ui.copyUserTitle')"
                                     @click="copyMessage(message)"
                                 >
                                     <Icon :icon="copiedId === message.id ? 'ri:check-line' : 'ri:file-copy-line'" class="h-3.5 w-3.5" />
@@ -575,7 +577,9 @@ onBeforeUnmount(() => {
                                                         : ''
                                                 "
                                             />
-                                            <span class="shrink-0 text-[10px] uppercase tracking-[0.2em] text-base-content/40"> 思考 </span>
+                                            <span class="shrink-0 text-[10px] uppercase tracking-[0.2em] text-base-content/40">
+                                                {{ $t("dbAgent.ui.thinking") }}
+                                            </span>
                                             <span
                                                 v-if="!expandedReasoningKeys.includes(reasoningKey(message.id, item.index ?? 0))"
                                                 class="min-w-0 flex-1 truncate text-[11px] text-base-content/35"
@@ -611,7 +615,9 @@ onBeforeUnmount(() => {
                                 <!-- 流式过程中尚未收尾的思考段落 -->
                                 <div v-if="liveReasoningOf(message)" class="flex items-baseline gap-1.5">
                                     <Icon icon="ri:refresh-line" class="h-3 w-3 shrink-0 translate-y-0.5 animate-spin text-primary" />
-                                    <span class="shrink-0 text-[10px] uppercase tracking-[0.2em] text-primary/70">思考中</span>
+                                    <span class="shrink-0 text-[10px] uppercase tracking-[0.2em] text-primary/70">{{
+                                        $t("dbAgent.ui.thinkingLive")
+                                    }}</span>
                                     <span class="min-w-0 flex-1 truncate text-[11px] text-base-content/40">
                                         {{ reasoningPreview(liveReasoningOf(message) ?? "") }}
                                     </span>
@@ -624,7 +630,9 @@ onBeforeUnmount(() => {
                                         class="cursor-pointer text-[10px] text-base-content/35 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                                         @click="toggleTrace(message.id)"
                                     >
-                                        {{ expandedIds.includes(message.id) ? "收起检索详情" : "检索详情" }}
+                                        {{
+                                            expandedIds.includes(message.id) ? $t("dbAgent.ui.traceCollapse") : $t("dbAgent.ui.traceExpand")
+                                        }}
                                     </button>
                                 </div>
                             </div>
@@ -647,7 +655,7 @@ onBeforeUnmount(() => {
                                 class="flex items-center gap-1.5 text-xs text-base-content/40"
                             >
                                 <Icon icon="ri:refresh-line" class="h-3.5 w-3.5 animate-spin" />
-                                正在检索资料库…
+                                {{ $t("dbAgent.ui.searching") }}
                             </p>
 
                             <!--
@@ -674,8 +682,8 @@ onBeforeUnmount(() => {
                                 <button
                                     type="button"
                                     class="grid size-4 cursor-pointer place-items-center text-base-content/35 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                                    title="复制这条回复"
-                                    aria-label="复制这条回复"
+                                    :title="$t('dbAgent.ui.copyAssistantTitle')"
+                                    :aria-label="$t('dbAgent.ui.copyAssistantTitle')"
                                     @click="copyMessage(message, assistantBodies.get(message.id) ?? null)"
                                 >
                                     <Icon :icon="copiedId === message.id ? 'ri:check-line' : 'ri:file-copy-line'" class="h-3.5 w-3.5" />
@@ -690,11 +698,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/*
- * 对话正文允许选中：全局 `:root, html, body { user-select: none }`（窗口拖拽/防误选）
- * 会继承下来，这里显式恢复文本选择，并给回文本光标（否则是默认箭头，看不出能选）。
- * 助手回复里的代码块/表格也一并允许选择并显示文本光标。
- */
 .db-selectable,
 .db-selectable :deep(*) {
     user-select: text;

@@ -396,66 +396,134 @@ watch(
 </script>
 
 <template>
-    <div class="space-y-4 rounded-md bg-base-200 p-3">
-        <div class="flex items-center justify-between gap-2">
-            <div class="text-xs text-base-content/70">限时奖池模拟</div>
-            <CopyID :id="eventId" />
-        </div>
+    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <SectionHeader no-animate compact kicker="LIMITED PRIZE" title="限时奖池模拟">
+            <template #trailing>
+                <CopyID :id="eventId" />
+            </template>
+        </SectionHeader>
 
-        <div v-if="poolIds.length" class="grid gap-2 text-sm">
-            <div class="flex flex-wrap gap-2">
-                <div class="join w-40">
-                    <button
-                        v-for="(poolId, index) in poolIds"
-                        :key="poolId"
-                        class="btn btn-sm join-item flex-1"
-                        :class="selectedPoolIndex === index ? 'btn-primary' : 'btn-ghost'"
-                        @click="selectedPoolIndex = index"
-                    >
-                        奖池{{ index + 1 }}
-                    </button>
-                </div>
-                <button class="btn btn-primary btn-sm" :disabled="isAutoDrawing" @click="drawOnce">抽1次</button>
-                <button class="btn btn-primary btn-sm" :disabled="isAutoDrawing" @click="drawMany(8)">抽8次</button>
-                <button class="btn btn-secondary btn-sm" @click="isAutoDrawing ? stopAutoDraw() : startAutoDraw()">
+        <div v-if="poolIds.length" class="space-y-3">
+            <div class="flex flex-wrap items-center gap-2">
+                <button
+                    v-for="(poolId, index) in poolIds"
+                    :key="poolId"
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        selectedPoolIndex === index
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
+                    @click="selectedPoolIndex = index"
+                >
+                    奖池 {{ index + 1 }}
+                </button>
+                <span class="h-4 w-px shrink-0 bg-base-content/15" aria-hidden="true" />
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                    :class="
+                        isAutoDrawing
+                            ? 'border-base-content/20 text-base-content/60'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
+                    :disabled="isAutoDrawing"
+                    @click="drawOnce"
+                >
+                    抽 1 次
+                </button>
+                <button
+                    type="button"
+                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                    :class="
+                        isAutoDrawing
+                            ? 'border-base-content/15 text-base-content/40'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
+                    :disabled="isAutoDrawing"
+                    @click="drawMany(8)"
+                >
+                    抽 8 次
+                </button>
+                <button
+                    type="button"
+                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
+                    :class="
+                        isAutoDrawing
+                            ? 'border-error bg-error/10 font-semibold text-error'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
+                    @click="isAutoDrawing ? stopAutoDraw() : startAutoDraw()"
+                >
                     {{ isAutoDrawing ? "停止" : "自动" }}
                 </button>
-                <button class="btn btn-error btn-sm" @click="resetSimulation">重置</button>
+                <button
+                    type="button"
+                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-error/40 px-2 text-[11px] text-error/80 transition-colors duration-150 hover:border-error hover:bg-error/10 hover:text-error"
+                    @click="resetSimulation"
+                >
+                    重置
+                </button>
             </div>
 
             <div v-if="currentPool" class="space-y-2">
-                <div class="text-xs text-base-content/70">奖品列表</div>
+                <div class="text-[11px] tracking-wide text-base-content/55">奖品列表</div>
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2">
                     <div
                         v-for="(prize, index) in visiblePrizeList"
                         :key="`${prize.id}-${index}`"
-                        class="flex items-center gap-3 rounded bg-base-300 p-2"
-                        :class="selectedPrizeKey === getPrizeEntryKey(prize) ? 'ring-2 ring-primary' : prize.isDrawn ? 'opacity-50' : ''"
+                        class="flex items-center gap-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200"
+                        :class="
+                            selectedPrizeKey === getPrizeEntryKey(prize)
+                                ? 'border-primary bg-primary/10'
+                                : prize.isDrawn
+                                  ? 'opacity-50'
+                                  : 'hover:border-primary/40'
+                        "
                     >
-                        <img :src="prize.icon" class="size-10 rounded bg-base-200 object-cover" :alt="prize.name" />
+                        <img :src="prize.icon" class="size-10 shrink-0 rounded-xs object-cover" :alt="prize.name" />
                         <div class="min-w-0 flex-1">
-                            <div class="truncate text-sm font-medium">{{ prize.name }}</div>
-                            <div class="text-xs text-base-content/60">
-                                概率 {{ (prize.currentProbability / 100).toFixed(2) }}% · 数量 {{ prize.count }}
+                            <div class="truncate text-sm font-medium text-base-content">{{ prize.name }}</div>
+                            <div class="flex items-center gap-1 text-[11px] text-base-content/55">
+                                <span>概率</span>
+                                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                    >{{ (prize.currentProbability / 100).toFixed(2) }}%</span
+                                >
+                                <span aria-hidden="true">·</span>
+                                <span>数量</span>
+                                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ prize.count }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2">
-                <div class="rounded bg-base-300 p-2">
-                    <div class="text-xs text-base-content/60">星辉丝线</div>
+            <div class="grid gap-2 sm:grid-cols-2">
+                <div class="space-y-1.5">
+                    <div class="text-[11px] tracking-wide text-base-content/55">累计消耗</div>
                     <ResourceCostItem :name="costResourceId.toString()" :value="[totalCost, costResourceId, 'Resource']" />
                 </div>
-                <div class="rounded bg-base-300 p-2">
-                    <div class="text-xs text-base-content/60">出货统计</div>
-                    <div class="font-bold">{{ Object.keys(drawStats).length }}</div>
+                <div class="grid content-start gap-2">
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-[11px] tracking-wide text-base-content/55">抽取次数</span>
+                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ drawCount }}</span>
+                    </div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-[11px] tracking-wide text-base-content/55">出货统计</span>
+                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            Object.keys(drawStats).length
+                        }}</span>
+                    </div>
                 </div>
             </div>
 
             <div v-if="rewardHistory.length" class="space-y-2">
-                <div class="text-xs text-base-content/70">最近结果</div>
+                <div class="text-[11px] tracking-wide text-base-content/55">最近结果</div>
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2">
                     <ResourceCostItem
                         v-for="reward in aggregatedRewardHistory"
@@ -484,6 +552,6 @@ watch(
             </div>
         </div>
 
-        <div v-else class="text-sm text-base-content/60">没有找到对应活动奖池。</div>
-    </div>
+        <div v-else class="py-1 text-sm text-base-content/55">没有找到对应活动奖池。</div>
+    </section>
 </template>

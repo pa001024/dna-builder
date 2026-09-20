@@ -5,6 +5,8 @@ export interface CharVoice {
     name: string
     res: string
     text: string
+    /** 偶遇语音所面向的角色 id，仅「闲谈·他人偶遇」类语音携带 */
+    companioCharId?: number
 }
 
 export const charVoiceData: CharVoice[] = [
@@ -119,6 +121,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Heitao_vo_companio_02_1",
         text: "松露小姐，你的……猪，我可以摸一摸吗？摸一下就好。请你帮我按住它，我怕它跑远了，小动物看到我总会跑得远远的。",
+        companioCharId: 5101,
     },
     {
         id: 10018,
@@ -126,6 +129,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Heitao_vo_companio_02_2",
         text: "谢谢你……啊，暖暖的，真好啊……",
+        companioCharId: 5101,
     },
     {
         id: 10019,
@@ -133,6 +137,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Heitao_vo_companio_03",
         text: "我不是军团的“零号”，更不是你手中随意拨弄的玩具。你可以离开，或者带着我的尸骸回去。",
+        companioCharId: 4301,
     },
     {
         id: 10020,
@@ -140,6 +145,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Heitao_vo_companio_04_1",
         text: "听说你是位优秀的美食家，可以给我看看你的食谱吗？{nickname}总说你做的饭很好吃，听起来不像客套话，而是发自内心的夸奖。",
+        companioCharId: 5102,
     },
     {
         id: 10021,
@@ -147,6 +153,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Heitao_vo_companio_04_2",
         text: "……你用的食材，也只是最普通不过的食物而已？那为什么……",
+        companioCharId: 5102,
     },
     {
         id: 10022,
@@ -364,6 +371,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Zhangyu_vo_companio_01",
         text: "要抓我？我又不是坏人！不就是顺了点东西吗，还是小偷的东西……哇，你不要过来啊！好热！",
+        companioCharId: 3201,
     },
     {
         id: 10094,
@@ -371,6 +379,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Zhangyu_vo_companio_02",
         text: "送我香薰？唔，你看起来就好危险，我不要我不要！等等……这个香薰闻起来，怎么让人感觉飘飘的……我的触手怎么麻麻的……你果然很危险！",
+        companioCharId: 2101,
     },
     {
         id: 10095,
@@ -378,6 +387,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Zhangyu_vo_companio_03",
         text: "你对着剑说话的样子好好玩！萨麦尔，你喜欢这个地方吗，我们还要一起去更多的地方哦！\n嗯……？你怎么在那里干憋气不出声，这样子更好玩了嘻嘻嘻！",
+        companioCharId: 1501,
     },
     {
         id: 10096,
@@ -588,6 +598,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Linen_vo_companio_01",
         text: "下次派任务能不能直说？唠唠叨叨的，烦死了。",
+        companioCharId: 4202,
     },
     {
         id: 10126,
@@ -595,6 +606,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Linen_vo_companio_02",
         text: "......长官好。",
+        companioCharId: 4301,
     },
     {
         id: 10127,
@@ -602,6 +614,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Linen_vo_companio_03",
         text: "你是优秀的士兵，仅此一句。哦，还有......好好工作之余，也得好好生活......啧，听完了还不快走？",
+        companioCharId: 4101,
     },
     {
         id: 10128,
@@ -861,6 +874,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Xier_vo_companio_01",
         text: "我最喜欢的花，生长在恒温的穹顶下。只需一片花瓣就可以制成安神的晚茶，而十片花瓣，又可以萃出一滴让人长眠的毒液。偶尔在梦里我还会修剪那片花圃，而醒来后，我会庆幸不用再照料它们。",
+        companioCharId: 5301,
     },
     {
         id: 10165,
@@ -868,6 +882,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Xier_vo_companio_02",
         text: "真厉害，我由内心深处涌出敬意，您每天都在思考一些重大的事情。不像我这样的女仆，只会关心眼前的琐事。",
+        companioCharId: 1501,
     },
     {
         id: 10166,
@@ -875,6 +890,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Xier_vo_companio_03",
         text: "这些堆积的无用杂物令我头痛了许久，如果您想带走它们当然乐意至极。不过在您进入房间前，请务必允许我为您提供清洁服务，您无权拒绝，不许挣扎。",
+        companioCharId: 3301,
     },
     {
         id: 10167,
@@ -1092,6 +1108,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Yuming_vo_companio_01",
         text: "虽然不知道你告别了怎样的过去，但我们气息相似，保持距离吧：我并不喜欢同类。",
+        companioCharId: 5102,
     },
     {
         id: 10198,
@@ -1099,6 +1116,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Yuming_vo_companio_02",
         text: "我早已不是你的故知。世人萍水相逢本就如风过耳，放下吧。",
+        companioCharId: 1503,
     },
     {
         id: 10199,
@@ -1106,6 +1124,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Yuming_vo_companio_03",
         text: "我羡慕你的意志与同样坚固的法条，不知道你可有过什么时刻，曾自我怀疑过。",
+        companioCharId: 3201,
     },
     {
         id: 10200,
@@ -1386,6 +1405,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Saiqi_vo_companio_01",
         text: "我听说奥特赛德先生为菲娜的生日精心准备了很久。虽然嘴上不饶人，但你其实是个很体贴的人吧？下一次菲娜生日，我可以和你们一起为她准备惊喜吗？",
+        companioCharId: 5102,
     },
     {
         id: 10240,
@@ -1393,6 +1413,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Saiqi_vo_companio_02",
         text: "看见卡米拉女士总会让我想起那间吵闹却温馨的酒馆……这些年能够认识大家，真是太好了。",
+        companioCharId: 3202,
     },
     {
         id: 10241,
@@ -1400,6 +1421,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Saiqi_vo_companio_03",
         text: "你要讲艾利西安的故事给我听吗？太感谢了！唔……作为回礼，我应该送你什么花好呢……\n嗯？你最喜欢好吃的花？",
+        companioCharId: 5101,
     },
     {
         id: 10242,
@@ -1666,6 +1688,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Baiheng_vo_companio_01",
         text: "兰迪先生，依我看来，懒惰散漫也是身患疾病的一种表现，如今虽一时无恙，但毕竟也是个隐患。不如我来陪你过上两招，活动活动筋骨，可好？",
+        companioCharId: 4202,
     },
     {
         id: 10280,
@@ -1673,6 +1696,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Baiheng_vo_companio_02",
         text: "医者疗疾，却终究无法逆天改命。我可以为您开一贴缓解心热的药方，但病因却无法根除，但愿您能顺天应时，自渡为好……\n",
+        companioCharId: 4102,
     },
     {
         id: 10281,
@@ -1680,6 +1704,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Baiheng_vo_companio_03",
         text: "有时会听到另一个人在说话？只有你能听见吗？近日睡眠如何？是否心有郁结？最怕心病难医，即使用上祝由术也无能为力，但身为医者，我必定竭尽全力。",
+        companioCharId: 3103,
     },
     {
         id: 10282,
@@ -1967,6 +1992,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Songlu_vo_companio_01",
         text: "你在垃圾桶里翻到了发了芽的土豆？不要扔不要扔，我们把它种起来，松松土、浇浇水，就会有好多好多土豆可以吃啦！",
+        companioCharId: 3301,
     },
     {
         id: 10323,
@@ -1974,6 +2000,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Songlu_vo_companio_02",
         text: "一直忙着干活，不饿吗？要不要加入传颂会，我会喂饱你的！",
+        companioCharId: 3101,
     },
     {
         id: 10324,
@@ -1981,6 +2008,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Songlu_vo_companio_03",
         text: "你好你好，我想请教一下……据说祈祷可以让人的灵魂感到满足，我觉得吃饭也可以，那么吃饭和祈祷哪个更管用呀？",
+        companioCharId: 1501,
     },
     {
         id: 10325,
@@ -2184,6 +2212,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Landi_vo_companio_01",
         text: "报告军团长，今日的工作已经安排完毕，您如果有其他的需要，可以随时下达指示。不过今日的工作已经很饱和了，您还是要注意歇息，不要再给自己增添额外的负担了。",
+        companioCharId: 4301,
     },
     {
         id: 10354,
@@ -2191,6 +2220,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Landi_vo_companio_02",
         text: "上次的任务真是辛苦你了，不过我接到了一些投诉，说是你在执行任务中损坏公物，唉，你是知道我的，我这么羞涩内向，还要替你去赔不是，这也太难为我了。所以……这几个紧急任务就麻烦你代劳了，相信美丽善良和蔼可亲的琳恩小姐一定不会拒绝的吧！",
+        companioCharId: 3101,
     },
     {
         id: 10355,
@@ -2198,6 +2228,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Landi_vo_companio_03",
         text: "嗯，你怎么会……？哎呀，看来我还是休息太少，竟然都出现幻觉，能看见不存在的人了！之后向长官打个工伤报告，再休两天病假好了。",
+        companioCharId: 1101,
     },
     {
         id: 10356,
@@ -2422,6 +2453,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Xibi_vo_companio_01",
         text: "……你与我，是时候做个了断了。",
+        companioCharId: 5401,
     },
     {
         id: 10390,
@@ -2709,6 +2741,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Maer_vo_companio_01",
         text: "这个布料，这个徽章，这个皮革！希尔妲大姐，你是我的神吗？！要是还有这种不法之徒的东西需要“妥善处理”，找我就对了，保证给您处理得安全无忧！",
+        companioCharId: 3102,
     },
     {
         id: 10431,
@@ -2716,6 +2749,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Maer_vo_companio_02",
         text: "小菲娜！好久不见啦~想听《雪猫游侠与橘猫侦探》的后续？好！等我搬个小板凳，坐下来慢慢给你讲！",
+        companioCharId: 1801,
     },
     {
         id: 10432,
@@ -2723,6 +2757,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Maer_vo_companio_03",
         text: "典狱长大人，我可是彻头彻尾的良民！一没偷二没抢，只是从垃圾桶里拿一点点残羹剩饭果腹罢了，您再敬业，也管不到垃圾头上吧？",
+        companioCharId: 3201,
     },
     {
         id: 10433,
@@ -2730,6 +2765,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其四",
         res: "char_Maer_vo_companio_04",
         text: "你这日子过得也太紧巴巴了吧！好、好惨……你要不要和我一起来捡垃圾，说不定日子还能过得宽裕一点？",
+        companioCharId: 3101,
     },
     {
         id: 10434,
@@ -2737,6 +2773,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其五",
         res: "char_Maer_vo_companio_05",
         text: "最最最善良美丽的卡米拉姐，我这里有一点小小小小的麻烦，得拜托你帮我个忙——这回绝对是最后一次！呃，本月的最后一次！你一定会答应我的，对吧？",
+        companioCharId: 3202,
     },
     {
         id: 10435,
@@ -2982,6 +3019,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Feina_vo_companio_01",
         text: "答应菲娜，再也再也再也……不要去那些有很多很多坏巫师的危险地方了，好吗？",
+        companioCharId: 5102,
     },
     {
         id: 10470,
@@ -2989,6 +3027,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Feina_vo_companio_02",
         text: "那是什么？仓鼠小姐饲养的精灵吗？不可思议……它一定可以载着你飞过所有城堡的围墙！",
+        companioCharId: 5101,
     },
     {
         id: 10471,
@@ -2996,6 +3035,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Feina_vo_companio_03",
         text: "狮子小姐，你想要唤醒沉睡在巨剑中的仙女吗？也许你需要吟诵很多很多咒语，比如——“唤醒圣剑萨麦尔之人啊，必将成为艾利西安之王！”",
+        companioCharId: 1501,
     },
     {
         id: 10473,
@@ -3234,6 +3274,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Yeer_vo_companio_01",
         text: "耶尔：您，您好……您的歌声，真的很、很动听。\n奥利弗：哼，又一只可怜虫。",
+        companioCharId: 1103,
     },
     {
         id: 10507,
@@ -3241,6 +3282,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Yeer_vo_companio_02",
         text: "耶尔：榛子……是你的朋友吗？我也有很好的朋友，他像榛、榛子一样可靠。\n奥利弗：你骂谁呢？",
+        companioCharId: 5101,
     },
     {
         id: 10508,
@@ -3248,6 +3290,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Yeer_vo_companio_03",
         text: "耶尔：唔啊……你、你不要生气，我的炸弹实验都是符！符符符符合安全规定的……",
+        companioCharId: 3201,
     },
     {
         id: 10509,
@@ -3507,6 +3550,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Haier_vo_companio_01",
         text: "典狱长和军团长，都是帝国“黑暗”秩序的维护者。我们心狠手辣、声名狼藉——但是为了海伯利亚，这点恶名又算得上什么？！",
+        companioCharId: 4301,
     },
     {
         id: 10546,
@@ -3514,6 +3558,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Haier_vo_companio_02",
         text: "又是你。",
+        companioCharId: 2101,
     },
     {
         id: 10547,
@@ -3521,6 +3566,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Haier_vo_companio_03",
         text: "啧，西比尔的副官……那个总被指责不尽职的家伙，对吧？可惜，你那些隐藏实力的拙劣技巧瞒不过我的眼睛！藏匿锋芒混迹在军团长身边，你到底有什么居心？！",
+        companioCharId: 4202,
     },
     {
         id: 10548,
@@ -3843,6 +3889,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Nifu_vo_companio_01",
         text: "人无法真正逃离自己的过去。总有一天，你会需要面对它们……希望到那时，你已经获得了足够与之对抗的力量。",
+        companioCharId: 5102,
     },
     {
         id: 10594,
@@ -3850,6 +3897,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Nifu_vo_companio_02",
         text: "姑娘，你身上有股熟悉的气息，莫不是与我同为旧日之人？",
+        companioCharId: 2401,
     },
     {
         id: 10597,
@@ -4158,6 +4206,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Lise_vo_companio_01",
         text: "每次看见歪歪扭扭的东西时，我总是忍不住想要把它们摆正一些。但是在希尔妲小姐这里就完全不会遇上这种问题，你在的地方总是井井有条，真好。",
+        companioCharId: 3102,
     },
     {
         id: 10641,
@@ -4165,6 +4214,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Lise_vo_companio_02",
         text: "这份计划书上的安排详略得当，精确到秒，逐步完成这些安排想必能获得巨大的满足感。只是……真的很难把这样严密的计划与兰迪长官联系起来。",
+        companioCharId: 4202,
     },
     {
         id: 10643,
@@ -4480,6 +4530,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Tuosi_vo_companio_01",
         text: "你最近过得好吗？\n……抱歉，是我唐突了。我们并不相识，我只是……替一个朋友问问罢了。",
+        companioCharId: 4101,
     },
     {
         id: 10688,
@@ -4487,6 +4538,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Tuosi_vo_companio_02",
         text: "是吗，你现在有了一个新家，也有了会关心照顾你的家人……真是太好了。你逃出了自己的囚笼，是个勇敢的孩子。",
+        companioCharId: 1801,
     },
     {
         id: 10690,
@@ -4851,6 +4903,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Dafu_vo_companio_01",
         text: "我曾在皇都的图书馆中阅读过华胥的医书，虽然与海伯利亚的医理不太相同，但应用于救治却十分有效。这本书中我仍有一些问题，方便向您请教吗？",
+        companioCharId: 2401,
     },
     {
         id: 10743,
@@ -4858,6 +4911,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Dafu_vo_companio_02",
         text: "典狱长女士，迟来的正义真的还是正义吗？",
+        companioCharId: 3201,
     },
     {
         id: 10744,
@@ -4865,6 +4919,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Dafu_vo_companio_03",
         text: "好久不见，自离开炼金院后我们就很少联系了，你还……好吗？",
+        companioCharId: 4301,
     },
     {
         id: 10745,
@@ -4872,6 +4927,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其四",
         res: "char_Dafu_vo_companio_04",
         text: "虽然我已经离开了佩剑炼金院，但那依旧是我学习过的地方。也许您永远不会选择宽恕，但还是请允许我说一句，对不起。",
+        companioCharId: 1103,
     },
     {
         id: 10746,
@@ -5138,6 +5194,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Kezhou_vo_companio_01",
         text: "所谓剑之极为无剑，一草一木皆可为剑。我听闻你会使用清洁工具当作武器御敌，想必你也是用剑的高手，还望不吝赐教。",
+        companioCharId: 3102,
     },
     {
         id: 10784,
@@ -5145,6 +5202,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Kezhou_vo_companio_02",
         text: "你的旧剑我先代为保管，等你什么时候不再紧锁眉头哭丧着脸，我就还你。当然，得先比试一场，要是输了，这剑就当你送我了。",
+        companioCharId: 4201,
     },
     {
         id: 10785,
@@ -5152,6 +5210,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Kezhou_vo_companio_03",
         text: "剑可以是朋友，可以是玩物，甚至也可以是餐具、撬棍和剃须刀，但是唯独不可以是主人。希望你前行的旅途不要被这柄剑困住。",
+        companioCharId: 1501,
     },
     {
         id: 10786,
@@ -5376,6 +5435,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Aote_vo_companio_01",
         text: "你怎么也在这儿？身体不要紧吗，病没问题吗，饭吃过了吗？哎……有什么想要的给我说就好，没事还是不要瞎跑了。",
+        companioCharId: 1801,
     },
     {
         id: 10818,
@@ -5383,6 +5443,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Aote_vo_companio_02_1",
         text: "你是跟{nickname}关系很好的那个女孩子吧……听说你身体不太好，就坐下好好休息一会儿吧。",
+        companioCharId: 5301,
     },
     {
         id: 10819,
@@ -5390,6 +5451,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Aote_vo_companio_02_2",
         text: "不用跟我客气，我家里也有个体弱多病的妹妹，早就习惯照顾人了……要是饿了、渴了，尽管跟我说，{nickname}的朋友就是我的朋友。",
+        companioCharId: 5301,
     },
     {
         id: 10820,
@@ -5397,6 +5459,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Aote_vo_companio_03_1",
         text: "哟，老板娘，你怎么也在这儿……难不成是有什么紧急的委托？{nickname}这段时间已经累坏了，暂时就让我们歇歇吧……",
+        companioCharId: 3202,
     },
     {
         id: 10821,
@@ -5404,6 +5467,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Aote_vo_companio_03_2",
         text: "噢，不过，如果报酬够高的话，还是说来听听吧。",
+        companioCharId: 3202,
     },
     {
         id: 10823,
@@ -5684,6 +5748,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Zhiliu_vo_companio_01",
         text: "你身上香水的味道，浓郁、热烈，散发出毫不克制的甜美。与华胥惯用香的疏淡却是有所不同。我很感兴趣。",
+        companioCharId: 2101,
     },
     {
         id: 10865,
@@ -5691,6 +5756,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Zhiliu_vo_companio_03",
         text: "我在你身上看见了故人的影子……不，是我多言了。",
+        companioCharId: 3202,
     },
     {
         id: 10866,
@@ -5929,6 +5995,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Baonu_vo_companio_02",
         text: "“坚忍，是七大美德之一……心中常存忍耐，就能够见到常人不能见的，行世人难以……难以……”\n啊啊啊不行受不了啦！小矮子你再在那里模仿本大人的样子本大人就要忍不住拿萨麦尔切水产了我以九神之名发誓真的会做到的！！",
+        companioCharId: 3101,
     },
     {
         id: 10901,
@@ -6188,6 +6255,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Kami_vo_companio_02",
         text: "每个人的天赋不同，有些人生来就拥有治愈人心的能力，就像你，好孩子。",
+        companioCharId: 4102,
     },
     {
         id: 10939,
@@ -6195,6 +6263,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Kami_vo_companio_03",
         text: "难得你会大老远跑来冰湖城。这次是想要什么帝国特产物资？还是只是打算听场戏？",
+        companioCharId: 5102,
     },
     {
         id: 10940,
@@ -6531,6 +6600,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Suyi_vo_companio_01",
         text: "卢卡人都这么开放吗，说话没有三两句，就要拥抱了。不、不行！现在还不可以！",
+        companioCharId: 2101,
     },
     {
         id: 10988,
@@ -6538,6 +6608,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Suyi_vo_companio_02",
         text: "又要买新剑？！……我们山外山的预算有那么充足吗？不买！跪下求也没用！喊姑奶奶也不行！这次我绝对不会被你说动了！",
+        companioCharId: 1503,
     },
     {
         id: 10989,
@@ -6545,6 +6616,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Suyi_vo_companio_03",
         text: "你的翅膀……真漂亮，不过我的也不差。要不要来比比谁飞得快？",
+        companioCharId: 5301,
     },
     {
         id: 10990,
@@ -6867,6 +6939,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Fuluo_vo_companio_01",
         text: "希尔妲，还好还有你，还好你还在这里。陪我多待一会儿吧。就这样……就好。",
+        companioCharId: 3102,
     },
     {
         id: 11036,
@@ -6874,6 +6947,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Fuluo_vo_companio_02",
         text: "您是我的同类。（轻笑）不必急于用“我如何能与你相提并论”之类的说辞来否定——我能看到您内心深处的火焰，无论您如何试图将它葬于地底，在冰冷的坟茔之下，始终无法熄灭的，愤怒之火。",
+        companioCharId: 5102,
     },
     {
         id: 11037,
@@ -6881,6 +6955,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Fuluo_vo_companio_03",
         text: "真是悲哀……他一手救下的孤狼，如今竟为了几根骨头甘为猎犬，向背叛他的仇敌摇尾乞怜。",
+        companioCharId: 4301,
     },
     {
         id: 11038,
@@ -7224,6 +7299,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Eve_vo_companio_01",
         text: "蓝头发的小鸟妹妹，我也会变“魔法朋友”哦，你看你看，这是小灰猫，这是小黄鸭……咿呜？！不，不，我不是故意变出三个翅膀的！呜呜，好妹妹，你假装刚才什么都没看见好不好？",
+        companioCharId: 1801,
     },
     {
         id: 11087,
@@ -7231,6 +7307,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Eve_vo_companio_02",
         text: "咿呜咿呜咿呜，好乖的小猪，我摸摸，我摸摸……“统领群猪的花帽将军”，能不能把你的这只小猪借我骑一下下？就一下下，拜托了嘛~",
+        companioCharId: 5101,
     },
     {
         id: 11088,
@@ -7238,6 +7315,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Eve_vo_companio_03",
         text: "咿呜，小猫咪你去哪里了呀，我和{nickname2}都很想你哦，快回来吧~",
+        companioCharId: 3104,
     },
     {
         id: 11089,
@@ -7518,6 +7596,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Falu_vo_companio_01",
         text: "不论你是否需要，也不论你是否会原谅，我都要对你，你的父亲和你的战友道歉。拿回阿瓦尔的录音设备只是开始，如果你想要以命抵命，那你也可以随时动手。",
+        companioCharId: 5401,
     },
     {
         id: 11129,
@@ -7525,6 +7604,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Falu_vo_companio_02",
         text: "说了多少次不要突然靠过来，我会下意识对一切接触行为做出反击。哪天要是突然给了你一拳，可不要怪我。",
+        companioCharId: 2102,
     },
     {
         id: 11130,
@@ -7532,6 +7612,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Falu_vo_companio_03",
         text: "看来就算同为杀手，我们也有本质性的不同。我是徘徊在影子里的一无所有者，而你还有要守护的人，以及要紧握的牵绊。",
+        companioCharId: 3102,
     },
     {
         id: 11131,
@@ -7938,6 +8019,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Shuimu_vo_companio_01",
         text: "……这个干燥的气息，原来是你啊。好久不见，你还是想把我拷走吗？嗯！可以哦。\n毕竟，即使重来一遍，重来多少遍，我依旧能够从你掌心逃脱……你、相、信、吗？海尔法大人。",
+        companioCharId: 3201,
     },
     {
         id: 21010029,
@@ -7945,6 +8027,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Shuimu_vo_companio_02",
         text: "你害怕我吗？那我会让你喜欢上我的，来闻一闻我调配的香薰吧，很甜的，保证你能体会到前所未有的幸福。",
+        companioCharId: 2301,
     },
     {
         id: 21010031,

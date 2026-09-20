@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
-import { LeveledChar, LeveledSkillWeapon } from "@/data"
+import { charMap, LeveledChar, LeveledSkillWeapon } from "@/data"
 import { type SkinItem, skinData } from "@/data/d/accessory.data"
 import { type CharExt, charExtData } from "@/data/d/charext.data"
 import { type CharVoice, charVoiceData } from "@/data/d/charvoice.data"
@@ -411,12 +411,18 @@ function getSkinIconUrl(icon: string): string {
 function getSkinDefaultItemValue(
     groupName: string,
     item: { id: number; num: number }
-): [number, number, "Resource" | "HeadSculpture" | "Hair"] {
+): [number, number, "Resource" | "HeadSculpture" | "Hair" | "Skin" | "Title"] {
     if (groupName === "Hair") {
         return [item.num, item.id, "Hair"]
     }
     if (groupName === "HeadSculpture") {
         return [item.num, item.id, "HeadSculpture"]
+    }
+    if (groupName === "Skin") {
+        return [item.num, item.id, "Skin"]
+    }
+    if (groupName === "Title") {
+        return [item.num, item.id, "Title"]
     }
     return [item.num, item.id, "Resource"]
 }
@@ -496,7 +502,30 @@ async function loadLocalizedCharVoiceData(locale: VoiceLocale): Promise<void> {
     localizedCharVoiceData.value = data
 }
 
-const charVoiceList = computed(() => localizedCharVoiceData.value.filter(item => item.charId === props.char.id))
+/**
+ * 语音 id → 偶遇角色，取自中文语音数据，供各语言语音复用。
+ */
+const companioCharIdByVoiceId = new Map<number, number>(
+    charVoiceData.filter(item => item.companioCharId !== undefined).map(item => [item.id, item.companioCharId as number])
+)
+
+/** 带偶遇角色的语音条目 */
+interface CharVoiceEntry {
+    voice: CharVoice
+    companio: Char | undefined
+}
+
+const charVoiceList = computed<CharVoiceEntry[]>(() =>
+    localizedCharVoiceData.value
+        .filter(item => item.charId === props.char.id)
+        .map(item => {
+            const companioCharId = companioCharIdByVoiceId.get(item.id)
+            return {
+                voice: item,
+                companio: companioCharId === undefined ? undefined : charMap.get(companioCharId),
+            }
+        })
+)
 
 // 当前角色所属的角色碎片资源（思绪片段·XXX），用于“获取方式”Tab 内嵌其 DB 资源详情。
 // 角色未配置碎片或资源数据缺失时返回 null，对应 Tab 不展示。
@@ -1136,18 +1165,18 @@ onBeforeUnmount(() => {
                 <div v-else-if="!char.icon" class="text-sm text-warning">当前角色缺少 icon，无法拼接语音资源地址</div>
                 <div v-else class="space-y-2">
                     <div
-                        v-for="voice in charVoiceList"
-                        :key="voice.id"
+                        v-for="entry in charVoiceList"
+                        :key="entry.voice.id"
                         class="rounded-xs border border-base-content/10 bg-base-content/3 p-3"
                     >
                         <div class="flex items-start gap-3">
                             <div class="min-w-0 grow">
                                 <div class="mb-1 flex items-center justify-between gap-2">
-                                    <div class="truncate text-sm font-medium">{{ formatStoryText(voice.name) }}</div>
-                                    <button type="button" class="btn btn-ghost btn-xs shrink-0" @click="toggleVoicePlayback(voice)">
+                                    <div class="truncate text-sm font-medium">{{ formatStoryText(entry.voice.name) }}</div>
+                                    <button type="button" class="btn btn-ghost btn-xs shrink-0" @click="toggleVoicePlayback(entry.voice)">
                                         <Icon
                                             :icon="
-                                                currentVoiceId === voice.id && isVoicePlaying
+                                                currentVoiceId === entry.voice.id && isVoicePlaying
                                                     ? 'ri:pause-circle-line'
                                                     : 'ri:play-circle-line'
                                             "
@@ -1155,8 +1184,22 @@ onBeforeUnmount(() => {
                                     </button>
                                 </div>
                                 <div class="text-sm leading-relaxed whitespace-pre-line text-base-content/85">
-                                    {{ formatStoryText(voice.text) }}
+                                    {{ formatStoryText(entry.voice.text) }}
                                 </div>
+                                <SRouterLink
+                                    v-if="entry.companio"
+                                    :to="`/db/char/${entry.companio.id}`"
+                                    class="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-1 text-[11px] transition-colors duration-150 hover:border-primary/50 hover:bg-primary/5"
+                                >
+                                    <span class="shrink-0 text-base-content/45">{{ $t("char-detail.companio_char") }}</span>
+                                    <img
+                                        :src="LeveledChar.url(entry.companio.icon)"
+                                        :alt="entry.companio.名称"
+                                        class="size-5 shrink-0 rounded-xs object-cover"
+                                    />
+                                    <span class="truncate font-medium text-primary">{{ $t(entry.companio.名称) }}</span>
+                                    <Icon icon="ri:arrow-right-up-line" class="h-3 w-3 shrink-0 text-base-content/40" />
+                                </SRouterLink>
                             </div>
                         </div>
                     </div>

@@ -1,3 +1,4 @@
+import i18next from "i18next"
 import { computed, ref, watch } from "vue"
 import { DBAgent, type DBAgentCallbacks, type DBAgentHistoryMessage, type DBAgentRunResult, type DBAgentToolTrace } from "@/api/dbAgent"
 import type { OpenAIConfig } from "@/api/openai"
@@ -17,9 +18,6 @@ import { parseRichComponents } from "@/utils/rich-component"
  * 会话与消息沿用项目既有的 Dexie 表（conversations / messages），
  * 因此历史对话与其它 AI 功能共享同一份本地数据。
  */
-
-/** 新会话的默认名称 */
-const DEFAULT_CONVERSATION_NAME = "新对话"
 
 /** 会话名称取用户首条提问的前若干字符 */
 const CONVERSATION_NAME_LENGTH = 18
@@ -133,10 +131,10 @@ export function useDBChat() {
 
     /**
      * 创建新会话。
-     * @param name 会话名称，缺省为「新对话」
+     * @param name 会话名称，缺省为当前语言下的「新对话」
      * @returns 新会话 id
      */
-    async function createConversation(name = DEFAULT_CONVERSATION_NAME) {
+    async function createConversation(name = i18next.t("dbAgent.conversation.defaultName")) {
         const now = Date.now()
         const record: UConversation = { name, createdAt: now, updatedAt: now }
         const id = await db.conversations.add(record)
@@ -210,7 +208,7 @@ export function useDBChat() {
                 continue
             }
 
-            sections.push(`${message.role === "user" ? "我" : "资料检索"}：${content}`)
+            sections.push(`${message.role === "user" ? i18next.t("dbAgent.ui.exportMe") : i18next.t("dbAgent.ui.exportAgent")}：${content}`)
         }
 
         return sections.length ? `${conversation.name}\n\n${sections.join("\n\n")}` : ""
@@ -416,15 +414,15 @@ export function useDBChat() {
         try {
             // 既没有自己的密钥又未登录时服务端代理不可用，直接给出可操作提示，不打无谓的请求
             if (!resolveAgentConfig()) {
-                throw new Error("请先登录后再使用资料检索，或在设置中填写自己的 AI 密钥")
+                throw new Error(i18next.t("dbAgent.error.noConfig"))
             }
 
             const result = await agent.run(history, buildCallbacks(assistantMessage, reasonings))
 
             await consumeResult(target, result)
         } catch (error) {
-            const message = error instanceof Error ? error.message : "未知错误"
-            assistantMessage.content = assistantMessage.content || `检索失败：${message}`
+            const message = error instanceof Error ? error.message : i18next.t("dbAgent.error.unknown")
+            assistantMessage.content = assistantMessage.content || i18next.t("dbAgent.error.failed", { message })
 
             await persistAssistant(assistantId, assistantMessage)
         } finally {
@@ -506,15 +504,15 @@ export function useDBChat() {
 
         try {
             if (!resolveAgentConfig()) {
-                throw new Error("请先登录后再使用资料检索，或在设置中填写自己的 AI 密钥")
+                throw new Error(i18next.t("dbAgent.error.noConfig"))
             }
 
             const result = await agent.answerAsk(response, buildCallbacks(target.message, reasonings))
 
             await consumeResult(target, result)
         } catch (error) {
-            const message = error instanceof Error ? error.message : "未知错误"
-            target.message.content = target.message.content || `检索失败：${message}`
+            const message = error instanceof Error ? error.message : i18next.t("dbAgent.error.unknown")
+            target.message.content = target.message.content || i18next.t("dbAgent.error.failed", { message })
 
             await persistAssistant(target.id, target.message)
         } finally {

@@ -6628,6 +6628,7 @@
         "title": "Liste de personnages"
     },
     "char-detail": {
+        "companio_char": "Personnage rencontré",
         "title": "Détails du personnage"
     },
     "char-list": {
@@ -6844,6 +6845,90 @@
         "desc": "Décomposer les formules de dégâts de CharBuild étape par étape avec surcharge manuelle",
         "title": "Décomposition des dégâts"
     },
+    "dbAgent": {
+        "conversation": {
+            "defaultName": "Nouvelle conversation",
+            "listEmpty": "Aucune conversation pour l'instant. Vos questions seront enregistrées ici."
+        },
+        "error": {
+            "clientNotInit": "Le client IA n'est pas initialisé",
+            "failed": "Échec de la recherche : {{message}}",
+            "needAnswer": "Veuillez choisir au moins une option ou saisir une réponse",
+            "noApiKey": "Clé IA non configurée. Veuillez la renseigner dans les paramètres",
+            "noConfig": "Connectez-vous pour utiliser la recherche de données, ou renseignez votre propre clé IA dans les paramètres",
+            "noPendingAsk": "Aucune question n'attend de réponse",
+            "unknown": "Erreur inconnue"
+        },
+        "summary": {
+            "answered": "Réponse reçue",
+            "askInvalid": "Format de question invalide",
+            "done": "Terminé",
+            "facets": "{{prefix}}{{count}} groupe(s) de filtres",
+            "modulesTotal": "{{count}} modules interrogeables au total",
+            "noFacets": "Aucun filtre supplémentaire pour ce module",
+            "questionFallback": "Question {{index}}",
+            "questionsPending": "{{count}} question(s) en attente",
+            "searchHits": "{{prefix}}{{count}} résultat(s)",
+            "skipped": "Ignoré par l'utilisateur",
+            "storyHits": "{{count}} chaîne(s) de quêtes trouvée(s)",
+            "storyLines": "{{count}} ligne(s) de dialogue renvoyée(s)",
+            "toolError": "Échec de l'exécution de l'outil",
+            "versionAdditions": "La version {{version}} ajoute {{count}} entrées",
+            "waitingChoice": "En attente de choix : {{question}}",
+            "waitingUser": "En attente de votre choix"
+        },
+        "tool": {
+            "ask_user": "Demander à l'utilisateur",
+            "list_data_modules": "Liste des modules",
+            "list_filter_options": "Options de filtre",
+            "list_version_additions": "Ajouts de version",
+            "query_module_entries": "Détails du module",
+            "read_story": "Texte de l'histoire",
+            "search_data": "Recherche globale",
+            "search_story": "Recherche d'histoire"
+        },
+        "ui": {
+            "askCustomPlaceholder": "Ou saisissez votre propre réponse…",
+            "askDefaultTitle": "Faites un choix pour poursuivre la recherche",
+            "askInputPlaceholder": "Saisissez ici…",
+            "askSkip": "Passer et rechercher",
+            "askSubmit": "Valider les choix",
+            "askSubmitting": "Recherche en cours…",
+            "backToDatabase": "Retour à la base de données",
+            "browseHint": "Entrée pour demander à l'IA · Maj + Entrée pour un saut de ligne",
+            "browseMoreResults": "{{count}} autres. Continuez à taper pour affiner",
+            "browsePlaceholder": "Que cherchez-vous aujourd'hui ? Tapez un mot-clé ou posez votre question à l'IA",
+            "browseSubmit": "Demander à l'IA",
+            "chatEmptyTip": "Confiez votre question à la recherche de données. Essayez :",
+            "chatHint": "Entrée pour envoyer · Maj + Entrée pour un saut de ligne",
+            "chatPlaceholderAnswer": "Vous pouvez aussi saisir votre réponse ici",
+            "chatPlaceholderIdle": "Continuez à poser des questions ou changez de sujet",
+            "chatSubmit": "Envoyer",
+            "copyAssistantTitle": "Copier cette réponse",
+            "copyConversationFailed": "Échec de la copie de la conversation",
+            "copyConversationTitle": "Copier la conversation",
+            "copyEmpty": "Cette conversation n'a encore rien à copier",
+            "copyFailed": "Échec de la copie",
+            "copySuccess": "Conversation copiée dans le presse-papiers",
+            "copyUserTitle": "Copier cette question",
+            "database": "Base de données",
+            "dialogDeleteBody": "Supprimer « {{name}} » ? Son historique de messages sera également supprimé.",
+            "dialogDeleteTitle": "Supprimer la conversation",
+            "enterChat": "Ouvrir la conversation",
+            "example1": "Ce que les personnages ont fait dans l'histoire",
+            "example2": "Les succès ajoutés dans la version 1.6",
+            "example3": "Les effets du mod « Abondance · Adresse »",
+            "exportAgent": "Recherche de données",
+            "exportMe": "Moi",
+            "newConversation": "Nouvelle conversation",
+            "searching": "Recherche dans la base de données…",
+            "stopSearch": "Arrêter la recherche",
+            "thinking": "Réflexion",
+            "thinkingLive": "Réflexion en cours",
+            "traceCollapse": "Masquer les détails de recherche",
+            "traceExpand": "Détails de recherche"
+        }
+    },
     "dna-announcement": {
         "empty": "Aucune annonce disponible pour le moment",
         "fetch_failed": "Echec de la recuperation des annonces",
@@ -7016,6 +7101,13 @@
         "title": "Erreur de rendu du composant"
     },
     "event": {
+        "photo_task_index": "Tâche",
+        "photo_task_location": "Lieu de photo",
+        "photo_task_quest": "Quête associée",
+        "photo_task_region": "Région",
+        "photo_task_reward": "Récompense",
+        "photo_task_unlock": "Déblocage",
+        "photo_tasks": "Tâches photo",
         "rule": "Règle"
     },
     "event-detail": {
