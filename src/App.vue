@@ -4,6 +4,7 @@ import { provideClient } from "@urql/vue"
 import { onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
+import { restoreScreenBar } from "./composables/useScreenBar"
 import { restoreSkillCdOverlay } from "./composables/useSkillCdOverlay"
 import { dataPackBootstrapLoading, isDataPackHydrated } from "./data/data-pack-bridge"
 import { env } from "./env"
@@ -14,6 +15,7 @@ import { useUIStore } from "./store/ui"
 import { useUserStore } from "./store/user"
 import { startAdminDataSyncCron, stopAdminDataSyncCron } from "./utils/admin-data-sync"
 import { buildCustomThemeCss, CUSTOM_THEME_ID, captureCurrentThemeVars } from "./utils/customTheme"
+import { SCREEN_BAR_WINDOW_LABEL } from "./utils/screen-bar"
 import { postVisitorCount } from "./vercount"
 
 const setting = useSettingStore()
@@ -26,6 +28,12 @@ const ONLINE_EXPERIENCE_TICK_MS = 60 * 1000
 const ONLINE_EXPERIENCE_RETRY_AT_KEY = "user_online_experience_retry_at"
 let onlineExperienceTimer: number | null = null
 const isMainWindow = env.isApp ? getCurrentWindow().label === "main" : true
+/**
+ * 当前窗口是否为屏幕信息条(顶部通用浮窗)。
+ * 该窗口由主窗口创建,只渲染一条信息:不加载底图与数据包、不参与登录/签到/访问统计,
+ * 也不重复拉起主程序的后台任务(密函推送轮询、技能 CD 浮窗恢复等)。
+ */
+const isScreenBarWindow = env.isApp && getCurrentWindow().label === SCREEN_BAR_WINDOW_LABEL
 
 /**
  * 上报页面访问统计，不阻塞主流程。
@@ -156,7 +164,8 @@ watchEffect(() => {
     // 自定义主题使用固定的 data-theme id（配套注入的 [data-theme] 样式）
     const themeName = setting.theme === "custom" ? CUSTOM_THEME_ID : setting.theme
     document.body.setAttribute("data-theme", themeName)
-    document.body.style.background = setting.windowTrasnparent ? "transparent" : "var(--color-base-300)"
+    // 信息条窗口是透明浮窗，body 必须保持透明，否则整条会顶着一块实色底板、看不到窗口后面的画面
+    document.body.style.background = isScreenBarWindow || setting.windowTrasnparent ? "transparent" : "var(--color-base-300)"
     document.documentElement.style.setProperty("--uiscale", String(setting.uiScale))
 })
 
@@ -181,6 +190,8 @@ watchEffect(() => {
 watch(
     () => route.path,
     () => {
+        // 信息条窗口不是真实访问来源，不参与访问统计
+        if (isScreenBarWindow) return
         reportVisitorCount()
     }
 )
@@ -211,7 +222,7 @@ watch(
 )
 
 provideClient(gqClient)
-if (env.isApp) {
+if (env.isApp && !isScreenBarWindow) {
     // 自动签到
     if (setting.autoSign) {
         setting.startAutoSign()
@@ -224,7 +235,7 @@ if (env.isApp) {
             console.error("启动时注册脚本热键失败:", error)
         })
     }
-} else {
+} else if (!env.isApp) {
     onMounted(() => {
         if (!setting.windowTrasnparent) return
         const app = document.getElementById("main-window")!
@@ -338,11 +349,18 @@ if (env.isApp) {
 }
 
 onMounted(async () => {
+    // 信息条窗口只需要字体(时钟数字用等宽字体 Aber Mono),其余启动流程一律跳过
+    if (isScreenBarWindow) {
+        void setting.initAppFont()
+        return
+    }
     // 从 OPFS 加载自定义底图与自定义字体，不阻塞启动流程
     void setting.initCustomWallpaper()
     void setting.initAppFont()
     // 后端浮窗不随应用自启：上次开启过就按持久化设置恢复（不阻塞启动）
     void restoreSkillCdOverlay()
+    // 屏幕信息条同理：窗口由主窗口按需创建
+    void restoreScreenBar()
     ui.setLoginState(setting.dnaUserId !== 0)
     ui.startTimer()
     reportVisitorCount()
@@ -360,61 +378,65 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
-    <!-- 自定义底图：铺满视口的用户上传背景，位于窗口内容之下（窗口本体为半透明，可透出底图） -->
-    <div
-        v-if="setting.customWallpaper"
-        class="pointer-events-none fixed z-0 bg-cover bg-center bg-no-repeat"
-        :class="[setting.customWallpaperBlur ? '-inset-6' : 'inset-0']"
-        :style="{
-            backgroundImage: `url(${setting.customWallpaper})`,
-            opacity: setting.customWallpaperOpacity,
-            filter: setting.customWallpaperBlur ? `blur(${setting.customWallpaperBlur}px)` : undefined,
-        }"
-    />
-    <StartupModal />
-    <ScriptRuntimeFloatingBar v-if="isMainWindow" />
-    <!-- 分享 MOD 下载队列（后台串行下载 + 安装，切页面不中断） -->
-    <ModDownloadPanel />
-    <ResizeableWindow
-        id="main-window"
-        :title="
-            ui.title || $t((typeof $route.meta?.title === 'string' ? $route.meta?.title : undefined) || `${String($route.name)}.title`, '')
-        "
-        darkable
-        pinable
-        :class="{ 'is-app': env.isApp }"
-    >
-        <RouterView
-            v-slot="{ Component, route }"
-            v-if="route.meta.requireData === false || isDataPackHydrated() || !dataPackBootstrapLoading"
+    <!-- 屏幕信息条窗口：只渲染信息条本身，不套主窗口外壳（ResizeableWindow 会给窗口加亚克力材质，透明浮窗用不了） -->
+    <RouterView v-if="isScreenBarWindow" />
+    <template v-else>
+        <canvas v-if="setting.windowTrasnparent && !env.isApp" id="background" class="fixed w-full h-full z-0 bg-indigo-300" />
+        <!-- 自定义底图：铺满视口的用户上传背景，位于窗口内容之下（窗口本体为半透明，可透出底图） -->
+        <div
+            v-if="setting.customWallpaper"
+            class="pointer-events-none fixed z-0 bg-cover bg-center bg-no-repeat"
+            :class="[setting.customWallpaperBlur ? '-inset-6' : 'inset-0']"
+            :style="{
+                backgroundImage: `url(${setting.customWallpaper})`,
+                opacity: setting.customWallpaperOpacity,
+                filter: setting.customWallpaperBlur ? `blur(${setting.customWallpaperBlur}px)` : undefined,
+            }"
+        />
+        <StartupModal />
+        <ScriptRuntimeFloatingBar v-if="isMainWindow" />
+        <!-- 分享 MOD 下载队列（后台串行下载 + 安装，切页面不中断） -->
+        <ModDownloadPanel />
+        <ResizeableWindow
+            id="main-window"
+            :title="
+                ui.title || $t((typeof $route.meta?.title === 'string' ? $route.meta?.title : undefined) || `${String($route.name)}.title`, '')
+            "
+            darkable
+            pinable
+            :class="{ 'is-app': env.isApp }"
         >
-            <transition name="slide-right">
-                <KeepAlive v-if="route.meta.keepAlive">
-                    <Suspense>
-                        <component :is="Component" />
-                        <template #fallback>
-                            <div class="w-full h-full flex justify-center items-center">
-                                <span class="loading loading-spinner loading-md" />
-                            </div>
-                        </template>
-                    </Suspense>
-                </KeepAlive>
-                <div v-else :key="$route.path" class="w-full h-full overflow-hidden">
-                    <ErrorBoundary>
-                        <component :is="Component" />
-                    </ErrorBoundary>
-                </div>
-            </transition>
-        </RouterView>
-    </ResizeableWindow>
-    <div
-        v-if="dataPackBootstrapLoading && !isDataPackHydrated() && $route.meta.requireData !== false"
-        class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-base-100/80 backdrop-blur-sm gap-2"
-    >
-        <span>{{ $t("ai.loading") }}</span>
-        <span class="loading loading-dots" />
-    </div>
+            <RouterView
+                v-slot="{ Component, route }"
+                v-if="route.meta.requireData === false || isDataPackHydrated() || !dataPackBootstrapLoading"
+            >
+                <transition name="slide-right">
+                    <KeepAlive v-if="route.meta.keepAlive">
+                        <Suspense>
+                            <component :is="Component" />
+                            <template #fallback>
+                                <div class="w-full h-full flex justify-center items-center">
+                                    <span class="loading loading-spinner loading-md" />
+                                </div>
+                            </template>
+                        </Suspense>
+                    </KeepAlive>
+                    <div v-else :key="$route.path" class="w-full h-full overflow-hidden">
+                        <ErrorBoundary>
+                            <component :is="Component" />
+                        </ErrorBoundary>
+                    </div>
+                </transition>
+            </RouterView>
+        </ResizeableWindow>
+        <div
+            v-if="dataPackBootstrapLoading && !isDataPackHydrated() && $route.meta.requireData !== false"
+            class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-base-100/80 backdrop-blur-sm gap-2"
+        >
+            <span>{{ $t("ai.loading") }}</span>
+            <span class="loading loading-dots" />
+        </div>
+    </template>
 </template>
 
 <style>

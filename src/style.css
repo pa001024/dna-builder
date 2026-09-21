@@ -78,11 +78,11 @@
     --animate-contentShow: contentShow 300ms cubic-bezier(0.16, 1, 0.3, 1);
     --animate-shake: shake 0.4s;
     --animate-ef-rise: ef-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-    /* 构筑简洁模式的全屏 HUD 用到的尘埃上浮动画（时长/延迟由组件内联覆盖） */
     --animate-mote-rise: mote-rise 12s linear infinite;
     --font-orbitron: "Orbitron", sans-serif;
     --font-mona: "Mona Sans", sans-serif;
     --font-wt: "WorldText02", sans-serif;
+    --font-mono: Consolas, monospace;
 
     /* 尘埃粒子自下而上缓慢上浮 */
     @keyframes mote-rise {
@@ -406,6 +406,22 @@ body {
 }
 
 @font-face {
+    font-family: "Aber Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/Aber-Mono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Aber Mono";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/Aber-Mono-Bold.woff2") format("woff2");
+}
+
+@font-face {
     font-family: "HarmonyOS Sans SC";
     font-style: normal;
     font-weight: 400;
@@ -425,13 +441,18 @@ body {
         "Mona Sans", -apple-system, BlinkMacSystemFont, "SourceHanSansCN", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
         "Fira Sans", "Droid Sans", "Helvetica Neue";
     font-family: var(--app-user-font, var(--app-font-fallback));
-    /* 640px */
+    /* 640px / 1px:窄窗口整机降一档。
+       只对主窗口生效 —— 屏幕信息条窗口的宽度由内容决定(只有一条时钟时只有几十像素),
+       跟着降档会让图标与内边距随条目增减而变,浮窗的尺寸测量也会一并算错。 */
     @media (max-width: calc(40rem - 1px)) {
-        font-size: calc(13px * var(--uiscale));
+        &:not(.is-screen-bar) {
+            font-size: calc(13px * var(--uiscale));
+        }
     }
-    /* 1px */
     @media (max-width: calc(10rem - 1px)) {
-        font-size: calc(16px * var(--uiscale));
+        &:not(.is-screen-bar) {
+            font-size: calc(16px * var(--uiscale));
+        }
     }
 }
 

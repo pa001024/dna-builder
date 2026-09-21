@@ -155,7 +155,7 @@ onBeforeUnmount(() => {
                 <span class="text-sm font-semibold tracking-wide">网页端不可用</span>
             </div>
             <a
-                href="/api/download"
+                href="https://api.dna-builder.cn/api/download"
                 class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xs border border-primary bg-primary px-5 text-[13px] font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:scale-[0.97]"
             >
                 <Icon icon="ri:download-2-line" class="size-4" />

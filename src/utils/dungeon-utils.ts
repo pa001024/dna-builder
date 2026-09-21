@@ -70,6 +70,12 @@ export function formatAbyssDungeonMbValue(dungeon: AbyssDungeon, key: AbyssDunge
     return typeof displayValue === "number" ? `${(displayValue * 100).toFixed(0)}%` : "--"
 }
 
+/**
+ * 委托密函副本清单:按 WalnutType 分成三组,每组 8 个副本,覆盖 8 种任务。
+ *
+ * 这份清单是"哪些任务存在委托密函副本"的唯一口径,`mihan-meta.ts` 的 `MIHAN_MISSIONS`
+ * 与它一一对应 —— 增删副本时必须同步那边的关注任务清单,否则会留下永远等不到的死选项。
+ */
 const mhList = [
     {
         DungeonId: [60102, 60202, 60402, 60502, 60602, 60702, 60902, 61102],

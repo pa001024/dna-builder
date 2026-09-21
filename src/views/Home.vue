@@ -311,7 +311,7 @@ async function checkUpdate() {
                     <div class="flex flex-wrap gap-3">
                         <a
                             v-if="!env.isApp"
-                            href="/api/download"
+                            href="https://api.dna-builder.cn/api/download"
                             target="_blank"
                             class="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-xs bg-primary px-5 text-sm font-semibold text-primary-content transition-all duration-150 hover:bg-primary/90 active:translate-y-px motion-reduce:transition-none"
                         >

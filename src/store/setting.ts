@@ -26,6 +26,7 @@ import {
     removeCustomFont as removeCustomFontFromOpfs,
     saveCustomFont,
 } from "@/utils/font-storage"
+import { createDefaultScreenBarConfig, parseScreenBarConfig, SCREEN_BAR_STORAGE_KEY, type ScreenBarConfig } from "@/utils/screen-bar"
 import {
     createDefaultSkillCdOverlaySettings,
     type FloatWindowKeyBinding,
@@ -106,6 +107,15 @@ export const useSettingStore = defineStore("setting", {
             ),
             // 后端浮窗实际运行状态(会话内瞬态,不持久化)
             skillCdOverlayRunning: false,
+            // ===== 屏幕信息条:顶部通用浮窗(独立 WebviewWindow:src/views/ScreenBarView.vue) =====
+            // 与技能 CD 浮窗同一套存储策略:整组配置放单个 localStorage 键。读取端交给 parseScreenBarConfig
+            // 而不是 mergeDefaults —— 后者只在对象这一层补字段,补不进条目数组内部的新字段。
+            screenBar: useLocalStorage<ScreenBarConfig>(SCREEN_BAR_STORAGE_KEY, createDefaultScreenBarConfig(), {
+                serializer: {
+                    read: raw => parseScreenBarConfig(raw),
+                    write: value => JSON.stringify(value),
+                },
+            }),
         }
     },
     getters: {},

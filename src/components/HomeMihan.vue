@@ -2,11 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from "vue"
 import { MIHAN_MISSIONS, MIHAN_TYPES, useMihanNotify } from "@/store/mihan"
 import { timeStr, useGameTimer } from "@/util"
-
-// 三种密函类型的主题色（角色金 / 武器蓝 / 魔之楔红）
-const TYPE_COLORS = ["#ba9011", "#1171ba", "#ba1111"] as const
-// 密函图标后缀（与 T_Walnut_<后缀>.webp 对应）
-const TYPE_ICON_SUFFIX = ["Avatar", "Weapon", "Mod"] as const
+import { MIHAN_TYPE_META } from "@/utils/mihan-meta"
 
 const mihanNotify = useMihanNotify()
 // 从 store 单例解构顶层 ref，便于模板直接 v-model
@@ -118,12 +114,8 @@ onUnmounted(() => {
                 class="rounded-xs border border-base-content/10 bg-base-100/60 p-3"
             >
                 <div class="mb-2 flex items-center gap-2">
-                    <img
-                        class="size-6 shrink-0"
-                        :src="`/imgs/webp/T_Walnut_${TYPE_ICON_SUFFIX[typeIndex]}.webp`"
-                        :alt="`${$t(MIHAN_TYPES[typeIndex])}密函`"
-                    />
-                    <span class="text-[13px] font-semibold" :style="{ color: TYPE_COLORS[typeIndex] }">
+                    <img class="size-6 shrink-0" :src="MIHAN_TYPE_META[typeIndex].icon" :alt="`${$t(MIHAN_TYPES[typeIndex])}密函`" />
+                    <span class="text-[13px] font-semibold" :style="{ color: MIHAN_TYPE_META[typeIndex].color }">
                         {{ $t(MIHAN_TYPES[typeIndex]) }}
                     </span>
                     <span

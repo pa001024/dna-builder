@@ -41,6 +41,14 @@ const routes: readonly RouteRecordRaw[] = [
         meta: { requireData: false },
     },
     {
+        // 屏幕信息条:独立 WebviewWindow 的承载页,只读 localStorage 里的配置与密函数据。
+        // 不设 minSize —— 该窗口要收缩到内容尺寸,设置最小尺寸会让它无法贴合内容。
+        name: "screen-bar",
+        path: "/screen-bar",
+        component: () => import("./views/ScreenBarView.vue"),
+        meta: { requireData: false },
+    },
+    {
         name: "points-mall",
         path: "/points-mall",
         component: () => import("./views/PointsMall.vue"),

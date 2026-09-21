@@ -10,19 +10,12 @@ import { env } from "../env"
 import { useUIStore } from "./ui"
 
 export const MIHAN_TYPES = ["角色", "武器", "魔之楔"] as const
-export const MIHAN_MISSIONS = [
-    "探险/无尽",
-    "驱离",
-    "拆解",
-    "驱逐",
-    "避险",
-    "扼守/无尽",
-    "护送",
-    "勘察/无尽",
-    "追缉",
-    "调停",
-    "迁移",
-] as const
+/** 委托任务名定义在无依赖模块里,便于屏幕信息条等纯逻辑模块直接引用。 */
+export { MIHAN_MISSIONS } from "@/utils/mihan-meta"
+/** 密函数据在 localStorage 中的键。悬浮条窗口按原始字符串比对做跨窗口同步。 */
+export const MIHAN_DATA_KEY = "mihanData"
+/** 关注任务列表在 localStorage 中的键。 */
+export const MIHAN_NOTIFY_MISSIONS_KEY = "mihanNotifyMissions"
 const MIHAN_UPDATE_DELAY_MS = 85 * 1000
 
 let mihanNotifySingleton: ReturnType<typeof createMihanNotify> | null = null
@@ -45,12 +38,12 @@ export type MihanNotifyContext = ReturnType<typeof createMihanNotify>
  * @returns 密函通知状态与方法
  */
 function createMihanNotify() {
-    const mihanData = useLocalStorage<string[][] | undefined>("mihanData", [])
+    const mihanData = useLocalStorage<string[][] | undefined>(MIHAN_DATA_KEY, [])
     const mihanUpdateTime = useLocalStorage<number>("mihanUpdateTime", 0)
     const mihanEnableNotify = useLocalStorage("mihanNotify", false)
     const mihanNotifyOnce = useLocalStorage("mihanNotifyOnce", true)
     const mihanNotifyTypes = useLocalStorage("mihanNotifyTypes", [] as number[])
-    const mihanNotifyMissions = useLocalStorage("mihanNotifyMissions", [] as string[])
+    const mihanNotifyMissions = useLocalStorage(MIHAN_NOTIFY_MISSIONS_KEY, [] as string[])
     const sfx = useSound("/sfx/notice.mp3")
     const watching = ref(false)
     let watchTimer: ReturnType<typeof setTimeout> | null = null

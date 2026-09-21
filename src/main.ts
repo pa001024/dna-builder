@@ -1,6 +1,7 @@
 import { createApp, type VNode } from "vue"
 import "./style.css"
 import * as Sentry from "@sentry/vue"
+import { getCurrentWindow } from "@tauri-apps/api/window"
 import i18next from "i18next"
 import I18NextVue from "i18next-vue"
 import packageJson from "../package.json"
@@ -14,8 +15,12 @@ import { applyLanguageFontClass, initI18n } from "./i18n"
 import "@globalhive/vuejs-tour/dist/style.css"
 import { createPinia } from "pinia"
 import type { Router } from "vue-router"
+import { SCREEN_BAR_WINDOW_LABEL } from "./utils/screen-bar"
 
 let appRouter: Router | null = null
+
+/** 当前窗口是否为屏幕信息条(顶部通用浮窗)：它不需要数据包与图片缓存。 */
+const isScreenBarWindow = env.isApp && getCurrentWindow().label === SCREEN_BAR_WINDOW_LABEL
 
 /**
  * 注册 App 端图片服务工作线程（启动时注册，用于 /imgs 缓存）。
@@ -83,6 +88,10 @@ async function bootstrap() {
     if (env.isApp) {
         document.documentElement.classList.add("is-app-font")
     }
+    // 信息条窗口宽度随内容变化,不能套用"窄窗口整机降一档"的根字号规则(见 style.css 的 :root 媒体查询)
+    if (isScreenBarWindow) {
+        document.documentElement.classList.add("is-screen-bar")
+    }
     applyLanguageFontClass(localStorage.getItem("setting_lang") || navigator.language)
 
     const [{ default: App }, { router }] = await Promise.all([import("./App.vue"), import("./router")])
@@ -126,6 +135,12 @@ async function bootstrap() {
 
     dataPackBootstrapLoading.value = true
     app.mount("#app")
+    if (isScreenBarWindow) {
+        // 信息条只读 localStorage 里的配置与密函数据，跳过数据包/图片缓存/外壳预热，
+        // 否则窗口要等最重的那段启动开销才能上屏。
+        dataPackBootstrapLoading.value = false
+        return
+    }
     requestAnimationFrame(() => {
         void bootstrapRuntimeAssets()
     })
