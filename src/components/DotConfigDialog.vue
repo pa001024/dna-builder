@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import type { DotFrequencySettings } from "@/composables/useCharSettings"
+import { useExprDrag } from "@/composables/useExprDrag"
 import { type CharBuild, type DotFrequencyResult, type DotSourceConfig } from "@/data/CharBuild"
 import { format100 } from "@/util"
 
@@ -8,6 +9,9 @@ const props = defineProps<{
     charBuild: CharBuild
     dotSettings: DotFrequencySettings
 }>()
+
+// 表达式字段拖拽 / 放置：来源行抓起后可放入表达式或自定义变量
+const { startExprDrag } = useExprDrag()
 
 defineEmits<{
     close: []
@@ -80,6 +84,24 @@ function sourceNamespace(type: DotSourceConfig["type"]): string {
     if (type === "ranged") return "远程"
     return "同律"
 }
+
+/**
+ * 来源对应的表达式字段文本：带命名空间为单来源分量（如 角色::DOT伤害），空串为全部来源。
+ * @param namespace 来源命名空间，空串表示全部来源
+ * @returns 表达式字段文本
+ */
+function dotExpression(namespace: string): string {
+    return namespace ? `${namespace}::DOT伤害` : "DOT伤害"
+}
+
+/**
+ * 指针按下时抓起 DOT 伤害字段：鼠标可拖到表达式 / 自定义变量输入框放置，触控为「点击抓起 → 点击放置」。
+ * @param namespace 来源命名空间，空串表示全部来源
+ * @param event 指针按下事件
+ */
+function startSourceDrag(namespace: string, event: PointerEvent) {
+    startExprDrag({ expr: dotExpression(namespace), label: namespace ? `${namespace} DOT伤害` : "全部来源 DOT伤害" }, event)
+}
 </script>
 
 <template>
@@ -94,7 +116,7 @@ function sourceNamespace(type: DotSourceConfig["type"]): string {
             </button>
         </div>
         <p class="mt-1 text-[11px] tracking-wide text-base-content/55">
-            公式：角色攻击 × 0.2 × 6 × 3 × (1 + 充盈威力) × 频率 × 抗性区（含属性穿透）
+            公式：Σ各来源 (角色攻击 + 来源武器攻击) × 0.2 × 6 × 4 × (1 + 充盈威力) × (1 + 增伤) × 昂扬乘区 × 背水乘区 × 频率 × 抗性区（含属性穿透）；技能来源仅按角色攻击结算
         </p>
 
         <!-- 各来源频率配置（无触发来源整块隐藏，不占位） -->
@@ -178,14 +200,20 @@ function sourceNamespace(type: DotSourceConfig["type"]): string {
         <!-- 各命名空间每秒 DOT 伤害（全部为每秒，语义由区块标题统一） -->
         <div class="mt-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="DPS" title="每秒DOT伤害（按来源）" />
-            <div class="mt-2 flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+            <div
+                class="cursor-grab flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 transition-colors duration-200 select-none hover:bg-base-content/5 active:cursor-grabbing"
+                title="点击抓起后可放入表达式或自定义变量"
+                @pointerdown="startSourceDrag('', $event)"
+            >
                 <span class="text-[11px] tracking-wide text-base-content/60">全部来源</span>
                 <DamageShow :value="charBuild.calculateDotDamage()" />
             </div>
             <div
                 v-for="source in visibleSources"
                 :key="source.type"
-                class="mt-2 flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                class="mt-2 cursor-grab flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 transition-colors duration-200 select-none hover:bg-base-content/5 active:cursor-grabbing"
+                title="点击抓起后可放入表达式或自定义变量"
+                @pointerdown="startSourceDrag(sourceNamespace(source.type), $event)"
             >
                 <span class="text-[11px] tracking-wide text-base-content/60">{{ sourceNamespace(source.type) }}::DOT伤害</span>
                 <DamageShow :value="sourceDamage(source.type)" />

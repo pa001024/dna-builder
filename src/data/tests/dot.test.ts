@@ -211,7 +211,9 @@ describe("DOT计算", () => {
             // 总追加伤害 > 0 时频率翻倍：ownFreq=2、otherFreq=6
             expect(freqs.ownFreq).toBeCloseTo(2, 6)
             expect(freqs.otherFreq).toBeCloseTo(6, 6)
-            const base = attrs.攻击 * 0.2 * 6 * 3 * (1 + attrs.充盈威力)
+            // 频率全部来自近战来源 → 基础攻击 = 角色攻击 + 近战武器攻击
+            const meleeAttack = build.calculateWeaponAttributes(build.meleeWeapon).weapon?.攻击 || 0
+            const base = (attrs.攻击 + meleeAttack) * 0.2 * 6 * 4 * (1 + attrs.充盈威力)
             const penetration = 1 + (attrs.属性穿透 || 0)
             // 角色自身属性按正常抗性区 factor(-4)=5；其余属性全部按 0.5
             const expected = base * (freqs.ownFreq * Math.max(0, 1 - -4) + freqs.otherFreq * 0.5) * penetration
@@ -226,7 +228,9 @@ describe("DOT计算", () => {
             })
             const attrs = build.calculateWeaponAttributes()
             const freqs = build.calculateDotFrequencies()
-            const base = attrs.攻击 * 0.2 * 6 * 3 * (1 + attrs.充盈威力)
+            // 频率全部来自近战来源 → 基础攻击 = 角色攻击 + 近战武器攻击
+            const meleeAttack = build.calculateWeaponAttributes(build.meleeWeapon).weapon?.攻击 || 0
+            const base = (attrs.攻击 + meleeAttack) * 0.2 * 6 * 4 * (1 + attrs.充盈威力)
             const penetration = 1 + (attrs.属性穿透 || 0)
             // 其余属性 3 种：原 0.5×3 = 1.5 → 5 + 0.5×2 = 6（每单位频率等效因子 = 6/3 = 2）
             const otherZone = (Math.max(0, 1 - -4) + Math.max(0, 1 - 0.5) * 2) / 3
@@ -245,7 +249,9 @@ describe("DOT计算", () => {
             })
             const attrs = build.calculateWeaponAttributes()
             const freqs = build.calculateDotFrequencies()
-            const base = attrs.攻击 * 0.2 * 6 * 3 * (1 + attrs.充盈威力)
+            // 频率全部来自近战来源 → 基础攻击 = 角色攻击 + 近战武器攻击
+            const meleeAttack = build.calculateWeaponAttributes(build.meleeWeapon).weapon?.攻击 || 0
+            const base = (attrs.攻击 + meleeAttack) * 0.2 * 6 * 4 * (1 + attrs.充盈威力)
             const penetration = 1 + (attrs.属性穿透 || 0)
             const expected = base * freqs.totalFreq * penetration
             expect(build.calculateDotDamage()).toBeCloseTo(expected, 6)
@@ -259,7 +265,9 @@ describe("DOT计算", () => {
             })
             const attrs = build.calculateWeaponAttributes()
             const freqs = build.calculateDotFrequencies()
-            const base = attrs.攻击 * 0.2 * 6 * 3 * (1 + attrs.充盈威力)
+            // melee 分量的基础攻击 = 角色攻击 + 近战武器攻击
+            const meleeAttack = build.calculateWeaponAttributes(build.meleeWeapon).weapon?.攻击 || 0
+            const base = (attrs.攻击 + meleeAttack) * 0.2 * 6 * 4 * (1 + attrs.充盈威力)
             const penetration = 1 + (attrs.属性穿透 || 0)
             // melee 分量 = 自身 1×0.5 + 其余 3×2
             const expected = base * (freqs.sources[1].ownFreq * 0.5 + freqs.sources[1].otherFreq * 2) * penetration
@@ -278,7 +286,9 @@ describe("DOT计算", () => {
             const attrs = build.calculateWeaponAttributes()
             const freqs = build.calculateDotFrequencies()
             expect(freqs.sources[1].otherElementCount).toBe(4)
-            const base = attrs.攻击 * 0.2 * 6 * 3 * (1 + attrs.充盈威力)
+            // 频率全部来自近战来源 → 基础攻击 = 角色攻击 + 近战武器攻击
+            const meleeAttack = build.calculateWeaponAttributes(build.meleeWeapon).weapon?.攻击 || 0
+            const base = (attrs.攻击 + meleeAttack) * 0.2 * 6 * 4 * (1 + attrs.充盈威力)
             const penetration = 1 + (attrs.属性穿透 || 0)
             const otherZone = (Math.max(0, 1 - -4) + Math.max(0, 1 - 0.5) * 3) / 4
             expect(otherZone).toBeCloseTo(1.625, 6)
@@ -374,7 +384,7 @@ describe("DOT计算", () => {
     })
 
     describe("DOT伤害公式", () => {
-        it("每秒DOT伤害 = 攻击×0.2×6×3×(1+充盈威力)×(自身频率×正常抗性区 + 其余频率×反转抗性区)", () => {
+        it("每秒DOT伤害 = Σ各来源(角色攻击+来源武器攻击)×0.2×6×4×(1+充盈威力)×(1+增伤)×昂扬乘区×背水乘区×(来源自身频率×正常抗性区+来源其余频率×反转抗性区)", () => {
             const build = createDotBuild({
                 charMods: [new LeveledMod(51317)],
                 dotSettings: { skill: 2.5, melee: 1, ranged: 1 },
@@ -383,7 +393,7 @@ describe("DOT计算", () => {
             const freqs = build.calculateDotFrequencies()
             // 敌人抗性 0：正常抗性区 = 1+属性穿透，反转抗性区 = 1+属性穿透（无反转）
             const penetration = 1 + (attrs.属性穿透 || 0)
-            const expected = attrs.攻击 * 0.2 * 6 * 3 * (1 + (attrs.充盈威力 || 0)) * (freqs.ownFreq + freqs.otherFreq) * penetration
+            const expected = attrs.攻击 * 0.2 * 6 * 4 * (1 + (attrs.充盈威力 || 0)) * (freqs.ownFreq + freqs.otherFreq) * penetration
             expect(build.calculateDotDamage()).toBeCloseTo(expected, 6)
         })
 
@@ -406,6 +416,28 @@ describe("DOT计算", () => {
             // 充盈威力参与：(1+充盈威力) 乘区不同 → 伤害不同
             expect(build.calculateDotDamage()).toBeGreaterThan(noFullness.calculateDotDamage())
         })
+
+        it("增伤、昂扬、背水 参与乘区", () => {
+            // 充盈·巧力(金 51317) 提供技能触发 100%，否则技能来源隐藏、频率为 0
+            const mk = (overrides: Partial<CharBuildOptions>) =>
+                createDotBuild({ charMods: [new LeveledMod(51317)], dotSettings: { skill: 2.5, melee: 0, ranged: 0 }, ...overrides })
+            const base = mk({}).calculateDotDamage()
+            // 增伤：期望 = 基准 × (1 + 增伤)
+            expect(mk({ buffs: [createBuffFromSettings("自定义BUFF", 1, [["增伤", 0.3]])] }).calculateDotDamage()).toBeCloseTo(
+                base * 1.3,
+                6
+            )
+            // 昂扬：hpPercent=1 → 乘区 = 1 + 昂扬
+            expect(mk({ buffs: [createBuffFromSettings("自定义BUFF", 1, [["昂扬", 0.4]])] }).calculateDotDamage()).toBeCloseTo(
+                base * 1.4,
+                6
+            )
+            // 背水：hpPercent=1 → 乘区 = 1（背水在满血时不生效）
+            expect(mk({ buffs: [createBuffFromSettings("自定义BUFF", 1, [["背水", 0.5]])] }).calculateDotDamage()).toBeCloseTo(base, 6)
+            // 背水在低血量时生效：hpPercent=0.5 → 乘区 = 1 + 4×0.5×(1-0.5)×(1.5-0.5) = 2
+            const lowHp = mk({ hpPercent: 0.5, buffs: [createBuffFromSettings("自定义BUFF", 1, [["背水", 0.5]])] })
+            expect(lowHp.calculateDotDamage()).toBeCloseTo(base * (1 + 4 * 0.5 * (1 - 0.5) * (1.5 - 0.5)), 6)
+        })
     })
 
     describe("表达式引用（命名空间）", () => {
@@ -426,7 +458,7 @@ describe("DOT计算", () => {
             // 技能分量 = 角色自身属性 2.5（技能占满共享上限）
             const attrs = build.calculateWeaponAttributes()
             const resistanceZone = Math.max(0, 1 + (attrs.属性穿透 || 0))
-            expect(build.calculateDotDamage("角色")).toBeCloseTo(attrs.攻击 * 0.2 * 6 * 3 * (1 + attrs.充盈威力) * 2.5 * resistanceZone, 6)
+            expect(build.calculateDotDamage("角色")).toBeCloseTo(attrs.攻击 * 0.2 * 6 * 4 * (1 + attrs.充盈威力) * 2.5 * resistanceZone, 6)
         })
 
         it("melee::DOT伤害 只计算近战分量（自身属性部分 + 其余属性部分）", () => {
@@ -436,10 +468,14 @@ describe("DOT计算", () => {
                 dotSettings: { skill: 1, melee: 1.5, ranged: 0 },
             })
             expect(build.evaluateAST("melee::DOT伤害")).toBeCloseTo(build.calculateDotDamage("melee"), 6)
-            // 近战分量 = 自身属性 1.5 + 其余属性 0
+            // 近战分量 = 自身属性 1.5 + 其余属性 0；武器来源基础攻击含近战武器攻击
             const attrs = build.calculateWeaponAttributes()
+            const meleeAttack = build.calculateWeaponAttributes(build.meleeWeapon).weapon?.攻击 || 0
             const resistanceZone = Math.max(0, 1 + (attrs.属性穿透 || 0))
-            expect(build.calculateDotDamage("melee")).toBeCloseTo(attrs.攻击 * 0.2 * 6 * 3 * (1 + attrs.充盈威力) * 1.5 * resistanceZone, 6)
+            expect(build.calculateDotDamage("melee")).toBeCloseTo(
+                (attrs.攻击 + meleeAttack) * 0.2 * 6 * 4 * (1 + attrs.充盈威力) * 1.5 * resistanceZone,
+                6
+            )
         })
 
         it("ranged::DOT伤害 与中文别名 近战::/远程:: 均可用", () => {

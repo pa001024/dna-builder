@@ -23,6 +23,9 @@ export interface CharLevelUpConfig {
     targetLevel: number
 
     skills: [SkillLevelUpConfig, SkillLevelUpConfig, SkillLevelUpConfig]
+
+    /** 勾选解锁的额外精通武器类型（名称，如 "长柄"），解锁成本计入总消耗 */
+    extraMastery?: string[]
 }
 
 export interface SkillLevelUpConfig {
@@ -100,6 +103,8 @@ export interface LevelUpResult {
         breakthrough?: ResourceCost
         craft?: ResourceCost
         skills?: ResourceCost
+        /** 额外精通武器解锁消耗 */
+        extraMastery?: ResourceCost
     }
 }
 
@@ -553,6 +558,11 @@ export class LevelUpCalculator {
                 // 合并技能升级消耗（如果有）
                 if (result.details.skills) {
                     acc.skills = LevelUpCalculator.mergeCosts(acc.skills || {}, result.details.skills)
+                }
+
+                // 合并额外精通解锁消耗（如果有）
+                if (result.details.extraMastery) {
+                    acc.extraMastery = LevelUpCalculator.mergeCosts(acc.extraMastery || {}, result.details.extraMastery)
                 }
 
                 return acc

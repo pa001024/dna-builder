@@ -17,12 +17,15 @@ import {
     weaponData,
     weaponMap,
 } from "@/data"
+import { charExtraExcelWeapon } from "@/data/d/charext.data"
+import { resourceMap } from "@/data/d/resource.data"
 import { dataPackBootstrapLoading, dataPackHydrationKey, isDataPackHydrated } from "@/data/data-pack-bridge"
 import {
     type CharLevelUpConfig,
     LevelUpCalculator,
     type LevelUpResult,
     type ModLevelUpConfig,
+    type ResourceCost,
     type TimeEstimateConfig,
     type WeaponLevelUpConfig,
 } from "@/data/LevelUpCalculator"
@@ -378,6 +381,17 @@ async function calculateResult() {
             Boolean
         ) as LevelUpResult[]
         let mergedResult = LevelUpCalculator.mergeResults(resultsToMerge)
+
+        // 合并额外精通解锁消耗：固定成本直接在前端汇总，计入总消耗与独立明细
+        const extraMasteryCost = computeExtraMasteryCost()
+        if (Object.keys(extraMasteryCost).length > 0) {
+            mergedResult.details.extraMastery = extraMasteryCost
+            for (const [resource, amount] of Object.entries(extraMasteryCost)) {
+                if (typeof amount !== "number") continue
+                mergedResult.totalCost[resource] = ((mergedResult.totalCost[resource] as number | undefined) || 0) + amount
+            }
+        }
+
         // 如果有排除的资源，重新计算结果
         if (excludedResources.value.size > 0) {
             // 过滤总消耗
@@ -405,6 +419,7 @@ async function calculateResult() {
                 breakthrough: mergedResult.details.breakthrough ? filterResourceObject(mergedResult.details.breakthrough) : undefined,
                 craft: mergedResult.details.craft ? filterResourceObject(mergedResult.details.craft) : undefined,
                 skills: mergedResult.details.skills ? filterResourceObject(mergedResult.details.skills) : undefined,
+                extraMastery: mergedResult.details.extraMastery ? filterResourceObject(mergedResult.details.extraMastery) : undefined,
             }
 
             // 返回过滤后的结果
@@ -471,6 +486,7 @@ function createDefaultCharConfig(): CharLevelUpConfig {
     return {
         currentLevel: 1,
         targetLevel: 80,
+        extraMastery: [],
         skills: [
             {
                 currentLevel: 1,
@@ -491,6 +507,53 @@ function createDefaultCharConfig(): CharLevelUpConfig {
 // 移除角色
 const removeChar = (index: number) => {
     chars.value.splice(index, 1)
+}
+
+/**
+ * 获取角色可选的额外精通武器类型
+ * 仅返回角色「额外精通」字段指定的武器类型
+ * @param charId 角色 ID
+ * @returns 可选的额外精通解锁条目
+ */
+function charExtraMasteryOptions(charId: number) {
+    const char = charMap.get(charId)
+    return charExtraExcelWeapon.filter(item => char?.额外精通?.includes(item.名称))
+}
+
+/**
+ * 切换角色的额外精通武器勾选
+ * 懒初始化 extraMastery 字段，兼容缺少该字段的旧本地存档
+ * @param char 角色养成项
+ * @param type 武器类型名称
+ */
+function toggleCharExtraMastery(char: CharItem, type: string) {
+    const list = char.config.extraMastery ?? (char.config.extraMastery = [])
+    const index = list.indexOf(type)
+    if (index >= 0) {
+        list.splice(index, 1)
+    } else {
+        list.push(type)
+    }
+}
+
+/**
+ * 汇总所有角色勾选的额外精通解锁消耗
+ * 每个勾选类型对应一份固定解锁成本（铜币 + 武器移转模块 + 熔铸X的领悟）
+ * @returns 按资源名汇总的解锁消耗
+ */
+function computeExtraMasteryCost(): ResourceCost {
+    const cost: ResourceCost = {}
+    for (const item of chars.value) {
+        for (const type of item.config.extraMastery ?? []) {
+            const unlock = charExtraExcelWeapon.find(w => w.名称 === type)
+            if (!unlock) continue
+            for (const [resourceId, count] of Object.entries(unlock.消耗)) {
+                const name = resourceMap.get(Number(resourceId))?.name || String(resourceId)
+                cost[name] = ((cost[name] as number | undefined) || 0) + count
+            }
+        }
+    }
+    return cost
 }
 
 /**
@@ -878,6 +941,27 @@ const dungeonTimeFields = [
                                                 :max="10"
                                             />
                                         </div>
+                                    </div>
+                                    <div
+                                        v-if="charExtraMasteryOptions(char.id).length"
+                                        class="mt-2 flex flex-wrap items-center gap-1.5"
+                                    >
+                                        <span class="text-xs text-base-content/50">额外精通</span>
+                                        <button
+                                            v-for="option in charExtraMasteryOptions(char.id)"
+                                            :key="option.id"
+                                            type="button"
+                                            class="cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                            :class="
+                                                char.config.extraMastery?.includes(option.名称)
+                                                    ? 'border-primary bg-primary font-semibold text-primary-content'
+                                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/60 hover:text-primary'
+                                            "
+                                            :aria-label="`勾选额外精通：${option.名称}`"
+                                            @click="toggleCharExtraMastery(char, option.名称)"
+                                        >
+                                            {{ $t(option.名称) }}
+                                        </button>
                                     </div>
                                 </div>
                                 <!-- 右侧独立删除列 -->
@@ -1278,6 +1362,24 @@ const dungeonTimeFields = [
                                 <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1">
                                     <ResourceCostItem
                                         v-for="(value, key) in result.details.breakthrough"
+                                        :key="key"
+                                        :name="key"
+                                        :value="value!"
+                                        class="cursor-pointer"
+                                        @click="toggleResourceFilter(key)"
+                                    />
+                                </div>
+                            </div>
+                            <div v-if="result.details.extraMastery && Object.keys(result.details.extraMastery).length > 0" class="min-w-0">
+                                <div
+                                    class="mb-2.5 flex items-center gap-1.5 border-b border-base-content/10 pb-2 text-[11px] tracking-wide text-base-content/55"
+                                >
+                                    <Icon icon="ri:key-2-line" />
+                                    额外精通解锁
+                                </div>
+                                <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1">
+                                    <ResourceCostItem
+                                        v-for="(value, key) in result.details.extraMastery"
                                         :key="key"
                                         :name="key"
                                         :value="value!"

@@ -2,6 +2,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import { computed, onBeforeUnmount, reactive, ref } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
+import { useSearchParam } from "@/composables/useSearchParam"
 import { CharBuild, CharBuildTimeline, charMap, LeveledCharHelper } from "@/data"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
 import { useInvStore } from "@/store/inv"
@@ -9,7 +10,7 @@ import { useTimeline } from "@/store/timeline"
 import { useUIStore } from "@/store/ui"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 
-type CalcMode = "weapon" | "skill"
+type CalcMode = "weapon" | "skill" | "dot"
 type StepOperator = "+" | "-" | "*" | "/"
 
 type WeaponNumberFieldKey =
@@ -82,6 +83,20 @@ type WeaponToggleFieldKey =
     | "imbalanceEnabled"
     | "fullnessFieldEnabled"
 type SkillToggleFieldKey = "imbalanceEnabled" | "fullnessFieldEnabled"
+
+type DotNumberFieldKey =
+    | "charAttack"
+    | "weaponAttack"
+    | "fullnessPower"
+    | "baseDamageBonus"
+    | "skillFreq"
+    | "weaponOwnFreq"
+    | "otherFreq"
+    | "boostBonus"
+    | "desperateBonus"
+    | "hpPercent"
+    | "enemyResistance"
+    | "penetrationBonus"
 
 interface WeaponDamageInput {
     charBaseAttack: number
@@ -157,6 +172,26 @@ interface SkillDamageInput {
     // 充盈：充盈威力（角色属性汇总）；当前伤害字段是否为充盈伤害（tag 含“充盈”）
     fullnessPower: number
     fullnessFieldEnabled: boolean
+}
+
+interface DotDamageInput {
+    /** 角色攻击（所有来源共用） */
+    charAttack: number
+    /** 来源武器攻击（仅武器来源频率享受；多武器时按频率加权平均） */
+    weaponAttack: number
+    fullnessPower: number
+    baseDamageBonus: number
+    /** 技能来源自身属性频率（次/秒，仅角色攻击） */
+    skillFreq: number
+    /** 武器来源自身属性频率（次/秒，角色攻击 + 武器攻击） */
+    weaponOwnFreq: number
+    /** 其余属性频率（次/秒，角色攻击 + 武器攻击） */
+    otherFreq: number
+    boostBonus: number
+    desperateBonus: number
+    hpPercent: number
+    enemyResistance: number
+    penetrationBonus: number
 }
 
 interface DamageStepContext<TInput> {
@@ -365,6 +400,27 @@ function createDefaultSkillInput(): SkillDamageInput {
         imbalanceEnabled: false,
         fullnessPower: 0,
         fullnessFieldEnabled: false,
+    }
+}
+
+/**
+ * 创建 DOT 伤害默认输入，便于快速进入调试。
+ * @returns 默认 DOT 输入
+ */
+function createDefaultDotInput(): DotDamageInput {
+    return {
+        charAttack: 1200,
+        weaponAttack: 800,
+        fullnessPower: 5.5,
+        baseDamageBonus: 0.25,
+        skillFreq: 0,
+        weaponOwnFreq: 2.5,
+        otherFreq: 0,
+        boostBonus: 0,
+        desperateBonus: 0,
+        hpPercent: 0.7,
+        enemyResistance: 0.2,
+        penetrationBonus: 0.15,
     }
 }
 
@@ -716,6 +772,38 @@ function buildSkillInputFromCharBuild(build: CharBuild): SkillDamageInput {
 }
 
 /**
+ * 将 CharBuild 快照映射为 DOT 模式输入参数。
+ * @param build 当前构筑
+ * @returns DOT 模式输入
+ */
+function buildDotInputFromCharBuild(build: CharBuild): DotDamageInput {
+    const result = createDefaultDotInput()
+    const attrs = build.calculateWeaponAttributes()
+    const freqs = build.calculateDotFrequencies(attrs)
+    // 技能来源自身属性频率仅吃角色攻击；其余自身属性频率与其余属性频率均来自武器，吃对应武器攻击
+    const skillFreq = freqs.sources.find(source => source.type === "skill")?.ownFreq || 0
+    const weaponFreq = freqs.ownFreq - skillFreq + freqs.otherFreq
+    // 多把武器同时贡献时，武器攻击按各武器来源频率加权平均，保证拆解公式与 CharBuild.calculateDotDamage 总值一致
+    const weightedWeaponAttack = freqs.sources.reduce(
+        (sum, source) => (source.type === "skill" ? sum : sum + source.weaponAttack * (source.ownFreq + source.otherFreq)),
+        0
+    )
+    result.charAttack = attrs.攻击
+    result.weaponAttack = weaponFreq > Number.EPSILON ? weightedWeaponAttack / weaponFreq : 0
+    result.fullnessPower = attrs.充盈威力 || 0
+    result.baseDamageBonus = attrs.增伤
+    result.skillFreq = skillFreq
+    result.weaponOwnFreq = freqs.ownFreq - skillFreq
+    result.otherFreq = freqs.otherFreq
+    result.boostBonus = attrs.昂扬
+    result.desperateBonus = attrs.背水
+    result.hpPercent = build.hpPercent
+    result.enemyResistance = build.enemyResistance
+    result.penetrationBonus = attrs.属性穿透
+    return result
+}
+
+/**
  * 从当前 CharBuildView 构筑导入参数到武器/技能两种模式。
  */
 function importFromCurrentCharBuild(): void {
@@ -723,8 +811,10 @@ function importFromCurrentCharBuild(): void {
         const build = createBuildFromCurrentCharView()
         replaceReactiveObject(weaponInput, buildWeaponInputFromCharBuild(build))
         replaceReactiveObject(skillInput, buildSkillInputFromCharBuild(build))
+        replaceReactiveObject(dotInput, buildDotInputFromCharBuild(build))
         weaponOverrides.value = {}
         skillOverrides.value = {}
+        dotOverrides.value = {}
         ui.showSuccessMessage(`已导入当前构筑: ${selectedCharForImport.value} / ${build.baseName}`)
     } catch (error) {
         ui.showErrorMessage("导入失败:", error instanceof Error ? error.message : "未知错误")
@@ -1415,17 +1505,142 @@ function buildSkillStepDefinitions(): DamageStepDefinition<SkillDamageInput>[] {
     ]
 }
 
-const mode = ref<CalcMode>("skill")
+/**
+ * 构建 DOT 伤害拆解步骤，公式与 CharBuild.calculateDotDamage 保持一致。
+ * @returns DOT 步骤定义
+ */
+function buildDotStepDefinitions(): DamageStepDefinition<DotDamageInput>[] {
+    return [
+        {
+            id: "dotBaseDamage",
+            title: "单跳基础伤害(角色攻击)",
+            formula: "单跳基础伤害(角色攻击) = 角色攻击 * 0.2 * 6 * 4（技能来源按此结算）",
+            compute: ({ input }) => input.charAttack * 0.2 * 6 * 4,
+            explain: ({ input }, value) => `${formatNumber(input.charAttack)} * 0.2 * 6 * 4 = ${formatNumber(value)}`,
+        },
+        {
+            id: "weaponBaseDamage",
+            title: "单跳基础伤害(武器来源)",
+            formula: "单跳基础伤害(武器来源) = (角色攻击 + 武器攻击) * 0.2 * 6 * 4（武器来源按此结算）",
+            compute: ({ input }) => (input.charAttack + input.weaponAttack) * 0.2 * 6 * 4,
+            explain: ({ input }, value) =>
+                `(${formatNumber(input.charAttack)} + ${formatNumber(input.weaponAttack)}) * 0.2 * 6 * 4 = ${formatNumber(value)}`,
+        },
+        {
+            id: "fullnessMultiplier",
+            title: "充盈乘区",
+            formula: "充盈乘区 = 1 + 充盈威力",
+            compute: ({ input }) => 1 + input.fullnessPower,
+            explain: ({ input }, value) => `1 + ${formatNumber(input.fullnessPower)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "damageIncrease",
+            title: "增伤乘区",
+            formula: "增伤乘区 = 1 + 增伤",
+            compute: ({ input }) => 1 + input.baseDamageBonus,
+            explain: ({ input }, value) => `1 + ${formatNumber(input.baseDamageBonus)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "boostMultiplier",
+            title: "昂扬乘区",
+            formula: "昂扬乘区 = 1 + 昂扬 * 生命比例(限制在 0~1)",
+            compute: ({ input }) => 1 + input.boostBonus * clampNumber(input.hpPercent, 0, 1),
+            explain: ({ input }, value) => {
+                const hp = clampNumber(input.hpPercent, 0, 1)
+                return `1 + ${formatNumber(input.boostBonus)} * ${formatNumber(hp)} = ${formatNumber(value)}`
+            },
+        },
+        {
+            id: "desperateMultiplier",
+            title: "背水乘区",
+            formula: "背水乘区 = 1 + 4 * 背水 * (1 - 生命比例(限制在 0.25~1)) * (1.5 - 生命比例(限制在 0.25~1))",
+            compute: ({ input }) => {
+                const hp = clampNumber(input.hpPercent, 0.25, 1)
+                return 1 + 4 * input.desperateBonus * (1 - hp) * (1.5 - hp)
+            },
+            explain: ({ input }, value) => {
+                const hp = clampNumber(input.hpPercent, 0.25, 1)
+                return `1 + 4 * ${formatNumber(input.desperateBonus)} * (1 - ${formatNumber(hp)}) * (1.5 - ${formatNumber(hp)}) = ${formatNumber(value)}`
+            },
+        },
+        {
+            id: "hpMore",
+            title: "血量相关乘区",
+            formula: "血量相关乘区 = 昂扬乘区 * 背水乘区",
+            compute: ({ get }) => get("boostMultiplier") * get("desperateMultiplier"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("boostMultiplier"))} * ${formatNumber(get("desperateMultiplier"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "totalFrequency",
+            title: "DOT频率合计",
+            formula: "DOT频率合计 = 技能来源频率 + 武器来源自身属性频率 + 其余属性频率",
+            compute: ({ input }) => input.skillFreq + input.weaponOwnFreq + input.otherFreq,
+            explain: ({ input }, value) =>
+                `${formatNumber(input.skillFreq)} + ${formatNumber(input.weaponOwnFreq)} + ${formatNumber(input.otherFreq)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "weaponFrequency",
+            title: "武器来源频率",
+            formula: "武器来源频率 = 武器来源自身属性频率 + 其余属性频率（该部分频率吃武器攻击）",
+            compute: ({ input }) => input.weaponOwnFreq + input.otherFreq,
+            explain: ({ input }, value) =>
+                `${formatNumber(input.weaponOwnFreq)} + ${formatNumber(input.otherFreq)} = ${formatNumber(value)}`,
+        },
+        {
+            id: "weightedBaseDamage",
+            title: "频率加权基础伤害",
+            formula: "频率加权基础伤害 = 单跳基础伤害(角色攻击) * (DOT频率合计 - 武器来源频率) + 单跳基础伤害(武器来源) * 武器来源频率",
+            compute: ({ get }) =>
+                get("dotBaseDamage") * (get("totalFrequency") - get("weaponFrequency")) + get("weaponBaseDamage") * get("weaponFrequency"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("dotBaseDamage"))} * ${formatNumber(get("totalFrequency") - get("weaponFrequency"))} + ${formatNumber(get("weaponBaseDamage"))} * ${formatNumber(get("weaponFrequency"))} = ${formatNumber(value)}`,
+        },
+        {
+            id: "resistancePenetration",
+            title: "抗性乘区",
+            formula: "抗性乘区 = (1 - 敌人抗性) * (1 + 属性穿透)，最小为 0",
+            compute: ({ input }) => Math.max(0, (1 - input.enemyResistance) * (1 + input.penetrationBonus)),
+            explain: ({ input }, value) => {
+                const raw = (1 - input.enemyResistance) * (1 + input.penetrationBonus)
+                return `(1 - ${formatNumber(input.enemyResistance)}) * (1 + ${formatNumber(input.penetrationBonus)}) = ${formatNumber(raw)} -> ${formatNumber(value)}`
+            },
+        },
+        {
+            id: "dotDamage",
+            title: "每秒DOT伤害",
+            formula:
+                "每秒DOT伤害 = 频率加权基础伤害 * 充盈乘区 * 增伤乘区 * 血量相关乘区 * 抗性乘区",
+            compute: ({ get }) =>
+                get("weightedBaseDamage") *
+                get("fullnessMultiplier") *
+                get("damageIncrease") *
+                get("hpMore") *
+                get("resistancePenetration"),
+            explain: ({ get }, value) =>
+                `${formatNumber(get("weightedBaseDamage"))} * ${formatNumber(get("fullnessMultiplier"))} * ${formatNumber(get("damageIncrease"))} * ${formatNumber(get("hpMore"))} * ${formatNumber(get("resistancePenetration"))} = ${formatNumber(value)}`,
+        },
+    ]
+}
+
+// 计算模式持久化到 URL query（?mode=weapon/dot，缺省为 skill），非法值回退 skill
+const mode = useSearchParam<CalcMode>("mode", "skill", {
+    parse: raw => (raw === "weapon" || raw === "skill" || raw === "dot" ? (raw as CalcMode) : "skill"),
+})
 const usePercentInput = ref(false)
 const weaponInput = reactive<WeaponDamageInput>(createDefaultWeaponInput())
 const skillInput = reactive<SkillDamageInput>(createDefaultSkillInput())
+const dotInput = reactive<DotDamageInput>(createDefaultDotInput())
 const weaponOverrides = ref<Record<string, ManualStepOverride>>({})
 const skillOverrides = ref<Record<string, ManualStepOverride>>({})
+const dotOverrides = ref<Record<string, ManualStepOverride>>({})
 const weaponMergeItems = ref<MergeItem[]>([{ operator: "*", stepId: "expectedDamage" }])
 const skillMergeItems = ref<MergeItem[]>([{ operator: "*", stepId: "expectedDamage" }])
+const dotMergeItems = ref<MergeItem[]>([{ operator: "*", stepId: "dotDamage" }])
 
 const weaponStepDefinitions = buildWeaponStepDefinitions()
 const skillStepDefinitions = buildSkillStepDefinitions()
+const dotStepDefinitions = buildDotStepDefinitions()
 
 interface NumberFieldConfig<TField extends string> {
     key: TField
@@ -1662,6 +1877,63 @@ const skillNonPercentFields = new Set<SkillNumberFieldKey>([
     "skillFlatDamage",
 ])
 
+const dotNumberGroups: NumberFieldGroup<DotNumberFieldKey, never>[] = [
+    {
+        title: "攻击",
+        fields: [
+            { key: "charAttack", label: "角色攻击", step: "0.01" },
+            { key: "weaponAttack", label: "武器攻击(来源加权)", step: "0.01" },
+        ],
+        outputs: [
+            { label: "单跳基础伤害(角色攻击)", stepId: "dotBaseDamage" },
+            { label: "单跳基础伤害(武器来源)", stepId: "weaponBaseDamage" },
+        ],
+    },
+    {
+        title: "充盈与增伤",
+        fields: [
+            { key: "fullnessPower", label: "充盈威力", step: "0.01" },
+            { key: "baseDamageBonus", label: "增伤", step: "0.01" },
+        ],
+        outputs: [
+            { label: "充盈乘区", stepId: "fullnessMultiplier" },
+            { label: "增伤乘区", stepId: "damageIncrease" },
+        ],
+    },
+    {
+        title: "DOT频率",
+        fields: [
+            { key: "skillFreq", label: "技能来源频率", step: "0.1" },
+            { key: "weaponOwnFreq", label: "武器来源自身属性频率", step: "0.1" },
+            { key: "otherFreq", label: "其余属性频率", step: "0.1" },
+        ],
+        outputs: [
+            { label: "DOT频率合计", stepId: "totalFrequency" },
+            { label: "武器来源频率", stepId: "weaponFrequency" },
+            { label: "频率加权基础伤害", stepId: "weightedBaseDamage" },
+        ],
+    },
+    {
+        title: "血量",
+        fields: [
+            { key: "boostBonus", label: "昂扬", step: "0.01" },
+            { key: "desperateBonus", label: "背水", step: "0.01" },
+            { key: "hpPercent", label: "生命比例", step: "0.01" },
+        ],
+        outputs: [{ label: "血量相关乘区", stepId: "hpMore" }],
+    },
+    {
+        title: "环境",
+        fields: [
+            { key: "enemyResistance", label: "敌人抗性", step: "0.01" },
+            { key: "penetrationBonus", label: "属性穿透", step: "0.01" },
+        ],
+        outputs: [{ label: "抗性乘区", stepId: "resistancePenetration" }],
+    },
+]
+
+const dotNonPercentFields = new Set<DotNumberFieldKey>(["charAttack", "weaponAttack", "skillFreq", "weaponOwnFreq", "otherFreq"])
+
 const resultLabelMap: Record<string, string> = {
     expectedDamage: "期望伤害",
     skillAttackPool: "总攻击",
@@ -1681,17 +1953,36 @@ const resultLabelMap: Record<string, string> = {
     fullnessPower: "总充盈威力",
     fullnessMultiplier: "充盈乘区",
     fullnessDamage: "充盈后最终伤害",
+    dotDamage: "每秒DOT伤害",
+    dotBaseDamage: "单跳基础伤害(角色攻击)",
+    weaponBaseDamage: "单跳基础伤害(武器来源)",
+    weightedBaseDamage: "频率加权基础伤害",
+    totalFrequency: "DOT频率合计",
+    weaponFrequency: "武器来源频率",
+    damageIncrease: "增伤乘区",
+    hpMore: "血量相关乘区",
+    boostMultiplier: "昂扬乘区",
+    desperateMultiplier: "背水乘区",
+    resistancePenetration: "抗性乘区",
 }
 
 /**
  * 读取当前模式的手动覆盖映射。
  */
-const currentOverrides = computed(() => (mode.value === "weapon" ? weaponOverrides.value : skillOverrides.value))
+const currentOverrides = computed(() => {
+    if (mode.value === "weapon") return weaponOverrides.value
+    if (mode.value === "dot") return dotOverrides.value
+    return skillOverrides.value
+})
 
 /**
  * 读取当前模式的合并项。
  */
-const currentMergeItems = computed(() => (mode.value === "weapon" ? weaponMergeItems.value : skillMergeItems.value))
+const currentMergeItems = computed(() => {
+    if (mode.value === "weapon") return weaponMergeItems.value
+    if (mode.value === "dot") return dotMergeItems.value
+    return skillMergeItems.value
+})
 
 /**
  * 顺序执行步骤计算，允许中间步骤手动覆盖并影响后续步骤。
@@ -1734,9 +2025,9 @@ function evaluateDamageSteps<TInput extends object>(
  * 计算当前模式的步骤结果。
  */
 const evaluatedSteps = computed<EvaluatedDamageStep[]>(() => {
-    return mode.value === "weapon"
-        ? evaluateDamageSteps(weaponStepDefinitions, weaponInput, weaponOverrides.value)
-        : evaluateDamageSteps(skillStepDefinitions, skillInput, skillOverrides.value)
+    if (mode.value === "weapon") return evaluateDamageSteps(weaponStepDefinitions, weaponInput, weaponOverrides.value)
+    if (mode.value === "dot") return evaluateDamageSteps(dotStepDefinitions, dotInput, dotOverrides.value)
+    return evaluateDamageSteps(skillStepDefinitions, skillInput, skillOverrides.value)
 })
 
 /**
@@ -1787,29 +2078,33 @@ const isMergeDropActive = ref(false)
  * 当前模式的核心结果摘要。
  */
 const summaryItems = computed(() => {
-    const keys =
-        mode.value === "weapon"
-            ? [
-                  "finalDamageAfterDefense",
-                  "expectedDamage",
-                  "calculateExpectedDamage",
-                  "skillBaseDamage",
-                  "expectedCritTrigger",
-                  "expectedCritNoTrigger",
-                  "lowerCritExpectedTrigger",
-                  "higherCritExpectedTrigger",
-                  "fullnessPower",
-                  "fullnessMultiplier",
-              ]
-            : [
-                  "finalDamageAfterDefense",
-                  "expectedDamage",
-                  "calculateExpectedDamage",
-                  "skillBaseDamage",
-                  "finalDamage",
-                  "fullnessPower",
-                  "fullnessMultiplier",
-              ]
+    let keys: string[]
+    if (mode.value === "weapon") {
+        keys = [
+            "finalDamageAfterDefense",
+            "expectedDamage",
+            "calculateExpectedDamage",
+            "skillBaseDamage",
+            "expectedCritTrigger",
+            "expectedCritNoTrigger",
+            "lowerCritExpectedTrigger",
+            "higherCritExpectedTrigger",
+            "fullnessPower",
+            "fullnessMultiplier",
+        ]
+    } else if (mode.value === "dot") {
+        keys = ["dotDamage", "weightedBaseDamage", "dotBaseDamage", "weaponBaseDamage", "totalFrequency", "weaponFrequency", "fullnessMultiplier", "damageIncrease", "hpMore"]
+    } else {
+        keys = [
+            "finalDamageAfterDefense",
+            "expectedDamage",
+            "calculateExpectedDamage",
+            "skillBaseDamage",
+            "finalDamage",
+            "fullnessPower",
+            "fullnessMultiplier",
+        ]
+    }
 
     return keys
         .filter(key => key in stepValueMap.value)
@@ -2010,6 +2305,56 @@ function setSkillToggleValue(key: SkillToggleFieldKey, checked: boolean): void {
 }
 
 /**
+ * 判断 DOT 模式字段是否支持百分比输入。
+ * @param key 字段键
+ * @returns 是否支持百分比
+ */
+function isDotPercentField(key: DotNumberFieldKey): boolean {
+    return !dotNonPercentFields.has(key)
+}
+
+/**
+ * 读取 DOT 数值字段。
+ * @param key 字段键
+ * @returns 当前值
+ */
+function getDotFieldValue(key: DotNumberFieldKey): number {
+    const isPercent = usePercentInput.value && isDotPercentField(key)
+    return toInputDisplayValue(dotInput[key], isPercent)
+}
+
+/**
+ * 写入 DOT 数值字段。
+ * @param key 字段键
+ * @param rawValue 输入文本
+ */
+function setDotFieldValue(key: DotNumberFieldKey, rawValue: string): void {
+    const parsedValue = toFiniteNumber(Number(rawValue))
+    const isPercent = usePercentInput.value && isDotPercentField(key)
+    dotInput[key] = isPercent ? parsedValue / 100 : parsedValue
+}
+
+/**
+ * 获取 DOT 字段输入步长。
+ * @param key 字段键
+ * @param fallback 默认步长
+ * @returns 最终步长
+ */
+function getDotFieldStep(key: DotNumberFieldKey, fallback: string): string {
+    return usePercentInput.value && isDotPercentField(key) ? "0.1" : fallback
+}
+
+/**
+ * 获取 DOT 字段展示标签。
+ * @param key 字段键
+ * @param label 原始标签
+ * @returns 展示标签
+ */
+function getDotFieldLabel(key: DotNumberFieldKey, label: string): string {
+    return usePercentInput.value && isDotPercentField(key) ? `${label}(%)` : label
+}
+
+/**
  * 查询步骤是否开启了手动覆盖。
  * @param stepId 步骤ID
  * @returns 是否覆盖
@@ -2199,10 +2544,10 @@ function startOutputMouseDrag(output: GroupOutputConfig, event: MouseEvent): voi
 }
 
 /**
- * 新增合并运算项，默认使用期望伤害。
+ * 新增合并运算项，默认使用当前模式的核心结果步骤。
  */
 function addMergeItem(): void {
-    currentMergeItems.value.push({ operator: "*", stepId: "expectedDamage" })
+    currentMergeItems.value.push({ operator: "*", stepId: mode.value === "dot" ? "dotDamage" : "expectedDamage" })
 }
 
 /**
@@ -2222,6 +2567,10 @@ function resetCurrentMode(): void {
         replaceReactiveObject(weaponInput, createDefaultWeaponInput())
         weaponOverrides.value = {}
         weaponMergeItems.value = [{ operator: "*", stepId: "expectedDamage" }]
+    } else if (mode.value === "dot") {
+        replaceReactiveObject(dotInput, createDefaultDotInput())
+        dotOverrides.value = {}
+        dotMergeItems.value = [{ operator: "*", stepId: "dotDamage" }]
     } else {
         replaceReactiveObject(skillInput, createDefaultSkillInput())
         skillOverrides.value = {}
@@ -2259,7 +2608,7 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
                 <!-- 计算模式切换方章 -->
-                <div class="mt-3 grid grid-cols-2 gap-1.5">
+                <div class="mt-3 grid grid-cols-3 gap-1.5">
                     <button
                         class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
                         :class="
@@ -2281,6 +2630,17 @@ onBeforeUnmount(() => {
                         @click="mode = 'weapon'"
                     >
                         武器伤害
+                    </button>
+                    <button
+                        class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
+                        :class="
+                            mode === 'dot'
+                                ? 'border-primary bg-primary font-semibold text-primary-content'
+                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                        "
+                        @click="mode = 'dot'"
+                    >
+                        DOT伤害
                     </button>
                 </div>
             </div>
@@ -2306,7 +2666,7 @@ onBeforeUnmount(() => {
                                 <label v-for="field in group.fields" :key="field.key" class="form-control">
                                     <div class="mb-1 text-xs text-base-content/70">{{ getWeaponFieldLabel(field.key, field.label) }}</div>
                                     <input
-                                        class="input input-sm input-bordered w-full"
+                                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         type="number"
                                         :step="getWeaponFieldStep(field.key, field.step)"
                                         :value="getWeaponFieldValue(field.key)"
@@ -2367,7 +2727,7 @@ onBeforeUnmount(() => {
                                                     />
                                                 </label>
                                                 <input
-                                                    class="input input-xs input-bordered w-24 font-mono"
+                                                    class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-mono text-[13px] text-base-content outline-none transition-colors duration-150 focus:border-primary disabled:border-base-content/10"
                                                     type="number"
                                                     step="0.0001"
                                                     :disabled="!isStepOverridden(output.stepId)"
@@ -2410,6 +2770,100 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
 
+                    <div v-else-if="mode === 'dot'" class="space-y-3">
+                        <div
+                            v-for="group in dotNumberGroups"
+                            :key="group.title"
+                            class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                        >
+                            <h4 class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ group.title }}</h4>
+                            <div v-if="group.fields.length > 0" class="grid grid-cols-1 gap-2 md:grid-cols-2">
+                                <label v-for="field in group.fields" :key="field.key" class="form-control">
+                                    <div class="mb-1 text-xs text-base-content/70">{{ getDotFieldLabel(field.key, field.label) }}</div>
+                                    <input
+                                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        type="number"
+                                        :step="getDotFieldStep(field.key, field.step)"
+                                        :value="getDotFieldValue(field.key)"
+                                        @input="setDotFieldValue(field.key, ($event.target as HTMLInputElement).value)"
+                                    />
+                                </label>
+                            </div>
+                            <div v-if="group.outputs && group.outputs.length > 0" class="mt-3 border-t border-base-content/15 pt-2">
+                                <div class="mb-1 text-xs text-base-content/60">块输出</div>
+                                <div class="space-y-1">
+                                    <div
+                                        v-for="output in group.outputs"
+                                        :key="output.stepId"
+                                        class="flex cursor-grab items-center justify-between rounded-xs bg-base-content/3 px-2 py-1 active:cursor-grabbing"
+                                        :class="{ 'opacity-50': !canAddStepToMerge(output.stepId) }"
+                                        @mousedown.prevent="startOutputMouseDrag(output, $event)"
+                                    >
+                                        <div class="min-w-0 flex-1">
+                                            <button
+                                                class="text-left text-xs text-base-content/60 transition-colors duration-150 hover:text-primary hover:underline"
+                                                @mousedown.stop
+                                                @click.stop="jumpToStep(output.stepId)"
+                                            >
+                                                {{ output.label }}
+                                            </button>
+                                            <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                                {{ formatNumber(getGroupOutputValue(output.stepId)) }}
+                                            </div>
+                                            <div class="mt-1 flex flex-wrap items-center gap-2" @mousedown.stop>
+                                                <label class="label cursor-pointer gap-1 p-0">
+                                                    <span class="label-text text-[11px]">覆盖</span>
+                                                    <input
+                                                        type="checkbox"
+                                                        class="toggle toggle-xs toggle-primary"
+                                                        :checked="isStepOverridden(output.stepId)"
+                                                        @change="
+                                                            toggleStepOverride(
+                                                                output.stepId,
+                                                                ($event.target as HTMLInputElement).checked,
+                                                                getStepAutoValue(output.stepId)
+                                                            )
+                                                        "
+                                                    />
+                                                </label>
+                                                <input
+                                                    class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-mono text-[13px] text-base-content outline-none transition-colors duration-150 focus:border-primary disabled:border-base-content/10"
+                                                    type="number"
+                                                    step="0.0001"
+                                                    :disabled="!isStepOverridden(output.stepId)"
+                                                    :value="getStepManualValue(output.stepId, getStepAutoValue(output.stepId))"
+                                                    @input="
+                                                        updateStepManualValue(
+                                                            output.stepId,
+                                                            ($event.target as HTMLInputElement).value,
+                                                            getStepAutoValue(output.stepId)
+                                                        )
+                                                    "
+                                                />
+                                                <button
+                                                    class="btn btn-xs btn-ghost"
+                                                    :disabled="!isStepOverridden(output.stepId)"
+                                                    @click="restoreStepAutoValue(output.stepId, getStepAutoValue(output.stepId))"
+                                                >
+                                                    回填
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <button
+                                            class="inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-sm leading-none text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                                            :disabled="!canAddStepToMerge(output.stepId)"
+                                            @mousedown.stop
+                                            @click="addMergeItemByStepId(output.stepId)"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="mt-1 text-[11px] text-base-content/55">支持块输出覆盖；按住并拖到右侧合并区，或点击 + 添加</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div v-else class="space-y-3">
                         <div
                             v-for="group in skillNumberGroups"
@@ -2421,7 +2875,7 @@ onBeforeUnmount(() => {
                                 <label v-for="field in group.fields" :key="field.key" class="form-control">
                                     <div class="mb-1 text-xs text-base-content/70">{{ getSkillFieldLabel(field.key, field.label) }}</div>
                                     <input
-                                        class="input input-sm input-bordered w-full"
+                                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         type="number"
                                         :step="getSkillFieldStep(field.key, field.step)"
                                         :value="getSkillFieldValue(field.key)"
@@ -2482,7 +2936,7 @@ onBeforeUnmount(() => {
                                                     />
                                                 </label>
                                                 <input
-                                                    class="input input-xs input-bordered w-24 font-mono"
+                                                    class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-mono text-[13px] text-base-content outline-none transition-colors duration-150 focus:border-primary disabled:border-base-content/10"
                                                     type="number"
                                                     step="0.0001"
                                                     :disabled="!isStepOverridden(output.stepId)"
@@ -2561,17 +3015,24 @@ onBeforeUnmount(() => {
                         <p class="-mt-0.5 mb-2 text-[11px] text-base-content/45">支持从左侧块输出拖入或点击 + 快速添加</p>
                         <div class="space-y-2">
                             <div v-for="(item, index) in currentMergeItems" :key="index" class="grid grid-cols-12 items-center gap-2">
-                                <select v-model="item.operator" class="select select-sm col-span-2" :disabled="index === 0">
-                                    <option value="+">+</option>
-                                    <option value="-">-</option>
-                                    <option value="*">*</option>
-                                    <option value="/">/</option>
-                                </select>
-                                <select v-model="item.stepId" class="select select-sm col-span-9">
-                                    <option v-for="option in stepOptions" :key="option.id" :value="option.id">
+                                <Select
+                                    v-model="item.operator"
+                                    class="col-span-2 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] outline-none focus:border-primary"
+                                    :disabled="index === 0"
+                                >
+                                    <SelectItem value="+">+</SelectItem>
+                                    <SelectItem value="-">-</SelectItem>
+                                    <SelectItem value="*">*</SelectItem>
+                                    <SelectItem value="/">/</SelectItem>
+                                </Select>
+                                <Select
+                                    v-model="item.stepId"
+                                    class="col-span-9 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] outline-none focus:border-primary"
+                                >
+                                    <SelectItem v-for="option in stepOptions" :key="option.id" :value="option.id">
                                         {{ option.label }} = {{ formatNumber(option.value) }}
-                                    </option>
-                                </select>
+                                    </SelectItem>
+                                </Select>
                                 <button
                                     class="btn btn-sm btn-ghost col-span-1 px-0"
                                     :disabled="currentMergeItems.length <= 1"

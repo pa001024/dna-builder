@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useTranslation } from "i18next-vue"
 import { computed, ref } from "vue"
 import type { AskUserAnswer, AskUserQuestion, AskUserRequest } from "@/utils/db-ask-user"
 
@@ -28,8 +27,6 @@ const emit = defineEmits<{
     /** 用户跳过整张卡片 */
     skip: []
 }>()
-
-const { t } = useTranslation()
 
 /** 题号 → 已选选项 id */
 const selected = ref<Record<string, string[]>>({})
