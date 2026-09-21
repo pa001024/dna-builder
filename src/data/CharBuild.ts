@@ -33,6 +33,7 @@ export interface CharAttr {
     增伤: number
     元素增伤: number
     物理增伤: number
+    属性攻击: number
     武器伤害: number
     技能伤害: number
     独立增伤: number
@@ -1218,6 +1219,7 @@ export class CharBuild {
             增伤: damageIncrease,
             元素增伤: elementDamageIncrease,
             物理增伤: physicalDamageIncrease,
+            属性攻击: elemDamageBonus,
             武器伤害: weaponDamage,
             技能伤害: skillDamage,
             独立增伤: independentDamageIncrease,

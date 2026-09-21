@@ -2,6 +2,16 @@ import { describe, expect, it } from "vitest"
 import { type CharAttr, CharBuild } from "../CharBuild"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledModHelper, LeveledMonster, LeveledWeapon } from "../leveled"
 
+/**
+ * 构造动态 BUFF 测试用的属性基线。
+ * 转换类 BUFF 只读取自己关心的字段（攻击/生命/属性攻击等），其余字段不参与断言。
+ * @param overrides 需要覆盖的属性
+ * @returns 角色属性上下文
+ */
+function createDynamicAttrContext(overrides: Partial<CharAttr> = {}) {
+    return { 攻击: 1000, 生命: 1000, 属性攻击: 0, ...overrides } as unknown as CharAttr
+}
+
 // 测试LeveledMod类
 describe("LeveledMod类测试", () => {
     // 测试1：创建带等级的MOD
@@ -156,6 +166,7 @@ describe("DynamicBuff", () => {
             充盈威力: 0,
             元素增伤: 0,
             物理增伤: 0,
+            属性攻击: 0,
             技能触发: 0,
             异常数量: 1,
             魔灵CD: 0,
@@ -208,6 +219,7 @@ describe("DynamicBuff", () => {
             充盈威力: 0,
             元素增伤: 0,
             物理增伤: 0,
+            属性攻击: 0,
             技能触发: 0,
             异常数量: 1,
             魔灵CD: 0,
@@ -267,6 +279,7 @@ describe("DynamicBuff", () => {
             充盈威力: 0,
             元素增伤: 0,
             物理增伤: 0,
+            属性攻击: 0,
             技能触发: 0,
             异常数量: 1,
             魔灵CD: 0,
@@ -278,6 +291,60 @@ describe("DynamicBuff", () => {
         // meleeMods.暴击(1) + charMods.技能伤害(0.2) 加到技能威力，skillMods.触发(0.3) 加到攻击
         expect(attrs.技能威力).toBe(2.2)
         expect(attrs.攻击).toBe(1.3)
+    })
+
+    it("法露茜Q 只把角色基础攻击与角色槽MOD攻击加成转化为生命", () => {
+        const buff = new LeveledBuff("法露茜Q")
+        const char = new LeveledChar("法露茜")
+        // 角色槽MOD提供 100% 攻击加成：可转换攻击 = 基础攻击 200.84 × 2 = 401.68
+        const modAttrs = { charMods: { 攻击: 1 }, meleeMods: {}, rangedMods: {}, skillMods: {} }
+        const attrs = buff.applyDynamicAttr(char, createDynamicAttrContext({ 攻击: 1000, 生命: 1000 }), [], undefined, undefined, modAttrs)
+
+        // floor(401.68 / 100) = 4 → 生命 +4000，攻击 -400（不足 100 的部分保留为攻击）
+        expect(attrs.生命).toBe(5000)
+        expect(attrs.攻击).toBe(600)
+    })
+
+    it("法露茜Q 的可转换攻击带属性攻击乘区", () => {
+        const buff = new LeveledBuff("法露茜Q")
+        const char = new LeveledChar("法露茜")
+        const modAttrs = { charMods: { 攻击: 1 }, meleeMods: {}, rangedMods: {}, skillMods: {} }
+        // 属性攻击 +100%：可转换攻击 = 200.84 × 2 × 2 = 803.36
+        const attrs = buff.applyDynamicAttr(
+            char,
+            createDynamicAttrContext({ 攻击: 1000, 生命: 1000, 属性攻击: 1 }),
+            [],
+            undefined,
+            undefined,
+            modAttrs
+        )
+
+        // floor(803.36 / 100) = 8 → 生命 +8000，攻击 -800
+        expect(attrs.生命).toBe(9000)
+        expect(attrs.攻击).toBe(200)
+    })
+
+    it("法露茜Q 的转换不作用于和鸣增益与各类BUFF提供的攻击", () => {
+        const buff = new LeveledBuff("法露茜Q")
+        const char = new LeveledChar("法露茜")
+        const modAttrs = { charMods: { 攻击: 1 }, meleeMods: {}, rangedMods: {}, skillMods: {} }
+        const lowAttack = buff.applyDynamicAttr(char, createDynamicAttrContext({ 攻击: 1000 }), [], undefined, undefined, modAttrs)
+        // 和鸣增益/BUFF 层把攻击抬到 5000，可转换攻击仍只取 基础攻击 × (1 + MOD加成)
+        const highAttack = buff.applyDynamicAttr(char, createDynamicAttrContext({ 攻击: 5000 }), [], undefined, undefined, modAttrs)
+
+        expect(highAttack.生命).toBe(lowAttack.生命)
+        expect(highAttack.攻击 - lowAttack.攻击).toBe(4000)
+    })
+
+    it("法露茜Q 在角色槽MOD无攻击加成时只折算角色基础攻击", () => {
+        const buff = new LeveledBuff("法露茜Q")
+        const char = new LeveledChar("法露茜")
+        // 角色槽MOD只有技能伤害：可转换攻击 = 基础攻击 200.84 → floor(200.84 / 100) = 2
+        const modAttrs = { charMods: { 技能伤害: 0.2 }, meleeMods: {}, rangedMods: {}, skillMods: {} }
+        const attrs = buff.applyDynamicAttr(char, createDynamicAttrContext({ 攻击: 1000, 生命: 1000 }), [], undefined, undefined, modAttrs)
+
+        expect(attrs.生命).toBe(3000)
+        expect(attrs.攻击).toBe(800)
     })
 })
 // 测试LeveledBuff类

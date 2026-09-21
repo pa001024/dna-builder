@@ -455,6 +455,7 @@ export class LeveledMod implements Mod {
             增伤: 0,
             元素增伤: 0,
             物理增伤: 0,
+            属性攻击: 0,
             武器伤害: 0,
             技能伤害: 0,
             独立增伤: 0,
