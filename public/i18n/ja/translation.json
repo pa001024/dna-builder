@@ -6511,6 +6511,7 @@
     },
     "char-detail": {
         "companio_char": "出会いキャラ",
+        "companio_char_absent": "{{name}}は未実装",
         "title": "キャラクター詳細"
     },
     "char-list": {

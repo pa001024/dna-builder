@@ -6629,6 +6629,7 @@
     },
     "char-detail": {
         "companio_char": "Personnage rencontré",
+        "companio_char_absent": "{{name}} non disponible",
         "title": "Détails du personnage"
     },
     "char-list": {

@@ -5716,6 +5716,7 @@
     },
     "char-detail": {
         "companio_char": "偶遇角色",
+        "companio_char_absent": "{{name}}未實裝",
         "title": "角色詳情"
     },
     "char-list": {

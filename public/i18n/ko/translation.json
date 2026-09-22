@@ -6597,6 +6597,7 @@
     },
     "char-detail": {
         "companio_char": "우연히 만난 캐릭터",
+        "companio_char_absent": "{{name}} 미출시",
         "title": "캐릭터 상세"
     },
     "char-list": {

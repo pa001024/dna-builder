@@ -7,6 +7,7 @@ export interface CharVoice {
     text: string
     /** 偶遇语音所面向的角色 id，仅「闲谈·他人偶遇」类语音携带 */
     companioCharId?: number
+    hide?: boolean
 }
 
 export const charVoiceData: CharVoice[] = [
@@ -114,6 +115,14 @@ export const charVoiceData: CharVoice[] = [
         name: "独白",
         res: "char_Heitao_vo_idle",
         text: "{性别:他|她}从来都不是一只甘愿困在笼中的鸟。我知道的，总有一天{性别:他|她}会离开那座岛，飞向更远的天空。但我不知道的是，这对我们来说究竟是幸运还是不幸。",
+    },
+    {
+        id: 10016,
+        charId: 1101,
+        hide: true,
+        name: "闲谈·他人偶遇·其一",
+        res: "char_Heitao_vo_companio_01",
+        text: "这些年来，我有好好照顾{性别:他|她}，也有好好保重自己，就像我答应你的……你可以像我小时候那样，摸摸我的头，夸夸我吗？还有，这一次，再也不要离开我们了……好吗？",
     },
     {
         id: 10017,
@@ -2456,11 +2465,28 @@ export const charVoiceData: CharVoice[] = [
         companioCharId: 5401,
     },
     {
+        id: 10388,
+        charId: 4301,
+        hide: true,
+        name: "闲谈·他人偶遇·其二",
+        res: "char_Xibi_vo_companio_02",
+        text: "你和我踏上的道路完全相反，曾经我也自我怀疑过，是否你是对的。可惜，你的名字只能作为败者而流传。",
+    },
+    {
+        id: 10389,
+        charId: 4301,
+        hide: true,
+        name: "闲谈·他人偶遇·其三",
+        res: "char_Xibi_vo_companio_03",
+        text: "如果您不是他的继承者……我手中的剑，早就已经贯穿了您的心脏。",
+    },
+    {
         id: 10390,
         charId: 4301,
         name: "闲谈·他人偶遇·其四",
         res: "char_Xibi_vo_companio_04",
         text: "你的伪装越是完美，就说明你的獠牙在暗地里打磨得越发锋锐，我等着你脱缰的那一天，亲手敲断你的大牙。",
+        companioCharId: 5102,
     },
     {
         id: 10391,
@@ -2468,6 +2494,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其五",
         res: "char_Xibi_vo_companio_05",
         text: "近期的任务说明、作战计划、后勤运输、损失条目都整理好了吗。\n好，那今天再和我把对外宣传标语、对内案例分析、对皇帝的定期报告以及佩剑炼金院新武器的测试数据做完。工作，可不能叫额外的负担。",
+        companioCharId: 4202,
     },
     {
         id: 10392,
@@ -3036,6 +3063,14 @@ export const charVoiceData: CharVoice[] = [
         res: "char_Feina_vo_companio_03",
         text: "狮子小姐，你想要唤醒沉睡在巨剑中的仙女吗？也许你需要吟诵很多很多咒语，比如——“唤醒圣剑萨麦尔之人啊，必将成为艾利西安之王！”",
         companioCharId: 1501,
+    },
+    {
+        id: 10472,
+        charId: 1801,
+        hide: true,
+        name: "闲谈·他人偶遇·其四",
+        res: "char_Feina_vo_companio_04",
+        text: "南国来的海马先生，我好像在哪儿见过你……唔……我想起来了！很久很久之前，爸爸在家里的墙上，挂了一张你的肖像。",
     },
     {
         id: 10473,
@@ -3900,6 +3935,22 @@ export const charVoiceData: CharVoice[] = [
         companioCharId: 2401,
     },
     {
+        id: 10595,
+        charId: 1502,
+        hide: true,
+        name: "闲谈·他人偶遇·其三",
+        res: "char_Nifu_vo_companio_03",
+        text: "你好，孩子。呵呵……是啊，我们有着相似的角，说不定过去有些渊源。但那不是你的故事，不必深究，不必介怀，只管去做你想做的事就好。",
+    },
+    {
+        id: 10596,
+        charId: 1502,
+        hide: true,
+        name: "闲谈·他人偶遇·其四",
+        res: "char_Nifu_vo_companio_04",
+        text: "我虽拥有漫长的记忆，然而所见多为残酷，能够遗忘未必不是一种幸运。请相信，那些真正重要的东西，即便不被铭记，也终会回到你身边。",
+    },
+    {
         id: 10597,
         charId: 1502,
         name: "准备就绪",
@@ -4215,6 +4266,14 @@ export const charVoiceData: CharVoice[] = [
         res: "char_Lise_vo_companio_02",
         text: "这份计划书上的安排详略得当，精确到秒，逐步完成这些安排想必能获得巨大的满足感。只是……真的很难把这样严密的计划与兰迪长官联系起来。",
         companioCharId: 4202,
+    },
+    {
+        id: 10642,
+        charId: 4101,
+        hide: true,
+        name: "闲谈·他人偶遇·其三",
+        res: "char_Lise_vo_companio_03",
+        text: "如果可以，可以请你换一首曲子吗？不……你弹的旋律很美，只是我有些……害怕听到那支曲子，它总让我想起一些旧事。",
     },
     {
         id: 10643,
@@ -4541,11 +4600,28 @@ export const charVoiceData: CharVoice[] = [
         companioCharId: 1801,
     },
     {
+        id: 10689,
+        charId: 1103,
+        hide: true,
+        name: "闲谈·他人偶遇·其三",
+        res: "char_Tuosi_vo_companio_03",
+        text: "诗人小姐，您演奏的这首乐曲十分动听，请问它的曲名是？\n原来是您自己写的曲子……真是令人艳羡的才华。或许，我能有幸看一看乐谱吗？",
+    },
+    {
         id: 10690,
         charId: 1103,
         name: "闲谈·他人偶遇·其四",
         res: "char_Tuosi_vo_companio_04",
         text: "你的拟态能力非常特别，哪怕是最优秀的舞台道具师也未必能做出这样精妙绝伦的效果。",
+        companioCharId: 2301,
+    },
+    {
+        id: 10691,
+        charId: 1103,
+        hide: true,
+        name: "闲谈·他人偶遇·其五",
+        res: "char_Tuosi_vo_companio_05",
+        text: "我不需要一面镜子，来时刻提醒自己丑陋的模样。",
     },
     {
         id: 10692,
@@ -5470,6 +5546,14 @@ export const charVoiceData: CharVoice[] = [
         companioCharId: 3202,
     },
     {
+        id: 10822,
+        charId: 5102,
+        hide: true,
+        name: "闲谈·他人偶遇·其四",
+        res: "char_Aote_vo_companio_04",
+        text: "还记得我小时候吗？你对我来说是位温柔的姐姐，也是位严苛的父亲……呃，没有说你又老又暴力的意思，只是想说……谢谢你在那时给了我一个归属。",
+    },
+    {
         id: 10823,
         charId: 5102,
         name: "准备就绪",
@@ -5751,12 +5835,28 @@ export const charVoiceData: CharVoice[] = [
         companioCharId: 2101,
     },
     {
+        id: 10863,
+        charId: 4102,
+        hide: true,
+        name: "闲谈·他人偶遇·其二",
+        res: "char_Zhiliu_vo_companio_02_1",
+        text: "兵不厌诈仅是行军布阵之道，并非适用于人情世故的手段。一招用老了，会有损商誉。",
+    },
+    {
+        id: 10864,
+        charId: 4102,
+        hide: true,
+        name: "闲谈·他人偶遇·其二",
+        res: "char_Zhiliu_vo_companio_02_2",
+        text: "不过，你有你的行事方式。我说的话，你大约会当成耳旁风吧。",
+    },
+    {
         id: 10865,
         charId: 4102,
         name: "闲谈·他人偶遇·其三",
         res: "char_Zhiliu_vo_companio_03",
         text: "我在你身上看见了故人的影子……不，是我多言了。",
-        companioCharId: 3202,
+        companioCharId: 1503,
     },
     {
         id: 10866,
@@ -5764,6 +5864,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其四",
         res: "char_Zhiliu_vo_companio_04",
         text: "许久未品过你亲手调的酒了。今日得空，可否再为我浅酌一杯午后小饮？",
+        companioCharId: 3202,
     },
     {
         id: 10867,
@@ -5990,12 +6091,20 @@ export const charVoiceData: CharVoice[] = [
         text: "萨麦尔，今天外面正艳阳高照呢，那我们吃点凉的怎么样？唔，听说圣都最近有一种叫“冰淇淋”的甜品，莉兹偷偷买给你吧！虽然是平民的食物，但肯定比那些老顽固给的餐点美味很多！",
     },
     {
+        id: 10899,
+        charId: 1501,
+        hide: true,
+        name: "闲谈·他人偶遇·其一",
+        res: "char_Baonu_vo_companio_01",
+        text: "萨麦尔？它每天都好得很啊，早上叫我起床，战斗时帮我鼓劲，晚上还要给我讲十二个睡前小故事！哼哼，才不劳你挂心。",
+    },
+    {
         id: 10900,
         charId: 1501,
         name: "闲谈·他人偶遇·其二",
         res: "char_Baonu_vo_companio_02",
         text: "“坚忍，是七大美德之一……心中常存忍耐，就能够见到常人不能见的，行世人难以……难以……”\n啊啊啊不行受不了啦！小矮子你再在那里模仿本大人的样子本大人就要忍不住拿萨麦尔切水产了我以九神之名发誓真的会做到的！！",
-        companioCharId: 3101,
+        companioCharId: 2301,
     },
     {
         id: 10901,
@@ -6003,6 +6112,15 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Baonu_vo_companio_03",
         text: "抹奶油？怎么啦。我们艾利西安人就是这样保养武器的，有什么意见吗？",
+        companioCharId: 3101,
+    },
+    {
+        id: 10902,
+        charId: 1501,
+        hide: true,
+        name: "闲谈·他人偶遇·其四",
+        res: "char_Baonu_vo_companio_04",
+        text: "话说，我都没见过你生气的样子诶……\n这样！本大人以七美德候补的名义命令你，气一个给我看看！不许重复那些老顽固的话，什么美德啊戒律啊第几卷第几条的！就表演一下那个那个，生气！",
     },
     {
         id: 10903,
@@ -6255,7 +6373,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其一",
         res: "char_Kami_vo_companio_02",
         text: "每个人的天赋不同，有些人生来就拥有治愈人心的能力，就像你，好孩子。",
-        companioCharId: 4102,
+        companioCharId: 5301,
     },
     {
         id: 10939,
@@ -6263,7 +6381,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其二",
         res: "char_Kami_vo_companio_03",
         text: "难得你会大老远跑来冰湖城。这次是想要什么帝国特产物资？还是只是打算听场戏？",
-        companioCharId: 5102,
+        companioCharId: 4102,
     },
     {
         id: 10940,
@@ -6271,6 +6389,7 @@ export const charVoiceData: CharVoice[] = [
         name: "闲谈·他人偶遇·其三",
         res: "char_Kami_vo_companio_04",
         text: "这伤疤……你难道又接了危险的任务？……唉，我店里有药，你自己去涂点，毕竟在这里出事会影响我做生意。怎么，傻站在这是想让我亲自给你去拿？",
+        companioCharId: 5102,
     },
     {
         id: 10941,
@@ -8028,6 +8147,14 @@ export const charVoiceData: CharVoice[] = [
         res: "char_Shuimu_vo_companio_02",
         text: "你害怕我吗？那我会让你喜欢上我的，来闻一闻我调配的香薰吧，很甜的，保证你能体会到前所未有的幸福。",
         companioCharId: 2301,
+    },
+    {
+        id: 21010030,
+        charId: 2101,
+        hide: true,
+        name: "闲谈·他人偶遇·其三",
+        res: "char_Shuimu_vo_companio_03",
+        text: "你也是个怪人呢，感受彼此带来的伤害，品味甜蜜的痛感，再果断地杀掉对方？呵呵，我知道你为什么这么做，这一定也是你表达爱的方式。",
     },
     {
         id: 21010031,

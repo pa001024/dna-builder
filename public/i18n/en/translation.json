@@ -6614,6 +6614,7 @@
     },
     "char-detail": {
         "companio_char": "Encounter Character",
+        "companio_char_absent": "{{name}} Not Yet Released",
         "title": "Character Details"
     },
     "char-list": {

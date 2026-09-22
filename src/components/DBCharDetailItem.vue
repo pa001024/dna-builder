@@ -1200,6 +1200,12 @@ onBeforeUnmount(() => {
                                     <span class="truncate font-medium text-primary">{{ $t(entry.companio.名称) }}</span>
                                     <Icon icon="ri:arrow-right-up-line" class="h-3 w-3 shrink-0 text-base-content/40" />
                                 </SRouterLink>
+                                <div
+                                    v-else-if="entry.voice.hide"
+                                    class="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-1 text-[11px] transition-colors duration-150 hover:border-primary/50 hover:bg-primary/5"
+                                >
+                                    <span class="text-base-content/45">{{ $t("char-detail.companio_char_absent", { name: $t("char-detail.companio_char") }) }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
