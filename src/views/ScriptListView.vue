@@ -414,6 +414,10 @@ const sortedScriptConfigItems = computed(() => {
     return Object.values(scriptConfigStore.value[scope] ?? {})
 })
 
+/**
+ * 解析脚本目录并写回 scriptsDir，解析失败时回退到公共文档目录。
+ * @returns 解析后的脚本目录，恒为非空字符串
+ */
 async function initScriptsDir() {
     try {
         scriptsDir.value = `${await getDocumentsDir()}\\dob-scripts`
@@ -421,15 +425,18 @@ async function initScriptsDir() {
         console.error("获取脚本目录失败", error)
         scriptsDir.value = "C:\\Users\\Public\\Documents\\dob-scripts"
     }
+    return scriptsDir.value
 }
 
 /**
- * 初始化 engine.d.ts 文件到脚本目录
- * 从 public 目录读取 engine.d.ts 并写入到脚本目录
+ * 初始化 engine.d.ts 与 tsconfig.json 到脚本目录。
+ * 目录必须先解析完成（未就绪则就地补一次），且两个文件都基于同一份已解析的目录拼接，
+ * 否则空目录会让路径退化成 `\engine.d.ts` 这类无盘符的根路径，被系统解析到当前盘根目录。
  */
 async function initEngineDts() {
     try {
-        const engineDtsPath = `${scriptsDir.value}\\engine.d.ts`
+        const dir = scriptsDir.value || (await initScriptsDir())
+        if (!dir) return
 
         const response = await fetch("/tpl/engine.d.ts")
         if (!response.ok) {
@@ -437,10 +444,14 @@ async function initEngineDts() {
         }
 
         const content = await response.text()
-        await writeTextFile(engineDtsPath, content)
-        const res = await fetch("/tpl/tsconfig.json")
-        const tsconfig = await res.text()
-        await writeTextFile(`${scriptsDir.value}\\tsconfig.json`, tsconfig)
+        await writeTextFile(`${dir}\\engine.d.ts`, content)
+
+        const tsconfigResponse = await fetch("/tpl/tsconfig.json")
+        if (!tsconfigResponse.ok) {
+            throw new Error(`读取 tsconfig.json 失败: ${tsconfigResponse.statusText}`)
+        }
+        const tsconfig = await tsconfigResponse.text()
+        await writeTextFile(`${dir}\\tsconfig.json`, tsconfig)
     } catch (error) {
         console.error("初始化 engine.d.ts 失败", error)
     }
@@ -3391,12 +3402,15 @@ onMounted(async () => {
             console.error("初始化脚本运行态监听失败", error)
         }
     }
-    await Promise.all([fetchScriptCategories(), initScriptsDir(), initEngineDts()])
+    // initEngineDts 依赖 initScriptsDir 解析出的目录，必须等目录就绪后再执行
+    await initScriptsDir()
+    await initEngineDts()
+    fetchScriptCategories()
     loadSchedulerConfig()
     loadScriptMcpPortConfig()
     loadScriptConfigItems()
     scriptRuntime.loadScriptHotkeys()
-    await syncScriptListGlobalShortcut()
+    syncScriptListGlobalShortcut()
     await fetchLocalScripts()
     document.addEventListener("keydown", handleKeyDown)
     await initFileChangeListener()
@@ -3474,7 +3488,11 @@ onUnmounted(async () => {
                         class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         @input="handleSearch"
                     />
-                    <Select v-model="selectedCategory" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" @change="handleSearch">
+                    <Select
+                        v-model="selectedCategory"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        @change="handleSearch"
+                    >
                         <SelectItem v-for="option in categoryOptions" :key="option.value" :value="option.value">
                             {{ option.label }}
                         </SelectItem>
@@ -4001,7 +4019,9 @@ onUnmounted(async () => {
                                             :model-value="String(item.value)"
                                             @update:model-value="updateScriptConfigValue(item.name, $event)"
                                         >
-                                            <SelectItem v-for="option in item.options" :key="option" :value="option">{{ option }}</SelectItem>
+                                            <SelectItem v-for="option in item.options" :key="option" :value="option">{{
+                                                option
+                                            }}</SelectItem>
                                         </Select>
 
                                         <div v-else-if="item.kind === 'multi-select'" class="space-y-2">
@@ -4383,7 +4403,11 @@ onUnmounted(async () => {
                     <div class="rounded-lg border border-base-300 p-4 space-y-3">
                         <div class="font-medium">MCP 地址</div>
                         <div class="flex items-center gap-2">
-                            <input :value="scriptMcpServerState.address" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" readonly />
+                            <input
+                                :value="scriptMcpServerState.address"
+                                class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                readonly
+                            />
                             <button class="btn btn-primary" @click="copyScriptMcpAddress">复制地址</button>
                         </div>
                     </div>
