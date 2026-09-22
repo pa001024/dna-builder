@@ -45,8 +45,9 @@ use winit::window::{Window, WindowId, WindowLevel};
 //    分辨率或窗口尺寸变化时浮窗自动跟随;同时钳制在客户区内,避免锚点 100% 时飘出屏幕。
 //
 // 2. 触发键:任意多条按键绑定。
-//    config.keys 是 KeyBinding 列表(虚拟键码 + 标签 + 完整 CD + 是否启用),后台逐键轮询
-//    上升沿(带防抖),每条绑定对应浮窗里的一行,互不干扰;改设置即时生效且不打断进行中的倒计时。
+//    config.keys 是 KeyBinding 列表(虚拟键码 + 标签 + 完整 CD + 无需冷却 + 是否启用),
+//    后台逐键轮询上升沿(带防抖),每条绑定对应浮窗里的一行,互不干扰;默认只有就绪的绑定
+//    响应按下,开启「无需冷却」则按下即从完整 CD 重新计时。改设置即时生效且不打断进行中的倒计时。
 //
 // 3. 绘制:超采样 + 逐像素 alpha 分层窗口,分三步:
 //      a. 在 SUPERSAMPLE 倍尺寸的离屏 DIB 上画两遍完全相同的几何:
@@ -104,6 +105,10 @@ pub struct FloatWindowKeyBinding {
     pub vk: u32,
     /// 该按键的完整冷却秒数。
     pub cd_seconds: f64,
+    /// 无需冷却:按下即从完整 CD 重新计时,不判断当前是否在冷却中。
+    /// false 时只有就绪(剩余时间为 0)的按键才响应按下。
+    #[serde(default)]
+    pub no_cooldown: bool,
     /// 是否参与触发与绘制。
     #[serde(default = "default_true")]
     pub enabled: bool,
@@ -176,6 +181,7 @@ impl Default for FloatWindowConfig {
                 label: "E".to_string(),
                 vk: 0x45, // VK_E
                 cd_seconds: 8.0,
+                no_cooldown: false,
                 enabled: true,
             }],
             ring_color: 0x3f4a5c,
@@ -206,6 +212,20 @@ impl FloatyTimer {
     /// 是否已就绪(冷却归零)。
     fn is_ready(&self) -> bool {
         self.remaining <= 0.0
+    }
+
+    /// 按一次触发键:重设该行为完整冷却。
+    ///
+    /// `no_cooldown` 为 false 时只在就绪状态下重设(避免按住/连发被判定为多次施放);
+    /// 为 true 时无视当前剩余时间,一律从完整 CD 重新开始。
+    /// 返回本次是否真的重设了计时。
+    fn restart_from_press(&mut self, cd: f64, no_cooldown: bool) -> bool {
+        if !no_cooldown && !self.is_ready() {
+            return false;
+        }
+        self.total = cd;
+        self.remaining = cd;
+        true
     }
 }
 
@@ -1021,14 +1041,22 @@ impl FloatyCore {
         self.maybe_trigger_by_key();
     }
 
-    /// 逐个绑定检测触发键上升沿:就绪时按下即从完整 CD 开始倒数;冷却中按下不打断。
+    /// 逐个绑定检测触发键上升沿:普通绑定只在就绪时按下的那一下开始倒数;
+    /// 开启「无需冷却」的绑定无论当前是否在冷却中,按下即从完整 CD 重新计时。
     fn maybe_trigger_by_key(&mut self) {
-        let bindings: Vec<(u32, String, f64)> = self
+        let bindings: Vec<(u32, String, f64, bool)> = self
             .config
             .keys
             .iter()
             .filter(|key| key.enabled && key.vk != 0 && key.cd_seconds > 0.0)
-            .map(|key| (key.vk, key.id.clone(), key.cd_seconds.clamp(0.05, 3600.0)))
+            .map(|key| {
+                (
+                    key.vk,
+                    key.id.clone(),
+                    key.cd_seconds.clamp(0.05, 3600.0),
+                    key.no_cooldown,
+                )
+            })
             .collect();
         if bindings.is_empty() {
             self.key_down.clear();
@@ -1036,7 +1064,7 @@ impl FloatyCore {
         }
         // 仅游戏窗口前台时允许触发;其他时候把按下状态复位,避免回到游戏后立刻补触发一次。
         let allowed = !self.config.game_only_trigger || self.game.is_game_foreground();
-        for (vk, id, cd) in bindings {
+        for (vk, id, cd, no_cooldown) in bindings {
             if !allowed {
                 self.key_down.insert(vk, false);
                 continue;
@@ -1057,11 +1085,7 @@ impl FloatyCore {
             }
             self.last_trigger_at.insert(vk, Instant::now());
             if let Some(timer) = self.timers.iter_mut().find(|timer| timer.id == id) {
-                // 技能就绪才允许施放;避免按住/连发被判定为多次施放。
-                if timer.is_ready() {
-                    timer.total = cd;
-                    timer.remaining = cd;
-                }
+                timer.restart_from_press(cd, no_cooldown);
             }
         }
     }
@@ -2224,6 +2248,7 @@ mod tests {
                 label: " E ".to_string(),
                 vk: 0x45,
                 cd_seconds: 8.0,
+                no_cooldown: true,
                 enabled: true,
             },
             // 与上一条重复(启用) -> 丢弃
@@ -2232,6 +2257,7 @@ mod tests {
                 label: "E2".to_string(),
                 vk: 0x45,
                 cd_seconds: 3.0,
+                no_cooldown: false,
                 enabled: true,
             },
             // 非法键码 -> 丢弃
@@ -2240,6 +2266,7 @@ mod tests {
                 label: "X".to_string(),
                 vk: 0,
                 cd_seconds: 5.0,
+                no_cooldown: false,
                 enabled: true,
             },
             // CD 越界 -> 钳制到 0.05
@@ -2248,14 +2275,40 @@ mod tests {
                 label: "Q".to_string(),
                 vk: 0x51,
                 cd_seconds: -3.0,
+                no_cooldown: false,
                 enabled: true,
             },
         ]);
         assert_eq!(keys.len(), 2);
         assert_eq!(keys[0].id, "key-69");
         assert_eq!(keys[0].label, "E");
+        assert!(keys[0].no_cooldown);
         assert_eq!(keys[1].vk, 0x51);
         assert_eq!(keys[1].cd_seconds, 0.05);
+        assert!(!keys[1].no_cooldown);
+    }
+
+    /// 按下触发键时按「无需冷却」决定是否重设:关闭时冷却中不打断,开启时一律重设。
+    #[test]
+    fn press_respects_no_cooldown() {
+        let mut timer = FloatyTimer {
+            id: "e".to_string(),
+            label: "E".to_string(),
+            total: 8.0,
+            remaining: 3.0,
+        };
+        // 普通绑定:冷却中按下不生效
+        assert!(!timer.restart_from_press(8.0, false));
+        assert_eq!(timer.remaining, 3.0);
+        // 就绪后按下从完整 CD 开始
+        timer.remaining = 0.0;
+        assert!(timer.restart_from_press(8.0, false));
+        assert_eq!(timer.remaining, 8.0);
+        // 无需冷却:冷却中按下也重设
+        assert!(timer.restart_from_press(9.0, true));
+        assert_eq!((timer.total, timer.remaining), (9.0, 9.0));
+        assert!(timer.restart_from_press(9.0, true));
+        assert_eq!(timer.remaining, 9.0);
     }
 
     /// 键位标签与剩余秒数文案。
@@ -2321,6 +2374,7 @@ mod tests {
                 label: "E".to_string(),
                 vk: 0x45,
                 cd_seconds: 8.0,
+                no_cooldown: false,
                 enabled: true,
             },
             FloatWindowKeyBinding {
@@ -2328,6 +2382,7 @@ mod tests {
                 label: "Q".to_string(),
                 vk: 0x51,
                 cd_seconds: 4.0,
+                no_cooldown: true,
                 enabled: true,
             },
         ];
@@ -2341,6 +2396,7 @@ mod tests {
             label: "R".to_string(),
             vk: 0x52,
             cd_seconds: 12.0,
+            no_cooldown: false,
             enabled: true,
         });
         core.sync_timers();
@@ -2420,6 +2476,7 @@ mod smoke {
                 label: "E".to_string(),
                 vk: 0x45,
                 cd_seconds: 5.0,
+                no_cooldown: false,
                 enabled: true,
             },
             FloatWindowKeyBinding {
@@ -2427,6 +2484,7 @@ mod smoke {
                 label: "Q".to_string(),
                 vk: 0x51,
                 cd_seconds: 3.2,
+                no_cooldown: true,
                 enabled: true,
             },
         ];
@@ -2495,6 +2553,7 @@ mod smoke {
                 label: "E".to_string(),
                 vk: 0x45,
                 cd_seconds: 30.0,
+                no_cooldown: false,
                 enabled: true,
             }];
             set(cfg).unwrap_or_else(|error| panic!("第 {round} 轮 set 失败: {error}"));

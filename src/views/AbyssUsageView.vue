@@ -563,8 +563,7 @@ async function loadAssistantLineups(charId: number | null) {
  * 处理配队助手角色选择。
  * @param event 选择事件。
  */
-async function handleAssistantCharChange(event: Event) {
-    const value = (event.target as HTMLSelectElement).value
+async function handleAssistantCharChange(value: number | string) {
     selectedAssistantCharId.value = value ? Number(value) : null
     await loadAssistantLineups(selectedAssistantCharId.value)
 }
@@ -1017,16 +1016,16 @@ onMounted(async () => {
                         <SectionHeader kicker="TEAM ASSISTANT" title="配队助手" />
                         <p class="mb-3 text-xs text-base-content/50">查询角色常用阵容</p>
                         <div class="mb-3 flex items-center gap-2">
-                            <select
-                                class="select select-bordered flex-1 rounded-xs"
-                                :value="selectedAssistantCharId ?? ''"
-                                @change="handleAssistantCharChange"
+                            <Select
+                                class="min-w-0 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                :model-value="selectedAssistantCharId ?? undefined"
+                                placeholder="请选择角色"
+                                @update:model-value="handleAssistantCharChange"
                             >
-                                <option disabled value="">请选择角色</option>
-                                <option v-for="item in lineupCharOptions" :key="item.charId" :value="item.charId">
+                                <SelectItem v-for="item in lineupCharOptions" :key="item.charId" :value="item.charId">
                                     {{ item.name }}
-                                </option>
-                            </select>
+                                </SelectItem>
+                            </Select>
                             <label class="label cursor-pointer gap-2 rounded-xs px-3 py-2">
                                 <span class="whitespace-nowrap text-sm">仅主控</span>
                                 <input

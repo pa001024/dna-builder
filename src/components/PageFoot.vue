@@ -23,7 +23,7 @@ defineEmits<{
                 min="1"
                 :max="totalPages"
                 @blur="$emit('update:page', page)"
-                class="input input-bordered input-sm w-20"
+                class="w-20 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
             />
             <button class="btn btn-sm btn-outline" :disabled="page >= totalPages" @click="$emit('update:page', page + 1)">下一页</button>
         </div>

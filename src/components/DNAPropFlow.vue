@@ -858,7 +858,7 @@ defineExpose({
                             <span class="label-text text-xs font-medium">角色</span>
                         </label>
                         <div class="relative">
-                            <Select v-model="selectedRole" class="input w-full">
+                            <Select v-model="selectedRole" class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                                 <SelectItem v-for="role in roles" :key="role.role_id" :value="role.role_id">
                                     {{ role.role_name }}
                                     <span v-if="role.is_verified === 1" class="text-success">(已验证)</span>
@@ -881,7 +881,7 @@ defineExpose({
                         <label class="label">
                             <span class="label-text text-xs font-medium">查询日期</span>
                         </label>
-                        <input v-model="queryDate" type="date" class="input input-bordered w-full" />
+                        <input v-model="queryDate" type="date" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
                     </div>
 
                     <!-- 时间范围 -->
@@ -889,7 +889,7 @@ defineExpose({
                         <label class="label">
                             <span class="label-text text-xs font-medium">时间范围</span>
                         </label>
-                        <Select v-model="selectedTimeRange" class="input w-full">
+                        <Select v-model="selectedTimeRange" class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                             <SelectItem v-for="option in timeRangeOptions" :key="option.value" :value="option.value">
                                 {{ option.label }}
                             </SelectItem>
@@ -917,7 +917,7 @@ defineExpose({
                         <label class="label">
                             <span class="label-text text-xs font-medium">道具分类</span>
                         </label>
-                        <Select v-model="selectedPropCategory" class="input w-full">
+                        <Select v-model="selectedPropCategory" class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                             <SelectItem v-for="category in propCategories" :key="category.id" :value="category.id">
                                 {{ category.name }}
                             </SelectItem>
@@ -932,7 +932,7 @@ defineExpose({
                         <Combobox
                             v-model="propName"
                             placeholder="可选，留空查询所有道具"
-                            class="input-md! input-bordered w-full"
+                            class="w-full"
                             :options="['时之纺线', '皎皎之民的信物', '委托密函线索'].map(v => ({ label: v, value: v }))"
                         />
                     </div>
@@ -1030,7 +1030,7 @@ defineExpose({
                     <span class="label-text">验证码</span>
                 </label>
                 <div class="flex gap-2">
-                    <input v-model="mailCode" type="text" placeholder="请输入验证码" class="input input-bordered flex-1" />
+                    <input v-model="mailCode" type="text" placeholder="请输入验证码" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
                     <button @click="sendGameMail" class="btn btn-secondary">发送验证码</button>
                 </div>
             </div>
@@ -1052,7 +1052,7 @@ defineExpose({
                 <label class="label">
                     <span class="label-text">手机号</span>
                 </label>
-                <input v-model="phoneNumber" type="tel" placeholder="请输入手机号" class="input input-bordered w-full" maxlength="11" />
+                <input v-model="phoneNumber" type="tel" placeholder="请输入手机号" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" maxlength="11" />
             </div>
 
             <!-- 验证码图片 -->
@@ -1065,7 +1065,7 @@ defineExpose({
                         v-model="captchaCode"
                         type="text"
                         placeholder="请输入图形验证码"
-                        class="input input-bordered w-full"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         maxlength="6"
                     />
                     <img
@@ -1088,7 +1088,7 @@ defineExpose({
                         v-model="phoneVerifyCode"
                         type="text"
                         placeholder="请输入短信验证码"
-                        class="input input-bordered flex-1"
+                        class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         maxlength="6"
                     />
                     <button @click="sendVerifyCode" class="btn btn-secondary" :disabled="smsColdDown > 0 || captchaCode.length !== 6">

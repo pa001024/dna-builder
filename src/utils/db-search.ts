@@ -18,6 +18,7 @@ import { getLocalizedQuestDataByLanguage, resolveStoryLocaleBySetting, type Stor
 import { titleData } from "@/data/d/title.data"
 import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
+import { DAMAGE_MODES, DAMAGE_TERMS } from "@/data/damage-mechanics"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
 import { getDungeonName, getDungeonType } from "@/utils/dungeon-utils"
 import { getGlobalSearchService } from "@/utils/global-search"
@@ -30,6 +31,7 @@ import { DEFAULT_STORY_TEXT_CONFIG, replaceStoryPlaceholders, stripStoryTextTags
  *
  * 为「资料检索 Agent」提供可调用的结构化查询能力，是 agent 工具的唯一数据出口：
  * - 模块清单与模块内条目检索（角色/武器/魔之楔/成就/任务链/活动/副本/怪物/资源/魔灵/密函/称号/读物/乐谱/鱼）
+ * - 伤害机制索引（技能伤害 / 武器伤害 / DOT 伤害的结算步骤与机制术语，来源同「伤害公式」页面）
  * - 按版本汇总新增内容
  * - 剧情全文检索与剧情原文读取（支撑「某某剧情里谁做了什么」这类提问）
  *
@@ -588,7 +590,66 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
                 },
             })),
     },
+    {
+        id: "damage",
+        labelKey: "database.damage",
+        path: "/db/damage",
+        versioned: false,
+        /**
+         * 伤害机制模块：条目不是游戏数据，而是伤害公式页面（`/db/damage`）的结算步骤与机制术语。
+         *
+         * 页面上的结算模式（技能伤害 / 武器伤害 / DOT 伤害）作为筛选项，内容类型（结算步骤 / 名词解释）
+         * 用于把「某一步怎么算」与「某个名词是什么意思」分开取。
+         */
+        facets: [
+            { id: "mode", label: "结算模式", kind: "enum", values: [] },
+            { id: "kind", label: "内容类型", kind: "enum", values: [] },
+        ],
+        list: () => buildDamageEntries(),
+    },
 ]
+
+/** 伤害机制条目的内容类型取值 */
+const DAMAGE_KIND_STEP = "结算步骤"
+const DAMAGE_KIND_TERM = "名词解释"
+
+/**
+ * 构建伤害机制模块的条目：每个结算步骤一条，每个机制术语一条。
+ * 数据源是 `src/data/damage-mechanics.ts`，与伤害公式页面的步骤定义保持逐字一致。
+ * @returns 该模块的条目列表
+ */
+function buildDamageEntries(): DBEntrySummary[] {
+    const entries: DBEntrySummary[] = []
+
+    for (const mode of DAMAGE_MODES) {
+        for (const step of mode.steps) {
+            entries.push({
+                id: `${mode.id}:${step.id}`,
+                name: step.title,
+                subtitle: joinParts([mode.label, step.group, step.formula]),
+                path: `/db/damage?mode=${mode.id}`,
+                facets: {
+                    mode: [facetValue(mode.label)],
+                    kind: [facetValue(DAMAGE_KIND_STEP)],
+                },
+            })
+        }
+    }
+
+    for (const term of DAMAGE_TERMS) {
+        entries.push({
+            id: `term:${term.term}`,
+            name: term.term,
+            subtitle: term.description,
+            path: "/db/damage",
+            facets: {
+                kind: [facetValue(DAMAGE_KIND_TERM)],
+            },
+        })
+    }
+
+    return entries
+}
 
 const MODULE_ADAPTER_MAP = new Map(MODULE_ADAPTERS.map(adapter => [adapter.id, adapter]))
 

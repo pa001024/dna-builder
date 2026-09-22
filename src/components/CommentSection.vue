@@ -124,7 +124,7 @@ onMounted(() => {
             <input
                 v-model="content"
                 type="text"
-                class="input input-bordered input-sm flex-1"
+                class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                 maxlength="500"
                 placeholder="友善评论，理性交流～"
                 @keyup.enter="postComment"

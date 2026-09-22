@@ -548,7 +548,7 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                     <div class="flex items-center gap-2">
                         <img :src="aMod.url" :alt="aMod.名称" class="w-8 h-8 inline-block" />
                         <Select
-                            class="w-30 input input-bordered input-sm"
+                            class="w-30 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             :model-value="auraMod"
                             @update:model-value="handleSelectAuraMod($event)"
                         >

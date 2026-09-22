@@ -218,9 +218,9 @@ const currentMonster = computed(() => {
                     <div>
                         <label class="block text-sm font-bold text-slate-400 mb-2">怪物名称</label>
                         <Select
-                            v-model="localSettings.monsterId"
-                            class="input input-bordered input-primary w-full"
-                            @change="updateSettings"
+                            :model-value="localSettings.monsterId"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            @update:modelValue="(val: number) => { localSettings.monsterId = val; updateSettings() }"
                         >
                             <SelectItem v-for="monster in monsterData" :key="monster.id" :value="monster.id">
                                 {{ $t(monster.n) }}

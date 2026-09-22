@@ -841,7 +841,7 @@ onUnmounted(() => {
                                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">{{ $t("setting.theme") }}</span>
-                                <Select v-model="setting.theme" class="input input-bordered input-sm w-40">
+                                <Select v-model="setting.theme" class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                                     <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t("setting.lightTheme") }}</SelectLabel>
                                     <SelectGroup>
                                         <SelectItem v-for="th in lightThemes" :key="th" :value="th">{{ capitalize(th) }}</SelectItem>
@@ -959,7 +959,7 @@ onUnmounted(() => {
                                 <div class="flex shrink-0 items-center gap-2">
                                     <Select
                                         v-model="selectedFontFamily"
-                                        class="input input-bordered input-sm w-44"
+                                        class="w-44 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         :placeholder="'默认字体'"
                                     >
                                         <SelectItem :value="FONT_DEFAULT_VALUE">默认字体</SelectItem>
@@ -1042,7 +1042,7 @@ onUnmounted(() => {
                                 <span class="label-text">{{ $t("setting.winMaterial") }}</span>
                                 <Select
                                     v-model="setting.winMaterial"
-                                    class="input input-bordered input-sm w-40"
+                                    class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     :placeholder="$t('setting.winMaterial')"
                                 >
                                     <SelectItem v-for="th in MATERIALS" :key="th" :value="th">{{ th }}</SelectItem>
@@ -1054,7 +1054,7 @@ onUnmounted(() => {
                                 <span class="label-text">{{ $t("setting.lang") }}</span>
                                 <Select
                                     v-model="setting.lang"
-                                    class="input input-bordered input-sm w-40"
+                                    class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     :placeholder="$t('setting.lang')"
                                     @update:model-value="setting.setLang($event)"
                                 >
@@ -1192,7 +1192,7 @@ onUnmounted(() => {
                             <div class="flex flex-wrap items-center gap-2">
                                 <Select
                                     v-model="dataPackSourceKind"
-                                    class="input input-bordered input-sm w-40"
+                                    class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     @update:model-value="saveSourceKind($event as 'official' | 'custom')"
                                 >
                                     <SelectItem value="official">{{ $t("setting.officialSource") }}</SelectItem>
@@ -1202,7 +1202,7 @@ onUnmounted(() => {
                                     v-model="dataPackSourceBaseUrl"
                                     :disabled="dataPackSourceKind === 'official'"
                                     type="text"
-                                    class="input input-bordered input-sm min-w-40 flex-1"
+                                    class="min-w-40 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     :placeholder="
                                         dataPackSourceKind === 'official' ? CDN_DATA_PACK_BASE_URL : $t('setting.dataPackSourceAddress')
                                     "
@@ -1404,13 +1404,13 @@ onUnmounted(() => {
                                 class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">{{ $t("setting.protagonistName1") }}</span>
-                                <input v-model="setting.protagonistName1" type="text" class="input input-bordered input-sm w-64" />
+                                <input v-model="setting.protagonistName1" type="text" class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
                             </div>
                             <div
                                 class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">{{ $t("setting.protagonistGender1") }}</span>
-                                <Select v-model="setting.protagonistGender" class="input input-bordered input-sm w-64">
+                                <Select v-model="setting.protagonistGender" class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                                     <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
                                     <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
                                 </Select>
@@ -1419,13 +1419,13 @@ onUnmounted(() => {
                                 class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">{{ $t("setting.protagonistName2") }}</span>
-                                <input v-model="setting.protagonistName2" type="text" class="input input-bordered input-sm w-64" />
+                                <input v-model="setting.protagonistName2" type="text" class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
                             </div>
                             <div
                                 class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">{{ $t("setting.protagonistGender2") }}</span>
-                                <Select v-model="setting.protagonistGender2" class="input input-bordered input-sm w-64">
+                                <Select v-model="setting.protagonistGender2" class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                                     <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
                                     <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
                                 </Select>

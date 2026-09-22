@@ -118,14 +118,17 @@ const filterDPSList = (dpsList: DPS[]) => {
                             v-model="searchQuery"
                             type="text"
                             :placeholder="$t('dps-view.searchPlaceholder')"
-                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         />
                     </div>
                     <div>
-                        <select v-model="sortBy" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="dpsValue">{{ $t("dps-view.sortByDpsValue") }}</option>
-                            <option value="createdAt">{{ $t("dps-view.sortByCreatedAt") }}</option>
-                        </select>
+                        <Select
+                            v-model="sortBy"
+                            class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        >
+                            <SelectItem value="dpsValue">{{ $t("dps-view.sortByDpsValue") }}</SelectItem>
+                            <SelectItem value="createdAt">{{ $t("dps-view.sortByCreatedAt") }}</SelectItem>
+                        </Select>
                     </div>
                 </div>
             </div>

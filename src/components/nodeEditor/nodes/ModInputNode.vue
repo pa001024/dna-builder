@@ -89,13 +89,13 @@ function updateModLevel(index: number, value: number) {
             <!-- MOD类型筛选 -->
             <div class="space-y-2">
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.modInput.type") }}</label>
-                <Select v-model="modType" class="w-full input input-sm">
+                <Select v-model="modType" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                     <SelectItem v-for="modTypeItem in modTypes" :key="modTypeItem" :value="modTypeItem">
                         {{ $t(modTypeItem) }}
                     </SelectItem>
                 </Select>
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.modInput.element") }}</label>
-                <Select v-model="modElm" class="w-full input input-sm">
+                <Select v-model="modElm" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                     <SelectItem v-for="modElmItem in modElms" :key="modElmItem" :value="modElmItem">
                         {{ $t(modElmItem) }}
                     </SelectItem>
@@ -108,7 +108,7 @@ function updateModLevel(index: number, value: number) {
                     <div class="flex gap-2">
                         <Select
                             v-model="selectedMods[index]"
-                            class="flex-1 input input-sm"
+                            class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             :placeholder="$t('node-editor.modInput.chooseMod')"
                             @update:model-value="updateMod(index, $event)"
                         >
@@ -118,7 +118,7 @@ function updateModLevel(index: number, value: number) {
                         </Select>
                         <Select
                             v-model="modLevels[index]"
-                            class="flex-1 input input-sm"
+                            class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             :placeholder="$t('node-editor.modInput.chooseLevel')"
                             @update:model-value="updateModLevel(index, $event)"
                         >

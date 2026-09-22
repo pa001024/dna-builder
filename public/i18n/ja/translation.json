@@ -6744,6 +6744,9 @@
         "summary": {
             "answered": "回答を受け取りました",
             "askInvalid": "質問の形式を解析できません",
+            "damageModes": "{{count}} 種類の計算モード",
+            "damageSteps": "{{count}} 件の計算ステップ",
+            "damageTerms": "{{count}} 件の用語",
             "done": "完了",
             "facets": "{{prefix}}絞り込み {{count}} 件",
             "modulesTotal": "検索可能なモジュールは全 {{count}} 件",
@@ -6761,6 +6764,7 @@
         },
         "tool": {
             "ask_user": "ユーザーに質問",
+            "explain_damage": "ダメージ計算",
             "list_data_modules": "モジュール一覧",
             "list_filter_options": "絞り込み条件",
             "list_version_additions": "バージョン追加",

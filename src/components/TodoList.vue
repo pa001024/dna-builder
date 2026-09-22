@@ -511,7 +511,7 @@ onBeforeUnmount(() => {
                             v-model="createForm.title"
                             type="text"
                             :placeholder="$t('todo.titlePlaceholder')"
-                            class="input input-bordered w-full"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             :disabled="formSubmitting"
                         />
                     </div>
@@ -520,7 +520,7 @@ onBeforeUnmount(() => {
                         <textarea
                             v-model="createForm.description"
                             :placeholder="$t('todo.descriptionPlaceholder')"
-                            class="textarea textarea-bordered h-24 w-full"
+                            class="h-24 w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
                             :disabled="formSubmitting"
                         />
                     </div>
@@ -530,7 +530,7 @@ onBeforeUnmount(() => {
                             <input
                                 v-model="createForm.startTime"
                                 type="datetime-local"
-                                class="input input-bordered w-full"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 :disabled="formSubmitting"
                             />
                         </div>
@@ -539,7 +539,7 @@ onBeforeUnmount(() => {
                             <input
                                 v-model="createForm.endTime"
                                 type="datetime-local"
-                                class="input input-bordered w-full"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 :disabled="formSubmitting"
                             />
                         </div>
@@ -567,7 +567,7 @@ onBeforeUnmount(() => {
                             v-model="editForm.title"
                             type="text"
                             :placeholder="$t('todo.titlePlaceholder')"
-                            class="input input-bordered w-full"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             :disabled="formSubmitting"
                         />
                     </div>
@@ -576,7 +576,7 @@ onBeforeUnmount(() => {
                         <textarea
                             v-model="editForm.description"
                             :placeholder="$t('todo.descriptionPlaceholder')"
-                            class="textarea textarea-bordered h-24 w-full"
+                            class="h-24 w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
                             :disabled="formSubmitting"
                         />
                     </div>
@@ -586,7 +586,7 @@ onBeforeUnmount(() => {
                             <input
                                 v-model="editForm.startTime"
                                 type="datetime-local"
-                                class="input input-bordered w-full"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 :disabled="formSubmitting"
                             />
                         </div>
@@ -595,7 +595,7 @@ onBeforeUnmount(() => {
                             <input
                                 v-model="editForm.endTime"
                                 type="datetime-local"
-                                class="input input-bordered w-full"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 :disabled="formSubmitting"
                             />
                         </div>

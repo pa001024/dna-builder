@@ -49,19 +49,19 @@ const resonanceGain = computed({
 
             <div>
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("char-build.level") }}</label>
-                <input v-model.number="charLevel" type="number" class="input input-bordered input-sm w-full" placeholder="80" />
+                <input v-model.number="charLevel" type="number" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums" placeholder="80" />
             </div>
 
             <div>
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("char-build.skill_level") }}</label>
-                <input v-model.number="charSkillLevel" type="number" class="input input-bordered input-sm w-full" placeholder="12" />
+                <input v-model.number="charSkillLevel" type="number" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums" placeholder="12" />
             </div>
 
             <div>
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("char-build.hp_percent") }}</label>
                 <Select
                     v-model="hpPercent"
-                    class="flex-1 input input-bordered input-sm"
+                    class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                 >
                     <SelectItem
                         v-for="hp in [
@@ -82,7 +82,7 @@ const resonanceGain = computed({
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("char-build.resonance_gain") }}</label>
                 <Select
                     v-model="resonanceGain"
-                    class="flex-1 input input-bordered input-sm"
+                    class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                 >
                     <SelectItem v-for="rg in [0, 0.5, 1, 1.5, 2, 2.5, 3]" :key="rg" :value="rg"> {{ rg * 100 }}% </SelectItem>
                 </Select>

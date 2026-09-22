@@ -147,72 +147,77 @@ function buildWeekCron(weekday: number, hour: number, minute: number) {
  * @param event 变更事件
  * @returns 数值
  */
-function readValue(event: Event) {
-    return Number((event.target as HTMLSelectElement).value)
+/**
+ * 把 Select 控件回传的选中值转成数字（间隔 / 周几 / 小时 / 分钟）。
+ * @param value Select 控件回传的选中值
+ * @returns 对应的数字值
+ */
+function toNumber(value: number | string) {
+    return Number(value)
 }
 </script>
 
 <template>
     <div class="grid gap-2">
         <div class="grid gap-2 sm:grid-cols-2">
-            <select
+            <Select
                 :disabled="disabled"
-                class="select select-bordered select-sm"
-                :value="parsed.interval"
-                @change="emitCron(buildIntervalCron(parsed.mode === 'custom' ? 'week' : parsed.mode, readValue($event)))"
+                class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary disabled:border-base-content/10 disabled:opacity-50"
+                :model-value="parsed.interval"
+                @update:model-value="emitCron(buildIntervalCron(parsed.mode === 'custom' ? 'week' : parsed.mode, toNumber($event)))"
             >
-                <option v-for="value in intervalOptions[parsed.mode === 'custom' ? 'week' : parsed.mode]" :key="value" :value="value">
+                <SelectItem v-for="value in intervalOptions[parsed.mode === 'custom' ? 'week' : parsed.mode]" :key="value" :value="value">
                     每{{ value }}
-                </option>
-            </select>
-            <select
+                </SelectItem>
+            </Select>
+            <Select
                 :disabled="disabled"
-                class="select select-bordered select-sm"
-                :value="parsed.mode"
-                @change="
-                    emitCron(buildIntervalCron(($event.target as HTMLSelectElement).value as Exclude<CronMode, 'custom'>, parsed.interval))
+                class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary disabled:border-base-content/10 disabled:opacity-50"
+                :model-value="parsed.mode"
+                @update:model-value="
+                    emitCron(buildIntervalCron(String($event) as Exclude<CronMode, 'custom'>, parsed.interval))
                 "
             >
-                <option value="year">年</option>
-                <option value="month">月</option>
-                <option value="week">周</option>
-                <option value="day">日</option>
-                <option value="hour">小时</option>
-                <option value="minute">分钟</option>
-            </select>
+                <SelectItem value="year">年</SelectItem>
+                <SelectItem value="month">月</SelectItem>
+                <SelectItem value="week">周</SelectItem>
+                <SelectItem value="day">日</SelectItem>
+                <SelectItem value="hour">小时</SelectItem>
+                <SelectItem value="minute">分钟</SelectItem>
+            </Select>
         </div>
 
         <div class="grid gap-2 sm:grid-cols-3">
-            <select
+            <Select
                 :disabled="disabled"
-                class="select select-bordered select-sm"
-                :value="parsed.weekday"
-                @change="emitCron(buildWeekCron(readValue($event), parsed.hour, parsed.minute))"
+                class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary disabled:border-base-content/10 disabled:opacity-50"
+                :model-value="parsed.weekday"
+                @update:model-value="emitCron(buildWeekCron(toNumber($event), parsed.hour, parsed.minute))"
             >
-                <option value="1">周一</option>
-                <option value="2">周二</option>
-                <option value="3">周三</option>
-                <option value="4">周四</option>
-                <option value="5">周五</option>
-                <option value="6">周六</option>
-                <option value="0">周日</option>
-            </select>
-            <select
+                <SelectItem :value="1">周一</SelectItem>
+                <SelectItem :value="2">周二</SelectItem>
+                <SelectItem :value="3">周三</SelectItem>
+                <SelectItem :value="4">周四</SelectItem>
+                <SelectItem :value="5">周五</SelectItem>
+                <SelectItem :value="6">周六</SelectItem>
+                <SelectItem :value="0">周日</SelectItem>
+            </Select>
+            <Select
                 :disabled="disabled"
-                class="select select-bordered select-sm"
-                :value="parsed.hour"
-                @change="emitCron(buildWeekCron(parsed.weekday, readValue($event), parsed.minute))"
+                class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary disabled:border-base-content/10 disabled:opacity-50"
+                :model-value="parsed.hour"
+                @update:model-value="emitCron(buildWeekCron(parsed.weekday, toNumber($event), parsed.minute))"
             >
-                <option v-for="hour in 24" :key="hour - 1" :value="hour - 1">{{ `${hour - 1}时` }}</option>
-            </select>
-            <select
+                <SelectItem v-for="hour in 24" :key="hour - 1" :value="hour - 1">{{ `${hour - 1}时` }}</SelectItem>
+            </Select>
+            <Select
                 :disabled="disabled"
-                class="select select-bordered select-sm"
-                :value="parsed.minute"
-                @change="emitCron(buildWeekCron(parsed.weekday, parsed.hour, readValue($event)))"
+                class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary disabled:border-base-content/10 disabled:opacity-50"
+                :model-value="parsed.minute"
+                @update:model-value="emitCron(buildWeekCron(parsed.weekday, parsed.hour, toNumber($event)))"
             >
-                <option v-for="minute in 60" :key="minute - 1" :value="minute - 1">{{ `${minute - 1}分` }}</option>
-            </select>
+                <SelectItem v-for="minute in 60" :key="minute - 1" :value="minute - 1">{{ `${minute - 1}分` }}</SelectItem>
+            </Select>
         </div>
 
         <div class="text-xs text-base-content/60">

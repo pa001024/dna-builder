@@ -6847,6 +6847,9 @@
         "summary": {
             "answered": "Answer received",
             "askInvalid": "Invalid question format",
+            "damageModes": "{{count}} damage mode(s)",
+            "damageSteps": "{{count}} calculation step(s) matched",
+            "damageTerms": "{{count}} mechanic term(s)",
             "done": "Done",
             "facets": "{{prefix}}{{count}} facet group(s)",
             "modulesTotal": "{{count}} searchable modules in total",
@@ -6864,6 +6867,7 @@
         },
         "tool": {
             "ask_user": "Ask user",
+            "explain_damage": "Damage mechanics",
             "list_data_modules": "Module list",
             "list_filter_options": "Filter options",
             "list_version_additions": "Version additions",

@@ -706,13 +706,16 @@ onMounted(async () => {
                     <div class="flex flex-wrap items-end gap-3">
                         <label class="form-control w-full sm:w-auto sm:min-w-40">
                             <span class="label-text mb-1 text-xs">服务器</span>
-                            <select v-model="selectedServer" class="select select-bordered select-sm w-full">
-                                <option v-for="server in RACE_LOTTERY_SERVERS" :key="server" :value="server">{{ server }}</option>
-                            </select>
+                            <Select
+                                v-model="selectedServer"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            >
+                                <SelectItem v-for="server in RACE_LOTTERY_SERVERS" :key="server" :value="server">{{ server }}</SelectItem>
+                            </Select>
                         </label>
                         <label class="form-control w-full sm:w-auto sm:min-w-44">
                             <span class="label-text mb-1 text-xs">比赛日期</span>
-                            <input v-model="selectedDate" type="date" class="input input-bordered input-sm w-full" />
+                            <input v-model="selectedDate" type="date" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
                         </label>
                         <button
                             class="btn btn-primary btn-sm"
@@ -1047,26 +1050,29 @@ onMounted(async () => {
                             <form class="mt-3 space-y-3" @submit.prevent="submitManualEntry">
                                 <label class="form-control">
                                     <span class="label-text mb-1 text-xs">选手</span>
-                                    <select v-model="selectedPlayerId" class="select select-bordered select-sm w-full">
-                                        <option v-for="player in orderedPlayers" :key="player.playerId" :value="player.playerId">
+                                    <Select
+                                        v-model="selectedPlayerId"
+                                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    >
+                                        <SelectItem v-for="player in orderedPlayers" :key="player.playerId" :value="player.playerId">
                                             {{ player.name }}
-                                        </option>
-                                    </select>
+                                        </SelectItem>
+                                    </Select>
                                 </label>
                                 <div class="space-y-2">
                                     <div class="text-xs text-base-content/70">状态词条（3 个位置，可不选）</div>
                                     <label v-for="slot in 3" :key="slot" class="form-control">
                                         <span class="label-text mb-1 text-xs">状态{{ slot }}</span>
-                                        <select
+                                        <Select
                                             v-model="selectedBuffIds[slot - 1]"
-                                            class="select select-bordered select-sm w-full"
+                                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             :aria-label="`状态${slot}`"
                                         >
-                                            <option :value="0">不选择</option>
-                                            <option v-for="buff in raceLotteryData.outsideBuffs" :key="buff.rumorId" :value="buff.rumorId">
+                                            <SelectItem :value="0">不选择</SelectItem>
+                                            <SelectItem v-for="buff in raceLotteryData.outsideBuffs" :key="buff.rumorId" :value="buff.rumorId">
                                                 {{ buff.name }} ({{ buff.buffMap }})
-                                            </option>
-                                        </select>
+                                            </SelectItem>
+                                        </Select>
                                     </label>
                                 </div>
                                 <button
@@ -1107,7 +1113,7 @@ onMounted(async () => {
                                         type="number"
                                         step="0.01"
                                         min="0"
-                                        class="input input-bordered input-sm w-full"
+                                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         :aria-label="`${player.name} 最终速度`"
                                     />
                                 </label>

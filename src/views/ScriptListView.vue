@@ -3471,10 +3471,10 @@ onUnmounted(async () => {
                         v-model="searchKeyword"
                         type="text"
                         :placeholder="$t('script-list.search_placeholder')"
-                        class="input input-bordered input-sm w-full"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         @input="handleSearch"
                     />
-                    <Select v-model="selectedCategory" class="input input-sm w-full" @change="handleSearch">
+                    <Select v-model="selectedCategory" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" @change="handleSearch">
                         <SelectItem v-for="option in categoryOptions" :key="option.value" :value="option.value">
                             {{ option.label }}
                         </SelectItem>
@@ -3565,7 +3565,7 @@ onUnmounted(async () => {
                                             id="script-name-input"
                                             v-model="editingScriptName"
                                             type="text"
-                                            class="flex-1 input input-bordered input-xs px-2 py-1 h-6"
+                                            class="flex-1 px-2 py-1 h-6 rounded-none border-b border-base-content/20 bg-transparent text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             @blur="confirmRenameScript"
                                             @keydown="handleEditKeyDown"
                                             @click.stop
@@ -3983,7 +3983,7 @@ onUnmounted(async () => {
                                             v-if="item.kind === 'string'"
                                             :value="String(item.value)"
                                             type="text"
-                                            class="input input-bordered input-sm w-full"
+                                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             @input="updateScriptConfigValue(item.name, ($event.target as HTMLInputElement).value)"
                                         />
 
@@ -3991,18 +3991,18 @@ onUnmounted(async () => {
                                             v-else-if="item.kind === 'number'"
                                             :value="Number(item.value)"
                                             type="number"
-                                            class="input input-bordered input-sm w-full"
+                                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             @input="updateScriptConfigValue(item.name, ($event.target as HTMLInputElement).value)"
                                         />
 
-                                        <select
+                                        <Select
                                             v-else-if="item.kind === 'select'"
-                                            :value="String(item.value)"
-                                            class="select select-bordered select-sm w-full"
-                                            @change="updateScriptConfigValue(item.name, ($event.target as HTMLSelectElement).value)"
+                                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                            :model-value="String(item.value)"
+                                            @update:model-value="updateScriptConfigValue(item.name, $event)"
                                         >
-                                            <option v-for="option in item.options" :key="option" :value="option">{{ option }}</option>
-                                        </select>
+                                            <SelectItem v-for="option in item.options" :key="option" :value="option">{{ option }}</SelectItem>
+                                        </Select>
 
                                         <div v-else-if="item.kind === 'multi-select'" class="space-y-2">
                                             <div v-if="item.options.length === 0" class="text-xs text-base-content/60">
@@ -4186,7 +4186,7 @@ onUnmounted(async () => {
                         </div>
                         <textarea
                             v-model="scriptHelpNote"
-                            class="textarea textarea-bordered h-24 resize-none"
+                            class="h-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
                             placeholder="可选，补充你的判断依据"
                         />
                     </label>
@@ -4215,7 +4215,7 @@ onUnmounted(async () => {
                             v-model="newScriptName"
                             type="text"
                             :placeholder="$t('script-list.enter_script_name')"
-                            class="input input-bordered w-full"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         />
                     </label>
                 </div>
@@ -4225,7 +4225,7 @@ onUnmounted(async () => {
                         <textarea
                             v-model="newScriptContent"
                             :placeholder="$t('script-list.enter_script_content')"
-                            class="textarea textarea-bordered w-full h-64 resize-none"
+                            class="w-full h-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
                         />
                     </label>
                 </div>
@@ -4276,7 +4276,7 @@ onUnmounted(async () => {
                             <input
                                 v-model="editingHotkeyValue"
                                 type="text"
-                                class="input input-bordered w-full"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 :placeholder="$t('script-list.hotkey_example')"
                             />
                         </template>
@@ -4298,7 +4298,7 @@ onUnmounted(async () => {
                         <input
                             v-model="editingHotkeyWinActive"
                             type="text"
-                            class="input input-bordered w-full"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             :disabled="useGameWinActive"
                             :placeholder="$t('script-list.hotif_example')"
                         />
@@ -4367,7 +4367,7 @@ onUnmounted(async () => {
                             type="number"
                             min="1"
                             max="65535"
-                            class="input input-bordered w-40"
+                            class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             :disabled="scriptMcpServerState.enabled"
                             @change="persistScriptMcpPortConfig"
                         />
@@ -4383,7 +4383,7 @@ onUnmounted(async () => {
                     <div class="rounded-lg border border-base-300 p-4 space-y-3">
                         <div class="font-medium">MCP 地址</div>
                         <div class="flex items-center gap-2">
-                            <input :value="scriptMcpServerState.address" class="input input-bordered flex-1" readonly />
+                            <input :value="scriptMcpServerState.address" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" readonly />
                             <button class="btn btn-primary" @click="copyScriptMcpAddress">复制地址</button>
                         </div>
                     </div>
@@ -4429,14 +4429,21 @@ onUnmounted(async () => {
                     >
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="text-xs font-mono text-base-content/70 shrink-0">#{{ stepIndex + 1 }}</div>
-                            <select v-model="step.scriptName" class="select select-bordered select-sm min-w-52">
-                                <option value="">{{ $t("script-list.select_local_script") }}</option>
-                                <option v-for="script in localScripts" :key="script" :value="script">{{ script }}</option>
-                            </select>
-                            <select v-model="step.flowControl.enabled" class="select select-bordered select-sm">
-                                <option :value="false">{{ $t("script-list.sequential_default") }}</option>
-                                <option :value="true">{{ $t("script-list.enable_flow_control") }}</option>
-                            </select>
+                            <Select
+                                v-model="step.scriptName"
+                                :placeholder="$t('script-list.select_local_script')"
+                                class="min-w-52 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            >
+                                <SelectItem v-for="script in localScripts" :key="script" :value="script">{{ script }}</SelectItem>
+                            </Select>
+                            <Select
+                                class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                :model-value="String(step.flowControl.enabled)"
+                                @update:model-value="step.flowControl.enabled = $event === 'true'"
+                            >
+                                <SelectItem value="false">{{ $t("script-list.sequential_default") }}</SelectItem>
+                                <SelectItem value="true">{{ $t("script-list.enable_flow_control") }}</SelectItem>
+                            </Select>
                             <button class="btn btn-xs" :disabled="stepIndex === 0" @click="moveSchedulerStep(stepIndex, -1)">
                                 {{ $t("script-list.move_up") }}
                             </button>
@@ -4461,16 +4468,20 @@ onUnmounted(async () => {
                                 <input
                                     v-model="rule.matchValue"
                                     type="text"
-                                    class="input input-bordered input-sm w-40"
+                                    class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     :placeholder="$t('script-list.return_value')"
                                 />
                                 <span class="text-xs">=></span>
-                                <select v-model="rule.targetStepId" class="select select-bordered select-sm min-w-52">
-                                    <option :value="null">{{ $t("script-list.no_jump") }}</option>
-                                    <option v-for="option in schedulerDraftStepOptions" :key="option.id" :value="option.id">
+                                <Select
+                                    class="min-w-52 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    :model-value="rule.targetStepId ?? '-'"
+                                    @update:model-value="rule.targetStepId = $event === '-' ? null : $event"
+                                >
+                                    <SelectItem value="-">{{ $t("script-list.no_jump") }}</SelectItem>
+                                    <SelectItem v-for="option in schedulerDraftStepOptions" :key="option.id" :value="option.id">
                                         {{ option.label }}
-                                    </option>
-                                </select>
+                                    </SelectItem>
+                                </Select>
                                 <button class="btn btn-xs btn-ghost" @click="removeSchedulerCase(stepIndex, caseIndex)">
                                     {{ $t("script-list.delete_case") }}
                                 </button>
@@ -4478,12 +4489,16 @@ onUnmounted(async () => {
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="text-xs">{{ $t("script-list.default_label") }}</span>
                                 <span class="text-xs">=></span>
-                                <select v-model="step.flowControl.defaultTargetStepId" class="select select-bordered select-sm min-w-52">
-                                    <option :value="null">{{ $t("script-list.next_step_default") }}</option>
-                                    <option v-for="option in schedulerDraftStepOptions" :key="option.id" :value="option.id">
+                                <Select
+                                    class="min-w-52 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    :model-value="step.flowControl.defaultTargetStepId ?? '-'"
+                                    @update:model-value="step.flowControl.defaultTargetStepId = $event === '-' ? null : $event"
+                                >
+                                    <SelectItem value="-">{{ $t("script-list.next_step_default") }}</SelectItem>
+                                    <SelectItem v-for="option in schedulerDraftStepOptions" :key="option.id" :value="option.id">
                                         {{ option.label }}
-                                    </option>
-                                </select>
+                                    </SelectItem>
+                                </Select>
                                 <button class="btn btn-xs" @click="addSchedulerCase(stepIndex)">{{ $t("script-list.add_case") }}</button>
                             </div>
                         </div>

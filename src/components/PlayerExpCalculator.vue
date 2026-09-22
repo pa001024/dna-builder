@@ -642,10 +642,10 @@ const extraTotalExp = computed(() => {
                                         v-model.number="manualExpSources[reason]"
                                         type="number"
                                         min="0"
-                                        class="input input-sm flex-1"
+                                        class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                         placeholder="数量"
                                     />
-                                    <div class="input input-sm w-28 text-right bg-base-300">{{ getExpPerItem(reason) }}</div>
+                                    <div class="w-28 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-right font-mono text-[13px] tabular-nums text-base-content/70">{{ getExpPerItem(reason) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -674,10 +674,10 @@ const extraTotalExp = computed(() => {
                                                 v-model.number="breakthroughRecords[reason][index]"
                                                 type="number"
                                                 min="0"
-                                                class="input input-sm flex-1"
+                                                class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                                 placeholder="次数"
                                             />
-                                            <div class="input input-sm w-12 text-center bg-base-300 text-xs">
+                                            <div class="w-12 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-center font-mono text-xs tabular-nums text-base-content/70">
                                                 {{ getExpPerItem(reason, index) }}
                                             </div>
                                         </div>
@@ -714,10 +714,10 @@ const extraTotalExp = computed(() => {
                                     type="number"
                                     min="0"
                                     :max="ExtraExpInputMax[reason as keyof typeof ExtraExpInputMax]"
-                                    class="input input-sm flex-1"
+                                    class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                     placeholder="经验值"
                                 />
-                                <div class="input input-sm w-28 text-right bg-base-300">
+                                <div class="w-28 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-right font-mono text-[13px] tabular-nums text-base-content/70">
                                     {{ exp.toLocaleString() }}
                                 </div>
                             </div>

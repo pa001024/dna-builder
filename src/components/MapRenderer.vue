@@ -545,12 +545,16 @@ onUnmounted(() => {
             <div class="space-y-2">
                 <div>
                     <label class="text-xs text-base-content/70 mb-1">名称</label>
-                    <input v-model="pendingMarker.name" type="text" class="w-full input input-sm" />
+                    <input v-model="pendingMarker.name" type="text" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
                 </div>
                 <div>
                     <label class="text-xs text-base-content/70 mb-1">分类</label>
-                    <Select v-model="pendingMarker.categoryId" class="w-full input input-sm">
-                        <SelectItem :value="null"> 无分类 </SelectItem>
+                    <Select
+                        :model-value="pendingMarker.categoryId ?? '-'"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        @update:model-value="pendingMarker.categoryId = $event === '-' ? undefined : Number($event)"
+                    >
+                        <SelectItem value="-">无分类</SelectItem>
                         <SelectItem v-for="category in categories" :key="category.id" :value="category.id">
                             {{ category.name }}
                         </SelectItem>

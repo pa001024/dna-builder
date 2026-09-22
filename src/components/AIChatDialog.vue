@@ -641,7 +641,7 @@ async function clearChat() {
                         v-model="inputMessage"
                         type="text"
                         :placeholder="$t('ai-chat.inputPlaceholder')"
-                        class="input input-bordered input-sm flex-1"
+                        class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         :disabled="isLoading"
                         @keyup.enter="handleKeyPress"
                     />

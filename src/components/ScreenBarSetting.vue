@@ -253,7 +253,7 @@ function itemParams(item: ScreenBarItem) {
                             <input
                                 :value="itemParams(item).format"
                                 type="text"
-                                class="input input-bordered input-xs w-36 font-orbitron"
+                                class="w-36 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                 placeholder="HH:mm:ss"
                                 @input="setClockFormat(item, ($event.target as HTMLInputElement).value)"
                             />
@@ -278,14 +278,14 @@ function itemParams(item: ScreenBarItem) {
                             <input
                                 :value="itemParams(item).title"
                                 type="text"
-                                class="input input-bordered input-xs w-28"
+                                class="w-28 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 :placeholder="$t('screenBar.countdownTitlePlaceholder')"
                                 @input="setCountdown(item, { title: ($event.target as HTMLInputElement).value })"
                             />
                             <input
                                 :value="itemParams(item).target"
                                 type="datetime-local"
-                                class="input input-bordered input-xs w-48 font-orbitron"
+                                class="w-48 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                 @input="setCountdown(item, { target: ($event.target as HTMLInputElement).value })"
                             />
                         </div>

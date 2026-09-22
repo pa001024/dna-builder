@@ -2007,7 +2007,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     id="share-title"
                     v-model="share_title"
                     type="text"
-                    class="input input-bordered w-full"
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :placeholder="$t('char-build.enter_title')"
                     maxlength="50"
                 />
@@ -2019,7 +2019,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 <textarea
                     id="share-desc"
                     v-model="share_desc"
-                    class="textarea textarea-bordered w-full"
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
                     :placeholder="$t('char-build.enter_description')"
                     rows="3"
                     maxlength="200"
@@ -2611,7 +2611,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     </div>
                                 </div>
                                 <label
-                                    class="input input-sm input-primary text-sm flex justify-between"
+                                    class="flex items-center gap-1 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-sm transition-colors duration-150 focus-within:border-primary"
                                     :class="dropTargetClass('target-function')"
                                 >
                                     <ExprInput
@@ -2638,7 +2638,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <template v-else>
                                 <Select
                                     :value="charSettings.baseName"
-                                    class="input input-sm input-primary w-full"
+                                    class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     :placeholder="$t('char-build.select_timeline')"
                                     @change="charSettings.baseName = $event"
                                 >
@@ -2721,7 +2721,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                         <Select
                                             v-model="charSettings.hpPercent"
-                                            class="flex-1 input input-bordered input-sm"
+                                            class="flex-1 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             @change="updateCharBuild"
                                         >
                                             <SelectItem v-for="hp in hpPercentOptions" :key="hp" :value="hp / 100"> {{ hp }}% </SelectItem>
@@ -2733,7 +2733,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                         <Select
                                             v-model="charSettings.resonanceGain"
-                                            class="flex-1 input input-bordered input-sm"
+                                            class="flex-1 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             @change="updateCharBuild"
                                         >
                                             <SelectItem v-for="rg in resonanceGainOptions" :key="rg" :value="rg">
@@ -2760,7 +2760,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                         <Select
                                             v-model="charSettings.enemyId"
-                                            class="flex-1 input input-bordered input-sm"
+                                            class="flex-1 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             @change="updateCharBuild"
                                         >
                                             <SelectItem v-for="enemy in monsterData" :key="enemy.id" :value="enemy.id">
@@ -2774,7 +2774,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                         <Select
                                             v-model="charSettings.enemyResistance"
-                                            class="flex-1 input input-bordered input-sm"
+                                            class="flex-1 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             @change="updateCharBuild"
                                         >
                                             <SelectItem v-for="res in enemyResistanceOptions" :key="res" :value="res">

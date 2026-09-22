@@ -42,20 +42,20 @@ const kbdSizeClass = computed(() => {
 })
 
 /**
- * 生成 input 容器尺寸类。
+ * 生成输入区字号类（原 daisyUI input 尺寸类的替代）。
  */
 const inputSizeClass = computed(() => {
     switch (props.size) {
         case "xs":
-            return "input-xs"
+            return "text-xs"
         case "sm":
-            return "input-sm"
+            return "text-[13px]"
         case "lg":
-            return "input-lg"
+            return "text-base"
         case "xl":
-            return "input-xl"
+            return "text-lg"
         default:
-            return ""
+            return "text-sm"
     }
 })
 
@@ -276,10 +276,10 @@ onBeforeUnmount(() => {
 
 <template>
     <div
-        class="input input-bordered relative flex w-full items-center px-0 py-0 transition-all"
+        class="relative flex w-full items-center rounded-none border-b border-base-content/20 px-0 py-0 transition-all"
         :class="[
             inputSizeClass,
-            recording ? 'input-primary shadow-lg shadow-primary/20' : inputFocused ? 'shadow-sm' : 'hover:border-base-content/30',
+            recording ? 'border-primary text-primary' : inputFocused ? 'border-primary' : 'hover:border-base-content/30',
         ]"
     >
         <div

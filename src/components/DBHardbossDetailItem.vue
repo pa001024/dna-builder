@@ -528,13 +528,13 @@ function getHardbossIcon(boss: HardBoss): string {
                 <template #trailing>
                     <label class="flex items-center gap-1.5 text-xs text-base-content/60">
                         等级
-                        <select
+                        <Select
                             v-if="monsterLevels.length"
                             v-model.number="selectedMonsterLevel"
-                            class="select select-bordered select-sm w-24"
+                            class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         >
-                            <option v-for="level in monsterLevels" :key="level" :value="level">Lv.{{ level }}</option>
-                        </select>
+                            <SelectItem v-for="level in monsterLevels" :key="level" :value="level">Lv.{{ level }}</SelectItem>
+                        </Select>
                     </label>
                 </template>
             </SectionHeader>

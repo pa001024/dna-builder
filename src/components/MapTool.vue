@@ -3428,15 +3428,15 @@ onUnmounted(() => {
                                 <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">区域</span>
                                 <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
                             </div>
-                            <select
-                                :value="selectedRegionId"
-                                class="select select-bordered select-sm w-full rounded-xs"
-                                @change="handleRegionChange"
+                            <Select
+                                :model-value="selectedRegionId"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                @update:modelValue="(val: number) => handleRegionChange({ target: { value: String(val) } } as unknown as Event)"
                             >
-                                <option v-for="region in regionOptions" :key="region.id" :value="region.id">
+                                <SelectItem v-for="region in regionOptions" :key="region.id" :value="region.id">
                                     {{ region.id }} - {{ region.name }}
-                                </option>
-                            </select>
+                                </SelectItem>
+                            </Select>
                         </div>
 
                         <!-- 图层（可折叠） -->

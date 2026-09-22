@@ -421,7 +421,7 @@ onUnmounted(async () => {
                     </h2>
                     <textarea
                         v-model="importJsonText"
-                        class="textarea textarea-bordered w-full flex-1 font-mono text-xs"
+                        class="w-full flex-1 font-mono text-xs rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1 tabular-nums"
                         placeholder='{"actions":[{"type":"key_down","key":"w","time":0}]}'
                     />
                     <input
@@ -437,7 +437,7 @@ onUnmounted(async () => {
             <div class="card bg-base-100 border border-base-300 shadow-sm min-h-0">
                 <div class="card-body p-4 min-h-0 flex flex-col gap-3">
                     <h2 class="card-title text-base">生成代码</h2>
-                    <textarea class="textarea textarea-bordered w-full flex-1 font-mono text-xs" readonly :value="generatedCode" />
+                    <textarea class="w-full flex-1 font-mono text-xs rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1 tabular-nums" readonly :value="generatedCode" />
                 </div>
             </div>
         </div>

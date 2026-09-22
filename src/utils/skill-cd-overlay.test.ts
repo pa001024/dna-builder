@@ -60,7 +60,19 @@ describe("skill-cd-overlay", () => {
         expect(keys[0].vk).toBe(0x45)
         expect(keys[0].label).toBe("E")
         expect(keys[0].cdSeconds).toBe(SKILL_CD_OVERLAY_DEFAULTS.cdSeconds)
+        expect(keys[0].noCooldown).toBe(false)
         expect(keys[0].enabled).toBe(true)
+    })
+
+    it("无需冷却开关按布尔值透传,脏数据一律视为关闭", () => {
+        const keys = normalizeKeyBindings([
+            { vk: 0x45, cdSeconds: 8, noCooldown: true },
+            { vk: 0x51, cdSeconds: 8, noCooldown: "yes" },
+            { vk: 0x52, cdSeconds: 8 },
+        ])
+        expect(keys.map(key => key.noCooldown)).toEqual([true, false, false])
+        expect(createKeyBinding({ vk: 0x45 }).noCooldown).toBe(false)
+        expect(createKeyBinding({ vk: 0x45, noCooldown: true }).noCooldown).toBe(true)
     })
 
     it("整组配置只占一个存储键", () => {
@@ -135,7 +147,7 @@ describe("skill-cd-overlay", () => {
             hideWhenGameMissing: false,
             gameOnlyTrigger: true,
             processName: "EM-Win64-Shipping.exe, custom.exe",
-            keys: [createKeyBinding({ vk: 0x45, cdSeconds: 9 })],
+            keys: [createKeyBinding({ vk: 0x45, cdSeconds: 9, noCooldown: true })],
         })
         expect(config.anchorXPercent).toBe(100)
         expect(config.anchorYPercent).toBe(0)
@@ -149,5 +161,6 @@ describe("skill-cd-overlay", () => {
         expect(config.discColor).toBe(SKILL_CD_OVERLAY_COLORS.discColor)
         expect(config.keys).toHaveLength(1)
         expect(config.keys[0].cdSeconds).toBe(9)
+        expect(config.keys[0].noCooldown).toBe(true)
     })
 })

@@ -83,7 +83,11 @@ const handleMaxInput = (event: Event) => {
 </script>
 
 <template>
-    <button @click="open = !open" :disabled="disabled" class="input input-sm flex gap-4">
+    <button
+        @click="open = !open"
+        :disabled="disabled"
+        class="flex gap-4 rounded-none border-b border-base-content/20 px-0.5 pb-1 transition-colors duration-150 hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+    >
         <span>{{ fromValue }}</span>
         <span>-</span>
         <span>{{ toValue }}</span>

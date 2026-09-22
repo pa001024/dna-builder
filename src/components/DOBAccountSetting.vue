@@ -380,7 +380,7 @@ async function startNameEdit() {
                                         ref="nameInput"
                                         v-model="nameEdit.name"
                                         type="text"
-                                        class="input input-ghost input-sm px-1 py-0 h-auto min-h-0 w-auto max-w-64 font-semibold outline rounded-xs"
+                                        class="h-auto min-h-0 w-auto max-w-64 font-semibold rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     />
                                     <span v-else>
                                         {{ user.name || "用户" }}
@@ -641,13 +641,13 @@ async function startNameEdit() {
                                 </div>
                                 <span class="text-lg font-bold">用户登录</span>
                             </div>
-                            <label class="input input-bordered flex items-center gap-2 w-full">
+                            <label class="flex items-center gap-2 w-full">
                                 <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="loginForm.email" type="text" class="grow" placeholder="邮箱" />
+                                <input v-model="loginForm.email" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="邮箱" />
                             </label>
-                            <label class="input input-bordered flex items-center gap-2 w-full">
+                            <label class="flex items-center gap-2 w-full">
                                 <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="loginForm.password" type="password" class="grow" placeholder="密码" />
+                                <input v-model="loginForm.password" type="password" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="密码" />
                             </label>
                             <!-- 登录按钮 -->
                             <button type="submit" class="btn btn-primary w-full" :disabled="loading">
@@ -687,21 +687,21 @@ async function startNameEdit() {
                                 </div>
                                 <span class="text-lg font-bold">用户注册</span>
                             </div>
-                            <label class="input input-bordered flex items-center gap-2 w-full">
+                            <label class="flex items-center gap-2 w-full">
                                 <Icon icon="ri:user-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="registerForm.name" type="text" class="grow" placeholder="昵称" />
+                                <input v-model="registerForm.name" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="昵称" />
                             </label>
-                            <label class="input input-bordered flex items-center gap-2 w-full">
+                            <label class="flex items-center gap-2 w-full">
                                 <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="registerForm.email" type="text" class="grow" placeholder="邮箱" />
+                                <input v-model="registerForm.email" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="邮箱" />
                             </label>
-                            <label class="input input-bordered flex items-center gap-2 w-full">
+                            <label class="flex items-center gap-2 w-full">
                                 <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="registerForm.password" type="password" class="grow" placeholder="密码" />
+                                <input v-model="registerForm.password" type="password" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="密码" />
                             </label>
-                            <label class="input input-bordered flex items-center gap-2 w-full">
+                            <label class="flex items-center gap-2 w-full">
                                 <Icon icon="ri:qq-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="registerForm.qq" type="text" class="grow" placeholder="QQ" />
+                                <input v-model="registerForm.qq" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="QQ" />
                             </label>
                             <LocalQQ
                                 @select="
@@ -748,9 +748,9 @@ async function startNameEdit() {
                                 <div class="space-y-4">
                                     <div>
                                         <p class="text-sm text-base-content/60 mb-2">请输入您的邮箱，我们将发送验证码到您的邮箱</p>
-                                        <label class="input input-bordered flex items-center gap-2 w-full">
+                                        <label class="flex items-center gap-2 w-full">
                                             <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                                            <input v-model="resetPasswordForm.email" type="text" class="grow" placeholder="邮箱" />
+                                            <input v-model="resetPasswordForm.email" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="邮箱" />
                                         </label>
                                     </div>
 
@@ -773,12 +773,12 @@ async function startNameEdit() {
                                 <div class="space-y-4">
                                     <div>
                                         <p class="text-sm text-base-content/60 mb-2">请输入邮箱中的6位验证码</p>
-                                        <label class="input input-bordered flex items-center gap-2 w-full">
+                                        <label class="flex items-center gap-2 w-full">
                                             <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
                                             <input
                                                 v-model="resetPasswordForm.code"
                                                 type="text"
-                                                class="grow"
+                                                class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                                 placeholder="6位验证码"
                                                 maxlength="6"
                                             />
@@ -787,9 +787,9 @@ async function startNameEdit() {
 
                                     <div>
                                         <p class="text-sm text-base-content/60 mb-2">请输入新密码</p>
-                                        <label class="input input-bordered flex items-center gap-2 w-full">
+                                        <label class="flex items-center gap-2 w-full">
                                             <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                                            <input v-model="resetPasswordForm.newPassword" type="password" class="grow" placeholder="新密码" />
+                                            <input v-model="resetPasswordForm.newPassword" type="password" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="新密码" />
                                         </label>
                                     </div>
 

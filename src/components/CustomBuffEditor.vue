@@ -169,7 +169,7 @@ const removeBuff = (index: number) => {
         <div class="flex gap-3 mb-4">
             <div class="flex-1">
                 <div class="text-xs text-base-content/60 mb-1">属性</div>
-                <Select v-model="newBuff.property" class="w-full input input-bordered input-md">
+                <Select v-model="newBuff.property" class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                     <SelectItem v-for="prop in properties" :key="prop" :value="prop">
                         {{ prop }}
                     </SelectItem>
@@ -181,7 +181,7 @@ const removeBuff = (index: number) => {
 
             <div class="flex-1">
                 <div class="text-xs text-base-content/60 mb-1">数值</div>
-                <input v-model="newBuff.value" type="number" step="0.01" class="input input-bordered w-full" placeholder="请输入数值" />
+                <input v-model="newBuff.value" type="number" step="0.01" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums" placeholder="请输入数值" />
                 <div v-if="errors.value" class="text-xs text-error mt-1">
                     {{ errors.value }}
                 </div>

@@ -468,7 +468,7 @@ async function submitVersion() {
         <!-- 工具栏 -->
         <div class="flex-none p-2 flex items-center gap-2 border-b border-base-300 flex-wrap">
             <label
-                class="input input-sm bg-base-content/5 hover:bg-base-content/10 backdrop-blur-xs rounded-xs border border-base-content/5 text-xs w-48"
+                class="bg-base-content/5 hover:bg-base-content/10 backdrop-blur-xs rounded-xs border border-base-content/5 text-xs w-48"
             >
                 <Icon icon="ri:search-line" class="size-4 opacity-50" />
                 <input v-model="shareSearch" type="text" :placeholder="$t('game-launcher.searchMod')" class="grow" />
@@ -829,19 +829,19 @@ async function submitVersion() {
                         v-model="uploadName"
                         type="text"
                         :placeholder="$t('game-launcher.modName')"
-                        class="input input-bordered input-sm w-full"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     />
                     <div class="relative">
                         <textarea
                             v-model="uploadDescription"
                             :placeholder="$t('game-launcher.modDescription')"
-                            class="textarea textarea-bordered textarea-sm w-full pr-16"
+                            class="w-full pr-16 rounded-none border-b border-base-content/20 bg-transparent text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none"
                             rows="4"
                         ></textarea>
                         <span class="absolute right-2 bottom-1.5 text-[10px] opacity-50 flex items-center gap-1"> Markdown </span>
                     </div>
                     <div class="flex gap-2">
-                        <Select v-model="uploadCategory" class="w-40 input input-sm">
+                        <Select v-model="uploadCategory" class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                             <SelectItem v-for="opt in shareCategoryOptions.slice(1)" :key="opt.value" :value="opt.value">
                                 {{ opt.label }}
                             </SelectItem>
@@ -850,7 +850,7 @@ async function submitVersion() {
                             v-model="uploadEntity"
                             type="text"
                             :placeholder="$t('game-launcher.modEntity')"
-                            class="input input-bordered input-sm w-full"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             :disabled="uploadCategory === 'standalone'"
                         />
                     </div>
@@ -858,7 +858,7 @@ async function submitVersion() {
                         v-model="uploadRequires"
                         type="text"
                         :placeholder="$t('game-launcher.modRequiresPlaceholder')"
-                        class="input input-bordered input-sm w-full"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     />
 
                     <!-- 原创 / 来源 -->
@@ -877,7 +877,7 @@ async function submitVersion() {
                                 v-model="uploadSource"
                                 type="text"
                                 :placeholder="$t('game-launcher.sourcePlaceholder')"
-                                class="input input-bordered input-sm w-full pl-8"
+                                class="w-full pl-8 rounded-none border-b border-base-content/20 bg-transparent text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             />
                         </div>
                         <span class="text-[11px] opacity-50">{{ $t("game-launcher.sourceRequired") }}</span>
@@ -889,13 +889,13 @@ async function submitVersion() {
                             v-model="uploadVersion"
                             type="text"
                             :placeholder="$t('game-launcher.versionLabel')"
-                            class="input input-bordered input-sm w-28"
+                            class="w-28 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         />
                         <input
                             v-model="uploadChangelog"
                             type="text"
                             :placeholder="$t('game-launcher.changelog')"
-                            class="input input-bordered input-sm w-full"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         />
                     </div>
                 </div>
@@ -942,13 +942,13 @@ async function submitVersion() {
                         v-model="versionLabel"
                         type="text"
                         :placeholder="$t('game-launcher.versionLabel')"
-                        class="input input-bordered input-sm w-28"
+                        class="w-28 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     />
                     <input
                         v-model="versionChangelog"
                         type="text"
                         :placeholder="$t('game-launcher.changelog')"
-                        class="input input-bordered input-sm w-full"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     />
                 </div>
                 <div class="flex justify-end gap-2">

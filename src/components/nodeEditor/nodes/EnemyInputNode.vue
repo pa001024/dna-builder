@@ -81,7 +81,7 @@ const imbalance = computed({
             <!-- 敌人选择 -->
             <div>
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.enemyInput.enemy") }}</label>
-                <Select v-model="enemyId" class="w-full input input-sm" @change="updateEnemy(enemyId)">
+                <Select v-model="enemyId" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" @change="updateEnemy(enemyId)">
                     <SelectItem v-for="option in enemyOptions" :key="option.value" :value="option.value">
                         {{ option.label }} {{ option.type ? `(${option.type})` : "" }}
                     </SelectItem>
@@ -94,7 +94,7 @@ const imbalance = computed({
                 <input
                     v-model.number="enemyLevel"
                     type="number"
-                    class="input input-sm w-full"
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                     min="1"
                     max="240"
                     @change="updateEnemyLevel(enemyLevel)"
@@ -107,7 +107,7 @@ const imbalance = computed({
                 <input
                     v-model.number="enemyResistance"
                     type="number"
-                    class="input input-sm w-full"
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                     min="0"
                     max="1"
                     step="0.1"

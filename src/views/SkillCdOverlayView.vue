@@ -284,7 +284,7 @@ onUnmounted(() => {
                             <input
                                 :value="binding.label"
                                 type="text"
-                                class="input input-bordered input-sm w-20"
+                                class="w-20 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 placeholder="标签"
                                 @input="updateKey(binding.id, { label: ($event.target as HTMLInputElement).value })"
                             />
@@ -307,6 +307,22 @@ onUnmounted(() => {
                                 :aria-label="`${displayLabel(binding)} 冷却秒数`"
                                 @update:model-value="value => updateKey(binding.id, { cdSeconds: clampCdSeconds(value) })"
                             />
+                            <label
+                                class="flex cursor-pointer items-center gap-1.5 text-xs text-base-content/60"
+                                :title="
+                                    binding.noCooldown
+                                        ? '按下即从完整 CD 重新计时,冷却中按下也会重设'
+                                        : '仅在冷却结束时响应按下(防止连发被判定为多次施放)'
+                                "
+                            >
+                                <input
+                                    type="checkbox"
+                                    class="toggle toggle-xs toggle-secondary"
+                                    :checked="binding.noCooldown"
+                                    @change="updateKey(binding.id, { noCooldown: ($event.target as HTMLInputElement).checked })"
+                                />
+                                无需冷却
+                            </label>
                             <div class="ml-auto flex items-center gap-1">
                                 <button
                                     class="btn btn-ghost btn-xs"
@@ -328,7 +344,7 @@ onUnmounted(() => {
                                 添加按键
                             </button>
                             <span class="text-xs text-base-content/50">
-                                最多 {{ SKILL_CD_MAX_KEYS }} 个 · 冷却未结束时不重复触发,就绪后按键立刻重新计时
+                                最多 {{ SKILL_CD_MAX_KEYS }} 个 · 默认冷却未结束时不重复触发,就绪后按键立刻重新计时;开启「无需冷却」则按下即重设
                             </span>
                         </div>
                         <div v-if="captureHint" class="text-xs text-warning">{{ captureHint }}</div>
@@ -524,7 +540,7 @@ onUnmounted(() => {
                             <input
                                 v-model="setting.skillCdOverlay.processName"
                                 type="text"
-                                class="input input-bordered input-sm w-64"
+                                class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 placeholder="EM-Win64-Shipping.exe"
                                 @input="scheduleApply()"
                             />

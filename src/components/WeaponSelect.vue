@@ -15,7 +15,7 @@ const weaponOptions = weaponData.map(weapon => ({
 const model = defineModel<T extends "id" ? number : string>()
 </script>
 <template>
-    <Select v-model="model" class="w-40 input input-bordered input-sm">
+    <Select v-model="model" class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
         <template v-for="weaponWithElm in groupBy(weaponOptions, 'elm')" :key="weaponWithElm[0].elm">
             <SelectLabel class="p-2 text-sm font-semibold text-primary">
                 {{ $t(weaponWithElm[0].elm) }}

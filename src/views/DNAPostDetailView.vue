@@ -332,7 +332,7 @@ async function uploadPostAbyssUsage() {
                                 <textarea
                                     v-model="commentContent"
                                     placeholder="写下你的评论..."
-                                    class="textarea textarea-bordered w-full min-h-30 bg-base-100 border-base-300 text-base-content"
+                                    class="w-full min-h-30 bg-base-100 text-base-content rounded-none border-b border-base-content/20 px-0.5 pb-1 text-[13px] outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
                                     :disabled="commentLoading"
                                 />
                                 <div class="flex justify-end">

@@ -249,7 +249,7 @@ onUnmounted(() => {
                                         :value="counter.maxValue ?? ''"
                                         type="number"
                                         min="1"
-                                        class="input input-bordered input-sm w-full"
+                                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         :placeholder="$t('counter.unlimited')"
                                         @change="
                                             counterStore.updateCounter(counter.id, {
@@ -311,20 +311,20 @@ onUnmounted(() => {
                                                 counterStore.updateTrigger(counter.id, trigger.id, { hotkey: trigger.hotkey })
                                             "
                                         />
-                                        <select
+                                        <Select
                                             v-model="trigger.action"
-                                            class="select select-bordered select-sm"
+                                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             @change="counterStore.updateTrigger(counter.id, trigger.id, { action: trigger.action })"
                                         >
-                                            <option value="-1">{{ $t("counter.action.count", { amount: "-1" }) }}</option>
-                                            <option value="+1">{{ $t("counter.action.count", { amount: "+1" }) }}</option>
-                                            <option value="+2">{{ $t("counter.action.count", { amount: "+2" }) }}</option>
-                                            <option value="+3">{{ $t("counter.action.count", { amount: "+3" }) }}</option>
-                                            <option value="+4">{{ $t("counter.action.count", { amount: "+4" }) }}</option>
-                                            <option value="+5">{{ $t("counter.action.count", { amount: "+5" }) }}</option>
-                                            <option value="+10">{{ $t("counter.action.count", { amount: "+10" }) }}</option>
-                                            <option value="reset">{{ $t("counter.action.reset") }}</option>
-                                        </select>
+                                            <SelectItem value="-1">{{ $t("counter.action.count", { amount: "-1" }) }}</SelectItem>
+                                            <SelectItem value="+1">{{ $t("counter.action.count", { amount: "+1" }) }}</SelectItem>
+                                            <SelectItem value="+2">{{ $t("counter.action.count", { amount: "+2" }) }}</SelectItem>
+                                            <SelectItem value="+3">{{ $t("counter.action.count", { amount: "+3" }) }}</SelectItem>
+                                            <SelectItem value="+4">{{ $t("counter.action.count", { amount: "+4" }) }}</SelectItem>
+                                            <SelectItem value="+5">{{ $t("counter.action.count", { amount: "+5" }) }}</SelectItem>
+                                            <SelectItem value="+10">{{ $t("counter.action.count", { amount: "+10" }) }}</SelectItem>
+                                            <SelectItem value="reset">{{ $t("counter.action.reset") }}</SelectItem>
+                                        </Select>
                                     </div>
                                 </div>
                             </div>

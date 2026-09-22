@@ -18,6 +18,11 @@ export type FloatWindowKeyBinding = {
     vk: number
     /** 该按键的完整冷却秒数 */
     cdSeconds: number
+    /**
+     * 无需冷却:按下即从完整 CD 重新计时,不判断当前是否在冷却中。
+     * 关闭时只有就绪(冷却归零)的按键才响应按下。
+     */
+    noCooldown: boolean
     /** 是否参与触发与绘制 */
     enabled: boolean
 }
@@ -217,6 +222,7 @@ export function createKeyBinding(partial: Partial<FloatWindowKeyBinding> = {}): 
         label: partial.label ?? vkLabel(vk),
         vk,
         cdSeconds: clampCdSeconds(partial.cdSeconds ?? SKILL_CD_OVERLAY_DEFAULTS.cdSeconds),
+        noCooldown: partial.noCooldown ?? false,
         enabled: partial.enabled ?? true,
     }
 }
@@ -249,6 +255,7 @@ export function normalizeKeyBindings(raw: unknown): FloatWindowKeyBinding[] {
             label,
             vk,
             cdSeconds: clampCdSeconds(Number(record.cdSeconds)),
+            noCooldown: record.noCooldown === true,
             enabled,
         })
     }

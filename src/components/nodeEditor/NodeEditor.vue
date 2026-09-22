@@ -536,7 +536,7 @@ function handleTransfer(charName: string) {
                     <label class="text-sm text-base-content/60 mr-2">图名称:</label>
                     <input
                         v-model="store.currentGraphName"
-                        class="input input-sm input-bordered w-48"
+                        class="w-48 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         placeholder="未命名图"
                         @blur="store.setCurrentGraphName(store.currentGraphName)"
                     />
@@ -544,12 +544,17 @@ function handleTransfer(charName: string) {
 
                 <div class="relative flex items-center">
                     <label class="text-sm text-base-content/60 mr-2 shrink-0">切换图:</label>
-                    <select v-model="selectedGraphId" class="select select-sm select-bordered" @change="handleGraphChange">
-                        <option value="">创建新图</option>
-                        <option v-for="graph in store.savedGraphs" :key="graph.id" :value="graph.id">
+                    <Select
+                        :model-value="selectedGraphId === '' ? '-' : selectedGraphId"
+                        class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        @update:model-value="selectedGraphId = $event === '-' ? '' : Number($event)"
+                        @change="handleGraphChange"
+                    >
+                        <SelectItem value="-">创建新图</SelectItem>
+                        <SelectItem v-for="graph in store.savedGraphs" :key="graph.id" :value="graph.id">
                             {{ graph.name }}
-                        </option>
-                    </select>
+                        </SelectItem>
+                    </Select>
                 </div>
 
                 <!-- 自动保存 -->

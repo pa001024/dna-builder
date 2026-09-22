@@ -1025,14 +1025,14 @@ function openConfigDir() {
                         <input
                             v-model.number="customResolution.width"
                             type="number"
-                            class="input input-bordered input-sm w-24 rounded-xs"
+                            class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             placeholder="宽度"
                         />
                         <span class="text-base-content/50">x</span>
                         <input
                             v-model.number="customResolution.height"
                             type="number"
-                            class="input input-bordered input-sm w-24 rounded-xs"
+                            class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                             placeholder="高度"
                         />
                         <button
@@ -1081,7 +1081,7 @@ function openConfigDir() {
                             <input
                                 :value="getOptionValue(option)"
                                 type="number"
-                                class="input input-bordered input-sm w-full rounded-xs"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))"
                             />
                         </div>
@@ -1090,7 +1090,7 @@ function openConfigDir() {
                         <div v-else-if="option.type === 'select'" class="flex-1">
                             <Select
                                 :model-value="getOptionValue(option)"
-                                class="input input-bordered input-sm w-full rounded-xs"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 @update:model-value="setOptionValue(option, $event)"
                             >
                                 <SelectItem v-for="(opt, idx) in option.options" :key="idx" :value="opt.value">
@@ -1160,7 +1160,7 @@ function openConfigDir() {
                                 <input
                                     :value="getOptionValue(option)"
                                     type="number"
-                                    class="input input-bordered input-sm w-full rounded-xs"
+                                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     :disabled="!isOptionEnabled(option)"
                                     @input="setOptionValue(option, parseFloat(($event.target as HTMLInputElement).value))"
                                 />
@@ -1171,7 +1171,7 @@ function openConfigDir() {
                                 <input
                                     :value="getOptionValue(option)"
                                     type="text"
-                                    class="input input-bordered input-sm w-full rounded-xs"
+                                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     :disabled="!isOptionEnabled(option)"
                                     @input="setOptionValue(option, ($event.target as HTMLInputElement).value)"
                                 />
@@ -1181,7 +1181,7 @@ function openConfigDir() {
                             <div v-else-if="option.type === 'select'" class="flex-1">
                                 <Select
                                     :model-value="getOptionValue(option)"
-                                    class="input input-bordered input-sm w-full rounded-xs"
+                                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     :disabled="!isOptionEnabled(option)"
                                     @update:model-value="setOptionValue(option, $event)"
                                 >

@@ -58,10 +58,10 @@ onBeforeMount(() => {
             >
                 <div class="flex p-2 gap-2 bg-base-100/30">
                     <!-- 搜索 -->
-                    <label class="text-base-content/70 flex-1 input input-ghost input-sm flex items-center gap-2 bg-base-200">
-                        <Icon icon="ri:search-line" />
-                        <input v-model="search" type="text" class="flex-1 w-8" :placeholder="$t('chat.search')" />
-                    </label>
+                    <div class="relative flex-1">
+                        <Icon icon="ri:search-line" class="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/35" />
+                        <input v-model="search" type="text" :placeholder="$t('chat.search')" class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary" />
+                    </div>
                     <Tooltip :tooltip="$t('chat.refresh')" side="bottom">
                         <div class="btn btn-square btn-sm" @click="reloadRooms">
                             <Icon icon="ri:refresh-line" />

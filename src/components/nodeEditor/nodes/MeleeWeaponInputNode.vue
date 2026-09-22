@@ -51,7 +51,7 @@ function updateWeaponLevel(value: number) {
                 <div class="space-y-2">
                     <Select
                         v-model="selectedWeapon"
-                        class="w-full input input-sm"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         :placeholder="$t('node-editor.meleeWeaponInput.chooseWeapon')"
                         @update:model-value="updateWeapon($event)"
                     >
@@ -65,7 +65,7 @@ function updateWeaponLevel(value: number) {
                             <label class="text-xs text-base-content/60 block mb-1">{{ $t("node-editor.meleeWeaponInput.refineLevel") }}</label>
                             <Select
                                 v-model="refineLevel"
-                                class="flex-1 input input-sm"
+                                class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 :placeholder="$t('node-editor.meleeWeaponInput.chooseLevel')"
                                 @update:model-value="updateRefineLevel($event)"
                             >
@@ -79,7 +79,7 @@ function updateWeaponLevel(value: number) {
                             <input
                                 v-model.number="weaponLevel"
                                 type="number"
-                                class="input input-sm input-bordered w-full"
+                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                 placeholder="80"
                                 min="1"
                                 max="90"

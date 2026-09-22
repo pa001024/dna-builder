@@ -564,7 +564,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                 <!-- Character and Project Selection -->
                                 <div class="flex flex-wrap gap-4">
                                     <h3 class="text-lg font-semibold text-primary">
-                                        <input v-model="config.name" type="text" class="input input-sm input-bordered w-32" />
+                                        <input v-model="config.name" type="text" class="w-32 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
                                     </h3>
                                     <!-- Character Selection -->
                                     <div class="bg-base-200 rounded-lg flex items-center gap-4">
@@ -582,7 +582,7 @@ function formatWeaponAttribute(configIndex: number, colKey: string): string {
                                         <Select
                                             v-if="config.projects.length > 0"
                                             v-model="config.selectedProject"
-                                            class="w-40 inline-flex justify-between input input-bordered input-sm"
+                                            class="w-40 inline-flex justify-between rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         >
                                             <SelectItem v-for="project in config.projects" :key="project.name" :value="project.name">
                                                 {{ project.name }}

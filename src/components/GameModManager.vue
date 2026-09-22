@@ -675,11 +675,11 @@ onMounted(() => {
                                                 v-model="customEntityName"
                                                 type="text"
                                                 :placeholder="$t('game-launcher.enterCustomTypeName')"
-                                                class="input input-bordered input-md w-full"
+                                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                             />
                                         </p>
                                         <p class="py-4">
-                                            <Select v-model="customEntityIcon" class="w-full input input-md">
+                                            <Select v-model="customEntityIcon" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                                                 <SelectItem v-for="icon in customEntityIconsOptions" :key="icon" :value="icon">
                                                     <Icon :icon="icon" class="size-8 rounded-box" />
                                                 </SelectItem>

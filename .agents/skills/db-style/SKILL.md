@@ -89,6 +89,58 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 </div>
 ```
 
+## 输入框与选择框（统一控件标准）
+
+### 下划线输入框（默认，替代 daisyUI `input input-*`）
+
+```html
+<input
+    v-model="keyword"
+    type="text"
+    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+/>
+```
+
+- 除「宽度/栅格/禁用/等宽数字」外，**其余类不得增删**：`w-full` / `w-24` / `col-span-*` 按布局补。
+- 数值输入追加 `font-mono tabular-nums`（编辑态对齐）；**展示态**数值仍用 `font-orbitron text-[13px] font-semibold tabular-nums text-primary`。
+- 只读/禁用：追加 `disabled:border-base-content/10 disabled:opacity-50`。
+- 百分比输入（`usePercentInput` / `toInputDisplayValue`）只换 class，`step`、label 后缀与换算逻辑保持不变。
+- 搜索框仍用上面的「下划线搜索框」配方（带图标与计数），不要混用。
+
+### 下拉选择（统一用 `Select.vue`，禁止原生 `<select>`）
+
+```html
+<Select
+    v-model="item.stepId"
+    class="col-span-9 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] outline-none focus:border-primary"
+>
+    <SelectItem v-for="option in options" :key="option.id" :value="option.id">{{ option.label }}</SelectItem>
+</Select>
+```
+
+- `Select` / `SelectItem` / `SelectTrigger` / `SelectValue` **全局自动注册，不要写 import**。
+- `class` 经 `$attrs` 落到 `SelectTrigger`（`SelectRoot` 是 renderless 节点），所以宽度与栅格类直接写在 `<Select>` 上。
+- 变体：默认（配 `$attrs` 类，如上）/ `variant="ghost"` 透明紧凑 / `variant="chip"` 胶囊底（工具栏）。
+- 自定义触发器用 `#trigger` 插槽 + `SelectTrigger` / `SelectValue`（如按钮式触发器）。
+- 选项值支持 number/string，组件内置「值与选项文案」回填，不会回退成裸 ID。
+- value 不可为空值，如果需要表达「未选择」用 `"-"` 代替。
+- 结构映射：`<option v-for="x in xs" :key="k" :value="v">{{ label }}</option>` → `<SelectItem v-for="x in xs" :key="k" :value="v">{{ label }}</SelectItem>`；
+  静态 `<option>` → 静态 `<SelectItem>`；`<option disabled>` → `<SelectItem disabled>`；`v-model` 原样保留。
+- 受控写法：`:value="x" @change="h"`（handler 读 `$event.target.value`）→ `:model-value="x"` + `@update:model-value="h"`，
+  handler 形参从 Event 改为**值本身**；能直改成 `v-model` 的就直改。`disabled` 直接透传。
+- **非表单标签误用 daisyUI `input` 类的**（`<div class="input …">` / `<button class="input …">` 这类容器/展示块）：
+  只摘掉 daisyUI 控件 token，保留其余类；**不要**套下划线配方（配方只给真正的 `<input>` / `<textarea>`）。
+
+### 旧写法映射表
+
+| 旧写法                                              | 新写法                                            |
+| --------------------------------------------------- | ------------------------------------------------- |
+| `input input-sm input-bordered w-full`              | 下划线输入框配方（+ 布局宽度类）                  |
+| `input input-xs input-bordered w-24 font-mono`      | 下划线输入框 + `w-24 font-mono tabular-nums`      |
+| `input input-primary` / `input-ghost`（提交、内联） | 下划线输入框配方；提交动作交给方章按钮            |
+| `<select class="select select-sm">…</select>`       | `<Select>` + `<SelectItem>`（禁止原生下拉）       |
+| `<textarea class="textarea textarea-bordered">`     | 下划线输入框配方 + `resize-none`（多行加 `py-1`） |
+
 ## 主从列表页（master-detail）
 
 列表项卡：
@@ -120,9 +172,9 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 - 入场：`animate-ef-rise motion-reduce:animate-none`（全局工具类，勿再写 keyframes）。
 - 列表项 stagger：`:style="{ animationDelay: \`${Math.min(index * 30, 300)}ms\` }"`。
 - **⚠️ 动画祖先会杀死后代毛玻璃**：Chromium 把"带 opacity/transform 动画（fill 保留）"的元素当作 backdrop root，其后代的 `backdrop-filter` 只能采样子树内部 → 模糊失效且动画结束时会跳变。因此：
-  - `animate-ef-rise` 只允许加在「**自身带 backdrop-filter**」或「**无 blur 后代**」的元素上；
-  - 容器需要子元素交错入场时，用全局工具类 **`.stagger-rise`**（style.css 已定义，直接子元素依次上浮，nth-child 延迟）——blur 卡片自己动，全程无跳变；
-  - 排查口诀：剩余每个 `animate-ef-rise` 必须与 `backdrop-blur-*` 同元素，或其子树内没有任何 blur 元素。
+    - `animate-ef-rise` 只允许加在「**自身带 backdrop-filter**」或「**无 blur 后代**」的元素上；
+    - 容器需要子元素交错入场时，用全局工具类 **`.stagger-rise`**（style.css 已定义，直接子元素依次上浮，nth-child 延迟）——blur 卡片自己动，全程无跳变；
+    - 排查口诀：剩余每个 `animate-ef-rise` 必须与 `backdrop-blur-*` 同元素，或其子树内没有任何 blur 元素。
 - 禁止新增 `<style scoped>` 块；一切样式用 Tailwind 工具类表达。
 
 ## ID 展示与复制
@@ -134,19 +186,19 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 ## 稀有度/品质徽章
 
 - 统一使用 `src/utils/rarity-utils.ts`：
-  - 徽章：`:class="getRarityBadgeClass(x.rarity)"`（返回完整方章配方——直角细边框 + 半透明底 + 同色系文字，接受数字或中文品质名）；调用处不要再补形状类
-  - 文本：`getRarityName(x.rarity)`；图标底色渐变：`getRarityGradientClass(...)`
+    - 徽章：`:class="getRarityBadgeClass(x.rarity)"`（返回完整方章配方——直角细边框 + 半透明底 + 同色系文字，接受数字或中文品质名）；调用处不要再补形状类
+    - 文本：`getRarityName(x.rarity)`；图标底色渐变：`getRarityGradientClass(...)`
 - ❌ 本地再写任何稀有度色表（`bg-gray-500 text-white` / `bg-X-200 text-X-800` 一律删除改走 util）。
 
 ## 弹窗与浮层
 
 - 点击条目展开详情的交互一律改为弹窗，统一用现成组件 `SourceDetailDialog.vue`（reka-ui 封装）：
-  ```html
-  <SourceDetailDialog v-model="showDetail">
-      <DBXxxDetailItem v-if="selected" :xxx="selected" />
-  </SourceDetailDialog>
-  ```
-  它**没有内置标题头**（由内容自带的档案头承担标题，避免重复）；半透明毛玻璃面板 + 遮罩。
+    ```html
+    <SourceDetailDialog v-model="showDetail">
+        <DBXxxDetailItem v-if="selected" :xxx="selected" />
+    </SourceDetailDialog>
+    ```
+    它**没有内置标题头**（由内容自带的档案头承担标题，避免重复）；半透明毛玻璃面板 + 遮罩。
 - 小型 popover / 下拉面板：`rounded-xs border border-base-content/15 bg-base-100/85 p-3 shadow-lg backdrop-blur-md`（不要纯 `bg-base-100`）。
 - 全屏覆盖层：`bg-base-100/85 backdrop-blur-md`。
 
@@ -155,7 +207,8 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 - ❌ 实底背景卡：`bg-base-200` / `bg-base-300` 作为卡片底色（图标稀有度渐变 `bg-linear-*` 除外）；页面根节点/详情包装页不得有实底（`bg-base-300` 等）
 - ❌ `rounded-full` / `rounded-md` / `rounded-lg` 卡片与按钮（头像图片内 `rounded-xs` 可用）
 - ❌ `text-white`（用 `text-primary-content`；数据驱动实色徽记如稀有度色表、副本类型色除外）
-- ❌ daisyUI `btn` 做筛选 chip（保留 daisyUI 于 modal/btn-ghost 图标按钮/select/toggle 等非列表场景可以）
+- ❌ daisyUI `input` / `select` / `textarea` / `input-bordered` 类（改用「输入框与选择框」章节配方）；daisyUI 仅保留 `modal` / `btn-ghost` 图标按钮 / `toggle` / `checkbox` 等非列表控件
+- ❌ daisyUI `btn` 做筛选 chip（保留 daisyUI 于 modal/btn-ghost 图标按钮/toggle 等非列表场景可以）
 - ❌ 页面级 header / hero 区
 - ❌ 新增 scoped CSS、!important hack
 - ❌ 改动业务逻辑：script 中仅允许 ① 滚动定位选择器参数 ② 抽取重复属性行为 computed/函数（带中文 JSDoc）。所有 `$t()` 调用、数据流、事件处理保持不变。
@@ -168,7 +221,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 - 注释一律中文 JSDoc（遵循 AGENTS.md）。
 - 图标只能用已注册的（见 `src/components/Icon.vue`）；需要新图标时**不要自行运行 icon_tool**，在结果报告中列出所需图标名（如 `ri:sword-line`），由主会话统一添加。
 - 不要运行 `pnpm lint` / `pnpm test` / `pnpm dev`，由主会话统一验证。
-- 已完成改造的参考页：DBCharListView、DBCharDetailView、DBCharDetailItem、CharSkillShow、AniTabs、ResourceCostItem、SourceDetailDialog、MonsterItem、WeaponItem（与 ModItem 同构）、DBEventDetailItem、LimitedPrizeSimulator、DBView（db-rise 风格，可对照但不必改动）。
+- 已完成改造的参考页：DBCharListView、DBCharDetailView、DBCharDetailItem、CharSkillShow、AniTabs、ResourceCostItem、SourceDetailDialog、MonsterItem、WeaponItem（与 ModItem 同构）、DBEventDetailItem、LimitedPrizeSimulator、DBDamageView（输入/选择框标准落地范例）、DBView（db-rise 风格，可对照但不必改动）。
 - 内嵌在已迁移页面里的小组件（活动页的模拟/解谜类）同样按「外层区块卡 + SectionHeader(no-animate compact) + 内层小卡/属性格」改造，
   根元素用 `<section>`，交给宿主的 `.stagger-rise` 做入场，自己不加 `animate-ef-rise`。
 - 动作按钮（抽卡/重置这类非筛选操作）也走方章，不要用 daisyUI `btn`；禁用态用 `disabled:cursor-not-allowed disabled:opacity-40`

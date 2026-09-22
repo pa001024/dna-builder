@@ -949,6 +949,9 @@
         "summary": {
             "answered": "已收到回答",
             "askInvalid": "提问格式无效",
+            "damageModes": "共 {{count}} 种结算模式",
+            "damageSteps": "命中 {{count}} 个结算步骤",
+            "damageTerms": "{{count}} 条机制术语",
             "done": "已完成",
             "facets": "{{prefix}}{{count}} 组筛选项",
             "modulesTotal": "共 {{count}} 个可检索模块",
@@ -966,6 +969,7 @@
         },
         "tool": {
             "ask_user": "询问用户",
+            "explain_damage": "伤害机制",
             "list_data_modules": "模块清单",
             "list_filter_options": "筛选条件",
             "list_version_additions": "版本新增",

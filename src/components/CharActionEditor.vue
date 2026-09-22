@@ -1021,7 +1021,7 @@ const handleMouseUp = () => {
                                 <!-- 技能选择 -->
                                 <Select
                                     v-model="actionSkillStates[action.id].skill"
-                                    class="input input-bordered input-xs flex-1"
+                                    class="flex-1 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     @update:model-value="
                                         updateActionSkillExpr(
                                             action.id,
@@ -1046,7 +1046,7 @@ const handleMouseUp = () => {
                                     v-model="actionSkillStates[action.id].field"
                                     type="text"
                                     placeholder="表达式, 如: 伤害"
-                                    class="input input-bordered input-xs w-32"
+                                    class="w-32 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     @update:model-value="
                                         updateActionSkillExpr(
                                             action.id,
@@ -1064,7 +1064,7 @@ const handleMouseUp = () => {
                             <input
                                 type="number"
                                 v-model.number="action.duration"
-                                class="input input-xs input-bordered w-16"
+                                class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                 min="0.1"
                                 max="10"
                                 step="0.1"
@@ -1076,7 +1076,7 @@ const handleMouseUp = () => {
                             <input
                                 type="number"
                                 v-model.number="action.times"
-                                class="input input-xs input-bordered w-16"
+                                class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                 min="1"
                                 max="10"
                             />
@@ -1084,12 +1084,15 @@ const handleMouseUp = () => {
                         </div>
                         <div class="flex items-center gap-1">
                             <span class="text-xs text-gray-400">BUFF组:</span>
-                            <select v-model="action.buffGroupIndex" class="select select-xs select-bordered w-20">
-                                <option value="-">-</option>
-                                <option v-for="(_, index) in buffGroups" :key="`buff-group-option-${index}`" :value="index">
+                            <Select
+                                v-model="action.buffGroupIndex"
+                                class="w-20 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            >
+                                <SelectItem value="-">-</SelectItem>
+                                <SelectItem v-for="(_, index) in buffGroups" :key="`buff-group-option-${index}`" :value="index">
                                     {{ index + 1 }}
-                                </option>
-                            </select>
+                                </SelectItem>
+                            </Select>
                         </div>
                         <div class="flex items-center gap-1">
                             <button class="btn btn-xs btn-primary" @click="moveActionUp(action.id)" title="上移" :disabled="index === 0">
@@ -1130,7 +1133,7 @@ const handleMouseUp = () => {
                                 <!-- 技能选择 -->
                                 <Select
                                     v-model="actionSkillStates[action.id].skill"
-                                    class="input input-bordered input-sm flex-1"
+                                    class="flex-1 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     @update:model-value="
                                         updateActionSkillExpr(
                                             action.id,
@@ -1155,7 +1158,7 @@ const handleMouseUp = () => {
                                     v-model="actionSkillStates[action.id].field"
                                     type="text"
                                     placeholder="表达式, 如: 伤害"
-                                    class="input input-bordered input-sm w-32"
+                                    class="w-32 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     @update:model-value="
                                         updateActionSkillExpr(
                                             action.id,
@@ -1173,7 +1176,7 @@ const handleMouseUp = () => {
                             <input
                                 type="number"
                                 v-model.number="action.delay"
-                                class="input input-xs input-bordered w-16"
+                                class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                 min="0"
                                 max="10"
                                 step="0.1"
@@ -1185,7 +1188,7 @@ const handleMouseUp = () => {
                             <input
                                 type="number"
                                 v-model.number="action.interval"
-                                class="input input-xs input-bordered w-16"
+                                class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                 min="0.1"
                                 max="10"
                                 step="0.1"
@@ -1197,7 +1200,7 @@ const handleMouseUp = () => {
                             <input
                                 type="number"
                                 v-model.number="action.times"
-                                class="input input-xs input-bordered w-16"
+                                class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                 min="1"
                                 max="10"
                             />
@@ -1205,12 +1208,15 @@ const handleMouseUp = () => {
                         </div>
                         <div class="flex items-center gap-1">
                             <span class="text-xs text-gray-400">BUFF组:</span>
-                            <select v-model="action.buffGroupIndex" class="select select-xs select-bordered w-20">
-                                <option value="-">-</option>
-                                <option v-for="(_, index) in buffGroups" :key="`buff-group-option-${index}`" :value="index">
+                            <Select
+                                v-model="action.buffGroupIndex"
+                                class="w-20 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            >
+                                <SelectItem value="-">-</SelectItem>
+                                <SelectItem v-for="(_, index) in buffGroups" :key="`buff-group-option-${index}`" :value="index">
                                     {{ index + 1 }}
-                                </option>
-                            </select>
+                                </SelectItem>
+                            </Select>
                         </div>
                         <div class="flex items-center gap-1">
                             <button

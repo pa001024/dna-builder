@@ -723,7 +723,7 @@ onBeforeUnmount(() => {
                 <input
                     :value="customColorState.hex"
                     type="text"
-                    class="input input-sm input-bordered w-36 text-center font-mono"
+                    class="w-36 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content text-center outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                     @input="onCustomHexInput"
                 />
                 <!-- 预览：OKLCH 派生后的磁贴渐变 -->

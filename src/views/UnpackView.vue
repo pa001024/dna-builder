@@ -494,21 +494,21 @@ onMounted(async () => {
             <div class="grid gap-3 md:grid-cols-2">
                 <div class="space-y-2">
                     <div class="text-sm text-base-content/60">pak 根目录</div>
-                    <input v-model="rootPath" class="input input-bordered w-full" placeholder="pak 根目录" />
+                    <input v-model="rootPath" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="pak 根目录" />
                     <button class="btn btn-outline w-full rounded-xs" @click="chooseDirectory('root')">选择目录</button>
                     <button class="btn btn-primary w-full rounded-xs" :disabled="loading" @click="scanPakFiles">扫描 pak</button>
                 </div>
                 <div class="space-y-2">
                     <div class="text-sm text-base-content/60">AES key</div>
-                    <input v-model="aesKey" class="input input-bordered w-full" placeholder="AES key" />
+                    <input v-model="aesKey" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="AES key" />
                     <div class="text-sm text-base-content/60">导出目录</div>
-                    <input v-model="targetPath" class="input input-bordered w-full" placeholder="导出目录" />
+                    <input v-model="targetPath" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="导出目录" />
                     <button class="btn btn-outline w-full rounded-xs" @click="chooseDirectory('target')">选择目录</button>
                     <div class="text-sm text-base-content/60">unluac jar</div>
-                    <input v-model="unluacPath" class="input input-bordered w-full" placeholder="unluac.jar" />
+                    <input v-model="unluacPath" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="unluac.jar" />
                     <button class="btn btn-outline w-full rounded-xs" @click="chooseUnluacFile">选择文件</button>
                     <div class="text-sm text-base-content/60">Lua 输出目录</div>
-                    <input v-model="luaOutputPath" class="input input-bordered w-full" placeholder="Lua 输出目录" />
+                    <input v-model="luaOutputPath" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="Lua 输出目录" />
                     <button class="btn btn-outline w-full rounded-xs" @click="chooseDirectory('luaOutput')">选择目录</button>
                 </div>
             </div>

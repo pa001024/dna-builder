@@ -134,7 +134,7 @@ async function resetTheme() {
                     <span class="truncate text-[10px] leading-tight text-base-content/70">{{ colorLabel(key) }}</span>
                     <input
                         :value="theme.colors[key]"
-                        class="input input-xs input-bordered w-full px-1 font-mono text-[10px]"
+                        class="w-full px-1 font-mono text-[10px] rounded-none border-b border-base-content/20 bg-transparent text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
                         spellcheck="false"
                         @change="onHexInput(key, $event)"
                     />
@@ -255,15 +255,18 @@ async function resetTheme() {
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label class="form-control w-full">
                         <span class="label-text pb-1 text-xs">Input</span>
-                        <input type="text" placeholder="Placeholder" class="input input-bordered input-sm w-full" />
+                        <input type="text" placeholder="Placeholder" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
                     </label>
                     <label class="form-control w-full">
                         <span class="label-text pb-1 text-xs">Select</span>
-                        <select class="select select-bordered select-sm w-full">
-                            <option>Option 1</option>
-                            <option>Option 2</option>
-                            <option>Option 3</option>
-                        </select>
+                        <Select
+                            model-value="Option 1"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        >
+                            <SelectItem value="Option 1">Option 1</SelectItem>
+                            <SelectItem value="Option 2">Option 2</SelectItem>
+                            <SelectItem value="Option 3">Option 3</SelectItem>
+                        </Select>
                     </label>
                 </div>
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">

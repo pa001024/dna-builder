@@ -83,10 +83,10 @@ function defaultLoopCondition(): FlowExpr {
 }
 
 /** 切换循环类型并确保条件循环始终拥有可编辑的条件。 */
-function onLoopTypeChange(event: Event) {
+function onLoopTypeChange(value: number | string) {
     const node = selectedNode.value
     if (!node || node.kind !== "loop") return
-    node.loopType = (event.target as HTMLSelectElement).value as typeof node.loopType
+    node.loopType = String(value) as typeof node.loopType
     if (node.loopType === "while" && !node.condition) node.condition = defaultLoopCondition()
 }
 
@@ -444,7 +444,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                     <span class="text-base-content/60">目标进程</span>
                     <input
                         v-model="store.doc.processName"
-                        class="input input-xs input-bordered w-48 font-mono"
+                        class="w-48 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         placeholder="EM-Win64-Shipping.exe"
                     />
                     <label class="flex items-center gap-1 cursor-pointer">
@@ -528,7 +528,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                 <span class="badge badge-primary badge-sm">{{ selectedNode.kind }}</span>
                                 <input
                                     v-model="selectedNode.comment"
-                                    class="input input-xs input-bordered flex-1"
+                                    class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     placeholder="备注（生成注释）"
                                     @input="storeWithPersist.persist?.()"
                                 />
@@ -544,24 +544,24 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                             >
                                 <div class="flex items-center gap-1 mb-1">
                                     <span class="text-xs w-12">按键</span>
-                                    <select v-model="selectedNode.button" class="select select-xs select-bordered flex-1">
-                                        <option v-for="button in MOUSE_BUTTONS" :key="button.value" :value="button.value">
+                                    <Select v-model="selectedNode.button" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
+                                        <SelectItem v-for="button in MOUSE_BUTTONS" :key="button.value" :value="button.value">
                                             {{ button.label }}
-                                        </option>
-                                    </select>
+                                        </SelectItem>
+                                    </Select>
                                 </div>
                                 <div class="flex items-center gap-1 mb-1">
                                     <span class="text-xs w-12">坐标</span>
                                     <input
                                         type="number"
-                                        class="input input-xs input-bordered w-20"
+                                        class="w-20 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                         placeholder="x"
                                         :value="selectedNode.x ?? ''"
                                         @input="onOptionalCoord('x', $event)"
                                     />
                                     <input
                                         type="number"
-                                        class="input input-xs input-bordered w-20"
+                                        class="w-20 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                         placeholder="y"
                                         :value="selectedNode.y ?? ''"
                                         @input="onOptionalCoord('y', $event)"
@@ -583,14 +583,14 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                     <span class="text-xs w-12">按键</span>
                                     <input
                                         v-model="selectedNode.key"
-                                        class="input input-xs input-bordered w-24 font-mono"
+                                        class="w-24 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         placeholder="q / enter / f1"
                                     />
                                     <template v-if="selectedNode.kind === 'keyPress'">
                                         <span class="text-xs">时长</span>
                                         <input
                                             type="number"
-                                            class="input input-xs input-bordered w-20"
+                                            class="w-20 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
                                             placeholder="ms"
                                             :value="selectedNode.duration ?? ''"
                                             @input="onOptionalCoord('duration', $event)"
@@ -606,7 +606,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                     <input
                                         type="number"
                                         v-model.number="selectedNode.ms"
-                                        class="input input-xs input-bordered w-28"
+                                        class="w-28 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         min="0"
                                     />
                                 </div>
@@ -619,13 +619,13 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                     <input
                                         type="number"
                                         v-model.number="selectedNode.x"
-                                        class="input input-xs input-bordered w-20"
+                                        class="w-20 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         placeholder="x"
                                     />
                                     <input
                                         type="number"
                                         v-model.number="selectedNode.y"
-                                        class="input input-xs input-bordered w-20"
+                                        class="w-20 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         placeholder="y"
                                     />
                                     <button class="btn btn-xs btn-ghost" title="抓取坐标与颜色" @click="pickWaitColorCoord">
@@ -635,7 +635,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                 <div class="flex items-center gap-1 mb-1">
                                     <span class="text-xs w-12">颜色</span>
                                     <input
-                                        class="input input-xs input-bordered w-24 font-mono"
+                                        class="w-24 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
                                         :value="'#' + selectedNode.color.toString(16).toUpperCase().padStart(6, '0')"
                                         @input="onColorHexInput"
                                     />
@@ -643,14 +643,14 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                     <input
                                         type="number"
                                         v-model.number="selectedNode.tolerance"
-                                        class="input input-xs input-bordered w-16"
+                                        class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     />
                                 </div>
                                 <div class="flex items-center gap-1 mb-1">
                                     <span class="text-xs w-12">超时</span>
                                     <input
                                         type="number"
-                                        class="input input-xs input-bordered w-24"
+                                        class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         placeholder="20000"
                                         :value="selectedNode.timeout ?? ''"
                                         @input="onOptionalCoord('timeout', $event)"
@@ -658,7 +658,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                     <span class="text-xs">存到</span>
                                     <input
                                         v-model="selectedNode.saveAs"
-                                        class="input input-xs input-bordered w-20 font-mono"
+                                        class="w-20 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
                                         placeholder="变量名"
                                     />
                                 </div>
@@ -668,7 +668,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                             <template v-else-if="selectedNode.kind === 'playDsl'">
                                 <textarea
                                     v-model="selectedNode.dsl"
-                                    class="textarea textarea-bordered textarea-xs w-full font-mono"
+                                    class="w-full font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1 tabular-nums"
                                     rows="3"
                                     placeholder="L(800,450)0.1 q #0.5"
                                 />
@@ -676,7 +676,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                     <span class="text-xs">Promise 存到</span>
                                     <input
                                         v-model="selectedNode.saveAs"
-                                        class="input input-xs input-bordered w-24 font-mono"
+                                        class="w-24 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
                                         placeholder="留空则 await"
                                     />
                                 </div>
@@ -687,29 +687,32 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                             <template v-else-if="selectedNode.kind === 'setStatus'">
                                 <input
                                     v-model="selectedNode.title"
-                                    class="input input-xs input-bordered w-full mb-1"
+                                    class="w-full mb-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     placeholder="状态标题"
                                 />
                                 <textarea
                                     v-model="selectedNode.payload"
-                                    class="textarea textarea-bordered textarea-xs w-full"
+                                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
                                     rows="2"
                                     placeholder="状态内容（文本）"
                                 />
                             </template>
                             <template v-else-if="selectedNode.kind === 'setConfig'">
-                                <select v-model="selectedNode.name" class="select select-xs select-bordered w-full mb-1">
-                                    <option value="" disabled>选择配置项</option>
-                                    <option v-for="configVar in store.doc.configVars" :key="configVar.varName" :value="configVar.name">
+                                <Select
+                                    v-model="selectedNode.name"
+                                    placeholder="选择配置项"
+                                    class="mb-1 w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                >
+                                    <SelectItem v-for="configVar in store.doc.configVars" :key="configVar.varName" :value="configVar.name">
                                         {{ configVar.name }}
-                                    </option>
-                                </select>
-                                <input v-model="selectedNode.value" class="input input-xs input-bordered w-full" placeholder="写入的值" />
+                                    </SelectItem>
+                                </Select>
+                                <input v-model="selectedNode.value" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="写入的值" />
                             </template>
                             <template v-else-if="selectedNode.kind === 'code'">
                                 <textarea
                                     v-model="selectedNode.source"
-                                    class="textarea textarea-bordered textarea-xs w-full font-mono"
+                                    class="w-full font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1 tabular-nums"
                                     rows="6"
                                     placeholder="原生 JS 代码（可访问 c / 引擎函数）"
                                 />
@@ -718,16 +721,20 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                             <!-- 循环 -->
                             <template v-else-if="selectedNode.kind === 'loop'">
                                 <div class="flex items-center gap-1 mb-2">
-                                    <select :value="selectedNode.loopType" class="select select-xs select-bordered" @change="onLoopTypeChange">
-                                        <option value="forever">无限循环</option>
-                                        <option value="count">次数循环</option>
-                                        <option value="while">条件循环 (while)</option>
-                                    </select>
+                                    <Select
+                                        class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        :model-value="selectedNode.loopType"
+                                        @update:model-value="onLoopTypeChange"
+                                    >
+                                        <SelectItem value="forever">无限循环</SelectItem>
+                                        <SelectItem value="count">次数循环</SelectItem>
+                                        <SelectItem value="while">条件循环 (while)</SelectItem>
+                                    </Select>
                                     <input
                                         v-if="selectedNode.loopType === 'count'"
                                         type="number"
                                         v-model.number="selectedNode.count"
-                                        class="input input-xs input-bordered w-24"
+                                        class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         min="0"
                                     />
                                 </div>
@@ -769,10 +776,13 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                             <template v-else-if="selectedNode.kind === 'switch'">
                                 <div class="flex items-center gap-1 mb-2">
                                     <span class="text-xs w-16">判断变量</span>
-                                    <select v-model="selectedNode.subjectVar" class="select select-xs select-bordered flex-1">
-                                        <option value="" disabled>选择变量</option>
-                                        <option v-for="name in store.variableNames" :key="name" :value="name">{{ name }}</option>
-                                    </select>
+                                    <Select
+                                        v-model="selectedNode.subjectVar"
+                                        placeholder="选择变量"
+                                        class="min-w-0 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    >
+                                        <SelectItem v-for="name in store.variableNames" :key="name" :value="name">{{ name }}</SelectItem>
+                                    </Select>
                                 </div>
                                 <div
                                     v-for="(switchCase, caseIndex) in selectedNode.cases"
@@ -782,7 +792,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                     <span class="text-xs w-10">case {{ caseIndex + 1 }}</span>
                                     <input
                                         v-model="switchCase.match"
-                                        class="input input-xs input-bordered flex-1"
+                                        class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         placeholder="匹配值（字符串）"
                                     />
                                     <button class="btn btn-xs btn-ghost btn-square text-error" @click="removeSwitchCase(caseIndex)">
@@ -800,7 +810,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                     <span class="text-xs w-16">函数名</span>
                                     <input
                                         v-model="selectedNode.funcName"
-                                        class="input input-xs input-bordered flex-1"
+                                        class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         placeholder="如：刷图"
                                     />
                                 </div>
@@ -809,10 +819,13 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                             <template v-else-if="selectedNode.kind === 'functionCall'">
                                 <div class="flex items-center gap-1">
                                     <span class="text-xs w-16">调用</span>
-                                    <select v-model="selectedNode.funcName" class="select select-xs select-bordered flex-1">
-                                        <option value="" disabled>选择函数</option>
-                                        <option v-for="name in store.functionNames" :key="name" :value="name">{{ name }}</option>
-                                    </select>
+                                    <Select
+                                        v-model="selectedNode.funcName"
+                                        placeholder="选择函数"
+                                        class="min-w-0 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    >
+                                        <SelectItem v-for="name in store.functionNames" :key="name" :value="name">{{ name }}</SelectItem>
+                                    </Select>
                                 </div>
                             </template>
 
@@ -858,10 +871,10 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                             class="border border-base-300 rounded p-2 mb-2"
                         >
                             <div class="flex items-center gap-1 mb-1">
-                                <input v-model="configVar.name" class="input input-xs input-bordered flex-1" placeholder="配置名" />
+                                <input v-model="configVar.name" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="配置名" />
                                 <input
                                     v-model="configVar.varName"
-                                    class="input input-xs input-bordered w-20 font-mono"
+                                    class="w-20 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
                                     placeholder="变量名"
                                 />
                                 <button class="btn btn-xs btn-ghost btn-square text-error" @click="store.removeConfigVar(index)">
@@ -869,15 +882,18 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                 </button>
                             </div>
                             <div class="flex items-center gap-1 mb-1">
-                                <select v-model="configVar.kind" class="select select-xs select-bordered">
-                                    <option v-for="kind in CONFIG_KINDS" :key="kind.value" :value="kind.value">{{ kind.label }}</option>
-                                </select>
-                                <input v-model="configVar.desc" class="input input-xs input-bordered flex-1" placeholder="描述" />
+                                <Select
+                                    v-model="configVar.kind"
+                                    class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                >
+                                    <SelectItem v-for="kind in CONFIG_KINDS" :key="kind.value" :value="kind.value">{{ kind.label }}</SelectItem>
+                                </Select>
+                                <input v-model="configVar.desc" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="描述" />
                             </div>
                             <div class="flex items-center gap-1">
                                 <template v-if="configVar.kind === 'select' || configVar.kind === 'multi-select'">
                                     <input
-                                        class="input input-xs input-bordered flex-1"
+                                        class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         placeholder="选项（逗号分隔）"
                                         :value="configVar.options.join(',')"
                                         @input="onOptionsInput(configVar, $event)"
@@ -887,7 +903,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                     v-if="configVar.kind === 'number'"
                                     type="number"
                                     v-model.number="configVar.defaultValue"
-                                    class="input input-xs input-bordered w-24"
+                                    class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     placeholder="默认值"
                                 />
                                 <label v-else-if="configVar.kind === 'boolean'" class="flex items-center gap-1 text-xs">
@@ -902,7 +918,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                 <input
                                     v-else-if="configVar.kind === 'string' || configVar.kind === 'select'"
                                     v-model="configVar.defaultValue"
-                                    class="input input-xs input-bordered w-24"
+                                    class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     placeholder="默认值"
                                 />
                             </div>

@@ -59,15 +59,6 @@ const series = computed(() => {
     return Array.from(seriesSet).sort()
 })
 
-// 获取所有可用品质
-const qualities = computed(() => {
-    const qualitySet = new Set<string>()
-    modData.forEach(m => {
-        qualitySet.add(m.品质)
-    })
-    return Array.from(qualitySet).sort()
-})
-
 // 获取所有可用版本
 const versions = computed(() => {
     const versionSet = new Set<string>()
@@ -79,6 +70,7 @@ const versions = computed(() => {
     return Array.from(versionSet).sort()
 })
 
+const qualities = ["白", "绿", "蓝", "紫", "金"]
 const elems = ["火", "水", "雷", "风", "暗", "光"]
 const modConvertIdSet = new Set<number>(modConvertData.flatMap(pool => pool.ModId))
 

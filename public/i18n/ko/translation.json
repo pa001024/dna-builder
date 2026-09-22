@@ -6830,6 +6830,9 @@
         "summary": {
             "answered": "답변을 받았습니다",
             "askInvalid": "질문 형식을 해석할 수 없습니다",
+            "damageModes": "계산 모드 {{count}}종",
+            "damageSteps": "계산 단계 {{count}}개",
+            "damageTerms": "용어 {{count}}개",
             "done": "완료",
             "facets": "{{prefix}}필터 {{count}}개",
             "modulesTotal": "총 {{count}}개의 검색 가능한 모듈",
@@ -6847,6 +6850,7 @@
         },
         "tool": {
             "ask_user": "사용자에게 질문",
+            "explain_damage": "피해 계산",
             "list_data_modules": "모듈 목록",
             "list_filter_options": "필터 조건",
             "list_version_additions": "버전 추가",

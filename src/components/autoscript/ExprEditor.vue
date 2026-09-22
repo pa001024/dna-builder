@@ -146,11 +146,11 @@ function applyPickedRoi(selection: RoiSelection) {
     update({ ...props.expr, ...selection })
 }
 
-function onKindChange(event: Event) {
-    const value = (event.target as HTMLSelectElement).value
-    if (value === "call") update(defaultCall())
-    else if (value === "cmp") update(defaultCmp())
-    else if (value === "and") toGroup("and")
+function onKindChange(value: number | string) {
+    const kind = String(value)
+    if (kind === "call") update(defaultCall())
+    else if (kind === "cmp") update(defaultCmp())
+    else if (kind === "and") toGroup("and")
     else toGroup("or")
 }
 
@@ -166,13 +166,13 @@ function onLiteralInput(side: "left" | "right", event: Event) {
     setOperand(side, { type: "literal", value: parseLiteralInput((event.target as HTMLInputElement).value) })
 }
 
-function onVarSelect(side: "left" | "right", event: Event) {
-    setOperand(side, { type: "var", name: (event.target as HTMLSelectElement).value })
+function onVarSelect(side: "left" | "right", value: number | string) {
+    setOperand(side, { type: "var", name: String(value) })
 }
 
-function onCmpOpChange(event: Event) {
+function onCmpOpChange(value: number | string) {
     if (props.expr?.op !== "cmp") return
-    update({ ...props.expr, cmp: (event.target as HTMLSelectElement).value as (typeof CMP_OPS)[number] })
+    update({ ...props.expr, cmp: String(value) as (typeof CMP_OPS)[number] })
 }
 
 function onCallFieldInput(field: "x" | "y" | "tolerance", event: Event) {
@@ -185,17 +185,17 @@ function onCallColorInput(event: Event) {
     setCallField(props.expr, "color", parseInt((event.target as HTMLInputElement).value.replace("#", ""), 16) || 0)
 }
 
-function onCallFnChange(event: Event) {
+function onCallFnChange(value: number | string) {
     if (props.expr?.op !== "call") return
-    const value = (event.target as HTMLSelectElement).value
-    if (value === "roiExists") update({ ...defaultRoiCall(), fn: "roiExists" })
-    else if (value === "roiNotExists") update({ ...defaultRoiCall(), fn: "roiNotExists" })
-    else if (value === "colorExists") update({ ...defaultCall(), fn: "colorExists" })
-    else if (value === "colorNotExists") update({ ...defaultCall(), fn: "colorNotExists" })
+    const fn = String(value)
+    if (fn === "roiExists") update({ ...defaultRoiCall(), fn: "roiExists" })
+    else if (fn === "roiNotExists") update({ ...defaultRoiCall(), fn: "roiNotExists" })
+    else if (fn === "colorExists") update({ ...defaultCall(), fn: "colorExists" })
+    else if (fn === "colorNotExists") update({ ...defaultCall(), fn: "colorNotExists" })
 }
 
-function onOperandTypeChange(side: "left" | "right", event: Event) {
-    changeOperandType(side, (event.target as HTMLSelectElement).value)
+function onOperandTypeChange(side: "left" | "right", value: number | string) {
+    changeOperandType(side, String(value))
 }
 
 function onColorCheckInput(side: "left" | "right", field: "x" | "y", event: Event) {
@@ -215,12 +215,16 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
     <div class="expr-editor flex flex-col gap-1">
         <div class="flex items-center gap-1 flex-wrap">
             <template v-if="!expr || expr.op === 'call' || expr.op === 'cmp'">
-                <select class="select select-xs select-bordered" :value="expr?.op ?? 'call'" @change="onKindChange">
-                    <option value="call">检查</option>
-                    <option value="cmp">比较</option>
-                    <option value="and">全部满足 (and)</option>
-                    <option value="or">任一满足 (or)</option>
-                </select>
+                <Select
+                    class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    :model-value="expr?.op ?? 'call'"
+                    @update:model-value="onKindChange"
+                >
+                    <SelectItem value="call">检查</SelectItem>
+                    <SelectItem value="cmp">比较</SelectItem>
+                    <SelectItem value="and">全部满足 (and)</SelectItem>
+                    <SelectItem value="or">任一满足 (or)</SelectItem>
+                </Select>
                 <button v-if="expr" class="btn btn-xs btn-ghost" title="取反" @click="wrapNot">
                     <Icon icon="ri:prohibited-line" class="w-3 h-3" />非
                 </button>
@@ -243,36 +247,40 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
 
         <!-- 检查条件 -->
         <div v-if="expr?.op === 'call'" class="flex items-center gap-1 flex-wrap">
-            <select class="select select-xs select-bordered" :value="expr.fn" @change="onCallFnChange">
-                <option value="colorExists">颜色存在</option>
-                <option value="colorNotExists">颜色不存在</option>
-                <option value="roiExists">区域特征存在</option>
-                <option value="roiNotExists">区域特征不存在</option>
-            </select>
+            <Select
+                class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                :model-value="expr.fn"
+                @update:model-value="onCallFnChange"
+            >
+                <SelectItem value="colorExists">颜色存在</SelectItem>
+                <SelectItem value="colorNotExists">颜色不存在</SelectItem>
+                <SelectItem value="roiExists">区域特征存在</SelectItem>
+                <SelectItem value="roiNotExists">区域特征不存在</SelectItem>
+            </Select>
             <template v-if="expr.fn === 'colorExists' || expr.fn === 'colorNotExists'">
                 <input
                     type="number"
-                    class="input input-xs input-bordered w-16"
+                    class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="expr.x"
                     placeholder="x"
                     @input="onCallFieldInput('x', $event)"
                 />
                 <input
                     type="number"
-                    class="input input-xs input-bordered w-16"
+                    class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="expr.y"
                     placeholder="y"
                     @input="onCallFieldInput('y', $event)"
                 />
                 <input
                     type="text"
-                    class="input input-xs input-bordered w-20 font-mono"
+                    class="w-20 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
                     :value="'#' + expr.color.toString(16).toUpperCase().padStart(6, '0')"
                     @input="onCallColorInput"
                 />
                 <input
                     type="number"
-                    class="input input-xs input-bordered w-14"
+                    class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="expr.tolerance"
                     title="容差"
                     @input="onCallFieldInput('tolerance', $event)"
@@ -284,42 +292,42 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
             <template v-else>
                 <input
                     type="number"
-                    class="input input-xs input-bordered w-14"
+                    class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="roiExpr(expr).x"
                     placeholder="x"
                     @input="setCallField(expr, 'x', Number(($event.target as HTMLInputElement).value))"
                 />
                 <input
                     type="number"
-                    class="input input-xs input-bordered w-14"
+                    class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="roiExpr(expr).y"
                     placeholder="y"
                     @input="setCallField(expr, 'y', Number(($event.target as HTMLInputElement).value))"
                 />
                 <input
                     type="number"
-                    class="input input-xs input-bordered w-14"
+                    class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="roiExpr(expr).width"
                     placeholder="宽"
                     @input="setCallField(expr, 'width', Number(($event.target as HTMLInputElement).value))"
                 />
                 <input
                     type="number"
-                    class="input input-xs input-bordered w-14"
+                    class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="roiExpr(expr).height"
                     placeholder="高"
                     @input="setCallField(expr, 'height', Number(($event.target as HTMLInputElement).value))"
                 />
                 <input
                     type="text"
-                    class="input input-xs input-bordered w-28 font-mono"
+                    class="w-28 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
                     :value="roiExpr(expr).hash"
                     placeholder="phash"
                     @input="setCallField(expr, 'hash', ($event.target as HTMLInputElement).value)"
                 />
                 <input
                     type="number"
-                    class="input input-xs input-bordered w-14"
+                    class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="roiExpr(expr).tolerance"
                     title="汉明容差"
                     @input="setCallField(expr, 'tolerance', Number(($event.target as HTMLInputElement).value))"
@@ -339,7 +347,7 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
                 <template v-if="roiExpr(expr).useFilter">
                     <input
                         type="text"
-                        class="input input-xs input-bordered w-20 font-mono"
+                        class="w-20 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
                         :value="'#' + roiExpr(expr).filterColor.toString(16).toUpperCase().padStart(6, '0')"
                         @input="
                             setCallField(expr, 'filterColor', parseInt(($event.target as HTMLInputElement).value.replace('#', ''), 16) || 0)
@@ -347,7 +355,7 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
                     />
                     <input
                         type="number"
-                        class="input input-xs input-bordered w-14"
+                        class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         :value="roiExpr(expr).filterTolerance"
                         title="滤色容差"
                         @input="setCallField(expr, 'filterTolerance', Number(($event.target as HTMLInputElement).value))"
@@ -359,27 +367,27 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
         <!-- 比较 -->
         <div v-else-if="expr?.op === 'cmp'" class="flex items-center gap-1 flex-wrap">
             <template v-for="side in ['left', 'right'] as const" :key="side">
-                <select
-                    class="select select-xs select-bordered"
-                    :value="operandType(expr[side])"
-                    @change="onOperandTypeChange(side, $event)"
+                <Select
+                    class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    :model-value="operandType(expr[side])"
+                    @update:model-value="onOperandTypeChange(side, $event)"
                 >
-                    <option value="var">变量</option>
-                    <option value="literal">字面量</option>
-                    <option value="colorCheck">颜色检查</option>
-                </select>
-                <select
+                    <SelectItem value="var">变量</SelectItem>
+                    <SelectItem value="literal">字面量</SelectItem>
+                    <SelectItem value="colorCheck">颜色检查</SelectItem>
+                </Select>
+                <Select
                     v-if="expr[side].type === 'var'"
-                    class="select select-xs select-bordered w-24"
-                    :value="(expr[side] as any).name"
-                    @change="onVarSelect(side, $event)"
+                    class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    :model-value="(expr[side] as any).name ?? undefined"
+                    placeholder="选择变量"
+                    @update:model-value="onVarSelect(side, $event)"
                 >
-                    <option value="" disabled>选择变量</option>
-                    <option v-for="name in variables" :key="name" :value="name">{{ name }}</option>
-                </select>
+                    <SelectItem v-for="name in variables" :key="name" :value="name">{{ name }}</SelectItem>
+                </Select>
                 <input
                     v-else-if="expr[side].type === 'literal'"
-                    class="input input-xs input-bordered w-20"
+                    class="w-20 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="String((expr[side] as any).value)"
                     placeholder="值"
                     @input="onLiteralInput(side, $event)"
@@ -387,22 +395,27 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
                 <span v-else class="flex items-center gap-1">
                     <input
                         type="number"
-                        class="input input-xs input-bordered w-14"
+                        class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         :value="(expr[side] as any).x"
                         placeholder="x"
                         @input="onColorCheckInput(side, 'x', $event)"
                     />
                     <input
                         type="number"
-                        class="input input-xs input-bordered w-14"
+                        class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         :value="(expr[side] as any).y"
                         placeholder="y"
                         @input="onColorCheckInput(side, 'y', $event)"
                     />
                 </span>
-                <select v-if="side === 'left'" class="select select-xs select-bordered w-16" :value="expr.cmp" @change="onCmpOpChange">
-                    <option v-for="op in CMP_OPS" :key="op" :value="op">{{ op }}</option>
-                </select>
+                <Select
+                    v-if="side === 'left'"
+                    class="w-16 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    :model-value="expr.cmp"
+                    @update:model-value="onCmpOpChange"
+                >
+                    <SelectItem v-for="op in CMP_OPS" :key="op" :value="op">{{ op }}</SelectItem>
+                </Select>
             </template>
         </div>
 

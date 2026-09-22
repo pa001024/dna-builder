@@ -5949,6 +5949,9 @@
         "summary": {
             "answered": "已收到回答",
             "askInvalid": "提問格式無效",
+            "damageModes": "共 {{count}} 種結算模式",
+            "damageSteps": "命中 {{count}} 個結算步驟",
+            "damageTerms": "{{count}} 條機制術語",
             "done": "已完成",
             "facets": "{{prefix}}{{count}} 組篩選項",
             "modulesTotal": "共 {{count}} 個可檢索模組",
@@ -5966,6 +5969,7 @@
         },
         "tool": {
             "ask_user": "詢問使用者",
+            "explain_damage": "傷害機制",
             "list_data_modules": "模組清單",
             "list_filter_options": "篩選條件",
             "list_version_additions": "版本新增",

@@ -276,7 +276,7 @@ async function removeAccount(account: GameAccount) {
                         v-model="pendingAccountName"
                         type="text"
                         :placeholder="$t('game-launcher.accountNamePlaceholder')"
-                        class="input input-bordered input-md w-full rounded-xs"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     />
                 </p>
                 <div class="modal-action">

@@ -66,7 +66,7 @@ const updateInputCount = () => {
                     v-model="expression"
                     type="text"
                     :placeholder="$t('node-editor.expressionCalc.expressionPlaceholder')"
-                    class="w-full input input-sm text-xs"
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     @input="updateExpression"
                 />
             </div>
@@ -74,7 +74,7 @@ const updateInputCount = () => {
             <!-- 输入数量设置 -->
             <div class="flex items-center gap-2">
                 <label class="text-xs font-semibold text-base-content/60">{{ $t("node-editor.expressionCalc.inputCount") }}</label>
-                <Select v-model.number="inputCount" class="input input-sm text-xs w-24" @change="updateInputCount">
+                <Select v-model.number="inputCount" class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" @change="updateInputCount">
                     <SelectItem :value="1">1</SelectItem>
                     <SelectItem :value="2">2</SelectItem>
                     <SelectItem :value="3">3</SelectItem>

@@ -953,13 +953,13 @@ onBeforeUnmount(() => {
                                 {{ character.名称 }}
                             </button>
                         </div>
-                        <select
-                            class="select select-bordered select-sm mb-3 w-full"
-                            :value="selectedSkinId"
-                            @change="selectSkin(Number(($event.target as HTMLSelectElement).value))"
+                        <Select
+                            class="mb-3 w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            :model-value="selectedSkinId"
+                            @update:model-value="selectSkin"
                         >
-                            <option v-for="skin in characterSkins" :key="skin.id" :value="skin.id">{{ skin.name }}</option>
-                        </select>
+                            <SelectItem v-for="skin in characterSkins" :key="skin.id" :value="skin.id">{{ skin.name }}</SelectItem>
+                        </Select>
                     </template>
 
                     <!-- 部位选择 -->
@@ -1087,7 +1087,7 @@ onBeforeUnmount(() => {
                                 <input
                                     v-model="hairCodeInput"
                                     type="text"
-                                    class="input input-bordered input-sm min-w-0 flex-1 font-mono"
+                                    class="min-w-0 flex-1 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
                                     placeholder="粘贴发型染色码（H 开头），回车导入"
                                     @keydown.enter="importHairCodeFromInput"
                                 />
@@ -1160,7 +1160,7 @@ onBeforeUnmount(() => {
                         id="share-source"
                         v-model="shareSource"
                         type="text"
-                        class="input input-bordered w-full"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         maxlength="500"
                         placeholder="例如：https://xxx / @作者名"
                     />

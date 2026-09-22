@@ -84,15 +84,15 @@ onMounted(() => {
                     v-model="searchKeyword"
                     type="text"
                     placeholder="搜索攻略标题..."
-                    class="input input-bordered input-sm flex-1"
+                    class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     @keyup.enter="handleSearch"
                 />
-                <Select v-model="selectedType" class="input input-sm w-40" @change="handleSearch">
+                <Select v-model="selectedType" class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" @change="handleSearch">
                     <SelectItem v-for="option in typeOptions" :key="option.value" :value="option.value">
                         {{ option.label }}
                     </SelectItem>
                 </Select>
-                <Select v-model="selectedCharId" class="input input-sm w-40" @change="handleSearch">
+                <Select v-model="selectedCharId" class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" @change="handleSearch">
                     <SelectItem v-for="option in charOptions" :key="option.value" :value="option.value">
                         {{ option.label }}
                     </SelectItem>

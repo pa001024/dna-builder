@@ -46,7 +46,7 @@ const props = defineProps<
         hidebtn?: boolean
         /**
          * 样式变体，用于适配不同页面的设计语言：
-         * - default：无内置样式，配合 $attrs 传入的 input 类（input input-sm 等）
+         * - default：无内置外观，配合 $attrs 传入的下划线输入框配方（border-b + focus:border-primary）
          * - ghost：透明无边框紧凑触发器（如 GameUpdate 的胶囊筛选栏，外层自行包胶囊容器）
          * - chip：自带胶囊底色的触发器（bg-base-content/5 圆角胶囊，适合工具栏/筛选栏）
          */
@@ -228,7 +228,7 @@ const forward = useForwardPropsEmits(props, emits)
 
 /**
  * 按变体计算触发器样式。
- * ghost：透明无边框紧凑触发器；chip：自带胶囊底色；default：不内置样式（依赖 $attrs 的 input 类）。
+ * ghost：透明无边框紧凑触发器；chip：自带胶囊底色；default：无内置外观（依赖 $attrs 传入的下划线输入框配方）。
  */
 const triggerVariantClass = computed(() => {
     switch (props.variant) {

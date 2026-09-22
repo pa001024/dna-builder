@@ -677,7 +677,7 @@ const badgeColors: Record<string, string> = {
                             v-model="attrValue"
                             type="number"
                             step="0.01"
-                            class="input input-xs input-bordered w-24 rounded-xs font-mono tabular-nums"
+                            class="w-24 font-mono tabular-nums rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         />
                         <span class="ml-auto truncate text-xs text-base-content/45">{{ attrContextHint }}</span>
                     </div>

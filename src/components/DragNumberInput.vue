@@ -232,7 +232,7 @@ function handleBlur() {
 
 <template>
     <label
-        class="input input-bordered input-sm flex items-center gap-1"
+        class="flex items-center gap-1 rounded-none border-b border-base-content/20 px-0.5 pb-1 transition-colors duration-150"
         :class="[widthClass, dragging ? 'border-primary' : '', editing ? 'cursor-text select-text' : 'cursor-ew-resize select-none']"
         :title="'左右拖拽可直接调整数值'"
     >

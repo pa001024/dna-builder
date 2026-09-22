@@ -101,7 +101,7 @@ const handleSkillChange = (val: string) => {
                 <div v-else-if="data.charBuild" class="mt-2">
                     <div class="text-xs text-base-content/60 mb-1">{{ $t("node-editor.coreCalc.defaultSkill") }}</div>
                     <Select
-                        class="input input-sm w-full"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                         :model-value="data.selectedSkill || ''"
                         :placeholder="$t('node-editor.coreCalc.selectSkill')"
                         @update:model-value="handleSkillChange"

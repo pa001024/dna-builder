@@ -3,6 +3,14 @@ import OpenAI from "openai"
 import type { ChatCompletionMessageParam, ChatCompletionTool, ChatCompletionToolMessageParam } from "openai/resources/index.mjs"
 import { containsDsmlMarker, type DsmlParseResult, DsmlStreamFilter } from "@/api/dsml-tool-call"
 import type { OpenAIConfig } from "@/api/openai"
+import {
+    DAMAGE_TERMS,
+    getDamageFields,
+    getDamageMode,
+    listDamageModes,
+    searchDamageSteps,
+    searchDamageTerms,
+} from "@/data/damage-mechanics"
 import { renderDBAgentSystemPrompt } from "@/shared/dbAgentSystemPrompt"
 import { DEFAULT_AI_MAX_TOKENS } from "@/utils/ai-config"
 import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
@@ -181,6 +189,7 @@ const TOOL_LABELS: Record<string, string> = {
     list_version_additions: "dbAgent.tool.list_version_additions",
     search_story: "dbAgent.tool.search_story",
     read_story: "dbAgent.tool.read_story",
+    explain_damage: "dbAgent.tool.explain_damage",
     ask_user: "dbAgent.tool.ask_user",
 }
 
@@ -338,6 +347,34 @@ const DB_AGENT_TOOLS: ChatCompletionTool[] = [
                     limit: { type: "integer", description: "可选，行数上限，默认 60，最大 200" },
                 },
                 required: ["chain_id"],
+            },
+        },
+    },
+    {
+        type: "function",
+        function: {
+            name: "explain_damage",
+            description:
+                "查询伤害机制：返回技能伤害 / 武器伤害 / DOT 伤害三种结算模式的公式步骤，以及昂扬、背水、充盈、失衡、抗性乘区、防御乘区等机制术语的解释。" +
+                "回答「伤害是怎么算的」「某个乘区或名词是什么」「某项属性收益为什么递减」这类问题时用它；" +
+                "不带参数时返回三种模式的概览与全部术语清单。",
+            parameters: {
+                type: "object",
+                properties: {
+                    mode: {
+                        type: "string",
+                        description:
+                            "可选，结算模式：weapon（武器伤害）/ skill（技能伤害）/ dot（DOT 伤害）。指定后返回该模式的完整公式链与输入参数",
+                    },
+                    keyword: {
+                        type: "string",
+                        description: "可选，关键词，例如 暴击 / 充盈 / 背水 / 抗性 / 防御 / 增伤；在步骤名称、公式与术语解释里定位",
+                    },
+                    step_id: {
+                        type: "string",
+                        description: "可选，步骤 id，例如 expectedDamage / defenseMultiplier / dotDamage；只取该步骤的完整信息",
+                    },
+                },
             },
         },
     },
@@ -502,6 +539,21 @@ function summarizeToolResult(name: string, payload: unknown): string {
         }
         case "read_story":
             return i18next.t("dbAgent.summary.storyLines", { count: (data.lines as unknown[])?.length ?? 0 })
+        case "explain_damage": {
+            const steps = (data.steps as unknown[] | undefined) ?? []
+            const modes = (data.modes as unknown[] | undefined) ?? []
+            const terms = (data.terms as unknown[] | undefined) ?? []
+
+            if (steps.length) {
+                return i18next.t("dbAgent.summary.damageSteps", { count: steps.length })
+            }
+
+            if (terms.length && modes.length === 0) {
+                return i18next.t("dbAgent.summary.damageTerms", { count: terms.length })
+            }
+
+            return i18next.t("dbAgent.summary.damageModes", { count: modes.length })
+        }
         case "ask_user": {
             const request = data.request as AskUserRequest | undefined
             return request ? summarizeAskUserRequest(request) : i18next.t("dbAgent.summary.waitingUser")
@@ -655,6 +707,92 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
                     speaker: line.speaker || undefined,
                     text: truncate(line.text, 220),
                 })),
+            })
+        }
+        case "explain_damage": {
+            const modeId = `${args.mode ?? ""}`.trim()
+            const keyword = `${args.keyword ?? ""}`.trim()
+            const stepId = `${args.step_id ?? ""}`.trim()
+            const mode = modeId ? getDamageMode(modeId) : undefined
+
+            if (modeId && !mode) {
+                return JSON.stringify({
+                    error: `未知的结算模式 "${modeId}"`,
+                    supported: listDamageModes().map(item => ({ id: item.id, label: item.label })),
+                })
+            }
+
+            /** 步骤条目统一投影，避免各分支重复拼字段 */
+            const toStepPayload = (hit: ReturnType<typeof searchDamageSteps>[number]) => ({
+                mode: hit.mode,
+                modeLabel: hit.modeLabel,
+                id: hit.step.id,
+                title: hit.step.title,
+                group: hit.step.group,
+                formula: hit.step.formula,
+            })
+
+            // 指定步骤：按 id 精确命中，命中不到时退化成关键词命中，便于模型用名称当 id 试一次
+            if (stepId) {
+                const hits = searchDamageSteps(stepId, { mode: modeId || undefined, limit: 10 })
+                const exact = hits.filter(hit => hit.step.id === stepId)
+                const picked = exact.length ? exact : hits
+
+                if (!picked.length) {
+                    return JSON.stringify({
+                        error: `未找到步骤 "${stepId}"`,
+                        hint: "可先不带参数取三种模式概览，或用 keyword 模糊查找步骤名称。",
+                    })
+                }
+
+                return JSON.stringify({ page: "/db/damage", steps: picked.map(toStepPayload) })
+            }
+
+            // 关键词：步骤与术语一起命中，模型一次调用就能拿到公式与名词解释
+            if (keyword) {
+                const steps = searchDamageSteps(keyword, { mode: modeId || undefined, limit: 24 })
+                const terms = searchDamageTerms(keyword, 8)
+
+                return JSON.stringify({
+                    keyword,
+                    mode: mode ? { id: mode.id, label: mode.label } : undefined,
+                    modeSummary: mode?.summary,
+                    resultStepId: mode?.resultStepId,
+                    fields: mode ? getDamageFields(mode.id, keyword) : undefined,
+                    steps: steps.map(toStepPayload),
+                    terms: terms.length ? terms : undefined,
+                    note:
+                        steps.length || terms.length
+                            ? undefined
+                            : "没有命中任何步骤或术语。可换更常见的说法（暴击 / 增伤 / 充盈 / 抗性 / 防御），或不带 keyword 取某个模式的完整公式链。",
+                    page: mode ? `/db/damage?mode=${mode.id}` : "/db/damage",
+                })
+            }
+
+            // 指定模式：返回该模式的完整公式链与输入参数
+            if (mode) {
+                return JSON.stringify({
+                    mode: { id: mode.id, label: mode.label },
+                    summary: mode.summary,
+                    resultStepId: mode.resultStepId,
+                    fields: getDamageFields(mode.id),
+                    steps: mode.steps.map(step => ({
+                        id: step.id,
+                        title: step.title,
+                        group: step.group,
+                        formula: step.formula,
+                    })),
+                    tip: "术语解释（昂扬 / 背水 / 充盈 / 独立增伤 等）用 keyword 单独查。",
+                    page: `/db/damage?mode=${mode.id}`,
+                })
+            }
+
+            // 无参数：模式概览 + 全部术语，让模型知道伤害机制里有哪些可查内容
+            return JSON.stringify({
+                modes: listDamageModes(),
+                terms: DAMAGE_TERMS.map(term => ({ term: term.term, aliases: term.aliases, description: term.description })),
+                tip: "指定 mode 取某个模式的完整公式链；用 keyword 或 step_id 定位具体步骤与术语。",
+                page: "/db/damage",
             })
         }
         case "ask_user": {

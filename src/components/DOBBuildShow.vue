@@ -120,6 +120,15 @@ function handleSortChange() {
     fetchBuilds(0)
 }
 
+/**
+ * 切换排序方式并重新检索。
+ * @param value Select 控件回传的排序键
+ */
+function handleSortSelect(value: string) {
+    sortBy.value = value as "latest" | "views"
+    handleSortChange()
+}
+
 const emits = defineEmits<{
     useBuild: [loadedSettings: CharSettings]
 }>()
@@ -344,13 +353,17 @@ defineExpose({
                     v-model="searchKeyword"
                     type="text"
                     :placeholder="t('搜索构筑标题...')"
-                    class="input input-bordered input-sm flex-1 min-w-50"
+                    class="flex-1 min-w-50 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     @keyup.enter="handleSearch"
                 />
-                <select v-model="sortBy" class="select select-bordered select-sm w-36" @change="handleSortChange">
-                    <option value="latest">最新修改</option>
-                    <option value="views">最多浏览</option>
-                </select>
+                <Select
+                    :model-value="sortBy"
+                    class="w-36 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    @update:model-value="handleSortSelect"
+                >
+                    <SelectItem value="latest">最新修改</SelectItem>
+                    <SelectItem value="views">最多浏览</SelectItem>
+                </Select>
                 <button class="btn btn-primary btn-sm" @click="handleSearch">
                     <Icon icon="ri:search-line" class="w-4 h-4" />
                     {{ t("搜索") }}
@@ -504,7 +517,7 @@ defineExpose({
                     id="edit-title"
                     v-model="edit_title"
                     type="text"
-                    class="input input-bordered w-full"
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :placeholder="t('输入标题...')"
                     maxlength="50"
                 />
@@ -516,7 +529,7 @@ defineExpose({
                 <textarea
                     id="edit-desc"
                     v-model="edit_desc"
-                    class="textarea textarea-bordered w-full"
+                    class="w-full resize-none rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 py-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :placeholder="t('输入描述...')"
                     rows="3"
                     maxlength="800"

@@ -724,9 +724,12 @@ function setActiveImageIndex(index: number) {
  * 处理图片切换下拉框输入。
  * @param event 输入事件
  */
-function handleActiveImageChange(event: Event) {
-    const input = event.target as HTMLSelectElement
-    setActiveImageIndex(Number(input.value))
+/**
+ * 切换当前编辑的图片。
+ * @param value 图片序号（Select 控件回传选中值）
+ */
+function handleActiveImageChange(value: number | string) {
+    setActiveImageIndex(Number(value))
 }
 
 /**
@@ -2432,7 +2435,7 @@ onUnmounted(() => {
                 <button class="btn btn-sm btn-ghost btn-square" @click="zoomOut" :disabled="zoomScale <= 1">-</button>
                 <input
                     type="number"
-                    class="input input-sm input-bordered w-20 text-center"
+                    class="w-20 text-center rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="zoomScale"
                     min="1"
                     max="32"
@@ -2446,7 +2449,7 @@ onUnmounted(() => {
                 <span class="text-xs text-base-content/70">默认容差</span>
                 <input
                     type="number"
-                    class="input input-sm input-bordered w-20 text-center"
+                    class="w-20 text-center rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     :value="defaultTolerance"
                     min="0"
                     max="255"
@@ -2491,15 +2494,15 @@ onUnmounted(() => {
                             >
                                 &lt;
                             </button>
-                            <select
-                                class="select select-xs select-bordered w-64"
-                                :value="activeImageIndex"
-                                @change="handleActiveImageChange"
+                            <Select
+                                class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                :model-value="activeImageIndex"
+                                @update:model-value="handleActiveImageChange"
                             >
-                                <option v-for="(image, index) in loadedImages" :key="image.id" :value="index">
+                                <SelectItem v-for="(image, index) in loadedImages" :key="image.id" :value="index">
                                     {{ index + 1 }}. {{ image.name }}
-                                </option>
-                            </select>
+                                </SelectItem>
+                            </Select>
                             <button
                                 class="btn btn-xs btn-ghost btn-square"
                                 @click="setActiveImageIndex(activeImageIndex + 1)"
@@ -2607,8 +2610,8 @@ onUnmounted(() => {
                                                 <input
                                                     :data-check-color-input-id="row.point.id"
                                                     type="text"
-                                                    class="input input-xs w-28 font-mono"
-                                                    :class="row.checkColorInputInvalid ? 'input-error' : 'input-bordered'"
+                                                    class="w-28 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
+                                                    :class="row.checkColorInputInvalid ? 'border-b-error text-error' : ''"
                                                     :value="row.checkColorInput"
                                                     placeholder="#RRGGBB 或 0xRRGGBB"
                                                     @input="updatePointCheckColorInput(row.point.id, $event)"
@@ -2632,7 +2635,7 @@ onUnmounted(() => {
                                                 <span class="text-[10px] text-base-content/60">容差</span>
                                                 <input
                                                     type="number"
-                                                    class="input input-xs input-bordered w-15 text-center"
+                                                    class="w-15 text-center rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                                     :value="row.toleranceInput"
                                                     min="0"
                                                     max="255"
@@ -2680,7 +2683,7 @@ onUnmounted(() => {
                                                 v-if="imageLabelEditing[imageRow.image.id]"
                                                 :data-image-label-input-id="imageRow.image.id"
                                                 type="text"
-                                                class="input input-xs input-bordered w-full"
+                                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                                 :value="imageLabels[imageRow.image.id] ?? ''"
                                                 placeholder="输入分类标签"
                                                 @input="updateImageLabelInput(imageRow.image.id, $event)"

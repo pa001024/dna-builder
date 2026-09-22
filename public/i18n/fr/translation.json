@@ -6862,6 +6862,9 @@
         "summary": {
             "answered": "Réponse reçue",
             "askInvalid": "Format de question invalide",
+            "damageModes": "{{count}} mode(s) de calcul",
+            "damageSteps": "{{count}} étape(s) de calcul",
+            "damageTerms": "{{count}} terme(s) de mécanique",
             "done": "Terminé",
             "facets": "{{prefix}}{{count}} groupe(s) de filtres",
             "modulesTotal": "{{count}} modules interrogeables au total",
@@ -6879,6 +6882,7 @@
         },
         "tool": {
             "ask_user": "Demander à l'utilisateur",
+            "explain_damage": "Mécanique des dégâts",
             "list_data_modules": "Liste des modules",
             "list_filter_options": "Options de filtre",
             "list_version_additions": "Ajouts de version",

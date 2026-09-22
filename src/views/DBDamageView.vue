@@ -3017,7 +3017,7 @@ onBeforeUnmount(() => {
                             <div v-for="(item, index) in currentMergeItems" :key="index" class="grid grid-cols-12 items-center gap-2">
                                 <Select
                                     v-model="item.operator"
-                                    class="col-span-2 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] outline-none focus:border-primary"
+                                    class="col-span-2 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     :disabled="index === 0"
                                 >
                                     <SelectItem value="+">+</SelectItem>
@@ -3027,7 +3027,7 @@ onBeforeUnmount(() => {
                                 </Select>
                                 <Select
                                     v-model="item.stepId"
-                                    class="col-span-9 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] outline-none focus:border-primary"
+                                    class="col-span-9 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 >
                                     <SelectItem v-for="option in stepOptions" :key="option.id" :value="option.id">
                                         {{ option.label }} = {{ formatNumber(option.value) }}
