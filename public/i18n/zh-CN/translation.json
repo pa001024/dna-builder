@@ -869,6 +869,7 @@
         "book_desc": "查看读物条目、线索文本与区域位置",
         "char": "角色",
         "char_desc": "查看角色信息和属性",
+        "charvoice": "角色语音",
         "damage": "伤害",
         "damage_desc": "伤害公式分步骤拆解",
         "desc": "查询游戏中的数据",

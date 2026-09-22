@@ -6778,6 +6778,7 @@
         "book_desc": "Consulter les livres, textes d'indices et zones associées",
         "char": "Personnage",
         "char_desc": "Consulter les informations et attributs des personnages",
+        "charvoice": "Voix des personnages",
         "damage": "Dégâts",
         "damage_desc": "Décomposition étape par étape des formules de dégâts",
         "desc": "Rechercher des données de jeu",

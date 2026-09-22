@@ -16,6 +16,13 @@ import { DEFAULT_AI_MAX_TOKENS } from "@/utils/ai-config"
 import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
 import { formatAskUserResponse, hasAskAnswer, normalizeAskUserRequest, summarizeAskUserRequest } from "@/utils/db-ask-user"
 import {
+    DB_AGENT_LANGS,
+    type DBAgentLang,
+    ensureDBAgentLangReady,
+    normalizeDBAgentLang,
+    resolveCurrentDBAgentLang,
+} from "@/utils/db-locale"
+import {
     listModuleFilters,
     listModules,
     listVersionAdditions,
@@ -216,6 +223,25 @@ const FILTERS_DESCRIPTION =
     "取值必须来自 list_filter_options 返回的 values，不要凭记忆编造；多个条件之间是「与」的关系。布尔类筛选项传 true 表示只要具备该特征的条目。"
 
 /**
+ * lang 参数的说明文案。
+ *
+ * 单独抽出来是因为它出现在除 ask_user 之外的每个工具上，措辞必须一致：
+ * 各工具对 lang 的措辞一旦不同，模型会以为语义有差异，从而在不同工具上给出不同的语言取值。
+ */
+const LANG_DESCRIPTION =
+    "可选，检索所用的数据语言：zh（游戏原文）/ en / jp / kr / fr / tc（繁中）。不传则用当前界面语言。" +
+    "剧情对话与角色语音是按语言切分的独立数据集，查这两类内容时传提问语言对应的取值；" +
+    "其余模块的条目名称会按该语言返回译文（名称未收录译文时保留原文）。" +
+    "能否真正拿到其他语言的内容取决于该模块是否有多语言数据，返回结果里的 note 会说明实际使用的语言。"
+
+/** lang 参数定义（各检索工具共用） */
+const LANG_SCHEMA = {
+    type: "string",
+    enum: DB_AGENT_LANGS,
+    description: LANG_DESCRIPTION,
+}
+
+/**
  * 工具定义（OpenAI function calling 格式）。
  * 工具名与参数说明面向模型，需要保持稳定，避免提示词与实现对不上。
  */
@@ -227,7 +253,7 @@ const DB_AGENT_TOOLS: ChatCompletionTool[] = [
             description: "列出资料库中可检索的模块清单，包含模块 id、名称、条目数与是否支持按版本过滤。用于确认某个提问应该查哪个模块。",
             parameters: {
                 type: "object",
-                properties: {},
+                properties: { lang: LANG_SCHEMA },
             },
         },
     },
@@ -240,6 +266,7 @@ const DB_AGENT_TOOLS: ChatCompletionTool[] = [
             parameters: {
                 type: "object",
                 properties: {
+                    lang: LANG_SCHEMA,
                     module: {
                         type: "string",
                         description: "模块 id，见 list_data_modules。剧情请用 questchain",
@@ -258,6 +285,7 @@ const DB_AGENT_TOOLS: ChatCompletionTool[] = [
             parameters: {
                 type: "object",
                 properties: {
+                    lang: LANG_SCHEMA,
                     query: { type: "string", description: "检索关键词，例如角色名、道具名、副本名" },
                     module: {
                         type: "string",
@@ -278,6 +306,7 @@ const DB_AGENT_TOOLS: ChatCompletionTool[] = [
             parameters: {
                 type: "object",
                 properties: {
+                    lang: LANG_SCHEMA,
                     module: { type: "string", description: "模块 id，见 list_data_modules，例如 achievement / mod / char / weapon" },
                     keyword: { type: "string", description: "可选，模块内关键词（名称、分类、描述等字段）" },
                     version: { type: "string", description: "可选，版本号，例如 1.6" },
@@ -300,6 +329,7 @@ const DB_AGENT_TOOLS: ChatCompletionTool[] = [
             parameters: {
                 type: "object",
                 properties: {
+                    lang: LANG_SCHEMA,
                     version: { type: "string", description: "版本号，例如 1.6" },
                 },
                 required: ["version"],
@@ -317,6 +347,7 @@ const DB_AGENT_TOOLS: ChatCompletionTool[] = [
             parameters: {
                 type: "object",
                 properties: {
+                    lang: LANG_SCHEMA,
                     keyword: {
                         type: "string",
                         description: "检索关键词，优先使用具体人名、地名或事件名。只按类型/篇章筛选时可省略",
@@ -341,6 +372,7 @@ const DB_AGENT_TOOLS: ChatCompletionTool[] = [
             parameters: {
                 type: "object",
                 properties: {
+                    lang: LANG_SCHEMA,
                     chain_id: { type: "integer", description: "任务链 id，例如 110201" },
                     quest_id: { type: "integer", description: "可选，任务 id" },
                     offset: { type: "integer", description: "可选，起始行号，默认 0" },
@@ -361,6 +393,10 @@ const DB_AGENT_TOOLS: ChatCompletionTool[] = [
             parameters: {
                 type: "object",
                 properties: {
+                    lang: {
+                        ...LANG_SCHEMA,
+                        description: `${LANG_DESCRIPTION}注意：伤害机制的步骤名与公式只有游戏原文（中文），lang 只用于标注本次检索语言，不改变返回内容。`,
+                    },
                     mode: {
                         type: "string",
                         description:
@@ -570,22 +606,31 @@ function summarizeToolResult(name: string, payload: unknown): string {
  * @returns 工具结果（序列化后的字符串）
  */
 async function executeTool(name: string, args: Record<string, unknown>): Promise<string> {
+    // 数据语言：模型显式指定优先，否则跟随界面语言。
+    // ask_user 的题面由模型按对话语言自行生成，与数据语言无关，因此不会用到这个值。
+    const lang: DBAgentLang = normalizeDBAgentLang(args.lang) ?? resolveCurrentDBAgentLang()
+
+    // 检索期需要在同步路径里读译文与语音数据集，先统一预热；同一语言重复调用会直接返回
+    await ensureDBAgentLangReady(lang)
+
     switch (name) {
         case "list_data_modules": {
-            return JSON.stringify({ modules: listModules(), versions: listVersions() })
+            return JSON.stringify({ lang, modules: listModules(lang), versions: listVersions() })
         }
         case "list_filter_options": {
             const moduleId = `${args.module ?? ""}`.trim()
-            const { module: moduleInfo, facets, note } = await listModuleFilters(moduleId)
+            const { module: moduleInfo, facets, note } = await listModuleFilters(moduleId, lang)
 
             if (!moduleInfo) {
                 return JSON.stringify({
+                    lang,
                     error: `不支持的模块 "${moduleId}"`,
-                    supported: listModules().map(item => item.id),
+                    supported: listModules(lang).map(item => item.id),
                 })
             }
 
             return JSON.stringify({
+                lang,
                 module: moduleInfo.id,
                 moduleLabel: moduleInfo.label,
                 total: moduleInfo.count,
@@ -603,10 +648,10 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
         case "search_data": {
             const query = `${args.query ?? ""}`.trim()
             const moduleId = `${args.module ?? ""}`.trim()
-            const pathPrefix = moduleId ? listModules().find(item => item.id === moduleId)?.path : undefined
-            const results = searchAll(query, { limit: Number(args.limit) || undefined, pathPrefix })
+            const pathPrefix = moduleId ? listModules(lang).find(item => item.id === moduleId)?.path : undefined
+            const results = searchAll(query, { limit: Number(args.limit) || undefined, pathPrefix, lang })
 
-            return JSON.stringify({ query, module: moduleId || undefined, results })
+            return JSON.stringify({ lang, query, module: moduleId || undefined, results })
         }
         case "query_module_entries": {
             const moduleId = `${args.module ?? ""}`.trim()
@@ -616,16 +661,19 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
                 version: args.version ? `${args.version}` : undefined,
                 filters,
                 limit: Number(args.limit) || undefined,
+                lang,
             })
 
             if (!module) {
                 return JSON.stringify({
+                    lang,
                     error: `不支持的模块 "${moduleId}"`,
-                    supported: listModules().map(item => item.id),
+                    supported: listModules(lang).map(item => item.id),
                 })
             }
 
             return JSON.stringify({
+                lang,
                 module: module.id,
                 moduleLabel: module.label,
                 modulePath: module.path,
@@ -645,10 +693,10 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
             const version = `${args.version ?? ""}`.trim()
 
             if (!version) {
-                return JSON.stringify({ error: "缺少版本号", knownVersions: listVersions() })
+                return JSON.stringify({ lang, error: "缺少版本号", knownVersions: listVersions() })
             }
 
-            return JSON.stringify(listVersionAdditions(version))
+            return JSON.stringify({ lang, ...listVersionAdditions(version, lang) })
         }
         case "search_story": {
             const keyword = `${args.keyword ?? ""}`.trim()
@@ -657,9 +705,11 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
                 limit: Number(args.limit) || undefined,
                 snippetLimit: Number(args.snippet_limit) || undefined,
                 filters,
+                lang,
             })
 
             return JSON.stringify({
+                lang,
                 keyword: keyword || undefined,
                 appliedFilters: Object.keys(filters).length ? filters : undefined,
                 total,
@@ -693,13 +743,15 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
                 questId: Number(args.quest_id) || undefined,
                 offset: Number(args.offset) || undefined,
                 limit: Number(args.limit) || undefined,
+                lang,
             })
 
             if (!result.chain) {
-                return JSON.stringify({ error: `未找到任务链 ${chainId}` })
+                return JSON.stringify({ lang, error: `未找到任务链 ${chainId}` })
             }
 
             return JSON.stringify({
+                lang,
                 chain: result.chain,
                 total: result.total,
                 lines: result.lines.map(line => ({

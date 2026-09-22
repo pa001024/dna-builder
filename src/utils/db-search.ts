@@ -1,8 +1,9 @@
 import Fuse from "fuse.js"
-import { t } from "i18next"
+import i18next from "i18next"
 import achievementData from "@/data/d/achievement.data"
 import { booksData } from "@/data/d/book.data"
 import charData from "@/data/d/char.data"
+import { getCachedCharVoiceData, resolveCharVoiceLocaleBySetting } from "@/data/d/charvoice-locale"
 import dungeonsData from "@/data/d/dungeon.data"
 import { eventData } from "@/data/d/event.data"
 import { fishs } from "@/data/d/fish.data"
@@ -14,12 +15,21 @@ import petData from "@/data/d/pet.data"
 import type { Dialogue, QuestItem, QuestStory } from "@/data/d/quest.data"
 import questChainData, { type QuestChain, questChain2Version } from "@/data/d/questchain.data"
 import { resourceData } from "@/data/d/resource.data"
-import { getLocalizedQuestDataByLanguage, resolveStoryLocaleBySetting, type StoryLocale } from "@/data/d/story-locale"
+import { getQuestDataByLocale } from "@/data/d/story-locale"
 import { titleData } from "@/data/d/title.data"
 import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
 import { DAMAGE_MODES, DAMAGE_TERMS } from "@/data/damage-mechanics"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
+import {
+    type DBAgentLang,
+    expandDBAgentKeyword,
+    resolveCurrentDBAgentLang,
+    resolveDBAgentValue,
+    toI18nLanguage,
+    translateDBAgentParts,
+    translateDBAgentText,
+} from "@/utils/db-locale"
 import { getDungeonName, getDungeonType } from "@/utils/dungeon-utils"
 import { getGlobalSearchService } from "@/utils/global-search"
 import { matchPinyin } from "@/utils/pinyin-utils"
@@ -148,8 +158,8 @@ interface DBModuleAdapter {
     versioned: boolean
     /** 本模块可用的筛选项定义（对应列表页上的筛选行） */
     facets?: DBFacetDefinition[]
-    /** 模块条目清单（懒执行，避免无用开销） */
-    list: () => DBEntrySummary[]
+    /** 模块条目清单（懒执行，避免无用开销）；需要按语言切分数据集的模块用 lang 决定取哪一套 */
+    list: (lang?: DBAgentLang) => DBEntrySummary[]
 }
 
 /** 拼接副信息，空值自动跳过 */
@@ -160,6 +170,54 @@ function joinParts(parts: Array<string | number | undefined | null>): string | u
         .join(" · ")
 
     return text || undefined
+}
+
+/**
+ * 取模块展示名。
+ *
+ * labelKey 指向界面文案，必须直接按目标语言取：这一类文案不在「游戏原文 → 译文」的词条表里
+ * （两者是不同的命名空间），把它当游戏原文再翻一遍会查不到词条而回落中文。
+ * @param labelKey 模块名 i18n key
+ * @param lang 目标语言
+ * @returns 模块展示名
+ */
+function moduleLabel(labelKey: string, lang: DBAgentLang): string {
+    const localized = i18next.t(labelKey, { lng: toI18nLanguage(lang), defaultValue: "" })
+
+    return localized || i18next.t(labelKey, { lng: "zh-CN", defaultValue: labelKey })
+}
+
+/**
+ * 本地化条目的展示字段（名称与副信息）。
+ *
+ * 只动展示字段：`facets` 是筛选用的机器可读取值，必须保持原文，
+ * 否则模型回传的取值无法与列表页口径对齐。
+ * @param entry 模块条目
+ * @param lang 目标语言
+ * @returns 本地化后的条目
+ */
+function localizeEntry(entry: DBEntrySummary, lang: DBAgentLang): DBEntrySummary {
+    if (lang === "zh") {
+        return entry
+    }
+
+    return {
+        ...entry,
+        name: translateDBAgentText(entry.name, lang) ?? entry.name,
+        subtitle: translateDBAgentParts(entry.subtitle, lang),
+    }
+}
+
+/**
+ * 把关键词扩展成「用户语言写法 + 可反查到的游戏原文写法」。
+ * @param keyword 关键词
+ * @param lang 提问使用的语言
+ * @returns 关键词列表（去重，首个为原关键词）
+ */
+function expandKeywords(keyword: string, lang: DBAgentLang): string[] {
+    const trimmed = keyword.trim()
+
+    return trimmed ? expandDBAgentKeyword(trimmed, lang) : []
 }
 
 /** 怪物类型展示名 */
@@ -184,9 +242,11 @@ function facetValue(value: string | number): string {
     return `${FACET_PREFIX}${value}`
 }
 
-/** 模块级 facet 取值的 i18n 处理：直接返回原文（游戏内文案多为硬编码中文） */
-function facetLabel(value: string | number): string {
-    return `${value}`.trim()
+/** 模块级 facet 取值的展示名：游戏内文案多为硬编码中文，能查到词条时给出对应语言 */
+function facetLabel(value: string | number, lang: DBAgentLang = "zh"): string {
+    const text = `${value}`.trim()
+
+    return translateDBAgentText(text, lang) ?? text
 }
 
 /**
@@ -249,9 +309,10 @@ function countFacetValues(entries: DBEntrySummary[], facetId: string): Map<strin
  * 把计数表按字典序（数值优先）转成 facet 可选值列表。
  * @param counts 取值计数表
  * @param sort 排序方式
+ * @param lang 取值的展示语言
  * @returns facet 可选值列表
  */
-function toFacetValues(counts: Map<string, number>, sort: "numeric" | "locale" = "locale"): DBFacetValue[] {
+function toFacetValues(counts: Map<string, number>, sort: "numeric" | "locale" = "locale", lang: DBAgentLang = "zh"): DBFacetValue[] {
     const compare = (a: string, b: string) => {
         if (sort === "numeric") {
             const [left, right] = [Number.parseFloat(storyFacetRawValue(a)), Number.parseFloat(storyFacetRawValue(b))]
@@ -266,7 +327,7 @@ function toFacetValues(counts: Map<string, number>, sort: "numeric" | "locale" =
 
     return [...counts.entries()]
         .sort(([a], [b]) => compare(a, b))
-        .map(([value, count]) => ({ value, label: facetLabel(storyFacetRawValue(value)), count }))
+        .map(([value, count]) => ({ value, label: facetLabel(storyFacetRawValue(value), lang), count }))
 }
 
 /**
@@ -309,6 +370,15 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
                     faction: item.阵营 ? [facetValue(item.阵营)] : [],
                 },
             })),
+    },
+    {
+        id: "charvoice",
+        labelKey: "database.charvoice",
+        /** 语音在角色详情页的「语音」标签下展示，没有独立列表页 */
+        path: "/db/char",
+        versioned: false,
+        facets: [{ id: "char", label: "角色", kind: "enum", values: [] }],
+        list: lang => buildCharVoiceEntries(lang ?? "zh"),
     },
     {
         id: "weapon",
@@ -613,6 +683,64 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
 const DAMAGE_KIND_STEP = "结算步骤"
 const DAMAGE_KIND_TERM = "名词解释"
 
+/** 角色 id → 角色名，用于语音 / 档案条目的副信息与按角色筛选 */
+const charNameMap = new Map(charData.map(item => [item.id, item.名称]))
+
+/**
+ * 语音 / 档案条目缓存。
+ *
+ * 以「数据集数组本身」为键：同一语言的数据集是同一个数组引用，
+ * 未预加载时回退到的中文数据也是稳定引用，因此不会把回退数据错记成目标语言的结果。
+ */
+const localizedEntryCache = new WeakMap<object, DBEntrySummary[]>()
+
+/** 副信息里的正文摘要长度上限 */
+const ENTRY_TEXT_LIMIT = 80
+
+/**
+ * 截断正文摘要。
+ * @param text 正文
+ * @returns 摘要
+ */
+function summarizeText(text: string): string {
+    return text.length > ENTRY_TEXT_LIMIT ? `${text.slice(0, ENTRY_TEXT_LIMIT)}…` : text
+}
+
+/**
+ * 构建角色语音模块的条目。
+ *
+ * 语音是「按语言切分的独立数据集」，因此条目内容取决于 lang；
+ * 条目挂到角色详情页（语音在该页的「语音」标签下展示）。
+ * @param lang 数据语言
+ * @returns 该模块的条目列表
+ */
+function buildCharVoiceEntries(lang: DBAgentLang): DBEntrySummary[] {
+    const data = getCachedCharVoiceData(resolveCharVoiceLocaleBySetting(lang))
+    const cached = localizedEntryCache.get(data)
+
+    if (cached) {
+        return cached
+    }
+
+    const entries = data.map(item => {
+        const charName = charNameMap.get(item.charId) ?? ""
+
+        return {
+            id: item.id,
+            name: item.name,
+            subtitle: joinParts([charName, summarizeText(item.text)]),
+            path: `/db/char/${item.charId}`,
+            facets: {
+                char: charName ? [facetValue(charName), facetValue(item.charId)] : [facetValue(item.charId)],
+            },
+        }
+    })
+
+    localizedEntryCache.set(data, entries)
+
+    return entries
+}
+
 /**
  * 构建伤害机制模块的条目：每个结算步骤一条，每个机制术语一条。
  * 数据源是 `src/data/damage-mechanics.ts`，与伤害公式页面的步骤定义保持逐字一致。
@@ -732,15 +860,16 @@ export function listVersions(): string[] {
 
 /**
  * 列出可结构化查询的模块清单。
+ * @param lang 数据语言（影响模块名与按语言切分数据集的条目数）
  * @returns 模块摘要列表
  */
-export function listModules(): DBModuleSummary[] {
+export function listModules(lang: DBAgentLang = resolveCurrentDBAgentLang()): DBModuleSummary[] {
     return MODULE_ADAPTERS.map(adapter => ({
         id: adapter.id,
-        label: t(adapter.labelKey),
+        label: moduleLabel(adapter.labelKey, lang),
         path: adapter.path,
         versioned: adapter.versioned,
-        count: adapter.list().length,
+        count: adapter.list(lang).length,
     }))
 }
 
@@ -753,10 +882,12 @@ export function listModules(): DBModuleSummary[] {
  * 剧情模块（questchain）走 `listStoryFilters`：印象检定 / 印象增加需要读对话选项才能统计，
  * 而这两个值不在模块条目上，只能从剧情正文索引里算。
  * @param moduleId 模块标识
+ * @param lang 数据语言
  * @returns 模块信息与筛选项；模块不支持筛选时 facets 为空数组
  */
 export async function listModuleFilters(
-    moduleId: string
+    moduleId: string,
+    lang: DBAgentLang = resolveCurrentDBAgentLang()
 ): Promise<{ module?: DBModuleSummary; facets: DBFacetDefinition[]; note?: string }> {
     const adapter = MODULE_ADAPTER_MAP.get(moduleId)
 
@@ -764,17 +895,17 @@ export async function listModuleFilters(
         return { facets: [] }
     }
 
-    const entries = adapter.list()
+    const entries = adapter.list(lang)
     const module: DBModuleSummary = {
         id: adapter.id,
-        label: t(adapter.labelKey),
+        label: moduleLabel(adapter.labelKey, lang),
         path: adapter.path,
         versioned: adapter.versioned,
         count: entries.length,
     }
 
     if (adapter.id === "questchain") {
-        const { facets, total } = await listStoryFilters()
+        const { facets, total } = await listStoryFilters(lang)
 
         return { module: { ...module, count: total }, facets }
     }
@@ -789,7 +920,8 @@ export async function listModuleFilters(
 
         // range 类筛选项同样列出实际出现过的取值：让模型知道能填哪些数，
         // 不必去猜「品质」到底是 1~5 还是 1~6。
-        return { ...facet, values: toFacetValues(counts, sort) }
+        // label 只是展示，value 保持原文口径，匹配时两种写法都能命中。
+        return { ...facet, label: facetLabel(facet.label, lang), values: toFacetValues(counts, sort, lang) }
     })
 
     return { module, facets }
@@ -799,9 +931,10 @@ export async function listModuleFilters(
  * 判断条目是否命中全部筛选条件。
  * @param entry 模块条目
  * @param filters 筛选条件（筛选项 id → 目标取值）
+ * @param lang 提问使用的语言（用于把译文取值还原成原文）
  * @returns 是否命中
  */
-function matchFacetFilters(entry: DBEntrySummary, filters: Record<string, string | number | boolean>): boolean {
+function matchFacetFilters(entry: DBEntrySummary, filters: Record<string, string | number | boolean>, lang: DBAgentLang): boolean {
     for (const [facetId, rawTarget] of Object.entries(filters)) {
         if (rawTarget === undefined || rawTarget === null || `${rawTarget}`.trim() === "") {
             continue
@@ -818,7 +951,7 @@ function matchFacetFilters(entry: DBEntrySummary, filters: Record<string, string
             continue
         }
 
-        const target = storyFacetRawValue(`${rawTarget}`.trim())
+        const target = resolveDBAgentValue(storyFacetRawValue(`${rawTarget}`.trim()), lang)
         const matched = actualValues.some(value => {
             const raw = storyFacetRawValue(value)
 
@@ -837,7 +970,7 @@ function matchFacetFilters(entry: DBEntrySummary, filters: Record<string, string
 /**
  * 按模块查询条目明细。
  * @param moduleId 模块标识
- * @param options 查询条件：关键词、版本、筛选项、条数上限
+ * @param options 查询条件：关键词、版本、筛选项、条数上限、数据语言
  * @returns 命中的条目（关键词与筛选项都缺失时返回该模块前若干条）
  */
 export function queryModule(
@@ -848,6 +981,8 @@ export function queryModule(
         limit?: number
         /** 筛选项条件：筛选项 id → 目标取值（取值见 listModuleFilters） */
         filters?: Record<string, string | number | boolean>
+        /** 数据语言：决定条目来自哪套数据集，以及名称以哪种语言返回 */
+        lang?: DBAgentLang
     } = {}
 ): { module?: DBModuleSummary; entries: DBEntrySummary[]; total: number; appliedFilters?: Record<string, string | number | boolean> } {
     const adapter = MODULE_ADAPTER_MAP.get(moduleId)
@@ -856,37 +991,43 @@ export function queryModule(
         return { entries: [], total: 0 }
     }
 
+    const lang = options.lang ?? resolveCurrentDBAgentLang()
     const keyword = options.keyword?.trim() ?? ""
     const version = normalizeVersion(options.version)
     const limit = Math.min(Math.max(options.limit ?? 20, 1), 80)
     const filters = options.filters ?? {}
 
-    const all = adapter.list()
+    const all = adapter.list(lang)
+    // 关键词先扩展成「提问语言写法 + 可反查到的原文写法」，其他语言提问才能命中仍是中文原文的数据
+    const keywords = expandKeywords(keyword, lang)
+
     const matched = all.filter(entry => {
         if (version && normalizeVersion(entry.version) !== version) {
             return false
         }
 
-        if (!matchFacetFilters(entry, filters)) {
+        if (!matchFacetFilters(entry, filters, lang)) {
             return false
         }
 
-        if (!keyword) {
+        if (!keywords.length) {
             return true
         }
 
-        return matchKeyword([entry.name, entry.subtitle, entry.version, entry.id].filter(Boolean).join(" "), keyword)
+        const haystack = [entry.name, entry.subtitle, entry.version, entry.id].filter(Boolean).join(" ")
+
+        return keywords.some(item => matchKeyword(haystack, item))
     })
 
     return {
         module: {
             id: adapter.id,
-            label: t(adapter.labelKey),
+            label: moduleLabel(adapter.labelKey, lang),
             path: adapter.path,
             versioned: adapter.versioned,
             count: all.length,
         },
-        entries: matched.slice(0, limit),
+        entries: matched.slice(0, limit).map(entry => localizeEntry(entry, lang)),
         total: matched.length,
         appliedFilters: Object.keys(filters).length ? filters : undefined,
     }
@@ -912,38 +1053,73 @@ function matchKeyword(text: string, keyword: string): boolean {
 
 /**
  * 全库关键词检索（覆盖首页模块卡片之外的长尾内容）。
+ *
+ * 全库索引按界面语言输出标题、且只收录原文与拼音，因此其他语言提问时
+ * 要先把词换成原文再检索（否则英文名匹配不到仍是中文的数据），最后把标题翻成目标语言。
  * @param keyword 关键词
- * @param options 查询条件：条数上限、路由前缀过滤（如 /db/char）
+ * @param options 查询条件：条数上限、路由前缀过滤（如 /db/char）、数据语言
  * @returns 命中的检索项
  */
 export function searchAll(
     keyword: string,
-    options: { limit?: number; pathPrefix?: string } = {}
+    options: { limit?: number; pathPrefix?: string; lang?: DBAgentLang } = {}
 ): Array<{ title: string; subtitle?: string; typeLabel: string; path: string }> {
+    const lang = options.lang ?? resolveCurrentDBAgentLang()
     const limit = Math.min(Math.max(options.limit ?? 20, 1), 50)
-    const results = getGlobalSearchService().search(keyword, options.pathPrefix ? 120 : limit * 3)
+    const service = getGlobalSearchService()
+    /** 扩展关键词只取最相关的前几个：每次检索都是全库扫描，不值得为长尾候选反复扫 */
+    const keywords = expandKeywords(keyword, lang).slice(0, 4)
 
-    const filtered = options.pathPrefix ? results.filter(item => item.path.startsWith(options.pathPrefix!)) : results
+    const collected: Array<{ title: string; subtitle?: string; typeLabel: string; path: string }> = []
+    const seen = new Set<string>()
 
-    return filtered.slice(0, limit).map(({ title, subtitle, typeLabel, path }) => ({ title, subtitle, typeLabel, path }))
+    for (const item of keywords) {
+        for (const hit of service.search(item, options.pathPrefix ? 120 : limit * 3)) {
+            const key = `${hit.path}|${hit.title}`
+
+            if (seen.has(key)) {
+                continue
+            }
+
+            seen.add(key)
+            collected.push(hit)
+        }
+
+        if (collected.length >= limit * 3) {
+            break
+        }
+    }
+
+    const filtered = options.pathPrefix ? collected.filter(item => item.path.startsWith(options.pathPrefix!)) : collected
+
+    return filtered.slice(0, limit).map(({ title, subtitle, typeLabel, path }) => ({
+        title: translateDBAgentText(title, lang) ?? title,
+        subtitle,
+        typeLabel,
+        path,
+    }))
 }
 
 /**
  * 汇总某个版本在全部可查模块中新增的内容。
  * @param version 版本号
+ * @param lang 数据语言
  * @returns 各模块的新增条目统计
  */
-export function listVersionAdditions(version: string | number): { version: string; modules: DBVersionAddition[]; note: string } {
+export function listVersionAdditions(
+    version: string | number,
+    lang: DBAgentLang = resolveCurrentDBAgentLang()
+): { version: string; modules: DBVersionAddition[]; note: string } {
     const target = normalizeVersion(version)
 
     const modules = MODULE_ADAPTERS.filter(adapter => adapter.versioned).map(adapter => {
-        const matched = adapter.list().filter(entry => normalizeVersion(entry.version) === target)
+        const matched = adapter.list(lang).filter(entry => normalizeVersion(entry.version) === target)
 
         return {
             module: adapter.id,
-            label: t(adapter.labelKey),
+            label: moduleLabel(adapter.labelKey, lang),
             count: matched.length,
-            samples: matched.slice(0, 20).map(entry => entry.name),
+            samples: matched.slice(0, 20).map(entry => translateDBAgentText(entry.name, lang) ?? entry.name),
         }
     })
 
@@ -988,18 +1164,16 @@ interface StoryChainIndex {
     imprIncrease: boolean
 }
 
-/** 剧情索引缓存：按语言缓存，避免重复构建 */
-const storyIndexCache = new Map<StoryLocale, StoryChainIndex[]>()
+/** 剧情索引缓存：按数据语言缓存，避免重复构建 */
+const storyIndexCache = new Map<DBAgentLang, StoryChainIndex[]>()
 
 /**
- * 解析界面语言对应的剧情数据语言。
- * @returns 剧情数据语言
+ * 解析本次检索使用的数据语言：显式指定优先，否则取当前界面语言。
+ * @param lang 显式指定的数据语言
+ * @returns 数据语言
  */
-function resolveStoryLocale(): StoryLocale {
-    const stored = typeof localStorage !== "undefined" ? localStorage.getItem("setting_lang") : ""
-    const language = stored || (typeof navigator !== "undefined" ? navigator.language : "zh-CN")
-
-    return resolveStoryLocaleBySetting(language)
+function resolveSearchLang(lang?: DBAgentLang): DBAgentLang {
+    return lang ?? resolveCurrentDBAgentLang()
 }
 
 /**
@@ -1093,18 +1267,18 @@ function collectChainStoryLines(
 }
 
 /**
- * 构建剧情索引（按任务链聚合对话正文），结果按语言缓存。
- * @param locale 剧情数据语言
+ * 构建剧情索引（按任务链聚合对话正文），结果按数据语言缓存。
+ * @param lang 数据语言
  * @returns 剧情索引
  */
-async function buildStoryIndex(locale: StoryLocale): Promise<StoryChainIndex[]> {
-    const cached = storyIndexCache.get(locale)
+async function buildStoryIndex(lang: DBAgentLang): Promise<StoryChainIndex[]> {
+    const cached = storyIndexCache.get(lang)
 
     if (cached) {
         return cached
     }
 
-    const questStories = (await getLocalizedQuestDataByLanguage(locale)) as QuestStory[]
+    const questStories = (await getQuestDataByLocale(lang)) as QuestStory[]
     const questItemMap = new Map<number, QuestItem>()
 
     for (const story of questStories) {
@@ -1140,7 +1314,7 @@ async function buildStoryIndex(locale: StoryLocale): Promise<StoryChainIndex[]> 
         }
     })
 
-    storyIndexCache.set(locale, index)
+    storyIndexCache.set(lang, index)
     return index
 }
 
@@ -1150,9 +1324,10 @@ async function buildStoryIndex(locale: StoryLocale): Promise<StoryChainIndex[]> 
  * 剧情是 Agent 里唯一「正文检索 + 列表页筛选」双向都要支持的模块：
  * `search_story` 传 `filters` 时按这里的定义匹配，`list_filter_options` 也复用同一份取值。
  * @param index 剧情索引
+ * @param lang 取值的展示语言
  * @returns 筛选项定义
  */
-function buildStoryFacets(index: StoryChainIndex[]): DBFacetDefinition[] {
+function buildStoryFacets(index: StoryChainIndex[], lang: DBAgentLang = "zh"): DBFacetDefinition[] {
     const typeCounts = new Map<string, number>()
     const chapterCounts = new Map<string, number>()
     let imprCheckCount = 0
@@ -1177,21 +1352,21 @@ function buildStoryFacets(index: StoryChainIndex[]): DBFacetDefinition[] {
     const values = typeOrder
         .map(group => facetValue(getQuestName(group)))
         .filter(value => (typeCounts.get(value) ?? 0) > 0)
-        .map(value => ({ value, label: storyFacetRawValue(value), count: typeCounts.get(value) ?? 0 }))
+        .map(value => ({ value, label: facetLabel(storyFacetRawValue(value), lang), count: typeCounts.get(value) ?? 0 }))
 
     return [
-        { id: "type", label: "任务类型", kind: "enum", values },
-        { id: "chapter", label: "篇章", kind: "enum", values: toFacetValues(chapterCounts) },
+        { id: "type", label: facetLabel("任务类型", lang), kind: "enum", values },
+        { id: "chapter", label: facetLabel("篇章", lang), kind: "enum", values: toFacetValues(chapterCounts, "locale", lang) },
         {
             id: "imprCheck",
-            label: "印象检定",
+            label: facetLabel("印象检定", lang),
             kind: "boolean",
             values: [],
             description: `只保留含印象检定选项的任务链（当前共 ${imprCheckCount} 条）`,
         },
         {
             id: "imprIncrease",
-            label: "印象增加",
+            label: facetLabel("印象增加", lang),
             kind: "boolean",
             values: [],
             description: `只保留含印象增加选项的任务链（当前共 ${imprIncreaseCount} 条）`,
@@ -1206,9 +1381,10 @@ function buildStoryFacets(index: StoryChainIndex[]): DBFacetDefinition[] {
  * 还接受 `1,2` 这种原始类型写法，避免模型因为口径不确定而检索失败。
  * @param entry 剧情索引条目
  * @param filters 筛选条件
+ * @param lang 提问使用的语言（用于把译文取值还原成原文）
  * @returns 是否命中
  */
-function matchStoryFilters(entry: StoryChainIndex, filters: Record<string, string | number | boolean>): boolean {
+function matchStoryFilters(entry: StoryChainIndex, filters: Record<string, string | number | boolean>, lang: DBAgentLang): boolean {
     for (const [facetId, rawTarget] of Object.entries(filters)) {
         if (rawTarget === undefined || rawTarget === null || `${rawTarget}`.trim() === "") {
             continue
@@ -1222,7 +1398,7 @@ function matchStoryFilters(entry: StoryChainIndex, filters: Record<string, strin
             continue
         }
 
-        const target = storyFacetRawValue(`${rawTarget}`.trim())
+        const target = resolveDBAgentValue(storyFacetRawValue(`${rawTarget}`.trim()), lang)
 
         if (facetId === "type") {
             const numeric = Number(target)
@@ -1328,7 +1504,7 @@ function pickStorySnippets(entry: StoryChainIndex, keyword: string, limit: numbe
  * - 无关键词但带 filters（或只按类型列举）：退化为「按列表页筛选规则列举任务链」，
  *   例如「主线任务有哪些」，此时不返回台词片段。
  * @param keyword 关键词（人名、事件、地点等），可为空串
- * @param options 查询条件：返回任务链数量、每个任务链的片段数量、筛选项条件
+ * @param options 查询条件：返回任务链数量、每个任务链的片段数量、筛选项条件、数据语言
  * @returns 命中的任务链与对话片段
  */
 export async function searchStory(
@@ -1338,6 +1514,8 @@ export async function searchStory(
         snippetLimit?: number
         /** 筛选项条件：筛选项 id → 目标取值，取值见 listModuleFilters("questchain") */
         filters?: Record<string, string | number | boolean>
+        /** 数据语言：决定读哪一套剧情数据集（中文 / 英文 / 日文 / 韩文 / 法文 / 繁中） */
+        lang?: DBAgentLang
     } = {}
 ): Promise<{ hits: DBStoryHit[]; total: number; note: string }> {
     const trimmed = keyword.trim()
@@ -1348,19 +1526,19 @@ export async function searchStory(
         return { hits: [], total: 0, note: "关键词与筛选条件都为空，请至少给出关键词或一个筛选项（如 type=主线任务）。" }
     }
 
-    const locale = resolveStoryLocale()
-    const index = await buildStoryIndex(locale)
+    const lang = resolveSearchLang(options.lang)
+    const index = await buildStoryIndex(lang)
 
     const limit = Math.min(Math.max(options.limit ?? 5, 1), 12)
     const snippetLimit = Math.min(Math.max(options.snippetLimit ?? 6, 1), 20)
 
     // 先把筛选条件收窄成候选集，再在候选集内做关键词检索，避免「筛选后被 limit 截断」造成的漏检
-    const scoped = hasFilters ? index.filter(entry => matchStoryFilters(entry, filters)) : index
+    const scoped = hasFilters ? index.filter(entry => matchStoryFilters(entry, filters, lang)) : index
 
     const notes: string[] = []
 
-    if (locale !== "zh") {
-        notes.push(`剧情数据语言：${locale}`)
+    if (lang !== "zh") {
+        notes.push(`剧情数据语言：${lang}`)
     }
     if (hasFilters) {
         notes.push(`已按筛选条件收窄：${JSON.stringify(filters)}，候选任务链 ${scoped.length} 条。`)
@@ -1376,6 +1554,10 @@ export async function searchStory(
         }
     }
 
+    // 其他语言提问时，关键词与剧情正文可能分属两套语言（任务链名仍是中文原文），
+    // 因此扩展成「提问语言写法 + 可反查到的原文写法」后逐个匹配。
+    const keywords = expandKeywords(trimmed, lang)
+
     const fuse = new Fuse(scoped, {
         threshold: 0.34,
         ignoreLocation: true,
@@ -1390,13 +1572,22 @@ export async function searchStory(
     })
 
     // 精确包含优先：先挑出对话正文里真的出现关键词的任务链，再用模糊检索补齐
-    const exact = scoped.filter(entry => matchKeyword(entry.searchText, trimmed))
-    const fuzzy = fuse.search(trimmed, { limit }).map(result => result.item)
-    const ordered = [...exact, ...fuzzy.filter(entry => !exact.includes(entry))].slice(0, limit)
+    const exact = scoped.filter(entry => keywords.some(item => matchKeyword(entry.searchText, item)))
+    const fuzzyHits: StoryChainIndex[] = []
+
+    for (const item of keywords) {
+        for (const result of fuse.search(item, { limit })) {
+            if (!fuzzyHits.includes(result.item)) {
+                fuzzyHits.push(result.item)
+            }
+        }
+    }
+
+    const ordered = [...exact, ...fuzzyHits.filter(entry => !exact.includes(entry))].slice(0, limit)
 
     return {
-        hits: ordered.map(entry => toStoryHit(entry, [trimmed], snippetLimit)),
-        total: exact.length + fuzzy.filter(entry => !exact.includes(entry)).length,
+        hits: ordered.map(entry => toStoryHit(entry, keywords, snippetLimit)),
+        total: exact.length + fuzzyHits.filter(entry => !exact.includes(entry)).length,
         note: notes.join(" "),
     }
 }
@@ -1404,14 +1595,14 @@ export async function searchStory(
 /**
  * 读取指定任务链的剧情原文（可限定单个任务）。
  * @param chainId 任务链 ID
- * @param options 查询条件：任务 ID、起始行号、行数上限
+ * @param options 查询条件：任务 ID、起始行号、行数上限、数据语言
  * @returns 任务链信息与对话行
  */
 export async function readStory(
     chainId: number,
-    options: { questId?: number; offset?: number; limit?: number } = {}
+    options: { questId?: number; offset?: number; limit?: number; lang?: DBAgentLang } = {}
 ): Promise<{ chain?: Omit<DBStoryHit, "snippets">; lines: DBStorySnippet[]; total: number }> {
-    const index = await buildStoryIndex(resolveStoryLocale())
+    const index = await buildStoryIndex(resolveSearchLang(options.lang))
     const entry = index.find(item => item.chainId === chainId)
 
     if (!entry) {
@@ -1449,10 +1640,13 @@ export async function readStory(
  *
  * 与 `listModuleFilters("questchain")` 的区别：这里给出的是**按剧情正文索引统计**的取值，
  * 包含印象检定 / 印象增加这类需要读对话选项才能得出的筛选项。
+ * @param lang 数据语言
  * @returns 剧情筛选项定义
  */
-export async function listStoryFilters(): Promise<{ facets: DBFacetDefinition[]; total: number }> {
-    const index = await buildStoryIndex(resolveStoryLocale())
+export async function listStoryFilters(
+    lang: DBAgentLang = resolveCurrentDBAgentLang()
+): Promise<{ facets: DBFacetDefinition[]; total: number }> {
+    const index = await buildStoryIndex(lang)
 
-    return { facets: buildStoryFacets(index), total: index.length }
+    return { facets: buildStoryFacets(index, lang), total: index.length }
 }

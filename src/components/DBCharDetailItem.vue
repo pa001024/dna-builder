@@ -5,6 +5,7 @@ import { charMap, LeveledChar, LeveledSkillWeapon } from "@/data"
 import { type SkinItem, skinData } from "@/data/d/accessory.data"
 import { type CharExt, charExtData } from "@/data/d/charext.data"
 import { type CharVoice, charVoiceData } from "@/data/d/charvoice.data"
+import { type CharVoiceLocale, getLocalizedCharVoiceData, resolveCharVoiceLocaleBySetting } from "@/data/d/charvoice-locale"
 import { type Resource, resourceMap } from "@/data/d/resource.data"
 import weaponData from "@/data/d/weapon.data"
 import type { Char, Weapon } from "@/data/data-types"
@@ -30,7 +31,7 @@ const activeBottomTab = ref<"profile" | "skin" | "voice" | "source">("skin")
 const currentVoiceId = ref<number | null>(null)
 const isVoicePlaying = ref(false)
 const voiceAudioRef = ref<HTMLAudioElement | null>(null)
-type VoiceLocale = "zh" | "en" | "jp" | "kr"
+type VoiceLocale = CharVoiceLocale
 const selectedVoiceLocale = ref<VoiceLocale>("zh")
 const voiceLocaleOptions: { key: VoiceLocale; label: string; cvLabel: string }[] = [
     { key: "zh", label: "汉语", cvLabel: "中文CV" },
@@ -42,13 +43,9 @@ const voiceLocaleOptions: { key: VoiceLocale; label: string; cvLabel: string }[]
 const VOICE_DATASET_BASE_URL = "https://modelscope.cn/datasets/pa001024/dna-voice-dataset/resolve/master"
 type CharExtLocale = "zh" | "en" | "jp" | "kr" | "fr" | "tc"
 type CharExtExtendedLocale = Exclude<CharExtLocale, "zh">
-type VoiceExtendedLocale = Exclude<VoiceLocale, "zh">
 
 const charExtDataCache: Partial<Record<CharExtLocale, CharExt[]>> = {
     zh: charExtData,
-}
-const charVoiceDataCache: Partial<Record<VoiceLocale, CharVoice[]>> = {
-    zh: charVoiceData,
 }
 const charExtLoaderMap: Record<CharExtExtendedLocale, () => Promise<CharExt[]>> = {
     en: async () => (await import("@/data/d/charext.en.data")).charExtData_en,
@@ -56,11 +53,6 @@ const charExtLoaderMap: Record<CharExtExtendedLocale, () => Promise<CharExt[]>> 
     kr: async () => (await import("@/data/d/charext.kr.data")).charExtData_kr,
     fr: async () => (await import("@/data/d/charext.fr.data")).charExtData_fr,
     tc: async () => (await import("@/data/d/charext.tc.data")).charExtData_tc,
-}
-const charVoiceLoaderMap: Record<VoiceExtendedLocale, () => Promise<CharVoice[]>> = {
-    en: async () => (await import("@/data/d/charvoice.en.data")).charVoiceData_en,
-    jp: async () => (await import("@/data/d/charvoice.jp.data")).charVoiceData_jp,
-    kr: async () => (await import("@/data/d/charvoice.kr.data")).charVoiceData_kr,
 }
 
 // 创建LeveledChar实例
@@ -371,19 +363,6 @@ function formatStoryText(text: string | undefined): string {
 }
 
 /**
- * 将设置语言代码映射为语音文本语言。
- * @param language 设置语言代码
- * @returns 语音语言
- */
-function resolveVoiceLocaleBySetting(language: string): VoiceLocale {
-    if (language === "jiaojiao") return "en"
-    if (language.startsWith("en")) return "en"
-    if (language.startsWith("ja")) return "jp"
-    if (language.startsWith("ko")) return "kr"
-    return "zh"
-}
-
-/**
  * 将语音文本语言映射为数据集目录语言代码。
  * @param locale 语音语言
  * @returns 数据集目录语言代码
@@ -482,20 +461,11 @@ async function loadLocalizedCharExtData(language: string): Promise<void> {
 }
 
 /**
- * 加载当前语音语言的角色语音数据，并缓存已加载模块。
+ * 加载当前语音语言的角色语音数据（数据集本身按语言缓存）。
  * @param locale 语音语言
  */
 async function loadLocalizedCharVoiceData(locale: VoiceLocale): Promise<void> {
-    const cachedData = charVoiceDataCache[locale]
-    if (cachedData) {
-        if (selectedVoiceLocale.value === locale) {
-            localizedCharVoiceData.value = cachedData
-        }
-        return
-    }
-
-    const data = await charVoiceLoaderMap[locale as VoiceExtendedLocale]()
-    charVoiceDataCache[locale] = data
+    const data = await getLocalizedCharVoiceData(locale)
     if (selectedVoiceLocale.value !== locale) {
         return
     }
@@ -692,7 +662,7 @@ watch(
 watch(
     () => setting.lang,
     async language => {
-        selectedVoiceLocale.value = resolveVoiceLocaleBySetting(language)
+        selectedVoiceLocale.value = resolveCharVoiceLocaleBySetting(language)
         await loadLocalizedCharExtData(language)
     },
     { immediate: true }
@@ -1204,7 +1174,9 @@ onBeforeUnmount(() => {
                                     v-else-if="entry.voice.hide"
                                     class="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-1 text-[11px] transition-colors duration-150 hover:border-primary/50 hover:bg-primary/5"
                                 >
-                                    <span class="text-base-content/45">{{ $t("char-detail.companio_char_absent", { name: $t("char-detail.companio_char") }) }}</span>
+                                    <span class="text-base-content/45">{{
+                                        $t("char-detail.companio_char_absent", { name: $t("char-detail.companio_char") })
+                                    }}</span>
                                 </div>
                             </div>
                         </div>

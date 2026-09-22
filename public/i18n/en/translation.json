@@ -6763,6 +6763,7 @@
         "book_desc": "Browse books, clue texts and related locations",
         "char": "Character",
         "char_desc": "View character information and attributes",
+        "charvoice": "Character Voice",
         "damage": "Damage",
         "damage_desc": "Step-by-step breakdown of damage formulas",
         "desc": "Query game data",

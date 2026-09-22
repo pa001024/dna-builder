@@ -107,3 +107,15 @@ export function getLocalizedQuestDataByLanguage(language: string): Promise<Quest
     const locale = resolveStoryLocaleBySetting(language)
     return loadQuestDataByLocale(locale)
 }
+
+/**
+ * 按数据语言直接取任务剧情数据。
+ *
+ * 调用方已经持有数据语言（如检索层拿到的 lang 参数）时用它，避免把数据语言
+ * 再当成设置语言代码传进映射函数。
+ * @param locale 数据语言
+ * @returns 任务剧情数据
+ */
+export function getQuestDataByLocale(locale: StoryLocale): Promise<QuestStory[]> {
+    return loadQuestDataByLocale(locale)
+}
