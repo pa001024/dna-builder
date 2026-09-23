@@ -4,9 +4,9 @@
     "version": "1.3.18",
     "identifier": "com.pa.dna-builder",
     "build": {
-        "beforeDevCommand": "pnpm dev",
+        "beforeDevCommand": "npm run dev",
         "devUrl": "http://localhost:1420",
-        "beforeBuildCommand": "pnpm build:app",
+        "beforeBuildCommand": "npm run build:app",
         "frontendDist": "../dist"
     },
     "app": {
