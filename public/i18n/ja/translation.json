@@ -6409,6 +6409,7 @@
         "mod_variant_remove": "このMOD構成を削除",
         "mod_variant_switch": "構成 {{letter}} に切り替え",
         "mods_need_weapon": "{{slot}}武器を装備しないと、このスロットの楔を設定できません。",
+        "mods_removed_on_weapon_change": "武器変更後、限定条件が新しい武器と一致しなくなったため、以下の楔を自動的に外しました：{{mods}}。",
         "new_project": "新規プロジェクト",
         "no_saved_projects": "保存済みプロジェクトはまだありません",
         "other": "その他",
@@ -6503,6 +6504,9 @@
         "weapon_attack_converted_from": "{{dmg}}攻撃から変換",
         "weapon_attack_label": "{{dmg}}攻撃",
         "weapon_attributes": "武器属性",
+        "weapon_change_reason_both": "武器変更",
+        "weapon_change_reason_melee": "近接武器の変更",
+        "weapon_change_reason_ranged": "遠隔武器の変更",
         "weapon_slot_empty_desc": "未装備のスロットは武器ステータス・スキル・楔の効果を一切提供しません。",
         "weapon_slot_not_equipped": "未装備"
     },

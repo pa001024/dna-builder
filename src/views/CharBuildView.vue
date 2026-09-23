@@ -16,6 +16,7 @@ import {
     getModVariantSlots,
     MOD_SLOT_COUNTS,
     MOD_SLOT_TYPES,
+    type ModSlot,
     type ModSlotType,
     normalizeCharSettings,
     removeLastModVariant,
@@ -32,6 +33,7 @@ import {
     CharBuildTimeline,
     charData,
     charMap,
+    formatModName,
     LeveledBuff,
     LeveledChar,
     LeveledCharHelper,
@@ -75,6 +77,7 @@ import { copyText, formatBigNumber, formatProp, pasteText, roundBuffValue } from
 import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
 import { joinExprText } from "@/utils/expr-field"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
+import { isModAllowedInSlot, type ModLimitContext } from "@/utils/mod-equip"
 
 //#region 角色
 const inv = useInvStore()
@@ -639,6 +642,67 @@ function swapMods(fromIndex: number, toIndex: number, type: string) {
         slots[toIndex] = temp
     }
     updateCharBuild()
+}
+
+/**
+ * 构造 MOD 限定校验上下文：角色 id/名称/属性，以及三把武器的类别与伤害类型。
+ * @returns 校验上下文
+ */
+function createModLimitContext(): ModLimitContext {
+    const pick = (weapon: LeveledWeapon | undefined) =>
+        weapon && !weapon.isEmpty ? { 类别: weapon.类别, 伤害类型: weapon.伤害类型 as string } : null
+    return {
+        charId: charBuild.value.char.id,
+        charName: charBuild.value.char.名称,
+        charElement: charBuild.value.char.属性,
+        melee: pick(charBuild.value.meleeWeapon),
+        ranged: pick(charBuild.value.rangedWeapon),
+        skill: pick(charBuild.value.skillWeapon as LeveledWeapon | undefined),
+    }
+}
+
+/**
+ * 剔除槽位中不再满足「限定」的魔之楔（换武器后原 MOD 可能已不适用）。
+ * 只改动传入的槽位数组本身，由调用方决定何时刷新构筑。
+ * @param slots 槽位数组（原地修改）
+ * @param type 槽位类型
+ * @param ctx 校验上下文
+ * @returns 被剔除的魔之楔名称列表
+ */
+function stripIncompatibleSlots(slots: ModSlot[], type: ModSlotType, ctx: ModLimitContext) {
+    const removed: string[] = []
+    slots.forEach((slot, index) => {
+        if (!slot) return
+        const mod = LeveledModHelper.optionalFromId(slot[0], slot[1], getBuffLv(slot[0]))
+        if (!mod || isModAllowedInSlot(mod, type, ctx)) return
+        removed.push(formatModName(mod.系列, mod.名称, t))
+        slots[index] = null
+    })
+    return removed
+}
+
+/**
+ * 剔除当前激活变体中所有不再满足「限定」的魔之楔，并提示被移除的 MOD。
+ * 武器更换后原 MOD 的限定（武器类别/伤害类型）可能已不匹配，继续保留会让构筑带上错误的加成。
+ * @param reasonKey 提示文案中说明触发原因（如「更换近战武器」）的 i18n 键
+ * @returns 是否有 MOD 被剔除
+ */
+function stripIncompatibleMods(reasonKey: string) {
+    const ctx = createModLimitContext()
+    const removed: string[] = []
+    MOD_SLOT_TYPES.forEach(type => {
+        removed.push(...stripIncompatibleSlots(activeModSlots(type), type, ctx))
+    })
+    // 非激活变体同样承载构筑数据（切回去即生效），一并清理
+    charSettings.value.modVariants?.forEach(variant => {
+        MOD_SLOT_TYPES.forEach(type => {
+            removed.push(...stripIncompatibleSlots(variant[type] ?? [], type, ctx))
+        })
+    })
+    if (removed.length) {
+        ui.showErrorMessage(t("char-build.mods_removed_on_weapon_change", { reason: t(reasonKey), mods: removed.join("、") }))
+    }
+    return removed.length > 0
 }
 
 /**
@@ -1620,9 +1684,10 @@ const skillWeaponInheritBaseEmpty = computed(() => {
 
 /**
  * 提交武器槽位选择（含卸下装备：id 为 0）。
- * 卸下某槽位武器时同步处理：
- * 1. 清空该槽位已装备的武器魔之楔（未装备的武器不承载魔之楔）；
- * 2. 若当前技能属于被卸下的武器，回退到角色主技能，避免残留失效技能。
+ * 更换武器后同步处理：
+ * 1. 清空被卸下槽位已装备的武器魔之楔（未装备的武器不承载魔之楔）；
+ * 2. 剔除两把武器上限定已不匹配的魔之楔（如「锋锐·缠缚」限切割，换成贯穿武器后失效）并提示；
+ * 3. 若当前技能属于被卸下的武器，回退到角色主技能，避免残留失效技能。
  * @param melee 近战武器 id（0 表示卸下）
  * @param ranged 远程武器 id（0 表示卸下）
  * @param closeModal 是否同时关闭武器选择弹窗
@@ -1634,6 +1699,8 @@ function commitWeaponSelection(melee: number, ranged: number, closeModal = true)
     const currentBuild = charBuild.value
     const droppingMelee = melee === 0 && prevMelee !== 0
     const droppingRanged = ranged === 0 && prevRanged !== 0
+    const switchingMelee = melee !== prevMelee && !droppingMelee
+    const switchingRanged = ranged !== prevRanged && !droppingRanged
 
     newWeaponSelection.value = { melee, ranged }
     charSettings.value.meleeWeapon = melee
@@ -1653,6 +1720,17 @@ function commitWeaponSelection(melee: number, ranged: number, closeModal = true)
             charSettings.value.baseName = currentBuild.char.技能[0]?.名称 || ""
         }
     }
+    // 换武器后按新武器重算限定：不匹配的魔之楔不能留在槽位里继续提供加成
+    if (switchingMelee || switchingRanged) {
+        const reasonKey =
+            switchingMelee && switchingRanged
+                ? "char-build.weapon_change_reason_both"
+                : switchingMelee
+                  ? "char-build.weapon_change_reason_melee"
+                  : "char-build.weapon_change_reason_ranged"
+        stripIncompatibleMods(reasonKey)
+    }
+    updateCharBuild()
     if (closeModal) {
         weapon_select_model_show.value = false
     }

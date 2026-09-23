@@ -6495,6 +6495,7 @@
         "mod_variant_remove": "이 MOD 구성 제거",
         "mod_variant_switch": "구성 {{letter}}(으)로 전환",
         "mods_need_weapon": "{{slot}} 무기를 먼저 장착해야 해당 슬롯의 마의 쐐기를 구성할 수 있습니다.",
+        "mods_removed_on_weapon_change": "무기 교체 후 한정 조건이 새 무기와 맞지 않아 다음 마의 쐐기를 자동으로 해제했습니다: {{mods}}.",
         "new_project": "새 프로젝트",
         "no_saved_projects": "저장된 프로젝트가 아직 없습니다",
         "other": "기타",
@@ -6589,6 +6590,9 @@
         "weapon_attack_converted_from": "{{dmg}} 공격에서 전환",
         "weapon_attack_label": "{{dmg}} 공격",
         "weapon_attributes": "무기 속성",
+        "weapon_change_reason_both": "무기 교체",
+        "weapon_change_reason_melee": "근접 무기 교체",
+        "weapon_change_reason_ranged": "원거리 무기 교체",
         "weapon_slot_empty_desc": "미장착 슬롯은 무기 속성·스킬·마의 쐐기 보너스를 제공하지 않습니다.",
         "weapon_slot_not_equipped": "미장착"
     },

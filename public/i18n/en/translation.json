@@ -6499,6 +6499,7 @@
         "mod_variant_remove": "Remove this MOD set",
         "mod_variant_switch": "Switch to set {{letter}}",
         "mods_need_weapon": "Equip a {{slot}} weapon first to configure Mods for this slot.",
+        "mods_removed_on_weapon_change": "After changing weapons, the following Mods were auto-unequipped because their limit no longer matches the new weapon: {{mods}}.",
         "new_project": "New project",
         "no_saved_projects": "No saved projects yet",
         "other": "Other",
@@ -6606,6 +6607,9 @@
         "weapon_attack_converted_from": "Converted from {{dmg}} ATK",
         "weapon_attack_label": "{{dmg}} ATK",
         "weapon_attributes": "Weapon Attributes",
+        "weapon_change_reason_both": "Changing weapons",
+        "weapon_change_reason_melee": "Changing the melee weapon",
+        "weapon_change_reason_ranged": "Changing the ranged weapon",
         "weapon_slot_empty_desc": "An empty slot provides no weapon stats, skills, or Mod bonuses.",
         "weapon_slot_not_equipped": "Not equipped"
     },

@@ -605,6 +605,7 @@
         "mod_variant_remove": "移除该MOD配置",
         "mod_variant_switch": "切换到配置 {{letter}}",
         "mods_need_weapon": "未装备{{slot}}武器，暂无法配置该槽位的魔之楔。",
+        "mods_removed_on_weapon_change": "{{reason}}后已自动卸下 {{mods}}：这些魔之楔的限定属性与新武器不匹配。",
         "new_project": "新建项目",
         "no_saved_projects": "暂无已保存项目",
         "other": "其他",
@@ -712,6 +713,9 @@
         "weapon_attack_converted_from": "由{{dmg}}攻击转换",
         "weapon_attack_label": "{{dmg}}攻击",
         "weapon_attributes": "武器属性",
+        "weapon_change_reason_both": "更换武器",
+        "weapon_change_reason_melee": "更换近战武器",
+        "weapon_change_reason_ranged": "更换远程武器",
         "weapon_slot_empty_desc": "未装备时该槽位不提供任何武器属性、技能与魔之楔加成。",
         "weapon_slot_not_equipped": "未装备"
     },
