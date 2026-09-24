@@ -26,6 +26,7 @@ import {
     useCharSettings,
 } from "@/composables/useCharSettings"
 import { type ExprDragPayload, useExprDrag } from "@/composables/useExprDrag"
+import { useGameText } from "@/composables/useGameText"
 import {
     buffData,
     buffMap,
@@ -51,7 +52,7 @@ import { charExtraExcelWeapon } from "@/data/d/charext.data"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
 import { resourceMap } from "@/data/d/resource.data"
 import { dataPackHydrationKey, isDataPackHydrated } from "@/data/data-pack-bridge"
-import type { SkillWeapon, Weapon } from "@/data/data-types"
+import type { ParamText, SkillWeapon, Weapon } from "@/data/data-types"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
 import {
     collectPetBuffs,
@@ -86,6 +87,7 @@ const ui = useUIStore()
 const route = useRoute()
 const tourStore = useTourStore()
 const { t } = useTranslation()
+const { gpt } = useGameText()
 const dataPackTick = computed(() => dataPackHydrationKey.value)
 const isCharBuildReady = computed(() => {
     dataPackTick.value
@@ -484,7 +486,10 @@ type WeaponTooltipData = {
     desc?: string
     props: Record<string, number | string>
     propEntries: [string, number | string][]
-    effdesc?: string
+    /** 熔炼效果原文（参数化文本，按 `effindex` 求值后展示） */
+    effdesc?: ParamText
+    /** 熔炼效果档位（精炼等级） */
+    effindex?: number
     ineffectiveProps?: Set<string>
     /** 槽位是否为空武器（未装备） */
     isEmpty?: boolean
@@ -588,10 +593,8 @@ function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTool
         props,
         propEntries: Object.entries(props).filter(([, val]) => val !== 0 && val != null),
         ineffectiveProps,
-        effdesc:
-            "熔炼" in weaponData && Array.isArray(weaponData.熔炼)
-                ? weaponData.熔炼[weapon instanceof LeveledWeapon ? weapon.精炼 : 0] || ""
-                : "",
+        effdesc: "熔炼" in weaponData ? weaponData.熔炼 : undefined,
+        effindex: weapon instanceof LeveledWeapon ? weapon.精炼 : 0,
     }
 }
 
@@ -2294,7 +2297,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                             {{ $t("char-build.weapon_slot_not_equipped") }}
                                         </div>
                                         <div v-if="charTabTooltipMap[tab.name].effdesc" class="ml-auto text-xs text-neutral-500">
-                                            {{ charTabTooltipMap[tab.name].effdesc }}
+                                            {{ gpt(charTabTooltipMap[tab.name].effdesc, charTabTooltipMap[tab.name].effindex ?? 0) }}
                                         </div>
                                         <div
                                             v-if="charTabTooltipMap[tab.name].mastery?.length"

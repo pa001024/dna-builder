@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { Fish, fish2SpotMap, fishingSpotMap, fishMap, resourceMap } from "@/data"
 import { calculateFishPrice } from "@/utils/fish-utils"
 import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
@@ -7,6 +8,8 @@ import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
 const props = defineProps<{
     fish: Fish
 }>()
+
+const { gt } = useGameText()
 
 /**
  * 获取出现时间名称
@@ -70,7 +73,7 @@ const fishSpots = computed(() => {
                 </SRouterLink>
                 <CopyID :id="fish.id" />
                 <span :class="getRarityBadgeClass(fish.rarity)">
-                    {{ getRarityName(fish.rarity) }}
+                    {{ gt(getRarityName(fish.rarity)) }}
                 </span>
             </div>
             <!-- 鱼图 -->
@@ -103,13 +106,13 @@ const fishSpots = computed(() => {
         <!-- 描述 -->
         <section v-if="fishResource?.desc" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('resource.description')" />
-            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/85">{{ fishResource.desc }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/85">{{ gt(fishResource.desc) }}</div>
         </section>
 
         <!-- 背景 -->
         <section v-if="fishResource?.desc2" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="BACKGROUND" :title="$t('resource.background')" />
-            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/85">{{ fishResource.desc2 }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/85">{{ gt(fishResource.desc2) }}</div>
         </section>
 
         <!-- 出现时间 / 变异概率 -->
@@ -118,7 +121,7 @@ const fishSpots = computed(() => {
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">出现时间</span>
-                    <span class="text-sm text-base-content/90">{{ getAppearName(fish.appear) }}</span>
+                    <span class="text-sm text-base-content/90">{{ gt(getAppearName(fish.appear)) }}</span>
                 </div>
                 <div
                     v-if="fish.var && fish.varProb && fish.var.length > 0 && fish.varProb > 0"

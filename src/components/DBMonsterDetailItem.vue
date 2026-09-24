@@ -2,6 +2,7 @@
 import * as echarts from "echarts"
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { abyssDungeonMap, Monster } from "@/data"
 import { MaxMonsterLevelLimit } from "@/data/d/const.data"
@@ -17,6 +18,8 @@ const props = defineProps<{
     monster: Monster
     defaultLevel?: number
 }>()
+
+const { gt } = useGameText()
 const { t } = useTranslation()
 
 const currentLevel = useSearchParam("level", props.defaultLevel || 180)
@@ -577,7 +580,7 @@ function getFactionName(faction: number | undefined): string {
                         </SRouterLink>
                     </div>
                     <div class="text-sm leading-relaxed whitespace-pre-line text-base-content/85">
-                        {{ monsterTagGroup.primaryTag.desc }}
+                        {{ gt(monsterTagGroup.primaryTag.desc) }}
                     </div>
                     <div v-if="monsterTagGroup.tags.length > 1" class="flex flex-wrap gap-2">
                         <SRouterLink
@@ -692,7 +695,7 @@ function getFactionName(faction: number | undefined): string {
                         </div>
                     </div>
                     <div class="mt-1 text-xs leading-relaxed text-base-content/55">
-                        {{ dungeon.desc }}
+                        {{ gt(dungeon.desc) }}
                     </div>
                 </div>
             </div>

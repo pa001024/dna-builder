@@ -1,12 +1,15 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
 import { computed, ref } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import type { MonsterTag } from "@/data/d/monstertag.data"
 import { getMonsterTagGroupByTagId, getRelatedMonstersByMonsterTagId } from "@/utils/monster-tag-utils"
 
 const props = defineProps<{
     monsterTag: MonsterTag
 }>()
+
+const { gt } = useGameText()
 const { t } = useTranslation()
 
 /**
@@ -183,7 +186,7 @@ function formatBonusValue(value: number): string {
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('monster-tag-detail.description')" />
             <div class="text-sm leading-relaxed whitespace-pre-line text-base-content/85">
-                {{ monsterTag.desc }}
+                {{ gt(monsterTag.desc) }}
             </div>
         </section>
 

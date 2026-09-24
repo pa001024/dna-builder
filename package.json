@@ -34,6 +34,7 @@
         "deploy": "bun server/deploy.ts",
         "icon": "bun run tools/icon-tool.ts",
         "importdata": "bun run tools/import-i18n-data.ts",
+        "prune-i18n": "bun tools/prune-migrated-i18n.ts",
         "iattr": "bun tools/import-attr-i18n.ts",
         "imgs-upload": "bun tools/imgs-upload.ts",
         "wi": "bun tools/webp-import.ts",

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { charMap } from "@/data"
 import {
@@ -86,6 +87,8 @@ function getAccessoryRarity(accessory: AccessoryItem): number {
  * 必须是实测卡高的小数值——上千张卡按取整值累计会多出数百像素的滚动空白。
  */
 const ACCESSORY_CARD_HEIGHT = 91
+
+const { gt } = useGameText()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedAccessoryKey = useSearchParam<string>("id", "")
@@ -400,7 +403,7 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                                 "
                                 @click="selectedRarity = rarity"
                             >
-                                {{ getRarityName(rarity) }}
+                                {{ gt(getRarityName(rarity)) }}
                             </button>
                         </div>
 
@@ -501,7 +504,7 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                                         class="flex flex-col items-end gap-1 shrink-0"
                                     >
                                         <span :class="getRarityBadgeClass(getAccessoryRarity(accessory))">
-                                            {{ getRarityName(getAccessoryRarity(accessory)) }}
+                                            {{ gt(getRarityName(getAccessoryRarity(accessory))) }}
                                         </span>
                                         <span class="font-mono text-[10px] tabular-nums text-base-content/35">ID: {{ accessory.id }}</span>
                                     </div>

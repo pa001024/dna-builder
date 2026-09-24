@@ -6,8 +6,11 @@ import {
     loadDataPackModule,
     syncDataPackModuleBindings,
 } from "./data-pack"
+// 副作用导入：注册「数据包激活后注入文案对照表」的钩子，必须早于首次激活
+import "./translations-pack"
 
 const DATA_PACK_MODULES = [
+    "translations.data",
     "char.data",
     "mod.data",
     "weapon.data",

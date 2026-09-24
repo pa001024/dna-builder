@@ -10,6 +10,192 @@ const TARGET_DIR = path.resolve("src", "data", "d")
 const LOCALES = ["cn", "en", "fr", "jp", "kr", "tc"] as const
 type Locale = (typeof LOCALES)[number]
 
+/** 打包进数据包的语言（简体中文是 fallbackLng，留在 public/i18n 不进包） */
+const TRANSLATION_LOCALES = ["tc", "en", "jp", "kr", "fr"] as const
+type TranslationLocale = (typeof TRANSLATION_LOCALES)[number]
+
+/** 打包语言 → 目标文件里的变量名 */
+const TRANSLATION_VARS: Record<TranslationLocale, string> = {
+    tc: "translationsTc",
+    en: "translationsEn",
+    jp: "translationsJa",
+    kr: "translationsKo",
+    fr: "translationsFr",
+}
+
+/**
+ * 前端自造展示名 → 官方文本表 ID 的映射。
+ *
+ * 少数展示名由前端从数值生成，上游各模块数据集里没有对应文本，按位置比对拿不到译文。
+ * 这类词在**官方文本表**（`out/TextMap_I18n.json`）里有权威译名，只是 ID 与模块字段不相干，
+ * 因此单独按 ID 取。键是前端实际输出的中文，值是官方 TextMapId。
+ */
+const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
+    // 稀有度：前端把 `rarity: 1~6` 显示成「白/绿/蓝/紫/金/红」，官方 ID 给的是「白色/绿色/…」
+    白: "BackpackResource_Rarity1",
+    绿: "BackpackResource_Rarity2",
+    蓝: "BackpackResource_Rarity3",
+    紫: "BackpackResource_Rarity4",
+    金: "BackpackResource_Rarity5",
+    红: "BackpackResource_Rarity6",
+    // 钓鱼出现时段
+    上午: "UI_Fishing_DayAndNight_Cont_1",
+    下午: "UI_Fishing_DayAndNight_Cont_2",
+    夜晚: "UI_Fishing_DayAndNight_Cont_3",
+}
+
+/**
+ * 官方文本表 ID → 应用语言字段。
+ */
+const TEXT_MAP_LOCALE_FIELDS: Record<TranslationLocale, string> = {
+    tc: "ContentTC",
+    en: "ContentEN",
+    jp: "ContentJP",
+    kr: "ContentKR",
+    fr: "ContentFR",
+}
+
+/**
+ * 无官方依据、纯前端自造的展示名译名表。
+ *
+ * 成就品质（前端把 `quality` 显示成「铜/银/金」）是前端自己的展示口径，
+ * 官方文本表里搜不到同义 ID，只能人工指定。键必须与前端实际输出的中文完全一致。
+ */
+const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string>> = {
+    tc: { 铜: "銅", 银: "銀" },
+    en: { 铜: "Bronze", 银: "Silver" },
+    jp: { 铜: "銅", 银: "銀" },
+    kr: { 铜: "동", 银: "은" },
+    fr: { 铜: "Bronze", 银: "Argent" },
+}
+
+/**
+ * 上游 i18n 源里承载「零散游戏文案」的各模块数据集。
+ *
+ * 与 translation.json（已是一张扁平的「中文原文 → 译文」表）不同，这里每个文件都是
+ * **按语言独立的数据集**：结构与字段名在简繁/各语言下一致，只有文本值不同。
+ * 因此按位置同步遍历两侧，即可把同一字段的简体中文原文与目标语言译文配成对照。
+ */
+const TRANSLATION_SOURCE_FILES = [
+    "AbyssBuff.json",
+    "AbyssDungeon.json",
+    "Achievement.json",
+    "BackpackPuzzleItem.json",
+    "BackpackPuzzleLevel.json",
+    "BookSeriesArchive.json",
+    "Char.json",
+    "CharAccessory.json",
+    "Cutoff.json",
+    "Dispatch.json",
+    "Draft.json",
+    "Dungeon.json",
+    "DynQuest.json",
+    "Event.json",
+    "ExtraExcelWeapon.json",
+    "ExtractionTreasure.json",
+    "ExtractionTreasureBag.json",
+    "ExtractionTreasureContainer.json",
+    "ExtractionTreasureMechanism.json",
+    "Fish.json",
+    "FishingSpot.json",
+    "ForgeLevelQuest.json",
+    "Hair.json",
+    "HardBoss.json",
+    "HeadFrame.json",
+    "HeadSculpture.json",
+    "ImpressionShop.json",
+    "IronSurvivalMonsterSpawn.json",
+    "IronTicket.json",
+    "Mod.json",
+    "Monster.json",
+    "MonsterStrongAffixes.json",
+    "Mount.json",
+    "Music.json",
+    "MusicScore.json",
+    "Npc.json",
+    "OptReward.json",
+    "Pet.json",
+    "PetEntry.json",
+    "QuestChain.json",
+    "RaidBuff.json",
+    "Region.json",
+    "RegionPoint.json",
+    "RegionReputation.json",
+    "Resource.json",
+    "Reward.json",
+    "RewardView.json",
+    "RobotEquip.json",
+    "RougeLikeBlessing.json",
+    "RougeLikeBlessingGroup.json",
+    "RougeLikeContract.json",
+    "RougeLikeRoom.json",
+    "RougeLikeStoryEvent.json",
+    "RougeLikeTalent.json",
+    "RougeLikeTalentBranch.json",
+    "RougeLikeTreasure.json",
+    "RougeLikeTreasureGroup.json",
+    "RougeProClass.json",
+    "RougeProContract.json",
+    "RougeProConvert.json",
+    "RougeProDifficulty.json",
+    "RougeProEffect.json",
+    "RougeProSeason.json",
+    "RougeProShopRandom.json",
+    "RougeProTalent.json",
+    "RougeProTreasure.json",
+    "RougeProTreasureGroup.json",
+    "RougeProTreasureRandom.json",
+    "RougePro_Defence.json",
+    "RougePro_Event.json",
+    "RougePro_EventArea.json",
+    "RougePro_Exterminate.json",
+    "RougePro_KillEliteMob.json",
+    "RougePro_MSRound.json",
+    "RougePro_MonsterSP.json",
+    "RougePro_Occupation.json",
+    "RougePro_RewardDropBox.json",
+    "RougePro_Room.json",
+    "RougePro_SabotagePro.json",
+    "RougePro_SurvivalPro.json",
+    "ShopItem.json",
+    "Skin.json",
+    "SkinGacha.json",
+    "SkinGachaCumulative.json",
+    "SkinGachaItem.json",
+    "SkinGachaTab.json",
+    "SkinGachaType.json",
+    "SoloTreasure.json",
+    "SoloTreasureDrop.json",
+    "SoloTreasureGamePlay.json",
+    "SubRegion.json",
+    "Title.json",
+    "TitleFrame.json",
+    "TreasureHuntProgress.json",
+    "TreasureHuntRepeatDungeon.json",
+    "TreasureHuntStoryDungeon.json",
+    "Walnut.json",
+    "Weapon.json",
+    "WeaponAccessory.json",
+    "WeaponSkin.json",
+    "translation.json",
+] as const
+
+/**
+ * 不参与对照表生成的模块。
+ *
+ * 这四个模块在前端已有按语言切分的独立 data 文件（`quest.*.data.ts` / `partytopic.*.data.ts` /
+ * `charvoice.*.data.ts` / `charext.*.data.ts`），组件按数据语言直接加载对应数据集，
+ * 不经 i18next，因此收进对照表只会白占包体（合计约 3.8MB）。
+ * storySummary 只有简体中文，无法构成对照。
+ */
+const TRANSLATION_EXCLUDED_SOURCES = new Set([
+    "QuestStory.json",
+    "PartyTopic.json",
+    "CharVoice.json",
+    "CharDataTarget.json",
+    "storySummary.json",
+])
+
 type MappingContext = {
     /** 目标文件绝对路径 */
     targetFile: string
@@ -696,6 +882,25 @@ const MAPPINGS: Mapping[] = [
         targetStem: "ironsurvival",
         targetVar: "defenceData",
     },
+    {
+        // 游戏内文案的多语言对照表：把上游 final/i18n/<locale> 里除简体中文外的各语言数据集
+        // 压成「zh-CN 原文 → 目标语言译文」的扁平映射，随数据包一起下发。
+        //
+        // 上游各语言是**独立数据集**（不是文本表映射），所以中文原文必须从对应语言的同名字段取
+        // ——即两个语言包按同一位置遍历得到的字符串才构成一对。简体中文不进表：它是 fallbackLng，
+        // 且键与值同形，各语言缺失时由 i18next 回落得到原文。
+        source: async () => {
+            const tables = await buildTranslationTables()
+
+            return TRANSLATION_LOCALES.map(locale => ({
+                targetVar: TRANSLATION_VARS[locale],
+                value: tables[locale],
+            }))
+        },
+        targetStem: "translations",
+        targetVar: TRANSLATION_VARS.tc,
+        targetVars: TRANSLATION_VARS,
+    },
 ]
 
 /**
@@ -851,6 +1056,129 @@ function formatTsValue(value: unknown, indent = 0): string {
  */
 function isRecord(value: unknown): value is Record<string, unknown> {
     return Boolean(value) && typeof value === "object" && !Array.isArray(value)
+}
+
+/**
+ * 按「同一位置」比较源语言与目标语言的值，收集对照条目。
+ *
+ * 上游各语言是独立数据集，同一字段在不同语言下只是文本不同、结构一致，
+ * 因此按下标/键名同步遍历两侧即可配成条目。
+ *
+ * ⚠️ 过滤条件只能是「译文与原文完全相同」——上游未翻译的字段就是原样照抄中文
+ * （`Char.json` 的 `行为` 脚本串、专有名词等都是这种情况）。
+ * **不能**用「译文里含汉字」来判定未翻译：繁体与日文本身就用汉字，
+ * 那样会把 zh-TW / ja 的九成以上有效译文误删。
+ * @param source 源语言（简体中文）节点。
+ * @param target 目标语言节点。
+ * @param table 输出对照表。
+ */
+function collectTranslationPairs(source: unknown, target: unknown, table: Map<string, string>): void {
+    if (typeof source === "string") {
+        if (typeof target !== "string") {
+            return
+        }
+        if (!source.trim() || !target.trim() || source === target) {
+            return
+        }
+        if (!/[\u4e00-\u9fff]/.test(source)) {
+            return
+        }
+        table.set(source, target)
+        return
+    }
+
+    if (Array.isArray(source)) {
+        if (!Array.isArray(target)) {
+            return
+        }
+        source.forEach((item, index) => collectTranslationPairs(item, target[index], table))
+        return
+    }
+
+    if (isRecord(source) && isRecord(target)) {
+        for (const [key, item] of Object.entries(source)) {
+            collectTranslationPairs(item, target[key], table)
+        }
+    }
+}
+
+/**
+ * 生成各语言的「简体中文原文 → 译文」对照表。
+ *
+ * 逐个模块比对简体中文与目标语言的数据集：同位置的字符串配成一条对照。
+ * 这样名称、描述、技能文本、熔炼文案（含数值的模板句）等**一切非枚举文本**都能覆盖，
+ * 不依赖前端是否已经把该字段接到 i18next 上。
+ *
+ * `translation.json` 是游戏内文本表的权威对照，最后合并以它的译法为准
+ * （同一中文在其他模块可能有不同译法，如「外观」）。
+ * @returns 打包语言 → 对照表
+ */
+async function buildTranslationTables(): Promise<Record<TranslationLocale, Record<string, string>>> {
+    const tables = {} as Record<TranslationLocale, Record<string, string>>
+
+    for (const locale of TRANSLATION_LOCALES) {
+        const table = new Map<string, string>()
+
+        for (const fileName of TRANSLATION_SOURCE_FILES) {
+            if (TRANSLATION_EXCLUDED_SOURCES.has(fileName) || fileName === "translation.json") {
+                continue
+            }
+
+            // 上游偶有模块在某种语言下缺失，跳过即可
+            const [sourceText, targetText] = await Promise.all([
+                readFile(path.join(SOURCE_ROOT, "cn", fileName), "utf8").catch(() => null),
+                readFile(path.join(SOURCE_ROOT, locale, fileName), "utf8").catch(() => null),
+            ])
+            if (!sourceText || !targetText) {
+                continue
+            }
+
+            collectTranslationPairs(JSON.parse(sourceText), JSON.parse(targetText), table)
+        }
+
+        // 权威表最后写入，覆盖其它模块的译法
+        const authoritativeText = await readFile(path.join(SOURCE_ROOT, locale, "translation.json"), "utf8").catch(() => null)
+        if (authoritativeText) {
+            const authoritative = JSON.parse(authoritativeText) as Record<string, unknown>
+            for (const [key, value] of Object.entries(authoritative)) {
+                if (typeof value === "string" && value.trim() && value !== key && /[\u4e00-\u9fff]/.test(key)) {
+                    table.set(key, value)
+                }
+            }
+        }
+
+        // 前端自造展示名：先按官方 TextMapId 取权威译名，再用人工表兜底。
+        // 两者都**强制覆盖**——上游按位置比对可能在别的语境下撞出同名单字键
+        // （如「白」在某模块被译成 Snow，但稀有度的官方译名是 White），
+        // 这种同名不同义必须以前端明确指定的展示名为准。
+        const textMapPath = path.join(OUT_ROOT, "TextMap_I18n.json")
+        const textMapText = await readFile(textMapPath, "utf8").catch(() => null)
+        if (textMapText) {
+            const textMap = JSON.parse(textMapText) as Record<string, Record<string, string>>
+            const field = TEXT_MAP_LOCALE_FIELDS[locale]
+            for (const [key, textMapId] of Object.entries(SUPPLEMENTAL_TEXT_MAP_IDS)) {
+                const text = textMap[textMapId]?.[field]?.trim()
+                if (text) {
+                    table.set(key, text)
+                }
+            }
+        }
+
+        for (const [key, value] of Object.entries(SUPPLEMENTAL_TRANSLATIONS[locale])) {
+            table.set(key, value)
+        }
+
+        // 按键排序，保证同样输入产出同样的文件内容（避免无意义的 diff）
+        const sorted: Record<string, string> = {}
+        for (const key of [...table.keys()].sort((left, right) => left.localeCompare(right, "zh-Hans-CN"))) {
+            sorted[key] = table.get(key)!
+        }
+
+        tables[locale] = sorted
+        console.log(`[i18n][translations] ${locale}: ${Object.keys(sorted).length} 条`)
+    }
+
+    return tables
 }
 
 /**
@@ -1231,16 +1559,58 @@ function isAbyssLevelRow(value: unknown): value is AbyssLevelRow {
 }
 
 /**
+ * 收集映射会写入的变量名。
+ *
+ * 每个映射至少写一个变量；带 language-series targetVars 的映射会写多个语言变量。
+ * @param mapping 数据映射。
+ * @returns 变量名列表（去重）。
+ */
+function collectMappingVars(mapping: Mapping): string[] {
+    const names = [mapping.targetVar, ...Object.values(mapping.targetVars ?? {})]
+    return [...new Set(names)]
+}
+
+/**
+ * 读取函数源的目标文件；文件尚不存在时按映射声明的变量生成空骨架。
+ *
+ * 函数源第一次运行时目标 data 文件还不存在（如 translations.data.ts），
+ * 先落一份空对象字面量让后续的 AST 定位与语义 diff 逻辑可以直接复用。
+ * @param filePath 目标文件绝对路径。
+ * @param skeletonVars 骨架需要声明的变量名。
+ * @returns 目标文件内容。
+ */
+async function readOrCreateSkeleton(filePath: string, skeletonVars: string[]): Promise<string> {
+    try {
+        return await readFile(filePath, "utf-8")
+    } catch {
+        const header = "// 该文件由 tools/import-i18n-data.ts 生成，请勿手工编辑。\n\n"
+        const body = skeletonVars.map(name => `export const ${name}: Record<string, string> = {}`).join("\n\n")
+        const skeleton = `${header}${body}\n`
+        await writeFile(filePath, skeleton, "utf-8")
+        return skeleton
+    }
+}
+
+/**
+ * 不交给 Biome 处理的生成文件（相对仓库根目录）。
+ *
+ * 它们是纯机器生成的字面量，格式已由 formatTsValue 固定；体量也远超 Biome 的
+ * maxSize，传进去只会让 biome 报「paths were provided but ignored」而非零退出。
+ */
+const BIOME_SKIPPED_FILES = new Set(["src/data/d/translations.data.ts"])
+
+/**
  * 仅对本次实际写入的文件执行 Biome 格式化，避免全仓库扫描。
  * @param files 本次变更文件的相对路径列表。
  * @returns Biome 非零退出时抛出错误。
  */
 async function formatWithBiome(files: string[]): Promise<void> {
-    if (files.length === 0) {
+    const targets = files.filter(file => !BIOME_SKIPPED_FILES.has(file.replaceAll("\\", "/")))
+    if (targets.length === 0) {
         return
     }
     // 通过 process.execPath（即当前 bun 可执行文件）调用 `bun x biome`，规避 Windows 下 .cmd 垫片问题
-    const proc = Bun.spawn([process.execPath, "x", "biome", "check", "--write", "--linter-enabled=false", ...files], {
+    const proc = Bun.spawn([process.execPath, "x", "biome", "check", "--write", "--linter-enabled=false", ...targets], {
         stdout: "inherit",
         stderr: "inherit",
         stdin: "inherit",
@@ -1326,7 +1696,9 @@ async function main() {
         }
 
         const targetFile = path.join(TARGET_DIR, `${mapping.targetStem}.data.ts`)
-        const originalText = await readFile(targetFile, "utf-8")
+        // 函数源的目标文件可能是新引入的（如 translations.data.ts），缺失时先落一份空骨架，
+        // 让后续的 AST 定位与语义 diff 逻辑可以原样复用。
+        const originalText = await readOrCreateSkeleton(targetFile, collectMappingVars(mapping))
         const sourceFile = ts.createSourceFile(targetFile, originalText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
         const context: MappingContext = { targetFile, originalText, sourceFile }
         const generatedReplacements = await mapping.source(context)

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import type { Book, BookResource } from "@/data/d/book.data"
 import { convertRegionMapIdToDBMapId } from "@/data/d/map.data"
 import { regionMap } from "@/data/d/region.data"
@@ -14,6 +15,7 @@ interface BookLocationInfo {
     mapId: number | null
 }
 
+const { gt } = useGameText()
 const props = withDefaults(
     defineProps<{
         book: Book
@@ -64,9 +66,12 @@ const selectedResourceLocation = computed<BookLocationInfo | null>(() => {
 
 /**
  * 当前条目文本对应的可渲染片段。
+ *
+ * 先在切分前翻译整段文本：富文本标记（如 <H></>）在对照表里与文本一起作为整键收录，
+ * 先切分会把标记拆散，反而查不到译文。
  */
 const selectedResourceTextSegments = computed(() => {
-    return parseBookTextSegments(selectedResource.value?.text)
+    return parseBookTextSegments(gt(selectedResource.value?.text))
 })
 
 /**
@@ -193,7 +198,7 @@ const bookTabItems = computed(() =>
         <!-- 简介 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="SUMMARY" :title="$t('book-detail.summary')" />
-            <div class="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word text-base-content/85">{{ book.desc }}</div>
+            <div class="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word text-base-content/85">{{ gt(book.desc) }}</div>
         </section>
 
         <!-- 条目阅读 -->
@@ -210,7 +215,7 @@ const bookTabItems = computed(() =>
                     <span
                         class="shrink-0 rounded-xs border border-base-content/20 px-1.5 py-0.5 text-[11px] tracking-wide text-base-content/60"
                     >
-                        {{ getResourceTypeLabel(selectedResource.type) }}
+                        {{ gt(getResourceTypeLabel(selectedResource.type)) }}
                     </span>
                 </div>
 

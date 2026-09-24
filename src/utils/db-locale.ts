@@ -1,6 +1,12 @@
 import i18next from "i18next"
 import { getLocalizedCharVoiceData } from "@/data/d/charvoice-locale"
 import { resolveStoryLocaleBySetting, type StoryLocale } from "@/data/d/story-locale"
+import {
+    applyPackTranslations,
+    getPackTranslationTable,
+    isPackTranslationLocale,
+    registerPackTranslationInvalidation,
+} from "@/data/translations-pack"
 
 /**
  * 资料检索 Agent 的数据语言。
@@ -118,6 +124,11 @@ export async function ensureDBAgentLangReady(lang: DBAgentLang): Promise<void> {
 
     if (lang !== "zh") {
         await ensureI18nBundle(toI18nLanguage(lang))
+        // 游戏文案随数据包下发，先确保它已注入 i18next 再建索引，
+        // 否则会缓存一份「只有界面文案」的不完整索引
+        if (isPackTranslationLocale(lang)) {
+            await applyPackTranslations(lang)
+        }
         // 预建反向索引：首次检索时不必现场扫全量词条
         getReverseIndex(lang)
     }
@@ -183,6 +194,12 @@ type ReverseIndex = Map<string, string[]>
 /** 反向索引缓存：按语言缓存，避免每次检索都重扫词条表 */
 const reverseIndexCache = new Map<DBAgentLang, ReverseIndex>()
 
+// 数据包换版本会换掉文案对照表，索引与「已就绪」标记都要作废，下次检索时按新表重建
+registerPackTranslationInvalidation(() => {
+    reverseIndexCache.clear()
+    readyLanguages.clear()
+})
+
 /**
  * 递归收集「中文原文 → 译文」的词条。
  * @param node 词条节点
@@ -223,7 +240,11 @@ function collectTranslations(node: unknown, index: ReverseIndex): void {
 /**
  * 取某语言的反向索引（译文 → 中文原文）。
  *
- * 语言包尚未加载时**不缓存**空索引：否则预热完成后索引仍是空的，
+ * 数据源优先用数据包下发的文案对照表：游戏文案已迁移到数据包里，内置翻译文件只剩
+ * 界面文案与属性说明，单靠资源包会查不到角色名/物品名这类原文。数据包未安装时退回
+ * 资源包扫描，行为与迁移前一致。
+ *
+ * 语言包尚未加载且数据包也没有对应表时**不缓存**空索引：否则预热完成后索引仍是空的，
  * 后续所有其他语言的检索都会静默退化成「只能匹配原文」。
  * @param lang 数据语言
  * @returns 反向索引
@@ -235,15 +256,23 @@ function getReverseIndex(lang: DBAgentLang): ReverseIndex {
         return cached
     }
 
-    const bundle = i18next.getResourceBundle(toI18nLanguage(lang), "translation")
-
-    if (!bundle) {
-        return new Map()
-    }
-
     const index: ReverseIndex = new Map()
 
-    collectTranslations(bundle, index)
+    if (isPackTranslationLocale(lang)) {
+        collectTranslations(getPackTranslationTable(lang), index)
+    }
+
+    const i18nLang = toI18nLanguage(lang)
+    const bundle = i18next.getResourceBundle(i18nLang, "translation")
+
+    if (bundle) {
+        collectTranslations(bundle, index)
+    }
+
+    if (!index.size) {
+        return index
+    }
+
     reverseIndexCache.set(lang, index)
 
     return index

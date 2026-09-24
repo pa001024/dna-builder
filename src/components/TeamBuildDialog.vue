@@ -371,6 +371,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown))
                                         :cost="mod.耐受"
                                         :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
                                         :effdesc="mod.效果"
+                                        :effindex="mod.等级 - 1"
                                         :eff="mod.getCondition()"
                                     >
                                         <div class="tb-mod" :data-quality="mod.品质">
@@ -404,6 +405,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown))
                                     :polarity="group.aura.极性"
                                     :cost="group.aura.耐受"
                                     :effdesc="group.aura.效果"
+                                    :effindex="group.aura.等级 - 1"
                                     :eff="group.aura.getCondition()"
                                 >
                                     <div class="tb-mod" :data-quality="group.aura.品质">

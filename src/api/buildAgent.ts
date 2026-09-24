@@ -28,6 +28,7 @@ import {
     weaponMap,
 } from "../data"
 import { createCharBuildFromSettings } from "../data/CharBuildHelper"
+import { formatParamText, getParamTemplate } from "../utils/param-text"
 import type { OpenAIConfig } from "./openai"
 
 type EffectSourceType = "mod" | "weapon"
@@ -919,7 +920,7 @@ export class BuildAgent {
             等级: weapon.等级,
             精炼: weapon.精炼,
             基础攻击: this.normalizeNumber(weapon.基础攻击),
-            效果: weapon.效果,
+            效果: formatParamText(weapon.效果, weapon.精炼),
         }
     }
 
@@ -1140,7 +1141,7 @@ export class BuildAgent {
                 const effectSummary = getEffectSummary(mod)
                 const searchableText = [
                     mod.名称,
-                    mod.效果 ?? "",
+                    getParamTemplate(mod.效果),
                     mod.系列 ?? "",
                     mod.属性 ?? "",
                     mod.类型 ?? "",

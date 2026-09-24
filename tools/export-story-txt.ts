@@ -6,6 +6,7 @@ import type { Dialogue, DialogueOption, QuestItem, QuestNode, QuestStory } from 
 import type { Char, Mod, Weapon } from "../src/data/data-types"
 import type { LeveledSkillField } from "../src/data/leveled/LeveledSkill"
 import { DNA_CURRENT_VERSION_GLOBAL_KEY } from "../src/data/versionGate"
+import { formatParamText } from "../src/utils/param-text"
 import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments } from "../src/utils/story-text"
 
 interface DialogueChainItem {
@@ -671,7 +672,7 @@ function buildModParagraph(group: ModExportGroup): string {
     lines.push(`系列: ${toPlainStoryText(primaryMod.系列)}`)
     lines.push(`品质: ${qualities.join("/")}`)
     if (primaryMod.效果) {
-        lines.push(`效果: ${toPlainStoryText(primaryMod.效果)}`)
+        lines.push(`效果: ${toPlainStoryText(formatParamText(primaryMod.效果, primaryMod.等级 - 1))}`)
     }
 
     for (const [propName, propValue] of Object.entries(primaryMod.getProperties())) {

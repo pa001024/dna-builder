@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import type { IconTicket } from "@/data/d/iconticket.data"
 import { collectIronTicketDraftSources } from "@/utils/draft-source"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
@@ -13,6 +14,8 @@ import {
 const props = defineProps<{
     ticket: IconTicket
 }>()
+
+const { gt } = useGameText()
 
 const draftSources = computed(() => collectIronTicketDraftSources(props.ticket.id))
 const dungeonSources = computed(() => collectIronTicketDungeonSources(props.ticket.id))
@@ -93,7 +96,7 @@ function getTicketIconUrl(icon: string): string {
         <!-- 罗盘描述 -->
         <section v-if="ticket.desc" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('iron-ticket.description')" />
-            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/90">{{ ticket.desc }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/90">{{ gt(ticket.desc) }}</div>
         </section>
 
         <!-- 罗盘功能 -->

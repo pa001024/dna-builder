@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { npcMap } from "@/data/d/npc.data"
 import { type DetectiveAnswer, type DetectiveQuestion, type Dialogue, type DialogueOption, type QuestNode } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
@@ -48,6 +49,8 @@ const props = defineProps<{
     searchTarget?: DialogueSearchTarget
     searchTargetRequest?: number
 }>()
+
+const { gt } = useGameText()
 
 const settingStore = useSettingStore()
 const normalizedSearchKeyword = computed(() => props.searchKeyword?.trim() || "")
@@ -1451,7 +1454,7 @@ watch(flattenedDialogueChain, () => {
 
                                 <div class="min-w-0 flex-1">
                                     <div class="text-xs font-medium">A{{ answer.id }} · {{ answer.name }}</div>
-                                    <div v-if="answer.desc" class="text-xs text-base-content/70">{{ answer.desc }}</div>
+                                    <div v-if="answer.desc" class="text-xs text-base-content/70">{{ gt(answer.desc) }}</div>
                                 </div>
                             </div>
                         </div>

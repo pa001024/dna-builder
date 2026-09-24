@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { parseNumberOrEmptySearchParam, useSearchParam } from "@/composables/useSearchParam"
 import { LeveledMod, LeveledWeapon } from "@/data"
 import { draftMap, modMap, resourceMap, weaponMap } from "@/data/d"
@@ -9,6 +10,8 @@ import { iconticketMap } from "@/data/d/iconticket.data"
 import { getRewardTypeText } from "@/utils/i18n-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityBadgeClass, getRarityGradientClass, getRarityName } from "@/utils/rarity-utils"
+
+const { gt } = useGameText()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDraftId = useSearchParam<number>("id", 0)
@@ -248,7 +251,7 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
                                                     {{ $t(draft.n) }}
                                                 </h3>
                                                 <span :class="getRarityBadgeClass(draft.r)">
-                                                    {{ getRarityName(draft.r) }}
+                                                    {{ gt(getRarityName(draft.r)) }}
                                                 </span>
                                             </div>
                                             <!-- 元信息行：类型 / 版本 / 制造时长 -->

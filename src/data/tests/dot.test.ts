@@ -22,7 +22,7 @@ function mkWeapon(name: string, trigger: number): LeveledWeapon {
         触发: trigger,
         描述: "",
         加成: {},
-        熔炼: [],
+        熔炼: "",
         技能: [],
     }
     return new LeveledWeapon(data)

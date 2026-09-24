@@ -192,6 +192,7 @@ function handleMouseUp(event: MouseEvent) {
             :cost="mod.耐受"
             :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
             :effdesc="mod.效果"
+            :effindex="mod.等级 - 1"
             :eff="charBuild?.checkModEffective(mod) || mod.getCondition()"
         >
             <div class="relative h-full w-full overflow-hidden rounded-xs">

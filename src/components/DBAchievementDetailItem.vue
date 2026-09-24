@@ -1,9 +1,13 @@
 <script lang="ts" setup>
+import { useGameText } from "@/composables/useGameText"
+
 type AchievementItem = (typeof import("@/data/d/achievement.data").default)[number]
 
 const props = defineProps<{
     achievement: AchievementItem
 }>()
+
+const { gt } = useGameText()
 
 /**
  * 将品质数字转换为中文标签。
@@ -75,7 +79,7 @@ function getQualityIcon(quality: number): string {
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="shrink-0 text-xs text-base-content/60">{{ $t("achievement-detail.quality") }}</span>
-                    <span class="shrink-0 text-sm font-medium">{{ getQualityLabel(achievement.品质) }}</span>
+                    <span class="shrink-0 text-sm font-medium">{{ gt(getQualityLabel(achievement.品质)) }}</span>
                 </div>
             </div>
         </section>

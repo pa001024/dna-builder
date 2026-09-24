@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { monsterMap } from "@/data"
 import { charMap, weaponMap } from "@/data/d"
@@ -55,6 +56,8 @@ interface WalnutRewardInfo {
 const props = defineProps<{
     boss: HardBoss
 }>()
+
+const { gt } = useGameText()
 
 const nowTimestamp = Math.floor(Date.now() / 1000)
 const timeFilterEnabled = useSearchParam("tf", true)
@@ -517,7 +520,7 @@ function getHardbossIcon(boss: HardBoss): string {
                         </SRouterLink>
                         <CopyID :id="boss.id" />
                     </div>
-                    <p class="mt-2 text-sm leading-relaxed text-base-content/70">{{ boss.desc }}</p>
+                    <p class="mt-2 text-sm leading-relaxed text-base-content/70">{{ gt(boss.desc) }}</p>
                 </div>
             </div>
         </header>

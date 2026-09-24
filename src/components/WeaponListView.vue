@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
 import type { CharSettings } from "@/composables/useCharSettings"
+import { useGameText } from "@/composables/useGameText"
 import { CharBuild, LeveledWeapon, weaponData } from "@/data"
 import { calcWeaponReplacementIncomes } from "@/data/CharBuildHelper"
 import type { Weapon } from "@/data/data-types"
@@ -17,6 +18,8 @@ const props = defineProps<{
     useGlobal?: boolean
     charSettings?: CharSettings
 }>()
+
+const { gpt } = useGameText()
 
 const inv = useInvStore()
 
@@ -333,7 +336,7 @@ function unequipCurrentWeapon() {
                                     class="flex min-h-5 items-center justify-between gap-2 text-[0.625rem] tracking-wide text-base-content/40"
                                 >
                                     <span v-if="weapon.伤害类型" class="truncate">{{ $t(weapon.伤害类型) }}</span>
-                                    <span v-if="weapon.熔炼" class="shrink-0 truncate">{{ $t(weapon.熔炼[5]) }}</span>
+                                    <span v-if="weapon.熔炼" class="shrink-0 truncate">{{ gpt(weapon.熔炼, 5) }}</span>
                                 </p>
 
                                 <!-- 配装收益 -->

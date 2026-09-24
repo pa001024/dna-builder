@@ -1,7 +1,11 @@
 <script setup lang="tsx">
+import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
+import type { ParamText } from "@/data/data-types"
 import { formatProp } from "@/util"
+import { getParamTemplate, splitByPolarity } from "@/utils/param-text"
 
-withDefaults(
+const componentProps = withDefaults(
     defineProps<{
         props: Record<string, any>
         attr?: Record<string, string>
@@ -10,7 +14,12 @@ withDefaults(
         title?: string
         rarity?: string
         desc?: string
-        effdesc?: string
+        /** 效果文案原文（参数化文本） */
+        effdesc?: ParamText
+        /** 效果档位下标（武器为精炼等级，MOD 为 `等级 - 1`） */
+        effindex?: number
+        /** 是否去掉首句（武器熔炼文案首句是属性摘要，数值已在属性区展示） */
+        effstrip?: boolean
         polarity?: "A" | "D" | "V" | "O"
         cost?: number
         type?: string
@@ -19,17 +28,29 @@ withDefaults(
     }>(),
     {
         side: "top",
+        effindex: 0,
+        effstrip: false,
     }
 )
 
-const formatDesc = (desc: string) => {
-    const po = desc.match(/([DVOA])趋向/)
-    if (!po) {
-        return desc
-    }
-    const parts = desc.split(po[0])
-    return [parts[0], po[1], parts[1]]
+const { gpt } = useGameText()
+
+/** 当前档位下已翻译的效果文案 */
+const effectText = computed(() =>
+    gpt(componentProps.effdesc, componentProps.effindex, { stripFirstSentence: componentProps.effstrip })
+)
+
+/** 原文模板里的极性字母（译文里的标记形态各语言不同，只能用原文判） */
+const polarityMarker = computed(() => getParamTemplate(componentProps.effdesc).match(/([DVOA])趋向/)?.[1])
+
+/**
+ * 把效果文案按极性标记切成 [前段, 极性字母, 后段]，供模板画极性图标。
+ * @returns 三段式；无标记或无法定位时返回单元素数组
+ */
+function formatDesc(): string[] {
+    return polarityMarker.value ? splitByPolarity(effectText.value, polarityMarker.value) : [effectText.value]
 }
+
 function getQualityColor(quality: string): string {
     const colorMap: Record<string, string> = {
         白: "bg-gray-200 text-gray-800",
@@ -91,17 +112,17 @@ function getQualityColor(quality: string): string {
                         {{ formatProp(prop, val) }}
                     </div>
                 </div>
-                <div v-if="effdesc" class="text-xs text-neutral-500">
-                    <span v-if="/[DVOA]趋向/.test(effdesc)">
-                        <template v-for="(part, index) in formatDesc(effdesc)" :key="index">
+                <div v-if="effectText" class="text-xs text-neutral-500">
+                    <span v-if="polarityMarker">
+                        <template v-for="(part, index) in formatDesc()" :key="index">
                             <span v-if="index !== 1">{{ part }}</span>
                             <span v-else>
                                 <Icon class="inline-block mx-1" :icon="`po-${part as 'A' | 'D' | 'V' | 'O'}`" />
-                                趋向
+                                {{ $t("趋向") }}
                             </span>
                         </template>
                     </span>
-                    <span v-else>{{ effdesc }}</span>
+                    <span v-else>{{ effectText }}</span>
                 </div>
 
                 <div v-if="code" class="text-xs text-gray-400">

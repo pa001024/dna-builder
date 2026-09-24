@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useTranslation } from "i18next-vue"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { charMap, LeveledChar, LeveledSkillWeapon } from "@/data"
 import { type SkinItem, skinData } from "@/data/d/accessory.data"
 import { type CharExt, charExtData } from "@/data/d/charext.data"
@@ -20,6 +21,8 @@ import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-te
 const props = defineProps<{
     char: Char
 }>()
+
+const { gt, gpt } = useGameText()
 const setting = useSettingStore()
 const { t } = useTranslation()
 
@@ -944,10 +947,10 @@ onBeforeUnmount(() => {
             </div>
 
             <!-- 熔炼效果 -->
-            <div v-if="exclusiveWeapon.熔炼 && exclusiveWeapon.熔炼.length > 0" class="mt-2.5">
+            <div v-if="exclusiveWeapon.熔炼" class="mt-2.5">
                 <div class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ $t("属性") }}</div>
                 <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed text-base-content/85">
-                    {{ exclusiveWeapon.熔炼[5] }}
+                    {{ gpt(exclusiveWeapon.熔炼, 5, { stripFirstSentence: true }) }}
                 </div>
             </div>
         </section>
@@ -992,7 +995,7 @@ onBeforeUnmount(() => {
                         v-if="leveledWeapon.inherit"
                         class="mt-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm text-base-content/85"
                     >
-                        {{ getSkillWeaponInheritDescription(leveledWeapon) }}
+                        {{ gt(getSkillWeaponInheritDescription(leveledWeapon)) }}
                     </div>
                     <template v-else>
                         <div class="mt-2.5 grid grid-cols-2 gap-1.5 md:grid-cols-4">
@@ -1059,7 +1062,7 @@ onBeforeUnmount(() => {
                                         </div>
                                     </div>
                                     <span :class="getRarityBadgeClass(skin.rarity)">
-                                        {{ getRarityName(skin.rarity) }}
+                                        {{ gt(getRarityName(skin.rarity)) }}
                                     </span>
                                 </div>
                                 <div class="mt-2 text-sm leading-relaxed whitespace-pre-line text-base-content/85">{{ $t(skin.desc) }}</div>

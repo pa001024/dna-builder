@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { LeveledSkill } from "@/data"
 import { modConvertData } from "@/data/d/convert.data"
 import { modDraftMap, modDungeonMap } from "@/data/d/index"
@@ -10,6 +11,7 @@ import type { Draft, Mod, WeaponSkill } from "@/data/data-types"
 import { formatModName, LeveledMod } from "@/data/leveled/LeveledMod"
 import { formatProp } from "@/util"
 import { formatModLimit } from "@/utils/mod-limit"
+import { getParamTemplate } from "@/utils/param-text"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { collectModCharBreakthroughSources, collectModPackSources, collectModQuestSources } from "@/utils/resource-source"
 import { getModDropInfo } from "@/utils/reward-utils"
@@ -18,6 +20,8 @@ import type { ShopSourceInfo } from "@/utils/weapon-source"
 const props = defineProps<{
     mod: Mod
 }>()
+
+const { gpt } = useGameText()
 
 interface SkillReplaceCompareGroup {
     skillId: number
@@ -50,13 +54,33 @@ watch(
 )
 
 // 处理效果描述中的极性
-const formatEffDesc = (desc: string) => {
-    const po = desc.match(/([DVOA])趋向/)
-    if (!po) {
-        return desc
+/** 当前等级下已求值并翻译的效果文案 */
+const effectText = computed(() => gpt(leveledMod.value.效果, currentLevel.value - 1))
+
+/**
+ * 把效果描述按极性标记切成三段，供模板渲染极性图标。
+ *
+ * 极性字母 `[DVOA]` 从**原文**提取（原文形如「仅当装备D趋向的魔之楔…」），
+ * 再在译文里定位同一个独立字母切分——各语言对标记的译法不同
+ * （繁中「A趨向」/ 英「Track A」/ 日「Aルーン」/ 韩「A 성향」/ 法「affinité A」），
+ * 但字母本身都作为独立词保留，所以只有这个定位方式跨语言成立。
+ * 译文里找不到该字母时退回整段显示，只是不显示图标。
+ * @param raw 效果原文（简体中文，含 `[DVOA]趋向` 标记）
+ * @param translated 已求值并翻译的效果文本
+ * @returns 三段式 [前段, 极性字母, 后段]；无极性标记或译文无法定位时返回单元素数组
+ */
+const formatEffDesc = (raw: string, translated: string) => {
+    const polarity = raw.match(/([DVOA])趋向/)?.[1]
+    if (!polarity) {
+        return [translated]
     }
-    const parts = desc.split(po[0])
-    return [parts[0], po[1], parts[1]]
+
+    const marker = translated.match(new RegExp(`(?<![A-Za-z])${polarity}(?![A-Za-z])`))
+    if (!marker || marker.index === undefined) {
+        return [translated]
+    }
+
+    return [translated.slice(0, marker.index), polarity, translated.slice(marker.index + polarity.length)]
 }
 
 // 获取当前mod的设计稿信息
@@ -349,19 +373,19 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
         </section>
 
         <!-- 效果 -->
-        <section v-if="leveledMod.效果" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <section v-if="effectText" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="EFFECT" title="效果" />
             <div class="text-sm leading-relaxed text-base-content/85">
-                <span v-if="/(?:[DVOA])趋向/.test(leveledMod.效果)">
-                    <template v-for="(part, index) in formatEffDesc(leveledMod.效果)" :key="index">
+                <span v-if="/[DVOA]趋向/.test(getParamTemplate(leveledMod.效果))">
+                    <template v-for="(part, index) in formatEffDesc(getParamTemplate(leveledMod.效果), effectText)" :key="index">
                         <span v-if="index !== 1">{{ part }}</span>
                         <span v-else>
                             <Icon class="mx-1 inline-block" :icon="`po-${part as 'A' | 'D' | 'V' | 'O'}`" />
-                            趋向
+                            {{ $t("趋向") }}
                         </span>
                     </template>
                 </span>
-                <span v-else>{{ leveledMod.效果 }}</span>
+                <span v-else>{{ effectText }}</span>
             </div>
         </section>
 

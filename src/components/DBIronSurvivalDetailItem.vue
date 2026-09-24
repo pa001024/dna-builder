@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { dungeonMap, ironSurvivalData, ironSurvivalDungeonData, LeveledChar, MonsterLevelUpperLimit, monsterLevelDropData } from "@/data"
 import { IronSurvivalMonsterLevelLimit } from "@/data/d/const.data"
 import { getDungeonType } from "@/utils/dungeon-utils"
@@ -36,6 +37,8 @@ const props = defineProps<{
     /** 结束等级（不含），[startLevel, endLevel) 半开区间 */
     endLevel?: number
 }>()
+
+const { gt } = useGameText()
 
 const dungeon = computed(() => ironSurvivalData[props.dungeonId] || null)
 const dungeonDetail = computed(() => ironSurvivalDungeonData[props.dungeonId] || null)
@@ -237,7 +240,7 @@ const rewardRowDetails = computed(() => {
                 </span>
             </div>
             <p class="text-sm leading-relaxed text-base-content/70">
-                {{ dungeonBase.desc }}
+                {{ gt(dungeonBase.desc) }}
             </p>
         </div>
 

@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { petMap } from "@/data"
 import { type PetEntry, petToEntey } from "@/data/d/pet.data"
 
 const props = defineProps<{
     entry: PetEntry
 }>()
+
+const { gt } = useGameText()
 
 interface EntryPetSource {
     petId: number
@@ -169,7 +172,7 @@ const groupedEntryPetSources = computed<EntryPetSourceGroup[]>(() => {
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="EFFECT" :title="$t('pet_detail.effect')" />
             <div class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed text-base-content/85">
-                {{ entry.desc }}
+                {{ gt(entry.desc) }}
             </div>
         </section>
 

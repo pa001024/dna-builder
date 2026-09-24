@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import type { Fish, FishingSpot } from "@/data"
 import { fishMap, petMap } from "@/data"
 import { calculateFishPrice, getRandomFish } from "@/utils/fish-utils"
@@ -9,6 +10,8 @@ import { getRewardDetails } from "@/utils/reward-utils"
 const props = defineProps<{
     spot: FishingSpot
 }>()
+
+const { gt } = useGameText()
 
 const selectedFish = ref<Fish | null>(null)
 
@@ -382,7 +385,7 @@ function clearHistory() {
                         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                             <SectionHeader no-animate compact kicker="EXPECTED" />
                             <div class="mb-2 text-[11px] tracking-wide text-base-content/55">
-                                100条鱼平均期望(下方可调选项 当前设置: {{ getLureName(lure) }} |
+                                100条鱼平均期望(下方可调选项 当前设置: {{ gt(getLureName(lure)) }} |
                                 {{ s2bCompare ? "放弃低价值授渔以鱼" : "无脑授渔以鱼" }})
                             </div>
                             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
@@ -391,7 +394,7 @@ function clearHistory() {
                                     :key="timeExpected.time"
                                     class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                                 >
-                                    <div class="text-xs text-base-content/60">{{ getAppearName(timeExpected.time) }}</div>
+                                    <div class="text-xs text-base-content/60">{{ gt(getAppearName(timeExpected.time)) }}</div>
                                     <div class="font-orbitron text-lg font-bold tabular-nums text-primary">
                                         {{ (timeExpected.value * 100).toFixed(2) }}
                                     </div>
@@ -432,7 +435,7 @@ function clearHistory() {
                                                     class="shrink-0 rounded-xs px-1.5 py-0.5 text-[10px] leading-4"
                                                     :class="getRarityBadgeClass(fish.rarity)"
                                                 >
-                                                    {{ getRarityName(fish.rarity) }}
+                                                    {{ gt(getRarityName(fish.rarity)) }}
                                                 </span>
                                             </div>
                                             <!-- 属性行 -->
@@ -471,7 +474,7 @@ function clearHistory() {
                                                     权重: {{ spot.weights[index] }}
                                                 </span>
                                                 <span class="rounded-xs border border-base-content/15 px-1"
-                                                    >出现时间: {{ getAppearNames(fish.appear) }}</span
+                                                    >出现时间: {{ gt(getAppearNames(fish.appear)) }}</span
                                                 >
                                                 <span
                                                     v-if="fish.varProb"
@@ -501,7 +504,7 @@ function clearHistory() {
                                     <span class="w-16 shrink-0 text-xs text-base-content/55">钓鱼时间</span>
                                     <label v-for="time in [1, 2, 3]" :key="time" class="cursor-pointer text-xs text-base-content/70">
                                         <input v-model="selectTime" type="radio" :value="time" class="radio radio-sm" />
-                                        {{ getAppearName(time) }}
+                                        {{ gt(getAppearName(time)) }}
                                     </label>
                                 </div>
                                 <div
@@ -523,7 +526,7 @@ function clearHistory() {
                                         class="cursor-pointer text-xs text-base-content/70"
                                     >
                                         <input v-model="lure" type="radio" :value="lureType" class="radio radio-sm" />
-                                        {{ getLureName(lureType) }}
+                                        {{ gt(getLureName(lureType)) }}
                                     </label>
                                 </div>
                             </div>
@@ -555,7 +558,7 @@ function clearHistory() {
                                             <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                                                 <span class="truncate text-sm font-semibold">{{ $t(record.finalFish.name) }}</span>
                                                 <span :class="getRarityBadgeClass(record.finalFish.rarity)">
-                                                    {{ getRarityName(record.finalFish.rarity) }}
+                                                    {{ gt(getRarityName(record.finalFish.rarity)) }}
                                                 </span>
                                                 <span
                                                     class="shrink-0 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] leading-4 tabular-nums text-base-content/60"

@@ -489,7 +489,7 @@ onBeforeUnmount(() => {
         <!-- 分组标题行：kicker 徽记 + 元信息 + hairline -->
         <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
             <div class="flex items-baseline gap-3">
-                <p class="inline-flex items-center gap-2 text-[10px] font-semibold text-base-content/60">
+                <p class="inline-flex items-center gap-2 text-[10px] font-semibold text-base-content/60 uppercase">
                     {{ label }}
                 </p>
                 <span class="font-mono text-xs tabular-nums text-base-content/40">v{{ version }} · {{ entries.length }}</span>

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { charMap, weaponMap } from "@/data"
 import {
     type SoloTreasureGamePlay,
@@ -13,6 +14,8 @@ import { charTemplateData, weaponTemplateData } from "@/data/d/template.data"
 const props = defineProps<{
     dungeon: TreasureHuntRepeatDungeon | TreasureHuntStoryDungeon
 }>()
+
+const { gt } = useGameText()
 
 type SoloTreasureEntry = (typeof soloTreasureData)[number]
 
@@ -167,7 +170,7 @@ watch(
                     {{ isStoryDungeon ? "剧情副本" : "常驻副本" }}
                 </span>
             </div>
-            <p class="mt-2 text-sm leading-relaxed text-base-content/70">{{ dungeon.desc }}</p>
+            <p class="mt-2 text-sm leading-relaxed text-base-content/70">{{ gt(dungeon.desc) }}</p>
         </header>
 
         <!-- 模式切换 -->

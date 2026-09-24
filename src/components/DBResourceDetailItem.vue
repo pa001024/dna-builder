@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
+import { useGameText } from "@/composables/useGameText"
 import { fishMap } from "@/data"
 import { optRewardMap } from "@/data/d"
 import { booksData } from "@/data/d/book.data"
@@ -21,6 +22,8 @@ import { getRewardDetails, type RewardItem } from "@/utils/reward-utils"
 const props = defineProps<{
     resource: Resource
 }>()
+
+const { gt } = useGameText()
 
 const draftSources = computed(() => collectResourceDraftSources(props.resource))
 const dungeonSources = computed(() => collectResourceDungeonSources(props.resource))
@@ -221,13 +224,13 @@ function getResourceIconUrl(icon: string): string {
         <!-- 资源描述 -->
         <section v-if="resource.desc" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('resource.description')" />
-            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/90">{{ resource.desc }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/90">{{ gt(resource.desc) }}</div>
         </section>
 
         <!-- 背景故事 -->
         <section v-if="resource.desc2" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="LORE" :title="$t('resource.background')" />
-            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/90">{{ resource.desc2 }}</div>
+            <div class="text-sm leading-6 whitespace-pre-wrap text-base-content/90">{{ gt(resource.desc2) }}</div>
         </section>
 
         <!-- 礼包奖励 -->

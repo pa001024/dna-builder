@@ -2,6 +2,7 @@
 import { useLocalStorage } from "@vueuse/core"
 import Fuse, { type FuseResultMatch } from "fuse.js"
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import dynQuestData, {
@@ -53,6 +54,8 @@ interface DynQuestFullTextEntry {
     snippets: string[]
     searchText: string
 }
+
+const { gt } = useGameText()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedQuestId = useSearchParam<number>("id", 0)
@@ -927,7 +930,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                                                     </div>
                                                     <!-- 元信息行：类型 / 印象 / 冷却 / 人数 / 权重 -->
                                                     <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                                        <span>{{ getDynQuestTypeLabel(questResult.quest.type) }}</span>
+                                                        <span>{{ gt(getDynQuestTypeLabel(questResult.quest.type)) }}</span>
                                                         <span
                                                             v-if="hasDynQuestImprIncrease(questResult.quest.id)"
                                                             class="rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 tracking-wide text-success"

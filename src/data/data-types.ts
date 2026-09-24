@@ -158,6 +158,18 @@ export interface SkillWeapon {
     视为?: string
 }
 
+/**
+ * 参数化文本：一条模板 + 各占位符的逐档取值。
+ *
+ * 上游把「按等级/精炼变化的数值文案」导出成 `[模板, #1 的取值, #2 的取值, ...]`
+ * 形式（如 `["角色攻击+#1。", ["60.0%", "72.0%", ...]]`），避免为每一档重复导出整句。
+ * 模板里的 `#N` 对应其后第 N 个数组，数组下标即档位（武器为精炼等级，MOD 为 `等级 - 1`）。
+ *
+ * 翻译对照表里只收录**模板**这一项（参数是数字与百分号，各语言共用），
+ * 因此展示时必须先翻译模板、再代入数值，顺序反了就查不到译文。
+ */
+export type ParamText = string | Array<string | string[]>
+
 export interface Weapon {
     id: number
     icon?: string
@@ -179,7 +191,8 @@ export interface Weapon {
     弹道类型?: keyof typeof BulletType
     装填?: number
     加成?: CommonAttr
-    熔炼?: string[]
+    /** 熔炼文案：参数化文本，档位为精炼等级（0~5） */
+    熔炼?: ParamText
     熔炉?: ForgeData[]
     技能?: WeaponSkill[]
 }
@@ -500,7 +513,8 @@ export interface Mod {
     属性?: string
     /** 角色名/角色 id，或武器伤害类型/类别（字符串） */
     限定?: string | number
-    效果?: string
+    /** 效果文案：参数化文本，档位为 `等级 - 1` */
+    效果?: ParamText
     消耗?: number[]
     技能替换?: Record<string, WeaponSkill>
     buff?: Buff

@@ -287,12 +287,8 @@ async function checkUpdate() {
                     aria-hidden="true"
                 />
                 <div class="mx-auto max-w-6xl px-5 pt-12 pb-10 animate-ef-rise motion-reduce:animate-none sm:pt-14 sm:pb-12">
-                    <p class="mb-4 inline-flex items-center gap-2.5 text-[11px] font-semibold tracking-[0.32em] text-primary uppercase">
-                        <span class="h-px w-7 bg-primary" aria-hidden="true" />
-                        Duet Night Abyss
-                    </p>
                     <h1 class="font-orbitron text-4xl font-bold leading-none tracking-tight text-base-content sm:text-6xl">
-                        DNA <span class="text-primary">Builder</span>
+                        Duet of <span class="text-primary">Builder</span>
                     </h1>
                     <p class="mt-5 mb-7 flex flex-wrap items-center gap-2.5 text-sm text-base-content/60">
                         <span

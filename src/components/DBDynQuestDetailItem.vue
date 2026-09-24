@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import type { DynQuest, DynQuestLevel } from "@/data/d/dynquest.data"
 import { DYN_QUEST_TYPE_ICON_MAP, formatDynQuestDemand, formatDynQuestLevelRange, getDynQuestTypeLabel } from "@/data/d/dynquest.data"
 import { regionMap } from "@/data/d/region.data"
@@ -10,6 +11,8 @@ import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-te
 const props = defineProps<{
     quest: DynQuest
 }>()
+
+const { gt } = useGameText()
 
 const settingStore = useSettingStore()
 
@@ -147,7 +150,7 @@ const questTypeIconUrl = computed(() => `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[pro
                 <div class="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-base-content/60">
                     <CopyID :id="quest.id" />
                     <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                    <span>{{ getDynQuestTypeLabel(quest.type) }}</span>
+                    <span>{{ gt(getDynQuestTypeLabel(quest.type)) }}</span>
                 </div>
             </div>
         </header>

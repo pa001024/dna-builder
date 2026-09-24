@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import {
@@ -46,6 +47,8 @@ import { stripStoryTextTags } from "@/utils/story-text"
 type RougeMode = "like" | "pro"
 type RougeLikeKind = "blessing" | "talent" | "treasure" | "treasureGroup" | "contract" | "room" | "story"
 type RougeProKind = "treasure" | "talent" | "contract" | "class" | "treasureGroup" | "room" | "event" | "season" | "difficulty"
+
+const { gt } = useGameText()
 
 const mode = useSearchParam<RougeMode>("mode", "like")
 const kind = useSearchParam<string>("kind", "blessing")
@@ -646,7 +649,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 "
                                 @click="filterRarity = rarity"
                             >
-                                {{ getRarityName(rarity + 2) }}
+                                {{ gt(getRarityName(rarity + 2)) }}
                             </button>
                         </div>
                         <div v-if="showUpgradableFilter" class="flex flex-wrap gap-1.5">

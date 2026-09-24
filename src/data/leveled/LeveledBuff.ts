@@ -35,6 +35,23 @@ function resolveBuffPropertyName(property: string) {
 }
 
 /**
+ * 给槽位属性记录套一层零值兜底视图。
+ * 槽位记录只包含该槽位实际提供的词条，动态 BUFF 的 code 直接对属性做算术时（如 `1 + charMods.攻击`），
+ * 未配置的词条读出 undefined 会把结果污染成 NaN，`NaN > 0` 之类的判断静默失败导致整段计算失效；
+ * 兜底后未配置词条按 0 参与运算，与「该槽位无此加成」语义一致。
+ * @param record 槽位属性记录（惰性求值结果）
+ * @returns 未命中键返回 0 的视图，键集合与遍历行为保持与记录一致
+ */
+function createZeroFilledRecord(record: Record<string, number>) {
+    return new Proxy(record, {
+        get(target, property, receiver) {
+            if (typeof property === "string" && !(property in target)) return 0
+            return Reflect.get(target, property, receiver)
+        },
+    })
+}
+
+/**
  * LeveledBuff类 - 继承Buff接口，添加等级属性和动态属性计算
  */
 export class LeveledBuff implements Buff {
@@ -184,9 +201,20 @@ export class LeveledBuff implements Buff {
             skillWeaponAttr,
             enemy,
         }
-        // 惰性注入各槽位 MOD 原始属性总和：accessor 不可枚举，仅当 code 实际访问（如 meleeMods.暴击）时才触发计算
+        // 惰性注入各槽位 MOD 原始属性总和：accessor 不可枚举，仅当 code 实际访问（如 meleeMods.暴击）时才触发计算；
+        // 取到的槽位记录再套零值兜底，未配置的词条按 0 参与算术，避免 undefined 让整段计算变成 NaN
         if (modAttrs) {
-            Object.defineProperties(sandbox, Object.getOwnPropertyDescriptors(modAttrs))
+            Object.getOwnPropertyNames(modAttrs).forEach(slot => {
+                let cached: Record<string, number> | undefined
+                Object.defineProperty(sandbox, slot, {
+                    enumerable: false,
+                    configurable: false,
+                    get() {
+                        if (!cached) cached = createZeroFilledRecord(modAttrs[slot])
+                        return cached
+                    },
+                })
+            })
         }
         const func = new Function("attr", `with(attr){${this.code};return attr}`)
         let result = null

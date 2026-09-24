@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { parseNumberOrEmptySearchParam, useSearchParam } from "@/composables/useSearchParam"
 import achievementData from "@/data/d/achievement.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
+
+const { gt } = useGameText()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedAchievementId = useSearchParam<number>("id", 0)
@@ -215,7 +218,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                                 "
                                 @click="selectedQuality = quality"
                             >
-                                {{ getQualityLabel(quality) }}
+                                {{ gt(getQualityLabel(quality)) }}
                             </button>
                         </div>
                     </div>

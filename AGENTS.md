@@ -184,6 +184,13 @@ public/i18n/         # Translation files
   （`WeaponTab.vue`）的属性来源 tooltip 标题与说明里。上游目录默认取同级 `DuetNightAbyssData2`，
   缺失时回退 `D:/dev/DuetNightAbyssData2`，可用 `--upstream <dir>` 或 `DNA_UPSTREAM` 覆盖，
   `--check` 只比对不落盘。
+- **Game text pack**: `pnpm importdata` 会额外产出 `src/data/d/translations.data.ts` —— 把上游
+  `final/i18n/<locale>/translation.json`（本身就是「简体中文原文 → 译文」扁平表）压成 tc/en/jp/kr/fr
+  五份对照表，随数据包下发。前端由 `src/data/translations-pack.ts` 在读包后注入 i18next
+  （走 `data-pack.ts` 的激活钩子，禁止反向 import 以免循环依赖），检索层的反向索引优先查这份表。
+  `pnpm prune-i18n`（`bun tools/prune-migrated-i18n.ts`）据此把 `public/i18n` 里已迁移的中文键条目删掉，
+  `--check` 只报告。**保留项**：英文点号键的界面文案、角色特质、属性名与 `attrDesc`（上游没有这些文案）；
+  zh-CN 整体不动（fallbackLng，不进包）。数据包未安装时界面会显示中文原文，属预期降级。
 - e2e测试使用[bun-webview-test](.agents\skills\bun-webview-test\SKILL.md) 禁止使用Playwright
 
 ## Git Hooks (Husky)

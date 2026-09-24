@@ -1,4 +1,4 @@
-import type { Buff, DmgType, Skill, SkillField, Weapon } from "../data-types"
+import type { Buff, DmgType, ParamText, Skill, SkillField, Weapon } from "../data-types"
 import { CommonLevelUp } from "./CommonLevelUp"
 import { LeveledBuff } from "./LeveledBuff"
 import { LeveledSkill } from "./LeveledSkill"
@@ -46,8 +46,8 @@ export class LeveledWeapon {
     基础弹匣?: number
     基础弹药?: number
     技能?: LeveledSkill[]
-    // 武器效果描述
-    效果?: string
+    // 武器熔炼效果文案（上游的「模板 + 各档取值」，展示时按精炼等级求值）
+    效果?: ParamText
 
     // 等级和精炼属性
     _等级: number = 80 // 武器等级，默认80级
@@ -72,7 +72,7 @@ export class LeveledWeapon {
             触发: 0,
             描述: "",
             加成: {},
-            熔炼: [],
+            熔炼: "",
             技能: [],
         })
     }
@@ -230,10 +230,11 @@ export class LeveledWeapon {
             if (originalValue !== undefined) {
                 const currentValue = shouldScaleAdditions ? (originalValue / 5) * (refineLevel + 5) : originalValue
                 this[prop] = currentValue
-                this.效果 = this._originalWeaponData.熔炼?.[refineLevel] || ""
-                this.效果 = this.效果.replace(/^.+?。/, "")
             }
         })
+        // 熔炼文案保持「模板 + 各档取值」原样：档位求值必须「先翻译模板再代入数值」，
+        // 这一步要发生在能拿到响应式翻译函数的展示层。
+        this.效果 = this._originalWeaponData.熔炼
         if (this.buff) {
             const buff = this.buff
             this.buff.ratio = (refineLevel + 5) / 10

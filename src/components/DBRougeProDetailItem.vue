@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import {
     type RougeProClass,
     type RougeProContract,
@@ -33,6 +34,8 @@ const props = defineProps<{
     item: RougeProItem
     kind: string
 }>()
+
+const { gt } = useGameText()
 
 const item = computed(() => props.item)
 
@@ -78,11 +81,14 @@ const simpleDesc = computed(() => ("simpleDesc" in item.value ? item.value.simpl
 
 /**
  * 解析富文本描述（<Highlight>...</> 等标签）。
+ *
+ * 先在切分前翻译整段：富文本标记在对照表里与文本一起作为整键收录，
+ * 先切分会把标记拆散，反而查不到译文。
  * @param text 原始文本
  * @returns 文本片段
  */
 function parseRichText(text?: string): StoryTextSegment[] {
-    return parseStoryTextSegments(text || "", DEFAULT_STORY_TEXT_CONFIG)
+    return parseStoryTextSegments(gt(text), DEFAULT_STORY_TEXT_CONFIG)
 }
 
 const talentTypeNames: Record<number, string> = {
@@ -183,7 +189,7 @@ const talentBranch = computed(() => {
                 </div>
                 <div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-base-content/55">
                     <span v-if="'rarity' in item" :class="getRarityBadgeClass(item.rarity + 2)">
-                        {{ getRarityName(item.rarity + 2) }}
+                        {{ gt(getRarityName(item.rarity + 2)) }}
                     </span>
                     <span v-if="groupName" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{ $t(groupName) }}</span>
                     <span v-if="talentBranch" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{
@@ -286,7 +292,7 @@ const talentBranch = computed(() => {
         >
             <SectionHeader no-animate compact kicker="LORE" title="背景" />
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-6 whitespace-pre-wrap break-all">
-                {{ item.ipDesc }}
+                {{ gt(item.ipDesc) }}
             </div>
         </section>
 

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import type { Dungeon, RewardChild } from "@/data"
 import {
@@ -18,6 +19,8 @@ import { getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-u
 const props = defineProps<{
     dungeon: Dungeon
 }>()
+
+const { gt } = useGameText()
 
 const currentLevel = ref(props.dungeon.lv)
 const ENDLESS_MAX_WAVE = 99
@@ -620,7 +623,7 @@ watch(
                         </span>
                     </div>
                     <div class="mt-2 text-sm leading-relaxed text-base-content/70">
-                        {{ dungeon.desc }}
+                        {{ gt(dungeon.desc) }}
                     </div>
                 </div>
             </div>

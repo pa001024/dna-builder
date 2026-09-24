@@ -219,11 +219,10 @@ export class LeveledMod implements Mod {
         this._effectAppliedKeys = []
         // 属性值 = 满级属性/(等级上限+1)*(等级+1)
         // 架势MOD属性耐受等级越高越低
+        // 效果文案保持上游的「模板 + 各档取值」原样：档位求值要「先翻译模板再代入数值」，
+        // 这一步必须发生在能拿到响应式翻译函数的展示层，数据层不预先求值。
         if (this.id > 100000) {
             this.耐受 = this._originalModData.耐受 + this.maxLevel - this._等级
-            if (this.id > 200000) {
-                this.效果 = this._originalModData.效果?.replace(/200\.0%/g, () => `${+(this._等级 * 10 + 100).toFixed(1)}%`)
-            }
         } else {
             this.耐受 = this._originalModData.耐受 - this.maxLevel + this._等级
         }
@@ -237,7 +236,6 @@ export class LeveledMod implements Mod {
         if (this._originalModData.生效) {
             const maxValue = this._originalModData.生效
             const keys = Object.keys(maxValue).filter(v => v !== "条件")
-            const vals: number[] = []
             this.生效 = keys.reduce(
                 (acc, key) => {
                     delete this[key]
@@ -248,12 +246,10 @@ export class LeveledMod implements Mod {
                         const currentValue1 = (mv1 / (this.maxLevel + 1)) * (lv + 1)
                         const currentValue2 = (mv2 / (this.maxLevel + 1)) * (lv + 1)
                         acc[key] = [currentValue1, currentValue2]
-                        vals.push(...acc[key])
                     } else {
                         let currentValue = (mv / (this.maxLevel + 1)) * (lv + 1)
                         if (key === "神智回复" || key === "最大耐受") currentValue = Math.ceil(currentValue)
                         acc[key] = currentValue
-                        vals.push(currentValue)
                     }
                     return acc
                 },
@@ -261,10 +257,6 @@ export class LeveledMod implements Mod {
                     条件: maxValue.条件,
                 } as Record<string, any>
             )
-            if (this._originalModData.效果) {
-                let i = 0
-                this.效果 = this._originalModData.效果.replace(/{%}/g, () => `${+(vals[i++] * 100).toFixed(1)}%`)
-            }
         }
         this.baseProperties.forEach(prop => {
             let lv = this._等级

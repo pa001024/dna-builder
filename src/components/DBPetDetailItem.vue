@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { petMap, resourceMap } from "@/data"
 import { petEntrys, petToEntey } from "@/data/d/pet.data"
 import { regionMap } from "@/data/d/region.data"
@@ -13,6 +14,8 @@ import { getRarityGradientClass } from "@/utils/rarity-utils"
 const props = defineProps<{
     pet: Pet
 }>()
+
+const { gt } = useGameText()
 
 const { t } = useTranslation()
 
@@ -366,7 +369,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
             <div
                 class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed whitespace-pre-line text-base-content/85"
             >
-                {{ pet.描述 }}
+                {{ gt(pet.描述) }}
             </div>
         </section>
 
@@ -407,7 +410,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
             <div
                 class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed whitespace-pre-wrap text-base-content/85"
             >
-                {{ leveledPet.主动.描述 }}
+                {{ gt(leveledPet.主动.描述) }}
             </div>
         </section>
 
@@ -417,7 +420,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
             <div
                 class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed whitespace-pre-wrap text-base-content/85"
             >
-                {{ leveledPet.被动.描述 }}
+                {{ gt(leveledPet.被动.描述) }}
             </div>
         </section>
 

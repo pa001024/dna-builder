@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import type { EventItem } from "@/data/d/event.data"
 import { limitedPrizePools } from "@/data/d/limitedprize.data"
 import { questChainMap } from "@/data/d/questchain.data"
@@ -11,13 +12,18 @@ const props = defineProps<{
     event: EventItem
 }>()
 
+const { gt } = useGameText()
+
 /**
  * 将活动文本解析为可渲染片段。
+ *
+ * 先在切分前翻译整段：富文本标记（如 <H></>）在对照表里与文本一起作为整键收录，
+ * 先切分会把标记拆散，反而查不到译文。
  * @param text 原始文本
  * @returns 文本片段
  */
 function parseEventText(text?: string): StoryTextSegment[] {
-    return parseStoryTextSegments(text || "", DEFAULT_STORY_TEXT_CONFIG)
+    return parseStoryTextSegments(gt(text), DEFAULT_STORY_TEXT_CONFIG)
 }
 
 /**

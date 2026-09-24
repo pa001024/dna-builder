@@ -487,6 +487,7 @@ function handleCardClick() {
         :cost="mod.耐受"
         :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
         :effdesc="mod.效果"
+        :effindex="mod.等级 - 1"
         :link="`/db/mod/${mod.id}`"
     >
         <div
@@ -520,6 +521,8 @@ function handleCardClick() {
         :title="$t(weapon.名称)"
         :type="weapon._originalWeaponData.类型.map((type: string) => $t(type)).join(',')"
         :effdesc="weapon.效果"
+        :effindex="weapon.精炼"
+        :effstrip="true"
         :link="`/db/weapon/${weapon.id}`"
     >
         <div

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { t } from "i18next"
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { charData } from "@/data"
 import type { Accessory, HairItem, HeadFrameItem, HeadSculptureItem, SkinItem } from "@/data/d/accessory.data"
 import draftData, { type Draft } from "@/data/d/draft.data"
@@ -60,6 +61,8 @@ type DetailAccessoryItem =
 const props = defineProps<{
     accessory: DetailAccessoryItem
 }>()
+
+const { gt } = useGameText()
 
 /**
  * 判断是否为角色皮肤。
@@ -508,7 +511,7 @@ const accessoryUnlock = computed(() => {
                             v-if="!isHeadFrameAccessory(accessory) && !isHeadAccessory(accessory)"
                             :class="getRarityBadgeClass(accessoryRarityValue)"
                         >
-                            {{ getRarityName(accessoryRarityValue) }}
+                            {{ gt(getRarityName(accessoryRarityValue)) }}
                         </span>
                     </div>
                     <div class="mt-2">

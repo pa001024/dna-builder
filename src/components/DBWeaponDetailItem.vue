@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { t } from "i18next"
 import { computed, ref, watch } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import charData from "@/data/d/char.data"
 import { weaponDraftMap } from "@/data/d/index"
 import modData from "@/data/d/mod.data"
@@ -16,6 +16,8 @@ import SkillCreatureCards from "./SkillCreatureCards.vue"
 const props = defineProps<{
     weapon: Weapon
 }>()
+
+const { gt, gpt } = useGameText()
 
 const currentLevel = ref(80)
 const currentRefine = ref(5)
@@ -97,7 +99,7 @@ function ensureReplaceModLevels() {
 function getModPropertiesText(mod: LeveledMod) {
     const entries = Object.entries(mod.getProperties()).filter(([_, value]) => value)
     if (!entries.length) return "-"
-    return entries.map(([key, value]) => `${t(key)} ${formatProp(key, value)}`).join(" / ")
+    return entries.map(([key, value]) => `${gt(key)} ${formatProp(key, value)}`).join(" / ")
 }
 
 /**
@@ -310,7 +312,7 @@ watch(
         <!-- 描述 -->
         <section v-if="weapon.描述" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="DESCRIPTION" />
-            <div class="text-sm leading-relaxed text-base-content/85">{{ weapon.描述 }}</div>
+            <div class="text-sm leading-relaxed text-base-content/85">{{ $t(weapon.描述) }}</div>
         </section>
 
         <!-- 等级调整 -->
@@ -412,12 +414,12 @@ watch(
 
         <!-- 熔炼效果 -->
         <section
-            v-if="weapon.熔炼 && weapon.熔炼.length > 0 && (!weapon.熔炉 || weapon.熔炉.length === 0)"
+            v-if="weapon.熔炼 && (!weapon.熔炉 || weapon.熔炉.length === 0)"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
             <SectionHeader no-animate compact kicker="REFINE" :title="$t('属性')" />
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed text-base-content/85">
-                {{ weapon.熔炼[currentRefine] }}
+                {{ gpt(weapon.熔炼, currentRefine, { stripFirstSentence: true }) }}
             </div>
         </section>
 
@@ -498,7 +500,7 @@ watch(
                                 <CopyID :id="skill.id" />
                             </div>
                             <div v-if="skill.描述" class="mt-1 text-sm text-base-content/70">
-                                {{ skill.描述 }}
+                                {{ gt(skill.描述) }}
                             </div>
                             <div v-if="skill.加成" class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-1.5 text-sm">
                                 <div
@@ -556,6 +558,7 @@ watch(
                                 :cost="item.mod.耐受"
                                 :type="`${$t(item.mod.类型)}${item.mod.属性 ? `,${$t(item.mod.属性 + '属性')}` : ''}${item.mod.限定 ? `,${$t(item.mod.限定)}` : ''}`"
                                 :effdesc="item.mod.效果"
+                                :effindex="item.mod.等级 - 1"
                                 :link="`/db/mod/${item.mod.id}`"
                             >
                                 <div
@@ -605,7 +608,7 @@ watch(
                                 </div>
                             </div>
                             <div v-if="item.mod.效果" class="mb-2 text-xs leading-relaxed text-base-content/70">
-                                {{ item.mod.效果 }}
+                                {{ gpt(item.mod.效果, item.mod.等级 - 1) }}
                             </div>
                             <SkillFields :skill="item.replaceSkill" />
                             <div v-if="item.replaceSkill.skillData.实体 && item.replaceSkill.skillData.实体.length > 0" class="mt-2">

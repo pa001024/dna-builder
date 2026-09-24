@@ -8,6 +8,7 @@ import packageJson from "../package.json"
 import { dataPackBootstrapLoading } from "./data/data-pack-bridge"
 import { bootstrapDataPack, getLoadedDataPackImgsCacheInfo, getLoadedDataPackImgsManifest } from "./data/data-pack-runtime"
 import { mountImgsToVirtualPath } from "./data/imgs-runtime"
+import { applyAllPackTranslations } from "./data/translations-pack"
 import { getCurrentVersionLimit, setCurrentVersionLimit } from "./data/versionGate"
 
 import { env } from "./env"
@@ -78,7 +79,11 @@ async function bootstrapRuntimeAssets(): Promise<void> {
     }
 }
 
-initI18n(localStorage.getItem("setting_lang") || navigator.language)
+void initI18n(localStorage.getItem("setting_lang") || navigator.language).then(() => {
+    // 游戏文案随数据包下发；这里先注入一次（构建时是被重写插件替换的空壳，dev 下就是源码数据），
+    // 数据包稍后激活完成时会再注入一次把新版本换上
+    return applyAllPackTranslations()
+})
 setCurrentVersionLimit(getCurrentVersionLimit())
 
 /**

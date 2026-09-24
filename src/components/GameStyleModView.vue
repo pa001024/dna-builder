@@ -187,6 +187,7 @@ const cardLayout = {
                                 :cost="mods[index]!.耐受"
                                 :type="`${$t(mods[index]!.类型)}${mods[index]!.属性 ? `,${$t(mods[index]!.属性 + '属性')}` : ''}${mods[index]!.限定 ? `,${$t(mods[index]!.限定)}` : ''}`"
                                 :effdesc="mods[index]!.效果"
+                                :effindex="mods[index]!.等级 - 1"
                                 :eff="getModEff(mods[index]!)"
                             >
                                 <div class="relative h-full">
@@ -252,6 +253,7 @@ const cardLayout = {
                                 :cost="mods[index]!.耐受"
                                 :type="`${$t(mods[index]!.类型)}${mods[index]!.属性 ? `,${$t(mods[index]!.属性 + '属性')}` : ''}${mods[index]!.限定 ? `,${$t(mods[index]!.限定)}` : ''}`"
                                 :effdesc="mods[index]!.效果"
+                                :effindex="mods[index]!.等级 - 1"
                                 :eff="getModEff(mods[index]!)"
                             >
                                 <div class="relative h-full">
@@ -341,6 +343,7 @@ const cardLayout = {
                 :cost="mods[cardLayout.center]!.耐受"
                 :type="`${$t(mods[cardLayout.center]!.类型)}${mods[cardLayout.center]!.属性 ? `,${$t(mods[cardLayout.center]!.属性 + '属性')}` : ''}${mods[cardLayout.center]!.限定 ? `,${$t(mods[cardLayout.center]!.限定)}` : ''}`"
                 :effdesc="mods[cardLayout.center]!.效果"
+                :effindex="mods[cardLayout.center]!.等级 - 1"
                 :eff="getModEff(mods[cardLayout.center]!)"
             >
                 <div class="transform transition-all duration-300 hover:scale-105 hover:border-white/70">

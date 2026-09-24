@@ -543,6 +543,7 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                     :cost="aMod.耐受"
                     :type="`${$t(aMod.类型)}${aMod.属性 ? `,${$t(aMod.属性 + '属性')}` : ''}${aMod.限定 ? `,${$t(formatModLimit(aMod.限定))}` : ''}`"
                     :effdesc="aMod.效果"
+                    :effindex="aMod.等级 - 1"
                     :eff="charBuild?.checkModEffective(aMod, true)"
                 >
                     <div class="flex items-center gap-2">
