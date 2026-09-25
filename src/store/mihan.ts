@@ -48,6 +48,7 @@ function createMihanNotify() {
     const watching = ref(false)
     let watchTimer: ReturnType<typeof setTimeout> | null = null
     const ui = useUIStore()
+    const setting = useSettingStore()
 
     watch(
         () => ui.mihanVisible,
@@ -58,13 +59,35 @@ function createMihanNotify() {
         }
     )
 
-    watch(mihanEnableNotify, val => {
-        if (val) {
-            startWatch()
-            return
-        }
-        stopWatch()
-    })
+    /**
+     * 是否应当维持每小时轮询。
+     *
+     * 两类来源都需要定时刷新委托数据:
+     * 1. 订阅开关 `mihanNotify`(来自委托面板)打开;
+     * 2. 屏幕信息条已开启,且配置里含有至少一个委托(mihan)条目——这是此前缺失的触发路径。
+     * @returns 是否应持续轮询
+     */
+    function shouldKeepWatch() {
+        const hasScreenBarMihan = setting.screenBar.enabled && setting.screenBar.items.some(item => item.type === "mihan")
+        return mihanEnableNotify.value || hasScreenBarMihan
+    }
+
+    /**
+     * 按当前条件拉起或停止轮询(已运行则幂等)。
+     */
+    function syncWatch() {
+        if (shouldKeepWatch()) startWatch()
+        else stopWatch()
+    }
+
+    watch(mihanEnableNotify, () => syncWatch())
+
+    // 屏幕信息条配置(总开关 + 条目列表)变化即重算,保证加了委托条目后自动开始每小时更新
+    watch(
+        () => setting.screenBar.enabled && setting.screenBar.items.some(item => item.type === "mihan"),
+        () => syncWatch(),
+        { deep: true }
+    )
 
     /**
      * 更新密函数据。
@@ -259,10 +282,20 @@ function createMihanNotify() {
                 await sleep(3e3)
             }
             await checkNotify()
-            if (mihanEnableNotify.value) {
+            if (shouldKeepWatch()) {
                 startWatch()
             }
         }, duration + MIHAN_UPDATE_DELAY_MS) // 整点后延迟85秒（原25秒+新增1分钟），避免拿到上一小时旧数据
+    }
+
+    /**
+     * 启动时按组合条件拉起轮询:强制刷一次当前委托,再开始每小时固定流程。
+     * 由 App 启动逻辑调用,保证"屏幕条已开启且含委托条目"这种上次会话遗留状态也能自动开始更新。
+     */
+    async function ensureWatch() {
+        if (!shouldKeepWatch()) return
+        await updateMihanData(true)
+        startWatch()
     }
 
     return {
@@ -281,5 +314,7 @@ function createMihanNotify() {
         checkNotify,
         startWatch,
         stopWatch,
+        shouldKeepWatch,
+        ensureWatch,
     }
 }

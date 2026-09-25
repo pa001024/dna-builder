@@ -4,7 +4,7 @@ import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { checkUpdate, downloadAndInstallUpdate } from "@/api/update"
-import { dataPackBootstrapLoading } from "@/data/data-pack-bridge"
+import { dataPackBootstrapLoading, getRegisteredDataPackModuleKeys } from "@/data/data-pack-bridge"
 import { env } from "@/env"
 import { useDataPackStore } from "@/store/dataPack"
 import { useUIStore } from "@/store/ui"
@@ -19,6 +19,9 @@ const { t } = useTranslation()
 
 const searchParams = new URLSearchParams(window.location.search)
 const hideUpdateInfo = searchParams.get("hideUpdateInfo") === "1"
+
+// DISABLE_REWRITE=1 时不注册数据回填绑定（bindingRegistry 为空），不会真正缺包，禁用数据包弹窗。
+const isRewriteDisabled = getRegisteredDataPackModuleKeys().length === 0
 
 // 当前页面是否需要数据包：路由 meta.requireData === false 时（如脚本页面）不依赖数据包，
 // 跳过数据包更新/安装弹窗，默认值为 true（需要数据包）。
@@ -217,10 +220,17 @@ function skipAppUpdate(): void {
 
 // ---------- 数据包 ----------
 async function checkDataPack(): Promise<void> {
-    // hideUpdateInfo=1 时禁用数据包安装/更新弹窗：
+    // hideUpdateInfo=1 时整体禁用弹窗（含更新日志）：
     // 无头冒烟测试（bun-webview-test）等场景没有数据包，弹窗会挡住页面导致无法断言 DOM。
     if (hideUpdateInfo) {
         dataPackChecked.value = true
+        return
+    }
+
+    // DISABLE_REWRITE=1：数据随源码直接就绪，跳过数据包弹窗但仍走更新日志。
+    if (isRewriteDisabled) {
+        dataPackChecked.value = true
+        await runChangelogFlow()
         return
     }
 
@@ -341,9 +351,9 @@ onMounted(async () => {
 })
 
 // 数据包启动加载完成后，若应用更新流程已结束，则继续数据包流程。
-// requireData = false 的页面（如脚本页面）不检查数据包；hideUpdateInfo=1 时数据包弹窗整体禁用。
+// requireData=false 的页面、hideUpdateInfo=1、或 DISABLE_REWRITE=1 时均不弹数据包提示。
 watch(dataPackBootstrapLoading, loading => {
-    if (loading || !appUpdateChecked.value || dataPackChecked.value || !dataRequired.value || hideUpdateInfo) {
+    if (loading || !appUpdateChecked.value || dataPackChecked.value || !dataRequired.value || hideUpdateInfo || isRewriteDisabled) {
         return
     }
     void checkDataPack()

@@ -365,9 +365,8 @@ onMounted(async () => {
     ui.startTimer()
     reportVisitorCount()
     startOnlineExperienceTimer()
-    if (mihanNotify.mihanEnableNotify.value) {
-        await mihanNotify.updateMihanData()
-        mihanNotify.startWatch()
+    if (mihanNotify.shouldKeepWatch()) {
+        await mihanNotify.ensureWatch()
     }
 })
 
