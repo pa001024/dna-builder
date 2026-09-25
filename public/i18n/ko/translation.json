@@ -1732,6 +1732,7 @@
             "skipped": "사용자가 건너뛰었습니다",
             "storyHits": "{{count}}개의 퀘스트 체인 일치",
             "storyLines": "대사 {{count}}행 반환",
+            "toolBudgetExhausted": "검색 횟수를 모두 사용했습니다. 이미 확보한 결과를 바탕으로 바로 답변하세요.",
             "toolError": "도구 실행 실패",
             "versionAdditions": "버전 {{version}}에 {{count}}개 추가됨",
             "waitingChoice": "선택 대기: {{question}}",

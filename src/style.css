@@ -406,22 +406,6 @@ body {
 }
 
 @font-face {
-    font-family: "Aber Mono";
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url("/fonts/Aber-Mono-Regular.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: "Aber Mono";
-    font-style: normal;
-    font-weight: 700;
-    font-display: swap;
-    src: url("/fonts/Aber-Mono-Bold.woff2") format("woff2");
-}
-
-@font-face {
     font-family: "HarmonyOS Sans SC";
     font-style: normal;
     font-weight: 400;

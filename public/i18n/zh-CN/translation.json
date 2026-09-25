@@ -1757,6 +1757,7 @@
             "skipped": "用户已跳过",
             "storyHits": "命中 {{count}} 个任务链",
             "storyLines": "返回 {{count}} 行对话",
+            "toolBudgetExhausted": "检索轮次已用尽，请基于已有结果直接作答",
             "toolError": "工具执行失败",
             "versionAdditions": "版本 {{version}} 新增 {{count}} 条",
             "waitingChoice": "等待选择：{{question}}",

@@ -1755,6 +1755,7 @@
             "skipped": "Skipped by user",
             "storyHits": "{{count}} quest chain(s) matched",
             "storyLines": "Returned {{count}} dialogue line(s)",
+            "toolBudgetExhausted": "Tool budget exhausted. Answer directly from the results you already have.",
             "toolError": "Tool execution failed",
             "versionAdditions": "Version {{version}} adds {{count}} entries",
             "waitingChoice": "Waiting for choice: {{question}}",

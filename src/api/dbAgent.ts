@@ -156,8 +156,15 @@ interface DBAgentPendingState extends DBAgentLoopState {
  *
  * `ask_user` 挂起会占用一轮（回答后从下一轮继续）：这样循环必然推进，
  * 不会出现「模型一直提问、轮次永不前进」的死循环。
+ *
+ * ⚠️ **超限只是不再接受新的工具调用，绝不撤掉 `tools` 声明**（见 {@link DB_AGENT_TOOLS} 的调用处）。
+ * 撤掉工具会落进上游一个确定的坏格子：**未声明工具 + 思考模式**下，模型仍会按训练范式
+ * 输出工具语法，但因为没有 `tools` 可挂，整段 `<||DSML|| calls>` 标记被当作**正文**下发
+ * （对 `api.deepseek.com/anthropic/v1/messages` 逐项 A/B 实测：声明 tools 时无论是否开思考
+ * 都正常返回 `tool_use`；不声明 tools 且开思考则 100% 吐标记）。
+ * DSH 全程带着工具跑、从不中途摘掉，这是它零 DSML 处理代码的原因。
  */
-const MAX_TOOL_ROUNDS = 4
+const MAX_TOOL_ROUNDS = 30
 
 /**
  * 单次回答触达输出上限后允许自动续写的次数。
@@ -1073,7 +1080,8 @@ export class DBAgent {
         let continuations = 0
 
         while (round <= MAX_TOOL_ROUNDS) {
-            const isLastRound = round === MAX_TOOL_ROUNDS
+            /** 已用尽工具轮：只用来决定「拿到工具调用后怎么处理」，不影响工具声明 */
+            const outOfToolRounds = round >= MAX_TOOL_ROUNDS
 
             let result: AgentRoundResult
 
@@ -1082,8 +1090,10 @@ export class DBAgent {
                     model: this.config.default_model,
                     system,
                     messages,
-                    // 最后一轮不再带工具，强制模型基于已有检索结果作答
-                    tools: isLastRound ? undefined : DB_AGENT_TOOLS,
+                    // tools 全程声明，绝不按轮次撤掉（撤掉会触发上游的文本工具语法泄露，见 MAX_TOOL_ROUNDS 的说明）。
+                    // 轮次用尽后的收敛靠两条一起兜：提示词里要求直接作答，以及下面把多出来的调用
+                    // 当成工具结果回灌、逼模型看到「额度已用尽」后收尾。
+                    tools: DB_AGENT_TOOLS,
                     temperature: this.config.default_temperature,
                     maxTokens: this.config.default_max_tokens,
                     handlers: {
@@ -1150,6 +1160,34 @@ export class DBAgent {
                 }
 
                 const args = parseToolArguments(call.arguments)
+
+                // 工具轮用尽后模型仍发起了调用：不执行，改成一条工具结果告诉它「额度已用尽」。
+                // 这样既保留了「工具声明始终在场」这个防泄露前提，又能让模型看到明确信号后收尾——
+                // 比单靠提示词要求它停手更可靠。
+                if (outOfToolRounds) {
+                    const summary = i18next.t("dbAgent.summary.toolBudgetExhausted", {
+                        defaultValue: "检索轮次已用尽，请基于已有结果直接作答",
+                    })
+
+                    traces.push({ id: call.id, name: call.name, label: toolLabel(call.name), args, summary, status: "error" })
+                    callbacks.onToolTrace?.({
+                        id: call.id,
+                        name: call.name,
+                        label: toolLabel(call.name),
+                        args,
+                        summary,
+                        status: "error",
+                    })
+
+                    toolResults.push({
+                        toolCallId: call.id,
+                        content: JSON.stringify({ error: summary }),
+                        isError: true,
+                    })
+
+                    continue
+                }
+
                 const trace: DBAgentToolTrace = {
                     id: call.id,
                     name: call.name,

@@ -1770,6 +1770,7 @@
             "skipped": "Ignoré par l'utilisateur",
             "storyHits": "{{count}} chaîne(s) de quêtes trouvée(s)",
             "storyLines": "{{count}} ligne(s) de dialogue renvoyée(s)",
+            "toolBudgetExhausted": "Le quota d'appels d'outils est épuisé. Répondez directement à partir des résultats déjà obtenus.",
             "toolError": "Échec de l'exécution de l'outil",
             "versionAdditions": "La version {{version}} ajoute {{count}} entrées",
             "waitingChoice": "En attente de choix : {{question}}",

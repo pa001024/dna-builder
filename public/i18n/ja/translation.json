@@ -1731,6 +1731,7 @@
             "skipped": "ユーザーがスキップしました",
             "storyHits": "{{count}} 件のクエストチェーンがヒット",
             "storyLines": "{{count}} 行のセリフを返しました",
+            "toolBudgetExhausted": "検索回数の上限に達しました。すでに得た結果をもとに直接回答してください。",
             "toolError": "ツールの実行に失敗しました",
             "versionAdditions": "バージョン {{version}} の追加 {{count}} 件",
             "waitingChoice": "選択待ち：{{question}}",
