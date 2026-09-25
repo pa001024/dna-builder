@@ -235,8 +235,12 @@ function createMihanNotify() {
 
     /**
      * 检查并触发通知。
+     *
+     * 轮询现在还服务于屏幕信息条,即便订阅开关关闭也会刷新数据,
+     * 因此这里必须再次确认订阅开关,否则未启用推送时也会误弹面板并播放提示音。
      */
     async function checkNotify() {
+        if (!mihanEnableNotify.value) return
         if (shouldNotify()) {
             await showMihanNotification()
         }
