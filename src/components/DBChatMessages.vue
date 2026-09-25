@@ -2,6 +2,7 @@
 import { useTranslation } from "i18next-vue"
 import { computed, createApp, h, nextTick, onBeforeUnmount, ref, watch } from "vue"
 import { useRouter } from "vue-router"
+import type { IconTypes } from "@/components/Icon.vue"
 import type { Message, MessageReasoning, MessageToolTrace } from "@/store/db"
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
@@ -54,8 +55,18 @@ const { t } = useTranslation()
 const scrollerRef = ref<HTMLElement | null>(null)
 /** 用户是否停留在底部（停留时才自动跟随新内容） */
 const isAtBottom = ref(true)
-/** 展开检索详情的消息 id 集合 */
-const expandedIds = ref<number[]>([])
+/**
+ * 展开的工具调用分组键集合：`${消息 id}:${分组 key}`。
+ * 连续多次工具调用合并成一组，每组各自独立展开/收起。
+ */
+const expandedGroupKeys = ref<string[]>([])
+/**
+ * 整体展开了检索过程的已完成消息 id 集合。
+ *
+ * 检索完成后整块过程默认收成一行「已完成 13m34s」，用户点开才铺开
+ * 思考与工具调用；正在流式输出的那条不受此控制，始终铺开展示。
+ */
+const expandedProcessIds = ref<number[]>([])
 /** 展开思考内容的键集合：`${消息 id}:${段落序号}`，每条思考各自独立折叠 */
 const expandedReasoningKeys = ref<string[]>([])
 /** 刚刚复制成功的消息 id（用于把复制图标临时换成对勾做反馈） */
@@ -333,13 +344,53 @@ function handleScroll() {
 }
 
 /**
- * 展开/收起某条回复的检索详情。
+ * 工具调用分组的折叠键：消息 id + 分组 key，保证每组独立展开/收起。
+ * @param messageId 消息 id
+ * @param groupKey 分组 key（首条工具调用的稳定 key）
+ */
+function toolGroupKey(messageId: number, groupKey: string) {
+    return `${messageId}:${groupKey}`
+}
+
+/**
+ * 切换某条已完成消息的检索过程整体展开状态。
  * @param messageId 消息 id
  */
-function toggleTrace(messageId: number) {
-    expandedIds.value = expandedIds.value.includes(messageId)
-        ? expandedIds.value.filter(id => id !== messageId)
-        : [...expandedIds.value, messageId]
+function toggleProcess(messageId: number) {
+    expandedProcessIds.value = expandedProcessIds.value.includes(messageId)
+        ? expandedProcessIds.value.filter(id => id !== messageId)
+        : [...expandedProcessIds.value, messageId]
+}
+
+/**
+ * 过程耗时的人类可读格式，形如 `13m34s` / `1h2m` / `8s`。
+ * @param ms 毫秒
+ * @returns 展示文本
+ */
+function formatDuration(ms: number): string {
+    const totalSeconds = Math.max(0, Math.round(ms / 1000))
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
+
+    if (hours > 0) {
+        return `${hours}h${minutes}m`
+    }
+
+    return minutes > 0 ? `${minutes}m${seconds}s` : `${seconds}s`
+}
+
+/**
+ * 切换某个工具调用分组的展开状态。
+ * @param messageId 消息 id
+ * @param groupKey 分组 key
+ */
+function toggleToolGroup(messageId: number, groupKey: string) {
+    const key = toolGroupKey(messageId, groupKey)
+
+    expandedGroupKeys.value = expandedGroupKeys.value.includes(key)
+        ? expandedGroupKeys.value.filter(item => item !== key)
+        : [...expandedGroupKeys.value, key]
 }
 
 /** 思考段落的折叠键：消息 id + 段落序号，保证每条思考独立展开/收起 */
@@ -381,25 +432,40 @@ function reasoningPreview(text: string): string {
 }
 
 /**
- * 消息过程流中的一段：一段思考（可折叠）或一次工具调用（始终可见） */
+ * 消息过程流中的一段：一段思考（可折叠）或一组连续的工具调用（可折叠）。
+ *
+ * 多个连续的工具调用合并成一组，标题一行概括「用了几个、哪些工具」，
+ * 展开后逐条查看参数与结果；单次调用则直接铺成一行，不需要额外点击。
+ */
 interface TraceItem {
     /** 稳定 key */
     key: string
     /** 类型 */
-    kind: "reasoning" | "tool"
+    kind: "reasoning" | "toolGroup"
     /** 思考文本 */
     text?: string
     /** 该段思考的段落序号（用于折叠键） */
     index?: number
-    /** 工具调用记录 */
-    trace?: MessageToolTrace
+    /** 工具调用记录（toolGroup 时有值） */
+    traces?: MessageToolTrace[]
+}
+
+/**
+ * 取片段里的工具调用列表（思考片段为空数组）。
+ * 单独抽出来是为了让模板里不用反复判空。
+ * @param item 过程片段
+ * @returns 工具调用列表
+ */
+function itemTraces(item: TraceItem): MessageToolTrace[] {
+    return item.traces ?? []
 }
 
 /**
  * 把一条助手回复的检索过程整理成按时间顺序排列的片段列表。
  *
  * 顺序对应真实的 Agent 执行流：思考 → 工具调用 → 思考 → 工具调用 → 最终回答。
- * 思考片段可折叠，工具调用始终可见（参考 Codex 的展示方式）。
+ * 思考片段可折叠；**连续多个工具调用合并成一组**（形如「使用了 3 个 模块清单、全库检索」），
+ * 展开后逐条查看参数与结果，避免一次回复把整屏铺满工具条。
  *
  * **正在流式的那一段不在这里**：`useDBChat` 约定「未收尾的思考不进 `reasonings`」，
  * 它只由 `props.reasoning` 单独渲染成末尾的「思考中」实时行。
@@ -413,31 +479,136 @@ interface TraceItem {
 function traceItems(message: Message): TraceItem[] {
     const reasonings: MessageReasoning[] = message.reasonings ?? []
     const pending = new Map<string, MessageToolTrace>((message.toolTraces ?? []).map(trace => [trace.id, trace]))
-    const items: TraceItem[] = []
+    // 先按时间顺序拍平，再在第二步把连续的工具调用收成一组
+    const flat: Array<{ kind: "reasoning"; key: string; text: string; index: number } | { kind: "tool"; trace: MessageToolTrace }> = []
 
     reasonings.forEach((reasoning, index) => {
         if (!reasoning.text.trim()) {
             return
         }
 
-        items.push({ key: `r-${index}`, kind: "reasoning", text: reasoning.text, index })
+        flat.push({ kind: "reasoning", key: `r-${index}`, text: reasoning.text, index })
 
         for (const id of reasoning.toolCallIds) {
             const trace = pending.get(id)
 
             if (trace) {
-                items.push({ key: `t-${id}`, kind: "tool", trace })
+                flat.push({ kind: "tool", trace })
                 pending.delete(id)
             }
         }
     })
 
     // 剩余的（未与思考关联的，例如旧数据）工具调用按原顺序收尾
-    for (const [id, trace] of pending) {
-        items.push({ key: `t-${id}`, kind: "tool", trace })
+    for (const trace of pending.values()) {
+        flat.push({ kind: "tool", trace })
     }
 
+    const items: TraceItem[] = []
+    let group: MessageToolTrace[] = []
+
+    /** 把当前累积的工具调用收尾成一个分组片段 */
+    const flushGroup = () => {
+        if (!group.length) {
+            return
+        }
+
+        items.push({ key: `g-${group[0].id}`, kind: "toolGroup", traces: group })
+        group = []
+    }
+
+    for (const entry of flat) {
+        if (entry.kind === "reasoning") {
+            flushGroup()
+            items.push({ key: entry.key, kind: "reasoning", text: entry.text, index: entry.index })
+        } else {
+            group.push(entry.trace)
+        }
+    }
+
+    flushGroup()
+
     return items
+}
+
+/**
+ * 工具调用分组标题里的工具名清单：按首次出现顺序去重后用「、」连接。
+ * @param traces 分组内的工具调用
+ * @returns 形如「模块清单、全库检索」的名称清单
+ */
+function groupToolNames(traces: MessageToolTrace[]): string {
+    const names: string[] = []
+
+    for (const trace of traces) {
+        if (!names.includes(trace.label)) {
+            names.push(trace.label)
+        }
+    }
+
+    return names.join("、")
+}
+
+/**
+ * 分组里是否还有正在执行的工具调用（决定标题是否显示转圈）。
+ * @param item 过程片段
+ * @returns 是否有调用在执行中
+ */
+function isGroupRunning(item: TraceItem): boolean {
+    return itemTraces(item).some(trace => trace.status === "running")
+}
+
+/**
+ * 单个工具参数值的可读文本：字符串原样、其它类型 JSON 化，过长截断。
+ * @param value 参数值
+ * @returns 展示文本
+ */
+function formatArgValue(value: unknown): string {
+    const text = typeof value === "string" ? value : JSON.stringify(value)
+
+    if (!text) {
+        return ""
+    }
+
+    return text.length > 80 ? `${text.slice(0, 80)}…` : text
+}
+
+/**
+ * 工具调用参数的单行摘要，形如 `module=achievement version=1.6`。
+ * 空值（undefined / null / 空字符串）不展示，避免出现 `keyword=` 这类噪音。
+ * @param trace 工具调用记录
+ * @returns 参数摘要文本
+ */
+function formatToolArgs(trace: MessageToolTrace): string {
+    return Object.entries(trace.args ?? {})
+        .filter(([, value]) => value !== undefined && value !== null && value !== "")
+        .map(([key, value]) => `${key}=${formatArgValue(value)}`)
+        .join(" ")
+}
+
+/**
+ * 工具行的状态图标：执行中转圈、失败警示、完成检索。
+ * @param status 执行状态
+ * @returns 图标名
+ */
+function traceIcon(status: MessageToolTrace["status"]): IconTypes {
+    if (status === "running") {
+        return "ri:refresh-line"
+    }
+
+    return status === "error" ? "ri:error-warning-line" : "ri:search-line"
+}
+
+/**
+ * 工具行状态图标的附加 class（转圈动画 / 错误配色）。
+ * @param status 执行状态
+ * @returns Tailwind class
+ */
+function traceIconClass(status: MessageToolTrace["status"]): string {
+    if (status === "running") {
+        return "animate-spin text-primary"
+    }
+
+    return status === "error" ? "text-error" : "text-base-content/40"
 }
 
 /**
@@ -569,91 +740,155 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
-                        <!-- 助手回复：检索过程（思考可折叠 + 工具调用常显）+ markdown 正文 -->
+                        <!-- 助手回复：检索过程（思考可折叠 + 连续工具调用合并折叠）+ markdown 正文 -->
                         <div v-else class="flex flex-col items-start gap-2">
                             <div v-if="traceItems(message).length || liveReasoningOf(message)" class="flex w-full flex-col gap-1">
-                                <template v-for="item in traceItems(message)" :key="item.key">
-                                    <!-- 思考：默认折叠，标题右侧给末行预览；展开后完整显示 -->
-                                    <div v-if="item.kind === 'reasoning'" class="flex flex-col gap-1">
-                                        <button
-                                            type="button"
-                                            class="group/think flex w-full cursor-pointer items-baseline gap-1.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                                            :aria-expanded="expandedReasoningKeys.includes(reasoningKey(message.id, item.index ?? 0))"
-                                            @click="toggleReasoning(message.id, item.index ?? 0)"
-                                        >
-                                            <Icon
-                                                icon="ri:arrow-right-s-line"
-                                                class="h-3 w-3 shrink-0 translate-y-0.5 text-base-content/35 transition-transform duration-200"
-                                                :class="
-                                                    expandedReasoningKeys.includes(reasoningKey(message.id, item.index ?? 0))
-                                                        ? 'rotate-90'
-                                                        : ''
-                                                "
-                                            />
-                                            <span class="shrink-0 text-[10px] uppercase tracking-[0.2em] text-base-content/40">
-                                                {{ $t("dbAgent.ui.thinking") }}
-                                            </span>
-                                            <span
-                                                v-if="!expandedReasoningKeys.includes(reasoningKey(message.id, item.index ?? 0))"
-                                                class="min-w-0 flex-1 truncate text-[11px] text-base-content/35"
+                                <!--
+                                  过程已完成：整块思考 / 工具调用收成一行并展示耗时，
+                                  点击展开查看完整过程；正在流式输出的那条始终铺开，不受此折叠控制。
+                                -->
+                                <button
+                                    v-if="!isLiveMessage(message)"
+                                    type="button"
+                                    class="flex w-full cursor-pointer items-center gap-1.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                    :aria-expanded="expandedProcessIds.includes(message.id)"
+                                    @click="toggleProcess(message.id)"
+                                >
+                                    <Icon
+                                        icon="ri:arrow-right-s-line"
+                                        class="h-3 w-3 shrink-0 text-base-content/35 transition-transform duration-200"
+                                        :class="expandedProcessIds.includes(message.id) ? 'rotate-90' : ''"
+                                    />
+                                    <span class="text-[11px] text-base-content/45">
+                                        {{
+                                            message.processMs
+                                                ? $t("dbAgent.ui.processDone", { duration: formatDuration(message.processMs) })
+                                                : $t("dbAgent.ui.processDoneNoTime")
+                                        }}
+                                    </span>
+                                </button>
+
+                                <template v-if="isLiveMessage(message) || expandedProcessIds.includes(message.id)">
+                                    <template v-for="item in traceItems(message)" :key="item.key">
+                                        <!-- 思考：默认折叠，标题右侧给末行预览；展开后完整显示 -->
+                                        <div v-if="item.kind === 'reasoning'" class="flex flex-col gap-1">
+                                            <button
+                                                type="button"
+                                                class="group/think flex w-full cursor-pointer items-baseline gap-1.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                                :aria-expanded="expandedReasoningKeys.includes(reasoningKey(message.id, item.index ?? 0))"
+                                                @click="toggleReasoning(message.id, item.index ?? 0)"
                                             >
-                                                {{ reasoningPreview(item.text ?? "") }}
-                                            </span>
-                                        </button>
+                                                <Icon
+                                                    icon="ri:arrow-right-s-line"
+                                                    class="h-3 w-3 shrink-0 translate-y-0.5 text-base-content/35 transition-transform duration-200"
+                                                    :class="
+                                                        expandedReasoningKeys.includes(reasoningKey(message.id, item.index ?? 0))
+                                                            ? 'rotate-90'
+                                                            : ''
+                                                    "
+                                                />
+                                                <span class="shrink-0 text-[10px] uppercase tracking-[0.2em] text-base-content/40">
+                                                    {{ $t("dbAgent.ui.thinking") }}
+                                                </span>
+                                                <span
+                                                    v-if="!expandedReasoningKeys.includes(reasoningKey(message.id, item.index ?? 0))"
+                                                    class="min-w-0 flex-1 truncate text-[11px] text-base-content/35"
+                                                >
+                                                    {{ reasoningPreview(item.text ?? "") }}
+                                                </span>
+                                            </button>
 
-                                        <p
-                                            v-if="expandedReasoningKeys.includes(reasoningKey(message.id, item.index ?? 0))"
-                                            class="border-l border-base-content/12 pl-2 text-[11px] leading-5 text-base-content/45 whitespace-pre-wrap"
-                                        >
-                                            {{ item.text }}
-                                        </p>
-                                    </div>
+                                            <p
+                                                v-if="expandedReasoningKeys.includes(reasoningKey(message.id, item.index ?? 0))"
+                                                class="border-l border-base-content/12 pl-2 text-[11px] leading-5 text-base-content/45 whitespace-pre-wrap"
+                                            >
+                                                {{ item.text }}
+                                            </p>
+                                        </div>
 
-                                    <!-- 工具调用：始终可见，不随思考折叠 -->
-                                    <div v-else-if="item.trace" class="flex flex-wrap items-center gap-1.5">
-                                        <span
-                                            class="inline-flex items-center gap-1 border border-base-content/12 px-1.5 py-0.5 text-[10px] text-base-content/45"
-                                        >
-                                            <Icon
-                                                :icon="item.trace.status === 'running' ? 'ri:refresh-line' : 'ri:search-line'"
-                                                class="h-3 w-3"
-                                                :class="item.trace.status === 'running' ? 'animate-spin text-primary' : ''"
-                                            />
-                                            {{ item.trace.label }}
-                                            <span v-if="item.trace.summary" class="text-base-content/35">{{ item.trace.summary }}</span>
+                                        <!--
+                                          工具调用：单次调用直接铺成一行；连续多次调用合并成一条总览，
+                                          展开后逐条查看参数与结果（参考 Codex 的过程折叠方式）。
+                                        -->
+                                        <div v-else class="flex flex-col gap-1">
+                                            <button
+                                                v-if="itemTraces(item).length > 1"
+                                                type="button"
+                                                class="flex w-full cursor-pointer items-center gap-1.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                                :title="
+                                                    expandedGroupKeys.includes(toolGroupKey(message.id, item.key))
+                                                        ? $t('dbAgent.ui.traceCollapse')
+                                                        : $t('dbAgent.ui.traceExpand')
+                                                "
+                                                :aria-expanded="expandedGroupKeys.includes(toolGroupKey(message.id, item.key))"
+                                                @click="toggleToolGroup(message.id, item.key)"
+                                            >
+                                                <Icon
+                                                    icon="ri:arrow-right-s-line"
+                                                    class="h-3 w-3 shrink-0 text-base-content/35 transition-transform duration-200"
+                                                    :class="
+                                                        expandedGroupKeys.includes(toolGroupKey(message.id, item.key))
+                                                            ? 'rotate-90'
+                                                            : ''
+                                                    "
+                                                />
+                                                <Icon
+                                                    v-if="isGroupRunning(item)"
+                                                    icon="ri:refresh-line"
+                                                    class="h-3 w-3 shrink-0 animate-spin text-primary"
+                                                />
+                                                <span class="text-[11px] text-base-content/45">
+                                                    {{
+                                                        $t("dbAgent.ui.toolsUsed", {
+                                                            total: itemTraces(item).length,
+                                                            tools: groupToolNames(itemTraces(item)),
+                                                        })
+                                                    }}
+                                                </span>
+                                            </button>
+
+                                            <ul
+                                                v-if="
+                                                    itemTraces(item).length === 1 ||
+                                                    expandedGroupKeys.includes(toolGroupKey(message.id, item.key))
+                                                "
+                                                class="flex flex-col gap-0.5"
+                                                :class="
+                                                    itemTraces(item).length > 1 ? 'ml-1.5 border-l border-base-content/12 pl-2.5' : ''
+                                                "
+                                            >
+                                                <li
+                                                    v-for="trace in itemTraces(item)"
+                                                    :key="trace.id"
+                                                    class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[11px] leading-5"
+                                                >
+                                                    <Icon
+                                                        :icon="traceIcon(trace.status)"
+                                                        class="h-3 w-3 shrink-0 translate-y-0.5"
+                                                        :class="traceIconClass(trace.status)"
+                                                    />
+                                                    <span class="shrink-0 text-base-content/55">{{ trace.label }}</span>
+                                                    <span v-if="formatToolArgs(trace)" class="min-w-0 break-all text-base-content/35">
+                                                        / {{ formatToolArgs(trace) }}
+                                                    </span>
+                                                    <span v-if="trace.summary" class="text-base-content/30">· {{ trace.summary }}</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </template>
+
+                                    <!-- 流式过程中尚未收尾的思考段落 -->
+                                    <div v-if="liveReasoningOf(message)" class="flex items-baseline gap-1.5">
+                                        <Icon icon="ri:refresh-line" class="h-3 w-3 shrink-0 translate-y-0.5 animate-spin text-primary" />
+                                        <span class="shrink-0 text-[10px] uppercase tracking-[0.2em] text-primary/70">{{
+                                            $t("dbAgent.ui.thinkingLive")
+                                        }}</span>
+                                        <span class="min-w-0 flex-1 truncate text-[11px] text-base-content/40">
+                                            {{ reasoningPreview(liveReasoningOf(message) ?? "") }}
                                         </span>
                                     </div>
                                 </template>
-
-                                <!-- 流式过程中尚未收尾的思考段落 -->
-                                <div v-if="liveReasoningOf(message)" class="flex items-baseline gap-1.5">
-                                    <Icon icon="ri:refresh-line" class="h-3 w-3 shrink-0 translate-y-0.5 animate-spin text-primary" />
-                                    <span class="shrink-0 text-[10px] uppercase tracking-[0.2em] text-primary/70">{{
-                                        $t("dbAgent.ui.thinkingLive")
-                                    }}</span>
-                                    <span class="min-w-0 flex-1 truncate text-[11px] text-base-content/40">
-                                        {{ reasoningPreview(liveReasoningOf(message) ?? "") }}
-                                    </span>
-                                </div>
-
-                                <!-- 检索详情：完整工具调用记录（含参数），按需展开 -->
-                                <div v-if="message.toolTraces?.length" class="flex items-center gap-1.5">
-                                    <button
-                                        type="button"
-                                        class="cursor-pointer text-[10px] text-base-content/35 transition-colors duration-200 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                                        @click="toggleTrace(message.id)"
-                                    >
-                                        {{
-                                            expandedIds.includes(message.id) ? $t("dbAgent.ui.traceCollapse") : $t("dbAgent.ui.traceExpand")
-                                        }}
-                                    </button>
-                                </div>
                             </div>
-
-                            <pre
-                                v-if="expandedIds.includes(message.id) && message.toolTraces?.length"
-                                class="db-chat-scroll max-h-48 overflow-auto border border-base-content/12 p-2 text-[10px] leading-4 text-base-content/50"
-                                >{{ JSON.stringify(message.toolTraces, null, 2) }}</pre>
 
                             <div
                                 v-if="message.content"

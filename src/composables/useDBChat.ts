@@ -324,8 +324,21 @@ export function useDBChat() {
             content: assistantMessage.content,
             toolTraces: assistantMessage.toolTraces,
             reasonings: assistantMessage.reasonings,
+            processMs: assistantMessage.processMs,
             pendingAsk: assistantMessage.pendingAsk,
         })
+    }
+
+    /**
+     * 把一个检索过程的总耗时记到消息上。
+     *
+     * 分多次运行时累加（例如 ask_user 挂起、用户作答后继续），
+     * 且只在模型真正在工作的区间累加，用户作答的等待时间不计入。
+     * @param message 助手消息
+     * @param startedAt 本次运行开始的毫秒时间戳
+     */
+    function addProcessMs(message: Message, startedAt: number) {
+        message.processMs = (message.processMs ?? 0) + (Date.now() - startedAt)
     }
 
     /**
@@ -449,6 +462,9 @@ export function useDBChat() {
 
         const target = { message: assistantMessage, id: assistantId, conversationId }
 
+        // 记录本轮开始时间，用于完成后展示过程耗时（见 addProcessMs）
+        const startedAt = Date.now()
+
         try {
             // 既没有自己的密钥又未登录时服务端代理不可用，直接给出可操作提示，不打无谓的请求
             if (!resolveAgentConfig()) {
@@ -457,11 +473,13 @@ export function useDBChat() {
 
             const result = await agent.run(history, buildCallbacks(assistantMessage, reasonings))
 
+            addProcessMs(assistantMessage, startedAt)
             await consumeResult(target, result)
         } catch (error) {
             const message = error instanceof Error ? error.message : i18next.t("dbAgent.error.unknown")
             assistantMessage.content = assistantMessage.content || i18next.t("dbAgent.error.failed", { message })
 
+            addProcessMs(assistantMessage, startedAt)
             await persistAssistant(assistantId, assistantMessage)
         } finally {
             isBusy.value = false
@@ -486,7 +504,7 @@ export function useDBChat() {
 
         const question = request.questions.find(item => item.allowCustom) ?? request.questions[0]
 
-        if (!question || !question.allowCustom) {
+        if (!question?.allowCustom) {
             // 没有任何题接受自由输入：清掉挂起态，把这段文字当新一轮提问
             pendingAsk.value = null
             pendingAskLive.value = false
@@ -540,6 +558,9 @@ export function useDBChat() {
         const reasonings: MessageReasoning[] = target.message.reasonings ?? []
         target.message.reasonings = reasonings
 
+        // 续跑同样计时并累加到同一条消息上
+        const startedAt = Date.now()
+
         try {
             if (!resolveAgentConfig()) {
                 throw new Error(i18next.t("dbAgent.error.noConfig"))
@@ -547,11 +568,13 @@ export function useDBChat() {
 
             const result = await agent.answerAsk(response, buildCallbacks(target.message, reasonings))
 
+            addProcessMs(target.message, startedAt)
             await consumeResult(target, result)
         } catch (error) {
             const message = error instanceof Error ? error.message : i18next.t("dbAgent.error.unknown")
             target.message.content = target.message.content || i18next.t("dbAgent.error.failed", { message })
 
+            addProcessMs(target.message, startedAt)
             await persistAssistant(target.id, target.message)
         } finally {
             isBusy.value = false
