@@ -1,5 +1,6 @@
 import type { EntityTable, TypedDB, Version } from "dexie"
 import Dexie from "dexie"
+import type { ChatImage } from "@/utils/chat-image"
 export const db = new Dexie("dna") as unknown as TypedDB<DB>
 declare module "dexie" {
     interface DBTable {
@@ -167,6 +168,13 @@ export interface Message {
      */
     renderedContentSource?: string
     imageUrl?: string
+    /**
+     * 用户这条提问附带的图片（截图 / 配装面板等，Base64 内联）。
+     *
+     * 随消息落库是为了刷新或切换会话后还能看到自己发过什么；发给模型时
+     * 只回灌最近若干轮（见 `useDBChat`），避免请求体随对话长度线性膨胀。
+     */
+    images?: ChatImage[]
     /** 该条回复过程中的资料检索工具调用（仅资料检索 Agent 使用） */
     toolTraces?: MessageToolTrace[]
     /** 该条回复过程中的分段思考内容（仅资料检索 Agent 使用） */

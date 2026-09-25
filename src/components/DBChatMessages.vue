@@ -5,6 +5,7 @@ import { useRouter } from "vue-router"
 import type { Message, MessageReasoning, MessageToolTrace } from "@/store/db"
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
+import { chatImageDataUrl } from "@/utils/chat-image"
 import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
 import { isHashRouterMode, renderMarkdown } from "@/utils/markdown"
 import { type ParsedRichComponent, parseRichComponents } from "@/utils/rich-component"
@@ -530,8 +531,20 @@ onBeforeUnmount(() => {
                 <ul v-else class="flex flex-col gap-5">
                     <li v-for="message in props.messages" :key="message.id" class="group/msg">
                         <!-- 用户提问：右对齐，hairline 边框区分 -->
-                        <div v-if="message.role === 'user'" class="flex flex-col items-end">
+                        <div v-if="message.role === 'user'" class="flex flex-col items-end gap-1.5">
+                            <!-- 附图排在正文之前：与发给模型的顺序一致，也符合「先看图再看问题」 -->
+                            <div v-if="message.images?.length" class="flex max-w-[80%] flex-wrap justify-end gap-2">
+                                <img
+                                    v-for="(image, index) in message.images"
+                                    :key="index"
+                                    :src="chatImageDataUrl(image)"
+                                    class="max-h-48 max-w-full border border-base-content/15 object-contain"
+                                    :alt="$t('dbAgent.ui.userImage')"
+                                />
+                            </div>
+
                             <p
+                                v-if="message.content"
                                 class="db-selectable max-w-[80%] border border-base-content/15 bg-base-content/5 px-3 py-2 text-sm leading-6 whitespace-pre-wrap"
                             >
                                 {{ message.content }}

@@ -1728,6 +1728,7 @@
     "dbAgent": {
         "conversation": {
             "defaultName": "New chat",
+            "imageName": "Image question",
             "listEmpty": "No conversations yet. Your questions will be saved here."
         },
         "error": {
@@ -1779,13 +1780,15 @@
             "askSkip": "Skip and search directly",
             "askSubmit": "Submit choices",
             "askSubmitting": "Searching…",
+            "attachImage": "Add an image (paste / drag in, up to {{count}})",
+            "attachImageFull": "Up to {{count}} images only",
             "backToDatabase": "Back to database",
-            "browseHint": "Enter to ask AI · Shift + Enter for a new line",
+            "browseHint": "Enter to ask AI · Shift + Enter for a new line · Paste an image",
             "browseMoreResults": "{{count}} more. Keep typing to narrow down",
             "browsePlaceholder": "What are you looking for today? Search the database, or ask the AI directly",
             "browseSubmit": "Ask AI",
             "chatEmptyTip": "Hand your question to data retrieval. Try these:",
-            "chatHint": "Enter to send · Shift + Enter for a new line",
+            "chatHint": "Enter to send · Shift + Enter for a new line · Paste an image",
             "chatPlaceholderAnswer": "You can also type your answer here",
             "chatPlaceholderIdle": "Keep asking, or start a new topic",
             "chatSubmit": "Send",
@@ -1806,12 +1809,14 @@
             "exportAgent": "Data Retrieval",
             "exportMe": "Me",
             "newConversation": "New chat",
+            "removeImage": "Remove this image",
             "searching": "Searching the database…",
             "stopSearch": "Stop retrieval",
             "thinking": "Thinking",
             "thinkingLive": "Thinking",
             "traceCollapse": "Hide retrieval details",
-            "traceExpand": "Retrieval details"
+            "traceExpand": "Retrieval details",
+            "userImage": "Image attached by user"
         }
     },
     "dialog-model": {

@@ -6,6 +6,7 @@ import { env } from "@/env"
 import { type Conversation, db, type Message, type MessageReasoning, type UConversation, type UMessage } from "@/store/db"
 import { useSettingStore } from "@/store/setting"
 import { useUserStore } from "@/store/user"
+import { type ChatImage, MAX_CHAT_IMAGES } from "@/utils/chat-image"
 import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
 import { formatAskUserResponse, hasAskAnswer } from "@/utils/db-ask-user"
 import { htmlToText } from "@/utils/html"
@@ -21,6 +22,15 @@ import { parseRichComponents } from "@/utils/rich-component"
 
 /** 会话名称取用户首条提问的前若干字符 */
 const CONVERSATION_NAME_LENGTH = 18
+
+/**
+ * 上下文中允许带图的用户轮数上限（含本轮）。
+ *
+ * 图片是 Base64 内联的，每发一轮整段上下文都会重传一遍；不限轮数的话请求体会随
+ * 对话长度线性膨胀，很快撞上上游的体积限制。只保留最近两轮，既能接住
+ * 「先发图提问 → 再追问这张图里的另一样东西」，也把体积封在常数级。
+ */
+const MAX_IMAGE_HISTORY_TURNS = 2
 
 /** 服务端代理使用的模型（服务端也会强制覆盖成同一个，这里只是让请求体看起来一致） */
 const PROXY_MODEL = "deepseek-flash"
@@ -361,11 +371,14 @@ export function useDBChat() {
     /**
      * 发送提问：写入用户消息 → 调用资料检索 Agent → 流式写入回复。
      * @param rawText 用户输入
+     * @param rawImages 本次附带的图片（截图 / 面板等）；只取前 MAX_CHAT_IMAGES 张
      */
-    async function send(rawText: string) {
+    async function send(rawText: string, rawImages: ChatImage[] = []) {
         const text = rawText.trim()
+        const images = rawImages.slice(0, MAX_CHAT_IMAGES)
 
-        if (!text || isBusy.value) {
+        // 只有图没有文字也是一次完整提问（「这是什么」由模型自己理解图片）
+        if ((!text && !images.length) || isBusy.value) {
             return
         }
 
@@ -376,11 +389,18 @@ export function useDBChat() {
             return
         }
 
-        // 首次提问时按提问内容命名会话
-        const conversationId = activeConversationId.value || (await createConversation(text.slice(0, CONVERSATION_NAME_LENGTH)))
+        // 首次提问时按提问内容命名会话；只发图时没有文字可取名，用固定名称兜底
+        const nameSource = text || i18next.t("dbAgent.conversation.imageName")
+        const conversationId = activeConversationId.value || (await createConversation(nameSource.slice(0, CONVERSATION_NAME_LENGTH)))
         const isFirstMessage = !messages.value.some(message => message.role === "user")
 
-        const userMessage: UMessage = { conversationId, role: "user", content: text, createdAt: Date.now() }
+        const userMessage: UMessage = {
+            conversationId,
+            role: "user",
+            content: text,
+            ...(images.length ? { images } : {}),
+            createdAt: Date.now(),
+        }
         const userId = await db.messages.add(userMessage)
         messages.value.push({
             ...userMessage,
@@ -404,10 +424,28 @@ export function useDBChat() {
         const reasonings: MessageReasoning[] = []
         assistantMessage.reasonings = reasonings
 
-        // 历史消息（不含本轮占位的助手消息）
-        const history: DBAgentHistoryMessage[] = messages.value
-            .filter(message => message.id !== assistantId && message.role !== "system" && message.content.trim())
-            .map(message => ({ role: message.role === "user" ? "user" : "assistant", content: message.content }))
+        // 历史消息（不含本轮占位的助手消息）。
+        // 只发图没打字的那一轮也要留下来——它是图片唯一的载体，按空正文过滤会把图一起丢掉。
+        const candidates = messages.value.filter(
+            message =>
+                message.id !== assistantId &&
+                message.role !== "system" &&
+                (message.content.trim() || (message.role === "user" && message.images?.length))
+        )
+
+        // 只有最近若干轮带图，更早的用户提问降级为纯文本（体积护栏，见 MAX_IMAGE_HISTORY_TURNS）
+        const imageTurnIds = new Set(
+            candidates
+                .filter(message => message.role === "user" && message.images?.length)
+                .slice(-MAX_IMAGE_HISTORY_TURNS)
+                .map(message => message.id)
+        )
+
+        const history: DBAgentHistoryMessage[] = candidates.map(message => ({
+            role: message.role === "user" ? "user" : "assistant",
+            content: message.content,
+            ...(message.role === "user" && imageTurnIds.has(message.id) && message.images?.length ? { images: message.images } : {}),
+        }))
 
         const target = { message: assistantMessage, id: assistantId, conversationId }
 
@@ -428,7 +466,7 @@ export function useDBChat() {
         } finally {
             isBusy.value = false
             liveReasoning.value = ""
-            await touchConversation(conversationId, isFirstMessage ? text.slice(0, CONVERSATION_NAME_LENGTH) : undefined)
+            await touchConversation(conversationId, isFirstMessage ? nameSource.slice(0, CONVERSATION_NAME_LENGTH) : undefined)
         }
     }
 

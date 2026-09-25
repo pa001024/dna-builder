@@ -36,6 +36,9 @@ interface ChatDelta {
     tool_calls?: ChatToolCallDelta[]
 }
 
+/** 用户轮的多模态内容分片（图片 + 文本）。 */
+type ChatCompletionContentPart = { type: "image_url"; image_url: { url: string } } | { type: "text"; text: string }
+
 /**
  * @description 把协议中立的对话消息序列化成 Chat Completions 的 messages。
  * @param messages 协议中立的对话消息
@@ -75,9 +78,26 @@ function serializeChatMessages(messages: readonly AgentWireMessage[]): ChatCompl
             result.push({ role: "tool", tool_call_id: item.toolCallId, content: item.content })
         }
 
-        if (message.text) {
-            result.push({ role: "user", content: message.text })
+        // 没有图片时保持纯文本 content：多数网关对字符串 content 的兼容性最好，
+        // 只有真的带图才退化成内容分片数组
+        if (!message.images?.length) {
+            if (message.text) {
+                result.push({ role: "user", content: message.text })
+            }
+
+            continue
         }
+
+        const parts: ChatCompletionContentPart[] = message.images.map(image => ({
+            type: "image_url",
+            image_url: { url: `data:${image.mimeType};base64,${image.data}` },
+        }))
+
+        if (message.text) {
+            parts.push({ type: "text", text: message.text })
+        }
+
+        result.push({ role: "user", content: parts })
     }
 
     return result

@@ -1730,6 +1730,7 @@
     "dbAgent": {
         "conversation": {
             "defaultName": "新对话",
+            "imageName": "图片提问",
             "listEmpty": "还没有对话记录，提问后会保存在这里。"
         },
         "error": {
@@ -1781,13 +1782,15 @@
             "askSkip": "跳过，直接检索",
             "askSubmit": "提交选择",
             "askSubmitting": "检索中…",
+            "attachImage": "添加图片（粘贴 / 拖入，最多 {{count}} 张）",
+            "attachImageFull": "最多只能附带 {{count}} 张图片",
             "backToDatabase": "返回资料库",
-            "browseHint": "Enter 询问AI · Shift + Enter 换行",
+            "browseHint": "Enter 询问AI · Shift + Enter 换行 · 可粘贴图片",
             "browseMoreResults": "还有 {{count}} 条，继续输入可缩小范围",
             "browsePlaceholder": "今天想查点什么？输入关键词检索资料库，或直接向 AI 提问",
             "browseSubmit": "询问AI",
             "chatEmptyTip": "把问题交给资料检索，试试这些：",
-            "chatHint": "Enter 发送 · Shift + Enter 换行",
+            "chatHint": "Enter 发送 · Shift + Enter 换行 · 可粘贴图片",
             "chatPlaceholderAnswer": "也可以直接输入内容作答",
             "chatPlaceholderIdle": "继续追问，或换个话题",
             "chatSubmit": "发送",
@@ -1808,12 +1811,14 @@
             "exportAgent": "资料检索",
             "exportMe": "我",
             "newConversation": "新对话",
+            "removeImage": "移除这张图片",
             "searching": "正在检索资料库…",
             "stopSearch": "停止检索",
             "thinking": "思考",
             "thinkingLive": "思考中",
             "traceCollapse": "收起检索详情",
-            "traceExpand": "检索详情"
+            "traceExpand": "检索详情",
+            "userImage": "用户附带的图片"
         }
     },
     "dialog-model": {

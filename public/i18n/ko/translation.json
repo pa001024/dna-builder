@@ -1705,6 +1705,7 @@
     "dbAgent": {
         "conversation": {
             "defaultName": "새 대화",
+            "imageName": "이미지 질문",
             "listEmpty": "아직 대화 기록이 없습니다. 질문하면 여기에 저장됩니다."
         },
         "error": {
@@ -1756,13 +1757,15 @@
             "askSkip": "건너뛰고 바로 검색",
             "askSubmit": "선택 제출",
             "askSubmitting": "검색 중…",
+            "attachImage": "이미지 추가 (붙여넣기 / 끌어다 놓기, 최대 {{count}}장)",
+            "attachImageFull": "이미지는 최대 {{count}}장까지입니다",
             "backToDatabase": "데이터베이스로 돌아가기",
-            "browseHint": "Enter: AI에게 질문 · Shift + Enter: 줄바꿈",
+            "browseHint": "Enter: AI에게 질문 · Shift + Enter: 줄바꿈 · 이미지 붙여넣기 가능",
             "browseMoreResults": "{{count}}개 더 있음. 계속 입력하면 범위를 좁힐 수 있습니다",
             "browsePlaceholder": "오늘은 무엇을 찾아볼까요? 키워드로 검색하거나 AI에게 바로 질문하세요",
             "browseSubmit": "AI에게 질문",
             "chatEmptyTip": "자료 검색에게 질문해 보세요. 예시:",
-            "chatHint": "Enter: 전송 · Shift + Enter: 줄바꿈",
+            "chatHint": "Enter: 전송 · Shift + Enter: 줄바꿈 · 이미지 붙여넣기 가능",
             "chatPlaceholderAnswer": "여기에 직접 입력하여 답변할 수도 있습니다",
             "chatPlaceholderIdle": "이어서 질문하거나 다른 주제를 입력하세요",
             "chatSubmit": "전송",
@@ -1783,12 +1786,14 @@
             "exportAgent": "자료 검색",
             "exportMe": "나",
             "newConversation": "새 대화",
+            "removeImage": "이 이미지 제거",
             "searching": "데이터베이스 검색 중…",
             "stopSearch": "검색 중지",
             "thinking": "생각",
             "thinkingLive": "생각 중",
             "traceCollapse": "검색 상세 접기",
-            "traceExpand": "검색 상세"
+            "traceExpand": "검색 상세",
+            "userImage": "사용자가 첨부한 이미지"
         }
     },
     "dialog-model": {

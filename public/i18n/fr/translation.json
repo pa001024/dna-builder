@@ -1743,6 +1743,7 @@
     "dbAgent": {
         "conversation": {
             "defaultName": "Nouvelle conversation",
+            "imageName": "Question avec image",
             "listEmpty": "Aucune conversation pour l'instant. Vos questions seront enregistrées ici."
         },
         "error": {
@@ -1794,13 +1795,15 @@
             "askSkip": "Passer et rechercher",
             "askSubmit": "Valider les choix",
             "askSubmitting": "Recherche en cours…",
+            "attachImage": "Ajouter une image (coller / glisser, {{count}} max)",
+            "attachImageFull": "{{count}} images maximum",
             "backToDatabase": "Retour à la base de données",
-            "browseHint": "Entrée pour demander à l'IA · Maj + Entrée pour un saut de ligne",
+            "browseHint": "Entrée pour demander à l'IA · Maj + Entrée pour un saut de ligne · Coller une image",
             "browseMoreResults": "{{count}} autres. Continuez à taper pour affiner",
             "browsePlaceholder": "Que cherchez-vous aujourd'hui ? Tapez un mot-clé ou posez votre question à l'IA",
             "browseSubmit": "Demander à l'IA",
             "chatEmptyTip": "Confiez votre question à la recherche de données. Essayez :",
-            "chatHint": "Entrée pour envoyer · Maj + Entrée pour un saut de ligne",
+            "chatHint": "Entrée pour envoyer · Maj + Entrée pour un saut de ligne · Coller une image",
             "chatPlaceholderAnswer": "Vous pouvez aussi saisir votre réponse ici",
             "chatPlaceholderIdle": "Continuez à poser des questions ou changez de sujet",
             "chatSubmit": "Envoyer",
@@ -1821,12 +1824,14 @@
             "exportAgent": "Recherche de données",
             "exportMe": "Moi",
             "newConversation": "Nouvelle conversation",
+            "removeImage": "Retirer cette image",
             "searching": "Recherche dans la base de données…",
             "stopSearch": "Arrêter la recherche",
             "thinking": "Réflexion",
             "thinkingLive": "Réflexion en cours",
             "traceCollapse": "Masquer les détails de recherche",
-            "traceExpand": "Détails de recherche"
+            "traceExpand": "Détails de recherche",
+            "userImage": "Image envoyée par l'utilisateur"
         }
     },
     "dialog-model": {

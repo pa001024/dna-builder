@@ -164,6 +164,33 @@ describe("truncateMessages", () => {
         const { truncated } = truncateMessages([{ role: "user", content: "a".repeat(100) }], 0)
         expect(truncated).toBe(false)
     })
+
+    it("内联图片整块脱敏，不留 Base64 残片", () => {
+        const { messages } = truncateMessages(
+            [
+                {
+                    role: "user",
+                    content: [
+                        { type: "text", text: "这把武器叫什么？" },
+                        { type: "image", source: { type: "base64", media_type: "image/jpeg", data: "A".repeat(5000) } },
+                        { type: "image_url", image_url: { url: `data:image/png;base64,${"B".repeat(5000)}` } },
+                        { type: "image_url", image_url: { url: "https://example.com/a.png" } },
+                    ],
+                },
+            ],
+            100_000
+        )
+
+        const parts = (messages[0] as { content: Array<Record<string, unknown>> }).content
+
+        // 脱敏发生在截断之前，因此无论上限多大都不会把 Base64 写进日志
+        expect(parts).toHaveLength(4)
+        expect(parts[1]).toEqual({ type: "image", source: { type: "base64", media_type: "image/jpeg", data: "[image omitted]" } })
+        expect(parts[2]).toEqual({ type: "image_url", image_url: { url: "[image omitted]" } })
+        // 外链只是文本，保留原样供排查
+        expect(parts[3]).toEqual({ type: "image_url", image_url: { url: "https://example.com/a.png" } })
+        expect(JSON.stringify(parts)).not.toContain("AAAAA")
+    })
 })
 
 describe("用量与费用", () => {

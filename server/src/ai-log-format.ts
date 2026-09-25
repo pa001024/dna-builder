@@ -37,6 +37,15 @@ const SESSION_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/
 /** 单条日志记录的大小上限（字符数），超长内容按此截断，避免单条消息把磁盘写穿。 */
 export const DEFAULT_MAX_CONTENT_CHARS = 100_000
 
+/**
+ * 日志里图片内容的占位标记。
+ *
+ * 用户附图是整张图的 Base64，单张就有几十万字符；按正文那样「截一段」毫无意义
+ * （截断的 Base64 既看不出内容，又照样占地方），所以整块换成这个标记，
+ * 只保留「这里有一张图」这个事实。
+ */
+export const AI_LOG_IMAGE_PLACEHOLDER = "[image omitted]"
+
 /** 日志记录里保留的对话消息（字段与 OpenAI 兼容格式一致，不做语义裁剪）。 */
 export interface AiLogMessage {
     role: string
@@ -266,6 +275,47 @@ function hasToolResultBlock(content: unknown): boolean {
 }
 
 /**
+ * @description 把多模态内容块里的图片数据换成占位标记。
+ *
+ * 两种协议的图片形态都在这里收敛：Messages 是 `{type:"image", source:{data}}`，
+ * Chat Completions 是 `{type:"image_url", image_url:{url}}`（内联图是 `data:` 开头）。
+ * 外链 URL 保留原样——它只是一行文本，排查时要靠它定位图片。
+ * @param content 消息的 content 数组
+ * @returns 脱敏后的 content 数组
+ */
+export function redactImageBlocks(content: readonly unknown[]): unknown[] {
+    return content.map(part => {
+        const record = toRecord(part)
+
+        if (!record) {
+            return part
+        }
+
+        if (record.type === "image") {
+            const source = toRecord(record.source)
+
+            return {
+                type: "image",
+                source: {
+                    type: typeof source?.type === "string" ? source.type : "base64",
+                    media_type: typeof source?.media_type === "string" ? source.media_type : "unknown",
+                    data: AI_LOG_IMAGE_PLACEHOLDER,
+                },
+            }
+        }
+
+        if (record.type === "image_url") {
+            const imageUrl = toRecord(record.image_url)
+            const url = typeof imageUrl?.url === "string" ? imageUrl.url : ""
+
+            return { type: "image_url", image_url: { url: url.startsWith("data:") ? AI_LOG_IMAGE_PLACEHOLDER : url } }
+        }
+
+        return part
+    })
+}
+
+/**
  * @description 取会话锚点：第一条**真实用户输入**的纯文本。
  * 客户端每轮都会把完整历史回传，因此同一次对话的每轮请求都以同一条 user 消息开头。
  * Messages 协议下工具结果也写在 user 轮里，这类轮不算用户输入，必须跳过。
@@ -404,11 +454,16 @@ export function truncateMessages(
         if (typeof record.content === "string") {
             next.content = cut(record.content)
         } else if (Array.isArray(record.content)) {
+            // 图片先脱敏再判长度：整张图的 Base64 裁一段既看不出内容又照样占地方
+            const redacted = redactImageBlocks(record.content)
             // 多模态内容整体序列化后判断，逐段裁剪会破坏结构
-            const serialized = JSON.stringify(record.content)
+            const serialized = JSON.stringify(redacted)
+
             if (serialized.length > maxContentChars * 4) {
                 truncated = true
                 next.content = [{ type: "text", text: `${serialized.slice(0, maxContentChars * 4)}…[truncated]` }]
+            } else {
+                next.content = redacted
             }
         }
 

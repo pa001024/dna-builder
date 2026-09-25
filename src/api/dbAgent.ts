@@ -1,5 +1,6 @@
 import i18next from "i18next"
 import {
+    type AgentImageAttachment,
     type AgentRoundResult,
     type AgentToolDefinition,
     type AgentToolResult,
@@ -87,6 +88,13 @@ export interface DBAgentCallbacks {
 export interface DBAgentHistoryMessage {
     role: "user" | "assistant"
     content: string
+    /**
+     * 这一轮用户附带的图片（仅 user 轮有意义）。
+     *
+     * 体积由调用方负责收敛（`useDBChat` 只回灌最近若干轮），这里不做裁剪：
+     * Agent 只管把拿到的图片放进上下文。
+     */
+    images?: readonly AgentImageAttachment[]
 }
 
 /** Agent 单条思考片段（一次运行可能有多段，对应多轮工具调用之间的思考） */
@@ -848,7 +856,11 @@ function toWireMessages(history: readonly DBAgentHistoryMessage[]): AgentWireMes
     return history.map(message =>
         message.role === "assistant"
             ? { role: "assistant" as const, text: message.content, thinking: "", toolCalls: [] }
-            : { role: "user" as const, text: message.content }
+            : {
+                  role: "user" as const,
+                  text: message.content,
+                  ...(message.images?.length ? { images: message.images } : {}),
+              }
     )
 }
 

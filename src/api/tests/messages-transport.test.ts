@@ -153,6 +153,32 @@ describe("createMessagesTransport 序列化", () => {
         expect(messages[2].content[0]).toMatchObject({ type: "tool_result", tool_use_id: "t1", is_error: true })
     })
 
+    it("用户轮的图片排在正文之前，只有图片时也能成轮", async () => {
+        const calls = mockFetch(() => sseResponse([{ type: "message_start", message: { id: "m" } }, { type: "message_stop" }]))
+
+        const transport = createMessagesTransport(OPTIONS)
+        await transport.runRound(
+            makeRequest({
+                messages: [
+                    { role: "user", text: "这把武器叫什么？", images: [{ mimeType: "image/jpeg", data: "AAAABBBB" }] },
+                    // 只发图不打字：不该补一个空的 text 块
+                    { role: "user", text: "", images: [{ mimeType: "image/png", data: "CCCC" }] },
+                ],
+            })
+        )
+
+        expect(calls[0].body.messages).toEqual([
+            {
+                role: "user",
+                content: [
+                    { type: "image", source: { type: "base64", media_type: "image/jpeg", data: "AAAABBBB" } },
+                    { type: "text", text: "这把武器叫什么？" },
+                    { type: "image", source: { type: "base64", media_type: "image/png", data: "CCCC" } },
+                ],
+            },
+        ])
+    })
+
     it("历史里的非法参数按空对象回灌，保不住调用本身", async () => {
         const calls = mockFetch(() => sseResponse([{ type: "message_start", message: { id: "m" } }, { type: "message_stop" }]))
 

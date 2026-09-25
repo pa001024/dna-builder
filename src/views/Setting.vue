@@ -911,13 +911,13 @@ onUnmounted(() => {
                                     <input
                                         :value="setting.customWallpaperOpacity"
                                         type="range"
-                                        class="range range-secondary w-32"
+                                        class="range range-secondary range-sm w-50"
                                         min="0"
                                         max="1"
                                         step="0.05"
                                         @input="setting.customWallpaperOpacity = +($event.target as HTMLInputElement)!.value"
                                     />
-                                    <span class="w-10 text-right font-orbitron text-[13px] font-semibold text-primary"
+                                    <span class="w-8 text-right text-xs"
                                         >{{ Math.round(setting.customWallpaperOpacity * 100) }}%</span
                                     >
                                 </div>
@@ -935,13 +935,13 @@ onUnmounted(() => {
                                     <input
                                         :value="setting.customWallpaperBlur"
                                         type="range"
-                                        class="range range-secondary w-32"
+                                        class="range range-secondary range-sm w-50"
                                         min="0"
                                         max="20"
                                         step="1"
                                         @input="setting.customWallpaperBlur = +($event.target as HTMLInputElement)!.value"
                                     />
-                                    <span class="w-12 text-right font-orbitron text-[13px] font-semibold text-primary"
+                                    <span class="w-8 text-right text-xs"
                                         >{{ setting.customWallpaperBlur }}px</span
                                     >
                                 </div>

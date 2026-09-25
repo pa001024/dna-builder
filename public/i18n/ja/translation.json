@@ -1704,6 +1704,7 @@
     "dbAgent": {
         "conversation": {
             "defaultName": "新しい会話",
+            "imageName": "画像での質問",
             "listEmpty": "まだ会話記録がありません。質問するとここに保存されます。"
         },
         "error": {
@@ -1755,13 +1756,15 @@
             "askSkip": "スキップして検索",
             "askSubmit": "選択を送信",
             "askSubmitting": "検索中…",
+            "attachImage": "画像を追加（貼り付け / ドラッグ、最大 {{count}} 枚）",
+            "attachImageFull": "画像は最大 {{count}} 枚までです",
             "backToDatabase": "データベースへ戻る",
-            "browseHint": "Enter で AI に質問 · Shift + Enter で改行",
+            "browseHint": "Enter で AI に質問 · Shift + Enter で改行 · 画像を貼り付け可",
             "browseMoreResults": "他に {{count}} 件。入力を続けると絞り込めます",
             "browsePlaceholder": "今日は何を調べますか？キーワードで検索するか、AI に直接質問してください",
             "browseSubmit": "AI に質問",
             "chatEmptyTip": "データ検索に質問してみましょう。例：",
-            "chatHint": "Enter で送信 · Shift + Enter で改行",
+            "chatHint": "Enter で送信 · Shift + Enter で改行 · 画像を貼り付け可",
             "chatPlaceholderAnswer": "ここに直接入力して回答できます",
             "chatPlaceholderIdle": "続けて質問するか、話題を変えてください",
             "chatSubmit": "送信",
@@ -1782,12 +1785,14 @@
             "exportAgent": "データ検索",
             "exportMe": "自分",
             "newConversation": "新しい会話",
+            "removeImage": "この画像を削除",
             "searching": "データベースを検索中…",
             "stopSearch": "検索を停止",
             "thinking": "思考",
             "thinkingLive": "思考中",
             "traceCollapse": "検索詳細を閉じる",
-            "traceExpand": "検索詳細"
+            "traceExpand": "検索詳細",
+            "userImage": "ユーザーが添付した画像"
         }
     },
     "dialog-model": {

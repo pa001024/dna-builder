@@ -1704,6 +1704,7 @@
     "dbAgent": {
         "conversation": {
             "defaultName": "新對話",
+            "imageName": "圖片提問",
             "listEmpty": "還沒有對話記錄，提問後會保存在這裡。"
         },
         "error": {
@@ -1755,13 +1756,15 @@
             "askSkip": "跳過，直接檢索",
             "askSubmit": "提交選擇",
             "askSubmitting": "檢索中…",
+            "attachImage": "新增圖片（貼上 / 拖入，最多 {{count}} 張）",
+            "attachImageFull": "最多只能附帶 {{count}} 張圖片",
             "backToDatabase": "返回資料庫",
-            "browseHint": "Enter 詢問AI · Shift + Enter 換行",
+            "browseHint": "Enter 詢問AI · Shift + Enter 換行 · 可貼上圖片",
             "browseMoreResults": "還有 {{count}} 條，繼續輸入可縮小範圍",
             "browsePlaceholder": "今天想查點什麼？輸入關鍵字檢索資料庫，或直接向 AI 提問",
             "browseSubmit": "詢問AI",
             "chatEmptyTip": "把問題交給資料檢索，試試這些：",
-            "chatHint": "Enter 傳送 · Shift + Enter 換行",
+            "chatHint": "Enter 傳送 · Shift + Enter 換行 · 可貼上圖片",
             "chatPlaceholderAnswer": "也可以直接輸入內容作答",
             "chatPlaceholderIdle": "繼續追問，或換個話題",
             "chatSubmit": "傳送",
@@ -1782,12 +1785,14 @@
             "exportAgent": "資料檢索",
             "exportMe": "我",
             "newConversation": "新對話",
+            "removeImage": "移除這張圖片",
             "searching": "正在檢索資料庫…",
             "stopSearch": "停止檢索",
             "thinking": "思考",
             "thinkingLive": "思考中",
             "traceCollapse": "收起檢索詳情",
-            "traceExpand": "檢索詳情"
+            "traceExpand": "檢索詳情",
+            "userImage": "使用者附帶的圖片"
         }
     },
     "dialog-model": {

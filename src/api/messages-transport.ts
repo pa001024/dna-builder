@@ -30,6 +30,7 @@ import {
 /** Messages 用户轮的写入块。 */
 type MessagesInputBlock =
     | { type: "text"; text: string }
+    | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
     | { type: "tool_result"; tool_use_id: string; content: Array<{ type: "text"; text: string }>; is_error?: boolean }
 
 /** Messages 助手轮的写入块。 */
@@ -69,9 +70,10 @@ interface StreamContext {
 /**
  * @description 把协议中立的对话消息序列化成 Messages 的 content block 数组。
  *
- * 两个由协议强制的顺序约束在这里落实：
+ * 三个顺序约束在这里落实：
  * 1. Messages 没有独立的 `tool` 角色，工具结果要作为 `tool_result` 块出现在 user 轮里，且必须排在文本之前；
- * 2. 助手轮里 `thinking` 块必须排在 `text` / `tool_use` 之前。
+ * 2. 助手轮里 `thinking` 块必须排在 `text` / `tool_use` 之前；
+ * 3. 用户轮里图片排在正文之前（上游按「先图后文」理解多模态输入）。
  *
  * 相邻的同角色轮会合并成一条消息——主循环为了「发起调用的助手轮后立刻跟上结果」
  * 可能连续压入多条 user 轮，拆开会让上游报「tool_use 缺少对应结果」。
@@ -103,6 +105,14 @@ function serializeMessages(messages: readonly AgentWireMessage[]): MessagesWireM
                               tool_use_id: item.toolCallId,
                               content: [{ type: "text", text: item.content }],
                               ...(item.isError ? { is_error: true } : {}),
+                          })
+                      ),
+                      // 图片排在正文之前：上游（Anthropic 兼容入口）把「先看图、再读问题」当默认顺序，
+                      // 反过来会让模型先读到问题再去找图，长上下文下容易漏看图片
+                      ...(message.images ?? []).map(
+                          (image): MessagesInputBlock => ({
+                              type: "image",
+                              source: { type: "base64", media_type: image.mimeType, data: image.data },
                           })
                       ),
                       ...(message.text ? [{ type: "text" as const, text: message.text }] : []),

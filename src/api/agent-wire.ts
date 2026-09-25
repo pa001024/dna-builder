@@ -42,6 +42,20 @@ export interface AgentToolCall {
     arguments: string
 }
 
+/**
+ * 用户轮附带的一张图片。
+ *
+ * 图片按 Base64 内联进请求体，两种线协议都支持（Messages 是 `image` 内容块，
+ * Chat Completions 是 `image_url` 内容分片），因此这里只保留 MIME 与裸 Base64，
+ * `data:` 前缀由各自的传输实现按需拼。
+ */
+export interface AgentImageAttachment {
+    /** 图片 MIME 类型（image/png、image/jpeg 等） */
+    mimeType: string
+    /** 图片内容的 Base64（不含 `data:` 前缀） */
+    data: string
+}
+
 /** 一次工具调用的执行结果。 */
 export interface AgentToolResult {
     /** 对应的工具调用 id */
@@ -56,10 +70,12 @@ export interface AgentToolResult {
 export type AgentWireMessage =
     | {
           role: "user"
-          /** 用户输入正文；只承载工具结果时为空串 */
+          /** 用户输入正文；只承载工具结果或图片时为空串 */
           text: string
           /** 本轮的检索工具结果 */
           toolResults?: AgentToolResult[]
+          /** 本轮附带的图片（截图 / 配装面板等），模型可见 */
+          images?: readonly AgentImageAttachment[]
       }
     | {
           role: "assistant"

@@ -12,6 +12,7 @@ import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
 import type { Conversation } from "@/store/db"
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
+import type { ChatSubmitPayload } from "@/utils/chat-image"
 import type { AskUserResponse } from "@/utils/db-ask-user"
 import { type DBGlobalSearchOption, getGlobalSearchService, warmUpGlobalSearchService } from "@/utils/global-search"
 
@@ -178,12 +179,11 @@ async function restoreChatFromUrl() {
  * URL 状态 → 组件状态：`dbchat` 被外部改动（前进/后退）时同步对话模式。
  *
  * 从「对话态」后退到「浏览态」时，浏览器恢复的是更早的那条历史记录，
- * 此时 `dbchat` 会变回 false，这里把 chatMode 一并退回。
+ * 此时 `dbchat` 会变回 false，这里把 chatMode 与会话上下文一并退回。
  */
 watch(chatModeParam, value => {
     if (!value && chatMode.value) {
-        chatMode.value = false
-        resetSearchKeyword()
+        exitChatToBrowse()
         return
     }
 
@@ -593,18 +593,19 @@ function handleSelectSearchOption(option: DBGlobalSearchOption) {
  * 提交提问：交给资料检索 Agent，并把界面切到对话态。
  *
  * 有挂起提问时不发新提问——交给输入框的文案去回答那道题（由 useDBChat 路由）。
- * @param query 输入框内容
+ * 附图随正文一起提交：只有图片没有文字也算一条完整提问。
+ * @param payload 输入框提交的内容（正文 + 附图）
  */
-function handleSubmit(query: string) {
-    const text = query.trim()
+function handleSubmit(payload: ChatSubmitPayload) {
+    const text = payload.text.trim()
 
-    if (!text || chatBusy.value) {
+    if ((!text && !payload.images.length) || chatBusy.value) {
         return
     }
 
     enterChatMode()
     resetSearchKeyword()
-    void sendChat(text)
+    void sendChat(text, payload.images)
 }
 
 /**
@@ -715,6 +716,35 @@ function handleEnterChat() {
 }
 
 /**
+ * 清掉当前会话上下文：URL 上的会话 id 与组件里的会话 id / 消息流 / 挂起提问。
+ *
+ * 退出对话态时必须做这件事。只把界面切回浏览态而不动 `activeConversationId` 的话，
+ * 下一次在浏览态直接提问会被 `useDBChat` 当成「当前会话的下一轮」，
+ * 内容直接串到刚看过的那条历史对话后面。
+ *
+ * URL 的写入要先置 `isConversationRestoring`：`activeConversationId` 归零会触发
+ * 上面的 watch，不守卫的话它会把刚清掉的会话 id 又写回 URL。
+ */
+function clearChatContext() {
+    isConversationRestoring.value = true
+    chatSessionId.value = 0
+    void startNewConversation()
+    void nextTick(() => {
+        isConversationRestoring.value = false
+    })
+}
+
+/**
+ * 切回浏览态（界面 + URL + 会话上下文），不做忙碌态判断。
+ */
+function exitChatToBrowse() {
+    chatMode.value = false
+    chatModeParam.value = false
+    clearChatContext()
+    resetSearchKeyword()
+}
+
+/**
  * 退出对话，回到资料库浏览态，并清掉 URL 上的对话标记。
  */
 function handleExitChat() {
@@ -722,14 +752,7 @@ function handleExitChat() {
         return
     }
 
-    chatMode.value = false
-    chatModeParam.value = false
-    isConversationRestoring.value = true
-    chatSessionId.value = 0
-    void nextTick(() => {
-        isConversationRestoring.value = false
-    })
-    resetSearchKeyword()
+    exitChatToBrowse()
 }
 
 /**
