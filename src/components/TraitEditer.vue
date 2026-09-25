@@ -372,7 +372,7 @@ function handleDragOver(index: number) {
                                 name="trait_select_rarity"
                                 :value="rarity"
                                 class="tab"
-                                :aria-label="rarity === '全部' ? $t('全部') : $t(`${rarity}色`)"
+                                :aria-label="rarity === '全部' ? $t('common.all') : $t(rarity)"
                             />
                             <div v-if="rarityTab === rarity" class="tab-content py-2">
                                 <ScrollArea class="h-[calc(110vh/1.2-10.5rem)] w-full">

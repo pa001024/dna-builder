@@ -1,11 +1,17 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import type { RougeProEffect } from "@/data/d/rouge.data"
 
 const props = defineProps<{
     effect: RougeProEffect
     name?: string
 }>()
+
+/** 效果名走游戏原文取词，效果说明走界面文案（参数化模板）。 */
+const { gt } = useGameText()
+const { t } = useTranslation()
 
 const effect = computed(() => props.effect)
 
@@ -40,48 +46,54 @@ const treasureName = computed<string>(() => {
     return ids.map(id => `#${id}`).join(", ")
 })
 
+/**
+ * 效果说明文案：按效果枚举名挑一条参数化模板，再把数值代入。
+ *
+ * 模板取自 `db-rouge-pro-detail.fx_*`，数值由 `param` 还原；
+ * 未收录的效果名返回空串（只显示名称与枚举名）。
+ */
 const detailText = computed<string>(() => {
     switch (effect.value.name) {
         case "RandomChoice":
-            return "抉择选项变为随机"
+            return t("db-rouge-pro-detail.fx_random_choice")
         case "RecoverTimeAdd":
-            return `受伤后回复提前 ${paramNumber(0)} 秒`
+            return t("db-rouge-pro-detail.fx_recover_time", { seconds: paramNumber(0) })
         case "ShopDiscount":
-            return `商店价格降低 ${formatPercent(1 - paramNumber(0, 1))}`
+            return t("db-rouge-pro-detail.fx_shop_discount", { percent: formatPercent(1 - paramNumber(0, 1)) })
         case "GetToken":
-            return `立即获得 ${paramNumber(0)} 余烬`
+            return t("db-rouge-pro-detail.fx_get_token", { num: paramNumber(0) })
         case "GetTreasure":
-            return `获得遗物：${treasureName.value || "-"}`
+            return t("db-rouge-pro-detail.fx_get_treasure", { name: treasureName.value || "-" })
         case "ChoiceNumber":
-            return `每次抉择可选数量 ${paramNumber(0)} 个`
+            return t("db-rouge-pro-detail.fx_choice_number", { num: paramNumber(0) })
         case "BlockEffect":
-            return `禁用效果：${blockDescription.value || "-"}`
+            return t("db-rouge-pro-detail.fx_block_effect", { name: blockDescription.value || "-" })
         case "GetTokenByTime":
-            return `每 ${paramNumber(0)} 秒获得 ${paramNumber(1)} 余烬`
+            return t("db-rouge-pro-detail.fx_token_by_time", { seconds: paramNumber(0), num: paramNumber(1) })
         case "GetModEveryOne":
-            return `全体获得 Mod #${paramNumber(0)}`
+            return t("db-rouge-pro-detail.fx_get_mod", { id: paramNumber(0) })
         case "AddBuff":
-            return `获得 Buff #${paramNumber(0)}`
+            return t("db-rouge-pro-detail.fx_get_buff", { id: paramNumber(0) })
         case "ActiveStaticPoint":
         case "ActiveMonsterSP":
         case "CreateCowEvent":
             return ""
         case "TokenExtraRate":
-            return `余烬获取提高 ${formatPercent(paramNumber(0))}`
+            return t("db-rouge-pro-detail.fx_token_extra_rate", { percent: formatPercent(paramNumber(0)) })
         case "OreExtraRate":
-            return `矿石获取提高 ${formatPercent(paramNumber(0))}`
+            return t("db-rouge-pro-detail.fx_ore_extra_rate", { percent: formatPercent(paramNumber(0)) })
         case "TimberExtraRate":
-            return `木材获取提高 ${formatPercent(paramNumber(0))}`
+            return t("db-rouge-pro-detail.fx_timber_extra_rate", { percent: formatPercent(paramNumber(0)) })
         case "LanternRange":
-            return `提灯照亮范围扩大 ${paramNumber(0)}`
+            return t("db-rouge-pro-detail.fx_lantern_range", { value: paramNumber(0) })
         case "EndPointsExtraRate":
-            return `积分获取提高 ${formatPercent(paramNumber(0))}`
+            return t("db-rouge-pro-detail.fx_end_points_rate", { percent: formatPercent(paramNumber(0)) })
         case "RebornFree":
-            return `免费复活次数 +${paramNumber(0)}`
+            return t("db-rouge-pro-detail.fx_reborn_free", { num: paramNumber(0) })
         case "PayForRebornGetBuff":
-            return `复活消耗 ${paramNumber(0)} 余烬`
+            return t("db-rouge-pro-detail.fx_pay_for_reborn", { num: paramNumber(0) })
         case "KillGetToken":
-            return `击杀目标后每 ${paramNumber(1)} 次获得 ${paramNumber(2)} 余烬`
+            return t("db-rouge-pro-detail.fx_kill_get_token", { times: paramNumber(1), num: paramNumber(2) })
         default:
             return ""
     }
@@ -92,7 +104,7 @@ const detailText = computed<string>(() => {
     <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-3">
         <div class="flex items-center gap-1.5">
             <span v-if="name" class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[11px] text-base-content/60">
-                {{ $t(name) }}
+                {{ gt(name) }}
             </span>
             <span class="text-xs text-base-content/55">{{ effect.name }}</span>
             <div class="flex-1"></div>

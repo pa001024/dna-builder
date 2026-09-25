@@ -114,11 +114,11 @@ function getCharacterName(charId: number): string {
 /**
  * 获取前置任务链名称。
  * @param conditionId 前置任务链 ID
- * @returns 任务链显示文本
+ * @returns 任务链名称或 ID 文本；无前置时返回空字符串
  */
-function getConditionQuestChainName(conditionId: number | undefined): string {
+function getPrerequisiteName(conditionId: number | undefined): string {
     if (!conditionId) {
-        return "无"
+        return ""
     }
 
     const questChain = questChainMap.get(conditionId)
@@ -161,7 +161,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbpt-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索光阴集 ID/名称/角色（支持拼音）..."
+                            :placeholder="$t('db-party-topic-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -173,12 +173,12 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbpt-item-active" })
 
                     <!-- 角色筛选 -->
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">角色筛选</span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('db-party-topic-list.filter_char') }}</span>
                         <Select
                             v-model="selectedCharacterId"
                             class="w-full min-w-0 flex-1 rounded-none border-b border-base-content/25 bg-transparent px-2 py-1 text-xs outline-none transition-colors duration-150 focus:border-primary"
                         >
-                            <SelectItem value="-">全部角色</SelectItem>
+                            <SelectItem value="-">{{ $t('db-party-topic-list.all_chars') }}</SelectItem>
                             <SelectItem
                                 v-for="characterOption in characterOptions"
                                 :key="characterOption.charId"
@@ -221,7 +221,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbpt-item-active" })
                                         </div>
                                         <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
                                             <span>{{ $t(getCharacterName(partyTopic.charId)) }}</span>
-                                            <span>资源 <span class="font-mono tabular-nums">{{ getConsumeCount(partyTopic) }}</span> 项</span>
+                                            <span>{{ $t('db-party-topic-list.resource') }} <span class="font-mono tabular-nums">{{ getConsumeCount(partyTopic) }}</span> {{ $t('common.items') }}</span>
                                         </div>
                                     </div>
 
@@ -229,7 +229,15 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbpt-item-active" })
                                 </div>
 
                                 <div class="mt-2 flex items-center gap-2 text-[11px] text-base-content/45">
-                                    <span>前置: {{ $t(getConditionQuestChainName(partyTopic.conditionId)) }}</span>
+                                    <span>
+                                        {{
+                                            $t("db-party-topic-list.prerequisite_value", {
+                                                name: partyTopic.conditionId
+                                                    ? $t(getPrerequisiteName(partyTopic.conditionId))
+                                                    : $t("common.none"),
+                                            })
+                                        }}
+                                    </span>
                                 </div>
                             </div>
                         </article>
@@ -239,7 +247,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbpt-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredPartyTopics.length }}</b> 条光阴集
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredPartyTopics.length }}</b> {{ $t('db-party-topic-list.topic_count') }}
                     </p>
                 </div>
             </div>

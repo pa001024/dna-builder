@@ -450,7 +450,7 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                                 :name="`mod_select_${type}`"
                                 :value="quality"
                                 class="tab"
-                                :aria-label="quality === '全部' ? $t('全部') : $t(quality + '色')"
+                                :aria-label="quality === '全部' ? $t('common.all') : $t(quality)"
                             />
                             <div v-if="selectedQuality === quality" class="tab-content py-2">
                                 <ScrollArea class="h-[calc(110vh/1.2-10.5rem)] w-full">
@@ -554,7 +554,7 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                             @update:model-value="handleSelectAuraMod($event)"
                         >
                             <SelectItem v-for="m in auraModOptions" :key="m.value" :value="m.value">
-                                {{ $t(m.quality + "色") }} - {{ $t(m.label) }}
+                                {{ $t(m.quality) }} - {{ $t(m.label) }}
                             </SelectItem>
                         </Select>
                         <!-- 光环槽：明显展示所极化的槽位类型（趋向图标）与半价耐受 -->

@@ -199,7 +199,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索角色名称/别名/ID（支持拼音）..."
+                            :placeholder="$t('db-char-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -248,7 +248,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                             "
                             @click="selectedElem = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="elem in elems"
@@ -279,7 +279,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                             "
                             @click="selectedVersion = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="version in versions"
@@ -310,7 +310,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                             "
                             @click="selectedTag = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="tag in tags"
@@ -341,7 +341,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                             "
                             @click="selectedProficiency = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="proficiency in proficiencies"
@@ -372,7 +372,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                             "
                             @click="selectedFaction = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="faction in factions"
@@ -396,7 +396,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                         <!-- 空状态 -->
                         <div v-if="filteredChars.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
                             <Icon icon="ri:user-search-line" class="mb-4 h-12 w-12 opacity-40" />
-                            <p class="text-sm">未找到匹配的角色</p>
+                            <p class="text-sm">{{ $t('db-char-list.no_match') }}</p>
                         </div>
 
                         <div v-else class="space-y-2">
@@ -477,7 +477,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredChars.length }}</b> 个角色
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredChars.length }}</b> {{ $t('db-char-list.char_count') }}
                     </p>
                 </div>
             </div>

@@ -129,64 +129,83 @@ const questTypeIconUrl = computed(() => `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[pro
 <template>
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 委托档案头 -->
-        <header class="flex items-start gap-3.5 border-b-2 border-primary pb-4">
-            <img
-                :src="questTypeIconUrl"
-                :alt="getDynQuestTypeLabel(quest.type)"
-                class="size-14 shrink-0 rounded-xs bg-base-content/3 object-cover"
-                loading="lazy"
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
             />
-            <div class="min-w-0 flex-1">
-                <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
-                    <span class="h-px w-6 bg-primary" aria-hidden="true" />
-                    Dyn Quest
-                </p>
-                <SRouterLink
-                    :to="`/db/dynquest/${quest.id}`"
-                    class="wrap-break-word font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
-                >
-                    {{ formatStoryText(quest.name) }}
-                </SRouterLink>
-                <div class="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-base-content/60">
-                    <CopyID :id="quest.id" />
-                    <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                    <span>{{ gt(getDynQuestTypeLabel(quest.type)) }}</span>
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
+                <img
+                    :src="questTypeIconUrl"
+                    :alt="getDynQuestTypeLabel(quest.type)"
+                    class="size-18 shrink-0 rounded-xs bg-base-content/3 object-cover"
+                    loading="lazy"
+                />
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Dyn Quest
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <SRouterLink
+                            :to="`/db/dynquest/${quest.id}`"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
+                            {{ formatStoryText(gt(quest.name)) }}
+                        </SRouterLink>
+                        <CopyID :id="quest.id" />
+                        <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                        <span class="text-xs text-base-content/60">{{ gt(getDynQuestTypeLabel(quest.type)) }}</span>
+                    </div>
                 </div>
             </div>
         </header>
 
         <!-- 委托信息 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="INFO" title="委托信息" />
+            <SectionHeader no-animate compact kicker="INFO" :title="$t('db-dynquest-detail.quest_info')" />
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">区域</span>
-                    <span class="text-sm">{{ getRegionInfo(quest.regionId).name }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.area') }}</span>
+                    <span class="text-sm">{{ $t(getRegionInfo(quest.regionId).name) }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">子区域</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.sub_region') }}</span>
                     <SubRegionLink :sub-region-id="quest.subRegionId" />
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">冷却</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ quest.cd }}m</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.cooldown') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ quest.cd }}m</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">人数</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ quest.person }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.player_count') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ quest.person }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">稀有度</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ quest.rarity }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.rarity') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ quest.rarity }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">权重</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ quest.weight }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.weight') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ quest.weight }}</span>
                 </div>
                 <div
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 sm:col-span-2"
                 >
-                    <span class="text-xs text-base-content/60">坐标</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.coordinate') }}</span>
                     <MapPosLink
                         :sub-region-id="quest.subRegionId"
                         :point="quest.pos"
@@ -199,7 +218,7 @@ const questTypeIconUrl = computed(() => `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[pro
 
         <!-- 等级档位 -->
         <section v-if="questLevelGroups.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="LEVELS" title="等级档位" :count="questLevelGroups.length" />
+            <SectionHeader no-animate compact kicker="LEVELS" :title="$t('db-dynquest-detail.level_tiers')" :count="questLevelGroups.length" />
             <AniTabs v-model="activeQuestLevelGroupKey" :tabs="questLevelGroupTabs" />
             <div v-if="activeQuestLevelGroup" class="mt-2 space-y-3">
                 <div
@@ -223,7 +242,7 @@ const questTypeIconUrl = computed(() => `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[pro
 
         <!-- 剧情节点 -->
         <section v-if="questNodes.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="NODES" title="剧情节点" :count="questNodes.length" />
+            <SectionHeader no-animate compact kicker="NODES" :title="$t('db-dynquest-detail.story_nodes')" :count="questNodes.length" />
             <DBQuestStoryNodes :quest-id="quest.id" :nodes="questNodes" :start-ids="quest.startIds" />
         </section>
     </div>

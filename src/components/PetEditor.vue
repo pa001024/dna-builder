@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue"
 import { useBuildIncomeWorker } from "@/composables/useBuildIncomeWorker"
 import type { CharSettings } from "@/composables/useCharSettings"
+import { useGameText } from "@/composables/useGameText"
 import { type CharBuild, LeveledPet, LeveledPetHelper, petMap } from "@/data"
 import type { Pet } from "@/data/d/pet.data"
 import { PET_BREAKTHROUGH_MAX_LEVEL } from "@/data/leveled/LeveledPet"
@@ -59,6 +60,8 @@ const petOptions = computed<Pet[]>(() =>
 
 /** 挑选器显隐 */
 const picker = ref(false)
+
+const { petSkillText } = useGameText()
 
 /** 当前魔灵（未选择时为 null），技能数值取生效技能等级 */
 const selectedPet = computed<LeveledPet | null>(() =>
@@ -219,7 +222,7 @@ function setPetCoverage(coverage: number) {
                     class="grid size-9 place-items-center overflow-hidden border bg-base-content/6 data-[empty=1]:border-dashed data-[empty=1]:border-base-content/28 data-[empty=1]:opacity-60"
                     :class="selectedPet ? qualityBorder(selectedPet.品质) : ''"
                 >
-                    <img v-if="selectedPet" class="size-full object-cover object-top" :src="selectedPet.url" :alt="selectedPet.名称" />
+                    <img v-if="selectedPet" class="size-full object-cover object-top" :src="selectedPet.url" :alt="$t(selectedPet.名称)" />
                     <Icon v-else icon="ri:magic-line" class="size-4 opacity-45" />
                 </span>
                 <span class="truncate text-xs font-semibold">{{ selectedPet ? $t(selectedPet.名称) : "—" }}</span>
@@ -303,7 +306,7 @@ function setPetCoverage(coverage: number) {
                 <FullTooltip side="bottom">
                     <template #tooltip>
                         <div class="flex flex-col gap-2">
-                            <div class="text-sm font-bold">{{ selectedPet.名称 }}</div>
+                            <div class="text-sm font-bold">{{ $t(selectedPet.名称) }}</div>
                             <div v-if="activeBuff?.等级 !== undefined" class="text-xs text-base-content/50">
                                 Lv.{{ activeBuff.等级 + PET_SKILL_LEVEL_OFFSET }}
                             </div>
@@ -319,7 +322,7 @@ function setPetCoverage(coverage: number) {
                             </ul>
                         </div>
                     </template>
-                    <p class="text-xs whitespace-pre-line text-base-content/70">{{ selectedPet.主动.描述 }}</p>
+                    <p class="text-xs whitespace-pre-line text-base-content/70">{{ petSkillText(selectedPet.主动模板, selectedPet.主动值) }}</p>
                 </FullTooltip>
             </div>
             <div v-if="selectedPet.被动" class="flex flex-col gap-0.5">
@@ -340,7 +343,7 @@ function setPetCoverage(coverage: number) {
                 <FullTooltip side="bottom">
                     <template #tooltip>
                         <div class="flex flex-col gap-2">
-                            <div class="text-sm font-bold">{{ selectedPet.名称 }}</div>
+                            <div class="text-sm font-bold">{{ $t(selectedPet.名称) }}</div>
                             <div v-if="passiveBuff?.等级 !== undefined" class="text-xs text-base-content/50">
                                 Lv.{{ passiveBuff.等级 + PET_SKILL_LEVEL_OFFSET }}
                             </div>
@@ -356,7 +359,7 @@ function setPetCoverage(coverage: number) {
                             </ul>
                         </div>
                     </template>
-                    <p class="text-xs whitespace-pre-line text-base-content/70">{{ selectedPet.被动.描述 }}</p>
+                    <p class="text-xs whitespace-pre-line text-base-content/70">{{ petSkillText(selectedPet.被动模板, selectedPet.被动值) }}</p>
                 </FullTooltip>
             </div>
         </div>

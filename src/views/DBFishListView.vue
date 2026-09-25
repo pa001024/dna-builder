@@ -115,7 +115,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索钓鱼点/鱼名称（支持拼音）..."
+                            :placeholder="$t('db-fish-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -137,7 +137,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                             "
                             @click="selectFishListType(0)"
                         >
-                            钓鱼点
+                            {{ $t('db-fish-list.fishing_spots') }}
                         </button>
                         <button
                             type="button"
@@ -149,7 +149,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                             "
                             @click="selectFishListType(1)"
                         >
-                            鱼
+                            {{ $t('db-fish-list.fish') }}
                         </button>
                     </div>
                 </div>
@@ -187,13 +187,13 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                                                 class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
                                                 :class="{ 'text-primary': selectedSpotId === spot.id }"
                                             >
-                                                {{ spot.name }}
+                                                {{ $t(spot.name) }}
                                             </h3>
                                             <CopyID :id="spot.id" class="ml-auto shrink-0" />
                                         </div>
                                         <!-- 元信息行 -->
                                         <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                            <span>鱼数限制: {{ spot.fishCountLimit }}</span>
+                                            <span>{{ $t('db-fish-spot.fish_count_limit') }}: {{ spot.fishCountLimit }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -247,7 +247,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredSpots.length }}</b> 个钓鱼点
+                        {{ $t('db-fish-list.spot_count', { count: filteredSpots.length }) }}
                     </p>
                 </div>
             </div>

@@ -102,7 +102,7 @@ async function loadPosts(page = 1) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
-            <h1 class="text-xl font-bold">社区帖子</h1>
+            <h1 class="text-xl font-bold">{{ $t('dna-post-list.community_posts') }}</h1>
             <div class="w-12" />
             <!-- Spacer -->
         </div>
@@ -115,8 +115,8 @@ async function loadPosts(page = 1) {
 
             <div v-else class="flex justify-center items-center h-full">
                 <div class="text-center">
-                    <p class="text-lg mb-4">暂无帖子数据</p>
-                    <button class="btn btn-secondary" @click="resetAndLoadPosts()">刷新</button>
+                    <p class="text-lg mb-4">{{ $t('dna-post-list.no_posts') }}</p>
+                    <button class="btn btn-secondary" @click="resetAndLoadPosts()">{{ $t('common.refresh') }}</button>
                 </div>
             </div>
 

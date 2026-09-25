@@ -28,7 +28,7 @@ defineProps<{
                 controls
                 class="max-w-full rounded-lg object-cover shadow-md"
             >
-                您的浏览器不支持视频播放
+                {{ $t('dna-post-content.video_unsupported') }}
             </video>
             <img
                 v-else-if="(content as DNAPostContentBean).contentVideo?.coverUrl"

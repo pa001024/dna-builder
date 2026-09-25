@@ -105,7 +105,7 @@ const handleMaxInput = (event: Event) => {
                 >
                     <div class="p-4">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold">选择等级范围</h3>
+                            <h3 class="text-lg font-semibold">{{ $t('common.select_level_range') }}</h3>
                             <button @click="open = false" class="text-base-content/70 hover:text-base-content">
                                 <Icon icon="radix-icons:cross2" class="w-5 h-5" />
                             </button>
@@ -136,8 +136,8 @@ const handleMaxInput = (event: Event) => {
 
                         <!-- 确认按钮 -->
                         <div class="flex gap-2">
-                            <button @click="cancelSelection" class="flex-1 btn btn-outline">取消</button>
-                            <button @click="confirmSelection" class="flex-1 btn btn-primary">确认</button>
+                            <button @click="cancelSelection" class="flex-1 btn btn-outline">{{ $t('取消') }}</button>
+                            <button @click="confirmSelection" class="flex-1 btn btn-primary">{{ $t('common.confirm') }}</button>
                         </div>
                     </div>
                 </div>
@@ -148,7 +148,7 @@ const handleMaxInput = (event: Event) => {
                 >
                     <div class="p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold">选择等级范围</h3>
+                            <h3 class="text-lg font-semibold">{{ $t('common.select_level_range') }}</h3>
                             <button @click="open = false" class="text-base-content/70 hover:text-base-content">
                                 <Icon icon="radix-icons:cross2" class="w-6 h-6" />
                             </button>
@@ -182,7 +182,7 @@ const handleMaxInput = (event: Event) => {
                             @click="confirmSelection"
                             class="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-lg transition-colors duration-200"
                         >
-                            确认
+                            {{ $t('common.confirm') }}
                         </button>
                     </div>
                 </div>

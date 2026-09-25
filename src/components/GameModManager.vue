@@ -690,7 +690,7 @@ onMounted(() => {
                                                 <button class="min-w-20 btn btn-primary" @click="addCustomEntity()">
                                                     {{ $t("setting.confirm") }}
                                                 </button>
-                                                <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
+                                                <button class="min-w-20 btn">{{ $t("取消") }}</button>
                                             </form>
                                         </div>
                                     </div>

@@ -38,7 +38,7 @@ const ui = useUIStore()
                     {{ weapon.name }}
                 </h4>
                 <div v-if="weapon.unLocked" class="text-xs">Lv. {{ weapon.level }}</div>
-                <div v-else class="text-xs text-error">未解锁</div>
+                <div v-else class="text-xs text-error">{{ $t('common.locked') }}</div>
             </div>
         </div>
     </div>

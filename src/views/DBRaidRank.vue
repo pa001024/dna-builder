@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { dungeonMap } from "@/data"
@@ -14,6 +15,8 @@ import {
 import { titleFrameIdToKey } from "@/data/generated/title-frame.generated"
 import { getDropModeText } from "@/utils/i18n-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
+
+const { t } = useTranslation()
 
 // 计算分数函数
 const calculateScore = (baseRaidPoint: number, remainingTime: number, formulaId: number): number => {
@@ -400,7 +403,7 @@ function isTopThreeRank(index: number): boolean {
                             "
                             @click="selectedDungeon = dungeon.DungeonId"
                         >
-                            {{ getDungeonName(dungeon.DungeonId) }} (难度{{ dungeon.DifficultyLevel }})
+                            {{ $t(getDungeonName(dungeon.DungeonId)) }} ({{ t('db-raid-rank.difficulty_label', { level: dungeon.DifficultyLevel }) }})
                         </button>
                     </div>
                 </div>
@@ -409,16 +412,16 @@ function isTopThreeRank(index: number): boolean {
             <!-- 词缀说明 -->
             <p class="flex flex-wrap items-center gap-x-2 text-sm leading-relaxed text-base-content/70">
                 <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">BUFF</span>
-                {{ RaidDungeon[selectedDungeon]?.RaidBuffID.map(id => RaidBuff[id].RaidBuffDes).join("、") }}
+                {{ RaidDungeon[selectedDungeon]?.RaidBuffID.map(id => $t(RaidBuff[id].RaidBuffDes)).join("、") }}
             </p>
 
             <!-- 信息分页 -->
             <AniTabs
                 v-model="activeInfoTab"
                 :tabs="[
-                    { label: '分数计算', value: 'score' },
-                    { label: '副本信息', value: 'dungeon' },
-                    { label: '排名信息', value: 'rank' },
+                    { label: t('db-raid-rank.score_calc'), value: 'score' },
+                    { label: t('db-raid-rank.dungeon_info'), value: 'dungeon' },
+                    { label: t('db-raid-rank.rank_info'), value: 'rank' },
                 ]"
             />
 
@@ -426,16 +429,16 @@ function isTopThreeRank(index: number): boolean {
             <div v-if="activeInfoTab === 'score'" class="space-y-3">
                 <!-- 分数计算器 -->
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                    <SectionHeader no-animate compact kicker="CALCULATOR" title="分数计算" />
+                    <SectionHeader no-animate compact kicker="CALCULATOR" :title="$t('db-raid-rank.score_calc')" />
                     <!-- 当前分数 -->
                     <div class="flex items-baseline gap-2">
-                        <span class="text-sm text-base-content/60">分数:</span>
+                        <span class="text-sm text-base-content/60">{{ $t('common.score') }}</span>
                         <span class="font-orbitron text-2xl font-bold tabular-nums text-primary">{{ currentScore }}</span>
                     </div>
                     <!-- 分数 / 剩余时间输入 -->
                     <div class="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
                         <label class="block">
-                            <span class="mb-1 block text-sm font-medium text-base-content/80">分数:</span>
+                            <span class="mb-1 block text-sm font-medium text-base-content/80">{{ $t('common.score') }}</span>
                             <input
                                 :value="scoreInput"
                                 @input="handleScoreInput"
@@ -443,13 +446,13 @@ function isTopThreeRank(index: number): boolean {
                                 type="number"
                                 :min="minScore"
                                 :max="maxScore"
-                                placeholder="输入分数"
+                                :placeholder="$t('db-raid-rank.input_score')"
                                 class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 placeholder:text-base-content/35 placeholder:font-sans focus:border-primary"
                             />
-                            <span class="mt-1 block text-[11px] tabular-nums text-base-content/45">最高分数: {{ maxScore }}</span>
+                            <span class="mt-1 block text-[11px] tabular-nums text-base-content/45">{{ t('db-raid-rank.max_score', { value: maxScore }) }}</span>
                         </label>
                         <label class="block">
-                            <span class="mb-1 block text-sm font-medium text-base-content/80">剩余时间(秒):</span>
+                            <span class="mb-1 block text-sm font-medium text-base-content/80">{{ $t('db-raid-rank.remaining_time') }}</span>
                             <input
                                 :value="remainingTime"
                                 @input="handleRemainingTimeInput"
@@ -457,11 +460,12 @@ function isTopThreeRank(index: number): boolean {
                                 min="0"
                                 :max="maxAllowedTime"
                                 step="0.1"
-                                placeholder="输入剩余时间"
+                                :placeholder="$t('db-raid-rank.input_remaining_time')"
                                 class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 placeholder:text-base-content/35 placeholder:font-sans focus:border-primary"
                             />
                             <span class="mt-1 block text-[11px] tabular-nums text-base-content/45">
-                                最大允许时间: {{ maxAllowedTime }}秒 用时: {{ +(maxAllowedTime - remainingTime).toFixed(2) }}秒
+                                {{ t('db-raid-rank.max_allowed_time', { value: maxAllowedTime }) }}
+                                {{ t('db-raid-rank.elapsed_time', { value: +(maxAllowedTime - remainingTime).toFixed(2) }) }}
                             </span>
                         </label>
                         <div class="col-span-2">
@@ -479,42 +483,43 @@ function isTopThreeRank(index: number): boolean {
 
                 <!-- 公式说明 -->
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                    <SectionHeader no-animate compact kicker="FORMULA" title="分数计算说明:" />
+                    <SectionHeader no-animate compact kicker="FORMULA" :title="$t('db-raid-rank.score_calc_desc')" />
                     <p class="text-sm leading-relaxed text-base-content/90">
-                        最终分数 = BaseRaidPoint + (1 + 时间区间1×速率1 + 时间区间2×速率2 + 时间区间3×速率3)
-                        <span class="ml-1 text-xs opacity-80">依次取区间值直到剩余时间用完</span>
+                        {{ $t('db-raid-rank.formula') }}
+                        <span class="ml-1 text-xs opacity-80">{{ $t('db-raid-rank.formula_note') }}</span>
                     </p>
                     <p class="mt-2 text-[11px] leading-relaxed tabular-nums text-base-content/55">
-                        当前副本: {{ RaidDungeon[selectedDungeon]?.DungeonId }} | BaseRaidPoint:
-                        {{ RaidDungeon[selectedDungeon]?.BaseRaidPoint }} | 公式ID: {{ RaidDungeon[selectedDungeon]?.FomulaId }} | 时间区间:
-                        {{ currentFormula?.RaidTimeZone }} | 速率:
+                        {{ t('db-raid-rank.current_dungeon', { id: RaidDungeon[selectedDungeon]?.DungeonId }) }} |
+                        BaseRaidPoint: {{ RaidDungeon[selectedDungeon]?.BaseRaidPoint }} |
+                        {{ t('db-raid-rank.formula_id', { id: RaidDungeon[selectedDungeon]?.FomulaId }) }} | {{ t('db-raid-rank.time_zone') }}:
+                        {{ currentFormula?.RaidTimeZone }} | {{ t('db-raid-rank.rate') }}:
                         {{ currentFormula?.RaidTimeRate }}
                     </p>
                 </section>
 
                 <!-- 奖励数量展示 -->
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                    <SectionHeader no-animate compact kicker="REWARD" title="分数奖励计算:" />
+                    <SectionHeader no-animate compact kicker="REWARD" :title="$t('db-raid-rank.score_reward_calc')" />
                     <p class="text-sm leading-relaxed text-base-content/90">
-                        每1000分可获得 <b class="font-orbitron tabular-nums text-primary">1</b> 次奖励 | 最大奖励次数:
+                        {{ $t('db-raid-rank.per_1000_points') }} <b class="font-orbitron tabular-nums text-primary">1</b> {{ $t('db-raid-rank.rewards_max') }}
                         <b class="font-orbitron tabular-nums text-primary">{{ rewardConfig.maxTime ?? 0 }}</b>
-                        次
+                        {{ $t('common.times') }}
                     </p>
                     <div class="mt-3">
-                        <p class="text-sm font-medium text-base-content/80">当前获得奖励次数:</p>
+                        <p class="text-sm font-medium text-base-content/80">{{ $t('db-raid-rank.current_rewards') }}</p>
                         <div class="mt-1 flex items-baseline gap-1">
-                            <span class="font-orbitron text-lg font-bold tabular-nums text-primary">{{ currentRewardCount }}</span>
-                            <span class="text-sm text-base-content/55">次</span>
+                            <span class="font-orbitron text-lg font-bold text-primary">{{ currentRewardCount }}</span>
+                            <span class="text-sm text-base-content/55">{{ $t('common.times') }}</span>
                         </div>
 
                         <!-- 奖励组（内层小卡） -->
                         <div class="mt-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                             <div class="mb-1 flex items-center justify-between gap-2">
-                                <span class="text-sm font-medium text-base-content/85">奖励组 {{ rewardId }}</span>
+                                <span class="text-sm font-medium text-base-content/85">{{ t('reward-item.reward_group_id', { id: rewardId }) }}</span>
                                 <span
                                     class="rounded-xs px-1.5 py-0.5 text-[10px] leading-4"
                                     :class="
-                                        getDropModeText(currentReward?.m || '') === '独立'
+                                        currentReward?.m === 'Independent'
                                             ? 'bg-success text-success-content'
                                             : 'bg-warning text-warning-content'
                                     "
@@ -532,7 +537,7 @@ function isTopThreeRank(index: number): boolean {
             <!-- 副本信息 -->
             <div
                 v-if="activeInfoTab === 'dungeon' && currentDungeon"
-                class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                class="rounded-xs border border-base-content/10 bg-base-100/60 p-1 backdrop-blur-sm"
             >
                 <DBDungeonDetailItem :dungeon="currentDungeon" />
             </div>
@@ -558,7 +563,7 @@ function isTopThreeRank(index: number): boolean {
                             <p class="font-orbitron text-lg font-bold tabular-nums" :class="isTopThreeRank(index) ? 'text-primary' : ''">
                                 {{ item.rank }}
                             </p>
-                            <p class="mt-0.5 text-[11px] text-base-content/50">排名前{{ item.percent }}%的玩家获得</p>
+                            <p class="mt-0.5 text-[11px] text-base-content/50">{{ t('db-raid-rank.rank_requirement', { percent: item.percent }) }}</p>
                         </div>
                     </div>
                     <!--

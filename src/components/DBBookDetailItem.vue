@@ -172,19 +172,36 @@ const bookTabItems = computed(() =>
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 读物档案头：纸面 + primary 强调线 -->
         <header class="relative overflow-hidden border-b-2 border-primary pb-4">
-            <div class="flex items-center gap-3.5">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-center gap-3.5">
                 <div class="size-14 shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3">
                     <img :src="getBookIcon(book.icon)" :alt="book.name" class="h-full w-full object-cover" loading="lazy" />
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-primary">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                         <span class="h-px w-6 bg-primary" aria-hidden="true" />
                         Book File
                     </p>
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/book/${book.id}`"
-                            class="wrap-break-word font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(book.name) }}
                         </SRouterLink>
@@ -234,7 +251,7 @@ const bookTabItems = computed(() =>
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="shrink-0 text-xs text-base-content/60">{{ $t("book-detail.region") }}</span>
-                        <span class="text-right text-xs wrap-break-word">{{ selectedResourceLocation.regionName }}</span>
+                        <span class="text-right text-xs wrap-break-word">{{ $t(selectedResourceLocation.regionName) }}</span>
                     </div>
 
                     <div
@@ -242,7 +259,7 @@ const bookTabItems = computed(() =>
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="text-xs text-base-content/60">{{ $t("book-detail.mechanismId") }}</span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                             selectedResource.mId
                         }}</span>
                     </div>

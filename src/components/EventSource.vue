@@ -60,7 +60,7 @@ const kindDescriptions = computed(() =>
                         </h4>
                         <span
                             v-if="source.num"
-                            class="ml-auto shrink-0 border border-base-content/25 px-1 py-px font-orbitron text-[9px] font-semibold tabular-nums text-base-content/70"
+                            class="ml-auto shrink-0 border border-base-content/25 px-1 py-px font-orbitron text-[9px] font-semibold text-base-content/70"
                         >
                             x{{ source.num }}
                         </span>

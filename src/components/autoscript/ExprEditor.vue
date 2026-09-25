@@ -220,15 +220,15 @@ function onNotItemUpdate(expr: FlowExpr | undefined) {
                     :model-value="expr?.op ?? 'call'"
                     @update:model-value="onKindChange"
                 >
-                    <SelectItem value="call">检查</SelectItem>
-                    <SelectItem value="cmp">比较</SelectItem>
-                    <SelectItem value="and">全部满足 (and)</SelectItem>
-                    <SelectItem value="or">任一满足 (or)</SelectItem>
+                    <SelectItem value="call">{{ $t('expr-editor.check') }}</SelectItem>
+                    <SelectItem value="cmp">{{ $t('expr-editor.compare') }}</SelectItem>
+                    <SelectItem value="and">{{ $t('expr-editor.all_match_and') }}</SelectItem>
+                    <SelectItem value="or">{{ $t('expr-editor.any_match_or') }}</SelectItem>
                 </Select>
-                <button v-if="expr" class="btn btn-xs btn-ghost" title="取反" @click="wrapNot">
-                    <Icon icon="ri:prohibited-line" class="w-3 h-3" />非
+                <button v-if="expr" class="btn btn-xs btn-ghost" :title="$t('expr-editor.negate')" @click="wrapNot">
+                    <Icon icon="ri:prohibited-line" class="w-3 h-3" />{{ $t('expr-editor.not') }}
                 </button>
-                <button v-if="expr && clearable" class="btn btn-xs btn-ghost text-error" title="清空条件" @click="update(undefined)">
+                <button v-if="expr && clearable" class="btn btn-xs btn-ghost text-error" :title="$t('expr-editor.clear_conditions')" @click="update(undefined)">
                     <Icon icon="ri:close-line" class="w-3 h-3" />
                 </button>
             </template>

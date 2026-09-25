@@ -296,7 +296,7 @@ watchEffect(() => {
                     </p>
                     <div class="modal-action">
                         <button class="min-w-24 btn" @click="ui.cancelDialog">
-                            {{ $t("setting.cancel") }}
+                            {{ $t("取消") }}
                         </button>
                         <button class="min-w-24 btn btn-primary" @click="ui.confirmDialog">
                             {{ $t("setting.confirm") }}

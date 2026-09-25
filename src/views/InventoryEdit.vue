@@ -433,7 +433,7 @@ const showExpCalculator = ref(false)
                         class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                         @click="showExpCalculator = true"
                     >
-                        经验计算
+                        {{ $t('inventory-edit.exp_calc') }}
                     </button>
                     <button
                         type="button"
@@ -448,20 +448,20 @@ const showExpCalculator = ref(false)
                         class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                         @click="handleImport"
                     >
-                        导入JSON
+                        {{ $t('inventory-edit.import_json') }}
                     </button>
                     <button
                         type="button"
                         class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                         @click="handleExport"
                     >
-                        复制JSON
+                        {{ $t('inventory-edit.copy_json') }}
                     </button>
                 </div>
 
                 <!-- 拥有武器 -->
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                    <SectionHeader no-animate compact kicker="WEAPONS" title="拥有武器">
+                    <SectionHeader no-animate compact kicker="WEAPONS" :title="$t('inventory-edit.owned_weapons')">
                         <template #trailing>
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
                                 <div class="relative w-52">
@@ -472,7 +472,7 @@ const showExpCalculator = ref(false)
                                     <input
                                         v-model="weaponSearchQuery"
                                         type="search"
-                                        placeholder="搜索（支持拼音）..."
+                                        :placeholder="$t('inventory-edit.search_placeholder')"
                                         class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1 pl-7 pr-3 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                                     />
                                 </div>
@@ -494,11 +494,11 @@ const showExpCalculator = ref(false)
                                     }}
                                 </button>
                                 <label class="flex cursor-pointer items-center gap-1.5 text-xs text-base-content/60">
-                                    近战
+                                    {{ $t('近战') }}
                                     <input v-model="inv.enableWeapons.近战" type="checkbox" class="toggle toggle-secondary toggle-sm" />
                                 </label>
                                 <label class="flex cursor-pointer items-center gap-1.5 text-xs text-base-content/60">
-                                    远程
+                                    {{ $t('远程') }}
                                     <input v-model="inv.enableWeapons.远程" type="checkbox" class="toggle toggle-secondary toggle-sm" />
                                 </label>
                             </div>
@@ -541,7 +541,7 @@ const showExpCalculator = ref(false)
                                     <input
                                         v-model="modSearchQuery"
                                         type="search"
-                                        placeholder="搜索（支持拼音）..."
+                                        :placeholder="$t('inventory-edit.search_placeholder')"
                                         class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1 pl-7 pr-3 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                                     />
                                 </div>
@@ -671,14 +671,14 @@ const showExpCalculator = ref(false)
                             class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                             @click="handleImport"
                         >
-                            导入JSON
+                            {{ $t('inventory-edit.import_json') }}
                         </button>
                         <button
                             type="button"
                             class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                             @click="handleExport"
                         >
-                            复制JSON
+                            {{ $t('inventory-edit.copy_json') }}
                         </button>
                     </div>
                     <PlayerExpCalculator />
@@ -719,7 +719,7 @@ const showExpCalculator = ref(false)
                 <div class="modal-action">
                     <form method="dialog">
                         <button class="btn" @click="showSyncModeDialog = false">
-                            {{ $t("setting.cancel") }}
+                            {{ $t("取消") }}
                         </button>
                     </form>
                 </div>

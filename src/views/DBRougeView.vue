@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
@@ -49,6 +50,7 @@ type RougeLikeKind = "blessing" | "talent" | "treasure" | "treasureGroup" | "con
 type RougeProKind = "treasure" | "talent" | "contract" | "class" | "treasureGroup" | "room" | "event" | "season" | "difficulty"
 
 const { gt } = useGameText()
+const { t } = useTranslation()
 
 const mode = useSearchParam<RougeMode>("mode", "like")
 const kind = useSearchParam<string>("kind", "blessing")
@@ -150,26 +152,24 @@ type ProItemEntity =
     | RougeProDifficulty
 
 /**
- * 提取列表项标题。
+ * 提取列表项标题（游戏原文 → 当前语言）。
  */
 function getItemTitle(item: ListItem): string {
     if (item.kind === "story" && "storyEventName" in item && item.name) {
-        return item.name
+        return gt(item.name)
     }
-    return "name" in item && item.name ? item.name : `ID ${item.id}`
+    return "name" in item && item.name ? gt(item.name) : `ID ${item.id}`
 }
 
 /**
- * 提取列表项描述。
+ * 提取列表项描述（游戏原文 → 当前语言，并剥掉 `<Highlight>` 之类的富文本标记）。
+ *
+ * 必须**先翻译再剥标记**：对照表收录的键是带标记的原文，先剥会把键改坏，
+ * 查不到译文就回落成中文原文（各语言下都会看到中文）。
  */
 function getItemDesc(item: ListItem): string {
-    if ("simpleDesc" in item && item.simpleDesc) {
-        return stripStoryTextTags(item.simpleDesc)
-    }
-    if ("desc" in item && item.desc) {
-        return stripStoryTextTags(item.desc)
-    }
-    return ""
+    const raw = "simpleDesc" in item && item.simpleDesc ? item.simpleDesc : "desc" in item && item.desc ? item.desc : ""
+    return stripStoryTextTags(gt(raw))
 }
 
 /**
@@ -227,28 +227,37 @@ function getItemBranchName(item: ListItem): string {
 }
 
 /**
- * 提取列表项元信息（分类/组名/稀有度等）。
+ * 提取列表项元信息（分类/组名/房间类型等，输出已本地化的文本）。
  */
 function getItemMeta(item: ListItem): string {
     const groupName = getItemGroupName(item)
     if (groupName) {
-        return groupName
+        return gt(groupName)
     }
     if (item.kind === "story" && "cutOffEvent" in item) {
-        return item.type
+        return gt(item.type)
     }
     if ("heatValue" in item) {
-        return `深浅深度 ${item.heatValue}`
+        return t("db-rouge.heat_value", { value: item.heatValue })
     }
     if ("roomType" in item) {
-        const roomTypeInfo = getRougeRoomTypeInfo(item.roomType)
-        return roomTypeInfo ? roomTypeInfo.name : `房间类型 ${item.roomType}`
+        return getRoomTypeName(item.roomType)
     }
     const branchName = getItemBranchName(item)
     if (branchName) {
-        return branchName
+        return gt(branchName)
     }
     return ""
+}
+
+/**
+ * 房间类型展示名（游戏原文 → 当前语言，表里查不到时回退为「房间类型 ID」）。
+ * @param roomType 房间类型 ID
+ * @returns 展示名
+ */
+function getRoomTypeName(roomType: number): string {
+    const roomTypeInfo = getRougeRoomTypeInfo(roomType)
+    return roomTypeInfo ? gt(roomTypeInfo.name) : t("db-rouge.room_type_fallback", { id: roomType })
 }
 
 /**
@@ -359,8 +368,7 @@ const filteredItems = computed<ListItem[]>(() => {
             if (!("roomType" in item)) {
                 return false
             }
-            const roomTypeName = getRougeRoomTypeInfo(item.roomType)?.name ?? `房间类型 ${item.roomType}`
-            if (roomTypeName !== filterRoomType.value) {
+            if (getRoomTypeName(item.roomType) !== filterRoomType.value) {
                 return false
             }
         }
@@ -409,9 +417,7 @@ const roomTypeFilterOptions = computed<Array<{ name: string }>>(() => {
         return []
     }
 
-    return Array.from(new Set(rougeLikeRooms.map(room => getRougeRoomTypeInfo(room.roomType)?.name ?? `房间类型 ${room.roomType}`))).map(
-        name => ({ name })
-    )
+    return Array.from(new Set(rougeLikeRooms.map(room => getRoomTypeName(room.roomType)))).map(name => ({ name }))
 })
 
 /**
@@ -551,7 +557,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 "
                                 @click="filterGroup = 0"
                             >
-                                全部
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 v-for="option in groupFilterOptions"
@@ -565,7 +571,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 "
                                 @click="filterGroup = option.id"
                             >
-                                {{ $t(option.name) }}
+                                {{ gt(option.name) }}
                             </button>
                         </div>
                         <div v-if="branchFilterOptions.length" class="flex flex-wrap gap-1.5">
@@ -579,7 +585,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 "
                                 @click="filterBranch = 0"
                             >
-                                全部
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 v-for="branch in branchFilterOptions"
@@ -593,7 +599,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 "
                                 @click="filterBranch = branch.id"
                             >
-                                {{ $t(branch.name) }}
+                                {{ gt(branch.name) }}
                             </button>
                         </div>
                         <div v-if="roomTypeFilterOptions.length" class="flex flex-wrap gap-1.5">
@@ -607,7 +613,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 "
                                 @click="filterRoomType = ''"
                             >
-                                全部
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 v-for="option in roomTypeFilterOptions"
@@ -621,7 +627,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 "
                                 @click="filterRoomType = option.name"
                             >
-                                {{ $t(option.name) }}
+                                {{ option.name }}
                             </button>
                         </div>
                         <div v-if="showRarityFilter" class="flex flex-wrap gap-1.5">
@@ -635,7 +641,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 "
                                 @click="filterRarity = 0"
                             >
-                                全部
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 v-for="rarity in [1, 2, 3]"
@@ -663,7 +669,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 "
                                 @click="filterUpgradable = 0"
                             >
-                                全部
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 type="button"
@@ -675,7 +681,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 "
                                 @click="filterUpgradable = 1"
                             >
-                                可升级
+                                {{ $t('db-rouge.upgradable') }}
                             </button>
                         </div>
                     </div>
@@ -685,7 +691,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索 ID/名称/描述..."
+                            :placeholder="$t('db-rouge.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -751,14 +757,14 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 </div>
                             </div>
                         </article>
-                        <div v-if="!filteredItems.length" class="p-6 text-center text-sm text-base-content/50">无匹配条目</div>
+                        <div v-if="!filteredItems.length" class="p-6 text-center text-sm text-base-content/50">{{ $t('db-rouge.no_match') }}</div>
                     </div>
                 </ScrollArea>
 
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredItems.length }}</b> 个条目
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredItems.length }}</b> {{ $t('db-rouge.item_count') }}
                     </p>
                 </div>
             </div>
@@ -770,7 +776,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
             <!-- 右侧详情面板 -->
             <ScrollArea v-if="selectedItem" class="min-h-0 min-w-0 flex-1">
                 <DBRougeLikeDetailItem :key="selectedId" v-if="selectedLikeItem" :item="selectedLikeItem" :kind="kind" />
-                <DBRougeProDetailItem :key="selectedId" v-else-if="selectedProItem" :item="selectedProItem" :kind="kind" />
+                <DBRougeProDetailItem :key="`${selectedId}-pro`" v-else-if="selectedProItem" :item="selectedProItem" :kind="kind" />
             </ScrollArea>
             </template>
         </SplitView>

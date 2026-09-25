@@ -181,7 +181,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索怪物名称（支持拼音）..."
+                            :placeholder="$t('db-monster-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -202,7 +202,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                             "
                             @click="selectedType = 'allMonster'"
                         >
-                            全部
+                            {{ $t('common.all') }}
                         </button>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
@@ -213,7 +213,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                             "
                             @click="selectedType = 'normalMonster'"
                         >
-                            普通
+                            {{ $t('db-monster-list.normal') }}
                         </button>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
@@ -224,7 +224,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                             "
                             @click="selectedType = 'commanderMonster'"
                         >
-                            号令者
+                            {{ $t('db-monster-list.commander') }}
                         </button>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
@@ -235,7 +235,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                             "
                             @click="selectedType = 'monsterTag'"
                         >
-                            号令者词条
+                            {{ $t('db-monster-list.commander_affixes') }}
                         </button>
                     </div>
 
@@ -250,7 +250,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                             "
                             @click="selectedFaction = ''"
                         >
-                            全部
+                            {{ $t('common.all') }}
                         </button>
                         <button
                             v-for="faction in factions"
@@ -313,7 +313,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                                             {{ $t(getFactionName(monster.f)) }}
                                         </div>
                                     </div>
-                                    <div class="font-mono text-[10px] tabular-nums text-base-content/35">ID {{ monster.id }}</div>
+                                    <CopyID :id="monster.id" />
                                 </div>
                             </article>
                         </template>
@@ -369,16 +369,16 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmo-item-active" })
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-center text-[11px] tracking-wide text-base-content/50">
                         <template v-if="normalizedSelectedType === 'allMonster'">
-                            共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredMonsters.length }}</b> 个怪物
+                            共 <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredMonsters.length }}</b> 个怪物
                         </template>
                         <template v-else-if="normalizedSelectedType === 'normalMonster'">
-                            共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredMonsters.length }}</b> 个普通怪物
+                            共 <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredMonsters.length }}</b> 个普通怪物
                         </template>
                         <template v-else-if="normalizedSelectedType === 'commanderMonster'">
-                            共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredMonsters.length }}</b> 个号令者怪物
+                            共 <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredMonsters.length }}</b> 个号令者怪物
                         </template>
                         <template v-else>
-                            共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredMonsterTags.length }}</b> 个号令者词条
+                            共 <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredMonsterTags.length }}</b> 个号令者词条
                         </template>
                     </p>
                 </div>

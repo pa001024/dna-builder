@@ -82,7 +82,7 @@ const creatureCards = computed(() =>
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="truncate text-base-content/60">{{ $t(field.key) }}</span>
-                    <span class="shrink-0 font-semibold tabular-nums text-primary">{{ field.value }}</span>
+                    <span class="shrink-0 font-semibold text-primary">{{ field.value }}</span>
                 </div>
             </div>
         </div>

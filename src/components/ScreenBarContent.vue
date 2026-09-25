@@ -38,7 +38,7 @@ const MIHAN_EMPTY_KEYS: Record<ScreenBarMihanEmptyReason, string> = {
                 class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/10 bg-base-200/70 px-1.5 py-1 h-5"
             >
                 <Icon icon="ri:time-line" class="size-3 shrink-0 opacity-70" />
-                <span class="font-mono font-semibold tabular-nums">{{ item.text }}</span>
+                <span class="font-mono font-semibold">{{ item.text }}</span>
             </span>
 
             <!-- 自定义倒计时 -->
@@ -50,7 +50,7 @@ const MIHAN_EMPTY_KEYS: Record<ScreenBarMihanEmptyReason, string> = {
                 <span v-if="item.title" class="text-base-content/60">{{ item.title }}</span>
                 <span v-if="item.status === 'unset'" class="text-base-content/45">{{ $t("screenBar.countdownUnset") }}</span>
                 <span v-else-if="item.status === 'expired'" class="text-base-content/45">{{ $t("screenBar.countdownExpired") }}</span>
-                <span v-else class="font-mono font-semibold tabular-nums text-primary">{{ item.text }}</span>
+                <span v-else class="font-mono font-semibold text-primary">{{ item.text }}</span>
             </span>
 
             <!-- 委托信息:按类型分组,关注中的任务高亮 -->
@@ -81,7 +81,7 @@ const MIHAN_EMPTY_KEYS: Record<ScreenBarMihanEmptyReason, string> = {
             >
                 <Icon icon="ri:refresh-line" class="size-3 shrink-0 text-primary" />
                 <span class="text-base-content/60">{{ $t(`screenBar.${item.type}`) }}</span>
-                <span class="font-mono font-semibold tabular-nums">{{ item.text }}</span>
+                <span class="font-mono font-semibold">{{ item.text }}</span>
             </span>
         </template>
     </div>

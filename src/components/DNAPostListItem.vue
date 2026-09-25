@@ -26,7 +26,7 @@ onUnmounted(() => {
                 <img
                     v-if="post.userHeadUrl"
                     :src="post.userHeadUrl"
-                    alt="用户头像"
+                    :alt="$t('common.user_avatar')"
                     class="h-9 w-9 shrink-0 rounded-full border border-base-content/15 object-cover"
                 />
                 <div
@@ -39,10 +39,10 @@ onUnmounted(() => {
                     <div class="flex items-center gap-2">
                         <span class="truncate text-sm font-medium text-base-content">{{ post.userName }}</span>
                         <span v-if="post.isOfficial === 1" class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                            官方
+                            {{ $t('common.official') }}
                         </span>
                         <span v-if="post.isElite === 1" class="shrink-0 rounded-xs border border-secondary/40 bg-secondary/10 px-1.5 py-0.5 text-[10px] font-medium text-secondary">
-                            精华
+                            {{ $t('dna-post-list-item.featured') }}
                         </span>
                     </div>
                     <div class="mt-0.5 text-xs text-base-content/50">
@@ -63,7 +63,7 @@ onUnmounted(() => {
                     v-for="(img, index) in post.imgContent.slice(0, 3)"
                     :key="index"
                     :src="img.url"
-                    alt="帖子图片"
+                    :alt="$t('dna-post-list-item.post_image')"
                     class="h-14 w-14 rounded-xs border border-base-content/10 object-cover cursor-pointer transition-transform duration-200 hover:scale-105"
                     @mouseenter="ui.startImagePreview(img.url, $event)"
                     @mouseleave="ui.stopImagePreview()"

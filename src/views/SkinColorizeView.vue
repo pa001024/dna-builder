@@ -702,13 +702,13 @@ onBeforeUnmount(() => {
 <template>
     <div class="flex h-full min-h-0 w-full flex-col">
         <div class="min-h-0 flex-1 overflow-auto p-4">
-            <div v-if="!characters.length" class="flex h-full items-center justify-center text-sm opacity-60">暂无角色染色数据</div>
+            <div v-if="!characters.length" class="flex h-full items-center justify-center text-sm opacity-60">{{ $t('skin-colorize.no_data') }}</div>
             <div v-else class="mx-auto grid max-w-6xl items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
                 <!-- 左列：平铺发布/展示区 -->
                 <div class="min-w-0 overflow-hidden rounded-xl bg-base-100 shadow-sm">
                     <!-- 标题 / 描述 / 作者时间 -->
                     <div class="p-4 sm:p-5">
-                        <div v-if="planLoading" class="py-6 text-center text-sm opacity-60">加载中...</div>
+                        <div v-if="planLoading" class="py-6 text-center text-sm opacity-60">{{ $t('common.loading') }}</div>
                         <template v-else>
                             <!-- 新建模式：直接编辑标题与描述 -->
                             <template v-if="isCreateMode">
@@ -726,7 +726,7 @@ onBeforeUnmount(() => {
                                     class="mt-2 w-full resize-none bg-transparent text-sm leading-relaxed outline-none placeholder:text-base-content/40"
                                     rows="2"
                                     maxlength="500"
-                                    placeholder="补充描述（可选）"
+                                    :placeholder="$t('skin-colorize.desc_placeholder')"
                                 />
                                 <div v-if="selectedSkin" class="mt-2 text-xs opacity-60">{{ selectedSkin.name }} · 新方案</div>
                             </template>

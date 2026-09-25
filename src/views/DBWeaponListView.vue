@@ -163,7 +163,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索武器名称（支持拼音）..."
+                            :placeholder="$t('db-weapon-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -185,7 +185,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                             "
                             @click="toggleFilterRow('category')"
                         >
-                            武器分类
+                            {{ $t('common.weapon_category') }}
                         </button>
                         <button
                             type="button"
@@ -197,7 +197,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                             "
                             @click="toggleFilterRow('damageType')"
                         >
-                            伤害类型
+                            {{ $t('伤害类型') }}
                         </button>
                         <button
                             type="button"
@@ -222,7 +222,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                 >
                     <!-- 武器分类筛选 -->
                     <div v-show="showCategoryFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">武器分类</span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.weapon_category') }}</span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -232,7 +232,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                             "
                             @click="selectedCategory = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="cat in categories"
@@ -251,7 +251,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
 
                     <!-- 伤害类型筛选 -->
                     <div v-show="showDamageTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">伤害类型</span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('伤害类型') }}</span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -261,7 +261,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                             "
                             @click="selectedDamageType = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="type in damageTypes"
@@ -292,7 +292,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                             "
                             @click="selectedVersion = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="version in versionOptions"
@@ -335,7 +335,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                                 <div class="flex items-start gap-3 p-3">
                                     <!-- 武器图标（稀有度渐变底） -->
                                     <div class="size-12 shrink-0 overflow-hidden rounded-xs bg-linear-15" :class="getRarityGradientClass(5)">
-                                        <img :src="LeveledWeapon.url(weapon.icon)" alt="武器图标" class="h-full w-full object-cover" />
+                                        <img :src="LeveledWeapon.url(weapon.icon)" :alt="$t('db-weapon-list.weapon_icon')" class="h-full w-full object-cover" />
                                     </div>
                                     <div class="min-w-0 flex-1">
                                         <!-- 名称行：名称 + 幽灵 ID -->
@@ -382,7 +382,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredWeapons.length }}</b> 个武器
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredWeapons.length }}</b> {{ $t('db-weapon-list.weapon_count') }}
                     </p>
                 </div>
             </div>

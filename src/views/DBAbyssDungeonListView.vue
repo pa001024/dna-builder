@@ -138,7 +138,7 @@ useInitialScrollToSelectedItem({
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索副本ID或角色名称..."
+                            :placeholder="$t('db-abyss-dungeon-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -153,7 +153,7 @@ useInitialScrollToSelectedItem({
                 <div class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise" style="animation-delay: 0.05s">
                     <!-- 赛季分组筛选 -->
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">赛季</span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.season') }}</span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -163,7 +163,7 @@ useInitialScrollToSelectedItem({
                             "
                             @click="selectedDungeonGroup = ''"
                         >
-                            全部
+                            {{ $t('common.all') }}
                         </button>
                         <button
                             v-for="group in allDungeonGroups"
@@ -182,7 +182,7 @@ useInitialScrollToSelectedItem({
 
                     <!-- 版本筛选 -->
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">版本</span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.version') }}</span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -192,7 +192,7 @@ useInitialScrollToSelectedItem({
                             "
                             @click="selectedVersion = ''"
                         >
-                            全部
+                            {{ $t('common.all') }}
                         </button>
                         <button
                             v-for="version in versions"
@@ -217,7 +217,7 @@ useInitialScrollToSelectedItem({
                             v-if="filteredDungeons.length === 0"
                             class="flex flex-col items-center justify-center py-20 text-base-content/45"
                         >
-                            <p class="text-sm">未找到匹配的深渊副本</p>
+                            <p class="text-sm">{{ $t('db-abyss-dungeon-list.no_match') }}</p>
                         </div>
 
                         <div v-else class="space-y-2">
@@ -270,7 +270,7 @@ useInitialScrollToSelectedItem({
                                             </div>
                                         </div>
                                         <div class="shrink-0 text-[11px] tabular-nums text-base-content/50">
-                                            共 <span class="font-mono">{{ group.dungeons.length }}</span> 项
+                                            {{ $t('common.total_count') }} <span class="font-mono">{{ group.dungeons.length }}</span> {{ $t('common.items') }}
                                         </div>
                                     </div>
                                 </div>
@@ -302,7 +302,7 @@ useInitialScrollToSelectedItem({
                                                 :key="buff.id"
                                                 class="rounded-xs border border-base-content/15 px-1 text-[10px] leading-4 tracking-wide text-base-content/55"
                                             >
-                                                {{ buff.n }}
+                                                {{ $t(buff.n) }}
                                             </span>
                                             <span
                                                 v-if="group.dungeons[0].buff.length > 3"
@@ -331,7 +331,7 @@ useInitialScrollToSelectedItem({
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredDungeons.length }}</b> 个深渊
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredDungeons.length }}</b> {{ $t('db-abyss-dungeon-list.abyss_count') }}
                     </p>
                 </div>
             </div>

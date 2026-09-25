@@ -133,7 +133,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbma-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索地图ID/名称/描述..."
+                            :placeholder="$t('db-map-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -186,7 +186,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbma-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredMaps.length }}</b> 个地图
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredMaps.length }}</b> {{ $t('db-map-list.map_count') }}
                     </p>
                 </div>
             </div>
@@ -197,7 +197,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbma-item-active" })
                     v-if="!showLeftPanel"
                     type="button"
                     class="absolute left-4 top-4 z-30 inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xs border border-base-content/15 bg-base-100/80 text-base-content/60 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
-                    title="显示地图列表"
+                    :title="$t('db-map-list.show_map_list')"
                     @click="showLeftPanel = true"
                 >
                     <Icon icon="tabler:arrow-bar-to-right" class="h-5 w-5" />

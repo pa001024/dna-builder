@@ -319,7 +319,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
             <div class="relative flex items-start gap-3.5">
                 <img
                     :src="leveledMod.url"
-                    alt="魔之楔图标"
+                    :alt="$t('common.mod_icon')"
                     class="size-20 shrink-0 overflow-hidden rounded-xs bg-linear-15 object-cover sm:size-24"
                     :class="getRarityGradientClass(mod.品质)"
                 />
@@ -331,7 +331,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/mod/${mod.id}`"
-                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ formatModName(mod.系列, mod.名称, $t) }}
                         </SRouterLink>
@@ -422,7 +422,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t(key) }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatProp(key, attr)
                     }}</span>
                 </div>
@@ -439,7 +439,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t(key) }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatProp(key, attr)
                     }}</span>
                 </div>
@@ -496,7 +496,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                 >
                     <div class="flex items-center justify-between gap-2">
                         <span class="font-medium">{{ rate.label }}</span>
-                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                        <span class="font-orbitron text-[13px] font-semibold text-primary"
                             >{{ +(rate.probability * 100).toFixed(2) }}%</span
                         >
                     </div>

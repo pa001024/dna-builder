@@ -1,49 +1,15 @@
-import { musicData } from "@/data/d/music.data"
 import { buildMusicAudioUrl } from "@/utils/music-audio"
 
-const bgmResourceToMusicPathCache = new Map<string, string>()
-
 /**
- * 根据乐谱数据集路径的末段名称定位完整乐谱路径。
+ * 将剧情 BGM 节点的资源键解析为可播放的 CDN 音频地址。
  *
- * 剧情 BGM 节点（PlayOrStopBGMNode）的 resource 是乐谱文件基名
- * （如 `0002_story_shahai`），而数据集内完整路径带版本目录
- * （如 `/bgm/cbt01/musicbox/0002_story_shahai`），这里通过
- * `musicData` 的路径末段做一次反查补齐版本目录。
- * @param resource BGM 资源键
- * @returns 匹配到的完整乐谱路径；无匹配返回空字符串
- */
-function resolveBgmResourceMusicPath(resource: string): string {
-    if (!resource) {
-        return ""
-    }
-
-    const cachedPath = bgmResourceToMusicPathCache.get(resource)
-    if (cachedPath !== undefined) {
-        return cachedPath
-    }
-
-    let matchedPath = ""
-    for (const music of musicData) {
-        const musicPath = music.music
-        const basename = musicPath.slice(musicPath.lastIndexOf("/") + 1)
-        if (basename === resource) {
-            matchedPath = musicPath
-            break
-        }
-    }
-
-    bgmResourceToMusicPathCache.set(resource, matchedPath)
-    return matchedPath
-}
-
-/**
- * 将剧情 BGM 节点资源键解析为可播放的 CDN 音频地址。
+ * 数据里的 resource 已是数据集内的完整相对路径（如 `bgm/1_1/0110_story_fushu_theme`），
+ * 与数据集目录结构一致，因此直接拼装地址即可，无需再按基名反查乐谱表。
  *
  * 支持三种形态：
  * - 空值或 `mute` 等无声控制键 → 返回空字符串（无音频可播）；
  * - 完整的 http(s) 直链 → 原样返回（供数据字段直接携带 URL）；
- * - 乐谱基名 → 通过 musicData 反查完整路径后拼装数据集地址。
+ * - 数据集相对路径 → 归一化后拼装数据集地址。
  * @param resource BGM 资源键（可为直链）
  * @returns 音频 URL；不可播放时返回空字符串
  */
@@ -61,12 +27,12 @@ export function buildQuestBgmUrl(resource: string | undefined): string {
         return trimmedResource
     }
 
-    const musicPath = resolveBgmResourceMusicPath(trimmedResource)
-    if (!musicPath) {
+    const normalizedPath = trimmedResource.replace(/\\/g, "/").replace(/^\/+/, "")
+    if (!normalizedPath) {
         return ""
     }
 
-    return buildMusicAudioUrl(musicPath)
+    return buildMusicAudioUrl(`/${normalizedPath}`)
 }
 
 /**

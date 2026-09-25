@@ -120,7 +120,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索成就 ID/名称/描述（支持拼音）..."
+                            :placeholder="$t('db-achievement-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -134,7 +134,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                 <!-- 筛选条件：方章 chip -->
                 <div class="flex-none space-y-2.5 border-b border-base-content/15 px-4 py-3 stagger-rise" style="animation-delay: 0.05s">
                     <div>
-                        <div class="mb-1 text-[10px] text-base-content/40">分类</div>
+                        <div class="mb-1 text-[10px] text-base-content/40">{{ $t('common.category') }}</div>
                         <div class="flex flex-wrap gap-1.5">
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
@@ -145,7 +145,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                                 "
                                 @click="selectedCategory = ''"
                             >
-                                全部
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 v-for="category in categoryOptions"
@@ -164,7 +164,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                     </div>
 
                     <div>
-                        <div class="mb-1 text-[10px] text-base-content/40">版本</div>
+                        <div class="mb-1 text-[10px] text-base-content/40">{{ $t('common.version') }}</div>
                         <div class="flex flex-wrap gap-1.5">
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
@@ -175,7 +175,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                                 "
                                 @click="selectedVersion = ''"
                             >
-                                全部
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 v-for="version in versionOptions"
@@ -194,7 +194,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                     </div>
 
                     <div>
-                        <div class="mb-1 text-[10px] text-base-content/40">品质</div>
+                        <div class="mb-1 text-[10px] text-base-content/40">{{ $t('common.quality') }}</div>
                         <div class="flex flex-wrap gap-1.5">
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
@@ -205,7 +205,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                                 "
                                 @click="selectedQuality = ''"
                             >
-                                全部
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 v-for="quality in qualityOptions"
@@ -233,7 +233,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                             class="flex flex-col items-center justify-center py-20 text-base-content/45"
                         >
                             <Icon icon="ri:search-line" class="mb-4 h-12 w-12 opacity-40" />
-                            <p class="text-sm">未找到匹配的成就</p>
+                            <p class="text-sm">{{ $t('db-achievement-list.no_match') }}</p>
                         </div>
 
                         <div v-else class="space-y-2">
@@ -273,10 +273,10 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                                         <img
                                             v-if="achievement.品质"
                                             :src="`/imgs/webp/Icon_Achievement_${['Copper', 'Silver', 'Gold'][achievement.品质 - 1]}.webp`"
-                                            alt="品质"
+                                            :alt="$t('common.quality')"
                                             class="h-5 w-5"
                                         />
-                                        <img v-if="getAchievementIcon(achievement.分类)" :src="getAchievementIcon(achievement.分类)" alt="分类" class="h-6 w-6" />
+                                        <img v-if="getAchievementIcon(achievement.分类)" :src="getAchievementIcon(achievement.分类)" :alt="$t('common.category')" class="h-6 w-6" />
                                         <CopyID :id="achievement.id" />
                                     </div>
                                 </div>
@@ -288,7 +288,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbac-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredAchievements.length }}</b> 个成就
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredAchievements.length }}</b> {{ $t('db-achievement-list.achievement_count') }}
                     </p>
                 </div>
             </div>

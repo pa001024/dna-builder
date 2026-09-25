@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { listen, type UnlistenFn } from "@tauri-apps/api/event"
 import * as dialog from "@tauri-apps/plugin-dialog"
+import { useTranslation } from "i18next-vue"
 import type { CSSProperties } from "vue"
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue"
 import { useRouter } from "vue-router"
@@ -121,6 +122,8 @@ const CLASSIFICATION_UNKNOWN_LABEL = "unknown"
 const router = useRouter()
 const ui = useUIStore()
 const scriptRuntime = useScriptRuntimeStore()
+/** 界面文案取词：本文件全部译名都在 script-color-tool 命名空间下 */
+const { t } = useTranslation()
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const projectFileInputRef = ref<HTMLInputElement | null>(null)
 const referenceImageRef = ref<HTMLImageElement | null>(null)
@@ -340,13 +343,13 @@ async function readFileAsDataUrl(file: File): Promise<string> {
         reader.onload = () => {
             const result = typeof reader.result === "string" ? reader.result : ""
             if (!result) {
-                reject(new Error("读取文件内容失败"))
+                reject(new Error(t('script-color-tool.err_read_file')))
                 return
             }
             resolve(result)
         }
         reader.onerror = () => {
-            reject(new Error("读取文件内容失败"))
+            reject(new Error(t('script-color-tool.err_read_file')))
         }
         reader.readAsDataURL(file)
     })
@@ -366,14 +369,14 @@ async function readImageDataFromUrl(url: string): Promise<ImageData> {
             canvas.height = img.naturalHeight
             const ctx = canvas.getContext("2d")
             if (!ctx) {
-                reject(new Error("无法创建 Canvas 上下文"))
+                reject(new Error(t('script-color-tool.err_canvas_context')))
                 return
             }
             ctx.drawImage(img, 0, 0)
             resolve(ctx.getImageData(0, 0, img.naturalWidth, img.naturalHeight))
         }
         img.onerror = () => {
-            reject(new Error(`无法读取图片: ${url}`))
+            reject(new Error(t('script-color-tool.err_read_image', { url })))
         }
         img.src = url
     })
@@ -444,7 +447,7 @@ async function loadImages(files: File[]) {
         }
         schedulePersistScriptColorToolState()
     } catch (error) {
-        ui.showErrorMessage(`图片加载失败: ${String(error)}`)
+        ui.showErrorMessage(t('script-color-tool.err_image_load', { error: String(error) }))
     } finally {
         loading.value = false
     }
@@ -578,7 +581,7 @@ async function restoreScriptColorToolState() {
         }
         await applyScriptColorToolStateSnapshot(state)
     } catch (error) {
-        console.error("恢复图色工具状态失败", error)
+        console.error(t('script-color-tool.log_restore_failed'), error)
     } finally {
         restoringPersistedState.value = false
     }
@@ -597,7 +600,7 @@ function readProjectExportFile(file: File): Promise<ScriptColorToolProjectExport
                 const text = event.target?.result as string
                 const payload = JSON.parse(text) as Partial<ScriptColorToolProjectExport>
                 if (payload.type !== "script-color-tool-project" || payload.version !== 1 || !payload.state) {
-                    throw new Error("工程文件格式不正确")
+                    throw new Error(t('script-color-tool.err_bad_project'))
                 }
                 resolve(payload as ScriptColorToolProjectExport)
             } catch (error) {
@@ -605,7 +608,7 @@ function readProjectExportFile(file: File): Promise<ScriptColorToolProjectExport
             }
         }
         reader.onerror = () => {
-            reject(new Error("读取工程文件失败"))
+            reject(new Error(t('script-color-tool.err_read_project')))
         }
         reader.readAsText(file)
     })
@@ -627,9 +630,9 @@ async function exportProject() {
 
         if (env.isApp) {
             const path = await dialog.save({
-                title: "导出图色工具工程",
+                title: t('script-color-tool.export_project_title'),
                 defaultPath: fileName,
-                filters: [{ name: "JSON 文件", extensions: ["json"] }],
+                filters: [{ name: t('script-color-tool.json_files'), extensions: ["json"] }],
             })
             if (!path) {
                 return
@@ -646,10 +649,10 @@ async function exportProject() {
             document.body.removeChild(link)
             URL.revokeObjectURL(url)
         }
-        ui.showSuccessMessage("工程导出成功")
+        ui.showSuccessMessage(t('script-color-tool.export_success'))
     } catch (error) {
-        console.error("导出图色工具工程失败", error)
-        ui.showErrorMessage(error instanceof Error ? error.message : "工程导出失败")
+        console.error(t('script-color-tool.log_export_failed'), error)
+        ui.showErrorMessage(error instanceof Error ? error.message : t('script-color-tool.export_failed'))
     }
 }
 
@@ -680,10 +683,10 @@ async function handleProjectImportSelection(event: Event) {
             ...createScriptColorToolStateSnapshot(),
             id: "default",
         })
-        ui.showSuccessMessage("工程导入成功")
+        ui.showSuccessMessage(t('script-color-tool.import_success'))
     } catch (error) {
-        console.error("导入图色工具工程失败", error)
-        ui.showErrorMessage(error instanceof Error ? error.message : "工程导入失败")
+        console.error(t('script-color-tool.log_import_failed'), error)
+        ui.showErrorMessage(error instanceof Error ? error.message : t('script-color-tool.import_failed'))
     } finally {
         restoringPersistedState.value = false
     }
@@ -911,7 +914,7 @@ function evaluateCcForImage(image: LoadedImageItem, x: number, y: number, color:
  */
 async function runClassificationTestFromClipboard() {
     if (loadedImages.value.length === 0) {
-        ui.showErrorMessage("请先加载图片")
+        ui.showErrorMessage(t('script-color-tool.err_load_image_first'))
         return
     }
 
@@ -923,12 +926,12 @@ async function runClassificationTestFromClipboard() {
             code = await navigator.clipboard.readText()
         }
     } catch (error) {
-        ui.showErrorMessage(`读取剪贴板失败: ${String(error)}`)
+        ui.showErrorMessage(t('script-color-tool.err_read_clipboard', { error: String(error) }))
         return
     }
 
     if (code.trim().length === 0) {
-        ui.showErrorMessage("剪贴板中没有可执行代码")
+        ui.showErrorMessage(t('script-color-tool.err_no_clipboard_code'))
         return
     }
 
@@ -939,12 +942,12 @@ async function runClassificationTestFromClipboard() {
             "frame",
             `${code}
 if (typeof checkState !== "function") {
-    throw new Error("剪贴板代码中未找到 checkState(frame) 函数")
+    throw new Error(t('script-color-tool.err_no_check_state'))
 }
 return checkState(frame)`
         ) as (cc: ScriptCcFunction, frame: unknown) => unknown
     } catch (error) {
-        ui.showErrorMessage(`分类代码编译失败: ${String(error)}`)
+        ui.showErrorMessage(t('script-color-tool.err_compile', { error: String(error) }))
         return
     }
 
@@ -968,7 +971,7 @@ return checkState(frame)`
         }
     }
     classificationTestResults.value = nextResults
-    ui.showSuccessMessage("已完成剪贴板分类测试")
+    ui.showSuccessMessage(t('script-color-tool.clipboard_test_done'))
 }
 
 /**
@@ -1863,17 +1866,17 @@ function renderClassificationTreeBranches(
  */
 function generateClassificationCode(): string | null {
     if (loadedImages.value.length === 0) {
-        ui.showErrorMessage("请先加载图片")
+        ui.showErrorMessage(t('script-color-tool.err_load_image_first'))
         return null
     }
     if (points.value.length === 0) {
-        ui.showErrorMessage("请先添加至少一个检测点")
+        ui.showErrorMessage(t('script-color-tool.err_no_points'))
         return null
     }
 
     const pointItems = getClassificationPointItems()
     if (pointItems.length === 0) {
-        ui.showErrorMessage("没有可用于分类的有效点位，请检查颜色输入和点位范围")
+        ui.showErrorMessage(t('script-color-tool.err_no_valid_points'))
         return null
     }
 
@@ -1899,7 +1902,7 @@ function generateClassificationCode(): string | null {
         const message = Array.from(unavailableForcedPointMap.entries())
             .map(([label, pointIndices]) => `${label}: #${pointIndices.join("、#")}`)
             .join("；")
-        ui.showErrorMessage(`强制检查点当前不可用于分类，请检查颜色输入和点位范围：${message}`)
+        ui.showErrorMessage(t('script-color-tool.err_forced_unusable', { message }))
         return null
     }
 
@@ -1937,7 +1940,7 @@ function generateClassificationCode(): string | null {
         const message = Array.from(missingForcedPointMap.entries())
             .map(([label, pointIndices]) => `${label}: #${pointIndices.join("、#")}`)
             .join("；")
-        ui.showErrorMessage(`强制检查点与对应分类样本冲突，请补充样本或关闭强制检查：${message}`)
+        ui.showErrorMessage(t('script-color-tool.err_forced_conflict', { message }))
         return null
     }
 
@@ -1960,9 +1963,9 @@ async function copyClassificationCode() {
     }
     try {
         await copyText(code)
-        ui.showSuccessMessage("已复制自动分类代码")
+        ui.showSuccessMessage(t('script-color-tool.copy_code_done'))
     } catch (error) {
-        ui.showErrorMessage(`复制失败: ${String(error)}`)
+        ui.showErrorMessage(t('script-color-tool.err_copy', { error: String(error) }))
     }
 }
 
@@ -1976,7 +1979,7 @@ function buildRealtimeTestScript(checkStateCode: string, fpsText?: string): stri
     const fpsLine = fpsText ? `setStatus(${JSON.stringify(REALTIME_TEST_STATUS_FPS)}, ${JSON.stringify(fpsText)})\n` : ""
     return `const cloud = ${realtimeTestCloudMode.value ? "true" : "false"}
 const hwnd = cloud ? getCGWindow() : getWindowByProcessName("EM-Win64-Shipping.exe")
-if (!hwnd) throw new Error("未找到窗口")
+if (!hwnd) throw new Error(t('script-color-tool.err_no_window'))
 checkSize(hwnd)
 
 ${checkStateCode}
@@ -2018,7 +2021,7 @@ function buildRealtimeTestScope(): string {
  */
 function buildSingleScreenshotScript(): string {
     return `const hwnd = getCGWindow() || getWindowByProcessName("EM-Win64-Shipping.exe")
-if (!hwnd) throw new Error("未找到窗口")
+if (!hwnd) throw new Error(t('script-color-tool.err_no_window'))
 checkSize(hwnd, 1600, 930)
 const frame = captureWindow(hwnd, 0, 30, 1600, 900)
 setStatus(${JSON.stringify(SINGLE_SCREENSHOT_STATUS_IMAGE)}, frame)
@@ -2108,7 +2111,7 @@ async function createSingleScreenshotWatcher(scope: string, startTime: number): 
     }
 
     timeoutId = setTimeout(() => {
-        finish(() => rejectImage(new Error("截图超时")))
+        finish(() => rejectImage(new Error(t('script-color-tool.err_screenshot_timeout'))))
     }, 5000)
 
     return {
@@ -2167,9 +2170,9 @@ async function startRealtimeTest() {
             await new Promise(resolve => setTimeout(resolve, 30))
         }
     } catch (error) {
-        console.error("启动图色工具实时测试失败", error)
+        console.error(t('script-color-tool.log_start_realtime_failed'), error)
         realtimeTestScriptPath.value = ""
-        ui.showErrorMessage(`启动实时测试失败: ${String(error)}`)
+        ui.showErrorMessage(t('script-color-tool.err_start_realtime', { error: String(error) }))
     }
 }
 
@@ -2184,8 +2187,8 @@ async function stopRealtimeTest() {
             scriptRuntime.clearScriptStatusesByScope(scriptScope)
         }
     } catch (error) {
-        console.error("停止图色工具实时测试失败", error)
-        ui.showErrorMessage(`停止实时测试失败: ${String(error)}`)
+        console.error(t('script-color-tool.log_stop_realtime_failed'), error)
+        ui.showErrorMessage(t('script-color-tool.err_stop_realtime', { error: String(error) }))
     }
 }
 
@@ -2218,10 +2221,10 @@ async function addRealtimeTestScreenshot() {
             activeImageIndex.value = 0
         }
         schedulePersistScriptColorToolState()
-        ui.showSuccessMessage("已添加截图到图片列表")
+        ui.showSuccessMessage(t('script-color-tool.screenshot_added'))
     } catch (error) {
-        console.error("添加截图失败", error)
-        ui.showErrorMessage(`添加截图失败: ${String(error)}`)
+        console.error(t('script-color-tool.log_add_screenshot_failed'), error)
+        ui.showErrorMessage(t('script-color-tool.err_add_screenshot', { error: String(error) }))
     } finally {
         loading.value = false
     }
@@ -2233,16 +2236,16 @@ async function addRealtimeTestScreenshot() {
  */
 async function copyCoordinateCommand(row: PointColorRow) {
     if (!row.checkColor) {
-        ui.showErrorMessage(`点 #${row.pointIndex} 在当前图中没有有效检查颜色`)
+        ui.showErrorMessage(t('script-color-tool.err_no_check_color', { index: row.pointIndex }))
         return
     }
 
     const command = `cc(frame,${row.point.x},${row.point.y},${toScriptHex(row.checkColor)},${row.tolerance})`
     try {
         await copyText(command)
-        ui.showSuccessMessage(`已复制: ${command}`)
+        ui.showSuccessMessage(t('script-color-tool.copied_value', { value: command }))
     } catch (error) {
-        ui.showErrorMessage(`复制失败: ${String(error)}`)
+        ui.showErrorMessage(t('script-color-tool.err_copy', { error: String(error) }))
     }
 }
 
@@ -2373,7 +2376,7 @@ async function handleNativeDrop(event: DragEvent) {
     isDragging.value = false
     const files = Array.from(event.dataTransfer?.files ?? []).filter(isSupportedImageFile)
     if (files.length === 0) {
-        ui.showErrorMessage("拖拽文件中不包含受支持的图片格式")
+        ui.showErrorMessage(t('script-color-tool.err_unsupported_format'))
         return
     }
     await loadImages(files)
@@ -2404,32 +2407,32 @@ onUnmounted(() => {
         @drop="handleNativeDrop"
     >
         <div class="flex flex-wrap items-center gap-2">
-            <button class="btn btn-sm btn-ghost" @click="backToScriptPage">返回脚本</button>
+            <button class="btn btn-sm btn-ghost" @click="backToScriptPage">{{ $t('script-color-tool.back_to_script') }}</button>
             <button class="btn btn-sm btn-primary" @click="openFilePicker" :disabled="loading">
-                {{ loading ? "加载中..." : "加载图片" }}
+                {{ loading ? $t('script-color-tool.loading') : $t('script-color-tool.load_image') }}
             </button>
-            <button class="btn btn-sm btn-ghost" @click="clearImages" :disabled="loadedImages.length === 0">清空图片</button>
-            <button class="btn btn-sm btn-ghost" @click="clearPoints" :disabled="points.length === 0">清空点位</button>
-            <button class="btn btn-sm btn-ghost" @click="openProjectImportPicker">导入工程</button>
-            <button class="btn btn-sm btn-ghost" @click="exportProject">导出工程</button>
-            <button class="btn btn-sm btn-ghost" @click="addRealtimeTestScreenshot" :disabled="!env.isApp || loading">截图</button>
+            <button class="btn btn-sm btn-ghost" @click="clearImages" :disabled="loadedImages.length === 0">{{ $t('script-color-tool.clear_images') }}</button>
+            <button class="btn btn-sm btn-ghost" @click="clearPoints" :disabled="points.length === 0">{{ $t('script-color-tool.clear_points') }}</button>
+            <button class="btn btn-sm btn-ghost" @click="openProjectImportPicker">{{ $t('script-color-tool.import_project') }}</button>
+            <button class="btn btn-sm btn-ghost" @click="exportProject">{{ $t('script-color-tool.export_project') }}</button>
+            <button class="btn btn-sm btn-ghost" @click="addRealtimeTestScreenshot" :disabled="!env.isApp || loading">{{ $t('script-color-tool.screenshot') }}</button>
             <button
                 class="btn btn-sm"
                 :class="isRealtimeTesting ? 'btn-warning' : 'btn-success'"
                 @click="toggleRealtimeTest"
                 :disabled="!env.isApp"
             >
-                {{ isRealtimeTesting ? "停止实时测试" : "启动实时测试" }}
+                {{ isRealtimeTesting ? $t('script-color-tool.stop_realtime') : $t('script-color-tool.start_realtime') }}
             </button>
             <button
                 class="btn btn-sm btn-secondary"
                 @click="copyClassificationCode"
                 :disabled="loadedImages.length === 0 || points.length === 0"
             >
-                复制分类代码
+                {{ $t('script-color-tool.copy_category_code') }}
             </button>
             <button class="btn btn-sm btn-accent" @click="runClassificationTestFromClipboard" :disabled="loadedImages.length === 0">
-                剪贴板测试分类
+                {{ $t('script-color-tool.clipboard_test_category') }}
             </button>
             <div class="flex items-center gap-1">
                 <button class="btn btn-sm btn-ghost btn-square" @click="zoomOut" :disabled="zoomScale <= 1">-</button>
@@ -2443,10 +2446,10 @@ onUnmounted(() => {
                     @change="handleZoomInput"
                 />
                 <button class="btn btn-sm btn-ghost btn-square" @click="zoomIn" :disabled="zoomScale >= 32">+</button>
-                <span class="text-xs text-base-content/70">缩放 {{ zoomScale }}x（1:N 像素）</span>
+                <span class="text-xs text-base-content/70">{{ $t('script-color-tool.zoom_scale', { scale: zoomScale }) }}</span>
             </div>
             <div class="flex items-center gap-1">
-                <span class="text-xs text-base-content/70">默认容差</span>
+                <span class="text-xs text-base-content/70">{{ $t('script-color-tool.default_tolerance') }}</span>
                 <input
                     type="number"
                     class="w-20 text-center rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -2456,10 +2459,10 @@ onUnmounted(() => {
                     step="1"
                     @change="handleToleranceInput"
                 />
-                <span class="text-xs text-base-content/70">新打点使用</span>
+                <span class="text-xs text-base-content/70">{{ $t('script-color-tool.new_point_uses') }}</span>
             </div>
             <label v-if="env.isApp" class="flex items-center gap-2 text-xs text-base-content/70">
-                <span>云游戏</span>
+                <span>{{ $t('script-color-tool.cloud_game') }}</span>
                 <input
                     v-model="realtimeTestCloudMode"
                     type="checkbox"
@@ -2476,7 +2479,7 @@ onUnmounted(() => {
                 @change="handleProjectImportSelection"
             />
             <div class="text-xs text-base-content/70">
-                请先加载多张图片，然后在当前图上点击添加坐标点（坐标可点击复制 cc，桌面端支持拖拽导入）
+                {{ $t('script-color-tool.load_images_hint') }}
             </div>
         </div>
 
@@ -2484,7 +2487,7 @@ onUnmounted(() => {
             <div class="card bg-base-100 border border-base-300 min-h-0">
                 <div class="card-body min-h-0 p-3 gap-3">
                     <div class="text-sm font-medium flex items-center">
-                        <div>当前图（点击打点）</div>
+                        <div>{{ $t('script-color-tool.current_image') }}</div>
 
                         <div v-if="loadedImages.length > 0" class="flex items-center gap-1">
                             <button
@@ -2510,12 +2513,12 @@ onUnmounted(() => {
                             >
                                 &gt;
                             </button>
-                            <span class="text-xs text-base-content/70">当前图 {{ activeImageIndex + 1 }}/{{ loadedImages.length }}</span>
+                            <span class="text-xs text-base-content/70">{{ $t('script-color-tool.current_image_index', { index: activeImageIndex + 1, total: loadedImages.length }) }}</span>
                         </div>
                     </div>
                     <div class="flex-1 overflow-auto border border-base-300 rounded bg-base-200/30 p-2">
                         <div v-if="!referenceImage" class="h-full min-h-60 flex items-center justify-center text-base-content/50 text-sm">
-                            暂无图片
+                            {{ $t('script-color-tool.no_images') }}
                         </div>
                         <div v-else class="relative" :style="referenceLayerStyle">
                             <img
@@ -2556,8 +2559,8 @@ onUnmounted(() => {
                     </div>
                     <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-base-content/60">
                         <div class="flex flex-wrap items-center gap-3">
-                            <span>已加载 {{ loadedImages.length }} 张图片，已打点 {{ points.length }} 个</span>
-                            <span v-if="env.isApp">实时结果 {{ realtimeTestResultText || "-" }}</span>
+                            <span>{{ $t('script-color-tool.loaded_stats', { images: loadedImages.length, points: points.length }) }}</span>
+                            <span v-if="env.isApp">{{ $t('script-color-tool.realtime_result', { value: realtimeTestResultText || '-' }) }}</span>
                             <span v-if="env.isApp">FPS {{ realtimeTestFpsText || "-" }}</span>
                         </div>
                         <div class="flex items-center gap-2 font-mono">
@@ -2579,22 +2582,22 @@ onUnmounted(() => {
 
             <div class="card bg-base-100 border border-base-300 min-h-0">
                 <div class="card-body min-h-0 p-3 gap-3">
-                    <div class="text-sm font-medium">同坐标颜色信息</div>
+                    <div class="text-sm font-medium">{{ $t('script-color-tool.same_coord_colors') }}</div>
                     <div class="flex-1 overflow-auto border border-base-300 rounded">
                         <div
                             v-if="points.length === 0 || loadedImages.length === 0"
                             class="h-full min-h-60 flex items-center justify-center text-base-content/50 text-sm"
                         >
-                            请先加载图片并在当前图上点击添加点位
+                            {{ $t('script-color-tool.load_image_first') }}
                         </div>
                         <table v-else class="table table-xs">
                             <thead>
                                 <tr>
-                                    <th class="min-w-42">图片/标签</th>
-                                    <th class="min-w-36">分类结果</th>
+                                    <th class="min-w-42">{{ $t('script-color-tool.image_label') }}</th>
+                                    <th class="min-w-36">{{ $t('script-color-tool.classify_result') }}</th>
                                     <th v-for="row in pointColorRows" :key="row.point.id" class="align-top">
                                         <div class="flex items-center justify-between gap-2">
-                                            <div class="font-semibold">点 #{{ row.pointIndex }}</div>
+                                            <div class="font-semibold">{{ $t('script-color-tool.point_label', { index: row.pointIndex }) }}</div>
                                             <button
                                                 class="btn btn-ghost btn-xs text-error h-5 min-h-0 px-1"
                                                 @click="removePoint(row.point.id)"
@@ -2613,7 +2616,7 @@ onUnmounted(() => {
                                                     class="w-28 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
                                                     :class="row.checkColorInputInvalid ? 'border-b-error text-error' : ''"
                                                     :value="row.checkColorInput"
-                                                    placeholder="#RRGGBB 或 0xRRGGBB"
+                                                    :placeholder="$t('script-color-tool.color_placeholder')"
                                                     @input="updatePointCheckColorInput(row.point.id, $event)"
                                                     @blur="endEditPointCheckColor(row.point.id)"
                                                     @keydown.enter.prevent="endEditPointCheckColor(row.point.id)"
@@ -2629,10 +2632,10 @@ onUnmounted(() => {
                                                     class="inline-block w-3 h-3 rounded border border-base-300"
                                                     :style="{ backgroundColor: row.checkColor ? row.checkColor.hex : 'transparent' }"
                                                 />
-                                                <span class="font-mono">{{ row.checkColorDisplay || "无效" }}</span>
+                                                <span class="font-mono">{{ row.checkColorDisplay || $t('script-color-tool.invalid') }}</span>
                                             </button>
                                             <div class="flex items-center gap-1">
-                                                <span class="text-[10px] text-base-content/60">容差</span>
+                                                <span class="text-[10px] text-base-content/60">{{ $t('script-color-tool.tolerance') }}</span>
                                                 <input
                                                     type="number"
                                                     class="w-15 text-center rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -2685,7 +2688,7 @@ onUnmounted(() => {
                                                 type="text"
                                                 class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                                 :value="imageLabels[imageRow.image.id] ?? ''"
-                                                placeholder="输入分类标签"
+                                                :placeholder="$t('script-color-tool.label_placeholder')"
                                                 @input="updateImageLabelInput(imageRow.image.id, $event)"
                                                 @blur="endEditImageLabel(imageRow.image.id)"
                                                 @keydown.enter.prevent="endEditImageLabel(imageRow.image.id)"
@@ -2715,7 +2718,7 @@ onUnmounted(() => {
                                         >
                                             {{ classificationTestResults[imageRow.image.id].result }}
                                         </div>
-                                        <div v-else class="text-xs text-base-content/50">未测试</div>
+                                        <div v-else class="text-xs text-base-content/50">{{ $t('script-color-tool.untested') }}</div>
                                     </td>
                                     <td v-for="entry in imageRow.colors" :key="`${imageRow.image.id}-${entry.point.id}`">
                                         <div v-if="entry.color" class="flex items-center gap-2">
@@ -2728,7 +2731,7 @@ onUnmounted(() => {
                                             <div class="leading-tight">
                                                 <div>{{ entry.color.hex }}</div>
                                                 <div class="text-[10px]">
-                                                    <span class="text-base-content/60">匹配:</span>
+                                                    <span class="text-base-content/60">{{ $t('script-color-tool.match') }}</span>
                                                     <span class="ml-1 font-semibold" :class="entry.match ? 'text-success' : 'text-error'">
                                                         {{ entry.match ? 1 : 0 }}
                                                     </span>
@@ -2765,7 +2768,7 @@ onUnmounted(() => {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div v-else class="text-base-content/50">超出范围</div>
+                                        <div v-else class="text-base-content/50">{{ $t('script-color-tool.out_of_range') }}</div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -2780,8 +2783,8 @@ onUnmounted(() => {
             class="absolute inset-0 z-50 bg-base-100/70 backdrop-blur-sm border-2 border-dashed border-primary rounded-lg flex items-center justify-center pointer-events-none"
         >
             <div class="text-center">
-                <div class="text-lg font-medium text-primary">拖拽图片到此处导入</div>
-                <div class="text-xs text-base-content/70 mt-1">支持 png / jpg / jpeg / webp / bmp / gif / tiff / ico</div>
+                <div class="text-lg font-medium text-primary">{{ $t('script-color-tool.drop_image_hint') }}</div>
+                <div class="text-xs text-base-content/70 mt-1">{{ $t('script-color-tool.supported_formats') }}</div>
             </div>
         </div>
     </div>

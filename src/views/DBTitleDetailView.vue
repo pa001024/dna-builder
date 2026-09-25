@@ -21,7 +21,7 @@ const title = computed(() => titleData.find(item => item.id === titleId.value))
         </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">
-            <div class="text-base-content/70">未找到称号</div>
+            <div class="text-base-content/70">{{ $t('db-title-detail-view.not_found') }}</div>
         </div>
     </div>
 </template>

@@ -585,11 +585,11 @@ const extraTotalExp = computed(() => {
             <div class="flex flex-wrap gap-2 justify-end">
                 <button class="btn btn-sm btn-primary" @click="syncGameData" :disabled="syncing">
                     <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
-                    <span v-else>同步游戏</span>
+                    <span v-else>{{ $t('player-exp.sync_game') }}</span>
                 </button>
-                <button class="btn btn-sm btn-secondary" @click="importData">导入JSON</button>
-                <button class="btn btn-sm btn-secondary" @click="exportData">复制JSON</button>
-                <button class="btn btn-sm btn-error" @click="resetData">重置</button>
+                <button class="btn btn-sm btn-secondary" @click="importData">{{ $t('player-exp.import_json') }}</button>
+                <button class="btn btn-sm btn-secondary" @click="exportData">{{ $t('player-exp.copy_json') }}</button>
+                <button class="btn btn-sm btn-error" @click="resetData">{{ $t('player-exp.reset') }}</button>
             </div>
 
             <!-- 等级显示卡片 -->
@@ -598,7 +598,7 @@ const extraTotalExp = computed(() => {
                     <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div class="flex items-center gap-4">
                             <div class="text-6xl text-center">
-                                <div class="text-sm opacity-70">历练等级</div>
+                                <div class="text-sm opacity-70">{{ $t('player-exp.level') }}</div>
                                 <span class="font-bold text-primary">{{ currentLevel }}</span>
                             </div>
                         </div>
@@ -613,7 +613,7 @@ const extraTotalExp = computed(() => {
                                     :style="{ width: progressPercent + '%' }"
                                 ></div>
                             </div>
-                            <div class="text-center mt-3 text-lg font-medium">总经验: {{ totalExp.toLocaleString() }}</div>
+                            <div class="text-center mt-3 text-lg font-medium">{{ $t('player-exp.total_exp', { value: totalExp.toLocaleString() }) }}</div>
                         </div>
                     </div>
                 </div>
@@ -626,7 +626,7 @@ const extraTotalExp = computed(() => {
                     <div class="card-body p-4">
                         <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                             <span class="text-xl">✏️</span>
-                            手动输入
+                            {{ $t('player-exp.manual_input') }}
                         </h3>
                         <div class="space-y-3">
                             <div v-for="reason in MANUAL_EXP_SOURCE_ORDER" :key="reason" class="space-y-1">
@@ -643,15 +643,15 @@ const extraTotalExp = computed(() => {
                                         type="number"
                                         min="0"
                                         class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
-                                        placeholder="数量"
+                                        :placeholder="$t('player-exp.amount')"
                                     />
                                     <div class="w-28 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-right font-mono text-[13px] tabular-nums text-base-content/70">{{ getExpPerItem(reason) }}</div>
                                 </div>
                             </div>
                         </div>
                         <div class="mt-auto pt-4 text-right">
-                            <span class="text-sm">小计: </span>
-                            <span class="text-lg font-bold text-primary">{{ manualTotalExp.toLocaleString() }} 经验</span>
+                            <span class="text-sm">{{ $t('player-exp.subtotal') }} </span>
+                            <span class="text-lg font-bold text-primary">{{ $t('common.label_exp', { count: manualTotalExp.toLocaleString() }) }}</span>
                         </div>
                     </div>
                 </div>
@@ -661,21 +661,21 @@ const extraTotalExp = computed(() => {
                     <div class="card-body p-4">
                         <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                             <span class="text-xl">⭐</span>
-                            突破记录
+                            {{ $t('player-exp.breakthrough_record') }}
                         </h3>
                         <div class="space-y-4">
                             <div v-for="(counts, reason) in breakthroughRecords" :key="reason" class="space-y-2">
                                 <div class="text-sm font-medium">{{ reason }}</div>
                                 <div class="grid grid-cols-2 gap-2">
                                     <div v-for="(_, index) in counts" :key="index" class="space-y-1">
-                                        <label class="text-xs opacity-70">第{{ index + 1 }}次</label>
+                                        <label class="text-xs opacity-70">{{ $t('player-exp.nth_time', { n: index + 1 }) }}</label>
                                         <div class="flex gap-1">
                                             <input
                                                 v-model.number="breakthroughRecords[reason][index]"
                                                 type="number"
                                                 min="0"
                                                 class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
-                                                placeholder="次数"
+                                                :placeholder="$t('player-exp.times')"
                                             />
                                             <div class="w-12 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-center font-mono text-xs tabular-nums text-base-content/70">
                                                 {{ getExpPerItem(reason, index) }}
@@ -686,8 +686,8 @@ const extraTotalExp = computed(() => {
                             </div>
                         </div>
                         <div class="mt-auto pt-4 text-right">
-                            <span class="text-sm">小计: </span>
-                            <span class="text-lg font-bold text-primary">{{ breakthroughTotalExp.toLocaleString() }} 经验</span>
+                            <span class="text-sm">{{ $t('player-exp.subtotal') }} </span>
+                            <span class="text-lg font-bold text-primary">{{ $t('common.label_exp', { count: breakthroughTotalExp.toLocaleString() }) }}</span>
                         </div>
                     </div>
                 </div>
@@ -698,14 +698,14 @@ const extraTotalExp = computed(() => {
                 <div class="card-body p-4">
                     <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                         <span class="text-xl">🎁</span>
-                        额外经验
+                        {{ $t('player-exp.extra_exp') }}
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div v-for="(exp, reason) in extraExpInputs" :key="reason" class="space-y-2">
                             <div class="flex justify-between items-center">
                                 <label class="text-sm font-medium">{{ reason }}</label>
                                 <span class="text-xs opacity-70"
-                                    >最大: {{ ExtraExpInputMax[reason as keyof typeof ExtraExpInputMax].toLocaleString() }}</span
+                                    >{{ $t('player-exp.max_value', { value: ExtraExpInputMax[reason as keyof typeof ExtraExpInputMax].toLocaleString() }) }}</span
                                 >
                             </div>
                             <div class="flex gap-2">
@@ -715,7 +715,7 @@ const extraTotalExp = computed(() => {
                                     min="0"
                                     :max="ExtraExpInputMax[reason as keyof typeof ExtraExpInputMax]"
                                     class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
-                                    placeholder="经验值"
+                                    :placeholder="$t('player-exp.exp_value')"
                                 />
                                 <div class="w-28 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-right font-mono text-[13px] tabular-nums text-base-content/70">
                                     {{ exp.toLocaleString() }}
@@ -724,7 +724,7 @@ const extraTotalExp = computed(() => {
                         </div>
                     </div>
                     <div class="mt-4 pt-4 border-t border-base-300 text-right">
-                        <span class="text-sm">小计: </span>
+                        <span class="text-sm">{{ $t('player-exp.subtotal') }} </span>
                         <span class="text-lg font-bold text-primary">{{ extraTotalExp.toLocaleString() }} 经验</span>
                     </div>
                 </div>
@@ -737,8 +737,8 @@ const extraTotalExp = computed(() => {
                         <div class="flex items-center gap-3">
                             <span class="text-3xl">💎</span>
                             <div>
-                                <div class="text-sm opacity-70">魔之楔经验</div>
-                                <div class="text-xs opacity-60">(自动计算)</div>
+                                <div class="text-sm opacity-70">{{ $t('player-exp.mod_exp') }}</div>
+                                <div class="text-xs opacity-60">{{ $t('player-exp.auto_calc') }}</div>
                             </div>
                         </div>
                         <div class="text-3xl font-bold text-purple-500">{{ modExp.toLocaleString() }}</div>
@@ -751,16 +751,16 @@ const extraTotalExp = computed(() => {
                 <div class="card-body p-4">
                     <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
                         <span class="text-xl">📊</span>
-                        经验来源详情
+                        {{ $t('player-exp.exp_source_detail') }}
                     </h3>
                     <div class="overflow-x-auto">
                         <table class="table table-sm w-full">
                             <thead>
                                 <tr class="bg-base-300">
-                                    <th class="text-left">来源</th>
-                                    <th class="text-right">数量</th>
-                                    <th class="text-right">单次经验</th>
-                                    <th class="text-right">总经验</th>
+                                    <th class="text-left">{{ $t('player-exp.source') }}</th>
+                                    <th class="text-right">{{ $t('player-exp.amount') }}</th>
+                                    <th class="text-right">{{ $t('player-exp.exp_per_unit') }}</th>
+                                    <th class="text-right">{{ $t('player-exp.total_exp') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -789,13 +789,13 @@ const extraTotalExp = computed(() => {
                                     <td class="text-right font-medium">{{ exp.toLocaleString() }}</td>
                                 </tr>
                                 <tr class="bg-linear-to-r from-purple-500/20 to-pink-500/20">
-                                    <td class="font-bold">魔之楔获取</td>
+                                    <td class="font-bold">{{ $t('player-exp.mod_acquisition') }}</td>
                                     <td class="text-right">-</td>
                                     <td class="text-right">-</td>
                                     <td class="text-right font-bold">{{ modExp.toLocaleString() }}</td>
                                 </tr>
                                 <tr class="bg-primary text-primary-content font-bold text-lg">
-                                    <td>总计</td>
+                                    <td>{{ $t('player-exp.total') }}</td>
                                     <td class="text-right">-</td>
                                     <td class="text-right">-</td>
                                     <td class="text-right">{{ totalExp.toLocaleString() }}</td>

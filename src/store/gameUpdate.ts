@@ -36,7 +36,7 @@ export const useGameUpdateStore = defineStore("gameUpdate", () => {
     const ui = useUIStore()
 
     // 与更新页共用同一份 CDN / 服务器 / 并发配置（localStorage 同名 key 天然共享）
-    const selectedCDN = useLocalStorage("selectedCDN", CDN_LIST[1].url)
+    const selectedCDN = useLocalStorage("selectedCDN", CDN_LIST[0].url)
     const selectedChannel = useLocalStorage("selectedChannel", "PC_OBT_CN_Pub")
     const customChannel = useLocalStorage("selectedChannel.custom", "")
     const concurrentThreads = useLocalStorage("download_threads", 8)

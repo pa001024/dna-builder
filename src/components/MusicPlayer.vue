@@ -1,196 +1,196 @@
 <script lang="ts" setup>
-import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue"
+import { computed, ref } from "vue"
+import { AUDIO_SEEK_STEP_SECONDS, useAudioPlayer } from "@/composables/useAudioPlayer"
 
-const props = defineProps<{
-    src: string
-}>()
+const props = withDefaults(
+    defineProps<{
+        src: string
+        /** 预加载策略：列表/多节点场景传 `none`，避免一次性拉取全部音频元数据 */
+        preload?: "none" | "metadata" | "auto"
+        /** 是否独占播放通道：开始播放时停掉其它播放器 */
+        exclusive?: boolean
+    }>(),
+    {
+        preload: "metadata",
+        exclusive: true,
+    }
+)
 
 const audioRef = ref<HTMLAudioElement | null>(null)
-const currentTime = ref(0)
-const duration = ref(0)
-const isPlaying = ref(false)
-const isLoading = ref(false)
-const errorMessage = ref("")
+const trackRef = ref<HTMLElement | null>(null)
+/** 是否正在拖动进度条 */
+const isSeeking = ref(false)
 
-const progress = computed(() => (duration.value > 0 ? (currentTime.value / duration.value) * 1000 : 0))
-const hasDuration = computed(() => Number.isFinite(duration.value) && duration.value > 0)
-
-/**
- * 将秒数格式化为播放器时间文本。
- * @param seconds 秒数。
- * @returns 分秒格式的时间文本。
- */
-function formatTime(seconds: number): string {
-    if (!Number.isFinite(seconds) || seconds < 0) {
-        return "0:00"
-    }
-
-    const totalSeconds = Math.floor(seconds)
-    const minutes = Math.floor(totalSeconds / 60)
-    const remainingSeconds = totalSeconds % 60
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
-}
-
-/**
- * 在切换乐谱时停止并重置播放器状态。
- */
-async function resetAudio(): Promise<void> {
-    const audio = audioRef.value
-    if (!audio) {
-        return
-    }
-
-    audio.pause()
-    currentTime.value = 0
-    duration.value = 0
-    isPlaying.value = false
-    isLoading.value = false
-    errorMessage.value = ""
-    await nextTick()
-    audio.load()
-}
-
-/**
- * 切换音频播放状态。
- */
-async function togglePlayback(): Promise<void> {
-    const audio = audioRef.value
-    if (!audio) {
-        return
-    }
-
-    if (audio.paused) {
-        errorMessage.value = ""
-        try {
-            await audio.play()
-        } catch (error) {
-            isPlaying.value = false
-            errorMessage.value = "音频无法播放"
-            console.error("乐谱音频播放失败:", error)
-        }
-        return
-    }
-
-    audio.pause()
-}
-
-/**
- * 根据进度条定位音频播放位置。
- * @param event 进度条输入事件。
- */
-function seekAudio(event: Event): void {
-    const audio = audioRef.value
-    const value = Number((event.target as HTMLInputElement).value)
-    if (!audio || !hasDuration.value || !Number.isFinite(value)) {
-        return
-    }
-
-    const nextTime = (value / 1000) * duration.value
-    audio.currentTime = nextTime
-    currentTime.value = nextTime
-}
-
-/**
- * 处理音频元数据加载完成事件。
- */
-function handleLoadedMetadata(): void {
-    const audio = audioRef.value
-    if (!audio) {
-        return
-    }
-
-    duration.value = Number.isFinite(audio.duration) ? audio.duration : 0
-    currentTime.value = audio.currentTime
-}
-
-/**
- * 同步音频时长变更。
- */
-function handleDurationChange(): void {
-    const audio = audioRef.value
-    if (!audio) {
-        return
-    }
-
-    duration.value = Number.isFinite(audio.duration) ? audio.duration : 0
-}
-
-/**
- * 同步音频当前播放位置。
- */
-function handleTimeUpdate(): void {
-    const audio = audioRef.value
-    if (audio) {
-        currentTime.value = audio.currentTime
-    }
-}
-
-/**
- * 标记音频进入播放状态。
- */
-function handlePlay(): void {
-    isPlaying.value = true
-    isLoading.value = false
-}
-
-/**
- * 标记音频暂停。
- */
-function handlePause(): void {
-    isPlaying.value = false
-}
-
-/**
- * 标记音频等待数据。
- */
-function handleWaiting(): void {
-    isLoading.value = true
-}
-
-/**
- * 标记音频已可继续播放。
- */
-function handleCanPlay(): void {
-    isLoading.value = false
-}
-
-/**
- * 处理音频资源加载失败。
- */
-function handleError(): void {
-    isPlaying.value = false
-    isLoading.value = false
-    errorMessage.value = "音频加载失败"
-}
-
-/**
- * 在音频播放结束后重置播放位置。
- */
-function handleEnded(): void {
-    isPlaying.value = false
-    currentTime.value = 0
-}
-
-watch(() => props.src, resetAudio)
-
-onBeforeUnmount(() => {
-    const audio = audioRef.value
-    if (!audio) {
-        return
-    }
-
-    audio.pause()
-    audio.removeAttribute("src")
-    audio.load()
+const {
+    currentTime,
+    duration,
+    isPlaying,
+    isLoading,
+    error,
+    progressRatio,
+    hasDuration,
+    formatTime,
+    togglePlayback,
+    seekToTime,
+    seekToRatio,
+    handleLoadedMetadata,
+    handleDurationChange,
+    handleTimeUpdate,
+    handlePlay,
+    handlePause,
+    handleWaiting,
+    handleCanPlay,
+    handleError,
+    handleEnded,
+} = useAudioPlayer({
+    src: () => props.src,
+    audio: audioRef,
+    exclusive: props.exclusive,
 })
+
+/** 进度条填充百分比 */
+const progressPercent = computed(() => `${(progressRatio.value * 100).toFixed(3)}%`)
+
+/**
+ * 按指针横坐标定位播放位置。
+ * @param clientX 指针相对视口的横坐标
+ */
+function seekByClientX(clientX: number): void {
+    const track = trackRef.value
+    if (!track) {
+        return
+    }
+
+    const rect = track.getBoundingClientRect()
+    if (rect.width <= 0) {
+        return
+    }
+
+    seekToRatio((clientX - rect.left) / rect.width)
+}
+
+/**
+ * 开始拖动进度条。
+ * @param event 指针事件
+ */
+function handleTrackPointerDown(event: PointerEvent): void {
+    if (!hasDuration.value || event.button !== 0) {
+        return
+    }
+
+    trackRef.value?.setPointerCapture(event.pointerId)
+    isSeeking.value = true
+    seekByClientX(event.clientX)
+}
+
+/**
+ * 拖动中持续定位。
+ * @param event 指针事件
+ */
+function handleTrackPointerMove(event: PointerEvent): void {
+    if (!isSeeking.value) {
+        return
+    }
+
+    seekByClientX(event.clientX)
+}
+
+/**
+ * 结束拖动进度条。
+ * @param event 指针事件
+ */
+function handleTrackPointerUp(event: PointerEvent): void {
+    if (!isSeeking.value) {
+        return
+    }
+
+    isSeeking.value = false
+    trackRef.value?.releasePointerCapture(event.pointerId)
+}
+
+/**
+ * 键盘定位进度条（方向键按固定步长跳转）。
+ * @param event 键盘事件
+ */
+function handleTrackKeydown(event: KeyboardEvent): void {
+    if (!hasDuration.value) {
+        return
+    }
+
+    const backwardKeys = ["ArrowLeft", "ArrowDown"]
+    const forwardKeys = ["ArrowRight", "ArrowUp"]
+    if (!backwardKeys.includes(event.key) && !forwardKeys.includes(event.key)) {
+        return
+    }
+
+    event.preventDefault()
+    const step = backwardKeys.includes(event.key) ? -AUDIO_SEEK_STEP_SECONDS : AUDIO_SEEK_STEP_SECONDS
+    seekToTime(currentTime.value + step)
+}
 </script>
 
 <template>
-    <div>
+    <div class="space-y-1">
+        <div class="flex items-center gap-2.5">
+            <!-- 播放/暂停方章 -->
+            <button
+                type="button"
+                class="inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-xs border transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                :class="
+                    isPlaying
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-base-content/20 text-base-content/65 hover:border-primary/60 hover:text-primary disabled:hover:border-base-content/20 disabled:hover:text-base-content/65'
+                "
+                :aria-label="isPlaying ? $t('music-player.pause') : $t('music-player.play')"
+                :disabled="isLoading || !src"
+                @click="togglePlayback"
+            >
+                <Icon :icon="isPlaying ? 'ri:pause-line' : 'ri:play-fill'" class="size-3.5" />
+            </button>
+
+            <!-- 进度条：hairline 轨道 + primary 播放头，支持拖动与方向键定位 -->
+            <div
+                ref="trackRef"
+                class="relative h-4 min-w-0 flex-1 touch-none select-none"
+                :class="hasDuration ? 'cursor-pointer' : 'cursor-not-allowed opacity-40'"
+                role="slider"
+                :tabindex="hasDuration ? 0 : -1"
+                :aria-label="$t('music-player.playback_progress')"
+                aria-valuemin="0"
+                :aria-valuemax="Math.floor(duration)"
+                :aria-valuenow="Math.floor(currentTime)"
+                :aria-valuetext="`${formatTime(currentTime)} / ${formatTime(duration)}`"
+                @keydown="handleTrackKeydown"
+                @pointercancel="handleTrackPointerUp"
+                @pointerdown="handleTrackPointerDown"
+                @pointermove="handleTrackPointerMove"
+                @pointerup="handleTrackPointerUp"
+            >
+                <div class="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 bg-base-content/20"></div>
+                <div class="absolute left-0 top-1/2 h-0.5 -translate-y-1/2 bg-primary" :style="{ width: progressPercent }"></div>
+                <div
+                    v-if="hasDuration"
+                    class="absolute top-1/2 h-3 w-0.75 -translate-x-1/2 -translate-y-1/2 bg-primary"
+                    :style="{ left: progressPercent }"
+                ></div>
+            </div>
+
+            <!-- 时长 -->
+            <span class="shrink-0 text-[11px] tabular-nums text-base-content/60">
+                {{ formatTime(currentTime) }} <span class="text-base-content/35">/</span> {{ formatTime(duration) }}
+            </span>
+        </div>
+
+        <p v-if="isLoading" class="text-[11px] text-base-content/50">{{ $t('music-player.loading_audio') }}</p>
+        <p v-else-if="error" class="text-[11px] text-error">
+            {{ $t(error === 'play-failed' ? 'music-player.play_failed' : 'music-player.load_failed') }}
+        </p>
+
         <audio
             ref="audioRef"
             :src="src"
-            preload="metadata"
+            :preload="preload"
+            class="hidden"
             @canplay="handleCanPlay"
             @durationchange="handleDurationChange"
             @ended="handleEnded"
@@ -201,36 +201,5 @@ onBeforeUnmount(() => {
             @timeupdate="handleTimeUpdate"
             @waiting="handleWaiting"
         />
-
-        <div class="flex items-center gap-3">
-            <button
-                type="button"
-                class="btn btn-circle btn-ghost btn-sm"
-                :aria-label="isPlaying ? '暂停' : '播放'"
-                :disabled="isLoading"
-                @click="togglePlayback"
-            >
-                <Icon :icon="isPlaying ? 'ri:pause-circle-line' : 'ri:play-fill'" />
-            </button>
-
-            <input
-                type="range"
-                min="0"
-                max="1000"
-                step="1"
-                :value="progress"
-                :disabled="!hasDuration"
-                aria-label="播放进度"
-                class="range range-xs flex-1"
-                @input="seekAudio"
-            />
-
-            <span class="shrink-0 font-mono text-xs tabular-nums text-base-content/70">
-                {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
-            </span>
-        </div>
-
-        <div v-if="isLoading" class="text-xs text-base-content/70">正在加载音频</div>
-        <div v-else-if="errorMessage" class="text-xs text-error">{{ errorMessage }}</div>
     </div>
 </template>

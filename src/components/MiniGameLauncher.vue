@@ -257,7 +257,7 @@ watch(() => game.path, refreshLauncherState)
         <RouterLink
             to="/game-launcher"
             class="inline-flex h-11 w-11 items-center justify-center rounded-xs text-base-content/50 transition-colors duration-150 hover:bg-base-content/10 hover:text-base-content"
-            aria-label="打开游戏启动器"
+            :aria-label="$t('mini-game-launcher.open_launcher')"
             :title="$t('game-launcher.title')"
         >
             <Icon icon="ri:more-line" class="h-5 w-5" />

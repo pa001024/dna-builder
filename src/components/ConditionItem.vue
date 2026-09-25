@@ -1,11 +1,15 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import type { ConditionItem } from "@/data/d/condition.data"
 import { rougeLikeBlessingGroups, rougeProTreasureGroups } from "@/data/d/rouge.data"
 
 const props = defineProps<{
     condition: ConditionItem
 }>()
+
+/** 游戏原文取词：条件术语与备注都来自游戏数据，需按当前语言取词。 */
+const { gt } = useGameText()
 
 const condition = computed(() => props.condition)
 
@@ -178,7 +182,7 @@ const joinLogic = computed<"AND" | "OR">(() => {
 <template>
     <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-3 space-y-1.5">
         <div class="flex items-center">
-            <div v-if="condition.remark" class="text-sm text-base-content/80">{{ condition.remark }}</div>
+            <div v-if="condition.remark" class="text-sm text-base-content/80">{{ gt(condition.remark) }}</div>
             <div class="flex-1"></div>
             <CopyID :id="condition.id" />
         </div>
@@ -192,7 +196,7 @@ const joinLogic = computed<"AND" | "OR">(() => {
                 </span>
                 <span class="rounded-xs border border-base-content/15 bg-base-content/4 px-1.5 py-0.5 text-xs text-base-content/80">
                     <template v-for="(segment, segIndex) in clause.segments" :key="segIndex">
-                        <span v-if="segment.type === 'term'" class="text-base-content/60">{{ $t(segment.text) }}</span>
+                        <span v-if="segment.type === 'term'" class="text-base-content/60">{{ gt(segment.text) }}</span>
                         <span
                             v-else-if="segment.type === 'op'"
                             class="px-0.5 font-orbitron text-[11px] font-semibold"
@@ -200,7 +204,7 @@ const joinLogic = computed<"AND" | "OR">(() => {
                         >
                             {{ segment.text }}
                         </span>
-                        <span v-else-if="segment.type === 'group'" class="text-secondary">{{ $t(segment.text) }}</span>
+                        <span v-else-if="segment.type === 'group'" class="text-secondary">{{ gt(segment.text) }}</span>
                         <span v-else-if="segment.type === 'value'" class="font-medium tabular-nums">{{ segment.text }}</span>
                         <span v-else>{{ segment.text }}</span>
                     </template>

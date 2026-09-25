@@ -92,7 +92,7 @@ function openPreview(image: string) {
             class="btn btn-circle btn-ghost absolute left-2 top-1/2 -translate-y-1/2 bg-base-100/80 backdrop-blur-sm opacity-0 transition-opacity duration-200 hover:bg-primary hover:text-primary-content focus-visible:opacity-100 group-hover:opacity-100"
             :class="{ 'pointer-events-none opacity-0': !hasPrev }"
             :disabled="!hasPrev"
-            aria-label="上一张"
+            :aria-label="$t('image-carousel.prev_image')"
             @click="prev"
         >
             <Icon icon="ri:arrow-left-line" class="size-5" />
@@ -102,7 +102,7 @@ function openPreview(image: string) {
             class="btn btn-circle btn-ghost absolute right-2 top-1/2 -translate-y-1/2 bg-base-100/80 backdrop-blur-sm opacity-0 transition-opacity duration-200 hover:bg-primary hover:text-primary-content focus-visible:opacity-100 group-hover:opacity-100"
             :class="{ 'pointer-events-none opacity-0': !hasNext }"
             :disabled="!hasNext"
-            aria-label="下一张"
+            :aria-label="$t('image-carousel.next_image')"
             @click="next"
         >
             <Icon icon="ri:arrow-right-line" class="size-5" />

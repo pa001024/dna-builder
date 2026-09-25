@@ -120,14 +120,14 @@ const slots = () => getNodeSlots(props.node)
             <div class="hidden group-hover:flex items-center gap-0.5 h-4">
                 <button
                     class="inline-flex shrink-0 items-center justify-center w-4 h-4 min-w-0 min-h-0 p-0 border-0 rounded bg-transparent text-base-content/60 cursor-pointer hover:bg-base-content/10"
-                    title="克隆"
+                    :title="$t('flow-block.clone')"
                     @click="onClone"
                 >
                     <Icon icon="ri:file-copy-line" class="w-3 h-3" />
                 </button>
                 <button
                     class="inline-flex shrink-0 items-center justify-center w-4 h-4 min-w-0 min-h-0 p-0 border-0 rounded bg-transparent text-error cursor-pointer hover:bg-error/10"
-                    title="删除"
+                    :title="$t('common.delete')"
                     @click="onRemove"
                 >
                     <Icon icon="ri:delete-bin-line" class="w-3 h-3" />

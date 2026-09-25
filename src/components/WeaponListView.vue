@@ -343,7 +343,7 @@ function unequipCurrentWeapon() {
                                 <div v-if="charBuild" class="flex items-center gap-1.5 text-xs">
                                     <Icon icon="ri:bar-chart-line" class="h-3.5 w-3.5 shrink-0 text-primary/80" />
                                     <span class="text-base-content/50">{{ $t("weapon-list.income") }}:</span>
-                                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                    <span class="font-orbitron text-[13px] font-semibold text-primary">
                                         {{ format100r(weaponIncomes.get(weapon.id) || 0) }}
                                     </span>
                                 </div>

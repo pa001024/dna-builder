@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { monsterMap } from "@/data"
 import {
     extractionTreasureContainerData,
@@ -12,6 +13,8 @@ import {
 const props = defineProps<{
     gamePlay: SoloTreasureGamePlay
 }>()
+
+const { gt } = useGameText()
 
 const spawnMonsters = computed(() =>
     (props.gamePlay.spawn?.m || [])
@@ -87,7 +90,9 @@ function getSoloTreasureRewards(monster: NonNullable<(typeof spawnMonsters.value
         <!-- 玩法头部：名称 + 类型 + ID -->
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
-                <div class="truncate text-sm font-medium">{{ gamePlay.name || `玩法 ${gamePlay.id}` }}</div>
+                <div class="truncate text-sm font-medium">
+                    {{ gt(gamePlay.name) || $t('db-solo-treasure-dungeon.gameplay_fallback', { id: gamePlay.id }) }}
+                </div>
                 <div class="mt-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-base-content/45">TYPE: {{ gamePlay.type }}</div>
             </div>
             <CopyID :id="gamePlay.id" />
@@ -100,40 +105,42 @@ function getSoloTreasureRewards(monster: NonNullable<(typeof spawnMonsters.value
                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
             >
                 <span class="text-xs text-base-content/60">CD</span>
-                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ gamePlay.cd }}</span>
+                <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ gamePlay.cd }}</span>
             </div>
             <div
                 v-if="gamePlay.gain !== undefined"
                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
             >
-                <span class="text-xs text-base-content/60">收益</span>
-                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ gamePlay.gain }}</span>
+                <span class="text-xs text-base-content/60">{{ $t('db-solo-treasure-gameplay.income') }}</span>
+                <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ gamePlay.gain }}</span>
             </div>
         </div>
 
         <!-- 刷怪 -->
         <div v-if="gamePlay.spawn" class="space-y-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-            <div class="text-[11px] tracking-wide text-base-content/55">刷怪</div>
+            <div class="text-[11px] tracking-wide text-base-content/55">{{ $t('db-solo-treasure-gameplay.spawning') }}</div>
             <div class="grid grid-cols-2 gap-1.5">
                 <div
                     v-for="spawnAttr in [
-                        { label: '生成器ID', value: String(gamePlay.spawn.id) },
-                        { label: '时间', value: String(gamePlay.spawn.time) },
-                        { label: '间隔', value: String(gamePlay.spawn.th) },
-                        { label: '范围', value: gamePlay.spawn.radius.join(' / ') },
+                        { key: 'db-solo-treasure-gameplay.generator_id', value: String(gamePlay.spawn.id) },
+                        { key: 'db-solo-treasure-gameplay.time', value: String(gamePlay.spawn.time) },
+                        { key: 'db-solo-treasure-gameplay.interval', value: String(gamePlay.spawn.th) },
+                        { key: 'db-solo-treasure-gameplay.radius', value: gamePlay.spawn.radius.join(' / ') },
                     ]"
-                    :key="spawnAttr.label"
+                    :key="spawnAttr.key"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ spawnAttr.label }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ spawnAttr.value }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t(spawnAttr.key) }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ spawnAttr.value }}</span>
                 </div>
             </div>
 
             <!-- 普通怪物 -->
             <div v-if="spawnMonsters.length" class="space-y-2">
-                <div class="text-[11px] tracking-wide text-base-content/55">普通怪物 ({{ spawnMonsters.length }}种)</div>
-                <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                <div class="text-[11px] tracking-wide text-base-content/55">
+                    {{ $t('db-solo-treasure-gameplay.normal_monsters_count', { count: spawnMonsters.length }) }}
+                </div>
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                     <DBMonsterCompactCard
                         v-for="monster in spawnMonsters"
                         :key="monster.config.id"
@@ -147,7 +154,7 @@ function getSoloTreasureRewards(monster: NonNullable<(typeof spawnMonsters.value
 
             <!-- 目标值 -->
             <div v-if="gamePlay.type === 2 && typeTwoTargetIds.length" class="space-y-2">
-                <div class="text-[11px] tracking-wide text-base-content/55">目标值</div>
+                <div class="text-[11px] tracking-wide text-base-content/55">{{ $t('db-solo-treasure-gameplay.target_value') }}</div>
                 <div class="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
                     <div
                         v-for="(value, index) in typeTwoTargetIds"
@@ -155,15 +162,15 @@ function getSoloTreasureRewards(monster: NonNullable<(typeof spawnMonsters.value
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="font-mono text-xs uppercase tracking-wider text-base-content/60">G{{ index + 1 }}</span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ value }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ value }}</span>
                     </div>
                 </div>
             </div>
 
             <!-- 怪物 -->
             <div v-if="gamePlay.type === 2 && typeTwoMonsters.length" class="space-y-2">
-                <div class="text-[11px] tracking-wide text-base-content/55">怪物</div>
-                <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                <div class="text-[11px] tracking-wide text-base-content/55">{{ $t('db-solo-treasure-gameplay.monsters') }}</div>
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                     <DBMonsterCompactCard
                         v-for="monster in typeTwoMonsters"
                         :key="monster.id"
@@ -186,7 +193,7 @@ function getSoloTreasureRewards(monster: NonNullable<(typeof spawnMonsters.value
 
         <!-- 机关 -->
         <div v-if="gamePlay.dom.length" class="space-y-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-            <div class="text-[11px] tracking-wide text-base-content/55">机关</div>
+            <div class="text-[11px] tracking-wide text-base-content/55">{{ $t('db-solo-treasure-gameplay.traps') }}</div>
             <div class="space-y-2">
                 <div v-for="item in mechanisms" :key="item.id" class="space-y-2">
                     <DBSoloTreasureMechanismItem v-if="item.mechanism" :mechanism="item.mechanism" />
@@ -195,12 +202,12 @@ function getSoloTreasureRewards(monster: NonNullable<(typeof spawnMonsters.value
                     </div>
                     <div v-if="item.guard" class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-sm">
                         <div class="flex items-center justify-between gap-2">
-                            <span>{{ item.guard.MechanismName }}</span>
+                            <span>{{ gt(item.guard.MechanismName) }}</span>
                             <CopyID :id="item.guard.MechanismID" />
                         </div>
                         <div class="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-base-content/60">
-                            <span>机关盒: {{ item.guard.MechanismItemBox }}</span>
-                            <span>修复速度: {{ item.guard.RepairSpeed }}</span>
+                            <span>{{ $t('db-solo-treasure-gameplay.mechanism_box') }}: {{ item.guard.MechanismItemBox }}</span>
+                            <span>{{ $t('db-solo-treasure-gameplay.repair_speed') }}: {{ item.guard.RepairSpeed }}</span>
                             <span>{{ item.pos.join(", ") }}</span>
                         </div>
                     </div>

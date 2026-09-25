@@ -773,7 +773,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                             "
                             @click="showFullTextSearch = !showFullTextSearch"
                         >
-                            剧情全文搜索
+                            {{ $t('db-dynquest-list.story_full_text_search') }}
                         </button>
                         <button
                             type="button"
@@ -785,7 +785,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                             "
                             @click="toggleRegionFilterRow()"
                         >
-                            区域筛选
+                            {{ $t('db-dynquest-list.filter_region') }}
                         </button>
                         <button
                             type="button"
@@ -797,7 +797,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                             "
                             @click="toggleLevelFilterRow()"
                         >
-                            等级筛选
+                            {{ $t('db-dynquest-list.filter_level') }}
                         </button>
                         <button
                             type="button"
@@ -809,7 +809,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                             "
                             @click="showImprIncreaseOnly = !showImprIncreaseOnly"
                         >
-                            印象
+                            {{ $t('印象') }}
                         </button>
                     </div>
                 </div>
@@ -832,7 +832,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                             "
                             @click="selectRegion('')"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="regionId in allRegions.map(r => String(r))"
@@ -845,7 +845,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                             "
                             @click="selectRegion(regionId)"
                         >
-                            {{ getRegionName(Number(regionId)) }}
+                            {{ $t(getRegionName(Number(regionId))) }}
                         </button>
                     </div>
 
@@ -861,7 +861,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                             "
                             @click="selectedLevel = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="levelRange in levelRanges"
@@ -904,7 +904,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                                 <div class="p-3">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0 flex-1">
-                                            <div class="flex items-start gap-3">
+                                            <div class="flex items-start gap-3 flex-wrap">
                                                 <ImageFallback
                                                     :src="getDynQuestIconUrl(questResult.quest)"
                                                     :alt="questResult.quest.name"
@@ -917,14 +917,14 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                                                         class="size-14 shrink-0 rounded-xs"
                                                     />
                                                 </ImageFallback>
-                                                <div class="min-w-0 flex-1">
+                                                <div class="min-w-0 flex-1 ">
                                                     <!-- 名称行：名称 + 幽灵 ID -->
                                                     <div class="flex items-baseline gap-2">
                                                         <h3
                                                             class="wrap-break-word text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
                                                             :class="{ 'text-primary': selectedQuestId === questResult.quest.id }"
                                                         >
-                                                            {{ questResult.quest.name }}
+                                                            {{ gt(questResult.quest.name) }}
                                                         </h3>
                                                         <CopyID :id="questResult.quest.id" class="ml-auto shrink-0" />
                                                     </div>
@@ -935,11 +935,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                                                             v-if="hasDynQuestImprIncrease(questResult.quest.id)"
                                                             class="rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 tracking-wide text-success"
                                                         >
-                                                            印象增加
+                                                            {{ $t('common.impression_increase') }}
                                                         </span>
-                                                        <span>冷却 <span class="font-mono tabular-nums">{{ questResult.quest.cd }}</span>m</span>
-                                                        <span>人数 <span class="font-mono tabular-nums">{{ questResult.quest.person }}</span></span>
-                                                        <span>权重 <span class="font-mono tabular-nums">{{ questResult.quest.weight }}</span></span>
+                                                        <span>{{ $t('common.cooldown') }} <span class="font-mono tabular-nums">{{ questResult.quest.cd }}</span>m</span>
+                                                        <span>{{ $t('common.player_count') }} <span class="font-mono tabular-nums">{{ questResult.quest.person }}</span></span>
+                                                        <span>{{ $t('common.weight') }} <span class="font-mono tabular-nums">{{ questResult.quest.weight }}</span></span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -948,18 +948,15 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                                                 <span
                                                     v-for="level in questResult.levelGroups"
                                                     :key="`${questResult.quest.id}-${level.key}`"
-                                                    class="rounded-xs border border-base-content/15 px-1 font-mono text-[10px] leading-4 tracking-wide text-base-content/55 tabular-nums"
+                                                    class="rounded-xs border border-base-content/15 px-1.5 py-0.5 font-mono text-[11px] text-base-content/55 tabular-nums"
                                                 >
                                                     {{ level.label }}
                                                 </span>
+                                                <span class="rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary">
+                                                    {{ $t(getRegionName(questResult.quest.regionId)) }}·
+                                                    <span>{{ $t(getSubRegionName(questResult.quest.subRegionId)) }}</span>
+                                                </span>
                                             </div>
-                                        </div>
-                                        <!-- 区域角标 -->
-                                        <div class="flex shrink-0 flex-col items-end gap-1">
-                                            <span class="rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary">
-                                                {{ getRegionName(questResult.quest.regionId) }}·
-                                                <span>{{ $t(getSubRegionName(questResult.quest.subRegionId)) }}</span>
-                                            </span>
                                         </div>
                                     </div>
 
@@ -968,7 +965,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                                         v-if="showFullTextSearch && searchKeyword.trim() && questResult.snippet"
                                         class="mt-2 text-xs leading-relaxed text-base-content/70"
                                     >
-                                        <span class="text-base-content/45">匹配：</span>
+                                        <span class="text-base-content/45">{{ $t('common.match') }}</span>
                                         <span v-if="questResult.snippet.prefixEllipsis">...</span>
                                         <template
                                             v-for="(segment, index) in questResult.snippet.segments"

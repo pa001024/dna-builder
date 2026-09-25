@@ -47,7 +47,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
 <template>
     <div v-if="dungeon || defence" class="space-y-3">
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="SPAWN" title="普通刷怪" />
+            <SectionHeader no-animate compact kicker="SPAWN" :title="$t('db-iron-survival-spawn.normal_spawn')" />
             <div class="space-y-2">
                 <div
                     v-for="(spawnGroup, index) in spawnGroups"
@@ -56,7 +56,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                 >
                     <div class="flex items-center justify-between gap-2 mb-2">
                         <div class="text-sm font-medium">第 {{ index + 1 }} 组</div>
-                        <span class="rounded-xs bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">怪物 ID 组</span>
+                        <span class="rounded-xs bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{{ $t('db-iron-survival-spawn.monster_id_group') }}</span>
                     </div>
                     <div class="space-y-2">
                         <div
@@ -65,11 +65,11 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                             class="rounded-xs border border-base-content/10 bg-base-content/3 p-2"
                         >
                             <div class="mb-2 flex items-center justify-between text-xs text-base-content/70">
-                                <span>生成器</span>
+                                <span>{{ $t('common.generator') }}</span>
                                 <CopyID :id="spawnId" />
                             </div>
                             <p class="mb-2 text-xs text-base-content/55">{{ strongKillCount }} 小怪后生成 1 个精英</p>
-                            <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                            <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                                 <DBMonsterCompactCard
                                     v-for="monsterId in getSpawnMonsterIds(spawnId)"
                                     :key="`${spawnId}-${monsterId}`"
@@ -94,7 +94,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
             v-if="dungeon?.StrongLoopSpawnId?.length"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="STRONG SPAWN" title="强敌刷怪" />
+            <SectionHeader no-animate compact kicker="STRONG SPAWN" :title="$t('db-iron-survival-spawn.elite_spawn')" />
             <div class="space-y-2">
                 <div
                     v-for="(spawnGroup, index) in dungeon.StrongLoopSpawnId"
@@ -103,7 +103,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                 >
                     <div class="flex items-center justify-between gap-2 mb-2">
                         <div class="text-sm font-medium">阶段 {{ index + 1 }}</div>
-                        <span class="rounded-xs bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">强敌 ID 组</span>
+                        <span class="rounded-xs bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{{ $t('db-iron-survival-spawn.elite_id_group') }}</span>
                     </div>
                     <div class="space-y-2">
                         <div
@@ -112,10 +112,10 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                             class="rounded-xs border border-base-content/10 bg-base-content/3 p-2"
                         >
                             <div class="mb-2 flex items-center justify-between text-xs text-base-content/70">
-                                <span>生成器</span>
+                                <span>{{ $t('common.generator') }}</span>
                                 <CopyID :id="spawnId" />
                             </div>
-                            <div class="grid grid-cols-[repeat(auto-fill,minmax(2840px,1fr))] gap-2">
+                            <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                                 <DBMonsterCompactCard
                                     v-for="monsterId in getSpawnMonsterIds(spawnId)"
                                     :key="`${spawnId}-${monsterId}`"
@@ -141,7 +141,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                 no-animate
                 compact
                 kicker="BUTCHER"
-                title="屠夫刷怪"
+                :title="$t('db-iron-survival-spawn.butcher_spawn')"
                 :count="`${defence.MonsterTotalBaseNum} 总怪 / 每 ${defence.WavesPerStage} 波`"
             />
             <div class="space-y-2">
@@ -152,7 +152,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                             第 {{ defence.ButcherMonsterSpawnMinWave }} 波起，概率 {{ defence.ButcherMonsterSpawnProbability.join(" / ") }}
                         </span>
                     </div>
-                    <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                         <DBMonsterCompactCard
                             :monster="
                                 LeveledMonsterHelper.fromId(

@@ -397,7 +397,7 @@ watch(
 
 <template>
     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-        <SectionHeader no-animate compact kicker="LIMITED PRIZE" title="限时奖池模拟">
+        <SectionHeader no-animate compact kicker="LIMITED PRIZE" :title="$t('limited-prize-simulator.title')">
             <template #trailing>
                 <CopyID :id="eventId" />
             </template>
@@ -487,12 +487,12 @@ watch(
                             <div class="truncate text-sm font-medium text-base-content">{{ prize.name }}</div>
                             <div class="flex items-center gap-1 text-[11px] text-base-content/55">
                                 <span>概率</span>
-                                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                <span class="font-orbitron text-[13px] font-semibold text-primary"
                                     >{{ (prize.currentProbability / 100).toFixed(2) }}%</span
                                 >
                                 <span aria-hidden="true">·</span>
                                 <span>数量</span>
-                                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ prize.count }}</span>
+                                <span class="font-orbitron text-[13px] font-semibold text-primary">{{ prize.count }}</span>
                             </div>
                         </div>
                     </div>
@@ -509,13 +509,13 @@ watch(
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="text-[11px] tracking-wide text-base-content/55">抽取次数</span>
-                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ drawCount }}</span>
+                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{ drawCount }}</span>
                     </div>
                     <div
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="text-[11px] tracking-wide text-base-content/55">出货统计</span>
-                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{
                             Object.keys(drawStats).length
                         }}</span>
                     </div>

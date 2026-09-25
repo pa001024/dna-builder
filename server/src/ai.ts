@@ -7,6 +7,7 @@ import {
     type AiLogAssistantMessage,
     type AiLogError,
     buildClientIdentity,
+    createMessagesStreamAggregator,
     createStreamAggregator,
     extractToolNames,
     extractUpstreamCompletionId,
@@ -24,6 +25,7 @@ import {
     MICROS_PER_YUAN,
     MIN_REQUEST_MICROS,
     PRICE_PER_MILLION_TOKENS,
+    pipeMessagesWithEvents,
     pipeWithUsage,
     resolveMaxTokens,
     type UpstreamUsage,
@@ -33,11 +35,15 @@ import { type JWTUser, jwtToken } from "./db/yoga"
 /**
  * AI 中转路由。
  *
- * 对外是 OpenAI 兼容的 `/api/v1/chat/completions`，按调用方自己的提示词转发到同一把上游 Key，
- * 不做场景限制，只做登录与计费：
- * - 必须带登录令牌（`token` 或 `Authorization: Bearer`），按上游返回的真实 tokens 记费；
- * - 每人每天有额度上限，按北京时间自然日重置，峰谷单价见 `ai-pricing.ts`；
- * - 上游模型固定为 DeepSeek 的 deepseek-flash，计费口径与 DeepSeek 官方价目表对齐。
+ * 对外提供两条协议，都按调用方自己的提示词转发到同一把上游 Key，不做场景限制，只做登录与计费：
+ * - `/api/v1/chat/completions`：OpenAI 兼容，给只有该入口的网关与老客户端用；
+ * - `/api/v1/messages`：Anthropic Messages 兼容，资料检索 Agent 走这条——
+ *   工具调用在 Messages 下是协议级字段，不像 OpenAI 兼容路径要靠上游在生成文本里
+ *   还原工具语法（还原失败即 DSML 标记泄露成正文）。
+ *
+ * 两条都以登录令牌鉴权（`token` 或 `Authorization: Bearer`），
+ * 按上游返回的真实 tokens 记费；每人每天有额度上限，按北京时间自然日重置，峰谷单价见 `ai-pricing.ts`；
+ * 上游模型固定为 DeepSeek 的 deepseek-flash，计费口径与 DeepSeek 官方价目表对齐。
  *
  * 每次请求都会在 `server/data/ai-logs` 下留一份调用日志（元数据 + 完整对话），见 `ai-log-store.ts`。
  */
@@ -48,6 +54,13 @@ const AI_API_KEY = process.env.AI_API_KEY
 const AI_MODEL = process.env.AI_MODEL || "deepseek-flash"
 /** 上游 OpenAI 兼容 base_url（需以 / 结尾，拼接后为 `${base}chat/completions`）。 */
 const AI_BASE_URL = process.env.AI_BASE_URL || "https://api.deepseek.com/"
+/**
+ * 上游 Messages（Anthropic 兼容）基址。
+ *
+ * DeepSeek 官方把 Anthropic 兼容入口挂在 `<origin>/anthropic`，
+ * 模型请求打在 `<origin>/anthropic/v1/messages`（见官方 Anthropic API 指南）。
+ */
+const AI_MESSAGES_BASE_URL = process.env.AI_MESSAGES_BASE_URL || `${AI_BASE_URL.replace(/\/+$/, "")}/anthropic`
 
 type ProxyMessage =
     | {
@@ -200,7 +213,10 @@ function isApiKeyConfigured(): boolean {
 
 /**
  * @description 从请求头解析登录用户。
- * 支持两种写法：`token: <jwt>`（与 GraphQL、MOD 接口一致）与 `Authorization: Bearer <jwt>`（OpenAI SDK 默认走这个头）。
+ * 支持两种写法，覆盖两条协议下客户端的默认行为：
+ * `token: <jwt>`（与 GraphQL、MOD 接口一致）与 `Authorization: Bearer <jwt>`（OpenAI SDK 默认走这个头）。
+ * 上游那把 API Key 用的也是 `x-api-key`，但那是**服务端发往 DeepSeek** 的出口凭证，
+ * 与入口鉴权无关，故此处不认这个头，避免两套语义混在一个字段上。
  * @param headers 请求头集合
  * @returns 解析出的用户信息；未登录或令牌无效时返回 null
  */
@@ -489,6 +505,190 @@ export const aiPlugin = () =>
                 }),
             }
         )
+        .post(
+            "/messages",
+            async ({ body, headers, request, server }) => {
+                const startedAt = new Date()
+                const peak = isPeakPricing(startedAt)
+                const user = resolveUser(headers)
+                const clientMessages = (body.messages ?? []) as unknown[]
+                // 会话归并由服务端推导：上游无状态，不返回任何会话级标识
+                const sessionId = resolveSessionId({ userId: user?.id, messages: clientMessages })
+
+                const logger = createAiCallLogger({
+                    requestId: randomUUID(),
+                    sessionId,
+                    startedAt,
+                    client: buildClientIdentity(user, request.headers, resolveSocketAddress(server, request)),
+                    model: AI_MODEL,
+                    // 中继只走流式：非流式要另建整包响应路径，而本接口的调用方只要流式
+                    stream: true,
+                    peak,
+                    temperature: typeof body.temperature === "number" ? body.temperature : null,
+                    maxTokensRequested: typeof body.max_tokens === "number" ? body.max_tokens : null,
+                    messages: clientMessages,
+                    toolNames: extractToolNames(body.tools),
+                })
+
+                if (!isApiKeyConfigured()) {
+                    const errorMsg = createProxyError("AI服务未配置，请联系管理员配置API密钥", "configuration_error", "ai_not_configured")
+                    logger.finish({ status: 401, ok: false, error: toLogError(errorMsg) })
+                    return createStreamErrorResponse(errorMsg)
+                }
+
+                // 验证登录：该接口按登录账号计费，未登录不转发
+                if (!user) {
+                    const errorMsg = createProxyError(
+                        "请先登录后再使用 AI 助手，该接口按登录账号计费",
+                        "authentication_error",
+                        "login_required"
+                    )
+                    logger.finish({ status: 403, ok: false, error: toLogError(errorMsg) })
+                    return createJsonErrorResponse(errorMsg, 403)
+                }
+
+                const day = beijingDayKey(startedAt)
+
+                try {
+                    const quota = await readDailyQuota(user.id, day)
+                    if (quota.remainingMicros < MIN_REQUEST_MICROS) {
+                        const errorMsg = createProxyError(
+                            `今日 AI 额度已用完（每人每天 ${formatYuan(DAILY_LIMIT_MICROS)} 元，北京时间自然日重置），请明天再试`,
+                            "insufficient_quota",
+                            "daily_quota_exceeded"
+                        )
+                        logger.finish({ status: 402, ok: false, error: toLogError(errorMsg) })
+                        return createJsonErrorResponse(errorMsg, 402)
+                    }
+
+                    const maxTokens = resolveMaxTokens(body.max_tokens, quota.remainingMicros, peak)
+                    if (typeof body.max_tokens === "number" && maxTokens < Math.floor(body.max_tokens)) {
+                        console.warn(
+                            `[ai] 用户 ${user.id} 剩余额度 ${formatYuan(quota.remainingMicros)} 元，max_tokens 由 ${body.max_tokens} 收紧为 ${maxTokens}`
+                        )
+                    }
+
+                    // 上游请求：模型与输出上限固定由服务端决定，其余字段（system / messages / tools / thinking 等）原样透传
+                    const requestBody: Record<string, unknown> = {
+                        ...body,
+                        model: AI_MODEL,
+                        max_tokens: maxTokens,
+                        stream: true,
+                    }
+
+                    const response = await fetch(`${AI_MESSAGES_BASE_URL}/v1/messages`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "text/event-stream",
+                            // Anthropic 兼容入口用 x-api-key，不是 Bearer
+                            "x-api-key": AI_API_KEY ?? "",
+                        },
+                        body: JSON.stringify(requestBody),
+                    })
+
+                    // 上游追踪 id 只出现在响应头，报错时同样有值——它是向 DeepSeek 对账 / 排查的唯一凭据
+                    const upstreamTraceId = response.headers.get(AI_LOG_UPSTREAM_TRACE_HEADER)
+
+                    if (!response.ok) {
+                        const errorText = await response.json()
+                        console.error("DeepSeek Messages API错误:", response.status, errorText)
+
+                        const upstream = parseUpstreamError(errorText, `上游AI服务错误: ${response.status}`)
+                        const errorMsg = createProxyError(upstream.message, "api_error", "upstream_error")
+
+                        logger.finish({
+                            status: response.status,
+                            ok: false,
+                            upstreamStatus: response.status,
+                            upstreamTraceId,
+                            messages: clientMessages,
+                            error: { ...upstream, raw: stringifyErrorRaw(errorText) },
+                        })
+                        return createStreamErrorResponse(errorMsg, response.status)
+                    }
+
+                    if (!response.body) {
+                        const errorMsg = createProxyError("上游未返回响应体", "api_error", "upstream_empty_body")
+                        logger.finish({
+                            status: 200,
+                            ok: false,
+                            upstreamStatus: response.status,
+                            upstreamTraceId,
+                            error: toLogError(errorMsg),
+                        })
+                        return createStreamErrorResponse(errorMsg)
+                    }
+
+                    // 流式响应：原样透传，同时旁路聚合（日志）与累加 usage（记账）。
+                    // usage 分散在 message_start 与 message_delta 两处，整条流收完才能定论，
+                    // 因此记账与收尾日志一并放在 finalizeOnEnd 里，覆盖读完 / 客户端取消 / 上游中断三种收尾。
+                    const aggregator = createMessagesStreamAggregator()
+                    const piped = pipeMessagesWithEvents(response.body, payload => aggregator.push(payload))
+
+                    return new Response(
+                        finalizeOnEnd(piped, () => {
+                            const state = aggregator.snapshot()
+                            void chargeUsage(user.id, day, peak, state.usage)
+                            logger.finish({
+                                status: 200,
+                                ok: true,
+                                upstreamStatus: response.status,
+                                upstreamTraceId,
+                                upstreamCompletionId: state.completionId,
+                                usage: state.usage,
+                                messages: clientMessages,
+                                assistant: { message: state.message, finishReason: state.finishReason },
+                                maxTokensResolved: maxTokens,
+                                firstTokenAt: state.firstTokenAt,
+                            })
+                        }),
+                        {
+                            headers: {
+                                "Content-Type": "text/event-stream",
+                                "Cache-Control": "no-cache",
+                                Connection: "keep-alive",
+                            },
+                        }
+                    )
+                } catch (error) {
+                    console.error("AI Messages 代理错误:", error)
+                    const errorMsg = createProxyError(
+                        `AI代理请求失败: ${error instanceof Error ? error.message : "未知错误"}`,
+                        "proxy_error",
+                        "internal_error"
+                    )
+
+                    logger.finish({
+                        status: 200,
+                        ok: false,
+                        error: {
+                            ...toLogError(errorMsg),
+                            raw: stringifyErrorRaw(error instanceof Error ? (error.stack ?? error.message) : error),
+                        },
+                    })
+
+                    return createStreamErrorResponse(errorMsg)
+                }
+            },
+            {
+                body: t.Object({
+                    // Messages 轮是 content block 数组，块结构随类型变化，这里只校验必需字段：
+                    // 中继不该比上游更早拒绝合法请求，具体块内容交给上游校验
+                    messages: t.Array(t.Any()),
+                    system: t.Optional(t.Any()),
+                    model: t.Optional(t.String()),
+                    max_tokens: t.Optional(t.Number()),
+                    temperature: t.Optional(t.Number()),
+                    stream: t.Optional(t.Boolean()),
+                    tools: t.Optional(t.Any()),
+                    tool_choice: t.Optional(t.Any()),
+                    thinking: t.Optional(t.Any()),
+                    output_config: t.Optional(t.Any()),
+                    stop_sequences: t.Optional(t.Any()),
+                }),
+            }
+        )
         .get("/models", async () => {
             // 验证API Key
             if (!isApiKeyConfigured()) {
@@ -541,6 +741,8 @@ export const aiPlugin = () =>
                 configured: isApiKeyConfigured(),
                 model: AI_MODEL,
                 base_url: AI_BASE_URL,
+                /** Messages（Anthropic 兼容）基址，模型请求实际打在 `<messages_base_url>/v1/messages`。 */
+                messages_base_url: AI_MESSAGES_BASE_URL,
                 /** 每个账号每天的额度上限（元）。 */
                 daily_limit_yuan: DAILY_LIMIT_MICROS / MICROS_PER_YUAN,
             }

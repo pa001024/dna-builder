@@ -62,14 +62,14 @@ const forgeReward = computed(() => getRewardDetails(props.forge.ForgeLevelReward
 
         <!-- 等级奖励详情 -->
         <div class="mt-3">
-            <SectionHeader no-animate compact kicker="REWARD" title="等级奖励详情" />
+            <SectionHeader no-animate compact kicker="REWARD" :title="$t('db-forge-detail.level_reward_detail')" />
             <RewardItem v-if="forgeReward" :reward="forgeReward" />
-            <div v-else class="text-sm text-base-content/60">未找到奖励详情</div>
+            <div v-else class="text-sm text-base-content/60">{{ $t('db-forge-detail.no_reward_detail') }}</div>
         </div>
 
         <!-- 关联任务 -->
         <div class="mt-4">
-            <SectionHeader no-animate compact kicker="QUESTS" title="关联任务" />
+            <SectionHeader no-animate compact kicker="QUESTS" :title="$t('db-forge-detail.related_quests')" />
             <div class="space-y-2">
                 <div
                     v-for="row in forgeQuestRows"
@@ -82,9 +82,9 @@ const forgeReward = computed(() => getRewardDetails(props.forge.ForgeLevelReward
                             <CopyID :id="row.detail.id" />
                         </div>
                         <div class="mt-2">
-                            <div class="mb-1 text-[11px] tracking-wide text-base-content/45">任务奖励</div>
+                            <div class="mb-1 text-[11px] tracking-wide text-base-content/45">{{ $t('db-forge-detail.quest_rewards') }}</div>
                             <RewardItem v-if="row.detail.reward" :reward="row.detail.reward" />
-                            <div v-else class="text-sm text-base-content/60">未找到任务奖励</div>
+                            <div v-else class="text-sm text-base-content/60">{{ $t('db-forge-detail.no_quest_rewards') }}</div>
                         </div>
                     </div>
                     <div v-else class="text-sm text-base-content/60">未找到任务 {{ row.id }}</div>

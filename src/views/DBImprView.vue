@@ -3,6 +3,7 @@ import { useLocalStorage } from "@vueuse/core"
 import Fuse, { type FuseResultMatch } from "fuse.js"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { execScript } from "@/api/app"
+import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { getImprEntryKey, getLocalizedImprEntriesByLanguage, type ImprEntry } from "@/data/d/impr"
 import { regionMap } from "@/data/d/region.data"
@@ -25,6 +26,8 @@ interface ImprResultItem {
     entry: ImprEntry
     snippet: ImprSearchSnippet | null
 }
+
+const { gt } = useGameText()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedRegionId = useSearchParam<string>("rg", "")
@@ -579,7 +582,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                     v-model="searchKeyword"
                                     type="text"
                                     class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
-                                    placeholder="搜索印象条目"
+                                    :placeholder="$t('db-impr.search_placeholder')"
                                 />
                                 <span
                                     class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 font-mono text-[11px] tabular-nums text-base-content/40"
@@ -590,7 +593,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                             <button class="btn btn-sm btn-primary" :disabled="ocrRunning" @click="runOcrSearch">OCR</button>
                             <label class="flex cursor-pointer select-none items-center gap-1 whitespace-nowrap">
                                 <input v-model="realtimeOcrEnabled" type="checkbox" class="toggle toggle-xs" />
-                                <span class="text-xs text-base-content/60">实时</span>
+                                <span class="text-xs text-base-content/60">{{ $t('db-impr.realtime') }}</span>
                             </label>
                         </div>
 
@@ -606,7 +609,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                 "
                                 @click="toggleRegionFilterRow()"
                             >
-                                地区
+                                {{ $t('common.region') }}
                             </button>
                             <button
                                 type="button"
@@ -618,7 +621,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                 "
                                 @click="toggleSourceFilterRow()"
                             >
-                                来源
+                                {{ $t('common.source') }}
                             </button>
                             <button
                                 type="button"
@@ -630,7 +633,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                 "
                                 @click="toggleValueFilterRow()"
                             >
-                                五维
+                                {{ $t('common.five_dimensions') }}
                             </button>
                         </div>
 
@@ -644,7 +647,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
 
                         <!-- 来源筛选 -->
                         <div v-show="showSourceFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">来源</span>
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.source') }}</span>
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
@@ -654,7 +657,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                 "
                                 @click="selectSourceType('')"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="option in sourceTypeOptions"
@@ -667,13 +670,13 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                 "
                                 @click="selectSourceType(option.value)"
                             >
-                                {{ option.label }}
+                                {{ $t(option.label) }}
                             </button>
                         </div>
 
                         <!-- 地区筛选 -->
                         <div v-show="showRegionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">地区</span>
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.region') }}</span>
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
@@ -683,7 +686,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                 "
                                 @click="selectRegion('')"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="region in regionOptions"
@@ -696,13 +699,13 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                 "
                                 @click="selectRegion(region.value)"
                             >
-                                {{ region.label }}
+                                {{ $t(region.label) }}
                             </button>
                         </div>
 
                         <!-- 子区域筛选 -->
                         <div v-show="showRegionFilter && selectedRegionId" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">子区域</span>
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.sub_region') }}</span>
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
@@ -712,7 +715,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                 "
                                 @click="selectSubRegion('')"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="subRegion in subRegionOptions"
@@ -731,7 +734,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
 
                         <!-- 五维筛选 -->
                         <div v-show="showValueFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">五维</span>
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.five_dimensions') }}</span>
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
@@ -741,7 +744,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                 "
                                 @click="selectValueType('')"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="type in IMPRESSION_TYPES"
@@ -797,19 +800,19 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                             class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
                                             :class="{ 'text-primary': isSelectedEntry(item.entry) }"
                                         >
-                                            {{ item.entry.sourceName }}
+                                            {{ $t(item.entry.sourceName) }}
                                         </span>
                                         <CopyID :id="item.entry.sourceId" />
                                     </div>
                                     <div class="mt-1.5 truncate text-xs leading-relaxed text-base-content/70">
-                                        {{ item.entry.displayText }}
+                                        {{ gt(item.entry.displayText) }}
                                     </div>
                                     <!-- 搜索命中摘要 -->
                                     <div
                                         v-if="item.snippet && searchKeyword.trim() && showFullTextSearch"
                                         class="mt-2 line-clamp-2 text-xs leading-relaxed wrap-break-word text-base-content/55"
                                     >
-                                        <span>匹配：</span>
+                                        <span>{{ $t('common.match') }}</span>
                                         <span v-if="item.snippet.prefixEllipsis">...</span>
                                         <template
                                             v-for="(segment, segIndex) in item.snippet.segments"
@@ -837,7 +840,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                                     </span>
                                     <span class="text-right text-[11px] leading-5 text-base-content/55">
                                         {{ $t(getImprType(item.entry.valueType)) }}
-                                        <b class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                        <b class="font-orbitron text-[13px] font-semibold text-primary">
                                             {{ item.entry.value > 0 ? `+${item.entry.value}` : item.entry.value }}
                                         </b>
                                     </span>
@@ -850,7 +853,7 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                     <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                         <p class="text-center text-[11px] tracking-wide text-base-content/50">
                             共
-                            <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredEntries.length }}</b> 条印象
+                            <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredEntries.length }}</b> 条印象
                         </p>
                     </div>
                 </div>

@@ -69,7 +69,7 @@ function attrName(key: string): string {
     <!-- 角色头部信息 -->
     <div class="flex flex-col md:flex-row gap-6 mb-6 mt-2">
         <div class="relative w-32 h-32 md:w-40 md:h-40 rounded-xs overflow-hidden border-2 border-primary/30 shadow-xl self-start">
-            <ImageFallback :src="charBuild.char.url" alt="角色头像" class="w-full h-full object-cover object-top">
+            <ImageFallback :src="charBuild.char.url" :alt="$t('common.char_avatar')" class="w-full h-full object-cover object-top">
                 <Icon icon="ri:question-mark" class="w-full h-full" />
             </ImageFallback>
             <div class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />

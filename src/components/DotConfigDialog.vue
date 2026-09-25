@@ -110,13 +110,13 @@ function startSourceDrag(namespace: string, event: PointerEvent) {
     >
         <!-- 弹窗头：英文小标 + 中文标题 + 关闭按钮 -->
         <div class="flex items-center gap-2 pr-1">
-            <SectionHeader no-animate compact kicker="DOT" title="DOT伤害计算" class="grow" />
+            <SectionHeader no-animate compact kicker="DOT" :title="$t('dot-config.title')" class="grow" />
             <button class="btn btn-sm btn-ghost btn-circle shrink-0" @click="$emit('close')">
                 <Icon icon="radix-icons:cross2" />
             </button>
         </div>
         <p class="mt-1 text-[11px] tracking-wide text-base-content/55">
-            公式：Σ各来源 (角色攻击 + 来源武器攻击) × 0.2 × 6 × 4 × (1 + 充盈威力) × (1 + 增伤) × 昂扬乘区 × 背水乘区 × 频率 × 抗性区（含属性穿透）；技能来源仅按角色攻击结算
+            {{ $t('dot-config.formula_desc') }}
         </p>
 
         <!-- 各来源频率配置（无触发来源整块隐藏，不占位） -->
@@ -128,10 +128,10 @@ function startSourceDrag(namespace: string, event: PointerEvent) {
                         <span v-if="source.type !== 'skill'" class="ml-1 font-normal text-base-content/55">{{ source.label }}</span>
                     </span>
                     <span class="text-[11px] tracking-wide text-base-content/55">
-                        触发
+                        {{ $t('dot-config.trigger') }}
                         <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatTrigger(source.trigger) }}</span>
-                        · 上限
-                        <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatFreq(source.cap) }}</span> 次/秒
+                        {{ $t('dot-config.upper_limit') }}
+                        <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatFreq(source.cap) }}</span> {{ $t('dot-config.per_second') }}
                     </span>
                 </div>
                 <div class="mt-2.5 flex items-center gap-3">
@@ -158,19 +158,19 @@ function startSourceDrag(namespace: string, event: PointerEvent) {
                 </div>
                 <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-base-content/55">
                     <span v-if="source.type !== 'skill' && source.otherElementCount > 0">
-                        其余属性 <span class="font-orbitron tabular-nums text-primary">{{ source.otherElementCount }}</span> 种
+                        {{ $t('dot-config.other_elements') }} <span class="font-orbitron tabular-nums text-primary">{{ source.otherElementCount }}</span> {{ $t('dot-config.kinds') }}
                     </span>
                     <span v-if="source.hasAdditionalDamage" class="text-primary">
-                        自属性追加伤害 &gt; 0（频率翻倍）
+                        {{ $t('dot-config.self_elem_bonus_cond') }}
                     </span>
                     <span v-if="source.doubled" class="text-secondary">
-                        频率翻倍 → <span class="font-orbitron tabular-nums">{{ formatFreq(source.effectiveFreq) }}</span> 次/秒
+                        {{ $t('dot-config.frequency_doubled') }} <span class="font-orbitron tabular-nums">{{ formatFreq(source.effectiveFreq) }}</span> {{ $t('dot-config.per_second') }}
                     </span>
                     <span v-if="source.otherFreq > 0">
-                        其余属性 <span class="font-orbitron tabular-nums">{{ formatFreq(source.otherFreq) }}</span> 次/秒
+                        {{ $t('dot-config.other_elements') }} <span class="font-orbitron tabular-nums">{{ formatFreq(source.otherFreq) }}</span> {{ $t('dot-config.per_second') }}
                     </span>
                     <span v-if="source.ownFreq > 0">
-                        角色自身属性 <span class="font-orbitron tabular-nums">{{ formatFreq(source.ownFreq) }}</span> 次/秒
+                        {{ $t('dot-config.char_own_element') }} <span class="font-orbitron tabular-nums">{{ formatFreq(source.ownFreq) }}</span> {{ $t('dot-config.per_second') }}
                     </span>
                 </div>
             </div>
@@ -178,41 +178,41 @@ function startSourceDrag(namespace: string, event: PointerEvent) {
 
         <label class="mt-3 flex items-center gap-2 text-[11px] text-base-content/65">
             <input v-model="dotSettings.forceOwnAdditionalDamage" type="checkbox" class="checkbox checkbox-xs checkbox-primary" />
-            <span>手动设置有自属性追加伤害</span>
+            <span>{{ $t('dot-config.manual_self_elem_note') }}</span>
         </label>
 
         <!-- 频率分解汇总 -->
         <div class="mt-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <span class="text-[11px] tracking-wide text-base-content/60">角色自身属性 DOT 频率</span>
+                <span class="text-[11px] tracking-wide text-base-content/60">{{ $t('dot-config.char_self_dot_freq') }}</span>
                 <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatFreq(dotFrequencies.ownFreq) }} 次/秒</span>
             </div>
             <div class="mt-2 flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <span class="text-[11px] tracking-wide text-base-content/60">其余属性 DOT 频率</span>
+                <span class="text-[11px] tracking-wide text-base-content/60">{{ $t('dot-config.other_elem_dot_freq') }}</span>
                 <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatFreq(dotFrequencies.otherFreq) }} 次/秒</span>
             </div>
             <div class="mt-2 flex items-center justify-between gap-2 rounded-xs border border-primary/30 bg-primary/5 px-2.5 py-2">
-                <span class="text-[11px] font-semibold tracking-wide text-base-content/80">总频率</span>
+                <span class="text-[11px] font-semibold tracking-wide text-base-content/80">{{ $t('dot-config.total_frequency') }}</span>
                 <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatFreq(dotFrequencies.totalFreq) }} 次/秒</span>
             </div>
         </div>
 
         <!-- 各命名空间每秒 DOT 伤害（全部为每秒，语义由区块标题统一） -->
         <div class="mt-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="DPS" title="每秒DOT伤害（按来源）" />
+            <SectionHeader no-animate compact kicker="DPS" :title="$t('dot-config.dot_per_second_by_source')" />
             <div
                 class="cursor-grab flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 transition-colors duration-200 select-none hover:bg-base-content/5 active:cursor-grabbing"
-                title="点击抓起后可放入表达式或自定义变量"
+                :title="$t('dot-config.drag_hint')"
                 @pointerdown="startSourceDrag('', $event)"
             >
-                <span class="text-[11px] tracking-wide text-base-content/60">全部来源</span>
+                <span class="text-[11px] tracking-wide text-base-content/60">{{ $t('dot-config.all_sources') }}</span>
                 <DamageShow :value="charBuild.calculateDotDamage()" />
             </div>
             <div
                 v-for="source in visibleSources"
                 :key="source.type"
                 class="mt-2 cursor-grab flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 transition-colors duration-200 select-none hover:bg-base-content/5 active:cursor-grabbing"
-                title="点击抓起后可放入表达式或自定义变量"
+                :title="$t('dot-config.drag_hint')"
                 @pointerdown="startSourceDrag(sourceNamespace(source.type), $event)"
             >
                 <span class="text-[11px] tracking-wide text-base-content/60">{{ sourceNamespace(source.type) }}::DOT伤害</span>
@@ -221,7 +221,7 @@ function startSourceDrag(namespace: string, event: PointerEvent) {
         </div>
 
         <div class="mt-3 flex justify-end">
-            <button class="btn btn-sm btn-ghost" @click="$emit('close')">关闭</button>
+            <button class="btn btn-sm btn-ghost" @click="$emit('close')">{{ $t('dot-config.close') }}</button>
         </div>
     </div>
 </template>

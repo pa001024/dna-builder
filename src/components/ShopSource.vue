@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { t } from "i18next"
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
 import { cutoffMap, resourceMap } from "@/data"
 import { formatDateTime, formatTimeRange } from "@/utils/time"
@@ -8,6 +8,21 @@ import type { ShopSourceInfo } from "@/utils/weapon-source"
 const props = defineProps<{
     shopSources: ShopSourceInfo[]
 }>()
+
+const { t } = useTranslation()
+
+/**
+ * 翻译商店来源标题。
+ * detail 由「主标签 -> 子标签」拼接而成，两段都是数据包里的中文术语键，逐段翻译后再拼回。
+ * @param detail 原始标题
+ * @returns 当前语言下的标题
+ */
+function translateDetail(detail: string): string {
+    return detail
+        .split(" -> ")
+        .map(part => t(part))
+        .join(" -> ")
+}
 
 /**
  * 反查折扣配置。
@@ -21,6 +36,7 @@ function getCutoffInfo(source: ShopSourceInfo) {
 const displayShopSources = computed(() => {
     return props.shopSources.map(source => ({
         ...source,
+        translatedDetail: translateDetail(source.detail),
         cutoffInfo: getCutoffInfo(source),
     }))
 })
@@ -47,7 +63,7 @@ function formatCutoffTime(timestamp: number) {
 
 <template>
     <div v-if="displayShopSources.length > 0" class="space-y-2">
-        <div class="text-[11px] tracking-wide text-base-content/55">商店购买</div>
+        <div class="text-[11px] tracking-wide text-base-content/55">{{ $t('shop-source.shop_purchase') }}</div>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
             <div
                 v-for="source in displayShopSources"
@@ -71,9 +87,9 @@ function formatCutoffTime(timestamp: number) {
                                 :to="`/db/shop/${source.shopId}/${source.subTabId}`"
                                 class="hover:underline"
                             >
-                                {{ source.detail }}
+                                {{ source.translatedDetail }}
                             </SRouterLink>
-                            <span v-else>{{ source.detail }}</span>
+                            <span v-else>{{ source.translatedDetail }}</span>
                         </h4>
                         <span
                             v-if="source.cutoffInfo"
@@ -131,7 +147,10 @@ function formatCutoffTime(timestamp: number) {
                         >
                             SHOP
                         </span>
-                        <span class="truncate">{{ source.shopName }} · 限购: {{ source.limit || "∞" }} 数量: x{{ source.num }}</span>
+                        <span class="truncate"
+                            >{{ $t(source.shopName) }} · {{ $t("shop-source.limit") }} {{ source.limit || "∞" }}
+                            {{ $t("shop-source.quantity") }} x{{ source.num }}</span
+                        >
                     </div>
                     <div class="mt-0.5 truncate text-[10px] text-base-content/45">
                         {{ formatTimeRange(source.timeStart, source.timeEnd, t("database.until_now")) }}

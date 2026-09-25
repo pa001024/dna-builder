@@ -45,7 +45,14 @@ export const MIN_REQUEST_MICROS = 256 * PRICE_PER_MILLION_TOKENS.output.peak
  */
 export const DEFAULT_MAX_TOKENS = 4096
 
-/** 上游返回的 usage 字段（DeepSeek 在 OpenAI 兼容结构上额外给出缓存命中明细）。 */
+/**
+ * 上游返回的 usage 字段。
+ *
+ * 两条协议各自给出不同形态，计费侧统一归一化：
+ * - Chat Completions（OpenAI 兼容）：`prompt_tokens` 是输入总量，缓存命中是其中的子集；
+ * - Messages（Anthropic 兼容）：`input_tokens` **只含未命中缓存的输入**，命中与写入分别记在
+ *   `cache_read_input_tokens` / `cache_creation_input_tokens`，三者相加才是输入总量。
+ */
 export interface UpstreamUsage {
     prompt_tokens?: number
     completion_tokens?: number
@@ -56,6 +63,14 @@ export interface UpstreamUsage {
     prompt_cache_miss_tokens?: number
     /** OpenAI 兼容写法：命中缓存的输入 tokens。 */
     prompt_tokens_details?: { cached_tokens?: number }
+    /** Messages 形态：未命中缓存的输入 tokens（`message_start` 给出）。 */
+    input_tokens?: number
+    /** Messages 形态：输出 tokens（`message_delta` 给出的是累计值）。 */
+    output_tokens?: number
+    /** Messages 形态：命中缓存的输入 tokens。 */
+    cache_read_input_tokens?: number
+    /** Messages 形态：写入缓存的输入 tokens。 */
+    cache_creation_input_tokens?: number
 }
 
 /** 归一化后用于计费的三档 tokens。 */
@@ -105,8 +120,14 @@ export function formatYuan(micros: number): string {
 
 /**
  * @description 把上游 usage 归一化成计费所需的三档 tokens。
- * 缓存命中优先取 DeepSeek 的 prompt_cache_hit_tokens，缺失时退回 OpenAI 的 prompt_tokens_details.cached_tokens；
- * 未命中缺失时用 prompt_tokens 与命中数的差值补齐。
+ *
+ * 两条协议的输入口径不同，先按形态分流：
+ * - **Messages**：`input_tokens` 不含缓存读写，命中取 `cache_read_input_tokens`，
+ *   未命中取 `input_tokens + cache_creation_input_tokens`——DeepSeek 的价目表只有「命中 / 未命中」
+ *   两档输入单价，写入缓存按未命中计价。
+ * - **Chat Completions**：`prompt_tokens` 是输入总量，命中优先取 DeepSeek 的
+ *   `prompt_cache_hit_tokens`，缺失时退回 `prompt_tokens_details.cached_tokens`，
+ *   未命中由总量与命中的差值补齐。
  * @param usage 上游 usage 字段
  * @returns 三档 tokens（非法值一律按 0 处理）
  */
@@ -114,6 +135,18 @@ export function normalizeUsage(usage: UpstreamUsage | undefined | null): Billing
     const toCount = (value: unknown) => (typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : 0)
     if (!usage) {
         return { cacheHit: 0, cacheMiss: 0, output: 0 }
+    }
+
+    if (
+        usage.input_tokens !== undefined ||
+        usage.cache_read_input_tokens !== undefined ||
+        usage.cache_creation_input_tokens !== undefined
+    ) {
+        return {
+            cacheHit: toCount(usage.cache_read_input_tokens),
+            cacheMiss: toCount(usage.input_tokens) + toCount(usage.cache_creation_input_tokens),
+            output: toCount(usage.output_tokens),
+        }
     }
 
     const prompt = toCount(usage.prompt_tokens)
@@ -159,18 +192,15 @@ export function resolveMaxTokens(requested: number | undefined, remainingMicros:
 }
 
 /**
- * @description 从 SSE 缓冲区中取出完整行并解析其中的 usage。
- * 不完整的尾行留在缓冲区里等下一个数据块补全（SSE 事件可能被分片切断）。
+ * @description 逐行消费 SSE 缓冲区，把每个完整的数据块交给回调。
+ *
+ * 不完整的尾行留在缓冲区里等下一个数据块补全（SSE 事件可能被分片切断）；
+ * 回调抛错不影响透传——观察者（调用日志）出错不得影响字节原样下发。
  * @param buffer 待解析文本
- * @param onUsage 解析出 usage 时的回调
- * @param onEvent 解析出任意数据块时的回调（调用日志聚合用）；回调抛错不影响透传
+ * @param onPayload 解析出一个 JSON 数据块时的回调
  * @returns 尚未成行的尾部文本
  */
-export function consumeSseBuffer(
-    buffer: string,
-    onUsage: (usage: UpstreamUsage) => void,
-    onEvent?: (payload: Record<string, unknown>) => void
-): string {
+function consumeSseLines(buffer: string, onPayload: (payload: Record<string, unknown>) => void): string {
     const lines = buffer.split("\n")
     const rest = lines.pop() ?? ""
 
@@ -181,23 +211,18 @@ export function consumeSseBuffer(
         const payload = trimmed.slice(SSE_DATA_PREFIX.length).trim()
         if (!payload || payload === "[DONE]") continue
 
-        let parsed: { usage?: UpstreamUsage } & Record<string, unknown>
+        let parsed: Record<string, unknown>
         try {
-            parsed = JSON.parse(payload)
+            parsed = JSON.parse(payload) as Record<string, unknown>
         } catch {
             // 心跳/注释块不是 JSON，忽略
             continue
         }
 
-        // 只有流末尾那个 choices 为空的数据块才带 usage，中间的数据块没有该字段
-        if (parsed.usage) onUsage(parsed.usage)
-
-        if (onEvent) {
-            try {
-                onEvent(parsed)
-            } catch {
-                // 观察者（调用日志）出错不得影响字节透传
-            }
+        try {
+            onPayload(parsed)
+        } catch {
+            // 观察者出错不得影响字节透传
         }
     }
 
@@ -205,8 +230,66 @@ export function consumeSseBuffer(
 }
 
 /**
- * @description 把上游 SSE 流原样透传给客户端，同时旁路解析 usage 与数据块用于记账和记录日志。
+ * @description 从 SSE 缓冲区中取出完整行并解析其中的 usage（Chat Completions 形态）。
+ * 该形态只有流末尾那个 `choices` 为空的数据块带 usage，单行即可定论。
+ * @param buffer 待解析文本
+ * @param onUsage 解析出 usage 时的回调
+ * @param onEvent 解析出任意数据块时的回调（调用日志聚合用）；回调抛错不影响透传
+ * @returns 尚未成行的尾部文本
+ */
+export function consumeSseBuffer(
+    buffer: string,
+    onUsage: (usage: UpstreamUsage) => void,
+    onEvent?: (payload: Record<string, unknown>) => void
+): string {
+    return consumeSseLines(buffer, parsed => {
+        if (parsed.usage) onUsage(parsed.usage as UpstreamUsage)
+        onEvent?.(parsed)
+    })
+}
+
+/**
+ * @description 从 SSE 缓冲区中取出 Messages 事件。
+ *
+ * 与 Chat Completions 不同，Messages 的 usage 分散在 `message_start`（输入侧）
+ * 与 `message_delta`（累计输出）两个事件里，单行解析无法定论，
+ * 因此这里只负责取出事件，usage 的累加交给 {@link createMessagesUsageAccumulator}。
+ * @param buffer 待解析文本
+ * @param onEvent 解析出一个事件时的回调
+ * @returns 尚未成行的尾部文本
+ */
+export function consumeMessagesSseBuffer(buffer: string, onEvent: (payload: Record<string, unknown>) => void): string {
+    return consumeSseLines(buffer, onEvent)
+}
+
+/**
+ * @description 把上游 SSE 流原样透传给客户端，同时旁路解析数据块。
  * 上游字节先原样下发再解析，客户端拿到的内容与直连上游完全一致。
+ * @param source 上游响应体
+ * @param consume 缓冲区消费者（决定该协议怎么从数据块里取信息）
+ * @returns 可直接作为响应体返回的流
+ */
+function pipeSse(source: ReadableStream<Uint8Array>, consume: (buffer: string) => string): ReadableStream<Uint8Array> {
+    const decoder = new TextDecoder()
+    let buffer = ""
+
+    return source.pipeThrough(
+        new TransformStream<Uint8Array, Uint8Array>({
+            transform(chunk, controller) {
+                controller.enqueue(chunk)
+                buffer += decoder.decode(chunk, { stream: true })
+                buffer = consume(buffer)
+            },
+            flush() {
+                buffer += decoder.decode()
+                consume(buffer)
+            },
+        })
+    )
+}
+
+/**
+ * @description 把上游 SSE 流原样透传给客户端，同时旁路解析 usage 与数据块用于记账和记录日志。
  * @param source 上游响应体
  * @param onUsage 解析到 usage 时的回调（上游未返回 usage 时不会被调用）
  * @param onEvent 解析到任意数据块时的回调（调用日志聚合用）
@@ -217,22 +300,89 @@ export function pipeWithUsage(
     onUsage: (usage: UpstreamUsage) => void,
     onEvent?: (payload: Record<string, unknown>) => void
 ): ReadableStream<Uint8Array> {
-    const decoder = new TextDecoder()
-    let buffer = ""
+    return pipeSse(source, buffer => consumeSseBuffer(buffer, onUsage, onEvent))
+}
 
-    return source.pipeThrough(
-        new TransformStream<Uint8Array, Uint8Array>({
-            transform(chunk, controller) {
-                controller.enqueue(chunk)
-                buffer += decoder.decode(chunk, { stream: true })
-                buffer = consumeSseBuffer(buffer, onUsage, onEvent)
-            },
-            flush() {
-                buffer += decoder.decode()
-                consumeSseBuffer(buffer, onUsage, onEvent)
-            },
-        })
-    )
+/**
+ * @description 把上游 Messages SSE 流原样透传给客户端，同时旁路把每个事件交给观察者。
+ * @param source 上游响应体
+ * @param onEvent 解析到任意事件时的回调（日志聚合与 usage 累加共用）
+ * @returns 可直接作为响应体返回的流
+ */
+export function pipeMessagesWithEvents(
+    source: ReadableStream<Uint8Array>,
+    onEvent: (payload: Record<string, unknown>) => void
+): ReadableStream<Uint8Array> {
+    return pipeSse(source, buffer => consumeMessagesSseBuffer(buffer, onEvent))
+}
+
+/** Messages 流式 usage 的累加器。 */
+export interface MessagesUsageAccumulator {
+    /**
+     * 喂入一个已解析的 Messages 事件。
+     * @param event 上游事件
+     * @returns 本次是否更新了 usage
+     */
+    push(event: Record<string, unknown>): boolean
+    /**
+     * 取当前累计的 usage。
+     * @returns 累计 usage；尚未收到任何 usage 字段时为 undefined
+     */
+    snapshot(): UpstreamUsage | undefined
+}
+
+/**
+ * @description 创建 Messages 流式 usage 的累加器。
+ *
+ * 必需的中间层：输入侧只在 `message_start` 出现一次，输出侧却在每个 `message_delta`
+ * 里给出累计值，任何单点都不能直接当作本次请求的最终用量。
+ * @returns 累加器实例
+ */
+export function createMessagesUsageAccumulator(): MessagesUsageAccumulator {
+    const merged: UpstreamUsage = {}
+    let seen = false
+
+    /**
+     * 把一条事件里出现的 usage 字段并入累计值。
+     * @param source 上游 usage 对象
+     * @param keys 本次允许并入的字段
+     * @returns 是否有字段被写入
+     */
+    const absorb = (source: unknown, keys: ReadonlyArray<keyof UpstreamUsage>): boolean => {
+        if (typeof source !== "object" || source === null) return false
+
+        const record = source as Record<string, unknown>
+        let changed = false
+
+        for (const key of keys) {
+            const value = record[key as string]
+            if (typeof value === "number" && Number.isFinite(value)) {
+                merged[key] = value
+                changed = true
+            }
+        }
+
+        if (changed) seen = true
+        return changed
+    }
+
+    return {
+        push(event) {
+            if (event.type === "message_start") {
+                const message = event.message as { usage?: unknown } | undefined
+                return absorb(message?.usage, ["input_tokens", "output_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"])
+            }
+
+            if (event.type === "message_delta") {
+                return absorb(event.usage, ["output_tokens"])
+            }
+
+            return false
+        },
+        snapshot() {
+            return seen ? { ...merged } : undefined
+        },
+    }
 }
 
 /**

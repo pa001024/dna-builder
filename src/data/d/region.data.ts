@@ -789,6 +789,26 @@ const t: Region[] = [
 
 export const mapOffsets: Record<string, [number, number]> = {}
 
+/** 一条静态标注的障碍线段（世界坐标）。 */
+export interface MapWallSegment {
+    from: [number, number]
+    to: [number, number]
+}
+
+/**
+ * 区域 id → 静态障碍线段列表。
+ *
+ * 手工维护：游戏地图的可行走区域无法可靠地从图层像素推导，
+ * 因此只记录明确不可通行的边界（墙、山脊、海域分界），其余一律视为可通行。
+ * 路径规划对候选直线做碰撞检测，撞上即视为不可达并降级到传送点。
+ */
+export const mapWallMap: Record<number, MapWallSegment[]> = {
+    // 净界岛
+    1001: [{ from: [13217, 845], to: [12784, 25365] }],
+    1013: [{ from: [-1853, 9736], to: [-7880, 10475] }],
+    1017: [{ from: [-28912, -6192], to: [-25352, -10929] }],
+}
+
 const regionDataWithVersion = t.map(region => ({
     ...region,
     版本: region2Version[region.id] || "1.0",

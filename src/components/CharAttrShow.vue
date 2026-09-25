@@ -199,7 +199,7 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                 <div v-if="attrDescMap[key]" class="max-w-75 text-xs text-base-content/60 whitespace-pre-line">
                     {{ attrDescMap[key] }}
                 </div>
-                <div v-if="key === '有效生命'" class="text-sm text-primary">(生命 / (1 - 防御 / (300 + 防御)) + 护盾) / (1 - 减伤)</div>
+                <div v-if="key === '有效生命'" class="text-sm text-primary">{{ $t('char-build.effective_hp_formula') }}</div>
                 <ul class="space-y-1">
                     <li v-if="'基础' + key in charBuild.char" class="flex justify-between gap-8 text-sm text-primary">
                         <div class="text-base-content/80">{{ $t("char-build.base_attr_label", { attr: $t(key) }) }}</div>

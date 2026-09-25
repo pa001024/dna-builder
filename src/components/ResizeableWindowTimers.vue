@@ -26,15 +26,15 @@ const { mihan, moling, zhouben } = useGameTimer()
             <div class="whitespace-nowrap">
                 {{ $t("resizeableWindow.mihan") }}
             </div>
-            <div class="font-orbitron">
+            <div class="font-orbitron tabular-nums">
                 {{ timeStr(mihan) }}
             </div>
         </div>
         <div class="text-center min-w-16" :class="[env.isApp ? 'hidden sm:inline-block' : 'inline-block']">
             <div class="whitespace-nowrap">
-                {{ $t("resizeableWindow.moling") }}
+                {{ $t("魔灵") }}
             </div>
-            <div class="font-orbitron">
+            <div class="font-orbitron tabular-nums">
                 {{ timeStr(moling) }}
             </div>
         </div>
@@ -42,7 +42,7 @@ const { mihan, moling, zhouben } = useGameTimer()
             <div class="whitespace-nowrap">
                 {{ $t("resizeableWindow.zhouben") }}
             </div>
-            <div class="font-orbitron">
+            <div class="font-orbitron tabular-nums">
                 {{ timeStr(zhouben) }}
             </div>
         </button>
@@ -50,7 +50,7 @@ const { mihan, moling, zhouben } = useGameTimer()
     <dialog class="modal" :class="{ 'modal-open': ui.mihanVisible }">
         <div class="modal-box rounded-xs border border-base-content/15 bg-base-100/85 text-md backdrop-blur-md">
             <div class="mb-3 flex items-center justify-between gap-3 border-b border-base-content/10 pb-2">
-                <h3 class="text-lg font-medium">{{ $t("resizeableWindow.mihanTitle") }}</h3>
+                <h3 class="text-lg font-medium">{{ $t("委托密函") }}</h3>
                 <form class="flex justify-end gap-2" method="dialog">
                     <button class="btn btn-ghost btn-sm btn-square rounded-xs" @click="ui.mihanVisible = false">
                         <Icon bold icon="codicon:chrome-close" />
@@ -89,7 +89,7 @@ const { mihan, moling, zhouben } = useGameTimer()
                                 <div v-if="section.nextRotationTime" class="text-xs text-base-content/50">
                                     下次轮换：{{ new Date(section.nextRotationTime * 1000).toLocaleString("zh-CN") }}
                                 </div>
-                                <div v-else class="text-xs text-base-content/45">暂无下次轮换时间</div>
+                                <div v-else class="text-xs text-base-content/45">{{ $t('resizeable-window-timers.no_rotation_time') }}</div>
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2">
@@ -124,7 +124,7 @@ const { mihan, moling, zhouben } = useGameTimer()
                 v-if="!weeklyCurrentSections.length"
                 class="rounded-xs border border-dashed border-base-content/15 p-6 text-center text-sm text-base-content/45"
             >
-                暂无数据
+                {{ $t('common.no_data') }}
             </div>
         </div>
     </DialogModel>

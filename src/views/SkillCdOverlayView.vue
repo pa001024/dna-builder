@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useTranslation } from "i18next-vue"
 import { computed, onMounted, onUnmounted, ref } from "vue"
 import DragNumberInput from "@/components/DragNumberInput.vue"
 import SkillCdPosPicker from "@/components/SkillCdPosPicker.vue"
@@ -23,6 +24,7 @@ import { vkFromKeyboardEvent, vkLabel } from "@/utils/virtual-key"
  * - 位置用"游戏窗口客户区百分比"表达,并支持在客户区缩略盒里直接拖拽调整;
  * - 所有改动都会防抖下发到后端浮窗(实时生效),无需重启浮窗。
  */
+const { t } = useTranslation()
 const setting = useSettingStore()
 const overlay = useSkillCdOverlay()
 const { state, busy, error, gameFound, clientSize, overlaySize, setEnabled, scheduleApply, previewTrigger, addKey, removeKey, updateKey, assignKey } =
@@ -120,7 +122,7 @@ async function handleToggle(checked: boolean) {
  */
 function beginCapture(binding: FloatWindowKeyBinding) {
     capturingId.value = binding.id
-    captureHint.value = "请按下要绑定的按键(Esc 取消)"
+    captureHint.value = t("skill-cd-overlay.capture_hint_start")
 }
 
 /**
@@ -139,7 +141,7 @@ function handleCaptureKeydown(event: KeyboardEvent) {
     }
     const vk = vkFromKeyboardEvent(event)
     if (!vk) {
-        captureHint.value = "无法识别该按键,请换一个"
+        captureHint.value = t("skill-cd-overlay.capture_hint_unknown")
         return
     }
     const reason = assignKey(target, vk)
@@ -157,10 +159,10 @@ function handleCaptureKeydown(event: KeyboardEvent) {
 function handleAddKey() {
     const created = addKey()
     if (!created) {
-        captureHint.value = "已达到最大按键数量,请先删除不用的按键"
+        captureHint.value = t("skill-cd-overlay.capture_hint_max")
         return
     }
-    captureHint.value = created.enabled ? "" : "候选键位已用尽,请点左侧按钮捕获新的按键后启用该行"
+    captureHint.value = created.enabled ? "" : t("skill-cd-overlay.capture_hint_exhausted")
 }
 
 /**
@@ -192,12 +194,12 @@ onUnmounted(() => {
                 v-if="!env.isApp"
                 class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning"
             >
-                浮窗依赖桌面端原生窗口能力,网页端只能查看与编辑配置,不会真正生效。
+                {{ $t('skill-cd-overlay.web_only_notice') }}
             </div>
 
             <!-- 总开关 -->
             <article>
-                <SectionHeader no-animate compact kicker="GAME OVERLAY" :title="'技能CD指示器'" />
+                <SectionHeader no-animate compact kicker="GAME OVERLAY" :title="$t('skill-cd-overlay.section_title')" />
                 <div
                     class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                 >
@@ -206,10 +208,9 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                技能 CD 倒计时浮窗
+                                {{ $t('skill-cd-overlay.entry_title') }}
                                 <div class="text-xs text-base-content/50">
-                                    原生 Win32 置顶浮窗(点击穿透、不抢焦点);按下绑定的按键即从完整 CD
-                                    开始倒计时,就绪时整环变绿。下方的设置改动都会实时下发。
+                                    {{ $t('skill-cd-overlay.entry_desc') }}
                                 </div>
                                 <div v-if="error" class="mt-0.5 text-xs text-error">{{ error }}</div>
                             </span>
@@ -219,7 +220,7 @@ onUnmounted(() => {
                                     v-else
                                     class="text-xs"
                                     :class="running ? 'text-success' : 'text-base-content/40'"
-                                    >{{ running ? "运行中" : "未运行" }}</span
+                                    >{{ running ? $t('skill-cd-overlay.running') : $t('skill-cd-overlay.not_running') }}</span
                                 >
                                 <input
                                     type="checkbox"
@@ -234,29 +235,29 @@ onUnmounted(() => {
                             class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                游戏窗口
+                                {{ $t('skill-cd-overlay.game_window') }}
                                 <div class="text-xs text-base-content/50">
-                                    浮窗位置以该进程窗口的客户区为参照(默认 {{ setting.skillCdOverlay.processName }})
+                                    {{ $t('skill-cd-overlay.game_window_tip', { name: setting.skillCdOverlay.processName }) }}
                                 </div>
                             </span>
                             <span
-                                class="font-orbitron text-[13px] font-semibold tabular-nums"
+                                class="font-orbitron text-[13px] font-semibold"
                                 :class="gameFound ? 'text-success' : 'text-base-content/40'"
                             >
-                                {{ gameFound ? `${clientSize.width} × ${clientSize.height}` : "未检测到" }}
+                                {{ gameFound ? `${clientSize.width} × ${clientSize.height}` : $t('skill-cd-overlay.not_detected') }}
                             </span>
                         </div>
                         <div
                             v-if="state?.timers?.length"
                             class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-xs text-base-content/60"
                         >
-                            浮窗当前条目:
+                            {{ $t('skill-cd-overlay.current_timers') }}
                             <span
                                 v-for="timer in state.timers"
                                 :key="timer.id"
                                 class="ml-2 inline-flex items-center gap-1 font-orbitron tabular-nums"
                                 :class="timer.remaining > 0 ? 'text-primary' : 'text-success'"
-                                >{{ timer.label }} {{ timer.remaining > 0 ? timer.remaining.toFixed(1) : "就绪" }}</span
+                                >{{ timer.label }} {{ timer.remaining > 0 ? timer.remaining.toFixed(1) : $t('skill-cd-overlay.ready') }}</span
                             >
                         </div>
                     </div>
@@ -265,7 +266,7 @@ onUnmounted(() => {
 
             <!-- 按键与冷却 -->
             <article>
-                <SectionHeader no-animate compact kicker="KEYS" :title="'按键与冷却'" />
+                <SectionHeader no-animate compact kicker="KEYS" :title="$t('skill-cd-overlay.keys_section')" />
                 <div
                     class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                 >
@@ -285,7 +286,7 @@ onUnmounted(() => {
                                 :value="binding.label"
                                 type="text"
                                 class="w-20 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                placeholder="标签"
+                                :placeholder="$t('skill-cd-overlay.label_placeholder')"
                                 @input="updateKey(binding.id, { label: ($event.target as HTMLInputElement).value })"
                             />
                             <button
@@ -293,7 +294,7 @@ onUnmounted(() => {
                                 :class="capturingId === binding.id ? 'btn-primary' : 'btn-outline'"
                                 @click="beginCapture(binding)"
                             >
-                                {{ capturingId === binding.id ? "按键…" : displayLabel(binding) }}
+                                {{ capturingId === binding.id ? $t('skill-cd-overlay.key_capturing') : displayLabel(binding) }}
                             </button>
                             <DragNumberInput
                                 :model-value="binding.cdSeconds"
@@ -304,15 +305,15 @@ onUnmounted(() => {
                                 :precision="1"
                                 suffix="s"
                                 width-class="w-24"
-                                :aria-label="`${displayLabel(binding)} 冷却秒数`"
+                                :aria-label="$t('skill-cd-overlay.cd_seconds_label', { name: displayLabel(binding) })"
                                 @update:model-value="value => updateKey(binding.id, { cdSeconds: clampCdSeconds(value) })"
                             />
                             <label
                                 class="flex cursor-pointer items-center gap-1.5 text-xs text-base-content/60"
                                 :title="
                                     binding.noCooldown
-                                        ? '按下即从完整 CD 重新计时,冷却中按下也会重设'
-                                        : '仅在冷却结束时响应按下(防止连发被判定为多次施放)'
+                                        ? $t('skill-cd-overlay.retrigger_tip')
+                                        : $t('skill-cd-overlay.cooldown_only_tip')
                                 "
                             >
                                 <input
@@ -321,18 +322,18 @@ onUnmounted(() => {
                                     :checked="binding.noCooldown"
                                     @change="updateKey(binding.id, { noCooldown: ($event.target as HTMLInputElement).checked })"
                                 />
-                                无需冷却
+                                {{ $t('skill-cd-overlay.no_cooldown') }}
                             </label>
                             <div class="ml-auto flex items-center gap-1">
                                 <button
                                     class="btn btn-ghost btn-xs"
                                     :disabled="!setting.skillCdOverlay.enabled"
-                                    :title="setting.skillCdOverlay.enabled ? '让浮窗立即开始一次倒计时' : '请先开启浮窗'"
+                                    :title="setting.skillCdOverlay.enabled ? $t('skill-cd-overlay.trigger_tip_on') : $t('skill-cd-overlay.trigger_tip_off')"
                                     @click="handlePreview(binding)"
                                 >
-                                    试触发
+                                    {{ $t('skill-cd-overlay.test_trigger') }}
                                 </button>
-                                <button class="btn btn-ghost btn-xs text-error" @click="removeKey(binding.id)">删除</button>
+                                <button class="btn btn-ghost btn-xs text-error" @click="removeKey(binding.id)">{{ $t('skill-cd-overlay.delete') }}</button>
                             </div>
                         </div>
                         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -341,10 +342,10 @@ onUnmounted(() => {
                                 :disabled="keys.length >= SKILL_CD_MAX_KEYS"
                                 @click="handleAddKey"
                             >
-                                添加按键
+                                {{ $t('skill-cd-overlay.add_key') }}
                             </button>
                             <span class="text-xs text-base-content/50">
-                                最多 {{ SKILL_CD_MAX_KEYS }} 个 · 默认冷却未结束时不重复触发,就绪后按键立刻重新计时;开启「无需冷却」则按下即重设
+                                {{ $t('skill-cd-overlay.max_keys_tip', { count: SKILL_CD_MAX_KEYS }) }}
                             </span>
                         </div>
                         <div v-if="captureHint" class="text-xs text-warning">{{ captureHint }}</div>
@@ -352,7 +353,7 @@ onUnmounted(() => {
                             v-if="setting.skillCdOverlay.enabled && !gameFound && setting.skillCdOverlay.hideWhenGameMissing"
                             class="text-xs text-warning"
                         >
-                            未检测到游戏窗口,浮窗暂不显示;若要立刻在桌面上核对配置,可在「高级」里关闭「未检测到游戏窗口时隐藏」。
+                            {{ $t('skill-cd-overlay.no_game_warning') }}
                         </div>
                     </div>
                 </div>
@@ -360,7 +361,7 @@ onUnmounted(() => {
 
             <!-- 位置 -->
             <article>
-                <SectionHeader no-animate compact kicker="POSITION" :title="'浮窗位置(客户区百分比)'" />
+                <SectionHeader no-animate compact kicker="POSITION" :title="$t('skill-cd-overlay.position_section')" />
                 <div
                     class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                 >
@@ -379,9 +380,9 @@ onUnmounted(() => {
                         />
                         <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                             <span class="label-text">
-                                锚点百分比
+                                {{ $t('skill-cd-overlay.anchor_percent') }}
                                 <div class="text-xs text-base-content/50">
-                                    浮窗左上角在游戏客户区中的位置;上方缩略盒拖拽与这里拖拽数值等价
+                                    {{ $t('skill-cd-overlay.anchor_percent_tip') }}
                                 </div>
                             </span>
                             <div class="flex items-center gap-2">
@@ -394,7 +395,7 @@ onUnmounted(() => {
                                     :drag-step="0.4"
                                     :precision="1"
                                     suffix="%"
-                                    aria-label="横向锚点百分比"
+                                    :aria-label="$t('skill-cd-overlay.anchor_x_percent')"
                                     @update:model-value="setAnchorX"
                                 />
                                 <span class="text-xs text-base-content/60">Y</span>
@@ -406,15 +407,21 @@ onUnmounted(() => {
                                     :drag-step="0.4"
                                     :precision="1"
                                     suffix="%"
-                                    aria-label="纵向锚点百分比"
+                                    :aria-label="$t('skill-cd-overlay.anchor_y_percent')"
                                     @update:model-value="setAnchorY"
                                 />
                             </div>
                         </div>
                         <div v-if="state" class="text-[11px] text-base-content/50">
-                            后端解析:屏幕坐标 X {{ state.resolvedX }} · Y {{ state.resolvedY }} · 浮窗尺寸
-                            {{ state.windowWidth }} × {{ state.windowHeight }}
-                            <span v-if="!state.visible">(当前未显示)</span>
+                            {{
+                                $t('skill-cd-overlay.resolved_info', {
+                                    x: state.resolvedX,
+                                    y: state.resolvedY,
+                                    w: state.windowWidth,
+                                    h: state.windowHeight,
+                                })
+                            }}
+                            <span v-if="!state.visible">{{ $t('skill-cd-overlay.not_shown') }}</span>
                         </div>
                     </div>
                 </div>
@@ -422,7 +429,7 @@ onUnmounted(() => {
 
             <!-- 外观 -->
             <article>
-                <SectionHeader no-animate compact kicker="APPEARANCE" :title="'外观'" />
+                <SectionHeader no-animate compact kicker="APPEARANCE" :title="$t('skill-cd-overlay.appearance_section')" />
                 <div
                     class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                 >
@@ -431,8 +438,8 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                浮窗缩放
-                                <div class="text-xs text-base-content/50">按屏幕分辨率缩放圆环与文字尺寸</div>
+                                {{ $t('skill-cd-overlay.scale') }}
+                                <div class="text-xs text-base-content/50">{{ $t('skill-cd-overlay.scale_tip') }}</div>
                             </span>
                             <div class="flex min-w-52 items-center gap-2">
                                 <input
@@ -445,7 +452,7 @@ onUnmounted(() => {
                                     @input="setScale(+($event.target as HTMLInputElement).value)"
                                 />
                                 <span
-                                    class="w-10 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                    class="w-10 text-right font-orbitron text-[13px] font-semibold text-primary"
                                     >{{ setting.skillCdOverlay.scale.toFixed(1) }}</span
                                 >
                             </div>
@@ -454,8 +461,8 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                圆盘不透明度
-                                <div class="text-xs text-base-content/50">数字衬底的通透度;调低可更清楚地透出游戏画面</div>
+                                {{ $t('skill-cd-overlay.disc_alpha') }}
+                                <div class="text-xs text-base-content/50">{{ $t('skill-cd-overlay.disc_alpha_tip') }}</div>
                             </span>
                             <div class="flex min-w-52 items-center gap-2">
                                 <input
@@ -468,7 +475,7 @@ onUnmounted(() => {
                                     @input="setDiscAlpha(+($event.target as HTMLInputElement).value)"
                                 />
                                 <span
-                                    class="w-10 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                    class="w-10 text-right font-orbitron text-[13px] font-semibold text-primary"
                                     >{{ Math.round(setting.skillCdOverlay.discAlpha * 100) }}%</span
                                 >
                             </div>
@@ -477,8 +484,8 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                就绪后隐藏
-                                <div class="text-xs text-base-content/50">CD 归零立即隐藏该条目,只在使用期间显示</div>
+                                {{ $t('skill-cd-overlay.hide_when_ready') }}
+                                <div class="text-xs text-base-content/50">{{ $t('skill-cd-overlay.hide_when_ready_tip') }}</div>
                             </span>
                             <input
                                 v-model="setting.skillCdOverlay.hideWhenReady"
@@ -493,7 +500,7 @@ onUnmounted(() => {
 
             <!-- 高级 -->
             <article>
-                <SectionHeader no-animate compact kicker="ADVANCED" :title="'高级'" />
+                <SectionHeader no-animate compact kicker="ADVANCED" :title="$t('skill-cd-overlay.advanced_section')" />
                 <div
                     class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                 >
@@ -502,9 +509,9 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                仅游戏窗口前台触发
+                                {{ $t('skill-cd-overlay.foreground_only') }}
                                 <div class="text-xs text-base-content/50">
-                                    开启后只在游戏进程获得焦点时响应按键,避免聊天输入误触发
+                                    {{ $t('skill-cd-overlay.foreground_only_tip') }}
                                 </div>
                             </span>
                             <input
@@ -518,9 +525,9 @@ onUnmounted(() => {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                未检测到游戏窗口时隐藏
+                                {{ $t('skill-cd-overlay.hide_without_game') }}
                                 <div class="text-xs text-base-content/50">
-                                    关闭后在游戏未运行时也能看到浮窗(便于用「试触发」核对配置)
+                                    {{ $t('skill-cd-overlay.hide_without_game_tip') }}
                                 </div>
                             </span>
                             <input
@@ -534,8 +541,8 @@ onUnmounted(() => {
                             class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="label-text">
-                                游戏进程名
-                                <div class="text-xs text-base-content/50">客户区定位与前台判断所用的进程;多个用逗号分隔,留空用内置默认</div>
+                                {{ $t('skill-cd-overlay.process_name') }}
+                                <div class="text-xs text-base-content/50">{{ $t('skill-cd-overlay.process_name_tip') }}</div>
                             </span>
                             <input
                                 v-model="setting.skillCdOverlay.processName"

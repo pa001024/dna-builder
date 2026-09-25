@@ -119,7 +119,24 @@ const totalLevelExp = computed(() => {
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 详情头部：纸面 + primary 强调线 -->
         <header class="relative overflow-hidden border-b-2 border-primary pb-4">
-            <div class="flex items-start gap-3.5">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
                 <img
                     :src="getReputationIcon(reputation.icon)"
                     :alt="reputation.name"
@@ -133,12 +150,12 @@ const totalLevelExp = computed(() => {
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/reputation/${reputation.id}`"
-                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(reputation.name) }}
                         </SRouterLink>
                         <CopyID :id="reputation.id" />
-                        <span class="ml-auto shrink-0 font-orbitron text-sm font-semibold tabular-nums text-primary"
+                        <span class="ml-auto shrink-0 font-orbitron text-sm font-semibold text-primary"
                             >Lv.{{ reputation.levels.length }}</span
                         >
                     </div>
@@ -152,23 +169,23 @@ const totalLevelExp = computed(() => {
             <div class="mt-2 grid grid-cols-1 gap-1.5 text-sm md:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("reputation.weeklyExpLimit") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         reputation.weekLimit
                     }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("reputation.totalLevel") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         reputation.levels.length
                     }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("reputation.totalExp") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ totalLevelExp }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ totalLevelExp }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("reputation.entrustCount") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         reputation.entrusts.length
                     }}</span>
                 </div>
@@ -184,7 +201,7 @@ const totalLevelExp = computed(() => {
                     >
                         <img :src="getResourceIcon(resourceMap.get(name)?.icon)" :alt="name" class="size-5 rounded-xs" />
                         <span>{{ $t(name) }}</span>
-                        <span class="font-orbitron text-[12px] font-semibold tabular-nums text-primary">x{{ value }}</span>
+                        <span class="font-orbitron text-[12px] font-semibold text-primary">x{{ value }}</span>
                     </div>
                 </div>
             </div>
@@ -205,7 +222,7 @@ const totalLevelExp = computed(() => {
             <div class="mt-2 space-y-2">
                 <div v-for="level in levelDetails" :key="level.lv" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                     <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                        <span class="font-orbitron text-[13px] font-semibold text-primary"
                             >{{ $t("reputation.level") }} {{ level.lv }}</span
                         >
                         <span class="text-[11px] tabular-nums text-base-content/50"
@@ -251,7 +268,7 @@ const totalLevelExp = computed(() => {
                         </div>
                         <div class="shrink-0 text-right text-[11px]">
                             <div
-                                class="inline-block rounded-xs bg-primary/10 px-1.5 py-0.5 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                class="inline-block rounded-xs bg-primary/10 px-1.5 py-0.5 font-orbitron text-[11px] font-semibold text-primary"
                             >
                                 EXP +{{ entrust.exp }}
                             </div>
@@ -273,7 +290,7 @@ const totalLevelExp = computed(() => {
                         >
                             <img :src="item.icon" :alt="item.name" class="size-5 rounded-xs" />
                             <span>{{ $t(item.name) }}</span>
-                            <span class="font-orbitron text-[12px] font-semibold tabular-nums text-primary">x{{ item.count }}</span>
+                            <span class="font-orbitron text-[12px] font-semibold text-primary">x{{ item.count }}</span>
                         </div>
                     </div>
                 </div>

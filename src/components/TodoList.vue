@@ -547,7 +547,7 @@ onBeforeUnmount(() => {
                 </div>
             </template>
             <template #actions>
-                <button class="btn" :disabled="formSubmitting" @click="closeCreateDialog">{{ $t("setting.cancel") }}</button>
+                <button class="btn" :disabled="formSubmitting" @click="closeCreateDialog">{{ $t("取消") }}</button>
                 <button class="btn btn-primary" :disabled="formSubmitting" @click="submitCreate">
                     <span v-if="formSubmitting" class="loading loading-spinner loading-sm mr-2" />
                     {{ $t("todo.save") }}
@@ -603,7 +603,7 @@ onBeforeUnmount(() => {
                 </div>
             </template>
             <template #actions>
-                <button class="btn" :disabled="formSubmitting" @click="closeEditDialog">{{ $t("setting.cancel") }}</button>
+                <button class="btn" :disabled="formSubmitting" @click="closeEditDialog">{{ $t("取消") }}</button>
                 <button class="btn btn-primary" :disabled="formSubmitting" @click="submitEdit">
                     <span v-if="formSubmitting" class="loading loading-spinner loading-sm mr-2" />
                     {{ $t("todo.save") }}

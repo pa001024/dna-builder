@@ -23,7 +23,7 @@ const weaponDamage = computed<DamageResult | null>(() => {
 <template>
     <BaseNode :id="id" :data="data" :type="type" :selected="selected">
         <div v-if="weaponDamage" class="space-y-1 text-sm">
-            <div class="font-semibold text-xs text-base-content/60 mb-2">{{ $t("node-editor.weaponDmg.result") }}</div>
+            <div class="font-semibold text-xs text-base-content/60 mb-2">{{ $t("武器伤害") }}</div>
             <div class="grid grid-cols-1 gap-1">
                 <div>{{ $t("node-editor.weaponDmg.expectedDamage") }}: {{ +(weaponDamage.expectedDamage?.toFixed(4) || 0) }}</div>
                 <div>{{ $t("node-editor.weaponDmg.lowerCrit") }}: {{ +(weaponDamage.lowerCritNoTrigger?.toFixed(4) || 0) }}</div>

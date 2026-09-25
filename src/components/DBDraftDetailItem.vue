@@ -123,15 +123,32 @@ const productDisplay = computed(() => {
 <template>
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 设计稿档案头：纸面 + primary 强调线 -->
-        <header class="border-b-2 border-primary pb-4">
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
             <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                 <span class="h-px w-6 bg-primary" aria-hidden="true" />
                 Blueprint File
             </p>
-            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div class="relative flex flex-wrap items-center gap-x-2 gap-y-1">
                 <SRouterLink
                     :to="`/db/draft/${draft.id}`"
-                    class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                    class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                     >{{ $t("UI_FORGING_BLUEPRINT") }}{{ $t(draft.n) }}</SRouterLink
                 >
                 <CopyID :id="draft.id" />
@@ -144,13 +161,13 @@ const productDisplay = computed(() => {
             <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("draft-detail.rarity") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         <Icon v-for="i in draft.r" :key="i" class="mr-1 inline-block" icon="ri:star-fill" />
                     </span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("draft-detail.version") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ draft.v }}
                     </span>
                 </div>
@@ -162,7 +179,7 @@ const productDisplay = computed(() => {
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("draft-detail.craftDuration") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ formatDuration(draft.d) }}
                     </span>
                 </div>

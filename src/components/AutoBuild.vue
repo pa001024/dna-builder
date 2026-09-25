@@ -373,7 +373,7 @@ function modCount(key: ModTypeKey): number {
                     <button
                         type="button"
                         class="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/55 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
-                        title="展开/收起日志"
+                        :title="$t('autobuild.toggle_log')"
                         @click="showLog = !showLog"
                     >
                         <Icon

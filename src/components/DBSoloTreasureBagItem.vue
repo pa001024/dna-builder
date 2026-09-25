@@ -142,12 +142,12 @@ function buildLayout(shape: number[][]): BagLayout {
         </div>
         <div class="grid grid-cols-2 gap-2 text-sm">
             <div class="flex items-center justify-between rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <span>价格</span>
-                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ bag.price }}</span>
+                <span>{{ $t('common.price') }}</span>
+                <span class="font-orbitron text-[13px] font-semibold text-primary">{{ bag.price }}</span>
             </div>
             <div class="flex items-center justify-between rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <span>容量</span>
-                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ +bag.desc }}</span>
+                <span>{{ $t('db-solo-treasure-bag.capacity') }}</span>
+                <span class="font-orbitron text-[13px] font-semibold text-primary">{{ +bag.desc }}</span>
             </div>
             <div class="text-xs text-base-content/70">形状: {{ bag.shape.map(shape => shape.join("x")).join(" / ") }}</div>
         </div>

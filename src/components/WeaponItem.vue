@@ -75,7 +75,7 @@ const emit = defineEmits<{
             v-if="weapon && !noremove"
             type="button"
             class="group/rm absolute -top-3 -right-3 z-30 h-14 w-14 cursor-pointer"
-            title="删除"
+            :title="$t('common.delete')"
             @click.stop="emit('removeWeapon')"
         >
             <span

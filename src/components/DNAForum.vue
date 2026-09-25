@@ -58,7 +58,7 @@ defineExpose({
     <div class="space-y-3">
         <div v-if="!nobtn" class="flex justify-between items-center">
             <span class="text-xs tracking-wide text-base-content/50">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
-            <Tooltip tooltip="刷新" side="bottom">
+            <Tooltip :tooltip="$t('common.refresh')" side="bottom">
                 <button
                     type="button"
                     class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
@@ -111,13 +111,13 @@ defineExpose({
 
         <div v-else class="flex justify-center items-center h-full py-12">
             <div class="text-center">
-                <p class="text-sm text-base-content/60 mb-4">无法获取游戏配置</p>
+                <p class="text-sm text-base-content/60 mb-4">{{ $t('dna-forum.load_failed') }}</p>
                 <button
                     type="button"
                     class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
                     @click="loadData(true)"
                 >
-                    重试
+                    {{ $t('common.retry') }}
                 </button>
             </div>
         </div>

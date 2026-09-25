@@ -403,7 +403,7 @@ async function generateScreenshot() {
         <div v-if="!nobtn" class="flex justify-between items-center">
             <span class="text-xs tracking-wide text-base-content/50">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
             <div class="flex gap-2">
-                <Tooltip tooltip="刷新" side="bottom">
+                <Tooltip :tooltip="$t('common.refresh')" side="bottom">
                     <button
                         type="button"
                         class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
@@ -453,7 +453,7 @@ async function generateScreenshot() {
                         >
                             <Icon v-if="isScreenshotLoading" icon="ri:refresh-line" class="size-3.5 animate-spin" />
                             <Icon v-else icon="ri:screenshot-line" class="size-3.5" />
-                            生成截图
+                            {{ $t('dna-game-info.generate_screenshot') }}
                         </button>
                         <button
                             type="button"
@@ -461,7 +461,7 @@ async function generateScreenshot() {
                             @click="syncInventory"
                         >
                             <Icon icon="ri:refresh-line" class="size-3.5" />
-                            同步库存
+                            {{ $t('dna-game-info.sync_inventory') }}
                         </button>
                     </div>
                 </div>
@@ -480,7 +480,7 @@ async function generateScreenshot() {
                             @click="ui.mihanVisible = true"
                         >
                             <Icon icon="ri:settings-3-line" class="size-3.5" />
-                            推送设置
+                            {{ $t('dna-game-info.push_settings') }}
                         </button>
                     </template>
                 </SectionHeader>
@@ -567,7 +567,7 @@ async function generateScreenshot() {
                                 >已完成</span
                             >
                         </span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                             {{ shortNoteInfo.currentTaskProgress }} / {{ shortNoteInfo.maxDailyTaskProgress }}
                         </span>
                     </div>
@@ -582,7 +582,7 @@ async function generateScreenshot() {
                                 >已完成</span
                             >
                         </span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                             {{ shortNoteInfo.rougeLikeRewardCount }} / {{ shortNoteInfo.rougeLikeRewardTotal }}
                         </span>
                     </div>
@@ -593,7 +593,7 @@ async function generateScreenshot() {
                             竞逐奖励
                             <span v-if="shortNoteInfo.dungeonReward == 0" class="ml-1 text-[10px] text-base-content/45">已完成</span>
                         </span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                             {{ shortNoteInfo.dungeonRewardTotal - shortNoteInfo.dungeonReward }} /
                             {{ shortNoteInfo.dungeonRewardTotal }}
                         </span>
@@ -605,7 +605,7 @@ async function generateScreenshot() {
                             周本奖励
                             <span v-if="shortNoteInfo.hardBossRewardCount == 0" class="ml-1 text-[10px] text-base-content/45">已完成</span>
                         </span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                             {{ shortNoteInfo.hardBossRewardTotal - shortNoteInfo.hardBossRewardCount }} /
                             {{ shortNoteInfo.hardBossRewardTotal }}
                         </span>
@@ -700,7 +700,7 @@ async function generateScreenshot() {
                         class="flex flex-col gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <div class="text-xs text-base-content/55">{{ p.paramKey }}</div>
-                        <div class="font-orbitron text-[15px] font-semibold tabular-nums text-primary">
+                        <div class="font-orbitron text-[15px] font-semibold text-primary">
                             {{ p.paramValue }}
                         </div>
                     </div>
@@ -708,7 +708,7 @@ async function generateScreenshot() {
                 <div class="mt-1.5 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-1.5">
                     <div class="flex flex-col gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                         <div class="text-xs text-base-content/55">成就达成</div>
-                        <div class="font-orbitron text-[15px] font-semibold tabular-nums text-primary">
+                        <div class="font-orbitron text-[15px] font-semibold text-primary">
                             {{ roleInfo.roleInfo.roleShow.roleAchv?.total }}
                         </div>
                     </div>
@@ -726,7 +726,7 @@ async function generateScreenshot() {
                             alt="品质"
                             class="size-7"
                         />
-                        <span class="font-orbitron text-[15px] font-semibold tabular-nums text-primary">{{ p }}</span>
+                        <span class="font-orbitron text-[15px] font-semibold text-primary">{{ p }}</span>
                     </div>
                 </div>
             </section>
@@ -735,7 +735,7 @@ async function generateScreenshot() {
             <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                 <SectionHeader no-animate compact kicker="CHARS" :title="$t('角色')">
                     <template #trailing>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                             {{ roleInfo.roleInfo.roleShow.roleChars.filter(v => v.unLocked).length }}/{{
                                 roleInfo.roleInfo.roleShow.roleChars.length
                             }}
@@ -751,7 +751,7 @@ async function generateScreenshot() {
             <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                 <SectionHeader no-animate compact kicker="RANGED" :title="$t('远程武器')">
                     <template #trailing>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                             getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.langRangeWeapons)
                         }}</span>
                     </template>
@@ -769,7 +769,7 @@ async function generateScreenshot() {
             <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                 <SectionHeader no-animate compact kicker="MELEE" :title="$t('近战武器')">
                     <template #trailing>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                             getWeaponUnlockProgress(roleInfo.roleInfo.roleShow.closeWeapons)
                         }}</span>
                     </template>
@@ -791,7 +791,7 @@ async function generateScreenshot() {
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="text-xs text-base-content/55">进度</span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                             {{ ["0", "I", "II", "III", "IV", "V", "VI"][roleInfo.roleInfo.roleShow.rougeLikeInfo.maxPassed >> 4] }}
                         </span>
                     </div>
@@ -799,7 +799,7 @@ async function generateScreenshot() {
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="text-xs text-base-content/55">本周行迹</span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                             {{ roleInfo.roleInfo.roleShow.rougeLikeInfo.rewardCount }}
                         </span>
                     </div>
@@ -807,7 +807,7 @@ async function generateScreenshot() {
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="text-xs text-base-content/55">重置时间</span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                             {{ ui.timeDistanceFuture(+roleInfo.roleInfo.roleShow.rougeLikeInfo.resetTime * 1000) }}
                         </span>
                     </div>
@@ -820,7 +820,7 @@ async function generateScreenshot() {
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="text-xs text-base-content/55">{{ ["技能", "适应", "近战", "远程"][index] }}强化</span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ talent.cur }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ talent.cur }}</span>
                     </div>
                 </div>
             </section>
@@ -861,7 +861,7 @@ async function generateScreenshot() {
                             roleInfo.roleInfo.abyssInfo.progressName.replace(/null\s+/g, "")
                         }}</span>
                         <span
-                            class="inline-flex items-center gap-1 rounded-xs border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-primary"
+                            class="inline-flex items-center gap-1 rounded-xs border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary"
                         >
                             <Icon icon="ri:star-line" class="size-3.5" />
                             {{ roleInfo.roleInfo.abyssInfo.stars }}

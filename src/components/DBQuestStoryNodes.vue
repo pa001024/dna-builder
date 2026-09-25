@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { t } from "i18next"
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { npcMap } from "@/data/d/npc.data"
@@ -60,9 +61,6 @@ const highlightedQuestNodeMap = reactive<Record<string, boolean>>({})
 const currentVoiceKey = ref<string | null>(null)
 const isVoicePlaying = ref(false)
 const dialogueAudioRef = ref<HTMLAudioElement | null>(null)
-const bgmAudioRef = ref<HTMLAudioElement | null>(null)
-const currentBgmNodeId = ref<string | null>(null)
-const isBgmPlaying = ref(false)
 const autoPlayEnabled = ref(false)
 const autoPlayCurrentIndex = ref(-1)
 const lastManualPlayedDialogueKey = ref<string | null>(null)
@@ -497,7 +495,6 @@ onBeforeUnmount(() => {
     clearStoryRangeMarks()
     stopAutoPlay()
     stopDialogueVoicePlayback()
-    stopBgmPlayback()
     clearPreloadedDialogueVoices()
 })
 
@@ -697,7 +694,7 @@ function buildQuestNodeChains(questId: number, nodes: QuestNode[], startIds?: st
 function getNodeLabel(nodeId: string): string {
     const label = nodeDisplayLabelMap.value.get(nodeId)
     if (!label) {
-        return `未知节点 ${nodeId}`
+        return t("db-quest-story-nodes.unknown_node", { id: nodeId })
     }
 
     return label
@@ -1158,74 +1155,6 @@ function isBgmNodeMute(resource: string | undefined): boolean {
 }
 
 /**
- * 停止当前 BGM 试听并重置状态。
- */
-function stopBgmPlayback(): void {
-    const audio = bgmAudioRef.value
-    if (!audio) {
-        return
-    }
-    audio.pause()
-    audio.removeAttribute("src")
-    audio.load()
-    currentBgmNodeId.value = null
-    isBgmPlaying.value = false
-}
-
-/**
- * 切换节点 BGM 试听播放状态（一次仅试听一个节点）。
- * @param node 任务节点
- */
-function toggleBgmPlayback(node: QuestNode): void {
-    const audio = bgmAudioRef.value
-    if (!audio) {
-        return
-    }
-
-    // 再次点击正在播放的节点 → 停止
-    if (currentBgmNodeId.value === node.id && isBgmPlaying.value) {
-        stopBgmPlayback()
-        return
-    }
-
-    const bgmUrl = getNodeBgmUrl(node)
-    if (!bgmUrl) {
-        return
-    }
-
-    // BGM 试听与对话语音相互独立，仅接管独立 BGM 音频通道
-    stopBgmPlayback()
-    audio.src = bgmUrl
-
-    audio
-        .play()
-        .then(() => {
-            currentBgmNodeId.value = node.id
-            isBgmPlaying.value = true
-        })
-        .catch(error => {
-            currentBgmNodeId.value = null
-            isBgmPlaying.value = false
-            console.error("BGM 试听播放失败:", error)
-        })
-}
-
-/**
- * BGM 试听结束事件回调。
- */
-function handleBgmEnded(): void {
-    isBgmPlaying.value = false
-    currentBgmNodeId.value = null
-}
-
-/**
- * BGM 试听暂停事件回调。
- */
-function handleBgmPause(): void {
-    isBgmPlaying.value = false
-}
-
-/**
  * 计算节点分支链。
  */
 const questNodeChains = computed<QuestNodeWithChain[]>(() => {
@@ -1295,7 +1224,6 @@ watch(
     () => {
         stopAutoPlay()
         stopDialogueVoicePlayback()
-        stopBgmPlayback()
     }
 )
 
@@ -1324,7 +1252,7 @@ watch(flattenedDialogueChain, () => {
                 "
                 @click="toggleAutoPlay()"
             >
-                自动播放
+                {{ $t('common.autoplay') }}
             </button>
         </div>
 
@@ -1359,37 +1287,33 @@ watch(flattenedDialogueChain, () => {
             <div v-if="node.resource || node.video" class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                 <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-base-content/70">
                     <span class="min-w-0 truncate font-medium text-base-content/85">
-                        {{ formatStoryText(node.name) || "未命名媒体节点" }}
+                        {{ formatStoryText(node.name) || $t('db-quest-story-nodes.unnamed_media_node') }}
                     </span>
                     <span class="text-base-content/45">·</span>
                     <span class="truncate text-[11px] text-accent">{{ node.type }}</span>
                 </div>
 
-                <div v-if="node.resource" class="flex flex-wrap items-center gap-1.5 text-xs">
-                    <span class="inline-flex items-center gap-1 text-accent">
-                        <Icon icon="ri:music-2-line" />
-                        <span>BGM 资源</span>
-                    </span>
-                    <code
-                        class="rounded-xs border border-base-content/15 bg-base-100/60 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-base-content/80"
-                    >
-                        {{ node.resource }}
-                    </code>
-                    <span v-if="isBgmNodeMute(node.resource)" class="text-base-content/40">（无声/停止控制节点，无试听）</span>
-                    <button
-                        v-else-if="getNodeBgmUrl(node)"
-                        type="button"
-                        class="cursor-pointer rounded-xs border px-1.5 py-0.5 text-[11px] transition-colors duration-150"
-                        :class="
-                            currentBgmNodeId === node.id && isBgmPlaying
-                                ? 'border-primary/60 bg-primary/10 font-semibold text-primary'
-                                : 'border-base-content/20 text-base-content/60 hover:border-primary/50 hover:text-primary'
-                        "
-                        @click="toggleBgmPlayback(node)"
-                    >
-                        {{ currentBgmNodeId === node.id && isBgmPlaying ? "停止试听" : "试听" }}
-                    </button>
-                    <span v-else class="text-base-content/40">（暂未收录 CDN 音频）</span>
+                <div v-if="node.resource" class="space-y-1.5">
+                    <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                        <span class="inline-flex items-center gap-1 text-accent">
+                            <Icon icon="ri:music-2-line" />
+                            <span>{{ $t('db-quest-story-nodes.bgm_resource') }}</span>
+                        </span>
+                        <code
+                            class="rounded-xs border border-base-content/15 bg-base-100/60 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-base-content/80"
+                        >
+                            {{ node.resource }}
+                        </code>
+                        <span v-if="isBgmNodeMute(node.resource)" class="text-base-content/40">
+                            {{ $t('db-quest-story-nodes.silent_node_note') }}
+                        </span>
+                        <span v-else-if="!getNodeBgmUrl(node)" class="text-base-content/40">
+                            {{ $t('db-quest-story-nodes.no_cdn_audio') }}
+                        </span>
+                    </div>
+
+                    <!-- BGM 试听：与乐谱播放器同一套标准（播放/暂停 + 进度 + 时长），多节点间独占播放通道 -->
+                    <MusicPlayer v-if="!isBgmNodeMute(node.resource) && getNodeBgmUrl(node)" :src="getNodeBgmUrl(node)" preload="none" />
                 </div>
 
                 <!-- 剧情内嵌视频 -->
@@ -1427,7 +1351,7 @@ watch(flattenedDialogueChain, () => {
 
             <!-- 侦探问答 -->
             <div v-if="node.questions?.length" class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                <div class="text-[11px] font-semibold tracking-wide text-accent">侦探问答</div>
+                <div class="text-[11px] font-semibold tracking-wide text-accent">{{ $t('db-quest-story-nodes.detective_quiz') }}</div>
 
                 <div
                     v-for="question in node.questions"
@@ -1435,7 +1359,9 @@ watch(flattenedDialogueChain, () => {
                     class="space-y-1.5 rounded-xs border border-base-content/10 bg-base-100/60 p-2"
                 >
                     <div class="text-sm font-medium">Q{{ question.id }} · {{ question.name }}</div>
-                    <div v-if="question.tips" class="text-xs text-base-content/70">提示：{{ question.tips }}</div>
+                    <div v-if="question.tips" class="text-xs text-base-content/70">
+                        {{ $t('db-quest-story-nodes.quiz_tips') }}{{ question.tips }}
+                    </div>
 
                     <div class="space-y-1">
                         <div
@@ -1464,7 +1390,7 @@ watch(flattenedDialogueChain, () => {
 
             <!-- 节点跳转 -->
             <div v-if="node.next?.length" class="flex flex-wrap items-center gap-1.5 text-xs">
-                <span class="text-base-content/60">节点跳转</span>
+                <span class="text-base-content/60">{{ $t('db-quest-story-nodes.node_jump') }}</span>
                 <template v-for="nextId in node.next" :key="`${node.id}-next-${nextId}`">
                     <span class="text-primary">→</span>
                     <button
@@ -1478,7 +1404,7 @@ watch(flattenedDialogueChain, () => {
             </div>
 
             <div v-if="!node.chain.length && !node.questions?.length && !node.resource && !node.video" class="text-base-content/70">
-                该节点暂无可展示内容
+                {{ $t('db-quest-story-nodes.empty_node') }}
             </div>
         </div>
         <audio
@@ -1490,6 +1416,5 @@ watch(flattenedDialogueChain, () => {
             @pause="handleDialogueVoicePause"
             @play="handleDialogueVoicePlay"
         />
-        <audio ref="bgmAudioRef" class="hidden" preload="none" @ended="handleBgmEnded" @pause="handleBgmPause" />
     </div>
 </template>

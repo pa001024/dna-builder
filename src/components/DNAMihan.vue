@@ -33,7 +33,7 @@ onUnmounted(() => {
         <div class="text-lg font-bold pb-2">
             {{ $t("resizeableWindow.monitorSettings") }}
 
-            <span class="text-xs opacity-80 cursor-pointer" @click="mihanNotify.showMihanNotification()">测试</span>
+            <span class="text-xs opacity-80 cursor-pointer" @click="mihanNotify.showMihanNotification()">{{ $t('common.test') }}</span>
         </div>
         <div class="flex gap-2">
             <label class="text-sm p-1 label">

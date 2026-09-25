@@ -3,6 +3,8 @@ import { computed, ref } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { petMap } from "@/data"
 import { type PetEntry, petToEntey } from "@/data/d/pet.data"
+import { getPetQualityName, getPetTypeName } from "@/utils/pet-labels"
+import { getRarityBadgeClass } from "@/utils/rarity-utils"
 
 const props = defineProps<{
     entry: PetEntry
@@ -20,52 +22,6 @@ interface EntryPetSource {
 }
 
 const groupSourcePetsByWeight = ref(true)
-
-/**
- * 根据魔灵类型获取名称。
- * @param type 类型值
- * @returns 类型名称
- */
-function getTypeName(type: number): string {
-    const typeMap: Record<number, string> = {
-        1: "活力魔灵",
-        2: "失活魔灵",
-        3: "活动魔灵",
-    }
-    return typeMap[type] || type.toString()
-}
-
-/**
- * 根据品质值获取品质名称。
- * @param quality 品质值
- * @returns 品质名称
- */
-function getQualityName(quality: number): string {
-    const qualityMap: Record<number, string> = {
-        1: "白",
-        2: "绿",
-        3: "蓝",
-        4: "紫",
-        5: "金",
-    }
-    return qualityMap[quality] || quality.toString()
-}
-
-/**
- * 根据品质值获取标签颜色样式。
- * @param quality 品质值
- * @returns 颜色样式类名
- */
-function getQualityColor(quality: number): string {
-    const colorMap: Record<number, string> = {
-        1: "bg-gray-200 text-gray-800",
-        2: "bg-green-200 text-green-800",
-        3: "bg-blue-200 text-blue-800",
-        4: "bg-purple-200 text-purple-800",
-        5: "bg-yellow-200 text-yellow-800",
-    }
-    return colorMap[quality] || "bg-base-content/3 text-base-content"
-}
 
 /**
  * 将权重格式化为百分比文本。
@@ -139,25 +95,42 @@ const groupedEntryPetSources = computed<EntryPetSourceGroup[]>(() => {
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 详情头部：纸面 + primary 强调线 -->
         <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
             <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                 <span class="h-px w-6 bg-primary" aria-hidden="true" />
                 Entry File
             </p>
-            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <h2 class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content sm:text-2xl">
+            <div class="relative flex flex-wrap items-center gap-x-2 gap-y-1">
+                <h2 class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content sm:text-2xl">
                     {{ $t(entry.name) }}
                 </h2>
                 <CopyID :id="entry.id" />
-                <span class="ml-auto shrink-0 rounded-xs px-1.5 py-0.5 text-[10px] tracking-wide" :class="getQualityColor(entry.r)">
-                    {{ $t(getQualityName(entry.r)) }}
+                <span class="ml-auto" :class="getRarityBadgeClass(entry.r)">
+                    {{ $t(getPetQualityName(entry.r)) }}
                 </span>
             </div>
-            <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
+            <div class="relative mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
                 <span>{{ $t("pet_detail.base_id") }}: {{ entry.bid }}</span>
                 <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
                 <span>{{ $t("pet_detail.name") }}: {{ $t(entry.name) }}</span>
                 <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                <span>{{ $t("pet_detail.rarity") }}: {{ $t(getQualityName(entry.r)) }}</span>
+                <span>{{ $t("pet_detail.rarity") }}: {{ $t(getPetQualityName(entry.r)) }}</span>
             </div>
         </header>
 
@@ -252,8 +225,8 @@ const groupedEntryPetSources = computed<EntryPetSourceGroup[]>(() => {
                         </div>
                         <div class="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-base-content/55">
                             <span>ID: {{ source.petId }}</span>
-                            <span>{{ $t(getTypeName(source.petType)) }}</span>
-                            <span class="truncate">{{ source.petDesc }}</span>
+                            <span>{{ $t(getPetTypeName(source.petType)) }}</span>
+                            <span class="truncate">{{ gt(source.petDesc) }}</span>
                         </div>
                     </div>
                 </template>

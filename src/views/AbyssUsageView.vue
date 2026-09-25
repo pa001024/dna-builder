@@ -859,7 +859,7 @@ onMounted(async () => {
                             <h1
                                 class="flex flex-wrap items-center gap-2 font-orbitron text-xl leading-none font-bold tracking-tight sm:text-2xl"
                             >
-                                <span>沉浸式戏剧</span>
+                                <span>{{ $t('沉浸式戏剧') }}</span>
                                 <span class="inline-flex items-center gap-1">
                                     <img
                                         v-for="key in seasonDungeonElementKeys"
@@ -906,16 +906,16 @@ onMounted(async () => {
                             >
                                 <span v-if="exporting" class="loading loading-spinner loading-xs"></span>
                                 <Icon v-else icon="ri:file-excel-2-line" />
-                                导出
+                                {{ $t('common.export') }}
                             </button>
                             <button class="btn btn-primary btn-sm rounded-xs" :disabled="abyssUploading" @click="uploadAbyssUsage">
                                 <span v-if="abyssUploading" class="loading loading-spinner loading-xs"></span>
                                 <Icon v-else icon="ri:upload-2-line" />
-                                上传
+                                {{ $t('common.upload') }}
                             </button>
                             <button class="btn btn-ghost btn-sm rounded-xs" :disabled="loading" @click="loadStats">
                                 <Icon icon="ri:refresh-line" class="size-4" />
-                                <span>刷新</span>
+                                <span>{{ $t('common.refresh') }}</span>
                             </button>
                         </div>
                     </div>
@@ -927,7 +927,7 @@ onMounted(async () => {
 
                 <!-- 角色使用率：外层区块卡 -->
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
-                    <SectionHeader kicker="ROLE USAGE" title="角色使用率" :count="lineupTotal" />
+                    <SectionHeader kicker="ROLE USAGE" :title="$t('abyss-usage.char_usage_rate')" :count="lineupTotal" />
                     <p class="mb-3 text-xs leading-relaxed text-base-content/50">
                         本页面全部数据分析自 {{ lineupTotal }} 名玩家。使用率=上场该角色玩家数÷持有该角色玩家数
                     </p>
@@ -957,7 +957,7 @@ onMounted(async () => {
                                             :alt="getCharName(item.charId)"
                                         />
                                         <div class="py-1.5 text-center">
-                                            <span class="font-orbitron text-[11px] font-semibold tabular-nums text-primary">
+                                            <span class="font-orbitron text-[11px] font-semibold text-primary">
                                                 {{ formatUsageRate(item.submissionCount || 0, item.ownedCount || 0) }}
                                             </span>
                                         </div>
@@ -971,8 +971,8 @@ onMounted(async () => {
                 <div class="grid gap-4 lg:grid-cols-2">
                     <!-- 最常用阵容：外层区块卡 -->
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
-                        <SectionHeader kicker="TOP LINEUPS" title="最常用阵容" />
-                        <p class="mb-3 text-xs text-base-content/50">出战数最高的阵容</p>
+                        <SectionHeader kicker="TOP LINEUPS" :title="$t('abyss-usage.most_used_team')" />
+                        <p class="mb-3 text-xs text-base-content/50">{{ $t('abyss-usage.top_deploy_team') }}</p>
                         <div class="space-y-3">
                             <div
                                 v-for="item in lineupStats.slice(0, 6)"
@@ -1003,7 +1003,7 @@ onMounted(async () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <span class="font-orbitron text-lg font-semibold tabular-nums text-primary">
+                                    <span class="font-orbitron text-lg font-semibold text-primary">
                                         {{ formatSharePercent(item.submissionCount || 0, lineupTotal) }}
                                     </span>
                                 </div>
@@ -1013,13 +1013,13 @@ onMounted(async () => {
 
                     <!-- 配队助手：外层区块卡 -->
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
-                        <SectionHeader kicker="TEAM ASSISTANT" title="配队助手" />
-                        <p class="mb-3 text-xs text-base-content/50">查询角色常用阵容</p>
+                        <SectionHeader kicker="TEAM ASSISTANT" :title="$t('abyss-usage.team_builder')" />
+                        <p class="mb-3 text-xs text-base-content/50">{{ $t('abyss-usage.query_char_teams') }}</p>
                         <div class="mb-3 flex items-center gap-2">
                             <Select
                                 class="min-w-0 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 :model-value="selectedAssistantCharId ?? undefined"
-                                placeholder="请选择角色"
+                                :placeholder="$t('abyss-usage.select_char')"
                                 @update:model-value="handleAssistantCharChange"
                             >
                                 <SelectItem v-for="item in lineupCharOptions" :key="item.charId" :value="item.charId">
@@ -1027,7 +1027,7 @@ onMounted(async () => {
                                 </SelectItem>
                             </Select>
                             <label class="label cursor-pointer gap-2 rounded-xs px-3 py-2">
-                                <span class="whitespace-nowrap text-sm">仅主控</span>
+                                <span class="whitespace-nowrap text-sm">{{ $t('abyss-usage.main_control_only') }}</span>
                                 <input
                                     type="checkbox"
                                     class="toggle toggle-primary toggle-sm"
@@ -1066,7 +1066,7 @@ onMounted(async () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <span class="font-orbitron text-lg font-semibold tabular-nums text-primary">
+                                    <span class="font-orbitron text-lg font-semibold text-primary">
                                         {{ formatSharePercent(item.submissionCount || 0, lineupTotal) }}
                                     </span>
                                 </div>
@@ -1076,7 +1076,7 @@ onMounted(async () => {
                             v-else
                             class="rounded-xs border border-dashed border-base-content/15 py-6 text-center text-sm text-base-content/45"
                         >
-                            暂无结果
+                            {{ $t('abyss-usage.no_result') }}
                         </div>
                     </section>
                 </div>
@@ -1113,7 +1113,7 @@ onMounted(async () => {
                                         </RouterLink>
                                         <div class="text-[11px] text-base-content/45 tabular-nums">{{ item.submissionCount }} 次</div>
                                     </div>
-                                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                    <span class="font-orbitron text-[13px] font-semibold text-primary">
                                         {{ formatSharePercent(item.submissionCount, section.total) }}
                                     </span>
                                 </div>
@@ -1124,7 +1124,7 @@ onMounted(async () => {
 
                 <!-- 历练等级分布：外层区块卡 -->
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm sm:p-4">
-                    <SectionHeader kicker="LEVEL DIST" title="历练等级分布">
+                    <SectionHeader kicker="LEVEL DIST" :title="$t('abyss-usage.level_distribution')">
                         <template #trailing>
                             <span class="shrink-0 text-[11px] text-base-content/50 tabular-nums">
                                 {{ levelRangeLabel }} · {{ abyssSubmissionsCount }} 次提交
@@ -1137,14 +1137,14 @@ onMounted(async () => {
                             :key="item.level"
                             class="grid gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 md:grid-cols-[4rem_minmax(0,1fr)_5rem] md:items-center"
                         >
-                            <div class="font-orbitron text-sm font-semibold tabular-nums">Lv.{{ item.level }}</div>
+                            <div class="font-orbitron text-sm font-semibold">Lv.{{ item.level }}</div>
                             <div class="space-y-1.5">
                                 <div class="h-1.5 overflow-hidden rounded-xs bg-base-content/10">
                                     <div class="h-full bg-primary transition-[width] duration-500" :style="{ width: item.percent }"></div>
                                 </div>
                                 <div class="text-[11px] text-base-content/45 tabular-nums">{{ item.submissionCount }} 次</div>
                             </div>
-                            <span class="text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            <span class="text-right font-orbitron text-[13px] font-semibold text-primary">
                                 {{ item.percent }}
                             </span>
                         </div>
@@ -1153,7 +1153,7 @@ onMounted(async () => {
                         v-else
                         class="rounded-xs border border-dashed border-base-content/15 py-6 text-center text-sm text-base-content/45"
                     >
-                        暂无结果
+                        {{ $t('abyss-usage.no_result') }}
                     </div>
                 </section>
 

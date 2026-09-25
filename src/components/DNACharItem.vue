@@ -57,7 +57,7 @@ const getAuraClass = (element: string) => {
                     {{ char.name }}
                 </h4>
                 <div v-if="char.unLocked" class="text-xs">Lv. {{ char.level }}</div>
-                <div v-else class="text-xs text-error">未解锁</div>
+                <div v-else class="text-xs text-error">{{ $t('common.locked') }}</div>
             </div>
         </div>
     </div>

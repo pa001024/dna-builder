@@ -9,13 +9,14 @@ import shopData from "@/data/d/shop.data"
 import { subRegionData } from "@/data/d/subregion.data"
 import type { Pet } from "@/data/data-types"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
+import { getPetTypeName } from "@/utils/pet-labels"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 const props = defineProps<{
     pet: Pet
 }>()
 
-const { gt } = useGameText()
+const { gt, petSkillText } = useGameText()
 
 const { t } = useTranslation()
 
@@ -168,20 +169,6 @@ watch(
 )
 
 /**
- * 根据类型值获取魔灵类型名称。
- * @param type 类型值
- * @returns 类型名称
- */
-function getTypeName(type: number): string {
-    const typeMap: Record<number, string> = {
-        1: "活力魔灵",
-        2: "失活魔灵",
-        3: "活动魔灵",
-    }
-    return typeMap[type] || type.toString()
-}
-
-/**
  * 通过魔灵 id 获取名称。
  * @param id 魔灵 id
  * @returns 魔灵名称
@@ -323,7 +310,24 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 详情头部：纸面 + primary 强调线 -->
         <header class="relative overflow-hidden border-b-2 border-primary pb-4">
-            <div class="flex items-start gap-3.5">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
                 <div class="size-20 shrink-0 overflow-hidden rounded-xs bg-linear-15 sm:size-24" :class="getRarityGradientClass(pet.品质)">
                     <ImageFallback :src="leveledPet.url" :alt="pet.名称" class="h-full w-full object-cover">
                         <img src="/imgs/webp/T_Head_Empty.webp" :alt="pet.名称" class="h-full w-full object-cover" />
@@ -337,7 +341,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/pet/${pet.id}`"
-                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(pet.名称) }}
                         </SRouterLink>
@@ -345,7 +349,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                         <span
                             class="ml-auto shrink-0 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
                         >
-                            {{ $t(getTypeName(pet.类型)) }}
+                            {{ $t(getPetTypeName(pet.类型)) }}
                         </span>
                     </div>
                     <!-- 元信息行：最大等级 / 捕获经验 / 当前经验 -->
@@ -356,7 +360,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                         <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
                         <span>
                             {{ $t("pet_detail.exp") }}:
-                            <b class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ displayedExperience }}</b>
+                            <b class="font-orbitron text-[13px] font-semibold text-primary">{{ displayedExperience }}</b>
                         </span>
                     </div>
                 </div>
@@ -410,7 +414,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
             <div
                 class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed whitespace-pre-wrap text-base-content/85"
             >
-                {{ gt(leveledPet.主动.描述) }}
+                {{ petSkillText(leveledPet.主动模板, leveledPet.主动值) }}
             </div>
         </section>
 
@@ -420,7 +424,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
             <div
                 class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed whitespace-pre-wrap text-base-content/85"
             >
-                {{ gt(leveledPet.被动.描述) }}
+                {{ petSkillText(leveledPet.被动模板, leveledPet.被动值) }}
             </div>
         </section>
 
@@ -436,7 +440,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                     <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
                         <SubRegionLink :sub-region-id="location.subRegionId" />
                         <div class="text-[11px] text-base-content/55">
-                            <span>{{ location.regionName }}</span>
+                            <span>{{ gt(location.regionName) }}</span>
                         </div>
                         <div class="flex-1"></div>
                         <span class="text-[11px] tabular-nums text-base-content/50">
@@ -484,14 +488,14 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                                 :to="`/db/shop/${source.shopId}/${source.subTabId}`"
                                 class="min-w-0 truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
                             >
-                                {{ source.mainTabName }} / {{ source.subTabName }}
+                                {{ gt(source.mainTabName) }} / {{ gt(source.subTabName) }}
                             </SRouterLink>
-                            <span class="shrink-0 text-[11px] text-base-content/55">({{ source.shopName }})</span>
+                            <span class="shrink-0 text-[11px] text-base-content/55">({{ gt(source.shopName) }})</span>
                         </div>
                         <div class="flex shrink-0 items-center gap-1">
-                            <img :src="getPriceIcon(source.priceName)" class="size-4 rounded-xs object-cover" :alt="source.priceName" />
-                            <span class="text-[11px] text-base-content/55">{{ source.priceName }}</span>
-                            <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ source.price }}</span>
+                            <img :src="getPriceIcon(source.priceName)" class="size-4 rounded-xs object-cover" :alt="gt(source.priceName)" />
+                            <span class="text-[11px] text-base-content/55">{{ gt(source.priceName) }}</span>
+                            <span class="font-orbitron text-[13px] font-semibold text-primary">{{ source.price }}</span>
                         </div>
                     </div>
                     <div v-if="source.timeStart" class="text-[11px] tabular-nums text-base-content/50">
@@ -503,7 +507,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
 
         <!-- 魔灵潜质来源 -->
         <section v-if="pet.类型 === 2" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="ENTRY" :title="$t('pet_detail.pet_entry')" />
+            <SectionHeader no-animate compact kicker="ENTRY" :title="$t('魔灵潜质')" />
             <div v-if="petToEnteySources.length" class="mt-2 space-y-2">
                 <div class="flex items-center justify-between gap-2">
                     <span class="text-[11px] tracking-wide text-base-content/55">{{ $t("pet_detail.group_by_weight") }}</span>
@@ -566,7 +570,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                         </div>
                         <div class="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-base-content/55">
                             <span>ID: {{ source.entryId }}</span>
-                            <span class="truncate">{{ source.entryDesc }}</span>
+                            <span class="truncate">{{ gt(source.entryDesc) }}</span>
                         </div>
                     </div>
                 </template>

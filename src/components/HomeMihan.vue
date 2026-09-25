@@ -203,7 +203,7 @@ onUnmounted(() => {
                     @click="mihanNotify.showMihanNotification()"
                 >
                     <Icon icon="ri:notification-3-line" class="h-3 w-3" />
-                    测试
+                    {{ $t('common.test') }}
                 </button>
             </div>
 

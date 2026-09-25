@@ -142,7 +142,7 @@ const proItem = computed(() => (item.value && mode.value === "pro" ? (item.value
             </div>
         </div>
         <div v-else class="p-4">
-            <div class="text-base-content/70">未找到迷津条目</div>
+            <div class="text-base-content/70">{{ $t('db-rouge-detail-view.not_found') }}</div>
         </div>
     </ScrollArea>
 </template>

@@ -331,7 +331,7 @@ const cardLayout = {
             <!-- 耐受值显示 -->
             <div class="absolute -top-20 text-center">
                 <div class="text-white text-lg font-bold">{{ displayCurrentVolume }}/{{ displaySumVolume }}</div>
-                <div class="text-white/70 text-sm">耐受值</div>
+                <div class="text-white/70 text-sm">{{ $t('game-style-mod.tolerance_value') }}</div>
             </div>
 
             <!-- 中心圆形卡片 -->

@@ -378,7 +378,7 @@ onUnmounted(async () => {
         <div class="grid grid-cols-3 gap-3">
             <div class="card bg-base-200 shadow-sm">
                 <div class="card-body p-4">
-                    <div class="text-xs opacity-70">当前状态</div>
+                    <div class="text-xs opacity-70">{{ $t('script-record-tool.current_status') }}</div>
                     <div class="text-lg font-semibold">
                         {{ recorderSnapshot.recording ? "录制中" : "未录制" }}
                     </div>
@@ -389,7 +389,7 @@ onUnmounted(async () => {
             </div>
             <div class="card bg-base-200 shadow-sm">
                 <div class="card-body p-4">
-                    <div class="text-xs opacity-70">动作数量</div>
+                    <div class="text-xs opacity-70">{{ $t('script-record-tool.action_count') }}</div>
                     <div class="text-lg font-semibold">{{ currentActionCount }}</div>
                     <div class="text-xs opacity-70">
                         {{ usingImportedActions ? "来源：导入 JSON" : "来源：实时录制" }}
@@ -398,26 +398,26 @@ onUnmounted(async () => {
             </div>
             <div class="card bg-base-200 shadow-sm">
                 <div class="card-body p-4">
-                    <div class="text-xs opacity-70">总时长</div>
+                    <div class="text-xs opacity-70">{{ $t('script-record-tool.total_duration') }}</div>
                     <div class="text-lg font-semibold">{{ formatSeconds(currentTotalTime) }}</div>
-                    <div class="text-xs opacity-70">按绝对时间点换算 sleep</div>
+                    <div class="text-xs opacity-70">{{ $t('script-record-tool.convert_to_sleep') }}</div>
                 </div>
             </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-            <button class="btn btn-sm btn-primary" @click="copyGeneratedCode">复制代码</button>
-            <button class="btn btn-sm btn-outline" @click="clearCurrentActions">清空当前动作</button>
-            <button v-if="usingImportedActions" class="btn btn-sm btn-ghost" @click="useRecordedActions">切回实时录制数据</button>
+            <button class="btn btn-sm btn-primary" @click="copyGeneratedCode">{{ $t('script-record-tool.copy_code') }}</button>
+            <button class="btn btn-sm btn-outline" @click="clearCurrentActions">{{ $t('script-record-tool.clear_actions') }}</button>
+            <button v-if="usingImportedActions" class="btn btn-sm btn-ghost" @click="useRecordedActions">{{ $t('script-record-tool.back_to_live') }}</button>
         </div>
 
         <div class="grid grid-cols-2 gap-4 min-h-0 flex-1">
             <div class="card bg-base-100 border border-base-300 shadow-sm min-h-0">
                 <div class="card-body p-4 min-h-0 flex flex-col gap-3">
                     <h2 class="card-title text-base">
-                        导入 JSON（绝对时间制）
-                        <button class="btn btn-sm btn-primary" @click="handleImportJson">导入文本</button>
-                        <button class="btn btn-sm btn-outline" @click="openImportFilePicker">导入 JSON 文件</button>
+                        {{ $t('script-record-tool.import_json_absolute') }}
+                        <button class="btn btn-sm btn-primary" @click="handleImportJson">{{ $t('script-record-tool.import_text') }}</button>
+                        <button class="btn btn-sm btn-outline" @click="openImportFilePicker">{{ $t('script-record-tool.import_json_file') }}</button>
                     </h2>
                     <textarea
                         v-model="importJsonText"
@@ -436,7 +436,7 @@ onUnmounted(async () => {
 
             <div class="card bg-base-100 border border-base-300 shadow-sm min-h-0">
                 <div class="card-body p-4 min-h-0 flex flex-col gap-3">
-                    <h2 class="card-title text-base">生成代码</h2>
+                    <h2 class="card-title text-base">{{ $t('script-record-tool.generate_code') }}</h2>
                     <textarea class="w-full flex-1 font-mono text-xs rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1 tabular-nums" readonly :value="generatedCode" />
                 </div>
             </div>
@@ -444,16 +444,16 @@ onUnmounted(async () => {
 
         <div class="card bg-base-100 border border-base-300 shadow-sm min-h-0 flex-1">
             <div class="card-body p-0 min-h-0">
-                <div class="px-4 pt-4 pb-2 text-sm font-medium">动作明细</div>
+                <div class="px-4 pt-4 pb-2 text-sm font-medium">{{ $t('script-record-tool.action_details') }}</div>
                 <div class="overflow-auto px-4 pb-4">
                     <table class="table table-zebra table-sm">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>时间(s)</th>
-                                <th>类型</th>
-                                <th>按键</th>
-                                <th>鼠标</th>
+                                <th>{{ $t('script-record-tool.time_sec') }}</th>
+                                <th>{{ $t('script-record-tool.type') }}</th>
+                                <th>{{ $t('script-record-tool.key') }}</th>
+                                <th>{{ $t('script-record-tool.mouse') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -465,7 +465,7 @@ onUnmounted(async () => {
                                 <td>{{ action.button ?? "-" }}</td>
                             </tr>
                             <tr v-if="currentActions.length === 0">
-                                <td colspan="5" class="text-center opacity-60 py-8">暂无动作数据</td>
+                                <td colspan="5" class="text-center opacity-60 py-8">{{ $t('script-record-tool.no_actions') }}</td>
                             </tr>
                         </tbody>
                     </table>

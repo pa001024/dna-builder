@@ -196,7 +196,7 @@ watch(
                         {{ categoryLabel(mod.category) }}
                     </p>
                     <div class="flex items-center gap-2 pr-10">
-                        <h2 class="font-orbitron text-xl font-bold leading-none tracking-tight text-base-content truncate">
+                        <h2 class="font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content truncate">
                             {{ mod.name }}
                         </h2>
                         <span v-if="mod.isRecommended" class="badge badge-warning badge-sm flex-none gap-1">
@@ -208,7 +208,7 @@ watch(
                         <button
                             v-if="closable"
                             class="ml-auto btn btn-square btn-ghost btn-sm flex-none"
-                            aria-label="关闭"
+                            :aria-label="$t('common.close')"
                             @click="emit('close')"
                         >
                             <Icon icon="ri:close-line" class="size-4" />
@@ -288,7 +288,7 @@ watch(
 
                     <!-- 预览图轮播（左右按钮切换） -->
                     <div class="space-y-2">
-                        <div class="text-xs text-base-content/80">预览图</div>
+                        <div class="text-xs text-base-content/80">{{ $t('game-mod-detail.preview_image') }}</div>
                         <ImageCarousel v-if="(mod.images?.length ?? 0) > 0" :images="mod.images || []" :alt="mod.name" />
                     </div>
 

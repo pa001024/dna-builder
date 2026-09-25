@@ -218,7 +218,7 @@ onUnmounted(() => {
                                     :value="counter.value"
                                     type="number"
                                     min="0"
-                                    class="w-full border-0 bg-transparent text-center font-orbitron text-7xl font-semibold tabular-nums text-primary outline-none"
+                                    class="w-full border-0 bg-transparent text-center font-orbitron text-7xl font-semibold text-primary outline-none"
                                     @change="counterStore.setCounterValue(counter.id, Number(($event.target as HTMLInputElement).value))"
                                 />
                             </div>

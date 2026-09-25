@@ -203,7 +203,7 @@ onMounted(async () => {
                                     Ranking
                                 </p>
                                 <h1
-                                    class="truncate font-orbitron text-xl leading-none font-bold tracking-tight text-base-content sm:text-2xl"
+                                    class="truncate font-orbitron text-xl leading-tight font-bold tracking-tight text-base-content sm:text-2xl"
                                 >
                                     {{ ranking?.name }}
                                 </h1>
@@ -249,7 +249,7 @@ onMounted(async () => {
 
                         <!-- 敌人抗性覆盖：选择抗性后覆盖榜单构筑中的敌人抗性字段并重算 DPS -->
                         <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-t border-base-content/8 pt-3">
-                            <span class="mr-1 shrink-0 text-xs text-base-content/55">敌人抗性覆盖:</span>
+                            <span class="mr-1 shrink-0 text-xs text-base-content/55">{{ $t('ranking-view.enemy_resistance_coverage') }}</span>
                             <button
                                 type="button"
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-3 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
@@ -260,7 +260,7 @@ onMounted(async () => {
                                 "
                                 @click="setResistanceOverride(null)"
                             >
-                                默认
+                                {{ $t('默认') }}
                             </button>
                             <button
                                 v-for="res in enemyResistanceOptions"
@@ -300,7 +300,7 @@ onMounted(async () => {
                         class="flex min-h-96 flex-col items-center justify-center rounded-xs border border-dashed border-base-content/15 px-6 py-12 text-center text-sm text-base-content/45"
                     >
                         <Icon icon="ri:trophy-line" class="mb-4 h-12 w-12 opacity-40" />
-                        暂无条目
+                        {{ $t('ranking-view.no_entries') }}
                     </div>
 
                     <!-- 条目列表 -->
@@ -368,7 +368,7 @@ onMounted(async () => {
                                         </div>
                                     </div>
                                     <div class="w-28 rounded-xs border border-primary/30 bg-primary/10 px-3 py-2">
-                                        <div class="text-[11px] text-base-content/55">排名</div>
+                                        <div class="text-[11px] text-base-content/55">{{ $t('ranking-view.ranking') }}</div>
                                         <div class="mt-1 font-orbitron text-xl font-bold tabular-nums text-primary">#{{ index + 1 }}</div>
                                     </div>
                                 </div>

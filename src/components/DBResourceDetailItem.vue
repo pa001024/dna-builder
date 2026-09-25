@@ -193,7 +193,7 @@ function getResourceIconUrl(icon: string): string {
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/resource/${resource.id}`"
-                            class="truncate font-orbitron text-xl leading-none font-bold tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(resource.name) }}
                         </SRouterLink>
@@ -203,7 +203,7 @@ function getResourceIconUrl(icon: string): string {
                     <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
                         <span v-if="sourceCounts" class="inline-flex items-center gap-1.5">
                             {{ $t("resource.source") }}
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                                 sourceCounts
                             }}</span>
                         </span>
@@ -211,7 +211,7 @@ function getResourceIconUrl(icon: string): string {
                             <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
                             <span class="inline-flex items-center gap-1.5">
                                 {{ $t("resource.mapPoints") }}
-                                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                                     resource.source.length
                                 }}</span>
                             </span>

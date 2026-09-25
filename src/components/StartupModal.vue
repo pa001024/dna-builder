@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
-import { t } from "i18next"
+import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { checkUpdate, downloadAndInstallUpdate } from "@/api/update"
@@ -14,6 +14,8 @@ const router = useRouter()
 const route = useRoute()
 const ui = useUIStore()
 const dataPack = useDataPackStore()
+/** 界面文案取词：用 useTranslation 的 t 才会随语言切换重算 */
+const { t } = useTranslation()
 
 const searchParams = new URLSearchParams(window.location.search)
 const hideUpdateInfo = searchParams.get("hideUpdateInfo") === "1"
@@ -91,11 +93,11 @@ const dialogTitle = computed(() => {
         case "app-update":
             return t("updater.updating")
         case "pack-install":
-            return "安装数据包"
+            return t("startup-modal.pack_install_title")
         case "pack-update":
-            return "数据包可更新"
+            return t("startup-modal.pack_update_title")
         case "pack-progress":
-            return "下载数据包"
+            return t("startup-modal.pack_download_title")
         case "changelog":
             return t("home.update_log")
         default:
@@ -273,7 +275,7 @@ async function runPackFlow(): Promise<void> {
 async function downloadPack(): Promise<void> {
     const version = latestVersion.value
     if (!version) {
-        ui.showErrorMessage("未找到可用的数据包版本")
+        ui.showErrorMessage(t("startup-modal.pack_version_missing"))
         return
     }
 
@@ -400,7 +402,7 @@ declare global {
                         <button
                             type="button"
                             class="flex-none cursor-pointer rounded-xs border border-base-content/20 bg-base-100/80 p-1.5 text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-                            title="关闭"
+                            :title="$t('common.close')"
                             :disabled="isBusy"
                             @click="handleDismiss"
                         >
@@ -428,7 +430,7 @@ declare global {
                             </ul>
                         </div>
                         <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                            <button class="btn btn-ghost w-full min-w-28 sm:w-auto" @click="skipAppUpdate">稍后</button>
+                            <button class="btn btn-ghost w-full min-w-28 sm:w-auto" @click="skipAppUpdate">{{ $t('startup-modal.later') }}</button>
                             <button class="btn btn-primary w-full min-w-36 sm:w-auto" @click="applyUpdate">
                                 <Icon icon="ri:download-2-line" />
                                 {{ $t("updater.downloadUpdate") }}
@@ -449,26 +451,26 @@ declare global {
                     <template v-else-if="step.kind === 'pack-install' || step.kind === 'pack-update'">
                         <p class="text-sm leading-6 text-base-content/70">
                             <template v-if="step.kind === 'pack-update'">
-                                当前版本 {{ packStepFrom }}，可更新至最新版。数据包决定内容数据的显示与最新效果。
+                                {{ $t("startup-modal.pack_update_hint", { from: packStepFrom }) }}
                             </template>
-                            <template v-else>尚未安装数据包，安装后才能正常加载全部内容数据。</template>
+                            <template v-else>{{ $t("startup-modal.pack_install_hint") }}</template>
                         </p>
 
                         <div class="mt-6 grid gap-2.5 sm:grid-cols-2">
                             <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2.5">
-                                <div class="text-[11px] tracking-wide text-base-content/50">当前版本</div>
+                                <div class="text-[11px] tracking-wide text-base-content/50">{{ $t("startup-modal.current_version") }}</div>
                                 <div class="mt-1 break-all text-sm font-semibold text-base-content tabular-nums">
-                                    {{ currentPackVersion || "未激活" }}
+                                    {{ currentPackVersion || $t("startup-modal.inactive") }}
                                 </div>
                             </div>
                             <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2.5">
-                                <div class="text-[11px] tracking-wide text-base-content/50">最新版本</div>
+                                <div class="text-[11px] tracking-wide text-base-content/50">{{ $t("startup-modal.latest_version") }}</div>
                                 <div class="mt-1 break-all text-sm font-semibold text-base-content tabular-nums">
-                                    {{ packStepVersion || "暂无" }}
+                                    {{ packStepVersion || $t("startup-modal.none_yet") }}
                                 </div>
                             </div>
                             <div v-if="packStepNotes" class="rounded-xs border border-base-content/10 bg-base-content/3 p-3 sm:col-span-2">
-                                <div class="text-[11px] tracking-wide text-base-content/50">更新说明</div>
+                                <div class="text-[11px] tracking-wide text-base-content/50">{{ $t("startup-modal.release_notes") }}</div>
                                 <div class="mt-1.5 whitespace-pre-wrap wrap-break-word text-[13px] leading-6 text-base-content/75">
                                     {{ packStepNotes }}
                                 </div>
@@ -483,16 +485,22 @@ declare global {
                             >
                                 <span class="loading loading-dots" v-if="dataPack.isDownloading" />
                                 <Icon v-else icon="ri:download-2-line" />
-                                {{ dataPack.isDownloading ? "下载中" : latestVersion ? `下载 ${latestVersion}` : "下载最新数据包" }}
+                                {{
+                                    dataPack.isDownloading
+                                        ? $t("startup-modal.downloading")
+                                        : latestVersion
+                                          ? $t("startup-modal.download_version", { version: latestVersion })
+                                          : $t("startup-modal.download_latest_pack")
+                                }}
                             </button>
-                            <button class="btn btn-ghost w-full min-w-28 sm:w-auto" @click="goSetting">打开设置</button>
-                            <button class="btn btn-ghost w-full min-w-24 sm:w-auto" @click="dismissPack">忽略</button>
+                            <button class="btn btn-ghost w-full min-w-28 sm:w-auto" @click="goSetting">{{ $t("startup-modal.open_settings") }}</button>
+                            <button class="btn btn-ghost w-full min-w-24 sm:w-auto" @click="dismissPack">{{ $t("startup-modal.ignore") }}</button>
                         </div>
                     </template>
 
                     <!-- 数据包下载进度 -->
                     <div v-else-if="step.kind === 'pack-progress'" class="py-2">
-                        <p class="text-sm leading-6 text-base-content/70">正在下载数据包，请稍候…</p>
+                        <p class="text-sm leading-6 text-base-content/70">{{ $t("startup-modal.pack_downloading_wait") }}</p>
                         <div class="mt-4 h-1.5 w-full overflow-hidden rounded-xs bg-base-content/10">
                             <div
                                 class="h-full bg-primary transition-[width] duration-200"

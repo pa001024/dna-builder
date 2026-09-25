@@ -1675,13 +1675,13 @@ const launchGame = async () => {
                                 v-model.lazy="gameUpdateStore.customChannel"
                                 type="text"
                                 class="bg-transparent border-none outline-hidden text-sm min-w-36 placeholder:text-base-content/30"
-                                placeholder="自定义 channel"
+                                :placeholder="$t('game-update.customChannelPlaceholder')"
                             />
                             <Select v-model="gameUpdateStore.selectedChannel" variant="ghost" class="min-w-20">
                                 <SelectItem v-for="channel in channels" :key="channel.value" :value="channel.value" xs>
                                     {{ channel.name }}
                                 </SelectItem>
-                                <SelectItem v-if="!setting.safeMode" :value="gameUpdateStore.CUSTOM_CHANNEL_VALUE" xs>自定义</SelectItem>
+                                <SelectItem v-if="!setting.safeMode" :value="gameUpdateStore.CUSTOM_CHANNEL_VALUE" xs>{{ $t('game-update.custom') }}</SelectItem>
                             </Select>
                         </div>
                     </div>
@@ -1717,7 +1717,7 @@ const launchGame = async () => {
                         class="group relative flex items-center gap-2 bg-base-content/3 px-3 py-1.5 rounded-xs border border-base-content/15 transition-colors duration-200 hover:border-primary/40 cursor-pointer"
                     >
                         <input v-model="showOptionalVoicePacks" type="checkbox" class="checkbox checkbox-xs" />
-                        <span class="text-sm">语音包</span>
+                        <span class="text-sm">{{ $t('game-update.voicePack') }}</span>
                     </label>
                 </div>
             </header>
@@ -1841,8 +1841,8 @@ const launchGame = async () => {
                     style="animation-delay: 280ms"
                 >
                     <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-semibold text-base-content/45">语音包</span>
-                        <span class="text-xs text-base-content/50">本地缓存</span>
+                        <span class="text-[11px] font-semibold text-base-content/45">{{ $t('game-update.voicePack') }}</span>
+                        <span class="text-xs text-base-content/50">{{ $t('game-update.localCache') }}</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div
@@ -1868,7 +1868,7 @@ const launchGame = async () => {
                                           : "下载"
                                 }}
                             </button>
-                            <span v-else class="text-xs text-success">已下载</span>
+                            <span v-else class="text-xs text-success">{{ $t('game-update.downloaded') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1907,7 +1907,7 @@ const launchGame = async () => {
                             <div class="text-xs font-mono text-primary tabular-nums" v-if="isDownloading">
                                 {{ downloadSpeed }}
                             </div>
-                            <div class="text-xs text-warning" v-else-if="isDownloadPaused">已暂停</div>
+                            <div class="text-xs text-warning" v-else-if="isDownloadPaused">{{ $t('game-update.paused') }}</div>
                         </div>
                     </div>
 
@@ -1926,7 +1926,7 @@ const launchGame = async () => {
                         <button
                             v-if="isDownloading && !isPauseRequested"
                             @click="gameUpdateStore.pauseCurrentDownload()"
-                            title="暂停下载"
+                            :title="$t('game-update.pauseDownload')"
                             class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-xs bg-warning text-warning-content transition-colors duration-150 hover:bg-warning/90"
                         >
                             <Icon icon="ri:pause-fill" class="size-3.5" />
@@ -1934,7 +1934,7 @@ const launchGame = async () => {
                         <button
                             v-else-if="isDownloading && isPauseRequested"
                             disabled
-                            title="暂停中"
+                            :title="$t('game-update.pausing')"
                             class="flex size-6 shrink-0 cursor-not-allowed items-center justify-center rounded-xs bg-warning/60 text-warning-content/70"
                         >
                             <Icon icon="ri:pause-fill" class="size-3.5 animate-pulse" />
@@ -1942,7 +1942,7 @@ const launchGame = async () => {
                         <button
                             v-else-if="isDownloadPaused"
                             @click="resumeCurrentDownload()"
-                            title="继续下载"
+                            :title="$t('game-update.resumeDownload')"
                             class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-xs bg-primary text-primary-content transition-colors duration-150 hover:bg-primary/90"
                         >
                             <Icon icon="ri:play-fill" class="size-3.5" />
@@ -2013,7 +2013,7 @@ const launchGame = async () => {
     <dialog class="modal" :class="{ 'modal-open': hotUpdateDetailOpen }" @click="hotUpdateDetailOpen = false">
         <div class="modal-box bg-base-100 w-[80%] min-w-72 max-w-160" @click.stop>
             <div class="text-center">
-                <h3 class="text-xl font-bold">热更详情</h3>
+                <h3 class="text-xl font-bold">{{ $t('game-update.hotUpdateDetail') }}</h3>
             </div>
             <div class="max-h-96 overflow-y-auto py-4">
                 <div v-if="hotUpdateDetailEntries.length" class="space-y-4">
@@ -2034,10 +2034,10 @@ const launchGame = async () => {
                         </div>
                     </div>
                 </div>
-                <div v-else class="text-center text-base-content/45">暂无热更</div>
+                <div v-else class="text-center text-base-content/45">{{ $t('game-update.noHotUpdate') }}</div>
             </div>
             <div class="modal-action justify-center">
-                <button class="btn btn-primary" @click="hotUpdateDetailOpen = false">关闭</button>
+                <button class="btn btn-primary" @click="hotUpdateDetailOpen = false">{{ $t('game-update.close') }}</button>
             </div>
         </div>
         <div class="modal-backdrop" @click="hotUpdateDetailOpen = false" />

@@ -165,7 +165,7 @@ async function uploadPostAbyssUsage() {
             >
                 <span v-if="abyssUploadLoading" class="loading loading-spinner loading-xs" />
                 <Icon v-else icon="ri:upload-cloud-line" />
-                上传深渊数据
+                {{ $t('dna-post-detail.upload_abyss_data') }}
             </button>
         </div>
 
@@ -252,16 +252,16 @@ async function uploadPostAbyssUsage() {
                                     <SRouterLink :to="`/dna/mine/${comment.userId}`" class="cursor-pointer">
                                         <img
                                             :src="comment.userHeadUrl"
-                                            alt="用户头像"
+                                            :alt="$t('common.user_avatar')"
                                             class="w-10 h-10 rounded-full object-cover border border-base-300"
                                         />
                                     </SRouterLink>
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
                                             <span class="font-medium text-base-content">{{ comment.userName }}</span>
-                                            <span v-if="comment.isOfficial === 1" class="badge badge-sm badge-primary text-xs">官方</span>
+                                            <span v-if="comment.isOfficial === 1" class="badge badge-sm badge-primary text-xs">{{ $t('common.official') }}</span>
                                             <span v-if="comment.isCreator === 1" class="badge badge-sm badge-secondary text-xs"
-                                                >创作者</span
+                                                >{{ $t('dna-post-detail.creator') }}</span
                                             >
                                         </div>
                                         <div class="text-xs text-base-content/60">
@@ -312,8 +312,8 @@ async function uploadPostAbyssUsage() {
 
                             <!-- 无评论提示 -->
                             <div v-if="comments.length === 0" class="text-center py-8">
-                                <p class="text-base-content/60 mb-2">暂无评论</p>
-                                <p class="text-xs text-base-content/40">成为第一个评论的人吧</p>
+                                <p class="text-base-content/60 mb-2">{{ $t('dna-post-detail.no_comments') }}</p>
+                                <p class="text-xs text-base-content/40">{{ $t('dna-post-detail.be_first_commenter') }}</p>
                             </div>
                         </div>
 
@@ -321,17 +321,17 @@ async function uploadPostAbyssUsage() {
                         <div v-if="commentHasNext" class="flex justify-center mt-6">
                             <button class="btn btn-outline" :disabled="moreLoading" @click="loadMoreComments">
                                 <span v-if="moreLoading" class="loading loading-spinner loading-xs mr-2" />
-                                加载更多
+                                {{ $t('common.load_more') }}
                             </button>
                         </div>
 
                         <!-- 发表评论 -->
                         <div class="mt-6 pt-6 border-t border-base-200">
-                            <h3 class="text-lg font-semibold mb-4">发表评论</h3>
+                            <h3 class="text-lg font-semibold mb-4">{{ $t('dna-post-detail.post_comment') }}</h3>
                             <div class="space-y-4">
                                 <textarea
                                     v-model="commentContent"
-                                    placeholder="写下你的评论..."
+                                    :placeholder="$t('dna-post-detail.comment_placeholder')"
                                     class="w-full min-h-30 bg-base-100 text-base-content rounded-none border-b border-base-content/20 px-0.5 pb-1 text-[13px] outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
                                     :disabled="commentLoading"
                                 />
@@ -353,8 +353,8 @@ async function uploadPostAbyssUsage() {
 
             <div v-else class="flex justify-center items-center h-full">
                 <div class="text-center">
-                    <p class="text-lg mb-4">无法获取帖子详情</p>
-                    <button class="btn btn-secondary" @click="loadPostDetail()">重试</button>
+                    <p class="text-lg mb-4">{{ $t('dna-post-detail.load_failed') }}</p>
+                    <button class="btn btn-secondary" @click="loadPostDetail()">{{ $t('common.retry') }}</button>
                 </div>
             </div>
         </div>

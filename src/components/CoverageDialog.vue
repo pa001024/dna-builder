@@ -117,7 +117,7 @@ const commitPercent = () => {
                     <button
                         type="button"
                         class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-sm leading-none text-base-content/60 transition-colors duration-150 active:scale-[0.97] hover:border-primary/50 hover:text-primary"
-                        aria-label="覆盖率减1%"
+                        :aria-label="$t('coverage-dialog.coverage_minus')"
                         @click="stepCoverage(-1)"
                     >
                         −
@@ -127,8 +127,8 @@ const commitPercent = () => {
                             v-model="percentText"
                             type="text"
                             inputmode="numeric"
-                            class="w-10 bg-transparent text-center font-orbitron text-[13px] font-semibold tabular-nums text-primary outline-none"
-                            aria-label="覆盖率百分比"
+                            class="w-10 bg-transparent text-center font-orbitron text-[13px] font-semibold text-primary outline-none"
+                            :aria-label="$t('coverage-dialog.coverage_percent')"
                             @blur="commitPercent"
                             @keydown.enter.prevent="commitPercent"
                         />
@@ -137,7 +137,7 @@ const commitPercent = () => {
                     <button
                         type="button"
                         class="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-sm leading-none text-base-content/60 transition-colors duration-150 active:scale-[0.97] hover:border-primary/50 hover:text-primary"
-                        aria-label="覆盖率加1%"
+                        :aria-label="$t('coverage-dialog.coverage_plus')"
                         @click="stepCoverage(1)"
                     >
                         +

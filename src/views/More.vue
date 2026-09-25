@@ -730,12 +730,12 @@ onBeforeUnmount(() => {
                 <span class="h-8 w-36 rounded-lg" :style="{ background: makeTileTheme(customColorState.hex).gradient }" />
             </div>
             <div class="modal-action">
-                <button class="btn btn-sm" @click="closeCustomColor">{{ $t("more.contextMenu.cancel") }}</button>
+                <button class="btn btn-sm" @click="closeCustomColor">{{ $t("取消") }}</button>
                 <button class="btn btn-sm btn-primary" @click="applyCustomColor">{{ $t("more.contextMenu.confirm") }}</button>
             </div>
         </div>
         <form method="dialog" class="modal-backdrop">
-            <button>{{ $t("more.contextMenu.cancel") }}</button>
+            <button>{{ $t("取消") }}</button>
         </form>
     </dialog>
 </template>

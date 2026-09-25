@@ -168,7 +168,7 @@ const removeBuff = (index: number) => {
         <!-- 添加新buff的表单 -->
         <div class="flex gap-3 mb-4">
             <div class="flex-1">
-                <div class="text-xs text-base-content/60 mb-1">属性</div>
+                <div class="text-xs text-base-content/60 mb-1">{{ $t('custom-buff-editor.attribute') }}</div>
                 <Select v-model="newBuff.property" class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
                     <SelectItem v-for="prop in properties" :key="prop" :value="prop">
                         {{ prop }}
@@ -180,15 +180,15 @@ const removeBuff = (index: number) => {
             </div>
 
             <div class="flex-1">
-                <div class="text-xs text-base-content/60 mb-1">数值</div>
-                <input v-model="newBuff.value" type="number" step="0.01" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums" placeholder="请输入数值" />
+                <div class="text-xs text-base-content/60 mb-1">{{ $t('custom-buff-editor.value') }}</div>
+                <input v-model="newBuff.value" type="number" step="0.01" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums" :placeholder="$t('custom-buff-editor.value_placeholder')" />
                 <div v-if="errors.value" class="text-xs text-error mt-1">
                     {{ errors.value }}
                 </div>
             </div>
 
             <div class="flex items-end">
-                <button class="btn btn-primary h-10" @click="addBuff">添加</button>
+                <button class="btn btn-primary h-10" @click="addBuff">{{ $t('custom-buff-editor.add') }}</button>
             </div>
         </div>
 
@@ -203,11 +203,11 @@ const removeBuff = (index: number) => {
                     <span class="font-medium">{{ buff[0] }}</span>
                     <span class="text-sm text-base-content/60">{{ formatProp(buff[0], buff[1]) }}</span>
                 </div>
-                <button class="btn btn-ghost btn-error btn-sm" @click="removeBuff(index)">移除</button>
+                <button class="btn btn-ghost btn-error btn-sm" @click="removeBuff(index)">{{ $t('custom-buff-editor.remove') }}</button>
             </div>
         </div>
 
         <!-- 空状态提示 -->
-        <div v-else class="py-4 text-center text-sm text-base-content/45">暂无自定义BUFF，请添加</div>
+        <div v-else class="py-4 text-center text-sm text-base-content/45">{{ $t('custom-buff-editor.empty_hint') }}</div>
     </div>
 </template>

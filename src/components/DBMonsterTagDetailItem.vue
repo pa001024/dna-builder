@@ -173,7 +173,7 @@ function formatBonusValue(value: number): string {
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <SRouterLink
                         :to="`/db/monstertag/${monsterTag.id}`"
-                        class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                     >
                         {{ monsterTag.name }}
                     </SRouterLink>
@@ -200,7 +200,7 @@ function formatBonusValue(value: number): string {
                     class="flex items-start justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="shrink-0 pt-0.5 text-xs text-base-content/60">{{ $t(key) }}</span>
-                    <span class="break-all text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="break-all text-right font-orbitron text-[13px] font-semibold text-primary">{{
                         formatVarValue(key, value)
                     }}</span>
                 </div>
@@ -217,7 +217,7 @@ function formatBonusValue(value: number): string {
                         class="flex items-start justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="shrink-0 pt-0.5 text-xs text-base-content/60">{{ $t(name) }}</span>
-                        <span class="break-all text-right font-orbitron text-[13px] font-semibold tabular-nums text-success">{{
+                        <span class="break-all text-right font-orbitron text-[13px] font-semibold text-success">{{
                             formatBonusValue(value)
                         }}</span>
                     </div>
@@ -259,7 +259,7 @@ function formatBonusValue(value: number): string {
                     step="1"
                 />
             </div>
-            <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                 <DBMonsterCompactCard
                     v-for="monster in relatedMonsters"
                     :key="monster.id"

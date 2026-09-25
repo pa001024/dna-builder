@@ -53,8 +53,8 @@ function getRewardDetailsById(id: number) {
                 <p class="mt-1 text-sm text-base-content/70">{{ weaponVerifyData.event.description }}</p>
             </div>
             <div class="text-right text-xs text-base-content/60">
-                <div>推荐解锁等级 Lv.{{ weaponVerifyData.event.jumpUnlockCondition }}</div>
-                <div>12 个关卡 · {{ weaponVerifyData.rewards.at(-1)?.requiredStar || 0 }} 星奖励</div>
+                <div>{{ $t('weapon-verify-event.recommended_unlock_level', { level: weaponVerifyData.event.jumpUnlockCondition }) }}</div>
+                <div>{{ $t('weapon-verify-event.levels_and_star_reward', { levels: 12, stars: weaponVerifyData.rewards.at(-1)?.requiredStar || 0 }) }}</div>
             </div>
         </div>
 
@@ -63,7 +63,7 @@ function getRewardDetailsById(id: number) {
                 <div v-for="[group, levels] in levelGroups" :key="group" class="space-y-2">
                     <div class="flex items-center justify-between text-xs text-base-content/60">
                         <span>{{ group === 1 ? "知其行" : group === 2 ? "观其术" : "战其道" }}</span>
-                        <span>推荐等级 {{ Math.min(...levels.map(level => level.recommendedLevel)) }}+</span>
+                        <span>{{ $t('weapon-verify-event.recommended_level', { level: Math.min(...levels.map(level => level.recommendedLevel)) }) }}</span>
                     </div>
                     <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
                         <button
@@ -91,7 +91,7 @@ function getRewardDetailsById(id: number) {
             <div v-if="selectedLevel" class="rounded border border-base-300 bg-base-100 p-3">
                 <div class="flex items-start justify-between gap-2">
                     <div>
-                        <div class="text-xs text-primary">关卡 {{ selectedLevel.number }}</div>
+                        <div class="text-xs text-primary">{{ $t('weapon-verify-event.level_n', { n: selectedLevel.number }) }}</div>
                         <h3 class="mt-1 font-bold">{{ selectedLevel.name }}</h3>
                     </div>
                     <span class="badge badge-outline">Lv.{{ selectedLevel.recommendedLevel }}</span>
@@ -99,25 +99,25 @@ function getRewardDetailsById(id: number) {
                 <p class="mt-2 text-sm text-base-content/70">{{ selectedLevel.description }}</p>
                 <dl class="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div class="rounded bg-base-200 p-2">
-                        <dt class="text-base-content/60">胜利目标</dt>
+                        <dt class="text-base-content/60">{{ $t('weapon-verify-event.victory_goal') }}</dt>
                         <dd class="mt-1 font-medium">{{ formatTarget(selectedLevel) }}</dd>
                     </div>
                     <div class="rounded bg-base-200 p-2">
-                        <dt class="text-base-content/60">限时</dt>
-                        <dd class="mt-1 font-medium">{{ selectedLevel.totalTime }} 秒</dd>
+                        <dt class="text-base-content/60">{{ $t('common.limited_time') }}</dt>
+                        <dd class="mt-1 font-medium">{{ $t('common.count_seconds', { count: selectedLevel.totalTime }) }}</dd>
                     </div>
                     <div class="rounded bg-base-200 p-2">
-                        <dt class="text-base-content/60">三星门槛</dt>
-                        <dd class="mt-1 font-medium">{{ selectedLevel.goalTimes.slice(1).join(" / ") }} 秒</dd>
+                        <dt class="text-base-content/60">{{ $t('weapon-verify-event.three_star_threshold') }}</dt>
+                        <dd class="mt-1 font-medium">{{ $t('common.count_seconds', { count: selectedLevel.goalTimes.slice(1).join(" / ") }) }}</dd>
                     </div>
                     <div class="rounded bg-base-200 p-2">
-                        <dt class="text-base-content/60">胜利模式</dt>
+                        <dt class="text-base-content/60">{{ $t('weapon-verify-event.victory_mode') }}</dt>
                         <dd class="mt-1 font-medium">{{ selectedLevel.winMode === 1 ? "首领战" : "歼灭战" }}</dd>
                     </div>
                 </dl>
                 <div v-if="selectedLevel.levelType === 2 && selectedLevel.dungeonMonsters.length" class="mt-3">
-                    <div class="mb-2 text-xs text-base-content/60">目标敌人</div>
-                    <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                    <div class="mb-2 text-xs text-base-content/60">{{ $t('weapon-verify-event.target_enemies') }}</div>
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                         <DBMonsterCompactCard
                             v-for="monsterId in selectedLevel.dungeonMonsters"
                             :key="monsterId"
@@ -127,14 +127,14 @@ function getRewardDetailsById(id: number) {
                 </div>
                 <div class="mt-3 space-y-2 text-xs">
                     <div class="flex flex-wrap items-center gap-1.5">
-                        <span class="text-base-content/60">可用词条：</span>
+                        <span class="text-base-content/60">{{ $t('weapon-verify-event.available_affixes') }}</span>
                         <FullTooltip v-for="id in selectedLevel.affixIds" :key="id" side="top">
                             <span class="badge badge-primary badge-sm cursor-help">{{ getAffixName(id) }}</span>
                             <template #tooltip>
                                 <div class="w-72 max-w-[calc(100vw-2rem)] space-y-2 leading-normal">
                                     <div class="flex items-center justify-between gap-3">
                                         <span class="font-semibold">{{ getAffixName(id) }}</span>
-                                        <span class="badge badge-outline badge-sm">描述</span>
+                                        <span class="badge badge-outline badge-sm">{{ $t('common.description') }}</span>
                                     </div>
                                     <p class="whitespace-normal text-base-content/75">{{ getAffixDescription(id) }}</p>
                                 </div>
@@ -182,11 +182,11 @@ function getRewardDetailsById(id: number) {
                 <div class="space-y-2">
                     <div v-for="reward in weaponVerifyData.rewards" :key="reward.rewardId" class="rounded bg-base-200 p-2 text-xs">
                         <div class="mb-2 flex items-center justify-between">
-                            <span class="font-medium">{{ reward.requiredStar }} 星</span>
+                            <span class="font-medium">{{ $t('common.count_stars', { count: reward.requiredStar }) }}</span>
                         </div>
                         <RewardItem :reward="getRewardDetailsById(reward.rewardId)" />
                     </div>
-                    <div class="rounded bg-base-200 p-2 text-xs text-base-content/70">活动规则：{{ weaponVerifyData.event.rule }}</div>
+                    <div class="rounded bg-base-200 p-2 text-xs text-base-content/70">{{ $t('weapon-verify-event.event_rule', { rule: weaponVerifyData.event.rule }) }}</div>
                 </div>
             </div>
         </details>

@@ -251,9 +251,9 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
         legend: {
             top: 6,
             data: [
-                t("monster-detail.hp"),
-                t("monster-detail.shield"),
-                t("monster-detail.effectiveHealth"),
+                t("生命"),
+                t("护盾"),
+                t("有效生命"),
                 t("monster-detail.levelDamageReductionRate"),
             ],
         },
@@ -318,7 +318,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
         ],
         series: [
             {
-                name: t("monster-detail.hp"),
+                name: t("生命"),
                 type: "line",
                 smooth: true,
                 showSymbol: false,
@@ -332,7 +332,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
                 data: levelTrendData.value.levels.map((level, index) => [level, levelTrendData.value.hp[index]]),
             },
             {
-                name: t("monster-detail.shield"),
+                name: t("护盾"),
                 type: "line",
                 smooth: true,
                 showSymbol: false,
@@ -346,7 +346,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
                 data: levelTrendData.value.levels.map((level, index) => [level, levelTrendData.value.shield[index]]),
             },
             {
-                name: t("monster-detail.effectiveHealth"),
+                name: t("有效生命"),
                 type: "line",
                 smooth: true,
                 showSymbol: false,
@@ -454,14 +454,14 @@ function getFactionName(faction: number | undefined): string {
                     <img :src="leveledMonster.url" :alt="$t(monster.n)" class="h-full w-full object-cover object-top" />
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                         <span class="h-px w-6 bg-primary" aria-hidden="true" />
                         Monster File
                     </p>
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/monster/${monster.id}`"
-                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(monster.n) }}
                         </SRouterLink>
@@ -485,7 +485,7 @@ function getFactionName(faction: number | undefined): string {
                     <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-base-content/60">
                         <label class="flex items-center gap-1">
                             <input v-model="showRougeStats" type="checkbox" class="toggle toggle-sm toggle-primary" />
-                            <span>{{ $t("monster-detail.badgeTitle") }}</span>
+                            <span>{{ $t("迷津") }}</span>
                         </label>
                         <label class="flex items-center gap-1">
                             <input v-model="useEightHpMultiplier" type="checkbox" class="checkbox checkbox-xs checkbox-primary" />
@@ -502,20 +502,20 @@ function getFactionName(faction: number | undefined): string {
             <SectionHeader no-animate compact kicker="ATTRIBUTES" :title="$t('基础属性')" />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-1.5 text-sm">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.attack") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="text-xs text-base-content/60">{{ $t("攻击") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ formatBigNumber(leveledMonster.atk) }}
                     </span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.defense") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="text-xs text-base-content/60">{{ $t("防御") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ formatBigNumber(leveledMonster.def) }}
                     </span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.hp") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="text-xs text-base-content/60">{{ $t("生命") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ formatBigNumber(leveledMonster.hp) }}
                     </span>
                 </div>
@@ -523,8 +523,8 @@ function getFactionName(faction: number | undefined): string {
                     v-if="leveledMonster.es !== undefined"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.shield") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="text-xs text-base-content/60">{{ $t("护盾") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ formatBigNumber(leveledMonster.es) }}
                     </span>
                 </div>
@@ -533,13 +533,13 @@ function getFactionName(faction: number | undefined): string {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("monster-detail.stance") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ formatBigNumber(leveledMonster.tn) }}
                     </span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("monster-detail.defenseDamageReductionRate") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ format100(defenseDamageReductionRate, 2) }}
                     </span>
                 </div>
@@ -548,13 +548,13 @@ function getFactionName(faction: number | undefined): string {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("monster-detail.levelDamageReductionRate") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ format100(levelDamageReductionRate, 2) }}
                     </span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t("monster-detail.effectiveHealth") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="text-xs text-base-content/60">{{ $t("有效生命") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ formatBigNumber(effectiveHealth) }}
                     </span>
                 </div>
@@ -620,7 +620,7 @@ function getFactionName(faction: number | undefined): string {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="text-xs text-base-content/60">{{ $t("monster-detail.dropMonsterTag") }}</span>
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                                 entry.MonsterTag
                             }}</span>
                         </div>
@@ -629,7 +629,7 @@ function getFactionName(faction: number | undefined): string {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="text-xs text-base-content/60">{{ $t("monster-detail.dropMechanismId") }}</span>
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                                 entry.DropMechanismId
                             }}</span>
                         </div>
@@ -638,7 +638,7 @@ function getFactionName(faction: number | undefined): string {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="text-xs text-base-content/60">{{ $t("monster-detail.dropRate") }}</span>
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                                 entry.BoxDropRate
                             }}</span>
                         </div>
@@ -647,7 +647,7 @@ function getFactionName(faction: number | undefined): string {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="text-xs text-base-content/60">{{ $t("monster-detail.killScore") }}</span>
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                                 entry.KillScore
                             }}</span>
                         </div>

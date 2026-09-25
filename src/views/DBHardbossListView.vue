@@ -80,7 +80,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbh-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索梦魇残声 ID/名称/描述/怪物名称（支持拼音）..."
+                            :placeholder="$t('db-hardboss-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -100,7 +100,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbh-item-active" })
                             class="flex flex-col items-center justify-center py-20 text-base-content/45"
                         >
                             <Icon icon="ri:search-line" class="mb-4 h-12 w-12 opacity-40" />
-                            <p class="text-sm">未找到匹配的梦魇残声</p>
+                            <p class="text-sm">{{ $t('db-hardboss-list.no_match') }}</p>
                         </div>
 
                         <div v-else class="space-y-2">
@@ -139,13 +139,13 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbh-item-active" })
                                         </h3>
                                         <!-- 描述 -->
                                         <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-base-content/55">
-                                            {{ boss.desc }}
+                                            {{ $t(boss.desc) }}
                                         </p>
                                     </div>
                                     <!-- 难度数 / 幽灵 ID -->
                                     <div class="ml-2 flex shrink-0 flex-col items-end gap-1">
                                         <span
-                                            class="rounded-xs bg-primary/10 px-2 py-0.5 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                            class="rounded-xs bg-primary/10 px-2 py-0.5 font-orbitron text-[11px] font-semibold text-primary"
                                         >
                                             {{ boss.diff.length }} 个难度
                                         </span>
@@ -160,8 +160,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbh-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                        共
-                        <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredBosses.length }}</b> 个梦魇残声
+                        {{ $t('common.total_count') }}
+                        <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredBosses.length }}</b> {{ $t('db-hardboss-list.hardboss_count') }}
                     </p>
                 </div>
             </div>

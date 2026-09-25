@@ -741,7 +741,11 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            :placeholder="showFullTextSearch ? '全文搜索任务/对话内容（不支持拼音）...' : '搜索任务 ID/名称（支持拼音）...'"
+                            :placeholder="
+                                showFullTextSearch
+                                    ? $t('questchain-list.full_text_search_placeholder')
+                                    : $t('questchain-list.search_placeholder')
+                            "
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -763,7 +767,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                             "
                             @click="toggleTypeFilterRow()"
                         >
-                            类型
+                            {{ $t('common.type') }}
                         </button>
                         <button
                             type="button"
@@ -775,7 +779,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                             "
                             @click="showImprCheckOnly = !showImprCheckOnly"
                         >
-                            印象检定
+                            {{ $t('common.impression_check') }}
                         </button>
                         <button
                             type="button"
@@ -787,7 +791,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                             "
                             @click="showImprIncreaseOnly = !showImprIncreaseOnly"
                         >
-                            印象增加
+                            {{ $t('common.impression_increase') }}
                         </button>
                         <button
                             type="button"
@@ -799,7 +803,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                             "
                             @click="showFullTextSearch = !showFullTextSearch"
                         >
-                            全文搜索
+                            {{ $t('common.full_text_search') }}
                         </button>
                         <button
                             type="button"
@@ -834,7 +838,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                             "
                             @click="selectedTypeGroup = 0"
                         >
-                            全部
+                            {{ $t('common.all') }}
                         </button>
                         <button
                             v-for="type in questTypeOptions"
@@ -847,7 +851,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                             "
                             @click="selectedTypeGroup = type.value"
                         >
-                            {{ type.display.name }}
+                            {{ $t(type.display.name) }}
                         </button>
                     </div>
 
@@ -863,7 +867,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                             "
                             @click="selectedVersion = ''"
                         >
-                            全部
+                            {{ $t('common.all') }}
                         </button>
                         <button
                             v-for="version in versionOptions"
@@ -906,7 +910,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                                 <div class="flex items-start gap-3 p-3">
                                     <img
                                         :src="`/imgs/tp/${getQuestChainTypeDisplay(questChainResult.questChain).icon}.webp`"
-                                        :alt="getQuestChainTypeDisplay(questChainResult.questChain).name"
+                                        :alt="$t(getQuestChainTypeDisplay(questChainResult.questChain).name)"
                                         class="size-12 shrink-0 rounded-xs object-contain"
                                         loading="lazy"
                                     />
@@ -931,20 +935,20 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                                             >
                                             <span>{{ $t(questChainResult.questChain.episode) }}</span>
                                             <span v-if="questChainResult.questChain.type" class="inline-flex items-center gap-1">
-                                                <span>{{ getQuestChainTypeDisplay(questChainResult.questChain).name }}</span>
+                                                <span>{{ $t(getQuestChainTypeDisplay(questChainResult.questChain).name) }}</span>
                                             </span>
                                             <span v-if="questChainResult.questChain.版本" class="font-mono tabular-nums">v{{ questChainResult.questChain.版本 }}</span>
                                             <span
                                                 v-if="hasQuestChainImprCheck(questChainResult.questChain.id)"
                                                 class="rounded-xs border border-secondary/40 bg-secondary/10 px-1 text-[10px] leading-4 tracking-wide text-secondary"
                                             >
-                                                印象检定
+                                                {{ $t('common.impression_check') }}
                                             </span>
                                             <span
                                                 v-if="hasQuestChainImprIncrease(questChainResult.questChain.id)"
                                                 class="rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 tracking-wide text-success"
                                             >
-                                                印象增加
+                                                {{ $t('common.impression_increase') }}
                                             </span>
                                         </div>
 
@@ -953,7 +957,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                                             v-if="showFullTextSearch && searchKeyword.trim() && questChainResult.snippet"
                                             class="mt-2 text-xs leading-relaxed text-base-content/70"
                                         >
-                                            <span class="text-base-content/45">匹配：</span>
+                                            <span class="text-base-content/45">{{ $t('common.match') }}</span>
                                             <span v-if="questChainResult.snippet.prefixEllipsis">...</span>
                                             <template
                                                 v-for="(segment, index) in questChainResult.snippet.segments"
@@ -983,7 +987,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredQuestChains.length }}</b> 个任务
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredQuestChains.length }}</b> {{ $t('questchain-list.quest_count') }}
                     </p>
                 </div>
             </div>

@@ -152,7 +152,7 @@ const isSignFinished = computed(() => {
     <div class="space-y-3">
         <div v-if="!nobtn" class="flex justify-between items-center">
             <span class="text-xs tracking-wide text-base-content/50">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
-            <Tooltip tooltip="刷新" side="bottom">
+            <Tooltip :tooltip="$t('common.refresh')" side="bottom">
                 <button
                     type="button"
                     class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
@@ -175,7 +175,7 @@ const isSignFinished = computed(() => {
                 class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
                 @click="loadData(true)"
             >
-                重试
+                {{ $t('common.retry') }}
             </button>
         </div>
 
@@ -185,17 +185,17 @@ const isSignFinished = computed(() => {
                 <SectionHeader no-animate compact kicker="SIGN-IN" :title="$t('签到日历')" />
                 <div v-if="calendarData?.period" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                     <div class="flex items-center gap-2 text-xs text-base-content/55">
-                        <span>周期:</span>
-                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ calendarData.period.name }}</span>
+                        <span>{{ $t('dna-sign-calendar.period') }}</span>
+                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{ calendarData.period.name }}</span>
                     </div>
                     <div class="flex items-center gap-2 text-xs text-base-content/55">
-                        <span>已签到:</span>
-                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ signedDaysCount }} 天</span>
+                        <span>{{ $t('dna-sign-calendar.signed_in') }}</span>
+                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{ signedDaysCount }} 天</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <!-- 自动签到开关 -->
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-base-content/60">自动签到</span>
+                            <span class="text-xs text-base-content/60">{{ $t('dna-sign-calendar.auto_sign_in') }}</span>
                             <input
                                 type="checkbox"
                                 class="toggle toggle-primary toggle-sm"
@@ -213,12 +213,12 @@ const isSignFinished = computed(() => {
                         >
                             <Icon v-if="signing" icon="ri:refresh-line" class="size-4 animate-spin" />
                             <Icon v-else icon="ri:checkbox-circle-fill" class="size-4" />
-                            签到
+                            {{ $t('dna-sign-calendar.sign_in') }}
                         </button>
                         <span
                             v-else-if="calendarData.todaySignin"
                             class="rounded-xs border border-primary/40 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary"
-                            >今日已签到</span
+                            >{{ $t('dna-sign-calendar.signed_in_today') }}</span
                         >
                     </div>
                 </div>
@@ -227,7 +227,7 @@ const isSignFinished = computed(() => {
                     <!-- 角色信息行 -->
                     <div class="flex items-center justify-between gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                         <div class="flex items-center gap-2.5">
-                            <img :src="calendarData.roleInfo.headUrl" alt="角色头像" class="h-10 w-10 rounded-full border border-base-content/15 object-cover" />
+                            <img :src="calendarData.roleInfo.headUrl" :alt="$t('common.char_avatar')" class="h-10 w-10 rounded-full border border-base-content/15 object-cover" />
                             <div>
                                 <div class="text-sm font-semibold">
                                     {{ calendarData.roleInfo.roleName }}
@@ -236,8 +236,8 @@ const isSignFinished = computed(() => {
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-xs text-base-content/55">金币</div>
-                            <div class="font-orbitron text-lg font-semibold tabular-nums text-primary">
+                            <div class="text-xs text-base-content/55">{{ $t('dna-sign-calendar.coins') }}</div>
+                            <div class="font-orbitron text-lg font-semibold text-primary">
                                 {{ calendarData.userGoldNum }}
                             </div>
                         </div>
@@ -258,7 +258,7 @@ const isSignFinished = computed(() => {
                                 'border-base-content/10 bg-base-content/3 text-base-content/75': !dayInfo.isSigned,
                             }"
                         >
-                            <div class="font-orbitron text-sm font-semibold tabular-nums">
+                            <div class="font-orbitron text-sm font-semibold">
                                 {{ dayInfo.day }}
                             </div>
                             <div class="flex flex-col items-center gap-0.5">
@@ -283,8 +283,8 @@ const isSignFinished = computed(() => {
                                 {{ task.remark }}
                             </div>
                             <div class="shrink-0 text-xs text-base-content/55">
-                                <span>进度:</span>
-                                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ task.completeTimes }}/{{ task.times }}</span>
+                                <span>{{ $t('dna-sign-calendar.progress') }}</span>
+                                <span class="font-orbitron text-[13px] font-semibold text-primary">{{ task.completeTimes }}/{{ task.times }}</span>
                             </div>
                         </div>
 
@@ -310,7 +310,7 @@ const isSignFinished = computed(() => {
                 </div>
 
                 <div v-else class="flex flex-col items-center justify-center py-8">
-                    <p class="text-base-content/55">暂无任务数据</p>
+                    <p class="text-base-content/55">{{ $t('dna-sign-calendar.no_tasks') }}</p>
                 </div>
             </section>
         </div>

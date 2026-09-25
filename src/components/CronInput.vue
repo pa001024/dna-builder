@@ -178,12 +178,12 @@ function toNumber(value: number | string) {
                     emitCron(buildIntervalCron(String($event) as Exclude<CronMode, 'custom'>, parsed.interval))
                 "
             >
-                <SelectItem value="year">年</SelectItem>
-                <SelectItem value="month">月</SelectItem>
-                <SelectItem value="week">周</SelectItem>
-                <SelectItem value="day">日</SelectItem>
-                <SelectItem value="hour">小时</SelectItem>
-                <SelectItem value="minute">分钟</SelectItem>
+                <SelectItem value="year">{{ $t('cron-input.unit_year') }}</SelectItem>
+                <SelectItem value="month">{{ $t('cron-input.unit_month') }}</SelectItem>
+                <SelectItem value="week">{{ $t('cron-input.unit_week') }}</SelectItem>
+                <SelectItem value="day">{{ $t('cron-input.unit_day') }}</SelectItem>
+                <SelectItem value="hour">{{ $t('common.hour') }}</SelectItem>
+                <SelectItem value="minute">{{ $t('common.minute') }}</SelectItem>
             </Select>
         </div>
 
@@ -194,13 +194,13 @@ function toNumber(value: number | string) {
                 :model-value="parsed.weekday"
                 @update:model-value="emitCron(buildWeekCron(toNumber($event), parsed.hour, parsed.minute))"
             >
-                <SelectItem :value="1">周一</SelectItem>
-                <SelectItem :value="2">周二</SelectItem>
-                <SelectItem :value="3">周三</SelectItem>
-                <SelectItem :value="4">周四</SelectItem>
-                <SelectItem :value="5">周五</SelectItem>
-                <SelectItem :value="6">周六</SelectItem>
-                <SelectItem :value="0">周日</SelectItem>
+                <SelectItem :value="1">{{ $t('cron-input.weekday_mon') }}</SelectItem>
+                <SelectItem :value="2">{{ $t('cron-input.weekday_tue') }}</SelectItem>
+                <SelectItem :value="3">{{ $t('cron-input.weekday_wed') }}</SelectItem>
+                <SelectItem :value="4">{{ $t('cron-input.weekday_thu') }}</SelectItem>
+                <SelectItem :value="5">{{ $t('cron-input.weekday_fri') }}</SelectItem>
+                <SelectItem :value="6">{{ $t('cron-input.weekday_sat') }}</SelectItem>
+                <SelectItem :value="0">{{ $t('cron-input.weekday_sun') }}</SelectItem>
             </Select>
             <Select
                 :disabled="disabled"

@@ -22,7 +22,7 @@ const walnut = computed(() => walnutData.find(w => w.id === walnutId.value))
         </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">
-            <div class="text-base-content/70">未找到密函</div>
+            <div class="text-base-content/70">{{ $t('db-walnut-detail-view.not_found') }}</div>
         </div>
     </div>
 </template>

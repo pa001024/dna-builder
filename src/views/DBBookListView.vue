@@ -203,7 +203,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbb-item-active" })
                             "
                             @click="selectedRegionId = region.id"
                         >
-                            {{ region.name }}
+                            {{ $t(region.name) }}
                         </button>
                     </div>
                 </div>

@@ -10,6 +10,16 @@ const searchKeyword = useSearchParam<string>("kw", "")
 const selectedWalnutId = useSearchParam<number>("id", 0)
 const selectedType = useSearchParam<number>("tp", 0)
 
+/**
+ * 把密函类型（1=角色 2=武器 3=魔之楔）转成展示名。
+ * 返回值是**游戏原文**，交给模板里的 `$t` 取译文。
+ * @param type 密函类型
+ * @returns 展示名原文
+ */
+function getWalnutTypeName(type: number): string {
+    return type === 1 ? "角色" : type === 2 ? "武器" : "魔之楔"
+}
+
 // 根据 ID 获取选中的密函
 const selectedWalnut = computed(() => {
     return selectedWalnutId.value ? walnutData.find(walnut => walnut.id === selectedWalnutId.value) || null : null
@@ -99,7 +109,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbwal-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索密函ID/名称（支持拼音）..."
+                            :placeholder="$t('db-walnut-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -125,7 +135,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbwal-item-active" })
                             "
                             @click="selectedType = 0"
                         >
-                            全部
+                            {{ $t('common.all') }}
                         </button>
                         <button
                             v-for="type in allTypes"
@@ -138,7 +148,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbwal-item-active" })
                             "
                             @click="selectedType = type"
                         >
-                            {{ $t(type === 1 ? "角色" : type === 2 ? "武器" : "魔之楔") }}
+                            {{ $t(getWalnutTypeName(type)) }}
                         </button>
                     </div>
                 </div>
@@ -181,13 +191,13 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbwal-item-active" })
                                         <CopyID :id="walnut.id" class="ml-auto shrink-0" />
                                     </div>
                                     <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                        <span>稀有度: {{ walnut.稀有度 }}星</span>
+                                        <span>{{ $t("db-walnut-detail.rarity_stars", { count: walnut.稀有度 }) }}</span>
                                     </div>
                                 </div>
                                 <span
                                     class="shrink-0 rounded-xs border border-base-content/15 px-1 text-[10px] leading-4 tracking-wide text-base-content/55"
                                 >
-                                    {{ $t(walnut.类型 === 1 ? "角色" : walnut.类型 === 2 ? "武器" : "魔之楔") }}
+                                    {{ $t(getWalnutTypeName(walnut.类型)) }}
                                 </span>
                             </div>
                         </article>
@@ -197,7 +207,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbwal-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredWalnuts.length }}</b> 个密函
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredWalnuts.length }}</b> {{ $t('db-walnut-list.walnut_count') }}
                     </p>
                 </div>
             </div>

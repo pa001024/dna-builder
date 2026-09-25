@@ -152,20 +152,20 @@ onBeforeUnmount(() => {
         >
             <div class="flex items-center gap-2.5 text-warning">
                 <Icon icon="ri:error-warning-line" class="size-8" />
-                <span class="text-sm font-semibold tracking-wide">网页端不可用</span>
+                <span class="text-sm font-semibold tracking-wide">{{ $t('user-manager.web_unavailable') }}</span>
             </div>
             <a
                 href="https://api.dna-builder.cn/api/download"
                 class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xs border border-primary bg-primary px-5 text-[13px] font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:scale-[0.97]"
             >
                 <Icon icon="ri:download-2-line" class="size-4" />
-                下载APP
+                {{ $t('user-manager.download_app') }}
             </a>
         </div>
 
         <!-- 页面标题行：kicker + hairline（子页面不做大标题 header） -->
         <div class="flex-none border-b border-base-content/15 px-4 pt-3 pb-3 stagger-rise">
-            <SectionHeader no-animate compact kicker="ACCOUNTS" title="皎皎角账号管理">
+            <SectionHeader no-animate compact kicker="ACCOUNTS" :title="$t('user-manager.account_management')">
                 <template #trailing>
                     <div class="flex items-center gap-1.5">
                         <!-- 添加账号按钮 -->
@@ -175,10 +175,10 @@ onBeforeUnmount(() => {
                             @click="isAddIframeOpen = true"
                         >
                             <Icon icon="ri:add-line" class="size-3.5" />
-                            添加账号
+                            {{ $t('user-manager.add_account') }}
                         </button>
                         <!-- 通过JSON添加账号 -->
-                        <Tooltip tooltip="通过JSON添加皎皎角账号(登录后可复制)" side="bottom">
+                        <Tooltip :tooltip="$t('user-manager.add_account_tip')" side="bottom">
                             <button
                                 type="button"
                                 class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary active:scale-[0.97]"
@@ -351,7 +351,7 @@ onBeforeUnmount(() => {
                             class="inline-flex h-8 w-full cursor-pointer items-center justify-center rounded-xs border border-primary bg-primary text-[13px] font-semibold text-primary-content transition-opacity duration-150 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
                             :disabled="!jsonInput.length"
                         >
-                            添加账号
+                            {{ $t('user-manager.add_account') }}
                         </button>
 
                         <!-- 辅助信息 -->

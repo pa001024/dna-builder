@@ -178,13 +178,13 @@ watch(filterSkinIds, () => {
                     type="button"
                     @click="clearFilter"
                 >
-                    全部方案
+                    {{ $t('skin-colorize-gallery.all_schemes') }}
                 </button>
             </div>
             <ScrollArea class="min-h-0 flex-1">
                 <div class="flex flex-col gap-5 px-4 pb-4">
                     <div class="flex flex-col gap-1.5">
-                        <div class="mb-1 text-xs font-medium opacity-60">按角色</div>
+                        <div class="mb-1 text-xs font-medium opacity-60">{{ $t('skin-colorize-gallery.by_character') }}</div>
                         <div class="grid grid-cols-2 gap-1.5">
                             <button
                                 v-for="character in characters"
@@ -211,8 +211,8 @@ watch(filterSkinIds, () => {
                     </div>
 
                     <div class="flex flex-col gap-1.5">
-                        <div class="mb-1 text-xs font-medium opacity-60">按皮肤系列</div>
-                        <div v-if="!seriesList.length" class="text-xs opacity-50">暂无系列</div>
+                        <div class="mb-1 text-xs font-medium opacity-60">{{ $t('skin-colorize-gallery.by_series') }}</div>
+                        <div v-if="!seriesList.length" class="text-xs opacity-50">{{ $t('skin-colorize-gallery.no_series') }}</div>
                         <div v-else class="grid grid-cols-2 gap-1.5">
                             <button
                                 v-for="series in seriesList"
@@ -231,7 +231,7 @@ watch(filterSkinIds, () => {
                                     loading="lazy"
                                 />
                                 <div v-else class="flex h-full w-full items-center justify-center bg-base-200 text-[10px] opacity-60">
-                                    暂无图标
+                                    {{ $t('skin-colorize-gallery.no_icon') }}
                                 </div>
                                 <span
                                     class="absolute inset-x-0 bottom-0 truncate bg-linear-to-t from-black/75 to-transparent px-1.5 pb-0.5 pt-3 text-[10px] font-medium text-white"
@@ -267,7 +267,7 @@ watch(filterSkinIds, () => {
                         {{ tab.label }}
                     </button>
                 </div>
-                <button class="btn btn-primary btn-sm" type="button" @click="goCreate">发布染色方案</button>
+                <button class="btn btn-primary btn-sm" type="button" @click="goCreate">{{ $t('skin-colorize-gallery.publish_scheme') }}</button>
             </div>
 
             <div v-if="loading" class="flex flex-1 items-center justify-center">
@@ -275,8 +275,8 @@ watch(filterSkinIds, () => {
             </div>
 
             <div v-else-if="!plans.length" class="flex flex-1 flex-col items-center justify-center gap-3 text-sm opacity-60">
-                <span>还没有染色方案</span>
-                <button class="btn btn-outline btn-sm" type="button" @click="loadPlans(true)">刷新</button>
+                <span>{{ $t('skin-colorize-gallery.no_schemes') }}</span>
+                <button class="btn btn-outline btn-sm" type="button" @click="loadPlans(true)">{{ $t('common.refresh') }}</button>
             </div>
 
             <template v-else>
@@ -306,7 +306,7 @@ watch(filterSkinIds, () => {
                                     :alt="plan.title"
                                     class="h-16 w-16 rounded-lg object-cover shadow"
                                 />
-                                <span v-if="!plan.colorIds?.some(id => id !== 0)" class="text-xs opacity-70">默认配色</span>
+                                <span v-if="!plan.colorIds?.some(id => id !== 0)" class="text-xs opacity-70">{{ $t('skin-colorize-gallery.default_colors') }}</span>
                             </div>
                             <span
                                 class="absolute left-2 top-2 rounded px-1.5 py-0.5 text-[10px] font-medium backdrop-blur"
@@ -318,7 +318,7 @@ watch(filterSkinIds, () => {
                                 v-if="plan.hairCode"
                                 class="absolute right-2 top-2 rounded bg-primary/80 px-1.5 py-0.5 text-[10px] font-medium text-primary-content backdrop-blur"
                             >
-                                含发型
+                                {{ $t('skin-colorize-gallery.include_hair') }}
                             </span>
                         </div>
 
@@ -344,7 +344,7 @@ watch(filterSkinIds, () => {
                     <button v-if="hasMore" class="btn btn-outline btn-sm" type="button" :disabled="loadingMore" @click="loadPlans(false)">
                         {{ loadingMore ? "加载中..." : "加载更多" }}
                     </button>
-                    <span v-else class="text-xs opacity-50">已经到底啦～</span>
+                    <span v-else class="text-xs opacity-50">{{ $t('skin-colorize-gallery.end_of_list') }}</span>
                 </div>
             </template>
         </main>

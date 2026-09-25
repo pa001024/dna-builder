@@ -21,7 +21,7 @@ const dungeon = computed(() => dungeonData.find(d => d.id === dungeonId.value))
         </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">
-            <div class="text-base-content/70">未找到副本</div>
+            <div class="text-base-content/70">{{ $t('db-dungeon-detail-view.not_found') }}</div>
         </div>
     </div>
 </template>

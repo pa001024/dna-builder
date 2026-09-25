@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, reactive } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { npcMap } from "@/data/d/npc.data"
 import type { RougeDialogue, RougeDialogueOption, RougeStoryNode } from "@/data/d/rouge.data"
 import { useSettingStore } from "@/store/setting"
@@ -15,17 +16,23 @@ const props = defineProps<{
     eventName: string
 }>()
 
+/** 游戏原文取词：剧情文本与说话人名都随数据包下发。 */
+const { gt } = useGameText()
+
 const settingStore = useSettingStore()
 
 const selectedOptionMap = reactive<Record<string, number>>({})
 
 /**
  * 获取当前剧情文本替换配置。
+ *
+ * `{nickname}` / `{nickname2}` 的默认值（维塔 / 墨斯）是游戏主角名，随数据包下发译文；
+ * 玩家自定义的角色名不在对照表里，`gt` 会原样返回，所以直接过一遍取词是安全的。
  */
 const storyTextConfig = computed<StoryTextConfig>(() => {
     return {
-        nickname: settingStore.protagonistName1?.trim() || "维塔",
-        nickname2: settingStore.protagonistName2?.trim() || "墨斯",
+        nickname: gt(settingStore.protagonistName1?.trim() || "维塔"),
+        nickname2: gt(settingStore.protagonistName2?.trim() || "墨斯"),
         gender: settingStore.protagonistGender,
         gender2: settingStore.protagonistGender2,
     }
@@ -208,12 +215,41 @@ function selectOption(scopeKey: string, dialogueId: number, optionId: number) {
 }
 
 /**
+ * 深拷贝对话选项并把文案翻成当前语言。
+ *
+ * `DBDialogueCard` 只负责渲染传入的数据（任务模块的数据已按语言切分，
+ * 不能在那里统一翻译），所以本地化在数据入口处完成。
+ * @param option 原始选项
+ * @returns 已本地化的选项
+ */
+function localizeOption(option: RougeDialogueOption): RougeDialogueOption {
+    return {
+        ...option,
+        content: gt(option.content),
+        options: option.options?.map(localizeOption),
+    }
+}
+
+/**
+ * 深拷贝对话节点并把文案翻成当前语言。
+ * @param dialogues 原始对话数组
+ * @returns 已本地化的对话数组
+ */
+function localizeDialogues(dialogues: RougeDialogue[]): RougeDialogue[] {
+    return dialogues.map(dialogue => ({
+        ...dialogue,
+        content: gt(dialogue.content),
+        options: dialogue.options?.map(localizeOption),
+    }))
+}
+
+/**
  * 节点对话链列表。
  */
 const nodeChains = computed<Array<{ node: RougeStoryNode; chain: DialogueChainItem[] }>>(() => {
     return props.nodes.map(node => ({
         node,
-        chain: buildDialogueChain(node.dialogues ?? [], getNodeScopeKey(node.id)),
+        chain: buildDialogueChain(localizeDialogues(node.dialogues ?? []), getNodeScopeKey(node.id)),
     }))
 })
 </script>
@@ -225,8 +261,8 @@ const nodeChains = computed<Array<{ node: RougeStoryNode; chain: DialogueChainIt
             :key="node.id"
             class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
         >
-            <div v-if="node.name && node.name !== '对话节点'" class="px-1 text-xs font-medium text-base-content/60">
-                {{ formatStoryText(node.name) }}
+            <div v-if="node.name && gt(node.name) !== gt('对话节点')" class="px-1 text-xs font-medium text-base-content/60">
+                {{ formatStoryText(gt(node.name)) }}
             </div>
 
             <!-- 过渡类名以 Tailwind 工具类内联表达，替代原 scoped CSS -->
@@ -254,9 +290,9 @@ const nodeChains = computed<Array<{ node: RougeStoryNode; chain: DialogueChainIt
                 />
             </TransitionGroup>
 
-            <div v-if="!chain.length" class="px-1 text-sm text-base-content/70">该节点暂无可展示内容</div>
+            <div v-if="!chain.length" class="px-1 text-sm text-base-content/70">{{ $t('db-rouge-storyline.no_content') }}</div>
         </div>
 
-        <div v-if="!nodeChains.length" class="text-sm text-base-content/70">暂无剧情对话</div>
+        <div v-if="!nodeChains.length" class="text-sm text-base-content/70">{{ $t('db-rouge-storyline.no_dialogue') }}</div>
     </div>
 </template>

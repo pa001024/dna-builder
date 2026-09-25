@@ -292,7 +292,7 @@ async function checkUpdate() {
                     </h1>
                     <p class="mt-5 mb-7 flex flex-wrap items-center gap-2.5 text-sm text-base-content/60">
                         <span
-                            >开服第 <b class="font-orbitron text-primary tabular-nums">{{ openServerDays }}</b> 天</span
+                            >{{ $t('home.server_day_prefix') }} <b class="font-orbitron text-primary tabular-nums">{{ openServerDays }}</b> {{ $t('common.day') }}</span
                         >
                         <span class="h-4 w-px bg-base-content/40" aria-hidden="true" />
                         <span>{{ $t("home.cureent_version") }}</span>
@@ -433,7 +433,7 @@ async function checkUpdate() {
                 </div>
 
                 <footer v-if="!env.isApp" class="flex justify-center pt-6 pb-2 text-[13px] text-base-content/50">
-                    <a class="link" href="https://beian.miit.gov.cn" target="_blank" one-link-mark="yes">浙ICP备2024097919号</a>
+                    <a class="link" href="https://beian.miit.gov.cn" target="_blank" one-link-mark="yes">{{ $t('home.icp') }}</a>
                 </footer>
             </div>
         </ScrollArea>

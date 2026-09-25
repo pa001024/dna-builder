@@ -310,7 +310,7 @@ function getAchievementIcon(category: string) {
                             "
                             @click="selectedCategory = null"
                         >
-                            <span class="truncate text-sm font-medium">{{ $t("全部") }}</span>
+                            <span class="truncate text-sm font-medium">{{ $t("common.all") }}</span>
                             <span class="shrink-0 text-[11px] tabular-nums opacity-80">
                                 {{ userFinishedIds.length }}/{{ totalAchievements }}
                             </span>
@@ -472,7 +472,7 @@ function getAchievementIcon(category: string) {
                                         class="inline-flex flex-col items-end leading-tight"
                                     >
                                         <span class="text-[10px] text-base-content/45">{{ $t(key) }}</span>
-                                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ value }}</span>
+                                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{ value }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -485,7 +485,7 @@ function getAchievementIcon(category: string) {
                         class="flex flex-col items-center justify-center py-24 text-base-content/45"
                     >
                         <Icon icon="ri:trophy-line" class="mb-4 h-12 w-12 opacity-40" />
-                        <p class="text-sm">没有符合条件的成就</p>
+                        <p class="text-sm">{{ $t('achievement-list.no_match') }}</p>
                     </div>
                 </ScrollArea>
             </div>
@@ -502,7 +502,7 @@ function getAchievementIcon(category: string) {
                             {{ $t("setting.confirm") }}
                         </button>
                         <button class="btn min-w-20">
-                            {{ $t("setting.cancel") }}
+                            {{ $t("取消") }}
                         </button>
                     </form>
                 </div>

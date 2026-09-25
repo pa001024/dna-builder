@@ -340,19 +340,19 @@ onMounted(async () => {
                     <div class="flex flex-wrap gap-2">
                         <button class="btn btn-outline rounded-xs" @click="showSettingsDialog = true">
                             <Icon icon="ri:settings-4-line" />
-                            设置
+                            {{ $t('unpack-view.settings') }}
                         </button>
                         <button class="btn btn-primary rounded-xs" :disabled="loading" @click="packSelectedFolder">
                             <Icon icon="ri:file-zip-line" />
-                            打包
+                            {{ $t('unpack-view.pack') }}
                         </button>
                         <button class="btn btn-primary rounded-xs" :disabled="loading" @click="loadPakFiles">
                             <Icon icon="ri:file-list-line" />
-                            读取文件列表
+                            {{ $t('unpack-view.read_file_list') }}
                         </button>
                         <button class="btn btn-primary rounded-xs" :disabled="loading" @click="exportSelectedFiles">
                             <Icon icon="ri:download-2-line" />
-                            导出
+                            {{ $t('common.export') }}
                         </button>
                     </div>
                 </template>
@@ -486,7 +486,7 @@ onMounted(async () => {
     <dialog class="modal" :class="{ 'modal-open': showSettingsDialog }">
         <div class="modal-box max-w-3xl rounded-xs bg-base-100/85 backdrop-blur-md">
             <div class="mb-4 flex items-center justify-between gap-3 border-b border-base-content/10 pb-3">
-                <h3 class="text-lg font-medium">设置</h3>
+                <h3 class="text-lg font-medium">{{ $t('unpack-view.settings') }}</h3>
                 <form method="dialog">
                     <button class="btn btn-ghost btn-sm rounded-xs" @click="showSettingsDialog = false">关闭</button>
                 </form>

@@ -1,6 +1,7 @@
 import { useTranslation } from "i18next-vue"
 import type { ParamText } from "@/data/data-types"
 import { formatParamText } from "@/utils/param-text"
+import { formatPetSkillText } from "@/utils/pet-skill-text"
 
 /**
  * 游戏原文取词选项。
@@ -58,7 +59,24 @@ export function useGameText() {
         return end < 0 ? text : text.slice(end + 1).trim()
     }
 
-    return { gt, gpt }
+    /**
+     * 求值魔灵技能文案（`主动` / `被动` 的「模板 + 顺序占位符」形态）。
+     *
+     * 对照表收录的是含 `{%}` / `{}` 的模板原文，所以同样固定按
+     * 「**先翻译模板、再代入数值**」求值，顺序反了永远查不到译文。
+     * @param template 技能文案模板（`LeveledPet` 的 `主动模板` / `被动模板`）
+     * @param values 该模板当前档位的数值（`LeveledPet` 的 `主动值` / `被动值`）
+     * @returns 当前语言下代入数值后的文本
+     */
+    function petSkillText(template: string | undefined, values: number[]): string {
+        if (!template) {
+            return ""
+        }
+
+        return formatPetSkillText(gt(template), values)
+    }
+
+    return { gt, gpt, petSkillText }
 }
 
 /**

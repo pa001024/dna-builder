@@ -22,7 +22,7 @@ const shop = computed(() => shopData.find(s => s.id === shopId.value))
         </ScrollArea>
 
         <div v-else class="flex-1 flex items-center justify-center">
-            <div class="text-base-content/70">未找到商店</div>
+            <div class="text-base-content/70">{{ $t('db-shop-detail-view.not_found') }}</div>
         </div>
     </div>
 </template>

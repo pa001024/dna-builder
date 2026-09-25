@@ -1,7 +1,15 @@
 import i18next from "i18next"
-import OpenAI from "openai"
-import type { ChatCompletionMessageParam, ChatCompletionTool, ChatCompletionToolMessageParam } from "openai/resources/index.mjs"
-import { containsDsmlMarker, type DsmlParseResult, DsmlStreamFilter } from "@/api/dsml-tool-call"
+import {
+    type AgentRoundResult,
+    type AgentToolDefinition,
+    type AgentToolResult,
+    type AgentTransport,
+    type AgentWireMessage,
+    parseToolArguments,
+    resolveAgentProtocol,
+} from "@/api/agent-wire"
+import { createChatTransport } from "@/api/chat-transport"
+import { createMessagesTransport } from "@/api/messages-transport"
 import type { OpenAIConfig } from "@/api/openai"
 import {
     DAMAGE_TERMS,
@@ -40,8 +48,9 @@ import {
  * 自己实现「流式 + 多轮工具调用」循环：每轮把模型的工具调用落到 src/utils/db-search.ts 上执行，
  * 再把工具结果回灌给模型，直到模型给出最终回答。
  *
- * 不复用 AIClient.streamChatWithTools 的原因：该方法只累积单个 tool_call（多工具会串行覆盖），
- * 且只处理一轮工具调用，无法支撑多轮检索。
+ * 线协议由 `agent-wire.ts` 的 `resolveAgentProtocol` 按端点能力选择：
+ * DeepSeek 官方与自家代理走 Messages（工具调用是协议级字段，不受上游文本解析器可靠性影响），
+ * 只有 OpenAI 兼容入口的网关走 Chat Completions。主循环本身与协议无关。
  */
 
 /** 工具调用记录：供对话界面展示检索过程 */
@@ -122,8 +131,8 @@ export interface DBAgentPendingAsk {
 
 /** Agent 循环的运行态 */
 interface DBAgentLoopState {
-    /** 完整消息序列（含 assistant 的工具调用与已回灌的 tool 结果） */
-    messages: ChatCompletionMessageParam[]
+    /** 完整消息序列（含助手轮的工具调用与已回灌的工具结果） */
+    messages: AgentWireMessage[]
     /** 已产出的正文 */
     reply: string
     /** 已累积的工具调用痕迹 */
@@ -151,14 +160,6 @@ interface DBAgentPendingState extends DBAgentLoopState {
 const MAX_TOOL_ROUNDS = 4
 
 /**
- * 单轮内因 DSML 标记无法解析而重试的最大次数。
- *
- * 取 1 是刻意保守：这类泄露通常是上游兼容层偶发问题，重试一次能解决绝大多数情况；
- * 再多次重试既浪费时间额度，也说明格式已超出容错能力，不如尽早收敛。
- */
-const MAX_DSML_RETRIES = 1
-
-/**
  * 单次回答触达输出上限后允许自动续写的次数。
  *
  * 上游在触达 max_tokens 时会以 `finish_reason === "length"` 收流，正文停在半句上；
@@ -173,6 +174,15 @@ const MAX_CONTINUATIONS = 3
  * 必须显式要求「不重复、不重开头」：只给「继续」两字时，模型常常把已输出的段落再讲一遍。
  */
 const CONTINUATION_PROMPT = "上一条回复因长度上限被截断。请紧接着未完成处继续输出剩余内容，不要重复已经输出过的部分，也不要重新开头。"
+
+/**
+ * Messages 协议下「两块增量之间」允许的最大间隔（毫秒）。
+ *
+ * 不能复用 `config.timeout`：那是给非流式请求的整轮超时（默认 30 秒），
+ * 而思考模型在长上下文下可能数十秒才吐出第一个 token，按 30 秒判空闲会把正常回答掐断。
+ * 取值与 DSH 的 `streamIdleTimeoutMs` 对齐。
+ */
+const MESSAGES_IDLE_TIMEOUT = 300_000
 
 /** 默认模型参数（设置项缺失时使用） */
 const DEFAULT_CONFIG: Pick<
@@ -242,255 +252,207 @@ const LANG_SCHEMA = {
 }
 
 /**
- * 工具定义（OpenAI function calling 格式）。
- * 工具名与参数说明面向模型，需要保持稳定，避免提示词与实现对不上。
+ * 工具定义（参数为 JSON Schema）。
+ *
+ * 工具名与参数说明面向模型，需要保持稳定，避免提示词与实现对不上；
+ * 线协议上的具体声明形态（`input_schema` 还是 `function.parameters`）由传输层转换。
  */
-const DB_AGENT_TOOLS: ChatCompletionTool[] = [
+const DB_AGENT_TOOLS: AgentToolDefinition[] = [
     {
-        type: "function",
-        function: {
-            name: "list_data_modules",
-            description: "列出资料库中可检索的模块清单，包含模块 id、名称、条目数与是否支持按版本过滤。用于确认某个提问应该查哪个模块。",
-            parameters: {
-                type: "object",
-                properties: { lang: LANG_SCHEMA },
-            },
+        name: "list_data_modules",
+        description: "列出资料库中可检索的模块清单，包含模块 id、名称、条目数与是否支持按版本过滤。用于确认某个提问应该查哪个模块。",
+        parameters: {
+            type: "object",
+            properties: { lang: LANG_SCHEMA },
         },
     },
     {
-        type: "function",
-        function: {
-            name: "list_filter_options",
-            description:
-                "列出某个模块可用的筛选项与全部合法取值（对应资料库各列表页上的筛选行），例如剧情模块的任务类型（主线任务 / 支线任务 / 限时任务 / 活动任务）、篇章、印象检定、印象增加。用于在按分类过滤前先确认取值。",
-            parameters: {
-                type: "object",
-                properties: {
-                    lang: LANG_SCHEMA,
-                    module: {
-                        type: "string",
-                        description: "模块 id，见 list_data_modules。剧情请用 questchain",
-                    },
+        name: "list_filter_options",
+        description:
+            "列出某个模块可用的筛选项与全部合法取值（对应资料库各列表页上的筛选行），例如剧情模块的任务类型（主线任务 / 支线任务 / 限时任务 / 活动任务）、篇章、印象检定、印象增加。用于在按分类过滤前先确认取值。",
+        parameters: {
+            type: "object",
+            properties: {
+                lang: LANG_SCHEMA,
+                module: {
+                    type: "string",
+                    description: "模块 id，见 list_data_modules。剧情请用 questchain",
                 },
-                required: ["module"],
             },
+            required: ["module"],
         },
     },
     {
-        type: "function",
-        function: {
-            name: "search_data",
-            description:
-                "全库关键词检索，覆盖资料库所有模块（角色、武器、魔之楔、成就、任务链、活动、副本、怪物、道具等），返回标题、副信息、类型与跳转路径。适合不确定内容属于哪个模块时先定位。",
-            parameters: {
-                type: "object",
-                properties: {
-                    lang: LANG_SCHEMA,
-                    query: { type: "string", description: "检索关键词，例如角色名、道具名、副本名" },
-                    module: {
-                        type: "string",
-                        description: "可选，限定只在该模块内检索，取值见 list_data_modules 的 id，例如 char / weapon / mod / achievement",
-                    },
-                    limit: { type: "integer", description: "返回条数上限，默认 20，最大 50" },
+        name: "search_data",
+        description:
+            "全库关键词检索，覆盖资料库所有模块（角色、武器、魔之楔、成就、任务链、活动、副本、怪物、道具等），返回标题、副信息、类型与跳转路径。适合不确定内容属于哪个模块时先定位。",
+        parameters: {
+            type: "object",
+            properties: {
+                lang: LANG_SCHEMA,
+                query: { type: "string", description: "检索关键词，例如角色名、道具名、副本名" },
+                module: {
+                    type: "string",
+                    description: "可选，限定只在该模块内检索，取值见 list_data_modules 的 id，例如 char / weapon / mod / achievement",
                 },
-                required: ["query"],
+                limit: { type: "integer", description: "返回条数上限，默认 20，最大 50" },
+            },
+            required: ["query"],
+        },
+    },
+    {
+        name: "query_module_entries",
+        description:
+            "按模块查询条目明细，支持关键词、版本与分类筛选（筛选项与资料库各列表页一致），返回名称、副信息、版本与详情路径。适合回答“某个版本新增了哪些成就”“某系列有哪些魔之楔”“三星星级的成就有多少”。",
+        parameters: {
+            type: "object",
+            properties: {
+                lang: LANG_SCHEMA,
+                module: { type: "string", description: "模块 id，见 list_data_modules，例如 achievement / mod / char / weapon" },
+                keyword: { type: "string", description: "可选，模块内关键词（名称、分类、描述等字段）" },
+                version: { type: "string", description: "可选，版本号，例如 1.6" },
+                filters: {
+                    type: "object",
+                    description: FILTERS_DESCRIPTION,
+                    additionalProperties: { type: ["string", "number", "boolean"] },
+                },
+                limit: { type: "integer", description: "返回条数上限，默认 20，最大 80" },
+            },
+            required: ["module"],
+        },
+    },
+    {
+        name: "list_version_additions",
+        description: "汇总某个版本在角色、武器、魔之楔、成就、任务链中新增的内容（数量 + 名称样例）。",
+        parameters: {
+            type: "object",
+            properties: {
+                lang: LANG_SCHEMA,
+                version: { type: "string", description: "版本号，例如 1.6" },
+            },
+            required: ["version"],
+        },
+    },
+    {
+        name: "search_story",
+        description:
+            "剧情检索：在任务链与剧情对话正文中查找人名、地点、事件，返回命中的任务链以及说话人与台词片段。用于回答“某某剧情里谁做了什么”“这句话是谁说的”。" +
+            '也可不带关键词、只用 filters 按剧情列表页的筛选规则列举任务链，例如列出全部主线任务（filters 传 {"type":"主线任务"}）。' +
+            "关键词与 filters 可以同时给出，此时先按 filters 收窄范围再检索。",
+        parameters: {
+            type: "object",
+            properties: {
+                lang: LANG_SCHEMA,
+                keyword: {
+                    type: "string",
+                    description: "检索关键词，优先使用具体人名、地名或事件名。只按类型/篇章筛选时可省略",
+                },
+                filters: {
+                    type: "object",
+                    description: `${FILTERS_DESCRIPTION} 剧情模块（questchain）的可用筛选项见 list_filter_options；常用 type（主线任务/支线任务/限时任务/活动任务）、chapter（篇章名）、imprCheck、imprIncrease。`,
+                    additionalProperties: { type: ["string", "number", "boolean"] },
+                },
+                limit: { type: "integer", description: "返回任务链数量上限，默认 5，最大 12" },
+                snippet_limit: { type: "integer", description: "每个任务链返回的台词片段上限，默认 6，最大 20" },
             },
         },
     },
     {
-        type: "function",
-        function: {
-            name: "query_module_entries",
-            description:
-                "按模块查询条目明细，支持关键词、版本与分类筛选（筛选项与资料库各列表页一致），返回名称、副信息、版本与详情路径。适合回答“某个版本新增了哪些成就”“某系列有哪些魔之楔”“三星星级的成就有多少”。",
-            parameters: {
-                type: "object",
-                properties: {
-                    lang: LANG_SCHEMA,
-                    module: { type: "string", description: "模块 id，见 list_data_modules，例如 achievement / mod / char / weapon" },
-                    keyword: { type: "string", description: "可选，模块内关键词（名称、分类、描述等字段）" },
-                    version: { type: "string", description: "可选，版本号，例如 1.6" },
-                    filters: {
+        name: "read_story",
+        description:
+            "读取指定任务链（可用 quest_id 限定单个任务）的剧情原文，按行返回说话人与台词，用于补充上下文。任务链 id 可由 search_story 或 search_data 得到。",
+        parameters: {
+            type: "object",
+            properties: {
+                lang: LANG_SCHEMA,
+                chain_id: { type: "integer", description: "任务链 id，例如 110201" },
+                quest_id: { type: "integer", description: "可选，任务 id" },
+                offset: { type: "integer", description: "可选，起始行号，默认 0" },
+                limit: { type: "integer", description: "可选，行数上限，默认 60，最大 200" },
+            },
+            required: ["chain_id"],
+        },
+    },
+    {
+        name: "explain_damage",
+        description:
+            "查询伤害机制：返回技能伤害 / 武器伤害 / DOT 伤害三种结算模式的公式步骤，以及昂扬、背水、充盈、失衡、抗性乘区、防御乘区等机制术语的解释。" +
+            "回答「伤害是怎么算的」「某个乘区或名词是什么」「某项属性收益为什么递减」这类问题时用它；" +
+            "不带参数时返回三种模式的概览与全部术语清单。",
+        parameters: {
+            type: "object",
+            properties: {
+                lang: {
+                    ...LANG_SCHEMA,
+                    description: `${LANG_DESCRIPTION}注意：伤害机制的步骤名与公式只有游戏原文（中文），lang 只用于标注本次检索语言，不改变返回内容。`,
+                },
+                mode: {
+                    type: "string",
+                    description:
+                        "可选，结算模式：weapon（武器伤害）/ skill（技能伤害）/ dot（DOT 伤害）。指定后返回该模式的完整公式链与输入参数",
+                },
+                keyword: {
+                    type: "string",
+                    description: "可选，关键词，例如 暴击 / 充盈 / 背水 / 抗性 / 防御 / 增伤；在步骤名称、公式与术语解释里定位",
+                },
+                step_id: {
+                    type: "string",
+                    description: "可选，步骤 id，例如 expectedDamage / defenseMultiplier / dotDamage；只取该步骤的完整信息",
+                },
+            },
+        },
+    },
+    {
+        name: "ask_user",
+        description:
+            "向用户提问，让用户在若干选项中挑选，或自己输入文本作答。调用后本轮会暂停并等待用户回答，拿到答案后你会继续检索并给出最终回答。\n" +
+            "使用场景（其余情况不要用）：\n" +
+            "1. 提问含糊、有多个同样合理的理解，且不同理解会导向完全不同的检索结果时；\n" +
+            "2. 需要用户在有限分类里做选择才能继续时（例如要哪一类剧情、哪个版本、哪个篇章）；\n" +
+            "3. 检索结果太多、需要用户缩小范围时。\n" +
+            "不要用于：打招呼、确认「是否需要帮助」、追问用户已经说过的信息、以及在能直接检索出结果时偷懒求澄清。一次提问可以包含多道题。",
+        parameters: {
+            type: "object",
+            properties: {
+                title: { type: "string", description: "可选，整张提问卡片的引导语，一句话说明为什么要问" },
+                questions: {
+                    type: "array",
+                    maxItems: 5,
+                    description: "题目列表，1~5 道",
+                    items: {
                         type: "object",
-                        description: FILTERS_DESCRIPTION,
-                        additionalProperties: { type: ["string", "number", "boolean"] },
-                    },
-                    limit: { type: "integer", description: "返回条数上限，默认 20，最大 80" },
-                },
-                required: ["module"],
-            },
-        },
-    },
-    {
-        type: "function",
-        function: {
-            name: "list_version_additions",
-            description: "汇总某个版本在角色、武器、魔之楔、成就、任务链中新增的内容（数量 + 名称样例）。",
-            parameters: {
-                type: "object",
-                properties: {
-                    lang: LANG_SCHEMA,
-                    version: { type: "string", description: "版本号，例如 1.6" },
-                },
-                required: ["version"],
-            },
-        },
-    },
-    {
-        type: "function",
-        function: {
-            name: "search_story",
-            description:
-                "剧情检索：在任务链与剧情对话正文中查找人名、地点、事件，返回命中的任务链以及说话人与台词片段。用于回答“某某剧情里谁做了什么”“这句话是谁说的”。" +
-                '也可不带关键词、只用 filters 按剧情列表页的筛选规则列举任务链，例如列出全部主线任务（filters 传 {"type":"主线任务"}）。' +
-                "关键词与 filters 可以同时给出，此时先按 filters 收窄范围再检索。",
-            parameters: {
-                type: "object",
-                properties: {
-                    lang: LANG_SCHEMA,
-                    keyword: {
-                        type: "string",
-                        description: "检索关键词，优先使用具体人名、地名或事件名。只按类型/篇章筛选时可省略",
-                    },
-                    filters: {
-                        type: "object",
-                        description: `${FILTERS_DESCRIPTION} 剧情模块（questchain）的可用筛选项见 list_filter_options；常用 type（主线任务/支线任务/限时任务/活动任务）、chapter（篇章名）、imprCheck、imprIncrease。`,
-                        additionalProperties: { type: ["string", "number", "boolean"] },
-                    },
-                    limit: { type: "integer", description: "返回任务链数量上限，默认 5，最大 12" },
-                    snippet_limit: { type: "integer", description: "每个任务链返回的台词片段上限，默认 6，最大 20" },
-                },
-            },
-        },
-    },
-    {
-        type: "function",
-        function: {
-            name: "read_story",
-            description:
-                "读取指定任务链（可用 quest_id 限定单个任务）的剧情原文，按行返回说话人与台词，用于补充上下文。任务链 id 可由 search_story 或 search_data 得到。",
-            parameters: {
-                type: "object",
-                properties: {
-                    lang: LANG_SCHEMA,
-                    chain_id: { type: "integer", description: "任务链 id，例如 110201" },
-                    quest_id: { type: "integer", description: "可选，任务 id" },
-                    offset: { type: "integer", description: "可选，起始行号，默认 0" },
-                    limit: { type: "integer", description: "可选，行数上限，默认 60，最大 200" },
-                },
-                required: ["chain_id"],
-            },
-        },
-    },
-    {
-        type: "function",
-        function: {
-            name: "explain_damage",
-            description:
-                "查询伤害机制：返回技能伤害 / 武器伤害 / DOT 伤害三种结算模式的公式步骤，以及昂扬、背水、充盈、失衡、抗性乘区、防御乘区等机制术语的解释。" +
-                "回答「伤害是怎么算的」「某个乘区或名词是什么」「某项属性收益为什么递减」这类问题时用它；" +
-                "不带参数时返回三种模式的概览与全部术语清单。",
-            parameters: {
-                type: "object",
-                properties: {
-                    lang: {
-                        ...LANG_SCHEMA,
-                        description: `${LANG_DESCRIPTION}注意：伤害机制的步骤名与公式只有游戏原文（中文），lang 只用于标注本次检索语言，不改变返回内容。`,
-                    },
-                    mode: {
-                        type: "string",
-                        description:
-                            "可选，结算模式：weapon（武器伤害）/ skill（技能伤害）/ dot（DOT 伤害）。指定后返回该模式的完整公式链与输入参数",
-                    },
-                    keyword: {
-                        type: "string",
-                        description: "可选，关键词，例如 暴击 / 充盈 / 背水 / 抗性 / 防御 / 增伤；在步骤名称、公式与术语解释里定位",
-                    },
-                    step_id: {
-                        type: "string",
-                        description: "可选，步骤 id，例如 expectedDamage / defenseMultiplier / dotDamage；只取该步骤的完整信息",
-                    },
-                },
-            },
-        },
-    },
-    {
-        type: "function",
-        function: {
-            name: "ask_user",
-            description:
-                "向用户提问，让用户在若干选项中挑选，或自己输入文本作答。调用后本轮会暂停并等待用户回答，拿到答案后你会继续检索并给出最终回答。\n" +
-                "使用场景（其余情况不要用）：\n" +
-                "1. 提问含糊、有多个同样合理的理解，且不同理解会导向完全不同的检索结果时；\n" +
-                "2. 需要用户在有限分类里做选择才能继续时（例如要哪一类剧情、哪个版本、哪个篇章）；\n" +
-                "3. 检索结果太多、需要用户缩小范围时。\n" +
-                "不要用于：打招呼、确认「是否需要帮助」、追问用户已经说过的信息、以及在能直接检索出结果时偷懒求澄清。一次提问可以包含多道题。",
-            parameters: {
-                type: "object",
-                properties: {
-                    title: { type: "string", description: "可选，整张提问卡片的引导语，一句话说明为什么要问" },
-                    questions: {
-                        type: "array",
-                        maxItems: 5,
-                        description: "题目列表，1~5 道",
-                        items: {
-                            type: "object",
-                            properties: {
-                                id: { type: "string", description: "题号，用简短英文标识，例如 type / version" },
-                                header: { type: "string", description: "题干，简短一句话，例如「要查哪一类剧情？」" },
-                                question: { type: "string", description: "可选，题干的补充说明" },
-                                options: {
-                                    type: "array",
-                                    maxItems: 8,
-                                    description: "可选项，2~8 个；每项给出 label 与可选 description",
-                                    items: {
-                                        type: "object",
-                                        properties: {
-                                            id: { type: "string", description: "选项 id，简短英文标识" },
-                                            label: { type: "string", description: "选项展示文案" },
-                                            description: { type: "string", description: "可选，选项说明" },
-                                        },
-                                        required: ["label"],
+                        properties: {
+                            id: { type: "string", description: "题号，用简短英文标识，例如 type / version" },
+                            header: { type: "string", description: "题干，简短一句话，例如「要查哪一类剧情？」" },
+                            question: { type: "string", description: "可选，题干的补充说明" },
+                            options: {
+                                type: "array",
+                                maxItems: 8,
+                                description: "可选项，2~8 个；每项给出 label 与可选 description",
+                                items: {
+                                    type: "object",
+                                    properties: {
+                                        id: { type: "string", description: "选项 id，简短英文标识" },
+                                        label: { type: "string", description: "选项展示文案" },
+                                        description: { type: "string", description: "可选，选项说明" },
                                     },
+                                    required: ["label"],
                                 },
-                                allowCustom: {
-                                    type: "boolean",
-                                    description: "是否允许用户自己输入文本，默认 true；除非确实不适合自由输入，否则保持默认",
-                                },
-                                multiple: { type: "boolean", description: "是否允许多选，默认 false" },
                             },
-                            required: ["header", "options"],
+                            allowCustom: {
+                                type: "boolean",
+                                description: "是否允许用户自己输入文本，默认 true；除非确实不适合自由输入，否则保持默认",
+                            },
+                            multiple: { type: "boolean", description: "是否允许多选，默认 false" },
                         },
+                        required: ["header", "options"],
                     },
                 },
-                required: ["questions"],
             },
+            required: ["questions"],
         },
     },
 ]
-
-/**
- * 合并流式返回的工具名分片。
- * 不同服务端可能一次性给出完整名称，也可能拆成多片，这里按前缀关系合并避免重复拼接。
- * @param current 已累积的名称
- * @param incoming 本次分片
- * @returns 合并后的名称
- */
-function mergeToolName(current: string, incoming: string): string {
-    if (!current) {
-        return incoming
-    }
-    if (!incoming || incoming === current || current.endsWith(incoming)) {
-        return current
-    }
-    if (incoming.startsWith(current)) {
-        return incoming
-    }
-    if (current.startsWith(incoming)) {
-        return current
-    }
-    return current + incoming
-}
 
 /**
  * 截断过长文本，避免工具结果撑爆上下文。
@@ -866,28 +828,28 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 }
 
 /**
- * 解析工具参数：模型偶尔会返回非法 JSON，这里做兜底。
- * @param rawArguments 原始参数串
- * @returns 解析后的参数对象
+ * 把会话历史转成协议中立的对话消息。
+ *
+ * 历史只带正文：Dexie 里的助手消息虽然存了思考分段，但分段是按「段 → 工具调用 id」
+ * 记录的，无法还原回线与线之间精确的交错顺序；凭这样的记录重建 thinking 块会把顺序猜错，
+ * 反而比不带更糟。**一次运行内部**的多轮检索（同一轮问答里的工具循环）不走这里，
+ * 那段上下文的思考是原样回灌的。
+ * @param history 会话历史
+ * @returns 协议中立的对话消息
  */
-function parseToolArguments(rawArguments: string): Record<string, unknown> {
-    if (!rawArguments?.trim()) {
-        return {}
-    }
-
-    try {
-        const parsed = JSON.parse(rawArguments)
-        return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {}
-    } catch {
-        return {}
-    }
+function toWireMessages(history: readonly DBAgentHistoryMessage[]): AgentWireMessage[] {
+    return history.map(message =>
+        message.role === "assistant"
+            ? { role: "assistant" as const, text: message.content, thinking: "", toolCalls: [] }
+            : { role: "user" as const, text: message.content }
+    )
 }
 
 /**
  * 资料检索 Agent 客户端。
  */
 export class DBAgent {
-    private client: OpenAI | null = null
+    private transport: AgentTransport
     private config: typeof DEFAULT_CONFIG & { api_key: string }
     /** 中断标记：置位后当前这一轮会在下一个数据块处停止 */
     private interrupted = false
@@ -915,7 +877,7 @@ export class DBAgent {
             default_max_tokens: config.default_max_tokens ?? DEFAULT_CONFIG.default_max_tokens,
         }
 
-        this.createClient()
+        this.transport = this.createTransport()
     }
 
     /**
@@ -932,7 +894,7 @@ export class DBAgent {
             default_max_tokens: config.default_max_tokens ?? this.config.default_max_tokens,
         }
 
-        this.createClient()
+        this.transport = this.createTransport()
     }
 
     /**
@@ -943,15 +905,27 @@ export class DBAgent {
     }
 
     /**
-     * 创建底层 OpenAI 客户端（OpenAI 兼容接口）。
+     * 按端点能力创建传输实现。
+     * @returns 该端点应使用的传输
      */
-    private createClient(): void {
-        this.client = new OpenAI({
-            apiKey: this.config.api_key || "missing-api-key",
-            baseURL: this.config.base_url,
+    private createTransport(): AgentTransport {
+        const protocol = resolveAgentProtocol(this.config.base_url)
+
+        if (protocol === "messages") {
+            return createMessagesTransport({
+                apiKey: this.config.api_key,
+                baseUrl: this.config.base_url,
+                // Messages 侧的超时口径是「两块增量之间的空闲」，与配置里的整轮超时不同义
+                timeout: MESSAGES_IDLE_TIMEOUT,
+                maxRetries: this.config.max_retries,
+            })
+        }
+
+        return createChatTransport({
+            apiKey: this.config.api_key,
+            baseUrl: this.config.base_url,
             timeout: this.config.timeout,
             maxRetries: this.config.max_retries,
-            dangerouslyAllowBrowser: true,
         })
     }
 
@@ -965,10 +939,6 @@ export class DBAgent {
      * @returns 最终回复与工具调用记录；挂起时附带 pendingAsk
      */
     public async run(history: DBAgentHistoryMessage[], callbacks: DBAgentCallbacks = {}): Promise<DBAgentRunResult> {
-        if (!this.client) {
-            throw new Error(i18next.t("dbAgent.error.clientNotInit"))
-        }
-
         if (!this.config.api_key) {
             throw new Error(i18next.t("dbAgent.error.noApiKey"))
         }
@@ -976,18 +946,16 @@ export class DBAgent {
         this.interrupted = false
         this.pending = null
 
-        const messages: ChatCompletionMessageParam[] = [
-            { role: "system", content: renderDBAgentSystemPrompt() },
-            ...history.map(item => ({ role: item.role, content: item.content }) as ChatCompletionMessageParam),
-        ]
-
-        return this.runLoop({ messages, reply: "", traces: [], reasonings: [], reasoningText: "", round: 0 }, callbacks)
+        return this.runLoop(
+            { messages: toWireMessages(history), reply: "", traces: [], reasonings: [], reasoningText: "", round: 0 },
+            callbacks
+        )
     }
 
     /**
      * 用户作答后从挂起点继续。
      *
-     * 回答会以 `tool` 消息回灌到挂起时的上下文里，因此模型看到的正是
+     * 回答会以 tool 结果回灌到挂起时的上下文里，因此模型看到的正是
      * 「我问了什么 → 用户选了什么」，接着的那一轮就能带着答案继续检索。
      * @param response 用户回答（题目 id 与选项 id 来自挂起时的 pendingAsk）
      * @param callbacks 续跑过程的回调（与 run 一致）
@@ -1058,9 +1026,9 @@ export class DBAgent {
         this.interrupted = false
 
         state.messages.push({
-            role: "tool",
-            tool_call_id: state.ask.toolCallId,
-            content: formatAskUserResponse(request, response),
+            role: "user",
+            text: "",
+            toolResults: [{ toolCallId: state.ask.toolCallId, content: formatAskUserResponse(request, response) }],
         })
 
         const trace = state.traces.find(item => item.id === state.ask.toolCallId)
@@ -1088,6 +1056,7 @@ export class DBAgent {
      */
     private async runLoop(state: DBAgentLoopState, callbacks: DBAgentCallbacks = {}): Promise<DBAgentRunResult> {
         const { messages, traces, reasonings } = state
+        const system = renderDBAgentSystemPrompt()
 
         /** 把已累积的思考收束成一段，并记录它后续发起的工具调用 */
         const flushReasoning = (toolCallIds: string[] = []) => {
@@ -1100,152 +1069,55 @@ export class DBAgent {
         }
 
         let round = state.round
-        /** 当前轮已重试次数（每轮独立计数，防止死循环） */
-        let roundRetries = 0
         /** 本次问答已自动续写的次数 */
         let continuations = 0
 
         while (round <= MAX_TOOL_ROUNDS) {
             const isLastRound = round === MAX_TOOL_ROUNDS
-            const stream = await this.client!.chat.completions.create({
-                model: this.config.default_model,
-                messages,
-                temperature: this.config.default_temperature,
-                max_tokens: this.config.default_max_tokens,
-                stream: true,
-                // 最后一轮不再带工具，强制模型基于已有检索结果作答
-                tools: isLastRound ? undefined : DB_AGENT_TOOLS,
-            })
 
-            let content = ""
-            /** 本轮的收流原因：`length` 表示正文被输出上限截断 */
-            let roundFinishReason: string | null = null
-            const callSlots = new Map<number, { id: string; name: string; args: string }>()
-            /**
-             * DSML 泄露过滤器。
-             *
-             * 上游兼容层偶尔把工具调用写成正文文本（见 dsml-tool-call.ts 的说明），
-             * 这里逐块过滤：DSML 块不进正文、不吐给界面，而是解析成工具调用补进调用表，
-             * 让这一轮能像正常调用一样继续检索。
-             */
-            const dsmlFilter = new DsmlStreamFilter()
-            /** 本轮流式过程中从正文里捞出的 DSML 工具调用数量 */
-            let dsmlCallCount = 0
+            let result: AgentRoundResult
 
-            /**
-             * 把 DSML 解析出的工具调用塞进调用表。
-             *
-             * 索引从当前表长度往后排，避免和真实 `tool_calls` 分片的下标撞车。
-             * @param result 一次解析结果
-             */
-            const absorbDsmlCalls = (result: DsmlParseResult) => {
-                for (const call of result.calls) {
-                    const index = callSlots.size
-                    callSlots.set(index, {
-                        id: `dsml_call_${index}_${Date.now()}`,
-                        name: call.name,
-                        args: JSON.stringify(call.args),
-                    })
-                    dsmlCallCount++
-                }
-            }
-
-            for await (const chunk of stream) {
-                if (this.interrupted) {
-                    break
-                }
-
-                const delta = chunk.choices[0]?.delta
-
-                const finishReason = chunk.choices[0]?.finish_reason
-
-                if (finishReason) {
-                    roundFinishReason = finishReason
-                }
-
-                if (delta?.reasoning_content) {
-                    state.reasoningText += delta.reasoning_content
-                    callbacks.onDelta?.(delta.reasoning_content, "reasoning")
-                }
-
-                if (delta?.content) {
-                    // 正文增量先过 DSML 过滤：命中的部分转成工具调用，剩余文本才是真正的正文
-                    const cleaned = dsmlFilter.push(delta.content)
-
-                    absorbDsmlCalls(cleaned)
-
-                    if (cleaned.text) {
-                        content += cleaned.text
-                        state.reply += cleaned.text
-                        callbacks.onDelta?.(cleaned.text, "content")
-                    }
-                }
-
-                for (const toolCall of delta?.tool_calls ?? []) {
-                    const index = toolCall.index ?? 0
-                    const slot = callSlots.get(index) ?? { id: "", name: "", args: "" }
-
-                    if (toolCall.id) {
-                        slot.id = toolCall.id
-                    }
-                    if (toolCall.function?.name) {
-                        slot.name = mergeToolName(slot.name, toolCall.function.name)
-                    }
-                    if (toolCall.function?.arguments) {
-                        slot.args += toolCall.function.arguments
-                    }
-
-                    callSlots.set(index, slot)
-                }
-            }
-
-            // 收流尾：缓冲区里可能还压着未闭合的片段，这里一次性判定
-            absorbDsmlCalls(dsmlFilter.flush())
-
-            // 留一条日志：这类泄露是上游兼容层的偶发问题，出现频率本身就是有用信号
-            if (dsmlCallCount) {
-                console.warn("[DBAgent] 检测到 DSML 标记泄露，已转为正常工具调用", {
-                    round,
-                    count: dsmlCallCount,
+            try {
+                result = await this.transport.runRound({
+                    model: this.config.default_model,
+                    system,
+                    messages,
+                    // 最后一轮不再带工具，强制模型基于已有检索结果作答
+                    tools: isLastRound ? undefined : DB_AGENT_TOOLS,
+                    temperature: this.config.default_temperature,
+                    maxTokens: this.config.default_max_tokens,
+                    handlers: {
+                        onText: text => callbacks.onDelta?.(text, "content"),
+                        onThinking: text => callbacks.onDelta?.(text, "reasoning"),
+                    },
+                    isInterrupted: () => this.interrupted,
                 })
+            } catch (error) {
+                // 已经流出去的内容不能丢：先把思考收束，再交给上层报错
+                flushReasoning()
+                throw error
             }
+
+            const content = result.text
+            state.reasoningText += result.thinking
+            state.reply += content
 
             if (this.interrupted) {
-                return { reply: state.reply, traces, reasonings }
-            }
-
-            const calls = [...callSlots.values()].filter(call => call.name)
-
-            // 兜底路线：正文里出现过 DSML 标记，却一个有效工具调用都没解析出来。
-            // 说明格式又变了（例如新增了别的标记形态），此时这轮内容没有任何价值，
-            // 丢弃并重发一次，避免把垃圾文本当成最终回答展示给用户。
-            if (!calls.length && containsDsmlMarker(content)) {
-                if (roundRetries < MAX_DSML_RETRIES) {
-                    roundRetries++
-                    console.warn("[DBAgent] 检测到无法解析的 DSML 标记，丢弃本轮并重试", {
-                        round,
-                        retry: roundRetries,
-                    })
-                    continue
-                }
-
-                // 重试次数用尽：宁可给出干净的提示，也不把标记原文抛给用户
-                console.error("[DBAgent] DSML 容错重试耗尽，已丢弃污染内容", { round })
-                state.reply = state.reply.replace(content, "")
                 flushReasoning()
-                callbacks.onReasoningEnd?.([])
                 return { reply: state.reply, traces, reasonings }
             }
+
+            const calls = result.toolCalls
 
             if (!calls.length) {
-                // 正文被输出上限截断时，上游以 finish_reason=length 收流，这里接着要一段续写，
+                // 正文被输出上限截断时，上游以 length 收流，这里接着要一段续写，
                 // 否则用户看到的就是半句话。已产出的正文先作为助手消息回灌，模型才知道从哪里接。
-                if (roundFinishReason === "length" && content.trim() && continuations < MAX_CONTINUATIONS) {
+                if (result.finishReason === "length" && content.trim() && continuations < MAX_CONTINUATIONS) {
                     continuations++
                     flushReasoning()
                     callbacks.onReasoningEnd?.([])
-                    messages.push({ role: "assistant", content: content.trim() })
-                    messages.push({ role: "user", content: CONTINUATION_PROMPT })
+                    messages.push({ role: "assistant", text: content.trim(), thinking: result.thinking, toolCalls: [] })
+                    messages.push({ role: "user", text: CONTINUATION_PROMPT })
                     console.warn("[DBAgent] 回复触达输出上限，已自动续写", { continuations })
                     continue
                 }
@@ -1257,37 +1129,29 @@ export class DBAgent {
             }
 
             // 这一轮思考的落点就是下面这批工具调用，先把思考收束并关联起来
-            const roundCallIds = calls.map(call => call.id || `call_${Date.now()}`)
+            const roundCallIds = calls.map(call => call.id)
 
             flushReasoning(roundCallIds)
             callbacks.onReasoningEnd?.(roundCallIds)
 
-            // 回灌助手消息（携带工具调用）与工具结果，进入下一轮。
-            // 注意：ask_user 的 tool 消息**不在这里**推送，它要等用户作答后由 resolvePending 补上；
-            // 其余工具调用照常回灌，保证「一次提问 + 若干检索」同时发生时上下文依然完整。
-            messages.push({
-                role: "assistant",
-                content: content.trim(),
-                tool_calls: calls.map(call => ({
-                    id: call.id || `call_${Date.now()}`,
-                    type: "function" as const,
-                    function: { name: call.name, arguments: call.args },
-                })),
-            })
+            // 回灌助手轮（携带工具调用）与工具结果，进入下一轮。
+            // 注意：ask_user 的工具结果**不在这里**推送，它要等用户作答后由 resolvePending 补上；
+            // 其余工具结果照常回灌，保证「一次提问 + 若干检索」同时发生时上下文依然完整。
+            messages.push({ role: "assistant", text: content.trim(), thinking: result.thinking, toolCalls: calls })
 
             // 同一轮里可能同时出现 ask_user 与其它检索工具，先跑完检索再处理提问，
-            // 这样挂起时除 ask_user 外的每个 tool_call 都已经有对应的 tool 消息。
+            // 这样挂起时除 ask_user 外的每个工具调用都已经有对应的结果。
             const askCall = calls.find(call => call.name === "ask_user")
+            const toolResults: AgentToolResult[] = []
 
             for (const call of calls) {
                 if (call === askCall) {
                     continue
                 }
 
-                const id = call.id || `call_${Date.now()}`
-                const args = parseToolArguments(call.args)
+                const args = parseToolArguments(call.arguments)
                 const trace: DBAgentToolTrace = {
-                    id,
+                    id: call.id,
                     name: call.name,
                     label: toolLabel(call.name),
                     args,
@@ -1313,26 +1177,23 @@ export class DBAgent {
 
                 callbacks.onToolTrace?.({ ...trace })
 
-                const toolMessage: ChatCompletionToolMessageParam = {
-                    role: "tool",
-                    tool_call_id: id,
-                    content: toolContent,
-                }
+                toolResults.push({ toolCallId: call.id, content: toolContent, ...(trace.status === "error" ? { isError: true } : {}) })
+            }
 
-                messages.push(toolMessage)
+            if (toolResults.length) {
+                messages.push({ role: "user", text: "", toolResults })
             }
 
             if (askCall) {
-                const id = askCall.id || `call_${Date.now()}`
-                const request = normalizeAskUserRequest(parseToolArguments(askCall.args))
+                const request = normalizeAskUserRequest(parseToolArguments(askCall.arguments))
 
                 // 题面解析不出来时不能把用户晾在空卡片上：当成工具错误回灌，让模型换个方式继续
                 if (!request) {
                     const trace: DBAgentToolTrace = {
-                        id,
+                        id: askCall.id,
                         name: askCall.name,
                         label: toolLabel(askCall.name),
-                        args: parseToolArguments(askCall.args),
+                        args: parseToolArguments(askCall.arguments),
                         summary: i18next.t("dbAgent.summary.askInvalid"),
                         status: "error",
                     }
@@ -1341,23 +1202,28 @@ export class DBAgent {
                     callbacks.onToolTrace?.({ ...trace })
 
                     messages.push({
-                        role: "tool",
-                        tool_call_id: id,
-                        content: JSON.stringify({
-                            error: "提问格式无效：至少需要一道带题干或选项的问题。请直接检索，或用更简单的结构重新提问。",
-                        }),
+                        role: "user",
+                        text: "",
+                        toolResults: [
+                            {
+                                toolCallId: askCall.id,
+                                content: JSON.stringify({
+                                    error: "提问格式无效：至少需要一道带题干或选项的问题。请直接检索，或用更简单的结构重新提问。",
+                                }),
+                                isError: true,
+                            },
+                        ],
                     })
 
                     round++
-                    roundRetries = 0
                     continue
                 }
 
                 const trace: DBAgentToolTrace = {
-                    id,
+                    id: askCall.id,
                     name: askCall.name,
                     label: toolLabel(askCall.name),
-                    args: parseToolArguments(askCall.args),
+                    args: parseToolArguments(askCall.arguments),
                     summary: summarizeAskUserRequest(request),
                     // 停在 running：这一步的完成与否取决于用户，不取决于模型
                     status: "running",
@@ -1374,7 +1240,7 @@ export class DBAgent {
                     reasonings,
                     reasoningText: state.reasoningText,
                     round,
-                    ask: { requestId: request.id, request, toolCallId: id },
+                    ask: { requestId: request.id, request, toolCallId: askCall.id },
                 }
 
                 state.round = round
@@ -1384,9 +1250,8 @@ export class DBAgent {
                 return { reply: state.reply, traces, reasonings, pendingAsk: this.pending.ask }
             }
 
-            // 本轮已正常消费，推进轮次并重置重试计数
+            // 本轮已正常消费，推进轮次
             round++
-            roundRetries = 0
         }
 
         return { reply: state.reply, traces, reasonings }

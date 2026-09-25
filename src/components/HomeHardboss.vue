@@ -119,7 +119,7 @@ onUnmounted(() => {
                         :to="`/db/hardboss/${section.bossId}`"
                         class="block truncate text-[13px] font-semibold text-base-content transition-colors duration-150 hover:text-primary"
                     >
-                        {{ section.bossName }}
+                        {{ $t(section.bossName) }}
                     </SRouterLink>
                     <div class="text-[11px] text-base-content/55">
                         <template v-if="section.nextRotationTime">

@@ -40,7 +40,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索熔炼等级、任务或奖励 ID..."
+                            :placeholder="$t('db-forge-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -63,9 +63,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbf-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共
+                        {{ $t('common.total_count') }}
                         <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredForgeLevels.length }}</b>
-                        个熔炼等级
+                        {{ $t('db-forge-list.forge_level_count') }}
                     </p>
                 </div>
             </div>

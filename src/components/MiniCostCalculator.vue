@@ -258,7 +258,7 @@ const dungeonTimeFields = [
         <div class="flex items-center gap-2 px-3 py-2.5">
             <div class="flex items-center gap-1.5 text-xs font-medium tracking-wide text-base-content/70">
                 <Icon icon="ri:calculator-line" class="text-primary" />
-                养成开销估算
+                {{ $t('mini-cost-calculator.title') }}
             </div>
             <div class="ml-auto flex items-center gap-1.5">
                 <button
@@ -268,7 +268,7 @@ const dungeonTimeFields = [
                     @click="isConfigOpen = !isConfigOpen"
                 >
                     <Icon icon="ri:settings-3-line" />
-                    估算设置
+                    {{ $t('mini-cost-calculator.settings') }}
                 </button>
                 <button
                     type="button"
@@ -276,7 +276,7 @@ const dungeonTimeFields = [
                     @click="jumpToFullCalculator"
                 >
                     <Icon icon="ri:arrow-right-up-line" />
-                    完整计算器
+                    {{ $t('mini-cost-calculator.full_calculator') }}
                 </button>
             </div>
         </div>
@@ -315,19 +315,19 @@ const dungeonTimeFields = [
                     />
                 </label>
             </div>
-            <p class="mt-2 text-[11px] text-base-content/40">以上参数仅影响时间估算结果，不影响资源消耗统计</p>
+            <p class="mt-2 text-[11px] text-base-content/40">{{ $t('mini-cost-calculator.params_note') }}</p>
         </div>
 
         <!-- 计算中 -->
         <div v-if="calculating" class="flex items-center justify-center gap-2 px-3 py-6">
             <span class="loading loading-spinner loading-sm text-primary"></span>
-            <span class="text-xs text-base-content/50">正在估算副本开销...</span>
+            <span class="text-xs text-base-content/50">{{ $t('mini-cost-calculator.estimating') }}</span>
         </div>
 
         <!-- 无魔之楔 -->
         <div v-else-if="mods.length === 0" class="flex items-center justify-center gap-2 px-3 py-6">
             <Icon icon="po-A" class="text-xl text-base-content/25" />
-            <span class="text-xs text-base-content/50">未装备魔之楔，暂无开销估算</span>
+            <span class="text-xs text-base-content/50">{{ $t('mini-cost-calculator.no_mod_equipped') }}</span>
         </div>
 
         <!-- 估算结果 -->
@@ -335,16 +335,16 @@ const dungeonTimeFields = [
             <div class="flex flex-wrap items-end gap-x-5 gap-y-2 px-3 pb-2.5">
                 <div class="flex items-baseline gap-2">
                     <span class="font-orbitron text-3xl font-bold tabular-nums text-primary">{{ result.timeEstimate.days }}</span>
-                    <span class="text-xs text-base-content/60">天</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.day') }}</span>
                     <span class="font-orbitron text-xl font-bold tabular-nums text-primary">{{ result.timeEstimate.hours }}</span>
-                    <span class="text-xs text-base-content/60">小时</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.hour') }}</span>
                     <span class="font-orbitron text-xl font-bold tabular-nums text-primary">{{ result.timeEstimate.mins }}</span>
-                    <span class="text-xs text-base-content/60">分钟</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.minute') }}</span>
                 </div>
                 <span class="text-[11px] text-base-content/40">
-                    需挑战
+                    {{ $t('mini-cost-calculator.need_challenge') }}
                     <b class="font-orbitron tabular-nums">{{ Object.keys(result.timeEstimate.dungeonTimes).length }}</b>
-                    种副本
+                    {{ $t('mini-cost-calculator.dungeon_kinds') }}
                 </span>
             </div>
             <div class="p-2 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2">

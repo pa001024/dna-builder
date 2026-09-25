@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { Fish, fish2SpotMap, fishingSpotMap, fishMap, resourceMap } from "@/data"
@@ -9,19 +10,33 @@ const props = defineProps<{
     fish: Fish
 }>()
 
+const { t } = useTranslation()
 const { gt } = useGameText()
 
 /**
- * 获取出现时间名称
+ * 出现时段枚举（1=上午 2=下午 3=夜晚）的中文原文。
+ * 值走数据包原文对照表，展示时过 `gt` 即可得到当前语言。
+ */
+const APPEAR_NAMES: Record<number, string> = {
+    1: "上午",
+    2: "下午",
+    3: "夜晚",
+}
+
+/**
+ * 获取出现时间名称。
+ *
+ * ⚠️ 这些原文要**逐个**过 `gt` 取译文，不能先拼成「上午、下午、夜晚」再翻译——
+ * 对照表的键是单词本身，拼出来的整句不在表里，会原样退回中文。
  * @param appear 出现时间数组 1=上午 2=下午 3=夜晚
+ * @returns 以「、」连接的当前语言时段名
  */
 function getAppearName(appear: number[]): string {
-    const timeMap: Record<number, string> = {
-        1: "上午",
-        2: "下午",
-        3: "夜晚",
-    }
-    return appear.map(t => timeMap[t]).join("、")
+    return appear
+        .map(t => APPEAR_NAMES[t])
+        .filter(Boolean)
+        .map(name => gt(name))
+        .join("、")
 }
 
 /**
@@ -41,16 +56,18 @@ const s2bFish = computed(() => getS2BFish(props.fish.s2b))
 const fishResource = computed(() => resourceMap.get(props.fish.rid) || null)
 
 /**
- * 获取当前鱼所在的鱼池和权重信息
+ * 获取当前鱼所在的鱼池和权重信息。
+ *
+ * `spotName` 保留**游戏原文**，由模板过 `$t` 取译文；查不到鱼池时退回已翻译的占位文案。
+ * @returns 鱼池条目（含名称原文与在池中的权重）
  */
 const fishSpots = computed(() => {
     const spots = fish2SpotMap.get(props.fish.id) || []
-    // 转换为包含鱼池名称的对象
     return spots.map(spotInfo => {
         const spot = fishingSpotMap.get(spotInfo.spotId)
         return {
             ...spotInfo,
-            spotName: spot?.name || `未知鱼池(${spotInfo.spotId})`,
+            spotName: spot?.name || t("db-fish-detail.unknown_spot", { id: spotInfo.spotId }),
         }
     })
 })
@@ -59,15 +76,32 @@ const fishSpots = computed(() => {
 <template>
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 档案头：纸面 + primary 强调线 -->
-        <header class="border-b-2 border-primary pb-3">
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
             <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                 <span class="h-px w-6 bg-primary" aria-hidden="true" />
                 Fish File
             </p>
-            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div class="relative flex flex-wrap items-center gap-x-2 gap-y-1">
                 <SRouterLink
                     :to="`/db/fish/${fish.id}`"
-                    class="truncate text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
+                    class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                 >
                     {{ $t(fish.name) }}
                 </SRouterLink>
@@ -77,7 +111,7 @@ const fishSpots = computed(() => {
                 </span>
             </div>
             <!-- 鱼图 -->
-            <div class="mt-3 flex justify-center">
+            <div class="relative mt-3 flex justify-center">
                 <img :src="`/imgs/res/T_Fish_${fish.icon}.webp`" class="w-24 rounded-xs object-cover" />
             </div>
         </header>
@@ -88,17 +122,17 @@ const fishSpots = computed(() => {
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">Lv.</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ fish.level }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ fish.level }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">长度</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="text-xs text-base-content/60">{{ $t('db-fish-detail.length') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ fish.length[0] }}-{{ fish.length[1] }}
                     </span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">价格</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ fish.price[0] }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.price') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ fish.price[0] }}</span>
                 </div>
             </div>
         </section>
@@ -120,15 +154,15 @@ const fishSpots = computed(() => {
             <SectionHeader no-animate compact kicker="APPEARANCE" />
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">出现时间</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-fish-detail.appearance_time') }}</span>
                     <span class="text-sm text-base-content/90">{{ gt(getAppearName(fish.appear)) }}</span>
                 </div>
                 <div
                     v-if="fish.var && fish.varProb && fish.var.length > 0 && fish.varProb > 0"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">变异概率</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="text-xs text-base-content/60">{{ $t('db-fish-detail.mutation_rate') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ (fish.varProb * 100).toFixed(0) }}%
                     </span>
                 </div>
@@ -146,7 +180,7 @@ const fishSpots = computed(() => {
                 >
                     {{ $t(s2bFish.name) }}
                 </SRouterLink>
-                <span class="ml-auto shrink-0 pl-2 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                <span class="ml-auto shrink-0 pl-2 font-orbitron text-[13px] font-semibold text-primary">
                     {{ calculateFishPrice(s2bFish).price }}
                 </span>
             </div>
@@ -161,10 +195,10 @@ const fishSpots = computed(() => {
                     :key="spot.spotId"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <SRouterLink :to="`/fish/${spot.spotId}`" class="truncate text-sm transition-colors duration-150 hover:text-primary">
-                        {{ spot.spotName }}
+                    <SRouterLink :to="`/db/fishspot/${spot.spotId}`" class="truncate text-sm transition-colors duration-150 hover:text-primary">
+                        {{ $t(spot.spotName) }}
                     </SRouterLink>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ spot.weight }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ spot.weight }}</span>
                 </div>
             </div>
         </section>

@@ -18,7 +18,7 @@ function submit() {
                 <div class="modal-action">
                     <form class="flex justify-end gap-2 w-full" method="dialog">
                         <slot name="action">
-                            <button class="btn btn-primary" @click="submit">确定</button>
+                            <button class="btn btn-primary" @click="submit">{{ $t('dialog-model.ok') }}</button>
                         </slot>
                     </form>
                 </div>

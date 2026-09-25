@@ -122,7 +122,7 @@ function handleSelectOption(dialogueId: number, optionId: number) {
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <SRouterLink
                         :to="`/db/npc/${npc.id}`"
-                        class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                     >
                         {{ $t(formatStoryText(npc.name || `NPC ${npc.id}`)) }}
                     </SRouterLink>
@@ -133,56 +133,56 @@ function handleSelectOption(dialogueId: number, optionId: number) {
 
         <!-- 基本信息 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="PROFILE" title="NPC 信息" />
+            <SectionHeader no-animate compact kicker="PROFILE" :title="$t('db-npc-detail.npc_info')" />
             <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">ID</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ npc.id }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ npc.id }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">名称</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-npc-detail.name') }}</span>
                     <span class="truncate text-sm font-semibold text-base-content">{{ $t(formatStoryText(npc.name || "未知")) }}</span>
                 </div>
                 <div
                     v-if="npc.camp"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">阵营</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-npc-detail.faction') }}</span>
                     <span class="truncate text-sm text-base-content/85">{{ npc.camp }}</span>
                 </div>
                 <div
                     v-if="npc.type"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">类型</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.type') }}</span>
                     <span class="truncate text-sm text-base-content/85">{{ npc.type }}</span>
                 </div>
                 <div
                     v-if="npc.charId"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">角色 ID</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ npc.charId }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-npc-detail.char_id') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ npc.charId }}</span>
                 </div>
                 <div
                     v-if="npc.icon"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">图标</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-npc-detail.icon') }}</span>
                     <span class="truncate font-mono text-[11px] tracking-wide text-base-content/70">{{ npc.icon }}</span>
                 </div>
                 <div
                     v-if="npc.srId"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">子区域</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.sub_region') }}</span>
                     <SubRegionLink :sub-region-id="npc.srId" />
                 </div>
                 <div
                     v-if="npc.srId && npc.pos"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">坐标</span>
+                    <span class="text-xs text-base-content/60">{{ $t('common.coordinate') }}</span>
                     <MapPosLink
                         :sub-region-id="npc.srId"
                         :point="npc.pos"
@@ -215,7 +215,7 @@ function handleSelectOption(dialogueId: number, optionId: number) {
         </section>
 
         <section v-else class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 text-sm text-base-content/60 backdrop-blur-sm">
-            暂无可展示的对话链
+            {{ $t('db-npc-detail.no_dialogue') }}
         </section>
     </div>
 </template>

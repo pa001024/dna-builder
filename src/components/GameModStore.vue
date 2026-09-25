@@ -905,7 +905,7 @@ async function submitVersion() {
                         <span v-if="uploadSubmitting" class="loading loading-spinner loading-xs"></span>
                         {{ $t("game-launcher.publish") }}
                     </button>
-                    <button class="min-w-20 btn" @click="uploadOpen = false">{{ $t("setting.cancel") }}</button>
+                    <button class="min-w-20 btn" @click="uploadOpen = false">{{ $t("取消") }}</button>
                 </div>
             </div>
             <div class="modal-backdrop" @click="uploadOpen = false" />
@@ -956,7 +956,7 @@ async function submitVersion() {
                         <span v-if="versionSubmitting" class="loading loading-spinner loading-xs"></span>
                         {{ $t("game-launcher.publish") }}
                     </button>
-                    <button class="min-w-20 btn" @click="versionOpen = false">{{ $t("setting.cancel") }}</button>
+                    <button class="min-w-20 btn" @click="versionOpen = false">{{ $t("取消") }}</button>
                 </div>
             </div>
             <div class="modal-backdrop" @click="versionOpen = false" />

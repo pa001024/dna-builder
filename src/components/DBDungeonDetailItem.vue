@@ -580,7 +580,24 @@ watch(
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 详情头部：纸面 + primary 强调线 -->
         <header class="relative overflow-hidden border-b-2 border-primary pb-4">
-            <div class="flex items-start gap-3.5">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-start gap-3.5">
                 <img
                     v-if="dungeon.e"
                     :src="LeveledChar.elementUrl(dungeon.e)"
@@ -595,7 +612,7 @@ watch(
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/dungeon/${dungeon.id}`"
-                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(dungeon.n) }}
                         </SRouterLink>
@@ -605,15 +622,15 @@ watch(
                         <span
                             v-if="dungeon.waves != null"
                             class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
-                            title="每阶段刷怪波数"
+                            :title="$t('db-dungeon-detail.waves_per_stage')"
                         >
-                            {{ dungeon.waves }} 波
+                            {{ $t('common.count_waves', { count: dungeon.waves }) }}
                         </span>
                         <span
                             v-if="dungeon.mod != null"
                             class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
                         >
-                            历练等级 {{ dungeon.mod }}
+                            {{ $t('db-dungeon-detail.level_requirement', { level: dungeon.mod }) }}
                         </span>
                         <span
                             class="rounded-xs px-1.5 py-0.5 text-[10px] tracking-wide"
@@ -644,11 +661,11 @@ watch(
 
         <!-- 无尽副本区间调整 -->
         <section v-if="isEndlessDungeon" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="ENDLESS" title="无尽副本设置" />
+            <SectionHeader no-animate compact kicker="ENDLESS" :title="$t('db-dungeon-detail.endless_dungeon_settings')" />
             <template v-if="isIronSurvivalDungeon">
                 <div class="mb-1 mt-2 flex items-center justify-between text-sm">
-                    <span>怪物等级区间</span>
-                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span>{{ $t('db-dungeon-detail.monster_level_range') }}</span>
+                    <span class="font-orbitron text-[13px] font-semibold text-primary">
                         Lv.{{ selectedIronStartLevel }} ~ Lv.{{ selectedIronEndLevel }} / Lv.{{ maxMonsterLevel }}
                     </span>
                 </div>
@@ -659,18 +676,18 @@ watch(
                     :max="maxMonsterLevel"
                     :step="ENDLESS_LEVEL_STEP"
                     :min-gap="ENDLESS_LEVEL_STEP"
-                    start-label="起始等级"
-                    end-label="结束等级"
+                    :start-label="$t('db-dungeon-detail.start_level')"
+                    :end-label="$t('db-dungeon-detail.end_level')"
                 />
                 <div class="mt-1 text-xs text-base-content/70">
-                    区间 [起始, 结束)，实际覆盖 Lv.{{ endlessStartLevelBase }} ~ Lv.{{ endlessLevelBase }}
+                    {{ $t('db-dungeon-detail.range_cover_level', { start: endlessStartLevelBase, end: endlessLevelBase }) }}
                 </div>
             </template>
             <template v-else>
                 <div class="mb-1 mt-2 flex items-center justify-between text-sm">
-                    <span>无尽波次</span>
-                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
-                        第 {{ selectedEndlessStartWave }} ~ {{ selectedEndlessWave - 1 }} 波 / {{ endlessMaxWave - 1 }}
+                    <span>{{ $t('db-dungeon-detail.endless_waves') }}</span>
+                    <span class="font-orbitron text-[13px] font-semibold text-primary">
+                        {{ $t('db-dungeon-detail.wave_range_over_max', { start: selectedEndlessStartWave, end: selectedEndlessWave - 1, max: endlessMaxWave - 1 }) }}
                     </span>
                 </div>
                 <DualRangeSlider
@@ -680,14 +697,11 @@ watch(
                     :max="endlessMaxWave"
                     :step="1"
                     :min-gap="1"
-                    start-label="起始波次"
-                    end-label="结束波次"
+                    :start-label="$t('db-dungeon-detail.start_wave')"
+                    :end-label="$t('db-dungeon-detail.end_wave')"
                 />
                 <div class="mt-1 text-xs text-base-content/70">
-                    区间 [起始, 结束) ，实际覆盖第 {{ displayStartWave }} ~ {{ displayEndWave }} 波，怪物等级 Lv.{{
-                        endlessStartLevelBase
-                    }}
-                    ~ Lv.{{ endlessLevelBase }}（每波 +{{ ENDLESS_LEVEL_STEP }}，最高 {{ maxMonsterLevel }}）
+                    {{ $t('db-dungeon-detail.range_cover_wave_level', { start: displayStartWave, end: displayEndWave, lvStart: endlessStartLevelBase, lvEnd: endlessLevelBase, step: ENDLESS_LEVEL_STEP, max: maxMonsterLevel }) }}
                 </div>
             </template>
         </section>
@@ -695,14 +709,14 @@ watch(
         <template v-if="activeTab === 'monster'">
             <!-- 普通怪物 -->
             <section v-if="dungeon.m?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                <SectionHeader no-animate compact kicker="MONSTERS" title="普通怪物">
+                <SectionHeader no-animate compact kicker="MONSTERS" :title="$t('db-dungeon-detail.normal_monsters')">
                     <template #trailing>
-                        <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.m.length }} 种</span>
+                        <span class="text-[11px] tabular-nums text-base-content/40">{{ $t('common.count_kinds', { count: dungeon.m.length }) }}</span>
                     </template>
                 </SectionHeader>
                 <!-- 等级控制 -->
                 <div class="mt-2 flex items-center gap-4 mb-3">
-                    <span class="min-w-12 shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                    <span class="min-w-12 shrink-0 font-orbitron text-[13px] font-semibold text-primary"
                         >Lv. {{ monsterTabLevel }}</span
                     >
                     <input
@@ -714,9 +728,9 @@ watch(
                         :max="MonsterLevelUpperLimit"
                         step="1"
                     />
-                    <span v-else class="text-xs text-base-content/70">无尽副本等级由上方波次滑块控制</span>
+                    <span v-else class="text-xs text-base-content/70">{{ $t('db-dungeon-detail.endless_level_hint') }}</span>
                 </div>
-                <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                     <DBMonsterCompactCard
                         v-for="monsterId in dungeon.m"
                         :key="monsterId"
@@ -727,12 +741,12 @@ watch(
 
             <!-- 特殊怪物 -->
             <section v-if="dungeon.sm?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                <SectionHeader no-animate compact kicker="ELITE" title="特殊怪物">
+                <SectionHeader no-animate compact kicker="ELITE" :title="$t('db-dungeon-detail.elite_monsters')">
                     <template #trailing>
-                        <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.sm.length }} 种</span>
+                        <span class="text-[11px] tabular-nums text-base-content/40">{{ $t('common.count_kinds', { count: dungeon.sm.length }) }}</span>
                     </template>
                 </SectionHeader>
-                <div class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                <div class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                     <DBMonsterCompactCard
                         v-for="monsterId in dungeon.sm"
                         :key="monsterId"
@@ -745,7 +759,7 @@ watch(
                 v-if="!dungeon.m?.length && !dungeon.sm?.length"
                 class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm text-sm text-base-content/70"
             >
-                暂无怪物数据
+                {{ $t('db-dungeon-detail.no_monster_data') }}
             </div>
         </template>
 
@@ -758,22 +772,22 @@ watch(
             />
             <template v-else>
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                    <SectionHeader no-animate compact kicker="SPAWN" title="刷新范围显示" />
+                    <SectionHeader no-animate compact kicker="SPAWN" :title="$t('db-dungeon-detail.spawn_range_title')" />
                     <div class="mt-2 flex items-center justify-between">
-                        <span class="text-sm">刷新范围显示</span>
+                        <span class="text-sm">{{ $t('db-dungeon-detail.spawn_range_title') }}</span>
                         <label class="label cursor-pointer gap-2 p-0">
-                            <span class="text-xs text-base-content/70">移动端</span>
+                            <span class="text-xs text-base-content/70">{{ $t('db-dungeon-detail.mobile') }}</span>
                             <input v-model="useMobileSpawnRadius" type="checkbox" class="checkbox checkbox-xs" />
                         </label>
                     </div>
-                    <div class="mt-1 text-xs text-base-content/70">当前平台：{{ getSpawnRadiusPlatformText() }}（默认 PC）</div>
+                    <div class="mt-1 text-xs text-base-content/70">{{ $t('db-dungeon-detail.current_platform', { platform: getSpawnRadiusPlatformText() }) }}</div>
                 </section>
 
                 <!-- 怪物波次 -->
                 <section v-if="dungeon.spawn?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                    <SectionHeader no-animate compact kicker="WAVES" title="怪物波次">
+                    <SectionHeader no-animate compact kicker="WAVES" :title="$t('db-dungeon-detail.monster_waves')">
                         <template #trailing>
-                            <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.spawn.length }} 波</span>
+                            <span class="text-[11px] tabular-nums text-base-content/40">{{ $t('common.count_waves', { count: dungeon.spawn.length }) }}</span>
                         </template>
                     </SectionHeader>
                     <div class="mt-2 space-y-3">
@@ -783,7 +797,7 @@ watch(
                             class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                         >
                             <div class="mb-2 flex items-center justify-between gap-2">
-                                <span class="text-sm font-medium">第 {{ waveIndex + 1 }} 波</span>
+                                <span class="text-sm font-medium">{{ $t('db-dungeon-detail.wave_n', { n: waveIndex + 1 }) }}</span>
                                 <span class="text-[11px] tabular-nums text-base-content/55">{{ getSpawnWaveSummaryText(wave) }}</span>
                             </div>
 
@@ -797,32 +811,32 @@ watch(
                                         <div
                                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                         >
-                                            <span>生成器ID</span>
-                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary">{{
+                                            <span>{{ $t('db-dungeon-detail.generator_id') }}</span>
+                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
                                                 spawnGenerator.id
                                             }}</span>
                                         </div>
                                         <div
                                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                         >
-                                            <span>检查时间</span>
-                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary">{{
+                                            <span>{{ $t('db-dungeon-detail.check_time') }}</span>
+                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
                                                 spawnGenerator.time ? `${spawnGenerator.time}s` : "-"
                                             }}</span>
                                         </div>
                                         <div
                                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                         >
-                                            <span>刷新间隔</span>
-                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary">{{
+                                            <span>{{ $t('db-dungeon-detail.spawn_interval') }}</span>
+                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
                                                 spawnGenerator.th ? `${spawnGenerator.th}s` : "-"
                                             }}</span>
                                         </div>
                                         <div
                                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                         >
-                                            <span>刷新范围 ({{ getSpawnRadiusPlatformText() }})</span>
-                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary">{{
+                                            <span>{{ $t('db-dungeon-detail.spawn_radius', { platform: getSpawnRadiusPlatformText() }) }}</span>
+                                            <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
                                                 formatSpawnRadius(spawnGenerator.radius)
                                             }}</span>
                                         </div>
@@ -830,9 +844,9 @@ watch(
 
                                     <div v-if="getSpawnGeneratorMonsters(spawnGenerator).length" class="mb-2">
                                         <div class="text-xs text-base-content/55 mb-2">
-                                            普通怪物 ({{ getSpawnGeneratorMonsters(spawnGenerator).length }}种)
+                                            {{ $t('db-dungeon-detail.normal_monsters_count', { count: getSpawnGeneratorMonsters(spawnGenerator).length }) }}
                                         </div>
-                                        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                                        <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                                             <div
                                                 v-for="(spawnMonster, monsterIndex) in getSpawnGeneratorMonsters(spawnGenerator)"
                                                 :key="`${spawnGenerator.id}-m-${spawnMonster.id}-${monsterIndex}`"
@@ -851,8 +865,8 @@ watch(
                                                 <div
                                                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs"
                                                 >
-                                                    <span>数量</span>
-                                                    <span class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                    <span>{{ $t('db-dungeon-detail.quantity') }}</span>
+                                                    <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                         >x{{ getSpawnMonsterCountText(spawnMonster) }}</span
                                                     >
                                                 </div>
@@ -862,7 +876,7 @@ watch(
 
                                     <div v-if="getSpawnGeneratorGroups(spawnGenerator).length" class="mb-2">
                                         <div class="text-xs text-base-content/55 mb-2">
-                                            组刷怪 ({{ getSpawnGeneratorGroups(spawnGenerator).length }}组)
+                                            {{ $t('db-dungeon-detail.group_spawns_count', { count: getSpawnGeneratorGroups(spawnGenerator).length }) }}
                                         </div>
                                         <div class="space-y-2">
                                             <div
@@ -874,99 +888,99 @@ watch(
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>组ID</span>
+                                                        <span>{{ $t('db-dungeon-detail.group_id') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ spawnGroup.id }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>数量</span>
+                                                        <span>{{ $t('db-dungeon-detail.quantity') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ getSpawnGroupCountText(spawnGroup) }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>权重</span>
+                                                        <span>{{ $t('db-dungeon-detail.weight') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ getSpawnGroupWeightText(spawnGroup) }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>检测时间</span>
+                                                        <span>{{ $t('db-dungeon-detail.detect_time') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ spawnGroup.gt ? `${spawnGroup.gt}s` : "-" }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>检测延迟</span>
+                                                        <span>{{ $t('db-dungeon-detail.detect_delay') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ spawnGroup.gdt ? `${spawnGroup.gdt}s` : "-" }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>补怪间隔</span>
+                                                        <span>{{ $t('db-dungeon-detail.refill_interval') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ spawnGroup.gri ? `${spawnGroup.gri}s` : "-" }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>阈值</span>
+                                                        <span>{{ $t('db-dungeon-detail.threshold') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ spawnGroup.gth || "-" }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>组上限</span>
+                                                        <span>{{ $t('db-dungeon-detail.group_limit') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ spawnGroup.gl || "-" }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>组半径 / Z</span>
+                                                        <span>{{ $t('db-dungeon-detail.group_radius_z') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ spawnGroup.gar || "-" }} / {{ spawnGroup.gz || "-" }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="col-span-full flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 md:col-span-3"
                                                     >
-                                                        <span>初始中心范围</span>
+                                                        <span>{{ $t('db-dungeon-detail.initial_center_range') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ formatSpawnRadius(spawnGroup.gir) }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="col-span-full flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 md:col-span-3"
                                                     >
-                                                        <span>刷新中心范围</span>
+                                                        <span>{{ $t('db-dungeon-detail.spawn_center_range') }}</span>
                                                         <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                             >{{ formatSpawnRadius(spawnGroup.gr) }}</span
                                                         >
                                                     </div>
@@ -974,9 +988,9 @@ watch(
 
                                                 <div v-if="getSpawnGroupMembers(spawnGroup).length">
                                                     <div class="text-xs text-base-content/55 mb-2">
-                                                        组成员 ({{ getSpawnGroupMembers(spawnGroup).length }}种)
+                                                        {{ $t('db-dungeon-detail.group_members_count', { count: getSpawnGroupMembers(spawnGroup).length }) }}
                                                     </div>
-                                                    <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                                                    <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                                                         <div
                                                             v-for="(groupMonster, memberIndex) in getSpawnGroupMembers(spawnGroup)"
                                                             :key="`${spawnGroup.id}-gm-${groupMonster.id}-${memberIndex}`"
@@ -995,9 +1009,9 @@ watch(
                                                             <div
                                                                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs"
                                                             >
-                                                                <span>概率</span>
+                                                                <span>{{ $t('db-dungeon-detail.probability') }}</span>
                                                                 <span
-                                                                    class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                                    class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                                 >
                                                                     {{ groupMonster.p ? `${Math.round(groupMonster.p * 100)}%` : "100%" }}
                                                                 </span>
@@ -1013,12 +1027,12 @@ watch(
                                         <div
                                             class="mb-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-medium text-base-content/70"
                                         >
-                                            <span>号令者 ({{ spawnGenerator.sm.length }}种)</span>
+                                            <span>{{ $t('db-dungeon-detail.commander_count', { count: spawnGenerator.sm.length }) }}</span>
                                             <span class="font-normal tabular-nums text-base-content/55"
-                                                >单次刷新数量池: {{ formatSpawnCommanderNumText(spawnGenerator.smnum) }}</span
+                                                >{{ $t('db-dungeon-detail.spawn_num_pool', { value: formatSpawnCommanderNumText(spawnGenerator.smnum) }) }}</span
                                             >
                                         </div>
-                                        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                                        <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                                             <div
                                                 v-for="(spawnTagMonster, tagIndex) in spawnGenerator.sm"
                                                 :key="`${spawnGenerator.id}-sm-${spawnTagMonster.id}-${tagIndex}`"
@@ -1037,9 +1051,9 @@ watch(
                                                 <div
                                                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs"
                                                 >
-                                                    <span>权重</span>
+                                                    <span>{{ $t('db-dungeon-detail.weight') }}</span>
                                                     <span
-                                                        class="shrink-0 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                                        class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                     >
                                                         {{ spawnTagMonster.w }} ({{
                                                             getSpawnTagMonsterWeightPercentText(spawnGenerator, spawnTagMonster)
@@ -1059,7 +1073,7 @@ watch(
                     v-else
                     class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm text-sm text-base-content/70"
                 >
-                    暂无波次数据
+                    {{ $t('db-dungeon-detail.no_wave_data') }}
                 </div>
             </template>
         </template>
@@ -1079,7 +1093,7 @@ watch(
                     <SectionHeader no-animate compact kicker="CUMULATIVE" :title="`波数累计奖励 (${displayStartWave}~${displayEndWave}波)`">
                         <template #trailing>
                             <label class="label cursor-pointer gap-2 p-0 text-xs">
-                                <span>你好箱</span>
+                                <span>{{ $t('db-dungeon-detail.hello_box') }}</span>
                                 <input v-model="useNihaoBoxBonus" type="checkbox" class="checkbox checkbox-xs" />
                             </label>
                         </template>
@@ -1087,7 +1101,7 @@ watch(
                     <div v-if="cumulativeWaveRewards.length" class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
                         <ResourceCostItem v-for="item in cumulativeWaveRewards" :key="item.key" :name="item.name" :value="item.value" />
                     </div>
-                    <div v-else class="mt-2 text-sm text-base-content/70">当前波次暂无可累计奖励</div>
+                    <div v-else class="mt-2 text-sm text-base-content/70">{{ $t('db-dungeon-detail.no_cumulative_reward') }}</div>
                 </section>
                 <!-- 深境探险奖励表 -->
                 <DBIronSurvivalDetailItem
@@ -1114,9 +1128,9 @@ watch(
 
                 <!-- 特殊奖励 -->
                 <section v-if="dungeon.sr?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                    <SectionHeader no-animate compact kicker="SPECIAL" title="特殊奖励">
+                    <SectionHeader no-animate compact kicker="SPECIAL" :title="$t('db-dungeon-detail.special_reward')">
                         <template #trailing>
-                            <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.sr.length }} 组</span>
+                            <span class="text-[11px] tabular-nums text-base-content/40">{{ $t('common.count_groups', { count: dungeon.sr.length }) }}</span>
                         </template>
                     </SectionHeader>
                     <div class="mt-2 space-y-3">
@@ -1126,7 +1140,7 @@ watch(
                             class="rounded-xs border border-base-content/10 bg-base-content/3 p-2 transition-colors duration-200 hover:border-primary/40 hover:bg-base-content/5"
                         >
                             <!-- 使用 RewardItem 组件显示奖励 -->
-                            <RewardItem :reward="reward" header="特殊奖励组" />
+                            <RewardItem :reward="reward" :header="$t('db-dungeon-detail.special_reward_group')" />
                         </div>
                     </div>
                 </section>
@@ -1135,7 +1149,7 @@ watch(
                     v-if="!dungeon.r?.length && !dungeon.sr?.length"
                     class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm text-sm text-base-content/70"
                 >
-                    暂无奖励数据
+                    {{ $t('db-dungeon-detail.no_reward_data') }}
                 </div>
             </template>
         </template>

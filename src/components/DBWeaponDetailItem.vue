@@ -288,7 +288,7 @@ watch(
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/weapon/${weapon.id}`"
-                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(weapon.名称) }}
                         </SRouterLink>
@@ -328,25 +328,25 @@ watch(
             <div class="grid grid-cols-2 gap-1.5 md:grid-cols-4">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("攻击") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         leveledWeapon.基础攻击
                     }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("暴击") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatProp("基础暴击", weapon.暴击)
                     }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("暴伤") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatProp("基础暴伤", weapon.暴伤)
                     }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("触发") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatProp("基础触发", weapon.触发)
                     }}</span>
                 </div>
@@ -355,21 +355,21 @@ watch(
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("弹匣") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ weapon.弹匣 }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ weapon.弹匣 }}</span>
                 </div>
                 <div
                     v-if="weapon.最大弹药"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("最大弹药") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ weapon.最大弹药 }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ weapon.最大弹药 }}</span>
                 </div>
                 <div
                     v-if="weapon.弹药转化率 !== undefined"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("弹药转化率") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         `${+(weapon.弹药转化率 * 100).toFixed(1)}%`
                     }}</span>
                 </div>
@@ -378,7 +378,7 @@ watch(
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("最大射程") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         `${+(weapon.最大射程 / 100).toFixed(1)}m`
                     }}</span>
                 </div>
@@ -387,7 +387,7 @@ watch(
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("装填") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatProp("基础装填", weapon.装填)
                     }}</span>
                 </div>
@@ -396,7 +396,7 @@ watch(
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("射击间隔") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatProp("基础装填", weapon.射击间隔)
                     }}</span>
                 </div>
@@ -405,7 +405,7 @@ watch(
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("射速") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatProp("攻击", leveledWeapon.射速)
                     }}</span>
                 </div>
@@ -509,7 +509,7 @@ watch(
                                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                                 >
                                     <span class="text-xs text-base-content/60">{{ $t(name) }}</span>
-                                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                                         formatProp(name, value)
                                     }}</span>
                                 </div>

@@ -2589,21 +2589,21 @@ onBeforeUnmount(() => {
             <div class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                 <div class="flex flex-wrap items-start justify-between gap-2">
                     <div class="min-w-0">
-                        <h2 class="text-lg font-semibold tracking-tight">伤害公式</h2>
-                        <p class="mt-0.5 text-xs text-base-content/55">按步骤查看每个乘区和中间值，支持手动覆盖并实时查看结果变化。</p>
+                        <h2 class="text-lg font-semibold tracking-tight">{{ $t('db-damage.damage_formula') }}</h2>
+                        <p class="mt-0.5 text-xs text-base-content/55">{{ $t('db-damage.formula_desc') }}</p>
                     </div>
                     <div class="flex shrink-0 items-center gap-2">
                         <button
                             class="inline-flex h-8 cursor-pointer items-center rounded-xs border border-primary bg-primary px-3 text-xs font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:scale-[0.97]"
                             @click="importFromCurrentCharBuild"
                         >
-                            从当前构筑导入
+                            {{ $t('db-damage.import_from_build') }}
                         </button>
                         <button
                             class="inline-flex h-8 cursor-pointer items-center rounded-xs border border-base-content/20 px-3 text-xs text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
                             @click="resetCurrentMode"
                         >
-                            重置当前模式
+                            {{ $t('db-damage.reset_current_mode') }}
                         </button>
                     </div>
                 </div>
@@ -2618,7 +2618,7 @@ onBeforeUnmount(() => {
                         "
                         @click="mode = 'skill'"
                     >
-                        技能伤害
+                        {{ $t('技能伤害') }}
                     </button>
                     <button
                         class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
@@ -2629,7 +2629,7 @@ onBeforeUnmount(() => {
                         "
                         @click="mode = 'weapon'"
                     >
-                        武器伤害
+                        {{ $t('武器伤害') }}
                     </button>
                     <button
                         class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-1.5 text-xs transition-colors duration-150 active:scale-[0.97]"
@@ -2640,17 +2640,17 @@ onBeforeUnmount(() => {
                         "
                         @click="mode = 'dot'"
                     >
-                        DOT伤害
+                        {{ $t('db-damage.dot_damage') }}
                     </button>
                 </div>
             </div>
 
             <div class="grid gap-4 lg:grid-cols-2">
                 <div class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                    <SectionHeader no-animate compact kicker="INPUT" title="输入参数">
+                    <SectionHeader no-animate compact kicker="INPUT" :title="$t('db-damage.input_params')">
                         <template #trailing>
                             <label class="label cursor-pointer gap-2 p-0">
-                                <span class="text-xs text-base-content/55">百分比输入</span>
+                                <span class="text-xs text-base-content/55">{{ $t('db-damage.percentage_input') }}</span>
                                 <input v-model="usePercentInput" type="checkbox" class="toggle toggle-sm toggle-primary" />
                             </label>
                         </template>
@@ -2707,7 +2707,7 @@ onBeforeUnmount(() => {
                                             >
                                                 {{ output.label }}
                                             </button>
-                                            <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                            <div class="font-orbitron text-[13px] font-semibold text-primary">
                                                 {{ formatNumber(getGroupOutputValue(output.stepId)) }}
                                             </div>
                                             <div class="mt-1 flex flex-wrap items-center gap-2" @mousedown.stop>
@@ -2807,7 +2807,7 @@ onBeforeUnmount(() => {
                                             >
                                                 {{ output.label }}
                                             </button>
-                                            <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                            <div class="font-orbitron text-[13px] font-semibold text-primary">
                                                 {{ formatNumber(getGroupOutputValue(output.stepId)) }}
                                             </div>
                                             <div class="mt-1 flex flex-wrap items-center gap-2" @mousedown.stop>
@@ -2916,7 +2916,7 @@ onBeforeUnmount(() => {
                                             >
                                                 {{ output.label }}
                                             </button>
-                                            <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                            <div class="font-orbitron text-[13px] font-semibold text-primary">
                                                 {{ formatNumber(getGroupOutputValue(output.stepId)) }}
                                             </div>
                                             <div class="mt-1 flex flex-wrap items-center gap-2" @mousedown.stop>
@@ -2990,7 +2990,7 @@ onBeforeUnmount(() => {
                                 class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                             >
                                 <div class="text-xs text-base-content/70">{{ item.label }}</div>
-                                <div class="font-orbitron text-base font-semibold tabular-nums text-primary">
+                                <div class="font-orbitron text-base font-semibold text-primary">
                                     {{ formatNumber(item.value) }}
                                 </div>
                             </div>
@@ -3046,7 +3046,7 @@ onBeforeUnmount(() => {
                             <div class="text-xs text-base-content/70">公式展开</div>
                             <div class="mt-1 break-all">{{ mergeResult.formulaText }}</div>
                             <div class="mt-2 text-xs text-base-content/70">合并结果</div>
-                            <div class="font-orbitron text-base font-semibold tabular-nums text-primary">
+                            <div class="font-orbitron text-base font-semibold text-primary">
                                 {{ formatNumber(mergeResult.result) }}
                             </div>
                         </div>
@@ -3069,7 +3069,7 @@ onBeforeUnmount(() => {
                             </div>
                             <div class="text-right">
                                 <div class="text-xs text-base-content/60">最终值</div>
-                                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                <div class="font-orbitron text-[13px] font-semibold text-primary">
                                     {{ formatNumber(step.finalValue) }}
                                 </div>
                             </div>
@@ -3093,7 +3093,7 @@ onBeforeUnmount(() => {
             :style="{ left: `${activeOutputDrag.x + 12}px`, top: `${activeOutputDrag.y + 12}px` }"
         >
             <div class="text-xs text-base-content/70">{{ activeOutputDrag.label }}</div>
-            <div class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ formatNumber(activeOutputDrag.value) }}</div>
+            <div class="font-orbitron text-sm font-semibold text-primary">{{ formatNumber(activeOutputDrag.value) }}</div>
         </div>
     </ScrollArea>
 </template>

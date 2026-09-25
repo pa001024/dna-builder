@@ -23,7 +23,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 | 外层区块卡 | `rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm`                                   | 页面顶级 section（属性、技能、溯源、筛选区…）   |
 | 内层小卡   | `rounded-xs border border-base-content/10 bg-base-content/3 p-2.5`                                               | 外层卡内的条目卡（皮肤条目、子技能、武器名片…） |
 | 属性格     | `flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2` | 键值对小格                                      |
-| 数值文本   | `font-orbitron text-[13px] font-semibold tabular-nums text-primary`                                              | 属性数值、计数                                  |
+| 数值文本   | `font-orbitron text-[13px] font-semibold text-primary`                                                           | 属性数值、计数                                  |
 
 规则：
 
@@ -41,6 +41,57 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 - `kicker` 用装饰性英文大写（LEVEL / ATTRIBUTES / BONUS / SKILLS / TRACE / SIGNATURE…）。
 - 右侧附加内容放 `<template #trailing>`。
 - 列表页顶部如需页面级标题行，可用 kicker + hairline 组合，但**不做**大标题 header。
+
+## 档案头（详情页 `DB*DetailItem.vue` 的 `<header>`）
+
+四件套**缺一不可**，`DBCharDetailItem.vue` 是基准：
+
+```html
+<header class="relative overflow-hidden border-b-2 border-primary pb-4">
+    <!-- 引导线网格（装饰性，随主题明暗） -->
+    <div
+        class="pointer-events-none absolute inset-0"
+        style="
+            background-image:
+                linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+            background-size: 26px 26px;
+            mask-image: linear-gradient(to bottom, black, transparent 85%);
+        "
+        aria-hidden="true"
+    />
+    <!-- 右上角斜切楔形 -->
+    <span
+        class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+        aria-hidden="true"
+    />
+    <div class="relative flex items-start gap-3.5">
+        <div class="min-w-0 flex-1">
+            <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                Character File
+            </p>
+            <div class="relative flex flex-wrap items-center gap-x-2 gap-y-1">
+                <SRouterLink class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl">…</SRouterLink>
+                <CopyID :id="char.id" />
+            </div>
+        </div>
+    </div>
+</header>
+```
+
+规则：
+
+- **每个直接子内容元素都要加 `relative`**（两个 absolute 装饰层在下、内容在上），漏加会被网格/楔形盖住。
+- 标题：链接加 `transition-colors duration-150 hover:text-primary`；纯文本标题（`h2`/`span`）去掉这两项。
+- **`leading-none` → `leading-tight`**：`truncate` 的 `overflow:hidden` 会把 CJK 墨迹切掉 0.5~1px。
+- ⚠️ **含 `top-full` 绝对浮窗的 header 例外**：写成 `relative z-10 border-b-2 border-primary pb-4`，
+  `z-10` 必需（否则被后续 `backdrop-blur` 的 section 盖住、点不到），**且绝不能带 `overflow-hidden`**（会裁掉浮窗）。
+  见 `topics/floating-panel-layer.md`。
+- 原本是「flex 名片头」的组件（图标 + 标题并排）改档案头时，**要自己包一层 `relative flex items-center gap-3`**，
+  否则图标与文字块会竖排。
+- 内嵌型组件（`DBIronSurvival` / `DBForge` / `DBFishSpot` 这类嵌在别页里的）**不加档案头**，
+  只做「外层区块卡 + SectionHeader + 内层小卡/属性格」与违规项清理。
 
 ## 方章（chip / toggle）
 
@@ -102,7 +153,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 ```
 
 - 除「宽度/栅格/禁用/等宽数字」外，**其余类不得增删**：`w-full` / `w-24` / `col-span-*` 按布局补。
-- 数值输入追加 `font-mono tabular-nums`（编辑态对齐）；**展示态**数值仍用 `font-orbitron text-[13px] font-semibold tabular-nums text-primary`。
+- 数值输入追加 `font-mono tabular-nums`（编辑态对齐）；**展示态**数值仍用 `font-orbitron text-[13px] font-semibold text-primary`。
 - 只读/禁用：追加 `disabled:border-base-content/10 disabled:opacity-50`。
 - 百分比输入（`usePercentInput` / `toInputDisplayValue`）只换 class，`step`、label 后缀与换算逻辑保持不变。
 - 搜索框仍用上面的「下划线搜索框」配方（带图标与计数），不要混用。
@@ -164,7 +215,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 - **切换选中必须重播入场动画**：右侧内嵌 DetailItem 必须绑定选中参数作为 key：
   `<DBXxxDetailItem :key="selectedXxxId" :xxx="selectedXxx" />`
 - 选中项名称加 `text-primary`；可在左侧加主色竖条 `absolute inset-y-0 left-0 z-10 w-[3px] bg-primary`（选中时 opacity-100）。
-- 底部统计条：`flex-none border-t border-base-content/15 px-4 py-2.5` + `text-[11px] tracking-wide text-base-content/50` 文本（含中文**不加 font-mono**），数字用 `font-orbitron text-sm font-semibold tabular-nums text-primary`。
+- 底部统计条：`flex-none border-t border-base-content/15 px-4 py-2.5` + `text-[11px] tracking-wide text-base-content/50` 文本（含中文**不加 font-mono**），数字用 `font-orbitron text-sm font-semibold text-primary`。
 - 面板分隔线用 `border-base-content/10~15`（替代旧 `border-base-200`）。
 
 ## 动效（与毛玻璃的硬性约束）
@@ -214,6 +265,7 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 - ❌ 改动业务逻辑：script 中仅允许 ① 滚动定位选择器参数 ② 抽取重复属性行为 computed/函数（带中文 JSDoc）。所有 `$t()` 调用、数据流、事件处理保持不变。
 - ❌ **font-mono 用于可能含中文的文本**：mono 字体栈无中文字形，配套 `uppercase` 与大字距对中文是灾难。移除 mono 时一并移除配套 uppercase/大字距（tracking-[0.1em~0.3em]）。**允许保留**：纯数字/ASCII（ID、版本号 v1.2、Lv.55、CD: 5s、时间戳、百分比）、纯英文徽记 kicker。
 - ❌ 动画祖先包 blur 后代（见动效章节）——`animate-ef-rise` 与 `backdrop-blur-*` 必须同元素或无嵌套关系
+- ❌ **`leading-none` 用在标题 / 可能换行或被 `truncate` 的文本上**：CJK 字形墨迹会被 `overflow:hidden` 切掉 0.5~1px，改 `leading-tight`。**允许保留**：徽章方章内部——`getRarityBadgeClass` 与 `CopyID` 自身就用 `leading-none`。
 - ❌ `#{{ xxx.id }}` 纯文本实体 ID（改 CopyID）
 
 ## 其他约定
@@ -222,6 +274,8 @@ description: DNA Builder 资料库（/db）页面风格改造标准。对 src/vi
 - 图标只能用已注册的（见 `src/components/Icon.vue`）；需要新图标时**不要自行运行 icon_tool**，在结果报告中列出所需图标名（如 `ri:sword-line`），由主会话统一添加。
 - 不要运行 `pnpm lint` / `pnpm test` / `pnpm dev`，由主会话统一验证。
 - 已完成改造的参考页：DBCharListView、DBCharDetailView、DBCharDetailItem、CharSkillShow、AniTabs、ResourceCostItem、SourceDetailDialog、MonsterItem、WeaponItem（与 ModItem 同构）、DBEventDetailItem、LimitedPrizeSimulator、DBDamageView（输入/选择框标准落地范例）、DBView（db-rise 风格，可对照但不必改动）。
+- **全部 `DB*DetailItem.vue` 已按「档案头」章节统一**（25 个文件，2026-09）。新增详情组件一律照「档案头」四件套写；
+  内嵌型（`DBIronSurvival` / `DBForge` / `DBFishSpot`）按内嵌标准，不加档案头。
 - 内嵌在已迁移页面里的小组件（活动页的模拟/解谜类）同样按「外层区块卡 + SectionHeader(no-animate compact) + 内层小卡/属性格」改造，
   根元素用 `<section>`，交给宿主的 `.stagger-rise` 做入场，自己不加 `animate-ef-rise`。
 - 动作按钮（抽卡/重置这类非筛选操作）也走方章，不要用 daisyUI `btn`；禁用态用 `disabled:cursor-not-allowed disabled:opacity-40`

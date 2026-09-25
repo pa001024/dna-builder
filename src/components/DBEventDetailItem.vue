@@ -172,7 +172,7 @@ const topUpRanks = computed(() => {
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <SRouterLink
                         :to="`/db/event/${event.id}`"
-                        class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                     >
                         {{ $t(event.name) }}
                     </SRouterLink>
@@ -215,7 +215,7 @@ const topUpRanks = computed(() => {
                 >
                     <div class="flex items-start gap-2.5">
                         <div class="w-9 shrink-0">
-                            <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                            <div class="font-orbitron text-[13px] font-semibold text-primary">
                                 {{ String(task.id).padStart(2, "0") }}
                             </div>
                             <div class="text-[10px] tracking-wide text-base-content/45">{{ $t("event.photo_task_index") }}</div>
@@ -334,7 +334,7 @@ const topUpRanks = computed(() => {
                     class="grid grid-cols-[88px_1fr] items-start gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2 transition-colors duration-200 hover:border-primary/40 hover:bg-base-content/5"
                 >
                     <div class="flex flex-col items-start gap-0.5 pt-0.5">
-                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ rank.score }}</span>
+                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{ rank.score }}</span>
                         <span class="text-[10px] tracking-wide text-base-content/45">积分档位</span>
                     </div>
                     <RewardItem v-if="rank.reward" :reward="rank.reward" />

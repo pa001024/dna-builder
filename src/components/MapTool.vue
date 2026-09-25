@@ -1,16 +1,23 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { petMap } from "@/data/d"
-import regionData, { mapOffsets, type Region, regionMap } from "@/data/d/region.data"
+import regionData, { mapOffsets, mapWallMap, type Region, regionMap } from "@/data/d/region.data"
 import { resourceData, resourceMap } from "@/data/d/resource.data"
 import { type SubRegion, subRegionData, type TeleportPoint } from "@/data/d/subregion.data"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
+import { useSettingStore } from "@/store/setting"
+import { buildNavWalls, type NavConnectivity, type NavWallSegment, queryNavConnectivity } from "@/utils/map-local-nav"
 import {
-    buildTraversalSegments,
+    buildRoutedTraversalLegs,
     computeShortestTraversalPath,
+    measureTraversalDistance,
+    type TraversalLeg,
     type TraversalPointLike,
+    type TraversalRouteResolver,
     type TraversalTeleportPoint,
 } from "@/utils/map-local-traversal"
 
@@ -173,6 +180,36 @@ interface MapPointInfo {
     iconUrl: string
 }
 
+/** 需要按当前语言渲染的文案：i18n 键 + 插值参数。 */
+interface LocalizedMessage {
+    key: string
+    params?: Record<string, string>
+}
+
+/**
+ * 地图静态资源加载失败。
+ * 只携带 i18n 键与插值参数，由展示层按当前语言渲染，避免把中文文案固化进 Error。
+ */
+class MapAssetLoadError extends Error {
+    constructor(
+        readonly messageKey: string,
+        readonly messageParams?: Record<string, string>
+    ) {
+        super(messageKey)
+        this.name = "MapAssetLoadError"
+    }
+}
+
+/**
+ * 地图点位名的展示文案。
+ * 数据名是简体中文原文（过 gt 取译文），路由未带名称时回退到「藏宝点」界面文案。
+ * @param name 点位原始名称，可为空
+ * @returns 当前语言下的展示名
+ */
+function mapPointLabel(name: string): string {
+    return name ? gt(name) : t("map-tool.treasure_point")
+}
+
 /**
  * 解析地图点位图标地址。
  * @param icon 图标资源名
@@ -242,6 +279,12 @@ const canvasRef = ref<HTMLCanvasElement>()
 const sidebarRef = ref<HTMLElement>()
 const route = useRoute()
 const router = useRouter()
+/** 界面文案取词（map-tool.* 等自有命名空间）。 */
+const { t } = useTranslation()
+/** 游戏原文取词：区域 / 子区域 / 传送点 / 资源 / 魔灵名都存的是简体中文原文。 */
+const { gt } = useGameText()
+/** 语言状态：切换语言后需要显式重绘 canvas 上的文案标签。 */
+const settingStore = useSettingStore()
 
 /**
  * 基于 region.data 生成本地分层地图配置。
@@ -274,6 +317,7 @@ const mapLocalProfiles: LocalMapProfile[] = regionData
 
 const firstProfile = mapLocalProfiles[0]
 if (!firstProfile) {
+    // 开发期不变量：region.data 里没有任何 mapMapping 属于数据配置错误，直接抛出、不走国际化
     throw new Error("mapLocalProfiles 不能为空")
 }
 
@@ -284,7 +328,8 @@ const selectedSingleLayerByGroup = ref<Map<string, string>>(new Map())
 const focusedLayerId = ref<string | null>(null)
 const layerImageMap = ref<Map<string, HTMLImageElement>>(new Map())
 const isImageLoading = ref(false)
-const loadError = ref("")
+/** 图层加载失败提示：存 i18n 键与插值参数，由模板按当前语言渲染（语言切换后提示同步更新）。 */
+const loadError = ref<LocalizedMessage | null>(null)
 
 const zoom = ref(1)
 const minZoom = 0.12
@@ -333,7 +378,8 @@ const routePointInfo = computed<RoutePointInfo | null>(() => {
     const target = mapLocalRouteTarget.value
     if (target.pointX === null || target.pointY === null) return null
     return {
-        name: target.pointName || "藏宝点",
+        // 这里保留原始名称（可为空），展示时统一过 mapPointLabel 取译文与兜底文案。
+        name: target.pointName || "",
         x: target.pointX,
         y: target.pointY,
         iconUrl: resolveMapPointIconUrl(target.pointIcon),
@@ -345,15 +391,24 @@ const routePointInfo = computed<RoutePointInfo | null>(() => {
  * 优先使用路由传入的持久点位，避免被其他点位点击覆盖。
  */
 const currentMapPointInfo = computed<MapPointInfo | null>(() => routeMapPoint.value)
-const projectedTeleportPoints = computed<TraversalTeleportPoint[]>(() =>
+/**
+ * 参与路径规划的传送点。
+ *
+ * 与显示筛选保持一致：被隐藏或未勾选的传送点不作为降级候选，
+ * 这样「只看某些传送点」的筛选同时约束了寻路可用的中转点。
+ * 可见性判定需要 `icon` 等原始字段，因此在 `ProjectedTeleportPoint` 层面过滤后再映射为寻路结构。
+ */
+const navTeleportPoints = computed<TraversalTeleportPoint[]>(() =>
     projectedSubRegions.value.flatMap(subRegion =>
-        subRegion.tpPoints.map(tpPoint => ({
-            ...tpPoint,
-            subRegionId: subRegion.id,
-            tpId: tpPoint.id,
-            worldX: tpPoint.worldX,
-            worldY: tpPoint.worldY,
-        }))
+        subRegion.tpPoints
+            .filter(tpPoint => isTeleportPointVisible({ ...tpPoint, subRegionId: subRegion.id, worldX: tpPoint.worldX, worldY: tpPoint.worldY }))
+            .map(tpPoint => ({
+                ...tpPoint,
+                subRegionId: subRegion.id,
+                tpId: tpPoint.id,
+                worldX: tpPoint.worldX,
+                worldY: tpPoint.worldY,
+            }))
     )
 )
 
@@ -629,13 +684,14 @@ function detectLayerGroupId(layer: LocalMapLayerSlot): string {
 }
 
 /**
- * 图层分组名称。
+ * 图层分组名称的 i18n 键。
+ * 返回键而不是成品文案：模板里过 $t 渲染，语言切换后分组名会即时更新。
  */
-function getLayerGroupName(groupId: string): string {
-    if (groupId === "base") return "基础图层"
-    if (groupId === "floor") return "楼层图层"
-    if (groupId === "subregion") return "子区域图层"
-    return "其它图层"
+function getLayerGroupNameKey(groupId: string): string {
+    if (groupId === "base") return "map-tool.layer_base"
+    if (groupId === "floor") return "map-tool.layer_floor"
+    if (groupId === "subregion") return "map-tool.layer_subregion"
+    return "map-tool.layer_misc"
 }
 
 /**
@@ -672,7 +728,7 @@ const layerGroups = computed<LocalLayerGroup[]>(() => {
             if (!layers || layers.length === 0) return null
             return {
                 id,
-                name: getLayerGroupName(id),
+                name: getLayerGroupNameKey(id),
                 selectMode: getLayerGroupSelectMode(id),
                 layers: [...layers].sort((a, b) => a.slot.zOrder - b.slot.zOrder || a.name.localeCompare(b.name)),
             }
@@ -1030,6 +1086,63 @@ const projectedSubRegions = computed<ProjectedSubRegionPoint[]>(() => {
 
     return result
 })
+
+// ---------- 障碍物绕行（静态标注） ----------
+
+/**
+ * 当前区域的障碍线段（地图空间）。
+ *
+ * 坐标来源是 `region.data.ts` 的 {@link mapWallMap}（人工标注的静态表），
+ * 换区域或投影参数变化时重新投影一次，路径判定只做线段相交检测，不涉及任何像素计算。
+ */
+const navWalls = computed<NavWallSegment[]>(() => {
+    const segments = mapWallMap[currentProfile.value.regionId]
+    if (!segments || segments.length === 0) return []
+    return buildNavWalls(segments, (worldX, worldY) => projectWorldToMap(worldX, worldY))
+})
+
+/** 障碍线段版本号：投影结果变化后自增，用于失效判定缓存并触发重绘。 */
+const navWallsRevision = ref(0)
+/** 可通行性缓存：键含版本号，障碍变化即整体失效。 */
+const navConnectivityCache = new Map<string, NavConnectivity>()
+
+watch(
+    () => [currentProfile.value.regionId, navWalls.value],
+    () => {
+        navWallsRevision.value += 1
+        navConnectivityCache.clear()
+        requestDraw()
+    }
+)
+
+/**
+ * 查询两点之间的可通行性（带缓存）。
+ * @param revision 障碍版本号
+ * @param from 起点（地图空间）
+ * @param to 终点（地图空间）
+ * @returns 可通行性
+ */
+function resolveNavConnectivity(revision: number, from: TraversalPointLike, to: TraversalPointLike): NavConnectivity {
+    const key = `${revision}|${Math.round(from.x)},${Math.round(from.y)}|${Math.round(to.x)},${Math.round(to.y)}`
+    const cached = navConnectivityCache.get(key)
+    if (cached) return cached
+
+    const result = queryNavConnectivity(navWalls.value, { x: from.x, y: from.y }, { x: to.x, y: to.y })
+    if (navConnectivityCache.size > 8192) navConnectivityCache.clear()
+    navConnectivityCache.set(key, result)
+    return result
+}
+
+/**
+ * 取得当前生效的可通行性判定回调。
+ * @returns 该区域没有标注障碍时返回 null（路径退回直线 + 距离阈值逻辑）
+ */
+function currentNavRouteResolver(): TraversalRouteResolver | null {
+    if (navWalls.value.length === 0) return null
+    const revision = navWallsRevision.value
+    return (from, to) => resolveNavConnectivity(revision, from, to)
+}
+
 const resourceOptions = computed<ResourceFilterOption[]>(() => {
     const regionId = currentProfile.value.regionId
     return resourceData
@@ -1067,6 +1180,7 @@ const isTeleportPointFilterActive = computed(
 /**
  * 魔灵筛选选项：按当前地图 RC 池中实际出现的魔灵推导。
  * 仅保留地图上真实出现的 5 星闪光种（名称以“闪亮”开头的 5 星魔灵），逐个列为具体名称选项。
+ * label 存的是魔灵简体中文原名：前缀判断与展示都基于原文，展示时才过 gt 取译文。
  */
 const petFilterOptions = computed<PetFilterOption[]>(() => {
     const seen = new Map<number, RcPetRate>()
@@ -1512,6 +1626,8 @@ const highlightedRcPoints = computed<ProjectedRcPoint[]>(() => {
         const isSubRegionHighlighted = isAllSelected || (highlightedSubRegionId !== null && subRegion.id === highlightedSubRegionId)
 
         for (const rcInfo of subRegion.rcInfos) {
+            // 魔灵筛选同时约束遍历：被筛掉的刷新点不参与最短遍历规划
+            if (!isRcInfoPetVisible(rcInfo)) continue
             const isActiveRc =
                 selectedRcState.value?.subRegionId === subRegion.id &&
                 selectedRcState.value?.rcId === rcInfo.rcId &&
@@ -1540,7 +1656,19 @@ const selectedRcInfo = computed(() => {
 })
 const highlightedRcTraversalPath = computed<TraversalPointLike[]>(() => {
     if (!showRcShortestTraversal.value) return []
-    return computeShortestTraversalPath(highlightedRcPoints.value)
+    navWallsRevision.value // 障碍标注变化必须让遍历顺序重算
+    // 障碍参与顺序规划：撞墙的段代价更高，DP 会据此重排出绕开障碍的访问顺序
+    return computeShortestTraversalPath(highlightedRcPoints.value, currentNavRouteResolver())
+})
+/**
+ * 最短遍历的规划结果。
+ * 启用障碍物绕行时按掩码连通性规划（直连不通则尝试传送中转）；否则退回直线 + 距离阈值逻辑。
+ */
+const highlightedRcTraversalLegs = computed(() => {
+    const path = highlightedRcTraversalPath.value
+    navWallsRevision.value // 障碍标注变化必须让规划结果失效
+    if (path.length < 2) return []
+    return buildRoutedTraversalLegs(path, navTeleportPoints.value, undefined, currentNavRouteResolver())
 })
 const mapLocalRouteTarget = computed<MapLocalRouteTarget>(() => ({
     regionId: parseRouteQueryNumber(route.query.regionId),
@@ -1599,7 +1727,7 @@ function loadLayerImage(fileName: string): Promise<HTMLImageElement> {
     const promise = new Promise<HTMLImageElement>((resolve, reject) => {
         const image = new Image()
         image.onload = () => resolve(image)
-        image.onerror = () => reject(new Error(`加载地图图层失败: ${fileName}`))
+        image.onerror = () => reject(new MapAssetLoadError("map-tool.error_load_layer", { file: fileName }))
         image.src = cacheKey
     })
 
@@ -1619,7 +1747,7 @@ function ensureRcIconImageLoaded(iconUrl: string): HTMLImageElement | null {
         const promise = new Promise<HTMLImageElement>((resolve, reject) => {
             const image = new Image()
             image.onload = () => resolve(image)
-            image.onerror = () => reject(new Error(`加载 RC 头像失败: ${iconUrl}`))
+            image.onerror = () => reject(new MapAssetLoadError("map-tool.error_load_rc_avatar", { url: iconUrl }))
             image.src = iconUrl
         })
         rcIconPromiseCache.set(iconUrl, promise)
@@ -1648,7 +1776,7 @@ function ensureTpIconImageLoaded(iconUrl: string): HTMLImageElement | null {
         const promise = new Promise<HTMLImageElement>((resolve, reject) => {
             const image = new Image()
             image.onload = () => resolve(image)
-            image.onerror = () => reject(new Error(`加载 TP 图标失败: ${iconUrl}`))
+            image.onerror = () => reject(new MapAssetLoadError("map-tool.error_load_tp_icon", { url: iconUrl }))
             image.src = iconUrl
         })
         tpIconPromiseCache.set(iconUrl, promise)
@@ -1677,7 +1805,7 @@ function ensureMapPointIconImageLoaded(iconUrl: string): HTMLImageElement | null
         const promise = new Promise<HTMLImageElement>((resolve, reject) => {
             const image = new Image()
             image.onload = () => resolve(image)
-            image.onerror = () => reject(new Error(`加载地图点位图标失败: ${iconUrl}`))
+            image.onerror = () => reject(new MapAssetLoadError("map-tool.error_load_marker_icon", { url: iconUrl }))
             image.src = iconUrl
         })
         mapPointIconPromiseCache.set(iconUrl, promise)
@@ -1807,7 +1935,7 @@ function resolveTeleportPointIconUrl(icon: string): string {
  */
 async function loadCurrentProfileImages() {
     isImageLoading.value = true
-    loadError.value = ""
+    loadError.value = null
     try {
         const loadedEntries = await Promise.all(
             currentProfile.value.layers.map(async layer => {
@@ -1819,7 +1947,10 @@ async function loadCurrentProfileImages() {
         loadedEntries.forEach(([layerId, image]) => nextMap.set(layerId, image))
         layerImageMap.value = nextMap
     } catch (error) {
-        loadError.value = error instanceof Error ? error.message : "加载本地地图图片失败"
+        loadError.value =
+            error instanceof MapAssetLoadError
+                ? { key: error.messageKey, params: error.messageParams }
+                : { key: "map-tool.error_load_map_image" }
     } finally {
         isImageLoading.value = false
         requestDraw()
@@ -2236,7 +2367,7 @@ function applyRouteTargetSelection() {
     }
 
     if (target.pointX !== null && target.pointY !== null) {
-        focusMapPoint(target.pointX, target.pointY, target.pointName || "藏宝点")
+        focusMapPoint(target.pointX, target.pointY, target.pointName || "")
     }
     if (target.rid !== null) {
         selectedResourceIds.value = new Set(resourceOptions.value.some(option => option.id === target.rid) ? [target.rid] : [])
@@ -2428,53 +2559,54 @@ function drawHoveredRangeOutline(ctx: CanvasRenderingContext2D) {
 }
 
 /**
+ * 计算一条遍历腿的世界距离。
+ * @param leg 遍历腿
+ * @returns 世界距离（游戏单位）
+ */
+function measureLegWorldDistance(leg: TraversalLeg): number {
+    const straightWorld = measureTraversalDistance(leg.from, leg.to)
+    if (Number.isFinite(straightWorld) && straightWorld > 0) return straightWorld
+    return Math.hypot(leg.to.x - leg.from.x, leg.to.y - leg.from.y) * regionProjectionConfig.value.unitsPerPixel
+}
+
+/**
  * 绘制选中 RC 的最短遍历路径。
+ * 障碍物只决定走法：线段始终是直线，虚线表示传送中转，红色虚线表示无法连通。
  */
 function drawSelectedRcTraversalPath(ctx: CanvasRenderingContext2D) {
     const traversalPath = highlightedRcTraversalPath.value
     if (traversalPath.length < 2) return
-    const segments = buildTraversalSegments(traversalPath, projectedTeleportPoints.value)
-    if (segments.length === 0) return
+    const legs = highlightedRcTraversalLegs.value
+    if (legs.length === 0) return
 
     ctx.save()
     ctx.lineJoin = "round"
     ctx.lineCap = "round"
-    ctx.strokeStyle = "rgba(255, 214, 102, 0.95)"
-    ctx.fillStyle = "rgba(255, 214, 102, 0.95)"
     ctx.lineWidth = 2.5 / zoom.value
     ctx.font = `${12 / zoom.value}px sans-serif`
     ctx.textAlign = "center"
     ctx.textBaseline = "middle"
 
-    for (let i = 0; i < segments.length; i += 1) {
-        const segment = segments[i]
-        const segmentDistance =
-            Number.isFinite(segment.from.worldX) &&
-            Number.isFinite(segment.from.worldY) &&
-            Number.isFinite(segment.to.worldX) &&
-            Number.isFinite(segment.to.worldY)
-                ? Math.hypot((segment.to.worldX || 0) - (segment.from.worldX || 0), (segment.to.worldY || 0) - (segment.from.worldY || 0))
-                : Math.hypot(segment.to.x - segment.from.x, segment.to.y - segment.from.y)
-        ctx.save()
-        if (segment.isDashed) {
-            ctx.setLineDash([8 / zoom.value, 6 / zoom.value])
-            ctx.strokeStyle = "rgba(90, 220, 255, 0.95)"
-        } else {
-            ctx.setLineDash([])
-            ctx.strokeStyle = "rgba(255, 214, 102, 0.95)"
-        }
+    for (const leg of legs) {
+        const legDistance = measureLegWorldDistance(leg)
+        const strokeColor = leg.unreachable ? "rgba(255, 96, 96, 0.95)" : leg.isDashed ? "rgba(90, 220, 255, 0.95)" : "rgba(255, 214, 102, 0.95)"
 
+        ctx.save()
+        ctx.setLineDash(leg.isDashed || leg.unreachable ? [8 / zoom.value, 6 / zoom.value] : [])
+        ctx.strokeStyle = strokeColor
+        ctx.fillStyle = strokeColor
         ctx.beginPath()
-        ctx.moveTo(segment.from.x, segment.from.y)
-        ctx.lineTo(segment.to.x, segment.to.y)
+        ctx.moveTo(leg.from.x, leg.from.y)
+        ctx.lineTo(leg.to.x, leg.to.y)
         ctx.stroke()
         ctx.restore()
 
-        const angle = Math.atan2(segment.to.y - segment.from.y, segment.to.x - segment.from.x)
+        // 箭头放在线段中点，方向沿线段本身
+        const angle = Math.atan2(leg.to.y - leg.from.y, leg.to.x - leg.from.x)
         const headLength = 14 / zoom.value
         const headWidth = 9 / zoom.value
-        const centerX = (segment.from.x + segment.to.x) / 2
-        const centerY = (segment.from.y + segment.to.y) / 2
+        const centerX = (leg.from.x + leg.to.x) / 2
+        const centerY = (leg.from.y + leg.to.y) / 2
         const tipX = centerX + Math.cos(angle) * (headLength / 2)
         const tipY = centerY + Math.sin(angle) * (headLength / 2)
         const backX = centerX - Math.cos(angle) * (headLength / 2)
@@ -2489,27 +2621,29 @@ function drawSelectedRcTraversalPath(ctx: CanvasRenderingContext2D) {
         ctx.lineTo(leftX, leftY)
         ctx.lineTo(rightX, rightY)
         ctx.closePath()
-        ctx.fillStyle = segment.isDashed ? "rgba(90, 220, 255, 0.98)" : "rgba(255, 214, 102, 0.98)"
+        ctx.fillStyle = strokeColor
         ctx.fill()
 
-        if (segmentDistance > 1e4) {
-            const midX = (segment.from.x + segment.to.x) / 2
-            const midY = (segment.from.y + segment.to.y) / 2 + 16 / zoom.value
-            const label = `${(segmentDistance / 100).toFixed(0)}m`
+        const showLabel = leg.unreachable || legDistance > 1e4
+        if (showLabel) {
+            const label = leg.unreachable ? t("map-tool.nav_unreachable") : `${(legDistance / 100).toFixed(0)}m`
             const textWidth = ctx.measureText(label).width
             const paddingX = 4 / zoom.value
             const paddingY = 2 / zoom.value
             const labelWidth = textWidth + paddingX * 2
             const labelHeight = 14 / zoom.value
+            const midX = centerX
+            const midY = centerY + 16 / zoom.value
             ctx.save()
             ctx.fillStyle = "rgba(15, 23, 42, 0.72)"
             ctx.fillRect(midX - labelWidth / 2, midY - labelHeight / 2, labelWidth, labelHeight)
-            ctx.fillStyle = "rgba(255, 255, 255, 0.95)"
+            ctx.fillStyle = leg.unreachable ? "rgba(255, 138, 138, 0.98)" : "rgba(255, 255, 255, 0.95)"
             ctx.fillText(label, midX, midY + paddingY / 4)
             ctx.restore()
         }
     }
 
+    ctx.fillStyle = "rgba(255, 214, 102, 0.95)"
     ctx.beginPath()
     ctx.arc(traversalPath[0].x, traversalPath[0].y, 4 / zoom.value, 0, Math.PI * 2)
     ctx.fill()
@@ -2583,7 +2717,7 @@ function drawHighlightedRcPoints(ctx: CanvasRenderingContext2D) {
                 ctx.stroke()
 
                 if (showLabel) {
-                    const tag = formatRcLabel(getRcDisplayName(rcInfo))
+                    const tag = formatRcLabel(gt(getRcDisplayName(rcInfo)))
                     const textWidth = ctx.measureText(tag).width
                     const labelX = point.x + radius + labelOffsetX
                     const labelY = point.y - radius - labelOffsetY
@@ -2648,7 +2782,7 @@ function drawTeleportPoints(ctx: CanvasRenderingContext2D) {
                 ctx.fill()
             }
 
-            const tag = formatSubRegionLabel(tpPoint.name)
+            const tag = formatSubRegionLabel(gt(tpPoint.name))
             const textWidth = ctx.measureText(tag).width
             const labelX = tpPoint.x + normalRadius + labelOffsetX
             const labelY = tpPoint.y - normalRadius - labelOffsetY
@@ -2672,6 +2806,7 @@ function formatSubRegionLabel(name: string): string {
 
 /**
  * RC 显示名称：优先最稀有魔灵名，缺失时回退 RC 编号。
+ * 魔灵名是简体中文原文，绘制前需要过 gt 取当前语言译文。
  */
 function getRcDisplayName(rcInfo: ProjectedRcInfo): string {
     return rcInfo.rarestPet?.petName || `RC${rcInfo.rcId}`
@@ -2721,7 +2856,7 @@ function drawSubRegionPoints(ctx: CanvasRenderingContext2D) {
         ctx.strokeStyle = "rgba(255, 255, 255, 0.95)"
         ctx.stroke()
 
-        const text = formatSubRegionLabel(point.name)
+        const text = formatSubRegionLabel(gt(point.name))
         const textWidth = ctx.measureText(text).width
         const labelX = point.mapX + radius + labelOffsetX
         const labelY = point.mapY - radius - labelOffsetY
@@ -2740,7 +2875,7 @@ function drawSubRegionPoints(ctx: CanvasRenderingContext2D) {
         const labelHeight = 16 / zoom.value
         const labelOffsetX = 4 / zoom.value
         const labelOffsetY = 2 / zoom.value
-        const text = formatSubRegionLabel(point.name)
+        const text = formatSubRegionLabel(mapPointLabel(point.name))
         const textWidth = ctx.measureText(text).width
         const labelX = point.mapX + radius + labelOffsetX
         const labelY = point.mapY - radius - labelOffsetY
@@ -2794,7 +2929,7 @@ function drawSubRegionPoints(ctx: CanvasRenderingContext2D) {
         ctx.textBaseline = "top"
 
         for (const point of visibleResourcePoints) {
-            const text = formatSubRegionLabel(point.resourceName)
+            const text = formatSubRegionLabel(gt(point.resourceName))
             const textWidth = ctx.measureText(text).width
             const labelX = point.mapX + radius + 4 / zoom.value
             const labelY = point.mapY - radius - 2 / zoom.value
@@ -3331,6 +3466,8 @@ watch(
     () => [
         activeLayers.value.map(layer => layer.id).join("|"),
         showTeleportPoints.value ? 1 : 0,
+        // 传送点筛选同时约束寻路候选，变化后路径要重新规划
+        navTeleportPoints.value.length,
         showPetPoints.value ? 1 : 0,
         showResourcePoints.value ? 1 : 0,
         [...selectedTeleportIcons.value].sort().join("|"),
@@ -3346,6 +3483,10 @@ watch(
         selectedRcState.value?.rcIndex ?? -1,
         highlightedRcPoints.value.length,
         showRcShortestTraversal.value ? 1 : 0,
+        // 障碍轮廓重建后必须重绘（路径走向与不可达提示都可能变化）
+        navWallsRevision.value,
+        // canvas 上的点位标签是数据名译文，语言切换后必须重绘
+        settingStore.lang,
         renderSize.value.width,
         renderSize.value.height,
         sourceSize.value.width,
@@ -3398,34 +3539,35 @@ onUnmounted(() => {
                             class="rounded-xs border border-base-content/15 bg-base-100 p-2.5 text-xs space-y-1.5"
                         >
                             <div class="flex items-center justify-between gap-2">
-                                <div class="font-medium text-base-content">当前地图点</div>
+                                <div class="font-medium text-base-content">{{ $t('map-tool.current_marker') }}</div>
                                 <button
                                     class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-xs border border-base-content/15 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                                     type="button"
                                     @click="clearRouteMapPoint"
                                 >
                                     <Icon icon="ri:close-line" class="size-3" />
-                                    清除
+                                    {{ $t('common.clear') }}
                                 </button>
                             </div>
                             <div class="flex items-center gap-2">
                                 <img
                                     v-if="currentMapPointInfo.iconUrl"
                                     :src="currentMapPointInfo.iconUrl"
-                                    :alt="currentMapPointInfo.name"
+                                    :alt="mapPointLabel(currentMapPointInfo.name)"
                                     class="size-5 shrink-0"
                                 />
-                                <span class="truncate">{{ currentMapPointInfo.name }}</span>
+                                <span class="truncate">{{ mapPointLabel(currentMapPointInfo.name) }}</span>
                             </div>
                             <div class="font-mono text-[11px] opacity-60">
-                                World: {{ currentMapPointInfo.worldX.toFixed(2) }}, {{ currentMapPointInfo.worldY.toFixed(2) }}
+                                {{ $t('map-tool.world_coordinate') }}: {{ currentMapPointInfo.worldX.toFixed(2) }},
+                                {{ currentMapPointInfo.worldY.toFixed(2) }}
                             </div>
                         </div>
 
                         <!-- 区域 -->
                         <div class="space-y-1.5">
                             <div class="flex items-center gap-2">
-                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">区域</span>
+                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">{{ $t('common.area') }}</span>
                                 <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
                             </div>
                             <Select
@@ -3434,7 +3576,7 @@ onUnmounted(() => {
                                 @update:modelValue="(val: number) => handleRegionChange({ target: { value: String(val) } } as unknown as Event)"
                             >
                                 <SelectItem v-for="region in regionOptions" :key="region.id" :value="region.id">
-                                    {{ region.id }} - {{ region.name }}
+                                    {{ region.id }} - {{ gt(region.name) }}
                                 </SelectItem>
                             </Select>
                         </div>
@@ -3447,7 +3589,7 @@ onUnmounted(() => {
                                 :aria-expanded="!isLayerSectionCollapsed"
                                 @click="isLayerSectionCollapsed = !isLayerSectionCollapsed"
                             >
-                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">图层</span>
+                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">{{ $t('map-tool.layer') }}</span>
                                 <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
                                 <Icon
                                     :icon="isLayerSectionCollapsed ? 'ri:arrow-down-s-line' : 'ri:arrow-up-s-line'"
@@ -3462,7 +3604,7 @@ onUnmounted(() => {
                                 >
                                     <div class="flex items-center gap-1.5 text-sm font-medium text-base-content/80">
                                         <Icon icon="ri:stack-line" class="size-3.5 text-base-content/40" />
-                                        {{ group.name }}
+                                        {{ $t(group.name) }}
                                     </div>
                                     <div class="space-y-0.5">
                                         <label
@@ -3495,7 +3637,7 @@ onUnmounted(() => {
 
                         <!-- 魔灵筛选（通用筛选卡片：整行折叠 + 全选图标 + 显示开关） -->
                         <MapFilterCard
-                            title="魔灵"
+                            :title="$t('魔灵')"
                             :collapsed="isPetSectionCollapsed"
                             :visible="showPetPoints"
                             :all-active="isPetFilterActive"
@@ -3514,15 +3656,15 @@ onUnmounted(() => {
                                             ? 'border-primary/60 bg-primary/10 font-medium text-primary hover:border-primary/60'
                                             : 'border-transparent bg-transparent text-base-content/70 hover:border-primary/40 hover:text-primary'
                                     "
-                                    :title="option.label"
+                                    :title="gt(option.label)"
                                     @click="togglePetFilter(option.id, !selectedPetFilterIds.has(option.id))"
                                 >
-                                    <img v-if="option.iconUrl" :src="option.iconUrl" :alt="option.label" class="size-4 shrink-0" />
+                                    <img v-if="option.iconUrl" :src="option.iconUrl" :alt="gt(option.label)" class="size-4 shrink-0" />
                                     <Icon v-else icon="ri:star-line" class="size-3.5 shrink-0 text-base-content/40" />
-                                    <span class="truncate">{{ option.label }}</span>
+                                    <span class="truncate">{{ gt(option.label) }}</span>
                                 </button>
                                 <div v-if="petFilterOptions.length === 0" class="px-1 py-0.5 text-xs opacity-60">
-                                    当前区域没有可筛选的魔灵
+                                    {{ $t('map-tool.no_geniemon_filter') }}
                                 </div>
                             </div>
                         </MapFilterCard>
@@ -3530,7 +3672,7 @@ onUnmounted(() => {
                         <!-- 传送点筛选（通用筛选卡片：整行折叠 + 全选图标 + 显示开关） -->
                         <MapFilterCard
                             v-if="teleportIconOptions.length > 0"
-                            title="传送点"
+                            :title="$t('map-tool.teleport_point')"
                             :collapsed="isTeleportSectionCollapsed"
                             :visible="showTeleportPoints"
                             :all-active="isTeleportPointFilterActive"
@@ -3560,7 +3702,7 @@ onUnmounted(() => {
                         <!-- 资源筛选（通用筛选卡片：整行折叠 + 全选图标 + 显示开关） -->
                         <MapFilterCard
                             v-if="resourceOptions.length > 0"
-                            title="资源"
+                            :title="$t('resource.title')"
                             :collapsed="isResourceSectionCollapsed"
                             :visible="showResourcePoints"
                             :all-active="isResourceFilterActive"
@@ -3579,15 +3721,15 @@ onUnmounted(() => {
                                             ? 'border-primary/60 bg-primary/10 font-medium text-primary hover:border-primary/60'
                                             : 'border-transparent bg-transparent text-base-content/70 hover:border-primary/40 hover:text-primary'
                                     "
-                                    :title="option.name"
+                                    :title="gt(option.name)"
                                     @click="toggleResourceFilter(option.id, !selectedResourceIds.has(option.id))"
                                 >
                                     <img
                                         :src="option.icon ? `/imgs/res/${option.icon}.webp` : '/imgs/webp/T_Head_Empty.webp'"
-                                        :alt="option.name"
+                                        :alt="gt(option.name)"
                                         class="size-4 shrink-0"
                                     />
-                                    <span class="truncate">{{ $t(option.name) }}</span>
+                                    <span class="truncate">{{ gt(option.name) }}</span>
                                 </button>
                             </div>
                         </MapFilterCard>
@@ -3600,7 +3742,7 @@ onUnmounted(() => {
                                 :aria-expanded="!isSubRegionSectionCollapsed"
                                 @click="isSubRegionSectionCollapsed = !isSubRegionSectionCollapsed"
                             >
-                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">子区域</span>
+                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">{{ $t('common.sub_region') }}</span>
                                 <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
                                 <Icon
                                     :icon="isSubRegionSectionCollapsed ? 'ri:arrow-down-s-line' : 'ri:arrow-up-s-line'"
@@ -3619,11 +3761,11 @@ onUnmounted(() => {
                                                 class="checkbox checkbox-xs"
                                                 @change="handleSubRegionAllChange(($event.target as HTMLInputElement).checked)"
                                             />
-                                            <span>全部</span>
+                                            <span>{{ $t('common.all') }}</span>
                                         </label>
                                         <label
                                             class="flex cursor-pointer items-center gap-2"
-                                            :title="highlightedRcPoints.length === 0 ? '请先选择包含魔灵点位的子区域' : ''"
+                                            :title="highlightedRcPoints.length === 0 ? $t('map-tool.shortest_traversal_hint') : ''"
                                         >
                                             <input
                                                 :checked="showRcShortestTraversal"
@@ -3632,7 +3774,7 @@ onUnmounted(() => {
                                                 class="checkbox checkbox-xs"
                                                 @change="showRcShortestTraversal = ($event.target as HTMLInputElement).checked"
                                             />
-                                            <span>最短图遍历</span>
+                                            <span>{{ $t('map-tool.shortest_traversal') }}</span>
                                         </label>
                                     </div>
                                     <button
@@ -3647,10 +3789,10 @@ onUnmounted(() => {
                                         @mouseleave="hoveredSubRegionId = null"
                                         @click="focusSubRegion(point.id)"
                                     >
-                                        <div class="font-medium">{{ $t(point.name) }}</div>
+                                        <div class="font-medium">{{ gt(point.name) }}</div>
                                     </button>
                                     <div v-if="projectedSubRegions.length === 0" class="p-3 text-sm opacity-60">
-                                        当前区域没有可显示的 subregion 坐标
+                                        {{ $t('map-tool.no_subregion_point') }}
                                     </div>
                                 </div>
                             </template>
@@ -3661,10 +3803,12 @@ onUnmounted(() => {
                             v-if="selectedSubRegion"
                             class="mt-auto rounded-xs border border-base-content/15 bg-base-100/90 p-3 text-sm shadow-sm"
                         >
-                            <div class="font-medium text-base-content">{{ $t(selectedSubRegion.name) }}</div>
+                            <div class="font-medium text-base-content">{{ gt(selectedSubRegion.name) }}</div>
 
                             <div class="mt-2 border-t border-base-content/10 pt-2">
-                                <div class="mb-1 text-[11px] font-semibold text-base-content/45 uppercase">RC 列表（点击可查看详情）</div>
+                                <div class="mb-1 text-[11px] font-semibold text-base-content/45 uppercase">
+                                    {{ $t('map-tool.rc_list_hint') }}
+                                </div>
                                 <div class="flex max-h-28 flex-wrap gap-1 overflow-y-auto">
                                     <button
                                         v-for="rcInfo in selectedSubRegion.rcInfos"
@@ -3681,7 +3825,7 @@ onUnmounted(() => {
                                         RC {{ rcInfo.rcId }}
                                     </button>
                                     <div v-if="selectedSubRegion.rcInfos.length === 0" class="w-full text-xs opacity-60">
-                                        当前子区域无 RC 配置
+                                        {{ $t('map-tool.no_rc_config') }}
                                     </div>
                                 </div>
                             </div>
@@ -3690,14 +3834,24 @@ onUnmounted(() => {
                                 v-if="selectedRcInfo"
                                 class="mt-2 space-y-1 rounded-xs border border-base-content/15 bg-base-100/85 p-2 text-xs"
                             >
-                                <div class="font-medium"><CopyID :id="selectedRcInfo.rcId" />详情</div>
-                                <div class="opacity-70">刷新数量 {{ selectedRcInfo.count }} | 点位 {{ selectedRcInfo.points.length }}</div>
-                                <div v-if="selectedRcInfo.rarestPet" class="opacity-70">
-                                    最稀有魔灵: {{ selectedRcInfo.rarestPet.petName }} ({{
-                                        (selectedRcInfo.rarestPet.ratio * 100).toFixed(2)
-                                    }}%)
+                                <div class="font-medium"><CopyID :id="selectedRcInfo.rcId" />{{ $t('map-tool.rc_detail') }}</div>
+                                <div class="opacity-70">
+                                    {{
+                                        $t('map-tool.rc_points', {
+                                            refresh: selectedRcInfo.count,
+                                            points: selectedRcInfo.points.length,
+                                        })
+                                    }}
                                 </div>
-                                <div class="pt-1 opacity-70">魔灵概率：</div>
+                                <div v-if="selectedRcInfo.rarestPet" class="opacity-70">
+                                    {{
+                                        $t('map-tool.rarest_geniemon', {
+                                            name: gt(selectedRcInfo.rarestPet.petName),
+                                            ratio: (selectedRcInfo.rarestPet.ratio * 100).toFixed(2),
+                                        })
+                                    }}
+                                </div>
+                                <div class="pt-1 opacity-70">{{ $t('map-tool.geniemon_probability') }}</div>
                                 <div class="space-y-1.5">
                                     <!-- 每行：魔灵图标 + 名称 + 概率（虚线下划线提示 tooltip），底部为按比例填充的矩形条 -->
                                     <FullTooltip
@@ -3709,8 +3863,8 @@ onUnmounted(() => {
                                             class="cursor-help rounded-xs px-1 py-0.5 transition-colors duration-150 hover:bg-base-content/5"
                                         >
                                             <div class="flex items-center gap-1.5">
-                                                <img :src="petRate.petIconUrl" :alt="petRate.petName" class="size-4 shrink-0" />
-                                                <span class="min-w-0 truncate">{{ petRate.petName }}</span>
+                                                <img :src="petRate.petIconUrl" :alt="gt(petRate.petName)" class="size-4 shrink-0" />
+                                                <span class="min-w-0 truncate">{{ gt(petRate.petName) }}</span>
                                                 <span class="flex-1" />
                                                 <span
                                                     class="shrink-0 underline decoration-dashed decoration-base-content/40 underline-offset-2 tabular-nums"
@@ -3731,18 +3885,29 @@ onUnmounted(() => {
                                         <template #tooltip>
                                             <div class="flex flex-col gap-1 text-xs leading-5">
                                                 <div class="flex items-center gap-1.5 font-medium">
-                                                    <img :src="petRate.petIconUrl" :alt="petRate.petName" class="size-4 shrink-0" />
-                                                    <span>{{ petRate.petName }}</span>
+                                                    <img :src="petRate.petIconUrl" :alt="gt(petRate.petName)" class="size-4 shrink-0" />
+                                                    <span>{{ gt(petRate.petName) }}</span>
                                                 </div>
-                                                <div class="opacity-75">权重 {{ petRate.weight }} / {{ petRate.totalWeight }}</div>
-                                                <div class="opacity-75">概率 {{ (petRate.ratio * 100).toFixed(2) }}%</div>
+                                                <div class="opacity-75">
+                                                    {{
+                                                        $t('map-tool.weight_ratio', {
+                                                            weight: petRate.weight,
+                                                            total: petRate.totalWeight,
+                                                        })
+                                                    }}
+                                                </div>
+                                                <div class="opacity-75">
+                                                    {{ $t('map-tool.probability', { ratio: (petRate.ratio * 100).toFixed(2) }) }}
+                                                </div>
                                             </div>
                                         </template>
                                     </FullTooltip>
-                                    <div v-if="selectedRcInfo.petRates.length === 0" class="opacity-70">无 pet.data 可识别魔灵</div>
+                                    <div v-if="selectedRcInfo.petRates.length === 0" class="opacity-70">
+                                        {{ $t('map-tool.no_geniemon_data') }}
+                                    </div>
                                 </div>
                                 <div v-if="selectedRcInfo.unknownRates.length > 0" class="pt-1">
-                                    <div class="opacity-70">未识别实体：</div>
+                                    <div class="opacity-70">{{ $t('map-tool.unknown_entity') }}</div>
                                     <div
                                         v-for="unknownRate in selectedRcInfo.unknownRates"
                                         :key="`${selectedRcInfo.rcId}-${unknownRate.entityId}`"
@@ -3759,7 +3924,7 @@ onUnmounted(() => {
                                 v-if="selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint)).length > 0"
                                 class="mt-2 space-y-1 rounded-xs border border-base-content/15 bg-base-100/85 p-2 text-xs"
                             >
-                                <div class="font-medium">TP 点位</div>
+                                <div class="font-medium">{{ $t('map-tool.tp_points') }}</div>
                                 <div class="grid gap-1">
                                     <div
                                         v-for="tpPoint in selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint))"
@@ -3775,10 +3940,10 @@ onUnmounted(() => {
                                         >
                                             <img
                                                 :src="resolveTeleportPointIconUrl(tpPoint.icon)"
-                                                :alt="tpPoint.name"
+                                                :alt="gt(tpPoint.name)"
                                                 class="inline-block size-6 shrink-0"
                                             />
-                                            <span class="min-w-0 truncate">{{ tpPoint.name }}</span>
+                                            <span class="min-w-0 truncate">{{ gt(tpPoint.name) }}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -3792,7 +3957,7 @@ onUnmounted(() => {
             <div class="pointer-events-auto ml-3 flex shrink-0 flex-col gap-1.5">
                 <button
                     class="inline-flex size-8 cursor-pointer items-center justify-center rounded-xs border border-base-content/15 bg-base-100/85 text-base-content/70 backdrop-blur-xs transition-[border-color,color,transform] duration-150 hover:border-primary/50 hover:text-primary active:translate-y-px"
-                    :title="isSidebarCollapsed ? '展开侧栏' : '折叠侧栏'"
+                    :title="isSidebarCollapsed ? $t('map-tool.sidebar_expand') : $t('map-tool.sidebar_collapse')"
                     :aria-expanded="!isSidebarCollapsed"
                     @click="isSidebarCollapsed = !isSidebarCollapsed"
                 >
@@ -3800,21 +3965,21 @@ onUnmounted(() => {
                 </button>
                 <button
                     class="inline-flex size-8 cursor-pointer items-center justify-center rounded-xs border border-base-content/15 bg-base-100/85 text-base-content/70 backdrop-blur-xs transition-[border-color,color,transform] duration-150 hover:border-primary/50 hover:text-primary active:translate-y-px"
-                    title="放大"
+                    :title="$t('map-tool.zoom_in')"
                     @click="zoomIn"
                 >
                     <Icon icon="ri:add-line" class="size-4" />
                 </button>
                 <button
                     class="inline-flex size-8 cursor-pointer items-center justify-center rounded-xs border border-base-content/15 bg-base-100/85 text-base-content/70 backdrop-blur-xs transition-[border-color,color,transform] duration-150 hover:border-primary/50 hover:text-primary active:translate-y-px"
-                    title="缩小"
+                    :title="$t('map-tool.zoom_out')"
                     @click="zoomOut"
                 >
                     <Icon icon="ri:subtract-line" class="size-4" />
                 </button>
                 <button
                     class="inline-flex size-8 cursor-pointer items-center justify-center rounded-xs border border-base-content/15 bg-base-100/85 text-base-content/70 backdrop-blur-xs transition-[border-color,color,transform] duration-150 hover:border-primary/50 hover:text-primary active:translate-y-px"
-                    title="重置视图"
+                    :title="$t('map-tool.reset_view')"
                     @click="resetView"
                 >
                     <Icon icon="ri:crosshair-line" class="size-4" />
@@ -3859,7 +4024,7 @@ onUnmounted(() => {
             <!-- 加载中 -->
             <div v-if="isImageLoading" class="absolute inset-0 z-20 grid place-items-center bg-base-100/45 backdrop-blur-[1px]">
                 <div class="flex items-center gap-2 rounded-xs border border-base-content/15 bg-base-100 px-4 py-2 text-sm shadow-sm">
-                    <span class="loading loading-spinner loading-sm" />正在加载本地图层...
+                    <span class="loading loading-spinner loading-sm" />{{ $t('map-tool.loading_layers') }}
                 </div>
             </div>
 
@@ -3868,7 +4033,7 @@ onUnmounted(() => {
                 v-if="loadError"
                 class="absolute right-3 bottom-3 z-20 rounded-xs border border-error/60 bg-error/10 px-3 py-2 text-sm text-error"
             >
-                {{ loadError }}
+                {{ $t(loadError.key, loadError.params ?? {}) }}
             </div>
         </section>
     </div>

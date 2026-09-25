@@ -289,16 +289,16 @@ onBeforeUnmount(() => cancelAnimationFrame(rafId))
     <div class="isolate relative flex h-full w-full flex-col overflow-hidden bg-base-100 text-base-content">
         <!-- 顶栏 -->
         <div class="flex items-center gap-3 border-b border-base-300 bg-base-200/50 py-2 pl-2 pr-4">
-            <button type="button" class="btn btn-ghost btn-xs" aria-label="关闭模拟" title="关闭模拟" @click="emit('close')">
+            <button type="button" class="btn btn-ghost btn-xs" :aria-label="$t('common.close_simulation')" :title="$t('common.close_simulation')" @click="emit('close')">
                 <Icon icon="ri:close-line" />
             </button>
             <Icon icon="ri:play-fill" class="text-lg text-primary" />
-            <span class="text-sm font-bold">赛跑模拟</span>
+            <span class="text-sm font-bold">{{ $t('race-lottery-simulator.race_simulation') }}</span>
             <span class="badge badge-sm badge-outline">第 {{ props.day }} 天</span>
             <span class="text-xs tabular-nums text-base-content/50">{{ raceTime.toFixed(1) }}s</span>
             <span v-if="state === 'running'" class="text-xs text-base-content/50">{{ finishedCount }}/{{ runners.length }} 完赛</span>
             <div class="ml-auto flex items-center gap-1">
-                <span class="mr-1 text-xs text-base-content/50">倍速</span>
+                <span class="mr-1 text-xs text-base-content/50">{{ $t('race-lottery-simulator.speed') }}</span>
                 <button
                     v-for="speed in SPEED_OPTIONS"
                     :key="speed"
@@ -311,7 +311,7 @@ onBeforeUnmount(() => cancelAnimationFrame(rafId))
                 </button>
                 <button v-if="state === 'running'" type="button" class="btn btn-ghost btn-xs gap-1" @click="skip">
                     <Icon icon="ri:skip-forward-line" />
-                    跳过
+                    {{ $t('race-lottery-simulator.skip') }}
                 </button>
             </div>
         </div>

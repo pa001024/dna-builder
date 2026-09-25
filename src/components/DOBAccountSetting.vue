@@ -396,9 +396,9 @@ async function startNameEdit() {
                     </div>
                     <div class="ml-auto flex items-center gap-2">
                         <button v-if="user.roles.includes('admin')" class="btn btn-sm btn-outline" @click="$router.push('/admin')">
-                            管理
+                            {{ $t('dob-account.manage') }}
                         </button>
-                        <button class="btn btn-sm btn-outline btn-error" @click="handleLogout">退出登录</button>
+                        <button class="btn btn-sm btn-outline btn-error" @click="handleLogout">{{ $t('dob-account.logout') }}</button>
                     </div>
                 </div>
                 <!-- 用户详细信息 -->
@@ -407,8 +407,8 @@ async function startNameEdit() {
                         <div class="flex items-center justify-between text-sm">
                             <span class="font-medium inline-flex items-center gap-1.5">
                                 <span
-                                    >等级
-                                    <b class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">Lv.{{ user.level }}</b></span
+                                    >{{ $t('common.level') }}
+                                    <b class="font-orbitron text-[13px] font-semibold text-primary">Lv.{{ user.level }}</b></span
                                 >
                                 <FullTooltip side="bottom">
                                     <button type="button" class="inline-flex text-base-content/50 hover:text-base-content/80">
@@ -416,10 +416,10 @@ async function startNameEdit() {
                                     </button>
                                     <template #tooltip>
                                         <div class="w-72 space-y-2 text-xs leading-5 text-base-content">
-                                            <div class="font-semibold">每日经验进度</div>
+                                            <div class="font-semibold">{{ $t('dob-account.daily_exp_progress') }}</div>
                                             <div v-if="dailyExperienceStatus" class="space-y-2">
                                                 <div class="flex items-center justify-between gap-3">
-                                                    <span>今日已获得</span>
+                                                    <span>{{ $t('dob-account.earned_today') }}</span>
                                                     <span class="tabular-nums">
                                                         {{ dailyExperienceStatus.todayAwardedExp }}/{{
                                                             dailyExperienceStatus.totalAvailableExp
@@ -434,7 +434,7 @@ async function startNameEdit() {
                                                 <div class="border-t border-base-content/10 pt-2 space-y-2">
                                                     <div class="space-y-1">
                                                         <div class="flex items-center justify-between gap-3">
-                                                            <span>打开软件 +2</span>
+                                                            <span>{{ $t('dob-account.task_open_app') }}</span>
                                                             <span class="tabular-nums">
                                                                 {{
                                                                     clampProgress(
@@ -457,7 +457,7 @@ async function startNameEdit() {
                                                     </div>
                                                     <div class="space-y-1">
                                                         <div class="flex items-center justify-between gap-3">
-                                                            <span>在线满1小时 +3</span>
+                                                            <span>{{ $t('dob-account.task_online_1h') }}</span>
                                                             <span class="tabular-nums">
                                                                 {{
                                                                     clampProgress(
@@ -502,7 +502,7 @@ async function startNameEdit() {
                                                     </div>
                                                     <div class="space-y-1">
                                                         <div class="flex items-center justify-between gap-3">
-                                                            <span>今日首条聊天消息 +1</span>
+                                                            <span>{{ $t('dob-account.task_first_chat') }}</span>
                                                             <span class="tabular-nums">
                                                                 {{
                                                                     clampProgress(
@@ -525,10 +525,10 @@ async function startNameEdit() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div v-else class="text-base-content/60">今日进度暂不可用</div>
+                                            <div v-else class="text-base-content/60">{{ $t('dob-account.progress_unavailable') }}</div>
                                             <div class="border-t border-base-content/10 pt-2 space-y-2">
                                                 <div class="flex items-center justify-between gap-3">
-                                                    <span>本赛季深渊上传 +50</span>
+                                                    <span>{{ $t('dob-account.task_abyss_upload') }}</span>
                                                     <span class="tabular-nums">
                                                         {{ abyssUsageUploadStatus?.uploadedThisSeason ? "1/1" : "0/1" }}
                                                     </span>
@@ -544,7 +544,7 @@ async function startNameEdit() {
                                 </FullTooltip>
                             </span>
                             <span class="text-base-content/60"
-                                ><b class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ user.experience }}</b> 总经验</span
+                                ><b class="font-orbitron text-[13px] font-semibold text-primary">{{ user.experience }}</b> {{ $t('dob-account.total_exp') }}</span
                             >
                         </div>
                         <progress
@@ -553,16 +553,16 @@ async function startNameEdit() {
                             :max="levelProgress.requiredExp"
                         />
                         <div class="text-xs text-base-content/60 mt-1 flex justify-between">
-                            <span>当前等级经验 {{ levelProgress.currentLevelExp }}/{{ levelProgress.requiredExp }}</span>
-                            <span>再获得 {{ levelProgress.requiredExp - levelProgress.currentLevelExp }} 经验升级</span>
+                            <span>{{ $t('dob-account.level_exp', { current: levelProgress.currentLevelExp, required: levelProgress.requiredExp }) }}</span>
+                            <span>{{ $t('dob-account.exp_to_level_up', { value: levelProgress.requiredExp - levelProgress.currentLevelExp }) }}</span>
                         </div>
                     </div>
                     <div v-if="user.qq" class="flex justify-between">
-                        <span class="text-base-content/60">QQ:</span>
+                        <span class="text-base-content/60">{{ $t('dob-account.qq') }}</span>
                         <span>{{ user.qq }}</span>
                     </div>
                     <div v-if="user.roles && user.roles.length" class="flex justify-between items-center">
-                        <span class="text-base-content/60">角色:</span>
+                        <span class="text-base-content/60">{{ $t('dob-account.roles') }}</span>
                         <span class="flex flex-wrap justify-end gap-1">
                             <span
                                 v-for="role in user.roles"
@@ -589,37 +589,37 @@ async function startNameEdit() {
                             <div class="text-xs text-base-content/50 mt-1">用于兑换称号、名字特效等装扮</div>
                         </div>
                         <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-3">
-                            <div class="text-xs text-base-content/60">当前装扮</div>
+                            <div class="text-xs text-base-content/60">{{ $t('dob-account.current_appearance') }}</div>
                             <div class="mt-1 text-sm space-y-1">
                                 <div class="flex justify-between gap-2">
-                                    <span class="text-base-content/60">称号</span>
+                                    <span class="text-base-content/60">{{ $t('title-frame-label.title') }}</span>
                                     <span class="truncate">
-                                        {{ shopSummary?.selectedTitleAsset?.rewardName || "默认" }}
+                                        {{ shopSummary?.selectedTitleAsset?.rewardName || $t('common.default') }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between gap-2">
-                                    <span class="text-base-content/60">名片</span>
+                                    <span class="text-base-content/60">{{ $t('points-mall.rewardType.nameCard') }}</span>
                                     <span class="truncate">
-                                        {{ shopSummary?.selectedNameCardAsset?.rewardName || "默认" }}
+                                        {{ shopSummary?.selectedNameCardAsset?.rewardName || $t('common.default') }}
                                     </span>
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-primary w-full mt-2" @click="$router.push('/points-mall')">前往积分商城</button>
+                            <button class="btn btn-sm btn-primary w-full mt-2" @click="$router.push('/points-mall')">{{ $t('dob-account.go_points_mall') }}</button>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- 未登录状态 -->
             <div v-else class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-5 text-center">
-                <div class="text-base-content/60 mb-3">未登录 DNA Builder 账号</div>
-                <button class="btn btn-primary px-12 mx-2" @click="openLoginModal">登录</button>
-                <button class="btn btn-primary px-12 mx-2" @click="openRegisterModal">注册</button>
+                <div class="text-base-content/60 mb-3">{{ $t('dob-account.not_logged_in') }}</div>
+                <button class="btn btn-primary px-12 mx-2" @click="openLoginModal">{{ $t('dob-account.login') }}</button>
+                <button class="btn btn-primary px-12 mx-2" @click="openRegisterModal">{{ $t('dob-account.register') }}</button>
             </div>
         </div>
 
         <!-- 功能说明 -->
         <div class="border-t border-base-content/10 pt-2.5 text-xs text-base-content/45">
-            <p>DNA Builder 账号用于访问社区功能、分享构建方案等</p>
+            <p>{{ $t('dob-account.account_desc') }}</p>
         </div>
 
         <!--
@@ -652,7 +652,7 @@ async function startNameEdit() {
                             <!-- 登录按钮 -->
                             <button type="submit" class="btn btn-primary w-full" :disabled="loading">
                                 <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                <span>{{ loading ? "登录中..." : "登录" }}</span>
+                                <span>{{ loading ? $t('dob-account.logging_in') : $t('dob-account.login') }}</span>
                             </button>
                             <!-- 忘记密码链接 -->
                             <div class="text-center">
@@ -714,13 +714,13 @@ async function startNameEdit() {
                             <!-- 登录按钮 -->
                             <button type="submit" class="btn btn-primary w-full" :disabled="loading">
                                 <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                <span>{{ loading ? "注册中..." : "注册" }}</span>
+                                <span>{{ loading ? $t('dob-account.registering') : $t('dob-account.register') }}</span>
                             </button>
                         </form>
                         <!-- 额外信息 -->
                         <div class="text-center mt-4 text-sm text-base-content/60">
                             <label class="label cursor-pointer">
-                                <span>*QQ号仅用于显示头像 无其他用途</span>
+                                <span>{{ $t('dob-account.qq_hint') }}</span>
                             </label>
                         </div>
                     </div>
@@ -762,7 +762,7 @@ async function startNameEdit() {
                                             @click="sendResetCode"
                                         >
                                             <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                            <span>{{ loading ? "发送中..." : "发送验证码" }}</span>
+                                            <span>{{ loading ? $t('dob-account.sending') : $t('dob-account.send_code') }}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -772,7 +772,7 @@ async function startNameEdit() {
                             <div v-else-if="resetPasswordForm.step === 2">
                                 <div class="space-y-4">
                                     <div>
-                                        <p class="text-sm text-base-content/60 mb-2">请输入邮箱中的6位验证码</p>
+                                        <p class="text-sm text-base-content/60 mb-2">{{ $t('dob-account.enter_code') }}</p>
                                         <label class="flex items-center gap-2 w-full">
                                             <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
                                             <input
@@ -808,7 +808,7 @@ async function startNameEdit() {
                                             @click="handleResetPassword"
                                         >
                                             <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                            <span>{{ loading ? "重置中..." : "重置密码" }}</span>
+                                            <span>{{ loading ? $t('dob-account.resetting') : $t('dob-account.reset_password') }}</span>
                                         </button>
                                     </div>
                                 </div>

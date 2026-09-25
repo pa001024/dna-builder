@@ -119,7 +119,7 @@ const effectiveHealth = computed(() => {
                 :title="$t('攻击')"
             >
                 <div class="text-[10px] text-base-content/55">{{ $t("攻击") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-warning">
+                <div class="font-orbitron text-[13px] font-semibold text-warning">
                     {{ formatBigNumber(displayMonster.atk) }}
                 </div>
             </div>
@@ -128,14 +128,14 @@ const effectiveHealth = computed(() => {
                 :title="$t('生命')"
             >
                 <div class="text-[10px] text-base-content/55">{{ $t("生命") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-error">{{ formatBigNumber(displayMonster.hp) }}</div>
+                <div class="font-orbitron text-[13px] font-semibold text-error">{{ formatBigNumber(displayMonster.hp) }}</div>
             </div>
             <div
                 class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
                 :title="$t('护盾')"
             >
                 <div class="text-[10px] text-base-content/55">{{ $t("护盾") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-info">
+                <div class="font-orbitron text-[13px] font-semibold text-info">
                     {{ formatBigNumber(displayMonster.es || 0) }}
                 </div>
             </div>
@@ -144,7 +144,7 @@ const effectiveHealth = computed(() => {
                 :title="$t('防御')"
             >
                 <div class="text-[10px] text-base-content/55">{{ $t("防御") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-success">
+                <div class="font-orbitron text-[13px] font-semibold text-success">
                     {{ formatBigNumber(displayMonster.def) }}
                 </div>
             </div>
@@ -153,7 +153,7 @@ const effectiveHealth = computed(() => {
                 :title="$t('战姿')"
             >
                 <div class="text-[10px] text-base-content/55">{{ $t("战姿") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-secondary">
+                <div class="font-orbitron text-[13px] font-semibold text-secondary">
                     {{ formatBigNumber(displayMonster.tn || 0) }}
                 </div>
             </div>
@@ -162,7 +162,7 @@ const effectiveHealth = computed(() => {
                 :title="$t('有效生命')"
             >
                 <div class="text-[10px] text-base-content/55">{{ $t("有效生命") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-accent">{{ formatBigNumber(effectiveHealth) }}</div>
+                <div class="font-orbitron text-[13px] font-semibold text-accent">{{ formatBigNumber(effectiveHealth) }}</div>
             </div>
         </div>
     </div>

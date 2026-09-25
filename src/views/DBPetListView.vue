@@ -1,12 +1,16 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { petMap } from "@/data/d"
 import petData, { type Pet, type PetEntry, petEntrys } from "@/data/d/pet.data"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
+import { getPetQualityName, getPetTypeName } from "@/utils/pet-labels"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
+
+const { gt, petSkillText } = useGameText()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedPetId = useSearchParam<number>("id", 0)
@@ -100,32 +104,17 @@ const filteredPets = computed(() => {
     })
 })
 
-function getTypeName(type: number): string {
-    const typeMap: Record<number, string> = {
-        1: "活力魔灵",
-        2: "失活魔灵",
-        3: "活动魔灵",
-        999: "魔灵潜质",
-    }
-    return typeMap[type] || type.toString()
-}
-
-function getQualityName(quality: number): string {
-    const qualityMap: Record<number, string> = {
-        1: "白",
-        2: "绿",
-        3: "蓝",
-        4: "紫",
-        5: "金",
-    }
-    return qualityMap[quality] || quality.toString()
-}
-
+/**
+ * 取魔灵某类技能在列表档位（固定 0 档）下的可展示文本。
+ *
+ * 必须走 `petSkillText`：先翻译文案模板、再代入数值，直接翻译已代入数值的文本查不到译文。
+ * @param pet 魔灵数据
+ * @param type 技能类型
+ * @returns 当前语言下的技能文案
+ */
 function formatSkillDescription(pet: Pet, type: "主动" | "被动"): string {
     const leveledPet = new LeveledPet(pet, 0)
-    const skill = type === "主动" ? leveledPet.主动 : leveledPet.被动
-    if (!skill) return ""
-    return skill.描述
+    return type === "主动" ? petSkillText(leveledPet.主动模板, leveledPet.主动值) : petSkillText(leveledPet.被动模板, leveledPet.被动值)
 }
 
 /**
@@ -164,7 +153,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索魔灵名称（支持拼音）..."
+                            :placeholder="$t('db-pet-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -179,7 +168,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                 <div class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise" style="animation-delay: 0.05s">
                     <!-- 类型筛选 -->
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">类型</span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.type') }}</span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -189,7 +178,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                             "
                             @click="selectedType = 0"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="type in types"
@@ -202,13 +191,13 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                             "
                             @click="selectedType = type"
                         >
-                            {{ $t(getTypeName(type)) }}
+                            {{ $t(getPetTypeName(type)) }}
                         </button>
                     </div>
 
                     <!-- 品质筛选 -->
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">品质</span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.quality') }}</span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -218,7 +207,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                             "
                             @click="selectedQuality = 0"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="quality in qualities"
@@ -231,7 +220,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                             "
                             @click="selectedQuality = quality"
                         >
-                            {{ $t(getQualityName(quality)) }}
+                            {{ $t(getPetQualityName(quality)) }}
                         </button>
                     </div>
                 </div>
@@ -240,7 +229,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                     <div class="p-3">
                         <!-- 空状态 -->
                         <div v-if="filteredPets.length === 0" class="flex flex-col items-center justify-center py-20 text-base-content/45">
-                            <p class="text-sm">未找到匹配的魔灵</p>
+                            <p class="text-sm">{{ $t('db-pet-list.no_match') }}</p>
                         </div>
 
                         <div v-else class="space-y-2">
@@ -287,7 +276,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                                                 {{ $t(item.name) }}
                                             </h3>
                                             <div class="mt-0.5 truncate text-[11px] text-base-content/45">
-                                                {{ item.desc }}
+                                                {{ gt(item.desc) }}
                                             </div>
                                         </template>
                                         <!-- 普通魔灵信息显示 -->
@@ -299,9 +288,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                                                 {{ $t(item.名称) }}
                                             </h3>
                                             <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                                <span>{{ $t(getTypeName(item.类型)) }}</span>
-                                                <span>最大等级: {{ item.最大等级 }}</span>
-                                                <span>捕获经验: {{ item.捕获经验 }}</span>
+                                                <span>{{ $t(getPetTypeName(item.类型)) }}</span>
+                                                <span>{{ $t("pet_detail.max_level") }}: {{ item.最大等级 }}</span>
+                                                <span>{{ $t("pet_detail.capture_exp") }}: {{ item.捕获经验 }}</span>
                                             </div>
                                         </template>
                                     </div>
@@ -309,10 +298,10 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                                 <!-- 普通魔灵技能显示 -->
                                 <template v-if="selectedType !== 999 && '主动' in item">
                                     <div v-if="item.主动" class="mt-2 px-3 pb-3 text-[11px] leading-relaxed text-base-content/55">
-                                        <div>主动: {{ formatSkillDescription(item, "主动") }}</div>
+                                        <div>{{ $t("pet_detail.active_short") }}: {{ formatSkillDescription(item, "主动") }}</div>
                                     </div>
                                     <div v-if="item.被动" class="-mt-1.5 px-3 pb-3 text-[11px] leading-relaxed text-base-content/55">
-                                        <div>被动: {{ formatSkillDescription(item, "被动") }}</div>
+                                        <div>{{ $t("pet_detail.passive_short") }}: {{ formatSkillDescription(item, "被动") }}</div>
                                     </div>
                                 </template>
                             </article>
@@ -323,8 +312,9 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredPets.length }}</b>
-                        {{ selectedType === 999 ? "个潜质" : "个魔灵" }}
+                        {{ $t("pet_detail.total_prefix") }}
+                        <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredPets.length }}</b>
+                        {{ selectedType === 999 ? $t("pet_detail.unit_entry") : $t("pet_detail.unit_pet") }}
                     </p>
                 </div>
             </div>

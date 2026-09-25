@@ -361,7 +361,7 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                                 "
                                 @click="selectedType = 'all'"
                             >
-                                {{ $t("accessory.typeAll") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="accessoryType in accessoryTypes"
@@ -390,7 +390,7 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                                 "
                                 @click="selectedRarity = -1"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="rarity in allRarities"
@@ -419,7 +419,7 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                                 "
                                 @click="selectedUnlock = 'all'"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="unlockMethod in allUnlockMethods"

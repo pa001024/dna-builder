@@ -159,7 +159,7 @@ watch(
                         Dungeon File
                     </p>
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <h2 class="truncate text-xl font-bold leading-tight tracking-tight">{{ dungeon.name }}</h2>
+                        <h2 class="truncate text-xl font-bold leading-tight tracking-tight">{{ gt(dungeon.name) }}</h2>
                         <CopyID :id="dungeon.id" />
                     </div>
                 </div>
@@ -167,7 +167,7 @@ watch(
                     class="shrink-0 rounded-xs border px-2 py-0.5 text-[10px] text-base-content/55"
                     :class="isStoryDungeon ? 'border-primary/40 text-primary' : 'border-base-content/20'"
                 >
-                    {{ isStoryDungeon ? "剧情副本" : "常驻副本" }}
+                    {{ $t(isStoryDungeon ? "db-solo-treasure-dungeon.story" : "db-solo-treasure-dungeon.repeat") }}
                 </span>
             </div>
             <p class="mt-2 text-sm leading-relaxed text-base-content/70">{{ gt(dungeon.desc) }}</p>
@@ -175,27 +175,27 @@ watch(
 
         <!-- 模式切换 -->
         <section v-if="!isStoryDungeon" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="MODE" title="模式" />
+            <SectionHeader no-animate compact kicker="MODE" :title="$t('db-solo-treasure-dungeon.mode')" />
             <div class="flex items-center justify-end">
                 <label class="label cursor-pointer gap-2 p-0">
-                    <span class="text-xs text-base-content/70">普通模式</span>
+                    <span class="text-xs text-base-content/70">{{ $t('db-solo-treasure-dungeon.normal_mode') }}</span>
                     <input v-model="hardModeEnabled" :disabled="!canToggleMode" type="checkbox" class="toggle toggle-primary toggle-sm" />
-                    <span class="text-xs text-base-content/70">挑战模式</span>
+                    <span class="text-xs text-base-content/70">{{ $t('db-solo-treasure-dungeon.challenge_mode') }}</span>
                 </label>
             </div>
             <div
                 class="mt-2 flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
             >
-                <span class="text-xs text-base-content/60">禁用协战</span>
-                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
-                    {{ banPhantomEnabled ? "是" : "否" }}
+                <span class="text-xs text-base-content/60">{{ $t('db-solo-treasure-dungeon.disable_coop') }}</span>
+                <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
+                    {{ $t(banPhantomEnabled ? "db-solo-treasure-dungeon.is_true" : "db-solo-treasure-dungeon.is_false") }}
                 </span>
             </div>
         </section>
 
         <!-- 报名费用 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="FEE" title="报名费用" />
+            <SectionHeader no-animate compact kicker="FEE" :title="$t('db-solo-treasure-dungeon.entry_fee')" />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem
                     v-if="hardModeEnabled && 'hardModeFee' in dungeon"
@@ -217,23 +217,23 @@ watch(
 
         <!-- 提取玩法 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="GAMEPLAY" title="提取玩法" />
+            <SectionHeader no-animate compact kicker="GAMEPLAY" :title="$t('db-solo-treasure-dungeon.extract_gameplay')" />
             <div v-if="soloTreasure" class="grid grid-cols-2 gap-1.5 lg:grid-cols-4">
                 <div
                     v-for="stat in [
-                        { label: '撤离时间', value: soloTreasure.etime },
-                        { label: '总时间', value: soloTreasure.gtime },
-                        { label: '下雨时间', value: soloTreasure.rtime },
-                        { label: '警告时间', value: soloTreasure.wtime },
+                        { key: 'db-solo-treasure-dungeon.evacuation_time', value: soloTreasure.etime },
+                        { key: 'db-solo-treasure-dungeon.total_time', value: soloTreasure.gtime },
+                        { key: 'db-solo-treasure-dungeon.rain_time', value: soloTreasure.rtime },
+                        { key: 'db-solo-treasure-dungeon.warning_time', value: soloTreasure.wtime },
                     ]"
-                    :key="stat.label"
+                    :key="stat.key"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ stat.label }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ stat.value }}s</span>
+                    <span class="text-xs text-base-content/60">{{ $t(stat.key) }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ stat.value }}s</span>
                 </div>
             </div>
-            <div v-else class="text-sm text-base-content/70">暂无提取玩法数据</div>
+            <div v-else class="text-sm text-base-content/70">{{ $t('db-solo-treasure-dungeon.no_extract_data') }}</div>
 
             <div v-if="gamePlayList.length" class="mt-3 space-y-2">
                 <!-- 玩法切换方章 -->
@@ -250,7 +250,7 @@ watch(
                         "
                         @click="gamePlayTab = gamePlay.id"
                     >
-                        {{ gamePlay.name || `玩法 ${gamePlay.id}` }}
+                        {{ gt(gamePlay.name) || $t('db-solo-treasure-dungeon.gameplay_fallback', { id: gamePlay.id }) }}
                     </button>
                 </div>
                 <!-- 内层小卡：当前玩法详情 -->
@@ -267,7 +267,7 @@ watch(
 
         <!-- 限定角色 -->
         <section v-if="limitCharacterRuleIds.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="LIMITED" title="限定角色" />
+            <SectionHeader no-animate compact kicker="LIMITED" :title="$t('db-solo-treasure-dungeon.limited_chars')" />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem
                     v-for="ruleId in limitCharacterRuleIds"
@@ -280,7 +280,7 @@ watch(
 
         <!-- 试用角色 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="TRIAL CHAR" title="试用角色" />
+            <SectionHeader no-animate compact kicker="TRIAL CHAR" :title="$t('db-solo-treasure-dungeon.trial_chars')" />
             <div v-if="trialCharacterRuleIds.length" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem
                     v-for="ruleId in trialCharacterRuleIds"
@@ -289,12 +289,12 @@ watch(
                     :value="[1, getCharId(ruleId) || ruleId, 'Char']"
                 />
             </div>
-            <div v-else class="text-sm text-base-content/70">暂无试用角色</div>
+            <div v-else class="text-sm text-base-content/70">{{ $t('db-solo-treasure-dungeon.no_trial_chars') }}</div>
         </section>
 
         <!-- 试用武器 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="TRIAL WEAPON" title="试用武器" />
+            <SectionHeader no-animate compact kicker="TRIAL WEAPON" :title="$t('db-solo-treasure-dungeon.trial_weapons')" />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                 <ResourceCostItem
                     v-for="ruleId in trialWeaponRuleIds"

@@ -23,8 +23,8 @@ const model = defineModel<T extends "id" ? number : string>()
             <SelectGroup>
                 <SelectItem v-for="weapon in weaponWithElm" :key="weapon.value" :value="weapon.value">
                     <div class="flex items-center gap-2">
-                        <ImageFallback :src="weapon.icon" alt="武器头像" class="size-6 rounded-full inline-block">
-                            <img src="/imgs/webp/T_Head_Empty.webp" alt="武器头像" class="size-6 rounded-full inline-block" />
+                        <ImageFallback :src="weapon.icon" :alt="$t('common.weapon_avatar')" class="size-6 rounded-full inline-block">
+                            <img src="/imgs/webp/T_Head_Empty.webp" :alt="$t('common.weapon_avatar')" class="size-6 rounded-full inline-block" />
                         </ImageFallback>
                         {{ $t(weapon.label) }}
                     </div>

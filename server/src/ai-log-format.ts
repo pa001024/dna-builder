@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto"
-import { beijingDayKey, computeCostMicros, normalizeUsage, type UpstreamUsage } from "./ai-pricing"
+import { beijingDayKey, computeCostMicros, createMessagesUsageAccumulator, normalizeUsage, type UpstreamUsage } from "./ai-pricing"
 
 /**
  * AI 调用日志的记录格式与纯逻辑（不碰数据库、不碰文件系统，可直接单测）。
@@ -253,15 +253,31 @@ export function extractContentText(content: unknown): string {
 }
 
 /**
- * @description 取会话锚点：第一条 user 消息的纯文本。
+ * @description 判断某个 content 是否承载工具结果。
+ *
+ * Chat Completions 用独立的 `tool` 角色承载，Messages 则把 `tool_result` 块放进 user 轮里，
+ * 日志的角色分布与会话锚点都要按同一口径把后者识别出来。
+ * @param content 消息 content 字段
+ * @returns 是否含工具结果块
+ */
+function hasToolResultBlock(content: unknown): boolean {
+    if (!Array.isArray(content)) return false
+    return content.some(part => toRecord(part)?.type === "tool_result")
+}
+
+/**
+ * @description 取会话锚点：第一条**真实用户输入**的纯文本。
  * 客户端每轮都会把完整历史回传，因此同一次对话的每轮请求都以同一条 user 消息开头。
+ * Messages 协议下工具结果也写在 user 轮里，这类轮不算用户输入，必须跳过。
  * @param messages 请求消息数组。
  * @returns 锚点文本；没有 user 消息时返回空字符串。
  */
 export function resolveSessionAnchor(messages: readonly unknown[]): string {
     for (const message of messages) {
         const record = toRecord(message)
-        if (record?.role === "user") return extractContentText(record.content)
+        if (record?.role !== "user" || hasToolResultBlock(record.content)) continue
+        const text = extractContentText(record.content)
+        if (text) return text
     }
     return ""
 }
@@ -325,7 +341,11 @@ export function summarizeMessages(
     for (const message of messages) {
         const record = toRecord(message)
         const role = typeof record?.role === "string" ? record.role : ""
-        if (role === "system" || role === "user" || role === "assistant" || role === "tool") {
+        // Messages 协议把工具结果放在 user 轮里，按 Chat Completions 的口径记成 tool，
+        // 否则两条协议的日志角色分布对不上，按角色筛选会漏掉 Messages 的工具结果
+        if (role === "user" && hasToolResultBlock(record?.content)) {
+            roles.tool += 1
+        } else if (role === "system" || role === "user" || role === "assistant" || role === "tool") {
             roles[role] += 1
         } else {
             roles.other += 1
@@ -563,6 +583,139 @@ export function createStreamAggregator(now: () => number = Date.now): AiLogStrea
                 finishReason,
                 firstTokenAt,
                 completionId,
+            }
+        },
+    }
+}
+
+/** Messages 流式聚合的中间状态。 */
+export interface AiLogMessagesStreamState extends AiLogStreamState {
+    /** 累计 usage（Messages 的用量分散在 `message_start` 与 `message_delta` 两个事件里）。 */
+    usage: UpstreamUsage | null
+}
+
+/** Messages 流式增量聚合器。 */
+export interface AiLogMessagesStreamAggregator {
+    /** 喂入一个 SSE 事件（已 JSON.parse 的 payload）。 */
+    push(payload: unknown): void
+    /** 取当前聚合结果。 */
+    snapshot(): AiLogMessagesStreamState
+}
+
+/**
+ * @description 把 Messages 的 `stop_reason` 归一化成日志里使用的结束原因。
+ * @param raw 上游 stop_reason
+ * @returns 结束原因；无法识别时为 null
+ */
+function normalizeMessagesStopReason(raw: unknown): string | null {
+    switch (raw) {
+        case "end_turn":
+        case "stop_sequence":
+            return "stop"
+        case "tool_use":
+            return "tool_calls"
+        case "max_tokens":
+            return "length"
+        default:
+            return typeof raw === "string" ? raw : null
+    }
+}
+
+/**
+ * @description 创建 Messages 流的增量聚合器，把事件拼装成一条完整的助手消息。
+ *
+ * 与 Chat Completions 聚合器的差别全在事件形态上：正文与思维链各是一个内容块，
+ * 工具参数走 `input_json_delta.partial_json` 分片，usage 要跨事件累加。
+ * 输出结构与 {@link AiLogAssistantMessage} 保持同构，日志查看页无需区分协议。
+ * @param now 取当前时间的函数，便于测试注入。
+ * @returns 聚合器实例。
+ */
+export function createMessagesStreamAggregator(now: () => number = Date.now): AiLogMessagesStreamAggregator {
+    const usageAccumulator = createMessagesUsageAccumulator()
+    /** 按块索引累积：正文 / 思维链文本，或工具调用的名称与参数分片。 */
+    const blocks = new Map<number, { kind: string; text: string; id: string; name: string; json: string }>()
+
+    let completionId: string | null = null
+    let finishReason: string | null = null
+
+    return {
+        push(payload: unknown) {
+            const event = toRecord(payload)
+            if (!event) return
+
+            // 补全 id 只在 message_start 出现一次
+            if (completionId === null && event.type === "message_start") {
+                completionId = extractUpstreamCompletionId(toRecord(event.message))
+            }
+
+            usageAccumulator.push(event)
+
+            if (event.type === "content_block_start") {
+                const index = typeof event.index === "number" ? event.index : blocks.size
+                const native = toRecord(event.content_block)
+                blocks.set(index, {
+                    kind: typeof native?.type === "string" ? native.type : "text",
+                    text: typeof native?.text === "string" ? native.text : typeof native?.thinking === "string" ? native.thinking : "",
+                    id: typeof native?.id === "string" ? native.id : "",
+                    name: typeof native?.name === "string" ? native.name : "",
+                    json: "",
+                })
+                return
+            }
+
+            if (event.type === "content_block_delta") {
+                const block = blocks.get(typeof event.index === "number" ? event.index : 0)
+                const delta = toRecord(event.delta)
+                if (!block || !delta) return
+
+                if (typeof delta.text === "string") block.text += delta.text
+                else if (typeof delta.thinking === "string") block.text += delta.thinking
+                else if (typeof delta.partial_json === "string") block.json += delta.partial_json
+                return
+            }
+
+            if (event.type === "message_delta") {
+                const delta = toRecord(event.delta)
+                if (delta && delta.stop_reason != null) finishReason = normalizeMessagesStopReason(delta.stop_reason)
+            }
+        },
+        snapshot(): AiLogMessagesStreamState {
+            let content = ""
+            let reasoning = ""
+            const toolCalls: AiLogToolCall[] = []
+
+            for (const [, block] of [...blocks.entries()].sort(([left], [right]) => left - right)) {
+                if (block.kind === "text") {
+                    content += block.text
+                    continue
+                }
+
+                if (block.kind === "thinking") {
+                    reasoning += block.text
+                    continue
+                }
+
+                if (block.kind === "tool_use" && block.name) {
+                    toolCalls.push({ id: block.id || null, type: "function", name: block.name, arguments: block.json })
+                }
+            }
+
+            const usage = usageAccumulator.snapshot() ?? null
+            const hasAnything = content.length > 0 || reasoning.length > 0 || toolCalls.length > 0 || finishReason !== null
+
+            return {
+                message: hasAnything
+                    ? {
+                          role: "assistant",
+                          content,
+                          reasoningContent: reasoning ? reasoning : null,
+                          toolCalls,
+                      }
+                    : null,
+                finishReason,
+                firstTokenAt: hasAnything ? now() : null,
+                completionId,
+                usage,
             }
         },
     }

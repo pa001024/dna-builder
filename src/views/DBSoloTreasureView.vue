@@ -1,5 +1,7 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import {
@@ -23,6 +25,9 @@ type SoloTreasureListItem =
     | { kind: "bag"; id: number; title: string; desc: string; meta: string }
     | { kind: "container"; id: number; title: string; desc: string; meta: string }
 
+const { t } = useTranslation()
+const { gt } = useGameText()
+
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDungeonId = useSearchParam<number>("id", 0)
 const selectedTreasureId = useSearchParam<number>("tid", 0)
@@ -31,11 +36,11 @@ const selectedContainerId = useSearchParam<number>("cid", 0)
 const selectedType = useSearchParam<SoloTreasureType>("tp", "story")
 
 const typeTabs = [
-    { key: "story" as const, label: "剧情副本" },
-    { key: "repeat" as const, label: "常驻副本" },
-    { key: "treasure" as const, label: "宝物" },
-    { key: "container" as const, label: "容器" },
-    { key: "bag" as const, label: "百宝囊" },
+    { key: "story" as const, label: "db-solo-treasure-dungeon.story" },
+    { key: "repeat" as const, label: "db-solo-treasure-dungeon.repeat" },
+    { key: "treasure" as const, label: "db-solo-treasure-entry.treasure" },
+    { key: "container" as const, label: "db-solo-treasure-entry.container" },
+    { key: "bag" as const, label: "db-solo-treasure-entry.bag" },
 ]
 
 const filteredSoloTreasure = computed<SoloTreasureListItem[]>(() => {
@@ -59,7 +64,7 @@ function getListItems(type: SoloTreasureType): SoloTreasureListItem[] {
             id: item.id,
             title: item.name,
             desc: item.desc,
-            meta: `副本 ${item.did} · 解锁 ${item.unlockCondition}`,
+            meta: t("db-solo-treasure.meta_dungeon_unlock", { id: item.did, condition: item.unlockCondition }),
         }))
     }
 
@@ -69,7 +74,11 @@ function getListItems(type: SoloTreasureType): SoloTreasureListItem[] {
             id: item.id,
             title: item.name,
             desc: item.desc,
-            meta: `副本 ${item.hardDungeonId}/${item.easyDungeonId ?? "-"} · 解锁 ${item.unlockCondition}`,
+            meta: t("db-solo-treasure.meta_dungeon_pair_unlock", {
+                hard: item.hardDungeonId,
+                easy: item.easyDungeonId ?? "-",
+                condition: item.unlockCondition,
+            }),
         }))
     }
 
@@ -89,7 +98,11 @@ function getListItems(type: SoloTreasureType): SoloTreasureListItem[] {
             id: item.id,
             title: item.name,
             desc: `${item.name} ${item.bp}`,
-            meta: `蓝图 ${item.bp} · 形状 ${item.shape.join("x")} · 爆率 ${getDropRateText(item)}`,
+            meta: t("db-solo-treasure.meta_container", {
+                bp: item.bp,
+                shape: item.shape.join("x"),
+                rate: getDropRateText(item),
+            }),
         }))
     }
 
@@ -98,7 +111,11 @@ function getListItems(type: SoloTreasureType): SoloTreasureListItem[] {
         id: item.id,
         title: item.name,
         desc: item.name,
-        meta: `类型 ${item.shapeType} · 价格 ${item.price} · 形状 ${item.shape.map(shape => shape.join("x")).join(" / ")}`,
+        meta: t("db-solo-treasure.meta_bag", {
+            type: item.shapeType,
+            price: item.price,
+            shape: item.shape.map(shape => shape.join("x")).join(" / "),
+        }),
     }))
 }
 
@@ -324,7 +341,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbst-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索ID/名称/描述..."
+                            :placeholder="$t('db-solo-treasure.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -349,7 +366,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbst-item-active" })
                             "
                             @click="selectedType = tab.key"
                         >
-                            {{ tab.label }}
+                            {{ $t(tab.label) }}
                         </button>
                     </div>
                 </div>
@@ -380,18 +397,18 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbst-item-active" })
                                     <ImageFallback
                                         v-if="item.kind === 'treasure'"
                                         :src="`/imgs/res/${item.treasure.icon}.webp`"
-                                        :alt="item.title"
+                                        :alt="gt(item.title)"
                                         class="w-14 h-14 rounded-xs shrink-0 bg-linear-15"
                                         :class="getRarityGradientClass(soloTreasureRarityData[item.treasure.rarity].show)"
                                     >
-                                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="item.title" class="w-14 h-14 rounded-xs shrink-0" />
+                                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="gt(item.title)" class="w-14 h-14 rounded-xs shrink-0" />
                                     </ImageFallback>
                                     <div class="w-full min-w-0">
                                         <div
                                             class="truncate text-sm font-medium transition-colors duration-200 group-hover:text-primary"
                                             :class="{ 'text-primary': isItemSelected(item) }"
                                         >
-                                            {{ item.title }}
+                                            {{ gt(item.title) }}
                                         </div>
                                         <CopyID :id="item.id" />
                                     </div>
@@ -426,7 +443,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbst-item-active" })
                                             class="truncate text-sm font-medium transition-colors duration-200 group-hover:text-primary"
                                             :class="{ 'text-primary': isItemSelected(item) }"
                                         >
-                                            {{ item.title }}
+                                            {{ gt(item.title) }}
                                         </div>
                                         <div
                                             v-if="'meta' in item"
@@ -447,7 +464,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbst-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredSoloTreasure.length }}</b> 个条目
+                        {{ $t('db-solo-treasure.total_count', { count: filteredSoloTreasure.length }) }}
                     </p>
                 </div>
             </div>

@@ -49,7 +49,7 @@ function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
                 <div class="grid grid-cols-[repeat(auto-fill,160px)] gap-4 justify-center mt-2">
                     <div class="card hover-3d">
                         <div class="card-body bg-linear-0 from-base-300 to-base-200 rounded-2xl relative p-4">
-                            <div class="text-sm font-medium">成就达成</div>
+                            <div class="text-sm font-medium">{{ $t('dna-game-info-show.achievement_progress') }}</div>
                             <div class="text-xl font-bold">
                                 {{ roleInfo.roleShow.roleAchv?.total }}
                             </div>
@@ -69,7 +69,7 @@ function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
                                 <div class="flex items-end gap-4">
                                     <img
                                         :src="`/imgs/webp/Icon_Achievement_${{ bronze: 'Copper', silver: 'Silver', gold: 'Gold' }[k]}.webp`"
-                                        alt="品质"
+                                        :alt="$t('common.quality')"
                                         class="size-10"
                                     />
                                     {{ p }}
@@ -112,24 +112,24 @@ function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
 
         <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
-                <h3 class="card-title mb-4">迷津</h3>
+                <h3 class="card-title mb-4">{{ $t('迷津') }}</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="bg-base-200 p-3 rounded-lg">
-                        <div class="text-sm font-medium">进度</div>
+                        <div class="text-sm font-medium">{{ $t('dna-game-info-show.progress') }}</div>
                         <div class="text-xl font-bold">
                             {{ ["0", "I", "II", "III", "IV", "V", "VI"][roleInfo.roleShow.rougeLikeInfo.maxPassed >> 4] }}
                         </div>
                         <div class="text-sm text-base-content/70">Lv.{{ (roleInfo.roleShow.rougeLikeInfo.maxPassed & 8) * 10 }}</div>
                     </div>
                     <div class="bg-base-200 p-3 rounded-lg">
-                        <div class="text-sm font-medium">本周行迹</div>
+                        <div class="text-sm font-medium">{{ $t('dna-game-info-show.weekly_trace') }}</div>
                         <div class="text-xl font-bold">
                             {{ roleInfo.roleShow.rougeLikeInfo.rewardCount }}
                         </div>
                         <div class="text-sm text-base-content/70">/ {{ roleInfo.roleShow.rougeLikeInfo.rewardTotal }}</div>
                     </div>
                     <div class="bg-base-200 p-3 rounded-lg">
-                        <div class="text-sm font-medium">重置时间</div>
+                        <div class="text-sm font-medium">{{ $t('dna-game-info-show.reset_time') }}</div>
                         <div class="text-xl font-bold">
                             {{ ui.timeDistanceFuture(+roleInfo.roleShow.rougeLikeInfo.resetTime * 1000) }}
                         </div>
@@ -178,7 +178,7 @@ function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
                             <img
                                 v-if="roleInfo.abyssInfo.bestTimeVo1.charIcon"
                                 :src="roleInfo.abyssInfo.bestTimeVo1.charIcon"
-                                alt="角色"
+                                :alt="$t('角色')"
                                 class="size-40 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                             />
                             <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
@@ -186,21 +186,21 @@ function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
                                 <img
                                     v-if="roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
                                     :src="roleInfo.abyssInfo.bestTimeVo1.closeWeaponIcon"
-                                    alt="近战武器"
+                                    :alt="$t('dna-game-info-show.melee_weapon')"
                                     class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                 />
                                 <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                 <img
                                     v-if="roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
                                     :src="roleInfo.abyssInfo.bestTimeVo1.langRangeWeaponIcon"
-                                    alt="远程武器"
+                                    :alt="$t('dna-game-info-show.ranged_weapon')"
                                     class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                 />
                                 <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                 <img
                                     v-if="roleInfo.abyssInfo.bestTimeVo1.petIcon"
                                     :src="roleInfo.abyssInfo.bestTimeVo1.petIcon"
-                                    alt="魔灵"
+                                    :alt="$t('魔灵')"
                                     class="size-12 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                 />
                                 <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
@@ -209,14 +209,14 @@ function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
                                 <img
                                     v-if="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1"
                                     :src="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon1"
-                                    alt="协战角色1"
+                                    :alt="$t('dna-game-info-show.coop_char_1')"
                                     class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                 />
                                 <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                 <img
                                     v-if="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
                                     :src="roleInfo.abyssInfo.bestTimeVo1.phantomCharIcon2"
-                                    alt="协战角色2"
+                                    :alt="$t('dna-game-info-show.coop_char_2')"
                                     class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                 />
                                 <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
@@ -225,20 +225,20 @@ function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
                                 <img
                                     v-if="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1"
                                     :src="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon1"
-                                    alt="协战武器1"
+                                    :alt="$t('dna-game-info-show.coop_weapon_1')"
                                     class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                 />
                                 <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                                 <img
                                     v-if="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
                                     :src="roleInfo.abyssInfo.bestTimeVo1.phantomWeaponIcon2"
-                                    alt="协战武器2"
+                                    :alt="$t('dna-game-info-show.coop_weapon_2')"
                                     class="size-19 object-cover rounded-xl bg-base-300 shadow-md border border-gray-300/50"
                                 />
                                 <div v-else class="size-12 rounded-xl bg-base-300 shadow-md border border-gray-300/50" />
                             </div>
                         </div>
-                        <span v-else>暂无数据</span>
+                        <span v-else>{{ $t('common.no_data') }}</span>
                     </div>
                 </div>
             </div>

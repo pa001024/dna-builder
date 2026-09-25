@@ -194,7 +194,7 @@ const selectedModIndex = computed(() => {
                             <input
                                 v-model="searchKeyword"
                                 type="text"
-                                placeholder="搜索魔之楔名称/系列（支持拼音）..."
+                                :placeholder="$t('db-mod-list.search_placeholder')"
                                 class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                             />
                             <span
@@ -289,7 +289,7 @@ const selectedModIndex = computed(() => {
                                 "
                                 @click="selectedType = ''"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="type in types"
@@ -320,7 +320,7 @@ const selectedModIndex = computed(() => {
                                 "
                                 @click="selectedSeries = ''"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="s in series"
@@ -351,7 +351,7 @@ const selectedModIndex = computed(() => {
                                 "
                                 @click="selectedQuality = ''"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="quality in qualities"
@@ -382,7 +382,7 @@ const selectedModIndex = computed(() => {
                                 "
                                 @click="selectedElem = ''"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="elem in elems"
@@ -413,7 +413,7 @@ const selectedModIndex = computed(() => {
                                 "
                                 @click="selectedVersion = ''"
                             >
-                                {{ $t("全部") }}
+                                {{ $t("common.all") }}
                             </button>
                             <button
                                 v-for="version in versions"
@@ -461,7 +461,7 @@ const selectedModIndex = computed(() => {
                                 <!-- 魔之楔图标（稀有度渐变底） -->
                                 <img
                                     :src="LeveledMod.url(mod.icon)"
-                                    alt="魔之楔图标"
+                                    :alt="$t('common.mod_icon')"
                                     class="size-12 shrink-0 overflow-hidden rounded-xs object-cover bg-linear-15"
                                     :class="getRarityGradientClass(mod.品质)"
                                 />
@@ -478,7 +478,7 @@ const selectedModIndex = computed(() => {
                                             v-if="isModConvertible(mod.id)"
                                             class="shrink-0 rounded-xs border border-success/40 bg-success/10 px-1 text-[10px] leading-4 font-medium text-success"
                                         >
-                                            可转换
+                                            {{ $t('db-mod-list.convertible') }}
                                         </span>
                                         <span class="ml-auto shrink-0"><CopyID :id="mod.id" /></span>
                                     </div>

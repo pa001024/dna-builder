@@ -17,7 +17,7 @@ const questChain = computed(() => questChainMap.get(questChainId.value))
         </template>
 
         <div v-else class="p-4">
-            <div class="text-base-content/70">未找到任务剧情</div>
+            <div class="text-base-content/70">{{ $t('questchain-detail.not_found') }}</div>
         </div>
     </ScrollArea>
 </template>

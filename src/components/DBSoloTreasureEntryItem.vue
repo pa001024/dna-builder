@@ -35,7 +35,7 @@ const rarity = computed(() => soloTreasureRarityData[props.treasure.rarity])
                     class="size-14 shrink-0 rounded-xs bg-linear-15"
                     :class="getRarityGradientClass(soloTreasureRarityData[treasure.rarity].show)"
                     :src="getTreasureImageUrl()"
-                    alt="宝物图标"
+                    :alt="$t('db-solo-treasure-entry.treasure_icon')"
                 />
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -49,7 +49,7 @@ const rarity = computed(() => soloTreasureRarityData[props.treasure.rarity])
 
         <!-- 基础信息 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="OVERVIEW" title="基础信息" />
+            <SectionHeader no-animate compact kicker="OVERVIEW" :title="$t('common.basic_info')" />
             <div class="grid grid-cols-2 gap-1.5 lg:grid-cols-4">
                 <div
                     v-for="stat in [
@@ -62,14 +62,14 @@ const rarity = computed(() => soloTreasureRarityData[props.treasure.rarity])
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ stat.label }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ stat.value }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ stat.value }}</span>
                 </div>
             </div>
         </section>
 
         <!-- 形状占位 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="SHAPE" title="形状占位" />
+            <SectionHeader no-animate compact kicker="SHAPE" :title="$t('db-solo-treasure-entry.shape_placeholder')" />
             <div class="flex justify-center items-center py-2">
                 <div
                     class="relative grid w-fit gap-0.5"

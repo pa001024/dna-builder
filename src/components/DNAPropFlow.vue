@@ -819,7 +819,7 @@ defineExpose({
         <!-- 刷新按钮 -->
         <div v-if="!nobtn" class="flex justify-between items-center">
             <span class="text-xs tracking-wide text-base-content/50">最后更新: {{ ui.timeDistancePassed(lastUpdateTime) }}</span>
-            <Tooltip tooltip="刷新" side="bottom">
+            <Tooltip :tooltip="$t('common.refresh')" side="bottom">
                 <button
                     type="button"
                     class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
@@ -846,7 +846,7 @@ defineExpose({
                             @click="exportToExcel"
                         >
                             <Icon icon="ri:file-excel-2-line" class="size-3.5" />
-                            导出EXCEL
+                            {{ $t('dna-prop-flow.export_excel') }}
                         </button>
                     </template>
                 </SectionHeader>
@@ -960,8 +960,8 @@ defineExpose({
                             <span class="label-text text-xs font-medium">进度显示</span>
                         </label>
                         <div class="flex items-center h-full text-xs text-base-content/70">
-                            已查询 <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary mx-1">{{ batchQueryProgress.currentDate }}</span> 日 共
-                            <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary mx-1">{{ batchQueryProgress.totalRecords }}</span> 条记录
+                            已查询 <span class="font-orbitron text-[13px] font-semibold text-primary mx-1">{{ batchQueryProgress.currentDate }}</span> 日 共
+                            <span class="font-orbitron text-[13px] font-semibold text-primary mx-1">{{ batchQueryProgress.totalRecords }}</span> 条记录
                         </div>
                     </div>
                 </div>

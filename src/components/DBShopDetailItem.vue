@@ -501,17 +501,34 @@ function formatShopTimeShort(timestamp: number): string {
 <template>
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 商店档案头：纸面 + primary 强调线 -->
-        <header class="border-b-2 border-primary pb-3">
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
             <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                 <span class="h-px w-6 bg-primary" aria-hidden="true" />
                 Shop File
             </p>
-            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div class="relative flex flex-wrap items-center gap-x-2 gap-y-1">
                 <SRouterLink
                     :to="`/db/shop/${shop.id}`"
-                    class="truncate text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
+                    class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                 >
-                    {{ shop.name }}
+                    {{ $t(shop.name) }}
                 </SRouterLink>
                 <CopyID :id="shop.id" />
             </div>
@@ -524,17 +541,23 @@ function formatShopTimeShort(timestamp: number): string {
             v-if="shopTimePoints.length > 0"
             class="space-y-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="FILTER" title="时间过滤" />
+            <SectionHeader no-animate compact kicker="FILTER" :title="$t('db-shop-detail.time_filter')" />
             <div class="flex flex-wrap items-start justify-between gap-3">
-                <div class="text-xs leading-relaxed text-base-content/55">按离散时间点查看可购买商品，也可只看相对上一时间点的变化。</div>
+                <div class="text-xs leading-relaxed text-base-content/55">{{ $t('db-shop-detail.timeline_desc') }}</div>
                 <div class="flex flex-wrap items-center gap-4">
-                    <button type="button" class="btn btn-xs btn-ghost" @click="resetToCurrentTimePoint">重置到当前</button>
+                    <button
+                        type="button"
+                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                        @click="resetToCurrentTimePoint"
+                    >
+                        {{ $t('common.reset_to_current') }}
+                    </button>
                     <label class="label cursor-pointer gap-2 p-0">
-                        <span class="text-sm">仅当前</span>
+                        <span class="text-sm">{{ $t('db-shop-detail.current_only') }}</span>
                         <input v-model="timeFilterEnabled" type="checkbox" class="toggle toggle-primary toggle-sm" />
                     </label>
                     <label class="label cursor-pointer gap-2 p-0">
-                        <span class="text-sm">仅显示差异</span>
+                        <span class="text-sm">{{ $t('common.show_diff_only') }}</span>
                         <input
                             v-model="diffOnlyEnabled"
                             type="checkbox"
@@ -547,16 +570,22 @@ function formatShopTimeShort(timestamp: number): string {
 
             <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60">
                 <span class="rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-0.5 tabular-nums">
-                    {{ shopTimePoints.length }} 个时间点
+                    {{ $t('db-shop-detail.time_point_count', { count: shopTimePoints.length }) }}
                 </span>
-                <span v-if="selectedTimePoint" class="tabular-nums">当前时间点：{{ selectedTimePoint.label }}</span>
-                <span v-if="selectedTimePoint" class="tabular-nums">可购买 {{ selectedTimePoint.activeItemCount }} 件</span>
-                <span v-if="diffOnlyEnabled && previousSelectedTimePoint">对比上一时间点：{{ previousSelectedTimePoint.label }}</span>
+                <span v-if="selectedTimePoint" class="tabular-nums">{{
+                    $t('db-shop-detail.current_time_point', { label: selectedTimePoint.label })
+                }}</span>
+                <span v-if="selectedTimePoint" class="tabular-nums">{{
+                    $t('db-shop-detail.purchasable_count', { count: selectedTimePoint.activeItemCount })
+                }}</span>
+                <span v-if="diffOnlyEnabled && previousSelectedTimePoint" class="tabular-nums">{{
+                    $t('db-shop-detail.compare_previous', { label: previousSelectedTimePoint.label })
+                }}</span>
                 <span
                     v-if="selectedTimePoint?.isCurrent"
                     class="rounded-xs bg-base-content px-1.5 py-0.5 text-[10px] font-semibold text-base-100"
                 >
-                    当前
+                    {{ $t('db-shop-detail.current') }}
                 </span>
             </div>
 
@@ -592,11 +621,20 @@ function formatShopTimeShort(timestamp: number): string {
                         class="shrink-0 rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-0.5 text-[11px] tabular-nums text-base-content/60"
                     >
                         <template v-if="diffOnlyEnabled">
-                            {{ subTab.changedItemCount }} 件变化 +{{ subTab.visibleItems.length - subTab.changedItemCount }} 依赖
+                            {{
+                                $t('db-shop-detail.changed_with_deps', {
+                                    changed: subTab.changedItemCount,
+                                    deps: subTab.visibleItems.length - subTab.changedItemCount,
+                                })
+                            }}
                         </template>
                         <template v-else>
-                            {{ subTab.activeVisibleItemCount }} 件可购 +{{ subTab.visibleItems.length - subTab.activeVisibleItemCount }}
-                            依赖
+                            {{
+                                $t('db-shop-detail.available_with_deps', {
+                                    count: subTab.activeVisibleItemCount,
+                                    deps: subTab.visibleItems.length - subTab.activeVisibleItemCount,
+                                })
+                            }}
                         </template>
                     </span>
                 </div>
@@ -613,7 +651,7 @@ function formatShopTimeShort(timestamp: number): string {
                     v-else
                     class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-6 text-center text-sm text-base-content/45"
                 >
-                    {{ diffOnlyEnabled ? "与上一时间点相比没有变化商品" : "当前时间点下没有可购买商品" }}
+                    {{ diffOnlyEnabled ? $t('db-shop-detail.no_diff_items') : $t('db-shop-detail.no_available_items') }}
                 </div>
             </section>
         </div>

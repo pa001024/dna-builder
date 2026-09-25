@@ -454,6 +454,6 @@ function getRowStyle(depth: number) {
             </div>
             <div :style="{ height: `${bottomPadding}px` }" />
         </div>
-        <div v-else class="px-2 py-3 text-sm text-base-content/45">无文件</div>
+        <div v-else class="px-2 py-3 text-sm text-base-content/45">{{ $t('unpack-file-tree.no_files') }}</div>
     </ScrollArea>
 </template>

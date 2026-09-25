@@ -361,8 +361,8 @@ defineExpose({
                     class="w-36 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     @update:model-value="handleSortSelect"
                 >
-                    <SelectItem value="latest">最新修改</SelectItem>
-                    <SelectItem value="views">最多浏览</SelectItem>
+                    <SelectItem value="latest">{{ $t('dob-build-show.recently_modified') }}</SelectItem>
+                    <SelectItem value="views">{{ $t('dob-build-show.most_viewed') }}</SelectItem>
                 </Select>
                 <button class="btn btn-primary btn-sm" @click="handleSearch">
                     <Icon icon="ri:search-line" class="w-4 h-4" />
@@ -396,7 +396,7 @@ defineExpose({
                         <div class="flex items-start justify-between mb-2">
                             <a
                                 :href="`${env.endpoint}/char/${charId}/${build.id}`"
-                                title="点击复制链接"
+                                :title="$t('dob-build-show.click_copy_link')"
                                 @click.prevent="copyLink(`${env.endpoint}/char/${charId}/${build.id}`)"
                                 class="line-clamp-2 flex-1 text-base font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
                             >

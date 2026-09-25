@@ -2,42 +2,133 @@
     "暗属性攻击": "暗屬性攻擊",
     "办事高效，可以更快完成任务。": "辦事高效，可以更快完成任務。",
     "办事细致，更有可能成功地完成任务。": "辦事細緻，更有可能成功地完成任務。",
+    "编辑": "編輯",
+    "编辑构筑": "編輯構築",
+    "标题": "標題",
     "才思敏捷或某一领域知识丰富。": "才思敏捷或某一領域知識豐富。",
+    "查看全部": "查看全部",
+    "查看详情": "查看詳情",
+    "称号框": "稱號框",
     "初始解锁": "初始解鎖",
+    "道具获取周报": "道具取得週報",
+    "道具流水查询": "道具流水查詢",
     "得心应手，有概率获得多倍的派遣奖励。": "得心應手，有機率獲得多倍的派遣獎勵。",
     "地质员": "地質員",
+    "等级": "等級",
+    "等级调整": "等級調整",
+    "掉落物": "掉落物",
+    "独立": "獨立",
+    "发型": "髮型",
+    "房间": "房間",
     "风属性攻击": "風屬性攻擊",
+    "副本": "副本",
+    "个构筑": "個構築",
+    "共": "共",
+    "固定": "固定",
+    "故事事件": "故事事件",
     "贯穿攻击": "貫穿攻擊",
     "光属性攻击": "光屬性攻擊",
+    "话题列表": "話題列表",
+    "活动任务": "活動任務",
     "火属性攻击": "火屬性攻擊",
+    "获取方式": "取得方式",
+    "基本信息": "基本資訊",
+    "基础属性": "基礎屬性",
+    "技能替换": "技能替換",
+    "加载更多": "載入更多",
+    "加载中...": "載入中...",
     "见微知著": "見微知著",
+    "奖励列表": "獎勵列表",
+    "奖励选择": "獎勵選擇",
+    "奖励组": "獎勵組",
+    "角色皮肤": "角色外觀",
+    "角色饰品": "角色飾品",
+    "角色数据": "角色資料",
+    "近战武器": "近戰武器",
+    "精英": "菁英",
+    "精英怪物": "菁英怪物",
     "雷属性攻击": "雷屬性攻擊",
+    "类型": "類型",
+    "流水记录明细": "流水記錄明細",
     "冒险家": "冒險家",
+    "梦魇残声": "夢魘殘聲",
+    "密函": "密函",
+    "描述": "描述",
+    "目标函数": "目標函數",
+    "耐受": "耐受",
+    "难度": "難度",
+    "皮肤": "外觀",
+    "签到日历": "簽到日曆",
     "切割攻击": "切割攻擊",
+    "趋向": "趨向",
     "全神贯注": "全神貫注",
+    "权重": "權重",
+    "确定": "確定",
+    "任务进度": "任務進度",
+    "赛季": "賽季",
     "擅长采集。": "擅長採集",
     "擅长采矿。": "擅長採礦",
     "擅长钓鱼。": "擅長釣魚",
     "擅长训练魔灵。": "擅長訓練魔靈",
     "擅长战斗。": "擅長戰鬥",
+    "设计稿": "設計稿",
+    "射速": "射速",
+    "深境罗盘": "深境羅盤",
+    "时间线": "時間線",
+    "实体": "實體",
     "拾穗者": "拾穗者",
+    "使用": "使用",
+    "事件": "事件",
+    "收起": "收合",
+    "首领": "首領",
+    "输入标题...": "輸入標題...",
+    "输入描述...": "輸入描述...",
+    "属性": "屬性",
+    "属性影响": "屬性影響",
     "水属性攻击": "水屬性攻擊",
+    "搜索": "搜尋",
+    "搜索构筑标题...": "搜尋構築標題...",
+    "溯源突破": "溯源突破",
     "特质": "特質",
     "同理心强，擅长感知他人情绪。": "同理心強，擅長感知他人情緒。",
     "突破至%s阶后解锁": "突破至%s階後解鎖",
+    "推荐": "推薦",
+    "推荐后将在首页推荐区域展示该构筑": "推薦後將在首頁推薦區域展示該構築",
+    "委托密函商店": "委託密函商店",
+    "未拥有": "未擁有",
+    "武器皮肤": "武器外觀",
+    "武器饰品": "武器飾品",
+    "限时任务": "限時任務",
+    "行为": "行為",
     "幸运儿，常常得到计划外的收益。": "幸運兒，常常得到計劃外的收益。",
+    "性别": "性別",
+    "序列": "序列",
     "训练师": "訓練師",
     "烟波客": "煙波客",
+    "一次": "一次",
+    "遗物套装": "遺物套裝",
+    "已推荐": "已推薦",
     "印象：才智": "印象：才智",
     "印象：道德": "印象：道德",
     "印象：功利": "印象：功利",
     "印象：共情": "印象：共情",
     "印象：混沌": "印象：渾沌",
+    "应用": "套用",
+    "游戏板块": "遊戲板塊",
+    "远程武器": "遠程武器",
     "灾厄攻击": "災厄攻擊",
+    "暂无构筑": "暫無構築",
+    "战姿": "戰姿",
     "震荡攻击": "震盪攻擊",
+    "支线任务": "支線任務",
+    "职业": "職業",
     "诸神宠儿": "諸神寵兒",
+    "主线任务": "主線任務",
     "注重惩恶扬善，公序良俗。": "注重懲惡揚善，公序良俗。",
     "注重权衡利弊，获取收益。": "注重權衡利弊，獲取收益。",
+    "专武": "專武",
+    "资源": "資源",
+    "子技能": "子技能",
     "左右逢源": "左右逢源",
     "做人最要紧的当然是自己开心。": "做人最要緊的當然是自己開心。",
     "abyss-dungeon-detail": {
@@ -53,6 +144,7 @@
         "assistantDesc": "查詢角色常用陣容",
         "available": "可用",
         "buildUploadDataFailed": "無法生成深淵上傳資料",
+        "char_usage_rate": "角色使用率",
         "createdAt": "建立時間",
         "desc": "深淵陣容與角色武器統計",
         "emptyUploadResult": "上傳結果為空",
@@ -60,24 +152,28 @@
         "exportFailed": "匯出深淵提交失敗",
         "exportSuccess": "深淵提交已匯出",
         "level": "等級",
+        "level_distribution": "歷練等級分布",
         "levelDistribution": "歷練等級分布",
         "loadDefaultRoleFailed": "取得預設角色資訊失敗",
         "loadLatestRoleInfoFailed": "取得最新角色資訊失敗",
         "loadStatsFailed": "載入深淵統計失敗",
         "loginFirst": "請先登入",
+        "main_control_only": "僅主控",
         "mainChar": "主角色",
         "mainCharId": "主角色ID",
         "mainOnly": "僅主控",
         "meleeWeapon": "近戰武器",
         "meleeWeaponId": "近戰武器ID",
         "missingUid": "缺少 UID",
+        "most_used_team": "最常用陣容",
         "mostUsedLineup": "最常用陣容",
         "mostUsedLineupDesc": "出戰數最高的陣容",
+        "no_result": "暫無結果",
         "noExportableSubmissions": "沒有可匯出的深淵提交",
         "noResult": "暫無結果",
         "noUploadData": "沒有可上傳的深淵資料",
-        "pet": "魔靈",
         "petId": "魔靈ID",
+        "query_char_teams": "查詢角色常用陣容",
         "rangedWeapon": "遠程武器",
         "rangedWeaponId": "遠程武器ID",
         "refresh": "重新整理",
@@ -86,6 +182,7 @@
         "roleType": "角色類型",
         "roleUsage": "角色使用率",
         "seasonId": "賽季ID",
+        "select_char": "請選擇角色",
         "selectRole": "請選擇角色",
         "sheetRole": "角色參與",
         "sheetSubmission": "提交",
@@ -103,7 +200,9 @@
         "supportWeapon1Id": "助戰武器1ID",
         "supportWeapon2": "助戰武器2",
         "supportWeapon2Id": "助戰武器2ID",
+        "team_builder": "配隊助手",
         "title": "深淵使用率",
+        "top_deploy_team": "出戰數最高的陣容",
         "uidSha256": "UID_SHA256",
         "updatedAt": "更新時間",
         "upload": "上傳",
@@ -134,7 +233,6 @@
         "titleFramePreview": "稱號框預覽",
         "totalCount": "共 {{count}} 個飾品",
         "type": "類型",
-        "typeAll": "全部",
         "typeAvatar": "頭像",
         "typeChar": "角色飾品",
         "typeHair": "髮型",
@@ -194,6 +292,7 @@
     },
     "achievement-list": {
         "desc": "遊戲成就解鎖統計",
+        "no_match": "沒有符合條件的成就",
         "title": "成就列表"
     },
     "activity-calendar": {
@@ -215,7 +314,6 @@
         "status_ongoing": "進行中",
         "status_upcoming": "即將開始",
         "theater_desc": "參演熱映劇目，領取委託密函！",
-        "theater_title": "沉浸式戲劇",
         "title": "活動日曆"
     },
     "admin-home": {
@@ -305,7 +403,6 @@
         "examples": {
             "baseStats": "基礎屬性",
             "complex": "複雜表達式",
-            "critDamage": "暴擊傷害",
             "elementDamage": "元素傷害分量",
             "expectedDamage": "期望傷害",
             "forceAttr": "強制屬性",
@@ -341,7 +438,6 @@
         "keywordsTitle": "關鍵字",
         "macrosTitle": "內建宏",
         "members": {
-            "crit": "暴擊傷害",
             "critTrigger": "暴擊且觸發",
             "element": "元素傷害分量",
             "n": "不計算背水昂揚乘區",
@@ -435,6 +531,28 @@
         "灾厄攻击": "觸發額外效果時，該次傷害對有屬性的目標造成的傷害變成原來的2倍。",
         "震荡攻击": "觸發額外效果時，該次傷害的戰姿削減變成原來的2倍。"
     },
+    "auto-script": {
+        "actions": "動作",
+        "capture_coord": "按 F9 抓取座標",
+        "capture_coord_hint": "按 F9 抓取座標…",
+        "click_node_hint": "點擊流程中的節點進行編輯",
+        "close": "關閉",
+        "code_preview": "程式碼預覽",
+        "comment_note": "備註（產生註解）",
+        "config_variables": "設定變數",
+        "coordinate": "座標",
+        "drag_node_hint": "拖曳節點到右側流程中",
+        "editor_title": "圖形化腳本編輯器",
+        "empty_click_hint": "留空表示在目前位置點擊",
+        "export_code": "匯出程式碼",
+        "export_to_tab": "匯出到目前腳本分頁",
+        "flow_control": "流程控制",
+        "frameless_mode": "無邊框模式 (frameless)",
+        "hotkey_hint": "F9 抓取座標 · F10 錄製",
+        "key": "按鍵",
+        "properties": "屬性",
+        "target_process": "目標處理序"
+    },
     "autobuild": {
         "calculating": "計算中...",
         "charMods": "角色MOD",
@@ -447,7 +565,12 @@
         "preserveTypes": "保留目前 MOD",
         "rangedMods": "遠程MOD",
         "skillWeaponMods": "同律MOD",
+        "toggle_log": "展開/收合日誌",
         "useInv": "使用使用者庫存"
+    },
+    "backpack-puzzle": {
+        "clear_manual_placement": "清空手動擺放",
+        "drag_item_hint": "將道具拖到背包中"
     },
     "book-detail": {
         "countSuffix": "條目數: {{count}}",
@@ -476,6 +599,7 @@
         "title": "讀物列表",
         "totalCount": "共 {{count}} 本讀物"
     },
+    "Boss削韧": "Boss削韌",
     "box-drop": {
         "boxMaximum": "總上限",
         "boxPerDay": "每日上限",
@@ -496,6 +620,11 @@
         "title": "抽獎",
         "totalCapacity": "總容量"
     },
+    "buff-editor": {
+        "copy_buff": "複製 BUFF",
+        "paste_buff": "貼上 BUFF",
+        "search_placeholder": "搜尋 BUFF"
+    },
     "build-compare": {
         "additional_buff_list": "額外BUFF列表",
         "additional_mod_list": "額外MOD列表",
@@ -513,6 +642,19 @@
         "select_project_to_compare": "選擇一個專案開始對比構築",
         "tip": "注意: 此頁面數據不會自動保存!",
         "title": "構築對比"
+    },
+    "char-action-editor": {
+        "action_list": "動作列表",
+        "action_n": "動作 {{n}}:",
+        "add_action": "新增動作",
+        "background_action_n": "背景動作 {{n}}:",
+        "buff_group_n": "BUFF組 {{n}}:",
+        "enable_action_sequence": "啟用動作序列",
+        "generate_hp_curve": "產生血量曲線",
+        "hover_hp": "血量: {{value}}%",
+        "hover_time": "時間: {{value}}s",
+        "hp": "血量",
+        "total_duration": "總時長: {{time}}"
     },
     "char-build": {
         "actions": "動作序列",
@@ -554,6 +696,7 @@
         "drag_field_armed": "已抓起 {{name}}：點擊表達式或自訂變數放入，再次點擊該欄位可取消",
         "drag_field_hint": "可拖曳到表達式或自訂變數中，雙擊複製",
         "dynamic_prop": "動態屬性",
+        "effective_hp_formula": "(生命 / (1 - 防禦 / (300 + 防禦)) + 護盾) / (1 - 減傷)",
         "elem": "元素",
         "enemy": "敵人",
         "enemy_level": "敵人等級",
@@ -567,6 +710,7 @@
         "extra_mastery_clear": "清除額外精通",
         "extra_mastery_desc": "選擇一種額外精通的武器類型。額外精通後，對應類型的武器會享受精通加成（攻擊×1.2），災厄武器的熔煉潛能也會同步生效。",
         "extra_mastery_hint": "選擇額外精通武器",
+        "extra_mastery_weapon_icon": "額外精通武器圖示",
         "faction": "陣營",
         "fetch_char_info_failed": "取得角色資訊失敗",
         "fetch_weapon_info_failed": "取得武器資訊失敗",
@@ -619,6 +763,7 @@
         "select_timeline": "選擇時間線",
         "selected_count": "已選 {{count}} 個",
         "series": "系列",
+        "set_buff_coverage": "設定 BUFF 覆蓋率",
         "share": "分享",
         "share_build": "配裝分享",
         "share_failed": "分享失敗",
@@ -704,21 +849,6 @@
     "char-list": {
         "empty": "沒有找到符合的角色",
         "searchPlaceholder": "搜尋角色名稱、別名、陣營（支援拼音）...",
-        "tabs": {
-            "all": "全部",
-            "control": "控制",
-            "defense": "防禦",
-            "heal": "治療",
-            "homologyWeapon": "同律武器",
-            "maxHp": "最大生命",
-            "output": "輸出",
-            "sanityRegen": "神智回復",
-            "shield": "護盾",
-            "skillDamage": "技能傷害",
-            "summon": "召喚物",
-            "support": "輔助",
-            "weaponDamage": "武器傷害"
-        },
         "title": "角色列表",
         "totalSuffix": "個角色",
         "unreleasedHint": "未上線內容可能會發生改變"
@@ -777,8 +907,90 @@
         "closeWindowFailed": "關閉雲遊戲視窗失敗",
         "openWindowFailed": "開啟雲遊戲視窗失敗"
     },
+    "comment-section": {
+        "comment": "評論",
+        "comment_placeholder": "友善評論，理性交流～",
+        "no_comments": "暫無評論，快來搶沙發～"
+    },
     "common": {
-        "delete": "刪除"
+        "all": "全部",
+        "area": "區域",
+        "autoplay": "自動播放",
+        "basic_info": "基礎資訊",
+        "category": "分類",
+        "char_avatar": "角色頭像",
+        "clear": "清除",
+        "close": "關閉",
+        "close_simulation": "關閉模擬",
+        "confirm": "確認",
+        "cooldown": "冷卻",
+        "coordinate": "座標",
+        "count_days": "第 {{day}} 天",
+        "count_groups": "{{count}} 組",
+        "count_items": "{{count}} 個",
+        "count_kinds": "{{count}} 種",
+        "count_per_sec": "{{count}} 次/秒",
+        "count_seconds": "{{count}} 秒",
+        "count_stars": "{{count}} 星",
+        "count_times": "{{count}} 次",
+        "count_waves": "{{count}} 波",
+        "day": "天",
+        "default": "預設",
+        "delete": "刪除",
+        "description": "描述",
+        "export": "匯出",
+        "five_dimensions": "五維",
+        "full_text_search": "全文搜尋",
+        "generator": "產生器",
+        "hour": "小時",
+        "impression_check": "印象檢定",
+        "impression_increase": "印象增加",
+        "items": "項",
+        "label_exp": "{{count}} 經驗",
+        "label_points": "分數 {{value}}",
+        "label_score": "目標 {{value}}",
+        "label_update_by": "最後更新：{{name}}",
+        "level": "等級",
+        "limited_time": "限時",
+        "load_more": "載入更多",
+        "loading": "載入中...",
+        "locked": "未解鎖",
+        "match": "符合：",
+        "minute": "分鐘",
+        "mod_icon": "魔之楔圖示",
+        "no_data": "暫無資料",
+        "none": "無",
+        "official": "官方",
+        "player_count": "人數",
+        "price": "價格",
+        "quality": "品質",
+        "rarity": "稀有度",
+        "refresh": "重新整理",
+        "region": "地區",
+        "related_char": "關聯角色：",
+        "reset_to_current": "重設到目前",
+        "retry": "重試",
+        "score": "分數：",
+        "season": "賽季",
+        "select_level_range": "選擇等級範圍",
+        "show_diff_only": "僅顯示差異",
+        "source": "來源",
+        "sub_region": "子區域",
+        "test": "測試",
+        "times": "次",
+        "total_count": "共",
+        "type": "類型",
+        "upload": "上傳",
+        "user_avatar": "使用者頭像",
+        "version": "版本",
+        "voice_pack": "語音包",
+        "weapon_avatar": "武器頭像",
+        "weapon_category": "武器分類",
+        "weight": "權重"
+    },
+    "copy-id": {
+        "click_copy": "點擊複製 {{name}}",
+        "click_copy_id": "點擊複製 ID"
     },
     "counter": {
         "action": {
@@ -806,6 +1018,32 @@
         "title": "計數器",
         "triggers": "觸發器",
         "unlimited": "不限制"
+    },
+    "coverage-dialog": {
+        "coverage_minus": "覆蓋率 -1%",
+        "coverage_percent": "覆蓋率百分比",
+        "coverage_plus": "覆蓋率 +1%"
+    },
+    "cron-input": {
+        "unit_day": "日",
+        "unit_month": "月",
+        "unit_week": "週",
+        "unit_year": "年",
+        "weekday_fri": "週五",
+        "weekday_mon": "週一",
+        "weekday_sat": "週六",
+        "weekday_sun": "週日",
+        "weekday_thu": "週四",
+        "weekday_tue": "週二",
+        "weekday_wed": "週三"
+    },
+    "custom-buff-editor": {
+        "add": "新增",
+        "attribute": "屬性",
+        "empty_hint": "暫無自訂 BUFF，請新增",
+        "remove": "移除",
+        "value": "數值",
+        "value_placeholder": "請輸入數值"
     },
     "damage": {
         "desc": "逐步拆解 CharBuild 傷害公式並支援手動覆蓋",
@@ -912,9 +1150,556 @@
         "weapon": "武器",
         "weapon_desc": "查看武器資訊和屬性"
     },
+    "db-abyss-dungeon": {
+        "abyss_id": "深淵 ID",
+        "buff_list": "BUFF 列表",
+        "char_avatar": "角色頭像",
+        "dungeon_id": "副本 ID",
+        "dungeon_info": "副本資訊",
+        "element": "元素屬性",
+        "end_time": "結束時間",
+        "mastery": "精通",
+        "monster_counter": "怪物屬性剋制",
+        "related_chars": "關聯角色",
+        "season_id": "賽季 ID",
+        "start_time": "開始時間",
+        "tags": "標籤",
+        "type": "類型",
+        "version": "版本"
+    },
+    "db-abyss-dungeon-list": {
+        "abyss_count": "個深淵",
+        "no_match": "找不到符合的深淵副本",
+        "search_placeholder": "搜尋副本 ID 或角色名稱..."
+    },
+    "db-achievement-list": {
+        "achievement_count": "個成就",
+        "no_match": "找不到符合的成就",
+        "search_placeholder": "搜尋成就 ID/名稱/描述（支援拼音）..."
+    },
+    "db-char-list": {
+        "char_count": "個角色",
+        "no_match": "找不到符合的角色",
+        "search_placeholder": "搜尋角色名稱/別名/ID（支援拼音）..."
+    },
     "db-damage": {
+        "damage_formula": "傷害公式",
         "desc": "逐步拆解 CharBuild 傷害公式並支援手動覆蓋",
+        "dot_damage": "DOT 傷害",
+        "formula_desc": "依步驟檢視每個乘區與中間值，支援手動覆寫並即時查看結果變化。",
+        "import_from_build": "從目前構築匯入",
+        "input_params": "輸入參數",
+        "percentage_input": "百分比輸入",
+        "reset_current_mode": "重設目前模式",
         "title": "傷害拆解"
+    },
+    "db-draft-list": {
+        "batch_craft": "批次製造",
+        "draft_count": "個設計稿",
+        "hidden": "隱藏",
+        "infinite_craft": "無限製造",
+        "output_count": "產物數量：",
+        "search_placeholder": "搜尋設計稿名稱（支援拼音）..."
+    },
+    "db-dungeon-detail": {
+        "check_time": "檢查時間",
+        "commander_count": "號令者 ({{count}}種)",
+        "current_platform": "目前平台：{{platform}}（預設 PC）",
+        "detect_delay": "檢測延遲",
+        "detect_time": "檢測時間",
+        "elite_monsters": "特殊怪物",
+        "end_level": "結束等級",
+        "end_wave": "結束波次",
+        "endless_dungeon_settings": "無盡副本設定",
+        "endless_level_hint": "無盡副本等級由上方波次滑桿控制",
+        "endless_waves": "無盡波次",
+        "generator_id": "生成器ID",
+        "group_id": "組ID",
+        "group_limit": "組上限",
+        "group_members_count": "組成員 ({{count}}種)",
+        "group_radius_z": "組半徑 / Z",
+        "group_spawns_count": "組刷怪 ({{count}}組)",
+        "hello_box": "你好箱",
+        "initial_center_range": "初始中心範圍",
+        "level_requirement": "歷練等級 {{level}}",
+        "mobile": "行動端",
+        "monster_level_range": "怪物等級區間",
+        "monster_waves": "怪物波次",
+        "no_cumulative_reward": "目前波次暫無可累計獎勵",
+        "no_monster_data": "暫無怪物資料",
+        "no_reward_data": "暫無獎勵資料",
+        "no_wave_data": "暫無波次資料",
+        "normal_monsters": "普通怪物",
+        "normal_monsters_count": "普通怪物 ({{count}}種)",
+        "probability": "機率",
+        "quantity": "數量",
+        "range_cover_level": "區間 [起始, 結束)，實際覆蓋 Lv.{{start}} ~ Lv.{{end}}",
+        "range_cover_wave_level": "區間 [起始, 結束)，實際覆蓋第 {{start}} ~ {{end}} 波，怪物等級 Lv.{{lvStart}} ~ Lv.{{lvEnd}}（每波 +{{step}}，最高 {{max}}）",
+        "refill_interval": "補怪間隔",
+        "spawn_center_range": "刷新中心範圍",
+        "spawn_interval": "刷新間隔",
+        "spawn_num_pool": "單次刷新數量池: {{value}}",
+        "spawn_radius": "刷新範圍 ({{platform}})",
+        "spawn_range_title": "刷新範圍顯示",
+        "special_reward": "特殊獎勵",
+        "special_reward_group": "特殊獎勵組",
+        "start_level": "起始等級",
+        "start_wave": "起始波次",
+        "threshold": "閾值",
+        "wave_n": "第 {{n}} 波",
+        "wave_range_over_max": "第 {{start}} ~ {{end}} 波 / {{max}}",
+        "waves_per_stage": "每階段刷怪波數",
+        "weight": "權重"
+    },
+    "db-dungeon-detail-view": {
+        "not_found": "找不到副本"
+    },
+    "db-dungeon-list": {
+        "dungeon_count": "個副本",
+        "no_match": "找不到符合的副本",
+        "search_placeholder": "搜尋副本 ID/名稱/描述/等級/獎勵（支援拼音）..."
+    },
+    "db-dynquest-detail": {
+        "level_tiers": "等級檔位",
+        "quest_info": "委託資訊",
+        "story_nodes": "劇情節點"
+    },
+    "db-dynquest-list": {
+        "filter_level": "等級篩選",
+        "filter_region": "區域篩選",
+        "story_full_text_search": "劇情全文搜尋"
+    },
+    "db-event-list": {
+        "compare_prev_time_point": "對比上一時間點：",
+        "current_time_point": "目前時間點：",
+        "no_data": "無資料",
+        "selected_time_point": "選取時間點：",
+        "time_point": "時間點",
+        "timeline": "時間表"
+    },
+    "db-fish-detail": {
+        "appearance_time": "出現時間",
+        "length": "長度",
+        "mutation_rate": "變異機率",
+        "unknown_spot": "未知魚池({{id}})"
+    },
+    "db-fish-list": {
+        "fish": "魚",
+        "fishing_spots": "釣魚點",
+        "search_placeholder": "搜尋釣魚點 / 魚名（支援拼音）...",
+        "spot_count": "共 {{count}} 個釣魚點"
+    },
+    "db-fish-spot": {
+        "always_s2b": "無腦授漁以魚",
+        "bait_type": "魚餌類型",
+        "clear_records": "清空記錄",
+        "expected_hint": "100條魚平均期望（下方可調選項 目前設定：{{lure}} | {{mode}}）",
+        "extra_reward": "額外獎勵（機率：{{prob}}）每週30次",
+        "fish_100": "釣 100 次",
+        "fish_count_limit": "魚數限制",
+        "fish_list": "魚種列表",
+        "fish_once": "釣一次",
+        "fishing_records": "釣魚記錄",
+        "fishing_sim": "釣魚模擬",
+        "fishing_time": "釣魚時間",
+        "lure_none": "其他",
+        "lure_same_attract": "同類相吸(變異機率+30%)",
+        "mutation": "變異",
+        "no_extra_reward": "額外獎勵資料不存在",
+        "no_pet_data": "魔靈資料不存在",
+        "no_records": "暫無釣魚記錄",
+        "other": "其他",
+        "per_fish_expected": "單條期望：{{value}}",
+        "pet_reward": "魔靈獎勵（機率：{{prob}}）觸發額外獎勵時",
+        "s2b": "授漁以魚",
+        "skip_low_value": "放棄低價值授漁以魚",
+        "total_value": "總價值：",
+        "variant": "異種",
+        "weight": "權重"
+    },
+    "db-forge-detail": {
+        "level_reward_detail": "等級獎勵詳情",
+        "no_quest_rewards": "找不到任務獎勵",
+        "no_reward_detail": "找不到獎勵詳情",
+        "quest_rewards": "任務獎勵",
+        "related_quests": "關聯任務"
+    },
+    "db-forge-list": {
+        "forge_level_count": "個熔煉等級",
+        "search_placeholder": "搜尋熔煉等級、任務或獎勵 ID..."
+    },
+    "db-hardboss-detail": {
+        "monster_info": "怪物資訊"
+    },
+    "db-hardboss-list": {
+        "hardboss_count": "個夢魘殘聲",
+        "no_match": "找不到符合的夢魘殘聲",
+        "search_placeholder": "搜尋夢魘殘聲 ID/名稱/描述/怪物名稱（支援拼音）..."
+    },
+    "db-impr": {
+        "realtime": "即時",
+        "search_placeholder": "搜尋印象條目"
+    },
+    "db-impr-detail": {
+        "impr_info": "印象資訊",
+        "options": "選項",
+        "source_link": "來源連結"
+    },
+    "db-iron-survival-detail": {
+        "compound": "複利",
+        "cumulative_rewards": "累計獎勵",
+        "with_compound": "（含複利）"
+    },
+    "db-iron-survival-spawn": {
+        "butcher_spawn": "屠夫刷怪",
+        "elite_id_group": "強敵 ID 組",
+        "elite_spawn": "強敵刷怪",
+        "monster_id_group": "怪物 ID 組",
+        "normal_spawn": "普通刷怪"
+    },
+    "db-iron-ticket-list": {
+        "iron_ticket_count": "個深境羅盤"
+    },
+    "db-map-list": {
+        "map_count": "個地圖",
+        "search_placeholder": "搜尋地圖 ID/名稱/描述...",
+        "show_map_list": "顯示地圖列表"
+    },
+    "db-mod-list": {
+        "convertible": "可轉換",
+        "search_placeholder": "搜尋魔之楔名稱/系列（支援拼音）..."
+    },
+    "db-monster-compact-card": {
+        "drops": "掉落",
+        "level": "等級"
+    },
+    "db-monster-list": {
+        "commander": "號令者",
+        "commander_affixes": "號令者詞條",
+        "normal": "普通",
+        "search_placeholder": "搜尋怪物名稱（支援拼音）..."
+    },
+    "db-music-list": {
+        "search_placeholder": "搜尋樂譜或專輯"
+    },
+    "db-npc-detail": {
+        "char_id": "角色 ID",
+        "faction": "陣營",
+        "icon": "圖示",
+        "name": "名稱",
+        "no_dialogue": "暫無可顯示的對話鏈",
+        "npc_info": "NPC 資訊"
+    },
+    "db-npc-list": {
+        "dialogue_only": "僅對話",
+        "no_match": "找不到符合的 NPC"
+    },
+    "db-party-topic": {
+        "bgm_media_section": "BGM / 音效",
+        "bgm_mute_hint": "（無聲/停止控制，無試聽）",
+        "bgm_no_cdn": "（暫未收錄 CDN 音訊）",
+        "bgm_preview": "試聽",
+        "bgm_preview_stop": "停止試聽",
+        "dialogue_chain_empty": "暫無可顯示的對話鏈",
+        "dialogue_empty": "暫無對話內容",
+        "dialogue_title": "劇情對話 ({{num}} 條)",
+        "not_found": "找不到光陰集",
+        "prerequisite_quest_chain": "前置任務鏈",
+        "resource_cost": "消耗資源",
+        "reward_id": "獎勵 ID",
+        "rewards": "獎勵",
+        "story_voice_settings": "劇情語音設定",
+        "voice_language": "語音語言"
+    },
+    "db-party-topic-list": {
+        "all_chars": "全部角色",
+        "filter_char": "角色篩選",
+        "prerequisite_value": "前置: {{name}}",
+        "resource": "資源",
+        "search_placeholder": "搜尋光陰集 ID/名稱/角色（支援拼音）...",
+        "topic_count": "條光陰集"
+    },
+    "db-pet-list": {
+        "no_match": "找不到符合的魔靈",
+        "search_placeholder": "搜尋魔靈名稱（支援拼音）..."
+    },
+    "db-quest-story-nodes": {
+        "bgm_resource": "BGM 資源",
+        "detective_quiz": "偵探問答",
+        "empty_node": "此節點暫無可顯示內容",
+        "no_cdn_audio": "（暫未收錄 CDN 音訊）",
+        "node_jump": "節點跳轉",
+        "quiz_tips": "提示：",
+        "silent_node_note": "（無聲/停止控制節點，無試聽）",
+        "unknown_node": "未知節點 {{id}}",
+        "unnamed_media_node": "未命名媒體節點"
+    },
+    "db-raid-rank": {
+        "current_dungeon": "當前副本: {{id}}",
+        "current_rewards": "目前已獲得獎勵次數：",
+        "difficulty_label": "難度{{level}}",
+        "dungeon_info": "副本資訊",
+        "elapsed_time": "用時: {{value}}秒",
+        "formula": "最終分數 = BaseRaidPoint + (1 + 時間區間1×速率1 + 時間區間2×速率2 + 時間區間3×速率3)",
+        "formula_id": "公式ID: {{id}}",
+        "formula_note": "依次取區間值直到剩餘時間用完",
+        "input_remaining_time": "輸入剩餘時間",
+        "input_score": "輸入分數",
+        "max_allowed_time": "最大允許時間: {{value}}秒",
+        "max_score": "最高分數: {{value}}",
+        "per_1000_points": "每 1000 分可獲得",
+        "prefix": "前綴",
+        "rank_info": "排名資訊",
+        "rank_requirement": "排名前{{percent}}%的玩家獲得",
+        "rate": "速率",
+        "remaining_time": "剩餘時間（秒）：",
+        "rewards_max": "次獎勵 | 最大獎勵次數：",
+        "score_calc": "分數計算",
+        "score_calc_desc": "分數計算說明：",
+        "score_reward_calc": "分數獎勵計算：",
+        "suffix": "後綴",
+        "time_zone": "時間區間"
+    },
+    "db-reputation-list": {
+        "no_match": "找不到符合的區域聲名"
+    },
+    "db-resource-list": {
+        "resource_count": "個資源"
+    },
+    "db-rouge": {
+        "heat_value": "深潛深度 {{value}}",
+        "item_count": "個條目",
+        "no_match": "無符合項目",
+        "room_type_fallback": "房間類型 {{id}}",
+        "search_placeholder": "搜尋 ID/名稱/描述...",
+        "upgradable": "可升級"
+    },
+    "db-rouge-detail": {
+        "archive_id": "圖鑑 ID",
+        "area": "區域",
+        "base_points": "基礎積分",
+        "blessing_award": "祝福獎勵",
+        "clear_score": "通關分數",
+        "collect_count": "收集 {{num}} 件",
+        "collect_items": "採集物",
+        "cut_off_event": "截斷事件",
+        "difficulty_id": "難度 ID",
+        "equip_role": "角色",
+        "equip_slot": "適用部位",
+        "event_area": "事件區域",
+        "event_chance": "事件機率",
+        "event_phase": "事件階段",
+        "event_sub_id": "事件子 ID",
+        "extra_points": "額外積分",
+        "global_passive": "全域被動",
+        "initial_dive_depth": "初始深潛深度",
+        "max_level": "最大等級",
+        "min_room": "最小房間",
+        "no": "否",
+        "outer_shop_token": "外部商店代幣",
+        "points": "積分",
+        "points_rate": "積分倍率",
+        "recommend_level": "推薦等級",
+        "room_level": "房間等級",
+        "room_weight": "房間權重",
+        "season_end": "賽季結束",
+        "season_start": "賽季開始",
+        "section_activation": "啟用需求",
+        "section_class_effects": "職業效果",
+        "section_conditions": "房間條件",
+        "section_contract": "契約效果（同職業 4 人觸發）",
+        "section_effects": "效果",
+        "section_lore": "背景",
+        "section_set_bonus": "套裝效果",
+        "section_story": "劇情",
+        "section_summary": "簡述",
+        "sellable": "可出售",
+        "shop_npc": "商店 NPC",
+        "shop_price": "商店價格",
+        "talent_type_general": "通用",
+        "token_award": "代幣獎勵",
+        "token_id": "代幣 ID",
+        "token_transform": "代幣轉化",
+        "type_fallback": "類型 {{id}}",
+        "unknown_treasure": "未知遺物",
+        "unlock_dep": "解鎖依賴",
+        "upgrade_cost": "升級花費",
+        "yes": "是"
+    },
+    "db-rouge-detail-view": {
+        "not_found": "找不到迷津條目"
+    },
+    "db-rouge-pro-detail": {
+        "event_defence": "據點防守",
+        "event_exterminate": "殲滅",
+        "event_kill_elite": "擊殺精英",
+        "event_occupation": "佔領",
+        "event_sabotage": "破壞",
+        "fx_block_effect": "禁用效果：{{name}}",
+        "fx_choice_number": "每次抉擇可選數量 {{num}} 個",
+        "fx_end_points_rate": "積分獲取提高 {{percent}}",
+        "fx_get_buff": "獲得 Buff #{{id}}",
+        "fx_get_mod": "全體獲得 Mod #{{id}}",
+        "fx_get_token": "立即獲得 {{num}} 餘燼",
+        "fx_get_treasure": "獲得遺物：{{name}}",
+        "fx_kill_get_token": "擊殺目標後每 {{times}} 次獲得 {{num}} 餘燼",
+        "fx_lantern_range": "提燈照亮範圍擴大 {{value}}",
+        "fx_ore_extra_rate": "礦石獲取提高 {{percent}}",
+        "fx_pay_for_reborn": "復活消耗 {{num}} 餘燼",
+        "fx_random_choice": "抉擇選項變為隨機",
+        "fx_reborn_free": "免費復活次數 +{{num}}",
+        "fx_recover_time": "受傷後回復提前 {{seconds}} 秒",
+        "fx_shop_discount": "商店價格降低 {{percent}}",
+        "fx_timber_extra_rate": "木材獲取提高 {{percent}}",
+        "fx_token_by_time": "每 {{seconds}} 秒獲得 {{num}} 餘燼",
+        "fx_token_extra_rate": "餘燼獲取提高 {{percent}}",
+        "unique": "唯一"
+    },
+    "db-rouge-storyline": {
+        "no_content": "該節點暫無可顯示內容",
+        "no_dialogue": "暫無劇情對話"
+    },
+    "db-shop-detail": {
+        "available_with_deps": "{{count}} 件可購 +{{deps}} 依賴",
+        "changed_with_deps": "{{changed}} 件變化 +{{deps}} 依賴",
+        "compare_previous": "對比上一時間點：{{label}}",
+        "current": "目前",
+        "current_only": "僅目前",
+        "current_time_point": "目前時間點：{{label}}",
+        "no_available_items": "目前時間點下沒有可購買商品",
+        "no_diff_items": "與上一時間點相比沒有變化商品",
+        "purchasable_count": "可購買 {{count}} 件",
+        "time_filter": "時間過濾",
+        "time_point_count": "{{count}} 個時間點",
+        "timeline_desc": "依離散時間點檢視可購買商品，也可只看相對上一時間點的變化。"
+    },
+    "db-shop-detail-view": {
+        "not_found": "找不到商店"
+    },
+    "db-shop-list": {
+        "item_count": "商品總數：{{count}}",
+        "main_tabs": "{{count}}個主標籤",
+        "search_placeholder": "搜尋商店 ID/名稱/商品...",
+        "shop_count": "個商店",
+        "sub_tabs": "{{count}}個子標籤"
+    },
+    "db-solo-treasure": {
+        "meta_bag": "類型 {{type}} · 價格 {{price}} · 形狀 {{shape}}",
+        "meta_container": "藍圖 {{bp}} · 形狀 {{shape}} · 爆率 {{rate}}",
+        "meta_dungeon_pair_unlock": "副本 {{hard}}/{{easy}} · 解鎖 {{condition}}",
+        "meta_dungeon_unlock": "副本 {{id}} · 解鎖 {{condition}}",
+        "search_placeholder": "搜尋 ID/名稱/描述...",
+        "total_count": "共 {{count}} 個條目"
+    },
+    "db-solo-treasure-bag": {
+        "capacity": "容量"
+    },
+    "db-solo-treasure-container": {
+        "container_slots": "容器格位",
+        "drop_weight": "掉落權重",
+        "level_count": "等級數量",
+        "no_drop_weight": "暫無掉落權重",
+        "no_level_limit": "暫無等級數量限制",
+        "no_slot_data": "暫無格位資料"
+    },
+    "db-solo-treasure-dungeon": {
+        "challenge_mode": "挑戰模式",
+        "disable_coop": "停用協戰",
+        "entry_fee": "報名費用",
+        "evacuation_time": "撤離時間",
+        "extract_gameplay": "提取玩法",
+        "gameplay_fallback": "玩法 {{id}}",
+        "is_false": "否",
+        "is_true": "是",
+        "limited_chars": "限定角色",
+        "mode": "模式",
+        "no_extract_data": "暫無提取玩法資料",
+        "no_trial_chars": "暫無試用角色",
+        "normal_mode": "普通模式",
+        "rain_time": "下雨時間",
+        "repeat": "常駐副本",
+        "story": "劇情副本",
+        "total_time": "總時間",
+        "trial_chars": "試用角色",
+        "trial_weapons": "試用武器",
+        "warning_time": "警告時間"
+    },
+    "db-solo-treasure-entry": {
+        "bag": "百寶囊",
+        "container": "容器",
+        "shape_placeholder": "形狀佔位",
+        "treasure": "寶物",
+        "treasure_icon": "寶物圖示"
+    },
+    "db-solo-treasure-gameplay": {
+        "generator_id": "生成器ID",
+        "income": "收益",
+        "interval": "間隔",
+        "mechanism_box": "機關盒",
+        "monsters": "怪物",
+        "normal_monsters_count": "普通怪物（{{count}}種）",
+        "radius": "範圍",
+        "repair_speed": "修復速度",
+        "spawning": "刷怪",
+        "target_value": "目標值",
+        "time": "時間",
+        "traps": "機關"
+    },
+    "db-solo-treasure-mechanism": {
+        "amount": "數量",
+        "quantity_range": "數量區間",
+        "shape": "形狀"
+    },
+    "db-title-detail": {
+        "title_preview": "稱號預覽"
+    },
+    "db-title-detail-view": {
+        "not_found": "找不到稱號"
+    },
+    "db-title-list": {
+        "prefix": "前綴",
+        "search_placeholder": "搜尋稱號 ID/名稱/來源（支援拼音）...",
+        "suffix": "後綴",
+        "title_count": "個稱號"
+    },
+    "db-walnut-detail": {
+        "col_at_least_once": "至少一次出金機率",
+        "col_count": "數量",
+        "col_exact_this_time": "剛好在這次開出金機率",
+        "col_name": "名稱",
+        "col_opens_n": "開函次數(n)",
+        "col_pool_range": "池隨機範圍*",
+        "gold_count": "出金次數",
+        "gold_probability": "出金機率期望",
+        "gold_rate": "出金率",
+        "mechanism_note": "* 機制: 從每個獎勵的隨機範圍抽取n個該種獎勵後加入到獎勵序列, 打亂後在序列結尾放置金獎勵, 重複抽取直到抽出金後重置序列",
+        "no_open_records": "暫無開函記錄",
+        "no_stats": "暫無統計資料",
+        "open_65": "開65次",
+        "open_once": "開1次",
+        "open_results": "開函結果（最近200次）",
+        "rarity_stars": "稀有度: {{count}}星",
+        "reset_data": "重置資料",
+        "reward_list": "獎勵列表",
+        "reward_stats": "獎勵數量統計",
+        "simulator": "模擬開函",
+        "source_section": "獲取途徑",
+        "start_auto": "開始自動開",
+        "stop_auto": "停止自動開",
+        "total_opens": "總開函次數",
+        "unknown": "未知"
+    },
+    "db-walnut-detail-view": {
+        "not_found": "找不到密函"
+    },
+    "db-walnut-list": {
+        "search_placeholder": "搜尋密函 ID / 名稱（支援拼音）...",
+        "walnut_count": "個密函"
+    },
+    "db-weapon-list": {
+        "search_placeholder": "搜尋武器名稱（支援拼音）...",
+        "weapon_count": "個武器",
+        "weapon_icon": "武器圖示"
     },
     "dbAgent": {
         "conversation": {
@@ -1004,16 +1789,37 @@
             "traceExpand": "檢索詳情"
         }
     },
+    "dialog-model": {
+        "ok": "確定"
+    },
     "dna-announcement": {
         "empty": "暫無公告資料",
         "fetch_failed": "取得公告失敗",
         "last_updated": "最後更新",
         "refresh": "刷新"
     },
+    "dna-forum": {
+        "load_failed": "無法取得遊戲設定"
+    },
     "dna-game-info": {
+        "generate_screenshot": "產生截圖",
         "no_inventory": "無庫存，請先到官方 APP 綁定角色",
+        "push_settings": "推送設定",
+        "sync_inventory": "同步庫存",
         "sync_inventory_failed": "庫存同步失敗",
         "sync_inventory_success": "庫存同步成功"
+    },
+    "dna-game-info-show": {
+        "achievement_progress": "成就達成",
+        "coop_char_1": "協戰角色 1",
+        "coop_char_2": "協戰角色 2",
+        "coop_weapon_1": "協戰武器 1",
+        "coop_weapon_2": "協戰武器 2",
+        "melee_weapon": "近戰武器",
+        "progress": "進度",
+        "ranged_weapon": "遠程武器",
+        "reset_time": "重置時間",
+        "weekly_trace": "本週行跡"
     },
     "dna-home": {
         "desc": "遊戲資訊/簽到/瀏覽帖子",
@@ -1028,6 +1834,21 @@
             "signIn": "簽到"
         },
         "title": "皎皎角"
+    },
+    "dna-login": {
+        "code": "驗證碼",
+        "code_placeholder": "請輸入驗證碼",
+        "email": "電子郵件",
+        "email_placeholder": "請輸入電子郵件",
+        "login": "登入",
+        "logo_alt": "皎皎角 logo",
+        "phone": "手機號碼",
+        "phone_placeholder": "請輸入手機號碼",
+        "privacy_note": "*帳號資訊僅儲存在本機，不會被上傳到伺服器。",
+        "server": "伺服器",
+        "server_cn": "國服",
+        "server_intl": "國際服",
+        "title": "皎皎角登入"
     },
     "dna-post": {
         "browse": "瀏覽",
@@ -1048,8 +1869,26 @@
         "postDetailTitle": "帖子詳情",
         "userAvatar": "使用者頭像"
     },
+    "dna-post-content": {
+        "video_unsupported": "您的瀏覽器不支援影片播放"
+    },
     "dna-post-detail": {
-        "title": "帖子詳情"
+        "be_first_commenter": "成為第一個評論的人吧",
+        "comment_placeholder": "寫下你的評論...",
+        "creator": "創作者",
+        "load_failed": "無法取得貼文詳情",
+        "no_comments": "暫無評論",
+        "post_comment": "發表評論",
+        "title": "帖子詳情",
+        "upload_abyss_data": "上傳深淵資料"
+    },
+    "dna-post-list": {
+        "community_posts": "社群貼文",
+        "no_posts": "暫無貼文資料"
+    },
+    "dna-post-list-item": {
+        "featured": "精華",
+        "post_image": "貼文圖片"
     },
     "dna-posts": {
         "title": "板塊"
@@ -1057,6 +1896,7 @@
     "dna-prop-flow": {
         "enter_phone_and_get_captcha": "請輸入手機號並獲取驗證碼",
         "enter_phone_and_sms_code": "請輸入手機號和驗證碼",
+        "export_excel": "匯出 EXCEL",
         "get_captcha_failed": "獲取驗證碼失敗",
         "login_failed": "登入失敗",
         "login_success": "登入成功",
@@ -1068,7 +1908,29 @@
         "verify_failed": "驗證失敗"
     },
     "dna-role-detail": {
-        "title": "角色詳情"
+        "char_attributes": "角色屬性",
+        "char_avatar": "角色頭像",
+        "char_splash": "角色立繪",
+        "char_trace": "角色溯源",
+        "hp": "生命值",
+        "load_failed": "無法取得角色詳情",
+        "max_sanity": "最大神智",
+        "no_avatar": "無頭像",
+        "no_splash": "無立繪",
+        "retry": "重試",
+        "skill_icons": "技能圖示",
+        "title": "角色詳情",
+        "trace_icons": "溯源圖示"
+    },
+    "dna-sign-calendar": {
+        "auto_sign_in": "自動簽到",
+        "coins": "金幣",
+        "no_tasks": "暫無任務資料",
+        "period": "週期：",
+        "progress": "進度：",
+        "sign_in": "簽到",
+        "signed_in": "已簽到：",
+        "signed_in_today": "今日已簽到"
     },
     "dna-topic": {
         "title": "主題"
@@ -1093,7 +1955,74 @@
         "userInfoFailed": "取得使用者資訊失敗"
     },
     "dna-weapon-detail": {
-        "title": "武器詳情"
+        "atk": "攻擊力",
+        "crit_rate": "暴擊率",
+        "element_icon": "元素圖示",
+        "load_failed": "無法取得武器詳情",
+        "mode": "模式",
+        "mods": "魔之楔：",
+        "no_icon": "無圖示",
+        "refine_level": "精煉等級：",
+        "retry": "重試",
+        "title": "武器詳情",
+        "weapon_attrs": "武器屬性",
+        "weapon_desc": "武器描述",
+        "weapon_icon": "武器圖示"
+    },
+    "dob-account": {
+        "account_desc": "DNA Builder 帳號用於存取社群功能、分享構建方案等",
+        "current_appearance": "當前裝扮",
+        "daily_exp_progress": "每日經驗進度",
+        "earned_today": "今日已獲得",
+        "enter_code": "請輸入信箱中的6位驗證碼",
+        "exp_to_level_up": "再獲得 {{value}} 經驗升級",
+        "go_points_mall": "前往積分商城",
+        "level_exp": "當前等級經驗 {{current}}/{{required}}",
+        "logging_in": "登入中...",
+        "login": "登入",
+        "logout": "登出",
+        "manage": "管理",
+        "not_logged_in": "未登入 DNA Builder 帳號",
+        "progress_unavailable": "今日進度暫不可用",
+        "qq": "QQ：",
+        "qq_hint": "*QQ號僅用於顯示頭像 無其他用途",
+        "register": "註冊",
+        "registering": "註冊中...",
+        "reset_password": "重設密碼",
+        "resetting": "重設中...",
+        "roles": "角色：",
+        "send_code": "傳送驗證碼",
+        "sending": "傳送中...",
+        "task_abyss_upload": "本賽季深淵上傳 +50",
+        "task_first_chat": "今日首則聊天訊息 +1",
+        "task_online_1h": "在線滿 1 小時 +3",
+        "task_open_app": "開啟軟體 +2",
+        "total_exp": "總經驗"
+    },
+    "dob-build-show": {
+        "click_copy_link": "點擊複製連結",
+        "most_viewed": "最多瀏覽",
+        "recently_modified": "最新修改"
+    },
+    "dot-config": {
+        "all_sources": "全部來源",
+        "char_own_element": "角色自身屬性",
+        "char_self_dot_freq": "角色自身屬性 DOT 頻率",
+        "close": "關閉",
+        "dot_per_second_by_source": "每秒 DOT 傷害（依來源）",
+        "drag_hint": "點擊抓起後可放入運算式或自訂變數",
+        "formula_desc": "公式：Σ各來源 (角色攻擊 + 來源武器攻擊) × 0.2 × 6 × 4 × (1 + 充盈威力) × (1 + 增傷) × 昂揚乘區 × 背水乘區 × 頻率 × 抗性區（含屬性穿透）；技能來源僅按角色攻擊結算",
+        "frequency_doubled": "頻率翻倍 →",
+        "kinds": "種",
+        "manual_self_elem_note": "手動設定為有自屬性追加傷害",
+        "other_elem_dot_freq": "其餘屬性 DOT 頻率",
+        "other_elements": "其餘屬性",
+        "per_second": "次/秒",
+        "self_elem_bonus_cond": "自屬性追加傷害 > 0（頻率翻倍）",
+        "title": "DOT 傷害計算",
+        "total_frequency": "總頻率",
+        "trigger": "觸發",
+        "upper_limit": "· 上限"
     },
     "dps-view": {
         "buildId": "構建 ID",
@@ -1126,6 +2055,7 @@
     "draft-list": {
         "title": "圖紙列表"
     },
+    "draft-source": {},
     "dungeon-detail": {
         "allMonster": "普通怪物",
         "allReward": "獎勵",
@@ -1155,13 +2085,18 @@
     "dungeon-list": {
         "level": "等級",
         "monster": "怪物",
-        "nightHandbook": "夜航手冊",
         "reward": "獎勵",
         "searchPlaceholder": "搜尋副本ID/名稱/描述/等級/獎勵（支援拼音）...",
         "special": "特殊",
         "title": "副本列表",
         "totalCount": "共 {{count}} 個副本",
         "type": "類型"
+    },
+    "effect-settings": {
+        "all_max": "全部最大",
+        "all_off": "全部關閉",
+        "goto_inventory": "點擊跳轉到庫存管理",
+        "use_global_settings": "使用全域設定"
     },
     "errorBoundary": {
         "backupTip": "重置前請務必備份資料：重置會清空本機設定與快取（不影響雲端資料），可解決約 99% 的報錯問題。",
@@ -1195,12 +2130,24 @@
     "event-list": {
         "title": "活動列表"
     },
+    "expr-editor": {
+        "all_match_and": "全部滿足 (and)",
+        "any_match_or": "任一滿足 (or)",
+        "check": "檢查",
+        "clear_conditions": "清空條件",
+        "compare": "比較",
+        "negate": "取反",
+        "not": "非"
+    },
     "fish-list": {
         "title": "釣魚"
     },
     "flow": {
         "desc": "傷害計算器節點版",
         "title": "節點編輯器"
+    },
+    "flow-block": {
+        "clone": "複製"
     },
     "flowEditor": {
         "canvas": "畫布",
@@ -1262,6 +2209,7 @@
         "enterCustomTypeName": "請輸入自定義類型名稱",
         "entityRequired": "該分類的 MOD 必須指定適用實體",
         "exec_files": "可執行檔案",
+        "game_options": "遊戲選項",
         "gameSetting": "遊戲設定",
         "gameUpdate": "下載更新",
         "importModFailed": "匯入MOD失敗",
@@ -1277,6 +2225,7 @@
         "json_files": "JSON檔案",
         "latest": "最新",
         "launch": "啟動遊戲",
+        "launch_path": "啟動路徑",
         "launched": "遊戲已啟動",
         "launchGameFailed": "啟動遊戲失敗: {{ error }}",
         "legacy": "Legacy",
@@ -1372,15 +2321,47 @@
         "versionLabel": "版本號（如 1.0.0）",
         "weapon": "武器"
     },
+    "game-mod-detail": {
+        "preview_image": "預覽圖"
+    },
+    "game-overlay": {
+        "low_sanity": "低神智",
+        "statistics": "統計"
+    },
+    "game-setting": {
+        "apply": "套用",
+        "config_dir": "設定目錄：",
+        "configure_game_path_first": "請先在遊戲設定中設定遊戲路徑",
+        "custom": "自訂",
+        "game_settings": "遊戲設定",
+        "height": "高度",
+        "performance_preset": "效能最佳化預設",
+        "preset_high": "高",
+        "preset_low": "低",
+        "preset_medium": "中",
+        "preset_none": "無最佳化",
+        "preset_very_low": "極低",
+        "reset_to_default": "重設為預設值",
+        "resolution": "解析度",
+        "width": "寬度",
+        "window_resolution": "遊戲視窗解析度"
+    },
+    "game-style-mod": {
+        "tolerance_value": "耐受值"
+    },
     "game-update": {
         "cdn": "下載節點",
         "change": "修改",
         "channel": "伺服器",
+        "close": "關閉",
         "confirmUninstall": "將刪除遊戲目錄下 EM 和 Engine 目錄中的所有檔案與子目錄，是否繼續？",
         "current_file": "當前檔案",
+        "custom": "自訂",
+        "customChannelPlaceholder": "自訂 channel",
         "desc": "遊戲版本更新與下載",
         "download_complete": "所有檔案下載和解壓縮成功，總大小: {{size}}",
         "download_failed": "下載失敗: {{error}}",
+        "downloaded": "已下載",
         "downloading": "下載中...",
         "downloading_resources": "正在下載資源",
         "extract_failed": "解壓縮失敗: {{error}}",
@@ -1392,17 +2373,24 @@
         "game_ready": "遊戲已就緒",
         "get_version_list_failed": "取得版本列表失敗: {{error}}",
         "global_server": "國際服",
+        "hotUpdateDetail": "熱更詳情",
         "install_path": "安裝路徑",
         "latest_version": "最新",
         "launch_game_failed": "啟動遊戲失敗: {{error}}",
+        "localCache": "本機快取",
         "media_server": "1.2媒體服",
         "move_file_failed": "移動檔案失敗",
         "no_path_selected": "未選擇安裝目錄",
         "no_pre_download_available": "沒有可用的預下載版本",
+        "noHotUpdate": "暫無熱更",
         "old_version": "舊版",
+        "paused": "已暫停",
+        "pauseDownload": "暫停下載",
+        "pausing": "暫停中",
         "pre_download_available": "預下載可用",
         "pre_download_complete": "預下載完成，總大小: {{size}}",
         "pre_download_size": "版本 {{version}} • {{size}}",
+        "resumeDownload": "繼續下載",
         "select_dir_failed": "選擇目錄失敗: {{error}}",
         "select_game_dir_first": "請先選擇遊戲安裝目錄",
         "select_game_file_first": "請先選擇遊戲檔案",
@@ -1419,19 +2407,43 @@
         "update_size": "更新大小: {{size}}",
         "update_success": "更新成功",
         "version": "版本",
-        "version_list_not_loaded": "版本列表未載入"
+        "version_list_not_loaded": "版本列表未載入",
+        "voicePack": "語音包"
     },
     "guide-create": {
         "title": "創建攻略"
     },
     "guide-detail": {
-        "title": "攻略詳情"
+        "build_info": "配裝資訊",
+        "build_info_hint": "此攻略包含配裝資訊，點擊下方按鈕可查看完整配裝",
+        "not_found": "攻略不存在",
+        "title": "攻略詳情",
+        "view_build": "查看配裝"
+    },
+    "guide-edit": {
+        "click_or_drag_upload": "點擊或拖曳上傳圖片",
+        "content_placeholder": "詳細描述你的攻略內容，支援 Markdown 格式...",
+        "guide_content": "攻略內容",
+        "guide_title": "攻略標題",
+        "guide_type": "攻略類型",
+        "insert_image": "插入圖片",
+        "no_relation": "不關聯",
+        "related_build": "關聯構築",
+        "related_build_hint": "勾選後，角色構築將隨攻略一同發布",
+        "related_char": "關聯角色",
+        "release_to_insert": "放開滑鼠以插入圖片",
+        "title_placeholder": "請輸入一個吸引人的標題...",
+        "upload_format_hint": "支援 JPG、PNG、GIF 格式，最大 3MB",
+        "upload_hint": "支援拖曳上傳或點擊選擇",
+        "upload_image": "上傳圖片"
     },
     "guide-list": {
+        "no_guides": "暫無攻略",
+        "publish_guide": "發布攻略",
+        "search_placeholder": "搜尋攻略標題...",
         "title": "攻略列表"
     },
     "guides": {
-        "all": "全部",
         "all_characters": "全部角色",
         "associated_character": "關聯角色",
         "build_info": "配裝信息",
@@ -1539,6 +2551,7 @@
         "hardbossWeeklyReset": "週本刷新",
         "hiddenSections": "已隱藏板塊",
         "hideSection": "隱藏板塊",
+        "icp": "浙ICP備2024097919號",
         "mihanEmpty": "暫無委託資料",
         "mihanMatched": "命中 {{count}} 項",
         "mihanNotifyMissions": "提醒任務",
@@ -1557,6 +2570,7 @@
         "resetSections": "恢復預設",
         "sectionHardboss": "夢魘殘聲",
         "sectionMihan": "即時委託",
+        "server_day_prefix": "開服第",
         "showSection": "顯示板塊",
         "starme": "去Github點個星",
         "title": "主頁",
@@ -1564,8 +2578,17 @@
         "update_log": "版本更新日誌",
         "welcome": "歡迎使用 DNA Builder"
     },
+    "image-carousel": {
+        "next_image": "下一張",
+        "prev_image": "上一張"
+    },
+    "image-preview": {
+        "close_preview": "關閉預覽",
+        "reset_zoom": "重設縮放",
+        "zoom_in": "放大",
+        "zoom_out": "縮小"
+    },
     "impr": {
-        "all": "全部",
         "count": "共 {{count}} 條印象",
         "region": "地區",
         "searchPlaceholder": "搜尋印象條目",
@@ -1587,6 +2610,13 @@
         "sync_mods_confirm_title": "同步魔之楔",
         "title": "庫存管理"
     },
+    "inventory-edit": {
+        "copy_json": "複製 JSON",
+        "exp_calc": "經驗計算",
+        "import_json": "匯入 JSON",
+        "owned_weapons": "擁有武器",
+        "search_placeholder": "搜尋（支援拼音）..."
+    },
     "iron-ticket": {
         "access": "取得途徑",
         "description": "描述",
@@ -1604,6 +2634,12 @@
     "levelup": {
         "desc": "計算角色、武器和魔之楔的養成資源需求",
         "title": "養成計算"
+    },
+    "limited-prize-simulator": {
+        "title": "限時獎池模擬"
+    },
+    "local-qq": {
+        "fill_qq_hint": "點擊快速填寫 QQ"
     },
     "main": {
         "btn_collapse_menu": "折疊菜單",
@@ -1626,9 +2662,85 @@
     "map-local": {
         "title": "地圖"
     },
+    "map-pos-link": {
+        "jump": "跳轉"
+    },
     "map-tool": {
+        "current_marker": "目前地圖點",
         "desc": "查看地圖資源與魔靈分佈",
-        "title": "地圖工具"
+        "error_load_layer": "載入地圖圖層失敗：{{file}}",
+        "error_load_map_image": "載入本機地圖圖片失敗",
+        "error_load_marker_icon": "載入地圖點位圖示失敗：{{url}}",
+        "error_load_rc_avatar": "載入 RC 頭像失敗：{{url}}",
+        "error_load_tp_icon": "載入 TP 圖示失敗：{{url}}",
+        "filter_hidden": "目前隱藏（點擊顯示）",
+        "filter_select_all": "選中全部",
+        "filter_unselect_all": "已選中全部（點擊取消全選）",
+        "filter_visible": "目前顯示（點擊隱藏）",
+        "geniemon_probability": "魔靈機率：",
+        "layer": "圖層",
+        "layer_base": "基礎圖層",
+        "layer_floor": "樓層圖層",
+        "layer_misc": "其他圖層",
+        "layer_subregion": "子區域圖層",
+        "loading_layers": "正在載入本機圖層...",
+        "no_geniemon_data": "無 pet.data 可識別魔靈",
+        "no_geniemon_filter": "目前區域沒有可篩選的魔靈",
+        "no_rc_config": "目前子區域無 RC 配置",
+        "no_subregion_point": "目前區域沒有可顯示的 subregion 座標",
+        "probability": "機率 {{ratio}}%",
+        "rarest_geniemon": "最稀有魔靈：{{name}}（{{ratio}}%）",
+        "rc_detail": "詳情",
+        "rc_list_hint": "RC 列表（點擊可查看詳情）",
+        "rc_points": "刷新數量 {{refresh}} | 點位 {{points}}",
+        "reset_view": "重設視圖",
+        "shortest_traversal": "最短路徑遍歷",
+        "shortest_traversal_hint": "請先選擇包含魔靈點位的子區域",
+        "sidebar_collapse": "摺疊側欄",
+        "sidebar_expand": "展開側欄",
+        "sub_region_unknown": "子區域 {{id}}",
+        "teleport_point": "傳送點",
+        "title": "地圖工具",
+        "tp_points": "TP 點位",
+        "treasure_point": "藏寶點",
+        "unknown_entity": "未識別實體：",
+        "weight_ratio": "權重 {{weight}} / {{total}}",
+        "world_coordinate": "世界座標",
+        "zoom_in": "放大",
+        "zoom_out": "縮小"
+    },
+    "map-tool.nav_alpha": "覆蓋 alpha 閾值",
+    "map-tool.nav_auto": "自動標註",
+    "map-tool.nav_auto_hint": "勾選的圖層視為可通行地面；未勾選（含基礎雲海層）一律視為障礙。若地圖明暗相反，請開啟下方「反選」。",
+    "map-tool.nav_base_hint": "基礎",
+    "map-tool.nav_brush_block": "新增障礙",
+    "map-tool.nav_brush_clear": "擦除障礙",
+    "map-tool.nav_brush_radius": "筆刷半徑",
+    "map-tool.nav_clear": "清空",
+    "map-tool.nav_enable": "啟用繞行",
+    "map-tool.nav_inflate": "障礙膨脹（安全距離）",
+    "map-tool.nav_invert": "反選（把圖層覆蓋範圍當作障礙）",
+    "map-tool.nav_luma_max": "可通行亮度上限",
+    "map-tool.nav_manual": "手動標註",
+    "map-tool.nav_mask": "顯示障礙",
+    "map-tool.nav_reset_layers": "恢復預設圖層",
+    "map-tool.nav_section": "障礙物繞行",
+    "map-tool.nav_show_mask": "在畫布上疊加顯示障礙物",
+    "map-tool.nav_undo": "復原",
+    "map-tool.nav_unlimited": "不限",
+    "map-tool.nav_unreachable": "不可達",
+    "mini-cost-calculator": {
+        "dungeon_kinds": "種副本",
+        "estimating": "正在估算副本開銷...",
+        "full_calculator": "完整計算器",
+        "need_challenge": "需挑戰",
+        "no_mod_equipped": "未裝備魔之楔，暫無開銷估算",
+        "params_note": "以上參數僅影響時間估算結果，不影響資源消耗統計",
+        "settings": "估算設定",
+        "title": "養成開銷估算"
+    },
+    "mini-game-launcher": {
+        "open_launcher": "開啟遊戲啟動器"
     },
     "misc": {
         "all_files": "所有檔案",
@@ -1679,24 +2791,18 @@
     "monster-detail": {
         "appearingAbyss": "出現深淵",
         "appearingDungeon": "出現副本",
-        "attack": "攻擊",
-        "badgeTitle": "迷津",
-        "defense": "防禦",
         "defenseDamageReductionRate": "防禦減傷率",
         "drop": "搜打撤掉落",
         "dropMechanismId": "機制 ID",
         "dropMonsterTag": "怪物標籤",
         "dropRate": "寶箱掉落率",
-        "effectiveHealth": "有效生命",
         "factionOther": "其他",
         "factionPrefix": "陣營",
         "growthPreview": "等級成長預覽",
-        "hp": "生命",
         "killScore": "擊殺積分",
         "level": "等級",
         "levelDamageReductionRate": "等級減傷率",
         "monsterTagInfo": "號令者資訊",
-        "shield": "護盾",
         "showDetail": "查看詳情",
         "showEightHp": "8倍血量",
         "stance": "戰姿",
@@ -1718,7 +2824,6 @@
     "more": {
         "badge": "More",
         "contextMenu": {
-            "cancel": "取消",
             "changeColor": "切換顏色",
             "changeSize": "切換大小",
             "color": {
@@ -1780,6 +2885,14 @@
     "music-list": {
         "title": "樂譜列表"
     },
+    "music-player": {
+        "load_failed": "音訊載入失敗",
+        "loading_audio": "正在載入音訊",
+        "pause": "暫停",
+        "play": "播放",
+        "play_failed": "音訊無法播放",
+        "playback_progress": "播放進度"
+    },
     "node-editor": {
         "addCalc": {
             "description": "計算輸入值的總和",
@@ -1790,7 +2903,6 @@
         "astExpression": {
             "description": "驗證 AST 表達式",
             "expression": "表達式",
-            "expressionPlaceholder": "傷害",
             "missingCore": "缺少核心計算節點",
             "result": "結果",
             "title": "AST 表達式",
@@ -1820,13 +2932,10 @@
             "waiting": "等待輸入"
         },
         "enemyInput": {
-            "attack": "攻擊",
             "attributes": "敵人屬性（目前等級）",
-            "defense": "防禦",
             "enemy": "敵人",
             "enemyLevel": "敵人等級",
             "enemyResistance": "敵人抗性",
-            "hp": "生命",
             "stance": "戰姿"
         },
         "expressionCalc": {
@@ -1843,6 +2952,7 @@
             "title": "完整計算",
             "waiting": "等待輸入..."
         },
+        "import_from_build": "從角色構築匯入資料",
         "meleeWeaponInput": {
             "chooseLevel": "選擇等級",
             "chooseWeapon": "選擇近戰武器",
@@ -1852,6 +2962,7 @@
             "weapon": "近戰武器",
             "weaponLevel": "武器等級"
         },
+        "migrate": "遷移",
         "modInput": {
             "addModSlot": "新增 MOD 槽位",
             "chooseLevel": "選擇等級",
@@ -1882,9 +2993,7 @@
             "waiting": "等待輸入..."
         },
         "weaponAttr": {
-            "attack": "攻擊",
             "attackSpeed": "攻擊速度",
-            "critDamage": "暴擊傷害",
             "critRate": "暴擊率",
             "multiShot": "多重射擊",
             "result": "武器屬性",
@@ -1896,7 +3005,6 @@
             "expectedDamage": "期望傷害",
             "higherCrit": "高級暴擊",
             "lowerCrit": "低級暴擊",
-            "result": "武器傷害",
             "waiting": "等待輸入..."
         }
     },
@@ -1911,6 +3019,10 @@
         "title": "NPC列表"
     },
     "other": "其他",
+    "page-foot": {
+        "next_page": "下一頁",
+        "prev_page": "上一頁"
+    },
     "partytopic-detail": {
         "title": "光陰集詳情"
     },
@@ -1918,6 +3030,7 @@
         "title": "光陰集列表"
     },
     "pet_detail": {
+        "active_short": "主動",
         "active_skill": "主動技能",
         "alternative_form": "異化",
         "base_id": "基礎ID",
@@ -1935,9 +3048,8 @@
         "no_pet_entry_sources": "暫無對應魔靈潛質來源",
         "no_sources": "暫無對應來源",
         "no_spawn": "暫無出現地點",
-        "old_master": "老道",
+        "passive_short": "被動",
         "passive_skill": "被動技能",
-        "pet_entry": "魔靈潛質",
         "rarity": "品質",
         "rc_label": "RC",
         "refresh_count": "刷新數",
@@ -1945,21 +3057,46 @@
         "shop_purchase": "商店購買",
         "spawn_area": "出現區域",
         "spot_count": "點位數",
+        "total_prefix": "共",
+        "unit_entry": "個潛質",
+        "unit_pet": "個魔靈",
         "until_now": "至今"
     },
     "pet-list": {
         "title": "魔靈列表"
     },
+    "player-exp": {
+        "amount": "數量",
+        "auto_calc": "（自動計算）",
+        "breakthrough_record": "突破記錄",
+        "copy_json": "複製 JSON",
+        "exp_per_unit": "單次經驗",
+        "exp_source_detail": "經驗來源詳情",
+        "exp_value": "經驗值",
+        "extra_exp": "額外經驗",
+        "import_json": "匯入 JSON",
+        "level": "歷練等級",
+        "manual_input": "手動輸入",
+        "max_value": "最大: {{value}}",
+        "mod_acquisition": "魔之楔取得",
+        "mod_exp": "魔之楔經驗",
+        "nth_time": "第{{n}}次",
+        "reset": "重設",
+        "source": "來源",
+        "subtotal": "小計：",
+        "sync_game": "同步遊戲",
+        "times": "次數",
+        "total": "總計",
+        "total_exp": "總經驗"
+    },
     "points-mall": {
         "accountSettings": "帳號設定",
-        "all": "全部",
         "availability": "投放時間",
         "balance": "積分餘額",
         "bubblePreview": "氣泡預覽",
         "confirmRedeem": "確認兌換",
         "confirmRedeemDesc": "確定花費 {{cost}} 積分兌換「{{name}}」嗎？",
         "currentAppearance": "目前裝扮",
-        "default": "預設",
         "equipAfterRedeem": "請先兌換該商品",
         "equipFailed": "套用裝扮失敗",
         "equipFailedRetry": "套用裝扮失敗，請稍後重試",
@@ -1996,8 +3133,7 @@
         "redeemSuccess": "兌換成功",
         "refresh": "重新整理",
         "rewardType": {
-            "nameCard": "名字特效",
-            "title": "稱號"
+            "nameCard": "名字特效"
         },
         "summaryNotReady": "目前無法取得積分資訊，請稍後重試",
         "title": "積分商城",
@@ -2006,22 +3142,75 @@
         "useHint": "你可以在商品列表中兌換並點擊「使用」來切換裝扮。",
         "userFallback": "使用者"
     },
+    "quest-source": {
+        "sum": "合計"
+    },
     "questchain-detail": {
-        "title": "任務劇情詳情"
+        "ai_summary": "劇情 AI 總結",
+        "ai_summary_note": "AI 生成 · 僅供參考",
+        "end_time": "結束時間",
+        "not_found": "找不到任務劇情",
+        "quest_jump": "任務跳轉",
+        "quest_label": "任務:",
+        "quest_list": "任務列表",
+        "quest_reward": "任務獎勵:",
+        "rewards": "獎勵資訊",
+        "start_time": "開始時間",
+        "story_voice_settings": "劇情語音設定",
+        "title": "任務劇情詳情",
+        "unknown_quest": "未知任務 {{id}}",
+        "voice_language": "語音語言"
     },
     "questchain-list": {
+        "full_text_search_placeholder": "全文搜尋任務／對話內容（不支援拼音）...",
+        "quest_count": "個任務",
+        "search_placeholder": "搜尋任務 ID／名稱（支援拼音）...",
         "title": "任務劇情列表"
     },
     "race-lottery": {
+        "avg_odds_top6": "投注前 6 名獲得的平均倍率",
+        "base_speed": "基礎速度",
+        "click_card_hint": "點擊卡片查看詳情",
+        "community_count": "{{count}} 條社群記錄",
+        "covered_count": "{{covered}}/{{total}} 已有詞條",
         "desc": "每日競速比賽的選手詞條統計",
-        "title": "魔靈競速"
+        "expected_return": "期望收益",
+        "expected_win_rank": "期望勝率排名",
+        "expected_win_rate": "期望勝率",
+        "hit_count": "中 {{count}} 個",
+        "other_possible_winners": "其他可能勝利",
+        "player_count": "{{count}} 名選手",
+        "race_date": "比賽日期",
+        "roster": "選手名冊",
+        "server": "伺服器",
+        "simulate": "模擬",
+        "simulate_one_race": "依當天最終速度與賽內詞條模擬一場比賽",
+        "speed_short": "速 {{value}}",
+        "status_slot": "狀態{{slot}}",
+        "title": "魔靈競速",
+        "toggle_other_highlight": "切換其他可能勝利高亮",
+        "toggle_top6_highlight": "切換前 6 高亮",
+        "top6": "前 6",
+        "top6_probability_desc": "依賽中詞條規則推斷的進入前 6 的機率",
+        "updated_by": "{{name}} 更新"
+    },
+    "race-lottery-simulator": {
+        "race_simulation": "賽跑模擬",
+        "skip": "跳過",
+        "speed": "倍速"
     },
     "raid-rank": {
         "title": "排名獎勵"
     },
+    "range-selector": {},
     "ranking": {
         "desc": "榜單排行",
         "title": "榜單"
+    },
+    "ranking-view": {
+        "enemy_resistance_coverage": "敵人抗性覆蓋：",
+        "no_entries": "暫無條目",
+        "ranking": "排名"
     },
     "reputation": {
         "accumulatedExp": "累計經驗",
@@ -2047,14 +3236,15 @@
     "reputation-list": {
         "title": "區域聲名"
     },
+    "resizeable-window-timers": {
+        "no_rotation_time": "暫無下次輪換時間"
+    },
     "resizeableWindow": {
         "and": "和",
         "enableNotify": "啟用提醒",
         "mihan": "密函",
         "mihanNotificationBody": "你關注的{{types}}刷新了",
         "mihanNotificationTitle": "委託密函提醒",
-        "mihanTitle": "委託密函",
-        "moling": "魔靈",
         "monitorSettings": "監控設定",
         "nextRefresh": "下次刷新",
         "onlyOnce": "僅一次",
@@ -2089,6 +3279,19 @@
     },
     "resource-list": {
         "title": "資源列表"
+    },
+    "reward-item": {
+        "capacity": "容量:{{value}}",
+        "drop_item": "掉落物:",
+        "expect_times": "每個期望:{{value}}次",
+        "fixed": "固定",
+        "independent_drop": "獨立掉落",
+        "probability": "機率:{{value}}%",
+        "ratio": "比例:{{value}}",
+        "reward_group": "獎勵組",
+        "reward_group_id": "獎勵組 {{id}}",
+        "total_capacity": "總容量 {{count}}",
+        "weight_ratio": "權重:{{value}}"
     },
     "room": {
         "remove": "刪除房間"
@@ -2125,6 +3328,83 @@
         "scale": "縮放",
         "sectionTitle": "螢幕資訊條",
         "zhouben": "周本刷新"
+    },
+    "script-color-tool": {
+        "back_to_script": "返回腳本",
+        "classify_result": "分類結果",
+        "clear_images": "清空圖片",
+        "clear_points": "清空點位",
+        "clipboard_test_category": "剪貼簿測試分類",
+        "clipboard_test_done": "已完成剪貼簿分類測試",
+        "cloud_game": "雲端遊戲",
+        "color_placeholder": "#RRGGBB 或 0xRRGGBB",
+        "copied_value": "已複製：{{value}}",
+        "copy_category_code": "複製分類程式碼",
+        "copy_code_done": "已複製自動分類程式碼",
+        "current_image": "目前圖（點擊打點）",
+        "current_image_index": "目前圖 {{index}}/{{total}}",
+        "default_tolerance": "預設容差",
+        "drop_image_hint": "拖曳圖片到此處匯入",
+        "err_add_screenshot": "新增截圖失敗：{{error}}",
+        "err_bad_project": "專案檔案格式不正確",
+        "err_canvas_context": "無法建立 Canvas 內容環境",
+        "err_compile": "分類程式碼編譯失敗：{{error}}",
+        "err_copy": "複製失敗：{{error}}",
+        "err_forced_conflict": "強制檢查點與對應分類樣本衝突，請補充樣本或關閉強制檢查：{{message}}",
+        "err_forced_unusable": "強制檢查點目前不可用於分類，請檢查顏色輸入與點位範圍：{{message}}",
+        "err_image_load": "圖片載入失敗：{{error}}",
+        "err_load_image_first": "請先載入圖片",
+        "err_no_check_color": "點 #{{index}} 在目前圖中沒有有效檢查顏色",
+        "err_no_check_state": "剪貼簿程式碼中找不到 checkState(frame) 函式",
+        "err_no_clipboard_code": "剪貼簿中沒有可執行程式碼",
+        "err_no_points": "請先新增至少一個檢測點",
+        "err_no_valid_points": "沒有可用於分類的有效點位，請檢查顏色輸入與點位範圍",
+        "err_no_window": "找不到視窗",
+        "err_read_clipboard": "讀取剪貼簿失敗：{{error}}",
+        "err_read_file": "讀取檔案內容失敗",
+        "err_read_image": "無法讀取圖片：{{url}}",
+        "err_read_project": "讀取專案檔案失敗",
+        "err_screenshot_timeout": "截圖逾時",
+        "err_start_realtime": "啟動即時測試失敗：{{error}}",
+        "err_stop_realtime": "停止即時測試失敗：{{error}}",
+        "err_unsupported_format": "拖曳的檔案中不包含受支援的圖片格式",
+        "export_failed": "專案匯出失敗",
+        "export_project": "匯出專案",
+        "export_project_title": "匯出圖色工具專案",
+        "export_success": "專案匯出成功",
+        "image_label": "圖片/標籤",
+        "import_failed": "專案匯入失敗",
+        "import_project": "匯入專案",
+        "import_success": "專案匯入成功",
+        "invalid": "無效",
+        "json_files": "JSON 檔案",
+        "label_placeholder": "輸入分類標籤",
+        "load_image": "載入圖片",
+        "load_image_first": "請先載入圖片並在目前圖上點擊新增點位",
+        "load_images_hint": "請先載入多張圖片，然後在目前圖上點擊新增座標點（座標可點擊複製 cc，桌面端支援拖曳匯入）",
+        "loaded_stats": "已載入 {{images}} 張圖片，已打點 {{points}} 個",
+        "loading": "載入中...",
+        "log_add_screenshot_failed": "新增截圖失敗",
+        "log_export_failed": "匯出圖色工具專案失敗",
+        "log_import_failed": "匯入圖色工具專案失敗",
+        "log_restore_failed": "還原圖色工具狀態失敗",
+        "log_start_realtime_failed": "啟動圖色工具即時測試失敗",
+        "log_stop_realtime_failed": "停止圖色工具即時測試失敗",
+        "match": "符合：",
+        "new_point_uses": "新打點使用",
+        "no_images": "暫無圖片",
+        "out_of_range": "超出範圍",
+        "point_label": "點 #{{index}}",
+        "realtime_result": "即時結果 {{value}}",
+        "same_coord_colors": "同座標顏色資訊",
+        "screenshot": "截圖",
+        "screenshot_added": "已新增截圖到圖片清單",
+        "start_realtime": "啟動即時測試",
+        "stop_realtime": "停止即時測試",
+        "supported_formats": "支援 png / jpg / jpeg / webp / bmp / gif / tiff / ico",
+        "tolerance": "容差",
+        "untested": "未測試",
+        "zoom_scale": "縮放 {{scale}}x（1:N 像素）"
     },
     "script-list": {
         "add_case": "新增 case",
@@ -2276,6 +3556,25 @@
         "visual_editor_exported": "已匯出到目前分頁",
         "visual_editor_need_local_tab": "請先開啟一個本地腳本分頁再匯出"
     },
+    "script-record-tool": {
+        "action_count": "動作數量",
+        "action_details": "動作明細",
+        "back_to_live": "切回即時錄製資料",
+        "clear_actions": "清空目前動作",
+        "convert_to_sleep": "依絕對時間點換算 sleep",
+        "copy_code": "複製程式碼",
+        "current_status": "目前狀態",
+        "generate_code": "產生程式碼",
+        "import_json_absolute": "匯入 JSON（絕對時間制）",
+        "import_json_file": "匯入 JSON 檔案",
+        "import_text": "匯入文字",
+        "key": "按鍵",
+        "mouse": "滑鼠",
+        "no_actions": "暫無動作資料",
+        "time_sec": "時間(s)",
+        "total_duration": "總時長",
+        "type": "類型"
+    },
     "script-runtime-floating": {
         "openScriptPage": "前往腳本頁: {{scripts}}",
         "runningLabel": "運行中({{count}})",
@@ -2302,15 +3601,25 @@
         "aiTemperatureTip": "控制生成內容的隨機性(0-1)",
         "aiTestConnection": "測試連接",
         "appearance": "外觀設定",
+        "backgroundBlur": "底圖模糊度",
+        "backgroundBlurTip": "對底圖做高斯模糊，營造景深效果",
+        "backgroundOpacity": "底圖透明度",
+        "backgroundOpacityTip": "數值越小越透明，用於弱化背景干擾",
         "baseColors": "基礎色",
         "borderWidth": "邊框寬度",
         "brandColors": "品牌色",
-        "cancel": "取消",
+        "clearBackground": "清除",
+        "close": "關閉",
         "colors": "顏色",
         "colorScheme": "配色模式",
         "confirm": "確認",
         "contrastHint": "文字色（對比度預覽）",
         "current": "目前",
+        "customBackground": "自訂底圖",
+        "customBackgroundPreview": "自訂底圖預覽",
+        "customBackgroundTip": "上傳一張圖片作為全域背景，可搭配視窗透明使用",
+        "customFont": "自訂字型",
+        "customFontTip": "選擇系統字型或上傳字型檔案，留空恢復預設",
         "customSource": "自訂",
         "customTheme": "自訂主題",
         "customThemeOption": "自訂",
@@ -2318,6 +3627,7 @@
         "darkTheme": "深色主題",
         "dataPackManagement": "資料包管理",
         "dataPackSourceAddress": "資料包來源位址",
+        "defaultFont": "預設字型",
         "depth": "陰影深度",
         "desc": "自定義應用程序設置",
         "download": "下載",
@@ -2348,6 +3658,7 @@
         "radiusField": "輸入框圓角",
         "radiusSelector": "選擇器圓角",
         "refresh": "重新整理",
+        "replaceBackground": "更換",
         "reset": "重置所有設置",
         "resetConfirm": "確認重置所有設置嗎？",
         "resetTheme": "重置主題",
@@ -2364,6 +3675,7 @@
         "showAIChat": "顯示AI配裝助手",
         "stateColors": "狀態色",
         "storyText": "劇情文本",
+        "systemFont": "系統字型",
         "theme": "主題",
         "title": "設定",
         "uiScale": "UI縮放",
@@ -2372,6 +3684,7 @@
         "uninstallDataPackConfirm": "確定要解除安裝 {{version}} 嗎？",
         "unknown": "未知",
         "updateLaunchAtStartupFailed": "更新開機啟動設定失敗",
+        "uploadBackground": "上傳",
         "use": "使用",
         "versionList": "版本列表",
         "windowTrasnparent": "透明效果",
@@ -2390,27 +3703,135 @@
         "startTime": "開始",
         "title": "商店"
     },
+    "shop-item": {
+        "item_id": "物品 ID",
+        "limit": "限購",
+        "real_currency": "現實貨幣",
+        "unlock_condition": "解鎖條件：{{cond}}"
+    },
     "shop-list": {
         "title": "商店"
     },
+    "shop-source": {
+        "limit": "限購：",
+        "quantity": "數量：",
+        "shop_purchase": "商店購買"
+    },
     "skill-cd-overlay": {
+        "add_key": "新增按鍵",
+        "advanced_section": "進階",
+        "anchor_percent": "錨點百分比",
+        "anchor_percent_tip": "浮窗左上角在遊戲客戶區中的位置；上方縮略盒拖曳與這裡拖曳數值等價",
+        "anchor_x_percent": "橫向錨點百分比",
+        "anchor_y_percent": "縱向錨點百分比",
+        "appearance_section": "外觀",
+        "capture_hint_exhausted": "候選鍵位已用盡，請點左側按鈕捕獲新的按鍵後啟用該行",
+        "capture_hint_max": "已達到最大按鍵數量，請先刪除不用的按鍵",
+        "capture_hint_start": "請按下要綁定的按鍵（Esc 取消）",
+        "capture_hint_unknown": "無法辨識該按鍵，請換一個",
+        "cd_seconds_label": "{{name}} 冷卻秒數",
+        "cooldown_only_tip": "僅在冷卻結束時回應按下（防止連發被判定為多次施放）",
+        "current_timers": "浮窗目前項目：",
+        "delete": "刪除",
         "desc": "置頂浮窗顯示按鍵冷卻倒計時",
-        "title": "技能CD指示器"
+        "disc_alpha": "圓盤不透明度",
+        "disc_alpha_tip": "數字襯底的通透度；調低可更清楚地透出遊戲畫面",
+        "entry_desc": "原生 Win32 置頂浮窗（點擊穿透、不搶焦點）；按下綁定的按鍵即從完整 CD 開始倒計時，就緒時整環變綠。下方的設定改動都會即時下發。",
+        "entry_title": "技能 CD 倒計時浮窗",
+        "foreground_only": "僅遊戲視窗前台觸發",
+        "foreground_only_tip": "開啟後只在遊戲程序獲得焦點時回應按鍵，避免聊天輸入誤觸發",
+        "game_window": "遊戲視窗",
+        "game_window_tip": "浮窗位置以該程序視窗的客戶區為參照（預設 {{name}}）",
+        "hide_when_ready": "就緒後隱藏",
+        "hide_when_ready_tip": "CD 歸零立即隱藏該項目，只在使用期間顯示",
+        "hide_without_game": "未偵測到遊戲視窗時隱藏",
+        "hide_without_game_tip": "關閉後在遊戲未執行時也能看到浮窗（便於用「試觸發」核對設定）",
+        "key_capturing": "按鍵…",
+        "keys_section": "按鍵與冷卻",
+        "label_placeholder": "標籤",
+        "max_keys_tip": "最多 {{count}} 個 · 預設冷卻未結束時不重複觸發，就緒後按鍵立刻重新計時；開啟「無需冷卻」則按下即重設",
+        "no_cooldown": "無需冷卻",
+        "no_game_warning": "未偵測到遊戲視窗，浮窗暫不顯示；若要立刻在桌面上核對設定，可在「進階」裡關閉「未偵測到遊戲視窗時隱藏」。",
+        "not_detected": "未偵測到",
+        "not_running": "未執行",
+        "not_shown": "（目前未顯示）",
+        "position_section": "浮窗位置（客戶區百分比）",
+        "process_name": "遊戲程序名",
+        "process_name_tip": "客戶區定位與前台判斷所用的程序；多個用逗號分隔，留空用內建預設",
+        "ready": "就緒",
+        "resolved_info": "後端解析：螢幕座標 X {{x}} · Y {{y}} · 浮窗尺寸 {{w}} × {{h}}",
+        "retrigger_tip": "按下即從完整 CD 重新計時，冷卻中按下也會重設",
+        "running": "執行中",
+        "scale": "浮窗縮放",
+        "scale_tip": "按螢幕解析度縮放圓環與文字尺寸",
+        "section_title": "技能CD指示器",
+        "test_trigger": "試觸發",
+        "title": "技能CD指示器",
+        "trigger_tip_off": "請先開啟浮窗",
+        "trigger_tip_on": "讓浮窗立即開始一次倒計時",
+        "web_only_notice": "浮窗依賴桌面端原生視窗能力，網頁端只能檢視與編輯設定，不會真正生效。"
+    },
+    "skill-cd-pos-picker": {
+        "no_game_window": "未偵測到遊戲視窗，預覽依目前螢幕解析度顯示"
     },
     "skin-colorize": {
         "desc": "預覽及分享角色皮膚染色",
+        "desc_placeholder": "補充描述（選填）",
+        "no_data": "暫無角色染色資料",
         "title": "染色方案"
     },
     "skin-colorize-create": {
         "title": "發佈染色方案"
     },
+    "skin-colorize-gallery": {
+        "all_schemes": "全部方案",
+        "by_character": "依角色",
+        "by_series": "依外觀系列",
+        "default_colors": "預設配色",
+        "end_of_list": "已經到底啦～",
+        "include_hair": "含髮型",
+        "no_icon": "暫無圖示",
+        "no_schemes": "還沒有染色方案",
+        "no_series": "暫無系列",
+        "publish_scheme": "發布染色方案"
+    },
     "skin-colorize-share": {
         "title": "染色方案詳情"
     },
     "skin-gacha": {
+        "auto_buy_moon_tip": "月石不足時自動按 1:1 消耗{{name}}",
+        "current_pool": "目前卡池",
         "desc": "萬華抽卡模擬",
         "guaranteeSpecial": "距離下次必定獲取金色品質道具還有至多<highlight>%d</>次",
-        "title": "萬華"
+        "moonstone_title": "{{name}}（點擊開啟商城）",
+        "pool": "卡池",
+        "sold_out": "已售罄",
+        "title": "萬華",
+        "total_spent": "累計花費"
+    },
+    "split-view": {
+        "resize_hint": "調整列表與詳情區域大小",
+        "resize_tip": "拖曳調整大小，點擊收合詳情"
+    },
+    "startup-modal": {
+        "current_version": "目前版本",
+        "download_latest_pack": "下載最新資料包",
+        "download_version": "下載 {{version}}",
+        "downloading": "下載中",
+        "ignore": "忽略",
+        "inactive": "未啟用",
+        "later": "稍後",
+        "latest_version": "最新版本",
+        "none_yet": "暫無",
+        "open_settings": "開啟設定",
+        "pack_download_title": "下載資料包",
+        "pack_downloading_wait": "正在下載資料包，請稍候…",
+        "pack_install_hint": "尚未安裝資料包，安裝後才能正常載入全部內容資料。",
+        "pack_install_title": "安裝資料包",
+        "pack_update_hint": "目前版本 {{from}}，可更新至最新版。資料包決定內容資料的顯示與最新效果。",
+        "pack_update_title": "資料包可更新",
+        "pack_version_missing": "找不到可用的資料包版本",
+        "release_notes": "更新說明"
     },
     "tag": {
         "防御": "防禦",
@@ -2499,6 +3920,9 @@
         "zoomIn": "放大",
         "zoomOut": "縮小"
     },
+    "title-frame-label": {
+        "title": "稱號"
+    },
     "todo": {
         "completeFailed": "標記完成失敗",
         "create": "新增",
@@ -2554,6 +3978,14 @@
         "desc": "讀取並匯出 pak 檔案",
         "title": "解包"
     },
+    "unpack-file-tree": {
+        "no_files": "無檔案"
+    },
+    "unpack-view": {
+        "pack": "打包",
+        "read_file_list": "讀取檔案列表",
+        "settings": "設定"
+    },
     "update": {
         "checkFailed": "檢查更新失敗：",
         "downloadInstallFailed": "下載並安裝更新失敗：",
@@ -2573,8 +4005,14 @@
         "updateFailed": "更新失敗",
         "updating": "更新中..."
     },
+    "user-manager": {
+        "account_management": "皎皎角帳號管理",
+        "add_account": "新增帳號",
+        "add_account_tip": "透過 JSON 新增皎皎角帳號（登入後可複製）",
+        "download_app": "下載 APP",
+        "web_unavailable": "網頁端不可用"
+    },
     "view": {
-        "all": "全部",
         "allModules": "全部模組",
         "collapse": "收合",
         "contentAuthorizationDesc": "除特別註明的內容外，本站文字內容遵循 CC BY-SA 3.0 協議，圖片等媒體內容則遵循其原有協議。",
@@ -2634,5 +4072,20 @@
         "sortByIncome": "收益排序：高→低",
         "title": "武器列表",
         "unequipSlot": "卸下"
+    },
+    "weapon-refine-tabs": {
+        "refine": "熔煉"
+    },
+    "weapon-verify-event": {
+        "available_affixes": "可用詞條：",
+        "event_rule": "活動規則：{{rule}}",
+        "level_n": "關卡 {{n}}",
+        "levels_and_star_reward": "{{levels}} 個關卡 · {{stars}} 星獎勵",
+        "recommended_level": "推薦等級 {{level}}+",
+        "recommended_unlock_level": "推薦解鎖等級 Lv.{{level}}",
+        "target_enemies": "目標敵人",
+        "three_star_threshold": "三星門檻",
+        "victory_goal": "勝利目標",
+        "victory_mode": "勝利模式"
     }
 }

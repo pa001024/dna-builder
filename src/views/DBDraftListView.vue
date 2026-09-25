@@ -131,7 +131,7 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
                             <input
                                 v-model="searchKeyword"
                                 type="text"
-                                placeholder="搜索设计稿名称（支持拼音）..."
+                                :placeholder="$t('db-draft-list.search_placeholder')"
                                 class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                             />
                             <span
@@ -146,7 +146,7 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
                     <div class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise" style="animation-delay: 0.05s">
                         <!-- 类型筛选 -->
                         <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">类型</span>
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.type') }}</span>
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
@@ -156,7 +156,7 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
                                 "
                                 @click="selectedType = ''"
                             >
-                                全部
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 v-for="type in types"
@@ -175,7 +175,7 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
 
                         <!-- 稀有度筛选 -->
                         <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">稀有度</span>
+                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.rarity') }}</span>
                             <button
                                 class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                 :class="
@@ -185,7 +185,7 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
                                 "
                                 @click="selectedRarity = ''"
                             >
-                                全部
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 v-for="rarity in rarities"
@@ -271,11 +271,11 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
                                     <!-- 属性行：产物数量 / 批量 / 无限 / 隐藏 / ID -->
                                     <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
                                         <span
-                                            >产物数量: <span class="font-medium tabular-nums">{{ draft.c }}</span></span
+                                            >{{ $t('db-draft-list.output_count') }} <span class="font-medium tabular-nums">{{ draft.c }}</span></span
                                         >
-                                        <span v-if="draft.b">批量制造</span>
-                                        <span v-if="draft.i">无限制造</span>
-                                        <span v-if="!draft.s">隐藏</span>
+                                        <span v-if="draft.b">{{ $t('db-draft-list.batch_craft') }}</span>
+                                        <span v-if="draft.i">{{ $t('db-draft-list.infinite_craft') }}</span>
+                                        <span v-if="!draft.s">{{ $t('db-draft-list.hidden') }}</span>
                                         <span class="ml-auto shrink-0 font-mono tabular-nums text-base-content/35">ID: {{ draft.id }}</span>
                                     </div>
                                 </div>
@@ -286,9 +286,9 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
                     <!-- 底部统计条 -->
                     <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                         <p class="text-[11px] tracking-wide text-base-content/50">
-                            共
+                            {{ $t('common.total_count') }}
                             <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredDrafts.length }}</b>
-                            个设计稿
+                            {{ $t('db-draft-list.draft_count') }}
                         </p>
                     </div>
                 </div>

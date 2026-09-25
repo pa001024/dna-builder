@@ -58,7 +58,7 @@ const dropRateText = computed(() => (props.container.dropRate === undefined ? "�
 
         <!-- 基础信息 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="OVERVIEW" title="基础信息" />
+            <SectionHeader no-animate compact kicker="OVERVIEW" :title="$t('common.basic_info')" />
             <div class="grid grid-cols-2 gap-1.5 lg:grid-cols-3">
                 <div
                     v-for="stat in [
@@ -70,31 +70,31 @@ const dropRateText = computed(() => (props.container.dropRate === undefined ? "�
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="shrink-0 text-xs text-base-content/60">{{ stat.label }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ stat.value }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ stat.value }}</span>
                 </div>
             </div>
         </section>
 
         <!-- 掉落权重 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="DROP WEIGHT" title="掉落权重" :count="levelWeights.length" />
+            <SectionHeader no-animate compact kicker="DROP WEIGHT" :title="$t('db-solo-treasure-container.drop_weight')" :count="levelWeights.length" />
             <div v-if="levelWeights.length" class="space-y-1.5">
                 <div v-for="entry in levelWeights" :key="entry.level" class="flex items-center gap-2">
                     <span :class="getRarityBadgeClass(entry.level)">{{ gt(getRarityName(entry.level)) }}</span>
                     <span class="h-1.5 min-w-0 flex-1 bg-base-content/10">
                         <span class="block h-full bg-primary" :style="{ width: entry.width }" />
                     </span>
-                    <span class="w-11 shrink-0 text-right font-orbitron text-[12px] font-semibold tabular-nums text-primary">
+                    <span class="w-11 shrink-0 text-right font-orbitron text-[12px] font-semibold text-primary">
                         {{ entry.percent }}
                     </span>
                 </div>
             </div>
-            <div v-else class="text-sm text-base-content/70">暂无掉落权重</div>
+            <div v-else class="text-sm text-base-content/70">{{ $t('db-solo-treasure-container.no_drop_weight') }}</div>
         </section>
 
         <!-- 等级数量 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="LEVEL LIMIT" title="等级数量" :count="levelLimits.length" />
+            <SectionHeader no-animate compact kicker="LEVEL LIMIT" :title="$t('db-solo-treasure-container.level_count')" :count="levelLimits.length" />
             <div v-if="levelLimits.length" class="grid grid-cols-2 gap-1.5 lg:grid-cols-3">
                 <div
                     v-for="entry in levelLimits"
@@ -102,17 +102,17 @@ const dropRateText = computed(() => (props.container.dropRate === undefined ? "�
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span :class="getRarityBadgeClass(entry.level)">{{ gt(getRarityName(entry.level)) }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         x{{ entry.count }}
                     </span>
                 </div>
             </div>
-            <div v-else class="text-sm text-base-content/70">暂无等级数量限制</div>
+            <div v-else class="text-sm text-base-content/70">{{ $t('db-solo-treasure-container.no_level_limit') }}</div>
         </section>
 
         <!-- 容器格位 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="SHAPE" title="容器格位" />
+            <SectionHeader no-animate compact kicker="SHAPE" :title="$t('db-solo-treasure-container.container_slots')" />
             <div class="flex justify-center items-center py-2">
                 <div
                     v-if="shapeColumns && shapeRows"
@@ -132,7 +132,7 @@ const dropRateText = computed(() => (props.container.dropRate === undefined ? "�
                         }"
                     />
                 </div>
-                <div v-else class="text-sm text-base-content/70">暂无格位数据</div>
+                <div v-else class="text-sm text-base-content/70">{{ $t('db-solo-treasure-container.no_slot_data') }}</div>
             </div>
         </section>
     </div>

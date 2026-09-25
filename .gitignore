@@ -66,3 +66,4 @@ tools/*.json
 tools/*.sh
 tools/radix-icons/
 screenshots/
+tools/i18n-hardcoded-report.md

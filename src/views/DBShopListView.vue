@@ -1,9 +1,11 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import shopData from "@/data/d/shop.data"
 
+const { t } = useTranslation()
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedShopId = useSearchParam<string>("id", "")
 
@@ -11,6 +13,42 @@ const selectedShopId = useSearchParam<string>("id", "")
 const selectedShop = computed(() => {
     return selectedShopId.value ? shopData.find(shop => shop.id === selectedShopId.value) || null : null
 })
+
+/**
+ * 判断单个文本是否命中检索关键词。
+ * 原文与当前语言的译文都参与比对，保证非中文语系下也能按名称搜到商店与商品。
+ * @param text 待比对文本
+ * @param keyword 已小写化的关键词
+ * @returns 是否命中
+ */
+function matchText(text: string, keyword: string): boolean {
+    if (text.toLowerCase().includes(keyword)) {
+        return true
+    }
+    const translated = t(text)
+    return translated !== text && translated.toLowerCase().includes(keyword)
+}
+
+/**
+ * 统计商店的子标签总数。
+ * @param shop 商店数据
+ * @returns 子标签总数
+ */
+function countSubTabs(shop: (typeof shopData)[number]): number {
+    return shop.mainTabs.reduce((total, tab) => total + tab.subTabs.length, 0)
+}
+
+/**
+ * 统计商店的商品总数。
+ * @param shop 商店数据
+ * @returns 商品总数
+ */
+function countItems(shop: (typeof shopData)[number]): number {
+    return shop.mainTabs.reduce(
+        (total, tab) => total + tab.subTabs.reduce((subTotal, subTab) => subTotal + subTab.items.length, 0),
+        0
+    )
+}
 
 // 按关键词筛选商店
 const filteredShops = computed(() => {
@@ -20,19 +58,16 @@ const filteredShops = computed(() => {
         } else {
             const q = searchKeyword.value.toLowerCase()
             return (
-                shop.id.toLowerCase().includes(q) ||
-                shop.name.toLowerCase().includes(q) ||
+                matchText(shop.id, q) ||
+                matchText(shop.name, q) ||
                 shop.mainTabs.some(
                     mainTab =>
-                        mainTab.name.toLowerCase().includes(q) ||
+                        matchText(mainTab.name, q) ||
                         mainTab.subTabs.some(
                             subTab =>
-                                subTab.name.toLowerCase().includes(q) ||
+                                matchText(subTab.name, q) ||
                                 subTab.items.some(
-                                    item =>
-                                        item.typeName.toLowerCase().includes(q) ||
-                                        item.itemType.toLowerCase().includes(q) ||
-                                        item.priceName.toLowerCase().includes(q)
+                                    item => matchText(item.typeName, q) || matchText(item.itemType, q) || matchText(item.priceName, q)
                                 )
                         )
                 )
@@ -67,7 +102,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbs-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索商店ID/名称/商品..."
+                            :placeholder="$t('db-shop-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -106,26 +141,17 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbs-item-active" })
                                         class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
                                         :class="{ 'text-primary': selectedShopId === shop.id }"
                                     >
-                                        {{ shop.name }}
+                                        {{ $t(shop.name) }}
                                     </h3>
                                     <CopyID :id="shop.id" class="ml-auto shrink-0" />
                                 </div>
                                 <!-- 元信息行：主标签 / 子标签 / 商品总数 -->
                                 <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
-                                    <span class="tabular-nums">{{ shop.mainTabs.length }}个主标签</span>
+                                    <span class="tabular-nums">{{ $t('db-shop-list.main_tabs', { count: shop.mainTabs.length }) }}</span>
                                     <span class="tabular-nums">{{
-                                        shop.mainTabs.reduce((total, tab) => total + tab.subTabs.length, 0)
-                                    }}个子标签</span>
-                                    <span class="tabular-nums"
-                                        >商品总数:
-                                        {{
-                                            shop.mainTabs.reduce(
-                                                (total, tab) =>
-                                                    total + tab.subTabs.reduce((subTotal, subTab) => subTotal + subTab.items.length, 0),
-                                                0
-                                            )
-                                        }}</span
-                                    >
+                                        $t('db-shop-list.sub_tabs', { count: countSubTabs(shop) })
+                                    }}</span>
+                                    <span class="tabular-nums">{{ $t('db-shop-list.item_count', { count: countItems(shop) }) }}</span>
                                 </div>
                             </div>
                         </article>
@@ -135,7 +161,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbs-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredShops.length }}</b> 个商店
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredShops.length }}</b> {{ $t('db-shop-list.shop_count') }}
                     </p>
                 </div>
             </div>

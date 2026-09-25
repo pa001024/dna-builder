@@ -854,7 +854,7 @@ const dungeonTimeFields = [
                         </template>
                         <span class="ml-auto hidden text-xs tracking-wide text-base-content/45 sm:block"
                             >共
-                            <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{
+                            <b class="font-orbitron text-sm font-semibold text-primary">{{
                                 chars.length + weapons.length + mods.length
                             }}</b>
                             项计划</span

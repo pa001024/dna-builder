@@ -855,12 +855,12 @@ const handleMouseUp = () => {
         <div class="flex justify-between items-center mb-4">
             <div class="flex gap-2">
                 <label class="label text-sm">
-                    启用动作序列
+                    {{ $t('char-action-editor.enable_action_sequence') }}
                     <input v-model="charSettings.actions.enable" type="checkbox" class="toggle toggle-secondary" />
                 </label>
-                <button class="btn btn-sm btn-primary" @click="addAction()">添加动作</button>
-                <button class="btn btn-sm btn-secondary" @click="generateSampleHealthCurve()">生成血量曲线</button>
-                <div class="text-sm opacity-50 self-center">总时长: {{ formatTime(totalDuration) }}</div>
+                <button class="btn btn-sm btn-primary" @click="addAction()">{{ $t('char-action-editor.add_action') }}</button>
+                <button class="btn btn-sm btn-secondary" @click="generateSampleHealthCurve()">{{ $t('char-action-editor.generate_hp_curve') }}</button>
+                <div class="text-sm opacity-50 self-center">{{ $t('char-action-editor.total_duration', { time: formatTime(totalDuration) }) }}</div>
             </div>
         </div>
 
@@ -978,12 +978,12 @@ const handleMouseUp = () => {
                             stroke-width="1"
                         />
                         <!-- 血量数值 -->
-                        <text x="5" y="20" font-size="12" fill="#ffffff">血量: {{ hoverHealthValue.toFixed(2) }}%</text>
+                        <text x="5" y="20" font-size="12" fill="#ffffff">{{ $t('char-action-editor.hover_hp', { value: hoverHealthValue.toFixed(2) }) }}</text>
                         <!-- 时间数值 -->
-                        <text x="5" y="40" font-size="12" fill="#ffffff">时间: {{ hoverTime.toFixed(2) }}s</text>
+                        <text x="5" y="40" font-size="12" fill="#ffffff">{{ $t('char-action-editor.hover_time', { value: hoverTime.toFixed(2) }) }}</text>
                     </g>
                 </svg>
-                <div class="absolute top-1 left-2 text-xs text-red-400 font-semibold">血量</div>
+                <div class="absolute top-1 left-2 text-xs text-red-400 font-semibold">{{ $t('char-action-editor.hp') }}</div>
             </div>
 
             <!-- 动作序列预览区域 -->
@@ -1011,12 +1011,12 @@ const handleMouseUp = () => {
 
         <!-- 动作列表 -->
         <div class="mt-4 rounded-lg p-2">
-            <h4 class="text-sm font-semibold mb-2">动作列表</h4>
+            <h4 class="text-sm font-semibold mb-2">{{ $t('char-action-editor.action_list') }}</h4>
             <div class="space-y-2">
                 <div v-for="(action, index) in actions" :key="action.id" class="flex items-center gap-2 p-2 rounded-md">
                     <div class="flex-1 text-sm">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-gray-400 w-12">动作 {{ index + 1 }}:</span>
+                            <span class="text-xs text-gray-400 w-12">{{ $t('char-action-editor.action_n', { n: index + 1 }) }}</span>
                             <div class="flex items-center gap-2 flex-1">
                                 <!-- 技能选择 -->
                                 <Select
@@ -1128,7 +1128,7 @@ const handleMouseUp = () => {
                 >
                     <div class="flex-1 text-sm">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-gray-400 w-16">背景动作 {{ index + 1 }}:</span>
+                            <span class="text-xs text-gray-400 w-16">{{ $t('char-action-editor.background_action_n', { n: index + 1 }) }}</span>
                             <div class="flex items-center gap-2 flex-1">
                                 <!-- 技能选择 -->
                                 <Select
@@ -1259,7 +1259,7 @@ const handleMouseUp = () => {
                 >
                     <div class="flex-1 text-sm">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-gray-400 w-16">BUFF组 {{ index + 1 }}:</span>
+                            <span class="text-xs text-gray-400 w-16">{{ $t('char-action-editor.buff_group_n', { n: index + 1 }) }}</span>
                             <div class="flex-1 text-sm text-gray-300">
                                 <span v-if="buffGroup.length === 0" class="text-gray-500">未选择BUFF</span>
                                 <span v-else>{{ buffGroup.map(([name, lv]) => `${name}×${lv}`).join(", ") }}</span>

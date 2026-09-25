@@ -76,7 +76,7 @@ function getTicketIconUrl(icon: string): string {
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/iron-ticket/${ticket.id}`"
-                            class="truncate font-orbitron text-xl leading-none font-bold tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ ticket.name }}
                         </SRouterLink>
@@ -86,7 +86,7 @@ function getTicketIconUrl(icon: string): string {
                     <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
                         <span class="inline-flex items-center gap-1.5">
                             {{ $t("iron-ticket.level") }}
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ ticket.level }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ ticket.level }}</span>
                         </span>
                     </div>
                 </div>

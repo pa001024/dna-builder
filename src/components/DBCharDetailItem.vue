@@ -734,7 +734,7 @@ onBeforeUnmount(() => {
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/char/${char.id}`"
-                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(char.名称) }}
                         </SRouterLink>
@@ -793,7 +793,7 @@ onBeforeUnmount(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t(attr.name) }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ attr.value }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ attr.value }}</span>
                 </div>
             </div>
         </section>
@@ -808,7 +808,7 @@ onBeforeUnmount(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t(attr.name) }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatProp(attr.name, attr.value)
                     }}</span>
                 </div>
@@ -866,7 +866,7 @@ onBeforeUnmount(() => {
                         <div class="flex items-center justify-between gap-2">
                             <span class="truncate text-sm font-semibold">{{ $t(trait.名称) }}</span>
                             <span
-                                class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-orbitron text-[11px] font-semibold tabular-nums text-primary"
+                                class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-orbitron text-[11px] font-semibold text-primary"
                             >
                                 Lv.{{ trait.等级 }}
                             </span>
@@ -942,7 +942,7 @@ onBeforeUnmount(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t(attr.name) }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ attr.value }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ attr.value }}</span>
                 </div>
             </div>
 
@@ -1005,7 +1005,7 @@ onBeforeUnmount(() => {
                                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="text-xs text-base-content/60">{{ $t(attr.name) }}</span>
-                                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                                     attr.value
                                 }}</span>
                             </div>

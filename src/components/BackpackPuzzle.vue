@@ -1734,13 +1734,13 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
         <div class="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
             <div class="rounded-md bg-base-200 p-3">
                 <div class="mb-2 flex items-center justify-between gap-2">
-                    <div class="text-xs text-base-content/70">将道具拖到背包中</div>
+                    <div class="text-xs text-base-content/70">{{ $t('backpack-puzzle.drag_item_hint') }}</div>
                     <div class="flex items-center gap-2">
                         <button class="btn btn-xs btn-primary" :class="{ 'btn-disabled': isSolving }" @click="solveCurrentBoard">
                             {{ isSolving ? "求解中" : "求解" }}
                         </button>
                         <button v-if="manualPlacements.length" class="btn btn-xs btn-ghost" @click="clearAllManualPlacements">
-                            清空手动摆放
+                            {{ $t('backpack-puzzle.clear_manual_placement') }}
                         </button>
                     </div>
                 </div>

@@ -4,8 +4,6 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import type { FloatWindowConfig } from "@/api/app"
 import { floatWindowDisable, floatWindowSet, floatWindowState, MATERIALS } from "@/api/app"
 import type { IconTypes } from "@/components/Icon.vue"
-import SafeModeQuizDialog from "@/components/SafeModeQuizDialog.vue"
-import SettingSectionNav from "@/components/SettingSectionNav.vue"
 import { useScrollSpy } from "@/composables/useScrollSpy"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { clearAllDataPackOpfs, getInstalledDataPackVersions, getMergedDataPackVersions } from "@/data/data-pack"
@@ -831,7 +829,7 @@ onUnmounted(() => {
         <div ref="settingContentRef" class="min-h-0 min-w-0 flex-1 overflow-y-auto">
             <div class="mx-auto flex max-w-2xl flex-col gap-4 p-4">
                 <section data-scroll-section="appearance" class="flex flex-col">
-                    <SectionHeader no-animate compact kicker="APPEARANCE" :title="$t('setting.appearance')" />
+                    <SectionHeader no-animate compact :title="$t('setting.appearance')" />
                     <div
                         class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                     >
@@ -876,8 +874,8 @@ onUnmounted(() => {
                                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">
-                                    自定义底图
-                                    <div class="text-xs text-base-content/50">上传一张图片作为全局背景，可配合窗口透明使用</div>
+                                    {{ $t('setting.customBackground') }}
+                                    <div class="text-xs text-base-content/50">{{ $t('setting.customBackgroundTip') }}</div>
                                 </span>
                                 <div class="flex shrink-0 items-center gap-2">
                                     <!-- 预览图：hover 显示「更换」覆盖层，点击触发文件选择，替代独立更换按钮 -->
@@ -887,15 +885,15 @@ onUnmounted(() => {
                                         class="group relative h-9 w-16 cursor-pointer overflow-hidden rounded-xs border border-base-content/15"
                                         @click="pickWallpaper"
                                     >
-                                        <img :src="setting.customWallpaper" alt="自定义底图预览" class="h-full w-full object-cover" />
+                                        <img :src="setting.customWallpaper" :alt="$t('setting.customBackgroundPreview')" class="h-full w-full object-cover" />
                                         <span
                                             class="absolute inset-0 flex items-center justify-center bg-base-content/55 text-[11px] font-medium text-base-100 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-                                            >更换</span
+                                            >{{ $t('setting.replaceBackground') }}</span
                                         >
                                     </button>
-                                    <button v-else class="btn btn-sm" @click="pickWallpaper">上传</button>
+                                    <button v-else class="btn btn-sm" @click="pickWallpaper">{{ $t('setting.uploadBackground') }}</button>
                                     <button v-if="setting.customWallpaper" class="btn btn-sm btn-error" @click="clearWallpaper">
-                                        清除
+                                        {{ $t('setting.clearBackground') }}
                                     </button>
                                 </div>
                             </div>
@@ -906,8 +904,8 @@ onUnmounted(() => {
                                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">
-                                    底图透明度
-                                    <div class="text-xs text-base-content/50">数值越小越透明，用于弱化背景干扰</div>
+                                    {{ $t('setting.backgroundOpacity') }}
+                                    <div class="text-xs text-base-content/50">{{ $t('setting.backgroundOpacityTip') }}</div>
                                 </span>
                                 <div class="flex shrink-0 items-center gap-2">
                                     <input
@@ -919,7 +917,7 @@ onUnmounted(() => {
                                         step="0.05"
                                         @input="setting.customWallpaperOpacity = +($event.target as HTMLInputElement)!.value"
                                     />
-                                    <span class="w-10 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                    <span class="w-10 text-right font-orbitron text-[13px] font-semibold text-primary"
                                         >{{ Math.round(setting.customWallpaperOpacity * 100) }}%</span
                                     >
                                 </div>
@@ -930,8 +928,8 @@ onUnmounted(() => {
                                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">
-                                    底图模糊度
-                                    <div class="text-xs text-base-content/50">对底图做高斯模糊，营造景深效果</div>
+                                    {{ $t('setting.backgroundBlur') }}
+                                    <div class="text-xs text-base-content/50">{{ $t('setting.backgroundBlurTip') }}</div>
                                 </span>
                                 <div class="flex shrink-0 items-center gap-2">
                                     <input
@@ -943,7 +941,7 @@ onUnmounted(() => {
                                         step="1"
                                         @input="setting.customWallpaperBlur = +($event.target as HTMLInputElement)!.value"
                                     />
-                                    <span class="w-12 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                                    <span class="w-12 text-right font-orbitron text-[13px] font-semibold text-primary"
                                         >{{ setting.customWallpaperBlur }}px</span
                                     >
                                 </div>
@@ -953,8 +951,8 @@ onUnmounted(() => {
                                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="label-text">
-                                    自定义字体
-                                    <div class="text-xs text-base-content/50">选择系统字体或上传字体文件，留空恢复默认</div>
+                                    {{ $t('setting.customFont') }}
+                                    <div class="text-xs text-base-content/50">{{ $t('setting.customFontTip') }}</div>
                                 </span>
                                 <div class="flex shrink-0 items-center gap-2">
                                     <Select
@@ -962,9 +960,9 @@ onUnmounted(() => {
                                         class="w-44 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         :placeholder="'默认字体'"
                                     >
-                                        <SelectItem :value="FONT_DEFAULT_VALUE">默认字体</SelectItem>
+                                        <SelectItem :value="FONT_DEFAULT_VALUE">{{ $t('setting.defaultFont') }}</SelectItem>
                                         <SelectSeparator />
-                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">系统字体</SelectLabel>
+                                        <SelectLabel class="p-2 text-sm font-semibold text-primary">{{ $t('setting.systemFont') }}</SelectLabel>
                                         <SelectGroup>
                                             <template v-if="setting.systemFonts.length">
                                                 <SelectItem
@@ -999,7 +997,7 @@ onUnmounted(() => {
                                         <span v-if="setting.systemFontsLoading" class="loading loading-spinner loading-xs" />
                                         <Icon v-else icon="ri:refresh-line" class="size-4" />
                                     </button>
-                                    <button class="btn btn-sm" @click="pickFontFile">上传</button>
+                                    <button class="btn btn-sm" @click="pickFontFile">{{ $t('setting.uploadBackground') }}</button>
                                     <button v-if="isCustomFontSelected" class="btn btn-sm btn-error" @click="deleteSelectedCustomFont">
                                         删除
                                     </button>
@@ -1008,7 +1006,7 @@ onUnmounted(() => {
                                         class="btn btn-sm"
                                         @click="selectedFontFamily = FONT_DEFAULT_VALUE"
                                     >
-                                        清除
+                                        {{ $t('setting.clearBackground') }}
                                     </button>
                                 </div>
                             </div>
@@ -1123,7 +1121,7 @@ onUnmounted(() => {
                 </section>
 
                 <section v-if="env.isApp" data-scroll-section="skill-cd" class="flex flex-col">
-                    <SectionHeader no-animate compact kicker="GAME OVERLAY" :title="$t('skill-cd-overlay.title')" />
+                    <SectionHeader no-animate compact :title="$t('skill-cd-overlay.title')" />
                     <div
                         class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                         :style="{ animationDelay: '0.03s' }"
@@ -1178,12 +1176,12 @@ onUnmounted(() => {
                 </section>
 
                 <section v-if="env.isApp" data-scroll-section="screen-bar" class="flex flex-col">
-                    <SectionHeader no-animate compact kicker="SCREEN BAR" :title="$t('screenBar.sectionTitle')" />
+                    <SectionHeader no-animate compact :title="$t('screenBar.sectionTitle')" />
                     <ScreenBarSetting />
                 </section>
 
                 <section data-scroll-section="data-pack" class="flex flex-col">
-                    <SectionHeader no-animate compact kicker="DATA PACK" :title="$t('setting.dataPackManagement')" />
+                    <SectionHeader no-animate compact :title="$t('setting.dataPackManagement')" />
                     <div
                         class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                         :style="{ animationDelay: '0.05s' }"
@@ -1226,7 +1224,7 @@ onUnmounted(() => {
                             <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-3">
                                 <div class="flex items-center justify-between gap-2 text-xs text-base-content/70">
                                     <span>{{ imgsDownloadProgressLabel }}</span>
-                                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                                    <span class="font-orbitron text-[13px] font-semibold text-primary">
                                         {{ imgsDownloadProgressValue }}%
                                     </span>
                                 </div>
@@ -1303,7 +1301,7 @@ onUnmounted(() => {
                                                 :value="Math.round(dataPack.downloadProgress * 100)"
                                                 max="100"
                                             />
-                                            <div class="font-orbitron text-[13px] font-semibold tabular-nums text-primary text-right">
+                                            <div class="font-orbitron text-[13px] font-semibold text-primary text-right">
                                                 {{ Math.round(dataPack.downloadProgress * 100) }}%
                                             </div>
                                         </div>
@@ -1384,7 +1382,7 @@ onUnmounted(() => {
                 </section>
 
                 <section data-scroll-section="account" class="flex flex-col">
-                    <SectionHeader no-animate compact kicker="ACCOUNT" :title="$t('setting.account')" />
+                    <SectionHeader no-animate compact :title="$t('setting.account')" />
                     <div
                         class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                         :style="{ animationDelay: '0.1s' }"
@@ -1394,7 +1392,7 @@ onUnmounted(() => {
                 </section>
 
                 <section data-scroll-section="story" class="flex flex-col">
-                    <SectionHeader no-animate compact kicker="STORY" :title="$t('setting.storyText')" />
+                    <SectionHeader no-animate compact :title="$t('setting.storyText')" />
                     <div
                         class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                         :style="{ animationDelay: '0.15s' }"
@@ -1435,7 +1433,7 @@ onUnmounted(() => {
                 </section>
 
                 <section data-scroll-section="other" class="flex flex-col">
-                    <SectionHeader no-animate compact kicker="OTHER" :title="$t('setting.other')" />
+                    <SectionHeader no-animate compact :title="$t('setting.other')" />
                     <div
                         class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                         :style="{ animationDelay: '0.2s' }"

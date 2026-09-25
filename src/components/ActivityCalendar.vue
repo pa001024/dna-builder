@@ -78,7 +78,7 @@ const getTheaterTimes = () => {
 
     // 生成当前活动信息
     const current = {
-        title: t("activity-calendar.theater_title"),
+        title: t("沉浸式戏剧"),
         description: t("activity-calendar.theater_desc", {
             charName: t(currentCharName),
         }),
@@ -90,7 +90,7 @@ const getTheaterTimes = () => {
 
     // 生成下一个活动信息
     const next = {
-        title: t("activity-calendar.theater_title"),
+        title: t("沉浸式戏剧"),
         description: t("activity-calendar.theater_desc", { charName: nextCharName }),
         begin_at: nextDungeon?.st || Math.floor(now + 7 * 24 * 60 * 60),
         end_at: nextDungeon?.et || Math.floor(now + 14 * 24 * 60 * 60),

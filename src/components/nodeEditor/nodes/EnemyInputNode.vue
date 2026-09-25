@@ -129,13 +129,13 @@ const imbalance = computed({
                 <div class="text-xs text-base-content/60 mb-2">{{ $t("node-editor.enemyInput.attributes") }}</div>
                 <div class="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                        <span class="font-medium">{{ $t("node-editor.enemyInput.hp") }}:</span> {{ formatBigNumber(selectedEnemy.hp) }}
+                        <span class="font-medium">{{ $t("生命") }}:</span> {{ formatBigNumber(selectedEnemy.hp) }}
                     </div>
                     <div>
-                        <span class="font-medium">{{ $t("node-editor.enemyInput.defense") }}:</span> {{ selectedEnemy.def }}
+                        <span class="font-medium">{{ $t("防御") }}:</span> {{ selectedEnemy.def }}
                     </div>
                     <div>
-                        <span class="font-medium">{{ $t("node-editor.enemyInput.attack") }}:</span> {{ selectedEnemy.atk }}
+                        <span class="font-medium">{{ $t("攻击") }}:</span> {{ selectedEnemy.atk }}
                     </div>
                     <div>
                         <span class="font-medium">{{ $t("node-editor.enemyInput.stance") }}:</span> {{ selectedEnemy.tn }}

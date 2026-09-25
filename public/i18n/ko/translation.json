@@ -3,42 +3,133 @@
     "暗属性攻击": "어둠 속성 공격",
     "办事高效，可以更快完成任务。": "효율적으로 일을 처리해 더 빠르게 퀘스트를 완료할 수 있다.",
     "办事细致，更有可能成功地完成任务。": "세심하게 일을 처리해 퀘스트에 성공할 가능성이 더 높다.",
+    "编辑": "편집",
+    "编辑构筑": "빌드 편집",
+    "标题": "제목",
     "才思敏捷或某一领域知识丰富。": "두뇌 회전이 빠르고, 특정 분야의 지식이 방대하다.",
+    "查看全部": "전체 보기",
+    "查看详情": "상세 보기",
+    "称号框": "칭호 프레임",
     "初始解锁": "초기 해금",
+    "道具获取周报": "아이템 획득 주간",
+    "道具流水查询": "아이템 거래 조회",
     "得心应手，有概率获得多倍的派遣奖励。": "숙련도가 높아 일정 확률로 파견 보상을 배로 획득한다.",
     "地质员": "지질학자",
+    "等级": "레벨",
+    "等级调整": "레벨 조정",
+    "掉落物": "드롭 아이템",
+    "独立": "개별",
+    "发型": "헤어스타일",
+    "房间": "방",
     "风属性攻击": "바람 속성 공격",
+    "副本": "의뢰 편지",
+    "个构筑": "개 빌드",
+    "共": "총",
+    "固定": "고정",
+    "故事事件": "스토리 이벤트",
     "贯穿攻击": "관통 공격",
     "光属性攻击": "빛 속성 공격",
+    "话题列表": "토픽 목록",
+    "活动任务": "이벤트 퀘스트",
     "火属性攻击": "불 속성 공격",
+    "获取方式": "획득 방법",
+    "基本信息": "기본 정보",
+    "基础属性": "기본 속성",
+    "技能替换": "스킬 교체",
+    "加载更多": "더 불러오기",
+    "加载中...": "불러오는 중...",
     "见微知著": "본질의 깨우침",
+    "奖励列表": "보상 목록",
+    "奖励选择": "보상 선택",
+    "奖励组": "보상 그룹",
+    "角色皮肤": "캐릭터 스킨",
+    "角色饰品": "캐릭터 장식품",
+    "角色数据": "캐릭터 데이터",
+    "近战武器": "근접 무기",
+    "精英": "정예",
+    "精英怪物": "정예 몬스터",
     "雷属性攻击": "번개 속성 공격",
+    "类型": "유형",
+    "流水记录明细": "거래 기록 상세",
     "冒险家": "모험가",
+    "梦魇残声": "악몽의 잔향",
+    "密函": "편지",
+    "描述": "설명",
+    "目标函数": "목표 함수",
+    "耐受": "내성",
+    "难度": "난이도",
+    "皮肤": "스킨",
+    "签到日历": "출석 달력",
     "切割攻击": "베기 공격",
+    "趋向": "성향",
     "全神贯注": "정신 집중",
+    "权重": "가중치",
+    "确定": "확인",
+    "任务进度": "작업 진행도",
+    "赛季": "시즌",
     "擅长采集。": "채집에 뛰어나다.",
     "擅长采矿。": "채광에 뛰어나다.",
     "擅长钓鱼。": "낚시에 뛰어나다.",
     "擅长训练魔灵。": "마령 훈련에 뛰어나다.",
     "擅长战斗。": "전투에 뛰어나다.",
+    "设计稿": "설계도",
+    "射速": "연사 속도",
+    "深境罗盘": "심층 나침반",
+    "时间线": "타임라인",
+    "实体": "실체",
     "拾穗者": "수집가",
+    "使用": "사용",
+    "事件": "이벤트",
+    "收起": "접기",
+    "首领": "보스",
+    "输入标题...": "제목 입력...",
+    "输入描述...": "설명 입력...",
+    "属性": "속성",
+    "属性影响": "속성 영향",
     "水属性攻击": "물 속성 공격",
+    "搜索": "검색",
+    "搜索构筑标题...": "빌드 제목 검색...",
+    "溯源突破": "근원 돌파",
     "特质": "특성",
     "同理心强，擅长感知他人情绪。": "공감 능력이 뛰어나 다른 이의 감정을 잘 헤아린다.",
     "突破至%s阶后解锁": "%s단계 돌파 후 해제",
+    "推荐": "추천",
+    "推荐后将在首页推荐区域展示该构筑": "추천하면 홈 추천 영역에 이 빌드가 표시됩니다",
+    "委托密函商店": "의뢰 편지 상점",
+    "未拥有": "미보유",
+    "武器皮肤": "무기 스킨",
+    "武器饰品": "무기 장식품",
+    "限时任务": "기간 한정 퀘스트",
+    "行为": "행동",
     "幸运儿，常常得到计划外的收益。": "행운을 타고나, 계획되지 않은 수익을 얻곤 한다.",
+    "性别": "성별",
+    "序列": "순서",
     "训练师": "훈련사",
     "烟波客": "숙련자",
+    "一次": "1회",
+    "遗物套装": "유물 세트",
+    "已推荐": "추천됨",
     "印象：才智": "인상: 지혜",
     "印象：道德": "인상: 도덕",
     "印象：功利": "인상: 실리",
     "印象：共情": "인상: 공감",
     "印象：混沌": "인상: 혼돈",
+    "应用": "적용",
+    "游戏板块": "게임 게시판",
+    "远程武器": "원거리 무기",
     "灾厄攻击": "재앙 공격",
+    "暂无构筑": "빌드 없음",
+    "战姿": "전투 자세",
     "震荡攻击": "진동 공격",
+    "支线任务": "서브 퀘스트",
+    "职业": "클래스",
     "诸神宠儿": "신의 총애",
+    "主线任务": "메인 퀘스트",
     "注重惩恶扬善，公序良俗。": "질서, 선함, 권선징악을 중요시한다.",
     "注重权衡利弊，获取收益。": "장단점을 저울질해 수익을 최대화한다.",
+    "专武": "전용 무기",
+    "资源": "자원",
+    "子技能": "하위 스킬",
     "左右逢源": "행운의 화신",
     "做人最要紧的当然是自己开心。": "내가 기쁜 게 가장 중요하다.",
     "abyss-dungeon-detail": {
@@ -54,6 +145,7 @@
         "assistantDesc": "캐릭터의 자주 쓰는 조합을 확인",
         "available": "사용 가능",
         "buildUploadDataFailed": "심연 업로드 데이터 생성에 실패했습니다",
+        "char_usage_rate": "캐릭터 사용률",
         "createdAt": "생성 시간",
         "desc": "어비스 조합과 캐릭터/무기 통계",
         "emptyUploadResult": "업로드 결과가 비어 있습니다",
@@ -61,24 +153,28 @@
         "exportFailed": "심연 제출 내보내기에 실패했습니다",
         "exportSuccess": "심연 제출을 내보냈습니다",
         "level": "레벨",
+        "level_distribution": "레벨 분포",
         "levelDistribution": "레벨 분포",
         "loadDefaultRoleFailed": "기본 캐릭터 정보를 불러오지 못했습니다",
         "loadLatestRoleInfoFailed": "최신 캐릭터 정보를 불러오지 못했습니다",
         "loadStatsFailed": "심연 통계를 불러오지 못했습니다",
         "loginFirst": "먼저 로그인하세요",
+        "main_control_only": "주 조작만",
         "mainChar": "주 캐릭터",
         "mainCharId": "주 캐릭터 ID",
         "mainOnly": "주 캐릭터만",
         "meleeWeapon": "근접 무기",
         "meleeWeaponId": "근접 무기 ID",
         "missingUid": "UID가 없습니다",
+        "most_used_team": "가장 많이 쓰인 편성",
         "mostUsedLineup": "가장 많이 사용된 조합",
         "mostUsedLineupDesc": "출전 수가 가장 많은 조합",
+        "no_result": "결과 없음",
         "noExportableSubmissions": "내보낼 수 있는 심연 제출이 없습니다",
         "noResult": "결과가 없습니다",
         "noUploadData": "업로드할 심연 데이터가 없습니다",
-        "pet": "마령",
         "petId": "마령 ID",
+        "query_char_teams": "캐릭터의 자주 쓰는 편성 조회",
         "rangedWeapon": "원거리 무기",
         "rangedWeaponId": "원거리 무기 ID",
         "refresh": "새로고침",
@@ -87,6 +183,7 @@
         "roleType": "캐릭터 유형",
         "roleUsage": "캐릭터 사용率",
         "seasonId": "시즌 ID",
+        "select_char": "캐릭터 선택",
         "selectRole": "캐릭터를選択하세요",
         "sheetRole": "캐릭터 참여",
         "sheetSubmission": "제출",
@@ -104,7 +201,9 @@
         "supportWeapon1Id": "지원 무기 1 ID",
         "supportWeapon2": "지원 무기 2",
         "supportWeapon2Id": "지원 무기 2 ID",
+        "team_builder": "편성 도우미",
         "title": "어비스 사용률",
+        "top_deploy_team": "출전 수가 가장 많은 편성",
         "uidSha256": "UID SHA256",
         "updatedAt": "업데이트 시간",
         "upload": "업로드",
@@ -135,7 +234,6 @@
         "titleFramePreview": "칭호 프레임 미리보기",
         "totalCount": "총 {{count}}개의 장식품",
         "type": "유형",
-        "typeAll": "전체",
         "typeAvatar": "프로필",
         "typeChar": "캐릭터 장식품",
         "typeHair": "헤어",
@@ -195,6 +293,7 @@
     },
     "achievement-list": {
         "desc": "게임 업적 진행 상황 통계",
+        "no_match": "조건에 맞는 업적이 없습니다",
         "title": "업적 목록"
     },
     "activity-calendar": {
@@ -216,7 +315,6 @@
         "status_ongoing": "진행 중",
         "status_upcoming": "곧 시작",
         "theater_desc": "공연에 참여하여 의뢰장을 획득!",
-        "theater_title": "몰입형 연극",
         "title": "활동 달력"
     },
     "admin-home": {
@@ -306,7 +404,6 @@
         "examples": {
             "baseStats": "기본 능력치",
             "complex": "복합 식",
-            "critDamage": "치명타 피해",
             "elementDamage": "원소 피해 성분",
             "expectedDamage": "기대 피해",
             "forceAttr": "속성 강제",
@@ -342,7 +439,6 @@
         "keywordsTitle": "키워드",
         "macrosTitle": "내장 매크로",
         "members": {
-            "crit": "치명타 피해",
             "critTrigger": "치명타 및 발동",
             "element": "원소 피해 성분",
             "n": "체력 비율 기반 효과 배율을 계산하지 않음",
@@ -436,6 +532,28 @@
         "灾厄攻击": "추가 효과 발동 시 해당 대미지가 속성을 가진 대상에게 원래의 2배 대미지를 입힌다.",
         "震荡攻击": "추가 효과 발동 시 해당 대미지의 전투 태세 감소 효과가 2배가 된다."
     },
+    "auto-script": {
+        "actions": "액션",
+        "capture_coord": "F9로 좌표 캡처",
+        "capture_coord_hint": "F9로 좌표 캡처…",
+        "click_node_hint": "흐름의 노드를 클릭하여 편집하세요",
+        "close": "닫기",
+        "code_preview": "코드 미리보기",
+        "comment_note": "메모(주석 생성)",
+        "config_variables": "설정 변수",
+        "coordinate": "좌표",
+        "drag_node_hint": "노드를 오른쪽 흐름으로 끌어다 놓으세요",
+        "editor_title": "그래픽 스크립트 편집기",
+        "empty_click_hint": "비워 두면 현재 위치를 클릭합니다",
+        "export_code": "코드 내보내기",
+        "export_to_tab": "현재 스크립트 탭으로 내보내기",
+        "flow_control": "흐름 제어",
+        "frameless_mode": "프레임리스 모드(frameless)",
+        "hotkey_hint": "F9 좌표 캡처 · F10 녹화",
+        "key": "키",
+        "properties": "속성",
+        "target_process": "대상 프로세스"
+    },
     "autobuild": {
         "calculating": "계산 중...",
         "charMods": "캐릭터 MOD",
@@ -448,7 +566,12 @@
         "preserveTypes": "현재 MOD 유지",
         "rangedMods": "원거리 MOD",
         "skillWeaponMods": "동률 MOD",
+        "toggle_log": "로그 펼치기/접기",
         "useInv": "사용자 인벤토리 사용"
+    },
+    "backpack-puzzle": {
+        "clear_manual_placement": "수동 배치 비우기",
+        "drag_item_hint": "아이템을 배낭으로 끌어다 놓으세요"
     },
     "book-detail": {
         "countSuffix": "항목 수: {{count}}",
@@ -477,6 +600,7 @@
         "title": "서적 목록",
         "totalCount": "총 {{count}}개 읽을거리"
     },
+    "Boss削韧": "보스 경직",
     "box-drop": {
         "boxMaximum": "총 한도",
         "boxPerDay": "일일 한도",
@@ -497,6 +621,11 @@
         "title": "뽑기",
         "totalCapacity": "총 용량"
     },
+    "buff-editor": {
+        "copy_buff": "BUFF 복사",
+        "paste_buff": "BUFF 붙여넣기",
+        "search_placeholder": "BUFF 검색"
+    },
     "build-compare": {
         "additional_buff_list": "추가 BUFF 목록",
         "additional_mod_list": "추가 MOD 목록",
@@ -514,6 +643,19 @@
         "select_project_to_compare": "빌드를 비교하기 위해 프로젝트를 선택하세요",
         "tip": "참고: 이 페이지의 데이터는 자동으로 저장되지 않습니다!",
         "title": "빌드 비교"
+    },
+    "char-action-editor": {
+        "action_list": "액션 목록",
+        "action_n": "액션 {{n}}:",
+        "add_action": "액션 추가",
+        "background_action_n": "배경 액션 {{n}}:",
+        "buff_group_n": "BUFF 그룹 {{n}}:",
+        "enable_action_sequence": "액션 시퀀스 사용",
+        "generate_hp_curve": "HP 곡선 생성",
+        "hover_hp": "HP: {{value}}%",
+        "hover_time": "시간: {{value}}s",
+        "hp": "HP",
+        "total_duration": "총 시간: {{time}}"
     },
     "char-build": {
         "actions": "액션 시퀀스",
@@ -555,6 +697,7 @@
         "drag_field_armed": "{{name}} 집었음: 수식 또는 사용자 변수를 탭해 넣고, 같은 항목을 다시 탭하면 취소됩니다",
         "drag_field_hint": "수식 또는 사용자 변수로 끌어다 놓을 수 있습니다. 더블 클릭하면 복사됩니다",
         "dynamic_prop": "동적 속성",
+        "effective_hp_formula": "(HP / (1 - 방어 / (300 + 방어)) + 실드) / (1 - 피해 감소)",
         "elem": "원소",
         "enemy": "적",
         "enemy_level": "적 레벨",
@@ -568,6 +711,7 @@
         "extra_mastery_clear": "추가 숙련 해제",
         "extra_mastery_desc": "추가로 숙련할 무기 유형을 선택하세요. 선택하면 해당 유형의 무기가 숙련 보너스(공격 ×1.2)를 받고, 재앙 무기의 단조 잠재 능력도 함께 활성화됩니다.",
         "extra_mastery_hint": "추가 숙련 무기 선택",
+        "extra_mastery_weapon_icon": "추가 숙련 무기 아이콘",
         "faction": "진영",
         "fetch_char_info_failed": "캐릭터 정보를 가져오지 못했습니다",
         "fetch_weapon_info_failed": "무기 정보를 가져오지 못했습니다",
@@ -620,6 +764,7 @@
         "select_timeline": "타임라인 선택",
         "selected_count": "{{count}}개 선택됨",
         "series": "시리즈",
+        "set_buff_coverage": "BUFF 커버리지 설정",
         "share": "공유하다",
         "share_build": "빌드 공유",
         "share_failed": "공유에 실패했습니다",
@@ -705,21 +850,6 @@
     "char-list": {
         "empty": "일치하는 캐릭터를 찾을 수 없습니다",
         "searchPlaceholder": "캐릭터 이름, 별명, 진영 검색(병음 지원)...",
-        "tabs": {
-            "all": "전체",
-            "control": "제어",
-            "defense": "방어",
-            "heal": "회복",
-            "homologyWeapon": "동조 무기",
-            "maxHp": "최대 체력",
-            "output": "출력",
-            "sanityRegen": "정신력 회복",
-            "shield": "방패",
-            "skillDamage": "스킬 피해",
-            "summon": "소환물",
-            "support": "지원",
-            "weaponDamage": "무기 피해"
-        },
         "title": "역할 목록",
         "totalSuffix": "명의 캐릭터",
         "unreleasedHint": "출시 전 콘텐츠는 변경될 수 있습니다"
@@ -778,8 +908,90 @@
         "closeWindowFailed": "클라우드 게임 창을 닫지 못했습니다",
         "openWindowFailed": "클라우드 게임 창을 열지 못했습니다"
     },
+    "comment-section": {
+        "comment": "댓글",
+        "comment_placeholder": "매너 있게, 이성적으로 소통해요～",
+        "no_comments": "댓글이 없습니다. 첫 번째로 남겨 보세요!"
+    },
     "common": {
-        "delete": "삭제"
+        "all": "전체",
+        "area": "지역",
+        "autoplay": "자동 재생",
+        "basic_info": "기본 정보",
+        "category": "분류",
+        "char_avatar": "캐릭터 아바타",
+        "clear": "지우기",
+        "close": "닫기",
+        "close_simulation": "시뮬레이션 닫기",
+        "confirm": "확인",
+        "cooldown": "쿨다운",
+        "coordinate": "좌표",
+        "count_days": "{{day}}일차",
+        "count_groups": "{{count}} 그룹",
+        "count_items": "{{count}}개",
+        "count_kinds": "{{count}}종",
+        "count_per_sec": "{{count}}회/초",
+        "count_seconds": "{{count}}초",
+        "count_stars": "{{count}}성",
+        "count_times": "{{count}}회",
+        "count_waves": "{{count}} 웨이브",
+        "day": "일",
+        "default": "기본",
+        "delete": "삭제",
+        "description": "설명",
+        "export": "내보내기",
+        "five_dimensions": "5속성",
+        "full_text_search": "전체 텍스트 검색",
+        "generator": "생성기",
+        "hour": "시간",
+        "impression_check": "인상 판정",
+        "impression_increase": "인상 증가",
+        "items": "항목",
+        "label_exp": "{{count}} 경험치",
+        "label_points": "점수 {{value}}",
+        "label_score": "목표 {{value}}",
+        "label_update_by": "최근 업데이트: {{name}}",
+        "level": "레벨",
+        "limited_time": "기간 한정",
+        "load_more": "더 불러오기",
+        "loading": "불러오는 중...",
+        "locked": "미해금",
+        "match": "일치:",
+        "minute": "분",
+        "mod_icon": "모드 아이콘",
+        "no_data": "데이터 없음",
+        "none": "없음",
+        "official": "공식",
+        "player_count": "인원",
+        "price": "가격",
+        "quality": "품질",
+        "rarity": "희귀도",
+        "refresh": "새로고침",
+        "region": "지역",
+        "related_char": "관련 캐릭터:",
+        "reset_to_current": "현재로 재설정",
+        "retry": "다시 시도",
+        "score": "점수:",
+        "season": "시즌",
+        "select_level_range": "레벨 범위 선택",
+        "show_diff_only": "차이만 표시",
+        "source": "소스",
+        "sub_region": "하위 지역",
+        "test": "테스트",
+        "times": "회",
+        "total_count": "총",
+        "type": "유형",
+        "upload": "업로드",
+        "user_avatar": "사용자 아바타",
+        "version": "버전",
+        "voice_pack": "음성 팩",
+        "weapon_avatar": "무기 아바타",
+        "weapon_category": "무기 분류",
+        "weight": "가중치"
+    },
+    "copy-id": {
+        "click_copy": "클릭하여 {{name}} 복사",
+        "click_copy_id": "클릭하여 ID 복사"
     },
     "counter": {
         "action": {
@@ -807,6 +1019,32 @@
         "title": "카운터",
         "triggers": "트리거",
         "unlimited": "무제한"
+    },
+    "coverage-dialog": {
+        "coverage_minus": "커버리지 -1%",
+        "coverage_percent": "커버리지 백분율",
+        "coverage_plus": "커버리지 +1%"
+    },
+    "cron-input": {
+        "unit_day": "일",
+        "unit_month": "월",
+        "unit_week": "주",
+        "unit_year": "년",
+        "weekday_fri": "금",
+        "weekday_mon": "월",
+        "weekday_sat": "토",
+        "weekday_sun": "일",
+        "weekday_thu": "목",
+        "weekday_tue": "화",
+        "weekday_wed": "수"
+    },
+    "custom-buff-editor": {
+        "add": "추가",
+        "attribute": "속성",
+        "empty_hint": "사용자 지정 BUFF가 없습니다. 추가하세요.",
+        "remove": "제거",
+        "value": "수치",
+        "value_placeholder": "수치 입력"
     },
     "damage": {
         "desc": "CharBuild 피해 공식을 단계별로 분해하고 수동 재정의를 지원합니다",
@@ -913,9 +1151,556 @@
         "weapon": "무기",
         "weapon_desc": "무기 정보와 속성 확인"
     },
+    "db-abyss-dungeon": {
+        "abyss_id": "심연 ID",
+        "buff_list": "BUFF 목록",
+        "char_avatar": "캐릭터 아바타",
+        "dungeon_id": "던전 ID",
+        "dungeon_info": "던전 정보",
+        "element": "속성",
+        "end_time": "종료 시간",
+        "mastery": "숙련",
+        "monster_counter": "몬스터 속성 상성",
+        "related_chars": "관련 캐릭터",
+        "season_id": "시즌 ID",
+        "start_time": "시작 시간",
+        "tags": "태그",
+        "type": "유형",
+        "version": "버전"
+    },
+    "db-abyss-dungeon-list": {
+        "abyss_count": "개 심연",
+        "no_match": "일치하는 심연 던전이 없습니다",
+        "search_placeholder": "던전 ID 또는 캐릭터 이름 검색..."
+    },
+    "db-achievement-list": {
+        "achievement_count": "개 업적",
+        "no_match": "일치하는 업적이 없습니다",
+        "search_placeholder": "업적 ID / 이름 / 설명 검색(병음 지원)..."
+    },
+    "db-char-list": {
+        "char_count": "명의 캐릭터",
+        "no_match": "일치하는 캐릭터가 없습니다",
+        "search_placeholder": "캐릭터 이름 / 별칭 / ID 검색(병음 지원)..."
+    },
     "db-damage": {
+        "damage_formula": "피해 공식",
         "desc": "CharBuild 대미지 공식을 단계별로 분해하고 수동 덮어쓰기를 지원",
+        "dot_damage": "DOT 피해",
+        "formula_desc": "각 배율 구간과 중간값을 단계별로 확인할 수 있으며, 수동 재정의와 실시간 결과 확인을 지원합니다.",
+        "import_from_build": "현재 빌드에서 가져오기",
+        "input_params": "입력 매개변수",
+        "percentage_input": "백분율 입력",
+        "reset_current_mode": "현재 모드 초기화",
         "title": "대미지 분해"
+    },
+    "db-draft-list": {
+        "batch_craft": "일괄 제작",
+        "draft_count": "개 설계도",
+        "hidden": "숨김",
+        "infinite_craft": "무한 제작",
+        "output_count": "산출 수량:",
+        "search_placeholder": "설계도 이름 검색(병음 지원)..."
+    },
+    "db-dungeon-detail": {
+        "check_time": "확인 시간",
+        "commander_count": "호령자 ({{count}}종)",
+        "current_platform": "현재 플랫폼: {{platform}}(기본 PC)",
+        "detect_delay": "감지 지연",
+        "detect_time": "감지 시간",
+        "elite_monsters": "특수 몬스터",
+        "end_level": "종료 레벨",
+        "end_wave": "종료 웨이브",
+        "endless_dungeon_settings": "무한 던전 설정",
+        "endless_level_hint": "무한 던전 레벨은 상단 웨이브 슬라이더로 조정합니다",
+        "endless_waves": "무한 웨이브",
+        "generator_id": "생성기 ID",
+        "group_id": "그룹 ID",
+        "group_limit": "그룹 상한",
+        "group_members_count": "그룹 구성원 ({{count}}종)",
+        "group_radius_z": "그룹 반경 / Z",
+        "group_spawns_count": "그룹 스폰 ({{count}}그룹)",
+        "hello_box": "헬로 박스",
+        "initial_center_range": "초기 중심 범위",
+        "level_requirement": "육성 레벨 {{level}}",
+        "mobile": "모바일",
+        "monster_level_range": "몬스터 레벨 구간",
+        "monster_waves": "몬스터 웨이브",
+        "no_cumulative_reward": "현재 웨이브에 누적 보상이 없습니다",
+        "no_monster_data": "몬스터 데이터 없음",
+        "no_reward_data": "보상 데이터 없음",
+        "no_wave_data": "웨이브 데이터 없음",
+        "normal_monsters": "일반 몬스터",
+        "normal_monsters_count": "일반 몬스터 ({{count}}종)",
+        "probability": "확률",
+        "quantity": "수량",
+        "range_cover_level": "구간 [시작, 종료), 실제 적용 Lv.{{start}} ~ Lv.{{end}}",
+        "range_cover_wave_level": "구간 [시작, 종료), 실제 적용 {{start}} ~ {{end}} 웨이브, 몬스터 Lv.{{lvStart}} ~ Lv.{{lvEnd}}(웨이브당 +{{step}}, 최대 {{max}})",
+        "refill_interval": "보충 간격",
+        "spawn_center_range": "스폰 중심 범위",
+        "spawn_interval": "스폰 간격",
+        "spawn_num_pool": "1회 스폰 수량 풀: {{value}}",
+        "spawn_radius": "스폰 범위 ({{platform}})",
+        "spawn_range_title": "스폰 범위 표시",
+        "special_reward": "특수 보상",
+        "special_reward_group": "특수 보상 그룹",
+        "start_level": "시작 레벨",
+        "start_wave": "시작 웨이브",
+        "threshold": "임계값",
+        "wave_n": "{{n}} 웨이브",
+        "wave_range_over_max": "{{start}} ~ {{end}} 웨이브 / {{max}}",
+        "waves_per_stage": "단계별 스폰 웨이브 수",
+        "weight": "가중치"
+    },
+    "db-dungeon-detail-view": {
+        "not_found": "던전을 찾을 수 없습니다"
+    },
+    "db-dungeon-list": {
+        "dungeon_count": "개 던전",
+        "no_match": "일치하는 던전이 없습니다",
+        "search_placeholder": "던전 ID / 이름 / 설명 / 레벨 / 보상 검색(병음 지원)..."
+    },
+    "db-dynquest-detail": {
+        "level_tiers": "레벨 구간",
+        "quest_info": "의뢰 정보",
+        "story_nodes": "스토리 노드"
+    },
+    "db-dynquest-list": {
+        "filter_level": "레벨 필터",
+        "filter_region": "지역 필터",
+        "story_full_text_search": "스토리 전체 텍스트 검색"
+    },
+    "db-event-list": {
+        "compare_prev_time_point": "이전 시점과 비교:",
+        "current_time_point": "현재 시점:",
+        "no_data": "데이터 없음",
+        "selected_time_point": "선택한 시점:",
+        "time_point": "시점",
+        "timeline": "타임라인"
+    },
+    "db-fish-detail": {
+        "appearance_time": "출현 시간",
+        "length": "길이",
+        "mutation_rate": "변이 확률",
+        "unknown_spot": "알 수 없는 낚시 포인트 ({{id}})"
+    },
+    "db-fish-list": {
+        "fish": "물고기",
+        "fishing_spots": "낚시터",
+        "search_placeholder": "낚시 포인트 / 물고기 이름 검색 (병음 지원)...",
+        "spot_count": "낚시 포인트 {{count}}곳"
+    },
+    "db-fish-spot": {
+        "always_s2b": "항상 물고기로 더 큰 물고기 잡기",
+        "bait_type": "미끼 종류",
+        "clear_records": "기록 비우기",
+        "expected_hint": "물고기 100마리 평균 기대값 (아래에서 조정 가능. 현재 설정: {{lure}} | {{mode}})",
+        "extra_reward": "추가 보상 (확률: {{prob}}) 주 30회",
+        "fish_100": "100회 낚시",
+        "fish_count_limit": "물고기 수 제한",
+        "fish_list": "어종 목록",
+        "fish_once": "1회 낚시",
+        "fishing_records": "낚시 기록",
+        "fishing_sim": "낚시 시뮬레이션",
+        "fishing_time": "낚시 시간",
+        "lure_none": "기타",
+        "lure_same_attract": "동종 유인 (변이 확률 +30%)",
+        "mutation": "변이",
+        "no_extra_reward": "추가 보상 데이터가 없습니다",
+        "no_pet_data": "마령 데이터가 없습니다",
+        "no_records": "낚시 기록이 없습니다",
+        "other": "기타",
+        "per_fish_expected": "개당 기대값: {{value}}",
+        "pet_reward": "마령 보상 (확률: {{prob}}) 추가 보상 발동 시",
+        "s2b": "물고기로 더 큰 물고기 잡기",
+        "skip_low_value": "저가치 어획물 버리기",
+        "total_value": "총 가치:",
+        "variant": "특이종",
+        "weight": "가중치"
+    },
+    "db-forge-detail": {
+        "level_reward_detail": "레벨 보상 상세",
+        "no_quest_rewards": "퀘스트 보상을 찾지 못했습니다",
+        "no_reward_detail": "보상 상세를 찾지 못했습니다",
+        "quest_rewards": "퀘스트 보상",
+        "related_quests": "관련 퀘스트"
+    },
+    "db-forge-list": {
+        "forge_level_count": "개 제련 레벨",
+        "search_placeholder": "제련 레벨, 퀘스트 또는 보상 ID 검색..."
+    },
+    "db-hardboss-detail": {
+        "monster_info": "몬스터 정보"
+    },
+    "db-hardboss-list": {
+        "hardboss_count": "개 악몽 잔영",
+        "no_match": "일치하는 악몽 잔영이 없습니다",
+        "search_placeholder": "악몽 잔영 ID / 이름 / 설명 / 몬스터 이름 검색(병음 지원)..."
+    },
+    "db-impr": {
+        "realtime": "실시간",
+        "search_placeholder": "인상 항목 검색"
+    },
+    "db-impr-detail": {
+        "impr_info": "인상 정보",
+        "options": "옵션",
+        "source_link": "소스 링크"
+    },
+    "db-iron-survival-detail": {
+        "compound": "복리",
+        "cumulative_rewards": "누적 보상",
+        "with_compound": "(복리 포함)"
+    },
+    "db-iron-survival-spawn": {
+        "butcher_spawn": "도살자 스폰",
+        "elite_id_group": "강적 ID 그룹",
+        "elite_spawn": "강적 스폰",
+        "monster_id_group": "몬스터 ID 그룹",
+        "normal_spawn": "일반 스폰"
+    },
+    "db-iron-ticket-list": {
+        "iron_ticket_count": "개 심경 나침반"
+    },
+    "db-map-list": {
+        "map_count": "개 지도",
+        "search_placeholder": "지도 ID / 이름 / 설명 검색...",
+        "show_map_list": "지도 목록 표시"
+    },
+    "db-mod-list": {
+        "convertible": "변환 가능",
+        "search_placeholder": "모드 이름 / 시리즈 검색(병음 지원)..."
+    },
+    "db-monster-compact-card": {
+        "drops": "드롭",
+        "level": "레벨"
+    },
+    "db-monster-list": {
+        "commander": "호령자",
+        "commander_affixes": "호령자 옵션",
+        "normal": "일반",
+        "search_placeholder": "몬스터 이름 검색(병음 지원)..."
+    },
+    "db-music-list": {
+        "search_placeholder": "악보 또는 앨범 검색"
+    },
+    "db-npc-detail": {
+        "char_id": "캐릭터 ID",
+        "faction": "진영",
+        "icon": "아이콘",
+        "name": "이름",
+        "no_dialogue": "표시할 대화 체인이 없습니다",
+        "npc_info": "NPC 정보"
+    },
+    "db-npc-list": {
+        "dialogue_only": "대화만",
+        "no_match": "일치하는 NPC가 없습니다"
+    },
+    "db-party-topic": {
+        "bgm_media_section": "BGM / 효과음",
+        "bgm_mute_hint": "(무음/정지 제어, 미리 듣기 없음)",
+        "bgm_no_cdn": "(CDN 오디오 미수록)",
+        "bgm_preview": "미리 듣기",
+        "bgm_preview_stop": "미리 듣기 중지",
+        "dialogue_chain_empty": "표시할 대화 체인이 없습니다",
+        "dialogue_empty": "대화 내용이 없습니다",
+        "dialogue_title": "스토리 대화 ({{num}}개)",
+        "not_found": "화제를 찾을 수 없습니다",
+        "prerequisite_quest_chain": "선행 퀘스트 체인",
+        "resource_cost": "소모 자원",
+        "reward_id": "보상 ID",
+        "rewards": "보상",
+        "story_voice_settings": "스토리 음성 설정",
+        "voice_language": "음성 언어"
+    },
+    "db-party-topic-list": {
+        "all_chars": "모든 캐릭터",
+        "filter_char": "캐릭터 필터",
+        "prerequisite_value": "선행: {{name}}",
+        "resource": "자원",
+        "search_placeholder": "화제 ID / 이름 / 캐릭터 검색(병음 지원)...",
+        "topic_count": "개 화제"
+    },
+    "db-pet-list": {
+        "no_match": "일치하는 마령이 없습니다",
+        "search_placeholder": "마령 이름 검색(병음 지원)..."
+    },
+    "db-quest-story-nodes": {
+        "bgm_resource": "BGM 리소스",
+        "detective_quiz": "탐정 퀴즈",
+        "empty_node": "이 노드에 표시할 내용이 없습니다",
+        "no_cdn_audio": "(CDN 오디오 미수록)",
+        "node_jump": "노드 이동",
+        "quiz_tips": "힌트:",
+        "silent_node_note": "(무음/정지 제어 노드, 미리듣기 없음)",
+        "unknown_node": "알 수 없는 노드 {{id}}",
+        "unnamed_media_node": "이름 없는 미디어 노드"
+    },
+    "db-raid-rank": {
+        "current_dungeon": "현재 던전: {{id}}",
+        "current_rewards": "현재 획득 보상 횟수:",
+        "difficulty_label": "난이도 {{level}}",
+        "dungeon_info": "던전 정보",
+        "elapsed_time": "소요 시간: {{value}}초",
+        "formula": "최종 점수 = BaseRaidPoint + (1 + 구간1×속도1 + 구간2×속도2 + 구간3×속도3)",
+        "formula_id": "계산식 ID: {{id}}",
+        "formula_note": "남은 시간이 소진될 때까지 구간 값을 순서대로 적용합니다",
+        "input_remaining_time": "남은 시간 입력",
+        "input_score": "점수 입력",
+        "max_allowed_time": "최대 허용 시간: {{value}}초",
+        "max_score": "최고 점수: {{value}}",
+        "per_1000_points": "1000점마다 획득",
+        "prefix": "접두어",
+        "rank_info": "순위 정보",
+        "rank_requirement": "상위 {{percent}}% 플레이어",
+        "rate": "속도",
+        "remaining_time": "남은 시간(초):",
+        "rewards_max": "회 보상 | 최대 보상 횟수:",
+        "score_calc": "점수 계산",
+        "score_calc_desc": "점수 계산 설명:",
+        "score_reward_calc": "점수 보상 계산:",
+        "suffix": "접미어",
+        "time_zone": "시간 구간"
+    },
+    "db-reputation-list": {
+        "no_match": "일치하는 지역 명성이 없습니다"
+    },
+    "db-resource-list": {
+        "resource_count": "개 자원"
+    },
+    "db-rouge": {
+        "heat_value": "딥다이브 깊이 {{value}}",
+        "item_count": "개 항목",
+        "no_match": "일치하는 항목이 없습니다",
+        "room_type_fallback": "방 유형 {{id}}",
+        "search_placeholder": "ID / 이름 / 설명 검색...",
+        "upgradable": "업그레이드 가능"
+    },
+    "db-rouge-detail": {
+        "archive_id": "도감 ID",
+        "area": "구역",
+        "base_points": "기본 포인트",
+        "blessing_award": "축복 보상",
+        "clear_score": "클리어 점수",
+        "collect_count": "{{num}}개 수집",
+        "collect_items": "채집물",
+        "cut_off_event": "중단 이벤트",
+        "difficulty_id": "난이도 ID",
+        "equip_role": "캐릭터",
+        "equip_slot": "적용 부위",
+        "event_area": "이벤트 지역",
+        "event_chance": "이벤트 확률",
+        "event_phase": "이벤트 단계",
+        "event_sub_id": "이벤트 하위 ID",
+        "extra_points": "추가 포인트",
+        "global_passive": "전역 패시브",
+        "initial_dive_depth": "초기 딥다이브 깊이",
+        "max_level": "최대 레벨",
+        "min_room": "최소 방",
+        "no": "아니오",
+        "outer_shop_token": "외부 상점 토큰",
+        "points": "포인트",
+        "points_rate": "포인트 배율",
+        "recommend_level": "권장 레벨",
+        "room_level": "방 레벨",
+        "room_weight": "방 가중치",
+        "season_end": "시즌 종료",
+        "season_start": "시즌 시작",
+        "section_activation": "활성화 조건",
+        "section_class_effects": "클래스 효과",
+        "section_conditions": "방 조건",
+        "section_contract": "계약 효과 (동일 클래스 4명 발동)",
+        "section_effects": "효과",
+        "section_lore": "배경",
+        "section_set_bonus": "세트 효과",
+        "section_story": "스토리",
+        "section_summary": "요약",
+        "sellable": "판매 가능",
+        "shop_npc": "상점 NPC",
+        "shop_price": "상점 가격",
+        "talent_type_general": "범용",
+        "token_award": "토큰 보상",
+        "token_id": "토큰 ID",
+        "token_transform": "토큰 전환",
+        "type_fallback": "유형 {{id}}",
+        "unknown_treasure": "알 수 없는 유물",
+        "unlock_dep": "해금 조건",
+        "upgrade_cost": "업그레이드 비용",
+        "yes": "네"
+    },
+    "db-rouge-detail-view": {
+        "not_found": "미진 항목을 찾을 수 없습니다"
+    },
+    "db-rouge-pro-detail": {
+        "event_defence": "거점 방어",
+        "event_exterminate": "섬멸",
+        "event_kill_elite": "정예 처치",
+        "event_occupation": "점령",
+        "event_sabotage": "파괴",
+        "fx_block_effect": "효과 차단: {{name}}",
+        "fx_choice_number": "선택 시 선택지 수 {{num}}개",
+        "fx_end_points_rate": "포인트 획득량 +{{percent}}",
+        "fx_get_buff": "Buff #{{id}} 획득",
+        "fx_get_mod": "전원 Mod #{{id}} 획득",
+        "fx_get_token": "즉시 잿불 {{num}} 획득",
+        "fx_get_treasure": "유물 획득: {{name}}",
+        "fx_kill_get_token": "적 {{times}}명 처치마다 잿불 {{num}} 획득",
+        "fx_lantern_range": "랜턴 조명 범위 +{{value}}",
+        "fx_ore_extra_rate": "광석 획득량 +{{percent}}",
+        "fx_pay_for_reborn": "부활 시 잿불 {{num}} 소모",
+        "fx_random_choice": "선택지가 무작위로 변경",
+        "fx_reborn_free": "무료 부활 횟수 +{{num}}",
+        "fx_recover_time": "피격 후 회복 시점 {{seconds}}초 앞당김",
+        "fx_shop_discount": "상점 가격 {{percent}} 감소",
+        "fx_timber_extra_rate": "목재 획득량 +{{percent}}",
+        "fx_token_by_time": "{{seconds}}초마다 잿불 {{num}} 획득",
+        "fx_token_extra_rate": "잿불 획득량 +{{percent}}",
+        "unique": "고유"
+    },
+    "db-rouge-storyline": {
+        "no_content": "이 노드에 표시할 내용이 없습니다",
+        "no_dialogue": "스토리 대화가 없습니다"
+    },
+    "db-shop-detail": {
+        "available_with_deps": "{{count}}개 구매 가능 +{{deps}} 의존",
+        "changed_with_deps": "{{changed}}개 변화 +{{deps}} 의존",
+        "compare_previous": "이전 시점 비교: {{label}}",
+        "current": "현재",
+        "current_only": "현재만",
+        "current_time_point": "현재 시점: {{label}}",
+        "no_available_items": "현재 시점에 구매 가능한 상품이 없습니다",
+        "no_diff_items": "이전 시점 대비 변화한 상품이 없습니다",
+        "purchasable_count": "구매 가능 {{count}}개",
+        "time_filter": "시간 필터",
+        "time_point_count": "{{count}}개 시점",
+        "timeline_desc": "이산 시점별로 구매 가능한 상품을 확인하거나 이전 시점 대비 변화만 볼 수 있습니다."
+    },
+    "db-shop-detail-view": {
+        "not_found": "상점을 찾을 수 없습니다"
+    },
+    "db-shop-list": {
+        "item_count": "상품 수: {{count}}",
+        "main_tabs": "메인 탭 {{count}}",
+        "search_placeholder": "상점 ID / 이름 / 상품 검색...",
+        "shop_count": "개 상점",
+        "sub_tabs": "하위 탭 {{count}}"
+    },
+    "db-solo-treasure": {
+        "meta_bag": "유형 {{type}} · 가격 {{price}} · 형상 {{shape}}",
+        "meta_container": "설계도 {{bp}} · 형상 {{shape}} · 드롭률 {{rate}}",
+        "meta_dungeon_pair_unlock": "던전 {{hard}}/{{easy}} · 해금 {{condition}}",
+        "meta_dungeon_unlock": "던전 {{id}} · 해금 {{condition}}",
+        "search_placeholder": "ID / 이름 / 설명 검색...",
+        "total_count": "{{count}}개 항목"
+    },
+    "db-solo-treasure-bag": {
+        "capacity": "용량"
+    },
+    "db-solo-treasure-container": {
+        "container_slots": "컨테이너 슬롯",
+        "drop_weight": "드롭 가중치",
+        "level_count": "레벨 / 수량",
+        "no_drop_weight": "드롭 가중치 데이터가 없습니다",
+        "no_level_limit": "레벨·수량 제한이 없습니다",
+        "no_slot_data": "슬롯 데이터가 없습니다"
+    },
+    "db-solo-treasure-dungeon": {
+        "challenge_mode": "도전 모드",
+        "disable_coop": "협동 비활성화",
+        "entry_fee": "참가 비용",
+        "evacuation_time": "철수 시간",
+        "extract_gameplay": "추출 플레이",
+        "gameplay_fallback": "게임플레이 {{id}}",
+        "is_false": "아니오",
+        "is_true": "예",
+        "limited_chars": "한정 캐릭터",
+        "mode": "모드",
+        "no_extract_data": "추출 플레이 데이터가 없습니다",
+        "no_trial_chars": "체험 캐릭터 없음",
+        "normal_mode": "일반 모드",
+        "rain_time": "비 시간",
+        "repeat": "상시 던전",
+        "story": "스토리 던전",
+        "total_time": "총 시간",
+        "trial_chars": "체험 캐릭터",
+        "trial_weapons": "체험 무기",
+        "warning_time": "경고 시간"
+    },
+    "db-solo-treasure-entry": {
+        "bag": "보물 주머니",
+        "container": "컨테이너",
+        "shape_placeholder": "형상 자리 표시자",
+        "treasure": "보물",
+        "treasure_icon": "보물 아이콘"
+    },
+    "db-solo-treasure-gameplay": {
+        "generator_id": "생성기 ID",
+        "income": "수익",
+        "interval": "간격",
+        "mechanism_box": "기관 상자",
+        "monsters": "몬스터",
+        "normal_monsters_count": "일반 몬스터 ({{count}}종)",
+        "radius": "범위",
+        "repair_speed": "수리 속도",
+        "spawning": "스폰",
+        "target_value": "목표값",
+        "time": "시간",
+        "traps": "함정"
+    },
+    "db-solo-treasure-mechanism": {
+        "amount": "수량",
+        "quantity_range": "수량 범위",
+        "shape": "형상"
+    },
+    "db-title-detail": {
+        "title_preview": "칭호 미리보기"
+    },
+    "db-title-detail-view": {
+        "not_found": "칭호를 찾을 수 없습니다"
+    },
+    "db-title-list": {
+        "prefix": "접두어",
+        "search_placeholder": "칭호 ID / 이름 / 출처 검색(병음 지원)...",
+        "suffix": "접미어",
+        "title_count": "개 칭호"
+    },
+    "db-walnut-detail": {
+        "col_at_least_once": "최소 1회 황금 확률",
+        "col_count": "수량",
+        "col_exact_this_time": "정확히 이번에 황금이 나올 확률",
+        "col_name": "이름",
+        "col_opens_n": "개봉 횟수 (n)",
+        "col_pool_range": "풀 추첨 범위*",
+        "gold_count": "황금 등장 횟수",
+        "gold_probability": "황금 확률 기대값",
+        "gold_rate": "황금 확률",
+        "mechanism_note": "* 메커니즘: 각 보상의 추첨 범위에서 해당 보상을 n개 추첨하여 보상 시퀀스에 추가합니다. 시퀀스를 섞은 뒤 끝에 황금 보상을 배치합니다. 황금 보상이 나올 때까지 추첨을 반복하고, 나오면 시퀀스를 초기화합니다.",
+        "no_open_records": "개봉 기록이 없습니다",
+        "no_stats": "통계 데이터가 없습니다",
+        "open_65": "65회 개봉",
+        "open_once": "1회 개봉",
+        "open_results": "개봉 결과 (최근 200회)",
+        "rarity_stars": "희귀도: {{count}}★",
+        "reset_data": "데이터 초기화",
+        "reward_list": "보상 목록",
+        "reward_stats": "보상 수량 통계",
+        "simulator": "개봉 시뮬레이션",
+        "source_section": "획득 경로",
+        "start_auto": "자동 개봉 시작",
+        "stop_auto": "자동 개봉 중지",
+        "total_opens": "총 개봉 횟수",
+        "unknown": "알 수 없음"
+    },
+    "db-walnut-detail-view": {
+        "not_found": "밀서를 찾을 수 없습니다"
+    },
+    "db-walnut-list": {
+        "search_placeholder": "밀서 ID / 이름 검색 (병음 지원)...",
+        "walnut_count": "개 밀서"
+    },
+    "db-weapon-list": {
+        "search_placeholder": "무기 이름 검색(병음 지원)...",
+        "weapon_count": "개 무기",
+        "weapon_icon": "무기 아이콘"
     },
     "dbAgent": {
         "conversation": {
@@ -1005,16 +1790,37 @@
             "traceExpand": "검색 상세"
         }
     },
+    "dialog-model": {
+        "ok": "확인"
+    },
     "dna-announcement": {
         "empty": "공지 데이터가 아직 없습니다",
         "fetch_failed": "공지를 가져오지 못했습니다",
         "last_updated": "마지막 업데이트",
         "refresh": "새로고침"
     },
+    "dna-forum": {
+        "load_failed": "게임 설정을 가져오지 못했습니다"
+    },
     "dna-game-info": {
+        "generate_screenshot": "스크린샷 생성",
         "no_inventory": "인벤토리가 없습니다. 먼저 공식 앱에서 캐릭터를 연동해 주세요.",
+        "push_settings": "설정 푸시",
+        "sync_inventory": "인벤토리 동기화",
         "sync_inventory_failed": "인벤토리 동기화에 실패했습니다",
         "sync_inventory_success": "인벤토리 동기화에 성공했습니다"
+    },
+    "dna-game-info-show": {
+        "achievement_progress": "업적 달성",
+        "coop_char_1": "협동 캐릭터 1",
+        "coop_char_2": "협동 캐릭터 2",
+        "coop_weapon_1": "협동 무기 1",
+        "coop_weapon_2": "협동 무기 2",
+        "melee_weapon": "근접 무기",
+        "progress": "진행도",
+        "ranged_weapon": "원거리 무기",
+        "reset_time": "초기화 시간",
+        "weekly_trace": "이번 주 행적"
     },
     "dna-home": {
         "desc": "게임 정보/출석/게시물 브라우징",
@@ -1029,6 +1835,21 @@
             "signIn": "로그인"
         },
         "title": "교교각"
+    },
+    "dna-login": {
+        "code": "인증 코드",
+        "code_placeholder": "인증 코드 입력",
+        "email": "이메일",
+        "email_placeholder": "이메일 입력",
+        "login": "로그인",
+        "logo_alt": "교교각 로고",
+        "phone": "휴대전화",
+        "phone_placeholder": "휴대전화 번호 입력",
+        "privacy_note": "*계정 정보는 로컬에만 저장되며 서버에 업로드되지 않습니다.",
+        "server": "서버",
+        "server_cn": "중국 서버",
+        "server_intl": "글로벌",
+        "title": "교교각 로그인"
     },
     "dna-post": {
         "browse": "조회",
@@ -1049,8 +1870,26 @@
         "postDetailTitle": "게시글 상세",
         "userAvatar": "사용자 아바타"
     },
+    "dna-post-content": {
+        "video_unsupported": "브라우저가 동영상 재생을 지원하지 않습니다"
+    },
     "dna-post-detail": {
-        "title": "게시물 상세"
+        "be_first_commenter": "첫 댓글을 남겨 보세요",
+        "comment_placeholder": "댓글을 작성하세요...",
+        "creator": "창작자",
+        "load_failed": "게시물 상세 정보를 가져오지 못했습니다",
+        "no_comments": "댓글이 없습니다",
+        "post_comment": "댓글 작성",
+        "title": "게시물 상세",
+        "upload_abyss_data": "심연 데이터 업로드"
+    },
+    "dna-post-list": {
+        "community_posts": "커뮤니티 게시물",
+        "no_posts": "게시물이 없습니다"
+    },
+    "dna-post-list-item": {
+        "featured": "추천",
+        "post_image": "게시물 이미지"
     },
     "dna-posts": {
         "title": "게시판"
@@ -1058,6 +1897,7 @@
     "dna-prop-flow": {
         "enter_phone_and_get_captcha": "전화번호를 입력하고 먼저 캡차를 받아 주세요",
         "enter_phone_and_sms_code": "전화번호와 인증 코드를 입력해 주세요",
+        "export_excel": "Excel로 내보내기",
         "get_captcha_failed": "캡차를 가져오지 못했습니다",
         "login_failed": "로그인에 실패했습니다",
         "login_success": "로그인에 성공했습니다",
@@ -1069,7 +1909,29 @@
         "verify_failed": "인증에 실패했습니다"
     },
     "dna-role-detail": {
-        "title": "캐릭터 상세"
+        "char_attributes": "캐릭터 속성",
+        "char_avatar": "아바타",
+        "char_splash": "일러스트",
+        "char_trace": "캐릭터 연원",
+        "hp": "HP",
+        "load_failed": "캐릭터 상세 정보를 가져오지 못했습니다",
+        "max_sanity": "최대 신지",
+        "no_avatar": "아바타 없음",
+        "no_splash": "일러스트 없음",
+        "retry": "다시 시도",
+        "skill_icons": "스킬 아이콘",
+        "title": "캐릭터 상세",
+        "trace_icons": "연원 아이콘"
+    },
+    "dna-sign-calendar": {
+        "auto_sign_in": "자동 출석",
+        "coins": "코인",
+        "no_tasks": "작업 데이터가 없습니다",
+        "period": "주기:",
+        "progress": "진행도:",
+        "sign_in": "출석",
+        "signed_in": "출석 완료:",
+        "signed_in_today": "오늘 출석 완료"
     },
     "dna-topic": {
         "title": "주제"
@@ -1094,7 +1956,74 @@
         "userInfoFailed": "사용자 정보를 불러오지 못했습니다"
     },
     "dna-weapon-detail": {
-        "title": "무기 상세"
+        "atk": "공격력",
+        "crit_rate": "치명타 확률",
+        "element_icon": "속성 아이콘",
+        "load_failed": "무기 상세 정보를 가져오지 못했습니다",
+        "mode": "모드",
+        "mods": "모드:",
+        "no_icon": "아이콘 없음",
+        "refine_level": "정련 레벨:",
+        "retry": "다시 시도",
+        "title": "무기 상세",
+        "weapon_attrs": "무기 속성",
+        "weapon_desc": "무기 설명",
+        "weapon_icon": "무기 아이콘"
+    },
+    "dob-account": {
+        "account_desc": "DNA Builder 계정은 커뮤니티 기능 이용과 빌드 공유 등에 사용됩니다.",
+        "current_appearance": "현재 외형",
+        "daily_exp_progress": "일일 경험치 진행도",
+        "earned_today": "오늘 획득",
+        "enter_code": "이메일로 받은 6자리 코드를 입력하세요",
+        "exp_to_level_up": "레벨업까지 {{value}} 경험치",
+        "go_points_mall": "포인트 상점으로",
+        "level_exp": "현재 레벨 경험치 {{current}}/{{required}}",
+        "logging_in": "로그인 중...",
+        "login": "로그인",
+        "logout": "로그아웃",
+        "manage": "관리",
+        "not_logged_in": "DNA Builder 계정에 로그인하지 않았습니다",
+        "progress_unavailable": "오늘 진행도를 일시적으로 사용할 수 없습니다",
+        "qq": "QQ:",
+        "qq_hint": "* QQ 번호는 아바타 표시에만 사용됩니다",
+        "register": "회원가입",
+        "registering": "가입 중...",
+        "reset_password": "비밀번호 재설정",
+        "resetting": "재설정 중...",
+        "roles": "역할:",
+        "send_code": "인증 코드 전송",
+        "sending": "전송 중...",
+        "task_abyss_upload": "이번 시즌 심연 업로드 +50",
+        "task_first_chat": "오늘 첫 채팅 메시지 +1",
+        "task_online_1h": "1시간 접속 +3",
+        "task_open_app": "앱 실행 +2",
+        "total_exp": "총 경험치"
+    },
+    "dob-build-show": {
+        "click_copy_link": "클릭하여 링크 복사",
+        "most_viewed": "조회수 순",
+        "recently_modified": "최근 수정"
+    },
+    "dot-config": {
+        "all_sources": "모든 소스",
+        "char_own_element": "캐릭터 자체 속성",
+        "char_self_dot_freq": "자속성 DOT 빈도",
+        "close": "닫기",
+        "dot_per_second_by_source": "초당 DOT 피해(소스별)",
+        "drag_hint": "클릭하여 집은 뒤 계산식이나 사용자 변수에 놓으세요",
+        "formula_desc": "공식: Σ소스별 (캐릭터 공격력 + 소스 무기 공격력) × 0.2 × 6 × 4 × (1 + 충영 위력) × (1 + 피해 증가) × 앙양 구간 × 배수 구간 × 빈도 × 내성 구간(속성 관통 포함). 스킬 소스는 캐릭터 공격력만으로 계산합니다.",
+        "frequency_doubled": "빈도 2배 →",
+        "kinds": "종",
+        "manual_self_elem_note": "자속성 추가 피해가 있는 것으로 수동 설정",
+        "other_elem_dot_freq": "기타 속성 DOT 빈도",
+        "other_elements": "기타 속성",
+        "per_second": "회/초",
+        "self_elem_bonus_cond": "자속성 추가 피해 > 0(빈도 2배)",
+        "title": "DOT 피해 계산",
+        "total_frequency": "총 빈도",
+        "trigger": "발동",
+        "upper_limit": "· 상한"
     },
     "dps-view": {
         "buildId": "빌드 ID",
@@ -1127,6 +2056,7 @@
     "draft-list": {
         "title": "도면 목록"
     },
+    "draft-source": {},
     "dungeon-detail": {
         "allMonster": "일반 몬스터",
         "allReward": "보상",
@@ -1149,20 +2079,25 @@
         "rewardList": "보상 목록",
         "specialMonster": "특수 몬스터",
         "specialReward": "특수 보상",
-        "title": "세부정보 복사",
+        "title": "던전 상세",
         "totalWaveReward": "웨이브 누적 보상(1~{{count}}웨이브)",
         "wave": "웨이브"
     },
     "dungeon-list": {
         "level": "레벨",
         "monster": "몬스터",
-        "nightHandbook": "나이트 핸드북",
         "reward": "보상",
         "searchPlaceholder": "던전 ID/이름/설명/레벨/보상 검색(병음 지원)...",
         "special": "특수",
         "title": "복제본 목록",
         "totalCount": "총 {{count}}개 던전",
         "type": "유형"
+    },
+    "effect-settings": {
+        "all_max": "모두 최대",
+        "all_off": "모두 끄기",
+        "goto_inventory": "클릭하여 인벤토리 관리로 이동",
+        "use_global_settings": "전역 설정 사용"
     },
     "errorBoundary": {
         "backupTip": "초기화 전에 반드시 데이터를 백업하세요. 초기화는 로컬 설정과 캐시를 지우며(클라우드 데이터는 영향 없음) 약 99%의 오류를 해결합니다.",
@@ -1196,6 +2131,15 @@
     "event-list": {
         "title": "이벤트 목록"
     },
+    "expr-editor": {
+        "all_match_and": "모두 충족 (and)",
+        "any_match_or": "하나라도 충족 (or)",
+        "check": "검사",
+        "clear_conditions": "조건 비우기",
+        "compare": "비교",
+        "negate": "반전",
+        "not": "NOT"
+    },
     "Fire Keeper Ⅰ": "불의 수호자 Ⅰ",
     "fish-list": {
         "title": "낚시"
@@ -1203,6 +2147,9 @@
     "flow": {
         "desc": "대미지 계산기 노드 버전",
         "title": "노드 편집기"
+    },
+    "flow-block": {
+        "clone": "복제"
     },
     "flowEditor": {
         "canvas": "캔버스",
@@ -1264,6 +2211,7 @@
         "enterCustomTypeName": "사용자 지정 유형 이름을 입력하세요",
         "entityRequired": "이 분류는 적용 엔티티를 지정해야 합니다",
         "exec_files": "실행 파일",
+        "game_options": "게임 옵션",
         "gameSetting": "게임 설정",
         "gameUpdate": "업데이트 다운로드",
         "importModFailed": "MOD 가져오기 실패",
@@ -1279,6 +2227,7 @@
         "json_files": "JSON 파일",
         "latest": "최신",
         "launch": "게임 시작",
+        "launch_path": "실행 경로",
         "launched": "게임 시작됨",
         "launchGameFailed": "게임 실행 실패: {{ error }}",
         "legacy": "레거시",
@@ -1374,15 +2323,47 @@
         "versionLabel": "버전(예: 1.0.0)",
         "weapon": "무기"
     },
+    "game-mod-detail": {
+        "preview_image": "미리보기 이미지"
+    },
+    "game-overlay": {
+        "low_sanity": "낮은 신지",
+        "statistics": "통계"
+    },
+    "game-setting": {
+        "apply": "적용",
+        "config_dir": "설정 디렉터리:",
+        "configure_game_path_first": "먼저 게임 설정에서 게임 경로를 지정하세요",
+        "custom": "사용자 지정",
+        "game_settings": "게임 설정",
+        "height": "높이",
+        "performance_preset": "성능 최적화 프리셋",
+        "preset_high": "높음",
+        "preset_low": "낮음",
+        "preset_medium": "중간",
+        "preset_none": "최적화 없음",
+        "preset_very_low": "매우 낮음",
+        "reset_to_default": "기본값으로 재설정",
+        "resolution": "해상도",
+        "width": "너비",
+        "window_resolution": "게임 창 해상도"
+    },
+    "game-style-mod": {
+        "tolerance_value": "내성치"
+    },
     "game-update": {
         "cdn": "다운로드 노드",
         "change": "변경",
         "channel": "서버",
+        "close": "닫기",
         "confirmUninstall": "게임 디렉터리의 EM 및 Engine 폴더 안에 있는 모든 파일과 하위 디렉터리를 삭제합니다. 계속하시겠습니까?",
         "current_file": "현재 파일",
+        "custom": "사용자 지정",
+        "customChannelPlaceholder": "사용자 지정 channel",
         "desc": "게임 버전 업데이트 및 다운로드",
         "download_complete": "모든 파일이 성공적으로 다운로드 및 추출되었습니다, 총 크기: {{size}}",
         "download_failed": "다운로드 실패: {{error}}",
+        "downloaded": "다운로드 완료",
         "downloading": "다운로드 중...",
         "downloading_resources": "리소스를 다운로드 중",
         "extract_failed": "추출 실패: {{error}}",
@@ -1394,17 +2375,24 @@
         "game_ready": "게임 준비 완료",
         "get_version_list_failed": "버전 목록 가져오기 실패: {{error}}",
         "global_server": "글로벌 서버",
+        "hotUpdateDetail": "핫 업데이트 상세",
         "install_path": "설치 경로",
         "latest_version": "최신 버전",
         "launch_game_failed": "게임 실행 실패: {{error}}",
+        "localCache": "로컬 캐시",
         "media_server": "1.2 미디어 서버",
         "move_file_failed": "파일 이동 실패",
         "no_path_selected": "설치 디렉터리가 선택되지 않았습니다",
         "no_pre_download_available": "사전 다운로드 가능한 버전이 없습니다",
+        "noHotUpdate": "핫 업데이트가 없습니다",
         "old_version": "구 버전",
+        "paused": "일시 중지됨",
+        "pauseDownload": "다운로드 일시 중지",
+        "pausing": "일시 중지 중",
         "pre_download_available": "사전 다운로드 가능",
         "pre_download_complete": "사전 다운로드 완료, 총 크기: {{size}}",
         "pre_download_size": "버전 {{version}} • {{size}}",
+        "resumeDownload": "다운로드 재개",
         "select_dir_failed": "디렉터리 선택 실패: {{error}}",
         "select_game_dir_first": "먼저 게임 디렉터리를 선택하세요",
         "select_game_file_first": "먼저 게임 파일을 선택하세요",
@@ -1421,19 +2409,43 @@
         "update_size": "업데이트 크기: {{size}}",
         "update_success": "업데이트 성공",
         "version": "버전",
-        "version_list_not_loaded": "버전 목록이 로드되지 않았습니다"
+        "version_list_not_loaded": "버전 목록이 로드되지 않았습니다",
+        "voicePack": "음성 팩"
     },
     "guide-create": {
         "title": "가이드 만들기"
     },
     "guide-detail": {
-        "title": "전략 세부정보"
+        "build_info": "빌드 정보",
+        "build_info_hint": "이 공략에는 빌드 정보가 포함되어 있습니다. 아래 버튼을 눌러 전체 빌드를 확인하세요.",
+        "not_found": "공략을 찾을 수 없습니다",
+        "title": "전략 세부정보",
+        "view_build": "빌드 보기"
+    },
+    "guide-edit": {
+        "click_or_drag_upload": "클릭하거나 이미지를 끌어다 놓아 업로드",
+        "content_placeholder": "공략 내용을 자세히 작성하세요. Markdown을 지원합니다...",
+        "guide_content": "공략 내용",
+        "guide_title": "공략 제목",
+        "guide_type": "공략 유형",
+        "insert_image": "이미지 삽입",
+        "no_relation": "연결 안 함",
+        "related_build": "관련 빌드",
+        "related_build_hint": "체크하면 캐릭터 빌드가 공략과 함께 게시됩니다",
+        "related_char": "관련 캐릭터",
+        "release_to_insert": "마우스를 놓아 이미지 삽입",
+        "title_placeholder": "눈에 띄는 제목을 입력하세요...",
+        "upload_format_hint": "JPG, PNG, GIF 형식, 최대 3MB",
+        "upload_hint": "끌어다 놓거나 클릭하여 선택",
+        "upload_image": "이미지 업로드"
     },
     "guide-list": {
+        "no_guides": "공략이 없습니다",
+        "publish_guide": "공략 게시",
+        "search_placeholder": "공략 제목 검색...",
         "title": "가이드 목록"
     },
     "guides": {
-        "all": "모두",
         "all_characters": "모든 역할",
         "associated_character": "연관된 역할",
         "build_info": "피팅 정보",
@@ -1541,6 +2553,7 @@
         "hardbossWeeklyReset": "주간 보스 갱신",
         "hiddenSections": "숨겨진 섹션",
         "hideSection": "섹션 숨기기",
+        "icp": "저장 ICP 제2024097919호",
         "mihanEmpty": "위탁 데이터가 없습니다",
         "mihanMatched": "{{count}}건 일치",
         "mihanNotifyMissions": "알림 임무",
@@ -1559,6 +2572,7 @@
         "resetSections": "초기화",
         "sectionHardboss": "악몽의 잔향",
         "sectionMihan": "실시간 위탁",
+        "server_day_prefix": "서버 오픈",
         "showSection": "섹션 표시",
         "starme": "Github에서 별 추가",
         "title": "홈",
@@ -1566,8 +2580,17 @@
         "update_log": "업데이트 로그",
         "welcome": "DNA Builder에 오신 것을 환영합니다"
     },
+    "image-carousel": {
+        "next_image": "다음 이미지",
+        "prev_image": "이전 이미지"
+    },
+    "image-preview": {
+        "close_preview": "미리보기 닫기",
+        "reset_zoom": "확대/축소 초기화",
+        "zoom_in": "확대",
+        "zoom_out": "축소"
+    },
     "impr": {
-        "all": "전체",
         "count": "인상 {{count}}개",
         "region": "지역",
         "searchPlaceholder": "인상 항목 검색",
@@ -1589,6 +2612,13 @@
         "sync_mods_confirm_title": "웨지 동기화",
         "title": "재고 관리"
     },
+    "inventory-edit": {
+        "copy_json": "JSON 복사",
+        "exp_calc": "경험치 계산",
+        "import_json": "JSON 가져오기",
+        "owned_weapons": "보유 무기",
+        "search_placeholder": "검색(병음 지원)..."
+    },
     "iron-ticket": {
         "access": "획득 방법",
         "description": "설명",
@@ -1606,6 +2636,12 @@
     "levelup": {
         "desc": "캐릭터、무기、마법 쐐기 육성 자원 요구 사항 계산",
         "title": "육성 계산"
+    },
+    "limited-prize-simulator": {
+        "title": "기간 한정 상자 시뮬레이션"
+    },
+    "local-qq": {
+        "fill_qq_hint": "클릭하여 QQ 빠르게 입력"
     },
     "main": {
         "btn_collapse_menu": "메뉴 접기",
@@ -1628,9 +2664,85 @@
     "map-local": {
         "title": "지도"
     },
+    "map-pos-link": {
+        "jump": "이동"
+    },
     "map-tool": {
+        "current_marker": "현재 지도 지점",
         "desc": "지도 자원과 몬스터 분포 보기",
-        "title": "지도 도구"
+        "error_load_layer": "지도 레이어를 불러오지 못했습니다: {{file}}",
+        "error_load_map_image": "로컬 지도 이미지를 불러오지 못했습니다",
+        "error_load_marker_icon": "지도 지점 아이콘을 불러오지 못했습니다: {{url}}",
+        "error_load_rc_avatar": "RC 아이콘을 불러오지 못했습니다: {{url}}",
+        "error_load_tp_icon": "TP 아이콘을 불러오지 못했습니다: {{url}}",
+        "filter_hidden": "숨김 (클릭하면 표시)",
+        "filter_select_all": "전체 선택",
+        "filter_unselect_all": "모두 선택됨 (클릭하면 해제)",
+        "filter_visible": "표시 중 (클릭하면 숨김)",
+        "geniemon_probability": "마령 확률:",
+        "layer": "레이어",
+        "layer_base": "기본 레이어",
+        "layer_floor": "층 레이어",
+        "layer_misc": "기타 레이어",
+        "layer_subregion": "하위 지역 레이어",
+        "loading_layers": "로컬 레이어 불러오는 중...",
+        "no_geniemon_data": "pet.data에서 식별되는 마령이 없습니다",
+        "no_geniemon_filter": "이 지역에는 필터링할 마령이 없습니다",
+        "no_rc_config": "이 하위 지역에는 RC 설정이 없습니다",
+        "no_subregion_point": "이 지역에는 표시할 하위 지역 좌표가 없습니다",
+        "probability": "확률 {{ratio}}%",
+        "rarest_geniemon": "가장 희귀한 마령: {{name}} ({{ratio}}%)",
+        "rc_detail": "상세",
+        "rc_list_hint": "RC 목록 (클릭하면 상세 보기)",
+        "rc_points": "갱신 수 {{refresh}} | 지점 {{points}}",
+        "reset_view": "보기 초기화",
+        "shortest_traversal": "최단 경로 탐색",
+        "shortest_traversal_hint": "마령 지점이 있는 하위 지역을 먼저 선택하세요",
+        "sidebar_collapse": "사이드바 접기",
+        "sidebar_expand": "사이드바 펼치기",
+        "sub_region_unknown": "하위 지역 {{id}}",
+        "teleport_point": "텔레포트 지점",
+        "title": "지도 도구",
+        "tp_points": "TP 지점",
+        "treasure_point": "보물 지점",
+        "unknown_entity": "미식별 엔티티:",
+        "weight_ratio": "가중치 {{weight}} / {{total}}",
+        "world_coordinate": "월드 좌표",
+        "zoom_in": "확대",
+        "zoom_out": "축소"
+    },
+    "map-tool.nav_alpha": "커버리지 alpha 임계값",
+    "map-tool.nav_auto": "자동 표시",
+    "map-tool.nav_auto_hint": "체크한 레이어를 통행 가능한 지면으로, 체크하지 않은 레이어(기본 운해 레이어 포함)는 장애물로 간주합니다. 지도 명암이 반대라면 아래 ‘반전’을 켜세요.",
+    "map-tool.nav_base_hint": "기본",
+    "map-tool.nav_brush_block": "장애물 추가",
+    "map-tool.nav_brush_clear": "장애물 지우기",
+    "map-tool.nav_brush_radius": "브러시 반경",
+    "map-tool.nav_clear": "비우기",
+    "map-tool.nav_enable": "우회 사용",
+    "map-tool.nav_inflate": "장애물 팽창(안전 거리)",
+    "map-tool.nav_invert": "반전(레이어 영역을 장애물로 처리)",
+    "map-tool.nav_luma_max": "통행 가능 밝기 상한",
+    "map-tool.nav_manual": "수동 표시",
+    "map-tool.nav_mask": "장애물 표시",
+    "map-tool.nav_reset_layers": "레이어 초기화",
+    "map-tool.nav_section": "장애물 우회",
+    "map-tool.nav_show_mask": "캔버스에 장애물 오버레이",
+    "map-tool.nav_undo": "실행 취소",
+    "map-tool.nav_unlimited": "제한 없음",
+    "map-tool.nav_unreachable": "도달 불가",
+    "mini-cost-calculator": {
+        "dungeon_kinds": "종류의 던전",
+        "estimating": "던전 비용 추정 중...",
+        "full_calculator": "전체 계산기",
+        "need_challenge": "도전 필요",
+        "no_mod_equipped": "장착한 모드가 없어 비용 추정이 없습니다",
+        "params_note": "이 매개변수는 시간 추정에만 영향을 주고 자원 소모 집계에는 영향을 주지 않습니다",
+        "settings": "추정 설정",
+        "title": "육성 비용 추정"
+    },
+    "mini-game-launcher": {
+        "open_launcher": "게임 런처 열기"
     },
     "misc": {
         "all_files": "모든 파일",
@@ -1681,24 +2793,18 @@
     "monster-detail": {
         "appearingAbyss": "심연에 출현",
         "appearingDungeon": "던전에 출현",
-        "attack": "공격",
-        "badgeTitle": "미로",
-        "defense": "방어",
         "defenseDamageReductionRate": "방어 피해 감소율",
         "drop": "드롭",
         "dropMechanismId": "기전 ID",
         "dropMonsterTag": "몬스터 태그",
         "dropRate": "보물상자 드롭률",
-        "effectiveHealth": "유효 체력",
         "factionOther": "기타",
         "factionPrefix": "진영",
         "growthPreview": "레벨 성장 미리보기",
-        "hp": "HP",
         "killScore": "처치 점수",
         "level": "레벨",
         "levelDamageReductionRate": "레벨 피해 감소율",
         "monsterTagInfo": "지휘자 정보",
-        "shield": "방패",
         "showDetail": "자세히 보기",
         "showEightHp": "체력 8배",
         "stance": "전투 자세",
@@ -1720,7 +2826,6 @@
     "more": {
         "badge": "More",
         "contextMenu": {
-            "cancel": "취소",
             "changeColor": "색상 변경",
             "changeSize": "크기 변경",
             "color": {
@@ -1782,6 +2887,14 @@
     "music-list": {
         "title": "악보 목록"
     },
+    "music-player": {
+        "load_failed": "오디오를 불러올 수 없습니다",
+        "loading_audio": "오디오 불러오는 중",
+        "pause": "일시정지",
+        "play": "재생",
+        "play_failed": "오디오를 재생할 수 없습니다",
+        "playback_progress": "재생 진행률"
+    },
     "node-editor": {
         "addCalc": {
             "description": "입력값의 합계를 계산합니다",
@@ -1792,7 +2905,6 @@
         "astExpression": {
             "description": "AST 표현식을 검증합니다",
             "expression": "식",
-            "expressionPlaceholder": "피해",
             "missingCore": "핵심 계산 노드가 없습니다",
             "result": "결과",
             "title": "AST 표현식",
@@ -1822,13 +2934,10 @@
             "waiting": "입력을 기다리는 중"
         },
         "enemyInput": {
-            "attack": "공격",
             "attributes": "적 속성(현재 레벨)",
-            "defense": "방어",
             "enemy": "적",
             "enemyLevel": "적 레벨",
             "enemyResistance": "적 저항",
-            "hp": "HP",
             "stance": "전투 자세"
         },
         "expressionCalc": {
@@ -1845,6 +2954,7 @@
             "title": "전체 계산",
             "waiting": "입력을 기다리는 중..."
         },
+        "import_from_build": "캐릭터 빌드에서 데이터 가져오기",
         "meleeWeaponInput": {
             "chooseLevel": "레벨 선택",
             "chooseWeapon": "근접 무기 선택",
@@ -1854,6 +2964,7 @@
             "weapon": "근접 무기",
             "weaponLevel": "무기 레벨"
         },
+        "migrate": "이전",
         "modInput": {
             "addModSlot": "MOD 슬롯 추가",
             "chooseLevel": "레벨 선택",
@@ -1884,9 +2995,7 @@
             "waiting": "입력을 기다리는 중..."
         },
         "weaponAttr": {
-            "attack": "공격",
             "attackSpeed": "공격 속도",
-            "critDamage": "치명타 피해",
             "critRate": "치명타 확률",
             "multiShot": "다중 사격",
             "result": "무기 속성",
@@ -1898,7 +3007,6 @@
             "expectedDamage": "기대 피해",
             "higherCrit": "높은 치명타",
             "lowerCrit": "낮은 치명타",
-            "result": "무기 피해",
             "waiting": "입력을 기다리는 중..."
         }
     },
@@ -1913,6 +3021,10 @@
         "title": "NPC 목록"
     },
     "other": "기타",
+    "page-foot": {
+        "next_page": "다음",
+        "prev_page": "이전"
+    },
     "partytopic-detail": {
         "title": "추억집 상세"
     },
@@ -1920,6 +3032,7 @@
         "title": "추억집 목록"
     },
     "pet_detail": {
+        "active_short": "액티브",
         "active_skill": "액티브 스킬",
         "alternative_form": "이형",
         "base_id": "기본 ID",
@@ -1937,9 +3050,8 @@
         "no_pet_entry_sources": "해당하는 마령 잠질 소스가 없습니다",
         "no_sources": "해당하는 소스가 없습니다",
         "no_spawn": "출현 위치가 없습니다",
-        "old_master": "노련함",
+        "passive_short": "패시브",
         "passive_skill": "패시브 스킬",
-        "pet_entry": "마령 잠질",
         "rarity": "품질",
         "rc_label": "RC",
         "refresh_count": "새로고침 수",
@@ -1947,21 +3059,46 @@
         "shop_purchase": "상점 구매",
         "spawn_area": "출현 지역",
         "spot_count": "출현 수",
+        "total_prefix": "총",
+        "unit_entry": "잠질",
+        "unit_pet": "마령",
         "until_now": "현재까지"
     },
     "pet-list": {
         "title": "마령 목록"
     },
+    "player-exp": {
+        "amount": "수량",
+        "auto_calc": "(자동 계산)",
+        "breakthrough_record": "돌파 기록",
+        "copy_json": "JSON 복사",
+        "exp_per_unit": "1회 경험치",
+        "exp_source_detail": "경험치 소스 상세",
+        "exp_value": "경험치",
+        "extra_exp": "추가 경험치",
+        "import_json": "JSON 가져오기",
+        "level": "레벨",
+        "manual_input": "수동 입력",
+        "max_value": "최대: {{value}}",
+        "mod_acquisition": "모드 획득",
+        "mod_exp": "모드 경험치",
+        "nth_time": "{{n}}회차",
+        "reset": "초기화",
+        "source": "소스",
+        "subtotal": "소계:",
+        "sync_game": "게임 동기화",
+        "times": "횟수",
+        "total": "합계",
+        "total_exp": "총 경험치"
+    },
     "points-mall": {
         "accountSettings": "계정 설정",
-        "all": "전체",
         "availability": "제공 시간",
         "balance": "포인트 잔액",
         "bubblePreview": "말풍선 미리보기",
         "confirmRedeem": "교환 확인",
         "confirmRedeemDesc": "\"{{name}}\"을(를) {{cost}} 포인트로 교환하시겠습니까?",
         "currentAppearance": "현재 외형",
-        "default": "기본",
         "equipAfterRedeem": "먼저 이 상품을 교환하세요",
         "equipFailed": "외형 적용에 실패했습니다",
         "equipFailedRetry": "외형 적용에 실패했습니다. 잠시 후 다시 시도하세요",
@@ -1998,8 +3135,7 @@
         "redeemSuccess": "교환 성공",
         "refresh": "새로고침",
         "rewardType": {
-            "nameCard": "이름 효과",
-            "title": "칭호"
+            "nameCard": "이름 효과"
         },
         "summaryNotReady": "현재 포인트 정보를 가져올 수 없습니다. 잠시 후 다시 시도하세요",
         "title": "포인트 상점",
@@ -2008,22 +3144,75 @@
         "useHint": "상품 목록에서 교환한 뒤 \"사용\"을 눌러 외형을 전환할 수 있습니다.",
         "userFallback": "사용자"
     },
+    "quest-source": {
+        "sum": "합계"
+    },
     "questchain-detail": {
-        "title": "퀘스트 체인 상세"
+        "ai_summary": "스토리 AI 요약",
+        "ai_summary_note": "AI 생성 · 참고용",
+        "end_time": "종료 시간",
+        "not_found": "퀘스트 체인을 찾을 수 없습니다",
+        "quest_jump": "퀘스트 이동",
+        "quest_label": "퀘스트:",
+        "quest_list": "퀘스트 목록",
+        "quest_reward": "퀘스트 보상:",
+        "rewards": "보상 정보",
+        "start_time": "시작 시간",
+        "story_voice_settings": "스토리 음성 설정",
+        "title": "퀘스트 체인 상세",
+        "unknown_quest": "알 수 없는 퀘스트 {{id}}",
+        "voice_language": "음성 언어"
     },
     "questchain-list": {
+        "full_text_search_placeholder": "퀘스트/대사 전체 검색 (병음 미지원)...",
+        "quest_count": "개 퀘스트",
+        "search_placeholder": "퀘스트 ID/이름 검색 (병음 지원)...",
         "title": "퀘스트 체인 목록"
     },
     "race-lottery": {
+        "avg_odds_top6": "상위 6위에 베팅했을 때의 평균 배당",
+        "base_speed": "기본 속도",
+        "click_card_hint": "카드를 클릭해 상세 정보 보기",
+        "community_count": "{{count}}건 커뮤니티 기록",
+        "covered_count": "{{covered}}/{{total}} 옵션 보유",
         "desc": "매일 진행되는 레이스 선수 버프 통계 확인",
-        "title": "마령 레이스"
+        "expected_return": "기대 수익",
+        "expected_win_rank": "예상 승률 순위",
+        "expected_win_rate": "예상 승률",
+        "hit_count": "{{count}}개 적중",
+        "other_possible_winners": "기타 승리 가능성",
+        "player_count": "{{count}}명 선수",
+        "race_date": "경기 날짜",
+        "roster": "선수 명부",
+        "server": "서버",
+        "simulate": "시뮬레이션",
+        "simulate_one_race": "당일 최종 속도와 경기 내 옵션으로 한 경기를 시뮬레이션",
+        "speed_short": "속도 {{value}}",
+        "status_slot": "상태 {{slot}}",
+        "title": "마령 레이스",
+        "toggle_other_highlight": "기타 승리 가능 하이라이트 전환",
+        "toggle_top6_highlight": "상위 6 하이라이트 전환",
+        "top6": "상위 6",
+        "top6_probability_desc": "경기 중 옵션 규칙으로 추정한 상위 6위 진입 확률",
+        "updated_by": "{{name}} 업데이트"
+    },
+    "race-lottery-simulator": {
+        "race_simulation": "경주 시뮬레이션",
+        "skip": "건너뛰기",
+        "speed": "배속"
     },
     "raid-rank": {
         "title": "순위 보상"
     },
+    "range-selector": {},
     "ranking": {
         "desc": "랭킹 목록",
         "title": "랭킹"
+    },
+    "ranking-view": {
+        "enemy_resistance_coverage": "적 내성 커버리지:",
+        "no_entries": "항목 없음",
+        "ranking": "순위"
     },
     "reputation": {
         "accumulatedExp": "누적 경험치",
@@ -2049,14 +3238,15 @@
     "reputation-list": {
         "title": "지역 명성"
     },
+    "resizeable-window-timers": {
+        "no_rotation_time": "다음 교체 시간이 없습니다"
+    },
     "resizeableWindow": {
         "and": "및",
         "enableNotify": "알림 활성화",
         "mihan": "비서",
         "mihanNotificationBody": "추적 중인 {{types}}이(가) 업데이트되었습니다",
         "mihanNotificationTitle": "위탁 비서 알림",
-        "mihanTitle": "위탁 비서",
-        "moling": "마령",
         "monitorSettings": "모니터 설정",
         "nextRefresh": "다음 갱신",
         "onlyOnce": "한 번만",
@@ -2091,6 +3281,19 @@
     },
     "resource-list": {
         "title": "자원 목록"
+    },
+    "reward-item": {
+        "capacity": "용량:{{value}}",
+        "drop_item": "드롭:",
+        "expect_times": "개당 기대:{{value}}회",
+        "fixed": "고정",
+        "independent_drop": "개별 드롭",
+        "probability": "확률:{{value}}%",
+        "ratio": "비율:{{value}}",
+        "reward_group": "보상 그룹",
+        "reward_group_id": "보상 그룹 {{id}}",
+        "total_capacity": "총 용량 {{count}}",
+        "weight_ratio": "가중치:{{value}}"
     },
     "room": {
         "remove": "방 제거"
@@ -2127,6 +3330,83 @@
         "scale": "배율",
         "sectionTitle": "화면 정보 바",
         "zhouben": "주간 보스 리셋"
+    },
+    "script-color-tool": {
+        "back_to_script": "스크립트로 돌아가기",
+        "classify_result": "분류 결과",
+        "clear_images": "이미지 비우기",
+        "clear_points": "포인트 비우기",
+        "clipboard_test_category": "클립보드 테스트 분류",
+        "clipboard_test_done": "클립보드 분류 테스트를 완료했습니다",
+        "cloud_game": "클라우드 게임",
+        "color_placeholder": "#RRGGBB 또는 0xRRGGBB",
+        "copied_value": "복사됨: {{value}}",
+        "copy_category_code": "분류 코드 복사",
+        "copy_code_done": "자동 분류 코드를 복사했습니다",
+        "current_image": "현재 이미지(클릭하여 포인트 추가)",
+        "current_image_index": "현재 이미지 {{index}}/{{total}}",
+        "default_tolerance": "기본 허용 오차",
+        "drop_image_hint": "이미지를 여기로 끌어다 놓아 가져오기",
+        "err_add_screenshot": "스크린샷 추가 실패: {{error}}",
+        "err_bad_project": "프로젝트 파일 형식이 올바르지 않습니다",
+        "err_canvas_context": "Canvas 컨텍스트를 생성할 수 없습니다",
+        "err_compile": "분류 코드 컴파일 실패: {{error}}",
+        "err_copy": "복사 실패: {{error}}",
+        "err_forced_conflict": "강제 검사 포인트가 해당 분류 샘플과 충돌합니다. 샘플을 추가하거나 강제 검사를 끄세요: {{message}}",
+        "err_forced_unusable": "강제 검사 포인트를 지금은 분류에 사용할 수 없습니다. 색상 입력과 포인트 범위를 확인하세요: {{message}}",
+        "err_image_load": "이미지 불러오기 실패: {{error}}",
+        "err_load_image_first": "먼저 이미지를 불러오세요",
+        "err_no_check_color": "포인트 #{{index}}에 현재 이미지에서 유효한 검사 색상이 없습니다",
+        "err_no_check_state": "클립보드 코드에서 checkState(frame) 함수를 찾지 못했습니다",
+        "err_no_clipboard_code": "클립보드에 실행 가능한 코드가 없습니다",
+        "err_no_points": "먼저 검출 포인트를 하나 이상 추가하세요",
+        "err_no_valid_points": "분류에 사용할 수 있는 유효한 포인트가 없습니다. 색상 입력과 포인트 범위를 확인하세요.",
+        "err_no_window": "창을 찾지 못했습니다",
+        "err_read_clipboard": "클립보드 읽기 실패: {{error}}",
+        "err_read_file": "파일 내용을 읽지 못했습니다",
+        "err_read_image": "이미지를 읽지 못했습니다: {{url}}",
+        "err_read_project": "프로젝트 파일을 읽지 못했습니다",
+        "err_screenshot_timeout": "스크린샷 시간이 초과되었습니다",
+        "err_start_realtime": "실시간 테스트 시작 실패: {{error}}",
+        "err_stop_realtime": "실시간 테스트 중지 실패: {{error}}",
+        "err_unsupported_format": "끌어온 파일에 지원되는 이미지 형식이 없습니다",
+        "export_failed": "프로젝트 내보내기에 실패했습니다",
+        "export_project": "프로젝트 내보내기",
+        "export_project_title": "색상 도구 프로젝트 내보내기",
+        "export_success": "프로젝트를 내보냈습니다",
+        "image_label": "이미지 / 라벨",
+        "import_failed": "프로젝트 가져오기에 실패했습니다",
+        "import_project": "프로젝트 가져오기",
+        "import_success": "프로젝트를 가져왔습니다",
+        "invalid": "유효하지 않음",
+        "json_files": "JSON 파일",
+        "label_placeholder": "분류 라벨 입력",
+        "load_image": "이미지 불러오기",
+        "load_image_first": "먼저 이미지를 불러오고 현재 이미지를 클릭해 포인트를 추가하세요",
+        "load_images_hint": "먼저 여러 이미지를 불러온 뒤 현재 이미지를 클릭해 좌표 포인트를 추가하세요(좌표를 클릭하면 cc를 복사할 수 있고, 데스크톱에서는 드래그 앤 드롭 가져오기를 지원합니다).",
+        "loaded_stats": "이미지 {{images}}장 불러옴, 포인트 {{points}}개 지정",
+        "loading": "불러오는 중...",
+        "log_add_screenshot_failed": "스크린샷 추가에 실패했습니다",
+        "log_export_failed": "색상 도구 프로젝트 내보내기에 실패했습니다",
+        "log_import_failed": "색상 도구 프로젝트 가져오기에 실패했습니다",
+        "log_restore_failed": "색상 도구 상태 복원에 실패했습니다",
+        "log_start_realtime_failed": "색상 도구 실시간 테스트 시작에 실패했습니다",
+        "log_stop_realtime_failed": "색상 도구 실시간 테스트 중지에 실패했습니다",
+        "match": "일치:",
+        "new_point_uses": "새 포인트에 적용",
+        "no_images": "이미지 없음",
+        "out_of_range": "범위 초과",
+        "point_label": "포인트 #{{index}}",
+        "realtime_result": "실시간 결과 {{value}}",
+        "same_coord_colors": "같은 좌표의 색상 정보",
+        "screenshot": "스크린샷",
+        "screenshot_added": "스크린샷을 이미지 목록에 추가했습니다",
+        "start_realtime": "실시간 테스트 시작",
+        "stop_realtime": "실시간 테스트 중지",
+        "supported_formats": "지원 형식: png / jpg / jpeg / webp / bmp / gif / tiff / ico",
+        "tolerance": "허용 오차",
+        "untested": "미테스트",
+        "zoom_scale": "확대 {{scale}}x (1:N 픽셀)"
     },
     "script-list": {
         "add_case": "case 추가",
@@ -2278,6 +3558,25 @@
         "visual_editor_exported": "현재 탭으로 낳아냈습니다",
         "visual_editor_need_local_tab": "낳아내기 전에 로컬 스크립트 탭을 여세요"
     },
+    "script-record-tool": {
+        "action_count": "액션 수",
+        "action_details": "액션 상세",
+        "back_to_live": "실시간 녹화 데이터로 돌아가기",
+        "clear_actions": "액션 비우기",
+        "convert_to_sleep": "절대 시각 기준으로 sleep 환산",
+        "copy_code": "코드 복사",
+        "current_status": "현재 상태",
+        "generate_code": "코드 생성",
+        "import_json_absolute": "JSON 가져오기(절대 시간제)",
+        "import_json_file": "JSON 파일 가져오기",
+        "import_text": "텍스트 가져오기",
+        "key": "키",
+        "mouse": "마우스",
+        "no_actions": "액션 데이터가 없습니다",
+        "time_sec": "시간(초)",
+        "total_duration": "총 시간",
+        "type": "유형"
+    },
     "script-runtime-floating": {
         "openScriptPage": "스크립트 페이지로 이동: {{scripts}}",
         "runningLabel": "실행 중({{count}})",
@@ -2304,15 +3603,25 @@
         "aiTemperatureTip": "생성 내용의 무작위성을 제어(0-1)",
         "aiTestConnection": "연결 테스트",
         "appearance": "모양 설정",
+        "backgroundBlur": "배경 흐림",
+        "backgroundBlurTip": "배경에 가우시안 흐림을 적용해 심도 효과를 냅니다",
+        "backgroundOpacity": "배경 불투명도",
+        "backgroundOpacityTip": "값이 작을수록 더 투명해져 배경 방해를 줄입니다",
         "baseColors": "기본 색상",
         "borderWidth": "테두리 두께",
         "brandColors": "브랜드 색상",
-        "cancel": "취소",
+        "clearBackground": "지우기",
+        "close": "닫기",
         "colors": "색상",
         "colorScheme": "색상 구성",
         "confirm": "확인",
         "contrastHint": "텍스트 색상 (대비 미리보기)",
         "current": "현재",
+        "customBackground": "사용자 지정 배경",
+        "customBackgroundPreview": "사용자 지정 배경 미리보기",
+        "customBackgroundTip": "이미지를 전체 배경으로 업로드합니다. 창 투명도와 함께 사용할 수 있습니다",
+        "customFont": "사용자 지정 글꼴",
+        "customFontTip": "시스템 글꼴을 선택하거나 글꼴 파일을 업로드하세요. 비우면 기본값으로 복원됩니다",
         "customSource": "사용자 정의",
         "customTheme": "커스텀 테마",
         "customThemeOption": "커스텀",
@@ -2320,6 +3629,7 @@
         "darkTheme": "다크 테마",
         "dataPackManagement": "데이터 팩 관리",
         "dataPackSourceAddress": "데이터 팩 소스 주소",
+        "defaultFont": "기본 글꼴",
         "depth": "깊이",
         "desc": "맞춤형 애플리케이션 설정",
         "download": "다운로드",
@@ -2350,6 +3660,7 @@
         "radiusField": "입력 필드 모서리 반경",
         "radiusSelector": "선택기 모서리 반경",
         "refresh": "새로고침",
+        "replaceBackground": "교체",
         "reset": "모든 설정 초기화",
         "resetConfirm": "모든 설정을 초기화하시겠습니까?",
         "resetTheme": "테마 재설정",
@@ -2366,6 +3677,7 @@
         "showAIChat": "AI 피팅 도우미 표시",
         "stateColors": "상태 색상",
         "storyText": "스토리 텍스트",
+        "systemFont": "시스템 글꼴",
         "theme": "테마",
         "title": "설정",
         "uiScale": "UI 스케일",
@@ -2374,6 +3686,7 @@
         "uninstallDataPackConfirm": "{{version}}을(를) 제거하시겠습니까?",
         "unknown": "알 수 없음",
         "updateLaunchAtStartupFailed": "시작 시 실행 설정을 업데이트하지 못했습니다",
+        "uploadBackground": "업로드",
         "use": "사용",
         "versionList": "버전 목록",
         "windowTrasnparent": "투명 효과",
@@ -2392,27 +3705,135 @@
         "startTime": "시작",
         "title": "상점"
     },
+    "shop-item": {
+        "item_id": "아이템 ID",
+        "limit": "구매 제한",
+        "real_currency": "실제 화폐",
+        "unlock_condition": "해금 조건: {{cond}}"
+    },
     "shop-list": {
         "title": "상점"
     },
+    "shop-source": {
+        "limit": "구매 제한:",
+        "quantity": "수량:",
+        "shop_purchase": "상점 구매"
+    },
     "skill-cd-overlay": {
+        "add_key": "키 추가",
+        "advanced_section": "고급",
+        "anchor_percent": "앵커 비율",
+        "anchor_percent_tip": "게임 클라이언트 영역에서 오버레이 왼쪽 위 모서리의 위치입니다. 위 미리보기 상자에서 드래그하는 것과 같은 값입니다.",
+        "anchor_x_percent": "가로 앵커 비율",
+        "anchor_y_percent": "세로 앵커 비율",
+        "appearance_section": "외형",
+        "capture_hint_exhausted": "사용 가능한 후보 키가 없습니다. 왼쪽 버튼으로 새 키를 캡처한 뒤 이 행을 활성화하세요",
+        "capture_hint_max": "키 개수 상한에 도달했습니다. 사용하지 않는 키를 먼저 삭제하세요",
+        "capture_hint_start": "지정할 키를 누르세요 (Esc 취소)",
+        "capture_hint_unknown": "인식할 수 없는 키입니다. 다른 키를 시도하세요",
+        "cd_seconds_label": "{{name}} 쿨다운 초",
+        "cooldown_only_tip": "쿨다운이 끝났을 때만 눌림에 반응합니다(연타가 여러 번의 발동으로 판정되는 것을 방지)",
+        "current_timers": "오버레이 항목:",
+        "delete": "삭제",
         "desc": "키 쿨다운을 항상 위에 표시",
-        "title": "스킬 CD 인디케이터"
+        "disc_alpha": "원판 불투명도",
+        "disc_alpha_tip": "숫자 배경의 투명도입니다. 낮추면 게임 화면이 더 잘 보입니다.",
+        "entry_desc": "네이티브 Win32 항상 위 창(클릭 통과, 포커스를 빼앗지 않음). 지정한 키를 누르면 전체 쿨다운부터 카운트다운이 시작되고, 준비되면 링이 초록색이 됩니다. 아래 설정 변경은 실시간으로 반영됩니다.",
+        "entry_title": "스킬 쿨다운 오버레이",
+        "foreground_only": "게임 창이 활성일 때만",
+        "foreground_only_tip": "켜면 게임 프로세스가 포커스를 가질 때만 키에 반응하여 채팅 입력 중 오작동을 막습니다.",
+        "game_window": "게임 창",
+        "game_window_tip": "오버레이 위치는 이 프로세스 창의 클라이언트 영역을 기준으로 합니다(기본 {{name}})",
+        "hide_when_ready": "준비되면 숨기기",
+        "hide_when_ready_tip": "쿨다운이 0이 되면 즉시 해당 항목을 숨기고, 사용 중에만 표시합니다.",
+        "hide_without_game": "게임 창이 없으면 숨기기",
+        "hide_without_game_tip": "끄면 게임이 실행되지 않아도 오버레이가 보입니다(테스트로 설정을 확인할 때 편리).",
+        "key_capturing": "키…",
+        "keys_section": "키 및 쿨다운",
+        "label_placeholder": "라벨",
+        "max_keys_tip": "최대 {{count}}개 · 기본적으로 쿨다운이 끝나기 전에는 재발동되지 않고, 준비되면 키를 눌러 바로 다시 측정합니다. '쿨다운 없음'을 켜면 누를 때마다 재설정됩니다.",
+        "no_cooldown": "쿨다운 없음",
+        "no_game_warning": "게임 창이 감지되지 않아 오버레이가 표시되지 않습니다. 데스크톱에서 바로 설정을 확인하려면 [고급]에서 '게임 창이 없으면 숨기기'를 끄세요.",
+        "not_detected": "감지되지 않음",
+        "not_running": "중지됨",
+        "not_shown": "(현재 표시 안 됨)",
+        "position_section": "오버레이 위치(클라이언트 영역 비율)",
+        "process_name": "게임 프로세스 이름",
+        "process_name_tip": "클라이언트 영역 위치와 활성 여부 판단에 쓰는 프로세스입니다. 여러 개는 쉼표로 구분하고, 비우면 내장 기본값을 사용합니다.",
+        "ready": "준비됨",
+        "resolved_info": "백엔드 해석: 화면 좌표 X {{x}} · Y {{y}} · 오버레이 크기 {{w}} × {{h}}",
+        "retrigger_tip": "누르면 전체 CD부터 다시 측정합니다(쿨다운 중에도 재설정)",
+        "running": "실행 중",
+        "scale": "오버레이 배율",
+        "scale_tip": "화면 해상도에 맞춰 링과 글자 크기를 조절합니다.",
+        "section_title": "스킬 CD 표시기",
+        "test_trigger": "테스트",
+        "title": "스킬 CD 인디케이터",
+        "trigger_tip_off": "먼저 오버레이를 켜세요",
+        "trigger_tip_on": "오버레이에서 즉시 카운트다운을 시작합니다",
+        "web_only_notice": "이 오버레이는 데스크톱 앱의 네이티브 창 기능이 필요합니다. 웹에서는 설정 조회와 편집만 가능하며 실제로 적용되지 않습니다."
+    },
+    "skill-cd-pos-picker": {
+        "no_game_window": "게임 창이 감지되지 않아 미리보기는 현재 화면 해상도로 표시됩니다"
     },
     "skin-colorize": {
         "desc": "캐릭터 스킨 염색 미리보기 및 공유",
+        "desc_placeholder": "추가 설명(선택)",
+        "no_data": "캐릭터 염색 데이터가 없습니다",
         "title": "염색 플랜"
     },
     "skin-colorize-create": {
         "title": "염색 플랜 게시"
     },
+    "skin-colorize-gallery": {
+        "all_schemes": "모든 배색",
+        "by_character": "캐릭터별",
+        "by_series": "스킨 시리즈별",
+        "default_colors": "기본 배색",
+        "end_of_list": "끝까지 봤어요～",
+        "include_hair": "헤어 포함",
+        "no_icon": "아이콘 없음",
+        "no_schemes": "아직 염색 배색이 없습니다",
+        "no_series": "시리즈 없음",
+        "publish_scheme": "염색 배색 게시"
+    },
     "skin-colorize-share": {
         "title": "염색 플랜 상세"
     },
     "skin-gacha": {
+        "auto_buy_moon_tip": "월석이 부족하면 {{name}}에서 1:1로 자동 소모",
+        "current_pool": "현재 뽑기",
         "desc": "스킨 가챠 시뮬레이터",
         "guaranteeSpecial": "골드 등급 아이템을 반드시 획득할 때까지 최대 <highlight>%d</>회 남았습니다.",
-        "title": "만화"
+        "moonstone_title": "{{name}}(클릭하여 상점 열기)",
+        "pool": "뽑기",
+        "sold_out": "품절",
+        "title": "만화",
+        "total_spent": "누적 소비"
+    },
+    "split-view": {
+        "resize_hint": "목록과 상세 영역 크기 조절",
+        "resize_tip": "끌어서 크기 조절, 클릭하면 상세가 접힙니다"
+    },
+    "startup-modal": {
+        "current_version": "현재 버전",
+        "download_latest_pack": "최신 데이터 팩 다운로드",
+        "download_version": "{{version}} 다운로드",
+        "downloading": "다운로드 중",
+        "ignore": "무시",
+        "inactive": "비활성",
+        "later": "나중에",
+        "latest_version": "최신 버전",
+        "none_yet": "없음",
+        "open_settings": "설정 열기",
+        "pack_download_title": "데이터 팩 다운로드",
+        "pack_downloading_wait": "데이터 팩을 다운로드하는 중입니다. 잠시만 기다려 주세요…",
+        "pack_install_hint": "데이터 팩이 아직 설치되지 않았습니다. 설치해야 모든 콘텐츠 데이터를 정상적으로 불러올 수 있습니다.",
+        "pack_install_title": "데이터 팩 설치",
+        "pack_update_hint": "현재 버전 {{from}}, 최신 버전으로 업데이트할 수 있습니다. 데이터 팩은 콘텐츠 데이터 표시와 최신 효과를 결정합니다.",
+        "pack_update_title": "데이터 팩 업데이트 가능",
+        "pack_version_missing": "사용 가능한 데이터 팩 버전을 찾을 수 없습니다",
+        "release_notes": "업데이트 내용"
     },
     "tag": {
         "防御": "방어",
@@ -2501,6 +3922,9 @@
         "zoomIn": "확대",
         "zoomOut": "축소"
     },
+    "title-frame-label": {
+        "title": "칭호"
+    },
     "todo": {
         "completeFailed": "완료로 표시하지 못했습니다",
         "create": "새로 만들기",
@@ -2556,6 +3980,14 @@
         "desc": "pak 파일을 읽고 내보냅니다",
         "title": "언팩"
     },
+    "unpack-file-tree": {
+        "no_files": "파일 없음"
+    },
+    "unpack-view": {
+        "pack": "패킹",
+        "read_file_list": "파일 목록 읽기",
+        "settings": "설정"
+    },
     "update": {
         "checkFailed": "업데이트 확인에 실패했습니다:",
         "downloadInstallFailed": "업데이트 다운로드 및 설치에 실패했습니다:",
@@ -2575,8 +4007,14 @@
         "updateFailed": "업데이트 실패",
         "updating": "업데이트 중..."
     },
+    "user-manager": {
+        "account_management": "교교각 계정 관리",
+        "add_account": "계정 추가",
+        "add_account_tip": "JSON으로 교교각 계정 추가(로그인 후 복사 가능)",
+        "download_app": "앱 다운로드",
+        "web_unavailable": "웹에서는 사용할 수 없습니다"
+    },
     "view": {
-        "all": "전체",
         "allModules": "모든 모듈",
         "collapse": "접기",
         "contentAuthorizationDesc": "별도 표기가 없는 한, 사이트의 텍스트 콘텐츠는 CC BY-SA 3.0 라이선스를 따르며 이미지 및 기타 미디어는 원래 라이선스를 따릅니다.",
@@ -2636,5 +4074,20 @@
         "sortByIncome": "수익 순: 높음→낮음",
         "title": "무기 목록",
         "unequipSlot": "장착 해제"
+    },
+    "weapon-refine-tabs": {
+        "refine": "제련"
+    },
+    "weapon-verify-event": {
+        "available_affixes": "사용 가능한 옵션:",
+        "event_rule": "이벤트 규칙: {{rule}}",
+        "level_n": "스테이지 {{n}}",
+        "levels_and_star_reward": "{{levels}}개 스테이지 · {{stars}}성 보상",
+        "recommended_level": "권장 레벨 {{level}}+",
+        "recommended_unlock_level": "권장 해금 레벨 Lv.{{level}}",
+        "target_enemies": "목표 적",
+        "three_star_threshold": "3성 기준",
+        "victory_goal": "승리 목표",
+        "victory_mode": "승리 모드"
     }
 }

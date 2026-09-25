@@ -46,7 +46,7 @@ const partyTopic = computed(() => {
                 </div>
             </template>
 
-            <div v-else class="text-sm text-base-content/60">未找到光阴集</div>
+            <div v-else class="text-sm text-base-content/60">{{ $t('db-party-topic.not_found') }}</div>
         </div>
     </ScrollArea>
 </template>

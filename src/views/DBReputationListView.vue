@@ -96,7 +96,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrp-item-active" })
                             v-if="filteredReputations.length === 0"
                             class="flex flex-col items-center justify-center py-20 text-base-content/45"
                         >
-                            <p class="text-sm">未找到匹配的区域声名</p>
+                            <p class="text-sm">{{ $t('db-reputation-list.no_match') }}</p>
                         </div>
 
                         <div v-else class="space-y-2">

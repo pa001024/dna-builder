@@ -83,7 +83,7 @@ onMounted(() => {
                 <input
                     v-model="searchKeyword"
                     type="text"
-                    placeholder="搜索攻略标题..."
+                    :placeholder="$t('guide-list.search_placeholder')"
                     class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     @keyup.enter="handleSearch"
                 />
@@ -99,7 +99,7 @@ onMounted(() => {
                 </Select>
                 <RouterLink to="/guides/create" class="btn btn-primary btn-sm">
                     <Icon icon="ri:add-line" class="w-4 h-4" />
-                    发布攻略
+                    {{ $t('guide-list.publish_guide') }}
                 </RouterLink>
             </div>
         </div>
@@ -107,7 +107,7 @@ onMounted(() => {
             <div v-if="loading" class="flex justify-center items-center h-full m-4">
                 <span class="loading loading-spinner" />
             </div>
-            <div v-else-if="guides.length === 0" class="flex justify-center items-center h-full text-base-content/50 m-4">暂无攻略</div>
+            <div v-else-if="guides.length === 0" class="flex justify-center items-center h-full text-base-content/50 m-4">{{ $t('guide-list.no_guides') }}</div>
             <div v-else class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div
                     v-for="guide in guides"
@@ -128,7 +128,7 @@ onMounted(() => {
                             {{ guide.content }}
                         </p>
                         <div v-if="guide.charId" class="flex items-center gap-2 mb-3">
-                            <span class="text-xs text-base-content/50">关联角色:</span>
+                            <span class="text-xs text-base-content/50">{{ $t('common.related_char') }}</span>
                             <span class="text-sm font-medium">{{ getCharName(guide.charId) }}</span>
                         </div>
                         <div class="flex items-center justify-between text-xs text-base-content/50">
@@ -152,7 +152,7 @@ onMounted(() => {
                 </div>
             </div>
             <div class="flex justify-center p-4">
-                <button v-if="guides.length >= 20" class="btn btn-sm" @click="loadMore">加载更多</button>
+                <button v-if="guides.length >= 20" class="btn btn-sm" @click="loadMore">{{ $t('common.load_more') }}</button>
             </div>
         </ScrollArea>
     </div>

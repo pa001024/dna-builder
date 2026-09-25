@@ -89,15 +89,27 @@ function formatCutoffTime(timestamp: number) {
 }
 
 /**
- * 格式化印象检定标签。
- * @param imprCheck 印象检定原始数据
- * @returns 印象检定文本
+ * 当前商品的印象检定视图。
+ * 文案在模板里组装，区域与印象类型各自走各自的语言键。
+ * @returns 区域 ID、印象类型与门槛；未配置时返回 null
  */
-function formatImpressionCheck(imprCheck: NonNullable<ShopItem["imprCheck"]>): string {
+const imprCheckView = computed(() => {
+    const imprCheck = props.item.imprCheck
+    if (!imprCheck) {
+        return null
+    }
     const [regionId, imprType, threshold] = imprCheck
-    return `印象检定 ${getRegionType(regionId)}·${getImprType(imprType as Parameters<typeof getImprType>[0])} ≥ ${threshold}`
-}
+    return {
+        regionId,
+        imprType: imprType as Parameters<typeof getImprType>[0],
+        threshold,
+    }
+})
 
+/**
+ * 把商品映射到具体资源（魔之楔 / 武器 / 资源 / 设计稿 …）。
+ * @returns 商品对应的资源图标、链接与名称
+ */
 const itemDetail = computed(() => {
     switch (props.item.itemType) {
         case "Mod":
@@ -291,6 +303,19 @@ const itemDetail = computed(() => {
             }
     }
 })
+/**
+ * 当前商品的展示名称。
+ * 反查到具体资源时优先用资源名，否则回退到数据包里的商品名；两者都走 i18n 键（中文原文），
+ * 数据包未收录名称时退回 typeId，避免渲染出空串。
+ * @returns 展示名称
+ */
+const itemDisplayName = computed(() => itemDetail.value?.name || props.item.typeName || `#${props.item.typeId}`)
+
+/**
+ * 获取价格货币图标。
+ * @param name 货币名称（中文原文）
+ * @returns 图标路径
+ */
 function getPriceIcon(name: string) {
     const res = resourceMap.get(name)
     return res?.icon ? `/imgs/res/${res.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`
@@ -326,21 +351,21 @@ function getPriceIcon(name: string) {
                             v-if="itemDetail?.link"
                             :to="itemDetail?.link"
                             class="hover:underline"
-                            :title="itemDetail?.name || item.typeName"
+                            :title="$t(itemDisplayName)"
                         >
-                            {{ itemDetail?.name || item.typeName }}
+                            {{ $t(itemDisplayName) }}
                         </SRouterLink>
-                        <span v-else>{{ itemDetail?.name || item.typeName }}</span>
+                        <span v-else>{{ $t(itemDisplayName) }}</span>
                     </h4>
                     <span class="shrink-0 bg-base-content px-1 py-px text-[10px] uppercase text-base-100">
                         {{ $t(getRewardTypeText(item.itemType)) }}
                     </span>
                     <span class="shrink-0 text-[10px] text-base-content/60">x{{ item.num }}</span>
-                    <span class="shrink-0 text-[10px] text-base-content/60">限购 {{ item.limit || "∞" }}</span>
+                    <span class="shrink-0 text-[10px] text-base-content/60">{{ $t("shop-item.limit") }} {{ item.limit || "∞" }}</span>
                     <FullTooltip v-if="payInfo" side="top">
                         <template #tooltip>
                             <div class="flex flex-col gap-2 min-w-28">
-                                <div class="text-sm font-bold">现实货币</div>
+                                <div class="text-sm font-bold">{{ $t('shop-item.real_currency') }}</div>
                                 <div
                                     v-for="currency in payInfo.currencies"
                                     :key="currency.code"
@@ -393,18 +418,21 @@ function getPriceIcon(name: string) {
                         v-else
                         class="ml-auto flex max-w-full min-w-0 shrink items-center gap-1 border border-base-content/25 bg-base-100/60 px-1 py-px text-xs wrap-break-word"
                     >
-                        <img :src="getPriceIcon(item.priceName)" class="size-3 object-cover rounded" :alt="item.priceName" />
-                        {{ item.priceName }} {{ currentPrice }}
+                        <img :src="getPriceIcon(item.priceName)" class="size-3 object-cover rounded" :alt="$t(item.priceName)" />
+                        {{ $t(item.priceName) }} {{ currentPrice }}
                     </span>
                 </div>
                 <div class="flex flex-wrap gap-2 items-center mt-1">
                     <div v-if="item.lv || item.cond" class="flex gap-2 text-xs text-base-content/45">
                         <span v-if="item.lv">Lv.{{ item.lv }}</span>
-                        <span v-if="item.cond">解锁条件: {{ item.cond }}</span>
+                        <span v-if="item.cond">{{ $t("shop-item.unlock_condition", { cond: $t(item.cond) }) }}</span>
                     </div>
-                    <div v-if="item.imprCheck">
+                    <div v-if="imprCheckView">
                         <span class="rounded border border-info/40 bg-info/10 px-1.5 py-0.5 text-xs leading-none text-info">
-                            {{ formatImpressionCheck(item.imprCheck) }}
+                            {{ $t("common.impression_check") }} {{ $t(getRegionType(imprCheckView.regionId)) }}·{{
+                                $t(getImprType(imprCheckView.imprType))
+                            }}
+                            ≥ {{ imprCheckView.threshold }}
                         </span>
                     </div>
                     <div v-if="item.startTime || item.endTime" class="text-xs text-base-content/45 flex gap-2">
@@ -416,7 +444,7 @@ function getPriceIcon(name: string) {
                 </div>
                 <div class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-base-content/45">
                     <CopyID :id="item.id" />
-                    <CopyID :id="item.typeId" name="物品ID" />
+                    <CopyID :id="item.typeId" :name="$t('shop-item.item_id')" />
                 </div>
                 <div v-if="item.itemType === 'Reward'" class="mt-1">
                     <RewardItem :reward="getRewardDetails(item.typeId)!" />

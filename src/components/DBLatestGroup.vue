@@ -537,7 +537,7 @@ onBeforeUnmount(() => {
             </div>
 
             <span
-                class="absolute -bottom-3 right-0 z-30 bg-base-content px-1.5 py-0.5 font-mono text-[9px] font-semibold tabular-nums text-base-100"
+                class="absolute -bottom-3 right-0 z-30 bg-base-content px-1.5 py-0.5 font-mono text-[9px] font-semibold text-base-100"
                 >+{{ stackedEntries.length }}</span
             >
         </div>

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { t } from "i18next"
+import { useTranslation } from "i18next-vue"
 import { draftMap, LeveledChar, LeveledCharHelper, LeveledModHelper, LeveledPetHelper, LeveledWeaponHelper, resourceMap } from "@/data"
 import { charMap, modMap, petMap, skinMap, walnutMap } from "@/data/d"
 import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
@@ -14,6 +14,8 @@ import { RewardItem as RewardItemType } from "@/utils/reward-utils"
 defineOptions({
     name: "RewardItem",
 })
+
+const { t } = useTranslation()
 
 const iconticketMap = new Map(iconticketData.map(ticket => [ticket.id, ticket]))
 
@@ -365,9 +367,9 @@ function getRewardDisplayName(item: RewardItemType) {
     }
     if (item.t === "IronTicket") {
         const ticket = iconticketMap.get(item.id)
-        return ticket?.name || "深境罗盘"
+        return ticket?.name || t(getRewardTypeText("IronTicket"))
     }
-    return (item.n && t(item.n)) || (item.t === "Reward" ? `奖励组 ${item.id}` : `ID: ${item.id}`)
+    return (item.n && t(item.n)) || (item.t === "Reward" ? t("reward-item.reward_group_id", { id: item.id }) : `ID: ${item.id}`)
 }
 
 /**
@@ -435,14 +437,16 @@ function getCharacterFragmentIcon(name?: string): string {
 <template>
     <div class="space-y-1">
         <div class="flex items-center gap-2 mb-1" v-if="reward && header">
-            <span class="text-xs font-medium">{{ typeof header === "string" ? header : "奖励组" }} <CopyID :id="reward.id" /></span>
+            <span class="text-xs font-medium"
+                >{{ typeof header === "string" ? header : $t('reward-item.reward_group') }} <CopyID :id="reward.id" /></span
+            >
             <slot></slot>
             <span
                 class="text-xs px-1.5 py-0.5 rounded"
                 :class="reward.m === 'Independent' ? 'bg-success text-success-content' : 'bg-warning text-warning-content'"
             >
                 {{ $t(getDropModeText(reward.m || "")) }}
-                <span v-if="reward.totalP">总容量 {{ reward.totalP }}</span>
+                <span v-if="reward.totalP">{{ $t('reward-item.total_capacity', { count: reward.totalP }) }}</span>
             </span>
         </div>
         <!-- 递归奖励显示 -->
@@ -460,12 +464,12 @@ function getCharacterFragmentIcon(name?: string): string {
                                     :class="getRewardBackgroundColor(item)"
                                 />
                                 <SRouterLink v-if="hasRewardLink(item)" :to="getRewardLink(item)" class="min-w-0 truncate hover:underline">
-                                    {{ item.dp ? "掉落物: " : "" }}
+                                    {{ item.dp ? `${$t('reward-item.drop_item')} ` : "" }}
                                     {{ item.d ? $t("UI_FORGING_BLUEPRINT") : "" }}
                                     {{ getRewardDisplayName(item) }}
                                 </SRouterLink>
                                 <span v-else>
-                                    {{ item.dp ? "掉落物: " : "" }}
+                                    {{ item.dp ? `${$t('reward-item.drop_item')} ` : "" }}
                                     {{ item.d ? $t("UI_FORGING_BLUEPRINT") : "" }}
                                     {{ getRewardDisplayName(item) }}
                                 </span>
@@ -473,29 +477,34 @@ function getCharacterFragmentIcon(name?: string): string {
                             </span>
                             <span v-if="item.c !== undefined" class="text-base-content/70">x{{ item.c }}</span>
                             <span v-if="item.t === 'Reward' && item.c === undefined && item.m === 'Fixed'" class="text-base-content/70"
-                                >固定</span
+                                >{{ $t('reward-item.fixed') }}</span
                             >
                             <span v-else-if="item.t !== 'Reward' && item.p && item.m !== 'Independent'" class="text-base-content/70">
-                                ({{ item.m === "Sequence" ? `容量:${item.p}` : `权重:${item.p}` }}
-                                {{ item.pp ? `比例:${+(item.pp * 100).toFixed(2)}%` : "" }}
-                                {{ item.times ? `每个期望:${+item.times.toFixed(2)}次` : "" }}
+                                ({{
+                                    item.m === "Sequence"
+                                        ? $t('reward-item.capacity', { value: item.p })
+                                        : $t('reward-item.weight_ratio', { value: item.p })
+                                }}
+                                {{ item.pp ? $t('reward-item.ratio', { value: +(item.pp * 100).toFixed(2) }) : "" }}
+                                {{ item.times ? $t('reward-item.expect_times', { value: +item.times.toFixed(2) }) : "" }}
                                 )
                             </span>
                             <span v-if="item.t !== 'Reward' && item.m === 'Independent'"
-                                >独立掉落 {{ `概率:${+(item.p / 100).toFixed(2)}%` }}</span
+                                >{{ $t('reward-item.independent_drop') }}
+                                {{ $t('reward-item.probability', { value: +(item.p / 100).toFixed(2) }) }}</span
                             >
                             <!-- 显示掉落模式 -->
                             <span
                                 v-if="item.t === 'Reward'"
                                 class="text-xs px-1.5 py-0.5 rounded"
                                 :class="
-                                    getDropModeText(item.m || '') === '独立'
+                                    item.m === 'Independent'
                                         ? 'bg-success text-success-content'
                                         : 'bg-warning text-warning-content'
                                 "
                             >
-                                {{ getDropModeText(item.m || "") }}
-                                <span v-if="item.totalP"> 总容量 {{ item.totalP }}</span>
+                                {{ $t(getDropModeText(item.m || "")) }}
+                                <span v-if="item.totalP">{{ $t('reward-item.total_capacity', { count: item.totalP }) }}</span>
                             </span>
                         </div>
                         <!-- 递归显示子奖励 -->

@@ -514,7 +514,7 @@ function getHardbossIcon(boss: HardBoss): string {
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/hardboss/${boss.id}`"
-                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(boss.name) }}
                         </SRouterLink>
@@ -527,10 +527,10 @@ function getHardbossIcon(boss: HardBoss): string {
 
         <!-- 怪物信息 -->
         <section v-if="monsters.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="MONSTERS" title="怪物信息">
+            <SectionHeader no-animate compact kicker="MONSTERS" :title="$t('db-hardboss-detail.monster_info')">
                 <template #trailing>
                     <label class="flex items-center gap-1.5 text-xs text-base-content/60">
-                        等级
+                        {{ $t('common.level') }}
                         <Select
                             v-if="monsterLevels.length"
                             v-model.number="selectedMonsterLevel"
@@ -607,7 +607,12 @@ function getHardbossIcon(boss: HardBoss): string {
                     />
                     <button
                         type="button"
-                        class="btn btn-xs btn-ghost gap-1"
+                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40"
+                        :class="
+                            selectedTimePointIndex === currentTimePointIndex
+                                ? 'border-base-content/15 text-base-content/40'
+                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                        "
                         :disabled="selectedTimePointIndex === currentTimePointIndex"
                         @click="resetToCurrentTimePoint"
                     >

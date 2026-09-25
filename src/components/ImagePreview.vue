@@ -360,7 +360,7 @@ defineExpose({
                     class="fixed z-30 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/45 text-white shadow-2xl backdrop-blur-md transition hover:bg-white/12"
                     :style="{ left: `${controlMargin}px`, top: `${controlMargin}px` }"
                     @click="closePreview"
-                    aria-label="关闭预览"
+                    :aria-label="$t('image-preview.close_preview')"
                 >
                     <Icon icon="ri:close-line" class="text-lg" />
                 </button>
@@ -377,7 +377,7 @@ defineExpose({
                         type="button"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/12"
                         @click="zoomOut"
-                        aria-label="缩小"
+                        :aria-label="$t('image-preview.zoom_out')"
                     >
                         <Icon icon="ri:zoom-out-line" class="text-lg" />
                     </button>
@@ -385,7 +385,7 @@ defineExpose({
                         type="button"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/12"
                         @click="resetZoom"
-                        aria-label="重置缩放"
+                        :aria-label="$t('image-preview.reset_zoom')"
                     >
                         <Icon icon="ri:focus-3-line" class="text-lg" />
                     </button>
@@ -393,7 +393,7 @@ defineExpose({
                         type="button"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/12"
                         @click="zoomIn"
-                        aria-label="放大"
+                        :aria-label="$t('image-preview.zoom_in')"
                     >
                         <Icon icon="ri:zoom-in-line" class="text-lg" />
                     </button>

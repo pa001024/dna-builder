@@ -140,14 +140,31 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 详情头部：纸面 + primary 强调线 -->
         <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
             <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                 <span class="h-px w-6 bg-primary" aria-hidden="true" />
                 Abyss File
             </p>
-            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <div class="relative flex flex-wrap items-center gap-x-2 gap-y-1">
                 <SRouterLink
                     :to="`/db/abyss/${dungeon.id}`"
-                    class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                    class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                 >
                     <span v-if="dungeon.sn">{{ dungeon.sn }}</span
                     >&nbsp;
@@ -160,32 +177,32 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
 
         <!-- 副本信息 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="INFO" title="副本信息" />
+            <SectionHeader no-animate compact kicker="INFO" :title="$t('db-abyss-dungeon.dungeon_info')" />
             <div class="mt-2 grid grid-cols-2 gap-1.5 text-sm md:grid-cols-3">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">深渊ID</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ dungeon.id }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-abyss-dungeon.abyss_id') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ dungeon.id }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">副本ID</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ dungeon.did }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-abyss-dungeon.dungeon_id') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ dungeon.did }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">类型</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-abyss-dungeon.type') }}</span>
                     <span class="shrink-0 text-xs text-base-content/85">{{ $t(getAbyssDungeonGroup(dungeon)) }}</span>
                 </div>
                 <div
                     v-if="dungeon.sid"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">赛季ID</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ dungeon.sid }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-abyss-dungeon.season_id') }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ dungeon.sid }}</span>
                 </div>
                 <div
                     v-if="dungeon.st"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">开始时间</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-abyss-dungeon.start_time') }}</span>
                     <span class="shrink-0 font-mono text-[11px] tabular-nums text-primary">{{
                         new Date(dungeon.st * 1000).toLocaleString()
                     }}</span>
@@ -194,7 +211,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     v-if="dungeon.et"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">结束时间</span>
+                    <span class="text-xs text-base-content/60">{{ $t('db-abyss-dungeon.end_time') }}</span>
                     <span class="shrink-0 font-mono text-[11px] tabular-nums text-primary">{{
                         new Date(dungeon.et * 1000).toLocaleString()
                     }}</span>
@@ -204,11 +221,11 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
 
         <!-- 关联角色 -->
         <section v-if="dungeon.cid" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="CHARACTER" title="关联角色" />
+            <SectionHeader no-animate compact kicker="CHARACTER" :title="$t('db-abyss-dungeon.related_chars')" />
             <div v-for="char in [getChar(dungeon.cid)!]" :key="dungeon.cid" class="mt-2 space-y-2">
                 <!-- 角色名片 -->
                 <div class="flex items-center gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                    <img :src="LeveledChar.url(char.icon)" alt="角色头像" class="size-10 shrink-0 rounded-xs object-cover object-top" />
+                    <img :src="LeveledChar.url(char.icon)" :alt="$t('db-abyss-dungeon.char_avatar')" class="size-10 shrink-0 rounded-xs object-cover object-top" />
                     <div class="min-w-0">
                         <SRouterLink
                             :to="`/char/${char.id}`"
@@ -223,19 +240,19 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     <div
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
-                        <span class="text-xs text-base-content/60">元素属性</span>
+                        <span class="text-xs text-base-content/60">{{ $t('db-abyss-dungeon.element') }}</span>
                         <span class="shrink-0 text-xs text-base-content/85">{{ $t(`${char.属性}属性`) }}</span>
                     </div>
                     <div
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
-                        <span class="text-xs text-base-content/60">精通</span>
+                        <span class="text-xs text-base-content/60">{{ $t('db-abyss-dungeon.mastery') }}</span>
                         <span class="truncate text-xs text-base-content/85">{{ char.精通?.map(item => $t(item)).join("/") }}</span>
                     </div>
                     <div
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
-                        <span class="text-xs text-base-content/60">标签</span>
+                        <span class="text-xs text-base-content/60">{{ $t('db-abyss-dungeon.tags') }}</span>
                         <span class="truncate text-xs text-base-content/85">{{
                             char.标签?.map(item => $t(`tag.${item}`, $t(item))).join("/")
                         }}</span>
@@ -243,7 +260,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     <div
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
-                        <span class="text-xs text-base-content/60">版本</span>
+                        <span class="text-xs text-base-content/60">{{ $t('db-abyss-dungeon.version') }}</span>
                         <span class="shrink-0 font-mono text-[11px] tabular-nums text-primary">{{ char.版本 }}</span>
                     </div>
                 </div>
@@ -252,7 +269,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
 
         <!-- 怪物属性克制 -->
         <section v-if="dungeon.mb" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="COUNTER" title="怪物属性克制" />
+            <SectionHeader no-animate compact kicker="COUNTER" :title="$t('db-abyss-dungeon.monster_counter')" />
             <div class="mt-2 grid grid-cols-3 gap-1.5 text-sm">
                 <div
                     v-for="key in ABYSS_DUNGEON_ELEMENT_KEYS"
@@ -260,7 +277,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t(`${key}属性`) }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatAbyssDungeonMbValue(dungeon, key)
                     }}</span>
                 </div>
@@ -269,7 +286,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
 
         <!-- BUFF列表 -->
         <section v-if="dungeon.buff?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="BUFF" title="BUFF列表">
+            <SectionHeader no-animate compact kicker="BUFF" :title="$t('db-abyss-dungeon.buff_list')">
                 <template #trailing>
                     <span class="text-[11px] tabular-nums text-base-content/40">{{ dungeon.buff.length }} 个</span>
                 </template>
@@ -284,11 +301,11 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                         <img :src="`/imgs/webp/T_Abyss_Buff_${buff.icon}.webp`" class="h-10 shrink-0 rounded-xs" alt="" />
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-1 text-sm font-medium">
-                                {{ buff.n }}
+                                {{ $t(buff.n) }}
                                 <CopyID :id="buff.id" />
                             </div>
                             <div class="mt-1 text-xs leading-relaxed text-base-content/70">
-                                {{ buff.d }}
+                                {{ $t(buff.d) }}
                             </div>
                         </div>
                     </div>
@@ -331,12 +348,12 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                             <span
                                 class="rounded-xs px-1.5 py-0.5 text-[10px] leading-4 tracking-wide"
                                 :class="
-                                    getDropModeText(getRewardDetails(item.r)?.m || '') === '独立'
+                                    getRewardDetails(item.r)?.m === 'Independent'
                                         ? 'bg-success text-success-content'
                                         : 'bg-warning text-warning-content'
                                 "
                             >
-                                {{ getDropModeText(getRewardDetails(item.r)?.m || "") }}
+                                {{ $t(getDropModeText(getRewardDetails(item.r)?.m || "")) }}
                             </span>
                         </div>
                     </div>
@@ -409,7 +426,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     step="1"
                     class="w-20 rounded-none border-b border-base-content/25 bg-transparent px-1 py-1 text-center font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 focus:border-primary"
                 />
-                <span class="flex items-center gap-1 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                <span class="flex items-center gap-1 font-orbitron text-[13px] font-semibold text-primary">
                     <img src="/imgs/res/T_Abyss_Star02.webp" alt="图标" class="h-5 w-5" />
                     {{ currentStarCount }}
                 </span>
@@ -443,14 +460,14 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                         step="1"
                         class="w-20 rounded-none border-b border-base-content/25 bg-transparent px-1 py-1 text-center font-orbitron text-sm tabular-nums outline-none transition-colors duration-200 focus:border-primary"
                     />
-                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                    <span class="font-orbitron text-[13px] font-semibold text-primary">
                         Lv.
                         {{ monsterDisplayLevel }}
                         <span class="font-mono text-[11px] font-normal text-base-content/55">/ {{ AbyssMonsterLevelLimit }}</span>
                     </span>
                 </template>
                 <template v-else>
-                    <span class="min-w-12 shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                    <span class="min-w-12 shrink-0 font-orbitron text-[13px] font-semibold text-primary"
                         >Lv. {{ currentMonsterLevel }}</span
                     >
                     <input
@@ -463,7 +480,7 @@ function getCumulativeRewardValue(item: RewardItem): number | [number | string, 
                     />
                 </template>
             </div>
-            <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+            <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                 <DBMonsterCompactCard
                     v-for="monsterId in dungeon.m"
                     :key="monsterId"

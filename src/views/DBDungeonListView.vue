@@ -140,7 +140,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索副本ID/名称/描述/等级/奖励（支持拼音）..."
+                            :placeholder="$t('db-dungeon-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -162,7 +162,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                             "
                             @click="onlyNightHandbook = !onlyNightHandbook"
                         >
-                            夜航手册
+                            {{ $t('夜航手册') }}
                         </button>
                         <button
                             type="button"
@@ -174,7 +174,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                             "
                             @click="toggleTypeFilterRow()"
                         >
-                            类型
+                            {{ $t('common.type') }}
                         </button>
                         <button
                             type="button"
@@ -186,7 +186,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                             "
                             @click="toggleLevelFilterRow()"
                         >
-                            等级
+                            {{ $t('common.level') }}
                         </button>
                     </div>
                 </div>
@@ -199,7 +199,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                 >
                     <!-- 类型筛选 -->
                     <div v-show="showTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40"> 类型 </span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40"> {{ $t('common.type') }} </span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -209,7 +209,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                             "
                             @click="selectedType = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="type in allTypes.map(t => getDungeonType(t))"
@@ -228,7 +228,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
 
                     <!-- 等级筛选 -->
                     <div v-show="showLevelFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40"> 等级 </span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40"> {{ $t('common.level') }} </span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -238,7 +238,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                             "
                             @click="selectedLevel = ''"
                         >
-                            {{ $t("全部") }}
+                            {{ $t("common.all") }}
                         </button>
                         <button
                             v-for="level in allLevels"
@@ -264,7 +264,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                             v-if="filteredDungeons.length === 0"
                             class="flex flex-col items-center justify-center py-20 text-base-content/45"
                         >
-                            <p class="text-sm">未找到匹配的副本</p>
+                            <p class="text-sm">{{ $t('db-dungeon-list.no_match') }}</p>
                         </div>
 
                         <div v-else class="space-y-2">
@@ -332,7 +332,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredDungeons.length }}</b> 个副本
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredDungeons.length }}</b> {{ $t('db-dungeon-list.dungeon_count') }}
                     </p>
                 </div>
             </div>

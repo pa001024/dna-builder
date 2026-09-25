@@ -31,6 +31,12 @@ const TRANSLATION_VARS: Record<TranslationLocale, string> = {
  * 因此单独按 ID 取。键是前端实际输出的中文，值是官方 TextMapId。
  */
 const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
+    // 迷津房间类型：名称来自游戏脚本 Script/Datas/RougeLikeRoomType.lua，
+    // 不在任何一个 i18n 模块数据集里，只能按官方文本表 ID 取权威译名
+    战斗: "RougeLike_RoomType_Name_1",
+    休整: "RougeLike_RoomType_Name_4",
+    奇遇: "RougeLike_RoomType_Name_3",
+    高危战斗: "RougeLike_RoomType_Name_5",
     // 稀有度：前端把 `rarity: 1~6` 显示成「白/绿/蓝/紫/金/红」，官方 ID 给的是「白色/绿色/…」
     白: "BackpackResource_Rarity1",
     绿: "BackpackResource_Rarity2",
@@ -42,6 +48,32 @@ const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     上午: "UI_Fishing_DayAndNight_Cont_1",
     下午: "UI_Fishing_DayAndNight_Cont_2",
     夜晚: "UI_Fishing_DayAndNight_Cont_3",
+    // 钓鱼界面从枚举值生成的展示名（出现时段之外的几项）。
+    // 这几个词在 `Fish.json` / `FishingSpot.json` 里没有对应字段，官方文本表却给了权威 ID，
+    // 因此按 ID 取；UI_Fishing_AutoSmallToBig 与 UI_Fishing_SmallToBig 同义，取其一即可。
+    异种: "UI_Fishing_FishType_2",
+    珍鳞: "UI_Fishing_FishType_3",
+    珍鳞异种: "UI_Fishing_FishType_4",
+    授渔以鱼: "UI_Fishing_AutoSmallToBig",
+    鱼饵: "UI_Fishing_FishingLure",
+    鱼竿: "UI_Fishing_FishingRod",
+    // 模拟器「钓100次」按钮：上游按钓获/图鉴语境给的是同一个词，逐字取官方译名
+    钓一次: "UI_Fishing_StartFishing",
+    // 密函「获取途径」标签：这三个词由前端 `walnut.data.ts` 自己写死，
+    // 不在任何 i18n 模块数据集里（`Walnut.json` 只含名称与奖励），
+    // 但官方文本表里有同义的权威 ID —— 按 ID 取，避免另造界面键。
+    副本: "UI_Dungeon_Tab_WalnutDungeon",
+    梦魇残声: "MAIN_UI_HARDBOSS",
+    委托密函商店: "MAIN_UI_WALNUTBAG",
+    // 迷津合作模式 Mod 装备部位：界面显示的是「近战武器 / 远程武器」单数形式，
+    // 官方文本表只有整句里出现的这些词，故按装备部位条目的 ID 取权威译名
+    近战武器: "UI_BAG_Meleeweapon",
+    远程武器: "UIGUIDE_TITLE_GUN",
+    // 剧情占位符 {nickname} / {nickname2} 的主角默认名，官方分别给了独立 ID
+    维塔: "PlayerDefaultName",
+    墨斯: "ExPlayerDefaultName",
+    秽兽: "UI_Archive_Tab_InfectionEnemy",
+    神弃者同盟: "UI_Archive_Tab_AllianceEnemy",
 }
 
 /**
@@ -58,15 +90,22 @@ const TEXT_MAP_LOCALE_FIELDS: Record<TranslationLocale, string> = {
 /**
  * 无官方依据、纯前端自造的展示名译名表。
  *
- * 成就品质（前端把 `quality` 显示成「铜/银/金」）是前端自己的展示口径，
- * 官方文本表里搜不到同义 ID，只能人工指定。键必须与前端实际输出的中文完全一致。
+ * 两类词在官方文本表里都搜不到同义 ID，只能人工指定，键必须与前端实际输出的中文完全一致：
+ * - 成就品质：前端把 `quality` 显示成「铜/银/金」；
+ * - 魔灵类型之一的「活动魔灵」（`pet.data.ts` 的 `类型: 3`，即无由生这类活动支援魔灵）：
+ *   官方只提供了「活力魔灵」（`Pet_BattlePet`）与「失活魔灵」（`Pet_ResourcePet`）两个分类名，
+ *   译名按这两个词的构词风格补。
+ *
+ * 钓鱼界面里由前端**文案模板 + 数值**拼出来的句子没有官方原文，不进这张表——
+ * 它们走 `translations.data.ts` 里对应的**整句模板键**（如「额外奖励(概率:{{prob}})」），
+ * 由界面直接 `$t` 取用，避免在此处按词硬拼出语法不通的译文。
  */
 const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string>> = {
-    tc: { 铜: "銅", 银: "銀" },
-    en: { 铜: "Bronze", 银: "Silver" },
-    jp: { 铜: "銅", 银: "銀" },
-    kr: { 铜: "동", 银: "은" },
-    fr: { 铜: "Bronze", 银: "Argent" },
+    tc: { 铜: "銅", 银: "銀", 活动魔灵: "活動魔靈", 守护机关1: "守護機關1" },
+    en: { 铜: "Bronze", 银: "Silver", 活动魔灵: "Event Geniemon", 守护机关1: "Guard Device 1" },
+    jp: { 铜: "銅", 银: "銀", 活动魔灵: "イベントジェネモン", 守护机关1: "守護装置1" },
+    kr: { 铜: "동", 银: "은", 活动魔灵: "이벤트 마령", 守护机关1: "수호 기관 1" },
+    fr: { 铜: "Bronze", 银: "Argent", 活动魔灵: "Géniemon d'événement", 守护机关1: "Dispositif de garde 1" },
 }
 
 /**

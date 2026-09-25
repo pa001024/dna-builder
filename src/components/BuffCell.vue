@@ -61,7 +61,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                         v-if="selected && coverage !== undefined"
                         :coverage="coverage"
                         :title="$t('char-build.coverage')"
-                        hint="设置BUFF覆盖率"
+                        :hint="$t('char-build.set_buff_coverage')"
                         @update-coverage="emit('setBuffCoverage', buff, $event)"
                     />
                 </div>

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { t } from "i18next"
+import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { formatModName, LeveledMod, LeveledWeaponHelper, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
 import { Walnut } from "@/data/d/walnut.data"
@@ -8,6 +8,20 @@ import { WalnutSequenceSimulator } from "@/utils/walnut-utils"
 const props = defineProps<{
     walnut: Walnut
 }>()
+
+const { t: $t } = useTranslation()
+
+/**
+ * 把密函类型（1=角色 2=武器 3=魔之楔）转成展示名。
+ *
+ * 返回值是**游戏原文**，交给模板里的 `$t` 取译文——`角色` / `武器` / `魔之楔`
+ * 三个词已在数据包对照表里，不要另造界面键。
+ * @param type 密函类型
+ * @returns 展示名原文
+ */
+function getWalnutTypeName(type: number): string {
+    return type === 1 ? "角色" : type === 2 ? "武器" : "魔之楔"
+}
 
 interface RewardLinkInfo {
     icon: string
@@ -124,6 +138,10 @@ function getRewardIcon(reward: Walnut["奖励"][number]): string {
 
 /**
  * 获取奖励对应的跳转链接。
+ *
+ * 链接文案在这里就翻译好，因为模板里只渲染 `link.text`。
+ * 用 `$t`（来自 `useTranslation`）而不是模块级 `t`：游戏原文里含 `.` / `:` 时
+ * 会被 i18next 当键路径切分，而 `useTranslation` 的 `t` 已经按项目的取词口径配置过。
  * @param reward 奖励项
  * @returns 跳转链接列表
  */
@@ -135,7 +153,7 @@ function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
         if (draft) {
             links.push({
                 icon: "/imgs/webp/T_Head_Empty.webp",
-                text: `${t("UI_FORGING_BLUEPRINT")}${t(draft.n)}`,
+                text: `${$t("UI_FORGING_BLUEPRINT")}${$t(draft.n)}`,
                 to: `/db/draft/${draft.id}`,
             })
             return links
@@ -147,7 +165,7 @@ function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
         if (mod) {
             links.push({
                 icon: LeveledMod.url(mod.icon),
-                text: formatModName(mod.系列, mod.名称, t),
+                text: formatModName(mod.系列, mod.名称, $t),
                 to: `/db/mod/${mod.id}`,
             })
         }
@@ -156,7 +174,7 @@ function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
         if (weapon) {
             links.push({
                 icon: LeveledWeaponHelper.idToUrl(weapon.id),
-                text: weapon.名称,
+                text: $t(weapon.名称),
                 to: `/db/weapon/${weapon.id}`,
             })
         }
@@ -165,7 +183,7 @@ function getRewardLinks(reward: Walnut["奖励"][number]): RewardLinkInfo[] {
         if (resource) {
             links.push({
                 icon: resource.icon ? `/imgs/res/${resource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp",
-                text: resource.name,
+                text: $t(resource.name),
                 to: `/db/resource/${resource.id}`,
             })
         }
@@ -232,7 +250,7 @@ function sortRewards(rewards: number[]): number[] {
         const reward = props.walnut.奖励[index]
         return {
             index,
-            name: reward?.name || "未知",
+            name: reward?.name || $t("db-walnut-detail.unknown"),
             isGold: index === 0, // 索引0为金奖
             rarity: index + 1, // 索引+1作为稀有度，1最高
             count: reward?.count || 1,
@@ -367,7 +385,7 @@ function getRewardInfo(index: number) {
     const reward = props.walnut.奖励[index]
     return {
         index,
-        name: reward?.name || "未知",
+        name: reward?.name || $t("db-walnut-detail.unknown"),
         count: reward?.count || 1,
         d: reward?.d || 0,
         links: reward ? getRewardLinks(reward) : [],
@@ -395,52 +413,71 @@ function getRewardTypeColor(index: number): string {
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 密函档案头：纸面 + primary 强调线 -->
         <header class="relative overflow-hidden border-b-2 border-primary pb-4">
-            <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-primary">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                 <span class="h-px w-6 bg-primary" aria-hidden="true" />
                 Walnut File
             </p>
-            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span class="font-orbitron text-xl font-bold leading-none tracking-tight sm:text-2xl">{{ walnut.名称 }}</span>
+            <div class="relative flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content sm:text-2xl">{{ $t(walnut.名称) }}</span>
                 <CopyID :id="walnut.id" />
             </div>
             <!-- 元信息行：稀有度 / 类型 / 模式 -->
-            <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
-                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ walnut.稀有度 }}星</span>
+            <div class="relative mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
+                <span class="font-orbitron text-[13px] font-semibold text-primary">{{
+                    $t("db-walnut-detail.rarity_stars", { count: walnut.稀有度 })
+                }}</span>
                 <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                <span>{{ $t(walnut.类型 === 1 ? "角色" : walnut.类型 === 2 ? "武器" : "魔之楔") }}</span>
+                <span>{{ $t(getWalnutTypeName(walnut.类型)) }}</span>
                 <template v-if="walnut.模式">
                     <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                    <span>{{ walnut.模式 }}</span>
+                    <span>{{ $t(walnut.模式) }}</span>
                 </template>
             </div>
         </header>
 
         <!-- 获取途径 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="SOURCE" title="获取途径" />
+            <SectionHeader no-animate compact kicker="SOURCE" :title="$t('db-walnut-detail.source_section')" />
             <div class="flex flex-wrap gap-1.5">
                 <span
                     v-for="way in walnut.获取途径"
                     :key="way"
                     class="rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-0.5 text-xs text-base-content/75"
                 >
-                    {{ way }}
+                    {{ $t(way) }}
                 </span>
             </div>
         </section>
 
         <!-- 奖励列表 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="REWARDS" title="奖励列表" />
+            <SectionHeader no-animate compact kicker="REWARDS" :title="$t('db-walnut-detail.reward_list')" />
             <div class="overflow-x-auto">
                 <table class="w-full min-w-100">
                     <thead>
                         <tr class="border-b border-base-content/20">
                             <th class="px-3 py-2 text-left font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">ID</th>
-                            <th class="px-3 py-2 text-left text-[10px] text-base-content/40">名称</th>
-                            <th class="px-3 py-2 text-left text-[10px] text-base-content/40">数量</th>
+                            <th class="px-3 py-2 text-left text-[10px] text-base-content/40">{{ $t("db-walnut-detail.col_name") }}</th>
+                            <th class="px-3 py-2 text-left text-[10px] text-base-content/40">{{ $t("db-walnut-detail.col_count") }}</th>
                             <th class="px-3 py-2 text-left text-[10px] text-base-content/40">
-                                池随机范围*
+                                {{ $t("db-walnut-detail.col_pool_range") }}
                             </th>
                         </tr>
                     </thead>
@@ -465,11 +502,11 @@ function getRewardTypeColor(index: number): string {
                                             <span v-if="linkIndex < item.links.length - 1" class="mx-1 text-base-content/50">/</span>
                                         </span>
                                     </template>
-                                    <span v-else>{{ item.reward.d ? `设计稿: ${item.reward.name}` : $t(item.reward.name) }}</span>
+                                    <span v-else>{{ item.reward.d ? `${$t("UI_FORGING_BLUEPRINT")}${$t(item.reward.name)}` : $t(item.reward.name) }}</span>
                                 </div>
                             </td>
                             <td class="px-3 py-2">
-                                <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                                <span class="font-orbitron text-[13px] font-semibold text-primary">{{
                                     item.reward.count
                                 }}</span>
                             </td>
@@ -481,7 +518,7 @@ function getRewardTypeColor(index: number): string {
                 </table>
             </div>
             <p class="mt-4 text-xs leading-relaxed text-base-content/55">
-                * 机制: 从每个奖励的随机范围抽取n个该种奖励后加入到奖励序列, 打乱后在序列结尾放置金奖励, 重复抽取直到抽出金后重置序列
+                {{ $t("db-walnut-detail.mechanism_note") }}
             </p>
         </section>
 
@@ -492,21 +529,21 @@ function getRewardTypeColor(index: number): string {
 
         <!-- 模拟开函 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="SIMULATOR" title="模拟开函" />
+            <SectionHeader no-animate compact kicker="SIMULATOR" :title="$t('db-walnut-detail.simulator')" />
 
             <!-- 统计信息 -->
             <div class="mb-3 grid grid-cols-3 gap-1.5">
                 <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <div class="mb-0.5 text-[11px] text-base-content/55">总开函次数</div>
-                    <div class="font-orbitron text-lg font-semibold tabular-nums text-primary">{{ totalOpens }}</div>
+                    <div class="mb-0.5 text-[11px] text-base-content/55">{{ $t("db-walnut-detail.total_opens") }}</div>
+                    <div class="font-orbitron text-lg font-semibold text-primary">{{ totalOpens }}</div>
                 </div>
                 <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <div class="mb-0.5 text-[11px] text-base-content/55">出金次数</div>
-                    <div class="font-orbitron text-lg font-semibold tabular-nums text-yellow-500">{{ goldCount }}</div>
+                    <div class="mb-0.5 text-[11px] text-base-content/55">{{ $t("db-walnut-detail.gold_count") }}</div>
+                    <div class="font-orbitron text-lg font-semibold text-yellow-500">{{ goldCount }}</div>
                 </div>
                 <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <div class="mb-0.5 text-[11px] text-base-content/55">出金率</div>
-                    <div class="font-orbitron text-lg font-semibold tabular-nums text-primary">
+                    <div class="mb-0.5 text-[11px] text-base-content/55">{{ $t("db-walnut-detail.gold_rate") }}</div>
+                    <div class="font-orbitron text-lg font-semibold text-primary">
                         {{ totalOpens > 0 ? ((goldCount / totalOpens) * 100).toFixed(2) : 0 }}%
                     </div>
                 </div>
@@ -514,19 +551,60 @@ function getRewardTypeColor(index: number): string {
 
             <!-- 操作按钮 -->
             <div class="mb-3 flex flex-wrap justify-center gap-2">
-                <button class="btn btn-primary btn-sm" :disabled="isAutoOpening" @click="openOnce">开1次</button>
-                <button class="btn btn-primary btn-sm" :disabled="isAutoOpening" @click="openWalnut(65)">开65次</button>
-                <button class="btn btn-secondary btn-sm" @click="isAutoOpening ? stopAutoOpen() : startAutoOpen()">
-                    {{ isAutoOpening ? "停止自动" : "开始自动" }}开
+                <button
+                    type="button"
+                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                    :class="
+                        isAutoOpening
+                            ? 'border-base-content/20 text-base-content/40'
+                            : 'border-primary bg-primary font-semibold text-primary-content'
+                    "
+                    :disabled="isAutoOpening"
+                    @click="openOnce"
+                >
+                    {{ $t("db-walnut-detail.open_once") }}
                 </button>
-                <button class="btn btn-error btn-sm" @click="resetSimulation">重置数据</button>
+                <button
+                    type="button"
+                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                    :class="
+                        isAutoOpening
+                            ? 'border-base-content/20 text-base-content/40'
+                            : 'border-primary bg-primary font-semibold text-primary-content'
+                    "
+                    :disabled="isAutoOpening"
+                    @click="openWalnut(65)"
+                >
+                    {{ $t("db-walnut-detail.open_65") }}
+                </button>
+                <button
+                    type="button"
+                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                    :class="
+                        isAutoOpening
+                            ? 'border-error bg-error/10 font-semibold text-error'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
+                    @click="isAutoOpening ? stopAutoOpen() : startAutoOpen()"
+                >
+                    {{ isAutoOpening ? $t("db-walnut-detail.stop_auto") : $t("db-walnut-detail.start_auto") }}
+                </button>
+                <button
+                    type="button"
+                    class="inline-flex h-6 cursor-pointer items-center rounded-xs border border-error/40 px-2 text-[11px] text-error/80 transition-colors duration-150 hover:border-error hover:bg-error/10 hover:text-error"
+                    @click="resetSimulation"
+                >
+                    {{ $t("db-walnut-detail.reset_data") }}
+                </button>
             </div>
 
             <!-- 开函结果 -->
             <div class="mb-3">
-                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">开函结果（最近200次）</div>
+                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ $t("db-walnut-detail.open_results") }}</div>
                 <div class="max-h-48 overflow-y-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                    <div v-if="openResults.length === 0" class="py-4 text-center text-base-content/55">暂无开函记录</div>
+                    <div v-if="openResults.length === 0" class="py-4 text-center text-base-content/55">
+                        {{ $t("db-walnut-detail.no_open_records") }}
+                    </div>
                     <div v-else class="grid grid-cols-1 gap-1">
                         <div
                             v-for="(result, index) in openResults"
@@ -564,9 +642,11 @@ function getRewardTypeColor(index: number): string {
 
             <!-- 奖励数量统计 -->
             <div class="mb-3">
-                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">奖励数量统计</div>
+                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ $t("db-walnut-detail.reward_stats") }}</div>
                 <div class="max-h-40 overflow-y-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                    <div v-if="Object.keys(rewardCounts).length === 0" class="py-4 text-center text-base-content/55">暂无统计数据</div>
+                    <div v-if="Object.keys(rewardCounts).length === 0" class="py-4 text-center text-base-content/55">
+                        {{ $t("db-walnut-detail.no_stats") }}
+                    </div>
                     <div v-else class="grid grid-cols-2 gap-2">
                         <div
                             v-for="reward in sortedRewardCounts"
@@ -578,7 +658,7 @@ function getRewardTypeColor(index: number): string {
                                     <span>{{ $t(reward.name) }}</span></span
                                 >
                             </div>
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary"
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary"
                                 >*{{ reward.count }}</span
                             >
                         </div>
@@ -587,19 +667,19 @@ function getRewardTypeColor(index: number): string {
             </div>
 
             <div>
-                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">出金概率期望</div>
+                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">{{ $t("db-walnut-detail.gold_probability") }}</div>
                 <div class="overflow-x-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                     <table class="w-full min-w-100">
                         <thead>
                             <tr class="border-b border-base-content/20">
                                 <th class="px-3 py-2 text-left text-[10px] text-base-content/40">
-                                    开函次数(n)
+                                    {{ $t("db-walnut-detail.col_opens_n") }}
                                 </th>
                                 <th class="px-3 py-2 text-left text-[10px] text-base-content/40">
-                                    至少一次出金概率
+                                    {{ $t("db-walnut-detail.col_at_least_once") }}
                                 </th>
                                 <th class="px-3 py-2 text-left text-[10px] text-base-content/40">
-                                    刚好在这次开出金概率
+                                    {{ $t("db-walnut-detail.col_exact_this_time") }}
                                 </th>
                             </tr>
                         </thead>

@@ -27,7 +27,7 @@ const select = (qq: LocalQQ) => emit("select", qq)
 
 <template>
     <div v-if="env.isApp" class="flex flex-col flex-wrap gap-2">
-        <span class="text-sm text-base-content/60">点击快速填写QQ</span>
+        <span class="text-sm text-base-content/60">{{ $t('local-qq.fill_qq_hint') }}</span>
         <div class="flex justify-center flex-wrap gap-2">
             <div
                 v-for="qq in Object.values(uins)"

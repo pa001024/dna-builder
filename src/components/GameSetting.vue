@@ -934,64 +934,64 @@ function openConfigDir() {
     <div class="flex flex-col gap-4">
         <!-- 配置文件路径显示 -->
         <div v-if="game.path" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm">
-            <div class="text-xs text-base-content/60">配置目录:</div>
+            <div class="text-xs text-base-content/60">{{ $t('game-setting.config_dir') }}</div>
             <div class="mt-1 break-all font-mono text-xs text-primary hover:underline cursor-pointer" @click="openConfigDir">{{ configDir }}</div>
         </div>
-        <div v-else class="rounded-xs border border-warning/30 bg-warning/10 p-2.5 text-sm text-warning">请先在游戏设置中配置游戏路径</div>
+        <div v-else class="rounded-xs border border-warning/30 bg-warning/10 p-2.5 text-sm text-warning">{{ $t('game-setting.configure_game_path_first') }}</div>
 
         <!-- 预设配置 -->
         <div v-if="game.path" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="PRESET" title="性能优化预设" />
+            <SectionHeader no-animate compact kicker="PRESET" :title="$t('game-setting.performance_preset')" />
             <div class="flex flex-wrap gap-1.5">
                 <button
                     type="button"
                     class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
                     @click="resetToDefault"
                 >
-                    无优化
+                    {{ $t('game-setting.preset_none') }}
                 </button>
                 <button
                     type="button"
                     class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
                     @click="applyPreset('low')"
                 >
-                    极低
+                    {{ $t('game-setting.preset_very_low') }}
                 </button>
                 <button
                     type="button"
                     class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
                     @click="applyPreset('medium')"
                 >
-                    低
+                    {{ $t('game-setting.preset_low') }}
                 </button>
                 <button
                     type="button"
                     class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
                     @click="applyPreset('high')"
                 >
-                    中
+                    {{ $t('game-setting.preset_medium') }}
                 </button>
                 <button
                     type="button"
                     class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2.5 py-1 text-[11px] transition-colors duration-150 active:scale-[0.97] border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary"
                     @click="applyPreset('ultra')"
                 >
-                    高
+                    {{ $t('game-setting.preset_high') }}
                 </button>
             </div>
         </div>
 
         <!-- 游戏设置（单独显示，不放在折叠框中） -->
         <div v-if="game.path" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="GAME" title="游戏设置" />
+            <SectionHeader no-animate compact kicker="GAME" :title="$t('game-setting.game_settings')" />
             <div v-if="gameSettingsCategory.description" class="mb-2 text-xs text-base-content/50">
                 {{ gameSettingsCategory.description }}
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 <!-- 分辨率设置 -->
                 <div class="flex flex-col gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 md:col-span-2">
-                    <div class="text-sm font-medium text-base-content/85">分辨率</div>
-                    <div class="text-xs text-base-content/50">游戏窗口分辨率</div>
+                    <div class="text-sm font-medium text-base-content/85">{{ $t('game-setting.resolution') }}</div>
+                    <div class="text-xs text-base-content/50">{{ $t('game-setting.window_resolution') }}</div>
                     <div class="mt-1 flex flex-wrap gap-1.5">
                         <button
                             v-for="res in commonResolutions"
@@ -1017,7 +1017,7 @@ function openConfigDir() {
                             "
                             @click="isCustomResolution = true"
                         >
-                            自定义
+                            {{ $t('game-setting.custom') }}
                         </button>
                     </div>
                     <!-- 自定义分辨率输入 -->
@@ -1026,21 +1026,21 @@ function openConfigDir() {
                             v-model.number="customResolution.width"
                             type="number"
                             class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                            placeholder="宽度"
+                            :placeholder="$t('game-setting.width')"
                         />
                         <span class="text-base-content/50">x</span>
                         <input
                             v-model.number="customResolution.height"
                             type="number"
                             class="w-24 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                            placeholder="高度"
+                            :placeholder="$t('game-setting.height')"
                         />
                         <button
                             type="button"
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
                             @click="applyCustomResolution"
                         >
-                            应用
+                            {{ $t('game-setting.apply') }}
                         </button>
                     </div>
                 </div>
@@ -1054,7 +1054,7 @@ function openConfigDir() {
                     <!-- 标题和操作区 -->
                     <div class="flex items-center justify-between gap-2">
                         <span class="text-sm font-medium text-base-content/85">{{ option.label }}</span>
-                        <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值" @click="resetOption(option)">
+                        <button class="btn btn-ghost btn-xs text-base-content/50" :title="$t('game-setting.reset_to_default')" @click="resetOption(option)">
                             <Icon icon="ri:refresh-line" />
                         </button>
                     </div>
@@ -1132,7 +1132,7 @@ function openConfigDir() {
                                 />
                                 <span class="text-sm font-medium text-base-content/85">{{ option.label }}</span>
                             </div>
-                            <button class="btn btn-ghost btn-xs text-base-content/50" title="重置为默认值" @click="resetOption(option)">
+                            <button class="btn btn-ghost btn-xs text-base-content/50" :title="$t('game-setting.reset_to_default')" @click="resetOption(option)">
                                 <Icon icon="ri:refresh-line" />
                             </button>
                         </div>

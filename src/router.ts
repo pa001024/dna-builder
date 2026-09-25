@@ -296,6 +296,9 @@ const routes: readonly RouteRecordRaw[] = [
                 path: "title",
                 component: () => import("./views/DBTitleListView.vue"),
                 beforeEnter: () => setMinSize(320, 360),
+                meta: {
+                    title: "称号",
+                },
             },
             {
                 name: "title-detail",

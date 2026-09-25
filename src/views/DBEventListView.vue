@@ -1251,7 +1251,7 @@ onUnmounted(() => {
                             "
                             @click="showVersionFilter = !showVersionFilter"
                         >
-                            版本
+                            {{ $t('common.version') }}
                         </button>
                         <button
                             type="button"
@@ -1263,7 +1263,7 @@ onUnmounted(() => {
                             "
                             @click="showTimeFilter = !showTimeFilter"
                         >
-                            时间点
+                            {{ $t('db-event-list.time_point') }}
                         </button>
                         <button
                             type="button"
@@ -1275,7 +1275,7 @@ onUnmounted(() => {
                             "
                             @click="showFullTextSearch = !showFullTextSearch"
                         >
-                            全文搜索
+                            {{ $t('common.full_text_search') }}
                         </button>
                         <button
                             type="button"
@@ -1287,13 +1287,13 @@ onUnmounted(() => {
                             "
                             @click="showTimeLine = !showTimeLine"
                         >
-                            时间表
+                            {{ $t('db-event-list.timeline') }}
                         </button>
                     </div>
 
                     <!-- 版本筛选方章 -->
                     <div v-show="showVersionFilter" class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">版本</span>
+                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.version') }}</span>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
                             :class="
@@ -1303,7 +1303,7 @@ onUnmounted(() => {
                             "
                             @click="selectedVersion = ''"
                         >
-                            全部
+                            {{ $t('common.all') }}
                         </button>
                         <button
                             v-for="version in eventVersions"
@@ -1332,7 +1332,7 @@ onUnmounted(() => {
                                 class="cursor-pointer text-[11px] text-base-content/50 transition-colors duration-150 hover:text-primary"
                                 @click="resetToCurrentTimePoint"
                             >
-                                重置到当前
+                                {{ $t('common.reset_to_current') }}
                             </button>
                             <button
                                 type="button"
@@ -1344,7 +1344,7 @@ onUnmounted(() => {
                                 "
                                 @click="diffOnlyEnabled = !diffOnlyEnabled"
                             >
-                                仅显示差异
+                                {{ $t('common.show_diff_only') }}
                             </button>
                         </div>
 
@@ -1366,13 +1366,13 @@ onUnmounted(() => {
                         </div>
                         <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] tabular-nums text-base-content/55">
                             <span
-                                >当前时间点：<span class="font-mono">{{ formatEventTimePoint(eventTimePoints[currentTimePointIndex] ?? null) }}</span></span
+                                >{{ $t('db-event-list.current_time_point') }}<span class="font-mono">{{ formatEventTimePoint(eventTimePoints[currentTimePointIndex] ?? null) }}</span></span
                             >
                             <span v-if="selectedTimePoint"
-                                >选中时间点：<span class="font-mono">{{ formatEventTimePoint(selectedTimePoint) }}</span></span
+                                >{{ $t('db-event-list.selected_time_point') }}<span class="font-mono">{{ formatEventTimePoint(selectedTimePoint) }}</span></span
                             >
                             <span v-if="diffOnlyEnabled && previousSelectedTimePoint"
-                                >对比上一时间点：<span class="font-mono">{{ formatEventTimePoint(previousSelectedTimePoint) }}</span></span
+                                >{{ $t('db-event-list.compare_prev_time_point') }}<span class="font-mono">{{ formatEventTimePoint(previousSelectedTimePoint) }}</span></span
                             >
                             <span
                                 class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
@@ -1388,7 +1388,7 @@ onUnmounted(() => {
                 <template v-if="showTimeLine">
                     <div class="flex-1 min-h-0 p-2 overflow-hidden">
                         <div v-if="hasEventTimeLinePoints" ref="eventTimeLineChartRef" class="h-full w-full" />
-                        <div v-else class="flex h-full items-center justify-center text-sm text-base-content/60">无数据</div>
+                        <div v-else class="flex h-full items-center justify-center text-sm text-base-content/60">{{ $t('db-event-list.no_data') }}</div>
                     </div>
                 </template>
                 <template v-else>
@@ -1436,7 +1436,7 @@ onUnmounted(() => {
                                         <CopyID :id="item.id" />
                                     </div>
                                     <div class="mt-2 line-clamp-2 whitespace-pre-wrap break-all text-xs leading-relaxed text-base-content/60">
-                                        {{ item.desc }}
+                                        {{ $t(item.desc) }}
                                     </div>
                                     <div
                                         v-if="showFullTextSearch && searchKeyword.trim() && getEventSnippet(item)?.segments?.length"
@@ -1470,7 +1470,7 @@ onUnmounted(() => {
                     <!-- 底部统计条 -->
                     <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                         <p class="text-center text-[11px] tracking-wide text-base-content/50">
-                            共 <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ filteredEvents.length }}</b> 个活动
+                            共 <b class="font-orbitron text-sm font-semibold text-primary">{{ filteredEvents.length }}</b> 个活动
                         </p>
                     </div>
                 </template>

@@ -491,13 +491,13 @@ const accessoryUnlock = computed(() => {
                         <SRouterLink
                             v-if="accessoryDetailLink"
                             :to="accessoryDetailLink"
-                            class="truncate font-orbitron text-xl leading-none font-bold tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(accessoryName) }}
                         </SRouterLink>
                         <div
                             v-else
-                            class="truncate font-orbitron text-xl leading-none font-bold tracking-tight text-base-content sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content sm:text-2xl"
                         >
                             {{ $t(accessoryName) }}
                         </div>
@@ -527,7 +527,7 @@ const accessoryUnlock = computed(() => {
         -->
         <section v-if="isTitleFrameAccessory(accessory)" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="TITLE FRAME" :title="$t('accessory.titleFramePreview')" />
-            <div class="mt-3 flex justify-center overflow-hidden rounded-xs bg-base-300/40 px-3 py-6">
+            <div class="mt-3 flex justify-center overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-6">
                 <TitleFrameRender class="w-full max-w-90" :frame="accessory.frame" :title="$t(accessoryName)" />
             </div>
         </section>

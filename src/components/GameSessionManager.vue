@@ -282,7 +282,7 @@ async function removeAccount(account: GameAccount) {
                 <div class="modal-action">
                     <form method="dialog" class="space-x-2">
                         <button class="min-w-20 btn btn-primary" @click="confirmAddAccount()">{{ $t("setting.confirm") }}</button>
-                        <button class="min-w-20 btn" @click="nameDialogVisible = false">{{ $t("setting.cancel") }}</button>
+                        <button class="min-w-20 btn" @click="nameDialogVisible = false">{{ $t("取消") }}</button>
                     </form>
                 </div>
             </div>

@@ -1,3 +1,4 @@
+import { formatPetSkillText } from "../../utils/pet-skill-text"
 import type { PetSkill } from "../d/pet.data"
 import type { Pet } from "../data-types"
 
@@ -32,6 +33,14 @@ export class LeveledPet implements Pet {
     经验: number = 0
     主动?: PetSkill
     被动?: PetSkill
+    /** 当前档位的主动技能文案模板（简体中文原文、含占位符），供界面翻译后代入数值 */
+    主动模板?: string
+    /** 与主动技能模板占位符按出现顺序一一对应的当前档位数值 */
+    主动值: number[] = []
+    /** 当前档位的被动技能文案模板（简体中文原文、含占位符） */
+    被动模板?: string
+    /** 与被动技能模板占位符按出现顺序一一对应的当前档位数值 */
+    被动值: number[] = []
 
     private _等级: number = 0
     private _originalPetData: Pet
@@ -74,9 +83,11 @@ export class LeveledPet implements Pet {
 
         if (this._originalPetData.主动) {
             const activeValues = this.calculateSkillValues(this._originalPetData.主动)
+            this.主动模板 = this._originalPetData.主动.描述
+            this.主动值 = activeValues
             this.主动 = {
                 id: this._originalPetData.主动.id,
-                描述: this.formatSkillDescription(this._originalPetData.主动.描述, activeValues),
+                描述: formatPetSkillText(this.主动模板, activeValues),
                 值: this._originalPetData.主动.值,
                 cd: this._originalPetData.主动.cd,
             }
@@ -84,8 +95,10 @@ export class LeveledPet implements Pet {
 
         if (this._originalPetData.被动) {
             const passiveValues = this.calculateSkillValues(this._originalPetData.被动)
+            this.被动模板 = this._originalPetData.被动.描述
+            this.被动值 = passiveValues
             this.被动 = {
-                描述: this.formatSkillDescription(this._originalPetData.被动.描述, passiveValues),
+                描述: formatPetSkillText(this.被动模板, passiveValues),
                 值: this._originalPetData.被动.值,
             }
         }
@@ -94,26 +107,6 @@ export class LeveledPet implements Pet {
     private calculateSkillValues(skill: PetSkill): number[] {
         return skill.值.map(val => {
             return val[this._等级]
-        })
-    }
-
-    private formatSkillDescription(description: string, values: number[]): string {
-        let valueIndex = 0
-
-        return description.replace(/\{%\}|\{\}/g, placeholder => {
-            if (valueIndex >= values.length) {
-                return placeholder
-            }
-
-            const value = values[valueIndex]
-            valueIndex++
-
-            // 按占位符类型格式化当前顺序对应的数值，确保严格按出现顺序替换。
-            if (placeholder === "{%}") {
-                return `${+(value * 100).toFixed(2)}%`
-            }
-
-            return `${+value.toFixed(2)}`
         })
     }
 

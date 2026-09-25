@@ -50,7 +50,7 @@ function isNameCardProduct(product: ShopProduct): boolean {
  * @param product 商品
  */
 function getRewardTypeLabel(product: ShopProduct): string {
-    if (isTitleProduct(product)) return t("points-mall.rewardType.title")
+    if (isTitleProduct(product)) return t("title-frame-label.title")
     if (isNameCardProduct(product)) return t("points-mall.rewardType.nameCard")
     return product.rewardType || t("points-mall.other")
 }
@@ -397,7 +397,7 @@ watch(
                                     </div>
                                 </div>
                                 <div class="mt-3 text-xs opacity-90">
-                                    {{ $t("points-mall.nameEffect") }}：{{ selectedNameCard?.rewardName || $t("points-mall.default") }}
+                                    {{ $t("points-mall.nameEffect") }}：{{ selectedNameCard?.rewardName || $t("common.default") }}
                                 </div>
                             </div>
 
@@ -425,10 +425,10 @@ watch(
                                 <div class="text-sm font-bold">{{ $t("points-mall.productList") }}</div>
                                 <div class="ml-auto tabs tabs-box">
                                     <a class="tab" :class="{ 'tab-active': tab === 'all' }" @click="tab = 'all'">{{
-                                        $t("points-mall.all")
+                                        $t("common.all")
                                     }}</a>
                                     <a class="tab" :class="{ 'tab-active': tab === 'title' }" @click="tab = 'title'">{{
-                                        $t("points-mall.rewardType.title")
+                                        $t("title-frame-label.title")
                                     }}</a>
                                     <a class="tab" :class="{ 'tab-active': tab === 'name_card' }" @click="tab = 'name_card'">
                                         {{ $t("points-mall.rewardType.nameCard") }}
@@ -596,7 +596,7 @@ watch(
                                             </button>
 
                                             <div class="ml-auto text-xs text-base-content/50">
-                                                <span v-if="isTitleProduct(p)">{{ $t("points-mall.rewardType.title") }}</span>
+                                                <span v-if="isTitleProduct(p)">{{ $t("title-frame-label.title") }}</span>
                                                 <span v-else-if="isNameCardProduct(p)">{{ $t("points-mall.rewardType.nameCard") }}</span>
                                                 <span v-else>{{ $t("points-mall.other") }}</span>
                                                 · ID: {{ p.id }}

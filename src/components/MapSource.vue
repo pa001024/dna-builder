@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
+import { useGameText } from "@/composables/useGameText"
 import { regionMap } from "@/data/d/region.data"
 import type { Resource } from "@/data/d/resource.data"
 import { subRegionMap } from "@/data/d/subregion.data"
@@ -16,6 +17,9 @@ interface ResourceSourceGroup {
 const props = defineProps<{
     resource: Resource
 }>()
+
+/** 游戏原文取词：子区域名与地区名存的是简体中文原文。 */
+const { gt } = useGameText()
 
 /** 按子区域聚合资源点位，并统计各区域点位数量。 */
 const mapSources = computed<ResourceSourceGroup[]>(() => {
@@ -77,7 +81,7 @@ function getMapLocalLink(regionId: number): RouteLocationRaw {
                             class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
                         >
                             <SRouterLink :to="getMapLocalLink(source.regionId)" class="hover:underline">
-                                {{ source.subRegionName }}
+                                {{ gt(source.subRegionName) }}
                             </SRouterLink>
                         </h4>
                         <span class="ml-auto shrink-0 border border-base-content/25 px-1 py-px text-[9px] text-base-content/70">
@@ -90,7 +94,7 @@ function getMapLocalLink(regionId: number): RouteLocationRaw {
                         >
                             MAP
                         </span>
-                        <span class="truncate">{{ source.regionName }}</span>
+                        <span class="truncate">{{ gt(source.regionName) }}</span>
                     </div>
                 </div>
             </div>

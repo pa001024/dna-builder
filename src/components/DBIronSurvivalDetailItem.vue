@@ -226,7 +226,7 @@ const rewardRowDetails = computed(() => {
                 <img v-if="dungeonBase.e" :src="LeveledChar.elementUrl(dungeonBase.e)" alt="" class="h-8 inline-block" />
                 <SRouterLink
                     :to="`/db/dungeon/${dungeonBase.id}`"
-                    class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
+                    class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
                 >
                     {{ $t(dungeonBase.n) }}
                 </SRouterLink>
@@ -245,12 +245,12 @@ const rewardRowDetails = computed(() => {
         </div>
 
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="CUMULATIVE" title="累计奖励">
+            <SectionHeader no-animate compact kicker="CUMULATIVE" :title="$t('db-iron-survival-detail.cumulative_rewards')">
                 <template #trailing>
                     <div class="flex items-center gap-2">
-                        <span v-if="useCompoundReward" class="text-xs text-base-content/70">（含复利）</span>
+                        <span v-if="useCompoundReward" class="text-xs text-base-content/70">{{ $t('db-iron-survival-detail.with_compound') }}</span>
                         <label class="label cursor-pointer gap-1 p-0">
-                            <span class="text-xs text-base-content/70">复利</span>
+                            <span class="text-xs text-base-content/70">{{ $t('db-iron-survival-detail.compound') }}</span>
                             <input v-model="useCompoundReward" type="checkbox" class="checkbox checkbox-xs" />
                         </label>
                         <span class="font-mono text-[11px] tabular-nums text-base-content/55">
@@ -276,7 +276,7 @@ const rewardRowDetails = computed(() => {
                 >
                     <div class="min-w-0 shrink-0">
                         <div class="flex items-baseline gap-1 text-sm">
-                            <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">Lv. {{ row.threshold }}</span>
+                            <span class="font-orbitron text-[13px] font-semibold text-primary">Lv. {{ row.threshold }}</span>
                             <CopyID :id="row.rewardId" />
                         </div>
                         <RewardItem v-if="row.reward" :reward="row.reward" />
@@ -294,7 +294,7 @@ const rewardRowDetails = computed(() => {
                     class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                 >
                     <div class="mb-2 flex flex-wrap items-center gap-2 text-sm">
-                        <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">Lv. {{ dropRow.level }}</span>
+                        <span class="font-orbitron text-[13px] font-semibold text-primary">Lv. {{ dropRow.level }}</span>
                         <span class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[11px] text-base-content/55">
                             概率 {{ dropRow.probability / 100 }}%
                         </span>

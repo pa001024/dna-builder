@@ -285,7 +285,7 @@ onMounted(async () => {
                     class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                     style="animation-delay: 0ms"
                 >
-                    <SectionHeader no-animate compact kicker="LAUNCH" title="启动路径" />
+                    <SectionHeader no-animate compact kicker="LAUNCH" :title="$t('game-launcher.launch_path')" />
                     <div class="space-y-2">
                         <div v-for="key in keys" :key="key">
                             <div class="flex flex-row flex-wrap items-center justify-between gap-2">
@@ -335,7 +335,7 @@ onMounted(async () => {
                     class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
                     style="animation-delay: 70ms"
                 >
-                    <SectionHeader no-animate compact kicker="GAME" title="游戏选项" />
+                    <SectionHeader no-animate compact kicker="GAME" :title="$t('game-launcher.game_options')" />
                     <div class="space-y-2">
                         <div class="flex flex-row flex-wrap items-center justify-between gap-2">
                             <label class="label flex cursor-pointer items-center justify-start gap-2 px-0 py-1">
@@ -421,7 +421,7 @@ onMounted(async () => {
                             <Icon icon="ri:delete-bin-6-line" class="size-4" />
                             {{ $t("game-launcher.uninstall") }}
                         </button>
-                        <button class="min-w-20 btn">{{ $t("setting.cancel") }}</button>
+                        <button class="min-w-20 btn">{{ $t("取消") }}</button>
                     </form>
                 </div>
             </div>

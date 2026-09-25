@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import type { Fish, FishingSpot } from "@/data"
@@ -11,6 +12,7 @@ const props = defineProps<{
     spot: FishingSpot
 }>()
 
+const { t: $t } = useTranslation()
 const { gt } = useGameText()
 
 const selectedFish = ref<Fish | null>(null)
@@ -56,42 +58,61 @@ const spotIcon = computed(() => {
 })
 
 /**
- * 获取出现时间名称
- * @param appear 出现时间 1=上午 2=下午 3=夜晚
+ * 出现时段枚举（1=上午 2=下午 3=夜晚）的中文原文，取值后需过 `gt`。
  */
-function getAppearName(appear: number): string {
-    const timeMap: Record<number, string> = {
-        1: "上午",
-        2: "下午",
-        3: "夜晚",
-    }
-    return timeMap[appear] || appear.toString()
+const APPEAR_NAMES: Record<number, string> = {
+    1: "上午",
+    2: "下午",
+    3: "夜晚",
 }
 
 /**
- * 获取出现时间名称
- * @param appear 出现时间数组 1=上午 2=下午 3=夜晚
+ * 鱼饵类型枚举（0=普通 1=同类相吸 2=好翅爱吃）对应的展示名。
+ * 值是 i18n 键或游戏原文：前两项是 `db-fish-spot.lure_*` 界面文案，
+ * 第三项「好翅爱吃」是游戏内鱼饵道具名，走数据包原文对照表。
  */
-function getAppearNames(appear: number[]): string {
-    const timeMap: Record<number, string> = {
-        1: "上午",
-        2: "下午",
-        3: "夜晚",
-    }
-    return appear.map(t => timeMap[t]).join("、")
+const LURE_NAMES: Record<number, string> = {
+    0: "db-fish-spot.lure_none",
+    1: "db-fish-spot.lure_same_attract",
+    2: "好翅爱吃",
 }
 
 /**
- * 获取鱼饵名称
- * @param lure 鱼饵类型 0=无 1=蚓鱼上钩 2=同类相吸
+ * 鱼饵类型的展示名。
+ *
+ * ⚠️ 取值必须用 `$t`（根级命名空间键），**不能**用 `gt`——`gt` 走的是「中文原文 → 译文」对照表，
+ * 拿 `db-fish-spot.lure_none` 去查只会原样返回键名并显示在界面上（会把键名泄漏出去）。
+ * 游戏原文（`好翅爱吃`）在 `$t` 下同样能命中对照表，所以这里统一用 `$t`。
+ * @param lure 鱼饵类型 0=无 1=同类相吸 2=好翅爱吃
+ * @returns 当前语言的鱼饵名
  */
 function getLureName(lure: number): string {
-    const lureMap: Record<number, string> = {
-        0: "其他",
-        1: "同类相吸(变异概率+30%)",
-        2: "好翅爱吃(稀有鱼权重+100%)",
-    }
-    return lureMap[lure] || lure.toString()
+    return $t(LURE_NAMES[lure] ?? String(lure))
+}
+
+/**
+ * 获取出现时间名称
+ * @param appear 出现时间 1=上午 2=下午 3=夜晚
+ * @returns 时段中文原文（调用方负责过 `gt`）
+ */
+function getAppearName(appear: number): string {
+    return APPEAR_NAMES[appear] || appear.toString()
+}
+
+/**
+ * 获取出现时间名称。
+ *
+ * ⚠️ 这些原文要**逐个**过 `gt` 取译文，不能先拼成「上午、下午、夜晚」再翻译——
+ * 对照表的键是单词本身，拼出来的整句不在表里，会原样退回中文。
+ * @param appear 出现时间数组 1=上午 2=下午 3=夜晚
+ * @returns 以「、」连接的当前语言时段名
+ */
+function getAppearNames(appear: number[]): string {
+    return appear
+        .map(t => APPEAR_NAMES[t])
+        .filter(Boolean)
+        .map(name => gt(name))
+        .join("、")
 }
 
 /**
@@ -337,9 +358,9 @@ function clearHistory() {
                                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                                         <SRouterLink
                                             :to="`/db/fishspot/${spot.id}`"
-                                            class="truncate text-lg font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
+                                            class="truncate text-lg font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
                                         >
-                                            {{ spot.name }}
+                                            {{ $t(spot.name) }}
                                         </SRouterLink>
                                         <CopyID :id="spot.id" />
                                     </div>
@@ -350,17 +371,22 @@ function clearHistory() {
                                 <!-- 额外奖励 -->
                                 <div v-if="extraRewardDetail" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                                     <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">
-                                        额外奖励 (概率:
-                                        {{ spot.extraRewardProb !== undefined ? `${(spot.extraRewardProb * 100).toFixed(2)}%` : "-" }})
-                                        每周30次
+                                        {{
+                                            $t("db-fish-spot.extra_reward", {
+                                                prob: spot.extraRewardProb !== undefined ? `${(spot.extraRewardProb * 100).toFixed(2)}%` : "-",
+                                            })
+                                        }}
                                     </div>
                                     <RewardItem :reward="extraRewardDetail" />
 
                                     <!-- 魔灵奖励 -->
                                     <div v-if="spotPet" class="mt-2">
                                         <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">
-                                            魔灵奖励 (概率:
-                                            {{ spot.petProb !== undefined ? `${(spot.petProb * 100).toFixed(2)}%` : "-" }}) 触发额外奖励时
+                                            {{
+                                                $t("db-fish-spot.pet_reward", {
+                                                    prob: spot.petProb !== undefined ? `${(spot.petProb * 100).toFixed(2)}%` : "-",
+                                                })
+                                            }}
                                         </div>
                                         <RewardItem :reward="spotPetReward" />
                                     </div>
@@ -369,14 +395,14 @@ function clearHistory() {
                                     v-else-if="spot.extraReward !== undefined"
                                     class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-xs text-warning"
                                 >
-                                    额外奖励数据不存在
+                                    {{ $t('db-fish-spot.no_extra_reward') }}
                                 </div>
 
                                 <div
                                     v-else-if="spot.petId !== undefined"
                                     class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-xs text-warning"
                                 >
-                                    魔灵数据不存在
+                                    {{ $t('db-fish-spot.no_pet_data') }}
                                 </div>
                             </div>
                         </section>
@@ -385,8 +411,12 @@ function clearHistory() {
                         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                             <SectionHeader no-animate compact kicker="EXPECTED" />
                             <div class="mb-2 text-[11px] tracking-wide text-base-content/55">
-                                100条鱼平均期望(下方可调选项 当前设置: {{ gt(getLureName(lure)) }} |
-                                {{ s2bCompare ? "放弃低价值授渔以鱼" : "无脑授渔以鱼" }})
+                                {{
+                                    $t("db-fish-spot.expected_hint", {
+                                        lure: getLureName(lure),
+                                        mode: s2bCompare ? $t("db-fish-spot.skip_low_value") : $t("db-fish-spot.always_s2b"),
+                                    })
+                                }}
                             </div>
                             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
                                 <div
@@ -395,11 +425,11 @@ function clearHistory() {
                                     class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                                 >
                                     <div class="text-xs text-base-content/60">{{ gt(getAppearName(timeExpected.time)) }}</div>
-                                    <div class="font-orbitron text-lg font-bold tabular-nums text-primary">
+                                    <div class="font-orbitron text-lg font-bold text-primary">
                                         {{ (timeExpected.value * 100).toFixed(2) }}
                                     </div>
                                     <div class="text-[11px] tabular-nums text-base-content/50">
-                                        单条期望: {{ timeExpected.value.toFixed(2) }}
+                                        {{ $t("db-fish-spot.per_fish_expected", { value: timeExpected.value.toFixed(2) }) }}
                                     </div>
                                 </div>
                             </div>
@@ -407,7 +437,7 @@ function clearHistory() {
 
                         <!-- 鱼列表 -->
                         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                            <SectionHeader no-animate compact kicker="SPECIES" title="鱼种列表" :count="spotFish.length" />
+                            <SectionHeader no-animate compact kicker="SPECIES" :title="$t('db-fish-spot.fish_list')" :count="spotFish.length" />
                             <div class="space-y-2">
                                 <div
                                     v-for="(fish, index) in spotFish"
@@ -449,41 +479,39 @@ function clearHistory() {
                                                     v-if="calculateFishPrice(fish, 1).length !== calculateFishPrice(fish, 10000).length"
                                                     class="rounded-xs border border-base-content/15 px-1 tabular-nums"
                                                 >
-                                                    长度: {{ calculateFishPrice(fish, 1).length }}~{{
-                                                        calculateFishPrice(fish, 10000).length
-                                                    }}
+                                                    {{ $t("db-fish-detail.length") }}:
+                                                    {{ calculateFishPrice(fish, 1).length }}~{{ calculateFishPrice(fish, 10000).length }}
                                                 </span>
                                                 <span v-else class="rounded-xs border border-base-content/15 px-1 tabular-nums">
-                                                    长度: {{ calculateFishPrice(fish, 10000).length }}
+                                                    {{ $t("db-fish-detail.length") }}: {{ calculateFishPrice(fish, 10000).length }}
                                                 </span>
                                                 <span
                                                     v-if="calculateFishPrice(fish, 1).price !== calculateFishPrice(fish, 10000).price"
                                                     class="rounded-xs border border-base-content/15 px-1 tabular-nums"
                                                 >
-                                                    价格: {{ calculateFishPrice(fish, 1).price }}~{{
-                                                        calculateFishPrice(fish, 10000).price
-                                                    }}
+                                                    {{ $t("common.price") }}:
+                                                    {{ calculateFishPrice(fish, 1).price }}~{{ calculateFishPrice(fish, 10000).price }}
                                                 </span>
                                                 <span v-else class="rounded-xs border border-base-content/15 px-1 tabular-nums">
-                                                    价格: {{ calculateFishPrice(fish, 10000).price }}
+                                                    {{ $t("common.price") }}: {{ calculateFishPrice(fish, 10000).price }}
                                                 </span>
                                                 <span
                                                     v-if="spot.weights[index]"
                                                     class="rounded-xs border border-base-content/15 px-1 tabular-nums"
                                                 >
-                                                    权重: {{ spot.weights[index] }}
+                                                    {{ $t("db-fish-spot.weight") }}: {{ spot.weights[index] }}
                                                 </span>
                                                 <span class="rounded-xs border border-base-content/15 px-1"
-                                                    >出现时间: {{ gt(getAppearNames(fish.appear)) }}</span
+                                                    >{{ $t("db-fish-detail.appearance_time") }}: {{ gt(getAppearNames(fish.appear)) }}</span
                                                 >
                                                 <span
                                                     v-if="fish.varProb"
                                                     class="rounded-xs border border-base-content/15 px-1 tabular-nums"
                                                 >
-                                                    异种: {{ +(fish.varProb * 100).toFixed(2) }}%
+                                                    {{ $t("db-fish-spot.variant") }}: {{ +(fish.varProb * 100).toFixed(2) }}%
                                                 </span>
                                                 <span v-if="fish.s2b" class="rounded-xs border border-base-content/15 px-1">
-                                                    授渔以鱼: {{ $t(fishMap.get(fish.s2b)!.name) }}({{
+                                                    {{ $t("db-fish-spot.s2b") }}: {{ $t(fishMap.get(fish.s2b)!.name) }}({{
                                                         calculateFishPrice(fishMap.get(fish.s2b)!, 10000).price
                                                     }})
                                                 </span>
@@ -496,12 +524,12 @@ function clearHistory() {
 
                         <!-- 钓鱼模拟 -->
                         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                            <SectionHeader no-animate compact kicker="SIMULATOR" title="钓鱼模拟" />
+                            <SectionHeader no-animate compact kicker="SIMULATOR" :title="$t('db-fish-spot.fishing_sim')" />
                             <div class="space-y-1">
                                 <div
                                     class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                                 >
-                                    <span class="w-16 shrink-0 text-xs text-base-content/55">钓鱼时间</span>
+                                    <span class="w-16 shrink-0 text-xs text-base-content/55">{{ $t('db-fish-spot.fishing_time') }}</span>
                                     <label v-for="time in [1, 2, 3]" :key="time" class="cursor-pointer text-xs text-base-content/70">
                                         <input v-model="selectTime" type="radio" :value="time" class="radio radio-sm" />
                                         {{ gt(getAppearName(time)) }}
@@ -510,39 +538,57 @@ function clearHistory() {
                                 <div
                                     class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                                 >
-                                    <span class="w-16 shrink-0 text-xs text-base-content/55">其他</span>
+                                    <span class="w-16 shrink-0 text-xs text-base-content/55">{{ $t('db-fish-spot.other') }}</span>
                                     <label class="cursor-pointer text-xs text-base-content/70">
                                         <input v-model="s2bCompare" type="checkbox" class="toggle toggle-sm" />
-                                        放弃低价值授渔以鱼
+                                        {{ $t('db-fish-spot.skip_low_value') }}
                                     </label>
                                 </div>
                                 <div
                                     class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                                 >
-                                    <span class="w-16 shrink-0 text-xs text-base-content/55">鱼饵类型</span>
+                                    <span class="w-16 shrink-0 text-xs text-base-content/55">{{ $t('db-fish-spot.bait_type') }}</span>
                                     <label
                                         v-for="lureType in [0, 1, 2]"
                                         :key="lureType"
                                         class="cursor-pointer text-xs text-base-content/70"
                                     >
                                         <input v-model="lure" type="radio" :value="lureType" class="radio radio-sm" />
-                                        {{ gt(getLureName(lureType)) }}
+                                        {{ getLureName(lureType) }}
                                     </label>
                                 </div>
                             </div>
                             <div class="mt-2 grid grid-cols-3 gap-2">
-                                <button type="button" class="btn btn-primary btn-sm" @click="fishOnce">钓一次</button>
-                                <button type="button" class="btn btn-secondary btn-sm" @click="fishMultiple(100)">钓100次</button>
-                                <button type="button" class="btn btn-ghost btn-sm" @click="clearHistory">清空记录</button>
+                                <button
+                                    type="button"
+                                    class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-primary bg-primary px-2 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                                    @click="fishOnce"
+                                >
+                                    {{ $t('db-fish-spot.fish_once') }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-primary/50 px-2 text-[11px] text-primary transition-colors duration-150 hover:bg-primary/10 active:scale-[0.97]"
+                                    @click="fishMultiple(100)"
+                                >
+                                    {{ $t('db-fish-spot.fish_100') }}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error active:scale-[0.97]"
+                                    @click="clearHistory"
+                                >
+                                    {{ $t('db-fish-spot.clear_records') }}
+                                </button>
                             </div>
                         </section>
 
                         <!-- 钓鱼记录 -->
                         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                            <SectionHeader no-animate compact kicker="RECORDS" title="钓鱼记录" :count="catchCount" />
+                            <SectionHeader no-animate compact kicker="RECORDS" :title="$t('db-fish-spot.fishing_records')" :count="catchCount" />
                             <div class="mb-2 text-[11px] tracking-wide text-base-content/55">
-                                总价值:
-                                <b class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{
+                                {{ $t('db-fish-spot.total_value') }}
+                                <b class="font-orbitron text-sm font-semibold text-primary">{{
                                     +reducedCatchHistory.reduce((acc, cur) => acc + cur.price * cur.count, 0).toFixed(2)
                                 }}</b>
                             </div>
@@ -567,10 +613,13 @@ function clearHistory() {
                                                 </span>
                                             </div>
                                             <div class="mt-1 text-[11px] tabular-nums text-base-content/55">
-                                                价格: {{ record.originPrice ? `${record.originPrice} -> ${record.price}` : record.price }}
-                                                <span v-if="record.mutated" class="ml-1 text-green-600">变异</span>
-                                                <span v-if="record.originFish" class="ml-1 text-blue-600"
-                                                    >授渔以鱼 ({{ $t(record.originFish.name) }})</span
+                                                {{ $t("common.price") }}:
+                                                {{ record.originPrice ? `${record.originPrice} -> ${record.price}` : record.price }}
+                                                <span v-if="record.mutated" class="ml-1 font-medium text-success">{{
+                                                    $t("db-fish-spot.mutation")
+                                                }}</span>
+                                                <span v-if="record.originFish" class="ml-1 font-medium text-info"
+                                                    >{{ $t("db-fish-spot.s2b") }} ({{ $t(record.originFish.name) }})</span
                                                 >
                                                 <span class="ml-1">{{ +record.length.toFixed(2) }}cm</span>
                                             </div>
@@ -578,7 +627,7 @@ function clearHistory() {
                                     </div>
                                 </div>
                                 <div v-if="reducedCatchHistory.length === 0" class="py-6 text-center text-sm text-base-content/45">
-                                    暂无钓鱼记录
+                                    {{ $t('db-fish-spot.no_records') }}
                                 </div>
                             </div>
                         </section>

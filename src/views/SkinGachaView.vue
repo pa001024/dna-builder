@@ -936,7 +936,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                         v-if="selectedTab?.tabId === tab.tabId"
                                         class="rounded-xs bg-white/20 px-1.5 py-px text-[10px] font-semibold text-white"
                                     >
-                                        当前卡池
+                                        {{ $t('skin-gacha.current_pool') }}
                                     </span>
                                 </div>
                             </div>
@@ -954,7 +954,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                     @click="showGachaDrawer = true"
                 >
                     <Icon icon="ri:menu-unfold-line" class="size-4" />
-                    卡池
+                    {{ $t('skin-gacha.pool') }}
                 </button>
                 <!-- 右上角：资源 / 累计消耗 / 描述小字 -->
                 <div class="absolute top-0 right-0 flex max-w-[70%] flex-col items-end gap-2 p-4">
@@ -963,10 +963,10 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                         <button
                             type="button"
                             class="flex h-9 cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 bg-base-100/80 px-2.5 backdrop-blur-sm transition-colors hover:border-primary/50"
-                            title="月石晶胚（点击打开商城）"
+                            :title="$t('skin-gacha.moonstone_title', { name: $t('月石晶胚') })"
                             @click="showShop = true"
                         >
-                            <img src="/imgs/res/T_Coin_Main_Lv1.webp" alt="月石晶胚" class="size-5 object-contain" />
+                            <img src="/imgs/res/T_Coin_Main_Lv1.webp" :alt="$t('月石晶胚')" class="size-5 object-contain" />
                             <span class="text-sm font-bold tabular-nums">{{ getResourceCount(RES_MOON_STONE) }}</span>
                             <Icon icon="ri:add-line" class="size-3.5 text-primary" />
                         </button>
@@ -981,7 +981,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                 v-if="resId === RES_LIMITED_TICKET"
                                 class="absolute -top-2 -left-1 rounded-xs bg-warning px-1 text-[9px] font-bold text-warning-content"
                             >
-                                限时
+                                {{ $t('common.limited_time') }}
                             </span>
                             <img
                                 :src="resolveItem(resId, 'Resource').icon"
@@ -1007,7 +1007,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                         </button>
                     </div>
                     <div v-if="chargeEnabled" class="text-xs text-base-content/60">
-                        累计花费 <span class="font-bold tabular-nums text-primary">¥{{ totalSpentCny }}</span>
+                        {{ $t('skin-gacha.total_spent') }} <span class="font-bold tabular-nums text-primary">¥{{ totalSpentCny }}</span>
                     </div>
                     <!-- 卡池描述小字 -->
                     <div v-if="selectedGacha" class="max-w-96 text-right text-[11px] leading-4 text-base-content/50">
@@ -1116,7 +1116,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                         </template>
                                         <template v-if="drawCost1.crystals > 0">
                                             <span v-if="drawCost1.tickets.length > 0" class="text-base-content/40">+</span>
-                                            <img src="/imgs/res/T_Coin_Main_Lv1.webp" alt="月石晶胚" class="size-4 object-contain" />
+                                            <img src="/imgs/res/T_Coin_Main_Lv1.webp" :alt="$t('月石晶胚')" class="size-4 object-contain" />
                                             <span>×{{ drawCost1.crystals }}</span>
                                         </template>
                                     </template>
@@ -1143,7 +1143,7 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                         </template>
                                         <template v-if="drawCost10.crystals > 0">
                                             <span v-if="drawCost10.tickets.length > 0" class="text-primary-content/50">+</span>
-                                            <img src="/imgs/res/T_Coin_Main_Lv1.webp" alt="月石晶胚" class="size-4 object-contain" />
+                                            <img src="/imgs/res/T_Coin_Main_Lv1.webp" :alt="$t('月石晶胚')" class="size-4 object-contain" />
                                             <span>×{{ drawCost10.crystals }}</span>
                                         </template>
                                     </template>
@@ -1353,11 +1353,11 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                             </div>
                             <div class="flex items-center gap-3 text-sm">
                                 <span class="flex items-center gap-1.5">
-                                    <img src="/imgs/res/T_Coin_Main_Lv1.webp" alt="月石晶胚" class="size-5 object-contain" />
+                                    <img src="/imgs/res/T_Coin_Main_Lv1.webp" :alt="$t('月石晶胚')" class="size-5 object-contain" />
                                     <b class="tabular-nums">{{ getResourceCount(RES_MOON_STONE) }}</b>
                                 </span>
                                 <span class="text-xs text-base-content/55">
-                                    累计花费 <b class="tabular-nums text-primary">¥{{ totalSpentCny }}</b>
+                                    {{ $t('skin-gacha.total_spent') }} <b class="tabular-nums text-primary">¥{{ totalSpentCny }}</b>
                                 </span>
                             </div>
                         </div>
@@ -1420,11 +1420,11 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
                                                         : 'bg-primary text-primary-content hover:bg-primary/90'
                                                 "
                                                 :disabled="getShopItemRemain(item) === 0"
-                                                :title="item.priceType === RES_MOON ? '月石不足时自动按 1:1 消耗月石晶胚' : undefined"
+                                                :title="item.priceType === RES_MOON ? $t('skin-gacha.auto_buy_moon_tip', { name: $t('月石晶胚') }) : undefined"
                                                 @click="buyShopItem(item)"
                                             >
                                                 <Icon v-if="item.pay?.CNY" icon="ri:bank-card-line" class="size-3.5" />
-                                                {{ getShopItemRemain(item) === 0 ? "已售罄" : getShopPriceText(item) }}
+                                                {{ getShopItemRemain(item) === 0 ? $t('skin-gacha.sold_out') : getShopPriceText(item) }}
                                             </button>
                                         </div>
                                     </div>

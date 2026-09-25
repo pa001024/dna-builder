@@ -113,7 +113,7 @@ onMounted(() => {
     <div class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
             <div class="text-sm font-medium">
-                评论 <span class="opacity-60">({{ comments.length }})</span>
+                {{ $t('comment-section.comment') }} <span class="opacity-60">({{ comments.length }})</span>
             </div>
             <button class="btn btn-ghost btn-xs" type="button" @click="loadComments">
                 <Icon icon="ri:refresh-line" />
@@ -126,7 +126,7 @@ onMounted(() => {
                 type="text"
                 class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                 maxlength="500"
-                placeholder="友善评论，理性交流～"
+                :placeholder="$t('comment-section.comment_placeholder')"
                 @keyup.enter="postComment"
             />
             <button class="btn btn-primary btn-sm shrink-0" type="button" :disabled="!content.trim() || posting" @click="postComment">
@@ -134,8 +134,8 @@ onMounted(() => {
             </button>
         </div>
 
-        <div v-if="loading" class="py-2 text-xs opacity-60">加载中...</div>
-        <div v-else-if="!comments.length" class="py-2 text-xs opacity-60">暂无评论，快来抢沙发～</div>
+        <div v-if="loading" class="py-2 text-xs opacity-60">{{ $t('common.loading') }}</div>
+        <div v-else-if="!comments.length" class="py-2 text-xs opacity-60">{{ $t('comment-section.no_comments') }}</div>
         <div v-else class="space-y-3">
             <div v-for="comment in comments" :key="comment.id" class="flex gap-2.5">
                 <QQAvatar class="w-8" :qq="comment.user?.qq" />

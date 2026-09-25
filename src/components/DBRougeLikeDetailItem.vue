@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useTranslation } from "i18next-vue"
 import { computed, ref } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { conditionsMap } from "@/data/d/condition.data"
@@ -34,6 +35,7 @@ const props = defineProps<{
 }>()
 
 const { gt } = useGameText()
+const { t } = useTranslation()
 
 const item = computed(() => props.item)
 
@@ -72,11 +74,8 @@ const iconUrl = computed(() => {
 })
 
 const displayName = computed(() => {
-    if ("storyEventName" in item.value && item.value.name) {
-        return item.value.name
-    }
     if ("name" in item.value && item.value.name) {
-        return item.value.name
+        return gt(item.value.name)
     }
     return `ID ${item.value.id}`
 })
@@ -97,10 +96,32 @@ function parseRichText(text?: string): StoryTextSegment[] {
     return parseStoryTextSegments(gt(text), DEFAULT_STORY_TEXT_CONFIG)
 }
 
-const talentTypeNames: Record<number, string> = {
-    1: "攻击",
-    2: "防御",
-    3: "通用",
+/**
+ * 解析提灯类型展示名（1 攻击 / 2 防御 / 3 通用）。
+ * @param type 类型 ID
+ * @returns 当前语言下的类型名
+ */
+function getTalentTypeName(type: number): string {
+    if (type === 1) {
+        return gt("攻击")
+    }
+    if (type === 2) {
+        return gt("防御")
+    }
+    if (type === 3) {
+        return t("db-rouge-detail.talent_type_general")
+    }
+    return t("db-rouge-detail.type_fallback", { id: type })
+}
+
+/**
+ * 解析房间类型展示名。
+ * @param roomType 房间类型 ID
+ * @returns 当前语言下的类型名
+ */
+function getRoomTypeName(roomType: number): string {
+    const info = getRougeRoomTypeInfo(roomType)
+    return info ? gt(info.name) : t("db-rouge.room_type_fallback", { id: roomType })
 }
 
 /**
@@ -194,64 +215,89 @@ const roomConditions = computed(() => {
 <template>
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 条目档案头：纸面名片 + primary 标题 -->
-        <header class="flex items-center gap-3">
-            <div class="h-14 min-w-14 w-fit shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3">
-                <ImageFallback :src="iconUrl" :alt="displayName" class="h-14 w-auto object-contain">
-                    <img src="/imgs/webp/T_Head_Empty.webp" :alt="displayName" class="h-14 w-auto object-contain" />
-                </ImageFallback>
-            </div>
-            <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                    <SRouterLink
-                        :to="`/db/rouge/like/${kind}/${item.id}`"
-                        class="line-clamp-1 font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
-                    >
-                        {{ displayName }}
-                    </SRouterLink>
-                    <CopyID :id="item.id" />
+        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
+            <div class="relative flex items-center gap-3">
+                <div class="h-14 min-w-14 w-fit shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3">
+                    <ImageFallback :src="iconUrl" :alt="displayName" class="h-14 w-auto object-contain">
+                        <img src="/imgs/webp/T_Head_Empty.webp" :alt="displayName" class="h-14 w-auto object-contain" />
+                    </ImageFallback>
                 </div>
-                <div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-base-content/55">
-                    <span
-                        v-if="'rarity' in item"
-                        class="rounded-xs px-1.5 py-0.5 font-semibold"
-                        :class="getRarityBadgeClass(item.rarity + 2)"
-                    >
-                        {{ gt(getRarityName(item.rarity + 2)) }}
-                    </span>
-                    <span v-if="groupName" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{ $t(groupName) }}</span>
-                    <span v-if="treasureGroupName" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{
-                        $t(treasureGroupName)
-                    }}</span>
-                    <span v-if="talentBranch" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{
-                        $t(talentBranch.name)
-                    }}</span>
-                    <span
-                        v-if="'type' in item && typeof item.type === 'number'"
-                        class="rounded-xs border border-base-content/15 px-1.5 py-0.5"
-                    >
-                        {{ $t(talentTypeNames[item.type] || `类型 ${item.type}`) }}
-                    </span>
-                    <span v-if="'roomType' in item" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">
-                        {{ getRougeRoomTypeInfo(item.roomType)?.name || `房间类型 ${item.roomType}` }}
-                    </span>
-                    <span v-if="'heatValue' in item" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">
-                        {{ $t("深潜深度") }} {{ item.heatValue }}
-                    </span>
-                    <span v-if="'moment' in item" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{ item.type }}</span>
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Rouge File
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <SRouterLink
+                            :to="`/db/rouge/like/${kind}/${item.id}`"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                        >
+                            {{ displayName }}
+                        </SRouterLink>
+                        <CopyID :id="item.id" />
+                    </div>
+                    <div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-base-content/55">
+                        <span
+                            v-if="'rarity' in item"
+                            class="rounded-xs px-1.5 py-0.5 font-semibold"
+                            :class="getRarityBadgeClass(item.rarity + 2)"
+                        >
+                            {{ gt(getRarityName(item.rarity + 2)) }}
+                        </span>
+                        <span v-if="groupName" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{ gt(groupName) }}</span>
+                        <span v-if="treasureGroupName" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{
+                            gt(treasureGroupName)
+                        }}</span>
+                        <span v-if="talentBranch" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{
+                            gt(talentBranch.name)
+                        }}</span>
+                        <span
+                            v-if="'type' in item && typeof item.type === 'number'"
+                            class="rounded-xs border border-base-content/15 px-1.5 py-0.5"
+                        >
+                            {{ getTalentTypeName(item.type) }}
+                        </span>
+                        <span v-if="'roomType' in item" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">
+                            {{ getRoomTypeName(item.roomType) }}
+                        </span>
+                        <span v-if="'heatValue' in item" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">
+                            {{ $t("db-rouge.heat_value", { value: item.heatValue }) }}
+                        </span>
+                        <span v-if="'moment' in item" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{
+                            gt(item.type)
+                        }}</span>
+                    </div>
                 </div>
             </div>
         </header>
 
         <!-- 深潜等级选择方章 -->
         <section v-if="showContractLevelSelector" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="LEVEL" title="等级">
+            <SectionHeader no-animate compact kicker="LEVEL" :title="$t('common.level')">
                 <template #trailing>
                     <div class="flex flex-wrap gap-1.5">
                         <button
                             v-for="level in (item as RougeLikeContract).maxLevel"
                             :key="level"
                             type="button"
-                            class="cursor-pointer rounded-xs border px-2 py-0.5 font-orbitron text-[11px] font-semibold tabular-nums transition-colors duration-150 active:scale-[0.97]"
+                            class="cursor-pointer rounded-xs border px-2 py-0.5 font-orbitron text-[11px] font-semibold transition-colors duration-150 active:scale-[0.97]"
                             :class="
                                 currentContractLevel === level
                                     ? 'border-primary bg-primary text-primary-content'
@@ -267,7 +313,7 @@ const roomConditions = computed(() => {
         </section>
 
         <section v-if="contractDescAtLevel" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="DESCRIPTION" title="描述" />
+            <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('common.description')" />
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-6 whitespace-pre-wrap break-all">
                 <template v-for="(segment, index) in parseRichText(contractDescAtLevel)" :key="`desc-${index}-${segment.tone}`">
                     <span
@@ -287,7 +333,7 @@ const roomConditions = computed(() => {
             v-if="simpleDesc && simpleDesc !== desc"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="SUMMARY" title="简述" />
+            <SectionHeader no-animate compact kicker="SUMMARY" :title="$t('db-rouge-detail.section_summary')" />
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-6 whitespace-pre-wrap break-all">
                 <template v-for="(segment, index) in parseRichText(simpleDesc)" :key="`simple-${index}-${segment.tone}`">
                     <span
@@ -307,7 +353,7 @@ const roomConditions = computed(() => {
             v-if="'ipDesc' in item && item.ipDesc"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="LORE" title="背景" />
+            <SectionHeader no-animate compact kicker="LORE" :title="$t('db-rouge-detail.section_lore')" />
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-6 whitespace-pre-wrap break-all">
                 {{ gt(item.ipDesc) }}
             </div>
@@ -317,7 +363,7 @@ const roomConditions = computed(() => {
             v-if="'groupEffectDesc' in item && item.groupEffectDesc"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="SET BONUS" title="套装效果" />
+            <SectionHeader no-animate compact kicker="SET BONUS" :title="$t('db-rouge-detail.section_set_bonus')" />
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-6 whitespace-pre-wrap break-all">
                 <template v-for="(segment, index) in parseRichText(item.groupEffectDesc)" :key="`group-${index}-${segment.tone}`">
                     <span
@@ -337,7 +383,7 @@ const roomConditions = computed(() => {
             v-if="'activateNeed' in item && item.activateNeed.length"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="ACTIVATION" title="激活需求" :count="item.activateNeed.length" />
+            <SectionHeader no-animate compact kicker="ACTIVATION" :title="$t('db-rouge-detail.section_activation')" :count="item.activateNeed.length" />
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <DBRougeTreasureItem v-for="treasureId in item.activateNeed" :key="treasureId" :id="treasureId" />
             </div>
@@ -347,10 +393,10 @@ const roomConditions = computed(() => {
             v-if="treasureGroup && (treasureGroup.groupEffectDesc || treasureGroup.activateNeed?.length)"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="SET" :title="$t(treasureGroup.name)">
+            <SectionHeader no-animate compact kicker="SET" :title="gt(treasureGroup.name)">
                 <template #trailing>
                     <span v-if="treasureGroup.activateNeed?.length" class="text-[11px] tracking-wide text-base-content/50">
-                        收集 {{ treasureGroup.activateNeed.length }} 件
+                        {{ $t("db-rouge-detail.collect_count", { num: treasureGroup.activateNeed.length }) }}
                     </span>
                 </template>
             </SectionHeader>
@@ -376,47 +422,47 @@ const roomConditions = computed(() => {
             v-if="'eventStoryline' in item && (item.eventStoryline as RougeStoryNode[]).length"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="STORY" title="剧情" />
+            <SectionHeader no-animate compact kicker="STORY" :title="$t('db-rouge-detail.section_story')" />
             <DBRougeStorylineItem :nodes="item.eventStoryline as RougeStoryNode[]" :event-name="String(item.id)" />
         </section>
 
         <section v-if="roomConditions.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="CONDITIONS" title="房间条件" :count="roomConditions.length" />
+            <SectionHeader no-animate compact kicker="CONDITIONS" :title="$t('db-rouge-detail.section_conditions')" :count="roomConditions.length" />
             <div class="space-y-2">
                 <ConditionItem v-for="condition in roomConditions" :key="condition.id" :condition="condition" />
             </div>
         </section>
 
         <section v-if="kind !== 'treasureGroup'" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="BASIC INFO" title="基础信息" />
+            <SectionHeader no-animate compact kicker="BASIC INFO" :title="$t('common.basic_info')" />
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 <div
                     v-if="'maxLevel' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">最大等级</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.maxLevel }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.max_level") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.maxLevel }}</span>
                 </div>
                 <div
                     v-if="kind === 'room' && 'weight' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">房间权重</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.weight }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.room_weight") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.weight }}</span>
                 </div>
                 <div
                     v-if="kind !== 'room' && 'weight' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">权重</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.weight }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.weight") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.weight }}</span>
                 </div>
                 <div
                     v-if="'shopPrices' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">商店价格</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.shop_price") }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
                         item.shopPrices
                     }}</span>
                 </div>
@@ -424,8 +470,8 @@ const roomConditions = computed(() => {
                     v-if="'endPoints' in item && (item.endPoints as number[]).length"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">积分</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.points") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         (item.endPoints as number[]).join(" / ")
                     }}</span>
                 </div>
@@ -433,15 +479,15 @@ const roomConditions = computed(() => {
                     v-if="'point' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">升级花费</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.point }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.upgrade_cost") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.point }}</span>
                 </div>
                 <div
                     v-if="'modEquip' in item && item.modEquip"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">适用部位</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.equip_slot") }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
                         item.modEquip
                     }}</span>
                 </div>
@@ -449,15 +495,15 @@ const roomConditions = computed(() => {
                     v-if="'mod' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t("提灯") }}/{{ $t("遗物") }} Mod</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.mod }}</span>
+                    <span class="text-xs text-base-content/60">{{ gt("提灯") }}/{{ gt("遗物") }} Mod</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{ item.mod }}</span>
                 </div>
                 <div
                     v-if="'globalPassiveId' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">全局被动</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.global_passive") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         item.globalPassiveId
                     }}</span>
                 </div>
@@ -465,24 +511,24 @@ const roomConditions = computed(() => {
                     v-if="'rlArchiveId' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">图鉴 ID</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.rlArchiveId }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.archive_id") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.rlArchiveId }}</span>
                 </div>
                 <div
                     v-if="'canSell' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">可出售</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
-                        item.canSell ? "是" : "否"
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.sellable") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                        item.canSell ? $t("db-rouge-detail.yes") : $t("db-rouge-detail.no")
                     }}</span>
                 </div>
                 <div
                     v-if="'blessingAward' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">祝福奖励</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.blessing_award") }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
                         item.blessingAward
                     }}</span>
                 </div>
@@ -490,8 +536,8 @@ const roomConditions = computed(() => {
                     v-if="'tokenAward' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">代币奖励</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.token_award") }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
                         item.tokenAward
                     }}</span>
                 </div>
@@ -499,15 +545,15 @@ const roomConditions = computed(() => {
                     v-if="'endPointsBase' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">基础积分</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.endPointsBase }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.base_points") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.endPointsBase }}</span>
                 </div>
                 <div
                     v-if="'endPointsExtras' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">额外积分</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.extra_points") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         item.endPointsExtras
                     }}</span>
                 </div>
@@ -515,8 +561,8 @@ const roomConditions = computed(() => {
                     v-if="'unlock' in item && (item.unlock as number[]).length"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">解锁依赖</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.unlock_dep") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         (item.unlock as number[]).join(", ")
                     }}</span>
                 </div>
@@ -524,8 +570,8 @@ const roomConditions = computed(() => {
                     v-if="'moment' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">事件阶段</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.event_phase") }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
                         item.moment
                     }}</span>
                 </div>
@@ -533,15 +579,15 @@ const roomConditions = computed(() => {
                     v-if="'minRoom' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">最小房间</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ item.minRoom }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.min_room") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.minRoom }}</span>
                 </div>
                 <div
                     v-if="'probability' in item && item.probability.length"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">事件概率</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.event_chance") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         item.probability.join(" / ")
                     }}</span>
                 </div>
@@ -549,9 +595,9 @@ const roomConditions = computed(() => {
                     v-if="'cutOffEvent' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">截断事件</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
-                        item.cutOffEvent ? "是" : "否"
+                    <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.cut_off_event") }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                        item.cutOffEvent ? $t("db-rouge-detail.yes") : $t("db-rouge-detail.no")
                     }}</span>
                 </div>
             </div>

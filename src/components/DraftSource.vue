@@ -130,7 +130,7 @@ function getCoinIconUrl(): string {
                     </div>
                     <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 border-t border-base-content/10 pt-1 text-[10px]">
                         <span class="flex items-center gap-1 text-base-content/70">
-                            <img :src="getCoinIconUrl()" alt="铜币" class="size-3.5 shrink-0 rounded-xs object-cover" />
+                            <img :src="getCoinIconUrl()" :alt="$t('铜币')" class="size-3.5 shrink-0 rounded-xs object-cover" />
                             铜币 x{{ source.draft.m }}
                         </span>
                         <span

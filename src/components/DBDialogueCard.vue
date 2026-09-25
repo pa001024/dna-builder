@@ -134,7 +134,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                         impression.value > 0 ? 'border-success/40 bg-success/10 text-success' : 'border-error/40 bg-error/10 text-error'
                     "
                 >
-                    {{ $t(getRegionType(impression.regionId)) }}·{{ impression.typeLabel }}
+                    {{ $t(getRegionType(impression.regionId)) }}·{{ $t(impression.typeLabel) }}
                     {{ impression.value > 0 ? `+${impression.value}` : impression.value }}
                 </span>
             </div>
@@ -156,7 +156,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
             >
                 <div class="flex items-start gap-2">
                     <span
-                        class="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-xs border font-orbitron text-[9px] font-semibold tabular-nums"
+                        class="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-xs border font-orbitron text-[9px] font-semibold"
                         :class="
                             selectedOption?.id === option.id
                                 ? 'border-primary bg-primary text-primary-content'
@@ -184,7 +184,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                                     : 'border-error/40 bg-error/10 text-error'
                             "
                         >
-                            {{ $t(getRegionType(impression.regionId)) }}·{{ impression.typeLabel }}
+                            {{ $t(getRegionType(impression.regionId)) }}·{{ $t(impression.typeLabel) }}
                             {{ impression.value > 0 ? `+${impression.value}` : impression.value }}
                         </span>
 
@@ -193,7 +193,7 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                             :key="`${option.id}-${impressionCheck.regionId}-${impressionCheck.typeLabel}-impr-check`"
                             class="rounded-xs border border-info/40 bg-info/10 px-1.5 py-0.5 text-xs leading-none tabular-nums text-info"
                         >
-                            印象检定 {{ $t(getRegionType(impressionCheck.regionId)) }}·{{ impressionCheck.typeLabel }}
+                            {{ $t('common.impression_check') }} {{ $t(getRegionType(impressionCheck.regionId)) }}·{{ $t(impressionCheck.typeLabel) }}
                             ≥
                             {{ impressionCheck.threshold }}
                         </span>

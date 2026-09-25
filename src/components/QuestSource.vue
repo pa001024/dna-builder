@@ -93,11 +93,11 @@ const sourceIconUrl = computed(() => {
             </div>
         </div>
         <div class="flex items-center justify-end gap-3">
-            <div class="text-xs text-base-content/60">合计</div>
+            <div class="text-xs text-base-content/60">{{ $t('quest-source.sum') }}</div>
             <div class="flex items-center gap-1 shrink-0">
                 <img :src="sourceIconUrl" class="h-4 w-4 rounded-xs object-cover" :alt="sourceName" />
                 <span class="text-xs text-base-content/70">{{ sourceName }}</span>
-                <span class="font-orbitron text-sm font-semibold tabular-nums text-primary">{{ totalQuestSourceNum }}</span>
+                <span class="font-orbitron text-sm font-semibold text-primary">{{ totalQuestSourceNum }}</span>
             </div>
         </div>
     </div>

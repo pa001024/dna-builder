@@ -327,7 +327,7 @@ const moduleFilterStatus = computed(() => {
 
 const searchScopeOptions = computed<SearchScopeOption[]>(() => {
     return [
-        { id: "all", label: t("view.all") },
+        { id: "all", label: t("common.all") },
         ...databaseSectionConfigs.value.map(section => ({
             id: section.id,
             label: section.title,

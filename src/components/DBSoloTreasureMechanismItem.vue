@@ -19,14 +19,14 @@ defineProps<{
         <!-- 形状 / 数量区间 -->
         <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
             <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <span class="text-xs text-base-content/60">形状</span>
-                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                <span class="text-xs text-base-content/60">{{ $t('db-solo-treasure-mechanism.shape') }}</span>
+                <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                     {{ mechanism.shape.join("x") }}
                 </span>
             </div>
             <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <span class="text-xs text-base-content/60">数量区间</span>
-                <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                <span class="text-xs text-base-content/60">{{ $t('db-solo-treasure-mechanism.quantity_range') }}</span>
+                <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                     {{ mechanism.itemNumRange.join("~") }}
                 </span>
             </div>
@@ -34,7 +34,7 @@ defineProps<{
 
         <!-- 权重 -->
         <div>
-            <div class="text-[11px] tracking-wide text-base-content/55">权重</div>
+            <div class="text-[11px] tracking-wide text-base-content/55">{{ $t('common.weight') }}</div>
             <p class="mt-1 text-[11px] tabular-nums leading-relaxed text-base-content/70">
                 {{
                     Object.entries(mechanism.itemLevelWeight)
@@ -46,7 +46,7 @@ defineProps<{
 
         <!-- 数量 -->
         <div>
-            <div class="text-[11px] tracking-wide text-base-content/55">数量</div>
+            <div class="text-[11px] tracking-wide text-base-content/55">{{ $t('db-solo-treasure-mechanism.amount') }}</div>
             <p class="mt-1 text-[11px] tabular-nums leading-relaxed text-base-content/70">
                 {{
                     Object.entries(mechanism.itemLevelLimit)

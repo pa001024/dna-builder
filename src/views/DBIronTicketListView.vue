@@ -112,7 +112,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbi-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredTickets.length }}</b> 个深境罗盘
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredTickets.length }}</b> {{ $t('db-iron-ticket-list.iron_ticket_count') }}
                     </p>
                 </div>
             </div>

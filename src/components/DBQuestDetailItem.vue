@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { useLocalStorage } from "@vueuse/core"
+import { t } from "i18next"
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
 import type { QuestItem, QuestStory } from "@/data/d/quest.data"
 import type { QuestChain } from "@/data/d/questchain.data"
@@ -284,7 +285,7 @@ watch(isVoiceSettingsOpen, isOpen => {
 function getQuestLabel(questId: number): string {
     const targetQuest = questItemMap.value.get(questId)
     if (!targetQuest) {
-        return `未知任务 ${questId}`
+        return t("questchain-detail.unknown_quest", { id: questId })
     }
 
     return `${formatStoryText(targetQuest.name)} (${questId})`
@@ -579,7 +580,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
         </div>
 
         <!-- 任务链档案头：纸面 + primary 强调线 + 引导网格 + 斜切楔形 -->
-        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+        <header class="relative z-10 border-b-2 border-primary pb-4">
             <!-- 引导线网格（装饰性，随主题明暗） -->
             <div
                 class="pointer-events-none absolute inset-0"
@@ -613,7 +614,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/questchain/${questChain.id}`"
-                            class="wrap-break-word font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(questChain.name) }}
                         </SRouterLink>
@@ -628,7 +629,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                             class="h-5 w-5 shrink-0 object-contain"
                             loading="lazy"
                         />
-                        <span>{{ questChainTypeDisplay.name }}</span>
+                        <span>{{ $t(questChainTypeDisplay.name) }}</span>
                         <template v-if="questChainVersion">
                             <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
                             <span class="font-mono tabular-nums">v{{ questChainVersion }}</span>
@@ -645,12 +646,12 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                         class="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-base-content/50"
                     >
                         <template v-if="questChain.startTime">
-                            <span>开始时间</span>
+                            <span>{{ $t('questchain-detail.start_time') }}</span>
                             <span class="font-mono tabular-nums">{{ new Date(questChain.startTime * 1000).toLocaleString() }}</span>
                         </template>
                         <template v-if="questChain.endTime">
                             <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                            <span>结束时间</span>
+                            <span>{{ $t('questchain-detail.end_time') }}</span>
                             <span class="font-mono tabular-nums">{{ new Date(questChain.endTime * 1000).toLocaleString() }}</span>
                         </template>
                     </div>
@@ -661,7 +662,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                     <button
                         type="button"
                         class="btn btn-ghost btn-sm btn-square"
-                        title="剧情语音设置"
+                        :title="$t('questchain-detail.story_voice_settings')"
                         :class="{ 'bg-base-content/10': isVoiceSettingsOpen }"
                         @click="toggleVoiceSettingsPanel"
                     >
@@ -672,7 +673,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                         class="absolute right-0 top-full z-1000 mt-2 w-56 rounded-xs border border-base-content/15 bg-base-100/85 p-3 shadow-lg backdrop-blur-md"
                     >
                         <div class="space-y-2">
-                            <div class="text-xs font-medium text-base-content/70">语音语言</div>
+                            <div class="text-xs font-medium text-base-content/70">{{ $t('questchain-detail.voice_language') }}</div>
                             <Select
                                 v-model="selectedVoiceLocale"
                                 class="w-full rounded-xs border border-base-content/20 bg-base-content/5 px-3 py-2 text-sm"
@@ -694,9 +695,9 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
             v-if="questChainAiSummary"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="AI" title="剧情 AI 总结">
+            <SectionHeader no-animate compact kicker="AI" :title="$t('questchain-detail.ai_summary')">
                 <template #trailing>
-                    <span class="text-[10px] tracking-wide text-base-content/45">AI 生成 · 仅供参考</span>
+                    <span class="text-[10px] tracking-wide text-base-content/45">{{ $t('questchain-detail.ai_summary_note') }}</span>
                 </template>
             </SectionHeader>
             <p class="text-sm leading-relaxed whitespace-pre-line text-base-content/75">{{ questChainAiSummary }}</p>
@@ -704,7 +705,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
 
         <!-- 奖励信息 -->
         <section v-if="questChain.reward?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="REWARD" title="奖励信息" />
+            <SectionHeader no-animate compact kicker="REWARD" :title="$t('questchain-detail.rewards')" />
             <div class="space-y-3">
                 <div
                     v-for="reward in questChain.reward
@@ -720,7 +721,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
 
         <!-- 任务列表 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="QUESTS" title="任务列表" :count="questChain.quests.length" />
+            <SectionHeader no-animate compact kicker="QUESTS" :title="$t('questchain-detail.quest_list')" :count="questChain.quests.length" />
             <div class="space-y-3">
                 <div
                     v-for="quest in questDetails"
@@ -731,7 +732,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                     :class="{ 'border-primary ring-4 ring-primary/10': highlightedQuestMap[quest.id] }"
                 >
                     <div class="flex items-center gap-2 text-sm">
-                        任务:
+                        {{ $t('questchain-detail.quest_label') }}
                         <HighlightStoryText
                             :text="quest.details?.name || '?'"
                             :keyword="normalizedSearchKeyword"
@@ -740,7 +741,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                         <CopyID :id="quest.id" />
                         <div class="flex-1"></div>
                         <span v-if="quest.sr" class="ml-2 inline-flex items-center gap-1 text-xs text-base-content/70">
-                            <span>子区域:</span>
+                            <span>{{ $t('common.sub_region') }}:</span>
                             <SubRegionLink :sub-region-id="quest.sr" />
                         </span>
                     </div>
@@ -754,7 +755,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                     </div>
 
                     <div v-if="shouldShowQuestNextOptions(quest)" class="flex flex-wrap items-center gap-1.5 text-xs">
-                        <span class="text-base-content/60">任务跳转</span>
+                        <span class="text-base-content/60">{{ $t('questchain-detail.quest_jump') }}</span>
                         <template
                             v-for="nextOption in quest.nextOptions"
                             :key="`${quest.id}-next-${nextOption.condition}-${nextOption.targetId}`"
@@ -786,7 +787,7 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
 
                     <!-- 任务奖励 -->
                     <div v-if="quest.reward" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                        <div class="mb-1 text-[11px] tracking-wide text-base-content/55">任务奖励:</div>
+                        <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t('questchain-detail.quest_reward') }}</div>
                         <RewardItem :reward="quest.reward as RewardItemType" />
                     </div>
                 </div>

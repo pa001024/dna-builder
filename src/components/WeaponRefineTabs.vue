@@ -11,7 +11,7 @@ const REFINE_LABELS = ["0", "I", "II", "III", "IV", "V"] as const
 
 <template>
     <div class="mt-2 flex items-center">
-        <span class="mr-1 shrink-0 text-xs text-base-content/55 min-w-20">熔炼</span>
+        <span class="mr-1 shrink-0 text-xs text-base-content/55 min-w-20">{{ $t('weapon-refine-tabs.refine') }}</span>
         <div class="ml-3 grid grid-cols-6 items-center gap-1.5 grow">
             <button
                 v-for="(label, index) in REFINE_LABELS"

@@ -1,55 +1,148 @@
 {
+    "白": "白色",
     "百首": "百首之",
     "暴击": "暴击率",
     "暴伤": "暴击伤害",
+    "编辑": "编辑",
+    "编辑构筑": "编辑构筑",
+    "标题": "标题",
     "不死鸟": "不死鸟之",
+    "查看全部": "查看全部",
+    "查看详情": "查看详情",
+    "称号框": "称号框",
     "初始解锁": "初始解锁",
     "触发": "触发概率",
     "弹匣": "弹匣容量",
     "弹药": "最大弹药",
+    "道具获取周报": "道具获取周报",
+    "道具流水查询": "道具流水查询",
+    "等级": "等级",
+    "等级调整": "等级调整",
+    "掉落物": "掉落物",
+    "独立": "独立",
     "多重": "多重射击",
+    "发型": "发型",
+    "房间": "房间",
+    "副本": "副本",
+    "个构筑": "个构筑",
     "攻速": "攻击速度",
+    "共": "共",
+    "固定": "固定",
+    "故事事件": "故事事件",
     "海妖": "海妖之",
+    "话题列表": "话题列表",
     "换生灵": "换生灵之",
     "黄衣": "黄衣之",
+    "活动任务": "活动任务",
+    "获取方式": "获取方式",
+    "基本信息": "基本信息",
+    "基础属性": "基础属性",
     "技能伤害": "造成技能伤害",
+    "技能替换": "技能替换",
+    "加载更多": "加载更多",
+    "加载中...": "加载中...",
+    "奖励列表": "奖励列表",
+    "奖励选择": "奖励选择",
+    "奖励组": "奖励组",
+    "角色皮肤": "角色皮肤",
+    "角色饰品": "角色饰品",
+    "角色数据": "角色数据",
+    "金": "金色",
     "金乌": "金乌之",
     "近战": "近战武器",
+    "近战武器": "近战武器",
     "巨鲸": "巨鲸之",
+    "蓝": "蓝色",
+    "类型": "类型",
+    "流水记录明细": "流水记录明细",
+    "绿": "绿色",
     "每持续神智每秒伤害": "DPS/每秒神智消耗",
     "每持续神智伤害": "DPH/每秒神智消耗",
     "每秒伤害": "DPS",
     "每神智每秒伤害": "DPS/神智消耗",
     "每神智伤害": "DPH/神智消耗",
+    "梦魇残声": "梦魇残声",
+    "密函": "密函",
+    "描述": "描述",
     "冥犬": "冥犬之",
+    "目标函数": "目标函数",
     "牧神": "牧神之",
+    "耐受": "耐受",
+    "难度": "难度",
+    "皮肤": "皮肤",
     "普攻增伤": "普通攻击伤害",
     "歧视": "阵营增伤",
     "契约者": "契约者之",
+    "签到日历": "签到日历",
     "囚狼": "囚狼之",
+    "趋向": "趋向",
+    "权重": "权重",
+    "确定": "确定",
     "人面狮": "人面狮之",
+    "任务进度": "任务进度",
+    "赛季": "赛季",
+    "设计稿": "设计稿",
+    "射速": "射速",
+    "深境罗盘": "深境罗盘",
     "审判者": "审判者之",
     "失衡": "战姿失衡",
     "狮鹫": "狮鹫之",
+    "时间线": "时间线",
+    "实体": "实体",
+    "使用": "使用",
+    "事件": "事件",
+    "收起": "收起",
+    "输入标题...": "输入标题...",
+    "输入描述...": "输入描述...",
+    "属性": "属性",
     "属性穿透": "全属性穿透",
     "属性伤": "属性攻击",
+    "属性影响": "属性影响",
+    "搜索": "搜索",
+    "搜索构筑标题...": "搜索构筑标题...",
+    "溯源突破": "溯源突破",
     "特质": "特质",
     "同律近战": "近战同律武器",
     "同律远程": "远程同律武器",
     "突破至%s阶后解锁": "突破至%s阶后解锁",
+    "推荐": "推荐",
+    "推荐后将在首页推荐区域展示该构筑": "推荐后将在首页推荐区域展示该构筑",
+    "委托密函商店": "委托密函商店",
+    "未拥有": "未拥有",
+    "武器皮肤": "武器皮肤",
+    "武器饰品": "武器饰品",
     "下落增伤": "下落攻击伤害",
+    "限时任务": "限时任务",
     "邪龙": "邪龙之",
+    "行为": "行为",
+    "性别": "性别",
+    "序列": "序列",
     "蓄力增伤": "蓄力攻击伤害",
     "焰灵": "焰灵之",
     "夜魔": "夜魔之",
     "夜使": "夜使之",
+    "一次": "一次",
+    "遗物套装": "遗物套装",
+    "已推荐": "已推荐",
     "异化冥犬": "异化冥犬之",
     "异化夜魔": "异化夜魔之",
+    "应用": "应用",
+    "游戏板块": "游戏板块",
     "羽蛇": "羽蛇之",
     "远程": "远程武器",
+    "远程武器": "远程武器",
+    "暂无构筑": "暂无构筑",
     "增伤": "造成的伤害",
+    "战姿": "战姿",
+    "支线任务": "支线任务",
+    "职业": "职业",
     "中庭蛇": "中庭蛇之",
+    "主线任务": "主线任务",
+    "专武": "专武",
     "装填": "子弹装填速度",
+    "资源": "资源",
+    "子技能": "子技能",
+    "紫": "紫色",
     "总伤": "总计伤害",
     "abyss-dungeon-detail": {
         "notFound": "未找到该深渊副本",
@@ -64,6 +157,7 @@
         "assistantDesc": "查询角色常用阵容",
         "available": "可用",
         "buildUploadDataFailed": "无法生成深渊上传数据",
+        "char_usage_rate": "角色使用率",
         "createdAt": "创建时间",
         "desc": "深渊阵容与角色武器统计",
         "emptyUploadResult": "上传结果为空",
@@ -71,24 +165,28 @@
         "exportFailed": "导出深渊提交失败",
         "exportSuccess": "深渊提交已导出",
         "level": "等级",
+        "level_distribution": "历练等级分布",
         "levelDistribution": "历练等级分布",
         "loadDefaultRoleFailed": "获取默认角色信息失败",
         "loadLatestRoleInfoFailed": "获取最新角色信息失败",
         "loadStatsFailed": "加载深渊统计失败",
         "loginFirst": "请先登录",
+        "main_control_only": "仅主控",
         "mainChar": "主角色",
         "mainCharId": "主角色ID",
         "mainOnly": "仅主控",
         "meleeWeapon": "近战武器",
         "meleeWeaponId": "近战武器ID",
         "missingUid": "缺少 UID",
+        "most_used_team": "最常用阵容",
         "mostUsedLineup": "最常用阵容",
         "mostUsedLineupDesc": "出战数最高的阵容",
+        "no_result": "暂无结果",
         "noExportableSubmissions": "没有可导出的深渊提交",
         "noResult": "暂无结果",
         "noUploadData": "没有可上传的深渊数据",
-        "pet": "魔灵",
         "petId": "魔灵ID",
+        "query_char_teams": "查询角色常用阵容",
         "rangedWeapon": "远程武器",
         "rangedWeaponId": "远程武器ID",
         "refresh": "刷新",
@@ -97,6 +195,7 @@
         "roleType": "角色类型",
         "roleUsage": "角色使用率",
         "seasonId": "赛季ID",
+        "select_char": "请选择角色",
         "selectRole": "请选择角色",
         "sheetRole": "角色参与",
         "sheetSubmission": "提交",
@@ -114,7 +213,9 @@
         "supportWeapon1Id": "助战武器1ID",
         "supportWeapon2": "助战武器2",
         "supportWeapon2Id": "助战武器2ID",
+        "team_builder": "配队助手",
         "title": "深渊使用率",
+        "top_deploy_team": "出战数最高的阵容",
         "uidSha256": "UID_SHA256",
         "updatedAt": "更新时间",
         "upload": "上传",
@@ -145,7 +246,6 @@
         "titleFramePreview": "称号框预览",
         "totalCount": "共 {{count}} 个饰品",
         "type": "类型",
-        "typeAll": "全部",
         "typeAvatar": "头像",
         "typeChar": "角色饰品",
         "typeHair": "发型",
@@ -205,6 +305,7 @@
     },
     "achievement-list": {
         "desc": "游戏成就解锁统计",
+        "no_match": "未找到匹配的区域声名",
         "title": "成就列表"
     },
     "activity-calendar": {
@@ -226,7 +327,6 @@
         "status_ongoing": "进行中",
         "status_upcoming": "即将开始",
         "theater_desc": "参演热映剧目，领取{{charName}}委托密函！",
-        "theater_title": "沉浸式戏剧",
         "title": "活动日历"
     },
     "admin-home": {
@@ -316,7 +416,6 @@
         "examples": {
             "baseStats": "基础属性",
             "complex": "复杂表达式",
-            "critDamage": "暴击伤害",
             "elementDamage": "元素伤害分量",
             "expectedDamage": "期望伤害",
             "forceAttr": "强制属性",
@@ -352,7 +451,6 @@
         "keywordsTitle": "关键字",
         "macrosTitle": "内置宏",
         "members": {
-            "crit": "暴击伤害",
             "critTrigger": "暴击且触发",
             "element": "元素伤害分量",
             "n": "不计算背水昂扬乘区",
@@ -448,6 +546,28 @@
         "灾厄攻击": "触发额外效果时，该次伤害对有属性的目标造成的伤害变成原来的2倍。",
         "震荡攻击": "触发额外效果时，该次伤害的战姿削减变成原来的2倍。"
     },
+    "auto-script": {
+        "actions": "动作",
+        "capture_coord": "按 F9 抓取坐标",
+        "capture_coord_hint": "按 F9 抓取坐标…",
+        "click_node_hint": "点击流程中的节点进行编辑",
+        "close": "关闭",
+        "code_preview": "代码预览",
+        "comment_note": "备注（生成注释）",
+        "config_variables": "配置变量",
+        "coordinate": "坐标",
+        "drag_node_hint": "拖动节点到右侧流程中",
+        "editor_title": "图形化脚本编辑器",
+        "empty_click_hint": "留空表示在当前位置点击",
+        "export_code": "导出代码",
+        "export_to_tab": "导出到当前脚本标签页",
+        "flow_control": "流程控制",
+        "frameless_mode": "无边框模式 (frameless)",
+        "hotkey_hint": "F9 抓取坐标 · F10 录制",
+        "key": "按键",
+        "properties": "属性",
+        "target_process": "目标进程"
+    },
     "autobuild": {
         "calculating": "计算中...",
         "charMods": "角色MOD",
@@ -460,7 +580,12 @@
         "preserveTypes": "保留当前MOD",
         "rangedMods": "远程MOD",
         "skillWeaponMods": "同律MOD",
+        "toggle_log": "展开/收起日志",
         "useInv": "使用用户库存"
+    },
+    "backpack-puzzle": {
+        "clear_manual_placement": "清空手动摆放",
+        "drag_item_hint": "将道具拖到背包中"
     },
     "book-detail": {
         "countSuffix": "条目数: {{count}}",
@@ -489,6 +614,7 @@
         "title": "读物列表",
         "totalCount": "共 {{count}} 本读物"
     },
+    "Boss削韧": "Boss削韧",
     "box-drop": {
         "boxMaximum": "总上限",
         "boxPerDay": "每日上限",
@@ -509,6 +635,11 @@
         "title": "抽奖",
         "totalCapacity": "总容量"
     },
+    "buff-editor": {
+        "copy_buff": "复制BUFF",
+        "paste_buff": "粘贴BUFF",
+        "search_placeholder": "搜索商店ID/名称/商品..."
+    },
     "build-compare": {
         "additional_buff_list": "额外BUFF列表",
         "additional_mod_list": "额外MOD列表",
@@ -526,6 +657,19 @@
         "select_project_to_compare": "选择一个项目开始对比构筑",
         "tip": "注意: 此页面数据不会自动保存!",
         "title": "构筑对比"
+    },
+    "char-action-editor": {
+        "action_list": "动作列表",
+        "action_n": "动作 {{n}}:",
+        "add_action": "添加动作",
+        "background_action_n": "背景动作 {{n}}:",
+        "buff_group_n": "BUFF组 {{n}}:",
+        "enable_action_sequence": "启用动作序列",
+        "generate_hp_curve": "生成血量曲线",
+        "hover_hp": "血量: {{value}}%",
+        "hover_time": "时间: {{value}}s",
+        "hp": "血量",
+        "total_duration": "总时长: {{time}}"
     },
     "char-build": {
         "actions": "动作序列",
@@ -567,6 +711,7 @@
         "drag_field_armed": "已抓起 {{name}}：点击表达式或自定义变量放入，再次点击该字段可取消",
         "drag_field_hint": "可拖动到表达式或自定义变量中，双击复制",
         "dynamic_prop": "动态属性",
+        "effective_hp_formula": "(生命 / (1 - 防御 / (300 + 防御)) + 护盾) / (1 - 减伤)",
         "elem": "元素",
         "enemy": "敌人",
         "enemy_level": "敌人等级",
@@ -580,6 +725,7 @@
         "extra_mastery_clear": "清除额外精通",
         "extra_mastery_desc": "选择一种额外精通的武器类型。额外精通后，对应类型的武器会享受精通加成（攻击×1.2），灾厄武器的熔炼潜能也会同步生效。",
         "extra_mastery_hint": "选择额外精通武器",
+        "extra_mastery_weapon_icon": "额外精通武器图标",
         "faction": "阵营",
         "fetch_char_info_failed": "获取角色信息失败",
         "fetch_weapon_info_failed": "获取武器信息失败",
@@ -641,6 +787,7 @@
         "select_trait_slot": "选择魔灵潜质 - 槽位",
         "selected_count": "已选 {{count}} 个",
         "series": "系列",
+        "set_buff_coverage": "设置BUFF覆盖率",
         "share": "分享",
         "share_build": "配装分享",
         "share_failed": "分享失败",
@@ -730,21 +877,6 @@
     "char-list": {
         "empty": "没有找到匹配的角色",
         "searchPlaceholder": "搜索角色名称、别名、阵营（支持拼音）...",
-        "tabs": {
-            "all": "全部",
-            "control": "控制",
-            "defense": "防御",
-            "heal": "治疗",
-            "homologyWeapon": "同律武器",
-            "maxHp": "最大生命",
-            "output": "输出",
-            "sanityRegen": "神智回复",
-            "shield": "护盾",
-            "skillDamage": "技能伤害",
-            "summon": "召唤物",
-            "support": "辅助",
-            "weaponDamage": "武器伤害"
-        },
         "title": "角色列表",
         "totalSuffix": "个角色",
         "unreleasedHint": "未上线内容可能会发生改变"
@@ -803,8 +935,90 @@
         "closeWindowFailed": "关闭云游戏窗口失败",
         "openWindowFailed": "打开云游戏窗口失败"
     },
+    "comment-section": {
+        "comment": "评论",
+        "comment_placeholder": "友善评论，理性交流～",
+        "no_comments": "暂无评论，快来抢沙发～"
+    },
     "common": {
-        "delete": "删除"
+        "all": "全部",
+        "area": "区域",
+        "autoplay": "自动播放",
+        "basic_info": "基础信息",
+        "category": "分类",
+        "char_avatar": "角色头像",
+        "clear": "清除",
+        "close": "关闭",
+        "close_simulation": "关闭模拟",
+        "confirm": "确认",
+        "cooldown": "冷却",
+        "coordinate": "坐标",
+        "count_days": "第 {{day}} 天",
+        "count_groups": "{{count}} 组",
+        "count_items": "{{count}} 个",
+        "count_kinds": "{{count}} 种",
+        "count_per_sec": "{{count}} 次/秒",
+        "count_seconds": "{{count}} 秒",
+        "count_stars": "{{count}} 星",
+        "count_times": "{{count}} 次",
+        "count_waves": "{{count}} 波",
+        "day": "天",
+        "default": "默认",
+        "delete": "删除",
+        "description": "描述",
+        "export": "导出",
+        "five_dimensions": "五维",
+        "full_text_search": "全文搜索",
+        "generator": "生成器",
+        "hour": "小时",
+        "impression_check": "印象检定",
+        "impression_increase": "印象增加",
+        "items": "项",
+        "label_exp": "{{count}} 经验",
+        "label_points": "分数 {{value}}",
+        "label_score": "目标 {{value}}",
+        "label_update_by": "最后更新：{{name}}",
+        "level": "等级",
+        "limited_time": "限时",
+        "load_more": "加载更多",
+        "loading": "加载中...",
+        "locked": "未解锁",
+        "match": "匹配：",
+        "minute": "分钟",
+        "mod_icon": "魔之楔图标",
+        "no_data": "暂无数据",
+        "none": "无",
+        "official": "官方",
+        "player_count": "人数",
+        "price": "价格",
+        "quality": "品质",
+        "rarity": "稀有度",
+        "refresh": "刷新",
+        "region": "地区",
+        "related_char": "关联角色:",
+        "reset_to_current": "重置到当前",
+        "retry": "重试",
+        "score": "分数:",
+        "season": "赛季",
+        "select_level_range": "选择等级范围",
+        "show_diff_only": "仅显示差异",
+        "source": "来源",
+        "sub_region": "子区域",
+        "test": "测试",
+        "times": "次",
+        "total_count": "共",
+        "type": "类型",
+        "upload": "上传",
+        "user_avatar": "用户头像",
+        "version": "版本",
+        "voice_pack": "语音包",
+        "weapon_avatar": "武器头像",
+        "weapon_category": "武器分类",
+        "weight": "权重"
+    },
+    "copy-id": {
+        "click_copy": "点击复制{{name}}",
+        "click_copy_id": "点击复制ID"
     },
     "counter": {
         "action": {
@@ -832,6 +1046,32 @@
         "title": "计数器",
         "triggers": "触发器",
         "unlimited": "不限制"
+    },
+    "coverage-dialog": {
+        "coverage_minus": "覆盖率减1%",
+        "coverage_percent": "覆盖率百分比",
+        "coverage_plus": "覆盖率加1%"
+    },
+    "cron-input": {
+        "unit_day": "日",
+        "unit_month": "月",
+        "unit_week": "周",
+        "unit_year": "年",
+        "weekday_fri": "周五",
+        "weekday_mon": "周一",
+        "weekday_sat": "周六",
+        "weekday_sun": "周日",
+        "weekday_thu": "周四",
+        "weekday_tue": "周二",
+        "weekday_wed": "周三"
+    },
+    "custom-buff-editor": {
+        "add": "添加",
+        "attribute": "属性",
+        "empty_hint": "暂无自定义BUFF，请添加",
+        "remove": "移除",
+        "value": "数值",
+        "value_placeholder": "请输入数值"
     },
     "damage": {
         "desc": "逐步拆解 CharBuild 伤害公式并支持手动覆盖",
@@ -938,6 +1178,555 @@
         "weapon": "武器",
         "weapon_desc": "查看武器信息和属性"
     },
+    "db-abyss-dungeon": {
+        "abyss_id": "深渊ID",
+        "buff_list": "BUFF列表",
+        "char_avatar": "角色头像",
+        "dungeon_id": "副本ID",
+        "dungeon_info": "副本信息",
+        "element": "元素属性",
+        "end_time": "结束时间",
+        "mastery": "精通",
+        "monster_counter": "怪物属性克制",
+        "related_chars": "关联角色",
+        "season_id": "赛季ID",
+        "start_time": "开始时间",
+        "tags": "标签",
+        "type": "类型",
+        "version": "版本"
+    },
+    "db-abyss-dungeon-list": {
+        "abyss_count": "个深渊",
+        "no_match": "未找到匹配的深渊副本",
+        "search_placeholder": "搜索副本ID或角色名称..."
+    },
+    "db-achievement-list": {
+        "achievement_count": "个成就",
+        "no_match": "未找到匹配的成就",
+        "search_placeholder": "搜索成就 ID/名称/描述（支持拼音）..."
+    },
+    "db-char-list": {
+        "char_count": "个角色",
+        "no_match": "未找到匹配的角色",
+        "search_placeholder": "搜索角色名称/别名/ID（支持拼音）..."
+    },
+    "db-damage": {
+        "damage_formula": "伤害公式",
+        "dot_damage": "DOT伤害",
+        "formula_desc": "按步骤查看每个乘区和中间值，支持手动覆盖并实时查看结果变化。",
+        "import_from_build": "从当前构筑导入",
+        "input_params": "输入参数",
+        "percentage_input": "百分比输入",
+        "reset_current_mode": "重置当前模式"
+    },
+    "db-draft-list": {
+        "batch_craft": "批量制造",
+        "draft_count": "个设计稿",
+        "hidden": "隐藏",
+        "infinite_craft": "无限制造",
+        "output_count": "产物数量:",
+        "search_placeholder": "搜索副本ID或角色名称..."
+    },
+    "db-dungeon-detail": {
+        "check_time": "检查时间",
+        "commander_count": "号令者 ({{count}}种)",
+        "current_platform": "当前平台：{{platform}}（默认 PC）",
+        "detect_delay": "检测延迟",
+        "detect_time": "检测时间",
+        "elite_monsters": "特殊怪物",
+        "end_level": "结束等级",
+        "end_wave": "结束波次",
+        "endless_dungeon_settings": "无尽副本设置",
+        "endless_level_hint": "无尽副本等级由上方波次滑块控制",
+        "endless_waves": "无尽波次",
+        "generator_id": "生成器ID",
+        "group_id": "组ID",
+        "group_limit": "组上限",
+        "group_members_count": "组成员 ({{count}}种)",
+        "group_radius_z": "组半径 / Z",
+        "group_spawns_count": "组刷怪 ({{count}}组)",
+        "hello_box": "你好箱",
+        "initial_center_range": "初始中心范围",
+        "level_requirement": "历练等级 {{level}}",
+        "mobile": "移动端",
+        "monster_level_range": "怪物等级区间",
+        "monster_waves": "怪物波次",
+        "no_cumulative_reward": "当前波次暂无可累计奖励",
+        "no_monster_data": "暂无怪物数据",
+        "no_reward_data": "暂无奖励数据",
+        "no_wave_data": "暂无波次数据",
+        "normal_monsters": "普通怪物",
+        "normal_monsters_count": "普通怪物 ({{count}}种)",
+        "probability": "概率",
+        "quantity": "数量",
+        "range_cover_level": "区间 [起始, 结束)，实际覆盖 Lv.{{start}} ~ Lv.{{end}}",
+        "range_cover_wave_level": "区间 [起始, 结束)，实际覆盖第 {{start}} ~ {{end}} 波，怪物等级 Lv.{{lvStart}} ~ Lv.{{lvEnd}}（每波 +{{step}}，最高 {{max}}）",
+        "refill_interval": "补怪间隔",
+        "spawn_center_range": "刷新中心范围",
+        "spawn_interval": "刷新间隔",
+        "spawn_num_pool": "单次刷新数量池: {{value}}",
+        "spawn_radius": "刷新范围 ({{platform}})",
+        "spawn_range_title": "刷新范围显示",
+        "special_reward": "特殊奖励",
+        "special_reward_group": "特殊奖励组",
+        "start_level": "起始等级",
+        "start_wave": "起始波次",
+        "threshold": "阈值",
+        "wave_n": "第 {{n}} 波",
+        "wave_range_over_max": "第 {{start}} ~ {{end}} 波 / {{max}}",
+        "waves_per_stage": "每阶段刷怪波数",
+        "weight": "权重"
+    },
+    "db-dungeon-detail-view": {
+        "not_found": "未找到密函"
+    },
+    "db-dungeon-list": {
+        "dungeon_count": "个副本",
+        "no_match": "未找到匹配的 NPC",
+        "search_placeholder": "搜索（支持拼音）..."
+    },
+    "db-dynquest-detail": {
+        "level_tiers": "等级档位",
+        "quest_info": "委托信息",
+        "story_nodes": "剧情节点"
+    },
+    "db-dynquest-list": {
+        "filter_level": "等级筛选",
+        "filter_region": "区域筛选",
+        "story_full_text_search": "剧情全文搜索"
+    },
+    "db-event-list": {
+        "compare_prev_time_point": "对比上一时间点：",
+        "current_time_point": "当前时间点：",
+        "no_data": "无数据",
+        "selected_time_point": "选中时间点：",
+        "time_point": "时间点",
+        "timeline": "时间表"
+    },
+    "db-fish-detail": {
+        "appearance_time": "出现时间",
+        "length": "长度",
+        "mutation_rate": "变异概率",
+        "unknown_spot": "未知鱼池({{id}})"
+    },
+    "db-fish-list": {
+        "fish": "鱼",
+        "fishing_spots": "钓鱼点",
+        "search_placeholder": "搜索钓鱼点 / 鱼名（支持拼音）...",
+        "spot_count": "共 {{count}} 个钓鱼点"
+    },
+    "db-fish-spot": {
+        "always_s2b": "无脑授渔以鱼",
+        "bait_type": "鱼饵类型",
+        "clear_records": "清空记录",
+        "expected_hint": "100条鱼平均期望（下方可调选项 当前设置：{{lure}} | {{mode}}）",
+        "extra_reward": "额外奖励（概率：{{prob}}）每周30次",
+        "fish_100": "钓100次",
+        "fish_count_limit": "鱼数限制",
+        "fish_list": "鱼种列表",
+        "fish_once": "钓一次",
+        "fishing_records": "钓鱼记录",
+        "fishing_sim": "钓鱼模拟",
+        "fishing_time": "钓鱼时间",
+        "lure_none": "其他",
+        "lure_same_attract": "同类相吸(变异概率+30%)",
+        "mutation": "变异",
+        "no_extra_reward": "额外奖励数据不存在",
+        "no_pet_data": "魔灵数据不存在",
+        "no_records": "暂无钓鱼记录",
+        "other": "其他",
+        "per_fish_expected": "单条期望：{{value}}",
+        "pet_reward": "魔灵奖励（概率：{{prob}}）触发额外奖励时",
+        "s2b": "授渔以鱼",
+        "skip_low_value": "放弃低价值授渔以鱼",
+        "total_value": "总价值:",
+        "variant": "异种",
+        "weight": "权重"
+    },
+    "db-forge-detail": {
+        "level_reward_detail": "等级奖励详情",
+        "no_quest_rewards": "未找到任务奖励",
+        "no_reward_detail": "未找到奖励详情",
+        "quest_rewards": "任务奖励",
+        "related_quests": "关联任务"
+    },
+    "db-forge-list": {
+        "forge_level_count": "个熔炼等级",
+        "search_placeholder": "搜索商店ID/名称/商品..."
+    },
+    "db-hardboss-detail": {
+        "monster_info": "怪物信息"
+    },
+    "db-hardboss-list": {
+        "hardboss_count": "个梦魇残声",
+        "no_match": "未找到匹配的梦魇残声",
+        "search_placeholder": "搜索商店ID/名称/商品..."
+    },
+    "db-impr": {
+        "realtime": "实时",
+        "search_placeholder": "搜索副本ID或角色名称..."
+    },
+    "db-impr-detail": {
+        "impr_info": "印象信息",
+        "options": "选项",
+        "source_link": "来源链接"
+    },
+    "db-iron-survival-detail": {
+        "compound": "复利",
+        "cumulative_rewards": "累计奖励",
+        "with_compound": "（含复利）"
+    },
+    "db-iron-survival-spawn": {
+        "butcher_spawn": "屠夫刷怪",
+        "elite_id_group": "强敌 ID 组",
+        "elite_spawn": "强敌刷怪",
+        "monster_id_group": "怪物 ID 组",
+        "normal_spawn": "普通刷怪"
+    },
+    "db-iron-ticket-list": {
+        "iron_ticket_count": "个深境罗盘"
+    },
+    "db-map-list": {
+        "map_count": "个地图",
+        "search_placeholder": "搜索商店ID/名称/商品...",
+        "show_map_list": "显示地图列表"
+    },
+    "db-mod-list": {
+        "convertible": "可转换",
+        "search_placeholder": "搜索商店ID/名称/商品..."
+    },
+    "db-monster-compact-card": {
+        "drops": "掉落",
+        "level": "等级"
+    },
+    "db-monster-list": {
+        "commander": "号令者",
+        "commander_affixes": "号令者词条",
+        "normal": "普通",
+        "search_placeholder": "搜索怪物名称（支持拼音）..."
+    },
+    "db-music-list": {
+        "search_placeholder": "搜索ID/名称/描述..."
+    },
+    "db-npc-detail": {
+        "char_id": "角色 ID",
+        "faction": "阵营",
+        "icon": "图标",
+        "name": "名称",
+        "no_dialogue": "暂无可展示的对话链",
+        "npc_info": "NPC 信息"
+    },
+    "db-npc-list": {
+        "dialogue_only": "仅对话",
+        "no_match": "未找到匹配的 NPC"
+    },
+    "db-party-topic": {
+        "bgm_media_section": "BGM / 音效",
+        "bgm_mute_hint": "（无声/停止控制，无试听）",
+        "bgm_no_cdn": "（暂未收录 CDN 音频）",
+        "bgm_preview": "试听",
+        "bgm_preview_stop": "停止试听",
+        "dialogue_chain_empty": "暂无可展示的对话链",
+        "dialogue_empty": "暂无对话内容",
+        "dialogue_title": "剧情对话 ({{num}} 条)",
+        "not_found": "未找到光阴集",
+        "prerequisite_quest_chain": "前置任务链",
+        "resource_cost": "消耗资源",
+        "reward_id": "奖励 ID",
+        "rewards": "奖励",
+        "story_voice_settings": "剧情语音设置",
+        "voice_language": "语音语言"
+    },
+    "db-party-topic-list": {
+        "all_chars": "全部角色",
+        "filter_char": "角色筛选",
+        "prerequisite_value": "前置: {{name}}",
+        "resource": "资源",
+        "search_placeholder": "搜索光阴集 ID / 名称 / 角色（支持拼音）...",
+        "topic_count": "条光阴集"
+    },
+    "db-pet-list": {
+        "no_match": "未找到匹配的角色",
+        "search_placeholder": "搜索角色名称/别名/ID（支持拼音）..."
+    },
+    "db-quest-story-nodes": {
+        "bgm_resource": "BGM 资源",
+        "detective_quiz": "侦探问答",
+        "empty_node": "该节点暂无可展示内容",
+        "no_cdn_audio": "（暂未收录 CDN 音频）",
+        "node_jump": "节点跳转",
+        "quiz_tips": "提示：",
+        "silent_node_note": "（无声/停止控制节点，无试听）",
+        "unknown_node": "未知节点 {{id}}",
+        "unnamed_media_node": "未命名媒体节点"
+    },
+    "db-raid-rank": {
+        "current_dungeon": "当前副本: {{id}}",
+        "current_rewards": "当前获得奖励次数:",
+        "difficulty_label": "难度{{level}}",
+        "dungeon_info": "副本信息",
+        "elapsed_time": "用时: {{value}}秒",
+        "formula": "最终分数 = BaseRaidPoint + (1 + 时间区间1×速率1 + 时间区间2×速率2 + 时间区间3×速率3)",
+        "formula_id": "公式ID: {{id}}",
+        "formula_note": "依次取区间值直到剩余时间用完",
+        "input_remaining_time": "输入剩余时间",
+        "input_score": "输入分数",
+        "max_allowed_time": "最大允许时间: {{value}}秒",
+        "max_score": "最高分数: {{value}}",
+        "per_1000_points": "每1000分可获得",
+        "prefix": "前缀",
+        "rank_info": "排名信息",
+        "rank_requirement": "排名前{{percent}}%的玩家获得",
+        "rate": "速率",
+        "remaining_time": "剩余时间(秒):",
+        "rewards_max": "次奖励 | 最大奖励次数:",
+        "score_calc": "分数计算",
+        "score_calc_desc": "分数计算说明:",
+        "score_reward_calc": "分数奖励计算:",
+        "suffix": "后缀",
+        "time_zone": "时间区间"
+    },
+    "db-reputation-list": {
+        "no_match": "未找到匹配的区域声名"
+    },
+    "db-resource-list": {
+        "resource_count": "个资源"
+    },
+    "db-rouge": {
+        "heat_value": "深潜深度 {{value}}",
+        "item_count": "个条目",
+        "no_match": "未找到匹配的深渊副本",
+        "room_type_fallback": "房间类型 {{id}}",
+        "search_placeholder": "搜索副本ID或角色名称...",
+        "upgradable": "可升级"
+    },
+    "db-rouge-detail": {
+        "archive_id": "图鉴 ID",
+        "area": "区域",
+        "base_points": "基础积分",
+        "blessing_award": "祝福奖励",
+        "clear_score": "通关分数",
+        "collect_count": "收集 {{num}} 件",
+        "collect_items": "采集物",
+        "cut_off_event": "截断事件",
+        "difficulty_id": "难度 ID",
+        "equip_role": "角色",
+        "equip_slot": "适用部位",
+        "event_area": "事件区域",
+        "event_chance": "事件概率",
+        "event_phase": "事件阶段",
+        "event_sub_id": "事件子 ID",
+        "extra_points": "额外积分",
+        "global_passive": "全局被动",
+        "initial_dive_depth": "初始深潜深度",
+        "max_level": "最大等级",
+        "min_room": "最小房间",
+        "no": "否",
+        "outer_shop_token": "外部商店代币",
+        "points": "积分",
+        "points_rate": "积分倍率",
+        "recommend_level": "推荐等级",
+        "room_level": "房间等级",
+        "room_weight": "房间权重",
+        "season_end": "赛季结束",
+        "season_start": "赛季开始",
+        "section_activation": "激活需求",
+        "section_class_effects": "职业效果",
+        "section_conditions": "房间条件",
+        "section_contract": "契约效果（同职业 4 人触发）",
+        "section_effects": "效果",
+        "section_lore": "背景",
+        "section_set_bonus": "套装效果",
+        "section_story": "剧情",
+        "section_summary": "简述",
+        "sellable": "可出售",
+        "shop_npc": "商店 NPC",
+        "shop_price": "商店价格",
+        "talent_type_general": "通用",
+        "token_award": "代币奖励",
+        "token_id": "代币 ID",
+        "token_transform": "代币转化",
+        "type_fallback": "类型 {{id}}",
+        "unknown_treasure": "未知遗物",
+        "unlock_dep": "解锁依赖",
+        "upgrade_cost": "升级花费",
+        "yes": "是"
+    },
+    "db-rouge-detail-view": {
+        "not_found": "未找到密函"
+    },
+    "db-rouge-pro-detail": {
+        "event_defence": "据点防守",
+        "event_exterminate": "歼灭",
+        "event_kill_elite": "击杀精英",
+        "event_occupation": "占领",
+        "event_sabotage": "破坏",
+        "fx_block_effect": "禁用效果：{{name}}",
+        "fx_choice_number": "每次抉择可选数量 {{num}} 个",
+        "fx_end_points_rate": "积分获取提高 {{percent}}",
+        "fx_get_buff": "获得 Buff #{{id}}",
+        "fx_get_mod": "全体获得 Mod #{{id}}",
+        "fx_get_token": "立即获得 {{num}} 余烬",
+        "fx_get_treasure": "获得遗物：{{name}}",
+        "fx_kill_get_token": "击杀目标后每 {{times}} 次获得 {{num}} 余烬",
+        "fx_lantern_range": "提灯照亮范围扩大 {{value}}",
+        "fx_ore_extra_rate": "矿石获取提高 {{percent}}",
+        "fx_pay_for_reborn": "复活消耗 {{num}} 余烬",
+        "fx_random_choice": "抉择选项变为随机",
+        "fx_reborn_free": "免费复活次数 +{{num}}",
+        "fx_recover_time": "受伤后回复提前 {{seconds}} 秒",
+        "fx_shop_discount": "商店价格降低 {{percent}}",
+        "fx_timber_extra_rate": "木材获取提高 {{percent}}",
+        "fx_token_by_time": "每 {{seconds}} 秒获得 {{num}} 余烬",
+        "fx_token_extra_rate": "余烬获取提高 {{percent}}",
+        "unique": "唯一"
+    },
+    "db-rouge-storyline": {
+        "no_content": "该节点暂无可展示内容",
+        "no_dialogue": "暂无剧情对话"
+    },
+    "db-shop-detail": {
+        "available_with_deps": "{{count}} 件可购 +{{deps}} 依赖",
+        "changed_with_deps": "{{changed}} 件变化 +{{deps}} 依赖",
+        "compare_previous": "对比上一时间点：{{label}}",
+        "current": "当前",
+        "current_only": "仅当前",
+        "current_time_point": "当前时间点：{{label}}",
+        "no_available_items": "当前时间点下没有可购买商品",
+        "no_diff_items": "与上一时间点相比没有变化商品",
+        "purchasable_count": "可购买 {{count}} 件",
+        "time_filter": "时间过滤",
+        "time_point_count": "{{count}} 个时间点",
+        "timeline_desc": "按离散时间点查看可购买商品，也可只看相对上一时间点的变化。"
+    },
+    "db-shop-detail-view": {
+        "not_found": "未找到密函"
+    },
+    "db-shop-list": {
+        "item_count": "商品总数: {{count}}",
+        "main_tabs": "{{count}}个主标签",
+        "search_placeholder": "搜索商店ID/名称/商品...",
+        "shop_count": "个商店",
+        "sub_tabs": "{{count}}个子标签"
+    },
+    "db-solo-treasure": {
+        "meta_bag": "类型 {{type}} · 价格 {{price}} · 形状 {{shape}}",
+        "meta_container": "蓝图 {{bp}} · 形状 {{shape}} · 爆率 {{rate}}",
+        "meta_dungeon_pair_unlock": "副本 {{hard}}/{{easy}} · 解锁 {{condition}}",
+        "meta_dungeon_unlock": "副本 {{id}} · 解锁 {{condition}}",
+        "search_placeholder": "搜索ID/名称/描述...",
+        "total_count": "共 {{count}} 个条目"
+    },
+    "db-solo-treasure-bag": {
+        "capacity": "容量"
+    },
+    "db-solo-treasure-container": {
+        "container_slots": "容器格位",
+        "drop_weight": "掉落权重",
+        "level_count": "等级数量",
+        "no_drop_weight": "暂无掉落权重",
+        "no_level_limit": "暂无等级数量限制",
+        "no_slot_data": "暂无格位数据"
+    },
+    "db-solo-treasure-dungeon": {
+        "challenge_mode": "挑战模式",
+        "disable_coop": "禁用协战",
+        "entry_fee": "报名费用",
+        "evacuation_time": "撤离时间",
+        "extract_gameplay": "提取玩法",
+        "gameplay_fallback": "玩法 {{id}}",
+        "is_false": "否",
+        "is_true": "是",
+        "limited_chars": "限定角色",
+        "mode": "模式",
+        "no_extract_data": "暂无提取玩法数据",
+        "no_trial_chars": "暂无试用角色",
+        "normal_mode": "普通模式",
+        "rain_time": "下雨时间",
+        "repeat": "常驻副本",
+        "story": "剧情副本",
+        "total_time": "总时间",
+        "trial_chars": "试用角色",
+        "trial_weapons": "试用武器",
+        "warning_time": "警告时间"
+    },
+    "db-solo-treasure-entry": {
+        "bag": "百宝囊",
+        "container": "容器",
+        "shape_placeholder": "形状占位",
+        "treasure": "宝物",
+        "treasure_icon": "宝物图标"
+    },
+    "db-solo-treasure-gameplay": {
+        "generator_id": "生成器ID",
+        "income": "收益",
+        "interval": "间隔",
+        "mechanism_box": "机关盒",
+        "monsters": "怪物",
+        "normal_monsters_count": "普通怪物（{{count}}种）",
+        "radius": "范围",
+        "repair_speed": "修复速度",
+        "spawning": "刷怪",
+        "target_value": "目标值",
+        "time": "时间",
+        "traps": "机关"
+    },
+    "db-solo-treasure-mechanism": {
+        "amount": "数量",
+        "quantity_range": "数量区间",
+        "shape": "形状"
+    },
+    "db-title-detail": {
+        "title_preview": "称号预览"
+    },
+    "db-title-detail-view": {
+        "not_found": "未找到密函"
+    },
+    "db-title-list": {
+        "prefix": "前缀",
+        "search_placeholder": "搜索角色名称/别名/ID（支持拼音）...",
+        "suffix": "后缀",
+        "title_count": "个称号"
+    },
+    "db-walnut-detail": {
+        "col_at_least_once": "至少一次出金概率",
+        "col_count": "数量",
+        "col_exact_this_time": "刚好在这次开出金概率",
+        "col_name": "名称",
+        "col_opens_n": "开函次数(n)",
+        "col_pool_range": "池随机范围*",
+        "gold_count": "出金次数",
+        "gold_probability": "出金概率期望",
+        "gold_rate": "出金率",
+        "mechanism_note": "* 机制: 从每个奖励的随机范围抽取n个该种奖励后加入到奖励序列, 打乱后在序列结尾放置金奖励, 重复抽取直到抽出金后重置序列",
+        "no_open_records": "暂无开函记录",
+        "no_stats": "暂无统计数据",
+        "open_65": "开65次",
+        "open_once": "开1次",
+        "open_results": "开函结果（最近200次）",
+        "rarity_stars": "稀有度: {{count}}星",
+        "reset_data": "重置数据",
+        "reward_list": "奖励列表",
+        "reward_stats": "奖励数量统计",
+        "simulator": "模拟开函",
+        "source_section": "获取途径",
+        "start_auto": "开始自动开",
+        "stop_auto": "停止自动开",
+        "total_opens": "总开函次数",
+        "unknown": "未知"
+    },
+    "db-walnut-detail-view": {
+        "not_found": "未找到密函"
+    },
+    "db-walnut-list": {
+        "search_placeholder": "搜索密函 ID / 名称（支持拼音）...",
+        "walnut_count": "个密函"
+    },
+    "db-weapon-list": {
+        "search_placeholder": "搜索（支持拼音）...",
+        "weapon_count": "个武器",
+        "weapon_icon": "武器图标"
+    },
     "dbAgent": {
         "conversation": {
             "defaultName": "新对话",
@@ -1026,16 +1815,37 @@
             "traceExpand": "检索详情"
         }
     },
+    "dialog-model": {
+        "ok": "确定"
+    },
     "dna-announcement": {
         "empty": "暂无公告数据",
         "fetch_failed": "获取公告失败",
         "last_updated": "最后更新",
         "refresh": "刷新"
     },
+    "dna-forum": {
+        "load_failed": "无法获取游戏配置"
+    },
     "dna-game-info": {
+        "generate_screenshot": "生成截图",
         "no_inventory": "无库存, 请先到官方APP绑定角色",
+        "push_settings": "推送设置",
+        "sync_inventory": "同步库存",
         "sync_inventory_failed": "库存同步失败",
         "sync_inventory_success": "库存同步成功"
+    },
+    "dna-game-info-show": {
+        "achievement_progress": "成就达成",
+        "coop_char_1": "协战角色1",
+        "coop_char_2": "协战角色2",
+        "coop_weapon_1": "协战武器1",
+        "coop_weapon_2": "协战武器2",
+        "melee_weapon": "近战武器",
+        "progress": "进度",
+        "ranged_weapon": "远程武器",
+        "reset_time": "重置时间",
+        "weekly_trace": "本周行迹"
     },
     "dna-home": {
         "desc": "游戏信息/签到/浏览帖子",
@@ -1050,6 +1860,21 @@
             "signIn": "签到"
         },
         "title": "皎皎角"
+    },
+    "dna-login": {
+        "code": "验证码",
+        "code_placeholder": "请输入验证码",
+        "email": "邮箱",
+        "email_placeholder": "请输入邮箱",
+        "login": "登录",
+        "logo_alt": "皎皎角logo",
+        "phone": "手机号",
+        "phone_placeholder": "请输入手机号",
+        "privacy_note": "*账号信息仅储存在本地, 不会被上传到服务器。",
+        "server": "服务器",
+        "server_cn": "国服",
+        "server_intl": "国际服",
+        "title": "皎皎角登录"
     },
     "dna-post": {
         "browse": "浏览",
@@ -1070,8 +1895,26 @@
         "postDetailTitle": "帖子详情",
         "userAvatar": "用户头像"
     },
+    "dna-post-content": {
+        "video_unsupported": "您的浏览器不支持视频播放"
+    },
     "dna-post-detail": {
-        "title": "帖子详情"
+        "be_first_commenter": "成为第一个评论的人吧",
+        "comment_placeholder": "写下你的评论...",
+        "creator": "创作者",
+        "load_failed": "无法获取帖子详情",
+        "no_comments": "暂无评论",
+        "post_comment": "发表评论",
+        "title": "帖子详情",
+        "upload_abyss_data": "上传深渊数据"
+    },
+    "dna-post-list": {
+        "community_posts": "社区帖子",
+        "no_posts": "暂无帖子数据"
+    },
+    "dna-post-list-item": {
+        "featured": "精华",
+        "post_image": "帖子图片"
     },
     "dna-posts": {
         "title": "板块"
@@ -1079,6 +1922,7 @@
     "dna-prop-flow": {
         "enter_phone_and_get_captcha": "请输入手机号并获取验证码",
         "enter_phone_and_sms_code": "请输入手机号和验证码",
+        "export_excel": "导出EXCEL",
         "get_captcha_failed": "获取验证码失败",
         "login_failed": "登录失败",
         "login_success": "登录成功",
@@ -1090,7 +1934,29 @@
         "verify_failed": "验证失败"
     },
     "dna-role-detail": {
-        "title": "角色详情"
+        "char_attributes": "角色属性",
+        "char_avatar": "角色头像",
+        "char_splash": "角色立绘",
+        "char_trace": "角色溯源",
+        "hp": "生命值",
+        "load_failed": "无法获取角色详情",
+        "max_sanity": "最大神智",
+        "no_avatar": "无头像",
+        "no_splash": "无立绘",
+        "retry": "重试",
+        "skill_icons": "技能图标",
+        "title": "角色详情",
+        "trace_icons": "溯源图标"
+    },
+    "dna-sign-calendar": {
+        "auto_sign_in": "自动签到",
+        "coins": "金币",
+        "no_tasks": "暂无任务数据",
+        "period": "周期:",
+        "progress": "进度:",
+        "sign_in": "签到",
+        "signed_in": "已签到:",
+        "signed_in_today": "今日已签到"
     },
     "dna-topic": {
         "title": "主题"
@@ -1115,7 +1981,74 @@
         "userInfoFailed": "获取用户信息失败"
     },
     "dna-weapon-detail": {
-        "title": "武器详情"
+        "atk": "攻击力",
+        "crit_rate": "暴击率",
+        "element_icon": "元素图标",
+        "load_failed": "无法获取武器详情",
+        "mode": "模式",
+        "mods": "魔之楔:",
+        "no_icon": "无图标",
+        "refine_level": "精炼等级:",
+        "retry": "重试",
+        "title": "武器详情",
+        "weapon_attrs": "武器属性",
+        "weapon_desc": "武器描述",
+        "weapon_icon": "武器图标"
+    },
+    "dob-account": {
+        "account_desc": "DNA Builder 账号用于访问社区功能、分享构建方案等",
+        "current_appearance": "当前装扮",
+        "daily_exp_progress": "每日经验进度",
+        "earned_today": "今日已获得",
+        "enter_code": "请输入邮箱中的6位验证码",
+        "exp_to_level_up": "再获得 {{value}} 经验升级",
+        "go_points_mall": "前往积分商城",
+        "level_exp": "当前等级经验 {{current}}/{{required}}",
+        "logging_in": "登录中...",
+        "login": "登录",
+        "logout": "退出登录",
+        "manage": "管理",
+        "not_logged_in": "未登录 DNA Builder 账号",
+        "progress_unavailable": "今日进度暂不可用",
+        "qq": "QQ:",
+        "qq_hint": "*QQ号仅用于显示头像 无其他用途",
+        "register": "注册",
+        "registering": "注册中...",
+        "reset_password": "重置密码",
+        "resetting": "重置中...",
+        "roles": "角色:",
+        "send_code": "发送验证码",
+        "sending": "发送中...",
+        "task_abyss_upload": "本赛季深渊上传 +50",
+        "task_first_chat": "今日首条聊天消息 +1",
+        "task_online_1h": "在线满1小时 +3",
+        "task_open_app": "打开软件 +2",
+        "total_exp": "总经验"
+    },
+    "dob-build-show": {
+        "click_copy_link": "点击复制链接",
+        "most_viewed": "最多浏览",
+        "recently_modified": "最新修改"
+    },
+    "dot-config": {
+        "all_sources": "全部来源",
+        "char_own_element": "角色自身属性",
+        "char_self_dot_freq": "角色自身属性 DOT 频率",
+        "close": "关闭",
+        "dot_per_second_by_source": "每秒DOT伤害（按来源）",
+        "drag_hint": "点击抓起后可放入表达式或自定义变量",
+        "formula_desc": "公式：Σ各来源 (角色攻击 + 来源武器攻击) × 0.2 × 6 × 4 × (1 + 充盈威力) × (1 + 增伤) × 昂扬乘区 × 背水乘区 × 频率 × 抗性区（含属性穿透）；技能来源仅按角色攻击结算",
+        "frequency_doubled": "频率翻倍 →",
+        "kinds": "种",
+        "manual_self_elem_note": "手动设置有自属性追加伤害",
+        "other_elem_dot_freq": "其余属性 DOT 频率",
+        "other_elements": "其余属性",
+        "per_second": "次/秒",
+        "self_elem_bonus_cond": "自属性追加伤害 > 0（频率翻倍）",
+        "title": "DOT伤害计算",
+        "total_frequency": "总频率",
+        "trigger": "触发",
+        "upper_limit": "· 上限"
     },
     "dps-view": {
         "buildId": "构建ID",
@@ -1148,6 +2081,7 @@
     "draft-list": {
         "title": "图纸列表"
     },
+    "draft-source": {},
     "dungeon-detail": {
         "allMonster": "普通怪物",
         "allReward": "奖励",
@@ -1177,13 +2111,18 @@
     "dungeon-list": {
         "level": "等级",
         "monster": "怪物",
-        "nightHandbook": "夜航手册",
         "reward": "奖励",
         "searchPlaceholder": "搜索副本ID/名称/描述/等级/奖励（支持拼音）...",
         "special": "特殊",
         "title": "副本列表",
         "totalCount": "共 {{count}} 个副本",
         "type": "类型"
+    },
+    "effect-settings": {
+        "all_max": "全部最大",
+        "all_off": "全部关闭",
+        "goto_inventory": "点击跳转到库存管理",
+        "use_global_settings": "使用全局设置"
     },
     "errorBoundary": {
         "backupTip": "重置前请务必备份数据：重置会清空本地设置与缓存（不影响云端数据），可解决约 99% 的报错问题。",
@@ -1217,12 +2156,24 @@
     "event-list": {
         "title": "活动列表"
     },
+    "expr-editor": {
+        "all_match_and": "全部满足 (and)",
+        "any_match_or": "任一满足 (or)",
+        "check": "检查",
+        "clear_conditions": "清空条件",
+        "compare": "比较",
+        "negate": "取反",
+        "not": "非"
+    },
     "fish-list": {
         "title": "钓鱼"
     },
     "flow": {
         "desc": "伤害计算器节点版",
         "title": "节点编辑器"
+    },
+    "flow-block": {
+        "clone": "克隆"
     },
     "flowEditor": {
         "canvas": "画布",
@@ -1284,6 +2235,7 @@
         "enterCustomTypeName": "请输入自定义类型名称",
         "entityRequired": "该分类的 MOD 必须指定适用实体",
         "exec_files": "可执行文件",
+        "game_options": "游戏选项",
         "gameSetting": "游戏设置",
         "gameUpdate": "下载更新",
         "importModFailed": "导入MOD失败",
@@ -1299,6 +2251,7 @@
         "json_files": "JSON文件",
         "latest": "最新",
         "launch": "启动游戏",
+        "launch_path": "启动路径",
         "launched": "游戏已启动",
         "launchGameFailed": "启动游戏失败: {{ error }}",
         "legacy": "Legacy",
@@ -1394,14 +2347,46 @@
         "versionLabel": "版本号（如 1.0.0）",
         "weapon": "武器"
     },
+    "game-mod-detail": {
+        "preview_image": "预览图"
+    },
+    "game-overlay": {
+        "low_sanity": "低神智",
+        "statistics": "统计"
+    },
+    "game-setting": {
+        "apply": "应用",
+        "config_dir": "配置目录:",
+        "configure_game_path_first": "请先在游戏设置中配置游戏路径",
+        "custom": "自定义",
+        "game_settings": "游戏设置",
+        "height": "高度",
+        "performance_preset": "性能优化预设",
+        "preset_high": "高",
+        "preset_low": "低",
+        "preset_medium": "中",
+        "preset_none": "无优化",
+        "preset_very_low": "极低",
+        "reset_to_default": "重置为默认值",
+        "resolution": "分辨率",
+        "width": "宽度",
+        "window_resolution": "游戏窗口分辨率"
+    },
+    "game-style-mod": {
+        "tolerance_value": "耐受值"
+    },
     "game-update": {
         "cdn": "下载节点",
         "change": "修改",
         "channel": "服务器",
+        "close": "关闭",
         "current_file": "当前文件",
+        "custom": "自定义",
+        "customChannelPlaceholder": "自定义 channel",
         "desc": "游戏版本更新与下载",
         "download_complete": "所有文件下载和解压缩成功，总大小: {{size}}",
         "download_failed": "下载失败: {{error}}",
+        "downloaded": "已下载",
         "downloading": "下载中...",
         "downloading_resources": "正在下载资源",
         "extract_failed": "解压缩失败: {{error}}",
@@ -1413,17 +2398,24 @@
         "game_ready": "游戏已就绪",
         "get_version_list_failed": "获取版本列表失败: {{error}}",
         "global_server": "国际服",
+        "hotUpdateDetail": "热更详情",
         "install_path": "安装路径",
         "latest_version": "最新",
         "launch_game_failed": "启动游戏失败: {{error}}",
+        "localCache": "本地缓存",
         "media_server": "1.2媒体服",
         "move_file_failed": "移动文件失败",
         "no_path_selected": "未选择安装目录",
         "no_pre_download_available": "没有可用的预下载版本",
+        "noHotUpdate": "暂无热更",
         "old_version": "旧版",
+        "paused": "已暂停",
+        "pauseDownload": "暂停下载",
+        "pausing": "暂停中",
         "pre_download_available": "预下载可用",
         "pre_download_complete": "预下载完成，总大小: {{size}}",
         "pre_download_size": "版本 {{version}} • {{size}}",
+        "resumeDownload": "继续下载",
         "select_dir_failed": "选择目录失败: {{error}}",
         "select_game_dir_first": "请先选择游戏安装目录",
         "select_game_file_first": "请先选择游戏文件",
@@ -1440,19 +2432,43 @@
         "update_size": "更新大小: {{size}}",
         "update_success": "更新成功",
         "version": "版本",
-        "version_list_not_loaded": "版本列表未加载"
+        "version_list_not_loaded": "版本列表未加载",
+        "voicePack": "语音包"
     },
     "guide-create": {
         "title": "创建攻略"
     },
     "guide-detail": {
-        "title": "攻略详情"
+        "build_info": "配装信息",
+        "build_info_hint": "此攻略包含配装信息，点击下方按钮可查看完整配装",
+        "not_found": "攻略不存在",
+        "title": "攻略详情",
+        "view_build": "查看配装"
+    },
+    "guide-edit": {
+        "click_or_drag_upload": "点击或拖拽上传图片",
+        "content_placeholder": "详细描述你的攻略内容，支持 Markdown 格式...",
+        "guide_content": "攻略内容",
+        "guide_title": "攻略标题",
+        "guide_type": "攻略类型",
+        "insert_image": "插入图片",
+        "no_relation": "不关联",
+        "related_build": "关联构筑",
+        "related_build_hint": "勾选后，角色构筑将随攻略一同发布",
+        "related_char": "关联角色",
+        "release_to_insert": "松开鼠标以插入图片",
+        "title_placeholder": "请输入一个吸引人的标题...",
+        "upload_format_hint": "支持 JPG、PNG、GIF 格式，最大 3MB",
+        "upload_hint": "支持拖拽上传或点击选择",
+        "upload_image": "上传图片"
     },
     "guide-list": {
+        "no_guides": "暂无攻略",
+        "publish_guide": "发布攻略",
+        "search_placeholder": "搜索角色名称/别名/ID（支持拼音）...",
         "title": "攻略列表"
     },
     "guides": {
-        "all": "全部",
         "all_characters": "全部角色",
         "associated_character": "关联角色",
         "build_info": "配装信息",
@@ -1560,6 +2576,7 @@
         "hardbossWeeklyReset": "周本刷新",
         "hiddenSections": "已隐藏板块",
         "hideSection": "隐藏板块",
+        "icp": "浙ICP备2024097919号",
         "mihanEmpty": "暂无委托数据",
         "mihanMatched": "命中 {{count}} 项",
         "mihanNotifyMissions": "提醒任务",
@@ -1578,6 +2595,7 @@
         "resetSections": "恢复默认",
         "sectionHardboss": "梦魇残声",
         "sectionMihan": "实时委托",
+        "server_day_prefix": "开服第",
         "showSection": "显示板块",
         "starme": "去Github点个星",
         "title": "主页",
@@ -1585,8 +2603,17 @@
         "update_log": "版本更新日志",
         "welcome": "欢迎使用 DNA Builder"
     },
+    "image-carousel": {
+        "next_image": "下一张",
+        "prev_image": "上一张"
+    },
+    "image-preview": {
+        "close_preview": "关闭预览",
+        "reset_zoom": "重置缩放",
+        "zoom_in": "放大",
+        "zoom_out": "缩小"
+    },
     "impr": {
-        "all": "全部",
         "count": "共 {{count}} 条印象",
         "region": "地区",
         "searchPlaceholder": "搜索印象条目",
@@ -1608,6 +2635,13 @@
         "sync_mods_confirm_title": "同步魔之楔",
         "title": "库存管理"
     },
+    "inventory-edit": {
+        "copy_json": "复制JSON",
+        "exp_calc": "经验计算",
+        "import_json": "导入JSON",
+        "owned_weapons": "拥有武器",
+        "search_placeholder": "搜索（支持拼音）..."
+    },
     "iron-ticket": {
         "access": "获取途径",
         "description": "描述",
@@ -1625,6 +2659,12 @@
     "levelup": {
         "desc": "计算角色、武器和魔之楔的养成资源需求",
         "title": "养成计算"
+    },
+    "limited-prize-simulator": {
+        "title": "限时奖池模拟"
+    },
+    "local-qq": {
+        "fill_qq_hint": "点击快速填写QQ"
     },
     "main": {
         "btn_collapse_menu": "折叠菜单",
@@ -1647,9 +2687,85 @@
     "map-local": {
         "title": "地图"
     },
+    "map-pos-link": {
+        "jump": "跳转"
+    },
     "map-tool": {
+        "current_marker": "当前地图点",
         "desc": "查看地图资源和魔灵分布",
-        "title": "地图工具"
+        "error_load_layer": "加载地图图层失败：{{file}}",
+        "error_load_map_image": "加载本地地图图片失败",
+        "error_load_marker_icon": "加载地图点位图标失败：{{url}}",
+        "error_load_rc_avatar": "加载 RC 头像失败：{{url}}",
+        "error_load_tp_icon": "加载 TP 图标失败：{{url}}",
+        "filter_hidden": "当前隐藏（点击显示）",
+        "filter_select_all": "选中全部",
+        "filter_unselect_all": "已选中全部（点击取消全选）",
+        "filter_visible": "当前显示（点击隐藏）",
+        "geniemon_probability": "魔灵概率：",
+        "layer": "图层",
+        "layer_base": "基础图层",
+        "layer_floor": "楼层图层",
+        "layer_misc": "其它图层",
+        "layer_subregion": "子区域图层",
+        "loading_layers": "正在加载本地图层...",
+        "no_geniemon_data": "无 pet.data 可识别魔灵",
+        "no_geniemon_filter": "当前区域没有可筛选的魔灵",
+        "no_rc_config": "当前子区域无 RC 配置",
+        "no_subregion_point": "当前区域没有可显示的 subregion 坐标",
+        "probability": "概率 {{ratio}}%",
+        "rarest_geniemon": "最稀有魔灵: {{name}} ({{ratio}}%)",
+        "rc_detail": "详情",
+        "rc_list_hint": "RC 列表（点击可查看详情）",
+        "rc_points": "刷新数量 {{refresh}} | 点位 {{points}}",
+        "reset_view": "重置视图",
+        "shortest_traversal": "最短图遍历",
+        "shortest_traversal_hint": "请先选择包含魔灵点位的子区域",
+        "sidebar_collapse": "折叠侧栏",
+        "sidebar_expand": "展开侧栏",
+        "sub_region_unknown": "子区域 {{id}}",
+        "teleport_point": "传送点",
+        "title": "地图工具",
+        "tp_points": "TP 点位",
+        "treasure_point": "藏宝点",
+        "unknown_entity": "未识别实体：",
+        "weight_ratio": "权重 {{weight}} / {{total}}",
+        "world_coordinate": "世界坐标",
+        "zoom_in": "放大",
+        "zoom_out": "缩小"
+    },
+    "map-tool.nav_alpha": "覆盖 alpha 阈值",
+    "map-tool.nav_auto": "自动标注",
+    "map-tool.nav_auto_hint": "勾选的图层视为可通行地面；未勾选（含基础云海层）一律视为障碍。若地图明暗相反，请打开下方「反选」。",
+    "map-tool.nav_base_hint": "基础",
+    "map-tool.nav_brush_block": "添加障碍",
+    "map-tool.nav_brush_clear": "擦除障碍",
+    "map-tool.nav_brush_radius": "笔刷半径",
+    "map-tool.nav_clear": "清空",
+    "map-tool.nav_enable": "启用绕行",
+    "map-tool.nav_inflate": "障碍膨胀（安全距离）",
+    "map-tool.nav_invert": "反选（把图层覆盖范围当作障碍）",
+    "map-tool.nav_luma_max": "可通行亮度上限",
+    "map-tool.nav_manual": "手动标注",
+    "map-tool.nav_mask": "显示障碍",
+    "map-tool.nav_reset_layers": "恢复默认图层",
+    "map-tool.nav_section": "障碍物绕行",
+    "map-tool.nav_show_mask": "在画布上叠加显示障碍物",
+    "map-tool.nav_undo": "撤销",
+    "map-tool.nav_unlimited": "不限",
+    "map-tool.nav_unreachable": "不可达",
+    "mini-cost-calculator": {
+        "dungeon_kinds": "种副本",
+        "estimating": "正在估算副本开销...",
+        "full_calculator": "完整计算器",
+        "need_challenge": "需挑战",
+        "no_mod_equipped": "未装备魔之楔，暂无开销估算",
+        "params_note": "以上参数仅影响时间估算结果，不影响资源消耗统计",
+        "settings": "估算设置",
+        "title": "养成开销估算"
+    },
+    "mini-game-launcher": {
+        "open_launcher": "打开游戏启动器"
     },
     "misc": {
         "all_files": "所有文件",
@@ -1700,24 +2816,18 @@
     "monster-detail": {
         "appearingAbyss": "出现深渊",
         "appearingDungeon": "出现副本",
-        "attack": "攻击",
-        "badgeTitle": "迷津",
-        "defense": "防御",
         "defenseDamageReductionRate": "防御减伤率",
         "drop": "搜打撤掉落",
         "dropMechanismId": "机制 ID",
         "dropMonsterTag": "怪物标签",
         "dropRate": "宝箱掉落率",
-        "effectiveHealth": "有效生命",
         "factionOther": "其他",
         "factionPrefix": "阵营",
         "growthPreview": "等级成长预览",
-        "hp": "生命",
         "killScore": "击杀积分",
         "level": "等级",
         "levelDamageReductionRate": "等级减伤率",
         "monsterTagInfo": "号令者信息",
-        "shield": "护盾",
         "showDetail": "查看详情",
         "showEightHp": "8倍血量",
         "stance": "战姿",
@@ -1739,7 +2849,6 @@
     "more": {
         "badge": "More",
         "contextMenu": {
-            "cancel": "取消",
             "changeColor": "切换颜色",
             "changeSize": "切换大小",
             "color": {
@@ -1801,6 +2910,14 @@
     "music-list": {
         "title": "乐谱列表"
     },
+    "music-player": {
+        "load_failed": "音频加载失败",
+        "loading_audio": "正在加载音频",
+        "pause": "暂停",
+        "play": "播放",
+        "play_failed": "音频无法播放",
+        "playback_progress": "播放进度"
+    },
     "node-editor": {
         "addCalc": {
             "description": "计算输入值的总和",
@@ -1811,7 +2928,6 @@
         "astExpression": {
             "description": "验证 AST 表达式",
             "expression": "表达式",
-            "expressionPlaceholder": "伤害",
             "missingCore": "缺少核心计算节点",
             "result": "结果",
             "title": "AST 表达式",
@@ -1841,13 +2957,10 @@
             "waiting": "等待输入"
         },
         "enemyInput": {
-            "attack": "攻击",
             "attributes": "敌人属性（当前等级）",
-            "defense": "防御",
             "enemy": "敌人",
             "enemyLevel": "敌人等级",
             "enemyResistance": "敌人抗性",
-            "hp": "生命",
             "stance": "战姿"
         },
         "expressionCalc": {
@@ -1864,6 +2977,7 @@
             "title": "完整计算",
             "waiting": "等待输入..."
         },
+        "import_from_build": "从角色构筑导入数据",
         "meleeWeaponInput": {
             "chooseLevel": "选择等级",
             "chooseWeapon": "选择近战武器",
@@ -1873,6 +2987,7 @@
             "weapon": "近战武器",
             "weaponLevel": "武器等级"
         },
+        "migrate": "迁移",
         "modInput": {
             "addModSlot": "添加MOD槽位",
             "chooseLevel": "选择等级",
@@ -1903,9 +3018,7 @@
             "waiting": "等待输入..."
         },
         "weaponAttr": {
-            "attack": "攻击",
             "attackSpeed": "攻击速度",
-            "critDamage": "暴击伤害",
             "critRate": "暴击率",
             "multiShot": "多重射击",
             "result": "武器属性",
@@ -1917,7 +3030,6 @@
             "expectedDamage": "期望伤害",
             "higherCrit": "高级暴击",
             "lowerCrit": "低级暴击",
-            "result": "武器伤害",
             "waiting": "等待输入..."
         }
     },
@@ -1932,6 +3044,10 @@
         "title": "NPC列表"
     },
     "other": "其他",
+    "page-foot": {
+        "next_page": "下一页",
+        "prev_page": "上一页"
+    },
     "partytopic-detail": {
         "title": "光阴集详情"
     },
@@ -1939,6 +3055,7 @@
         "title": "光阴集列表"
     },
     "pet_detail": {
+        "active_short": "主动",
         "active_skill": "主动技能",
         "alternative_form": "异化",
         "base_id": "基础ID",
@@ -1956,9 +3073,8 @@
         "no_pet_entry_sources": "暂无对应魔灵潜质来源",
         "no_sources": "暂无对应来源",
         "no_spawn": "暂无出现地点",
-        "old_master": "老道",
+        "passive_short": "被动",
         "passive_skill": "被动技能",
-        "pet_entry": "魔灵潜质",
         "rarity": "品质",
         "rc_label": "RC",
         "refresh_count": "刷新数",
@@ -1966,21 +3082,46 @@
         "shop_purchase": "商店购买",
         "spawn_area": "出现区域",
         "spot_count": "点位数",
+        "total_prefix": "共",
+        "unit_entry": "个潜质",
+        "unit_pet": "个魔灵",
         "until_now": "至今"
     },
     "pet-list": {
         "title": "魔灵列表"
     },
+    "player-exp": {
+        "amount": "数量",
+        "auto_calc": "(自动计算)",
+        "breakthrough_record": "突破记录",
+        "copy_json": "复制JSON",
+        "exp_per_unit": "单次经验",
+        "exp_source_detail": "经验来源详情",
+        "exp_value": "经验值",
+        "extra_exp": "额外经验",
+        "import_json": "导入JSON",
+        "level": "历练等级",
+        "manual_input": "手动输入",
+        "max_value": "最大: {{value}}",
+        "mod_acquisition": "魔之楔获取",
+        "mod_exp": "魔之楔经验",
+        "nth_time": "第{{n}}次",
+        "reset": "重置",
+        "source": "来源",
+        "subtotal": "小计:",
+        "sync_game": "同步游戏",
+        "times": "次数",
+        "total": "总计",
+        "total_exp": "总经验"
+    },
     "points-mall": {
         "accountSettings": "账号设置",
-        "all": "全部",
         "availability": "投放时间",
         "balance": "积分余额",
         "bubblePreview": "气泡预览",
         "confirmRedeem": "确认兑换",
         "confirmRedeemDesc": "确定花费 {{cost}} 积分兑换\"{{name}}\"吗？",
         "currentAppearance": "当前装扮",
-        "default": "默认",
         "equipAfterRedeem": "请先兑换该商品",
         "equipFailed": "应用装扮失败",
         "equipFailedRetry": "应用装扮失败，请稍后重试",
@@ -2017,8 +3158,7 @@
         "redeemSuccess": "兑换成功",
         "refresh": "刷新",
         "rewardType": {
-            "nameCard": "名字特效",
-            "title": "称号"
+            "nameCard": "名字特效"
         },
         "summaryNotReady": "当前无法获取积分信息，请稍后重试",
         "title": "积分商城",
@@ -2027,22 +3167,75 @@
         "useHint": "你可以在商品列表中兑换并点击\"使用\"来切换装扮。",
         "userFallback": "用户"
     },
+    "quest-source": {
+        "sum": "合计"
+    },
     "questchain-detail": {
-        "title": "任务剧情详情"
+        "ai_summary": "剧情 AI 总结",
+        "ai_summary_note": "AI 生成 · 仅供参考",
+        "end_time": "结束时间",
+        "not_found": "未找到任务剧情",
+        "quest_jump": "任务跳转",
+        "quest_label": "任务:",
+        "quest_list": "任务列表",
+        "quest_reward": "任务奖励:",
+        "rewards": "奖励信息",
+        "start_time": "开始时间",
+        "story_voice_settings": "剧情语音设置",
+        "title": "任务剧情详情",
+        "unknown_quest": "未知任务 {{id}}",
+        "voice_language": "语音语言"
     },
     "questchain-list": {
+        "full_text_search_placeholder": "全文搜索任务/对话内容（不支持拼音）...",
+        "quest_count": "个任务",
+        "search_placeholder": "搜索任务 ID/名称（支持拼音）...",
         "title": "任务剧情列表"
     },
     "race-lottery": {
+        "avg_odds_top6": "投注前6名获得的平均倍率",
+        "base_speed": "基础速度",
+        "click_card_hint": "点击卡片查看详情",
+        "community_count": "{{count}} 条社区记录",
+        "covered_count": "{{covered}}/{{total}} 已有词条",
         "desc": "每日竞速比赛的选手词条统计",
-        "title": "魔灵竞速"
+        "expected_return": "期望收益",
+        "expected_win_rank": "期望胜率排名",
+        "expected_win_rate": "期望胜率",
+        "hit_count": "中 {{count}} 个",
+        "other_possible_winners": "其他可能胜利",
+        "player_count": "{{count}} 名选手",
+        "race_date": "比赛日期",
+        "roster": "选手名册",
+        "server": "服务器",
+        "simulate": "模拟",
+        "simulate_one_race": "按当天最终速度与赛内词条模拟一场比赛",
+        "speed_short": "速 {{value}}",
+        "status_slot": "状态{{slot}}",
+        "title": "魔灵竞速",
+        "toggle_other_highlight": "切换其他可能胜利高亮",
+        "toggle_top6_highlight": "切换前 6 高亮",
+        "top6": "前 6",
+        "top6_probability_desc": "按赛中词条规则推断的进入前 6 的概率",
+        "updated_by": "{{name}} 更新"
+    },
+    "race-lottery-simulator": {
+        "race_simulation": "赛跑模拟",
+        "skip": "跳过",
+        "speed": "倍速"
     },
     "raid-rank": {
         "title": "排名奖励"
     },
+    "range-selector": {},
     "ranking": {
         "desc": "榜单排行",
         "title": "榜单"
+    },
+    "ranking-view": {
+        "enemy_resistance_coverage": "敌人抗性覆盖:",
+        "no_entries": "暂无条目",
+        "ranking": "排名"
     },
     "reputation": {
         "accumulatedExp": "累计经验",
@@ -2068,14 +3261,15 @@
     "reputation-list": {
         "title": "区域声名"
     },
+    "resizeable-window-timers": {
+        "no_rotation_time": "暂无下次轮换时间"
+    },
     "resizeableWindow": {
         "and": "和",
         "enableNotify": "启用提醒",
         "mihan": "密函",
         "mihanNotificationBody": "你关注的{{types}}刷新了",
         "mihanNotificationTitle": "委托密函提醒",
-        "mihanTitle": "委托密函",
-        "moling": "魔灵",
         "monitorSettings": "推送设置",
         "nextRefresh": "下次刷新",
         "onlyOnce": "仅一次",
@@ -2110,6 +3304,19 @@
     },
     "resource-list": {
         "title": "资源列表"
+    },
+    "reward-item": {
+        "capacity": "容量:{{value}}",
+        "drop_item": "掉落物:",
+        "expect_times": "每个期望:{{value}}次",
+        "fixed": "固定",
+        "independent_drop": "独立掉落",
+        "probability": "概率:{{value}}%",
+        "ratio": "比例:{{value}}",
+        "reward_group": "奖励组",
+        "reward_group_id": "奖励组 {{id}}",
+        "total_capacity": "总容量 {{count}}",
+        "weight_ratio": "权重:{{value}}"
     },
     "room": {
         "remove": "删除房间"
@@ -2146,6 +3353,83 @@
         "scale": "缩放",
         "sectionTitle": "屏幕信息条",
         "zhouben": "周本刷新"
+    },
+    "script-color-tool": {
+        "back_to_script": "返回脚本",
+        "classify_result": "分类结果",
+        "clear_images": "清空图片",
+        "clear_points": "清空点位",
+        "clipboard_test_category": "剪贴板测试分类",
+        "clipboard_test_done": "已完成剪贴板分类测试",
+        "cloud_game": "云游戏",
+        "color_placeholder": "#RRGGBB 或 0xRRGGBB",
+        "copied_value": "已复制: {{value}}",
+        "copy_category_code": "复制分类代码",
+        "copy_code_done": "已复制自动分类代码",
+        "current_image": "当前图（点击打点）",
+        "current_image_index": "当前图 {{index}}/{{total}}",
+        "default_tolerance": "默认容差",
+        "drop_image_hint": "拖拽图片到此处导入",
+        "err_add_screenshot": "添加截图失败: {{error}}",
+        "err_bad_project": "工程文件格式不正确",
+        "err_canvas_context": "无法创建 Canvas 上下文",
+        "err_compile": "分类代码编译失败: {{error}}",
+        "err_copy": "复制失败: {{error}}",
+        "err_forced_conflict": "强制检查点与对应分类样本冲突，请补充样本或关闭强制检查：{{message}}",
+        "err_forced_unusable": "强制检查点当前不可用于分类，请检查颜色输入和点位范围：{{message}}",
+        "err_image_load": "图片加载失败: {{error}}",
+        "err_load_image_first": "请先加载图片",
+        "err_no_check_color": "点 #{{index}} 在当前图中没有有效检查颜色",
+        "err_no_check_state": "剪贴板代码中未找到 checkState(frame) 函数",
+        "err_no_clipboard_code": "剪贴板中没有可执行代码",
+        "err_no_points": "请先添加至少一个检测点",
+        "err_no_valid_points": "没有可用于分类的有效点位，请检查颜色输入和点位范围",
+        "err_no_window": "未找到窗口",
+        "err_read_clipboard": "读取剪贴板失败: {{error}}",
+        "err_read_file": "读取文件内容失败",
+        "err_read_image": "无法读取图片: {{url}}",
+        "err_read_project": "读取工程文件失败",
+        "err_screenshot_timeout": "截图超时",
+        "err_start_realtime": "启动实时测试失败: {{error}}",
+        "err_stop_realtime": "停止实时测试失败: {{error}}",
+        "err_unsupported_format": "拖拽文件中不包含受支持的图片格式",
+        "export_failed": "工程导出失败",
+        "export_project": "导出工程",
+        "export_project_title": "导出图色工具工程",
+        "export_success": "工程导出成功",
+        "image_label": "图片/标签",
+        "import_failed": "工程导入失败",
+        "import_project": "导入工程",
+        "import_success": "工程导入成功",
+        "invalid": "无效",
+        "json_files": "JSON 文件",
+        "label_placeholder": "输入分类标签",
+        "load_image": "加载图片",
+        "load_image_first": "请先加载图片并在当前图上点击添加点位",
+        "load_images_hint": "请先加载多张图片，然后在当前图上点击添加坐标点（坐标可点击复制 cc，桌面端支持拖拽导入）",
+        "loaded_stats": "已加载 {{images}} 张图片，已打点 {{points}} 个",
+        "loading": "加载中...",
+        "log_add_screenshot_failed": "添加截图失败",
+        "log_export_failed": "导出图色工具工程失败",
+        "log_import_failed": "导入图色工具工程失败",
+        "log_restore_failed": "恢复图色工具状态失败",
+        "log_start_realtime_failed": "启动图色工具实时测试失败",
+        "log_stop_realtime_failed": "停止图色工具实时测试失败",
+        "match": "匹配:",
+        "new_point_uses": "新打点使用",
+        "no_images": "暂无图片",
+        "out_of_range": "超出范围",
+        "point_label": "点 #{{index}}",
+        "realtime_result": "实时结果 {{value}}",
+        "same_coord_colors": "同坐标颜色信息",
+        "screenshot": "截图",
+        "screenshot_added": "已添加截图到图片列表",
+        "start_realtime": "启动实时测试",
+        "stop_realtime": "停止实时测试",
+        "supported_formats": "支持 png / jpg / jpeg / webp / bmp / gif / tiff / ico",
+        "tolerance": "容差",
+        "untested": "未测试",
+        "zoom_scale": "缩放 {{scale}}x（1:N 像素）"
     },
     "script-list": {
         "add_case": "添加 case",
@@ -2297,6 +3581,25 @@
         "visual_editor_exported": "已导出到当前标签页",
         "visual_editor_need_local_tab": "请先打开一个本地脚本标签页再导出"
     },
+    "script-record-tool": {
+        "action_count": "动作数量",
+        "action_details": "动作明细",
+        "back_to_live": "切回实时录制数据",
+        "clear_actions": "清空当前动作",
+        "convert_to_sleep": "按绝对时间点换算 sleep",
+        "copy_code": "复制代码",
+        "current_status": "当前状态",
+        "generate_code": "生成代码",
+        "import_json_absolute": "导入 JSON（绝对时间制）",
+        "import_json_file": "导入 JSON 文件",
+        "import_text": "导入文本",
+        "key": "按键",
+        "mouse": "鼠标",
+        "no_actions": "暂无动作数据",
+        "time_sec": "时间(s)",
+        "total_duration": "总时长",
+        "type": "类型"
+    },
     "script-runtime-floating": {
         "openScriptPage": "前往脚本页: {{scripts}}",
         "runningLabel": "运行中({{count}})",
@@ -2323,15 +3626,25 @@
         "aiTemperatureTip": "控制生成内容的随机性(0-1)",
         "aiTestConnection": "测试连接",
         "appearance": "外观设置",
+        "backgroundBlur": "底图模糊度",
+        "backgroundBlurTip": "对底图做高斯模糊，营造景深效果",
+        "backgroundOpacity": "底图透明度",
+        "backgroundOpacityTip": "数值越小越透明，用于弱化背景干扰",
         "baseColors": "基础色",
         "borderWidth": "边框宽度",
         "brandColors": "品牌色",
-        "cancel": "取消",
+        "clearBackground": "清除",
+        "close": "关闭",
         "colors": "颜色",
         "colorScheme": "配色模式",
         "confirm": "确认",
         "contrastHint": "文字色（对比度预览）",
         "current": "当前",
+        "customBackground": "自定义底图",
+        "customBackgroundPreview": "自定义底图预览",
+        "customBackgroundTip": "上传一张图片作为全局背景，可配合窗口透明使用",
+        "customFont": "自定义字体",
+        "customFontTip": "选择系统字体或上传字体文件，留空恢复默认",
         "customSource": "自定义",
         "customTheme": "自定义主题",
         "customThemeOption": "自定义",
@@ -2339,6 +3652,7 @@
         "darkTheme": "深色主题",
         "dataPackManagement": "数据包管理",
         "dataPackSourceAddress": "数据包来源地址",
+        "defaultFont": "默认字体",
         "depth": "阴影深度",
         "desc": "自定义应用程序设置",
         "download": "下载",
@@ -2369,6 +3683,7 @@
         "radiusField": "输入框圆角",
         "radiusSelector": "选择器圆角",
         "refresh": "刷新",
+        "replaceBackground": "更换",
         "reset": "重置所有设置",
         "resetConfirm": "确认重置所有设置吗？",
         "resetTheme": "重置主题",
@@ -2385,6 +3700,7 @@
         "showAIChat": "显示AI配装助手",
         "stateColors": "状态色",
         "storyText": "剧情文本",
+        "systemFont": "系统字体",
         "theme": "主题",
         "title": "设置",
         "uiScale": "UI缩放",
@@ -2393,6 +3709,7 @@
         "uninstallDataPackConfirm": "确定要卸载 {{version}} 吗？",
         "unknown": "未知",
         "updateLaunchAtStartupFailed": "更新开机启动设置失败",
+        "uploadBackground": "上传",
         "use": "使用",
         "versionList": "版本列表",
         "windowTrasnparent": "透明效果",
@@ -2411,27 +3728,135 @@
         "startTime": "开始",
         "title": "商店"
     },
+    "shop-item": {
+        "item_id": "物品ID",
+        "limit": "限购",
+        "real_currency": "现实货币",
+        "unlock_condition": "解锁条件: {{cond}}"
+    },
     "shop-list": {
         "title": "商店"
     },
+    "shop-source": {
+        "limit": "限购:",
+        "quantity": "数量:",
+        "shop_purchase": "商店购买"
+    },
     "skill-cd-overlay": {
+        "add_key": "添加按键",
+        "advanced_section": "高级",
+        "anchor_percent": "锚点百分比",
+        "anchor_percent_tip": "浮窗左上角在游戏客户区中的位置;上方缩略盒拖拽与这里拖拽数值等价",
+        "anchor_x_percent": "横向锚点百分比",
+        "anchor_y_percent": "纵向锚点百分比",
+        "appearance_section": "外观",
+        "capture_hint_exhausted": "候选键位已用尽,请点左侧按钮捕获新的按键后启用该行",
+        "capture_hint_max": "已达到最大按键数量,请先删除不用的按键",
+        "capture_hint_start": "请按下要绑定的按键(Esc 取消)",
+        "capture_hint_unknown": "无法识别该按键,请换一个",
+        "cd_seconds_label": "{{name}} 冷却秒数",
+        "cooldown_only_tip": "仅在冷却结束时响应按下(防止连发被判定为多次施放)",
+        "current_timers": "浮窗当前条目:",
+        "delete": "删除",
         "desc": "置顶浮窗显示按键冷却倒计时",
-        "title": "技能CD指示器"
+        "disc_alpha": "圆盘不透明度",
+        "disc_alpha_tip": "数字衬底的通透度;调低可更清楚地透出游戏画面",
+        "entry_desc": "原生 Win32 置顶浮窗(点击穿透、不抢焦点);按下绑定的按键即从完整 CD 开始倒计时,就绪时整环变绿。下方的设置改动都会实时下发。",
+        "entry_title": "技能 CD 倒计时浮窗",
+        "foreground_only": "仅游戏窗口前台触发",
+        "foreground_only_tip": "开启后只在游戏进程获得焦点时响应按键,避免聊天输入误触发",
+        "game_window": "游戏窗口",
+        "game_window_tip": "浮窗位置以该进程窗口的客户区为参照(默认 {{name}})",
+        "hide_when_ready": "就绪后隐藏",
+        "hide_when_ready_tip": "CD 归零立即隐藏该条目,只在使用期间显示",
+        "hide_without_game": "未检测到游戏窗口时隐藏",
+        "hide_without_game_tip": "关闭后在游戏未运行时也能看到浮窗(便于用「试触发」核对配置)",
+        "key_capturing": "按键…",
+        "keys_section": "按键与冷却",
+        "label_placeholder": "标签",
+        "max_keys_tip": "最多 {{count}} 个 · 默认冷却未结束时不重复触发,就绪后按键立刻重新计时;开启「无需冷却」则按下即重设",
+        "no_cooldown": "无需冷却",
+        "no_game_warning": "未检测到游戏窗口,浮窗暂不显示;若要立刻在桌面上核对配置,可在「高级」里关闭「未检测到游戏窗口时隐藏」。",
+        "not_detected": "未检测到",
+        "not_running": "未运行",
+        "not_shown": "(当前未显示)",
+        "position_section": "浮窗位置(客户区百分比)",
+        "process_name": "游戏进程名",
+        "process_name_tip": "客户区定位与前台判断所用的进程;多个用逗号分隔,留空用内置默认",
+        "ready": "就绪",
+        "resolved_info": "后端解析:屏幕坐标 X {{x}} · Y {{y}} · 浮窗尺寸 {{w}} × {{h}}",
+        "retrigger_tip": "按下即从完整 CD 重新计时,冷却中按下也会重设",
+        "running": "运行中",
+        "scale": "浮窗缩放",
+        "scale_tip": "按屏幕分辨率缩放圆环与文字尺寸",
+        "section_title": "技能CD指示器",
+        "test_trigger": "试触发",
+        "title": "技能CD指示器",
+        "trigger_tip_off": "请先开启浮窗",
+        "trigger_tip_on": "让浮窗立即开始一次倒计时",
+        "web_only_notice": "浮窗依赖桌面端原生窗口能力,网页端只能查看与编辑配置,不会真正生效。"
+    },
+    "skill-cd-pos-picker": {
+        "no_game_window": "未检测到游戏窗口,预览按当前屏幕分辨率显示"
     },
     "skin-colorize": {
         "desc": "预览和分享角色皮肤染色",
+        "desc_placeholder": "补充描述（可选）",
+        "no_data": "暂无角色染色数据",
         "title": "染色方案"
     },
     "skin-colorize-create": {
         "title": "发布染色方案"
     },
+    "skin-colorize-gallery": {
+        "all_schemes": "全部方案",
+        "by_character": "按角色",
+        "by_series": "按皮肤系列",
+        "default_colors": "默认配色",
+        "end_of_list": "已经到底啦～",
+        "include_hair": "含发型",
+        "no_icon": "暂无图标",
+        "no_schemes": "还没有染色方案",
+        "no_series": "暂无系列",
+        "publish_scheme": "发布染色方案"
+    },
     "skin-colorize-share": {
         "title": "染色方案详情"
     },
     "skin-gacha": {
+        "auto_buy_moon_tip": "月石不足时自动按 1:1 消耗{{name}}",
+        "current_pool": "当前卡池",
         "desc": "万华抽卡模拟",
         "guaranteeSpecial": "距离下次必定获取金色品质道具还有至多<highlight>%d</>次",
-        "title": "万华"
+        "moonstone_title": "{{name}}（点击打开商城）",
+        "pool": "卡池",
+        "sold_out": "已售罄",
+        "title": "万华",
+        "total_spent": "累计花费"
+    },
+    "split-view": {
+        "resize_hint": "调整列表与详情区域大小",
+        "resize_tip": "拖动调整大小，单击收起详情"
+    },
+    "startup-modal": {
+        "current_version": "当前版本",
+        "download_latest_pack": "下载最新数据包",
+        "download_version": "下载 {{version}}",
+        "downloading": "下载中",
+        "ignore": "忽略",
+        "inactive": "未激活",
+        "later": "稍后",
+        "latest_version": "最新版本",
+        "none_yet": "暂无",
+        "open_settings": "打开设置",
+        "pack_download_title": "下载数据包",
+        "pack_downloading_wait": "正在下载数据包，请稍候…",
+        "pack_install_hint": "尚未安装数据包，安装后才能正常加载全部内容数据。",
+        "pack_install_title": "安装数据包",
+        "pack_update_hint": "当前版本 {{from}}，可更新至最新版。数据包决定内容数据的显示与最新效果。",
+        "pack_update_title": "数据包可更新",
+        "pack_version_missing": "未找到可用的数据包版本",
+        "release_notes": "更新说明"
     },
     "tag": {
         "防御": "防御",
@@ -2520,6 +3945,9 @@
         "zoomIn": "放大",
         "zoomOut": "缩小"
     },
+    "title-frame-label": {
+        "title": "称号"
+    },
     "todo": {
         "completeFailed": "标记完成失败",
         "create": "新建",
@@ -2575,6 +4003,14 @@
         "desc": "读取并导出 pak 文件",
         "title": "解包"
     },
+    "unpack-file-tree": {
+        "no_files": "无文件"
+    },
+    "unpack-view": {
+        "pack": "打包",
+        "read_file_list": "读取文件列表",
+        "settings": "设置"
+    },
     "update": {
         "checkFailed": "检查更新失败:",
         "downloadInstallFailed": "下载安装更新失败:",
@@ -2594,8 +4030,14 @@
         "updateFailed": "更新失败",
         "updating": "更新中..."
     },
+    "user-manager": {
+        "account_management": "皎皎角账号管理",
+        "add_account": "添加账号",
+        "add_account_tip": "通过JSON添加皎皎角账号(登录后可复制)",
+        "download_app": "下载APP",
+        "web_unavailable": "网页端不可用"
+    },
     "view": {
-        "all": "全部",
         "allModules": "全部模块",
         "collapse": "收起",
         "contentAuthorizationDesc": "除特别注明的内容外，本站文字内容遵循 CC BY-SA 3.0 协议，图片等媒体内容则遵循其原有协议。",
@@ -2655,5 +4097,20 @@
         "sortByIncome": "收益排序：高→低",
         "title": "武器列表",
         "unequipSlot": "卸下"
+    },
+    "weapon-refine-tabs": {
+        "refine": "熔炼"
+    },
+    "weapon-verify-event": {
+        "available_affixes": "可用词条：",
+        "event_rule": "活动规则：{{rule}}",
+        "level_n": "关卡 {{n}}",
+        "levels_and_star_reward": "{{levels}} 个关卡 · {{stars}} 星奖励",
+        "recommended_level": "推荐等级 {{level}}+",
+        "recommended_unlock_level": "推荐解锁等级 Lv.{{level}}",
+        "target_enemies": "目标敌人",
+        "three_star_threshold": "三星门槛",
+        "victory_goal": "胜利目标",
+        "victory_mode": "胜利模式"
     }
 }

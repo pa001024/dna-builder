@@ -82,14 +82,14 @@ function setAllOff() {
                 class="toggle toggle-sm toggle-primary"
                 @change="emit('update:useGlobal', ($event.target as HTMLInputElement).checked)"
             />
-            使用全局设置
-            <RouterLink title="点击跳转到库存管理" to="/inventory" class="btn btn-xs text-lg btn-ghost btn-circle">
+            {{ $t('effect-settings.use_global_settings') }}
+            <RouterLink :title="$t('effect-settings.goto_inventory')" to="/inventory" class="btn btn-xs text-lg btn-ghost btn-circle">
                 <Icon icon="ri:question-line" />
             </RouterLink>
         </label>
         <div class="ml-auto flex items-center gap-2">
-            <div class="btn btn-ghost btn-sm border border-base-content/15" @click="setAllMax">全部最大</div>
-            <div class="btn btn-ghost btn-sm border border-base-content/15" @click="setAllOff">全部关闭</div>
+            <div class="btn btn-ghost btn-sm border border-base-content/15" @click="setAllMax">{{ $t('effect-settings.all_max') }}</div>
+            <div class="btn btn-ghost btn-sm border border-base-content/15" @click="setAllOff">{{ $t('effect-settings.all_off') }}</div>
         </div>
     </div>
     <BuffEditer

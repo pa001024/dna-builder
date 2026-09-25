@@ -991,25 +991,41 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
-        <!-- 光阴集档案头：纸面 + primary 强调线 -->
-        <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+        <header class="relative z-10 border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
+            <span
+                class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
+                aria-hidden="true"
+            />
             <div class="relative flex items-start gap-3">
                 <img
                     :src="LeveledCharHelper.idToUrl(partyTopic.charId)"
                     alt=""
-                    class="size-12 shrink-0 overflow-hidden rounded-xs bg-base-content/6 object-cover object-top"
+                    class="size-18 shrink-0 overflow-hidden rounded-xs bg-base-content/6 object-cover object-top"
                     loading="lazy"
                 />
 
                 <div class="min-w-0 flex-1">
-                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-primary">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                         <span class="h-px w-6 bg-primary" aria-hidden="true" />
                         Party Topic File
                     </p>
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/partytopic/${partyTopic.id}`"
-                            class="line-clamp-1 font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ formatStoryText(partyTopic.name) }}
                         </SRouterLink>
@@ -1022,7 +1038,7 @@ onBeforeUnmount(() => {
                     <button
                         type="button"
                         class="btn btn-ghost btn-sm btn-square"
-                        title="剧情语音设置"
+                        :title="$t('db-party-topic.story_voice_settings')"
                         :class="{ 'bg-primary/10 text-primary': isVoiceSettingsOpen }"
                         @click="toggleVoiceSettingsPanel"
                     >
@@ -1033,7 +1049,7 @@ onBeforeUnmount(() => {
                         class="absolute right-0 top-full z-1000 mt-2 w-56 rounded-xs border border-base-content/15 bg-base-100/85 p-3 shadow-lg backdrop-blur-md"
                     >
                         <div class="space-y-2">
-                            <div class="text-[11px] tracking-wide text-base-content/45">语音语言</div>
+                            <div class="text-[11px] tracking-wide text-base-content/45">{{ $t('db-party-topic.voice_language') }}</div>
                             <Select
                                 v-model="selectedVoiceLocale"
                                 class="w-full rounded-none border-b border-base-content/25 bg-transparent px-3 py-2 text-sm outline-none transition-colors duration-150 focus:border-primary"
@@ -1052,11 +1068,11 @@ onBeforeUnmount(() => {
 
         <!-- 基础信息 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="BASIC" title="基础信息" />
+            <SectionHeader no-animate compact kicker="BASIC" :title="$t('common.basic_info')" />
 
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="shrink-0 text-xs text-base-content/60">角色</span>
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t('角色') }}</span>
                     <SRouterLink
                         :to="`/db/char/${partyTopic.charId}`"
                         class="truncate text-right text-xs font-medium text-primary transition-colors duration-150 hover:text-primary/80"
@@ -1069,7 +1085,7 @@ onBeforeUnmount(() => {
                     v-if="partyTopic.conditionId"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="shrink-0 text-xs text-base-content/60">前置任务链</span>
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t('db-party-topic.prerequisite_quest_chain') }}</span>
                     <SRouterLink
                         :to="`/db/questchain/${partyTopic.conditionId}`"
                         class="truncate text-right text-xs font-medium text-primary transition-colors duration-150 hover:text-primary/80"
@@ -1083,30 +1099,32 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="shrink-0 text-xs text-base-content/60">奖励 ID</span>
-                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ partyTopic.reward }}</span>
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t('db-party-topic.reward_id') }}</span>
+                    <span class="font-orbitron text-[13px] font-semibold text-primary">{{ partyTopic.reward }}</span>
                 </div>
             </div>
 
             <div v-if="partyTopic.desc" class="mt-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                <div class="mb-1 text-[11px] tracking-wide text-base-content/45">描述</div>
+                <div class="mb-1 text-[11px] tracking-wide text-base-content/45">{{ $t('common.description') }}</div>
                 <div class="text-sm leading-relaxed text-base-content/85">{{ formatStoryText(partyTopic.desc) }}</div>
             </div>
 
             <div v-if="partyTopic.memoryDesc" class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                <div class="mb-1 text-[11px] tracking-wide text-base-content/45">{{ formatStoryText(partyTopic.memoryName || "无") }}</div>
+                <div class="mb-1 text-[11px] tracking-wide text-base-content/45">
+                    {{ partyTopic.memoryName ? formatStoryText(partyTopic.memoryName) : $t('common.none') }}
+                </div>
                 <div class="text-sm leading-relaxed text-base-content/85">{{ formatStoryText(partyTopic.memoryDesc) }}</div>
             </div>
         </section>
         <!-- 奖励 -->
         <section v-if="partyTopicReward" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="REWARD" title="奖励" />
+            <SectionHeader no-animate compact kicker="REWARD" :title="$t('db-party-topic.rewards')" />
             <RewardItem :reward="partyTopicReward" />
         </section>
 
         <!-- 消耗资源 -->
         <section v-if="consumeEntries.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="COST" title="消耗资源" />
+            <SectionHeader no-animate compact kicker="COST" :title="$t('db-party-topic.resource_cost')" />
 
             <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
                 <ResourceCostItem
@@ -1120,10 +1138,10 @@ onBeforeUnmount(() => {
 
         <!-- 剧情对话 -->
         <section v-if="partyTopicDialogueRows.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="DIALOGUE" :title="`剧情对话 (${dialogueRows.length} 条)`">
+            <SectionHeader no-animate compact kicker="DIALOGUE" :title="$t('db-party-topic.dialogue_title', { num: dialogueRows.length })">
                 <template #trailing>
                     <label class="flex select-none items-center gap-2 text-xs text-base-content/70">
-                        <span>自动播放</span>
+                        <span>{{ $t('common.autoplay') }}</span>
                         <input
                             v-model="autoPlayEnabled"
                             type="checkbox"
@@ -1202,7 +1220,7 @@ onBeforeUnmount(() => {
                         >
                             <div class="flex items-start gap-2">
                                 <span
-                                    class="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-xs border text-[9px] font-semibold tabular-nums"
+                                    class="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-xs border text-[9px] font-semibold"
                                     :class="
                                         item.selectedOption?.id === option.id
                                             ? 'border-primary bg-primary text-primary-content'
@@ -1231,7 +1249,7 @@ onBeforeUnmount(() => {
                                             : 'border-error/40 bg-error/10 text-error'
                                     "
                                 >
-                                    {{ $t(getRegionType(impression.regionId)) }}·{{ impression.typeLabel }}
+                                    {{ $t(getRegionType(impression.regionId)) }}·{{ $t(impression.typeLabel) }}
                                     {{ impression.value > 0 ? `+${impression.value}` : impression.value }}
                                 </span>
 
@@ -1240,8 +1258,10 @@ onBeforeUnmount(() => {
                                     :key="`${option.id}-${impressionCheck.regionId}-${impressionCheck.typeLabel}-impr-check`"
                                     class="rounded-xs border border-info/40 bg-info/10 px-1.5 py-0.5 text-[10px] leading-none tabular-nums text-info"
                                 >
-                                    印象检定 {{ $t(getRegionType(impressionCheck.regionId)) }}·{{ impressionCheck.typeLabel }} ≥
-                                    {{ impressionCheck.threshold }}
+                                    {{ $t('common.impression_check') }} {{ $t(getRegionType(impressionCheck.regionId)) }}·{{
+                                        $t(impressionCheck.typeLabel)
+                                    }}
+                                    ≥ {{ impressionCheck.threshold }}
                                 </span>
                             </div>
                         </button>
@@ -1250,12 +1270,12 @@ onBeforeUnmount(() => {
             </TransitionGroup>
 
             <div v-if="!dialogueChain.length" class="text-sm text-base-content/60">
-                {{ dialogueRows.length ? "暂无可展示的对话链" : "暂无对话内容" }}
+                {{ dialogueRows.length ? $t('db-party-topic.dialogue_chain_empty') : $t('db-party-topic.dialogue_empty') }}
             </div>
 
             <!-- 剧情媒体标记：BGM 试听 -->
             <div v-if="mediaMarkerRows.length" class="mt-2 space-y-2">
-                <div class="text-[11px] font-semibold tracking-wide text-accent">BGM / 音效</div>
+                <div class="text-[11px] font-semibold tracking-wide text-accent">{{ $t('db-party-topic.bgm_media_section') }}</div>
                 <div
                     v-for="marker in mediaMarkerRows"
                     :key="marker.id"
@@ -1271,7 +1291,7 @@ onBeforeUnmount(() => {
                         >
                             {{ marker.resource }}
                         </code>
-                        <span v-if="isMarkerBgmMute(marker)" class="text-base-content/40">（无声/停止控制，无试听）</span>
+                        <span v-if="isMarkerBgmMute(marker)" class="text-base-content/40">{{ $t('db-party-topic.bgm_mute_hint') }}</span>
                         <button
                             v-else-if="getMarkerBgmUrl(marker)"
                             type="button"
@@ -1283,9 +1303,9 @@ onBeforeUnmount(() => {
                             "
                             @click="toggleMarkerBgm(marker)"
                         >
-                            {{ currentBgmMarkerId === marker.id && isBgmPlaying ? "停止试听" : "试听" }}
+                            {{ currentBgmMarkerId === marker.id && isBgmPlaying ? $t('db-party-topic.bgm_preview_stop') : $t('db-party-topic.bgm_preview') }}
                         </button>
-                        <span v-else class="text-base-content/40">（暂未收录 CDN 音频）</span>
+                        <span v-else class="text-base-content/40">{{ $t('db-party-topic.bgm_no_cdn') }}</span>
                     </div>
                 </div>
             </div>

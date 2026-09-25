@@ -164,7 +164,7 @@ function applyPointer(event: PointerEvent) {
             v-if="!gameFound"
             class="pointer-events-none absolute inset-x-0 bottom-0 bg-warning/15 px-2 py-0.5 text-[11px] text-warning"
         >
-            未检测到游戏窗口,预览按当前屏幕分辨率显示
+            {{ $t('skill-cd-pos-picker.no_game_window') }}
         </div>
     </div>
     <div class="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-base-content/50">

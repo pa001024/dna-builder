@@ -4250,7 +4250,7 @@ onUnmounted(async () => {
                     </label>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <button class="btn btn-ghost" @click="showNewScriptDialog = false">{{ $t("setting.cancel") }}</button>
+                    <button class="btn btn-ghost" @click="showNewScriptDialog = false">{{ $t("取消") }}</button>
                     <button class="btn btn-primary" @click="createNewScript">{{ $t("script-list.create") }}</button>
                 </div>
             </div>
@@ -4353,7 +4353,7 @@ onUnmounted(async () => {
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-5">
-                    <button class="btn btn-ghost" @click="showScriptHotkeyDialog = false">{{ $t("setting.cancel") }}</button>
+                    <button class="btn btn-ghost" @click="showScriptHotkeyDialog = false">{{ $t("取消") }}</button>
                     <button
                         v-if="scriptRuntime.scriptHotkeyStore[editingHotkeyScriptName]"
                         class="btn btn-warning"
@@ -4529,7 +4529,7 @@ onUnmounted(async () => {
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
-                    <button class="btn btn-ghost" @click="showSchedulerDialog = false">{{ $t("setting.cancel") }}</button>
+                    <button class="btn btn-ghost" @click="showSchedulerDialog = false">{{ $t("取消") }}</button>
                     <button class="btn btn-primary" @click="saveSchedulerConfig">{{ $t("script-list.save_and_switch") }}</button>
                 </div>
             </div>

@@ -77,7 +77,7 @@ const currentMonster = computed(() => {
                     v-if="playerStats.currentSanity < 50"
                     class="bg-purple-900/40 border border-purple-500 text-purple-300 px-3 py-1 rounded-full text-xs font-bold"
                 >
-                    低神智
+                    {{ $t('game-overlay.low_sanity') }}
                 </div>
             </div>
 
@@ -126,7 +126,7 @@ const currentMonster = computed(() => {
         <!-- --- HUD: Top Right DPS --- -->
         <div class="absolute top-4 right-4 bg-black/40 backdrop-blur-sm p-4 rounded-xl border border-white/10 text-right">
             <div class="flex items-center justify-end gap-2 text-slate-300 text-xs font-bold uppercase tracking-wider mb-1">
-                <Icon icon="ri:line-chart-line" /> 统计
+                <Icon icon="ri:line-chart-line" /> {{ $t('game-overlay.statistics') }}
             </div>
             <div class="text-2xl font-black font-mono text-white">
                 {{ dps.current.toLocaleString() }} <span class="text-sm text-slate-400">DPS</span>

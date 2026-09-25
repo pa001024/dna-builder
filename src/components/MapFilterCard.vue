@@ -41,7 +41,7 @@ const emit = defineEmits<{
                 :class="allActive
                     ? 'border-primary/60 bg-primary/10 text-primary hover:border-primary/60'
                     : 'border-transparent text-base-content/50 hover:border-primary/40 hover:text-primary'"
-                :title="allActive ? '已选中全部（点击取消全选）' : '选中全部'"
+                :title="allActive ? $t('map-tool.filter_unselect_all') : $t('map-tool.filter_select_all')"
                 @click.stop="emit('toggle-all')"
             >
                 <Icon icon="ri:list-check-2" class="size-3.5" />
@@ -50,7 +50,7 @@ const emit = defineEmits<{
                 v-if="visible !== undefined"
                 type="button"
                 class="inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-xs border border-transparent text-base-content/50 transition-colors duration-150 hover:border-primary/40 hover:text-primary"
-                :title="visible ? '当前显示（点击隐藏）' : '当前隐藏（点击显示）'"
+                :title="visible ? $t('map-tool.filter_visible') : $t('map-tool.filter_hidden')"
                 @click.stop="emit('toggle-visibility')"
             >
                 <Icon :icon="visible ? 'ri:eye-line' : 'ri:eye-off-line'" class="size-3.5" />

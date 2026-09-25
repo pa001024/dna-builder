@@ -3,6 +3,7 @@ import { t } from "i18next"
 import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
 import { useRouter } from "vue-router"
+import { useGameText } from "@/composables/useGameText"
 import { LeveledMonsterHelper } from "@/data"
 import type { Monster } from "@/data/d/monster.data"
 import { type ExtractionTreasureContainer, extractionTreasureContainerData, type SoloTreasureDropEntry } from "@/data/d/solotreasure.data"
@@ -30,6 +31,19 @@ const props = withDefaults(
 )
 
 const router = useRouter()
+const { gt } = useGameText()
+
+/**
+ * 获取怪物类型展示文本。
+ *
+ * `getMonsterType` 返回的是简体中文原文（普通/精英/首领），需要再走一次译文查找；
+ * 未收录的类型名原样返回。
+ * @param type 怪物类型
+ * @returns 当前语言下的类型文本
+ */
+function getMonsterTypeLabel(type: Monster["t"]): string {
+    return gt(getMonsterType(type).label)
+}
 
 /**
  * 判断传入数据是否为已计算等级的怪物对象。
@@ -115,7 +129,7 @@ const monsterAvatarUrl = computed(() => {
  */
 function getFactionName(faction: number | undefined): string {
     if (faction === undefined) {
-        return t("other")
+        return t("other", { keySeparator: false, nsSeparator: false })
     }
 
     return Faction[faction] || t("monster.faction", { faction })
@@ -246,7 +260,7 @@ function handleClickMonsterCard(): void {
                         class="rounded-xs px-1.5 py-0.5 text-[10px] font-medium text-primary-content"
                         :class="getMonsterType(displayMonster.t).color"
                     >
-                        {{ getMonsterType(displayMonster.t).label }}
+                        {{ getMonsterTypeLabel(displayMonster.t) }}
                     </span>
                     <span
                         class="rounded-xs border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-medium tabular-nums text-primary"
@@ -274,44 +288,44 @@ function handleClickMonsterCard(): void {
         <div class="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-4">
             <div
                 class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
-                :title="$t('生命')"
+                :title="gt('生命')"
             >
-                <div class="text-[10px] text-base-content/55">{{ $t("生命") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-error">
+                <div class="text-[10px] text-base-content/55">{{ gt("生命") }}</div>
+                <div class="font-orbitron text-[13px] font-semibold text-error">
                     {{ formatBigNumber(displayMonster.hp, 0) }}
                 </div>
             </div>
             <div
                 class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
-                :title="$t('护盾')"
+                :title="gt('护盾')"
             >
-                <div class="text-[10px] text-base-content/55">{{ $t("护盾") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-info">
+                <div class="text-[10px] text-base-content/55">{{ gt("护盾") }}</div>
+                <div class="font-orbitron text-[13px] font-semibold text-info">
                     {{ formatBigNumber(displayMonster.es || 0, 0) }}
                 </div>
             </div>
             <div
                 class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
-                :title="$t('防御')"
+                :title="gt('防御')"
             >
-                <div class="text-[10px] text-base-content/55">{{ $t("防御") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-success">
+                <div class="text-[10px] text-base-content/55">{{ gt("防御") }}</div>
+                <div class="font-orbitron text-[13px] font-semibold text-success">
                     {{ formatBigNumber(displayMonster.def) }}
                 </div>
             </div>
             <div
                 class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
-                :title="$t('有效生命')"
+                :title="gt('有效生命')"
             >
-                <div class="text-[10px] text-base-content/55">{{ $t("有效生命") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold tabular-nums text-accent">
+                <div class="text-[10px] text-base-content/55">{{ gt("有效生命") }}</div>
+                <div class="font-orbitron text-[13px] font-semibold text-accent">
                     {{ formatBigNumber(effectiveHealth, 0) }}
                 </div>
             </div>
         </div>
 
         <div v-if="dropMechanisms.length" class="mt-2 space-y-1.5">
-            <span class="text-[10px] text-base-content/40">掉落</span>
+            <span class="text-[10px] text-base-content/40">{{ $t('db-monster-compact-card.drops') }}</span>
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-1.5 py-1">
                 <DBSoloTreasureMechanismItem v-for="mechanism in dropMechanisms" :key="mechanism.id" :mechanism="mechanism" />
             </div>

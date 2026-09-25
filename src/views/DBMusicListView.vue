@@ -82,7 +82,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbmu-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索乐谱或专辑"
+                            :placeholder="$t('db-music-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                     </div>

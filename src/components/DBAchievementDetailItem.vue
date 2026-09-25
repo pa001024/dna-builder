@@ -28,6 +28,19 @@ function getQualityIcon(quality: number): string {
     <div class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 成就档案头：纸面 + primary 强调线 + 斜切楔形 -->
         <header class="relative overflow-hidden border-b-2 border-primary pb-4">
+            <!-- 引导线网格（装饰性，随主题明暗） -->
+            <div
+                class="pointer-events-none absolute inset-0"
+                style="
+                    background-image:
+                        linear-gradient(to right, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px),
+                        linear-gradient(to bottom, color-mix(in oklab, var(--color-base-content) 7%, transparent) 1px, transparent 1px);
+                    background-size: 26px 26px;
+                    mask-image: linear-gradient(to bottom, black, transparent 85%);
+                "
+                aria-hidden="true"
+            />
+            <!-- 右上角斜切楔形 -->
             <span
                 class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
                 aria-hidden="true"
@@ -41,7 +54,7 @@ function getQualityIcon(quality: number): string {
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <SRouterLink
                             :to="`/db/achievement/${achievement.id}`"
-                            class="truncate font-orbitron text-xl font-bold leading-none tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
                         >
                             {{ $t(achievement.名称) }}
                         </SRouterLink>
@@ -51,7 +64,7 @@ function getQualityIcon(quality: number): string {
                 <img
                     v-if="achievement.品质"
                     :src="`/imgs/webp/Icon_Achievement_${getQualityIcon(achievement.品质)}.webp`"
-                    alt="品质"
+                    :alt="$t('common.quality')"
                     class="size-8 shrink-0 sm:size-10"
                 />
             </div>
@@ -75,7 +88,7 @@ function getQualityIcon(quality: number): string {
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="shrink-0 text-xs text-base-content/60">{{ $t("achievement-detail.version") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ achievement.版本 }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ achievement.版本 }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="shrink-0 text-xs text-base-content/60">{{ $t("achievement-detail.quality") }}</span>

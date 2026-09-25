@@ -60,7 +60,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbt-item-active" })
                         <input
                             v-model="searchKeyword"
                             type="text"
-                            placeholder="搜索称号ID/名称/来源（支持拼音）..."
+                            :placeholder="$t('db-title-list.search_placeholder')"
                             class="w-full rounded-none border-b border-base-content/25 bg-transparent py-1.5 pl-7 pr-12 text-sm outline-none transition-colors duration-200 placeholder:text-base-content/35 focus:border-primary"
                         />
                         <span
@@ -84,7 +84,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbt-item-active" })
                             "
                             @click="selectedType = 0"
                         >
-                            全部
+                            {{ $t('common.all') }}
                         </button>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
@@ -95,7 +95,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbt-item-active" })
                             "
                             @click="selectedType = 1"
                         >
-                            前缀
+                            {{ $t('db-title-list.prefix') }}
                         </button>
                         <button
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
@@ -106,7 +106,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbt-item-active" })
                             "
                             @click="selectedType = 2"
                         >
-                            后缀
+                            {{ $t('db-title-list.suffix') }}
                         </button>
                     </div>
                 </div>
@@ -150,7 +150,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbt-item-active" })
                                     <CopyID :id="title.id" />
                                 </div>
                                 <p class="mt-2 line-clamp-2 break-all text-[11px] leading-relaxed text-base-content/45">
-                                    {{ title.src || "暂无来源说明" }}
+                                    {{ $t(title.src || "暂无来源说明") }}
                                 </p>
                             </div>
                         </article>
@@ -160,7 +160,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbt-item-active" })
                 <!-- 底部统计条 -->
                 <div class="flex-none border-t border-base-content/15 px-4 py-2.5">
                     <p class="text-[11px] tracking-wide text-base-content/50">
-                        共 <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredTitles.length }}</b> 个称号
+                        {{ $t('common.total_count') }} <b class="font-orbitron text-sm font-semibold text-primary tabular-nums">{{ filteredTitles.length }}</b> {{ $t('db-title-list.title_count') }}
                     </p>
                 </div>
             </div>

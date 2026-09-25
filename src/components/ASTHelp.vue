@@ -33,7 +33,7 @@ const examples = [
     { label: t("ast-help.examples.baseStats"), expr: "攻击 + 防御" },
     { label: t("ast-help.examples.specialValue"), expr: "[攻击]" },
     { label: t("ast-help.examples.expectedDamage"), expr: skillName },
-    { label: t("ast-help.examples.critDamage"), expr: skillName + ".暴击" },
+    { label: t("暴击伤害"), expr: skillName + ".暴击" },
     { label: t("ast-help.examples.physicalDamage"), expr: skillName + ".物理" },
     { label: t("ast-help.examples.elementDamage"), expr: skillName + ".元素" },
     { label: t("ast-help.examples.temporaryAttrs"), expr: "[攻击]{增伤:0.1}.暴击" },
@@ -68,7 +68,7 @@ const functions = {
 
 const members = {
     N: t("ast-help.members.n"),
-    暴击: t("ast-help.members.crit"),
+    暴击: t("暴击伤害"),
     未暴击: t("ast-help.members.noCrit"),
     触发: t("ast-help.members.trigger"),
     未触发: t("ast-help.members.noTrigger"),

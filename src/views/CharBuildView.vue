@@ -2035,7 +2035,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             >
                 <!-- 图标走 mask 上色：原图是白色字形，直接显示在浅色主题下不可见；mask 取 currentColor 随选中态变化 -->
                 <div
-                    alt="额外精通武器图标"
+                    :alt="$t('char-build.extra_mastery_weapon_icon')"
                     class="size-9 shrink-0 bg-current"
                     :style="{ mask: `url(${LeveledWeapon.typeUrl(item.名称)}) no-repeat center/contain` }"
                 />
@@ -2135,7 +2135,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         >
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2">
                 <div class="flex min-w-0 items-center gap-2.5 px-1">
-                    <h1 class="font-orbitron text-base font-bold leading-none tracking-tight text-base-content truncate sm:text-lg">
+                    <h1 class="font-orbitron text-base font-bold leading-tight tracking-tight text-base-content truncate sm:text-lg">
                         {{ $t(selectedChar) || $t("char-build.title") }}
                         <span class="text-primary">Build</span>
                     </h1>
@@ -2389,7 +2389,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     <!-- 图标走 mask 上色，与同律页签的技能图标一致；居中自适应容器尺寸 -->
                                     <div
                                         v-if="selectedExtraMastery"
-                                        alt="额外精通武器图标"
+                                        :alt="$t('char-build.extra_mastery_weapon_icon')"
                                         class="flex h-full w-full items-center justify-center bg-current"
                                         :style="{
                                             mask: `url(${LeveledWeapon.typeUrl(selectedExtraMastery.名称)}) no-repeat center/contain`,

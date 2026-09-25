@@ -258,11 +258,11 @@ watch(
             <div class="grid grid-cols-2 gap-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ t("box-drop.boxMaximum") }}</span>
-                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ boxDrop.boxMaximum }}</span>
+                    <span class="font-orbitron text-[13px] font-semibold text-primary">{{ boxDrop.boxMaximum }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ t("box-drop.boxPerDay") }}</span>
-                    <span class="font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ boxDrop.boxPerDay }}</span>
+                    <span class="font-orbitron text-[13px] font-semibold text-primary">{{ boxDrop.boxPerDay }}</span>
                 </div>
             </div>
             <div>
