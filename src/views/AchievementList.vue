@@ -1,15 +1,68 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
-import { computed, ref, watch } from "vue"
+import { computed, nextTick, ref, useTemplateRef, watch } from "vue"
+import VirtualList from "@/components/VirtualList.vue"
 import { achievementData } from "@/data"
 import { useUIStore } from "@/store/ui"
-import { matchPinyin } from "@/utils/pinyin-utils"
+import { getPinyin, getPinyinFirst } from "@/utils/pinyin-utils"
+
+/**
+ * 成就卡片高度的估算下界（px）。
+ * 卡片高度已做成确定性（描述固定两行、页脚不换行），首帧后由 VirtualList 按实测值校正。
+ */
+const ACHIEVEMENT_CARD_HEIGHT = 160
+
+/**
+ * 自适应列数的最小列宽（px）。
+ * 取值须保证卡片内容区（列宽 - 左右内边距）放得下最宽的页脚（分类徽记 + 奖励行约 336px），
+ * 否则奖励行会被迫换行，卡片高度参差会让虚拟列表的后续卡片错位。
+ */
+const ACHIEVEMENT_MIN_COLUMN_WIDTH = 380
+
+/** 列表内容区内边距与行间距（px），对应原网格的 m-4 与 gap-3。 */
+const LIST_PADDING = 16
+const LIST_GAP = 12
 
 const ui = useUIStore()
 
+/**
+ * 文本 → 拼音检索索引的缓存。
+ *
+ * 数据集是静态的，而拼音转换是全页最重的一环：搜索框每敲一个字都要对全量条目重算一次拼音。
+ * 这里按文本缓存首字母与全拼，让每条数据的拼音只算一次。
+ */
+const pinyinIndexCache = new Map<string, { first: string; full: string }>()
+
+/**
+ * 判断文本是否命中拼音检索（首字母或全拼）。
+ * @param text 待匹配文本（成就名称或描述）
+ * @param query 已转小写的查询串
+ * @returns 是否命中
+ */
+function matchesPinyin(text: string, query: string): boolean {
+    let index = pinyinIndexCache.get(text)
+    if (!index) {
+        index = { first: getPinyinFirst(text).toLowerCase(), full: getPinyin(text).toLowerCase() }
+        pinyinIndexCache.set(text, index)
+    }
+    return index.first.includes(query) || index.full.includes(query)
+}
+
 // 用户已完成的成就ID列表
 const userFinishedIds = useLocalStorage("achi.finished", [] as number[])
+
+/**
+ * 已完成 ID 的集合视图。
+ * 卡片渲染与筛选都要按 ID 查完成态，数组的 indexOf/includes 是线性查找，
+ * 620 条数据在滚动时会被逐张调用，换成 Set 让每次判定降到 O(1)。
+ */
+const finishedIdSet = computed(() => new Set(userFinishedIds.value))
+
+/** 判断成就是否已完成。 */
+function isFinished(id: number): boolean {
+    return finishedIdSet.value.has(id)
+}
 
 // 当前选中的分类
 const selectedCategory = ref<string | null>(null)
@@ -20,7 +73,7 @@ const hideCompleted = ref(false)
 
 // 获取所有类别并构建分类树
 const categorizedAchievements = computed(() => {
-    const categories: Record<string, any[]> = {}
+    const categories: Record<string, typeof achievementData> = {}
     achievementData.forEach(achievement => {
         if (achievement.分类) {
             if (!categories[achievement.分类]) {
@@ -47,7 +100,7 @@ const categoryFinishedCounts = computed(() => {
     const counts: Record<string, number> = {}
 
     Object.entries(categorizedAchievements.value).forEach(([category, achievements]) => {
-        counts[category] = achievements.filter(a => userFinishedIds.value.indexOf(a.id) !== -1).length
+        counts[category] = achievements.reduce((sum, achievement) => sum + (isFinished(achievement.id) ? 1 : 0), 0)
     })
 
     return counts
@@ -74,46 +127,33 @@ const showClearConfirmDialog = () => {
 
 // 根据选中分类筛选的成就列表
 const filteredAchievements = computed(() => {
-    const query = searchQuery.value.trim()
-    let filtered = achievementData.filter(achievement => {
+    const query = searchQuery.value.trim().toLowerCase()
+    const filtered = achievementData.filter(achievement => {
         // 分类筛选
         const categoryMatch = !selectedCategory.value || achievement.分类 === selectedCategory.value
         // 版本筛选
         const versionMatch = selectedVersion.value === "所有版本" || achievement.版本 === selectedVersion.value
 
-        // 搜索筛选
-        let searchMatch = false
+        // 搜索筛选：先中文直配，未命中再走拼音索引
+        let searchMatch = true
         if (query) {
-            // 直接中文匹配
-            const directMatch = achievement.名称.includes(query) || achievement.描述.includes(query)
-            if (directMatch) {
-                searchMatch = true
-            } else {
-                // 拼音匹配（全拼/首字母）
-                const nameMatch = matchPinyin(achievement.名称, query).match
-                const descMatch = matchPinyin(achievement.描述, query).match
-                searchMatch = nameMatch || descMatch
-            }
-        } else {
-            searchMatch = true
+            searchMatch =
+                achievement.名称.toLowerCase().includes(query) ||
+                achievement.描述.toLowerCase().includes(query) ||
+                matchesPinyin(achievement.名称, query) ||
+                matchesPinyin(achievement.描述, query)
         }
 
         // 已完成筛选
-        const completedMatch = !hideCompleted.value || userFinishedIds.value.indexOf(achievement.id) === -1
+        const completedMatch = !hideCompleted.value || !isFinished(achievement.id)
 
         return categoryMatch && versionMatch && searchMatch && completedMatch
     })
 
-    // 排序：未完成优先
+    // 排序：未完成优先。sort 会原地修改，而 filter 已产出新数组，可直接排
     if (prioritizeUnfinished.value) {
-        filtered.sort((a, b) => {
-            const aCompleted = userFinishedIds.value.indexOf(a.id) !== -1
-            const bCompleted = userFinishedIds.value.indexOf(b.id) !== -1
-
-            if (aCompleted && !bCompleted) return 1
-            if (!aCompleted && bCompleted) return -1
-            return 0
-        })
+        const finished = finishedIdSet.value
+        filtered.sort((a, b) => Number(finished.has(a.id)) - Number(finished.has(b.id)))
     }
 
     return filtered
@@ -121,6 +161,22 @@ const filteredAchievements = computed(() => {
 
 // 统计数据计算
 const totalAchievements = computed(() => achievementData.length)
+
+/** 虚拟列表实例：筛选条件变化后需要把列表拉回顶部。 */
+const listRef = useTemplateRef<{ scrollToIndex: (index: number, behavior?: ScrollBehavior) => void }>("achievementList")
+
+/**
+ * 筛选条件变化时回到列表顶部。
+ *
+ * 虚拟列表的窗口起点由滚动位置驱动，换条件后结果集整体变短，
+ * 若沿用旧位置就会停在结果中间（搜索时看到的是末尾几条，而不是命中的第一条）。
+ * 用 scrollToIndex(0) 而不是直接写 scrollTop：前者会同步刷新渲染窗口，
+ * 避免当帧仍显示旧数据。
+ */
+watch([selectedCategory, selectedVersion, searchQuery, prioritizeUnfinished, hideCompleted], async () => {
+    await nextTick()
+    listRef.value?.scrollToIndex(0)
+})
 
 // 选择分类的方法
 const selectCategory = (category: string) => {
@@ -191,42 +247,31 @@ const importAchievements = () => {
 const selectAllCurrentPage = ref(false)
 // 监听全选复选框变化
 watch(selectAllCurrentPage, newValue => {
-    // 创建一个新的数组，避免直接修改userFinishedIds
-    const updatedFinishedIds = [...userFinishedIds.value]
+    // 用集合累积结果：原做法对每个成就做一次 indexOf，是 O(n²)，
+    // 全选 620 条时会产生几十万次比较；集合查找让整体降到 O(n) 且保持插入顺序。
+    const updatedFinishedIds = new Set(userFinishedIds.value)
 
-    // 遍历当前页面的所有成就
     filteredAchievements.value.forEach(achievement => {
-        const id = achievement.id
-        const index = updatedFinishedIds.indexOf(id)
-
-        if (newValue && index === -1) {
-            // 如果要全选且成就未完成，则添加到完成列表
-            updatedFinishedIds.push(id)
-        } else if (!newValue && index > -1) {
-            // 如果要取消全选且成就已完成，则从完成列表中移除
-            updatedFinishedIds.splice(index, 1)
+        if (newValue) {
+            updatedFinishedIds.add(achievement.id)
+        } else {
+            updatedFinishedIds.delete(achievement.id)
         }
     })
 
     // 更新userFinishedIds
-    userFinishedIds.value = updatedFinishedIds
+    userFinishedIds.value = [...updatedFinishedIds]
 })
 
 // 监听筛选结果变化，更新全选复选框状态
 watch(
     filteredAchievements,
     () => {
-        // 检查当前页面是否所有成就都已完成
-        const allCompleted =
-            filteredAchievements.value.length > 0 &&
-            filteredAchievements.value.every(achievement => userFinishedIds.value.includes(achievement.id))
+        const finished = finishedIdSet.value
+        const list = filteredAchievements.value
 
-        // 只有当筛选结果不为空时，才更新全选状态
-        if (filteredAchievements.value.length > 0) {
-            selectAllCurrentPage.value = allCompleted
-        } else {
-            selectAllCurrentPage.value = false
-        }
+        // 检查当前筛选结果是否已全部完成；结果为空时复选框回落为未选
+        selectAllCurrentPage.value = list.length > 0 && list.every(achievement => finished.has(achievement.id))
     },
     { immediate: true }
 )
@@ -421,73 +466,87 @@ function getAchievementIcon(category: string) {
                     </div>
                 </div>
 
-                <ScrollArea class="min-h-0 flex-1">
-                    <!-- 成就列表卡片 -->
-                    <div class="grid grid-cols-1 gap-3 m-4 lg:grid-cols-2 2xl:grid-cols-3">
-                        <div
-                            v-for="(achievement, index) in filteredAchievements"
-                            :key="achievement.id"
-                            class="group relative overflow-hidden rounded-xs border bg-base-100/60 p-4 backdrop-blur-sm transition-colors duration-200 hover:border-primary/50 animate-ef-rise motion-reduce:animate-none"
-                            :class="userFinishedIds.indexOf(achievement.id) !== -1 ? 'border-success/30' : 'border-base-content/12'"
-                            :style="{ animationDelay: `${Math.min(index * 20, 240)}ms` }"
-                        >
-                            <div class="flex items-start justify-between gap-2 mb-3">
-                                <div class="flex items-center gap-2.5">
-                                    <input
-                                        type="checkbox"
-                                        :checked="userFinishedIds.indexOf(achievement.id) !== -1"
-                                        class="checkbox checkbox-sm"
-                                        @change="toggleAchievement(achievement.id)"
-                                    />
-                                    <h3
-                                        class="text-sm font-medium"
-                                        :class="{ 'line-through opacity-50': userFinishedIds.indexOf(achievement.id) !== -1 }"
-                                    >
-                                        {{ $t(achievement.名称) }}
-                                    </h3>
-                                </div>
-                                <img
-                                    v-if="achievement.品质"
-                                    :src="`/imgs/webp/Icon_Achievement_${['Copper', 'Silver', 'Gold'][achievement.品质 - 1]}.webp`"
-                                    :alt="$t('achievement.quality')"
-                                    class="size-6 shrink-0"
+                <!-- 成就列表：卡片等高，走虚拟滚动，DOM 只保留可视区内的条目 -->
+                <VirtualList
+                    v-if="filteredAchievements.length > 0"
+                    ref="achievementList"
+                    data-achievement-list
+                    class="min-h-0 flex-1"
+                    :items="filteredAchievements"
+                    :item-height="ACHIEVEMENT_CARD_HEIGHT"
+                    :item-key="achievement => achievement.id"
+                    :columns="'auto'"
+                    :min-column-width="ACHIEVEMENT_MIN_COLUMN_WIDTH"
+                    :gap="LIST_GAP"
+                    :padding="LIST_PADDING"
+                    v-slot="{ item: achievement, index, animate, rowHeight }"
+                >
+                    <div
+                        class="group relative overflow-hidden rounded-xs border bg-base-100/60 p-4 backdrop-blur-sm transition-colors duration-200 hover:border-primary/50"
+                        :class="[isFinished(achievement.id) ? 'border-success/30' : 'border-base-content/12', animate ? 'animate-ef-rise motion-reduce:animate-none' : '']"
+                        :style="{ minHeight: `${rowHeight}px`, animationDelay: `${Math.min(index * 20, 240)}ms` }"
+                    >
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="flex min-w-0 items-center gap-2.5">
+                                <input
+                                    type="checkbox"
+                                    :checked="isFinished(achievement.id)"
+                                    class="checkbox checkbox-sm"
+                                    @change="toggleAchievement(achievement.id)"
                                 />
-                            </div>
-
-                            <div class="mb-3 text-sm leading-relaxed text-base-content/65">
-                                {{ $t(achievement.描述) }}
-                            </div>
-
-                            <div class="flex flex-wrap items-end justify-between gap-2 border-t border-base-content/8 pt-2.5">
-                                <span
-                                    v-if="achievement.分类"
-                                    class="inline-flex shrink-0 items-center rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium leading-none text-primary"
+                                <h3
+                                    class="truncate text-sm font-medium"
+                                    :class="{ 'line-through opacity-50': isFinished(achievement.id) }"
                                 >
-                                    {{ $t(achievement.分类) }}
-                                </span>
-                                <div class="ml-auto flex flex-wrap justify-end gap-x-3 gap-y-1">
-                                    <div
-                                        v-for="(value, key) in achievement.奖励"
-                                        :key="key"
-                                        class="inline-flex flex-col items-end leading-tight"
-                                    >
-                                        <span class="text-[10px] text-base-content/45">{{ $t(key) }}</span>
-                                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{ value }}</span>
-                                    </div>
+                                    {{ $t(achievement.名称) }}
+                                </h3>
+                            </div>
+                            <img
+                                v-if="achievement.品质"
+                                :src="`/imgs/webp/Icon_Achievement_${['Copper', 'Silver', 'Gold'][achievement.品质 - 1]}.webp`"
+                                :alt="$t('achievement.quality')"
+                                class="size-6 shrink-0"
+                            />
+                        </div>
+
+                        <!--
+                            描述固定占用两行高度：卡片高度必须与数据无关，
+                            否则高低参差的卡片会让虚拟列表的后续条目错位。
+                        -->
+                        <div class="mb-3 line-clamp-2 h-[2lh] text-sm leading-relaxed text-base-content/65">
+                            {{ $t(achievement.描述) }}
+                        </div>
+
+                        <!-- 页脚同样不换行：分类徽记与奖励行各自保持单行，挤不下时整体隐藏 -->
+                        <div class="flex flex-nowrap items-end justify-between gap-2 overflow-hidden border-t border-base-content/8 pt-2.5">
+                            <span
+                                v-if="achievement.分类"
+                                class="inline-flex shrink-0 items-center whitespace-nowrap rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium leading-none text-primary"
+                            >
+                                {{ $t(achievement.分类) }}
+                            </span>
+                            <div class="ml-auto flex shrink-0 flex-nowrap items-end justify-end gap-x-3">
+                                <div
+                                    v-for="(value, key) in achievement.奖励"
+                                    :key="key"
+                                    class="inline-flex flex-col items-end leading-tight whitespace-nowrap"
+                                >
+                                    <span class="text-[10px] text-base-content/45">{{ $t(key) }}</span>
+                                    <span class="font-orbitron text-[13px] font-semibold text-primary">{{ value }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </VirtualList>
 
-                    <!-- 空状态 -->
-                    <div
-                        v-if="filteredAchievements.length === 0"
-                        class="flex flex-col items-center justify-center py-24 text-base-content/45"
-                    >
-                        <Icon icon="ri:trophy-line" class="mb-4 h-12 w-12 opacity-40" />
-                        <p class="text-sm">{{ $t('achievement-list.no_match') }}</p>
-                    </div>
-                </ScrollArea>
+                <!-- 空状态 -->
+                <div
+                    v-else
+                    class="flex flex-1 flex-col items-center justify-center text-base-content/45"
+                >
+                    <Icon icon="ri:trophy-line" class="mb-4 h-12 w-12 opacity-40" />
+                    <p class="text-sm">{{ $t('achievement-list.no_match') }}</p>
+                </div>
             </div>
         </div>
 

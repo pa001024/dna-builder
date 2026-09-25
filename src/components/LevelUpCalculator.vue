@@ -157,8 +157,12 @@ const clearResourceFilters = () => {
 // 创建 LevelUpCalculator 实例
 const levelUpCalculator = ref<LevelUpCalculator | null>(null)
 
+// 组件是否已卸载。卸载后旧实例（可能在防抖窗口内被重新赋值）不得再被使用。
+let isUnmounted = false
+
 // 销毁计算器实例
 onBeforeUnmount(() => {
+    isUnmounted = true
     if (debounceTimer) {
         clearTimeout(debounceTimer)
         debounceTimer = null
@@ -333,7 +337,7 @@ const latestRequestId = ref(0)
  * 计算结果
  */
 async function calculateResult() {
-    if (!levelUpCalculator.value || dataPackBootstrapLoading.value) return
+    if (isUnmounted || !levelUpCalculator.value || dataPackBootstrapLoading.value) return
 
     if (!isDataPackHydrated()) {
         result.value = {
@@ -350,6 +354,8 @@ async function calculateResult() {
 
     // 递增请求ID并保存当前请求ID
     const requestId = ++latestRequestId.value
+    // 固定本次请求使用的实例：等待期间组件可能已卸载并把 levelUpCalculator 置空
+    const calculator = levelUpCalculator.value
     calculating.value = true
     try {
         // 获取实际的角色、武器、魔之楔数据
@@ -362,7 +368,7 @@ async function calculateResult() {
         const actualMods = mods.value.map(item => modMap.get(item.id)).filter((mod): mod is (typeof modData)[0] => mod !== undefined)
 
         // 使用合并计算方法，减少异步通信开销，提高性能
-        const mergeResults = await levelUpCalculator.value.mergeCalculate(
+        const mergeResults = await calculator.mergeCalculate(
             actualChars,
             chars.value.map(item => item.config),
             actualWeapons,
@@ -430,7 +436,7 @@ async function calculateResult() {
             }
         }
         // 重新计算时间，基于过滤后的资源
-        mergedResult.timeEstimate = await levelUpCalculator.value.estimateTime(mergedResult.totalCost, getTimeEstimateRequestConfig())
+        mergedResult.timeEstimate = await calculator.estimateTime(mergedResult.totalCost, getTimeEstimateRequestConfig())
 
         // 检查是否为最新请求，如果不是则终止
         if (requestId !== latestRequestId.value) {
@@ -439,6 +445,11 @@ async function calculateResult() {
 
         result.value = mergedResult
     } catch (error) {
+        // 组件已卸载（含 StrictMode 式的挂载即卸载）时不再打扰用户，仅留调试日志
+        if (isUnmounted) {
+            console.debug("计算器已卸载，忽略本次计算的失败", error)
+            return
+        }
         console.error("计算失败:", error)
         // 只有最新请求的错误才显示
         if (requestId === latestRequestId.value) {
@@ -472,8 +483,11 @@ watch(
     { deep: true }
 )
 
-// 初始化计算器实例并计算结果
+// 初始化计算器实例并计算结果。
+// onMounted 可能早于 onBeforeUnmount 的同帧执行（keep-alive 复用时即如此），
+// 已卸载状态下不得再新建实例，否则会留下无人 destroy 的 Worker。
 onMounted(() => {
+    if (isUnmounted) return
     levelUpCalculator.value = new LevelUpCalculator()
     calculateResult()
 })

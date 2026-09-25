@@ -149,6 +149,8 @@ export class LevelUpCalculator {
     private rejectWorkerReady: ((reason: unknown) => void) | null = null
     private pendingPromises: Map<number, { resolve: (value: any) => void; reject: (reason: any) => void }> = new Map()
     private messageId = 0
+    /** 是否已销毁。销毁后本实例不可再发起计算（生命周期必须由创建方显式结束）。 */
+    private disposed = false
 
     /**
      * 构造函数
@@ -161,6 +163,15 @@ export class LevelUpCalculator {
         this.rejectWorkerReady = null
         this.pendingPromises = new Map()
         this.messageId = 0
+        this.disposed = false
+    }
+
+    /**
+     * 实例是否已销毁。
+     * @returns 已调用 destroy() 返回 true
+     */
+    get isDisposed(): boolean {
+        return this.disposed
     }
 
     /**
@@ -214,12 +225,19 @@ export class LevelUpCalculator {
      * 向 Worker 发送消息并获取结果
      */
     private async sendMessage(method: WorkerMethod, data: WorkerMessageData): Promise<LevelUpResult | TimeEstimateResult> {
+        if (this.disposed) {
+            throw new Error("LevelUpCalculator 已销毁，无法发起计算")
+        }
         const worker = this.initWorker()
         const workerReady = this.workerReady
         if (!workerReady) {
             throw new Error("Worker initialization failed")
         }
         await workerReady
+        // Worker 就绪期间实例可能已被销毁（页面切走），此时不能再向已 terminate 的 Worker 投递。
+        if (this.disposed) {
+            throw new Error("LevelUpCalculator 已销毁，无法发起计算")
+        }
         const id = ++this.messageId
 
         return new Promise((resolve, reject) => {
@@ -609,6 +627,7 @@ export class LevelUpCalculator {
      * 销毁实例，清理资源
      */
     destroy(): void {
+        this.disposed = true
         if (this.worker) {
             this.worker.terminate()
             this.worker = null
