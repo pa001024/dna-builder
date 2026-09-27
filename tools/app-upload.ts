@@ -1,5 +1,16 @@
 #!/usr/bin/env bun
 
+/**
+ * 安卓安装包发布：构建（可选）→ 改名 `v<版本>.apk` → 上传安装包与 `apk/latest.json` 到 OSS。
+ *
+ *   pnpm apk build upload -v 1.0.1        # 把 pubspec 版本写成 1.0.1 → 构建 → 发布
+ *   pnpm apk build -v 1.0.1               # 只构建，清单快照留在本地 .tmp/apk-latest.json
+ *   pnpm apk upload                       # 只上传已有产物，版本取 pubspec 现值
+ *   pnpm apk build upload -v 1.0.1 -m 描述 # 附加更新说明（写进清单的 notes）
+ *
+ * 不传 -v 就不动 pubspec；传了则写回并保留改动，发布后自行提交。
+ */
+
 import { createHash } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
@@ -15,6 +26,12 @@ const OSS_MANIFEST_KEY = `${OSS_APK_PREFIX}/latest.json`
 
 /** 超过该体积走分片上传，便于输出进度 */
 const MULTIPART_THRESHOLD = 1024 * 1024
+
+/** 发布版本号格式：三段数字，可带 -预发布 / +构建号 后缀（构建号可选，只喂 Android 的 versionCode） */
+const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/
+
+/** pubspec.yaml 里 version 那一行（行尾注释不吞） */
+const PUBSPEC_VERSION_PATTERN = /^version:\s*([^\s#]+)/m
 
 /** apk/latest.json 的内容：只描述最新一版安装包 */
 export type ApkLatest = {
@@ -40,7 +57,7 @@ const shouldBuild = args.includes("build")
 const shouldUpload = args.includes("upload")
 const isDryRun = args.includes("--dry-run") || args.includes("--dry")
 const versionArgIndex = args.findIndex(arg => arg === "-v" || arg === "--version")
-const versionOverride = versionArgIndex >= 0 ? args[versionArgIndex + 1] : null
+const versionArg = versionArgIndex >= 0 ? (args[versionArgIndex + 1] ?? "").trim() : ""
 const notesArgIndex = args.findIndex(arg => arg === "-m" || arg === "--msg")
 const notes = notesArgIndex >= 0 ? args[notesArgIndex + 1] : undefined
 
@@ -131,12 +148,49 @@ function resolveFlutterProject(apkPath: string): string {
  */
 function readProjectVersion(projectRoot: string): string {
     const pubspec = fs.readFileSync(path.join(projectRoot, "pubspec.yaml"), "utf8")
-    const matched = pubspec.match(/^version:\s*([^\s#]+)/m)
+    const matched = pubspec.match(PUBSPEC_VERSION_PATTERN)
     if (!matched) {
         throw new Error(`${path.join(projectRoot, "pubspec.yaml")} 中未找到 version 字段`)
     }
 
     return matched[1].split("+")[0]
+}
+
+/**
+ * 校验 -v 传入的版本号，返回去掉 +build 后缀的版本名。
+ * 版本名要同时写进 pubspec 与发布清单：客户端只按版本名判断新旧，构建号不参与比较。
+ * @param raw 命令行传入的版本号
+ * @returns 版本名
+ */
+function assertVersionArg(raw: string): string {
+    if (!VERSION_PATTERN.test(raw)) {
+        throw new Error(`版本号格式不对: ${raw || "(空)"}（应形如 1.0.1 或 1.0.1-rc.1，可带 +构建号 后缀）`)
+    }
+
+    return raw.split("+")[0]
+}
+
+/**
+ * 把版本号写回 pubspec.yaml（`flutter build` 从这里取 versionName / versionCode）。
+ * 只在传了 -v 时调用；写坏不自动回滚，发布前看一眼 git diff 即可。
+ * @param projectRoot flutter 工程根目录
+ * @param version 要写入的版本号（含可选的 +构建号）
+ * @returns 是否真的改动了内容
+ */
+function writeProjectVersion(projectRoot: string, version: string): boolean {
+    const pubspecPath = path.join(projectRoot, "pubspec.yaml")
+    const pubspec = fs.readFileSync(pubspecPath, "utf8")
+    if (!PUBSPEC_VERSION_PATTERN.test(pubspec)) {
+        throw new Error(`${pubspecPath} 中未找到 version 字段`)
+    }
+
+    const updated = pubspec.replace(PUBSPEC_VERSION_PATTERN, `version: ${version}`)
+    if (updated === pubspec) {
+        return false
+    }
+
+    fs.writeFileSync(pubspecPath, updated)
+    return true
 }
 
 /**
@@ -218,13 +272,29 @@ async function main(): Promise<void> {
 
     const appTarget = resolveAppTarget()
     const projectRoot = resolveFlutterProject(appTarget)
-    const version = versionOverride || readProjectVersion(projectRoot)
+    const version = versionArg ? assertVersionArg(versionArg) : readProjectVersion(projectRoot)
     const versionedPath = path.join(path.dirname(appTarget), formatApkFileName(version))
 
     if (shouldBuild) {
-        console.log(`🔨 在 ${projectRoot} 执行 flutter build apk ...`)
-        await $`flutter build apk`.cwd(projectRoot)
+        // `-v` 是版本的唯一来源：先写回 pubspec，构建出来的包才带着新 versionName。
+        // 客户端只按版本名判断新旧，pubspec 不改就等于发了个同版本的包。
+        if (versionArg && writeProjectVersion(projectRoot, versionArg)) {
+            console.log(`✏️  pubspec.yaml 版本号 -> ${versionArg}`)
+        }
+
+        // 先自己跑 pub get，别让构建代劳：构建触发的 pub get 会把「带 dev 依赖
+        // （integration_test）」的 GeneratedPluginRegistrant.java 覆盖在 release 版之后，
+        // 紧接着的 javac 找不到测试插件类，整个 release 构建会失败。
+        console.log("📦 flutter pub get ...")
+        await $`flutter pub get`.cwd(projectRoot)
+
+        // 显式写 --release：`flutter build apk` 默认就是 release，但不写明容易被误读成 debug 包
+        console.log(`🔨 在 ${projectRoot} 执行 flutter build apk --release（v${version}）...`)
+        await $`flutter build apk --release`.cwd(projectRoot)
     } else {
+        if (versionArg) {
+            console.log(`⚠️  未构建：确认 ${path.basename(appTarget)} 内部的 versionName 就是 ${version}`)
+        }
         console.log("⏭️  跳过构建，直接使用已有安装包")
     }
 
