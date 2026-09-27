@@ -19,7 +19,7 @@ import { decodeSkinColorizeCode, encodeSkinColorizeCode, formatSkinColorizeRgb, 
 import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
-import { copyText } from "@/util"
+import { copyText, pasteText } from "@/util"
 import { formatRelativeTime } from "@/utils/time"
 
 const ui = useUIStore()
@@ -43,8 +43,10 @@ const hairTargetId = ref<number>()
 const hairColorIds = ref<number[]>(Array.from({ length: skinColorizeMaxHairColorParts }, () => 0))
 /** 当前正在编辑的发型部件序号（1~6），发型颜色选择器作用于该部件。 */
 const activeHairPartId = ref(1)
-/** 发型染色码手动导入输入框内容。 */
-const hairCodeInput = ref("")
+/** 皮肤染剂相似色查询弹窗开关。 */
+const skinFinderShow = ref(false)
+/** 发色染剂相似色查询弹窗开关。 */
+const hairFinderShow = ref(false)
 
 /** 当前预览图：用户上传的图片（blob URL）或分享方案携带的远程图片。 */
 const previewImage = ref("")
@@ -114,7 +116,7 @@ const dyeGroups = computed(() => {
     return groups
 })
 
-/** 当前方案需要的染剂资源统计（按 ResourceID 聚合数量）。 */
+/** 当前方案需要的染剂资源统计（按 ResourceID 聚合数量，附带发型染色时含发色染剂）。 */
 const requiredResources = computed(() => {
     const counts = new Map<number, number>()
     for (const colorId of selectedColorIds.value) {
@@ -122,6 +124,15 @@ const requiredResources = computed(() => {
         const swatch = skinColorizeSwatches.find(item => item.id === colorId)
         if (!swatch) continue
         counts.set(swatch.resourceId, (counts.get(swatch.resourceId) || 0) + 1)
+    }
+    // 发型染色为可选附加项：勾选后其发色染剂同样计入消耗
+    if (includeHair.value) {
+        for (const colorId of hairColorIds.value) {
+            if (!colorId) continue
+            const swatch = skinColorizeSwatches.find(item => item.id === colorId)
+            if (!swatch) continue
+            counts.set(swatch.hairResourceId, (counts.get(swatch.hairResourceId) || 0) + 1)
+        }
     }
     return [...counts.entries()].map(([resourceId, count]) => ({ resourceId, count }))
 })
@@ -613,33 +624,37 @@ function applyHairCode(rawCode: string) {
 /** 从系统剪贴板导入发型染色码（发型染色区专用入口）。 */
 async function importHairCode() {
     try {
-        applyHairCode(await navigator.clipboard.readText())
+        const rawCode = (await pasteText()).trim()
+        if (!rawCode) throw new Error("剪贴板为空")
+        applyHairCode(rawCode)
         ui.showSuccessMessage("发型染色码已导入")
     } catch (error) {
         ui.showErrorMessage(error instanceof Error ? error.message : String(error))
     }
 }
 
-/** 从发型染色区的手动输入框导入发型染色码。 */
-function importHairCodeFromInput() {
-    const value = hairCodeInput.value.trim()
-    if (!value) {
-        ui.showErrorMessage("请先粘贴发型染色码")
-        return
+/** 解析并应用一段角色皮肤染色码到页面（校验格式、皮肤存在、数量与色板有效），失败时抛出错误。 */
+function applySkinCode(rawCode: string) {
+    const imported = decodeSkinColorizeCode(rawCode)
+    if (imported.type !== "Char") throw new Error("当前内容不是角色皮肤染色码")
+    const skin = skinData.find(item => item.id === imported.skinId)
+    if (!skin) throw new Error("数据中不存在该皮肤")
+    if (imported.colorIds.length > skinColorizeMaxColorParts) throw new Error("染色部件数量超出游戏上限")
+    const validIds = new Set(skinColorizeSwatches.map(swatch => swatch.id))
+    if (imported.colorIds.some(colorId => colorId !== 0 && !validIds.has(colorId))) {
+        throw new Error("染色码包含当前版本不存在的色板")
     }
-    try {
-        applyHairCode(value)
-        hairCodeInput.value = ""
-        ui.showSuccessMessage("发型染色码已导入")
-    } catch (error) {
-        ui.showErrorMessage(error instanceof Error ? error.message : String(error))
-    }
+    selectedCharacterId.value = skin.charId
+    selectedSkinId.value = imported.skinId
+    selectedColorIds.value = Array.from({ length: skinColorizeMaxColorParts }, (_, index) => imported.colorIds[index] || 0)
+    activePartId.value = 1
 }
 
 /** 从系统剪贴板读取社区码：发型码应用到发型染色，皮肤码应用到皮肤。 */
 async function importCode() {
     try {
-        const rawCode = await navigator.clipboard.readText()
+        const rawCode = (await pasteText()).trim()
+        if (!rawCode) throw new Error("剪贴板为空")
         const imported = decodeSkinColorizeCode(rawCode)
         if (imported.type === "Hair") {
             applyHairCode(rawCode)
@@ -647,15 +662,7 @@ async function importCode() {
             return
         }
         if (imported.type !== "Char") throw new Error("当前页面只支持角色皮肤染色码")
-        const skin = skinData.find(item => item.id === imported.skinId)
-        if (!skin) throw new Error("数据中不存在该皮肤")
-        if (imported.colorIds.length > skinColorizeMaxColorParts) throw new Error("染色部件数量超出游戏上限")
-        const validIds = new Set(skinColorizeSwatches.map(swatch => swatch.id))
-        if (imported.colorIds.some(colorId => colorId !== 0 && !validIds.has(colorId))) throw new Error("染色码包含当前版本不存在的色板")
-        selectedCharacterId.value = skin.charId
-        selectedSkinId.value = imported.skinId
-        selectedColorIds.value = Array.from({ length: skinColorizeMaxColorParts }, (_, index) => imported.colorIds[index] || 0)
-        activePartId.value = 1
+        applySkinCode(rawCode)
         ui.showSuccessMessage("染色码已导入")
     } catch (error) {
         ui.showErrorMessage(error instanceof Error ? error.message : String(error))
@@ -702,13 +709,28 @@ onBeforeUnmount(() => {
 <template>
     <div class="flex h-full min-h-0 w-full flex-col">
         <div class="min-h-0 flex-1 overflow-auto p-4">
-            <div v-if="!characters.length" class="flex h-full items-center justify-center text-sm opacity-60">{{ $t('skin-colorize.no_data') }}</div>
-            <div v-else class="mx-auto grid max-w-6xl items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
-                <!-- 左列：平铺发布/展示区 -->
-                <div class="min-w-0 overflow-hidden rounded-xl bg-base-100 shadow-sm">
-                    <!-- 标题 / 描述 / 作者时间 -->
-                    <div class="p-4 sm:p-5">
-                        <div v-if="planLoading" class="py-6 text-center text-sm opacity-60">{{ $t('common.loading') }}</div>
+            <div v-if="!characters.length" class="flex h-full items-center justify-center text-sm text-base-content/50">
+                {{ $t('skin-colorize.no_data') }}
+            </div>
+            <div v-else class="mx-auto grid max-w-7xl items-start gap-4 lg:grid-cols-[minmax(0,1fr)_400px]">
+                <!-- 左列：方案信息 / 预览图 / 染色码 / 颜色预览 / 消耗 / 评论 -->
+                <div class="stagger-rise min-w-0 space-y-4">
+                    <!-- 方案信息：标题 / 描述 / 作者与统计 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                        <SectionHeader no-animate compact kicker="PLAN" title="方案信息">
+                            <template #trailing>
+                                <button
+                                    v-if="loadedPlan && (loadedPlan.userId === user.id || user.isAdmin)"
+                                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-error/40 px-2 text-[11px] text-error transition-colors duration-150 hover:border-error hover:bg-error/10 active:scale-[0.97]"
+                                    type="button"
+                                    @click="removePlan"
+                                >
+                                    删除
+                                </button>
+                            </template>
+                        </SectionHeader>
+
+                        <div v-if="planLoading" class="py-6 text-center text-sm text-base-content/50">{{ $t('common.loading') }}</div>
                         <template v-else>
                             <!-- 新建模式：直接编辑标题与描述 -->
                             <template v-if="isCreateMode">
@@ -716,26 +738,32 @@ onBeforeUnmount(() => {
                                     id="plan-title"
                                     v-model="editTitle"
                                     type="text"
-                                    class="w-full bg-transparent text-xl font-bold outline-none placeholder:text-base-content/40"
+                                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-lg font-semibold text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     maxlength="100"
                                     :placeholder="defaultPlanTitle || '填写标题'"
                                 />
                                 <textarea
                                     id="plan-desc"
                                     v-model="editDesc"
-                                    class="mt-2 w-full resize-none bg-transparent text-sm leading-relaxed outline-none placeholder:text-base-content/40"
+                                    class="mt-2 w-full resize-none rounded-none border-b border-base-content/20 bg-transparent px-0.5 py-1 text-[13px] leading-relaxed text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     rows="2"
                                     maxlength="500"
                                     :placeholder="$t('skin-colorize.desc_placeholder')"
                                 />
-                                <div v-if="selectedSkin" class="mt-2 text-xs opacity-60">{{ selectedSkin.name }} · 新方案</div>
+                                <div v-if="selectedSkin" class="mt-2 text-[11px] tracking-wide text-base-content/50">
+                                    {{ selectedSkin.name }} · 新方案
+                                </div>
                             </template>
                             <!-- 编辑模式 -->
                             <template v-else-if="loadedPlan">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span
-                                        class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium"
-                                        :class="loadedPlan.isOriginal ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'"
+                                        class="inline-flex shrink-0 items-center rounded-xs border px-1.5 py-0.5 text-[10px] leading-none"
+                                        :class="
+                                            loadedPlan.isOriginal
+                                                ? 'border-success/40 bg-success/10 text-success'
+                                                : 'border-warning/40 bg-warning/10 text-warning'
+                                        "
                                     >
                                         {{ loadedPlan.isOriginal ? "原创" : "转载" }}
                                     </span>
@@ -743,83 +771,94 @@ onBeforeUnmount(() => {
                                         v-if="canEdit"
                                         v-model="editTitle"
                                         type="text"
-                                        class="min-w-0 flex-1 bg-transparent text-lg font-bold outline-none placeholder:text-base-content/40"
+                                        class="min-w-0 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-lg font-semibold text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                         maxlength="100"
                                         placeholder="请输入标题"
                                     />
-                                    <h2 v-else class="min-w-0 flex-1 text-lg font-bold leading-snug">{{ loadedPlan.title }}</h2>
-                                    <button
-                                        v-if="loadedPlan.userId === user.id || user.isAdmin"
-                                        class="btn btn-ghost btn-sm shrink-0 text-error"
-                                        type="button"
-                                        @click="removePlan"
-                                    >
-                                        删除
-                                    </button>
+                                    <h2 v-else class="min-w-0 flex-1 text-lg font-semibold leading-tight">{{ loadedPlan.title }}</h2>
                                 </div>
                                 <textarea
                                     v-if="canEdit"
                                     v-model="editDesc"
-                                    class="mt-2 w-full resize-none bg-transparent text-sm leading-relaxed outline-none placeholder:text-base-content/40"
+                                    class="mt-2 w-full resize-none rounded-none border-b border-base-content/20 bg-transparent px-0.5 py-1 text-[13px] leading-relaxed text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                     rows="2"
                                     maxlength="2000"
                                     placeholder="可选：染色思路、搭配说明等"
                                 />
-                                <div v-else-if="loadedPlan.desc" class="mt-2 whitespace-pre-wrap text-sm leading-relaxed opacity-80">
+                                <div v-else-if="loadedPlan.desc" class="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-base-content/70">
                                     {{ loadedPlan.desc }}
                                 </div>
-                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs opacity-60">
+                                <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-base-content/50">
                                     <span class="flex items-center gap-1.5">
                                         <QQAvatar class="w-5" :qq="loadedPlan.user?.qq" />
-                                        <span class="font-medium">{{ loadedPlan.user?.name || "匿名" }}</span>
+                                        <span class="font-medium text-base-content/70">{{ loadedPlan.user?.name || "匿名" }}</span>
                                     </span>
-                                    <span class="flex gap-1">{{ formatRelativeTime(loadedPlan.createdAt, i18next.language) }}</span>
-                                    <span class="flex gap-1"
-                                        ><Icon icon="ri:eye-line" class="align-[-2px]" /> {{ loadedPlan.views }} 浏览</span
-                                    >
+                                    <span class="tabular-nums">{{ formatRelativeTime(loadedPlan.createdAt, i18next.language) }}</span>
+                                    <span class="flex items-center gap-1">
+                                        <Icon icon="ri:eye-line" class="size-3.5 shrink-0" />{{ loadedPlan.views }} 浏览
+                                    </span>
                                     <button
-                                        class="flex items-center gap-1 transition-colors hover:opacity-80"
+                                        class="flex cursor-pointer items-center gap-1 transition-colors duration-150 hover:text-primary"
                                         :class="loadedPlan.isLiked ? 'text-error' : ''"
                                         type="button"
                                         @click="toggleLike"
                                     >
-                                        <Icon :icon="loadedPlan.isLiked ? 'ri:heart-fill' : 'ri:heart-line'" class="align-[-2px]" />
+                                        <Icon :icon="loadedPlan.isLiked ? 'ri:heart-fill' : 'ri:heart-line'" class="size-3.5 shrink-0" />
                                         {{ loadedPlan.likes }} 点赞
                                     </button>
-                                    <span class="flex gap-1"
-                                        ><Icon icon="ri:message-2-line" class="align-[-2px]" /> {{ loadedPlan.commentsCount }} 评论</span
-                                    >
+                                    <span class="flex items-center gap-1">
+                                        <Icon icon="ri:message-2-line" class="size-3.5 shrink-0" />{{ loadedPlan.commentsCount }} 评论
+                                    </span>
                                 </div>
-                                <div v-if="!loadedPlan.isOriginal && loadedPlan.source" class="mt-1.5 text-xs opacity-60">
+                                <div v-if="!loadedPlan.isOriginal && loadedPlan.source" class="mt-1.5 text-[11px] text-base-content/50">
                                     来源：{{ loadedPlan.source }}
                                 </div>
                             </template>
-                            <div v-else class="py-6 text-center text-sm opacity-60">染色方案不存在</div>
+                            <div v-else class="py-6 text-center text-sm text-base-content/50">染色方案不存在</div>
                         </template>
-                    </div>
+                    </section>
 
-                    <!-- 预览图 -->
-                    <div class="border-t border-base-200 p-4 sm:p-5">
-                        <div class="mb-2 flex items-center justify-between">
-                            <span class="text-sm font-medium">预览图</span>
-                            <div v-if="canEdit" class="flex items-center gap-1">
-                                <button class="btn btn-ghost btn-xs" type="button" @click="fileInputRef?.click()">选择图片</button>
-                                <button v-if="previewImage" class="btn btn-ghost btn-xs" type="button" @click="clearPreviewImage">
-                                    移除
-                                </button>
-                            </div>
-                        </div>
+                    <!-- 预览图：选择 / 拖拽 / 粘贴截图 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                        <SectionHeader no-animate compact kicker="PREVIEW" title="预览图">
+                            <template #trailing>
+                                <div v-if="canEdit" class="flex shrink-0 items-center gap-1.5">
+                                    <button
+                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        type="button"
+                                        @click="fileInputRef?.click()"
+                                    >
+                                        选择图片
+                                    </button>
+                                    <button
+                                        v-if="previewImage"
+                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error active:scale-[0.97]"
+                                        type="button"
+                                        @click="clearPreviewImage"
+                                    >
+                                        移除
+                                    </button>
+                                </div>
+                            </template>
+                        </SectionHeader>
+
                         <div
-                            class="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border border-dashed border-base-300 bg-base-200/40"
+                            class="relative flex aspect-video items-center justify-center overflow-hidden rounded-xs border border-dashed border-base-content/20 bg-base-content/3"
                             @dragover.prevent="dragging = true"
                             @dragleave.prevent="dragging = false"
                             @drop.prevent="handleDrop"
                         >
                             <img v-if="previewImage" :src="previewImage" alt="预览图" class="h-full w-full object-contain" />
-                            <div v-else class="flex flex-col items-center gap-2 px-4 text-center text-sm opacity-60">
+                            <div v-else class="flex flex-col items-center gap-2 px-4 text-center text-sm text-base-content/50">
                                 <span>以游戏内截图作为预览图</span>
                                 <span class="text-xs">支持拖拽、粘贴（截图）或点击选择</span>
-                                <button class="btn btn-ghost btn-sm mt-1" type="button" @click="fileInputRef?.click()">选择图片</button>
+                                <button
+                                    class="mt-1 inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                    type="button"
+                                    @click="fileInputRef?.click()"
+                                >
+                                    选择图片
+                                </button>
                             </div>
                             <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="handleFileInput" />
                             <div
@@ -829,228 +868,325 @@ onBeforeUnmount(() => {
                                 松开以使用该图片
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <!-- 颜色代码 -->
-                    <div class="border-t border-base-200 p-4 sm:p-5">
-                        <div class="mb-2 flex items-center justify-between">
-                            <span class="text-sm font-medium">染色码</span>
-                            <div class="flex items-center gap-1">
-                                <button class="btn btn-ghost btn-xs" type="button" :disabled="!selectedCode" @click="copyCode">复制</button>
-                                <button class="btn btn-ghost btn-xs" type="button" @click="importCode">导入</button>
-                            </div>
-                        </div>
-                        <code class="block overflow-x-auto rounded-lg bg-base-200 px-3 py-2 text-center font-mono text-lg tracking-widest">
+                    <!-- 染色码：皮肤码 / 发型码（可选） -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                        <SectionHeader no-animate compact kicker="CODE" title="染色码">
+                            <template #trailing>
+                                <div class="flex shrink-0 items-center gap-1.5">
+                                    <button
+                                        class="inline-flex h-6 shrink-0 items-center rounded-xs border px-2 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                        :class="
+                                            selectedCode
+                                                ? 'cursor-pointer border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                                : 'cursor-not-allowed border-base-content/10 text-base-content/30'
+                                        "
+                                        type="button"
+                                        :disabled="!selectedCode"
+                                        @click="copyCode"
+                                    >
+                                        复制
+                                    </button>
+                                    <button
+                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        type="button"
+                                        title="读取剪贴板内容"
+                                        @click="importCode"
+                                    >
+                                        导入
+                                    </button>
+                                </div>
+                            </template>
+                        </SectionHeader>
+
+                        <code
+                            class="block overflow-x-auto rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2 text-center text-base-content"
+                            :class="selectedCode ? 'font-mono text-lg tracking-widest' : 'text-sm text-base-content/45'"
+                        >
                             {{ selectedCode || "请先选择角色与皮肤" }}
                         </code>
+
                         <template v-if="hairCode">
-                            <div class="mt-2 flex items-center justify-between">
-                                <span class="text-xs opacity-60">发型染色码</span>
-                                <div class="flex items-center gap-1">
-                                    <button class="btn btn-ghost btn-xs" type="button" @click="importHairCode">导入</button>
-                                    <button class="btn btn-ghost btn-xs" type="button" @click="copyHairCode">复制</button>
+                            <div class="mt-3 flex items-center justify-between gap-2 border-t border-base-content/10 pt-3">
+                                <span class="text-xs text-base-content/55">发型染色码</span>
+                                <div class="flex shrink-0 items-center gap-1.5">
+                                    <button
+                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        type="button"
+                                        @click="copyHairCode"
+                                    >
+                                        复制
+                                    </button>
+                                    <button
+                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        type="button"
+                                        title="读取剪贴板内容"
+                                        @click="importHairCode"
+                                    >
+                                        导入
+                                    </button>
                                 </div>
                             </div>
-                            <code class="block overflow-x-auto rounded-lg bg-base-200 px-3 py-2 text-center font-mono text-lg tracking-widest">
+                            <code
+                                class="mt-1.5 block overflow-x-auto rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2 text-center font-mono text-lg tracking-widest text-base-content"
+                            >
                                 {{ hairCode }}
                             </code>
                         </template>
-                    </div>
+                    </section>
 
-                    <!-- 颜色预览 & 所需资源 -->
-                    <div class="border-t border-base-200 p-4 sm:p-5">
-                        <div class="mb-3 text-sm font-medium">颜色预览</div>
+                    <!-- 颜色预览：每个部件当前色板 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                        <SectionHeader no-animate compact kicker="COLORS" title="颜色预览" />
                         <div class="flex flex-wrap gap-1.5">
-                            <div
+                            <button
                                 v-for="part in skinColorizeParts"
                                 :key="part.id"
-                                class="flex items-center gap-1.5 rounded-lg border border-base-300 px-2 py-1 text-xs"
-                                :class="activePartId === part.id ? 'border-primary ring-1 ring-primary' : ''"
+                                class="flex cursor-pointer items-center gap-1.5 rounded-xs border px-2 py-1 text-xs transition-colors duration-150"
+                                :class="
+                                    activePartId === part.id
+                                        ? 'border-primary/70 bg-primary/10 text-primary'
+                                        : 'border-base-content/15 bg-base-content/3 text-base-content/70 hover:border-primary/40'
+                                "
+                                type="button"
                                 :title="currentSwatch(part.id)?.name || '默认'"
                                 @click="activePartId = part.id"
                             >
                                 <span
-                                    class="h-3.5 w-3.5 rounded-full border border-base-content/20"
+                                    class="size-3.5 shrink-0 rounded-xs border border-base-content/20"
                                     :style="{
                                         backgroundColor: currentSwatch(part.id)
                                             ? formatSkinColorizeRgb(currentSwatch(part.id)!.rgb)
                                             : 'transparent',
                                     }"
                                 />
-                                <span class="opacity-70">{{ part.id }}</span>
-                                <span class="font-mono opacity-60">{{ currentColorId(part.id) || "默认" }}</span>
-                            </div>
+                                <span class="tabular-nums text-base-content/55">{{ part.id }}</span>
+                                <span class="tabular-nums text-base-content/45">{{ currentColorId(part.id) || "默认" }}</span>
+                            </button>
                         </div>
 
                         <!-- 发型颜色预览（可选） -->
-                        <div v-if="includeHair" class="mt-4 border-t border-base-200 pt-4">
-                            <div class="mb-3 text-sm font-medium">发型颜色预览</div>
-                            <div class="flex flex-wrap gap-1.5">
-                                <div
-                                    v-for="partId in hairParts"
-                                    :key="partId"
-                                    class="flex items-center gap-1.5 rounded-lg border border-base-300 px-2 py-1 text-xs"
-                                    :class="activeHairPartId === partId ? 'border-primary ring-1 ring-primary' : ''"
-                                    :title="currentHairSwatch(partId)?.name || '默认'"
-                                    @click="activeHairPartId = partId"
+                        <template v-if="includeHair">
+                            <div class="mt-3 border-t border-base-content/10 pt-3">
+                                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">发型颜色预览</div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button
+                                        v-for="partId in hairParts"
+                                        :key="partId"
+                                        class="flex cursor-pointer items-center gap-1.5 rounded-xs border px-2 py-1 text-xs transition-colors duration-150"
+                                        :class="
+                                            activeHairPartId === partId
+                                                ? 'border-primary/70 bg-primary/10 text-primary'
+                                                : 'border-base-content/15 bg-base-content/3 text-base-content/70 hover:border-primary/40'
+                                        "
+                                        type="button"
+                                        :title="currentHairSwatch(partId)?.name || '默认'"
+                                        @click="activeHairPartId = partId"
+                                    >
+                                        <span
+                                            class="size-3.5 shrink-0 rounded-xs border border-base-content/20"
+                                            :style="{
+                                                backgroundColor: currentHairSwatch(partId)
+                                                    ? formatSkinColorizeRgb(currentHairSwatch(partId)!.rgb)
+                                                    : 'transparent',
+                                            }"
+                                        />
+                                        <span class="tabular-nums text-base-content/55">{{ partId }}</span>
+                                        <span class="tabular-nums text-base-content/45">{{ currentHairColorId(partId) || "默认" }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </section>
+
+                    <!-- 所需资源：按染剂聚合的消耗 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                        <SectionHeader no-animate compact kicker="COST" title="所需资源" :count="requiredResources.length || undefined" />
+                        <div v-if="requiredResources.length" class="flex flex-col gap-1.5">
+                            <ResourceCostItem
+                                v-for="resource in requiredResources"
+                                :key="resource.resourceId"
+                                :name="'染剂'"
+                                :value="[resource.count, resource.resourceId, 'Resource']"
+                            />
+                        </div>
+                        <div v-else class="text-xs text-base-content/45">默认配色，无需染剂</div>
+                    </section>
+
+                    <!-- 评论区 -->
+                    <section
+                        v-if="!isCreateMode && loadedPlan"
+                        class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                    >
+                        <CommentSection :target-id="`dp_${loadedPlan.id}`" @count="onCommentCount" />
+                    </section>
+                </div>
+
+                <!-- 右列：颜色选择器 / 发型染色 / 保存 -->
+                <aside class="stagger-rise min-w-0 space-y-4 lg:sticky lg:top-4">
+                    <!-- 颜色选择器 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                        <SectionHeader no-animate compact kicker="PALETTE" title="颜色选择器">
+                            <template #trailing>
+                                <span v-if="!canEdit" class="shrink-0 text-[11px] text-base-content/45">仅作者可保存修改</span>
+                            </template>
+                        </SectionHeader>
+
+                        <!-- 角色 / 皮肤选择（新建或可编辑时展示） -->
+                        <template v-if="canEdit">
+                            <div class="mb-2 flex max-h-40 flex-wrap gap-1 overflow-y-auto rounded-xs border border-base-content/10 bg-base-content/3 p-2">
+                                <button
+                                    v-for="character in characters"
+                                    :key="character.id"
+                                    class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                    :class="
+                                        character.id === selectedCharacterId
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    type="button"
+                                    @click="selectCharacter(character.id)"
                                 >
-                                    <span
-                                        class="h-3.5 w-3.5 rounded-full border border-base-content/20"
-                                        :style="{
-                                            backgroundColor: currentHairSwatch(partId)
-                                                ? formatSkinColorizeRgb(currentHairSwatch(partId)!.rgb)
-                                                : 'transparent',
-                                        }"
+                                    {{ character.名称 }}
+                                </button>
+                            </div>
+                            <Select
+                                class="mb-3 w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                :model-value="selectedSkinId"
+                                @update:model-value="selectSkin"
+                            >
+                                <SelectItem v-for="skin in characterSkins" :key="skin.id" :value="skin.id">{{ skin.name }}</SelectItem>
+                            </Select>
+                        </template>
+
+                        <!-- 部位选择 -->
+                        <div class="mb-2 flex items-center justify-between gap-2">
+                            <span class="text-[11px] tracking-wide text-base-content/55">当前部位</span>
+                            <div class="flex shrink-0 items-center gap-1.5">
+                                <button
+                                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                    type="button"
+                                    @click="skinFinderShow = true"
+                                >
+                                    相似色
+                                </button>
+                                <button
+                                    class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                    type="button"
+                                    @click="resetActivePartColor"
+                                >
+                                    恢复默认色
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3 flex flex-wrap gap-1.5">
+                            <button
+                                v-for="part in skinColorizeParts"
+                                :key="part.id"
+                                class="inline-flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    activePartId === part.id
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                type="button"
+                                @click="activePartId = part.id"
+                            >
+                                <span
+                                    class="size-3 shrink-0 rounded-xs border border-base-content/20"
+                                    :style="{
+                                        backgroundColor: currentSwatch(part.id)
+                                            ? formatSkinColorizeRgb(currentSwatch(part.id)!.rgb)
+                                            : 'transparent',
+                                    }"
+                                />
+                                <span class="tabular-nums">{{ part.id }}</span>
+                            </button>
+                        </div>
+
+                        <!-- 染剂行：图标 + 分割线 + 所属颜色 -->
+                        <div class="space-y-1.5">
+                            <div
+                                v-for="group in dyeGroups"
+                                :key="group.resourceId"
+                                class="flex items-center gap-2.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5 transition-colors duration-150 hover:border-primary/30"
+                            >
+                                <ResourceCostItem :name="group.name" :value="[1, group.resourceId, 'Resource']" mini class="w-9 shrink-0" />
+                                <span class="h-6 w-px shrink-0 bg-base-content/10" aria-hidden="true" />
+                                <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+                                    <button
+                                        v-for="swatch in group.swatches"
+                                        :key="swatch.id"
+                                        class="size-6 shrink-0 rounded-xs border transition-transform duration-150"
+                                        :class="[
+                                            currentColorId(activePartId) === swatch.id
+                                                ? 'border-primary ring-1 ring-primary'
+                                                : 'border-base-content/20',
+                                            isSwatchValidForActivePart(swatch)
+                                                ? 'cursor-pointer hover:scale-110'
+                                                : 'cursor-not-allowed opacity-25',
+                                        ]"
+                                        :style="{ backgroundColor: formatSkinColorizeRgb(swatch.rgb) }"
+                                        type="button"
+                                        :title="`${swatch.name} #${swatch.id}`"
+                                        @click="applyColorToActivePart(swatch)"
                                     />
-                                    <span class="opacity-70">{{ partId }}</span>
-                                    <span class="font-mono opacity-60">{{ currentHairColorId(partId) || "默认" }}</span>
                                 </div>
                             </div>
                         </div>
+                    </section>
 
-                        <div class="mt-4 border-t border-base-200 pt-4">
-                            <div class="mb-2 text-sm font-medium">所需资源</div>
-                            <div v-if="requiredResources.length" class="flex flex-col gap-2">
-                                <ResourceCostItem
-                                    v-for="resource in requiredResources"
-                                    :key="resource.resourceId"
-                                    :name="'染剂'"
-                                    :value="[resource.count, resource.resourceId, 'Resource']"
-                                />
-                            </div>
-                            <div v-else class="text-xs opacity-60">默认配色，无需染剂</div>
-                        </div>
-                    </div>
-
-                    <!-- 评论区 -->
-                    <div v-if="!isCreateMode && loadedPlan" class="border-t border-base-200 p-4 sm:p-5">
-                        <CommentSection :target-id="`dp_${loadedPlan.id}`" @count="onCommentCount" />
-                    </div>
-                </div>
-
-                <!-- 右列：颜色选择器详情 -->
-                <aside class="min-w-0 rounded-xl bg-base-100 p-4 shadow-sm sm:p-5 lg:sticky lg:top-4">
-                    <div class="mb-3 flex items-center justify-between">
-                        <span class="text-sm font-medium">颜色选择器</span>
-                        <span v-if="!canEdit" class="text-[10px] opacity-50">仅作者可保存修改</span>
-                    </div>
-
-                    <!-- 角色 / 皮肤选择（新建或可编辑时展示） -->
-                    <template v-if="canEdit">
-                        <div class="mb-2 flex max-h-40 flex-wrap gap-1 overflow-y-auto">
-                            <button
-                                v-for="character in characters"
-                                :key="character.id"
-                                class="rounded-full border border-base-300 px-2.5 py-1 text-xs transition-colors"
-                                :class="
-                                    character.id === selectedCharacterId
-                                        ? 'border-primary bg-primary text-primary-content'
-                                        : 'hover:bg-base-200'
-                                "
-                                type="button"
-                                @click="selectCharacter(character.id)"
-                            >
-                                {{ character.名称 }}
-                            </button>
-                        </div>
-                        <Select
-                            class="mb-3 w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                            :model-value="selectedSkinId"
-                            @update:model-value="selectSkin"
-                        >
-                            <SelectItem v-for="skin in characterSkins" :key="skin.id" :value="skin.id">{{ skin.name }}</SelectItem>
-                        </Select>
-                    </template>
-
-                    <!-- 部位选择 -->
-                    <div class="mb-2 flex items-center justify-between">
-                        <span class="text-xs opacity-60">当前部位</span>
-                        <button class="btn btn-ghost btn-xs" type="button" @click="resetActivePartColor">恢复默认色</button>
-                    </div>
-                    <div class="mb-3 flex flex-wrap gap-1.5">
-                        <button
-                            v-for="part in skinColorizeParts"
-                            :key="part.id"
-                            class="flex items-center gap-1 rounded-full border px-2 py-1 text-xs"
-                            :class="
-                                activePartId === part.id ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 hover:bg-base-200'
-                            "
-                            type="button"
-                            @click="activePartId = part.id"
-                        >
-                            <span
-                                class="h-3 w-3 rounded-full border border-base-content/20"
-                                :style="{
-                                    backgroundColor: currentSwatch(part.id)
-                                        ? formatSkinColorizeRgb(currentSwatch(part.id)!.rgb)
-                                        : 'transparent',
-                                }"
-                            />
-                            {{ part.id }}
-                        </button>
-                    </div>
-
-                    <!-- 染剂行：图标 + 分割线 + 所属颜色 -->
-                    <div class="space-y-1.5">
-                        <div
-                            v-for="group in dyeGroups"
-                            :key="group.resourceId"
-                            class="flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors hover:bg-base-200/60"
-                        >
-                            <ResourceCostItem :name="group.name" :value="[1, group.resourceId, 'Resource']" mini class="w-9 shrink-0" />
-                            <div class="divider divider-horizontal my-0 mx-0 before:bg-base-300 after:bg-base-300" />
-                            <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-                                <button
-                                    v-for="swatch in group.swatches"
-                                    :key="swatch.id"
-                                    class="h-6 w-6 rounded-full border-2 border-base-content/20 transition-transform hover:scale-110"
-                                    :class="[
-                                        currentColorId(activePartId) === swatch.id ? 'ring-2 ring-primary' : '',
-                                        isSwatchValidForActivePart(swatch) ? '' : 'cursor-not-allowed opacity-25',
-                                    ]"
-                                    :style="{ backgroundColor: formatSkinColorizeRgb(swatch.rgb) }"
-                                    type="button"
-                                    :title="`${swatch.name} #${swatch.id}`"
-                                    @click="applyColorToActivePart(swatch)"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 发型染色（可选）：勾选后显示发型染色信息，仅保存代码无需上传图片 -->
-                    <div class="mt-4 border-t border-base-200 pt-4">
+                    <!-- 发型染色（可选）：勾选后显示发型色位与发色染剂，仅保存代码无需上传图片 -->
+                    <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                        <SectionHeader no-animate compact kicker="HAIR" title="发型染色" />
                         <label class="flex cursor-pointer items-center gap-2">
                             <input v-model="includeHair" type="checkbox" class="checkbox checkbox-sm" />
-                            <span class="text-sm font-medium">附带发型染色</span>
+                            <span class="text-[11px] tracking-wide text-base-content/55">附带发型染色</span>
                         </label>
 
                         <template v-if="includeHair">
-                            <div class="mt-3 mb-2 flex items-center justify-between">
-                                <span class="text-xs opacity-60">发型色位</span>
-                                <button class="btn btn-ghost btn-xs" type="button" @click="resetActiveHairPartColor">
-                                    恢复默认色
-                                </button>
+                            <div class="mt-3 mb-2 flex items-center justify-between gap-2">
+                                <span class="text-[11px] tracking-wide text-base-content/55">发型色位</span>
+                                <div class="flex shrink-0 items-center gap-1.5">
+                                    <button
+                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        type="button"
+                                        @click="hairFinderShow = true"
+                                    >
+                                        相似色
+                                    </button>
+                                    <button
+                                        class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                        type="button"
+                                        @click="resetActiveHairPartColor"
+                                    >
+                                        恢复默认色
+                                    </button>
+                                </div>
                             </div>
                             <div class="mb-3 flex flex-wrap gap-1.5">
                                 <button
                                     v-for="partId in hairParts"
                                     :key="partId"
-                                    class="flex items-center gap-1 rounded-full border px-2 py-1 text-xs"
+                                    class="inline-flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
                                     :class="
-                                        activeHairPartId === partId ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 hover:bg-base-200'
+                                        activeHairPartId === partId
+                                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                     "
                                     type="button"
                                     @click="activeHairPartId = partId"
                                 >
                                     <span
-                                        class="h-3 w-3 rounded-full border border-base-content/20"
+                                        class="size-3 shrink-0 rounded-xs border border-base-content/20"
                                         :style="{
                                             backgroundColor: currentHairSwatch(partId)
                                                 ? formatSkinColorizeRgb(currentHairSwatch(partId)!.rgb)
                                                 : 'transparent',
                                         }"
                                     />
-                                    {{ partId }}
+                                    <span class="tabular-nums">{{ partId }}</span>
                                 </button>
                             </div>
 
@@ -1059,21 +1195,20 @@ onBeforeUnmount(() => {
                                 <div
                                     v-for="group in hairDyeGroups"
                                     :key="group.resourceId"
-                                    class="flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors hover:bg-base-200/60"
+                                    class="flex items-center gap-2.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5 transition-colors duration-150 hover:border-primary/30"
                                 >
-                                    <ResourceCostItem
-                                        :name="group.name"
-                                        :value="[1, group.resourceId, 'Resource']"
-                                        mini
-                                        class="w-9 shrink-0"
-                                    />
-                                    <div class="divider divider-horizontal my-0 mx-0 before:bg-base-300 after:bg-base-300" />
+                                    <ResourceCostItem :name="group.name" :value="[1, group.resourceId, 'Resource']" mini class="w-9 shrink-0" />
+                                    <span class="h-6 w-px shrink-0 bg-base-content/10" aria-hidden="true" />
                                     <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
                                         <button
                                             v-for="swatch in group.swatches"
                                             :key="swatch.id"
-                                            class="h-6 w-6 rounded-full border-2 border-base-content/20 transition-transform hover:scale-110"
-                                            :class="[currentHairColorId(activeHairPartId) === swatch.id ? 'ring-2 ring-primary' : '']"
+                                            class="size-6 shrink-0 cursor-pointer rounded-xs border transition-transform duration-150 hover:scale-110"
+                                            :class="
+                                                currentHairColorId(activeHairPartId) === swatch.id
+                                                    ? 'border-primary ring-1 ring-primary'
+                                                    : 'border-base-content/20'
+                                            "
                                             :style="{ backgroundColor: formatSkinColorizeRgb(swatch.rgb) }"
                                             type="button"
                                             :title="`${swatch.name} #${swatch.id}`"
@@ -1083,65 +1218,77 @@ onBeforeUnmount(() => {
                                 </div>
                             </div>
 
-                            <div class="mt-3 flex gap-1.5">
-                                <input
-                                    v-model="hairCodeInput"
-                                    type="text"
-                                    class="min-w-0 flex-1 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
-                                    placeholder="粘贴发型染色码（H 开头），回车导入"
-                                    @keydown.enter="importHairCodeFromInput"
-                                />
-                                <button class="btn btn-ghost btn-xs shrink-0" type="button" @click="importHairCodeFromInput">导入</button>
-                                <button class="btn btn-ghost btn-xs shrink-0" type="button" title="读取剪贴板内容" @click="importHairCode">
-                                    剪贴板
-                                </button>
-                            </div>
-
-                            <div class="mt-3 rounded-lg bg-base-200 px-3 py-2 text-xs opacity-70">
+                            <p class="mt-3 text-[11px] leading-relaxed text-base-content/45">
                                 仅保存发型染色码，无需上传图片；染色码以角色默认发型为目标生成。
-                            </div>
+                            </p>
                         </template>
-                    </div>
+                    </section>
 
                     <!-- 保存 / 上传 -->
-                    <div v-if="canEdit" class="mt-4 flex flex-col gap-2">
-                        <button
-                            v-if="isCreateMode"
-                            class="btn btn-primary w-full rounded-full"
-                            type="button"
-                            :disabled="!selectedSkin"
-                            @click="openShareModal"
-                        >
-                            发布染色方案
-                        </button>
-                        <template v-else>
-                            <button class="btn btn-primary w-full" type="button" :disabled="saving" @click="savePlan">
-                                {{ saving ? "保存中..." : "保存染色" }}
-                            </button>
+                    <section v-if="canEdit" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                        <SectionHeader no-animate compact kicker="ACTION" title="方案操作" />
+                        <div class="flex flex-col gap-2">
                             <button
-                                class="btn btn-outline w-full"
+                                v-if="isCreateMode"
+                                class="inline-flex h-8 w-full items-center justify-center rounded-xs border px-3 text-xs font-semibold transition-colors duration-150 active:scale-[0.98]"
+                                :class="
+                                    selectedSkin
+                                        ? 'cursor-pointer border-primary bg-primary text-primary-content hover:bg-primary/90'
+                                        : 'cursor-not-allowed border-base-content/15 text-base-content/30'
+                                "
                                 type="button"
-                                :disabled="uploading || !previewFile"
-                                @click="uploadPreview"
+                                :disabled="!selectedSkin"
+                                @click="openShareModal"
                             >
-                                {{ uploading ? "上传中..." : "上传新的预览图" }}
+                                发布染色方案
                             </button>
-                        </template>
-                    </div>
-                    <div v-else class="mt-4 rounded-lg bg-base-200 px-3 py-2 text-center text-xs opacity-60">
+                            <template v-else>
+                                <button
+                                    class="inline-flex h-8 w-full items-center justify-center rounded-xs border px-3 text-xs font-semibold transition-colors duration-150 active:scale-[0.98]"
+                                    :class="
+                                        saving
+                                            ? 'cursor-not-allowed border-base-content/15 text-base-content/30'
+                                            : 'cursor-pointer border-primary bg-primary text-primary-content hover:bg-primary/90'
+                                    "
+                                    type="button"
+                                    :disabled="saving"
+                                    @click="savePlan"
+                                >
+                                    {{ saving ? "保存中..." : "保存染色" }}
+                                </button>
+                                <button
+                                    class="inline-flex h-8 w-full items-center justify-center rounded-xs border px-3 text-xs transition-colors duration-150 active:scale-[0.98]"
+                                    :class="
+                                        uploading || !previewFile
+                                            ? 'cursor-not-allowed border-base-content/15 text-base-content/30'
+                                            : 'cursor-pointer border-base-content/20 text-base-content/70 hover:border-primary/60 hover:text-primary'
+                                    "
+                                    type="button"
+                                    :disabled="uploading || !previewFile"
+                                    @click="uploadPreview"
+                                >
+                                    {{ uploading ? "上传中..." : "上传新的预览图" }}
+                                </button>
+                            </template>
+                        </div>
+                    </section>
+                    <section
+                        v-else
+                        class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 text-center text-[11px] text-base-content/50 backdrop-blur-sm"
+                    >
                         此方案由他人发布，仅作者可保存修改
-                    </div>
+                    </section>
                 </aside>
             </div>
         </div>
 
-        <DialogModel v-model="shareShow" @submit="confirmShare" class="bg-base-300">
+        <DialogModel v-model="shareShow" @submit="confirmShare" class="rounded-xs border border-base-content/15 bg-base-100/85 backdrop-blur-md">
             <h3 class="text-xl font-bold">发布染色方案</h3>
-            <div class="mt-2 text-sm opacity-70">
+            <div class="mt-2 text-sm text-base-content/70">
                 标题「{{ editTitle.trim() || defaultPlanTitle }}」<span v-if="editDesc.trim()"> · 含描述</span>
             </div>
             <div class="mt-3">
-                <div class="mb-1 text-sm opacity-70">归属标注</div>
+                <div class="mb-1 text-sm text-base-content/70">归属标注</div>
                 <div class="flex gap-4">
                     <label class="flex cursor-pointer items-center gap-1.5 text-sm">
                         <input v-model="shareIsOriginal" type="radio" name="share-origin" class="radio radio-sm" :value="true" />
@@ -1153,9 +1300,7 @@ onBeforeUnmount(() => {
                     </label>
                 </div>
                 <div v-if="!shareIsOriginal" class="mt-2">
-                    <label class="label" for="share-source">
-                        <span class="label-text">来源链接或作者名称（必填）</span>
-                    </label>
+                    <div class="mb-1 text-xs text-base-content/55">来源链接或作者名称（必填）</div>
                     <input
                         id="share-source"
                         v-model="shareSource"
@@ -1167,14 +1312,30 @@ onBeforeUnmount(() => {
                 </div>
             </div>
             <div v-if="previewImage" class="mt-2">
-                <div class="mb-1 text-sm opacity-70">预览图</div>
-                <img :src="previewImage" alt="预览图" class="max-h-48 rounded object-contain" />
+                <div class="mb-1 text-sm text-base-content/70">预览图</div>
+                <img :src="previewImage" alt="预览图" class="max-h-48 rounded-xs object-contain" />
             </div>
-            <div v-else class="mt-2 text-xs opacity-60">未上传预览图，发布后将不包含图片。</div>
-            <div v-if="hairCode" class="mt-2 text-sm opacity-70">
+            <div v-else class="mt-2 text-xs text-base-content/50">未上传预览图，发布后将不包含图片。</div>
+            <div v-if="hairCode" class="mt-2 text-sm text-base-content/70">
                 发型染色码：<code class="font-mono">{{ hairCode }}</code>
             </div>
-            <div v-if="sharing" class="mt-2 text-sm opacity-60">正在发布...</div>
+            <div v-if="sharing" class="mt-2 text-sm text-base-content/50">正在发布...</div>
         </DialogModel>
+
+        <!-- 相似色查询：按目标颜色的 ΔE 从近到远列出可用染剂 -->
+        <SkinColorizeColorFinder
+            v-model="skinFinderShow"
+            :part-label="`部位 ${activePartId}`"
+            :current-color-id="currentColorId(activePartId)"
+            :valid-ids="activePart?.colorIds"
+            @select="applyColorToActivePart"
+        />
+        <SkinColorizeColorFinder
+            v-model="hairFinderShow"
+            variant="hair"
+            :part-label="`发型色位 ${activeHairPartId}`"
+            :current-color-id="currentHairColorId(activeHairPartId)"
+            @select="applyHairColorToActivePart"
+        />
     </div>
 </template>
