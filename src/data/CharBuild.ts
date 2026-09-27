@@ -488,8 +488,8 @@ export class CharBuild {
     }
 
     /**
-     * 收集指定模组列表中的技能替换映射
-     * @param mods 模组列表
+     * 收集指定魔之楔列表中的技能替换映射
+     * @param mods 魔之楔列表
      * @returns 技能替换映射（key 为原技能 ID）
      */
     private getSkillReplaceMap(mods: (LeveledMod | null)[]) {
@@ -521,9 +521,9 @@ export class CharBuild {
     }
 
     /**
-     * 根据装备的模组将武器技能替换为对应版本
+     * 根据装备的魔之楔将武器技能替换为对应版本
      * @param weaponSkills 原始武器技能列表
-     * @param mods 生效模组列表
+     * @param mods 生效魔之楔列表
      * @returns 替换后的武器技能列表
      */
     private replaceWeaponSkillsByMods(weaponSkills: LeveledSkill[], mods: (LeveledMod | null)[]) {
@@ -3736,7 +3736,7 @@ export class CharBuild {
     }
     /**
      * 主计算函数
-     * @param props 武器、模组或 buff
+     * @param props 武器、魔之楔或 buff
      * @returns 目标函数结果
      */
     public calculateOneTime(attrs?: ReturnType<typeof this.calculateWeaponAttributes>): number {
@@ -3767,7 +3767,7 @@ export class CharBuild {
     }
     /**
      * 主计算函数(包含时间线)
-     * @param props 武器、模组或 buff
+     * @param props 武器、魔之楔或 buff
      * @returns 目标函数结果
      */
     public calculate(): number {
@@ -3979,7 +3979,7 @@ export class CharBuild {
     tempMod: LeveledMod | null = null
     /**
      * 计算单属性收益（加上属性值）
-     * @param props 武器、模组或 buff
+     * @param props 武器、魔之楔或 buff
      * @returns 单属性值
      */
     public calcIncome(props: AbstractMod | LeveledBuff, minus = false): number {

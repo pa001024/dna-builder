@@ -4,7 +4,6 @@ import tailwindcss from "@tailwindcss/vite"
 import vue from "@vitejs/plugin-vue"
 import vueJsx from "@vitejs/plugin-vue-jsx"
 import RekaResolver from "reka-ui/resolver"
-// @ts-expect-error
 import graphqlTag from "rollup-plugin-graphql-tag"
 import Component from "unplugin-vue-components/vite"
 import { defineConfig } from "vite"
@@ -56,7 +55,16 @@ export default defineConfig(async () => ({
         ...(isAppBuild ? [stripPublicImgsPlugin()] : []),
         // 仅在构建时启用数据包重写插件，dev 启动（command 为 serve）时直接使用源码数据模块
         ...(!isDisableRewrite ? [dataPackRewritePlugin()] : []),
-        vue(),
+        vue({
+            template: {
+                // 模板注释不进产物：默认值取自 compiler 的构建模式（prod 关、dev 开），
+                // 而 SSG 预渲染跑在 middlewareMode 开发服务器里，走的是 dev 编译器，
+                // 不显式关掉的话 dist/*/index.html 里会留下一堆 <!-- 中文说明 -->。
+                compilerOptions: {
+                    comments: false,
+                },
+            },
+        }),
         vueJsx(),
         tailwindcss(),
         Component({

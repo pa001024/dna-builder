@@ -165,6 +165,23 @@ AST（抽象语法树）解析器和求值器。
 - `member_access`：成员访问（`伤害.N`）
 - `number`：数字字面量
 
+### pack-storage.ts（数据包存储）
+
+数据包（十几 MB 的整包 zip 与逐个模块文件）放在浏览器存储里，由本模块统一选择后端：
+
+- **优先 OPFS**，但用一次真实写入做能力探测，而不是只看 `navigator.storage.getDirectory` 是否存在：
+  Safari 15.2 起就有该 API，却直到 Safari 26 才实现 `FileSystemFileHandle.createWritable()`，
+  只判断 API 存在性会让 Safari 上「能建目录、写文件必抛错」。
+- **探测失败回退 IndexedDB**（库名 `dna-builder-pack`，键为 `/` 分隔的完整路径，
+  目录记录与文件记录同库存储）。回退实现同样暴露 `getDirectoryHandle` / `getFileHandle` /
+  `removeEntry` / `entries` 等与 `FileSystemDirectoryHandle` 同形的接口，
+  因此 `data-pack.ts` 的安装、差分升级、卸载、清空逻辑无需感知数据落在哪里。
+- 首次解析出的后端会记在 localStorage 的 `dna-builder:pack-storage-backend`：
+  环境升级（如 Safari 26 补上了 `createWritable`）后不会因为换了存储位置而看起来像「丢包」；
+  同一把键也可在调试时手工改成 `opfs` / `indexeddb` 强制切换后端。
+
+图片缓存（`imgs-runtime.ts`）目前仍直接使用 OPFS，且只在桌面端启用。
+
 ### d/
 
 静态游戏数据文件，包含所有角色的技能、武器、MOD、怪物等数据。

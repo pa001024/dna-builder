@@ -23,6 +23,20 @@ pnpm format                           # Format with Biome
 改动文件 + 依赖它们的文件 + 环境声明文件（mtime 指纹缓存在 `.tmp/lint-cache.json`，仅检查通过才写入）。
 首次运行 / 缓存失效 / 环境声明变更 / 影响面过半时自动退回全量。需要完整检查用 `pnpm lint:full`。
 
+### SSG 预渲染（仅网页版）
+
+`pnpm build` 在 vite build 之后会跑 `node tools/ssg.mjs`：用 Vite 的 SSR 模块加载器（middlewareMode
+开发服务器 + `ssrLoadModule` 载入 `src/ssr/entry-server.ts`）把主要路由渲染成静态 HTML，写成
+`dist/<route>/index.html` 并注入各自的 title / description / canonical / og 标签。
+
+- 客户端**不做 hydration**：静态标记只服务爬虫与首屏，`main.ts` 挂载时会整体替换 `#app` 的内容。
+  预渲染时没有 `navigator`，页面要保证"无浏览器环境也能渲染出可看的静态版本"。
+- 只有页面级兼容改动需要留意：新增页面若要在 node 侧渲染，setup 阶段不要直接操作 DOM。
+- 桌面端构建（`DNA_BUILDER_APP_BUILD=1`）自动跳过；`DNA_SSG_SKIP=1` 手动跳过；
+  `pnpm ssg` 可单独重跑，`node tools/ssg.mjs --only=/download` 只重跑一个路由（调样式时很方便）。
+- 新增需要被搜索引擎收录的页面：把它加进 `tools/ssg.mjs` 的 `PAGES`（含 SEO 文案）。
+- 单个路由渲染失败只会退化成"SEO 头 + 空 `#app`"的 SPA 外壳并在日志里告警，不会中断构建。
+
 ### Desktop App (Tauri + Rust)
 
 ```bash

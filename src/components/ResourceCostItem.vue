@@ -433,7 +433,7 @@ function getAccessoryByType(type: "CharAccessory" | "WeaponAccessory", id: numbe
 }
 
 /**
- * 获取用于模组展示的构造参数。
+ * 获取用于魔之楔展示的构造参数。
  * @param id 资源ID
  * @returns 规范化后的数值ID
  */
@@ -442,9 +442,9 @@ function getNormalizedId(id: number | string): number {
 }
 
 /**
- * 构造带等级的模组展示对象。
- * @param id 模组ID
- * @returns 带等级的模组对象
+ * 构造带等级的魔之楔展示对象。
+ * @param id 魔之楔ID
+ * @returns 带等级的魔之楔对象
  */
 function createLeveledMod(id: number | string) {
     return LeveledModHelper.fromId(getNormalizedId(id))

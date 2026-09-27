@@ -6,7 +6,7 @@ import { floatWindowDisable, floatWindowSet, floatWindowState, MATERIALS } from 
 import type { IconTypes } from "@/components/Icon.vue"
 import { useScrollSpy } from "@/composables/useScrollSpy"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { clearAllDataPackOpfs, getInstalledDataPackVersions, getMergedDataPackVersions } from "@/data/data-pack"
+import { clearAllDataPackStorage, getInstalledDataPackVersions, getMergedDataPackVersions } from "@/data/data-pack"
 import { deleteImgsCache, imgsDownloadState } from "@/data/imgs-runtime"
 import { closeSafeMode, openSafeMode } from "@/data/versionGate"
 import { env } from "@/env"
@@ -32,7 +32,7 @@ const CDN_DATA_PACK_BASE_URL = "https://cdn.dna-builder.cn/data-pack"
 const versionDragUrls = ref<Record<string, string>>({})
 const sourceSaveTimer = ref<number | null>(null)
 const isApplyingSourceUpdate = ref(false)
-const isClearingDataPackOpfs = ref(false)
+const isClearingDataPackStorage = ref(false)
 const formatSize = new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 1 })
 const dataPackLoadingRemoteVersions = ref(false)
 
@@ -707,16 +707,16 @@ async function clearDataPackStorage() {
         return
     }
 
-    isClearingDataPackOpfs.value = true
+    isClearingDataPackStorage.value = true
     try {
-        await clearAllDataPackOpfs()
+        await clearAllDataPackStorage()
         await deleteImgsCache()
         await refreshDataPackStatus(true)
     } catch (error) {
         console.error("清空数据包存储失败", error)
         ui.showErrorMessage(error instanceof Error ? error.message : String(error))
     } finally {
-        isClearingDataPackOpfs.value = false
+        isClearingDataPackStorage.value = false
     }
 }
 
@@ -1207,7 +1207,7 @@ onUnmounted(() => {
                                     @input="dataPackSourceKind === 'custom' && saveSourceBaseUrl()"
                                 />
                                 <button class="btn btn-sm" @click="importDataPack">{{ $t("achievement.import") }}</button>
-                                <button class="btn btn-sm btn-error" :disabled="isClearingDataPackOpfs" @click="clearDataPackStorage">
+                                <button class="btn btn-sm btn-error" :disabled="isClearingDataPackStorage" @click="clearDataPackStorage">
                                     清空
                                 </button>
                             </div>

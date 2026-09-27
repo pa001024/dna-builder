@@ -10,6 +10,7 @@ import {
 } from "./data-pack-bridge"
 import { applyHdiff } from "./hpatchz-wasm"
 import { mountImgsToVirtualPath } from "./imgs-runtime"
+import { getPackStorageRoot, isPackStorageAvailable, type PackDirectoryHandle } from "./pack-storage"
 
 export type DataPackModuleRecord = Record<string, unknown>
 
@@ -59,8 +60,6 @@ const DEV_BASE_URL = "/mock/data-pack"
 const RELEASE_BASE_URL = "https://cdn.dna-builder.cn/data-pack"
 const DATA_PACK_VERSIONS_FILE = "versions.json"
 const DEFAULT_CUSTOM_BASE_URL = DEV_BASE_URL
-
-type FileSystemDirectoryHandleLike = Awaited<ReturnType<NonNullable<Navigator["storage"]>["getDirectory"]>>
 
 type DataPackState = {
     readyVersion: string | null
@@ -116,14 +115,6 @@ const bootstrapState: BootstrapDataPackState = {
 let installedVersionsCache: DataPackVersionInfo[] | null = null
 
 /**
- * 判断当前环境是否支持 OPFS。
- * @returns 是否支持 OPFS
- */
-function hasOpfs(): boolean {
-    return typeof navigator !== "undefined" && Boolean(navigator.storage?.getDirectory)
-}
-
-/**
  * 获取默认数据包基址。
  * @returns 基础地址
  */
@@ -136,7 +127,7 @@ function getDefaultBaseUrl(): string {
  * @returns 配置对象
  */
 async function readConfig(): Promise<DataPackConfig> {
-    if (!hasOpfs()) {
+    if (!(await isPackStorageAvailable())) {
         return {}
     }
 
@@ -238,34 +229,26 @@ export async function setDataPackSourceKind(sourceKind: "official" | "custom"): 
 }
 
 /**
- * 获取 OPFS 根目录。
- * @returns 根目录句柄
- */
-async function getRootDirectory(): Promise<FileSystemDirectoryHandleLike> {
-    if (!navigator.storage?.getDirectory) {
-        throw new Error("当前环境不支持 OPFS")
-    }
-
-    return navigator.storage.getDirectory()
-}
-
-/**
  * 获取数据包根目录。
  * @returns 数据包根目录句柄
  */
-async function getPackRootDirectory(): Promise<FileSystemDirectoryHandleLike> {
-    const root = await getRootDirectory()
+async function getPackRootDirectory(): Promise<PackDirectoryHandle> {
+    const root = await getPackStorageRoot()
     return root.getDirectoryHandle(PACK_ROOT_DIR, { create: true })
 }
 
 /**
  * 获取版本目录。
+ *
+ * 读取路径一律传 create: false：句柄的 create 语义是「不存在就建」，
+ * 扫描/导出时用它会把刚刚卸载掉（或本来就缺失）的版本目录重新建出来，留下空目录。
  * @param version 版本号
+ * @param create 目录不存在时是否创建
  * @returns 版本目录句柄
  */
-async function getVersionDirectory(version: string): Promise<FileSystemDirectoryHandleLike> {
+async function getVersionDirectory(version: string, create = true): Promise<PackDirectoryHandle> {
     const root = await getPackRootDirectory()
-    return root.getDirectoryHandle(version, { create: true })
+    return root.getDirectoryHandle(version, { create })
 }
 
 /**
@@ -274,18 +257,18 @@ async function getVersionDirectory(version: string): Promise<FileSystemDirectory
  * @param create 目录不存在时是否创建
  * @returns 模块目录句柄
  */
-async function getModulesDirectory(version: string, create: boolean): Promise<FileSystemDirectoryHandleLike> {
-    const versionDir = await getVersionDirectory(version)
+async function getModulesDirectory(version: string, create: boolean): Promise<PackDirectoryHandle> {
+    const versionDir = await getVersionDirectory(version, create)
     return versionDir.getDirectoryHandle(MODULES_DIR, { create })
 }
 
 /**
- * 读取 OPFS 文件内容。
+ * 读取存储中的文件内容。
  * @param directory 目录句柄
  * @param fileName 文件名
  * @returns 文件内容；不存在时返回 null
  */
-async function readFile(directory: FileSystemDirectoryHandleLike, fileName: string): Promise<Uint8Array | null> {
+async function readFile(directory: PackDirectoryHandle, fileName: string): Promise<Uint8Array | null> {
     try {
         const handle = await directory.getFileHandle(fileName, { create: false })
         const blob = await handle.getFile()
@@ -348,12 +331,12 @@ function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
 }
 
 /**
- * 写入 OPFS 文件内容。
+ * 写入存储中的文件内容。
  * @param directory 目录句柄
  * @param fileName 文件名
  * @param bytes 文件内容
  */
-async function writeFile(directory: FileSystemDirectoryHandleLike, fileName: string, bytes: Uint8Array): Promise<void> {
+async function writeFile(directory: PackDirectoryHandle, fileName: string, bytes: Uint8Array): Promise<void> {
     const handle = await directory.getFileHandle(fileName, { create: true })
     const writable = await handle.createWritable()
     await writable.write(toArrayBuffer(bytes))
@@ -361,23 +344,23 @@ async function writeFile(directory: FileSystemDirectoryHandleLike, fileName: str
 }
 
 /**
- * 读取 OPFS 文本内容。
+ * 读取存储中的文本内容。
  * @param directory 目录句柄
  * @param fileName 文件名
  * @returns 文本内容
  */
-async function readTextFile(directory: FileSystemDirectoryHandleLike, fileName: string): Promise<string | null> {
+async function readTextFile(directory: PackDirectoryHandle, fileName: string): Promise<string | null> {
     const bytes = await readFile(directory, fileName)
     return bytes ? new TextDecoder().decode(bytes) : null
 }
 
 /**
- * 写入 OPFS 文本内容。
+ * 写入存储中的文本内容。
  * @param directory 目录句柄
  * @param fileName 文件名
  * @param content 文本内容
  */
-async function writeTextFile(directory: FileSystemDirectoryHandleLike, fileName: string, content: string): Promise<void> {
+async function writeTextFile(directory: PackDirectoryHandle, fileName: string, content: string): Promise<void> {
     await writeFile(directory, fileName, new TextEncoder().encode(content))
 }
 
@@ -457,7 +440,7 @@ function decodePack(bytes: Uint8Array): DecodedDataPack {
  * @returns 版本信息；不存在时返回 null
  */
 async function readInstalledInfo(): Promise<DataPackVersionInfo | null> {
-    if (!hasOpfs()) {
+    if (!(await isPackStorageAvailable())) {
         return null
     }
 
@@ -495,7 +478,7 @@ async function readInstalledVersionInfo(version: string): Promise<DataPackVersio
  */
 async function readInstalledManifest(version: string): Promise<DataPackManifest | null> {
     try {
-        const versionDir = await getVersionDirectory(version)
+        const versionDir = await getVersionDirectory(version, false)
         const raw = await readTextFile(versionDir, MANIFEST_FILE)
         return raw ? (JSON.parse(raw) as DataPackManifest) : null
     } catch {
@@ -508,7 +491,7 @@ async function readInstalledManifest(version: string): Promise<DataPackManifest 
  * @returns 已安装版本信息列表
  */
 async function scanInstalledDataPackVersions(): Promise<DataPackVersionInfo[]> {
-    if (!hasOpfs()) {
+    if (!(await isPackStorageAvailable())) {
         return []
     }
 
@@ -520,7 +503,7 @@ async function scanInstalledDataPackVersions(): Promise<DataPackVersionInfo[]> {
     const installedVersions: DataPackVersionInfo[] = []
 
     try {
-        for await (const [entryName, entry] of root as unknown as AsyncIterable<[string, FileSystemHandle]>) {
+        for await (const [entryName, entry] of root) {
             if (
                 entryName === CONFIG_FILE ||
                 entryName === INSTALL_INFO_FILE ||
@@ -563,8 +546,12 @@ async function writeInstalledInfo(info: DataPackVersionInfo): Promise<void> {
  * @returns 包字节
  */
 async function readPackBytes(version: string): Promise<Uint8Array | null> {
-    const versionDir = await getVersionDirectory(version)
-    return readFile(versionDir, PACK_BYTES_FILE)
+    try {
+        const versionDir = await getVersionDirectory(version, false)
+        return await readFile(versionDir, PACK_BYTES_FILE)
+    } catch {
+        return null
+    }
 }
 
 /**
@@ -692,7 +679,7 @@ async function loadLocalVersion(version: string): Promise<boolean> {
         return false
     }
 
-    const versionDir = await getVersionDirectory(version)
+    const versionDir = await getVersionDirectory(version, false)
     const imgsManifestRaw = await readTextFile(versionDir, IMGS_MANIFEST_FILE)
     const imgsManifestPayload = imgsManifestRaw
         ? (JSON.parse(imgsManifestRaw) as { files?: { path: string; url?: string }[] } | { path: string; url?: string }[])
@@ -736,7 +723,7 @@ export async function syncDataPackModuleBindings(moduleKey: string): Promise<voi
  * @returns 是否准备成功
  */
 export async function ensureDataPackReady(): Promise<boolean> {
-    if (!hasOpfs()) {
+    if (!(await isPackStorageAvailable())) {
         return false
     }
 
@@ -876,7 +863,7 @@ export async function setActiveDataPackVersion(version: string): Promise<DataPac
  * @param version 目标版本
  */
 export async function removeInstalledDataPackVersion(version: string): Promise<void> {
-    if (!hasOpfs()) {
+    if (!(await isPackStorageAvailable())) {
         return
     }
 
@@ -1065,11 +1052,11 @@ export async function importDataPackFile(file: File): Promise<DataPackInstallSta
  * 删除当前安装的数据包。
  */
 export async function deleteDataPack(): Promise<void> {
-    if (!hasOpfs()) {
+    if (!(await isPackStorageAvailable())) {
         return
     }
 
-    const root = await getRootDirectory()
+    const root = await getPackStorageRoot()
     try {
         await root.removeEntry(PACK_ROOT_DIR, { recursive: true })
     } catch {}
@@ -1079,9 +1066,9 @@ export async function deleteDataPack(): Promise<void> {
 }
 
 /**
- * 清空所有数据包相关 OPFS 数据。
+ * 清空所有数据包存储（OPFS 目录或 IndexedDB 记录）。
  */
-export async function clearAllDataPackOpfs(): Promise<void> {
+export async function clearAllDataPackStorage(): Promise<void> {
     await deleteDataPack()
 }
 
@@ -1091,8 +1078,8 @@ export async function clearAllDataPackOpfs(): Promise<void> {
  * @returns 可用于导出或拖拽的数据包文件
  */
 export async function exportDataPackVersionFile(version: string): Promise<File> {
-    const versionDir = await getVersionDirectory(version)
     try {
+        const versionDir = await getVersionDirectory(version, false)
         const handle = await versionDir.getFileHandle(PACK_BYTES_FILE, { create: false })
         const file = await handle.getFile()
         return new File([file], `${version}.zip`, {

@@ -28,10 +28,19 @@ let setMinSize = async (_w: number, _h: number) => {}
 })()
 
 // NOTE: every router must have i18n key like xx.title it will be used by ResizeableWindow.vue by default
-const routes: readonly RouteRecordRaw[] = [
+// 导出路由表：SSG 预渲染（src/ssr/entry-server.ts）需要用同一张表建 memory history 实例
+export const routes: readonly RouteRecordRaw[] = [
     { name: "home", path: "/", component: Home, beforeEnter: () => setMinSize(360, 430) },
     { name: "counter", path: "/counter", component: CounterView, beforeEnter: () => setMinSize(360, 430), meta: { requireData: false } },
     { name: "setting", path: "/setting", component: Setting, beforeEnter: () => setMinSize(360, 430) },
+    {
+        // APP 下载页：不依赖游戏数据包；PC 端展示二维码，移动端倒计时直接下载，参与 SSG 预渲染
+        name: "download",
+        path: "/download",
+        component: () => import("./views/DownloadAppView.vue"),
+        beforeEnter: () => setMinSize(360, 430),
+        meta: { requireData: false },
+    },
     {
         // 技能 CD 浮窗搬到独立页面:设置页只保留总开关与入口
         name: "skill-cd-overlay",

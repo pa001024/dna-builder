@@ -12,7 +12,7 @@ import { pathToFileURL } from "node:url"
  * 引用来源有两种，两者合并即为“真实引用集合”：
  *   1. 文本扫描：src/data 里出现的 /imgs/** 字符串字面量（精确引用，如 rank 目录、占位图等）。
  *   2. 数据评估：导入实际数据层，调用 Leveled* 的 URL 生成器，
- *      枚举全部角色/武器/模组/怪物/宠物/钓鱼/读物/乐谱专辑/技能等真实取值。
+ *      枚举全部角色/武器/魔之楔/怪物/宠物/钓鱼/读物/乐谱专辑/技能等真实取值。
  *      不再用 `${icon}` 模板对源目录做通配展开，避免导入从未使用的贴图。
  *
  * 注意：形如 `/imgs/music/${icon}.webp` 的“全通配”模板无法从文本推导 basename，
@@ -415,7 +415,7 @@ async function evaluateDataUrls(): Promise<Set<string>> {
         }
     }
 
-    // 模组 / 怪物 / 宠物
+    // 魔之楔 / 怪物 / 宠物
     for (const mod of modData) {
         if (mod.icon) {
             urls.add(LeveledMod.url(mod.icon))

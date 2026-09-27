@@ -305,15 +305,15 @@ async function checkUpdate() {
                         </a>
                     </p>
                     <div class="flex flex-wrap gap-3">
-                        <a
+                        <!-- 下载入口指向站内下载页（安卓 APK 与 Windows 版都在那里） -->
+                        <SRouterLink
                             v-if="!env.isApp"
-                            href="https://api.dna-builder.cn/api/download"
-                            target="_blank"
+                            to="/download"
                             class="cursor-pointer inline-flex h-11 items-center justify-center gap-2 rounded-xs bg-primary px-5 text-sm font-semibold text-primary-content transition-all duration-150 hover:bg-primary/90 active:translate-y-px motion-reduce:transition-none"
                         >
-                            <Icon icon="ri:windows-fill" class="h-5 w-5" />
+                            <Icon icon="ri:download-2-line" class="h-5 w-5" />
                             <span>{{ $t("home.download") }}</span>
-                        </a>
+                        </SRouterLink>
                         <button
                             v-else
                             type="button"

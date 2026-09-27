@@ -44,6 +44,8 @@ export function getMoreItems(envs: MoreItemEnv): MoreItem[] {
         { name: "abyss-usage", path: "/abyss-usage", icon: "ri:bar-chart-line" },
         { name: "ranking", path: "/ranking", icon: "ri:sort-number-asc" },
         { name: "setting", path: "/setting", icon: "ri:settings-3-line" },
+        // APP 下载页只服务网页端访客（Tauri 桌面端已经是完整客户端，不需要再装移动端）
+        { name: "download", path: "/download", icon: "ri:download-2-line", show: !isApp },
         { name: "game-launcher", path: "/game-launcher", icon: "ri:rocket-2-line" },
         // 技能 CD 浮窗依赖 Tauri 后端（原生置顶浮窗），网页端不显示。
         { name: "skill-cd-overlay", path: "/skill-cd-overlay", icon: "ri:timer-flash-line", show: isApp },
