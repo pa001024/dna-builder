@@ -1,18 +1,19 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import { computed, onMounted, onUnmounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { buildsQuery, createGuideMutation, guideQuery, updateGuideMutation } from "@/api/graphql"
 import { charData } from "@/data"
 import { env } from "@/env"
+import { useAuthStore } from "@/store/auth"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
-import { useUserStore } from "@/store/user"
 
 const route = useRoute()
 const router = useRouter()
 const ui = useUIStore()
 const setting = useSettingStore()
-const user = useUserStore()
+const auth = useAuthStore()
 
 const isEdit = computed(() => !!route.params.id)
 const { id } = route.params
@@ -184,8 +185,7 @@ async function handleSubmit() {
     }
     isLoading.value = true
 
-    if (!user.id) {
-        ui.showErrorMessage("请先登录")
+    if (!auth.requireLogin(t("login-dialog.need_login_hint"))) {
         isLoading.value = false
         return
     }

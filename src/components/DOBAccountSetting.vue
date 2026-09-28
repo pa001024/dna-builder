@@ -1,47 +1,16 @@
 <script setup lang="ts">
 import { computed, nextTick, reactive, ref, watch } from "vue"
-import {
-    forgotPasswordMutation,
-    loginMutation,
-    meQuery,
-    myShopSummaryQuery,
-    registerMutation,
-    resetPasswordMutation,
-    type UserShopSummary,
-    updateUserMetaMutation,
-} from "@/api/graphql"
+import { meQuery, myShopSummaryQuery, type UserShopSummary, updateUserMetaMutation } from "@/api/graphql"
+import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { getUserLevelProgress } from "@/utils/user-level"
 
 const user = useUserStore()
 const ui = useUIStore()
+const auth = useAuthStore()
 
-// 表单数据
-const loading = ref(false)
-
-const loginForm = reactive({
-    open: false,
-    email: "",
-    password: "",
-})
-
-const registerForm = reactive({
-    open: false,
-    name: "",
-    qq: "",
-    email: "",
-    password: "",
-})
-
-// 密码重置表单
-const resetPasswordForm = reactive({
-    open: false,
-    step: 1, // 1: 输入邮箱, 2: 输入验证码和新密码
-    email: "",
-    code: "",
-    newPassword: "",
-})
+// 登录/注册/重置密码弹窗由全局的 LoginDialog 承载（见 store/auth.ts），这里只负责拉起
 
 const nameEdit = reactive({
     active: false,
@@ -171,74 +140,6 @@ watch(
     { immediate: true }
 )
 
-// 登录处理
-const handleLogin = async () => {
-    // 表单验证
-    if (!loginForm.email || !loginForm.password) {
-        ui.showErrorMessage("请输入邮箱和密码")
-        return
-    }
-
-    loading.value = true
-
-    try {
-        // 发送登录请求
-        const loginResult = await loginMutation({
-            email: loginForm.email,
-            password: loginForm.password,
-        })
-
-        if (!loginResult?.success || !loginResult.token) {
-            ui.showErrorMessage(loginResult?.message || "登录失败")
-            return
-        }
-
-        // 保存登录状态
-        user.jwtToken = loginResult.token
-        loginForm.open = false
-        ui.showSuccessMessage("登录成功")
-    } catch (error) {
-        ui.showErrorMessage("登录失败，请稍后重试")
-        console.error("登录失败:", error)
-    } finally {
-        loading.value = false
-    }
-}
-
-const handleRegister = async () => {
-    // 表单验证
-    if (!registerForm.name || !registerForm.qq || !registerForm.email || !registerForm.password) {
-        ui.showErrorMessage("请填写完整信息")
-        return
-    }
-
-    loading.value = true
-
-    try {
-        // 发送注册请求
-        const registerResult = await registerMutation({
-            name: registerForm.name,
-            qq: registerForm.qq,
-            email: registerForm.email,
-            password: registerForm.password,
-        })
-
-        if (!registerResult?.success || !registerResult.token) {
-            ui.showErrorMessage(registerResult?.message || "注册失败")
-            return
-        }
-
-        // 保存登录状态
-        user.jwtToken = registerResult.token
-        registerForm.open = false
-        ui.showSuccessMessage("注册成功")
-    } catch (error) {
-        ui.showErrorMessage("注册失败，请稍后重试")
-        console.error("注册失败:", error)
-    } finally {
-        loading.value = false
-    }
-}
 // 退出登录
 const handleLogout = async () => {
     if (await ui.showDialog("确认退出", "确定要退出当前账号吗？")) {
@@ -248,94 +149,6 @@ const handleLogout = async () => {
     }
 }
 
-// 密码重置处理
-const openResetPasswordModal = () => {
-    resetPasswordForm.open = true
-    resetPasswordForm.step = 1
-    resetPasswordForm.email = ""
-    resetPasswordForm.code = ""
-    resetPasswordForm.newPassword = ""
-}
-
-const closeResetPasswordModal = () => {
-    resetPasswordForm.open = false
-}
-
-const sendResetCode = async () => {
-    // 表单验证
-    if (!resetPasswordForm.email) {
-        ui.showErrorMessage("请输入邮箱")
-        return
-    }
-
-    loading.value = true
-
-    try {
-        // 发送验证码请求
-        const result = await forgotPasswordMutation({
-            email: resetPasswordForm.email,
-        })
-
-        if (result) {
-            ui.showSuccessMessage("验证码已发送到邮箱，请查收")
-            resetPasswordForm.step = 2
-        } else {
-            ui.showErrorMessage("发送验证码失败，请稍后重试")
-        }
-    } catch (error) {
-        ui.showErrorMessage("发送验证码失败，请稍后重试")
-        console.error("发送验证码失败:", error)
-    } finally {
-        loading.value = false
-    }
-}
-
-const handleResetPassword = async () => {
-    // 表单验证
-    if (!resetPasswordForm.code || !resetPasswordForm.newPassword) {
-        ui.showErrorMessage("请输入验证码和新密码")
-        return
-    }
-
-    loading.value = true
-
-    try {
-        // 发送重置密码请求
-        const result = await resetPasswordMutation({
-            token: resetPasswordForm.code,
-            new_password: resetPasswordForm.newPassword,
-        })
-
-        if (result?.success && result.token) {
-            // 保存新的登录状态
-            user.jwtToken = result.token
-            closeResetPasswordModal()
-            ui.showSuccessMessage("密码重置成功")
-        } else {
-            ui.showErrorMessage(result?.message || "密码重置失败")
-        }
-    } catch (error) {
-        ui.showErrorMessage("密码重置失败，请稍后重试")
-        console.error("密码重置失败:", error)
-    } finally {
-        loading.value = false
-    }
-}
-
-// 打开登录弹窗
-const openLoginModal = () => {
-    loginForm.email = ""
-    loginForm.password = ""
-    loginForm.open = true
-}
-
-const openRegisterModal = () => {
-    registerForm.name = ""
-    registerForm.qq = ""
-    registerForm.email = ""
-    registerForm.password = ""
-    registerForm.open = true
-}
 const nameInput = ref<HTMLInputElement>()
 
 /**
@@ -612,8 +425,8 @@ async function startNameEdit() {
             <!-- 未登录状态 -->
             <div v-else class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-5 text-center">
                 <div class="text-base-content/60 mb-3">{{ $t('dob-account.not_logged_in') }}</div>
-                <button class="btn btn-primary px-12 mx-2" @click="openLoginModal">{{ $t('dob-account.login') }}</button>
-                <button class="btn btn-primary px-12 mx-2" @click="openRegisterModal">{{ $t('dob-account.register') }}</button>
+                <button class="btn btn-primary px-12 mx-2" @click="auth.openLogin()">{{ $t('dob-account.login') }}</button>
+                <button class="btn btn-primary px-12 mx-2" @click="auth.openRegister()">{{ $t('dob-account.register') }}</button>
             </div>
         </div>
 
@@ -622,215 +435,5 @@ async function startNameEdit() {
             <p>{{ $t('dob-account.account_desc') }}</p>
         </div>
 
-        <!--
-            账号相关弹窗统一 Teleport 到 body：
-            设置页的账号卡片带有 animate-ef-rise（fill 模式保留 transform）与 backdrop-blur-sm，
-            二者都会让该卡片成为 position: fixed 后代的包含块，
-            导致 daisyUI 的 .modal 按卡片尺寸定位/裁剪，出现弹窗显示不全的问题。
-        -->
-        <Teleport to="body">
-            <!-- 登录模态框 -->
-            <div class="modal" :class="{ 'modal-open': loginForm.open }">
-                <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
-                    <div class="p-6">
-                        <!-- 登录表单 -->
-                        <form class="space-y-4" @submit.prevent="handleLogin">
-                            <div class="text-center mb-6">
-                                <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
-                                    <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
-                                </div>
-                                <span class="text-lg font-bold">用户登录</span>
-                            </div>
-                            <label class="flex items-center gap-2 w-full">
-                                <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="loginForm.email" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="邮箱" />
-                            </label>
-                            <label class="flex items-center gap-2 w-full">
-                                <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="loginForm.password" type="password" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="密码" />
-                            </label>
-                            <!-- 登录按钮 -->
-                            <button type="submit" class="btn btn-primary w-full" :disabled="loading">
-                                <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                <span>{{ loading ? $t('dob-account.logging_in') : $t('dob-account.login') }}</span>
-                            </button>
-                            <!-- 忘记密码链接 -->
-                            <div class="text-center">
-                                <button
-                                    type="button"
-                                    class="text-sm link link-primary transition-colors duration-200"
-                                    @click="openResetPasswordModal"
-                                >
-                                    忘记密码？
-                                </button>
-                            </div>
-                        </form>
-                        <!-- 额外信息 -->
-                        <div class="text-center mt-4 text-sm text-base-content/60">
-                            <p>登录后即可使用社区功能</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 模态框背景 -->
-                <div class="modal-backdrop" @click="loginForm.open = false" />
-            </div>
-            <!-- 注册模态框 -->
-            <div class="modal" :class="{ 'modal-open': registerForm.open }">
-                <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
-                    <div class="p-6">
-                        <!-- 注册表单 -->
-                        <form class="space-y-4" @submit.prevent="handleRegister">
-                            <div class="text-center mb-6">
-                                <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
-                                    <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
-                                </div>
-                                <span class="text-lg font-bold">用户注册</span>
-                            </div>
-                            <label class="flex items-center gap-2 w-full">
-                                <Icon icon="ri:user-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="registerForm.name" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="昵称" />
-                            </label>
-                            <label class="flex items-center gap-2 w-full">
-                                <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="registerForm.email" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="邮箱" />
-                            </label>
-                            <label class="flex items-center gap-2 w-full">
-                                <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="registerForm.password" type="password" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="密码" />
-                            </label>
-                            <label class="flex items-center gap-2 w-full">
-                                <Icon icon="ri:qq-line" class="w-4 h-4 opacity-70" />
-                                <input v-model="registerForm.qq" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="QQ" />
-                            </label>
-                            <LocalQQ
-                                @select="
-                                    qq => {
-                                        registerForm.qq = String(qq.uin)
-                                        registerForm.name = qq.nickname
-                                    }
-                                "
-                            />
-                            <!-- 登录按钮 -->
-                            <button type="submit" class="btn btn-primary w-full" :disabled="loading">
-                                <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                <span>{{ loading ? $t('dob-account.registering') : $t('dob-account.register') }}</span>
-                            </button>
-                        </form>
-                        <!-- 额外信息 -->
-                        <div class="text-center mt-4 text-sm text-base-content/60">
-                            <label class="label cursor-pointer">
-                                <span>{{ $t('dob-account.qq_hint') }}</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 模态框背景 -->
-                <div class="modal-backdrop" @click="registerForm.open = false" />
-            </div>
-
-            <!-- 密码重置模态框 -->
-            <div class="modal" :class="{ 'modal-open': resetPasswordForm.open }">
-                <div class="modal-box bg-base-100 shadow-2xl rounded-xs p-0 w-96">
-                    <div class="p-6">
-                        <!-- 密码重置表单 -->
-                        <div class="space-y-4">
-                            <div class="text-center mb-6">
-                                <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
-                                    <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
-                                </div>
-                                <span class="text-lg font-bold">密码重置</span>
-                            </div>
-
-                            <!-- 步骤1: 输入邮箱 -->
-                            <div v-if="resetPasswordForm.step === 1">
-                                <div class="space-y-4">
-                                    <div>
-                                        <p class="text-sm text-base-content/60 mb-2">请输入您的邮箱，我们将发送验证码到您的邮箱</p>
-                                        <label class="flex items-center gap-2 w-full">
-                                            <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                                            <input v-model="resetPasswordForm.email" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="邮箱" />
-                                        </label>
-                                    </div>
-
-                                    <div class="flex gap-2">
-                                        <button
-                                            type="button"
-                                            class="btn btn-primary w-full"
-                                            :disabled="loading"
-                                            @click="sendResetCode"
-                                        >
-                                            <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                            <span>{{ loading ? $t('dob-account.sending') : $t('dob-account.send_code') }}</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 步骤2: 输入验证码和新密码 -->
-                            <div v-else-if="resetPasswordForm.step === 2">
-                                <div class="space-y-4">
-                                    <div>
-                                        <p class="text-sm text-base-content/60 mb-2">{{ $t('dob-account.enter_code') }}</p>
-                                        <label class="flex items-center gap-2 w-full">
-                                            <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                                            <input
-                                                v-model="resetPasswordForm.code"
-                                                type="text"
-                                                class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                                placeholder="6位验证码"
-                                                maxlength="6"
-                                            />
-                                        </label>
-                                    </div>
-
-                                    <div>
-                                        <p class="text-sm text-base-content/60 mb-2">请输入新密码</p>
-                                        <label class="flex items-center gap-2 w-full">
-                                            <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                                            <input v-model="resetPasswordForm.newPassword" type="password" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="新密码" />
-                                        </label>
-                                    </div>
-
-                                    <div class="flex gap-2">
-                                        <button
-                                            type="button"
-                                            class="btn w-1/3"
-                                            @click="resetPasswordForm.step = 1"
-                                        >
-                                            上一步
-                                        </button>
-                                        <button
-                                            type="button"
-                                            class="btn btn-primary flex-1"
-                                            :disabled="loading"
-                                            @click="handleResetPassword"
-                                        >
-                                            <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                            <span>{{ loading ? $t('dob-account.resetting') : $t('dob-account.reset_password') }}</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 关闭按钮 -->
-                            <div class="text-center mt-4">
-                                <button
-                                    type="button"
-                                    class="text-sm text-base-content/60 hover:text-base-content transition-colors duration-200"
-                                    @click="closeResetPasswordModal"
-                                >
-                                    返回登录
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 模态框背景 -->
-                <div class="modal-backdrop" @click="closeResetPasswordModal" />
-            </div>
-        </Teleport>
     </div>
 </template>

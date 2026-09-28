@@ -10,6 +10,7 @@ import { modDownloadUrl, modVersionDownloadUrl } from "@/api/modShare"
 import { env } from "@/env"
 import { isDownloadPausedError, pauseDownload } from "@/utils/game-download"
 import { buildModTempFileName, computeDownloadProgress, findInstalledLocalMod, MOD_TEMP_DIR_NAME, modTaskKey } from "@/utils/mod-download"
+import { useAuthStore } from "./auth"
 import { db, type InstalledShareMod, STANDALONE_ENTITY } from "./db"
 import { useGameStore } from "./game"
 import { useUIStore } from "./ui"
@@ -144,7 +145,8 @@ export const useModDownloadStore = defineStore("modDownload", () => {
             return false
         }
         if (!user.jwtToken) {
-            ui.showErrorMessage(t("game-launcher.loginToDownload"))
+            // 下载接口需要账号鉴权：未登录时直接拉起全局登录弹窗，而不是只弹一条提示
+            useAuthStore().requireLogin(t("game-launcher.loginToDownload"))
             return false
         }
         if (!game.path) {

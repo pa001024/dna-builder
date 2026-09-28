@@ -170,11 +170,15 @@ watch(filterSkinIds, () => {
 <template>
     <div class="flex h-full min-h-0 w-full">
         <!-- 左侧筛选栏 -->
-        <aside class="hidden w-64 shrink-0 flex-col border-r border-base-200 bg-base-100 md:flex">
+        <aside class="hidden w-64 shrink-0 flex-col border-r border-base-content/10 md:flex">
             <div class="shrink-0 p-4 pb-3">
                 <button
-                    class="w-full rounded-lg px-3 py-2 text-left text-sm font-medium"
-                    :class="!filterCharId && !filterSeries ? 'bg-primary text-primary-content' : 'hover:bg-base-200'"
+                    class="w-full cursor-pointer rounded-xs border px-3 py-1.5 text-left text-[13px] transition-colors duration-150 active:scale-[0.98]"
+                    :class="
+                        !filterCharId && !filterSeries
+                            ? 'border-primary bg-primary font-semibold text-primary-content'
+                            : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                    "
                     type="button"
                     @click="clearFilter"
                 >
@@ -184,13 +188,17 @@ watch(filterSkinIds, () => {
             <ScrollArea class="min-h-0 flex-1">
                 <div class="flex flex-col gap-5 px-4 pb-4">
                     <div class="flex flex-col gap-1.5">
-                        <div class="mb-1 text-xs font-medium opacity-60">{{ $t('skin-colorize-gallery.by_character') }}</div>
+                        <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t('skin-colorize-gallery.by_character') }}</div>
                         <div class="grid grid-cols-2 gap-1.5">
                             <button
                                 v-for="character in characters"
                                 :key="character.id"
-                                class="group relative h-16 overflow-hidden rounded-lg text-left transition-all"
-                                :class="filterCharId === character.id ? 'ring-2 ring-primary' : 'hover:ring-2 hover:ring-base-300'"
+                                class="group relative h-16 overflow-hidden rounded-xs border text-left transition-colors duration-150 active:scale-[0.98]"
+                                :class="
+                                    filterCharId === character.id
+                                        ? 'dbcg-item-active border-primary'
+                                        : 'border-base-content/15 hover:border-primary/50'
+                                "
                                 type="button"
                                 :title="character.名称"
                                 @click="toggleFilter('char', String(character.id))"
@@ -211,14 +219,18 @@ watch(filterSkinIds, () => {
                     </div>
 
                     <div class="flex flex-col gap-1.5">
-                        <div class="mb-1 text-xs font-medium opacity-60">{{ $t('skin-colorize-gallery.by_series') }}</div>
-                        <div v-if="!seriesList.length" class="text-xs opacity-50">{{ $t('skin-colorize-gallery.no_series') }}</div>
+                        <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t('skin-colorize-gallery.by_series') }}</div>
+                        <div v-if="!seriesList.length" class="text-[11px] text-base-content/45">{{ $t('skin-colorize-gallery.no_series') }}</div>
                         <div v-else class="grid grid-cols-2 gap-1.5">
                             <button
                                 v-for="series in seriesList"
                                 :key="series.name"
-                                class="group relative h-16 overflow-hidden rounded-lg text-left transition-all"
-                                :class="filterSeries === series.name ? 'ring-2 ring-primary' : 'hover:ring-2 hover:ring-base-300'"
+                                class="group relative h-16 overflow-hidden rounded-xs border text-left transition-colors duration-150 active:scale-[0.98]"
+                                :class="
+                                    filterSeries === series.name
+                                        ? 'dbcg-item-active border-primary'
+                                        : 'border-base-content/15 hover:border-primary/50'
+                                "
                                 type="button"
                                 :title="`${series.name} ×${series.count}`"
                                 @click="toggleFilter('series', series.name)"
@@ -230,7 +242,7 @@ watch(filterSkinIds, () => {
                                     class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
                                     loading="lazy"
                                 />
-                                <div v-else class="flex h-full w-full items-center justify-center bg-base-200 text-[10px] opacity-60">
+                                <div v-else class="flex h-full w-full items-center justify-center bg-base-content/5 text-[10px] text-base-content/45">
                                     {{ $t('skin-colorize-gallery.no_icon') }}
                                 </div>
                                 <span
@@ -238,7 +250,8 @@ watch(filterSkinIds, () => {
                                 >
                                     {{ series.name }}
                                 </span>
-                                <span class="absolute right-1 top-1 rounded bg-black/60 px-1 text-[9px] leading-4 text-white"
+                                <span
+                                    class="absolute right-1 top-1 rounded-xs border border-white/20 bg-black/60 px-1 text-[9px] leading-4 tabular-nums text-white backdrop-blur-sm"
                                     >×{{ series.count }}</span
                                 >
                             </button>
@@ -251,7 +264,7 @@ watch(filterSkinIds, () => {
         <!-- 右侧卡片瀑布 -->
         <main class="flex min-h-0 flex-1 flex-col overflow-auto p-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center gap-1 rounded-full bg-base-200 p-1">
+                <div class="flex flex-wrap items-center gap-1.5">
                     <button
                         v-for="tab in [
                             { key: 'latest', label: '最新' },
@@ -259,35 +272,52 @@ watch(filterSkinIds, () => {
                             { key: 'views', label: '最多浏览' },
                         ]"
                         :key="tab.key"
-                        class="rounded-full px-3 py-1 text-sm"
-                        :class="sortBy === tab.key ? 'bg-base-100 font-medium shadow' : 'opacity-60'"
+                        class="inline-flex h-7 shrink-0 cursor-pointer items-center whitespace-nowrap rounded-xs border px-2.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                        :class="
+                            sortBy === tab.key
+                                ? 'border-primary bg-primary font-semibold text-primary-content'
+                                : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                        "
                         type="button"
                         @click="switchSort(tab.key as 'latest' | 'likes' | 'views')"
                     >
                         {{ tab.label }}
                     </button>
                 </div>
-                <button class="btn btn-primary btn-sm" type="button" @click="goCreate">{{ $t('skin-colorize-gallery.publish_scheme') }}</button>
+                <button
+                    class="inline-flex h-7 shrink-0 cursor-pointer items-center rounded-xs border border-primary bg-primary px-3 text-xs font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90 active:scale-[0.98]"
+                    type="button"
+                    @click="goCreate"
+                >
+                    {{ $t('skin-colorize-gallery.publish_scheme') }}
+                </button>
             </div>
 
             <div v-if="loading" class="flex flex-1 items-center justify-center">
                 <span class="loading loading-spinner loading-lg" />
             </div>
 
-            <div v-else-if="!plans.length" class="flex flex-1 flex-col items-center justify-center gap-3 text-sm opacity-60">
+            <div v-else-if="!plans.length" class="flex flex-1 flex-col items-center justify-center gap-3 text-sm text-base-content/45">
                 <span>{{ $t('skin-colorize-gallery.no_schemes') }}</span>
-                <button class="btn btn-outline btn-sm" type="button" @click="loadPlans(true)">{{ $t('common.refresh') }}</button>
+                <button
+                    class="inline-flex h-7 cursor-pointer items-center rounded-xs border border-base-content/20 px-3 text-xs text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.98]"
+                    type="button"
+                    @click="loadPlans(true)"
+                >
+                    {{ $t('common.refresh') }}
+                </button>
             </div>
 
             <template v-else>
                 <div class="grid gap-4 grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
-                    <div
-                        v-for="plan in plans"
+                    <article
+                        v-for="(plan, index) in plans"
                         :key="plan.id"
-                        class="group cursor-pointer overflow-hidden rounded border border-base-200 bg-base-100 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                        class="group animate-ef-rise cursor-pointer overflow-hidden rounded-xs border border-base-content/15 bg-base-100/60 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 active:scale-[0.99] motion-reduce:animate-none"
+                        :style="{ animationDelay: `${Math.min(index * 30, 300)}ms` }"
                         @click="router.push(`/skin-colorize/${plan.id}`)"
                     >
-                        <div class="relative aspect-4/3 overflow-hidden bg-base-200">
+                        <div class="relative aspect-4/3 overflow-hidden bg-base-content/3">
                             <img
                                 v-if="plan.imageUrl"
                                 :src="plan.imageUrl"
@@ -304,47 +334,75 @@ watch(filterSkinIds, () => {
                                     v-if="getSkin(plan)?.icon"
                                     :src="resolveSkinIconUrl(getSkin(plan)!.icon)"
                                     :alt="plan.title"
-                                    class="h-16 w-16 rounded-lg object-cover shadow"
+                                    class="h-16 w-16 rounded-xs object-cover"
                                 />
-                                <span v-if="!plan.colorIds?.some(id => id !== 0)" class="text-xs opacity-70">{{ $t('skin-colorize-gallery.default_colors') }}</span>
+                                <span v-if="!plan.colorIds?.some(id => id !== 0)" class="text-[11px] text-base-content/55">{{
+                                    $t('skin-colorize-gallery.default_colors')
+                                }}</span>
                             </div>
                             <span
-                                class="absolute left-2 top-2 rounded px-1.5 py-0.5 text-[10px] font-medium backdrop-blur"
-                                :class="plan.isOriginal ? 'bg-success/80 text-success-content' : 'bg-warning/80 text-warning-content'"
+                                class="absolute left-2 top-2 rounded-xs border px-1.5 py-0.5 text-[10px] font-medium leading-none backdrop-blur-sm"
+                                :class="
+                                    plan.isOriginal
+                                        ? 'border-success/50 bg-success/85 text-success-content'
+                                        : 'border-warning/50 bg-warning/85 text-warning-content'
+                                "
                             >
                                 {{ plan.isOriginal ? "原创" : "转载" }}
                             </span>
                             <span
                                 v-if="plan.hairCode"
-                                class="absolute right-2 top-2 rounded bg-primary/80 px-1.5 py-0.5 text-[10px] font-medium text-primary-content backdrop-blur"
+                                class="absolute right-2 top-2 rounded-xs border border-primary/50 bg-primary/85 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary-content backdrop-blur-sm"
                             >
                                 {{ $t('skin-colorize-gallery.include_hair') }}
                             </span>
                         </div>
 
                         <div class="flex flex-col gap-2 p-3">
-                            <div class="line-clamp-2 text-sm font-medium leading-snug">{{ plan.title }}</div>
+                            <div class="line-clamp-2 text-[13px] font-medium leading-snug transition-colors duration-150 group-hover:text-primary">
+                                {{ plan.title }}
+                            </div>
                             <div class="flex items-center gap-2">
                                 <QQAvatar class="w-5" :qq="plan.user?.qq" />
-                                <span class="min-w-0 flex-1 truncate text-xs opacity-70">{{ plan.user?.name || "匿名" }}</span>
-                                <span class="shrink-0 text-[10px] opacity-50">{{
+                                <span class="min-w-0 flex-1 truncate text-[11px] text-base-content/60">{{ plan.user?.name || "匿名" }}</span>
+                                <span class="shrink-0 text-[10px] tabular-nums text-base-content/40">{{
                                     formatRelativeTime(plan.createdAt, i18next.language)
                                 }}</span>
                             </div>
-                            <div class="flex items-center gap-3 text-[11px] opacity-60">
-                                <span class="flex items-center gap-1"><Icon icon="ri:heart-line" />{{ plan.likes }}</span>
-                                <span class="flex items-center gap-1"><Icon icon="ri:message-2-line" />{{ plan.commentsCount }}</span>
-                                <span class="ml-auto flex items-center gap-1"><Icon icon="ri:eye-line" />{{ plan.views }}</span>
+                            <div class="flex items-center gap-3 text-[11px] text-base-content/50">
+                                <span class="flex items-center gap-1">
+                                    <Icon icon="ri:heart-line" class="size-3.5 shrink-0" />
+                                    <span class="tabular-nums">{{ plan.likes }}</span>
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <Icon icon="ri:message-2-line" class="size-3.5 shrink-0" />
+                                    <span class="tabular-nums">{{ plan.commentsCount }}</span>
+                                </span>
+                                <span class="ml-auto flex items-center gap-1">
+                                    <Icon icon="ri:eye-line" class="size-3.5 shrink-0" />
+                                    <span class="tabular-nums">{{ plan.views }}</span>
+                                </span>
                             </div>
                         </div>
-                    </div>
+                    </article>
                 </div>
 
                 <div class="mt-4 flex justify-center">
-                    <button v-if="hasMore" class="btn btn-outline btn-sm" type="button" :disabled="loadingMore" @click="loadPlans(false)">
+                    <button
+                        v-if="hasMore"
+                        class="inline-flex h-7 items-center rounded-xs border px-3 text-xs transition-colors duration-150 active:scale-[0.98]"
+                        :class="
+                            loadingMore
+                                ? 'cursor-not-allowed border-base-content/15 text-base-content/30'
+                                : 'cursor-pointer border-base-content/20 text-base-content/70 hover:border-primary/60 hover:text-primary'
+                        "
+                        type="button"
+                        :disabled="loadingMore"
+                        @click="loadPlans(false)"
+                    >
                         {{ loadingMore ? "加载中..." : "加载更多" }}
                     </button>
-                    <span v-else class="text-xs opacity-50">{{ $t('skin-colorize-gallery.end_of_list') }}</span>
+                    <span v-else class="text-[11px] tracking-wide text-base-content/45">{{ $t('skin-colorize-gallery.end_of_list') }}</span>
                 </div>
             </template>
         </main>

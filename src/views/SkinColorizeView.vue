@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import { useTranslation } from "i18next-vue"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
@@ -17,6 +18,7 @@ import charData from "@/data/d/char.data"
 import { skinColorizeMaxColorParts, skinColorizeMaxHairColorParts, skinColorizeParts, skinColorizeSwatches } from "@/data/d/skin-colorize.data"
 import { decodeSkinColorizeCode, encodeSkinColorizeCode, formatSkinColorizeRgb, type SkinColorizeSwatch } from "@/data/skin-colorize"
 import { env } from "@/env"
+import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { copyText, pasteText } from "@/util"
@@ -24,6 +26,7 @@ import { formatRelativeTime } from "@/utils/time"
 
 const ui = useUIStore()
 const user = useUserStore()
+const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 /** i18n 实例（代理访问会登记语言切换重渲染依赖，保证相对时间随语言刷新）。 */
@@ -429,10 +432,7 @@ async function loadDyePlan(id: string) {
 /** 打开分享弹窗并初始化表单（新建模式）。 */
 function openShareModal() {
     if (!selectedSkin.value) return
-    if (!user.id) {
-        ui.showErrorMessage("请先登录后再分享")
-        return
-    }
+    if (!auth.requireLogin(t("login-dialog.need_login_hint"))) return
     shareIsOriginal.value = true
     shareSource.value = ""
     shareShow.value = true
@@ -580,10 +580,7 @@ async function removePlan() {
 /** 点赞 / 取消点赞当前方案。 */
 async function toggleLike() {
     if (!loadedPlan.value) return
-    if (!user.id) {
-        ui.showErrorMessage("请先登录")
-        return
-    }
+    if (!auth.requireLogin(t("login-dialog.need_login_hint"))) return
     if (loadedPlan.value.isLiked) {
         await unlikeDyePlanMutation({ id: loadedPlan.value.id })
     } else {
@@ -719,6 +716,8 @@ onBeforeUnmount(() => {
                     <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                         <SectionHeader no-animate compact kicker="PLAN" title="方案信息">
                             <template #trailing>
+                                <!-- 未登录：点赞/评论/发布都需要账号，这里常驻登录入口 -->
+                                <LoginButton v-if="!user.id" size="xs" variant="outline" />
                                 <button
                                     v-if="loadedPlan && (loadedPlan.userId === user.id || user.isAdmin)"
                                     class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-error/40 px-2 text-[11px] text-error transition-colors duration-150 hover:border-error hover:bg-error/10 active:scale-[0.97]"

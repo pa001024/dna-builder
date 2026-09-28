@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
+import { t } from "i18next"
 import { computed, onMounted, ref, watch } from "vue"
 import { execScript } from "@/api/app"
 import RaceLotterySimulator from "@/components/RaceLotterySimulator.vue"
 import { raceLotteryData, raceLotteryPlayersOrder } from "@/data/d/race-lottery.data"
 import { env } from "@/env"
+import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { mergeRaceLotteryBuffIds, parseRaceLotteryOcr, type RaceLotteryBuffIds, type RaceLotteryOcrBuff } from "@/utils/race-lottery-ocr"
@@ -57,6 +59,7 @@ type RaceLotteryServer = (typeof RACE_LOTTERY_SERVERS)[number]
 
 const user = useUserStore()
 const ui = useUIStore()
+const auth = useAuthStore()
 const selectedServer = useLocalStorage<RaceLotteryServer>("rl.server", "CN")
 const selectedDate = ref(getLocalDate())
 const orderedPlayers = raceLotteryPlayersOrder.flatMap(playerId => {
@@ -588,7 +591,9 @@ function fillOwnEntry(): void {
 async function submitEntry(playerId = selectedPlayerId.value, buffIds = selectedBuffIds.value): Promise<boolean> {
     const player = raceLotteryData.players.find(item => item.playerId === playerId)
     const normalizedBuffIds: RaceLotteryBuffIds = [buffIds[0] || 0, buffIds[1] || 0, buffIds[2] || 0]
-    if (!user.jwtToken || !player || !normalizedBuffIds.some(buffId => buffId > 0)) return false
+    // 提交接口按账号鉴权：未登录时先拉起登录弹窗
+    if (!auth.requireLogin(t("login-dialog.need_login_hint"))) return false
+    if (!player || !normalizedBuffIds.some(buffId => buffId > 0)) return false
 
     submitting.value = true
     errorMessage.value = ""
@@ -632,7 +637,9 @@ async function submitManualEntry(): Promise<void> {
  * 截图识别选手卡片并自动上传词条。
  */
 async function runRaceLotteryOcrUpload(): Promise<void> {
-    if (!env.isApp || ocrRunning.value || !user.jwtToken) return
+    if (!env.isApp || ocrRunning.value) return
+    // 识别结果直接上传到服务端，同样需要账号
+    if (!auth.requireLogin(t("login-dialog.need_login_hint"))) return
 
     ocrRunning.value = true
     errorMessage.value = ""
@@ -1019,7 +1026,7 @@ onMounted(async () => {
                                 <button
                                     class="btn btn-secondary btn-sm min-w-0 flex-1"
                                     type="button"
-                                    :disabled="!user.jwtToken || ocrRunning"
+                                    :disabled="ocrRunning"
                                     @click="runRaceLotteryOcrUpload"
                                 >
                                     <span v-if="ocrRunning" class="loading loading-spinner loading-sm" />
@@ -1078,7 +1085,7 @@ onMounted(async () => {
                                 <button
                                     class="btn btn-primary btn-sm w-full"
                                     type="submit"
-                                    :disabled="!user.jwtToken || submitting || !hasSelectedBuff"
+                                    :disabled="submitting || !hasSelectedBuff"
                                 >
                                     <span v-if="submitting" class="loading loading-spinner loading-sm" />
                                     {{ user.jwtToken ? "提交词条" : "登录后提交" }}

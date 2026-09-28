@@ -10,6 +10,7 @@ import {
     type UserShopSummary,
 } from "@/api/graphql"
 import { env } from "@/env"
+import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { formatDateTime } from "@/utils/time"
@@ -18,6 +19,7 @@ type ShopTab = "all" | "title" | "name_card"
 
 const ui = useUIStore()
 const user = useUserStore()
+const auth = useAuthStore()
 const { t } = useTranslation()
 
 const tab = ref<ShopTab>("all")
@@ -231,8 +233,7 @@ async function fetchSummary(): Promise<void> {
  * @param product 商品
  */
 async function redeemProduct(product: ShopProduct): Promise<void> {
-    if (!user.jwtToken) {
-        ui.showErrorMessage(t("points-mall.loginFirst"))
+    if (!auth.requireLogin(t("points-mall.loginFirst"))) {
         return
     }
     if (!summary.value) {
@@ -272,8 +273,7 @@ async function redeemProduct(product: ShopProduct): Promise<void> {
  * @param product 商品
  */
 async function equipProduct(product: ShopProduct): Promise<void> {
-    if (!user.jwtToken) {
-        ui.showErrorMessage(t("points-mall.loginFirst"))
+    if (!auth.requireLogin(t("points-mall.loginFirst"))) {
         return
     }
     if (!ownedIdSet.value.has(product.assetId)) {
@@ -330,7 +330,9 @@ watch(
                         <Icon icon="ri:refresh-line" class="w-4 h-4" />
                         {{ $t("points-mall.refresh") }}
                     </button>
-                    <RouterLink to="/setting" class="btn btn-primary btn-sm">
+                    <!-- 未登录：兑换/装扮都需要账号，顶部常驻登录入口；已登录则保留账号设置入口 -->
+                    <LoginButton v-if="!user.jwtToken" />
+                    <RouterLink v-else to="/setting" class="btn btn-primary btn-sm">
                         <Icon icon="ri:settings-3-line" class="w-4 h-4" />
                         {{ $t("points-mall.accountSettings") }}
                     </RouterLink>
@@ -354,9 +356,10 @@ watch(
                                 </div>
                                 <div class="badge badge-primary badge-outline">{{ $t("points-mall.points") }}</div>
                             </div>
-                            <div class="text-xs text-base-content/50 mt-2">
+                            <div class="mt-2 flex items-center gap-2 text-xs text-base-content/50">
                                 <span v-if="!user.jwtToken">{{ $t("points-mall.loginHint") }}</span>
                                 <span v-else>{{ $t("points-mall.pointsHint") }}</span>
+                                <LoginButton v-if="!user.jwtToken" size="xs" variant="outline" />
                             </div>
                         </div>
                     </div>
@@ -550,22 +553,19 @@ watch(
                                                 v-if="!ownedIdSet.has(p.assetId)"
                                                 class="btn btn-primary btn-sm"
                                                 :disabled="
-                                                    !user.jwtToken ||
                                                     pointsBalance === null ||
                                                     !isProductPurchasable(p) ||
                                                     pointsBalance < p.pointsCost ||
                                                     actionProductId === p.id
                                                 "
                                                 :title="
-                                                    !user.jwtToken
-                                                        ? $t('points-mall.loginFirst')
-                                                        : pointsBalance === null
-                                                          ? $t('points-mall.summaryNotReady')
-                                                          : !isProductPurchasable(p)
-                                                            ? $t('points-mall.notInRedeemWindow')
-                                                            : pointsBalance < p.pointsCost
-                                                              ? $t('points-mall.insufficientPoints')
-                                                              : ''
+                                                    pointsBalance === null
+                                                        ? $t('points-mall.summaryNotReady')
+                                                        : !isProductPurchasable(p)
+                                                          ? $t('points-mall.notInRedeemWindow')
+                                                          : pointsBalance < p.pointsCost
+                                                            ? $t('points-mall.insufficientPoints')
+                                                            : ''
                                                 "
                                                 @click="redeemProduct(p)"
                                             >

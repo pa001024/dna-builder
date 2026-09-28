@@ -6,6 +6,7 @@ import type { GameMod } from "@/api/gen/api-types"
 import { uploadGameMod, uploadGameModVersion } from "@/api/modShare"
 // 显式 import：首次进入的教程弹窗由本组件承载，避免依赖自动注册的时机
 import ModUsageGuideDialog from "@/components/ModUsageGuideDialog.vue"
+import { useAuthStore } from "@/store/auth"
 import { useModDownloadStore } from "@/store/modDownload"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
@@ -30,6 +31,7 @@ const emit = defineEmits<{
 
 const ui = useUIStore()
 const user = useUserStore()
+const auth = useAuthStore()
 const download = useModDownloadStore()
 
 const isLoggedIn = computed(() => !!user.jwtToken)
@@ -211,8 +213,10 @@ const imagesInput = ref<HTMLInputElement | null>(null)
 
 /**
  * 打开上传弹窗（保留上次未提交的输入，关闭后重开不丢失草稿）。
+ * 未登录时改为拉起登录弹窗，登录成功后再回到本页继续上传。
  */
 function openUploadModal() {
+    if (!auth.requireLogin(t("game-launcher.loginToUpload"))) return
     uploadOpen.value = true
 }
 
@@ -326,8 +330,7 @@ function selectUploadedCover() {
  * 提交上传发布 MOD。
  */
 async function submitUpload() {
-    if (!user.jwtToken) {
-        ui.showErrorMessage(t("game-launcher.loginToUpload"))
+    if (!auth.requireLogin(t("game-launcher.loginToUpload"))) {
         return
     }
     if (!uploadFile.value) {
@@ -422,8 +425,7 @@ function onVersionZipChange(event: Event) {
  * 提交上传新版本。
  */
 async function submitVersion() {
-    if (!user.jwtToken) {
-        ui.showErrorMessage(t("game-launcher.loginToUpload"))
+    if (!auth.requireLogin(t("game-launcher.loginToUpload"))) {
         return
     }
     if (!versionMod.value) return
@@ -497,16 +499,13 @@ async function submitVersion() {
                 >
                     <Icon icon="ri:question-line" class="size-4" />
                 </button>
-                <span v-if="!isLoggedIn" class="text-xs opacity-60 flex items-center gap-1">
+                <span v-if="!isLoggedIn" class="flex items-center gap-1 text-xs opacity-60">
                     <Icon icon="ri:lock-line" class="size-4" />
                     {{ $t("game-launcher.loginToDownload") }}
                 </span>
-                <button
-                    class="btn btn-primary btn-sm"
-                    :class="{ 'btn-disabled': !isLoggedIn }"
-                    :data-tip="!isLoggedIn ? $t('game-launcher.loginToUpload') : ''"
-                    @click="openUploadModal"
-                >
+                <!-- 未登录：下载/上传都需要账号，工具栏常驻登录入口 -->
+                <LoginButton v-if="!isLoggedIn" variant="outline" />
+                <button class="btn btn-primary btn-sm" @click="openUploadModal">
                     <Icon icon="ri:upload-2-line" class="size-4" />
                     {{ $t("game-launcher.uploadMod") }}
                 </button>
@@ -639,11 +638,13 @@ async function submitVersion() {
                                 <Icon icon="ri:eye-line" class="size-4" />
                                 {{ $t("mods-list.viewDetail") }}
                             </button>
-                            <!-- 未登录：仅提示，不提供下载入口 -->
-                            <button v-else-if="!isLoggedIn" class="btn btn-sm btn-ghost flex-1" disabled>
-                                <Icon icon="ri:lock-line" class="size-4" />
-                                {{ $t("game-launcher.loginToDownload") }}
-                            </button>
+                            <!-- 未登录：下载需要账号，点击就地登录 -->
+                            <LoginButton
+                                v-else-if="!isLoggedIn"
+                                class="flex-1"
+                                variant="ghost"
+                                :label="$t('game-launcher.loginToDownload')"
+                            />
                             <!-- 队列中：进度条 + 取消 -->
                             <div v-else-if="cardTask(mod)" class="flex min-w-0 flex-1 flex-col gap-1">
                                 <div class="flex items-center gap-1.5 text-xs">

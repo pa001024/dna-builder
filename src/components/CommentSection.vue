@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { t } from "i18next"
 import { useTranslation } from "i18next-vue"
 import { onMounted, ref, watch } from "vue"
 import type { Comment } from "@/api/gen/api-types"
 import { commentsQuery, createCommentMutation, deleteCommentMutation } from "@/api/graphql"
+import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { formatRelativeTime } from "@/utils/time"
@@ -24,6 +26,7 @@ const emit = defineEmits<{
 
 const ui = useUIStore()
 const user = useUserStore()
+const auth = useAuthStore()
 /** i18n 实例（代理访问会登记语言切换重渲染依赖，保证相对时间随语言刷新）。 */
 const { i18next } = useTranslation()
 
@@ -63,10 +66,7 @@ async function loadComments() {
 async function postComment() {
     const text = content.value.trim()
     if (!text) return
-    if (!user.id) {
-        ui.showErrorMessage("请先登录后再评论")
-        return
-    }
+    if (!auth.requireLogin(t("login-dialog.need_login_hint"))) return
     posting.value = true
     try {
         const comment = await createCommentMutation({ targetId: props.targetId, content: text })
@@ -120,7 +120,13 @@ onMounted(() => {
             </button>
         </div>
 
-        <div class="flex items-center gap-2">
+        <!-- 未登录：评论需要账号，直接给出登录入口 -->
+        <div v-if="!user.id" class="flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2">
+            <Icon icon="ri:lock-line" class="size-4 shrink-0 text-base-content/40" />
+            <span class="text-xs text-base-content/60">{{ $t('login-dialog.need_login_hint') }}</span>
+            <LoginButton class="ml-auto shrink-0" size="xs" variant="outline" />
+        </div>
+        <div v-else class="flex items-center gap-2">
             <input
                 v-model="content"
                 type="text"

@@ -363,6 +363,13 @@ watch(
                                     <Icon icon="ri:download-2-line" class="size-4" />
                                 </button>
                             </template>
+                            <!-- 未登录：单个版本也给出登录入口，点击就地登录 -->
+                            <LoginButton
+                                v-else-if="isApp"
+                                variant="ghost"
+                                :label="$t('game-launcher.loginToDownload')"
+                                :icon="false"
+                            />
                         </div>
                     </div>
 
@@ -414,10 +421,8 @@ watch(
                                 {{ $t("game-launcher.downloadLatest") }}
                             </button>
                         </template>
-                        <button v-else class="btn btn-ghost" disabled>
-                            <Icon icon="ri:lock-line" class="size-4" />
-                            {{ $t("game-launcher.loginToDownload") }}
-                        </button>
+                        <!-- 未登录：下载需要账号，点击就地登录 -->
+                        <LoginButton v-else variant="ghost" size="md" :label="$t('game-launcher.loginToDownload')" />
                     </template>
                     <div
                         v-else

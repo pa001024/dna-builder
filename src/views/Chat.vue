@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { t } from "i18next"
-import { computed, onBeforeMount, ref } from "vue"
+import { computed, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { deleteRoomMutation, Room, roomsQuery } from "@/api/graphql"
 import { useUIStore } from "@/store/ui"
@@ -40,16 +40,18 @@ async function deleteRoom(room: Room) {
 }
 
 const toggleMenu = ref(true)
-
-onBeforeMount(() => {
-    if (!user.id) {
-        router.push({ name: "user", query: { tip: t("chat.needLogin") } })
-    }
-})
 </script>
 
 <template>
-    <div class="w-full h-full flex overflow-hidden">
+    <!-- 未登录：聊天室属社区功能，就地给出登录入口 -->
+    <div v-if="!user.id" class="flex h-full w-full items-center justify-center p-6">
+        <div class="w-full max-w-sm rounded-xs border border-base-content/10 bg-base-100/60 p-6 text-center backdrop-blur-sm">
+            <Icon icon="ri:chat-3-line" class="mx-auto mb-3 size-10 text-base-content/35" />
+            <div class="text-sm text-base-content/70">{{ $t('chat.needLogin') }}</div>
+            <LoginButton class="mt-4" size="md" />
+        </div>
+    </div>
+    <div v-else class="w-full h-full flex overflow-hidden">
         <transition name="slide-right">
             <div
                 v-show="toggleMenu"

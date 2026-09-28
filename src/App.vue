@@ -393,6 +393,8 @@ onBeforeUnmount(() => {
             }"
         />
         <StartupModal />
+        <!-- 全局账号弹窗：任意页面都能通过 useAuthStore().openLogin() / requireLogin() 拉起 -->
+        <LoginDialog />
         <ScriptRuntimeFloatingBar v-if="isMainWindow" />
         <!-- 分享 MOD 下载队列（后台串行下载 + 安装，切页面不中断） -->
         <ModDownloadPanel />

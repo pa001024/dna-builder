@@ -13,6 +13,7 @@ import {
 } from "@/api/graphql"
 import { CharSettings, serializeCharSettings, useCharSettings } from "@/composables/useCharSettings"
 import { env } from "@/env"
+import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { copyText } from "@/util"
@@ -24,6 +25,7 @@ const props = defineProps<{
 
 const ui = useUIStore()
 const userStore = useUserStore()
+const auth = useAuthStore()
 const { t } = useTranslation()
 
 // 搜索和筛选
@@ -280,9 +282,8 @@ function copyLink(url: string) {
 
 // 点赞/取消点赞
 async function toggleLike(build: Build) {
-    // 检查用户是否已登录
-    if (!userStore.id) {
-        ui.showErrorMessage("请先登录后再进行点赞操作")
+    // 点赞需要账号：未登录时先拉起全局登录弹窗
+    if (!auth.requireLogin(t("login-dialog.need_login_hint"))) {
         return
     }
 
