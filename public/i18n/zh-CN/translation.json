@@ -1108,6 +1108,7 @@
         "book_desc": "查看读物条目、线索文本与区域位置",
         "char": "角色",
         "char_desc": "查看角色信息和属性",
+        "charprofile": "角色档案",
         "charvoice": "角色语音",
         "damage": "伤害",
         "damage_desc": "伤害公式分步骤拆解",
@@ -1744,6 +1745,11 @@
             "noPendingAsk": "当前没有等待回答的提问",
             "unknown": "未知错误"
         },
+        "map": {
+            "empty": "资料库里没有这条数据的坐标",
+            "more": "另有 {{count}} 处未列出",
+            "points": "共 {{count}} 处"
+        },
         "summary": {
             "answered": "已收到回答",
             "askInvalid": "提问格式无效",
@@ -1757,6 +1763,8 @@
             "noFacets": "该模块无额外筛选项",
             "questionFallback": "问题 {{index}}",
             "questionsPending": "{{count}} 个问题待选择",
+            "ragDisabled": "上下文检索增强未开启",
+            "ragHits": "命中 {{count}} 条证据",
             "searchHits": "{{prefix}}命中 {{count}} 条",
             "skipped": "用户已跳过",
             "storyHits": "命中 {{count}} 个任务链",
@@ -1774,6 +1782,7 @@
             "list_filter_options": "筛选条件",
             "list_version_additions": "版本新增",
             "query_module_entries": "模块明细",
+            "rag_search": "统一召回",
             "read_entry": "条目详情",
             "read_story": "剧情原文",
             "search_data": "全库检索",
@@ -1797,6 +1806,7 @@
             "chatHint": "Enter 发送 · Shift + Enter 换行 · 可粘贴图片",
             "chatPlaceholderAnswer": "也可以直接输入内容作答",
             "chatPlaceholderIdle": "继续追问，或换个话题",
+            "chatPlaceholderStart": "向资料检索提问",
             "chatSubmit": "发送",
             "copyAssistantTitle": "复制这条回复",
             "copyConversationFailed": "复制对话失败",
@@ -1817,6 +1827,8 @@
             "newConversation": "新对话",
             "processDone": "已完成 {{duration}}",
             "processDoneNoTime": "已完成",
+            "ragLocked": "不可更改已开始的对话",
+            "ragToggle": "实验性: 上下文检索增强",
             "removeImage": "移除这张图片",
             "searching": "正在检索资料库…",
             "stopSearch": "停止检索",
@@ -4183,7 +4195,9 @@
         "noResult": "没有找到匹配内容，试试角色、地图、任务、副本或怪物等关键词",
         "noResultEntries": "未找到匹配的资料库条目",
         "placeholder": "搜索已选模块...",
+        "searchKeywordTooLong": "输入超过 {{max}} 字，已跳过模糊检索；直接发送即可交给 AI 处理。",
         "searchScope": "当前搜索范围：{{scope}}",
+        "searchSkipped": "输入过长，已跳过模糊检索",
         "section": {
             "build": {
                 "badge": "Build",

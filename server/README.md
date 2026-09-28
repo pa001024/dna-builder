@@ -16,6 +16,8 @@
 ## 主要功能
 
 - GraphQL API（`/graphql`）与 WebSocket 订阅
+- 游戏数据查询（`gameData*` 系列字段）：统一暴露 `src/data/d/*.data.ts` 的全部数据集，
+  支持过滤 / 全文匹配 / 排序 / 字段投影 / 分页，详见 [.agents/docs/game-data-api.md](../.agents/docs/game-data-api.md)
 - MOD 接口（`/api/mods`）
 - AI 中转（`/api/v1/chat/completions`）：OpenAI 兼容，按登录账号计费，每人每天 0.5 元
 - AI 调用日志（`/api/v1/ai/logs`）：记录每次请求的元数据与完整对话，管理员可检索

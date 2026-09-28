@@ -1103,6 +1103,7 @@
         "book_desc": "Browse books, clue texts and related locations",
         "char": "Character",
         "char_desc": "View character information and attributes",
+        "charprofile": "Character Archive",
         "charvoice": "Character Voice",
         "damage": "Damage",
         "damage_desc": "Step-by-step breakdown of damage formulas",
@@ -1747,6 +1748,11 @@
             "noPendingAsk": "There is no question waiting for an answer",
             "unknown": "Unknown error"
         },
+        "map": {
+            "empty": "No coordinates for this entry in the database",
+            "more": "{{count}} more not listed",
+            "points": "{{count}} location(s)"
+        },
         "summary": {
             "answered": "Answer received",
             "askInvalid": "Invalid question format",
@@ -1760,6 +1766,8 @@
             "noFacets": "No extra facets for this module",
             "questionFallback": "Question {{index}}",
             "questionsPending": "{{count}} question(s) pending",
+            "ragDisabled": "Retrieval augmentation is off",
+            "ragHits": "{{count}} passage(s) recalled",
             "searchHits": "{{prefix}}{{count}} hit(s)",
             "skipped": "Skipped by user",
             "storyHits": "{{count}} quest chain(s) matched",
@@ -1777,6 +1785,7 @@
             "list_filter_options": "Filter options",
             "list_version_additions": "Version additions",
             "query_module_entries": "Module entries",
+            "rag_search": "Unified recall",
             "read_entry": "Entry details",
             "read_story": "Story text",
             "search_data": "Global search",
@@ -1800,6 +1809,7 @@
             "chatHint": "Enter to send · Shift + Enter for a new line · Paste an image",
             "chatPlaceholderAnswer": "You can also type your answer here",
             "chatPlaceholderIdle": "Keep asking, or start a new topic",
+            "chatPlaceholderStart": "Ask the retrieval agent",
             "chatSubmit": "Send",
             "copyAssistantTitle": "Copy this reply",
             "copyConversationFailed": "Failed to copy conversation",
@@ -1820,6 +1830,8 @@
             "newConversation": "New chat",
             "processDone": "Completed in {{duration}}",
             "processDoneNoTime": "Completed",
+            "ragLocked": "Cannot be changed once the conversation has started",
+            "ragToggle": "Experimental: retrieval-augmented context",
             "removeImage": "Remove this image",
             "searching": "Searching the database…",
             "stopSearch": "Stop retrieval",
@@ -4192,7 +4204,9 @@
         "noResult": "No matching content found. Try keywords like characters, maps, quests, dungeons, or monsters.",
         "noResultEntries": "No matching database entries found",
         "placeholder": "Search selected modules...",
+        "searchKeywordTooLong": "Over {{max}} characters: fuzzy search is skipped. Send it as-is and let the AI handle it.",
         "searchScope": "Current search scope: {{scope}}",
+        "searchSkipped": "Input too long, fuzzy search skipped",
         "section": {
             "build": {
                 "badge": "Build",

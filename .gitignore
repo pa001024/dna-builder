@@ -31,6 +31,8 @@ weixin/
 coverage/
 
 # other
+*.db
+*.ddb
 IFLOW.md
 INTRO.md
 .claude/
@@ -48,15 +50,14 @@ INTRO.md
 .umap-cache/
 .umap-export/
 .workbuddy/
-docs/
+.docs/
 externals/dna-api/java/
 externals/dna-api/js/
 mock/
 output/playwright/
 public/imgs/map
 server/.env
-server/data/race-lottery/*.final-speeds.json
-server/data/race-lottery/*.jsonl
+server/data/
 src-tauri/gen/android/keystore.properties
 src-tauri/sidecar/dna_mcp_server-x86_64-pc-windows-msvc.exe
 src/data/txt/*

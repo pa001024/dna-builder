@@ -14,7 +14,10 @@ import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import type { ChatSubmitPayload } from "@/utils/chat-image"
 import type { AskUserResponse } from "@/utils/db-ask-user"
+import { resolveCurrentDBAgentLang } from "@/utils/db-locale"
 import { type DBGlobalSearchOption, getGlobalSearchService, warmUpGlobalSearchService } from "@/utils/global-search"
+import { warmUpRagCorpus } from "@/utils/rag/corpus"
+import { isRagEnabled, setRagEnabled } from "@/utils/rag/enabled"
 
 const router = useRouter()
 const { t } = useTranslation()
@@ -45,7 +48,14 @@ const searchKeyword = ref("")
 const debouncedKeyword = ref("")
 /** 检索防抖延迟（ms）：取值需同时满足「打字时不卡」与「停顿后尽快出结果」 */
 const SEARCH_DEBOUNCE_MS = 150
+/**
+ * 参与模糊检索的关键词长度上限
+ */
+const SEARCH_KEYWORD_MAX_LENGTH = 20
 let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+/** 当前输入是否超出模糊检索的关键词长度上限 */
+const isKeywordTooLong = computed(() => searchKeyword.value.trim().length > SEARCH_KEYWORD_MAX_LENGTH)
 
 /**
  * 取消尚未触发的检索防抖任务。
@@ -60,8 +70,14 @@ function cancelSearchDebounce() {
 /**
  * 输入变化时重置防抖计时器：连续输入期间不做检索，停顿后一次性同步关键词。
  */
-watch(searchKeyword, () => {
+watch(searchKeyword, value => {
     cancelSearchDebounce()
+
+    if (value.trim().length > SEARCH_KEYWORD_MAX_LENGTH) {
+        debouncedKeyword.value = ""
+        return
+    }
+
     searchDebounceTimer = setTimeout(() => {
         searchDebounceTimer = null
         debouncedKeyword.value = searchKeyword.value
@@ -103,6 +119,7 @@ const {
     isConversationLoading,
     activeConversationId,
     messages: chatMessages,
+    hasMessages: chatHasMessages,
     isBusy: chatBusy,
     liveReasoning,
     pendingAsk: chatPendingAsk,
@@ -205,6 +222,49 @@ watch(activeConversationId, id => {
     }
 
     chatSessionId.value = id
+})
+
+/**
+ * 上下文检索增强（RAG）开关：实验性功能，**默认关闭**。
+ *
+ * 关闭时不构建语料索引、不发服务端向量检索请求，资料检索 Agent 也不会调用统一召回；
+ * 开启时立刻开始索引 Worker 的预热（不必等首次检索），因此这里同时承担
+ * 「状态持久化」与「开启即建索引」两件事——开关本身在输入框右下角。
+ */
+const ragEnabled = ref(isRagEnabled())
+
+watch(ragEnabled, value => {
+    setRagEnabled(value)
+
+    if (value) {
+        void warmUpRagCorpus(resolveCurrentDBAgentLang())
+    }
+})
+
+/**
+ * 上下文检索增强开关是否锁定：**当前这条会话已经在跑**（已有消息 / 检索进行中 / 有待作答的提问）后不可再改。
+ *
+ * 口径是「对话内容已经产生」，而不是「进了对话界面」——新对话（空输入点发送进入的空白对话、
+ * 或刚点过「新对话」）一条消息都没有，此时开关必须仍然可改，否则用户会被一个还没开始的对话锁住，
+ * 得先退出去才能开启检索增强。
+ *
+ * 反过来，本轮的提示词、工具面与是否建索引都在提问那一刻定下，
+ * 中途翻转会让「运行中的对话」与新的开关状态不一致（例如索引刚被关掉却仍在被检索）。
+ */
+const isRagToggleLocked = computed(() => chatHasMessages.value || chatBusy.value || chatPendingAsk.value !== null)
+
+/**
+ * 对话态输入框占位文案：等待作答 > 会话已开始 > 全新对话。
+ *
+ * 「继续追问，或换个话题」只对已经有来有回的会话成立；
+ * 刚打开、还没发出任何提问的空白对话用这句，会让人误以为上一轮已经存在。
+ */
+const chatPlaceholder = computed(() => {
+    if (chatPendingAsk.value) {
+        return t("dbAgent.ui.chatPlaceholderAnswer")
+    }
+
+    return chatHasMessages.value ? t("dbAgent.ui.chatPlaceholderIdle") : t("dbAgent.ui.chatPlaceholderStart")
 })
 
 /** 模块入口：icon 为 Icon.vue 中登记的字形名（as const 保留字面量类型，供 Icon 组件校验） */
@@ -365,7 +425,7 @@ const selectedSearchPaths = computed(() => {
  * 索引尚未预热完成时返回空列表，由结果区展示占位。
  */
 const searchOptions = computed<DBGlobalSearchOption[]>(() => {
-    if (!isSearchIndexReady.value) {
+    if (!isSearchIndexReady.value || isKeywordTooLong.value) {
         return []
     }
 
@@ -393,7 +453,12 @@ const searchStatusText = computed(() => {
         ? t("view.allModules")
         : t("view.moduleCount", { count: selectedSearchSectionIds.value.length })
 
+    // 索引未就绪时只标注检索范围；超长输入同理，但要单独说明「已跳过检索」
     if (!isSearchIndexReady.value || !debouncedKeyword.value.trim()) {
+        if (isKeywordTooLong.value) {
+            return t("view.searchSkipped")
+        }
+
         return t("view.searchScope", { scope: searchScopeText })
     }
 
@@ -825,6 +890,13 @@ onMounted(() => {
         isSearchIndexReady.value = true
     })
 
+    // 紧跟着预热 RAG 语料（词法索引）；它要枚举全库条目，所以排在检索索引之后。
+    // 资料检索 Agent 首次调用 rag_search 时就不必现场建索引。
+    // 上下文检索增强默认关闭：关闭态下不建索引，开启后由上面的 watch 立即预热。
+    if (ragEnabled.value) {
+        void warmUpRagCorpus(resolveCurrentDBAgentLang())
+    }
+
     // URL 里带着对话标记时恢复对话态（浏览器后退 / 刷新回到原来的对话）。
     // 会话列表由 useDBChat 在创建时发起异步加载，这里等它落地再查表。
     void until(() => !isConversationLoading.value).then(() => restoreChatFromUrl())
@@ -893,8 +965,10 @@ onBeforeUnmount(() => {
                     <div class="mx-auto w-full max-w-7xl">
                         <DBAskBox
                             v-model="searchKeyword"
+                            v-model:rag-enabled="ragEnabled"
+                            :rag-locked="isRagToggleLocked"
                             :busy="chatBusy"
-                            :placeholder="chatPendingAsk ? $t('dbAgent.ui.chatPlaceholderAnswer') : $t('dbAgent.ui.chatPlaceholderIdle')"
+                            :placeholder="chatPlaceholder"
                             :hint="$t('dbAgent.ui.chatHint')"
                             :submit-label="$t('dbAgent.ui.chatSubmit')"
                             @submit="handleSubmit"
@@ -951,6 +1025,12 @@ onBeforeUnmount(() => {
                                             </button>
                                         </li>
                                     </ul>
+
+                                    <!-- 超长输入：说明跳过的是模糊检索，直接发送仍可交给 Agent -->
+                                    <p v-else-if="isKeywordTooLong" class="px-1 py-4 text-sm text-base-content/55">
+                                        {{ $t("view.searchKeywordTooLong", { max: SEARCH_KEYWORD_MAX_LENGTH }) }}
+                                        <span class="mt-1.5 block text-xs text-base-content/40">{{ $t("dbAgent.ui.browseHint") }}</span>
+                                    </p>
 
                                     <p v-else class="px-1 py-4 text-sm text-base-content/55">
                                         {{ $t("view.noResultEntries") }}
@@ -1024,6 +1104,8 @@ onBeforeUnmount(() => {
                     <div class="mx-auto w-full max-w-7xl">
                         <DBAskBox
                             v-model="searchKeyword"
+                            v-model:rag-enabled="ragEnabled"
+                            :rag-locked="isRagToggleLocked"
                             :busy="chatBusy"
                             :placeholder="$t('dbAgent.ui.browsePlaceholder')"
                             :hint="$t('dbAgent.ui.browseHint')"

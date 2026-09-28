@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { $ } from "bun"
 import { glob } from "glob"
 import {
+    type EnumTypeDefinitionNode,
     type FieldDefinitionNode,
     type InputObjectTypeDefinitionNode,
     type NonNullTypeNode,
@@ -183,6 +184,7 @@ function parseSchema(schema: string) {
     const mutations: FieldDefinitionNode[] = []
     const objectTypes: Map<string, ObjectTypeDefinitionNode> = new Map()
     const inputTypes: Map<string, InputObjectTypeDefinitionNode> = new Map()
+    const enumTypes: Map<string, EnumTypeDefinitionNode> = new Map()
 
     // 遍历所有定义
     for (const definition of ast.definitions) {
@@ -201,10 +203,14 @@ function parseSchema(schema: string) {
             // 保存所有输入类型
             const inputDef = definition as InputObjectTypeDefinitionNode
             inputTypes.set(inputDef.name.value, inputDef)
+        } else if (definition.kind === "EnumTypeDefinition") {
+            // 保存所有枚举类型（生成的查询会以 Types.X 引用它们）
+            const enumDef = definition as EnumTypeDefinitionNode
+            enumTypes.set(enumDef.name.value, enumDef)
         }
     }
 
-    return { queries, mutations, objectTypes, inputTypes }
+    return { queries, mutations, objectTypes, inputTypes, enumTypes }
 }
 
 /**
@@ -234,6 +240,8 @@ function graphqlTypeToTsType(type: TypeNode): string {
         Float: "number",
         Boolean: "boolean",
         ID: "string",
+        // 自定义 JSON 标量：记录主体结构随数据集而异，只能落到 unknown
+        JSON: "unknown",
     }
 
     switch (type.kind) {
@@ -265,6 +273,11 @@ function generateGraphQLFields(typeName: string, allObjectTypes: Map<string, Obj
         const fieldName = field.name.value
         const fieldType = field.type
 
+        // 必填参数的字段无法自动补参数（例如 field(name: String!)），跳过而不是生成非法查询
+        if ((field.arguments || []).some(arg => arg.type.kind === "NonNullType")) {
+            continue
+        }
+
         // 标量类型列表
         const graphqlScalarTypes = new Set(["String", "Int", "Float", "Boolean", "ID"])
 
@@ -284,8 +297,8 @@ function generateGraphQLFields(typeName: string, allObjectTypes: Map<string, Obj
 
         const fieldTypeName = extractFieldTypeName(fieldType)
 
-        // 如果是标量类型，直接输出字段名
-        if (graphqlScalarTypes.has(fieldTypeName)) {
+        // 标量、自定义标量（如 JSON）以及未定义的对象类型都按叶子处理，不能展开选择集
+        if (graphqlScalarTypes.has(fieldTypeName) || !allObjectTypes.has(fieldTypeName)) {
             fieldsStr += `${indentStr}${fieldName}\n`
         } else {
             // 如果是对象类型，递归生成嵌套字段
@@ -309,8 +322,8 @@ function generateClientCode(
 ): string {
     let code = ""
 
-    // 标量类型列表
-    const scalarTypes = new Set(["string", "number", "boolean"])
+    // 标量类型列表（unknown / any 覆盖自定义 JSON 标量与未知类型）
+    const scalarTypes = new Set(["string", "number", "boolean", "unknown", "any"])
 
     for (const field of fields) {
         const fieldName = field.name.value
@@ -326,7 +339,7 @@ function generateClientCode(
         // 为自定义类型添加Types.前缀
         returnTypeStr = returnTypeStr.replace(/([A-Z]\w*)/g, match => {
             // 跳过标量类型
-            if (["string", "number", "boolean", "any"].includes(match)) {
+            if (["string", "number", "boolean", "unknown", "any"].includes(match)) {
                 return match
             }
             return `Types.${match}`
@@ -339,11 +352,11 @@ function generateClientCode(
         let objectTypeName = ""
         const graphqlScalarTypes = new Set(["String", "Int", "Float", "Boolean", "ID"])
 
-        // 辅助函数：递归提取对象类型名称
+        // 辅助函数：递归提取对象类型名称（自定义标量与未定义类型都按叶子处理，不展开选择集）
         function extractObjectName(type: TypeNode): string {
             switch (type.kind) {
                 case "NamedType":
-                    return graphqlScalarTypes.has(type.name.value) ? "" : type.name.value
+                    return graphqlScalarTypes.has(type.name.value) || !allObjectTypes.has(type.name.value) ? "" : type.name.value
                 case "NonNullType":
                     return extractObjectName(type.type)
                 case "ListType":
@@ -366,7 +379,7 @@ function generateClientCode(
                     // 为自定义类型添加Types.前缀
                     const finalTypeStr = argTypeStr.replace(/([A-Z]\w*)/g, match => {
                         // 跳过标量类型
-                        if (["string", "number", "boolean", "any"].includes(match)) {
+                        if (["string", "number", "boolean", "unknown", "any"].includes(match)) {
                             return match
                         }
                         return `Types.${match}`
@@ -504,6 +517,14 @@ function generateTypeScriptInput(inputType: InputObjectTypeDefinitionNode): stri
 }
 
 /**
+ * 将GraphQL枚举转换为TypeScript联合类型
+ */
+function generateTypeScriptEnum(enumType: EnumTypeDefinitionNode): string {
+    const values = (enumType.values || []).map(value => `"${value.name.value}"`)
+    return `export type ${enumType.name.value} = ${values.length > 0 ? values.join(" | ") : "never"}\n\n`
+}
+
+/**
  * 主函数
  */
 async function main() {
@@ -519,6 +540,7 @@ async function main() {
     const allMutations: FieldDefinitionNode[] = []
     const allObjectTypes: Map<string, ObjectTypeDefinitionNode> = new Map()
     const allInputTypes: Map<string, InputObjectTypeDefinitionNode> = new Map()
+    const allEnumTypes: Map<string, EnumTypeDefinitionNode> = new Map()
 
     // 遍历所有文件，解析schema
     for (const file of files) {
@@ -528,7 +550,7 @@ async function main() {
 
         if (typeDefs) {
             try {
-                const { queries, mutations, objectTypes, inputTypes } = parseSchema(typeDefs)
+                const { queries, mutations, objectTypes, inputTypes, enumTypes } = parseSchema(typeDefs)
                 allQueries.push(...queries)
                 allMutations.push(...mutations)
 
@@ -541,6 +563,11 @@ async function main() {
                 for (const [name, type] of inputTypes.entries()) {
                     if (!allInputTypes.has(name)) {
                         allInputTypes.set(name, type)
+                    }
+                }
+                for (const [name, type] of enumTypes.entries()) {
+                    if (!allEnumTypes.has(name)) {
+                        allEnumTypes.set(name, type)
                     }
                 }
             } catch (error) {
@@ -556,6 +583,9 @@ async function main() {
     }
     for (const [_name, inputType] of allInputTypes.entries()) {
         typesCode += generateTypeScriptInput(inputType)
+    }
+    for (const [_name, enumType] of allEnumTypes.entries()) {
+        typesCode += generateTypeScriptEnum(enumType)
     }
 
     // 写入类型文件

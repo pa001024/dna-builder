@@ -1,4 +1,5 @@
 import i18next from "i18next"
+import { getLocalizedCharExtData } from "@/data/d/charext-locale"
 import { getLocalizedCharVoiceData } from "@/data/d/charvoice-locale"
 import { resolveStoryLocaleBySetting, type StoryLocale } from "@/data/d/story-locale"
 import {
@@ -109,7 +110,8 @@ async function ensureI18nBundle(i18nLang: string): Promise<void> {
  * 确保指定语言可用：翻译资源与「按语言切分的数据集」都就绪。
  *
  * 检索期需要在同步路径里读译文与数据集（如模块条目、模块名），这里统一做一次异步预热。
- * 预热范围只含体积小、且被同步读取的角色语音；剧情正文由检索函数自身异步取用，不在此处加载。
+ * 预热范围只含体积小、且被同步读取的角色语音与角色档案；剧情正文由检索函数自身异步取用，
+ * 不在此处加载。
  * @param lang 数据语言
  */
 export async function ensureDBAgentLangReady(lang: DBAgentLang): Promise<void> {
@@ -137,6 +139,12 @@ export async function ensureDBAgentLangReady(lang: DBAgentLang): Promise<void> {
         await getLocalizedCharVoiceData(lang)
     } catch (error) {
         console.warn("[db-locale] 语音数据集加载失败，将回退中文原文", { lang, error })
+    }
+
+    try {
+        await getLocalizedCharExtData(lang)
+    } catch (error) {
+        console.warn("[db-locale] 角色档案数据集加载失败，将回退中文原文", { lang, error })
     }
 }
 

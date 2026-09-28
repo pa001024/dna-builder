@@ -14,8 +14,12 @@ import { apiPlugin } from "./api"
 import { aiLogPlugin } from "./api/ai-log"
 import { modApiPlugin } from "./api/mod"
 import { raceLotteryPlugin } from "./api/race-lottery"
+import { ragPlugin } from "./api/rag"
 
 import { botPlugin } from "./bot"
+import { requestIndexBuild, resolveAllowedLangs, warmCurrentFingerprints } from "./rag/build"
+import { startRagProgressUi, stopRagProgressUi } from "./rag/progress-ui"
+import { warmVectorIndex } from "./rag/search"
 
 const app = new Elysia()
     // 不处理文件请求 由nginx处理
@@ -27,6 +31,7 @@ const app = new Elysia()
     .use(raceLotteryPlugin())
     .use(aiPlugin())
     .use(aiLogPlugin())
+    .use(ragPlugin())
     .use(
         cors({
             // origin: "*",
@@ -38,8 +43,40 @@ const app = new Elysia()
     .use(yogaPlugin())
     .use(botPlugin())
 
-app.listen(8887)
+// 监听端口：PORT 可覆盖（默认 8887）
+const port = Number(process.env.PORT ?? "") || 8887
+
+app.listen(port)
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`)
+
+// RAG 索引构建的固定进度区域（仅交互式终端；日志照旧在区域上方滚动）
+startRagProgressUi()
+
+// 启动参数 `bun sv -- --index-all`：预热完成后把白名单内的语言全部排入后台构建队列
+// （已最新的语言只做指纹比对，不重新嵌入）
+const indexAll = process.argv.includes("--index-all")
+
+// 启动预热：算一次各语言的当前数据指纹并缓存；索引落后的语言自动排队重建
+void warmCurrentFingerprints()
+    .then(async () => {
+        // 指纹就绪后空跑一次检索：HNSW 索引首次查询要从磁盘载入（约 85ms），之后约 7ms
+        await warmVectorIndex().catch(error =>
+            console.warn(`[rag] 向量索引预热失败：${error instanceof Error ? error.message : String(error)}`)
+        )
+
+        if (!indexAll) {
+            return
+        }
+
+        console.log(`[rag] --index-all：语言白名单 ${resolveAllowedLangs().join(" / ")} 已排入后台构建队列（单飞串行，日志按语言输出）`)
+
+        for (const lang of resolveAllowedLangs()) {
+            requestIndexBuild(lang, "启动参数 --index-all")
+        }
+    })
+    .catch(error => console.error("[rag] 启动预热失败", error))
+
+process.on("beforeExit", stopRagProgressUi)
 
 // AI 调用日志的保留期清理（未配置 AI_LOG_RETENTION_DAYS 时不做任何事）
 scheduleAiLogRetention()

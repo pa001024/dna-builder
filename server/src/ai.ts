@@ -220,7 +220,7 @@ function isApiKeyConfigured(): boolean {
  * @param headers 请求头集合
  * @returns 解析出的用户信息；未登录或令牌无效时返回 null
  */
-function resolveUser(headers: Record<string, string | undefined>): JWTUser | null {
+export function resolveUser(headers: Record<string, string | undefined>): JWTUser | null {
     const raw = (headers.token || headers.authorization?.replace(/^Bearer\s+/i, "") || "").trim()
     if (!raw) return null
     try {

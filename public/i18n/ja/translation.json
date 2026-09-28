@@ -1085,6 +1085,7 @@
         "book_desc": "読物の条目、手がかり本文、関連エリアを確認",
         "char": "キャラクター",
         "char_desc": "キャラクターの情報と属性を確認",
+        "charprofile": "キャラクターアーカイブ",
         "charvoice": "キャラクターボイス",
         "damage": "ダメージ",
         "damage_desc": "ダメージ計算式を段階的に分解",
@@ -1723,6 +1724,11 @@
             "noPendingAsk": "回答待ちの質問はありません",
             "unknown": "不明なエラー"
         },
+        "map": {
+            "empty": "データベースにこのデータの座標がありません",
+            "more": "他 {{count}} か所は省略",
+            "points": "全 {{count}} か所"
+        },
         "summary": {
             "answered": "回答を受け取りました",
             "askInvalid": "質問の形式を解析できません",
@@ -1736,6 +1742,8 @@
             "noFacets": "このモジュールには追加の絞り込み項目がありません",
             "questionFallback": "質問 {{index}}",
             "questionsPending": "{{count}} 件の質問が未回答",
+            "ragDisabled": "コンテキスト検索拡張は未使用",
+            "ragHits": "根拠を {{count}} 件取得",
             "searchHits": "{{prefix}}{{count}} 件ヒット",
             "skipped": "ユーザーがスキップしました",
             "storyHits": "{{count}} 件のクエストチェーンがヒット",
@@ -1753,6 +1761,7 @@
             "list_filter_options": "絞り込み条件",
             "list_version_additions": "バージョン追加",
             "query_module_entries": "モジュール明細",
+            "rag_search": "統合リコール",
             "read_entry": "エントリ詳細",
             "read_story": "ストーリー本文",
             "search_data": "全体検索",
@@ -1776,6 +1785,7 @@
             "chatHint": "Enter で送信 · Shift + Enter で改行 · 画像を貼り付け可",
             "chatPlaceholderAnswer": "ここに直接入力して回答できます",
             "chatPlaceholderIdle": "続けて質問するか、話題を変えてください",
+            "chatPlaceholderStart": "データ検索に質問する",
             "chatSubmit": "送信",
             "copyAssistantTitle": "この返信をコピー",
             "copyConversationFailed": "会話のコピーに失敗しました",
@@ -1796,6 +1806,8 @@
             "newConversation": "新しい会話",
             "processDone": "完了 {{duration}}",
             "processDoneNoTime": "完了",
+            "ragLocked": "開始済みの会話では変更できません",
+            "ragToggle": "実験的: コンテキスト検索拡張",
             "removeImage": "この画像を削除",
             "searching": "データベースを検索中…",
             "stopSearch": "検索を停止",
@@ -4164,7 +4176,9 @@
         "noResult": "一致する内容が見つかりません。キャラクター、マップ、クエスト、ダンジョン、モンスターなどのキーワードを試してください。",
         "noResultEntries": "一致するデータベース項目が見つかりません",
         "placeholder": "選択したモジュールを検索...",
+        "searchKeywordTooLong": "{{max}} 文字を超える入力のため、あいまい検索をスキップしました。そのまま送信すれば AI が処理します。",
         "searchScope": "現在の検索範囲: {{scope}}",
+        "searchSkipped": "入力が長すぎるため、あいまい検索をスキップしました",
         "section": {
             "build": {
                 "badge": "ビルド",

@@ -99,6 +99,14 @@ run()
 - `evaluate` 接收**字符串表达式**；多语句用 `(function(){ ... })()` 包裹，顶层 `const/let` 会抛 `SyntaxError`。
 - `console` 选项必须是**函数**（`console: (level, ...a) => {...}`），传 `true` 会抛 `ERR_INVALID_ARG_TYPE`。
 - 断言失败不要靠"肉眼看截图"判断；优先用 `evaluate` 读取 DOM/状态做代码级断言，截图仅作人工辅助。
+- **`navigate` 会重置页面**：注入到 `window` 上的钩子/状态（含 `localStorage` 之外的临时全局量）会随整页加载丢失，
+  所以钩子只能在**最后一次 `navigate` 之后**装，且每个用例内自给自足，不要跨用例依赖注入态。
+- **要断言「某个功能被触发」就 hook 构造函数**：例如确认「开关打开后立刻启动了索引 Worker」，
+  可在页面里替换 `window.Worker` 记录 URL 再触发交互（`new Worker` 的参数是 `URL` 对象，`String()` 后含 `xxx.worker`）。
+- **读模块内部状态**：页面上下文 `await import("/src/utils/xxx.ts")` 可直接调纯前端模块（裸包名解析不了），
+  用来断言「语料/索引是否已建」这类不体现在 DOM 上的状态，比翻 UI 稳。
+- 无头 profile 默认**深色主题且没有数据包**：依赖游戏数据的异步流程会静默失败，
+  断言要挑不依赖数据的信号（DOM 结构、`localStorage`、Worker 计数），别把「数据没装」误判成功能坏了。
 - 需要登录态跨用例保留时，给 `WebView` 传 `dataStore: "./profile"`。
 - **导航 URL 一律追加 `?hideUpdateInfo=1`**，否则启动期的数据包弹窗会盖住页面（详见上方「启动弹窗」）。
 - 截图与临时脚本放 `.tmp/`：框架按 `process.cwd()` 写 `screenshots/`，所以**以 `.tmp` 为工作目录运行**

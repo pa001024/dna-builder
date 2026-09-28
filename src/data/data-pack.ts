@@ -33,6 +33,14 @@ export interface DataPackManifest {
     version: string
     imgsHash?: string
     modules: Record<string, DataPackModuleMeta>
+    /**
+     * RAG 内容指纹：按数据语言、语言内按语料种类（模块）分别给出。
+     *
+     * 打包时算出，客户端检索时原样携带；服务端按种类比对，相符的种类才提供向量。
+     * 分模块的意义是「只有部分模块变化」时其余模块仍然可用（例如只改了对话，
+     * 语音/档案的向量照常命中）。老数据包没有这一项，此时语义通道不可用。
+     */
+    rag?: Record<string, { kinds: Record<string, string>; count: number }>
 }
 
 export interface DataPackInstallStatus {
@@ -1097,6 +1105,21 @@ export async function exportDataPackVersionFile(version: string): Promise<File> 
  */
 export function getLoadedDataPackManifest(): DataPackManifest | null {
     return state.manifest
+}
+
+/**
+ * 取当前已加载数据包里某个语言**按种类分别**的 RAG 内容指纹。
+ *
+ * 打包时由 `tools/data-pack.ts` 用与服务端同一套切块器算出，客户端只负责原样携带。
+ * 因此这里**不做本地重算**：客户端的数据会被安全模式门限过滤，重算出来的值因人而异，
+ * 与服务端按全量数据算出的指纹对不上。
+ * @param lang 数据语言
+ * @returns 种类 → 内容指纹；未安装数据包 / 老数据包没有该字段时返回 null
+ */
+export function getLoadedDataPackRagFingerprints(lang: string): Record<string, string> | null {
+    const kinds = state.manifest?.rag?.[lang]?.kinds
+
+    return kinds && Object.keys(kinds).length ? kinds : null
 }
 
 /**

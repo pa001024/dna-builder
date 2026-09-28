@@ -1,7 +1,7 @@
 [
     {
-        "version": "v1.4.1",
-        "msg": "优化资料库检索AI"
+        "version": "v1.4.2",
+        "msg": "优化资料库检索AI, 增加RAG功能"
     },
     {
         "version": "v1.4.0",

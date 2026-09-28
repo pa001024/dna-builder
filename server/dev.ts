@@ -20,8 +20,11 @@ if (mig.exitCode !== 0) process.exit(mig.exitCode ?? 1)
  * 从符号链接路径(如 D:\dev\dna-builder\server)启动时, 模块的真实路径(E:\...)会被判定为
  * "不在项目目录内"而放弃监听(热更新失效)。
  * 这里以真实路径作为 cwd 重新派生子进程, 即可让 watch 对盘符符号链接路径同样生效。
+ *
+ * 启动参数(如 --index-all)原样透传给服务端子进程。
  */
-const server = Bun.spawn(["bun", "run", "--watch", "src/index.ts"], {
+const extraArgs = process.argv.slice(2).filter(arg => arg !== "--")
+const server = Bun.spawn(["bun", "run", "--watch", "src/index.ts", ...extraArgs], {
     cwd: SERVER_DIR,
     stdout: "inherit",
     stderr: "inherit",

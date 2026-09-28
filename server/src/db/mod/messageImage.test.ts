@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { appendOssAutoFormat, estimateDataUrlBytes, processMessageImageContent } from "./messageImage"
+import { estimateDataUrlBytes, processMessageImageContent } from "./messageImage"
 
 /**
  * @description 生成指定字节大小的 Data URL，便于测试消息图片处理逻辑。
@@ -12,23 +12,6 @@ function buildDataUrl(bytes: number): string {
 }
 
 describe("messageImage", () => {
-    describe("appendOssAutoFormat", () => {
-        it("应该在无查询参数时追加 x-oss-process", () => {
-            const url = appendOssAutoFormat("https://cdn.example.com/img/a.png")
-            expect(url).toBe("https://cdn.example.com/img/a.png?x-oss-process=image/format,auto")
-        })
-
-        it("应该在已有查询参数时追加 x-oss-process", () => {
-            const url = appendOssAutoFormat("https://cdn.example.com/img/a.png?v=1")
-            expect(url).toBe("https://cdn.example.com/img/a.png?v=1&x-oss-process=image/format,auto")
-        })
-
-        it("应该避免重复追加 x-oss-process", () => {
-            const url = appendOssAutoFormat("https://cdn.example.com/img/a.png?x-oss-process=image/format,auto")
-            expect(url).toBe("https://cdn.example.com/img/a.png?x-oss-process=image/format,auto")
-        })
-    })
-
     describe("estimateDataUrlBytes", () => {
         it("应该正确估算 Data URL 的字节数", () => {
             const dataUrl = buildDataUrl(128)

@@ -2,6 +2,22 @@
 
 Guidelines for agentic coding assistants working on the dna-builder codebase.
 
+本文件只做**索引**：命令、约定与硬性规则留在本页，机制细节一律放独立文档，避免单文件无限膨胀。
+新增说明请写进 `.agents/docs/` 并在下方登记一行，不要往本页堆内容。
+
+## 文档索引
+
+| 主题 | 文档 |
+|---|---|
+| 构建 / 增量 lint / SSG 预渲染 / 数据包改写（动手前必读） | [build-and-ssg.md](.agents/docs/build-and-ssg.md) |
+| 代码风格细则（Formatter / TS / Vue / Rust） | [code-style.md](.agents/docs/code-style.md) |
+| Dev Tools（i18n / 图标 / 称号框 / 属性 i18n / 文本包 / 数据包） | [dev-tools.md](.agents/docs/dev-tools.md) |
+| RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |
+| 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
+
+- 技能：`.agents/skills/*/SKILL.md`（admin-management-page、bun-webview-test、db-style、fmodel-unpack、perf-hotspot-profiling、ue4-pak-mod）
+- 业务与设计文档：`docs/`
+
 ## Build / Lint / Test Commands
 
 ### Frontend (Vue + TypeScript)
@@ -17,26 +33,6 @@ pnpm coverage                         # Tests with coverage
 pnpm format                           # Format with Biome
 ```
 
-### Incremental lint (`pnpm lint`)
-
-`pnpm lint` = `bun tools/incremental-lint.ts`：无改动直接跳过；有改动时 Biome 只跑改动文件，vue-tsc 只查
-改动文件 + 依赖它们的文件 + 环境声明文件（mtime 指纹缓存在 `.tmp/lint-cache.json`，仅检查通过才写入）。
-首次运行 / 缓存失效 / 环境声明变更 / 影响面过半时自动退回全量。需要完整检查用 `pnpm lint:full`。
-
-### SSG 预渲染（仅网页版）
-
-`pnpm build` 在 vite build 之后会跑 `node tools/ssg.mjs`：用 Vite 的 SSR 模块加载器（middlewareMode
-开发服务器 + `ssrLoadModule` 载入 `src/ssr/entry-server.ts`）把主要路由渲染成静态 HTML，写成
-`dist/<route>/index.html` 并注入各自的 title / description / canonical / og 标签。
-
-- 客户端**不做 hydration**：静态标记只服务爬虫与首屏，`main.ts` 挂载时会整体替换 `#app` 的内容。
-  预渲染时没有 `navigator`，页面要保证"无浏览器环境也能渲染出可看的静态版本"。
-- 只有页面级兼容改动需要留意：新增页面若要在 node 侧渲染，setup 阶段不要直接操作 DOM。
-- 桌面端构建（`DNA_BUILDER_APP_BUILD=1`）自动跳过；`DNA_SSG_SKIP=1` 手动跳过；
-  `pnpm ssg` 可单独重跑，`node tools/ssg.mjs --only=/download` 只重跑一个路由（调样式时很方便）。
-- 新增需要被搜索引擎收录的页面：把它加进 `tools/ssg.mjs` 的 `PAGES`（含 SEO 文案）。
-- 单个路由渲染失败只会退化成"SEO 头 + 空 `#app`"的 SPA 外壳并在日志里告警，不会中断构建。
-
 ### Desktop App (Tauri + Rust)
 
 ```bash
@@ -47,9 +43,9 @@ pnpm tauri build   # Build desktop app
 ### Server (Bun + Elysia)
 
 ```bash
-cd server && bun run dev   # Start dev server (port 8887)
-bun run gen                # Generate database migrations
-bun run migrate            # Run migrations
+cd server && bun run dev         # Start dev server (port 8887)
+bun run gen                      # Generate database migrations
+bun run migrate                  # Run migrations
 ```
 
 ### Rust (MCP Server)
@@ -58,92 +54,22 @@ bun run migrate            # Run migrations
 cd mcp_server && cargo build --release
 ```
 
-## Code Style Guidelines
+## Code Style（完整清单见 code-style.md）
 
-### Formatting (Biome)
-
-- **Formatter**: Biome (`biome.json`) — NOT Prettier
-- **Indentation**: 4 spaces (no tabs)
-- **Line width**: 140 characters
-- **Semicolons**: `asNeeded` (omit when possible)
-- **Quotes**: Double quotes
-- **Trailing commas**: ES5 style
-- **Arrow parens**: As needed (omit for single param)
-- **Line endings**: LF
-- **Imports**: Auto-organized by Biome assist
-
-### TypeScript Config
-
-- **Strict mode**: Enabled (`strict: true`)
-- **No unused locals/params**: Enforced
-- **Path alias**: `@/*` → `./src/*`
-- **Target**: ESNext, bundler module resolution
-- **JSX**: Preserve with Vue JSX import source
-- **Decorators**: `experimentalDecorators` enabled
-
-### Vue / TypeScript Conventions
-
-**Imports**: Named imports, type-only imports with `type` keyword
-
-```typescript
-import { ref, computed } from "vue"
-import { defineStore } from "pinia"
-import type { SomeType } from "./types"
-```
-
-**Naming**:
-
-- Components: PascalCase (`Icon.vue`, `CharBuildView.vue`)
-- Utilities/Composables: camelCase (`useCharSettings`, `formatProp`)
-- Stores: `use` prefix (`useGameStore`, `useUIStore`)
-- Constants: UPPER_SNAKE_CASE (`GAME_PROCESS`)
-- Types/Interfaces: PascalCase (`CharBuild`, `LeveledWeapon`)
-
-**Vue Specifics**:
-
-- `<script setup lang="ts">` for all components
-- Composition API only (no Options API)
-- Pinia with `defineStore()` for state
-- `defineProps<>()` and `defineEmits<>()` for type-safe props/emits
-- Auto component imports via `unplugin-vue-components/vite`
-
-**Error Handling**:
-
-```typescript
-async function someAsync() {
-    try {
-        const result = await apiCall()
-        return result
-    } catch (error) {
-        console.error("Operation failed", error)
-        return null
-    }
-}
-```
-
-### Rust (Tauri / MCP Server)
-
-- Functions: snake_case, Structs: PascalCase, Constants: UPPER_SNAKE_CASE
-- Tauri commands: `#[tauri::command]`, return `Result<T, String>`
-- Error handling: `Result<T, E>` with `?` operator
+- Biome 格式化：**4 空格缩进 / 双引号 / 省略分号 / 140 列 / ES5 尾逗号 / LF**
+- TypeScript `strict`，`@/*` → `./src/*`，不用 Prettier
+- Vue 一律 `<script setup lang="ts">` + 组合式 API + Pinia `defineStore()`
+- **每个函数与复杂逻辑块必须写中文注释（JSDoc：参数 / 返回值 / 异常）**；注释只写代码看不出的约束与口径
+- 命名：组件 PascalCase / 工具与组合式 camelCase / Store `use` 前缀 / 常量 UPPER_SNAKE_CASE
+- Rust：函数 snake_case、结构体 PascalCase、Tauri 命令返回 `Result<T, String>`
 
 ## Testing Guidelines
 
-- **Framework**: Vitest
-- **Location**: `src/data/tests/` or alongside source files
-- **Naming**: `*.test.ts`
-- **Excludes**: `server/**`, `externals/**`
-- **Coverage thresholds**: Lines 80%, Functions 80%, Branches 70%, Statements 80%
-
-```typescript
-import { describe, it, expect } from "vitest"
-
-describe("Feature", () => {
-    it("should do something", () => {
-        expect(functionUnderTest()).toBe(expected)
-    })
-})
-```
+- **Framework**：前端 Vitest、server 侧 `bun test`
+- **Location**：`src/data/tests/` 或与源文件同目录；**Naming**：`*.test.ts`
+- 前端 vitest 排除 `server/**`、`externals/**`（server 单独跑）
+- **Coverage thresholds**：Lines 80% / Functions 80% / Branches 70% / Statements 80%
+- e2e 用 [bun-webview-test](.agents/skills/bun-webview-test/SKILL.md)，**禁止 Playwright**
 
 ## Project Structure
 
@@ -155,6 +81,7 @@ src/
 ├── views/           # Page components
 ├── api/             # API calls
 ├── utils/           # Utility functions
+├── shared/          # Agent 提示词等跨端共享文本
 └── router.ts        # Route config
 server/              # Bun + Elysia backend
 src-tauri/           # Tauri Rust backend
@@ -162,6 +89,7 @@ mcp_server/          # MCP server (Rust)
 tools/               # Dev tools (i18n-tool.ts, icon-tool.ts)
 externals/dna-api/   # DNA API package
 public/i18n/         # Translation files
+.agents/docs/        # 本文件展开的细节文档
 ```
 
 ## Key Technologies
@@ -176,37 +104,6 @@ public/i18n/         # Translation files
 - **Build**: Vite v7
 - **Linting/Formatting**: Biome
 
-## Dev Tools
-
-- **i18n**: `bun tools/i18n-tool.ts export|import` — export missing translations, import completed ones
-- **Icons**: `bun tools/icon-tool.ts add|check|clean|list` — manage icons in `src/components/Icon.vue` use when lint error on icon not found
-- **API gen**: `pnpm gen` — generate API calls from tools/generate-api-calls.ts
-- **Title frames**: `pnpm itf` (`bun tools/import-title-frame.ts`) — regenerate 称号框 render data by
-  reading the game pak through fmodel-cli; outputs `src/data/generated/title-frame.generated.ts`,
-  `src/data/generated/title-frame-textures.json`（webp 文件名 → 游戏内包路径的清单）and
-  `public/imgs/titleframe/*.webp`. Preview any frame with `tools/title-frame-preview.html` on the dev
-  server (`?frames=07_1,09_1` to narrow down).
-    - 称号框贴图遇到同名冲突会改写成带父目录前缀的名字（如 `13_T_PersonalInfo_Title_13_08.webp`），
-      basename 与源 PNG 对不上；`tools/webp-import.ts` 读上面那份清单，按包路径把它们补齐，
-      所以 `bun tools/webp-import.ts` 也能覆盖这些贴图，不会再把它们报成缺失。
-- **Attribute i18n**: `pnpm iattr` (`bun tools/import-attr-i18n.ts`) — 把上游
-  `out/AttrConfig.json` + `out/TextMap_I18n.json` 里的属性名（`Attr_*_Name`，如 `Attr_ATK_Fire_Name`）
-  与属性说明（`ATTR_DESC_*`，如 `ATTR_DESC_ATK_Fire`）导入 `public/i18n/*/translation.json`。
-  属性名补进根命名空间，只补缺失键、不覆盖已有译文；属性说明写入 `attrDesc` 命名空间。
-  键均为属性在 zh-CN 下的展示名（攻击行按元素/伤害类型区分，如 `火属性攻击`、`切割攻击`），
-  读取入口为 `src/composables/useAttrI18n.ts`，展示在角色属性面板（`CharAttrShow.vue`）、武器面板
-  （`WeaponTab.vue`）的属性来源 tooltip 标题与说明里。上游目录默认取同级 `DuetNightAbyssData2`，
-  缺失时回退 `D:/dev/DuetNightAbyssData2`，可用 `--upstream <dir>` 或 `DNA_UPSTREAM` 覆盖，
-  `--check` 只比对不落盘。
-- **Game text pack**: `pnpm importdata` 会额外产出 `src/data/d/translations.data.ts` —— 把上游
-  `final/i18n/<locale>/translation.json`（本身就是「简体中文原文 → 译文」扁平表）压成 tc/en/jp/kr/fr
-  五份对照表，随数据包下发。前端由 `src/data/translations-pack.ts` 在读包后注入 i18next
-  （走 `data-pack.ts` 的激活钩子，禁止反向 import 以免循环依赖），检索层的反向索引优先查这份表。
-  `pnpm prune-i18n`（`bun tools/prune-migrated-i18n.ts`）据此把 `public/i18n` 里已迁移的中文键条目删掉，
-  `--check` 只报告。**保留项**：英文点号键的界面文案、角色特质、属性名与 `attrDesc`（上游没有这些文案）；
-  zh-CN 整体不动（fallbackLng，不进包）。数据包未安装时界面会显示中文原文，属预期降级。
-- e2e测试使用[bun-webview-test](.agents\skills\bun-webview-test\SKILL.md) 禁止使用Playwright
-
 ## Git Hooks (Husky)
 
 Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
@@ -218,7 +115,7 @@ Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
 <system_rules>
 
 1. **DO NOT RUN `pnpm dev` or `pnpm build`** — view http://localhost:1420/ directly in browser
-2. **CHINESE COMMENTS**: Required for every function and complex logic block (JSDoc format)
+2. **CHINESE COMMENTS**: Required for every function and complex logic block (JSDoc format). Do not overdo it. Keep the main content. Strictly prohibit writing design ideas, process descriptions, detailed implementation records, and repetitive explanations in code comments
 3. **JSDoc**: Use for function documentation including params, return values, exceptions
 4. **No shortcuts**: Never remove functions, skip processing, or use TODO placeholders instead of real code
 5. **Consistency**: Check sibling files before writing to match existing patterns

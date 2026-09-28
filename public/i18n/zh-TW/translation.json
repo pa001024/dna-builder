@@ -1085,6 +1085,7 @@
         "book_desc": "查看讀物條目、線索文本與區域位置",
         "char": "角色",
         "char_desc": "查看角色資訊和屬性",
+        "charprofile": "角色檔案",
         "charvoice": "角色語音",
         "damage": "傷害",
         "damage_desc": "傷害公式分步驟拆解",
@@ -1723,6 +1724,11 @@
             "noPendingAsk": "目前沒有等待回答的提問",
             "unknown": "未知錯誤"
         },
+        "map": {
+            "empty": "資料庫裡沒有這筆資料的座標",
+            "more": "另有 {{count}} 處未列出",
+            "points": "共 {{count}} 處"
+        },
         "summary": {
             "answered": "已收到回答",
             "askInvalid": "提問格式無效",
@@ -1736,6 +1742,8 @@
             "noFacets": "該模組無額外篩選項",
             "questionFallback": "問題 {{index}}",
             "questionsPending": "{{count}} 個問題待選擇",
+            "ragDisabled": "上下文檢索增強未開啟",
+            "ragHits": "命中 {{count}} 條證據",
             "searchHits": "{{prefix}}命中 {{count}} 條",
             "skipped": "使用者已跳過",
             "storyHits": "命中 {{count}} 個任務鏈",
@@ -1753,6 +1761,7 @@
             "list_filter_options": "篩選條件",
             "list_version_additions": "版本新增",
             "query_module_entries": "模組明細",
+            "rag_search": "統一召回",
             "read_entry": "條目詳情",
             "read_story": "劇情原文",
             "search_data": "全庫檢索",
@@ -1776,6 +1785,7 @@
             "chatHint": "Enter 傳送 · Shift + Enter 換行 · 可貼上圖片",
             "chatPlaceholderAnswer": "也可以直接輸入內容作答",
             "chatPlaceholderIdle": "繼續追問，或換個話題",
+            "chatPlaceholderStart": "向資料檢索提問",
             "chatSubmit": "傳送",
             "copyAssistantTitle": "複製這條回覆",
             "copyConversationFailed": "複製對話失敗",
@@ -1796,6 +1806,8 @@
             "newConversation": "新對話",
             "processDone": "已完成 {{duration}}",
             "processDoneNoTime": "已完成",
+            "ragLocked": "不可更改已開始的對話",
+            "ragToggle": "實驗性: 上下文檢索增強",
             "removeImage": "移除這張圖片",
             "searching": "正在檢索資料庫…",
             "stopSearch": "停止檢索",
@@ -4163,7 +4175,9 @@
         "noResult": "沒有找到符合內容，試試角色、地圖、任務、副本或怪物等關鍵字",
         "noResultEntries": "未找到符合的資料庫條目",
         "placeholder": "搜尋已選模組...",
+        "searchKeywordTooLong": "輸入超過 {{max}} 字，已跳過模糊檢索；直接發送即可交給 AI 處理。",
         "searchScope": "目前搜尋範圍：{{scope}}",
+        "searchSkipped": "輸入過長，已跳過模糊檢索",
         "section": {
             "build": {
                 "badge": "Build",

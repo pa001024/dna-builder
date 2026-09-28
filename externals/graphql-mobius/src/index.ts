@@ -197,7 +197,7 @@ type MapSchema<T extends string, Known extends CustomTypes = {}> = T extends `${
 
 type RemovePrefixArrayBracket<T extends string> = T extends `[${infer Rest}` ? RemovePrefixArrayBracket<Rest> : T
 
-// @ts-expect-error To hard to explain this shape in TS, I works trust me
+// @ts-ignore To hard to explain this shape in TS, I works trust me
 type CreateArray<
     T extends string,
     // @ts-expect-error
@@ -406,6 +406,31 @@ type UndefinedToNullableFields<T> = T extends object
 type MaybePromise<T> = T | Promise<T>
 type MaybeRepeater<T> = T | Repeater<T> | null
 
+/**
+ * 非根类型的字段解析器：与根字段同样的四参签名（parent / args / context / info）。
+ *
+ * 记录主体、派生统计这类字段往往需要拿父对象现算（而不是查库时的 join），
+ * 因此非根类型也必须能写解析器，而不是只能给值。
+ */
+export type FieldResolver<Parent, Value, Args, Context = unknown> = (
+    parent: Parent,
+    args: Args,
+    context: Context,
+    info: GraphQLResolveInfo
+) => MaybePromise<UndefinedToNullableFields<Value>> | (Value extends null ? void : never)
+
+/**
+ * 非根类型（`type Foo { ... }`）的解析器映射。
+ *
+ * - 带参数字段（如 `field(name: String!)`）只能写解析器，因为值形态无法表达参数；
+ * - 无参数字段既能写解析器，也能像以前一样直接给值（保留旧写法）。
+ */
+export type TypeResolvers<Shape, Context = unknown> = {
+    [K in keyof Shape]?: Shape[K] extends (arg: infer Args) => infer Returned
+        ? FieldResolver<Shape, Returned, Args, Context>
+        : Shape[K] | FieldResolver<Shape, Shape[K], null | undefined | {}, Context>
+}
+
 export type Resolver<
     T extends {
         Query: Record<string, unknown>
@@ -475,7 +500,9 @@ export type Resolver<
                 ? { Subscription?: {} }
                 : { Subscription: A }
             : never) &
-        Partial<Omit<T, "Query" | "Mutation" | "Subscription" | "Fragment">>
+        Partial<{
+            [K in Exclude<keyof T, "Query" | "Mutation" | "Subscription" | "Fragment">]: TypeResolvers<T[K], Context>
+        }>
 >
 
 type Selective<T> = T extends object

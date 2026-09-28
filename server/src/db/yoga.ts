@@ -6,7 +6,9 @@ import { createSchema, createYoga, type YogaInitialContext } from "graphql-yoga"
 import jwt from "jsonwebtoken"
 import { machineIdSync } from "node-machine-id"
 import { pubsub } from "../rt/pubsub"
+import { isIntrospectionOperation } from "./introspection"
 import { schemaWith } from "./mod"
+
 export type Context = YogaInitialContext & CustomContext
 
 export type CustomContext = {
@@ -50,7 +52,12 @@ export function yogaPlugin() {
                 }
                 return { user, pubsub }
             },
-            plugins: [useGraphQlJit()],
+            plugins: [
+                // graphql-jit 加速普通查询；内省查询交给默认执行器：
+                // graphql-jit 在 graphql v17 下会把内省字段的默认参数判成缺失，导致 GraphiQL 拉取 schema 失败
+                // （详见 introspection.ts 的说明）
+                useGraphQlJit({}, { enableIf: args => !isIntrospectionOperation(args) }),
+            ],
             graphiql: {
                 subscriptionsProtocol: "WS", // use WebSockets instead of SSE
             },

@@ -41,6 +41,9 @@ yarn-error.log*
 package-lock.json
 **/*.bun
 **/*.db
+# RAG 向量索引库（DuckDB，可随时重建的派生数据）
+**/*.duckdb
+**/*.duckdb.wal
 *.lock
 
 # AI 调用日志（运行数据，不入库）

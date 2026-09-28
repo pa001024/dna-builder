@@ -5,7 +5,8 @@ import { useGameText } from "@/composables/useGameText"
 import { charMap, LeveledChar, LeveledSkillWeapon } from "@/data"
 import { resourceMap } from "@/data/d"
 import { type SkinItem, skinData } from "@/data/d/accessory.data"
-import { type CharExt, charExtData } from "@/data/d/charext.data"
+import type { CharExt } from "@/data/d/charext.data"
+import { getCachedCharExtData, loadCharExtDataByLocale, resolveCharExtLocaleBySetting } from "@/data/d/charext-locale"
 import { type CharVoice, charVoiceData } from "@/data/d/charvoice.data"
 import { type CharVoiceLocale, getLocalizedCharVoiceData, resolveCharVoiceLocaleBySetting } from "@/data/d/charvoice-locale"
 import { type Resource } from "@/data/d/resource.data"
@@ -45,19 +46,6 @@ const voiceLocaleOptions: { key: VoiceLocale; label: string; cvLabel: string }[]
 ]
 
 const VOICE_DATASET_BASE_URL = "https://modelscope.cn/datasets/pa001024/dna-voice-dataset/resolve/master"
-type CharExtLocale = "zh" | "en" | "jp" | "kr" | "fr" | "tc"
-type CharExtExtendedLocale = Exclude<CharExtLocale, "zh">
-
-const charExtDataCache: Partial<Record<CharExtLocale, CharExt[]>> = {
-    zh: charExtData,
-}
-const charExtLoaderMap: Record<CharExtExtendedLocale, () => Promise<CharExt[]>> = {
-    en: async () => (await import("@/data/d/charext.en.data")).charExtData_en,
-    jp: async () => (await import("@/data/d/charext.jp.data")).charExtData_jp,
-    kr: async () => (await import("@/data/d/charext.kr.data")).charExtData_kr,
-    fr: async () => (await import("@/data/d/charext.fr.data")).charExtData_fr,
-    tc: async () => (await import("@/data/d/charext.tc.data")).charExtData_tc,
-}
 
 // 创建LeveledChar实例
 const leveledChar = computed(() => {
@@ -314,23 +302,8 @@ function getSkillWeaponInheritDescription(weapon: LeveledSkillWeapon): string {
     if (weapon.inherit === "ranged") return "继承远程武器属性"
     return ""
 }
-const localizedCharExtData = ref<CharExt[]>(charExtData)
+const localizedCharExtData = ref<CharExt[]>(getCachedCharExtData("zh"))
 const localizedCharVoiceData = ref<CharVoice[]>(charVoiceData)
-
-/**
- * 将设置语言代码映射为角色档案文本语言。
- * @param language 设置语言代码
- * @returns 角色档案语言
- */
-function resolveCharExtLocaleBySetting(language: string): CharExtLocale {
-    if (language === "jiaojiao") return "en"
-    if (language.startsWith("en")) return "en"
-    if (language.startsWith("ja")) return "jp"
-    if (language.startsWith("ko")) return "kr"
-    if (language.startsWith("fr")) return "fr"
-    if (language === "zh-TW" || language.startsWith("zh-Hant")) return "tc"
-    return "zh"
-}
 
 const charExtList = computed(() => localizedCharExtData.value.filter(item => item.charId === props.char.id))
 const charSkinList = computed<SkinItem[]>(() =>
@@ -443,21 +416,11 @@ const skinUpgradeCostItems = computed(() =>
 const voiceLanguage = computed(() => resolveVoiceDatasetLanguage(selectedVoiceLocale.value))
 
 /**
- * 加载当前语言的角色档案数据，并缓存已加载模块。
+ * 加载当前语言的角色档案数据（数据集本身按语言缓存，见 charext-locale）。
  * @param language 设置语言代码
  */
 async function loadLocalizedCharExtData(language: string): Promise<void> {
-    const locale = resolveCharExtLocaleBySetting(language)
-    const cachedData = charExtDataCache[locale]
-    if (cachedData) {
-        if (setting.lang === language) {
-            localizedCharExtData.value = cachedData
-        }
-        return
-    }
-
-    const data = await charExtLoaderMap[locale as CharExtExtendedLocale]()
-    charExtDataCache[locale] = data
+    const data = await loadCharExtDataByLocale(resolveCharExtLocaleBySetting(language))
     if (setting.lang !== language) {
         return
     }

@@ -84,11 +84,25 @@ export class GlobalSearchService {
     private readonly fuse: Fuse<DBSearchEntry>
     /** 带数字 ID 的条目：数字查询时先在这里做精确/包含命中 */
     private readonly idEntries: DBSearchEntry[]
+    /** 全部索引条目：供 RAG 语料构建等需要「全库枚举」的场景复用，避免重复实现枚举规则 */
+    private readonly entries: DBSearchEntry[]
 
     constructor() {
         const entries = this.buildSearchEntries()
+        this.entries = entries
         this.fuse = this.createFuse(entries)
         this.idEntries = entries.filter(entry => entry.idText !== "")
+    }
+
+    /**
+     * 列出全库检索索引的全部条目（含条目 id、标题、副信息、类型、路径与隐藏检索词）。
+     *
+     * 返回的是内部条目的浅引用，调用方**不要修改**其中的字段：
+     * 这些对象就是 Fuse 索引的数据源，改字段会让索引与数据不一致。
+     * @returns 全库索引条目列表
+     */
+    listEntries(): readonly DBSearchEntry[] {
+        return this.entries
     }
 
     /**

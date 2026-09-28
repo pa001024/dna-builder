@@ -20,6 +20,7 @@ import {
     searchDamageSteps,
     searchDamageTerms,
 } from "@/data/damage-mechanics"
+import { RAG_CHUNK_KINDS, type RagChunkKind } from "@/data/rag/types"
 import { renderDBAgentSystemPrompt } from "@/shared/dbAgentSystemPrompt"
 import { DEFAULT_AI_MAX_TOKENS } from "@/utils/ai-config"
 import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
@@ -42,6 +43,8 @@ import {
     searchAll,
     searchStory,
 } from "@/utils/db-search"
+import { isRagEnabled } from "@/utils/rag/enabled"
+import { ragSearch } from "@/utils/rag/search"
 
 /**
  * 资料检索 Agent。
@@ -218,6 +221,7 @@ const TOOL_LABELS: Record<string, string> = {
     list_data_modules: "dbAgent.tool.list_data_modules",
     list_filter_options: "dbAgent.tool.list_filter_options",
     search_data: "dbAgent.tool.search_data",
+    rag_search: "dbAgent.tool.rag_search",
     query_module_entries: "dbAgent.tool.query_module_entries",
     read_entry: "dbAgent.tool.read_entry",
     list_version_additions: "dbAgent.tool.list_version_additions",
@@ -302,7 +306,7 @@ const DB_AGENT_TOOLS: AgentToolDefinition[] = [
     {
         name: "search_data",
         description:
-            "全库关键词检索，覆盖资料库所有模块（角色、武器、魔之楔、成就、任务链、活动、副本、怪物、道具等），返回标题、副信息、类型与跳转路径。适合不确定内容属于哪个模块时先定位。",
+            "全库关键词检索，覆盖资料库所有模块（角色、武器、魔之楔、成就、任务链、活动、副本、怪物、NPC、道具等），返回标题、副信息、类型与跳转路径。适合不确定内容属于哪个模块时先定位。",
         parameters: {
             type: "object",
             properties: {
@@ -313,6 +317,37 @@ const DB_AGENT_TOOLS: AgentToolDefinition[] = [
                     description: "可选，限定只在该模块内检索，取值见 list_data_modules 的 id，例如 char / weapon / mod / achievement",
                 },
                 limit: { type: "integer", description: "返回条数上限，默认 20，最大 50" },
+            },
+            required: ["query"],
+        },
+    },
+    {
+        name: "rag_search",
+        description:
+            "统一召回：一次跨「剧情台词 / 剧情 AI 总结 / 角色语音 / 角色档案 / 全库条目」检索，返回可直接引用的证据——命中正文、前后几行的上下文片段、出处路径与得分。" +
+            "用于回答“谁说过什么”“哪段剧情、哪句语音、哪条角色档案、哪件道具提到过 X”“某个词在资料库里出现在哪”这类需要证据的问题；" +
+            "要「这条剧情讲了什么」这类整链梗概时，用 kinds 只查 summary（剧情 AI 总结）——一条任务链一条，一次性拿到完整脉络，比逐行台词快得多。" +
+            "不确定内容属于哪个模块、或需要跨模块找线索时也先用它。返回的是片段：要某个条目的完整字段（生日、CV、面板数值）或某条档案的全文仍用 read_entry，要按分类穷举仍用 query_module_entries。",
+        parameters: {
+            type: "object",
+            properties: {
+                lang: LANG_SCHEMA,
+                query: { type: "string", description: "检索关键词或一句话描述，例如角色名、道具名、机制术语、台词片段" },
+                kinds: {
+                    type: "array",
+                    items: { type: "string", enum: [...RAG_CHUNK_KINDS] },
+                    description:
+                        "可选，限定语料种类：story 剧情台词 / summary 任务链剧情 AI 总结（整链梗概）/ voice 角色语音 / profile 角色档案（角色背景故事原文）/ entry 全库条目。不传则五者都查",
+                },
+                modules: {
+                    type: "array",
+                    items: { type: "string" },
+                    description:
+                        "可选，限定条目模块（char / weapon / mod / charprofile 等，取值见 list_data_modules）。只给 modules 未给 kinds 时自动只查带模块归属的语料（条目 + 角色档案）",
+                },
+                version: { type: "string", description: "可选，限定版本号，例如 1.6" },
+                limit: { type: "integer", description: "返回条数上限，默认 8，最大 30" },
+                context_lines: { type: "integer", description: "剧情命中行前后附带的台词行数，默认 2，最大 5" },
             },
             required: ["query"],
         },
@@ -342,14 +377,17 @@ const DB_AGENT_TOOLS: AgentToolDefinition[] = [
     {
         name: "read_entry",
         description:
-            "读取单个条目的完整字段（详情页上的档案与面板）：角色的生日 / 出生地 / 势力 / 阵营 / CV / 基础属性 / 技能 / 突破材料，武器的面板数值与技能，魔之楔的词条属性与效果，成就奖励，怪物属性等。" +
-            "回答「某某的生日是什么」「谁配的音」「这把武器暴击多少」这类问题必须调用它——query_module_entries 与 search_data 只返回条目摘要，不含这些字段。" +
+            "读取单个条目的完整字段（详情页上的档案与面板）：角色的生日 / 出生地 / 势力 / 阵营 / CV / 基础属性 / 技能 / 突破材料，武器的面板数值与技能，魔之楔的词条属性与效果，成就奖励，怪物属性，角色档案的整篇正文（module=charprofile），以及读物与资源的地图坐标（书页位置 / 宝藏位置 / 采集位置）等。" +
+            "回答「某某的生日是什么」「谁配的音」「这把武器暴击多少」「某某的档案里讲了什么」「这件道具 / 这本书在哪」这类问题必须调用它——query_module_entries 与 search_data 只返回条目摘要，不含这些字段。" +
             "先用 query_module_entries 或 search_data 定位条目拿到 id，再用本工具；给名称也可以，但只在唯一命中时直接返回详情，否则会返回候选列表。",
         parameters: {
             type: "object",
             properties: {
                 lang: LANG_SCHEMA,
-                module: { type: "string", description: "模块 id，见 list_data_modules，例如 char / weapon / mod / achievement" },
+                module: {
+                    type: "string",
+                    description: "模块 id，见 list_data_modules，例如 char / weapon / mod / achievement / charprofile（角色档案）",
+                },
                 id: { type: "string", description: "条目 id（取自 query_module_entries / search_data 的返回），优先用它定位" },
                 name: { type: "string", description: "可选，条目名称；不确定 id 时可只给名称，命中唯一时直接返回详情" },
             },
@@ -373,7 +411,8 @@ const DB_AGENT_TOOLS: AgentToolDefinition[] = [
         description:
             "剧情检索：在任务链与剧情对话正文中查找人名、地点、事件，返回命中的任务链以及说话人与台词片段。用于回答“某某剧情里谁做了什么”“这句话是谁说的”。" +
             '也可不带关键词、只用 filters 按剧情列表页的筛选规则列举任务链，例如列出全部主线任务（filters 传 {"type":"主线任务"}）。' +
-            "关键词与 filters 可以同时给出，此时先按 filters 收窄范围再检索。",
+            "关键词与 filters 可以同时给出，此时先按 filters 收窄范围再检索。" +
+            "有关键词时，每条命中都附带 summary（该任务链的整链 AI 剧情总结，中文）：问“这条剧情讲了什么”时直接用 summary 作答即可，不必再读原文。",
         parameters: {
             type: "object",
             properties: {
@@ -395,7 +434,8 @@ const DB_AGENT_TOOLS: AgentToolDefinition[] = [
     {
         name: "read_story",
         description:
-            "读取指定任务链（可用 quest_id 限定单个任务）的剧情原文，按行返回说话人与台词，用于补充上下文。任务链 id 可由 search_story 或 search_data 得到。",
+            "读取指定任务链（可用 quest_id 限定单个任务）的剧情原文，按行返回说话人与台词，用于补充上下文。任务链 id 可由 search_story 或 search_data 得到。" +
+            "返回里 chain.summary 是该链的整链 AI 剧情总结（中文）：要概括剧情先看它，lines 用来核对细节，不必把整链读完。",
         parameters: {
             type: "object",
             properties: {
@@ -559,6 +599,15 @@ function summarizeToolResult(name: string, payload: unknown): string {
             const results = data.results as unknown[] | undefined
             return i18next.t("dbAgent.summary.searchHits", { prefix: "", count: results?.length ?? 0 })
         }
+        case "rag_search": {
+            // 开关关闭时工具只返回不可用提示，展示成「已关闭」而不是「召回 0 条」
+            if (data.error) {
+                return i18next.t("dbAgent.summary.ragDisabled", { defaultValue: "上下文检索增强未开启" })
+            }
+
+            const hits = (data.hits as unknown[] | undefined) ?? []
+            return i18next.t("dbAgent.summary.ragHits", { count: hits.length })
+        }
         case "query_module_entries":
             return i18next.t("dbAgent.summary.searchHits", { prefix: data.module ? `${data.module}.` : "", count: data.total ?? 0 })
         case "read_entry": {
@@ -668,6 +717,53 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
             const results = searchAll(query, { limit: Number(args.limit) || undefined, pathPrefix, lang })
 
             return JSON.stringify({ lang, query, module: moduleId || undefined, results })
+        }
+        case "rag_search": {
+            // 兜底：上下文检索增强关闭时不声明该工具，正常路径下模型不会调到它。
+            // 真被调到也要在这里拦住——否则会触发语料装配与索引构建。
+            if (!isRagEnabled()) {
+                return JSON.stringify({ lang, error: "上下文检索增强未开启" })
+            }
+
+            const query = `${args.query ?? ""}`.trim()
+            // 种类与模块由模型给出，可能夹带不存在的取值：先按白名单收敛，避免脏参数把检索面清空
+            const kinds = Array.isArray(args.kinds)
+                ? ([...new Set(args.kinds.map(item => `${item}`.trim()))].filter(item =>
+                      (RAG_CHUNK_KINDS as readonly string[]).includes(item)
+                  ) as RagChunkKind[])
+                : undefined
+            const modules = Array.isArray(args.modules)
+                ? [...new Set(args.modules.map(item => `${item}`.trim()))].filter(Boolean)
+                : undefined
+            const result = await ragSearch(query, {
+                lang,
+                kinds: kinds?.length ? kinds : undefined,
+                modules: modules?.length ? modules : undefined,
+                version: args.version ? `${args.version}` : undefined,
+                limit: Number(args.limit) || undefined,
+                contextLines: Number(args.context_lines) || undefined,
+            })
+
+            return JSON.stringify({
+                lang,
+                query,
+                total: result.total,
+                note: result.note,
+                hits: result.hits.map(hit => ({
+                    kind: hit.kind,
+                    module: hit.module,
+                    id: hit.entityId,
+                    title: hit.title,
+                    text: hit.text,
+                    snippet: hit.snippet,
+                    meta: hit.meta,
+                    version: hit.version,
+                    path: hit.path,
+                    score: hit.score,
+                    matchedBy: hit.matchedBy,
+                })),
+                tip: "snippet 是带上下文的片段（`> ` 标出命中行）。要某条目的完整字段请用 read_entry（module + id）；要按分类穷举请用 query_module_entries；kind=summary 的命中是整链剧情梗概（中文），可直接用来概括剧情，需要逐句原文再 read_story（chainId 取自路径 /db/questchain/<id>）；kind=profile 的命中是角色档案（角色背景故事原文），要整篇正文用 read_entry（module=charprofile + id）。",
+            })
         }
         case "query_module_entries": {
             const moduleId = `${args.module ?? ""}`.trim()
@@ -781,6 +877,7 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
                     questType: hit.questType,
                     imprCheck: hit.imprCheck || undefined,
                     imprIncrease: hit.imprIncrease || undefined,
+                    summary: hit.summary,
                     path: hit.path,
                     snippets: hit.snippets.map(snippet => ({
                         questName: snippet.questName,
@@ -812,6 +909,7 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
                 lang,
                 chain: result.chain,
                 total: result.total,
+                note: result.note,
                 lines: result.lines.map(line => ({
                     questName: line.questName,
                     speaker: line.speaker || undefined,
@@ -1156,7 +1254,17 @@ export class DBAgent {
      */
     private async runLoop(state: DBAgentLoopState, callbacks: DBAgentCallbacks = {}): Promise<DBAgentRunResult> {
         const { messages, traces, reasonings } = state
-        const system = renderDBAgentSystemPrompt()
+        /** 上下文检索增强是否开启：关闭时提示词与该工具的声明一并缺席 */
+        const ragEnabled = isRagEnabled()
+        const system = renderDBAgentSystemPrompt({ ragEnabled })
+        /**
+         * 本次问答声明的工具。
+         *
+         * 在进入循环前算一次：**整轮内保持恒定**——中途撤换工具会触发上游的文本工具语法泄露
+         * （见 {@link MAX_TOOL_ROUNDS}），而「关闭上下文检索增强时不声明 rag_search」是一次性裁剪，
+         * 提示词里同样没有它，模型不会去调。
+         */
+        const tools = ragEnabled ? DB_AGENT_TOOLS : DB_AGENT_TOOLS.filter(tool => tool.name !== "rag_search")
 
         /** 把已累积的思考收束成一段，并记录它后续发起的工具调用 */
         const flushReasoning = (toolCallIds: string[] = []) => {
@@ -1186,7 +1294,7 @@ export class DBAgent {
                     // tools 全程声明，绝不按轮次撤掉（撤掉会触发上游的文本工具语法泄露，见 MAX_TOOL_ROUNDS 的说明）。
                     // 轮次用尽后的收敛靠两条一起兜：提示词里要求直接作答，以及下面把多出来的调用
                     // 当成工具结果回灌、逼模型看到「额度已用尽」后收尾。
-                    tools: DB_AGENT_TOOLS,
+                    tools,
                     temperature: this.config.default_temperature,
                     maxTokens: this.config.default_max_tokens,
                     handlers: {

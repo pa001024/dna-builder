@@ -5,6 +5,7 @@ import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledCharHelper } from "@/data"
 import { npcMap } from "@/data/d"
 import npcData, { type NPC } from "@/data/d/npc.data"
+import { getNpcDisplayName, hasNpcDialogue, hasNpcImprCheck, hasNpcImprIncrease } from "@/utils/npc-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { stripStoryTextTags } from "@/utils/story-text"
 
@@ -38,37 +39,6 @@ const showImprCheckOnly = useSearchParam<boolean>("ico", false)
 const showImprIncreaseOnly = useSearchParam<boolean>("iio", false)
 const showFullTextSearch = useSearchParam<boolean>("fts", false)
 const showDialogueOnly = useSearchParam<boolean>("dio", false)
-
-/**
- * 判断 NPC 是否包含印象检定。
- * @param npc NPC 数据
- * @returns 是否包含印象检定
- */
-function hasNpcImprCheck(npc: NPC): boolean {
-    return !!npc.talks?.some(dialogue => dialogue.options?.some(option => !!option.imprCheck))
-}
-
-/**
- * 判断 NPC 是否包含印象增加。
- * @param npc NPC 数据
- * @returns 是否包含印象增加
- */
-function hasNpcImprIncrease(npc: NPC): boolean {
-    return !!npc.talks?.some(dialogue => {
-        return dialogue.options?.some(option => {
-            return !!option.impr && option.impr[2] > 0
-        })
-    })
-}
-
-/**
- * 判断 NPC 是否包含可显示的对话。
- * @param npc NPC 数据
- * @returns 是否包含对话
- */
-function hasNpcDialogue(npc: NPC): boolean {
-    return !!npc.talks?.length
-}
 
 /**
  * 收集 NPC 可用于全文搜索的文本片段。
@@ -548,7 +518,7 @@ const selectedNpcIndex = computed(() => filteredNpcs.value.findIndex(result => r
                                 <img
                                     v-if="npcResult.npc.charId"
                                     :src="getNpcCharIconUrl(npcResult.npc)"
-                                    :alt="npcResult.npc.name || `NPC ${npcResult.npc.id}`"
+                                    :alt="getNpcDisplayName(npcResult.npc)"
                                     class="size-11 shrink-0 rounded-xs object-cover"
                                 />
 
@@ -559,7 +529,7 @@ const selectedNpcIndex = computed(() => filteredNpcs.value.findIndex(result => r
                                                 class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
                                                 :class="{ 'text-primary': selectedNpcId === npcResult.npc.id }"
                                             >
-                                                {{ $t(npcResult.npc.name || `NPC ${npcResult.npc.id}`) }}
+                                                {{ $t(getNpcDisplayName(npcResult.npc)) }}
                                             </div>
 
                                             <div

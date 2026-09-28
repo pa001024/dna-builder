@@ -7,6 +7,10 @@ import { encode } from "@msgpack/msgpack"
 import { parse } from "dotenv"
 import { zipSync } from "fflate"
 import { globSync } from "glob"
+import { computeRagFingerprints } from "../src/data/rag/corpus"
+
+/** 数据包覆盖的语言（RAG 指纹按语言各算一份，与服务端索引的语言口径一致） */
+const PACK_LANGS = ["zh", "en", "jp", "kr", "fr", "tc"] as const
 
 type PlainData = unknown
 
@@ -16,6 +20,15 @@ type PackManifest = {
     version: string
     imgsHash: string
     modules: Record<string, { exports: string[]; hasFunctions: boolean; hash: string }>
+    /**
+     * RAG 向量检索用的内容指纹：按数据语言给出，语言内再**按语料种类（模块）分别**给出。
+     *
+     * 分模块是为了让「只有部分模块变化」时其余模块仍可用：客户端原样携带这些指纹，
+     * 服务端按种类比对，相符的种类照常提供向量（它用同一套切块器算自己的指纹）。
+     * 这份值必须在打包时算：客户端的数据会被安全模式门限过滤，不同用户算出来的值不一样，
+     * 只有「与本包同源的数据算出的指纹」才是这份包的身份。
+     */
+    rag: Record<string, { kinds: Record<string, string>; count: number }>
 }
 
 type PackImgsEntry = {
@@ -223,12 +236,27 @@ async function buildDataPack(targetVersion: string, updateVersions: boolean): Pr
     }
 
     const imgsManifest = collectImgsManifest()
+
+    // RAG 内容指纹：与数据包同源的数据切块后算出，客户端检索时携带、服务端据此判定索引是否与客户端内容一致。
+    // 放在数据打包流程里算（而不是客户端运行时算）：客户端的数据会被安全模式门限过滤，算出来的值因人而异。
+    console.log("🔎 计算 RAG 内容指纹（按语言）…")
+    const ragFingerprints = await computeRagFingerprints(PACK_LANGS)
+
+    for (const [lang, info] of Object.entries(ragFingerprints)) {
+        const detail = Object.entries(info.kinds)
+            .map(([kind, fingerprint]) => `${kind}=${fingerprint}`)
+            .join(" ")
+
+        console.log(`   ${lang}: ${info.count} 条 → ${detail}`)
+    }
+
     const manifest: PackManifest = {
         builtAt: new Date().toISOString(),
         packageFile: `${targetVersion}.zip`,
         version: targetVersion,
         imgsHash: hashString(JSON.stringify(imgsManifest)),
         modules: manifestModules,
+        rag: ragFingerprints,
     }
 
     const zipEntries: Record<string, Uint8Array> = {

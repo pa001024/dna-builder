@@ -1118,6 +1118,7 @@
         "book_desc": "Consulter les livres, textes d'indices et zones associées",
         "char": "Personnage",
         "char_desc": "Consulter les informations et attributs des personnages",
+        "charprofile": "Archives du personnage",
         "charvoice": "Voix des personnages",
         "damage": "Dégâts",
         "damage_desc": "Décomposition étape par étape des formules de dégâts",
@@ -1762,6 +1763,11 @@
             "noPendingAsk": "Aucune question n'attend de réponse",
             "unknown": "Erreur inconnue"
         },
+        "map": {
+            "empty": "Aucune coordonnée pour cette entrée dans la base",
+            "more": "{{count}} autre(s) non listée(s)",
+            "points": "{{count}} emplacement(s)"
+        },
         "summary": {
             "answered": "Réponse reçue",
             "askInvalid": "Format de question invalide",
@@ -1775,6 +1781,8 @@
             "noFacets": "Aucun filtre supplémentaire pour ce module",
             "questionFallback": "Question {{index}}",
             "questionsPending": "{{count}} question(s) en attente",
+            "ragDisabled": "Enrichissement contextuel non activé",
+            "ragHits": "{{count}} passage(s) trouvé(s)",
             "searchHits": "{{prefix}}{{count}} résultat(s)",
             "skipped": "Ignoré par l'utilisateur",
             "storyHits": "{{count}} chaîne(s) de quêtes trouvée(s)",
@@ -1792,6 +1800,7 @@
             "list_filter_options": "Options de filtre",
             "list_version_additions": "Ajouts de version",
             "query_module_entries": "Détails du module",
+            "rag_search": "Rappel unifié",
             "read_entry": "Détails de l'entrée",
             "read_story": "Texte de l'histoire",
             "search_data": "Recherche globale",
@@ -1815,6 +1824,7 @@
             "chatHint": "Entrée pour envoyer · Maj + Entrée pour un saut de ligne · Coller une image",
             "chatPlaceholderAnswer": "Vous pouvez aussi saisir votre réponse ici",
             "chatPlaceholderIdle": "Continuez à poser des questions ou changez de sujet",
+            "chatPlaceholderStart": "Interroger l’agent de recherche",
             "chatSubmit": "Envoyer",
             "copyAssistantTitle": "Copier cette réponse",
             "copyConversationFailed": "Échec de la copie de la conversation",
@@ -1835,6 +1845,8 @@
             "newConversation": "Nouvelle conversation",
             "processDone": "Terminé en {{duration}}",
             "processDoneNoTime": "Terminé",
+            "ragLocked": "Non modifiable une fois la conversation commencée",
+            "ragToggle": "Expérimental : enrichissement par recherche contextuelle",
             "removeImage": "Retirer cette image",
             "searching": "Recherche dans la base de données…",
             "stopSearch": "Arrêter la recherche",
@@ -4209,7 +4221,9 @@
         "noResult": "Aucun contenu correspondant trouvé. Essayez des mots-clés comme personnages, cartes, quêtes, donjons ou monstres.",
         "noResultEntries": "Aucune entrée de base de données correspondante trouvée",
         "placeholder": "Rechercher dans les modules sélectionnés...",
+        "searchKeywordTooLong": "Saisie de plus de {{max}} caractères : la recherche floue est ignorée. Envoyez directement pour laisser l'IA s'en charger.",
         "searchScope": "Portée de recherche actuelle : {{scope}}",
+        "searchSkipped": "Saisie trop longue, recherche floue ignorée",
         "section": {
             "build": {
                 "badge": "Build",

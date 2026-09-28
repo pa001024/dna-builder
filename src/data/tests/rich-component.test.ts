@@ -151,11 +151,35 @@ describe("DBAICard", () => {
                     ? `<${name} :reward="1" />`
                     : name === "DBAICard"
                       ? `<${name} kind="char" name="煜明" />`
-                      : `<${name} name="星尘" value="10" />`
+                      : name === "DBMapLink"
+                        ? `<${name} kind="book" :id="1001" />`
+                        : `<${name} name="星尘" value="10" />`
             )
 
             expect(components).toHaveLength(1)
             expect(components[0].component).toBeTruthy()
         }
+    })
+})
+
+describe("DBMapLink", () => {
+    it("kind / id / name / part 四个参数都放行", () => {
+        const { components } = parseRichComponents('<DBMapLink kind="book" :id="1001" name="遗落的纸张·净界岛" part="treasure" />')
+
+        expect(components).toHaveLength(1)
+        expect(components[0].name).toBe("DBMapLink")
+        expect(components[0].props).toEqual({ kind: "book", id: 1001, name: "遗落的纸张·净界岛", part: "treasure" })
+    })
+
+    it("只给名称也能解析（坐标补全在组件里做）", () => {
+        const { components } = parseRichComponents('<DBMapLink kind="resource" name="铜币" />')
+
+        expect(components[0].props).toEqual({ kind: "resource", name: "铜币" })
+    })
+
+    it("白名单外的属性被丢弃（模型无法借坐标参数旁路）", () => {
+        const { components } = parseRichComponents('<DBMapLink kind="book" :id="1001" pointX="1" pointY="2" regionId="9" />')
+
+        expect(Object.keys(components[0].props)).toEqual(["kind", "id"])
     })
 })

@@ -1052,6 +1052,100 @@ export const gameModQuery = typedQuery(
     ` as const
 )<Types.GameMod, { id: string }>()
 
+export const gameDataModulesQuery = typedQuery(
+    /* GraphQL */ `
+        query {
+            gameDataModules {
+                id
+                label
+                file
+                baseId
+                locale
+                variants
+            }
+        }
+    ` as const
+)<Types.GameDataModule[]>()
+
+export const gameDataSetsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($module: String) {
+            gameDataSets(module: $module) {
+                id
+                module
+                exportName
+                file
+                label
+                baseId
+                locale
+                variants
+                kind
+                count
+            }
+        }
+    ` as const
+)<Types.GameDataSet[], { module?: string }>()
+
+export const gameDataQuery = typedQuery(
+    /* GraphQL */ `
+        query ($input: GameDataQuery!) {
+            gameData(input: $input) {
+                dataset
+                dataSet {
+                    id
+                    module
+                    exportName
+                    file
+                    label
+                    baseId
+                    locale
+                    variants
+                    kind
+                    count
+                }
+                total
+                offset
+                limit
+                count
+                items {
+                    key
+                    data
+                }
+            }
+        }
+    ` as const
+)<Types.GameDataPage, { input: Types.GameDataQuery }>()
+
+export const gameDataRecordQuery = typedQuery(
+    /* GraphQL */ `
+        query ($dataset: String!, $key: String!) {
+            gameDataRecord(dataset: $dataset, key: $key) {
+                key
+                data
+            }
+        }
+    ` as const
+)<Types.GameDataRecord, { dataset: string; key: string }>()
+
+export const gameDataFieldsQuery = typedQuery(
+    /* GraphQL */ `
+        query ($dataset: String!, $limit: Int) {
+            gameDataFields(dataset: $dataset, limit: $limit)
+        }
+    ` as const
+)<string[], { dataset: string; limit?: number }>()
+
+export const gameDataFieldValuesQuery = typedQuery(
+    /* GraphQL */ `
+        query ($dataset: String!, $field: String!, $limit: Int) {
+            gameDataFieldValues(dataset: $dataset, field: $field, limit: $limit) {
+                value
+                count
+            }
+        }
+    ` as const
+)<Types.GameDataFieldValue[], { dataset: string; field: string; limit?: number }>()
+
 export const dyePlansQuery = typedQuery(
     /* GraphQL */ `
         query (

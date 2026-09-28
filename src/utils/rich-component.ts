@@ -4,6 +4,8 @@
  * 资料检索 Agent 除了 markdown 之外，还可以输出少量**受限的自定义标签**来嵌入真实业务组件，例如：
  * - `<ResourceCostItem :value="[100, 151001, 'Resource']" />`
  * - `<RewardItem :reward="120301" />`
+ * - `<DBAICard kind="char" name="煜明" />`
+ * - `<DBMapLink kind="resource" :id="99" />`
  *
  * 安全模型（与 markdown 的 `html: false` 保持一致）：
  * 1. **白名单**：只有下表中登记过的组件名会被实例化，其余标签一律按普通文本转义输出，
@@ -68,6 +70,14 @@ const RICH_COMPONENTS: Record<string, RichComponentDefinition> = {
     DBAICard: {
         component: defineAsyncComponent(() => import("@/components/DBAICard.vue")),
         props: ["kind", "id", "name"],
+    },
+    /**
+     * 地图跳转：只给类型与 id / 名称即可，区域 / 子区域 / 世界坐标由组件自己补齐，
+     * 见 `src/components/DBMapLink.vue` 与 `resolveDBMapGroups`。
+     */
+    DBMapLink: {
+        component: defineAsyncComponent(() => import("@/components/DBMapLink.vue")),
+        props: ["kind", "id", "name", "part"],
     },
 }
 

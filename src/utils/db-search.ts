@@ -4,6 +4,7 @@ import { npcMap } from "@/data/d"
 import achievementData from "@/data/d/achievement.data"
 import { booksData } from "@/data/d/book.data"
 import charData from "@/data/d/char.data"
+import { getCachedCharExtData, resolveCharExtLocaleBySetting } from "@/data/d/charext-locale"
 import { getCachedCharVoiceData, resolveCharVoiceLocaleBySetting } from "@/data/d/charvoice-locale"
 import dungeonsData from "@/data/d/dungeon.data"
 import { eventData } from "@/data/d/event.data"
@@ -11,16 +12,19 @@ import { fishs } from "@/data/d/fish.data"
 import modData from "@/data/d/mod.data"
 import monsterData from "@/data/d/monster.data"
 import { musicData, musicScoreData } from "@/data/d/music.data"
+import { npcData } from "@/data/d/npc.data"
 import petData from "@/data/d/pet.data"
 import type { Dialogue, QuestItem, QuestStory } from "@/data/d/quest.data"
 import questChainData, { type QuestChain, questChain2Version } from "@/data/d/questchain.data"
 import { resourceData } from "@/data/d/resource.data"
 import { getQuestDataByLocale } from "@/data/d/story-locale"
+import { storySummaryData } from "@/data/d/storysummary.data"
 import { titleData } from "@/data/d/title.data"
 import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
 import { DAMAGE_MODES, DAMAGE_TERMS } from "@/data/damage-mechanics"
 import { Faction } from "@/data/game-const"
+import { RAG_PROFILE_MODULE } from "@/data/rag/types"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
 import {
     type DBAgentLang,
@@ -31,10 +35,12 @@ import {
     translateDBAgentParts,
     translateDBAgentText,
 } from "@/utils/db-locale"
+import { type DBMapGroup, resolveDBMapGroups } from "@/utils/db-map-utils"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import { getGlobalSearchService } from "@/utils/global-search"
 import { formatModLimit } from "@/utils/mod-limit"
 import { getMonsterTagGroupsByMonster } from "@/utils/monster-tag-utils"
+import { getNpcDisplayText, hasNpcDialogue, hasNpcImprCheck, hasNpcImprIncrease } from "@/utils/npc-utils"
 import { formatParamText } from "@/utils/param-text"
 import { getPetQualityName, getPetTypeName } from "@/utils/pet-labels"
 import { matchPinyin } from "@/utils/pinyin-utils"
@@ -147,6 +153,13 @@ export interface DBStoryHit {
     imprCheck?: boolean
     /** 是否包含印象增加选项 */
     imprIncrease?: boolean
+    /**
+     * 整条任务链的 AI 剧情总结（`storysummary.data.ts`，只有中文；无总结时不返回）。
+     *
+     * 只在关键词检索的结果里附带：模型问「这条剧情讲了什么」时一次调用就能拿到脉络，
+     * 不必再用 read_story 逐段翻原文。纯筛选列举（无关键词）不带，避免刷屏。
+     */
+    summary?: string
     /** 命中的对话片段 */
     snippets: DBStorySnippet[]
     /** 该任务链在资料库中的详情路由 */
@@ -429,6 +442,15 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
         list: lang => buildCharVoiceEntries(lang ?? "zh"),
     },
     {
+        id: RAG_PROFILE_MODULE,
+        labelKey: "database.charprofile",
+        /** 档案在角色详情页的「档案」标签下展示，没有独立列表页 */
+        path: "/db/char",
+        versioned: false,
+        facets: [{ id: "char", label: "角色", kind: "enum", values: [] }],
+        list: lang => buildCharProfileEntries(lang ?? "zh"),
+    },
+    {
         id: "weapon",
         labelKey: "database.weapon",
         path: "/db/weapon",
@@ -586,6 +608,42 @@ const MODULE_ADAPTERS: DBModuleAdapter[] = [
                 path: `/db/monster/${item.id}`,
                 facets: {
                     type: [facetValue(item.t ? MONSTER_TYPE_LABELS[item.t] || item.t : "普通")],
+                },
+            })),
+    },
+    {
+        id: "npc",
+        labelKey: "database.npc",
+        path: "/db/npc",
+        versioned: false,
+        /**
+         * 与 NPC 列表页一致：印象检定 / 印象增加 / 有对话（列表页上的三个开关）。
+         *
+         * 这三个是布尔筛选项，条目上必须有对应取值才筛得出来——`matchFacetFilters`
+         * 对布尔条件是「取值集合为空即不命中」。
+         */
+        facets: [
+            { id: "imprCheck", label: "印象检定", kind: "boolean", values: [], description: "只保留含印象检定选项的 NPC" },
+            { id: "imprIncrease", label: "印象增加", kind: "boolean", values: [], description: "只保留含印象增加选项的 NPC" },
+            { id: "dialogue", label: "有对话", kind: "boolean", values: [], description: "只保留有分支对话的 NPC" },
+        ],
+        list: () =>
+            npcData.map(item => ({
+                id: item.id,
+                name: getNpcDisplayText(item),
+                // 「有坐标」是回答「XX 在哪」的前提：这类 NPC 才能在 DBMapLink 里跳转
+                subtitle: joinParts([
+                    item.camp,
+                    item.type,
+                    item.talks?.length ? `${item.talks.length} 条对话` : undefined,
+                    item.pos && item.srId ? "有坐标" : undefined,
+                ]),
+                path: `/db/npc/${item.id}`,
+                facets: {
+                    // 布尔筛选项只看取值集合是否为空，取值本身不展示
+                    imprCheck: hasNpcImprCheck(item) ? [facetValue(1)] : [],
+                    imprIncrease: hasNpcImprIncrease(item) ? [facetValue(1)] : [],
+                    dialogue: hasNpcDialogue(item) ? [facetValue(1)] : [],
                 },
             })),
     },
@@ -793,6 +851,57 @@ function buildCharVoiceEntries(lang: DBAgentLang): DBEntrySummary[] {
     localizedEntryCache.set(data, entries)
 
     return entries
+}
+
+/**
+ * 构建角色档案模块的条目。
+ *
+ * 档案与语音一样是「按语言切分的独立数据集」，因此条目内容取决于 lang（六种语言齐备）；
+ * 条目挂到角色详情页（档案在该页的「档案」标签下展示）。
+ * @param lang 数据语言
+ * @returns 该模块的条目列表
+ */
+function buildCharProfileEntries(lang: DBAgentLang): DBEntrySummary[] {
+    const data = getCachedCharExtData(resolveCharExtLocaleBySetting(lang))
+    const cached = localizedEntryCache.get(data)
+
+    if (cached) {
+        return cached
+    }
+
+    const entries = data.map(item => {
+        const charName = charNameMap.get(item.charId) ?? ""
+        const text = cleanDialogueContent(item.text)
+
+        return {
+            id: item.id,
+            name: item.name,
+            // 档案名在各角色间高度重复（如「见证·其一」被多个角色共用），副信息里必须带上角色名，
+            // 否则条目列表看起来全是同名条目，模型也无法判断这条档案属于谁
+            subtitle: joinParts([charName, oneLine(cleanDialogueContent(item.unlock)), summarizeText(text)]),
+            path: `/db/char/${item.charId}`,
+            // 正文进隐藏检索词：「哪条档案提到过 X」这类问法要在条目检索阶段就能命中，
+            // 而正文会撑大条目摘要，因此只参与匹配、不随条目返回（取全文用 readEntry）
+            searchText: joinParts([charName, text]),
+            facets: {
+                char: charName ? [facetValue(charName), facetValue(item.charId)] : [facetValue(item.charId)],
+            },
+        }
+    })
+
+    localizedEntryCache.set(data, entries)
+
+    return entries
+}
+
+/**
+ * 把多行文本压成单行：档案解锁条件里带换行（如「角色等级达到50级\n完成任务：…」），
+ * 直接放进条目副信息会在列表里断成两行。
+ * @param text 原始文本
+ * @returns 单行文本
+ */
+function oneLine(text: string): string {
+    return text.replace(/\s+/g, " ").trim()
 }
 
 /**
@@ -1283,6 +1392,57 @@ function formatSkillLine(skill: { 名称?: string; 类型?: string; 描述?: str
 }
 
 /**
+ * 详情字段里位置清单的条数上限。
+ *
+ * 同名资源可能有数十个子区域（`resource.source`），全部展开会把工具结果撑爆；
+ * 超出的部分只在末项上报数量。跳转与逐点查看交给 `DBMapLink` 组件。
+ */
+const MAX_LOCATION_ITEMS = 20
+
+/**
+ * 把地图位置折成可读文本行。
+ *
+ * 与 `DBMapLink` 共用 `resolveDBMapGroups` 的分组口径，因此文字位置与卡片上的
+ * 跳转行一一对应：读物按页拆分，资源按子区域聚合。
+ * @param groups 位置分组
+ * @param lang 数据语言
+ * @param withLabel 是否在行首带上位置归属名（读物的页名）
+ * @returns 文本行列表；没有位置时返回 undefined
+ */
+function formatMapLocations(groups: DBMapGroup[], lang: DBAgentLang, withLabel = false): string[] | undefined {
+    if (!groups.length) {
+        return undefined
+    }
+
+    const items: string[] = []
+
+    for (const group of groups.slice(0, MAX_LOCATION_ITEMS)) {
+        const point = group.points[0]
+
+        if (!point) {
+            continue
+        }
+
+        const region = translateDBAgentText(group.regionName, lang) ?? group.regionName
+        const subRegion = translateDBAgentText(group.subRegionName, lang) ?? group.subRegionName
+        const place = region === subRegion ? region : `${region}·${subRegion}`
+        const count = group.points.length > 1 ? `（共 ${group.points.length} 处）` : ""
+
+        items.push(
+            `${withLabel ? `${translateDBAgentText(group.label, lang) ?? group.label}：` : ""}${place} (${point[0]}, ${point[1]})${count}`
+        )
+    }
+
+    const hidden = groups.length - items.length
+
+    if (hidden > 0) {
+        items.push(`另有 ${hidden} 处未列出`)
+    }
+
+    return items.length ? items : undefined
+}
+
+/**
  * 角色详情字段：档案（生日 / 出生地 / 势力 / 四国 CV 等）、面板基础值、技能与特质、突破材料。
  * @param id 角色 id
  * @param lang 数据语言
@@ -1366,6 +1526,14 @@ function readCharDetailFields(id: string, lang: DBAgentLang): DBEntryFields | un
     const fragment = char.碎片 === undefined ? undefined : resourceData.find(item => item.id === char.碎片)
     if (fragment) {
         fields.碎片 = `${translateDBAgentText(fragment.name, lang) ?? fragment.name}（/db/resource/${fragment.id}）`
+    }
+
+    // 档案条目挂在角色详情页的「档案」标签下（不在本模块的字段里）：这里只列清单与 id，
+    // 正文用 read_entry 取 charprofile 模块，避免把几万字档案塞进角色详情
+    const profiles = getCachedCharExtData(resolveCharExtLocaleBySetting(lang)).filter(item => item.charId === char.id)
+
+    if (profiles.length) {
+        fields.档案条目 = profiles.map(item => `${item.name}（id ${item.id}）`)
     }
 
     return fields
@@ -1715,7 +1883,50 @@ function readMonsterDetailFields(id: string, lang: DBAgentLang): DBEntryFields |
 }
 
 /**
- * 资源详情字段：稀有度与描述（含设定文案）。
+ * NPC 详情字段：阵营、类型、关联角色、分支对话数与所在坐标。
+ *
+ * 坐标来自 `NPC.pos` / `NPC.srId`（与资料库 NPC 详情页的「坐标」一格同源），
+ * 是「某个 NPC 在哪」类提问的答案来源；没有坐标的 NPC 不产出该字段。
+ * @param id NPC id
+ * @param lang 数据语言
+ * @returns 字段表；NPC 不存在时返回 undefined
+ */
+function readNpcDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
+    const npc = npcData.find(item => `${item.id}` === id)
+
+    if (!npc) {
+        return undefined
+    }
+
+    const fields = pickFields(
+        npc,
+        [
+            ["阵营", "camp"],
+            ["类型", "type"],
+            ["角色id", "charId"],
+            ["图标", "icon"],
+        ],
+        lang
+    )
+
+    if (npc.talks?.length) {
+        fields.分支对话 = `${npc.talks.length} 条`
+    }
+
+    const locations = formatMapLocations(resolveDBMapGroups({ kind: "npc", id: npc.id }), lang, true)
+
+    if (locations) {
+        fields.坐标 = locations
+    }
+
+    return fields
+}
+
+/**
+ * 资源详情字段：稀有度、描述与采集位置。
+ *
+ * 采集位置是「这东西在哪」类提问唯一的答案来源：`resource.source[].pos` 是世界坐标，
+ * 按子区域聚合后与 `DBMapLink` 的跳转行一致。
  * @param id 资源 id
  * @param lang 数据语言
  * @returns 字段表；资源不存在时返回 undefined
@@ -1727,7 +1938,7 @@ function readResourceDetailFields(id: string, lang: DBAgentLang): DBEntryFields 
         return undefined
     }
 
-    return pickFields(
+    const fields = pickFields(
         resource,
         [
             ["稀有度", "rarity"],
@@ -1736,6 +1947,14 @@ function readResourceDetailFields(id: string, lang: DBAgentLang): DBEntryFields 
         ],
         lang
     )
+
+    const locations = formatMapLocations(resolveDBMapGroups({ kind: "resource", id: resource.id }), lang)
+
+    if (locations) {
+        fields.采集位置 = locations
+    }
+
+    return fields
 }
 
 /**
@@ -1819,7 +2038,10 @@ function readTitleDetailFields(id: string, lang: DBAgentLang): DBEntryFields | u
 }
 
 /**
- * 读物详情字段：描述与收录内容清单（正文在详情页阅读）。
+ * 读物详情字段：描述、收录内容清单与各页的位置。
+ *
+ * 读物正文在详情页阅读，这里不给全文；但「收录内容」里的每一页都有书页坐标与藏宝点坐标
+ * （`BookResource.pos` / `treasurePos`），是「这本书/这页在哪」类提问的答案来源。
  * @param id 读物 id
  * @param lang 数据语言
  * @returns 字段表；读物不存在时返回 undefined
@@ -1839,6 +2061,17 @@ function readBookDetailFields(id: string, lang: DBAgentLang): DBEntryFields | un
 
             return item.type ? `${name}（${item.type}）` : name
         })
+    }
+
+    const pages = formatMapLocations(resolveDBMapGroups({ kind: "book", id: book.id, part: "page" }), lang, true)
+    const treasures = formatMapLocations(resolveDBMapGroups({ kind: "book", id: book.id, part: "treasure" }), lang, true)
+
+    if (pages) {
+        fields.书页位置 = pages
+    }
+
+    if (treasures) {
+        fields.宝藏位置 = treasures
     }
 
     return fields
@@ -1945,9 +2178,47 @@ function readCharVoiceDetailFields(id: string, lang: DBAgentLang): DBEntryFields
     return fields
 }
 
+/**
+ * 角色档案详情字段：所属角色、档案名、解锁条件与整篇档案正文。
+ *
+ * 正文**不截断**：档案本身就是这一条目的全部内容（实测 517 条里最长的 2,877 字），
+ * 按其他长文本的 600 字口径截断会把叙事拦腰砍断，而 read_entry 是模型专门为它发起的调用。
+ * @param id 档案 id
+ * @param lang 数据语言
+ * @returns 字段表；档案不存在时返回 undefined
+ */
+function readCharProfileDetailFields(id: string, lang: DBAgentLang): DBEntryFields | undefined {
+    const profile = getCachedCharExtData(resolveCharExtLocaleBySetting(lang)).find(item => `${item.id}` === id)
+
+    if (!profile) {
+        return undefined
+    }
+
+    const fields: DBEntryFields = { 档案: profile.name }
+    const charName = charNameMap.get(profile.charId)
+
+    if (charName) {
+        fields.角色 = `${charName}（/db/char/${profile.charId}）`
+    }
+
+    const unlock = cleanDialogueContent(profile.unlock)
+
+    if (unlock) {
+        fields.解锁条件 = unlock
+    }
+
+    // 正文与角色详情页「档案」标签同口径清洗（去样式标签、替换昵称与性别占位符）
+    const text = cleanDialogueContent(profile.text)
+
+    if (text) {
+        fields.正文 = text
+    }
+
+    return fields
+}
+
 /** 伤害机制条目里术语条目的 id 前缀 */
 const DAMAGE_TERM_PREFIX = "term:"
-
 /**
  * 伤害机制详情字段：结算步骤给出所属模式、分组与公式，机制术语给出别名与解释。
  * @param id 步骤 / 术语 id（形如 `skill:expectedDamage` 或 `term:充盈`）
@@ -2003,6 +2274,7 @@ function readDamageDetailFields(id: string): DBEntryFields | undefined {
 const MODULE_DETAIL_READERS: Record<string, DBEntryDetailReader> = {
     char: readCharDetailFields,
     charvoice: readCharVoiceDetailFields,
+    [RAG_PROFILE_MODULE]: readCharProfileDetailFields,
     weapon: readWeaponDetailFields,
     mod: readModDetailFields,
     achievement: readAchievementDetailFields,
@@ -2010,6 +2282,7 @@ const MODULE_DETAIL_READERS: Record<string, DBEntryDetailReader> = {
     event: readEventDetailFields,
     dungeon: readDungeonDetailFields,
     monster: readMonsterDetailFields,
+    npc: readNpcDetailFields,
     resource: readResourceDetailFields,
     pet: readPetDetailFields,
     walnut: readWalnutDetailFields,
@@ -2232,6 +2505,8 @@ interface StoryChainIndex {
     version?: string
     path: string
     lines: StoryLine[]
+    /** 整链 AI 剧情总结（storysummary.data.ts，已按剧情文本口径清洗；无则空串） */
+    summary: string
     searchText: string
     /** 分组后的任务类型（1/3/5/6，对应主线 / 支线 / 限时 / 活动） */
     questType: number
@@ -2373,7 +2648,10 @@ async function buildStoryIndex(lang: DBAgentLang): Promise<StoryChainIndex[]> {
     const index = questChainData.map(chain => {
         const chapter = `${chain.chapterName} ${chain.chapterNumber || ""}`.trim()
         const { lines, imprCheck, imprIncrease } = collectChainStoryLines(chain, questItemMap)
-        const searchText = [chain.name, chapter, chain.episode, ...lines.map(line => `${line.speaker} ${line.text}`)]
+        // 总结与对话正文同一套清洗口径（占位符替换 + 去标签），保证引用的文本与详情页一致
+        const summary = cleanDialogueContent(storySummaryData[chain.id])
+        // 总结正文也进检索文本：它概括了整链的人与事，是「哪条剧情提到过 X」最省事的一路召回
+        const searchText = [chain.name, chapter, chain.episode, summary, ...lines.map(line => `${line.speaker} ${line.text}`)]
             .filter(Boolean)
             .join(" ")
         const questType = resolveQuestTypeGroup(chain.type)
@@ -2387,6 +2665,7 @@ async function buildStoryIndex(lang: DBAgentLang): Promise<StoryChainIndex[]> {
             version: getQuestChainVersion(chain),
             path: `/db/questchain/${chain.id}`,
             lines,
+            summary,
             searchText,
             questType,
             questTypeName: getQuestName(questType),
@@ -2531,9 +2810,10 @@ function matchStoryFilters(entry: StoryChainIndex, filters: Record<string, strin
  * @param entry 剧情索引条目
  * @param keywords 用于挑选片段的关键词列表（空列表表示不做片段定位）
  * @param snippetLimit 片段数量上限
+ * @param withSummary 是否附带整链 AI 总结（关键词检索时带，纯筛选列举时不带）
  * @returns 剧情命中
  */
-function toStoryHit(entry: StoryChainIndex, keywords: string[], snippetLimit: number): DBStoryHit {
+function toStoryHit(entry: StoryChainIndex, keywords: string[], snippetLimit: number, withSummary: boolean): DBStoryHit {
     const snippets: DBStorySnippet[] = []
 
     for (const keyword of keywords) {
@@ -2553,6 +2833,7 @@ function toStoryHit(entry: StoryChainIndex, keywords: string[], snippetLimit: nu
         questType: entry.questTypeName,
         imprCheck: entry.imprCheck,
         imprIncrease: entry.imprIncrease,
+        summary: withSummary ? entry.summary || undefined : undefined,
         snippets,
         path: entry.path,
     }
@@ -2631,7 +2912,7 @@ export async function searchStory(
         const picked = scoped.slice(0, limit)
 
         return {
-            hits: picked.map(entry => toStoryHit(entry, [], snippetLimit)),
+            hits: picked.map(entry => toStoryHit(entry, [], snippetLimit, false)),
             total: scoped.length,
             note: notes.join(" "),
         }
@@ -2668,8 +2949,12 @@ export async function searchStory(
 
     const ordered = [...exact, ...fuzzyHits.filter(entry => !exact.includes(entry))].slice(0, limit)
 
+    // 关键词检索的结果附带整链 AI 总结：模型据此可直接回答「这条剧情讲了什么」，
+    // 省掉一次 read_story 往返（纯筛选列举不带，见上面的分支）
+    notes.push("命中结果里的 summary 是该任务链的整链剧情总结（中文），可用于直接概括剧情；需要逐句原文再用 read_story。")
+
     return {
-        hits: ordered.map(entry => toStoryHit(entry, keywords, snippetLimit)),
+        hits: ordered.map(entry => toStoryHit(entry, keywords, snippetLimit, true)),
         total: exact.length + fuzzyHits.filter(entry => !exact.includes(entry)).length,
         note: notes.join(" "),
     }
@@ -2677,6 +2962,9 @@ export async function searchStory(
 
 /**
  * 读取指定任务链的剧情原文（可限定单个任务）。
+ *
+ * 返回里始终带上该链的整链 AI 总结（summary）：它是这条链最省 token 的上下文，
+ * 模型补上下文时先看总结、再决定要不要翻下面的逐行原文。
  * @param chainId 任务链 ID
  * @param options 查询条件：任务 ID、起始行号、行数上限、数据语言
  * @returns 任务链信息与对话行
@@ -2684,7 +2972,7 @@ export async function searchStory(
 export async function readStory(
     chainId: number,
     options: { questId?: number; offset?: number; limit?: number; lang?: DBAgentLang } = {}
-): Promise<{ chain?: Omit<DBStoryHit, "snippets">; lines: DBStorySnippet[]; total: number }> {
+): Promise<{ chain?: Omit<DBStoryHit, "snippets">; lines: DBStorySnippet[]; total: number; note?: string }> {
     const index = await buildStoryIndex(resolveSearchLang(options.lang))
     const entry = index.find(item => item.chainId === chainId)
 
@@ -2706,6 +2994,7 @@ export async function readStory(
             questType: entry.questTypeName,
             imprCheck: entry.imprCheck,
             imprIncrease: entry.imprIncrease,
+            summary: entry.summary || undefined,
             path: entry.path,
         },
         lines: scoped.slice(offset, offset + limit).map(line => ({
@@ -2715,6 +3004,7 @@ export async function readStory(
             text: line.text,
         })),
         total: scoped.length,
+        note: entry.summary ? "chain.summary 是该任务链的整链剧情总结（中文）；lines 是逐行原文，用于核对细节。" : undefined,
     }
 }
 

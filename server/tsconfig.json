@@ -28,8 +28,16 @@
         "module": "ESNext" /* Specify what module code is generated. */,
         // "rootDir": "./",                                  /* Specify the root folder within your source files. */
         "moduleResolution": "bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,
-        // "baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
-        // "paths": {},                                      /* Specify a set of entries that re-map imports to additional lookup locations. */
+        // "baseUrl": "./",                                  /* Specify the base directory to resolve non-root module names. */
+        "paths": {
+            /* 本地开发中的 graphql-mobius：非根类型的字段级 resolver 支持目前只在 externals/graphql-mobius 源码里，
+               等它发布新版本后删掉这三条映射即可（服务端对它的引用全是 import type，不影响运行时）。
+               后两条是为了让 externals 里的源码也用服务端这份 graphql / graphql-yoga，
+               否则它会解析到仓库根目录的 graphql v16，GraphQLResolveInfo 与服务端 v17 不兼容 */
+            "@pa001024/graphql-mobius": ["../externals/graphql-mobius/src/index.ts"],
+            "graphql": ["./node_modules/graphql"],
+            "graphql-yoga": ["./node_modules/graphql-yoga"]
+        },
         // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
         // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
         "types": ["bun-types"] /* Specify type package names to be included without being referenced in a source file. */,

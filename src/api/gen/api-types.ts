@@ -366,6 +366,48 @@ export interface GameMod {
     latestVersion?: GameModVersion
 }
 
+export interface GameDataModule {
+    id: string
+    label: string
+    file: string
+    baseId: string
+    locale: string
+    variants?: string[]
+}
+
+export interface GameDataSet {
+    id: string
+    module: string
+    exportName: string
+    file: string
+    label: string
+    baseId: string
+    locale: string
+    variants?: string[]
+    kind: string
+    count: number
+}
+
+export interface GameDataPage {
+    dataset: string
+    dataSet: GameDataSet
+    total: number
+    offset: number
+    limit: number
+    count: number
+    items?: GameDataRecord[]
+}
+
+export interface GameDataRecord {
+    key: string
+    data: unknown
+}
+
+export interface GameDataFieldValue {
+    value: unknown
+    count: number
+}
+
 export interface DyePlan {
     id: string
     title: string
@@ -622,6 +664,27 @@ export interface GameModInput {
     source?: string
 }
 
+export interface GameDataQuery {
+    dataset: string
+    where?: GameDataFilter[]
+    search?: string
+    sort?: GameDataSort[]
+    fields?: string[]
+    offset?: number
+    limit?: number
+}
+
+export interface GameDataFilter {
+    field: string
+    op?: GameDataFilterOp
+    value?: unknown
+}
+
+export interface GameDataSort {
+    field: string
+    desc?: boolean
+}
+
 export interface DyePlanInput {
     title: string
     desc?: string
@@ -693,3 +756,5 @@ export interface AbyssUsageSubmissionInput {
     ownedChars?: AbyssOwnedCharInput[]
     ownedWeapons?: AbyssOwnedWeaponInput[]
 }
+
+export type GameDataFilterOp = "EQ" | "NE" | "CONTAINS" | "IN" | "GT" | "GTE" | "LT" | "LTE" | "EXISTS"

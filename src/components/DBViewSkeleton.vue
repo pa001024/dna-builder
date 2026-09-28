@@ -76,6 +76,8 @@ const LATEST_GROUPS = [
 
                         <div class="flex items-center justify-between gap-3 border-t border-base-content/10 px-3 py-2">
                             <span class="db-skeleton-bar h-2.5 w-[min(18rem,45%)]" />
+                            <!-- 工具行右侧：RAG 开关 + 发送按钮 -->
+                            <span class="db-skeleton-bar h-4 w-14 shrink-0" />
                             <span class="db-skeleton-bar size-8 shrink-0" />
                         </div>
                     </div>

@@ -11,12 +11,18 @@ const props = withDefaults(
         submitLabel?: string
         /** 检索进行中：发送按钮变为中断按钮，提交被忽略 */
         busy?: boolean
+        /** 上下文检索增强（实验性，默认关闭）：开启后才建索引并允许服务端向量检索 */
+        ragEnabled?: boolean
+        /** 锁定上下文检索增强开关（当前会话已有消息）：本轮提示词与索引状态已固定，中途改动会与运行中的对话不一致 */
+        ragLocked?: boolean
     }>(),
     {
         placeholder: "",
         hint: "",
         submitLabel: "",
         busy: false,
+        ragEnabled: false,
+        ragLocked: false,
     }
 )
 
@@ -31,6 +37,8 @@ const emit = defineEmits<{
      * 输入框为空说明用户还没想好问什么，直接切到对话态（含历史会话列表）比什么都不发生更有用。
      */
     "enter-chat": []
+    /** 切换上下文检索增强开关 */
+    "update:ragEnabled": [value: boolean]
 }>()
 
 const { t } = useTranslation()
@@ -63,6 +71,12 @@ const remainingSlots = computed(() => Math.max(MAX_CHAT_IMAGES - pendingImages.v
 const attachTitle = computed(() =>
     remainingSlots.value ? t("dbAgent.ui.attachImage", { count: MAX_CHAT_IMAGES }) : t("dbAgent.ui.attachImageFull", { count: MAX_CHAT_IMAGES })
 )
+
+/**
+ * 上下文检索增强开关的悬浮提示：
+ * 锁定态（对话已开始）说明「不可更改已开始的对话」，否则提示这是实验性功能。
+ */
+const ragToggleTitle = computed(() => (props.ragLocked ? t("dbAgent.ui.ragLocked") : t("dbAgent.ui.ragToggle")))
 
 /**
  * 依据内容高度自适应文本域高度，超过上限后转为内部滚动。
@@ -157,6 +171,14 @@ function handleFilePick(event: Event) {
  */
 function openFilePicker() {
     fileInputRef.value?.click()
+}
+
+/**
+ * 切换上下文检索增强开关：把输入框上的开关状态交给父组件（父组件负责持久化与建索引）。
+ * @param event 复选框变化事件
+ */
+function handleRagToggle(event: Event) {
+    emit("update:ragEnabled", (event.target as HTMLInputElement).checked)
 }
 
 /**
@@ -291,6 +313,28 @@ defineExpose({ focus })
             <p class="min-w-0 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-base-content/40">{{ hint }}</p>
 
             <div class="flex shrink-0 items-center gap-3">
+                <!--
+                  上下文检索增强开关（实验性，默认关闭）：关闭时不构建索引、不发起服务端向量检索请求。
+                  开关状态由父组件持有（持久化与「开启即建索引」都在那里）；
+                  当前会话已有内容后锁定——本轮提示词与索引状态已固定，中途改动会让二者不一致。
+                  空白新对话不算「已开始」，开关仍可改。
+                -->
+                <label
+                    class="flex shrink-0 items-center gap-1.5"
+                    :class="props.ragLocked ? 'cursor-not-allowed' : 'cursor-pointer'"
+                    :title="ragToggleTitle"
+                >
+                    <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-base-content/40">RAG</span>
+                    <input
+                        type="checkbox"
+                        class="toggle toggle-sm toggle-primary rounded-xs disabled:cursor-not-allowed disabled:opacity-45"
+                        :checked="props.ragEnabled"
+                        :disabled="props.ragLocked"
+                        :aria-label="ragToggleTitle"
+                        @change="handleRagToggle"
+                    />
+                </label>
+
                 <button
                     type="button"
                     class="flex h-8 w-8 cursor-pointer items-center justify-center border border-base-content/25 text-base-content/55 transition-colors duration-200 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-base-content/25 disabled:hover:text-base-content/55"
