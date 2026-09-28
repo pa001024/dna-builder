@@ -8,7 +8,7 @@ import petData, { type Pet, type PetEntry, petEntrys } from "@/data/d/pet.data"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
 import { getPetQualityName, getPetTypeName } from "@/utils/pet-labels"
 import { matchPinyin } from "@/utils/pinyin-utils"
-import { getRarityGradientClass } from "@/utils/rarity-utils"
+import { getRarityGradientClass, getRaritySwatchClass } from "@/utils/rarity-utils"
 
 const { gt, petSkillText } = useGameText()
 
@@ -209,19 +209,20 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbp-item-active" })
                         >
                             {{ $t("common.all") }}
                         </button>
-                        <button
-                            v-for="quality in qualities"
-                            :key="quality"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedQuality === quality
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedQuality = quality"
-                        >
-                            {{ $t(getPetQualityName(quality)) }}
-                        </button>
+                            <button
+                                v-for="quality in qualities"
+                                :key="quality"
+                                class="inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-xs border px-2 py-1 transition-colors duration-150 active:scale-[0.97]"
+                                :class="
+                                    selectedQuality === quality
+                                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                                "
+                                :title="getPetQualityName(quality)"
+                                @click="selectedQuality = quality"
+                            >
+                                <span :class="getRaritySwatchClass(quality)" />
+                            </button>
                     </div>
                 </div>
 

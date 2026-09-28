@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { charMap } from "@/data"
 import {
@@ -21,7 +20,7 @@ import { type TitleFrame, titleFrameData } from "@/data/d/titleframe.data"
 import { titleFrameIdToKey } from "@/data/generated/title-frame.generated"
 import { getAccessoryUnlockLabelKey, getWanhuaSkinUnlock, normalizeAccessoryUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
-import { getRarityBadgeClass, getRarityGradientClass, getRarityName } from "@/utils/rarity-utils"
+import { getRarityGradientClass, getRarityName, getRaritySwatchClass } from "@/utils/rarity-utils"
 
 type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head" | "titleframe"
 
@@ -87,8 +86,6 @@ function getAccessoryRarity(accessory: AccessoryItem): number {
  * 必须是实测卡高的小数值——上千张卡按取整值累计会多出数百像素的滚动空白。
  */
 const ACCESSORY_CARD_HEIGHT = 91
-
-const { gt } = useGameText()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedAccessoryKey = useSearchParam<string>("id", "")
@@ -395,15 +392,16 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                             <button
                                 v-for="rarity in allRarities"
                                 :key="rarity"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-xs border px-2 py-1 transition-colors duration-150 active:scale-[0.97]"
                                 :class="
                                     selectedRarity === rarity
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
+                                :title="getRarityName(rarity)"
                                 @click="selectedRarity = rarity"
                             >
-                                {{ gt(getRarityName(rarity)) }}
+                                <span :class="getRaritySwatchClass(rarity)" />
                             </button>
                         </div>
 
@@ -503,9 +501,6 @@ function getAccessoryTypeLabelKey(accessoryType: AccessoryType): string {
                                         v-if="accessory.accessoryType !== 'headframe' && accessory.accessoryType !== 'head'"
                                         class="flex flex-col items-end gap-1 shrink-0"
                                     >
-                                        <span :class="getRarityBadgeClass(getAccessoryRarity(accessory))">
-                                            {{ gt(getRarityName(getAccessoryRarity(accessory))) }}
-                                        </span>
                                         <span class="font-mono text-[10px] tabular-nums text-base-content/35">ID: {{ accessory.id }}</span>
                                     </div>
                                     <div v-else class="flex flex-col items-end gap-1 shrink-0">

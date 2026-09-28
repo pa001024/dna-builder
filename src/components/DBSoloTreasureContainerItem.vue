@@ -1,15 +1,12 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { useGameText } from "@/composables/useGameText"
 import type { ExtractionTreasureContainer } from "@/data/d/solotreasure.data"
 import { format100 } from "@/util"
-import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
+import { getRaritySwatchClass } from "@/utils/rarity-utils"
 
 const props = defineProps<{
     container: ExtractionTreasureContainer
 }>()
-
-const { gt } = useGameText()
 
 /** 容器格位边长（px），按 shape 画出容器占格 */
 const CONTAINER_CELL_PX = 40
@@ -80,7 +77,7 @@ const dropRateText = computed(() => (props.container.dropRate === undefined ? "�
             <SectionHeader no-animate compact kicker="DROP WEIGHT" :title="$t('db-solo-treasure-container.drop_weight')" :count="levelWeights.length" />
             <div v-if="levelWeights.length" class="space-y-1.5">
                 <div v-for="entry in levelWeights" :key="entry.level" class="flex items-center gap-2">
-                    <span :class="getRarityBadgeClass(entry.level)">{{ gt(getRarityName(entry.level)) }}</span>
+                    <span :class="getRaritySwatchClass(entry.level)" />
                     <span class="h-1.5 min-w-0 flex-1 bg-base-content/10">
                         <span class="block h-full bg-primary" :style="{ width: entry.width }" />
                     </span>
@@ -101,7 +98,7 @@ const dropRateText = computed(() => (props.container.dropRate === undefined ? "�
                     :key="entry.level"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span :class="getRarityBadgeClass(entry.level)">{{ gt(getRarityName(entry.level)) }}</span>
+                    <span :class="getRaritySwatchClass(entry.level)" />
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         x{{ entry.count }}
                     </span>

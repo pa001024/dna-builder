@@ -9,7 +9,7 @@ import modData from "@/data/d/mod.data"
 import { formatProp } from "@/util"
 import { formatModLimit } from "@/utils/mod-limit"
 import { matchPinyin } from "@/utils/pinyin-utils"
-import { getRarityGradientClass } from "@/utils/rarity-utils"
+import { getRarityGradientClass, getRaritySwatchClass } from "@/utils/rarity-utils"
 
 /**
  * 列表卡片的固定主轴尺寸（px）：虚拟滚动按它切片。
@@ -356,15 +356,16 @@ const selectedModIndex = computed(() => {
                             <button
                                 v-for="quality in qualities"
                                 :key="quality"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-xs border px-2 py-1 transition-colors duration-150 active:scale-[0.97]"
                                 :class="
                                     selectedQuality === quality
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
+                                :title="quality"
                                 @click="selectedQuality = quality"
                             >
-                                {{ $t(quality) }}
+                                <span :class="getRaritySwatchClass(quality)" />
                             </button>
                         </div>
 

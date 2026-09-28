@@ -15,7 +15,7 @@ import { useSettingStore } from "@/store/setting"
 import { formatProp } from "@/util"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRewardTypeText } from "@/utils/i18n-utils"
-import { getRarityBadgeClass, getRarityGradientClass, getRarityName } from "@/utils/rarity-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
 const props = defineProps<{
@@ -1052,7 +1052,12 @@ onBeforeUnmount(() => {
                         class="space-y-3 rounded-xs border border-base-content/10 bg-base-content/3 p-3"
                     >
                         <div class="flex items-start gap-3">
-                            <img :src="getSkinIconUrl(skin.icon)" :alt="skin.name" class="size-16 shrink-0 rounded-xs object-cover" />
+                            <img
+                                :src="getSkinIconUrl(skin.icon)"
+                                :alt="skin.name"
+                                class="size-16 shrink-0 rounded-xs bg-linear-15 object-cover"
+                                :class="getRarityGradientClass(skin.rarity)"
+                            />
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-start justify-between gap-2">
                                     <div class="min-w-0">
@@ -1061,9 +1066,6 @@ onBeforeUnmount(() => {
                                             {{ skin.release ? `v${skin.release}` : "未标注版本" }}
                                         </div>
                                     </div>
-                                    <span :class="getRarityBadgeClass(skin.rarity)">
-                                        {{ gt(getRarityName(skin.rarity)) }}
-                                    </span>
                                 </div>
                                 <div class="mt-2 text-sm leading-relaxed whitespace-pre-line text-base-content/85">{{ $t(skin.desc) }}</div>
                             </div>

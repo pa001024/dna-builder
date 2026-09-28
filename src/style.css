@@ -79,6 +79,7 @@
     --animate-shake: shake 0.4s;
     --animate-ef-rise: ef-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
     --animate-mote-rise: mote-rise 12s linear infinite;
+    --animate-track-glint: track-glint 1.6s linear infinite;
     --font-orbitron: "Orbitron", sans-serif;
     --font-mona: "Mona Sans", sans-serif;
     --font-wt: "WorldText02", sans-serif;
@@ -102,6 +103,22 @@
         100% {
             transform: translate3d(var(--sc-mote-drift, 20px), -108vh, 0);
             opacity: 0;
+        }
+    }
+
+    /* 乐谱进度条：光点无缝循环扫过已播放区间。
+       结构是「两个相距一个区间宽度的光点 + 载体位移恰好一个自身宽度（0 → 100%）」：
+       位移以载体自身宽度（= 已播放区间宽）为基准，循环回绕时光点恰好首尾衔接，
+       右侧退出多少左侧就进入多少（回绕瞬间同时存在两个半截光点），视觉上无缝且匀速。
+       注意不要用静态 translate 工具类参与位移 —— Tailwind v4 的 translate-x-* 是独立
+       translate 属性，会与关键帧 transform 叠加导致实际位移少一半 */
+    @keyframes track-glint {
+        from {
+            transform: translateX(0);
+        }
+
+        to {
+            transform: translateX(100%);
         }
     }
 

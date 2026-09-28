@@ -37,13 +37,6 @@ const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     休整: "RougeLike_RoomType_Name_4",
     奇遇: "RougeLike_RoomType_Name_3",
     高危战斗: "RougeLike_RoomType_Name_5",
-    // 稀有度：前端把 `rarity: 1~6` 显示成「白/绿/蓝/紫/金/红」，官方 ID 给的是「白色/绿色/…」
-    白: "BackpackResource_Rarity1",
-    绿: "BackpackResource_Rarity2",
-    蓝: "BackpackResource_Rarity3",
-    紫: "BackpackResource_Rarity4",
-    金: "BackpackResource_Rarity5",
-    红: "BackpackResource_Rarity6",
     // 钓鱼出现时段
     上午: "UI_Fishing_DayAndNight_Cont_1",
     下午: "UI_Fishing_DayAndNight_Cont_2",
@@ -1187,9 +1180,12 @@ async function buildTranslationTables(): Promise<Record<TranslationLocale, Recor
         }
 
         // 前端自造展示名：先按官方 TextMapId 取权威译名，再用人工表兜底。
-        // 两者都**强制覆盖**——上游按位置比对可能在别的语境下撞出同名单字键
-        // （如「白」在某模块被译成 Snow，但稀有度的官方译名是 White），
+        // 两者都**强制覆盖**——上游按位置比对可能在别的语境下撞出同名键，
         // 这种同名不同义必须以前端明确指定的展示名为准。
+        //
+        // 但这里的键就是全局翻译键，**与游戏原文同形的词一律不能进表**：
+        // 稀有度「白/绿/蓝/紫/金/红」曾按 BackpackResource_RarityN 覆盖，结果把剧情人物「白」
+        // 翻成了 White——界面已改为只用色块表示稀有度（见 `src/utils/rarity-utils.ts`），不再需要译文。
         const textMapPath = path.join(OUT_ROOT, "TextMap_I18n.json")
         const textMapText = await readFile(textMapPath, "utf8").catch(() => null)
         if (textMapText) {

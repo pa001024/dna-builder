@@ -1380,7 +1380,11 @@
         "search_placeholder": "搜尋怪物名稱（支援拼音）..."
     },
     "db-music-list": {
-        "search_placeholder": "搜尋樂譜或專輯"
+        "album_count": "張專輯",
+        "no_match": "找不到符合的樂譜",
+        "playback": "試聽",
+        "search_placeholder": "搜尋樂譜或專輯",
+        "track_count": "首樂譜"
     },
     "db-npc-detail": {
         "char_id": "角色 ID",
@@ -2945,6 +2949,7 @@
     "music-player": {
         "load_failed": "音訊載入失敗",
         "loading_audio": "正在載入音訊",
+        "loop_playback": "循環播放",
         "pause": "暫停",
         "play": "播放",
         "play_failed": "音訊無法播放",

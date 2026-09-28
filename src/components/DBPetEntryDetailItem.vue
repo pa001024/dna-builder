@@ -3,8 +3,8 @@ import { computed, ref } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { petMap } from "@/data"
 import { type PetEntry, petToEntey } from "@/data/d/pet.data"
-import { getPetQualityName, getPetTypeName } from "@/utils/pet-labels"
-import { getRarityBadgeClass } from "@/utils/rarity-utils"
+import { getPetTypeName } from "@/utils/pet-labels"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 const props = defineProps<{
     entry: PetEntry
@@ -121,23 +121,23 @@ const groupedEntryPetSources = computed<EntryPetSourceGroup[]>(() => {
                     {{ $t(entry.name) }}
                 </h2>
                 <CopyID :id="entry.id" />
-                <span class="ml-auto" :class="getRarityBadgeClass(entry.r)">
-                    {{ $t(getPetQualityName(entry.r)) }}
-                </span>
             </div>
             <div class="relative mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
                 <span>{{ $t("pet_detail.base_id") }}: {{ entry.bid }}</span>
                 <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
                 <span>{{ $t("pet_detail.name") }}: {{ $t(entry.name) }}</span>
-                <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                <span>{{ $t("pet_detail.rarity") }}: {{ $t(getPetQualityName(entry.r)) }}</span>
             </div>
         </header>
 
-        <!-- 潜质图标 -->
+        <!-- 潜质图标：底色按品质渐变 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <div class="flex justify-center items-center">
-                <img :src="`/imgs/webp/T_Armory_Pet_Attr_${entry.icon}.webp`" class="w-24 object-cover rounded-xs" alt="" />
+                <img
+                    :src="`/imgs/webp/T_Armory_Pet_Attr_${entry.icon}.webp`"
+                    class="w-24 rounded-xs bg-linear-15 object-cover"
+                    :class="getRarityGradientClass(entry.r)"
+                    alt=""
+                />
             </div>
         </section>
 

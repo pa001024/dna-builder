@@ -4,6 +4,7 @@ import { useGameText } from "@/composables/useGameText"
 import type { ParamText } from "@/data/data-types"
 import { formatProp } from "@/util"
 import { getParamTemplate, splitByPolarity } from "@/utils/param-text"
+import { getRaritySwatchClass } from "@/utils/rarity-utils"
 
 const componentProps = withDefaults(
     defineProps<{
@@ -51,18 +52,7 @@ function formatDesc(): string[] {
     return polarityMarker.value ? splitByPolarity(effectText.value, polarityMarker.value) : [effectText.value]
 }
 
-function getQualityColor(quality: string): string {
-    const colorMap: Record<string, string> = {
-        白: "bg-gray-200 text-gray-800",
-        绿: "bg-green-200 text-green-800",
-        蓝: "bg-blue-200 text-blue-800",
-        紫: "bg-purple-200 text-purple-800",
-        金: "bg-yellow-200 text-yellow-800",
-    }
-    return colorMap[quality] || "bg-base-200 text-base-content"
-}
-</script>
-<template>
+</script><template>
     <FullTooltip :side="side">
         <template #tooltip>
             <div class="flex flex-col gap-2 max-w-75 min-w-28">
@@ -70,9 +60,7 @@ function getQualityColor(quality: string): string {
                     <div v-if="title" class="text-sm font-bold">
                         <SRouterLink v-if="link" :to="link" class="cursor-pointer hover:underline">{{ title }}</SRouterLink>
                         <span v-else>{{ title }}</span>
-                        <span v-if="rarity" class="text-xs p-1 rounded-sm ml-1" :class="getQualityColor(rarity)">
-                            {{ rarity }}
-                        </span>
+                        <span v-if="rarity" class="ml-1" :class="getRaritySwatchClass(rarity)" />
                     </div>
                     <div v-if="polarity || cost" class="ml-auto badge badge-sm badge-soft gap-1 text-base-content/80">
                         {{ cost }}

@@ -1398,7 +1398,11 @@
         "search_placeholder": "Search monster name (pinyin supported)..."
     },
     "db-music-list": {
-        "search_placeholder": "Search sheet music or albums"
+        "album_count": "albums",
+        "no_match": "No matching sheet music",
+        "playback": "Preview",
+        "search_placeholder": "Search sheet music or albums",
+        "track_count": "tracks"
     },
     "db-npc-detail": {
         "char_id": "Character ID",
@@ -2968,6 +2972,7 @@
     "music-player": {
         "load_failed": "Audio failed to load",
         "loading_audio": "Loading audio",
+        "loop_playback": "Loop playback",
         "pause": "Pause",
         "play": "Play",
         "play_failed": "Audio cannot be played",

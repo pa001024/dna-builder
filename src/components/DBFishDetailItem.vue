@@ -4,7 +4,7 @@ import { computed } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { Fish, fish2SpotMap, fishingSpotMap, fishMap, resourceMap } from "@/data"
 import { calculateFishPrice } from "@/utils/fish-utils"
-import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 
 const props = defineProps<{
     fish: Fish
@@ -106,13 +106,14 @@ const fishSpots = computed(() => {
                     {{ $t(fish.name) }}
                 </SRouterLink>
                 <CopyID :id="fish.id" />
-                <span :class="getRarityBadgeClass(fish.rarity)">
-                    {{ gt(getRarityName(fish.rarity)) }}
-                </span>
             </div>
-            <!-- 鱼图 -->
+            <!-- 鱼图：底色按稀有度渐变 -->
             <div class="relative mt-3 flex justify-center">
-                <img :src="`/imgs/res/T_Fish_${fish.icon}.webp`" class="w-24 rounded-xs object-cover" />
+                <img
+                    :src="`/imgs/res/T_Fish_${fish.icon}.webp`"
+                    class="w-24 rounded-xs bg-linear-15 object-cover"
+                    :class="getRarityGradientClass(fish.rarity)"
+                />
             </div>
         </header>
 

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { ExtractionTreasureMechanism } from "@/data/d/solotreasure.data"
 import { format100 } from "@/util"
-import { getRarityName } from "@/utils/rarity-utils"
+import { getRaritySwatchClass } from "@/utils/rarity-utils"
 
 defineProps<{
     mechanism: ExtractionTreasureMechanism
@@ -35,25 +35,25 @@ defineProps<{
         <!-- 权重 -->
         <div>
             <div class="text-[11px] tracking-wide text-base-content/55">{{ $t('common.weight') }}</div>
-            <p class="mt-1 text-[11px] tabular-nums leading-relaxed text-base-content/70">
-                {{
-                    Object.entries(mechanism.itemLevelWeight)
-                        .map(([lv, weight]) => `${getRarityName(+lv)}:${format100(weight, 1)}`)
-                        .join(" / ")
-                }}
-            </p>
+            <div class="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] tabular-nums leading-relaxed text-base-content/70">
+                <span
+                    v-for="[lv, weight] in Object.entries(mechanism.itemLevelWeight)"
+                    :key="lv"
+                    class="inline-flex items-center gap-1"
+                >
+                    <span :class="getRaritySwatchClass(Number(lv))" />{{ format100(weight, 1) }}
+                </span>
+            </div>
         </div>
 
         <!-- 数量 -->
         <div>
             <div class="text-[11px] tracking-wide text-base-content/55">{{ $t('db-solo-treasure-mechanism.amount') }}</div>
-            <p class="mt-1 text-[11px] tabular-nums leading-relaxed text-base-content/70">
-                {{
-                    Object.entries(mechanism.itemLevelLimit)
-                        .map(([lv, count]) => `${getRarityName(+lv)}x${count}`)
-                        .join(" / ")
-                }}
-            </p>
+            <div class="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] tabular-nums leading-relaxed text-base-content/70">
+                <span v-for="[lv, count] in Object.entries(mechanism.itemLevelLimit)" :key="lv" class="inline-flex items-center gap-1">
+                    <span :class="getRaritySwatchClass(Number(lv))" />x{{ count }}
+                </span>
+            </div>
         </div>
     </div>
 </template>

@@ -41,7 +41,7 @@ import {
     rougeProTreasures,
 } from "@/data/d/rouge.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
-import { getRarityGradientClass, getRarityName } from "@/utils/rarity-utils"
+import { getRarityGradientClass, getRarityName, getRaritySwatchClass } from "@/utils/rarity-utils"
 import { getRougeRoomTypeInfo } from "@/utils/rouge-room-type"
 import { stripStoryTextTags } from "@/utils/story-text"
 
@@ -647,15 +647,16 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbrg-item-active" })
                                 v-for="rarity in [1, 2, 3]"
                                 :key="rarity"
                                 type="button"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-xs border px-2 py-1 transition-colors duration-150 active:scale-[0.97]"
                                 :class="
                                     filterRarity === rarity
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
+                                :title="getRarityName(rarity + 2)"
                                 @click="filterRarity = rarity"
                             >
-                                {{ gt(getRarityName(rarity + 2)) }}
+                                <span :class="getRaritySwatchClass(rarity + 2)" />
                             </button>
                         </div>
                         <div v-if="showUpgradableFilter" class="flex flex-wrap gap-1.5">

@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { computed } from "vue"
-import { useGameText } from "@/composables/useGameText"
 import { parseNumberOrEmptySearchParam, useSearchParam } from "@/composables/useSearchParam"
 import { LeveledMod, LeveledWeapon } from "@/data"
 import { draftMap, modMap, resourceMap, weaponMap } from "@/data/d"
@@ -9,9 +8,7 @@ import draftData, { type Draft } from "@/data/d/draft.data"
 import { iconticketMap } from "@/data/d/iconticket.data"
 import { getRewardTypeText } from "@/utils/i18n-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
-import { getRarityBadgeClass, getRarityGradientClass, getRarityName } from "@/utils/rarity-utils"
-
-const { gt } = useGameText()
+import { getRarityGradientClass, getRarityName, getRaritySwatchClass } from "@/utils/rarity-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDraftId = useSearchParam<number>("id", 0)
@@ -190,15 +187,16 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
                             <button
                                 v-for="rarity in rarities"
                                 :key="rarity"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                                class="inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-xs border px-2 py-1 transition-colors duration-150 active:scale-[0.97]"
                                 :class="
                                     selectedRarity === rarity
                                         ? 'border-primary bg-primary font-semibold text-primary-content'
                                         : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
                                 "
+                                :title="getRarityName(rarity)"
                                 @click="selectedRarity = rarity"
                             >
-                                {{ ["", "白", "绿", "蓝", "紫", "金"][rarity] }}
+                                <span :class="getRaritySwatchClass(rarity)" />
                             </button>
                         </div>
                     </div>
@@ -242,7 +240,7 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0">
-                                            <!-- 名称行：名称 + 稀有度徽记 -->
+                                            <!-- 名称行：稀有度已由图标底色渐变表示 -->
                                             <div class="flex items-baseline gap-2">
                                                 <h3
                                                     class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
@@ -250,9 +248,6 @@ const selectedDraftIndex = computed(() => filteredDrafts.value.findIndex(draft =
                                                 >
                                                     {{ $t(draft.n) }}
                                                 </h3>
-                                                <span :class="getRarityBadgeClass(draft.r)">
-                                                    {{ gt(getRarityName(draft.r)) }}
-                                                </span>
                                             </div>
                                             <!-- 元信息行：类型 / 版本 / 制造时长 -->
                                             <div

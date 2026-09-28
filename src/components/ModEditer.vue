@@ -8,6 +8,7 @@ import { createWorkerSnapshot } from "@/data/CharBuildSnapshot"
 import { useInvStore } from "@/store/inv"
 import { copyText, pasteText } from "@/util"
 import { formatModLimit } from "@/utils/mod-limit"
+import { getRaritySwatchClass } from "@/utils/rarity-utils"
 
 interface ModOption {
     value: number
@@ -444,14 +445,17 @@ const auraPolset = computed(() => props.type === "角色" && polsetIndices.value
                     <!-- 品质筛选 -->
                     <div class="tabs tabs-box bg-transparent">
                         <template v-for="quality in ['全部', '金', '紫', '蓝', '绿', '白']" :key="quality">
-                            <input
-                                v-model="selectedQuality"
-                                type="radio"
-                                :name="`mod_select_${type}`"
-                                :value="quality"
-                                class="tab"
-                                :aria-label="quality === '全部' ? $t('common.all') : $t(quality)"
-                            />
+                            <label class="tab">
+                                <input
+                                    v-model="selectedQuality"
+                                    type="radio"
+                                    :name="`mod_select_${type}`"
+                                    :value="quality"
+                                    :aria-label="quality === '全部' ? $t('common.all') : quality"
+                                />
+                                <span v-if="quality === '全部'">{{ $t("common.all") }}</span>
+                                <span v-else :class="getRaritySwatchClass(quality)" :title="quality" />
+                            </label>
                             <div v-if="selectedQuality === quality" class="tab-content py-2">
                                 <ScrollArea class="h-[calc(110vh/1.2-10.5rem)] w-full">
                                     <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">

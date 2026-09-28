@@ -1413,7 +1413,11 @@
         "search_placeholder": "Rechercher un nom de monstre (pinyin pris en charge)..."
     },
     "db-music-list": {
-        "search_placeholder": "Rechercher des partitions ou albums"
+        "album_count": "albums",
+        "no_match": "Aucune partition correspondante",
+        "playback": "Écoute",
+        "search_placeholder": "Rechercher des partitions ou albums",
+        "track_count": "titres"
     },
     "db-npc-detail": {
         "char_id": "ID de personnage",
@@ -2985,6 +2989,7 @@
     "music-player": {
         "load_failed": "Échec du chargement de l'audio",
         "loading_audio": "Chargement de l'audio",
+        "loop_playback": "Lecture en boucle",
         "pause": "Pause",
         "play": "Lecture",
         "play_failed": "Impossible de lire l'audio",

@@ -45,16 +45,68 @@ export function useAudioPlayer(options: UseAudioPlayerOptions) {
     const isLoading = ref(false)
     const error = ref<AudioPlayerError>(null)
 
+    /** 展示用播放时刻（秒）。播放中由 rAF 逐帧跟随 `audio.currentTime`，其余场景与 `currentTime` 同步。 */
+    const displayTime = ref(0)
+
+    /** rAF 帧回调句柄 */
+    let displayRafId: number | null = null
+
+    /** 停止逐帧刷新显示时刻。 */
+    function stopDisplayLoop(): void {
+        if (displayRafId !== null) {
+            cancelAnimationFrame(displayRafId)
+            displayRafId = null
+        }
+    }
+
+    /**
+     * 播放中逐帧同步展示时刻。
+     *
+     * `timeupdate` 事件约 250ms 才触发一次，直接驱动进度条会一格一格跳；
+     * `audio.currentTime` 属性本身随解码管线连续前进，rAF 逐帧读取即可得到平滑进度。
+     */
+    function startDisplayLoop(): void {
+        stopDisplayLoop()
+        const step = (): void => {
+            const audio = audioRef.value
+            if (!audio) {
+                displayRafId = null
+                return
+            }
+
+            displayTime.value = audio.currentTime
+            displayRafId = requestAnimationFrame(step)
+        }
+        displayRafId = requestAnimationFrame(step)
+    }
+
     /** 是否存在可定位的有效时长 */
     const hasDuration = computed(() => Number.isFinite(duration.value) && duration.value > 0)
 
-    /** 播放进度占比（0~1） */
+    /** 播放进度占比（0~1），基于展示时刻以获得平滑进度条 */
     const progressRatio = computed(() => {
         if (!hasDuration.value) {
             return 0
         }
 
-        return Math.min(1, Math.max(0, currentTime.value / duration.value))
+        return Math.min(1, Math.max(0, displayTime.value / duration.value))
+    })
+
+    // 播放状态驱动显示循环：暂停/结束后回到事件驱动的精确时刻
+    watch(isPlaying, playing => {
+        if (playing) {
+            startDisplayLoop()
+        } else {
+            stopDisplayLoop()
+            displayTime.value = currentTime.value
+        }
+    })
+
+    // 非播放态下 currentTime 是唯一真源（拖动定位、重置、加载元数据等），直接透传
+    watch(currentTime, time => {
+        if (!isPlaying.value) {
+            displayTime.value = time
+        }
     })
 
     /**
@@ -237,6 +289,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions) {
     watch(() => toValue(options.src), resetAudio)
 
     onScopeDispose(() => {
+        stopDisplayLoop()
         releaseExclusive()
         const audio = audioRef.value
         if (!audio) {
@@ -250,6 +303,8 @@ export function useAudioPlayer(options: UseAudioPlayerOptions) {
 
     return {
         currentTime,
+        /** 展示用平滑播放时刻（进度条与时间文本用） */
+        displayTime,
         duration,
         isPlaying,
         isLoading,

@@ -16,7 +16,7 @@ import {
     rougeLikeTalentBranches,
     rougeLikeTreasureGroups,
 } from "@/data/d/rouge.data"
-import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { getRougeRoomTypeInfo } from "@/utils/rouge-room-type"
 import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments, type StoryTextSegment } from "@/utils/story-text"
 
@@ -234,7 +234,10 @@ const roomConditions = computed(() => {
                 aria-hidden="true"
             />
             <div class="relative flex items-center gap-3">
-                <div class="h-14 min-w-14 w-fit shrink-0 overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3">
+                <div
+                    class="h-14 min-w-14 w-fit shrink-0 overflow-hidden rounded-xs border border-base-content/10"
+                    :class="'rarity' in item ? `bg-linear-15 ${getRarityGradientClass(item.rarity + 2)}` : 'bg-base-content/3'"
+                >
                     <ImageFallback :src="iconUrl" :alt="displayName" class="h-14 w-auto object-contain">
                         <img src="/imgs/webp/T_Head_Empty.webp" :alt="displayName" class="h-14 w-auto object-contain" />
                     </ImageFallback>
@@ -254,13 +257,6 @@ const roomConditions = computed(() => {
                         <CopyID :id="item.id" />
                     </div>
                     <div class="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-base-content/55">
-                        <span
-                            v-if="'rarity' in item"
-                            class="rounded-xs px-1.5 py-0.5 font-semibold"
-                            :class="getRarityBadgeClass(item.rarity + 2)"
-                        >
-                            {{ gt(getRarityName(item.rarity + 2)) }}
-                        </span>
                         <span v-if="groupName" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{ gt(groupName) }}</span>
                         <span v-if="treasureGroupName" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">{{
                             gt(treasureGroupName)

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { t } from "i18next"
 import { computed } from "vue"
-import { useGameText } from "@/composables/useGameText"
 import { charData } from "@/data"
 import type { Accessory, HairItem, HeadFrameItem, HeadSculptureItem, SkinItem } from "@/data/d/accessory.data"
 import draftData, { type Draft } from "@/data/d/draft.data"
@@ -9,7 +8,7 @@ import shopData from "@/data/d/shop.data"
 import type { TitleFrame } from "@/data/d/titleframe.data"
 import { getWanhuaSkinUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import type { ResourceDraftSourceInfo } from "@/utils/draft-source"
-import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
 
 type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head" | "titleframe" | "titleframe"
@@ -61,8 +60,6 @@ type DetailAccessoryItem =
 const props = defineProps<{
     accessory: DetailAccessoryItem
 }>()
-
-const { gt } = useGameText()
 
 /**
  * 判断是否为角色皮肤。
@@ -481,7 +478,17 @@ const accessoryUnlock = computed(() => {
                 aria-hidden="true"
             />
             <div class="relative flex items-start gap-3.5">
-                <img :src="accessoryIcon" :alt="accessoryName" class="size-14 shrink-0 rounded-xs bg-base-content/6 object-cover" />
+                <!-- 图标底色按稀有度渐变（头像框 / 头像没有稀有度，用中性底） -->
+                <img
+                    :src="accessoryIcon"
+                    :alt="accessoryName"
+                    class="size-14 shrink-0 rounded-xs object-cover"
+                    :class="
+                        isHeadFrameAccessory(accessory) || isHeadAccessory(accessory)
+                            ? 'bg-base-content/6'
+                            : `bg-linear-15 ${getRarityGradientClass(accessoryRarityValue)}`
+                    "
+                />
                 <div class="min-w-0 flex-1">
                     <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
                         <span class="h-px w-6 bg-primary" aria-hidden="true" />
@@ -506,12 +513,6 @@ const accessoryUnlock = computed(() => {
                             class="shrink-0 rounded-xs border border-base-content/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-base-content/50"
                         >
                             {{ accessoryVersionText }}
-                        </span>
-                        <span
-                            v-if="!isHeadFrameAccessory(accessory) && !isHeadAccessory(accessory)"
-                            :class="getRarityBadgeClass(accessoryRarityValue)"
-                        >
-                            {{ gt(getRarityName(accessoryRarityValue)) }}
                         </span>
                     </div>
                     <div class="mt-2">

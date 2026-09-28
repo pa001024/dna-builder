@@ -46,6 +46,7 @@ import {
 import { useInvStore } from "@/store/inv"
 import { useUIStore } from "@/store/ui"
 import { formatProp, formatSkillProp } from "@/util"
+import { getRaritySwatchClass } from "@/utils/rarity-utils"
 
 const { t } = useTranslation()
 const ui = useUIStore()
@@ -2484,11 +2485,12 @@ onBeforeUnmount(() => {
                                 v-for="quality in MOD_QUALITIES"
                                 :key="quality"
                                 type="button"
-                                class="px-1.5 py-0.5 text-[11px]"
+                                class="inline-flex items-center px-1.5 py-0.5 text-[11px]"
                                 :class="modQuality === quality ? 'bg-primary/10 text-primary' : 'text-base-content/45 hover:text-base-content/80'"
                                 @click="modQuality = quality"
                             >
-                                {{ quality === "全部" ? $t("common.all") : $t(quality) }}
+                                <span v-if="quality === '全部'">{{ $t("common.all") }}</span>
+                                <span v-else :class="getRaritySwatchClass(quality)" :title="quality" />
                             </button>
                         </div>
                         <span class="ml-auto font-orbitron text-[11px] tabular-nums text-base-content/40">{{ pickerMods.length }}</span>

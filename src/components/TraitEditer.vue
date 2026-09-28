@@ -17,6 +17,7 @@ import {
     TRAIT_SLOT_COUNT,
     type TraitSlot,
 } from "@/data/petTrait"
+import { getRaritySwatchClass } from "@/utils/rarity-utils"
 
 /**
  * 魔灵潜质编辑区——4 个互不相同的潜质槽位，交互与魔之楔槽位一致：
@@ -366,14 +367,17 @@ function handleDragOver(index: number) {
                     <!-- 稀有度筛选 -->
                     <div class="tabs tabs-box bg-transparent">
                         <template v-for="rarity in RARITY_TABS" :key="rarity">
-                            <input
-                                v-model="rarityTab"
-                                type="radio"
-                                name="trait_select_rarity"
-                                :value="rarity"
-                                class="tab"
-                                :aria-label="rarity === '全部' ? $t('common.all') : $t(rarity)"
-                            />
+                            <label class="tab">
+                                <input
+                                    v-model="rarityTab"
+                                    type="radio"
+                                    name="trait_select_rarity"
+                                    :value="rarity"
+                                    :aria-label="rarity === '全部' ? $t('common.all') : rarity"
+                                />
+                                <span v-if="rarity === '全部'">{{ $t("common.all") }}</span>
+                                <span v-else :class="getRaritySwatchClass(rarity)" :title="rarity" />
+                            </label>
                             <div v-if="rarityTab === rarity" class="tab-content py-2">
                                 <ScrollArea class="h-[calc(110vh/1.2-10.5rem)] w-full">
                                     <div class="grid grid-cols-1 2xl:grid-cols-2 gap-2">

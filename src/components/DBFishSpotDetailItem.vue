@@ -5,7 +5,7 @@ import { useGameText } from "@/composables/useGameText"
 import type { Fish, FishingSpot } from "@/data"
 import { fishMap, petMap } from "@/data"
 import { calculateFishPrice, getRandomFish } from "@/utils/fish-utils"
-import { getRarityBadgeClass, getRarityName } from "@/utils/rarity-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
 
 const props = defineProps<{
@@ -451,7 +451,11 @@ function clearHistory() {
                                     @click="selectedFish = fish"
                                 >
                                     <div class="flex items-center gap-2.5">
-                                        <img :src="getFishIcon(fish)" class="size-8 shrink-0 rounded-xs object-cover" />
+                                        <img
+                                            :src="getFishIcon(fish)"
+                                            class="size-8 shrink-0 rounded-xs bg-linear-15 object-cover"
+                                            :class="getRarityGradientClass(fish.rarity)"
+                                        />
                                         <div class="min-w-0 flex-1">
                                             <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                                                 <span
@@ -461,12 +465,6 @@ function clearHistory() {
                                                     {{ $t(fish.name) }}
                                                 </span>
                                                 <CopyID :id="fish.id" />
-                                                <span
-                                                    class="shrink-0 rounded-xs px-1.5 py-0.5 text-[10px] leading-4"
-                                                    :class="getRarityBadgeClass(fish.rarity)"
-                                                >
-                                                    {{ gt(getRarityName(fish.rarity)) }}
-                                                </span>
                                             </div>
                                             <!-- 属性行 -->
                                             <div
@@ -599,13 +597,14 @@ function clearHistory() {
                                     class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40"
                                 >
                                     <div class="flex items-center gap-2.5">
-                                        <img :src="getFishIcon(record.finalFish)" class="size-8 shrink-0 rounded-xs object-cover" />
+                                        <img
+                                            :src="getFishIcon(record.finalFish)"
+                                            class="size-8 shrink-0 rounded-xs bg-linear-15 object-cover"
+                                            :class="getRarityGradientClass(record.finalFish.rarity)"
+                                        />
                                         <div class="min-w-0 flex-1">
                                             <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                                                 <span class="truncate text-sm font-semibold">{{ $t(record.finalFish.name) }}</span>
-                                                <span :class="getRarityBadgeClass(record.finalFish.rarity)">
-                                                    {{ gt(getRarityName(record.finalFish.rarity)) }}
-                                                </span>
                                                 <span
                                                     class="shrink-0 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] leading-4 tabular-nums text-base-content/60"
                                                 >

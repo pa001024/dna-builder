@@ -1380,7 +1380,11 @@
         "search_placeholder": "モンスター名を検索（ピンイン対応）..."
     },
     "db-music-list": {
-        "search_placeholder": "楽譜またはアルバムを検索"
+        "album_count": "アルバム",
+        "no_match": "一致する楽譜がありません",
+        "playback": "試聴",
+        "search_placeholder": "楽譜またはアルバムを検索",
+        "track_count": "曲"
     },
     "db-npc-detail": {
         "char_id": "キャラ ID",
@@ -2946,6 +2950,7 @@
     "music-player": {
         "load_failed": "音声の読み込みに失敗しました",
         "loading_audio": "音声を読み込み中",
+        "loop_playback": "リピート再生",
         "pause": "一時停止",
         "play": "再生",
         "play_failed": "音声を再生できません",
