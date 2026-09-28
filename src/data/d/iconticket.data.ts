@@ -31,6 +31,4 @@ export const iconticketData: IconTicket[] = [
         accessKey: ["Forging", "Dungeon"],
     },
 ]
-export const iconticketMap = new Map(iconticketData.map(ticket => [ticket.id, ticket]))
-
 export default iconticketData

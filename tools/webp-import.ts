@@ -360,7 +360,7 @@ async function evaluateDataUrls(): Promise<Set<string>> {
     const { default: rewardList } = await loadModule<{ default: IconItem[] }>("d/reward.data.ts")
     const { default: reputationList } = await loadModule<{ default: IconItem[] }>("d/reputation.data.ts")
     const { questChainData } = await loadModule<{ questChainData: IconItem[] }>("d/questchain.data.ts")
-    const { hardBossMap } = await loadModule<{ hardBossMap: Map<number, IconItem> }>("d/hardboss.data.ts")
+    const { hardBossData } = await loadModule<{ hardBossData: IconItem[] }>("d/hardboss.data.ts")
     const { subRegionData } = await loadModule<{ subRegionData: IconItem[] }>("d/subregion.data.ts")
     const { extractionTreasureData } = await loadModule<{ extractionTreasureData: IconItem[] }>("d/solotreasure.data.ts")
     const { skinGachaTabs } = await loadModule<{ skinGachaTabs: IconItem[] }>("d/skingacha.data.ts")
@@ -544,7 +544,7 @@ async function evaluateDataUrls(): Promise<Set<string>> {
             urls.add(`/imgs/webp/${reputation.icon}.webp`)
         }
     }
-    for (const boss of hardBossMap.values()) {
+    for (const boss of hardBossData) {
         if (boss.icon) {
             urls.add(`/imgs/webp/${boss.icon}.webp`)
         }

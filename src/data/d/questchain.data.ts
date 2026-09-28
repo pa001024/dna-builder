@@ -8917,6 +8917,4 @@ const questChainDataWithVersion = questChainDataRaw.map(questChain => ({
 
 export const questChainData: QuestChain[] = applyVersionGate(questChainDataWithVersion)
 
-export const questChainMap = new Map(questChainData.map(questChain => [questChain.id, questChain]))
-
 export default questChainData

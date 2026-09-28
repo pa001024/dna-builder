@@ -1,9 +1,9 @@
 import type { DynQuest } from "./dynquest.data"
 import dynQuestData from "./dynquest.data"
+import { questChainMap } from "./index"
 import type { NPC } from "./npc.data"
 import npcData from "./npc.data"
 import type { Dialogue, DialogueOption, ImprType, QuestStory } from "./quest.data"
-import { questChainMap } from "./questchain.data"
 import { getLocalizedQuestDataByLanguage } from "./story-locale"
 
 export type ImprSourceType = "npc" | "dynquest" | "questchain"

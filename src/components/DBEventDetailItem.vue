@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useGameText } from "@/composables/useGameText"
+import { questChainMap } from "@/data/d"
 import type { EventItem } from "@/data/d/event.data"
 import { limitedPrizePools } from "@/data/d/limitedprize.data"
-import { questChainMap } from "@/data/d/questchain.data"
 import { getRewardDetails, type RewardItem as RewardDetail } from "@/utils/reward-utils"
 import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments, type StoryTextSegment } from "@/utils/story-text"
 import { formatDateTime, formatTimeRange } from "@/utils/time"

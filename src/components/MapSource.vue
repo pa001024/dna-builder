@@ -2,9 +2,9 @@
 import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
 import { useGameText } from "@/composables/useGameText"
-import { regionMap } from "@/data/d/region.data"
+import { regionMap, subRegionMap } from "@/data/d"
 import type { Resource } from "@/data/d/resource.data"
-import { subRegionMap } from "@/data/d/subregion.data"
+
 
 interface ResourceSourceGroup {
     srId: number

@@ -32838,6 +32838,4 @@ export const partyTopicData: PartyTopic[] = [
     },
 ]
 
-export const partyTopicMap = new Map<number, PartyTopic>(partyTopicData.map(partyTopic => [partyTopic.id, partyTopic]))
-
 export default partyTopicData

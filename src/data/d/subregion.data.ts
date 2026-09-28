@@ -5557,9 +5557,4 @@ export const subRegionData: SubRegion[] = [
     },
 ]
 
-export const subRegionMap = subRegionData.reduce((acc, cur) => {
-    acc.set(cur.id, cur)
-    return acc
-}, new Map<number, SubRegion>())
-
 export default subRegionData

@@ -13,11 +13,9 @@ import {
     walnutMap,
     weaponMap,
 } from "@/data"
-import { skinMap } from "@/data/d"
+import { headSculptureMap, iconticketMap, skinMap } from "@/data/d"
 import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Cutoff } from "@/data/d/cutoff.data"
-import { headSculptureMap } from "@/data/d/headsculpture.data"
-import { iconticketMap } from "@/data/d/iconticket.data"
 import { mountData } from "@/data/d/mount.data"
 import type { ShopItem } from "@/data/d/shop.data"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"

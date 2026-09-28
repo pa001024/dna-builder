@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { iconticketMap } from "@/data/d/iconticket.data"
+import { iconticketMap } from "@/data/d"
+
 
 const route = useRoute()
 

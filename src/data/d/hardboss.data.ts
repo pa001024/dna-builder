@@ -3216,7 +3216,7 @@ export interface HardBossDetail {
     }[]
     mid: number[]
 }
-export const hardBossMap: Map<number, HardBoss> = [
+export const hardBossData: HardBoss[] = [
     {
         id: 1,
         name: "西比尔",
@@ -3490,13 +3490,18 @@ export const hardBossMap: Map<number, HardBoss> = [
         ],
         mid: [8519501, 8519504, 8519504],
     },
-].reduce((acc, cur) => {
-    acc.set(cur.id, cur)
-    return acc
-}, new Map<number, HardBoss>())
+]
 
+/**
+ * 获取高难 Boss 详情（含动态奖励合并）。
+ *
+ * id 索引由 data/d/index.ts 统一维护；这里按原始表查找，
+ * 避免数据脚本反向依赖索引模块。
+ * @param id Boss id
+ * @returns Boss 详情；不存在时返回 undefined
+ */
 export const getHardBossDetail = (id: number) => {
-    const boss = hardBossMap.get(id)
+    const boss = hardBossData.find(item => item.id === id)
     if (!boss) return
     const detail: HardBossDetail = {
         ...boss,

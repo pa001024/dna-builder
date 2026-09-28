@@ -5090,7 +5090,4 @@ const monsterData: Monster[] = [
 
 monsterData.push(...mock)
 
-export const monsterMap = new Map<number, Monster>()
-monsterData.forEach(v => monsterMap.set(v.id, v))
-
 export default monsterData

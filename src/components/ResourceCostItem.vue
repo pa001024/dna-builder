@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import { formatModName, LeveledChar, LeveledCharHelper, LeveledMod, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "@/data"
-import { charMap, draftMap, modMap, skinMap, walnutMap, weaponMap } from "@/data/d"
+import { charMap, draftMap, iconticketMap, modMap, skinMap, walnutMap, weaponMap } from "@/data/d"
 import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
-import { iconticketMap } from "@/data/d/iconticket.data"
 import { titleData } from "@/data/d/title.data"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"

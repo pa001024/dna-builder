@@ -2,9 +2,8 @@
 import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
+import { regionMap, subRegionMap } from "@/data/d"
 import { type Book, booksData } from "@/data/d/book.data"
-import { regionMap } from "@/data/d/region.data"
-import { subRegionMap } from "@/data/d/subregion.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")

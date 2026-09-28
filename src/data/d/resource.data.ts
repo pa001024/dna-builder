@@ -16705,10 +16705,4 @@ export const resourceData: Resource[] = [
     },
 ]
 
-export const resourceMap = new Map<number | string, Resource>()
-resourceData.forEach(v => {
-    resourceMap.set(v.id, v)
-    resourceMap.set(v.name, v)
-})
-
 export default resourceData

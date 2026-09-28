@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
+import { regionMap } from "@/data/d"
 import type { DynQuest, DynQuestLevel } from "@/data/d/dynquest.data"
 import { DYN_QUEST_TYPE_ICON_MAP, formatDynQuestDemand, formatDynQuestLevelRange, getDynQuestTypeLabel } from "@/data/d/dynquest.data"
-import { regionMap } from "@/data/d/region.data"
 import { useSettingStore } from "@/store/setting"
 import { getRewardDetails } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"

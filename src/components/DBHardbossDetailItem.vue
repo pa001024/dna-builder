@@ -3,10 +3,10 @@ import { computed, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { monsterMap } from "@/data"
-import { charMap, weaponMap } from "@/data/d"
+import { charMap, walnutMap, weaponMap } from "@/data/d"
 import type { HardBoss, HardBossDetail } from "@/data/d/hardboss.data"
 import { getHardBossDetail } from "@/data/d/hardboss.data"
-import { type Walnut, walnutMap } from "@/data/d/walnut.data"
+import { type Walnut } from "@/data/d/walnut.data"
 import { getRewardDetails } from "@/utils/reward-utils"
 
 interface DynamicRewardEntry {

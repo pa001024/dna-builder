@@ -2,7 +2,7 @@
 import { t } from "i18next"
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
-import { npcMap } from "@/data/d/npc.data"
+import { npcMap } from "@/data/d"
 import { type DetectiveAnswer, type DetectiveQuestion, type Dialogue, type DialogueOption, type QuestNode } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
 import { getDialogueDisplayContent } from "@/utils/dialogue"

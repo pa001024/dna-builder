@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
+import { iconticketMap } from "@/data/d"
 import { charAccessoryData } from "@/data/d/accessory.data"
-import { iconticketMap } from "@/data/d/iconticket.data"
 import { draftDungeonMap, modMap, weaponMap } from "@/data/d/index"
 import shopData from "@/data/d/shop.data"
 import type { Draft } from "@/data/data-types"

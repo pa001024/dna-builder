@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue"
+import { resourceMap } from "@/data/d"
 import { type CharExtraExcelWeapon, charExtraExcelWeapon } from "@/data/d/charext.data"
-import { resourceMap } from "@/data/d/resource.data"
 import type { Char } from "@/data/data-types"
 
 const props = defineProps<{

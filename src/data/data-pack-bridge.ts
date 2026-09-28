@@ -1,5 +1,6 @@
 import { ref } from "vue"
 import type { DataPackModuleRecord } from "./data-pack"
+import { applyVersionGate, type VersionedItem } from "./versionGate"
 
 type DataPackFallbackKind = "array" | "object" | "map" | "undefined"
 
@@ -34,6 +35,24 @@ function createFallbackValue(fallbackKind: DataPackFallbackKind): unknown {
     if (fallbackKind === "object") return {}
     if (fallbackKind === "map") return new Map()
     return undefined
+}
+
+/**
+ * 数据包水合时重放版本门限。
+ *
+ * 数据包按「安全模式全开」打包全量数据，版本门限只在客户端生效：
+ * 条目数组（角色/武器/魔之楔等带版本字段的表）在写入导出前统一过滤，
+ * rebuildStaticIndexes 等水合回调与后续读取拿到的都是裁剪后的数据。
+ * 数据包按约定只装原始条目表（questChainMap 等派生索引一律放 index.ts 重建），
+ * 因此只需处理数组；门限为 Infinity（安全模式关闭）时 applyVersionGate 原样返回。
+ * @param value 水合值
+ * @returns 应用门限后的值
+ */
+function applyVersionGateToPackedValue(value: unknown): unknown {
+    if (Array.isArray(value)) {
+        return applyVersionGate(value as VersionedItem[])
+    }
+    return value
 }
 
 /**
@@ -74,7 +93,7 @@ export function hydrateRegisteredDataPackBindings(moduleKey: string, moduleRecor
 
     for (const [exportName, entry] of moduleBindings) {
         if (Object.hasOwn(moduleRecord, exportName)) {
-            entry.setter(moduleRecord[exportName])
+            entry.setter(applyVersionGateToPackedValue(moduleRecord[exportName]))
         } else {
             entry.setter(createFallbackValue(entry.fallbackKind))
         }

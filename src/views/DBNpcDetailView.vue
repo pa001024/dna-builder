@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { npcMap } from "@/data/d/npc.data"
+import { npcMap } from "@/data/d"
+
 
 const route = useRoute()
 

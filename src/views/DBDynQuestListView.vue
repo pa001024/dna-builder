@@ -5,6 +5,7 @@ import { computed } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
+import { regionMap, subRegionMap } from "@/data/d"
 import dynQuestData, {
     DYN_QUEST_TYPE_ICON_MAP,
     type DynQuest,
@@ -14,8 +15,6 @@ import dynQuestData, {
     getDynQuestTypeLabel,
 } from "@/data/d/dynquest.data"
 import type { Dialogue, DialogueOption } from "@/data/d/quest.data"
-import { regionMap } from "@/data/d/region.data"
-import { subRegionMap } from "@/data/d/subregion.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { stripStoryTextTags } from "@/utils/story-text"

@@ -816,9 +816,4 @@ const regionDataWithVersion = t.map(region => ({
 
 const filteredRegionData = applyVersionGate(regionDataWithVersion)
 
-export const regionMap = filteredRegionData.reduce((acc, cur) => {
-    acc.set(cur.id, cur)
-    return acc
-}, new Map<number, Region>())
-
 export default filteredRegionData

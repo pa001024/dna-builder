@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { hardBossMap } from "@/data/d/hardboss.data"
+
+import { hardBossMap } from "@/data/d"
 import { formatWeaponSourceTimeRange, type WeaponHardbossSourceInfo } from "@/utils/weapon-source"
 
 const props = defineProps<{

@@ -72300,6 +72300,4 @@ export const npcData: NPC[] = [
     },
 ]
 
-export const npcMap = new Map(npcData.map(npc => [npc.id, npc]))
-
 export default npcData

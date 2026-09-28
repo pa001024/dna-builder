@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
-import { regionMap } from "@/data/d/region.data"
-import { subRegionMap } from "@/data/d/subregion.data"
+import { regionMap, subRegionMap } from "@/data/d"
+
+
 
 const props = defineProps<{
     subRegionId: number

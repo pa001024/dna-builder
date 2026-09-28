@@ -1,6 +1,6 @@
-import { charMap, weaponMap } from "@/data/d"
-import { getHardBossDetail, type HardBossDetail, hardBossMap } from "@/data/d/hardboss.data"
-import { type Walnut, walnutMap } from "@/data/d/walnut.data"
+import { charMap, hardBossMap, walnutMap, weaponMap } from "@/data/d"
+import { getHardBossDetail, type HardBossDetail } from "@/data/d/hardboss.data"
+import type { Walnut } from "@/data/d/walnut.data"
 import { getRewardDetails } from "@/utils/reward-utils"
 
 /**

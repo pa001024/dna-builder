@@ -1394,9 +1394,4 @@ export const headSculptureData: HeadSculpture[] = [
     },
 ]
 
-export const headSculptureMap = headSculptureData.reduce((map, item) => {
-    map.set(item.id, item)
-    return map
-}, new Map<number, HeadSculpture>())
-
 export default headSculptureData

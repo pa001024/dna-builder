@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest"
+import i18next from "i18next"
+import { beforeAll, describe, expect, it } from "vitest"
 import type { AskUserRequest } from "@/utils/db-ask-user"
 import { formatAskUserResponse, hasAskAnswer, normalizeAskUserRequest, summarizeAskUserRequest } from "@/utils/db-ask-user"
 
@@ -8,6 +9,17 @@ import { formatAskUserResponse, hasAskAnswer, normalizeAskUserRequest, summarize
  * 只覆盖 utils 层，不碰 Agent 循环——循环需要真实网络与 OpenAI 客户端，
  * 放在这里会让测试依赖外部服务。
  */
+
+// 占位题干 / 摘要文案走 i18next 的 defaultValue 兜底，
+// 测试环境没有应用级初始化，这里补一个最小 init 让 defaultValue 生效
+beforeAll(async () => {
+    await i18next.init({
+        lng: "zh-CN",
+        resources: { "zh-CN": { translation: {} } },
+        interpolation: { escapeValue: false },
+        showSupportNotice: false,
+    })
+})
 
 /** 构造一份标准提问，供回填类用例复用 */
 function makeRequest(): AskUserRequest {

@@ -155858,6 +155858,4 @@ export const questData: QuestStory[] = [
     },
 ]
 
-export const questMap = new Map(questData.map(questList => [questList.id, questList]))
-
 export default questData

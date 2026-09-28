@@ -2,10 +2,9 @@
 import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
+import { regionMap, subRegionMap } from "@/data/d"
 import type { Book, BookResource } from "@/data/d/book.data"
 import { convertRegionMapIdToDBMapId } from "@/data/d/map.data"
-import { regionMap } from "@/data/d/region.data"
-import { subRegionMap } from "@/data/d/subregion.data"
 import { useSettingStore } from "@/store/setting"
 import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments, type StoryTextConfig } from "@/utils/story-text"
 

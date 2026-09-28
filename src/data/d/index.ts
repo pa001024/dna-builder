@@ -13,17 +13,29 @@ export { weaponVerifyData } from "./weapon-verify.data"
 
 import { isDataPackHydrated, registerDataPackHydrationCallback } from "../data-pack-bridge"
 import { skinData } from "./accessory.data"
+import dynQuestData, { type DynQuest } from "./dynquest.data"
+import { type HardBoss, hardBossData } from "./hardboss.data"
+import headSculptureData, { type HeadSculpture } from "./headsculpture.data"
+import iconticketData, { type IconTicket } from "./iconticket.data"
 import modData from "./mod.data"
-import monsterData, { monsterMap } from "./monster.data"
+import monsterData, { type Monster } from "./monster.data"
+import npcData, { type NPC } from "./npc.data"
+import partyTopicData, { type PartyTopic } from "./partytopic.data"
+import questData, { type QuestStory } from "./quest.data"
+import { type QuestChain, questChainData } from "./questchain.data"
+import regionData, { type Region } from "./region.data"
 import resourceData, { type Resource } from "./resource.data"
 import rewardData from "./reward.data"
+import shopData from "./shop.data"
+import subRegionData, { type SubRegion } from "./subregion.data"
+import walnutData, { type Walnut } from "./walnut.data"
 import weaponData from "./weapon.data"
 
 export { hairData, headFrameData } from "./accessory.data"
 
 export const charMap = new Map<number | string, Char>()
 
-export { cutoffData, monsterData, monsterMap }
+export { cutoffData, monsterData }
 
 export const cutoffMap = new Map<number, (typeof cutoffData)[number]>()
 
@@ -42,6 +54,9 @@ export const weaponEffectMap = new Map<number, Buff>()
 export const weaponMap = new Map<number, Weapon>()
 export const weaponNameMap = new Map<string, Weapon>()
 export const skinMap = new Map<number, (typeof skinData)[number]>()
+
+/** 任务链 id → 任务链（派生索引，随水合在 rebuildStaticIndexes 里从 questChainData 重建） */
+export const questChainMap = new Map<number, QuestChain>()
 
 export const rewardMap = new Map<number, Reward>()
 
@@ -111,7 +126,7 @@ export const petMap = new Map<number, Pet>()
 
 export type { DBMap, DBMapMarker } from "./map.data"
 
-export { type Walnut, type WalnutReward, walnutMap, walnutRewardMap } from "./walnut.data"
+export type { Walnut, WalnutReward } from "./walnut.data"
 
 import { type Fish, type FishingSpot, fishingSpots, fishs } from "./fish.data"
 export const fishMap = new Map<number, Fish>()
@@ -121,8 +136,25 @@ export const fishingSpotMap = new Map<number, FishingSpot>()
 export const fish2SpotMap = new Map<number, { spotId: number; weight: number }[]>()
 
 export { AbyssMonsterLevelLimit, MonsterLevelUpperLimit } from "./const.data"
-export { type Resource, resourceData, resourceMap } from "./resource.data"
+export { type Resource, resourceData } from "./resource.data"
 export type { Fish, FishingSpot }
+
+export const npcMap = new Map<number, NPC>()
+export const iconticketMap = new Map<number, IconTicket>()
+export const headSculptureMap = new Map<number, HeadSculpture>()
+export const partyTopicMap = new Map<number, PartyTopic>()
+export const questMap = new Map<number, QuestStory>()
+export const subRegionMap = new Map<number, SubRegion>()
+export const regionMap = new Map<number, Region>()
+export const dynQuestMap = new Map<number, DynQuest>()
+export const hardBossMap = new Map<number, HardBoss>()
+export const monsterMap = new Map<number, Monster>()
+export const resourceMap = new Map<number | string, Resource>()
+export const walnutMap = new Map<number, Walnut>()
+export const walnutRewardMap = new Map<number, Walnut>()
+export const modShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Mod" }>()
+export const weaponShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Mod" }>()
+export const draftShopSourceMap = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Draft" }>()
 
 /**
  * 重建静态索引。
@@ -166,6 +198,11 @@ function rebuildStaticIndexes(): void {
     for (const weapon of weaponData) {
         weaponMap.set(weapon.id, weapon as Weapon)
         weaponNameMap.set(weapon.名称, weapon as Weapon)
+    }
+
+    questChainMap.clear()
+    for (const questChain of questChainData) {
+        questChainMap.set(questChain.id, questChain)
     }
 
     // 武器特效需在 weaponMap 建立后再按 id 索引
@@ -305,6 +342,131 @@ function rebuildStaticIndexes(): void {
             }
             fish2SpotMap.get(id)!.push({ spotId: spot.id, weight: spot.weights[index] })
         })
+    }
+
+    npcMap.clear()
+    for (const npc of npcData) {
+        npcMap.set(npc.id, npc)
+    }
+
+    iconticketMap.clear()
+    for (const ticket of iconticketData) {
+        iconticketMap.set(ticket.id, ticket)
+    }
+
+    headSculptureMap.clear()
+    for (const headSculpture of headSculptureData) {
+        headSculptureMap.set(headSculpture.id, headSculpture)
+    }
+
+    partyTopicMap.clear()
+    for (const partyTopic of partyTopicData) {
+        partyTopicMap.set(partyTopic.id, partyTopic)
+    }
+
+    questMap.clear()
+    for (const questStory of questData) {
+        questMap.set(questStory.id, questStory)
+    }
+
+    subRegionMap.clear()
+    for (const subRegion of subRegionData) {
+        subRegionMap.set(subRegion.id, subRegion)
+    }
+
+    regionMap.clear()
+    for (const region of regionData) {
+        regionMap.set(region.id, region)
+    }
+
+    dynQuestMap.clear()
+    for (const dynQuest of dynQuestData) {
+        dynQuestMap.set(dynQuest.id, dynQuest)
+    }
+
+    hardBossMap.clear()
+    for (const hardBoss of hardBossData) {
+        hardBossMap.set(hardBoss.id, hardBoss)
+    }
+
+    monsterMap.clear()
+    for (const monster of monsterData) {
+        monsterMap.set(monster.id, monster)
+    }
+
+    resourceMap.clear()
+    for (const resource of resourceData) {
+        resourceMap.set(resource.id, resource)
+        resourceMap.set(resource.name, resource)
+    }
+
+    walnutMap.clear()
+    walnutRewardMap.clear()
+    for (const walnut of walnutData) {
+        walnutMap.set(walnut.id, walnut)
+        const reward = walnut.奖励[0]
+        if (reward.type === "Mod" || reward.type === "Weapon") {
+            walnutRewardMap.set(reward.id, walnut)
+        }
+    }
+
+    // 商店来源索引依赖上面的 modMap 与 walnutMap，必须放在它们之后重建
+    rebuildShopSourceIndexes()
+}
+
+/**
+ * 重建商店来源索引。
+ *
+ * 遍历全部商店条目：密函类条目按密函首个奖励反查魔之楔/武器 id，
+ * 直接售卖的魔之楔按 id 命中 modMap，设计稿按 id 单独入索引。
+ */
+function rebuildShopSourceIndexes(): void {
+    modShopSourceMap.clear()
+    weaponShopSourceMap.clear()
+    draftShopSourceMap.clear()
+    for (const shop of shopData) {
+        for (const mainTab of shop.mainTabs) {
+            for (const subTab of mainTab.subTabs) {
+                for (const item of subTab.items) {
+                    const shopName = `${mainTab.name} - ${subTab.name}`
+                    if (item.itemType === "Walnut") {
+                        const walnut = walnutMap.get(item.typeId)
+                        if (walnut) {
+                            const reward = walnut.奖励[0]
+                            if (reward.type === "Mod") {
+                                modShopSourceMap.set(reward.id, {
+                                    shop: shopName,
+                                    cost: item.priceName,
+                                    n: item.price,
+                                    t: "Walnut",
+                                })
+                            } else if (reward.type === "Weapon") {
+                                weaponShopSourceMap.set(reward.id, {
+                                    shop: shopName,
+                                    cost: item.priceName,
+                                    n: item.price,
+                                    t: "Walnut",
+                                })
+                            }
+                        } else if (modMap.has(item.typeId)) {
+                            modShopSourceMap.set(item.typeId, {
+                                shop: shopName,
+                                cost: item.priceName,
+                                n: item.price,
+                                t: "Mod",
+                            })
+                        }
+                    } else if (item.itemType === "Draft") {
+                        draftShopSourceMap.set(item.typeId, {
+                            shop: shopName,
+                            cost: item.priceName,
+                            n: item.price,
+                            t: "Draft",
+                        })
+                    }
+                }
+            }
+        }
     }
 }
 

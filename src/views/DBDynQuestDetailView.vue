@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { dynQuestMap } from "@/data/d/dynquest.data"
+import { dynQuestMap } from "@/data/d"
+
 
 const route = useRoute()
 

@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
 import { draftMap, LeveledChar, LeveledCharHelper, LeveledModHelper, LeveledPetHelper, LeveledWeaponHelper, resourceMap } from "@/data"
-import { charMap, modMap, petMap, skinMap, walnutMap } from "@/data/d"
+import { charMap, iconticketMap, modMap, petMap, skinMap, walnutMap } from "@/data/d"
 import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
-import { iconticketData } from "@/data/d/iconticket.data"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getDropModeText, getRewardTypeText } from "@/utils/i18n-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
@@ -16,8 +15,6 @@ defineOptions({
 })
 
 const { t } = useTranslation()
-
-const iconticketMap = new Map(iconticketData.map(ticket => [ticket.id, ticket]))
 
 // 定义组件接收的Props
 interface Props {

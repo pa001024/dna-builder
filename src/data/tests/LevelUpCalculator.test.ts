@@ -245,33 +245,6 @@ describe("LevelUpCalculator", () => {
         const shopSources = collectResourceShopSources(smeltingMould!)
         const questSources = collectResourceQuestSources(smeltingMould!)
 
-        console.log("棘刺绝响熔炼0-5锻造消耗", result.details.craft)
-        console.log(
-            "熔炼模具商店来源",
-            shopSources.map(source => ({
-                detail: source.detail,
-                shopName: source.shopName,
-                price: source.price,
-                priceName: source.priceName,
-                limit: source.limit,
-                num: source.num,
-                timeStart: source.timeStart,
-                timeEnd: source.timeEnd,
-            }))
-        )
-        console.log(
-            "熔炼模具任务来源",
-            questSources.map(source => ({
-                questChainName: source.questChainName,
-                chapterName: source.chapterName,
-                episode: source.episode,
-                rewardId: source.rewardId,
-                num: source.num,
-                timeStart: source.timeStart,
-                timeEnd: source.timeEnd,
-            }))
-        )
-
         expect(result.details.craft?.熔炼模具).toBe(1)
         expect(result.details.craft?.铜币).toBe(500000)
         expect(result.details.craft?.熔铸突击枪的领悟).toBe(5)

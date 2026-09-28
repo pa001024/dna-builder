@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { hardBossMap } from "@/data/d/hardboss.data"
+import { hardBossMap } from "@/data/d"
+
 
 const route = useRoute()
 

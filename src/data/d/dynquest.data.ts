@@ -13265,9 +13265,4 @@ const t: DynQuest[] = [
     },
 ]
 
-export const dynQuestMap = t.reduce((acc, cur) => {
-    acc.set(cur.id, cur)
-    return acc
-}, new Map<number, DynQuest>())
-
 export default t

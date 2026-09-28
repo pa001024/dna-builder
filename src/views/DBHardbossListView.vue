@@ -3,7 +3,8 @@ import { computed } from "vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { monsterMap } from "@/data"
-import { type HardBoss, hardBossMap } from "@/data/d/hardboss.data"
+import { hardBossMap } from "@/data/d"
+import { type HardBoss } from "@/data/d/hardboss.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
 const searchKeyword = useSearchParam<string>("kw", "")

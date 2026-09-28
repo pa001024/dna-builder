@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, reactive } from "vue"
 import { useGameText } from "@/composables/useGameText"
-import { npcMap } from "@/data/d/npc.data"
+import { npcMap } from "@/data/d"
 import type { RougeDialogue, RougeDialogueOption, RougeStoryNode } from "@/data/d/rouge.data"
 import { useSettingStore } from "@/store/setting"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"

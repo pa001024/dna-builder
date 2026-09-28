@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useRoute } from "vue-router"
-import { questChainMap } from "@/data/d/questchain.data"
+import { questChainMap } from "@/data/d"
 
 const route = useRoute()
 

@@ -18,7 +18,6 @@ import {
     weaponMap,
 } from "@/data"
 import { charExtraExcelWeapon } from "@/data/d/charext.data"
-import { resourceMap } from "@/data/d/resource.data"
 import { dataPackBootstrapLoading, dataPackHydrationKey, isDataPackHydrated } from "@/data/data-pack-bridge"
 import {
     type CharLevelUpConfig,
@@ -463,6 +462,7 @@ async function calculateResult() {
     }
 }
 
+import { resourceMap } from "@/data/d"
 // 监听数据变化，重新计算结果
 import { matchPinyin } from "@/utils/pinyin-utils"
 

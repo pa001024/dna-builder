@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite"
 import vue from "@vitejs/plugin-vue"
 import vueJsx from "@vitejs/plugin-vue-jsx"
 import RekaResolver from "reka-ui/resolver"
+// @ts-expect-error
 import graphqlTag from "rollup-plugin-graphql-tag"
 import Component from "unplugin-vue-components/vite"
 import { defineConfig } from "vite"
@@ -167,6 +168,7 @@ export default defineConfig(async () => ({
             "langchain",
             "zod",
             "@chenglou/pretext",
+            "bcryptjs",
         ],
     },
     build: {

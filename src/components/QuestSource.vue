@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { modMap, resourceMap } from "@/data"
-import { iconticketMap } from "@/data/d/iconticket.data"
+import { iconticketMap } from "@/data/d"
 import { LeveledMod } from "@/data/leveled/LeveledMod"
 import type { ResourceQuestSourceInfo } from "@/utils/resource-source"
 import { formatTimeRange } from "@/utils/time"

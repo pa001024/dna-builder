@@ -719,7 +719,7 @@ async function main(): Promise<void> {
         { questData: loadedQuestData },
         { questChainData: loadedQuestChainData },
         { partyTopicData: loadedPartyTopicData },
-        { npcMap: loadedNpcMap },
+        { npcData: loadedNpcData },
         { default: loadedCharData },
         { default: loadedWeaponData },
         { default: loadedModData },
@@ -742,7 +742,7 @@ async function main(): Promise<void> {
     questData = loadedQuestData
     questChainData = loadedQuestChainData
     partyTopicData = loadedPartyTopicData
-    npcMap = loadedNpcMap
+    npcMap = new Map(loadedNpcData.map(npc => [npc.id, npc]))
     charData = loadedCharData
     weaponData = loadedWeaponData
     modData = loadedModData

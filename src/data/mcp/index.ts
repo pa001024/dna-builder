@@ -173,6 +173,65 @@ function fromMapExport(value: unknown, tag: string): Record<string, unknown>[] {
     })
 }
 
+/**
+ * 密函原始表与派生索引。
+ *
+ * 数据脚本只导出原始条目表，MCP 侧按 data/d/index.ts 的同一口径现算：
+ * 密函 id → 密函；首个奖励为魔之楔/武器时，奖励 id → 密函。
+ */
+const walnutData = walnutModule.default
+const walnutMap = new Map(walnutData.map(walnut => [walnut.id, walnut]))
+const walnutRewardMap = new Map<number, (typeof walnutData)[number]>()
+for (const walnut of walnutData) {
+    const reward = walnut.奖励[0]
+    if (reward.type === "Mod" || reward.type === "Weapon") {
+        walnutRewardMap.set(reward.id, walnut)
+    }
+}
+
+/**
+ * 构建商店来源索引（与 data/d/index.ts 的 modShopSourceMap 等保持同一口径）。
+ *
+ * 密函类条目按密函首个奖励反查魔之楔/武器 id，直接售卖的魔之楔按 id 命中魔之楔表，
+ * 设计稿按 id 单独入索引。数据脚本不再导出这些派生 Map，因此在 MCP 侧现算。
+ * @returns 魔之楔 / 武器 / 设计稿 id → 商店与价格
+ */
+function buildShopSourceMaps() {
+    const modSources = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Mod" }>()
+    const weaponSources = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Mod" }>()
+    const draftSources = new Map<number, { shop: string; cost: string; n: number; t: "Walnut" | "Draft" }>()
+    const modIds = new Set(modModule.default.map(mod => mod.id))
+
+    for (const shop of shopModule.shopData) {
+        for (const mainTab of shop.mainTabs) {
+            for (const subTab of mainTab.subTabs) {
+                for (const item of subTab.items) {
+                    const shopName = `${mainTab.name} - ${subTab.name}`
+                    if (item.itemType === "Walnut") {
+                        const walnut = walnutMap.get(item.typeId)
+                        if (walnut) {
+                            const reward = walnut.奖励[0]
+                            if (reward.type === "Mod") {
+                                modSources.set(reward.id, { shop: shopName, cost: item.priceName, n: item.price, t: "Walnut" })
+                            } else if (reward.type === "Weapon") {
+                                weaponSources.set(reward.id, { shop: shopName, cost: item.priceName, n: item.price, t: "Walnut" })
+                            }
+                        } else if (modIds.has(item.typeId)) {
+                            modSources.set(item.typeId, { shop: shopName, cost: item.priceName, n: item.price, t: "Mod" })
+                        }
+                    } else if (item.itemType === "Draft") {
+                        draftSources.set(item.typeId, { shop: shopName, cost: item.priceName, n: item.price, t: "Draft" })
+                    }
+                }
+            }
+        }
+    }
+
+    return { modSources, weaponSources, draftSources }
+}
+
+const shopSourceMaps = buildShopSourceMaps()
+
 const LOCAL_DATASETS = {
     abyss: fromArrayExport(abyssModule.abyssDungeons, "abyss.dungeons"),
     accessory: [
@@ -202,7 +261,7 @@ const LOCAL_DATASETS = {
     effect: fromArrayExport(effectModule.default, "effect.default"),
     fish: [...fromArrayExport(fishModule.fishs, "fish.fishs"), ...fromArrayExport(fishModule.fishingSpots, "fish.fishingSpots")],
     hardboss: [
-        ...fromMapExport(hardbossModule.hardBossMap, "hardboss.hardBossMap"),
+        ...fromArrayExport(hardbossModule.hardBossData, "hardboss.hardBossMap"),
         ...fromObjectExport(hardbossModule.dynamicRewardMap, "hardboss.dynamicRewardMap"),
     ],
     headsculpture: fromArrayExport(headsculptureModule.headSculptureData, "headsculpture.headSculptureData"),
@@ -251,9 +310,9 @@ const LOCAL_DATASETS = {
     reward: fromArrayExport(rewardModule.default, "reward.default"),
     shop: [
         ...fromArrayExport(shopModule.shopData, "shop.shopData"),
-        ...fromMapExport(shopModule.modShopSourceMap, "shop.modShopSourceMap"),
-        ...fromMapExport(shopModule.weaponShopSourceMap, "shop.weaponShopSourceMap"),
-        ...fromMapExport(shopModule.draftShopSourceMap, "shop.draftShopSourceMap"),
+        ...fromMapExport(shopSourceMaps.modSources, "shop.modShopSourceMap"),
+        ...fromMapExport(shopSourceMaps.weaponSources, "shop.weaponShopSourceMap"),
+        ...fromMapExport(shopSourceMaps.draftSources, "shop.draftShopSourceMap"),
     ],
     story_locale: fromArrayExport(
         STORY_LOCALE_SAMPLES.map(language => {
@@ -272,8 +331,8 @@ const LOCAL_DATASETS = {
     title: fromArrayExport(titleModule.titleData, "title.titleData"),
     walnut: [
         ...fromArrayExport(walnutModule.default, "walnut.default"),
-        ...fromMapExport(walnutModule.walnutMap, "walnut.walnutMap"),
-        ...fromMapExport(walnutModule.walnutRewardMap, "walnut.walnutRewardMap"),
+        ...fromMapExport(walnutMap, "walnut.walnutMap"),
+        ...fromMapExport(walnutRewardMap, "walnut.walnutRewardMap"),
     ],
     weapon: fromArrayExport(weaponModule.default, "weapon.default"),
 } as const
