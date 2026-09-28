@@ -25,6 +25,50 @@ const md = MarkdownIt({
 })
     .use(mdKatex, { throwOnError: false })
     .use(mdHighlightjs)
+    .use(richPlaceholderPlugin)
+
+/**
+ * 特殊组件占位注释：`<!--rich:0-->`（由 `parseRichComponents` 生成）。
+ * 只匹配这个形态，模型自己写的任意 HTML 注释依旧按文本转义。
+ */
+const RICH_PLACEHOLDER_RE = /^<!--rich:\d+-->/
+
+/**
+ * 放行「特殊组件占位注释」的 markdown-it 插件。
+ *
+ * `html: false` 会把尖括号一律转义成实体，占位注释也不例外——那会让渲染端
+ * 找不到注释节点（挂点变成页面上可见的 `&lt;!--rich:0--&gt;` 文本），特殊组件永远渲染不出来。
+ * 这里只对 `<!--rich:N-->` 这一个形态产出 `html_inline` 原样透传，其余 HTML 仍走转义，
+ * 与「AI 无法注入任意 HTML」的安全模型一致。
+ * @param instance markdown-it 实例
+ */
+function richPlaceholderPlugin(instance: MarkdownIt): void {
+    instance.inline.ruler.before("text", "rich_placeholder", (state, silent) => {
+        const matched = RICH_PLACEHOLDER_RE.exec(state.src.slice(state.pos))
+
+        if (!matched) {
+            return false
+        }
+
+        if (!silent) {
+            const token = state.push("html_inline", "", 0)
+            token.content = matched[0]
+        }
+
+        state.pos += matched[0].length
+
+        return true
+    })
+}
+
+/**
+ * 相邻特殊组件之间的换行。
+ *
+ * `breaks: true` 会把换行渲染成 `<br>`，于是模型逐行写出的多张卡片会各占一行。
+ * 这里只删掉「两个占位注释之间」的那个 `<br>`，让同一段里的卡片并排成一行（放不下时自动折行），
+ * 其余换行不受影响。
+ */
+const RICH_ADJACENT_BREAK_RE = /(<!--rich:\d+-->)\s*<br\s*\/?>\s*(?=<!--rich:\d+-->)/g
 
 /**
  * 渲染 markdown 文本为 HTML。
@@ -41,7 +85,7 @@ export function renderMarkdown(text: string, hashMode = false): string {
     }
 
     try {
-        return renderInternalLinks(md.render(text), hashMode)
+        return renderInternalLinks(md.render(text), hashMode).replace(RICH_ADJACENT_BREAK_RE, "$1")
     } catch (error) {
         console.error("Markdown 渲染失败:", error)
         return md.utils.escapeHtml(text)

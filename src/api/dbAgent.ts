@@ -37,6 +37,7 @@ import {
     listVersionAdditions,
     listVersions,
     queryModule,
+    readEntry,
     readStory,
     searchAll,
     searchStory,
@@ -218,6 +219,7 @@ const TOOL_LABELS: Record<string, string> = {
     list_filter_options: "dbAgent.tool.list_filter_options",
     search_data: "dbAgent.tool.search_data",
     query_module_entries: "dbAgent.tool.query_module_entries",
+    read_entry: "dbAgent.tool.read_entry",
     list_version_additions: "dbAgent.tool.list_version_additions",
     search_story: "dbAgent.tool.search_story",
     read_story: "dbAgent.tool.read_story",
@@ -318,7 +320,8 @@ const DB_AGENT_TOOLS: AgentToolDefinition[] = [
     {
         name: "query_module_entries",
         description:
-            "按模块查询条目明细，支持关键词、版本与分类筛选（筛选项与资料库各列表页一致），返回名称、副信息、版本与详情路径。适合回答“某个版本新增了哪些成就”“某系列有哪些魔之楔”“三星星级的成就有多少”。",
+            "按模块查询条目明细，支持关键词、版本与分类筛选（筛选项与资料库各列表页一致），返回名称、副信息、版本与详情路径。适合回答“某个版本新增了哪些成就”“某系列有哪些魔之楔”“三星星级的成就有多少”。" +
+            "返回的是条目摘要：要某个条目的完整字段（角色生日 / 出生地 / CV、武器面板、魔之楔效果等）请再用 read_entry 按 id 取详情。",
         parameters: {
             type: "object",
             properties: {
@@ -332,6 +335,23 @@ const DB_AGENT_TOOLS: AgentToolDefinition[] = [
                     additionalProperties: { type: ["string", "number", "boolean"] },
                 },
                 limit: { type: "integer", description: "返回条数上限，默认 20，最大 80" },
+            },
+            required: ["module"],
+        },
+    },
+    {
+        name: "read_entry",
+        description:
+            "读取单个条目的完整字段（详情页上的档案与面板）：角色的生日 / 出生地 / 势力 / 阵营 / CV / 基础属性 / 技能 / 突破材料，武器的面板数值与技能，魔之楔的词条属性与效果，成就奖励，怪物属性等。" +
+            "回答「某某的生日是什么」「谁配的音」「这把武器暴击多少」这类问题必须调用它——query_module_entries 与 search_data 只返回条目摘要，不含这些字段。" +
+            "先用 query_module_entries 或 search_data 定位条目拿到 id，再用本工具；给名称也可以，但只在唯一命中时直接返回详情，否则会返回候选列表。",
+        parameters: {
+            type: "object",
+            properties: {
+                lang: LANG_SCHEMA,
+                module: { type: "string", description: "模块 id，见 list_data_modules，例如 char / weapon / mod / achievement" },
+                id: { type: "string", description: "条目 id（取自 query_module_entries / search_data 的返回），优先用它定位" },
+                name: { type: "string", description: "可选，条目名称；不确定 id 时可只给名称，命中唯一时直接返回详情" },
             },
             required: ["module"],
         },
@@ -541,6 +561,25 @@ function summarizeToolResult(name: string, payload: unknown): string {
         }
         case "query_module_entries":
             return i18next.t("dbAgent.summary.searchHits", { prefix: data.module ? `${data.module}.` : "", count: data.total ?? 0 })
+        case "read_entry": {
+            const entry = data.entry as { name?: string; fields?: Record<string, unknown> } | undefined
+
+            if (entry) {
+                return i18next.t("dbAgent.summary.entryFields", {
+                    defaultValue: "{{name}}：{{count}} 项字段",
+                    name: entry.name ?? "",
+                    count: Object.keys(entry.fields ?? {}).length,
+                })
+            }
+
+            const candidates = (data.candidates as unknown[] | undefined) ?? []
+
+            return i18next.t("dbAgent.summary.searchHits", {
+                defaultValue: "命中 {{count}} 条",
+                prefix: "",
+                count: candidates.length,
+            })
+        }
         case "list_version_additions": {
             const modules = (data.modules as Array<{ count: number }> | undefined) ?? []
             const total = modules.reduce((sum, item) => sum + item.count, 0)
@@ -664,6 +703,48 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
                     version: entry.version,
                     path: entry.path,
                 })),
+                tip: "这里只有条目摘要。需要某条目的完整字段（角色生日 / 出生地 / CV、武器面板、魔之楔效果等）时，用 read_entry 按 module + id 取详情。",
+            })
+        }
+        case "read_entry": {
+            const moduleId = `${args.module ?? ""}`.trim()
+            const id = args.id === undefined || args.id === null ? undefined : `${args.id}`.trim()
+            const name = args.name ? `${args.name}`.trim() : undefined
+            const { module: moduleInfo, entry, candidates, error } = readEntry(moduleId, { id, name, lang })
+
+            if (!moduleInfo) {
+                return JSON.stringify({
+                    lang,
+                    error: `不支持的模块 "${moduleId}"`,
+                    supported: listModules(lang).map(item => item.id),
+                })
+            }
+
+            return JSON.stringify({
+                lang,
+                module: moduleInfo.id,
+                moduleLabel: moduleInfo.label,
+                modulePath: moduleInfo.path,
+                total: moduleInfo.count,
+                entry: entry
+                    ? {
+                          id: entry.id,
+                          name: entry.name,
+                          subtitle: entry.subtitle,
+                          version: entry.version,
+                          path: entry.path,
+                          fields: entry.fields,
+                      }
+                    : undefined,
+                candidates: candidates?.map(candidate => ({
+                    id: candidate.id,
+                    name: candidate.name,
+                    subtitle: candidate.subtitle,
+                    version: candidate.version,
+                    path: candidate.path,
+                })),
+                error,
+                tip: entry ? undefined : "candidates 是关键词命中的相近条目：确认哪个才是目标，再用它的 id 重新调用本工具。",
             })
         }
         case "list_version_additions": {

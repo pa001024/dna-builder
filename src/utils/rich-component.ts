@@ -19,10 +19,20 @@
  *    条目 id，由本模块的数据工具补齐成组件真正需要的结构，降低模型编造的失败率。
  */
 
+import { type Component, defineAsyncComponent } from "vue"
 import { getRewardDetails } from "@/utils/reward-utils"
 
 /** 一个可渲染的特殊组件定义 */
 interface RichComponentDefinition {
+    /**
+     * 组件本体。
+     *
+     * 必须显式登记：渲染端是用 `createApp().mount()` 挂进占位宿主的独立实例，
+     * 没有 `unplugin-vue-components` 的按文件自动注册，`h("ResourceCostItem")`
+     * 只会落成一个未知元素（页面上什么都看不到）。用异步组件是为了让这些体积不小的
+     * 业务组件只在模型真的输出组件标签时才加载。
+     */
+    component: Component
     /** 允许的属性名（对应组件 props） */
     props: string[]
     /**
@@ -36,20 +46,33 @@ interface RichComponentDefinition {
 /**
  * 特殊组件白名单。
  *
- * 新增组件时在这里登记：组件本身放在 `src/components` 下即可被
- * `unplugin-vue-components` 自动注册，无需改 import。
+ * 新增组件时在这里登记：组件本体写进 `component`（渲染端据此实例化），
+ * 属性名写进 `props`（白名单外的属性一律丢弃）。
  */
 const RICH_COMPONENTS: Record<string, RichComponentDefinition> = {
     /** 消耗/材料条目：name + value，value 支持数字或 [数量, 条目id, 类型] */
     ResourceCostItem: {
+        component: defineAsyncComponent(() => import("@/components/ResourceCostItem.vue")),
         props: ["name", "value", "mini"],
     },
     /** 奖励组条目：需要完整的 RewardItem 结构，允许只给 id 或 id 数组 */
     RewardItem: {
+        component: defineAsyncComponent(() => import("@/components/RewardItem.vue")),
         props: ["reward", "typeFilter", "header"],
         normalize: resolveRewardProp,
     },
+    /**
+     * 资料库条目卡片：只给类型与 id / 名称即可，条目数据由组件自己补齐，
+     * 见 `src/components/DBAICard.vue` 与 `resolveDBCardEntry`。
+     */
+    DBAICard: {
+        component: defineAsyncComponent(() => import("@/components/DBAICard.vue")),
+        props: ["kind", "id", "name"],
+    },
 }
+
+/** 白名单里的全部组件名（供测试与调试核对） */
+export const RICH_COMPONENT_NAMES: string[] = Object.keys(RICH_COMPONENTS)
 
 /** 特殊组件标签的匹配规则：`<组件名 属性... />` 或 `<组件名 属性...></组件名>` */
 const RICH_COMPONENT_RE = /<([A-Z][A-Za-z0-9]*)\b([^<>]*?)\/?>(?:\s*<\/\1\s*>)?/g
@@ -73,6 +96,8 @@ const MAX_COMPONENTS_PER_MESSAGE = 24
 export interface ParsedRichComponent {
     /** 组件名（已在白名单内） */
     name: string
+    /** 组件本体，渲染端直接用它实例化（不要用组件名去 `h()`，那会落成未知元素） */
+    component: Component
     /** 归一化后的属性 */
     props: Record<string, unknown>
     /** 原始标签文本（用于替换） */
@@ -305,7 +330,7 @@ export function parseRichComponents(text: string): ParsedRichText {
             return raw
         }
 
-        components.push({ name, props, raw, start: offset })
+        components.push({ name, component: definition.component, props, raw, start: offset })
 
         return `<!--rich:${components.length - 1}-->`
     })

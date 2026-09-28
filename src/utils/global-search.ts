@@ -296,7 +296,24 @@ export class GlobalSearchService {
                         typeLabel: t("database.char"),
                         path: `/db/char/${char.id}`,
                     },
-                    [char.id, char.别名, char.属性, char.版本, char.阵营, ...(char.标签 || []), ...(char.精通 || [])]
+                    // 检索词里带上档案字段：生日 / 出生地 / 势力 / CV 都只在角色详情页出现，
+                    // 收进来后「谁的生日是 11-11」「XX 的日配是谁」这类问法才能定位到角色
+                    [
+                        char.id,
+                        char.别名,
+                        char.属性,
+                        char.版本,
+                        char.阵营,
+                        char.出生地,
+                        char.势力,
+                        char.生日,
+                        char.中文CV,
+                        char.日文CV,
+                        char.英文CV,
+                        char.韩文CV,
+                        ...(char.标签 || []),
+                        ...(char.精通 || []),
+                    ]
                 )
             )
         )

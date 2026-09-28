@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { parseRichComponents } from "@/utils/rich-component"
+import { parseRichComponents, RICH_COMPONENT_NAMES } from "@/utils/rich-component"
 
 describe("parseRichComponents", () => {
     it("应把白名单组件剥离成占位符并解析出属性", () => {
@@ -119,5 +119,43 @@ describe("parseRichComponents", () => {
 
         expect(components).toHaveLength(0)
         expect(markdown).toBe(source)
+    })
+})
+
+describe("DBAICard", () => {
+    it("kind / id / name 三个参数都放行", () => {
+        const source = '<DBAICard kind="char" :id="4201" name="煜明" />'
+        const { components } = parseRichComponents(source)
+
+        expect(components).toHaveLength(1)
+        expect(components[0].name).toBe("DBAICard")
+        expect(components[0].props).toEqual({ kind: "char", id: 4201, name: "煜明" })
+    })
+
+    it("只给名称也能解析（数据补全在组件里做）", () => {
+        const { components } = parseRichComponents('<DBAICard kind="weapon" name="辉珀刃" />')
+
+        expect(components[0].props).toEqual({ kind: "weapon", name: "辉珀刃" })
+    })
+
+    it("白名单外的属性被丢弃", () => {
+        const { components } = parseRichComponents('<DBAICard kind="char" name="煜明" onclick="steal()" icon="x" />')
+
+        expect(Object.keys(components[0].props)).toEqual(["kind", "name"])
+    })
+
+    it("每个白名单组件都带着组件本体（渲染端不用组件名去 h()）", () => {
+        for (const name of RICH_COMPONENT_NAMES) {
+            const { components } = parseRichComponents(
+                name === "RewardItem"
+                    ? `<${name} :reward="1" />`
+                    : name === "DBAICard"
+                      ? `<${name} kind="char" name="煜明" />`
+                      : `<${name} name="星尘" value="10" />`
+            )
+
+            expect(components).toHaveLength(1)
+            expect(components[0].component).toBeTruthy()
+        }
     })
 })

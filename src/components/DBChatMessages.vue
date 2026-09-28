@@ -1,6 +1,8 @@
 <script lang="ts" setup>
-import { useTranslation } from "i18next-vue"
-import { computed, createApp, h, nextTick, onBeforeUnmount, ref, watch } from "vue"
+import i18next from "i18next"
+import I18NextVue, { useTranslation } from "i18next-vue"
+import { createPinia } from "pinia"
+import { computed, createApp, h, nextTick, onBeforeUnmount, onUpdated, ref, watch } from "vue"
 import { useRouter } from "vue-router"
 import type { IconTypes } from "@/components/Icon.vue"
 import type { Message, MessageReasoning, MessageToolTrace } from "@/store/db"
@@ -166,10 +168,10 @@ function mountRichComponents(messageId: number, element: HTMLElement) {
         placeholder.parentNode?.replaceChild(host, placeholder)
 
         try {
-            // 组件名来自白名单（rich-component.ts 校验过），属性也已过滤
             const app = createApp({
-                render: () => h(component.name, component.props),
+                render: () => h(component.component, component.props),
             })
+            app.use(createPinia()).use(I18NextVue, { i18next }).use(router)
             app.mount(host)
             richApps.push(app)
             richMounts.push(host)
@@ -188,8 +190,7 @@ function mountRichComponents(messageId: number, element: HTMLElement) {
  * 流式输出期间每次内容变化都会触发一次；已处理过的消息会被移出待办集合，
  * 不会重复插入。
  */
-async function flushRichMounts() {
-    if (!pendingRichMounts.size) {
+async function flushRichMounts() {    if (!pendingRichMounts.size) {
         return
     }
 
@@ -201,7 +202,6 @@ async function flushRichMounts() {
         if (!element) {
             continue
         }
-
         // 重新渲染会整体替换 v-html 内容，先清掉该消息上一次挂载的宿主
         clearRichMountsFor(element)
         mountRichComponents(messageId, element)
@@ -677,6 +677,18 @@ watch(
         void scrollToBottom()
     }
 )
+
+/**
+ * 渲染后再补一次挂载。
+ *
+ * `renderAssistant` 是在渲染过程中解析出特殊组件、把消息 id 记进待办的，
+ * 而 watch 回调默认在渲染**之前**跑：只靠上面两个 watch，最后一次内容变化
+ * （流式结束后不再有任何更新）解析出的占位符会一直留在待办里，页面上只剩一段注释，
+ * 组件永远出不来。这里在每次更新后兜一次，保证占位符必然被替换成真实组件。
+ */
+onUpdated(() => {
+    void flushRichMounts()
+})
 
 onBeforeUnmount(() => {
     window.clearTimeout(copiedTimer)

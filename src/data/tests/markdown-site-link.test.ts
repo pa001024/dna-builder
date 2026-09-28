@@ -75,6 +75,7 @@ function installMinimalBrowserGlobals() {
 installMinimalBrowserGlobals()
 
 const { isHashRouterMode, renderMarkdown } = await import("@/utils/markdown")
+const { parseRichComponents } = await import("@/utils/rich-component")
 
 describe("renderMarkdown 站内链接", () => {
     it("应把站内路径渲染成可点击链接", () => {
@@ -119,5 +120,44 @@ describe("renderMarkdown 站内链接", () => {
         const html = renderMarkdown("## 标题\n\n**加粗**")
         expect(html).toContain("<h2>")
         expect(html).toContain("<strong>")
+    })
+})
+
+describe("特殊组件占位注释", () => {
+    it("占位注释原样透传，渲染端才能在渲染后的 DOM 里找到挂点", () => {
+        const html = renderMarkdown("材料需要 <!--rich:0--> 才能合成")
+
+        expect(html).toContain("<!--rich:0-->")
+        expect(html).not.toContain("&lt;!--rich:0--&gt;")
+    })
+
+    it("模型自己写的 HTML 注释仍按文本转义（html: false 不变）", () => {
+        const html = renderMarkdown("<!-- 普通注释 -->")
+
+        expect(html).not.toContain("<!-- 普通注释 -->")
+        expect(html).toContain("&lt;!-- 普通注释 --&gt;")
+    })
+
+    it("parseRichComponents 的产物经渲染后仍留有占位注释", () => {
+        const { markdown, components } = parseRichComponents('<DBAICard kind="char" name="煜明" />')
+        const html = renderMarkdown(markdown, isHashRouterMode())
+
+        expect(components).toHaveLength(1)
+        expect(html).toContain("<!--rich:0-->")
+    })
+
+    it("相邻占位注释之间的换行会被去掉，连写的卡片才能并排", () => {
+        const { markdown } = parseRichComponents('<DBAICard kind="char" name="煜明" />\n<DBAICard kind="weapon" :id="10101" />')
+        const html = renderMarkdown(markdown)
+
+        expect(html).toContain("<!--rich:0--><!--rich:1-->")
+        expect(html).not.toContain("<!--rich:0--><br>")
+    })
+
+    it("普通换行不受影响", () => {
+        const html = renderMarkdown("第一行\n第二行")
+
+        expect(html).toContain("第一行<br>")
+        expect(html).toContain("第二行")
     })
 })
