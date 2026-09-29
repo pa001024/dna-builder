@@ -3,6 +3,13 @@ import { defineStore } from "pinia"
 import type { IconTypes } from "@/components/Icon.vue"
 import { env } from "@/env"
 
+/** 全局提示自动隐藏延时（毫秒） */
+const MESSAGE_HIDE_DELAY = 3000
+
+// 自动隐藏定时器句柄放在模块级：定时器对象不可序列化，进入 Pinia state 会被响应式包装且污染 devtools
+let errorMessageHideTimer: ReturnType<typeof setTimeout> | undefined
+let successMessageHideTimer: ReturnType<typeof setTimeout> | undefined
+
 export interface ITab {
     name?: string
     path?: string
@@ -21,6 +28,9 @@ export const useUIStore = defineStore("ui", {
             title: "",
             errorMessage: "",
             successMessage: "",
+            // 提示条可见性：与文本分离，退场动画期间文本必须保留，否则元素会先塌成只剩图标再播动画
+            errorMessageVisible: false,
+            successMessageVisible: false,
             dialogVisible: false,
             dialogTitle: "",
             dialogContent: "",
@@ -100,17 +110,35 @@ export const useUIStore = defineStore("ui", {
         toggleSidebar() {
             this.sidebarExpand = !this.sidebarExpand
         },
+        /**
+         * 收起错误提示：只切可见性，保留文本供退场动画渲染。
+         * @param delay 延时毫秒；不传则立即收起
+         */
+        dismissErrorMessage(delay = 0) {
+            clearTimeout(errorMessageHideTimer)
+            errorMessageHideTimer = setTimeout(() => {
+                this.errorMessageVisible = false
+            }, delay)
+        },
+        /**
+         * 收起成功提示：只切可见性，保留文本供退场动画渲染。
+         * @param delay 延时毫秒；不传则立即收起
+         */
+        dismissSuccessMessage(delay = 0) {
+            clearTimeout(successMessageHideTimer)
+            successMessageHideTimer = setTimeout(() => {
+                this.successMessageVisible = false
+            }, delay)
+        },
         showErrorMessage(...messages: any[]) {
             this.errorMessage = messages.join(" ")
-            setTimeout(() => {
-                this.errorMessage = ""
-            }, 3000)
+            this.errorMessageVisible = true
+            this.dismissErrorMessage(MESSAGE_HIDE_DELAY)
         },
         showSuccessMessage(...messages: any[]) {
             this.successMessage = messages.join(" ")
-            setTimeout(() => {
-                this.successMessage = ""
-            }, 3000)
+            this.successMessageVisible = true
+            this.dismissSuccessMessage(MESSAGE_HIDE_DELAY)
         },
         timeDistancePassed(time: number) {
             const now = this.timeNow

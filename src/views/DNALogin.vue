@@ -5,6 +5,12 @@ import { tauriFetch } from "@/api/app"
 
 const errorMessage = ref("")
 const successMessage = ref("")
+// 提示条可见性与文本分离：退场动画期间文本必须保留，否则元素先塌成只剩图标再播动画
+const errorMessageVisible = ref(false)
+const successMessageVisible = ref(false)
+// 提示自动隐藏定时器句柄，重复提示时需清掉旧定时器
+let errorMessageHideTimer: ReturnType<typeof setTimeout> | undefined
+let successMessageHideTimer: ReturnType<typeof setTimeout> | undefined
 
 const email = ref("")
 const phone = ref("")
@@ -24,17 +30,36 @@ const api = new DNAAPI({
     mode: "android",
 })
 
+/**
+ * 收起成功提示：只切可见性，保留文本供退场动画渲染。
+ * @param delay 延时毫秒；不传则立即收起
+ */
+function dismissSuccessMessage(delay = 0) {
+    clearTimeout(successMessageHideTimer)
+    successMessageHideTimer = setTimeout(() => {
+        successMessageVisible.value = false
+    }, delay)
+}
+/**
+ * 收起错误提示：只切可见性，保留文本供退场动画渲染。
+ * @param delay 延时毫秒；不传则立即收起
+ */
+function dismissErrorMessage(delay = 0) {
+    clearTimeout(errorMessageHideTimer)
+    errorMessageHideTimer = setTimeout(() => {
+        errorMessageVisible.value = false
+    }, delay)
+}
+
 function showSuccessMessage(message: string) {
     successMessage.value = message
-    setTimeout(() => {
-        successMessage.value = ""
-    }, 3e3)
+    successMessageVisible.value = true
+    dismissSuccessMessage(3e3)
 }
 function showErrorMessage(message: string) {
     errorMessage.value = message
-    setTimeout(() => {
-        errorMessage.value = ""
-    }, 3e3)
+    errorMessageVisible.value = true
+    dismissErrorMessage(3e3)
 }
 
 async function getEmailCode() {
@@ -352,12 +377,12 @@ interface Captcha4Instance {
         <!-- 消息提示 -->
         <div class="pointer-events-none fixed bottom-6 right-6 z-50 space-y-4">
             <!-- 错误消息 -->
-            <transition name="slide-right">
+            <transition name="toast-slide">
                 <div
-                    v-if="errorMessage"
+                    v-if="errorMessageVisible"
                     role="alert"
                     class="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-xs border border-error/40 bg-base-100/85 px-3 py-2 shadow-lg backdrop-blur-md"
-                    @click="errorMessage = ''"
+                    @click="dismissErrorMessage()"
                 >
                     <Icon icon="ri:error-warning-line" class="size-4 shrink-0 text-error" />
                     <span class="text-xs text-base-content/85">{{ errorMessage }}</span>
@@ -365,12 +390,12 @@ interface Captcha4Instance {
             </transition>
 
             <!-- 成功消息 -->
-            <transition name="slide-right">
+            <transition name="toast-slide">
                 <div
-                    v-if="successMessage"
+                    v-if="successMessageVisible"
                     role="alert"
                     class="pointer-events-auto flex cursor-pointer items-center gap-2 rounded-xs border border-success/40 bg-base-100/85 px-3 py-2 shadow-lg backdrop-blur-md"
-                    @click="successMessage = ''"
+                    @click="dismissSuccessMessage()"
                 >
                     <Icon icon="ri:checkbox-circle-line" class="size-4 shrink-0 text-success" />
                     <span class="text-xs text-base-content/85">{{ successMessage }}</span>
@@ -380,19 +405,31 @@ interface Captcha4Instance {
     </div>
 </template>
 <style>
-.slide-right-enter-active {
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+/*
+ * 提示条专用转场：只过渡 opacity 与 transform，不用 all。
+ * 若用 all，长文本换成短文本时宽高会参与过渡，堆叠布局会被拉着慢慢变形。
+ */
+.toast-slide-enter-active {
+    transition:
+        opacity 0.24s ease-out,
+        transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.slide-right-leave-active {
-    transition: all 0.2s cubic-bezier(0.6, -0.28, 0.73, 0.04);
+.toast-slide-leave-active {
+    transition:
+        opacity 0.2s ease-in,
+        transform 0.2s cubic-bezier(0.6, -0.28, 0.73, 0.04);
 }
 
-.slide-right-enter-from {
-    opacity: 0;
-    transform: translateX(-2rem);
-}
-.slide-right-leave-to {
+.toast-slide-enter-from,
+.toast-slide-leave-to {
     opacity: 0;
     transform: translateX(2rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast-slide-enter-active,
+    .toast-slide-leave-active {
+        transition: none;
+    }
 }
 </style>

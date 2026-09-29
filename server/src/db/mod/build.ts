@@ -285,7 +285,7 @@ export const resolvers = {
                 throw createGraphQLError("构建不存在")
             }
 
-            if (build.userId !== context.user.id) {
+            if (build.userId !== context.user.id && !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("无权修改此构建")
             }
 

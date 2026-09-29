@@ -279,7 +279,7 @@ export const resolvers = {
                 throw createGraphQLError("时间线不存在")
             }
 
-            if (timeline.userId !== context.user.id) {
+            if (timeline.userId !== context.user.id && !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("无权修改此时间线")
             }
 

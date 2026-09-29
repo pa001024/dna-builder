@@ -306,25 +306,26 @@ watchEffect(() => {
                 <!-- 模态框背景 -->
                 <div class="modal-backdrop" @click="ui.cancelDialog" />
             </dialog>
-            <!-- 全局提示（ui store 的 errorMessage / successMessage 驱动）：右下角堆叠，直角细边框 + 半透明毛玻璃 -->
+            <!-- 全局提示（ui store 的 errorMessage / successMessage 驱动）：右下角堆叠，直角细边框 + 半透明毛玻璃
+                 可见性与文本分离，退场动画期间文本常驻（见 toast-slide 样式说明） -->
             <div class="pointer-events-none absolute right-8 bottom-8 z-10000 flex flex-col items-end gap-2">
-                <transition name="slide-right">
+                <transition name="toast-slide">
                     <div
-                        v-if="ui.errorMessage"
+                        v-if="ui.errorMessageVisible"
                         role="alert"
                         class="pointer-events-auto flex max-w-96 cursor-pointer items-start gap-2 rounded-xs border border-error/40 bg-base-100/60 px-3 py-2 shadow-lg backdrop-blur-lg hover:border-error/70"
-                        @click="ui.errorMessage = ''"
+                        @click="ui.dismissErrorMessage()"
                     >
                         <Icon icon="ri:error-warning-line" class="mt-0.5 size-4 shrink-0 text-error" />
                         <span class="text-left text-xs leading-snug text-base-content/85">{{ ui.errorMessage }}</span>
                     </div>
                 </transition>
-                <transition name="slide-right">
+                <transition name="toast-slide">
                     <div
-                        v-if="ui.successMessage"
+                        v-if="ui.successMessageVisible"
                         role="alert"
                         class="pointer-events-auto flex max-w-96 cursor-pointer items-start gap-2 rounded-xs border border-success/40 bg-base-100/60 px-3 py-2 shadow-lg backdrop-blur-lg hover:border-success/70"
-                        @click="ui.successMessage = ''"
+                        @click="ui.dismissSuccessMessage()"
                     >
                         <Icon icon="ri:checkbox-circle-line" class="mt-0.5 size-4 shrink-0 text-success" />
                         <span class="text-left text-xs leading-snug text-base-content/85">{{ ui.successMessage }}</span>
@@ -334,3 +335,36 @@ watchEffect(() => {
         </div>
     </div>
 </template>
+
+<style scoped>
+/*
+ * 提示条专用转场：不能复用全局 .slide-right。
+ * App.vue 里的 .slide-right-enter-active 带 position:absolute / inset:0（页面进出场叠放用），
+ * 套到提示条上会让它在整段入场动画里被压成「只剩图标」的小盒，文字被挤出可视区。
+ * 这里只过渡 opacity 与 transform（不用 all，避免宽高参与过渡），盒子尺寸全程稳定，堆叠不跳动。
+ */
+.toast-slide-enter-active {
+    transition:
+        opacity 0.24s ease-out,
+        transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-slide-leave-active {
+    transition:
+        opacity 0.2s ease-in,
+        transform 0.2s cubic-bezier(0.6, -0.28, 0.73, 0.04);
+}
+
+.toast-slide-enter-from,
+.toast-slide-leave-to {
+    opacity: 0;
+    transform: translateX(2rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast-slide-enter-active,
+    .toast-slide-leave-active {
+        transition: none;
+    }
+}
+</style>

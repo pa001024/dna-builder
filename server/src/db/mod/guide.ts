@@ -237,7 +237,7 @@ export const resolvers = {
                 throw createGraphQLError("攻略不存在")
             }
 
-            if (guide.userId !== context.user.id) {
+            if (guide.userId !== context.user.id && !context.user.roles?.includes("admin")) {
                 throw createGraphQLError("无权修改此攻略")
             }
 
