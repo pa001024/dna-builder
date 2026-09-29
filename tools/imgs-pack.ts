@@ -2,9 +2,8 @@
 
 import fs from "node:fs"
 import path from "node:path"
-import OSS from "ali-oss"
-import { parse } from "dotenv"
 import { zipSync } from "fflate"
+import { assertStorageConfig, getPublicUrl, putFile } from "./object-storage"
 
 type ImgsPackVersionEntry = {
     builtAt: string
@@ -18,15 +17,6 @@ const rootDir = path.resolve(".")
 const publicImgsRoot = path.resolve(rootDir, "public", "imgs")
 const outDir = path.resolve(rootDir, "mock", "imgs-pack")
 const versionsPath = path.resolve(outDir, "versions.json")
-const envPath = path.resolve(rootDir, "server", ".env")
-const envConfig = fs.existsSync(envPath) ? parse(fs.readFileSync(envPath)) : {}
-const ossConfig = {
-    endpoint: envConfig.OSS_ACC_ENDPOINT || envConfig.OSS_ENDPOINT || "",
-    bucket: envConfig.OSS_BUCKET || "",
-    accessKeyId: envConfig.OSS_ACCESS_KEY_ID || "",
-    accessKeySecret: envConfig.OSS_ACCESS_KEY_SECRET || "",
-    cdn: envConfig.CDN_URL || "",
-}
 
 /**
  * 确保目录存在。
@@ -34,29 +24,6 @@ const ossConfig = {
  */
 function ensureDir(dirPath: string): void {
     fs.mkdirSync(dirPath, { recursive: true })
-}
-
-/**
- * 创建 OSS 客户端。
- * @returns OSS 客户端
- */
-function createOssClient() {
-    return new OSS({
-        region: ossConfig.endpoint.replace(".aliyuncs.com", "") || "oss-cn-hongkong",
-        endpoint: ossConfig.endpoint,
-        accessKeyId: ossConfig.accessKeyId,
-        accessKeySecret: ossConfig.accessKeySecret,
-        bucket: ossConfig.bucket,
-    })
-}
-
-/**
- * 获取公开 URL。
- * @param ossKey OSS key
- * @returns 公网 URL
- */
-function getPublicUrl(ossKey: string): string {
-    return ossConfig.cdn ? `${ossConfig.cdn.replace(/\/$/, "")}/${ossKey}` : `https://${ossConfig.bucket}.${ossConfig.endpoint}/${ossKey}`
 }
 
 /**
@@ -147,34 +114,31 @@ function buildPack(version: string, files: string[]): ImgsPackVersionEntry {
 }
 
 /**
- * 上传图片包与版本列表到 OSS。
+ * 上传图片包与版本列表到 R2。
  * @param entry 版本条目
  */
 async function uploadImgsPack(entry: ImgsPackVersionEntry): Promise<void> {
-    if (!ossConfig.endpoint || !ossConfig.bucket || !ossConfig.accessKeyId || !ossConfig.accessKeySecret) {
-        throw new Error("缺少必要的 OSS 环境变量")
-    }
+    assertStorageConfig()
 
-    const client = createOssClient()
     const localZipPath = path.join(outDir, `${entry.version}.zip`)
-    const ossPrefix = "imgs-pack"
-    const ossZipKey = `${ossPrefix}/${entry.version}.zip`
-    const ossVersionsKey = `${ossPrefix}/versions.json`
+    const prefix = "imgs-pack"
+    const zipKey = `${prefix}/${entry.version}.zip`
+    const versionsKey = `${prefix}/versions.json`
 
     if (!fs.existsSync(localZipPath)) {
         throw new Error(`图片包文件不存在: ${localZipPath}`)
     }
 
-    console.log(`📤 上传图片包文件到OSS: ${ossZipKey}`)
-    await client.put(ossZipKey, fs.readFileSync(localZipPath))
-    console.log(`✅ 上传成功: ${ossZipKey}`)
+    console.log(`📤 上传图片包文件到 R2: ${zipKey}`)
+    await putFile(zipKey, localZipPath)
+    console.log(`✅ 上传成功: ${zipKey}`)
 
-    console.log(`📤 上传版本列表到OSS: ${ossVersionsKey}`)
-    await client.put(ossVersionsKey, fs.readFileSync(versionsPath))
-    console.log(`✅ 上传成功: ${ossVersionsKey}`)
+    console.log(`📤 上传版本列表到 R2: ${versionsKey}`)
+    await putFile(versionsKey, versionsPath)
+    console.log(`✅ 上传成功: ${versionsKey}`)
 
-    console.log(`已上传 ${entry.version}.zip -> ${getPublicUrl(ossZipKey)}`)
-    console.log(`已上传 versions.json -> ${getPublicUrl(ossVersionsKey)}`)
+    console.log(`已上传 ${entry.version}.zip -> ${getPublicUrl(zipKey)}`)
+    console.log(`已上传 versions.json -> ${getPublicUrl(versionsKey)}`)
 }
 
 /**

@@ -16,6 +16,7 @@ import {
     skinGachaItems,
     skinGachaTabs,
 } from "@/data/d/skingacha.data"
+import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { DEFAULT_GOLD_PITY, getGoldPityConfig, getGoldRate, PURPLE_PITY } from "@/utils/skin-gacha-probability"
@@ -148,7 +149,7 @@ const bgImage = computed(() => {
     if (!bgUseFallback.value) {
         const skin = getFeaturedSkin(gacha)
         if (skin && skin.icon.startsWith("T_Head_")) {
-            return `https://cdn.dna-builder.cn/img/res/${skin.icon.replace("T_Head", "T_Bust")}.webp`
+            return `${env.cdn}/img/res/${skin.icon.replace("T_Head", "T_Bust")}.webp`
         }
     }
     return `/imgs/webp/${tab.icon}.webp`

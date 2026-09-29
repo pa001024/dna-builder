@@ -1,3 +1,4 @@
+import { env } from "../../env"
 import type { Char, CommonAttr, SkillWeapon } from "../data-types"
 import { CommonLevelUp } from "./CommonLevelUp"
 import { LeveledSkill } from "./LeveledSkill"
@@ -186,4 +187,4 @@ export class LeveledChar {
 }
 
 /** 立绘 CDN 基址（与角色详情页使用的一致） */
-const CHAR_BUST_CDN_BASE = "https://cdn.dna-builder.cn/img/res"
+const CHAR_BUST_CDN_BASE = `${env.cdn}/img/res`

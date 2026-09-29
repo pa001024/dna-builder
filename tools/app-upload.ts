@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 /**
- * 安卓安装包发布：构建（可选）→ 改名 `v<版本>.apk` → 上传安装包与 `apk/latest.json` 到 OSS。
+ * 安卓安装包发布：构建（可选）→ 改名 `v<版本>.apk` → 上传安装包与 `apk/latest.json` 到 R2。
  *
  *   pnpm apk build upload -v 1.0.1        # 把 pubspec 版本写成 1.0.1 → 构建 → 发布
  *   pnpm apk build -v 1.0.1               # 只构建，清单快照留在本地 .tmp/apk-latest.json
@@ -14,18 +14,14 @@
 import { createHash } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
-import OSS from "ali-oss"
 import { $ } from "bun"
-import { parse } from "dotenv"
+import { assertStorageConfig, envConfig, getPublicUrl, putFile } from "./object-storage"
 
-/** 安装包与发布清单在 OSS 上的存放前缀（清单只在 apk 目录内，不动桌面端的根 latest.json） */
-const OSS_APK_PREFIX = "apk"
+/** 安装包与发布清单在 R2 上的存放前缀（清单只在 apk 目录内，不动桌面端的根 latest.json） */
+const APK_PREFIX = "apk"
 
 /** 发布清单的键名：与数据包的 versions.json 不同，安卓只保留最新一版，故为单个对象 */
-const OSS_MANIFEST_KEY = `${OSS_APK_PREFIX}/latest.json`
-
-/** 超过该体积走分片上传，便于输出进度 */
-const MULTIPART_THRESHOLD = 1024 * 1024
+const APK_MANIFEST_KEY = `${APK_PREFIX}/latest.json`
 
 /** 发布版本号格式：三段数字，可带 -预发布 / +构建号 后缀（构建号可选，只喂 Android 的 versionCode） */
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/
@@ -37,7 +33,7 @@ const PUBSPEC_VERSION_PATTERN = /^version:\s*([^\s#]+)/m
 export type ApkLatest = {
     /** 版本号（pubspec 的 version，去掉 +build 后缀） */
     version: string
-    /** OSS 上的文件名 */
+    /** 对象存储上的文件名 */
     fileName: string
     /** 下载地址 */
     url: string
@@ -62,49 +58,8 @@ const notesArgIndex = args.findIndex(arg => arg === "-m" || arg === "--msg")
 const notes = notesArgIndex >= 0 ? args[notesArgIndex + 1] : undefined
 
 const rootDir = path.resolve(".")
-const envPath = path.resolve(rootDir, "server", ".env")
 const tmpDir = path.resolve(rootDir, ".tmp")
 const localManifestPath = path.resolve(tmpDir, "apk-latest.json")
-const envConfig = fs.existsSync(envPath) ? parse(fs.readFileSync(envPath)) : {}
-const ossConfig = {
-    endpoint: envConfig.OSS_ACC_ENDPOINT || envConfig.OSS_ENDPOINT || "",
-    bucket: envConfig.OSS_BUCKET || "",
-    accessKeyId: envConfig.OSS_ACCESS_KEY_ID || "",
-    accessKeySecret: envConfig.OSS_ACCESS_KEY_SECRET || "",
-    cdn: envConfig.CDN_URL || "",
-}
-
-/**
- * 创建 OSS 客户端。
- * @returns OSS 客户端
- */
-function createOssClient(): OSS {
-    return new OSS({
-        region: ossConfig.endpoint.replace(".aliyuncs.com", "") || "oss-cn-hongkong",
-        endpoint: ossConfig.endpoint,
-        accessKeyId: ossConfig.accessKeyId,
-        accessKeySecret: ossConfig.accessKeySecret,
-        bucket: ossConfig.bucket,
-    })
-}
-
-/**
- * 获取 OSS 对象的公网 URL（优先 CDN）。
- * @param ossKey OSS 键名
- * @returns 公网 URL
- */
-function getPublicUrl(ossKey: string): string {
-    return ossConfig.cdn ? `${ossConfig.cdn.replace(/\/$/, "")}/${ossKey}` : `https://${ossConfig.bucket}.${ossConfig.endpoint}/${ossKey}`
-}
-
-/**
- * 校验 OSS 配置完整性。
- */
-function assertOssConfig(): void {
-    if (!ossConfig.endpoint || !ossConfig.bucket || !ossConfig.accessKeyId || !ossConfig.accessKeySecret) {
-        throw new Error("缺少必要的 OSS 环境变量")
-    }
-}
 
 /**
  * 读取 server/.env 中的 APP_TARGET，解析为安装包绝对路径。
@@ -233,34 +188,14 @@ async function stageVersionedApk(sourcePath: string, version: string): Promise<{
 }
 
 /**
- * 上传文件到 OSS，大文件分片上传并打印进度。
- * @param client OSS 客户端
+ * 上传文件到 R2，超过 1MB 时打印进度（进度逻辑在共用存储模块里）。
  * @param filePath 本地文件路径
- * @param ossKey OSS 键名
+ * @param objectKey 对象键名
  */
-async function uploadToOss(client: OSS, filePath: string, ossKey: string): Promise<void> {
-    console.log(`📤 上传到 OSS: ${ossKey}`)
-
-    if (fs.statSync(filePath).size > MULTIPART_THRESHOLD) {
-        let lastPercent = -1
-        await client.multipartUpload(ossKey, filePath, {
-            partSize: 1024 * 1024,
-            progress: (percent: number) => {
-                const current = Math.round(percent * 100)
-                if (current === lastPercent) {
-                    return
-                }
-                lastPercent = current
-                // 用 \r 覆盖同一行，避免进度刷屏
-                process.stdout.write(`\r📊 上传进度: ${current}%`)
-            },
-        })
-        process.stdout.write("\n")
-    } else {
-        await client.put(ossKey, fs.readFileSync(filePath))
-    }
-
-    console.log(`✅ 上传成功: ${ossKey}`)
+async function uploadToStorage(filePath: string, objectKey: string): Promise<void> {
+    console.log(`📤 上传到 R2: ${objectKey}`)
+    await putFile(objectKey, filePath)
+    console.log(`✅ 上传成功: ${objectKey}`)
 }
 
 async function main(): Promise<void> {
@@ -268,7 +203,7 @@ async function main(): Promise<void> {
         throw new Error("请指定 build（先构建）或 upload（仅上传）")
     }
 
-    assertOssConfig()
+    assertStorageConfig()
 
     const appTarget = resolveAppTarget()
     const projectRoot = resolveFlutterProject(appTarget)
@@ -308,7 +243,7 @@ async function main(): Promise<void> {
     const fileName = path.basename(staged.apkPath)
     console.log(`🏷️  已改名为 ${fileName}（源文件 ${sourcePath}，${(staged.size / 1024 / 1024).toFixed(2)} MB）`)
 
-    const apkKey = `${OSS_APK_PREFIX}/${fileName}`
+    const apkKey = `${APK_PREFIX}/${fileName}`
     const latest: ApkLatest = {
         version,
         fileName,
@@ -324,18 +259,17 @@ async function main(): Promise<void> {
 
     console.log(`\n📦 Android 安装包 v${version}`)
     console.log(`   本地文件: ${staged.apkPath}`)
-    console.log(`   OSS 键名: ${apkKey}`)
+    console.log(`   R2 键名: ${apkKey}`)
     console.log(`   下载地址: ${latest.url}`)
-    console.log(`\n📋 ${OSS_MANIFEST_KEY}`)
+    console.log(`\n📋 ${APK_MANIFEST_KEY}`)
     console.log(JSON.stringify(latest, null, 2))
     console.log(`   本地快照: ${localManifestPath}`)
 
     if (shouldUpload && !isDryRun) {
-        const client = createOssClient()
-        await uploadToOss(client, staged.apkPath, apkKey)
-        await uploadToOss(client, localManifestPath, OSS_MANIFEST_KEY)
+        await uploadToStorage(staged.apkPath, apkKey)
+        await uploadToStorage(localManifestPath, APK_MANIFEST_KEY)
         console.log(`\n✅ 已发布 ${fileName} -> ${latest.url}`)
-        console.log(`✅ 已发布 ${OSS_MANIFEST_KEY} -> ${getPublicUrl(OSS_MANIFEST_KEY)}`)
+        console.log(`✅ 已发布 ${APK_MANIFEST_KEY} -> ${getPublicUrl(APK_MANIFEST_KEY)}`)
         return
     }
 

@@ -945,7 +945,7 @@ declare function existsFile(path: string): boolean
 /**
  * 初始化 OCR 模块（自动下载缺失资源到本地）。
  * @param localRootDir 本地资源目录（可选，默认使用程序数据目录）
- * @param cdnBaseUrl CDN 根地址（可选，默认 https://cdn.dna-builder.cn/ocr）
+ * @param cdnBaseUrl CDN 根地址（可选，默认 https://dl.dobapp.cc/ocr）
  * @param numThread 识别线程数（可选，默认 2）
  * @returns 实际使用的本地资源目录
  * @throws 初始化失败时抛出错误

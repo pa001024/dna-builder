@@ -65,7 +65,7 @@ const MODULES_DIR = "modules"
 const INSTALL_INFO_FILE = "installed.json"
 const CONFIG_FILE = "config.json"
 const DEV_BASE_URL = "/mock/data-pack"
-const RELEASE_BASE_URL = "https://cdn.dna-builder.cn/data-pack"
+const RELEASE_BASE_URL = `${env.cdn}/data-pack`
 const DATA_PACK_VERSIONS_FILE = "versions.json"
 const DEFAULT_CUSTOM_BASE_URL = DEV_BASE_URL
 

@@ -20,7 +20,7 @@ use std::{
 };
 
 /// OCR 资源默认 CDN 根地址。
-const DEFAULT_OCR_CDN_BASE: &str = "https://cdn.dna-builder.cn/ocr";
+const DEFAULT_OCR_CDN_BASE: &str = "https://dl.dobapp.cc/ocr";
 /// 检测模型文件名。
 const DET_MODEL_FILE: &str = "ch_PP-OCRv3_det_infer.onnx";
 /// 分类模型文件名。

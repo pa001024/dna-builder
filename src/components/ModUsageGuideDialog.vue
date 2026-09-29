@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue"
+import { env } from "@/env"
 import { useTourStore } from "@/store/tour"
 
 /**
@@ -13,7 +14,7 @@ import { useTourStore } from "@/store/tour"
 const GUIDE_TOUR_KEY = "mod-share-guide"
 
 /** 教程配图（游戏启动器 - 游戏设置中勾选「启用MOD」的截图），加载失败时展示兜底占位 */
-const GUIDE_IMAGE_URL = "https://cdn.dna-builder.cn/img/help/mod.webp"
+const GUIDE_IMAGE_URL = `${env.cdn}/img/help/mod.webp`
 
 /** 弹窗开关：由父组件 v-model 控制；首次进入未读时也会自动置为 true */
 const open = defineModel<boolean>({ default: false })

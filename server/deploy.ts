@@ -2,9 +2,9 @@
 
 import fs from "node:fs"
 import path from "node:path"
-import OSS from "ali-oss"
 import { $ } from "bun"
 import { parse } from "dotenv"
+import { getPublicObjectUrl, isObjectStorageConfigured, putObjectFromFile } from "./src/util/r2-storage"
 
 const args = process.argv.slice(2)
 const isAppMode = args.includes("app")
@@ -15,17 +15,12 @@ const generateOnly = args.includes("json")
 
 const envPath = path.resolve("server/.env")
 const envConfig = fs.existsSync(envPath) ? parse(fs.readFileSync(envPath)) : {}
+// r2-storage 从 process.env 读配置，这里把 server/.env 注入进程环境，保持单一配置来源
+Object.assign(process.env, envConfig)
 
 const packageJsonPath = path.resolve("./package.json")
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"))
 const version = packageJson.version
-
-const OSS_CONFIG = {
-    endpoint: envConfig.OSS_ACC_ENDPOINT || envConfig.OSS_ENDPOINT || "",
-    bucket: envConfig.OSS_BUCKET || "",
-    accessKeyId: envConfig.OSS_ACCESS_KEY_ID || "",
-    accessKeySecret: envConfig.OSS_ACCESS_KEY_SECRET || "",
-}
 
 const CONFIG = {
     ssh: {
@@ -47,50 +42,14 @@ const CONFIG = {
 }
 
 /**
- * 阿里云OSS上传函数
+ * 上传文件到 R2（S3 语义下同名 PUT 直接覆盖，无需先删）。
  * @param filePath 本地文件路径
- * @param ossKey OSS存储路径
+ * @param objectKey 对象键名
  */
-async function uploadToOss(filePath: string, ossKey: string): Promise<void> {
-    console.log(`📤 上传文件到OSS: ${ossKey}`)
-
-    const client = new OSS({
-        endpoint: OSS_CONFIG.endpoint,
-        accessKeyId: OSS_CONFIG.accessKeyId,
-        accessKeySecret: OSS_CONFIG.accessKeySecret,
-        bucket: OSS_CONFIG.bucket,
-        secure: true,
-    })
-
-    // 强制覆盖：先删除旧文件，再上传新文件
-    try {
-        const info = await client.head(ossKey)
-        if (info.status === 200) {
-            await client.delete(ossKey)
-            console.log(`🗑️  已删除旧文件: ${ossKey}`)
-        }
-    } catch {}
-
-    // 大文件使用分片上传并显示进度
-    if (fs.statSync(filePath).size > 1024 * 1024) {
-        console.log(`📤 大文件 ${filePath} 开始分片上传...`)
-        await client.multipartUpload(ossKey, filePath, {
-            progress: function* (p) {
-                const percentage = Math.round(p * 100)
-                // 使用 \r 实现进度条覆盖效果
-                process.stdout.write(`\r📊 上传进度: ${percentage}%`)
-                yield
-            },
-            // 设置分片大小为1MB
-            partSize: 1024 * 1024,
-        })
-    } else {
-        // 小文件直接上传
-        await client.put(ossKey, filePath)
-    }
-
-    // 换行避免进度条与后续输出重叠
-    console.log(`\n✅ 上传成功: ${ossKey}`)
+async function uploadToStorage(filePath: string, objectKey: string): Promise<void> {
+    console.log(`📤 上传文件到 R2: ${objectKey}`)
+    await putObjectFromFile(objectKey, filePath)
+    console.log(`✅ 上传成功: ${objectKey}`)
 }
 
 /**
@@ -175,8 +134,8 @@ async function deployApp() {
     try {
         console.log("=== 开始App部署流程 ===")
 
-        if (!OSS_CONFIG.endpoint || !OSS_CONFIG.bucket || !OSS_CONFIG.accessKeyId || !OSS_CONFIG.accessKeySecret) {
-            throw new Error("OSS配置不完整，请检查.env中的OSS配置")
+        if (!isObjectStorageConfigured()) {
+            throw new Error("对象存储配置不完整，请检查 .env 中的 R2 配置")
         }
 
         if (!skipBuild) {
@@ -193,23 +152,16 @@ async function deployApp() {
             throw new Error(`MSI文件不存在: ${msiAbsPath}`)
         }
 
-        console.log("2. 上传MSI文件到OSS...")
-        const msiOssKey = `msi/${path.basename(msiAbsPath)}`
-        await uploadToOss(msiAbsPath, msiOssKey)
+        console.log("2. 上传MSI文件到R2...")
+        const msiKey = `msi/${path.basename(msiAbsPath)}`
+        await uploadToStorage(msiAbsPath, msiKey)
 
         console.log("3. 读取签名文件...")
         if (!fs.existsSync(sigAbsPath)) {
             throw new Error(`签名文件不存在: ${sigAbsPath}`)
         }
         const signature = fs.readFileSync(sigAbsPath, "utf-8").trim()
-        // 生成原始OSS地址
-        const originalMsiUrl = `https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/${msiOssKey}`
-
-        // 将OSS域名替换为CDN域名（如果CDN_URL存在）
-        const cdnUrl = envConfig.CDN_URL?.trim()
-        const msiUrl = cdnUrl
-            ? originalMsiUrl.replace(`https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}`, cdnUrl.replace(/\/$/, ""))
-            : originalMsiUrl
+        const msiUrl = getPublicObjectUrl(msiKey)
 
         console.log("4. 生成latest.json...")
         const latestJson = generateLatestJson(version, signature, msiUrl)
@@ -223,8 +175,8 @@ async function deployApp() {
         const newLatestJsonPath = path.resolve("./latest.json")
         fs.writeFileSync(newLatestJsonPath, JSON.stringify(latestJson, null, 2))
 
-        console.log("5. 上传latest.json到OSS根目录...")
-        await uploadToOss(newLatestJsonPath, "latest.json")
+        console.log("5. 上传latest.json到R2根目录...")
+        await uploadToStorage(newLatestJsonPath, "latest.json")
 
         fs.unlinkSync(newLatestJsonPath)
 
@@ -256,17 +208,9 @@ async function main() {
             console.log("⚠️  未找到签名文件，使用模拟签名")
         }
 
-        // 生成MSI文件名和OSS路径
-        const msiOssKey = `msi/DNA Builder_${version}_x64_zh-CN.msi`
-
-        // 生成原始OSS地址
-        const originalMsiUrl = `https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}/${msiOssKey}`
-
-        // 将OSS域名替换为CDN域名（如果CDN_URL存在）
-        const cdnUrl = envConfig.CDN_URL?.trim()
-        const msiUrl = cdnUrl
-            ? originalMsiUrl.replace(`https://${OSS_CONFIG.bucket}.${OSS_CONFIG.endpoint}`, cdnUrl.replace(/\/$/, ""))
-            : originalMsiUrl
+        // 生成MSI文件名与对象 key，下载地址与服务端 latest.json 里的口径一致
+        const msiKey = `msi/DNA Builder_${version}_x64_zh-CN.msi`
+        const msiUrl = getPublicObjectUrl(msiKey)
 
         // 生成latest.json
         const latestJson = generateLatestJson(version, signature, msiUrl)

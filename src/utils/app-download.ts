@@ -1,7 +1,7 @@
 import { env } from "@/env"
 
 /** Android 安装包发布清单（由 tools/app-upload.ts 上传到 CDN） */
-export const APK_MANIFEST_URL = "https://cdn.dna-builder.cn/apk/latest.json"
+export const APK_MANIFEST_URL = `${env.cdn}/apk/latest.json`
 
 /** 桌面端（Windows）安装包下载入口：服务端 302 到最新的 MSI */
 export const DESKTOP_DOWNLOAD_URL = `${env.endpoint}/api/download`

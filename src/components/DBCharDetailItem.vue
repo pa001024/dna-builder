@@ -13,6 +13,7 @@ import { type Resource } from "@/data/d/resource.data"
 import weaponData from "@/data/d/weapon.data"
 import type { Char, Weapon } from "@/data/data-types"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
+import { env } from "@/env"
 import { useSettingStore } from "@/store/setting"
 import { formatProp } from "@/util"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
@@ -1039,7 +1040,7 @@ onBeforeUnmount(() => {
                             <div class="mb-2 text-[11px] tracking-wide text-base-content/55">立绘</div>
                             <ImagePreview
                                 :thumb-url="`/imgs/bust/${skin.icon.replace('_Head', '_Bust')}.webp`"
-                                :full-url="`https://cdn.dna-builder.cn/img/res/${skin.icon.replace('_Head', '_Bust')}.webp`"
+                                :full-url="`${env.cdn}/img/res/${skin.icon.replace('_Head', '_Bust')}.webp`"
                             />
                         </div>
 

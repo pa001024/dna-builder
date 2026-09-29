@@ -15,6 +15,7 @@ import {
     renameFile,
     writeTextFile,
 } from "@/api/app"
+import { env } from "@/env"
 import { useGameStore } from "@/store/game"
 import { useGameUpdateStore } from "@/store/gameUpdate"
 import { useSettingStore } from "@/store/setting"
@@ -1647,7 +1648,7 @@ const launchGame = async () => {
     <!-- 主容器：深色背景，全屏 -->
     <div class="relative w-full h-full overflow-hidden select-none bg-base-100/30 font-sans">
         <video
-            src="http://cdn.dna-builder.cn/bg.mp4"
+            :src="`${env.cdn}/bg.mp4`"
             muted
             autoplay
             loop

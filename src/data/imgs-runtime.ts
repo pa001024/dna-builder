@@ -4,8 +4,8 @@ import { tauriFetch } from "../api/app"
 import { env } from "../env"
 
 const IMGS_CACHE_DIR = "dna-builder-imgs"
-const IMGS_REMOTE_BASE_URL = "https://cdn.dna-builder.cn/imgs"
-const IMGS_PACK_REMOTE_BASE_URL = "https://cdn.dna-builder.cn/imgs-pack"
+const IMGS_REMOTE_BASE_URL = `${env.cdn}/imgs`
+const IMGS_PACK_REMOTE_BASE_URL = `${env.cdn}/imgs-pack`
 const IMGS_PACK_VERSIONS_FILE = "versions.json"
 const IMGS_INSTALL_MARKER_FILE = ".installed.json"
 

@@ -4,10 +4,10 @@ import fs from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 import { encode } from "@msgpack/msgpack"
-import { parse } from "dotenv"
 import { zipSync } from "fflate"
 import { globSync } from "glob"
 import { computeRagFingerprints } from "../src/data/rag/corpus"
+import { assertStorageConfig, getPublicUrl, putFile } from "./object-storage"
 
 /** 数据包覆盖的语言（RAG 指纹按语言各算一份，与服务端索引的语言口径一致） */
 const PACK_LANGS = ["zh", "en", "jp", "kr", "fr", "tc"] as const
@@ -43,8 +43,6 @@ type PackVersionEntry = {
     notes?: string
 }
 
-import OSS from "ali-oss"
-
 const args = process.argv.slice(2)
 const shouldBuild = args.includes("build") || args.includes("upload")
 const shouldUpload = args.includes("upload")
@@ -58,15 +56,6 @@ const sourceRoot = path.resolve(rootDir, "src", "data", "d")
 const outDir = path.resolve(rootDir, "mock", "data-pack")
 const versionsPath = path.resolve(rootDir, "mock", "data-pack", "versions.json")
 const publicImgsRoot = path.resolve(rootDir, "public", "imgs")
-const envPath = path.resolve(rootDir, "server", ".env")
-const envConfig = fs.existsSync(envPath) ? parse(fs.readFileSync(envPath)) : {}
-const ossConfig = {
-    endpoint: envConfig.OSS_ACC_ENDPOINT || envConfig.OSS_ENDPOINT || "",
-    bucket: envConfig.OSS_BUCKET || "",
-    accessKeyId: envConfig.OSS_ACCESS_KEY_ID || "",
-    accessKeySecret: envConfig.OSS_ACCESS_KEY_SECRET || "",
-    cdn: envConfig.CDN_URL || "",
-}
 
 /**
  * 将特殊值转换为可序列化结构。
@@ -179,28 +168,6 @@ function collectImgsManifest(): PackImgsEntry[] {
 }
 
 /**
- * 创建 OSS 客户端。
- */
-function createOssClient() {
-    return new OSS({
-        region: ossConfig.endpoint.replace(".aliyuncs.com", "") || "oss-cn-hongkong",
-        endpoint: ossConfig.endpoint,
-        accessKeyId: ossConfig.accessKeyId,
-        accessKeySecret: ossConfig.accessKeySecret,
-        bucket: ossConfig.bucket,
-    })
-}
-
-/**
- * 获取公开 URL。
- * @param ossKey OSS key
- * @returns 公网 URL
- */
-function getPublicUrl(ossKey: string): string {
-    return ossConfig.cdn ? `${ossConfig.cdn.replace(/\/$/, "")}/${ossKey}` : `https://${ossConfig.bucket}.${ossConfig.endpoint}/${ossKey}`
-}
-
-/**
  * 构建并输出数据包。
  * @param targetVersion 目标版本
  * @param updateVersions 是否更新 versions.json（仅 upload 模式下写版本列表）
@@ -287,34 +254,31 @@ async function buildDataPack(targetVersion: string, updateVersions: boolean): Pr
 }
 
 /**
- * 上传 zip 和版本列表。
+ * 上传 zip 和版本列表到 R2。
  * @param entry 版本条目
  */
 async function uploadDataPack(entry: PackVersionEntry): Promise<void> {
-    if (!ossConfig.endpoint || !ossConfig.bucket || !ossConfig.accessKeyId || !ossConfig.accessKeySecret) {
-        throw new Error("缺少必要的 OSS 环境变量")
-    }
+    assertStorageConfig()
 
-    const client = createOssClient()
     const localZipPath = path.join(outDir, `${entry.version}.zip`)
-    const ossPrefix = "data-pack"
-    const ossZipKey = `${ossPrefix}/${entry.version}.zip`
-    const ossVersionsKey = `${ossPrefix}/versions.json`
+    const prefix = "data-pack"
+    const zipKey = `${prefix}/${entry.version}.zip`
+    const versionsKey = `${prefix}/versions.json`
 
     if (!fs.existsSync(localZipPath)) {
         throw new Error(`数据包文件不存在: ${localZipPath}`)
     }
 
-    console.log(`📤 上传数据包文件到OSS: ${ossZipKey}`)
-    await client.put(ossZipKey, fs.readFileSync(localZipPath))
-    console.log(`✅ 上传成功: ${ossZipKey}`)
+    console.log(`📤 上传数据包文件到 R2: ${zipKey}`)
+    await putFile(zipKey, localZipPath)
+    console.log(`✅ 上传成功: ${zipKey}`)
 
-    console.log(`📤 上传版本列表到OSS: ${ossVersionsKey}`)
-    await client.put(ossVersionsKey, fs.readFileSync(versionsPath))
-    console.log(`✅ 上传成功: ${ossVersionsKey}`)
+    console.log(`📤 上传版本列表到 R2: ${versionsKey}`)
+    await putFile(versionsKey, versionsPath)
+    console.log(`✅ 上传成功: ${versionsKey}`)
 
-    console.log(`已上传 ${entry.version}.zip -> ${getPublicUrl(ossZipKey)}`)
-    console.log(`已上传 versions.json -> ${getPublicUrl(ossVersionsKey)}`)
+    console.log(`已上传 ${entry.version}.zip -> ${getPublicUrl(zipKey)}`)
+    console.log(`已上传 versions.json -> ${getPublicUrl(versionsKey)}`)
 }
 
 async function main() {
