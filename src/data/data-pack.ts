@@ -2,6 +2,7 @@ import { decode } from "@msgpack/msgpack"
 import { unzipSync } from "fflate"
 import { tauriFetch } from "../api/app"
 import { env } from "../env"
+import { getActiveCdnBase, resolveCdnUrls } from "../utils/cdn"
 import {
     getRegisteredDataPackModuleKeys,
     hydrateRegisteredDataPackBindings,
@@ -55,6 +56,10 @@ export interface DataPackSourceInfo {
     versionsUrl: string
     baseUrl: string
     sourceKind: "official" | "custom"
+    /** 候选基址列表（有序）：官方来源为 [OSS, R2] 两个并列官方地址，自定义来源只有用户填的一个 */
+    baseUrls: string[]
+    /** 与 baseUrls 一一对应的版本列表地址 */
+    versionsUrls: string[]
 }
 
 const PACK_ROOT_DIR = "dna-builder-data-pack"
@@ -65,9 +70,16 @@ const MODULES_DIR = "modules"
 const INSTALL_INFO_FILE = "installed.json"
 const CONFIG_FILE = "config.json"
 const DEV_BASE_URL = "/mock/data-pack"
-const RELEASE_BASE_URL = `${env.cdn}/data-pack`
 const DATA_PACK_VERSIONS_FILE = "versions.json"
 const DEFAULT_CUSTOM_BASE_URL = DEV_BASE_URL
+
+/**
+ * @description 取数据包默认基址（官方来源）。按测速选定的快源动态求值，不在模块加载时固定。
+ * @returns 官方数据包基址
+ */
+function getReleaseBaseUrl(): string {
+    return `${getActiveCdnBase()}/data-pack`
+}
 
 type DataPackState = {
     readyVersion: string | null
@@ -127,7 +139,7 @@ let installedVersionsCache: DataPackVersionInfo[] | null = null
  * @returns 基础地址
  */
 function getDefaultBaseUrl(): string {
-    return RELEASE_BASE_URL
+    return getReleaseBaseUrl()
 }
 
 /**
@@ -192,10 +204,18 @@ export async function getDataPackSourceInfo(): Promise<DataPackSourceInfo> {
     const config = await readConfig()
     const sourceKind = config.sourceKind || "official"
     const baseUrl = resolveAbsoluteBaseUrl(await getBaseUrl())
+    // 官方来源是「OSS + R2」两个并列的官方地址：测速选定的快源在前，另一端作故障兜底；
+    // 自定义来源只有用户填的那一个
+    const urls = resolveCdnUrls("data-pack")
+    const preferred = getActiveCdnBase() === urls.backup ? urls.backup : urls.primary
+    const baseUrls = sourceKind === "official" ? [preferred, preferred === urls.primary ? urls.backup : urls.primary] : [baseUrl]
+    const versionsUrls = baseUrls.map(item => new URL(DATA_PACK_VERSIONS_FILE, `${item}/`).toString())
     return {
         baseUrl,
-        versionsUrl: new URL(DATA_PACK_VERSIONS_FILE, `${baseUrl}/`).toString(),
+        versionsUrl: versionsUrls[0],
         sourceKind,
+        baseUrls,
+        versionsUrls,
     }
 }
 
@@ -638,7 +658,7 @@ async function fetchRemoteDataPackVersions(forceRefresh = false): Promise<DataPa
 
     remoteState.promise = (async () => {
         try {
-            const info = await fetchDataPackVersions(source.versionsUrl)
+            const info = await fetchDataPackVersions(source.versionsUrls)
             info.sort((a, b) => b.version.localeCompare(a.version, "zh-CN", { numeric: true }))
             remoteState.hasCached = true
             remoteState.cached = info
@@ -656,24 +676,38 @@ async function fetchRemoteDataPackVersions(forceRefresh = false): Promise<DataPa
 }
 
 /**
- * 读取数据包版本列表，优先使用浏览器 fetch，失败时回退到 tauriFetch。
- * @param versionsUrl 版本列表地址
+ * 读取数据包版本列表：按候选源顺序依次尝试，单个源内浏览器 fetch 失败再回退 tauriFetch。
+ * 官方来源的候选源是 [OSS, R2] 两个并列官方地址，因此任一站缺该文件都不影响读取。
+ * @param versionsUrls 候选源版本列表地址（有序）
  * @returns 版本列表
+ * @throws 所有来源均不可用时抛出最后一个错误
  */
-async function fetchDataPackVersions(versionsUrl: string): Promise<DataPackVersionInfo[]> {
-    try {
-        const response = await fetch(versionsUrl, { cache: "no-store" })
-        if (response.ok) {
-            return (await response.json()) as DataPackVersionInfo[]
-        }
-    } catch {}
+async function fetchDataPackVersions(versionsUrls: string[]): Promise<DataPackVersionInfo[]> {
+    let lastError: unknown = null
 
-    const fallbackResponse = await tauriFetch(versionsUrl, { cache: "no-store" })
-    if (!fallbackResponse.ok) {
-        return []
+    for (const url of versionsUrls) {
+        // 首次尝试浏览器 fetch，失败（含 CORS 与网络异常）再走 tauriFetch
+        for (const request of [fetch, tauriFetch]) {
+            try {
+                const response = await request(url, { cache: "no-store" })
+                if (!response.ok) {
+                    lastError = new Error(`HTTP ${response.status}: ${url}`)
+                    continue
+                }
+
+                const payload = (await response.json()) as DataPackVersionInfo[]
+                // 拿到空列表时继续试下一个源，避免单站缺文件被误判成「没有版本」
+                if (Array.isArray(payload) && payload.length) {
+                    return payload
+                }
+                lastError = new Error(`版本列表为空: ${url}`)
+            } catch (error) {
+                lastError = error
+            }
+        }
     }
 
-    return (await fallbackResponse.json()) as DataPackVersionInfo[]
+    throw lastError instanceof Error ? lastError : new Error(String(lastError))
 }
 
 /**
@@ -994,11 +1028,24 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
     let bytes = await tryDownloadDataPackViaDiff(remote.version, remote.packageFile)
     if (!bytes) {
         const source = await getDataPackSourceInfo()
-        const response = await fetch(getDataPackPackageUrl(source.baseUrl, remote.version), { cache: "no-store" })
-        if (!response.ok) {
-            throw new Error(`下载数据包失败: ${response.status} ${response.statusText}`)
+        // 整包同样按候选源顺序尝试（官方来源为 OSS + R2 两个官方地址）
+        let lastError: unknown = null
+        for (const baseUrl of source.baseUrls) {
+            try {
+                const response = await fetch(getDataPackPackageUrl(baseUrl, remote.version), { cache: "no-store" })
+                if (!response.ok) {
+                    lastError = new Error(`下载数据包失败: ${response.status} ${response.statusText}`)
+                    continue
+                }
+                bytes = await readResponseBytes(response, onProgress)
+                break
+            } catch (error) {
+                lastError = error
+            }
         }
-        bytes = await readResponseBytes(response, onProgress)
+        if (!bytes) {
+            throw lastError instanceof Error ? lastError : new Error(String(lastError))
+        }
     }
     const pack = decodePack(bytes)
     await writePackBytes(remote.version, bytes, pack)

@@ -2904,7 +2904,7 @@ fn _imread_url_rgba(
 ///
 /// 参数：
 /// - `local_root_dir`：可选，本地资源目录（为空时使用默认目录）；
-/// - `cdn_base_url`：可选，CDN 根地址（默认 `https://dl.dobapp.cc/ocr`）；
+/// - `cdn_base_url`：可选，CDN 根地址（主源默认 `https://cdn.dna-builder.cn/ocr`，失败时回退 `https://cdn.dobapp.cc/ocr`）；
 /// - `num_thread`：可选，OCR 线程数（默认 2）。
 ///
 /// 返回：

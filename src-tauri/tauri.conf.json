@@ -48,8 +48,8 @@
         "updater": {
             "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY4QzdGODBGQzlDNDExNjgKUldSb0VjVEpEL2pIYU1WamtyaWJvaGowZkllVDJtR1dkUjBjNmhzd3hSYk9MdTJUZjQxb2IyMDkK",
             "endpoints": [
-                "https://dl.dobapp.cc/latest.json",
                 "https://cdn.dna-builder.cn/latest.json",
+                "https://cdn.dobapp.cc/latest.json",
                 "https://github.com/pa001024/dna-builder/releases/latest/download/latest.json"
             ],
             "dialog": false,

@@ -2,10 +2,10 @@ import { unzipSync } from "fflate"
 import { ref } from "vue"
 import { tauriFetch } from "../api/app"
 import { env } from "../env"
+import { buildCdnUrl, getOtherCdnBase } from "../utils/cdn"
 
 const IMGS_CACHE_DIR = "dna-builder-imgs"
-const IMGS_REMOTE_BASE_URL = `${env.cdn}/imgs`
-const IMGS_PACK_REMOTE_BASE_URL = `${env.cdn}/imgs-pack`
+
 const IMGS_PACK_VERSIONS_FILE = "versions.json"
 const IMGS_INSTALL_MARKER_FILE = ".installed.json"
 
@@ -104,21 +104,21 @@ function hasOpfs(): boolean {
 }
 
 /**
- * 获取图片资源基址。
+ * 获取图片资源基址（未指定时按测速选定的快源）。
  * @param baseUrl 外部基址
  * @returns 图片基址
  */
 function getImgsBaseUrl(baseUrl?: string): string {
-    return (baseUrl || IMGS_REMOTE_BASE_URL).replace(/\/$/, "")
+    return (baseUrl || buildCdnUrl("imgs")).replace(/\/$/, "")
 }
 
 /**
- * 获取图片包资源基址。
+ * 获取图片包资源基址（未指定时按测速选定的快源）。
  * @param baseUrl 外部基址
  * @returns 图片包基址
  */
 function getImgsPackBaseUrl(baseUrl?: string): string {
-    return (baseUrl || IMGS_PACK_REMOTE_BASE_URL).replace(/\/$/, "")
+    return (baseUrl || buildCdnUrl("imgs-pack")).replace(/\/$/, "")
 }
 
 /**
@@ -258,40 +258,67 @@ function getRemoteImgUrl(path: string, baseUrl?: string): string {
 }
 
 /**
- * 获取图片包版本列表。
+ * 获取图片包版本列表：主源为空或失败时读兜底源。
  * @param baseUrl 外部基址
  * @returns 图片包版本列表
  */
 async function fetchRemoteImgsPackVersions(baseUrl?: string): Promise<ImgsPackVersionInfo[]> {
-    try {
-        const versionsUrl = new URL(IMGS_PACK_VERSIONS_FILE, `${getImgsPackBaseUrl(baseUrl)}/`).toString()
-        let response: Response
+    // 自定义基址场景没有另一端；默认基址才追加另一端作为故障兜底
+    const urls = baseUrl ? [getImgsPackBaseUrl(baseUrl)] : [getImgsPackBaseUrl(), `${getOtherCdnBase()}/imgs-pack`]
+
+    for (const packBase of urls) {
         try {
-            response = await fetch(versionsUrl, { cache: "no-store" })
+            const versionsUrl = new URL(IMGS_PACK_VERSIONS_FILE, `${packBase}/`).toString()
+            let response: Response
+            try {
+                response = await fetch(versionsUrl, { cache: "no-store" })
+            } catch {
+                response = await tauriFetch(versionsUrl, { cache: "no-store" })
+            }
+
+            if (!response.ok) {
+                continue
+            }
+
+            const payload = (await response.json()) as ImgsPackVersionInfo[]
+            if (Array.isArray(payload) && payload.length) {
+                return payload.sort((a, b) => compareVersion(a.version, b.version))
+            }
         } catch {
-            response = await tauriFetch(versionsUrl, { cache: "no-store" })
+            // 该源不可用，继续下一个
         }
-
-        if (!response.ok) {
-            return []
-        }
-
-        const payload = (await response.json()) as ImgsPackVersionInfo[]
-        return Array.isArray(payload) ? payload.sort((a, b) => compareVersion(a.version, b.version)) : []
-    } catch {
-        return []
     }
+
+    return []
 }
 
 /**
- * 读取图片包并解压。
+ * 读取图片包并解压：按选定快源下载，失败时换另一端。
  * @param versionInfo 图片包版本信息
  * @param baseUrl 图片包基址
  * @returns 解压后的文件映射
+ * @throws 两端都下载失败时抛错
  */
 async function loadImgsPack(versionInfo: ImgsPackVersionInfo, baseUrl: string): Promise<Record<string, Uint8Array>> {
-    const response = await fetch(new URL(versionInfo.packageFile, `${baseUrl}/`).toString(), { cache: "no-store" })
-    if (!response.ok) {
+    // 默认基址才包含另一端作为故障兜底；自定义基址只有用户给的那一个
+    const candidates = [baseUrl, baseUrl === getImgsPackBaseUrl() ? `${getOtherCdnBase()}/imgs-pack` : ""].filter(Boolean)
+
+    let response: Response | null = null
+    for (const packBase of candidates) {
+        try {
+            const current = await fetch(new URL(versionInfo.packageFile, `${packBase.replace(/\/$/, "")}/`).toString(), {
+                cache: "no-store",
+            })
+            if (current.ok) {
+                response = current
+                break
+            }
+        } catch {
+            // 换下一个源
+        }
+    }
+
+    if (!response) {
         throw new Error(`下载图片包失败: ${versionInfo.packageFile}`)
     }
 
@@ -631,12 +658,31 @@ export async function mountImgsToVirtualPath(options: ImgsMountOptions = {}): Pr
                         return
                     }
 
-                    const response = await fetch(entry.url || getRemoteImgUrl(relPath, baseUrl), { cache: "no-store" })
-                    if (!response.ok) {
+                    // 自定义 url 与自定义基址场景没有另一端，只有默认基址才追加另一端兜底
+                    const candidates = entry.url
+                        ? [entry.url]
+                        : options.baseUrl
+                          ? [getRemoteImgUrl(relPath, baseUrl)]
+                          : [getRemoteImgUrl(relPath, baseUrl), getRemoteImgUrl(relPath, `${getOtherCdnBase()}/imgs`)]
+
+                    let bytes: Uint8Array | null = null
+                    for (const url of candidates) {
+                        try {
+                            const response = await fetch(url, { cache: "no-store" })
+                            if (!response.ok) {
+                                continue
+                            }
+                            bytes = new Uint8Array(await response.arrayBuffer())
+                            break
+                        } catch {
+                            // 换下一个源
+                        }
+                    }
+
+                    if (!bytes) {
                         throw new Error(`下载图片失败: ${entry.path}`)
                     }
 
-                    const bytes = new Uint8Array(await response.arrayBuffer())
                     await cacheImg(relPath, bytes, true)
                     completedPaths.add(relPath)
                     patchImgsDownloadState({ completed: imgsDownloadState.value.completed + 1 })

@@ -3,7 +3,7 @@ import { Elysia, t } from "elysia"
 import { getPackageDiff, type PackageDiffConfig } from "./api/package-diff"
 import { uploadImage } from "./upload"
 import { getCachedNameEffectStylesheet } from "./util/name-effect-style"
-import { getPublicObjectUrl, isObjectStorageConfigured } from "./util/r2-storage"
+import { getPublicObjectUrl, isObjectStorageConfigured } from "./util/object-storage"
 
 /**
  * 缓存的最新版本信息
@@ -18,7 +18,7 @@ let cachedVersion: CachedVersion | null = null
 /**
  * 获取 MSI 下载 URL
  * 从在线的 latest.json 获取最新版本，带 5 分钟缓存
- * @returns MSI 文件的 R2 下载地址
+ * @returns MSI 文件的下载地址（主端 CDN）
  */
 async function getMsiDownloadUrl(): Promise<string | null> {
     if (!isObjectStorageConfigured()) {

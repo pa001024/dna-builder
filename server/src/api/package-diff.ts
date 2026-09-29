@@ -12,7 +12,7 @@ const MAX_PATCH_SIZE = 2 * 1024 * 1024
 /** 已放弃发送的差分占位文件大小：差分超过 MAX_PATCH_SIZE 后会被截断成 0 字节。 */
 const DISCARDED_PATCH_SIZE = 0
 const PACKAGE_FILE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._ -]*\.zip$/i
-const DEFAULT_DATA_PACKAGE_BASE_URL = "https://dl.dobapp.cc/data-pack/"
+const DEFAULT_DATA_PACKAGE_BASE_URL = "https://cdn.dobapp.cc/data-pack/"
 
 type PackageFetch = (input: string | URL | Request, init?: RequestInit) => Promise<Response>
 

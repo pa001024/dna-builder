@@ -16,6 +16,7 @@ import { applyLanguageFontClass, initI18n } from "./i18n"
 import "@globalhive/vuejs-tour/dist/style.css"
 import { createPinia } from "pinia"
 import type { Router } from "vue-router"
+import { probeCdnSpeed } from "./utils/cdn"
 import { SCREEN_BAR_WINDOW_LABEL } from "./utils/screen-bar"
 
 let appRouter: Router | null = null
@@ -140,6 +141,13 @@ async function bootstrap() {
 
     dataPackBootstrapLoading.value = true
     app.mount("#app")
+
+    // CDN 选源测速：尽早发起并与数据包初始化并行，让后续所有资源请求都走实测更快的一端。
+    // 不 await：测速完成前资源按主源取，避免为了测速把首屏拖住。
+    const cdnProbe = probeCdnSpeed().catch(error => {
+        console.error("CDN 测速失败，按主源使用", error)
+    })
+
     if (isScreenBarWindow) {
         // 信息条只读 localStorage 里的配置与密函数据，跳过数据包/图片缓存/外壳预热，
         // 否则窗口要等最重的那段启动开销才能上屏。
@@ -147,7 +155,8 @@ async function bootstrap() {
         return
     }
     requestAnimationFrame(() => {
-        void bootstrapRuntimeAssets()
+        // 图片缓存与数据包下载都走 CDN，先等测速出结果再开跑，避免用错源下载大文件
+        void cdnProbe.then(() => bootstrapRuntimeAssets())
     })
 
     // 资料库外壳预热：外壳本身只有骨架屏，先把它取回来，

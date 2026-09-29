@@ -13,10 +13,10 @@ import { type Resource } from "@/data/d/resource.data"
 import weaponData from "@/data/d/weapon.data"
 import type { Char, Weapon } from "@/data/data-types"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
-import { env } from "@/env"
 import { useSettingStore } from "@/store/setting"
 import { formatProp } from "@/util"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { buildCdnUrl } from "@/utils/cdn"
 import { getRewardTypeText } from "@/utils/i18n-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
@@ -28,6 +28,15 @@ const props = defineProps<{
 const { gt, gpt } = useGameText()
 const setting = useSettingStore()
 const { t } = useTranslation()
+
+/**
+ * 构造皮肤立绘大图的 CDN 地址（按测速选定的快源）。
+ * @param icon 皮肤图标名，形如 T_Head_XXX
+ * @returns 立绘地址
+ */
+function buildBustUrl(icon: string): string {
+    return buildCdnUrl(`img/res/${icon.replace("_Head", "_Bust")}.webp`)
+}
 
 // 当前角色等级
 const currentLevel = ref(80) // 默认80级
@@ -1040,7 +1049,7 @@ onBeforeUnmount(() => {
                             <div class="mb-2 text-[11px] tracking-wide text-base-content/55">立绘</div>
                             <ImagePreview
                                 :thumb-url="`/imgs/bust/${skin.icon.replace('_Head', '_Bust')}.webp`"
-                                :full-url="`${env.cdn}/img/res/${skin.icon.replace('_Head', '_Bust')}.webp`"
+                                :full-url="buildBustUrl(skin.icon)"
                             />
                         </div>
 

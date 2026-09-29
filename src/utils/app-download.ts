@@ -1,7 +1,8 @@
 import { env } from "@/env"
+import { buildCdnUrl, fetchWithCdnFallback } from "@/utils/cdn"
 
-/** Android 安装包发布清单（由 tools/app-upload.ts 上传到 CDN） */
-export const APK_MANIFEST_URL = `${env.cdn}/apk/latest.json`
+/** Android 安装包发布清单（由 tools/app-upload.ts 上传到 CDN，主源失败时读兜底源） */
+export const APK_MANIFEST_URL = buildCdnUrl("apk/latest.json")
 
 /** 桌面端（Windows）安装包下载入口：服务端 302 到最新的 MSI */
 export const DESKTOP_DOWNLOAD_URL = `${env.endpoint}/api/download`
@@ -148,7 +149,8 @@ export async function fetchApkRelease(options: { timeoutMs?: number } = {}): Pro
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), timeoutMs)
     try {
-        const response = await fetch(APK_MANIFEST_URL, { signal: controller.signal, cache: "no-cache" })
+        // 主源失败（网络异常或非 2xx）时自动读兜底源
+        const response = await fetchWithCdnFallback("apk/latest.json", { signal: controller.signal, cache: "no-cache" })
         if (!response.ok) {
             throw new Error(`安装包清单请求失败：HTTP ${response.status}`)
         }

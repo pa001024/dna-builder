@@ -114,7 +114,7 @@ function buildPack(version: string, files: string[]): ImgsPackVersionEntry {
 }
 
 /**
- * 上传图片包与版本列表到 R2。
+ * 上传图片包与版本列表到对象存储（OSS 与 R2 双写，发布内容固定覆盖写）。
  * @param entry 版本条目
  */
 async function uploadImgsPack(entry: ImgsPackVersionEntry): Promise<void> {
@@ -129,11 +129,11 @@ async function uploadImgsPack(entry: ImgsPackVersionEntry): Promise<void> {
         throw new Error(`图片包文件不存在: ${localZipPath}`)
     }
 
-    console.log(`📤 上传图片包文件到 R2: ${zipKey}`)
+    console.log(`📤 上传图片包文件到对象存储: ${zipKey}`)
     await putFile(zipKey, localZipPath)
     console.log(`✅ 上传成功: ${zipKey}`)
 
-    console.log(`📤 上传版本列表到 R2: ${versionsKey}`)
+    console.log(`📤 上传版本列表到对象存储: ${versionsKey}`)
     await putFile(versionsKey, versionsPath)
     console.log(`✅ 上传成功: ${versionsKey}`)
 

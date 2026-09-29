@@ -19,8 +19,10 @@ use std::{
     sync::{Mutex, OnceLock},
 };
 
-/// OCR 资源默认 CDN 根地址。
-const DEFAULT_OCR_CDN_BASE: &str = "https://dl.dobapp.cc/ocr";
+/// OCR 资源默认 CDN 根地址（主源，阿里云 OSS）。
+const DEFAULT_OCR_CDN_BASE: &str = "https://cdn.dna-builder.cn/ocr";
+/// OCR 资源兜底 CDN 根地址（Cloudflare R2），主源不可用时回退。
+const FALLBACK_OCR_CDN_BASE: &str = "https://cdn.dobapp.cc/ocr";
 /// 检测模型文件名。
 const DET_MODEL_FILE: &str = "ch_PP-OCRv3_det_infer.onnx";
 /// 分类模型文件名。
@@ -120,6 +122,11 @@ fn normalize_cdn_base_url(base: Option<String>) -> String {
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| DEFAULT_OCR_CDN_BASE.to_string());
     raw.trim_end_matches('/').to_string()
+}
+
+/// 规范化兜底 CDN 地址；调用方已自定义主源时仍用它兜底。
+fn fallback_cdn_base_url() -> String {
+    FALLBACK_OCR_CDN_BASE.trim_end_matches('/').to_string()
 }
 
 /// 根据相对路径拼接 CDN 完整地址。
@@ -231,8 +238,21 @@ fn ensure_resource_file(
         return Ok(());
     }
 
-    let url = build_cdn_url(base_url, remote_relative);
-    download_file(&url, local_path)
+    // 主源失败时回退到兜底源；两个源内容互为冗余
+    let primary_url = build_cdn_url(base_url, remote_relative);
+    match download_file(&primary_url, local_path) {
+        Ok(()) => Ok(()),
+        Err(primary_error) => {
+            let fallback_base = fallback_cdn_base_url();
+            if fallback_base == base_url.trim_end_matches('/') {
+                return Err(primary_error);
+            }
+            let fallback_url = build_cdn_url(&fallback_base, remote_relative);
+            download_file(&fallback_url, local_path).map_err(|fallback_error| {
+                format!("{primary_error}; 兜底源亦失败: {fallback_error}")
+            })
+        }
+    }
 }
 
 /// 预下载 OCR 运行所需文件。

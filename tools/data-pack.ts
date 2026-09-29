@@ -254,7 +254,7 @@ async function buildDataPack(targetVersion: string, updateVersions: boolean): Pr
 }
 
 /**
- * 上传 zip 和版本列表到 R2。
+ * 上传 zip 和版本列表到对象存储（OSS 与 R2 双写，发布内容固定覆盖写）。
  * @param entry 版本条目
  */
 async function uploadDataPack(entry: PackVersionEntry): Promise<void> {
@@ -269,11 +269,11 @@ async function uploadDataPack(entry: PackVersionEntry): Promise<void> {
         throw new Error(`数据包文件不存在: ${localZipPath}`)
     }
 
-    console.log(`📤 上传数据包文件到 R2: ${zipKey}`)
+    console.log(`📤 上传数据包文件到对象存储: ${zipKey}`)
     await putFile(zipKey, localZipPath)
     console.log(`✅ 上传成功: ${zipKey}`)
 
-    console.log(`📤 上传版本列表到 R2: ${versionsKey}`)
+    console.log(`📤 上传版本列表到对象存储: ${versionsKey}`)
     await putFile(versionsKey, versionsPath)
     console.log(`✅ 上传成功: ${versionsKey}`)
 

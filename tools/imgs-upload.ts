@@ -1,15 +1,16 @@
 #!/usr/bin/env bun
 
 /**
- * 图片补传：把 `public/imgs` 下远端缺失的文件补传到 R2 的 `imgs/` 前缀，已存在的同名对象跳过。
+ * 图片补传：把 `public/imgs` 下远端缺失的文件补传到各存储端的 `imgs/` 前缀。
  *
- * 与 OSS 时代的差别：R2 没有「目录」概念，不需要逐目录 head 再 put 空占位对象，
- * 一次性列出前缀下全部 key 做差集即可（3.5k 个对象约 4 次 list）。
+ * 判定**按端各算各的**：每个后端（OSS / R2）各自列出前缀下的 key 集合，
+ * 本地文件在某端已存在就跳过该端，只在缺失的那端补写。因此历史遗留的单端缺失
+ * 会在一次运行里被补齐到两端，且不会重传已一致的文件。
  */
 
 import fs from "node:fs"
 import path from "node:path"
-import { assertStorageConfig, getPublicUrl, listAllKeys, putFile } from "./object-storage"
+import { assertStorageConfig, getActiveBackends, getPublicUrl, listAllKeysInBackend, putFileToBackend } from "./object-storage"
 
 const rootDir = path.resolve(".")
 const localImgsDir = path.resolve(rootDir, "public/imgs")
@@ -47,7 +48,7 @@ function collectLocalFiles(dirPath: string, relativeDir = ""): { absPath: string
 }
 
 /**
- * @description 上传远端缺失的图片。
+ * @description 把本地缺失的图片补传到各存储端，逐端判定与写入。
  * @throws 本地目录不存在或对象存储未配置时抛错
  */
 async function uploadMissingImgs(): Promise<void> {
@@ -58,26 +59,38 @@ async function uploadMissingImgs(): Promise<void> {
     assertStorageConfig()
 
     const localFiles = collectLocalFiles(localImgsDir)
-    console.log(`本地图片 ${localFiles.length} 个，读取远端清单…`)
-    const remoteKeys = await listAllKeys("imgs/")
-    console.log(`远端已有 ${remoteKeys.size} 个对象`)
+    console.log(`本地图片 ${localFiles.length} 个`)
 
-    let uploadedCount = 0
-    let skippedCount = 0
+    // 逐端拉取已有 key：判定各算各的，缺哪端补哪端
+    const backends = getActiveBackends()
+    const remoteKeysByBackend = new Map<string, Set<string>>()
+    for (const backend of backends) {
+        const keys = await listAllKeysInBackend("imgs/", backend)
+        remoteKeysByBackend.set(backend.label, keys)
+        console.log(`${backend.label} 远端已有 ${keys.size} 个对象`)
+    }
+
+    // 统计与上传：仅在目标端缺失时写入该端
+    const uploadedByBackend = new Map<string, number>(backends.map(backend => [backend.label, 0]))
+    let fullySkipped = 0
 
     for (const file of localFiles) {
         const remoteKey = toRemoteKey(file.relPath)
-        if (remoteKeys.has(remoteKey)) {
-            skippedCount += 1
+        const missingOn = backends.filter(backend => !remoteKeysByBackend.get(backend.label)?.has(remoteKey))
+        if (!missingOn.length) {
+            fullySkipped += 1
             continue
         }
 
-        await putFile(remoteKey, file.absPath)
-        uploadedCount += 1
-        console.log(`上传: ${remoteKey} -> ${getPublicUrl(remoteKey)}`)
+        for (const backend of missingOn) {
+            await putFileToBackend(backend, remoteKey, file.absPath)
+            uploadedByBackend.set(backend.label, (uploadedByBackend.get(backend.label) ?? 0) + 1)
+        }
+        console.log(`上传: ${remoteKey} -> [${missingOn.map(b => b.label).join(", ")}] ${getPublicUrl(remoteKey)}`)
     }
 
-    console.log(`完成: 上传 ${uploadedCount} 个文件, 跳过 ${skippedCount} 个文件`)
+    const summary = backends.map(backend => `${backend.label} 上传 ${uploadedByBackend.get(backend.label) ?? 0} 个`).join(", ")
+    console.log(`完成: ${summary}, 两端均已存在跳过 ${fullySkipped} 个文件`)
 }
 
 void uploadMissingImgs().catch(error => {

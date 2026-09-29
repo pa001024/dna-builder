@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, useAttrs } from "vue"
+import { swapCdnBase } from "@/utils/cdn"
 
 defineOptions({
     inheritAttrs: false,
@@ -32,6 +33,8 @@ const controlMargin = 60
 const panOffset = ref({ x: 0, y: 0 })
 let requestId = 0
 let loader: HTMLImageElement | null = null
+/** 本次预览是否已尝试过兜底源 */
+let fallbackTried = false
 let enterFrameId = 0
 let settleFrameId = 0
 
@@ -146,6 +149,7 @@ function openFromUrls(thumbUrl: string, fullUrl: string) {
 
     requestId += 1
     const token = requestId
+    fallbackTried = false
     loadingVisible.value = true
     loadedFullImage.value = false
     displayUrl.value = thumbUrl
@@ -200,6 +204,13 @@ function preloadFullImage(token: number, fullUrl: string) {
     }
     loader.onerror = () => {
         if (token !== requestId) return
+        // 主源失败时先切兜底源重试一次，仍失败才结束加载态
+        const backupUrl = fallbackTried ? null : swapCdnBase(fullUrl)
+        if (backupUrl) {
+            fallbackTried = true
+            preloadFullImage(token, backupUrl)
+            return
+        }
         loadingVisible.value = false
         loadedFullImage.value = true
     }

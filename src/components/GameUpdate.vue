@@ -15,11 +15,11 @@ import {
     renameFile,
     writeTextFile,
 } from "@/api/app"
-import { env } from "@/env"
 import { useGameStore } from "@/store/game"
 import { useGameUpdateStore } from "@/store/gameUpdate"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
+import { buildCdnUrl, swapCdnBase } from "@/utils/cdn"
 import {
     compareGameVersions,
     type DiffPackageInfo,
@@ -122,6 +122,19 @@ let extractionProgressTimer: number | null = null
 
 const EXTRACTION_LINEAR_DURATION = 40_000
 const EXTRACTION_LOG_DURATION = 30_000
+
+/** 当前背景视频地址：初始为测速选定的快源，失败后换另一端 */
+const bgVideoUrl = ref(buildCdnUrl("bg.mp4"))
+
+/**
+ * 背景视频加载失败时换另一端再试，两端都失败就维持原状（背景非关键资源）。
+ */
+function handleBgVideoError() {
+    const swapped = swapCdnBase(bgVideoUrl.value)
+    if (swapped) {
+        bgVideoUrl.value = swapped
+    }
+}
 
 /**
  * 计算解压阶段的模拟进度：前 40 秒匀速到 90%，后 30 秒按对数曲线减速到 100%。
@@ -1648,11 +1661,12 @@ const launchGame = async () => {
     <!-- 主容器：深色背景，全屏 -->
     <div class="relative w-full h-full overflow-hidden select-none bg-base-100/30 font-sans">
         <video
-            :src="`${env.cdn}/bg.mp4`"
+            :src="bgVideoUrl"
             muted
             autoplay
             loop
             class="absolute top-0 left-0 w-full h-full object-cover pointer-events-none opacity-80"
+            @error="handleBgVideoError"
         ></video>
         <div class="flex flex-col h-full max-w-7xl mx-auto gap-8 px-8 pt-16 pb-4">
             <!-- 顶部 HUD：服务器配置 -->

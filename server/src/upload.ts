@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto"
 import { nanoid } from "nanoid"
-import { getPublicObjectUrl, objectExists, putObject } from "./util/r2-storage"
+import { getPublicObjectUrl, objectExists, putObject } from "./util/object-storage"
 
 const MAX_FILE_SIZE = 3 * 1024 * 1024
 const HASH_IMAGE_PREFIX = "img/hash"
@@ -26,10 +26,10 @@ function getBufferSha256(buffer: Buffer): string {
 }
 
 /**
- * @description 使用图片哈希作为文件名上传到 R2，避免重复上传同内容图片。
+ * @description 使用图片哈希作为文件名上传，避免重复上传同内容图片（OSS 与 R2 双写）。
  * @param buffer 图片二进制内容
  * @param mimeType 图片 MIME 类型
- * @returns R2 图片地址
+ * @returns 主端图片地址
  */
 export async function uploadImageBufferByHash(buffer: Buffer, mimeType: string): Promise<string> {
     if (!buffer.length) {
@@ -55,15 +55,15 @@ export async function uploadImageBufferByHash(buffer: Buffer, mimeType: string):
         }
         return getPublicObjectUrl(objectKey)
     } catch (error) {
-        console.error("按哈希上传图片到 R2 失败:", error)
+        console.error("按哈希上传图片到对象存储失败:", error)
         throw new Error("图片上传失败")
     }
 }
 
 /**
- * @description 上传图片到 R2，使用随机文件名。
+ * @description 上传图片到对象存储（OSS 与 R2 双写），使用随机文件名。
  * @param file 浏览器 File 对象
- * @returns R2 图片地址
+ * @returns 主端图片地址
  */
 export async function uploadImage(file: File): Promise<string> {
     if (!file) {
@@ -86,7 +86,7 @@ export async function uploadImage(file: File): Promise<string> {
         await putObject(objectKey, buffer, file.type)
         return getPublicObjectUrl(objectKey)
     } catch (error) {
-        console.error("上传图片到 R2 失败:", error)
+        console.error("上传图片到对象存储失败:", error)
         throw new Error("图片上传失败")
     }
 }

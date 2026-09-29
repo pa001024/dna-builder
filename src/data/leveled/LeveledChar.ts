@@ -1,4 +1,4 @@
-import { env } from "../../env"
+import { buildCdnUrl } from "../../utils/cdn"
 import type { Char, CommonAttr, SkillWeapon } from "../data-types"
 import { CommonLevelUp } from "./CommonLevelUp"
 import { LeveledSkill } from "./LeveledSkill"
@@ -178,13 +178,10 @@ export class LeveledChar {
         if (!icon) return ""
         // 角色 icon 是裸名（如 Heitao），皮肤 icon 可能已带 T_Head_ 前缀，两种都兼容
         const base = icon.startsWith("T_Head_") ? icon.slice("T_Head_".length) : icon
-        return `${CHAR_BUST_CDN_BASE}/T_Bust_${base}.webp`
+        return buildCdnUrl(`img/res/T_Bust_${base}.webp`)
     }
 
     public clone() {
         return new LeveledChar(this._originalCharData, this._等级)
     }
 }
-
-/** 立绘 CDN 基址（与角色详情页使用的一致） */
-const CHAR_BUST_CDN_BASE = `${env.cdn}/img/res`

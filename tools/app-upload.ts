@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 /**
- * 安卓安装包发布：构建（可选）→ 改名 `v<版本>.apk` → 上传安装包与 `apk/latest.json` 到 R2。
+ * 安卓安装包发布：构建（可选）→ 改名 `v<版本>.apk` → 上传安装包与 `apk/latest.json` 到对象存储（OSS 与 R2 双写）。
  *
  *   pnpm apk build upload -v 1.0.1        # 把 pubspec 版本写成 1.0.1 → 构建 → 发布
  *   pnpm apk build -v 1.0.1               # 只构建，清单快照留在本地 .tmp/apk-latest.json
@@ -17,7 +17,7 @@ import path from "node:path"
 import { $ } from "bun"
 import { assertStorageConfig, envConfig, getPublicUrl, putFile } from "./object-storage"
 
-/** 安装包与发布清单在 R2 上的存放前缀（清单只在 apk 目录内，不动桌面端的根 latest.json） */
+/** 安装包与发布清单在对象存储上的存放前缀（清单只在 apk 目录内，不动桌面端的根 latest.json） */
 const APK_PREFIX = "apk"
 
 /** 发布清单的键名：与数据包的 versions.json 不同，安卓只保留最新一版，故为单个对象 */
@@ -188,12 +188,12 @@ async function stageVersionedApk(sourcePath: string, version: string): Promise<{
 }
 
 /**
- * 上传文件到 R2，超过 1MB 时打印进度（进度逻辑在共用存储模块里）。
+ * 上传文件到对象存储（OSS 与 R2 双写），超过 1MB 时打印进度（进度逻辑在共用存储模块里）。
  * @param filePath 本地文件路径
  * @param objectKey 对象键名
  */
 async function uploadToStorage(filePath: string, objectKey: string): Promise<void> {
-    console.log(`📤 上传到 R2: ${objectKey}`)
+    console.log(`📤 上传到对象存储: ${objectKey}`)
     await putFile(objectKey, filePath)
     console.log(`✅ 上传成功: ${objectKey}`)
 }
@@ -259,7 +259,7 @@ async function main(): Promise<void> {
 
     console.log(`\n📦 Android 安装包 v${version}`)
     console.log(`   本地文件: ${staged.apkPath}`)
-    console.log(`   R2 键名: ${apkKey}`)
+    console.log(`   对象键名: ${apkKey}`)
     console.log(`   下载地址: ${latest.url}`)
     console.log(`\n📋 ${APK_MANIFEST_KEY}`)
     console.log(JSON.stringify(latest, null, 2))

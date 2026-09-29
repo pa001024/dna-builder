@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
-import { computed, ref } from "vue"
+import { computed, ref, watch } from "vue"
 import { charAccessoryData, skinData, weaponSkinData } from "@/data/d/accessory.data"
 import { resourceData } from "@/data/d/resource.data"
 import rewardData from "@/data/d/reward.data"
@@ -16,9 +16,9 @@ import {
     skinGachaItems,
     skinGachaTabs,
 } from "@/data/d/skingacha.data"
-import { env } from "@/env"
 import { useUIStore } from "@/store/ui"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { buildCdnUrl, swapCdnBase } from "@/utils/cdn"
 import { DEFAULT_GOLD_PITY, getGoldPityConfig, getGoldRate, PURPLE_PITY } from "@/utils/skin-gacha-probability"
 import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments, type StoryTextSegment } from "@/utils/story-text"
 
@@ -140,7 +140,8 @@ function getFeaturedSkin(gacha: SkinGacha) {
 const bgUseFallback = ref(false)
 
 /**
- * 页面背景大图：卡池主打皮肤的半身立绘大图（走 CDN 全尺寸图），加载失败时回退到 Banner 缩略图。
+ * 页面背景大图：卡池主打皮肤的半身立绘大图（走 CDN 全尺寸图）。
+ * 先按测速选定的快源取；该源加载失败时换成另一端，两端都失败才回退本地 Banner 缩略图。
  */
 const bgImage = computed(() => {
     const gacha = selectedGacha.value
@@ -149,11 +150,35 @@ const bgImage = computed(() => {
     if (!bgUseFallback.value) {
         const skin = getFeaturedSkin(gacha)
         if (skin && skin.icon.startsWith("T_Head_")) {
-            return `${env.cdn}/img/res/${skin.icon.replace("T_Head", "T_Bust")}.webp`
+            return buildCdnUrl(`img/res/${skin.icon.replace("T_Head", "T_Bust")}.webp`)
         }
     }
     return `/imgs/webp/${tab.icon}.webp`
 })
+
+/** 当前渲染中的背景图地址：初始为选定快源，失败后换另一端 */
+const bgImageUrl = ref("")
+
+/** 背景图地址跟随 bgImage 变化重置到选定快源 */
+watch(
+    bgImage,
+    () => {
+        bgImageUrl.value = bgImage.value
+    },
+    { immediate: true }
+)
+
+/**
+ * 背景大图加载失败时换另一端再试，两端都失败才退回本地 Banner。
+ */
+function handleBgImageError() {
+    const swapped = swapCdnBase(bgImageUrl.value)
+    if (swapped) {
+        bgImageUrl.value = swapped
+        return
+    }
+    bgUseFallback.value = true
+}
 
 /**
  * 选择卡池页签（移动端选择后自动收起抽屉）。
@@ -873,12 +898,12 @@ function getStarGlowClass(star: 3 | 4 | 5): string {
         <!-- 页面背景：卡池主打皮肤大图（切换时淡入淡出） -->
         <Transition name="gacha-bg">
             <img
-                :key="bgImage"
-                :src="bgImage"
+                :key="bgImageUrl"
+                :src="bgImageUrl"
                 alt=""
                 aria-hidden="true"
                 class="pointer-events-none absolute inset-0 size-full object-cover object-top-right"
-                @error="bgUseFallback = true"
+                @error="handleBgImageError"
             />
         </Transition>
         <!-- 左侧遮罩渐变，保证可读性 -->

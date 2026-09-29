@@ -87,7 +87,7 @@ describe("fetchApkRelease", () => {
             json: async () => ({
                 version: "1.2.3",
                 fileName: "v1.2.3.apk",
-                url: "https://dl.dobapp.cc/apk/v1.2.3.apk",
+                url: "https://cdn.dobapp.cc/apk/v1.2.3.apk",
                 size: 1024,
                 sha256: "abc",
                 builtAt: "2026-09-27T00:00:00.000Z",
@@ -98,7 +98,7 @@ describe("fetchApkRelease", () => {
         const release = await fetchApkRelease()
         expect(fetchMock).toHaveBeenCalledWith(APK_MANIFEST_URL, expect.objectContaining({ signal: expect.anything() }))
         expect(release.version).toBe("1.2.3")
-        expect(release.url).toBe("https://dl.dobapp.cc/apk/v1.2.3.apk")
+        expect(release.url).toBe("https://cdn.dobapp.cc/apk/v1.2.3.apk")
         expect(release.size).toBe(1024)
     })
 

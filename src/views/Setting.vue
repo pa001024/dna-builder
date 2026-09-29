@@ -15,6 +15,7 @@ import { useDataPackStore } from "@/store/dataPack"
 import { db } from "@/store/db"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
+import { buildCdnUrl, resolveCdnUrls } from "@/utils/cdn"
 import { cssQuoteFamily, customFontCssFamily } from "@/utils/font-storage"
 import { buildFloatWindowConfig } from "@/utils/skill-cd-overlay"
 
@@ -28,7 +29,10 @@ const safeModeQuizOpen = ref(false)
 const dataPackFileInput = ref<HTMLInputElement | null>(null)
 const dataPackSourceBaseUrl = ref("")
 const dataPackSourceKind = ref<"official" | "custom">("custom")
-const CDN_DATA_PACK_BASE_URL = `${env.cdn}/data-pack`
+/** 官方来源的两个并列地址（OSS / R2），读取时依次尝试，界面上只读展示 */
+const OFFICIAL_DATA_PACK_BASE_URLS = resolveCdnUrls("data-pack")
+/** 官方来源展示用的主地址（测速选定的快源） */
+const CDN_DATA_PACK_BASE_URL = computed(() => buildCdnUrl("data-pack"))
 const versionDragUrls = ref<Record<string, string>>({})
 const sourceSaveTimer = ref<number | null>(null)
 const isApplyingSourceUpdate = ref(false)
@@ -282,8 +286,8 @@ watch(
     () => dataPackSourceKind.value,
     kind => {
         if (kind === "official") {
-            dataPackSourceBaseUrl.value = CDN_DATA_PACK_BASE_URL
-        } else if (!dataPackSourceBaseUrl.value || dataPackSourceBaseUrl.value === CDN_DATA_PACK_BASE_URL) {
+            dataPackSourceBaseUrl.value = CDN_DATA_PACK_BASE_URL.value
+        } else if (!dataPackSourceBaseUrl.value || dataPackSourceBaseUrl.value === CDN_DATA_PACK_BASE_URL.value) {
             dataPackSourceBaseUrl.value = "/mock/data-pack"
         }
     },
@@ -614,7 +618,7 @@ async function saveSourceKind(kind: "official" | "custom") {
     try {
         await dataPack.setSourceKind(kind)
         if (kind === "official") {
-            dataPackSourceBaseUrl.value = CDN_DATA_PACK_BASE_URL
+            dataPackSourceBaseUrl.value = CDN_DATA_PACK_BASE_URL.value
         }
     } finally {
         isApplyingSourceUpdate.value = false
@@ -1197,15 +1201,22 @@ onUnmounted(() => {
                                     <SelectItem value="custom">{{ $t("setting.customSource") }}</SelectItem>
                                 </Select>
                                 <input
+                                    v-if="dataPackSourceKind === 'custom'"
                                     v-model="dataPackSourceBaseUrl"
-                                    :disabled="dataPackSourceKind === 'official'"
                                     type="text"
                                     class="min-w-40 flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    :placeholder="
-                                        dataPackSourceKind === 'official' ? CDN_DATA_PACK_BASE_URL : $t('setting.dataPackSourceAddress')
-                                    "
-                                    @input="dataPackSourceKind === 'custom' && saveSourceBaseUrl()"
+                                    :placeholder="$t('setting.dataPackSourceAddress')"
+                                    @input="saveSourceBaseUrl()"
                                 />
+                                <div
+                                    v-else
+                                    class="min-w-40 flex-1 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-[13px] text-base-content/70"
+                                    :title="`${OFFICIAL_DATA_PACK_BASE_URLS.primary}\n${OFFICIAL_DATA_PACK_BASE_URLS.backup}`"
+                                >
+                                    {{ OFFICIAL_DATA_PACK_BASE_URLS.primary }}
+                                    <span class="text-base-content/40"> · </span>
+                                    {{ OFFICIAL_DATA_PACK_BASE_URLS.backup }}
+                                </div>
                                 <button class="btn btn-sm" @click="importDataPack">{{ $t("achievement.import") }}</button>
                                 <button class="btn btn-sm btn-error" :disabled="isClearingDataPackStorage" @click="clearDataPackStorage">
                                     清空
