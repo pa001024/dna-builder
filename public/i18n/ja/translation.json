@@ -1832,6 +1832,13 @@
         "load_failed": "ゲーム設定を取得できません"
     },
     "dna-game-info": {
+        "forge_alarm_added": "リマインダーを追加しました：{{time}} {{name}}",
+        "forge_alarm_cancelled": "リマインダーをキャンセルしました",
+        "forge_alarm_completed": "このアイテムはすでに鋳造が完了しています",
+        "forge_alarm_done": "鋳造完了：{{name}}",
+        "forge_alarm_hint_add": "クリックで完了リマインダーを追加",
+        "forge_alarm_hint_cancel": "クリックでリマインダーをキャンセル",
+        "forge_alarm_notify_title": "鋳造完了",
         "generate_screenshot": "スクリーンショットを生成",
         "no_inventory": "在庫がありません。先に公式アプリでキャラクターを紐付けてください。",
         "push_settings": "設定を送信",

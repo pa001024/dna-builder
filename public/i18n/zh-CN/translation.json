@@ -1853,6 +1853,13 @@
         "load_failed": "无法获取游戏配置"
     },
     "dna-game-info": {
+        "forge_alarm_added": "已添加提醒：{{time}} {{name}}",
+        "forge_alarm_cancelled": "已取消提醒",
+        "forge_alarm_completed": "这一条已经铸造完成了",
+        "forge_alarm_done": "铸造完成：{{name}}",
+        "forge_alarm_hint_add": "点击添加完成提醒",
+        "forge_alarm_hint_cancel": "点击取消提醒",
+        "forge_alarm_notify_title": "铸造完成",
         "generate_screenshot": "生成截图",
         "no_inventory": "无库存, 请先到官方APP绑定角色",
         "push_settings": "推送设置",

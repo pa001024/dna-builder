@@ -2,20 +2,23 @@
 import { useLocalStorage } from "@vueuse/core"
 import { DNAAPI, DNAItemWeeklyReport, DNARoleEntity, DNAShortNoteEntity, DNAWeaponBean } from "dna-api"
 import { toPng } from "html-to-image"
-import { t } from "i18next"
+import i18next, { t } from "i18next"
 import { computed, onMounted, ref } from "vue"
 import { useRouter } from "vue-router"
 import { submitAbyssUsageMutation } from "@/api/graphql"
+import { useGameText } from "@/composables/useGameText"
 import { Draft } from "@/data"
 import { modDraftMap, modMap, resourceDraftMap, resourceMap, weaponDraftMap, weaponMap } from "@/data/d"
 import { LeveledMod } from "@/data/leveled/LeveledMod"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
+import { useForgeAlarm } from "@/store/forgeAlarm"
 import { useInvStore } from "@/store/inv"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { buildAbyssUploadPayload } from "@/utils/abyss-upload"
 import { imgRemoteToLocal } from "@/utils/remoteImg"
+import { formatTimeOnly } from "@/utils/time"
 
 defineProps<{
     nobtn?: boolean
@@ -25,12 +28,41 @@ const ui = useUIStore()
 const user = useUserStore()
 const router = useRouter()
 const inv = useInvStore()
+const forgeAlarm = useForgeAlarm()
+const { gt } = useGameText()
 
 let api: DNAAPI
 
 const loading = ref(true)
 const roleInfo = useLocalStorage<DNARoleEntity>("dna.roleInfo", {} as any)
 const shortNoteInfo = useLocalStorage<DNAShortNoteEntity>("dna.shortNoteInfo", {} as any)
+
+/**
+ * 计算铸造的真实结束时间戳
+ * @param startTime 开始时间（秒数时间戳）
+ * @param doingNum 进行中数量
+ * @param draft 设计稿信息
+ * @returns 结束时间戳（毫秒）；数据不足时返回 null
+ */
+function getRealEndTime(startTime: string | number, doingNum: number, draft?: Draft): number | null {
+    if (!draft) return null
+
+    try {
+        // 转换startTime为秒数
+        const startSeconds = typeof startTime === "string" ? parseInt(startTime) : startTime
+        if (isNaN(startSeconds)) return null
+
+        // 计算单个产物的制造时间（秒）
+        const secs = (draft.d || 0) * 60 * doingNum
+        if (secs <= 0) return null
+
+        // 计算真实结束时间（毫秒）
+        return (startSeconds + secs) * 1000
+    } catch (error) {
+        console.error("计算结束时间失败:", error)
+        return null
+    }
+}
 
 /**
  * 计算铸造的真实结束时间
@@ -40,25 +72,51 @@ const shortNoteInfo = useLocalStorage<DNAShortNoteEntity>("dna.shortNoteInfo", {
  * @returns 结束时间字符串
  */
 function calculateRealEndTime(startTime: string | number, doingNum: number, draft?: Draft): string {
-    if (!draft) return ""
+    const endTimeMs = getRealEndTime(startTime, doingNum, draft)
+    return endTimeMs === null ? "" : ui.timeDistanceFutureFix(endTimeMs)
+}
 
-    try {
-        // 转换startTime为秒数
-        const startSeconds = typeof startTime === "string" ? parseInt(startTime) : startTime
-        if (isNaN(startSeconds)) return ""
+/**
+ * 取进行中铸造条目的结束时间戳（毫秒）。
+ * @param draft 进行中的铸造条目
+ * @returns 结束时间戳；数据不足时返回 null
+ */
+function getDraftEndTime(draft: any): number | null {
+    return getRealEndTime(draft.startTime, draft.draftDoingNum + draft.draftCompleteNum, getDraftInfo(draft.productId))
+}
 
-        // 计算单个产物的制造时间（秒）
-        const secs = (draft.d || 0) * 60 * doingNum
-        if (secs <= 0) return ""
+/**
+ * 判断某条铸造是否已设置完成提醒。
+ * @param draft 进行中的铸造条目
+ * @returns 是否已设
+ */
+function isAlarmArmed(draft: any): boolean {
+    const endTimeMs = getDraftEndTime(draft)
+    return endTimeMs !== null && forgeAlarm.isArmed(endTimeMs)
+}
 
-        // 计算真实结束时间（毫秒）
-        const endTimeMs = (startSeconds + secs) * 1000
-
-        return ui.timeDistanceFutureFix(endTimeMs)
-    } catch (error) {
-        console.error("计算结束时间失败:", error)
-        return ""
+/**
+ * 点击倒计时：为这条铸造设置或取消完成提醒（全应用同时只保留一个）。
+ * 提醒只记时间与标题，设置后不再依赖游戏信息刷新。
+ * @param draft 进行中的铸造条目
+ */
+function toggleForgeAlarm(draft: any) {
+    const endTimeMs = getDraftEndTime(draft)
+    if (endTimeMs === null) return
+    if (endTimeMs <= Date.now()) {
+        ui.showErrorMessage(t("dna-game-info.forge_alarm_completed"))
+        return
     }
+    const name = gt(draft.productName)
+    if (forgeAlarm.isArmed(endTimeMs)) {
+        forgeAlarm.cancel()
+        ui.showSuccessMessage(t("dna-game-info.forge_alarm_cancelled"))
+        return
+    }
+    forgeAlarm.setAlarm(endTimeMs, name)
+    ui.showSuccessMessage(
+        t("dna-game-info.forge_alarm_added", { time: formatTimeOnly(endTimeMs, i18next.language), name })
+    )
 }
 
 /**
@@ -661,10 +719,40 @@ async function generateScreenshot() {
                                         </div>
                                     </div>
 
-                                    <!-- 时间信息 -->
+                                    <!-- 时间信息（点击倒计时可设置铸造完成提醒，全应用同时只保留一个） -->
                                     <div class="mt-1.5 flex items-center justify-between gap-2 text-xs">
                                         <span class="text-base-content/55">剩余时间:</span>
-                                        <span class="font-medium text-primary">
+                                        <button
+                                            v-if="getDraftEndTime(draft) !== null"
+                                            type="button"
+                                            class="flex shrink-0 items-center gap-1 rounded-xs border px-1.5 py-0.5 font-medium transition-colors print:hidden"
+                                            :class="
+                                                isAlarmArmed(draft)
+                                                    ? 'border-primary/40 bg-primary/10 text-primary'
+                                                    : 'border-transparent text-primary hover:border-primary/30 hover:bg-primary/5'
+                                            "
+                                            :title="
+                                                isAlarmArmed(draft)
+                                                    ? $t('dna-game-info.forge_alarm_hint_cancel')
+                                                    : $t('dna-game-info.forge_alarm_hint_add')
+                                            "
+                                            @click="toggleForgeAlarm(draft)"
+                                        >
+                                            <span class="font-orbitron tabular-nums">
+                                                {{
+                                                    calculateRealEndTime(
+                                                        draft.startTime,
+                                                        draft.draftDoingNum + draft.draftCompleteNum,
+                                                        getDraftInfo(draft.productId)
+                                                    )
+                                                }}
+                                            </span>
+                                            <Icon
+                                                :icon="isAlarmArmed(draft) ? 'ri:alarm-fill' : 'ri:alarm-add-line'"
+                                                class="size-3.5"
+                                            />
+                                        </button>
+                                        <span v-else class="shrink-0 font-medium text-primary">
                                             {{
                                                 calculateRealEndTime(
                                                     draft.startTime,

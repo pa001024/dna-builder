@@ -1871,6 +1871,13 @@
         "load_failed": "Impossible de charger la configuration du jeu"
     },
     "dna-game-info": {
+        "forge_alarm_added": "Rappel ajouté : {{time}} {{name}}",
+        "forge_alarm_cancelled": "Rappel annulé",
+        "forge_alarm_completed": "Cet objet est déjà forgé",
+        "forge_alarm_done": "Forge terminée : {{name}}",
+        "forge_alarm_hint_add": "Cliquez pour ajouter un rappel de fin",
+        "forge_alarm_hint_cancel": "Cliquez pour annuler le rappel",
+        "forge_alarm_notify_title": "Forge terminée",
         "generate_screenshot": "Générer une capture d'écran",
         "no_inventory": "Aucun inventaire detecte. Veuillez d'abord lier un personnage dans l'application officielle.",
         "push_settings": "Envoyer les réglages",

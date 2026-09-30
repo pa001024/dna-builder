@@ -1833,6 +1833,13 @@
         "load_failed": "게임 설정을 가져오지 못했습니다"
     },
     "dna-game-info": {
+        "forge_alarm_added": "알림이 추가되었습니다: {{time}} {{name}}",
+        "forge_alarm_cancelled": "알림이 취소되었습니다",
+        "forge_alarm_completed": "이 항목은 이미 제작이 완료되었습니다",
+        "forge_alarm_done": "제작 완료: {{name}}",
+        "forge_alarm_hint_add": "클릭하여 완료 알림 추가",
+        "forge_alarm_hint_cancel": "클릭하여 알림 취소",
+        "forge_alarm_notify_title": "제작 완료",
         "generate_screenshot": "스크린샷 생성",
         "no_inventory": "인벤토리가 없습니다. 먼저 공식 앱에서 캐릭터를 연동해 주세요.",
         "push_settings": "설정 푸시",

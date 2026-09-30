@@ -1856,6 +1856,13 @@
         "load_failed": "Could not load game config"
     },
     "dna-game-info": {
+        "forge_alarm_added": "Reminder set: {{name}} at {{time}}",
+        "forge_alarm_cancelled": "Reminder cancelled",
+        "forge_alarm_completed": "This craft is already finished",
+        "forge_alarm_done": "Crafting complete: {{name}}",
+        "forge_alarm_hint_add": "Click to add a completion reminder",
+        "forge_alarm_hint_cancel": "Click to cancel the reminder",
+        "forge_alarm_notify_title": "Crafting Complete",
         "generate_screenshot": "Generate Screenshot",
         "no_inventory": "No inventory found. Please bind a character in the official app first.",
         "push_settings": "Push Settings",

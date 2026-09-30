@@ -8,6 +8,7 @@ import { restoreScreenBar } from "./composables/useScreenBar"
 import { restoreSkillCdOverlay } from "./composables/useSkillCdOverlay"
 import { dataPackBootstrapLoading, isDataPackHydrated } from "./data/data-pack-bridge"
 import { env } from "./env"
+import { useForgeAlarm } from "./store/forgeAlarm"
 import { useMihanNotify } from "./store/mihan"
 import { useScriptRuntimeStore } from "./store/scriptRuntime"
 import { useSettingStore } from "./store/setting"
@@ -21,6 +22,7 @@ import { postVisitorCount } from "./vercount"
 const setting = useSettingStore()
 const ui = useUIStore()
 const mihanNotify = useMihanNotify()
+const forgeAlarm = useForgeAlarm()
 const scriptRuntime = useScriptRuntimeStore()
 const route = useRoute()
 const user = useUserStore()
@@ -365,6 +367,7 @@ onMounted(async () => {
     ui.startTimer()
     reportVisitorCount()
     startOnlineExperienceTimer()
+    forgeAlarm.restore()
     if (mihanNotify.shouldKeepWatch()) {
         await mihanNotify.ensureWatch()
     }
