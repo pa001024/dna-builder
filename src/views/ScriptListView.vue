@@ -3943,11 +3943,11 @@ onUnmounted(async () => {
                 <!-- 右侧面板（调试状态 + 脚本配置） -->
                 <div v-if="showStatusPanel" class="w-88 max-w-[45%] min-w-70 border-l border-base-300 bg-base-950/20 flex flex-col">
                     <div class="h-10 px-3 border-b border-base-300 flex items-center justify-between gap-2">
-                        <div class="tabs tabs-box tabs-xs">
-                            <button class="tab" :class="{ 'tab-active': sidePanelTab === 'status' }" @click="sidePanelTab = 'status'">
+                        <div class="space-x-1 text-xs">
+                            <button class="group cursor-pointer animate-ef-rise rounded-xs transition-all duration-200 hover:border-primary/50! active:scale-[0.99] motion-reduce:animate-none p-1 border border-transparent" :class="{ 'bg-base-100/60 backdrop-blur-sm border-base-content/15!': sidePanelTab === 'status' }" @click="sidePanelTab = 'status'">
                                 调试状态
                             </button>
-                            <button class="tab" :class="{ 'tab-active': sidePanelTab === 'config' }" @click="sidePanelTab = 'config'">
+                            <button class="group cursor-pointer animate-ef-rise rounded-xs transition-all duration-200 hover:border-primary/50! active:scale-[0.99] motion-reduce:animate-none p-1 border border-transparent" :class="{ 'bg-base-100/60 backdrop-blur-sm border-base-content/15!': sidePanelTab === 'config' }" @click="sidePanelTab = 'config'">
                                 脚本配置
                             </button>
                         </div>
@@ -3982,7 +3982,7 @@ onUnmounted(async () => {
                                     <div
                                         v-for="item in sortedScriptConfigItems"
                                         :key="item.name"
-                                        class="border border-base-300 rounded bg-base-100/40 p-2 space-y-2"
+                                        class="group animate-ef-rise rounded-xs border border-base-content/15 bg-base-100/60 backdrop-blur-sm transition-all duration-200 hover:border-primary/50 active:scale-[0.99] motion-reduce:animate-none p-2 space-y-2"
                                     >
                                         <div class="flex items-center justify-between gap-2">
                                             <div class="text-sm font-medium truncate">{{ item.name }}</div>
@@ -4105,7 +4105,7 @@ onUnmounted(async () => {
                                     <div
                                         v-for="item in scriptStatuses"
                                         :key="item.title"
-                                        class="border border-base-300 rounded bg-base-100/40 p-2 space-y-2"
+                                        class="group animate-ef-rise rounded-xs border border-base-content/15 bg-base-100/60 backdrop-blur-sm transition-all duration-200 hover:border-primary/50 active:scale-[0.99] motion-reduce:animate-none p-2 space-y-2"
                                     >
                                         <div class="flex items-center justify-between gap-2">
                                             <div class="text-xs text-base-content/70 truncate">{{ item.title }}</div>
