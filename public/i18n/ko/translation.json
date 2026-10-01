@@ -347,6 +347,8 @@
         "user": "사용자"
     },
     "ai-chat": {
+        "askHint": "옵션을 선택하거나 입력란에 직접 답변을 입력하세요.",
+        "askInputPlaceholder": "답변 입력…",
         "assistantNotInitialized": "AI 도우미가 초기화되지 않았습니다. 먼저 AI 설정을 구성하세요.",
         "automationContinuePrompt": "이전 라운드에서 끝나지 않은 자동화 세팅 흐름(라운드 {{round}})을 이어서 진행하세요.\n요구사항:\n1. 필요한 도구를 계속 호출해 흐름을 진행하세요.\n2. 완료되면 {{doneTag}}를 한 줄로만 출력하세요.\n3. 아직 완료되지 않았으면 {{continueTag}}를 한 줄로만 출력하세요.",
         "automationIncompleteWarning": "⚠️ 예상 라운드 내에 완료가 확인되지 않았습니다. 계속하려면 \"계속\"을 보내세요.",
@@ -3721,8 +3723,6 @@
         "aiModelName": "모델 이름",
         "aiModelNameTip": "사용할 AI 모델 선택",
         "aiReset": "AI 설정 초기화",
-        "aiTemperature": "Temperature",
-        "aiTemperatureTip": "생성 내용의 무작위성을 제어(0-1)",
         "aiTestConnection": "연결 테스트",
         "appearance": "모양 설정",
         "backgroundBlur": "배경 흐림",

@@ -346,6 +346,8 @@
         "user": "ユーザー"
     },
     "ai-chat": {
+        "askHint": "選択肢を選ぶか、入力欄に直接回答を入力してください。",
+        "askInputPlaceholder": "回答を入力…",
         "assistantNotInitialized": "AIアシスタントが初期化されていません。先にAI設定を行ってください。",
         "automationContinuePrompt": "前回未完了の自動配装ワークフロー（ラウンド {{round}}）を続行してください。\n要件:\n1. 必要なツールを呼び出し続けて、ワークフローを前進させてください。\n2. 完了したら {{doneTag}} をそれ単独の行で出力してください。\n3. 未完了なら {{continueTag}} をそれ単独の行で出力してください。",
         "automationIncompleteWarning": "⚠️ 期待されたラウンド内にワークフローの完了が確認されませんでした。続けるには「continue」を送信してください。",
@@ -3720,8 +3722,6 @@
         "aiModelName": "モデル名",
         "aiModelNameTip": "使用するAIモデルを選択",
         "aiReset": "AI設定をリセット",
-        "aiTemperature": "Temperature",
-        "aiTemperatureTip": "生成内容のランダム性を制御(0-1)",
         "aiTestConnection": "接続テスト",
         "appearance": "外観設定",
         "backgroundBlur": "背景のぼかし",

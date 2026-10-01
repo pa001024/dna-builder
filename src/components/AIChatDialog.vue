@@ -2,15 +2,16 @@
 import { useLocalStorage } from "@vueuse/core"
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, ref, watch } from "vue"
+import type { AgentToolTrace } from "@/api/agent/kernel"
 import { BuildAgent } from "@/api/buildAgent"
 import { useCharSettings } from "@/composables/useCharSettings"
 import type { CharBuild } from "@/data"
-import { env } from "@/env"
 import { type BuildAgentChatMessage, db } from "@/store/db"
 import { useInvStore } from "@/store/inv"
 import { useSettingStore } from "@/store/setting"
-import { useUserStore } from "@/store/user"
+import { resolveSharedAgentUpstream, watchAgentUpstream } from "@/utils/agent-upstream"
 import { DEFAULT_AI_MAX_TOKENS } from "@/utils/ai-config"
+import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
 
 const props = defineProps<{
     charBuild: CharBuild
@@ -30,11 +31,13 @@ const chatContainer = ref<HTMLElement>()
 let agent: BuildAgent | null = null
 const lastFailedMessage = ref<string>("") // 保存最后一次失败的消息
 const collapsedReasoning = ref<Set<number>>(new Set()) // 跟踪哪些消息的思考过程被折叠
-const AUTOMATION_DONE_TAG = "[[AUTOMATION_DONE]]"
-const AUTOMATION_CONTINUE_TAG = "[[AUTOMATION_CONTINUE]]"
-const RETRY_TAG = "[[RETRY]]"
-const MAX_AUTOMATION_ROUNDS = 4
+/** 当前等待用户作答的 ask_user 提问；非空时输入框的提交被路由成「回答这道题」 */
+const pendingAsk = ref<AskUserRequest | null>(null)
 const BUILD_AGENT_CHAT_ID_PREFIX = "build-agent-chat:"
+/** 挂起等待的唤醒回调：由 runAgentTurn 在需要等待时写入 */
+let pendingResolver: (() => void) | null = null
+/** 待回填的用户回答 */
+let pendingAnswer: AskUserResponse = { requestId: "", answers: [], skipped: false }
 
 /**
  * 获取当前角色对应的配装助手对话主键
@@ -67,6 +70,7 @@ function normalizePersistMessages(chatMessages: BuildAgentChatMessage[]): BuildA
         role: message.role,
         content: typeof message.content === "string" ? message.content : String(message.content ?? ""),
         reasoning: typeof message.reasoning === "string" ? message.reasoning : undefined,
+        traces: Array.isArray(message.traces) ? [...message.traces] : undefined,
     }))
 }
 
@@ -79,7 +83,7 @@ async function loadPersistedChat(): Promise<void> {
         messages.value = normalizePersistMessages(chat?.messages ?? [])
         const collapsed = new Set<number>()
         messages.value.forEach((message, index) => {
-            if (message.role === "assistant" && message.reasoning) {
+            if (message.role === "assistant" && (message.reasoning || message.traces?.length)) {
                 collapsed.add(index)
             }
         })
@@ -152,65 +156,6 @@ async function clearPersistedChat(): Promise<void> {
 }
 
 /**
- * 构建自动化执行模式的首轮提示词
- * @param userMessage 用户输入
- * @returns 自动化提示词
- */
-function createAutomationPrompt(userMessage: string): string {
-    return t("ai-chat.automationPrompt", {
-        doneTag: AUTOMATION_DONE_TAG,
-        continueTag: AUTOMATION_CONTINUE_TAG,
-        userMessage,
-    })
-}
-
-/**
- * 构建自动化执行模式的续跑提示词
- * @param round 当前轮次
- * @returns 续跑提示词
- */
-function createAutomationContinuePrompt(round: number): string {
-    return t("ai-chat.automationContinuePrompt", {
-        round,
-        doneTag: AUTOMATION_DONE_TAG,
-        continueTag: AUTOMATION_CONTINUE_TAG,
-    })
-}
-
-/**
- * 检查自动化流程标记
- * @param content 当前轮次响应文本
- * @returns 自动化状态
- */
-function detectAutomationStatus(content: string): "done" | "continue" | "unknown" {
-    if (content.includes(AUTOMATION_DONE_TAG)) {
-        return "done"
-    }
-    if (content.includes(AUTOMATION_CONTINUE_TAG)) {
-        return "continue"
-    }
-    return "unknown"
-}
-
-/**
- * 清理自动化状态标记，避免展示给用户
- * @param content 原始文本
- * @returns 清理后的文本
- */
-function sanitizeAutomationTags(content: string): string {
-    return content.replaceAll(AUTOMATION_DONE_TAG, "").replaceAll(AUTOMATION_CONTINUE_TAG, "").trim()
-}
-
-/**
- * 兜底判断自动化是否可能已经完成
- * @param content 当前轮次响应文本
- * @returns 是否可能完成
- */
-function isAutomationLikelyDone(content: string): boolean {
-    return /已(完成|应用|设置|切换)/.test(content) || content.includes("自动构建参数")
-}
-
-/**
  * 将指定消息的思考过程设为折叠状态
  * @param index 消息索引
  */
@@ -226,73 +171,41 @@ function collapseReasoning(index: number): void {
 // 初始化AI Agent
 async function initAgent() {
     if (agent) {
-        // 如果角色切换，更新系统提示词
-        agent.updateSystemPrompt(charSettings.value, selectedChar.value)
         return
     }
 
-    // 优先使用setting store中的API密钥配置
-    const userApiKey = settingStore.aiApiKey
-    const hasUserConfig = userApiKey && userApiKey.trim() !== ""
+    const config = resolveSharedAgentUpstream()
 
-    if (hasUserConfig) {
-        try {
-            const config = settingStore.getOpenAIConfig()
-            // 补充缺失的字段
-            const fullConfig = {
-                ...config,
-                timeout: 30000,
-                max_retries: 3,
-                system_prompt: "", // BuildAgent会设置
-                mcp_server_url: "",
-                mcp_server_port: 0,
-            }
-            agent = new BuildAgent(fullConfig, charSettings, selectedChar, inv)
-            console.log("使用用户配置的API密钥初始化AI Agent")
-            return
-        } catch (error) {
-            console.error("使用用户配置初始化AI Agent失败:", error)
-        }
+    if (!config) {
+        messages.value.push({
+            role: "assistant",
+            content: t("ai-chat.noConfigMessage", {
+                hasUserConfig: false,
+            }),
+        })
+        return
     }
 
-    // 如果用户没有配置API密钥，尝试使用服务端代理（该接口按登录账号计费，凭证就是登录令牌）
-    const userStore = useUserStore()
-    if (userStore.jwtToken) {
-        try {
-            const proxyConfig = {
-                base_url: `${env.apiEndpoint}/api/v1`,
-                // OpenAI SDK 会把它发成 Authorization: Bearer <jwtToken>，服务端据此识别账号并扣额度
-                api_key: userStore.jwtToken,
-                default_model: "deepseek-flash",
-                default_temperature: settingStore.aiTemperature || 0.6,
-                default_max_tokens: settingStore.aiMaxTokens || DEFAULT_AI_MAX_TOKENS,
-                timeout: 30000,
-                max_retries: 3,
-                system_prompt: "", // BuildAgent会设置
-                mcp_server_url: "",
-                mcp_server_port: 0,
-            }
-            agent = new BuildAgent(proxyConfig, charSettings, selectedChar, inv)
-            console.log("使用服务端代理初始化AI Agent")
-            return
-        } catch (error) {
-            console.error("使用代理初始化AI Agent失败:", error)
-        }
-    }
-
-    // 都没有配置
-    messages.value.push({
-        role: "assistant",
-        content: t("ai-chat.noConfigMessage", {
-            hasUserConfig,
-        }),
-    })
+    agent = new BuildAgent(
+        {
+            ...config,
+            timeout: config.timeout ?? 30000,
+            max_retries: config.max_retries ?? 3,
+            default_max_tokens: config.default_max_tokens ?? (settingStore.aiMaxTokens || DEFAULT_AI_MAX_TOKENS),
+        },
+        charSettings,
+        selectedChar,
+        inv
+    )
 }
+
+// 设置或登录状态变化时同步上游配置（换密钥 / 登录 / 退出都要重建传输）
+watchAgentUpstream(config => agent?.updateConfig(config))
 
 // 监听角色切换
 watch(selectedChar, async () => {
     if (agent && isOpen.value) {
-        agent.updateSystemPrompt(charSettings.value, selectedChar.value)
+        agent.updateHost(charSettings, selectedChar)
     }
     if (isOpen.value) {
         await loadPersistedChat()
@@ -317,23 +230,151 @@ function closeChat() {
     isOpen.value = false
 }
 
-// 发送消息
+/**
+ * 把一条工具痕迹渲染成一行过程说明
+ * @param trace 工具痕迹
+ * @returns 展示文本
+ */
+function describeTrace(trace: { label: string; summary?: string; status: string }): string {
+    return trace.summary ? `${trace.label} · ${trace.summary}` : trace.label
+}
+
+/**
+ * 组装 Agent 回调：把流式增量、工具痕迹与思考写进当前助手消息
+ * @param messageIndex 目标消息下标
+ * @returns Agent 回调集合
+ */
+function createCallbacks(messageIndex: number) {
+    return {
+        onDelta: (text: string, type: "reasoning" | "content") => {
+            const message = messages.value[messageIndex]
+
+            if (type === "reasoning") {
+                message.reasoning = `${message.reasoning ?? ""}${text}`
+            } else {
+                message.content += text
+            }
+            scrollToBottom()
+        },
+        onToolTrace: (trace: AgentToolTrace) => {
+            const message = messages.value[messageIndex]
+
+            if (!Array.isArray(message.traces)) {
+                message.traces = []
+            }
+            const line = describeTrace(trace)
+            const exists = message.traces.findIndex(item => item.startsWith(trace.label))
+
+            if (exists >= 0) {
+                message.traces[exists] = line
+            } else {
+                message.traces.push(line)
+            }
+            scrollToBottom()
+        },
+    }
+}
+
+/**
+ * 运行一轮问答（含工具单轮的多次挂起续跑）
+ * @param userMessage 用户输入
+ */
+async function runAgentTurn(runner: BuildAgent, userMessage: string): Promise<void> {
+    lastFailedMessage.value = ""
+
+    const assistantIndex = messages.value.length
+    messages.value.push({ role: "assistant", content: "", reasoning: "", traces: [] })
+    await savePersistedChat()
+
+    const callbacks = createCallbacks(assistantIndex)
+    const history = messages.value
+        .slice(0, assistantIndex)
+        .filter(message => message.role === "user" || message.role === "assistant")
+        .map(message => ({ role: message.role, content: message.content }))
+
+    try {
+        // ask_user 会让一轮问答多次挂起：每次拿到提问就停下来等用户作答，答完再续跑
+        let result = await runner.run([...history, { role: "user", content: userMessage }], callbacks)
+
+        while (result.pendingAsk) {
+            pendingAsk.value = result.pendingAsk.payload
+            await savePersistedChat()
+            await new Promise<void>(resolve => {
+                pendingResolver = resolve
+            })
+            result = pendingAnswer.skipped ? await runner.skipAsk(callbacks) : await runner.answerAsk(pendingAnswer, callbacks)
+        }
+
+        messages.value[assistantIndex].content = result.reply || messages.value[assistantIndex].content
+        collapseReasoning(assistantIndex)
+        await savePersistedChat()
+    } finally {
+        pendingAsk.value = null
+        pendingResolver = null
+    }
+}
+
+/**
+ * 挂起中的ask_user作答：选了某个选项即用该选项作答
+ * @param questionId 题号
+ * @param optionId 选项 id
+ */
+function answerAskOption(questionId: string, optionId: string): void {
+    submitAskAnswer([{ questionId, optionIds: [optionId], custom: "" }])
+}
+
+/**
+ * 挂起中的ask_user作答：自由输入
+ * @param text 用户输入的文本
+ */
+function answerAskCustom(text: string): void {
+    const first = pendingAsk.value?.questions[0]
+
+    if (!first) {
+        return
+    }
+    submitAskAnswer([{ questionId: first.id, optionIds: [], custom: text }])
+}
+
+/**
+ * 提交ask_user回答并唤醒挂起中的循环
+ * @param answers 逐题回答
+ */
+function submitAskAnswer(answers: AskUserResponse["answers"]): void {
+    const request = pendingAsk.value
+
+    if (!request) {
+        return
+    }
+
+    pendingAnswer = { requestId: request.id, answers }
+    pendingAsk.value = null
+    pendingResolver?.()
+}
+
+/**
+ * 发送一条消息（或重试上一条失败的消息）
+ * @param retryMessage 重试时的原始消息；为空表示正常输入
+ */
 async function sendMessage(retryMessage = "") {
     if (!inputMessage.value.trim() && !retryMessage) return
     if (isLoading.value) return
 
     const userMessage = retryMessage || inputMessage.value.trim()
 
-    if (!retryMessage) {
-        messages.value.push({
-            role: "user",
-            content: userMessage,
-        })
+    // 有挂起提问时，输入框的内容按「自由作答」提交，而不是当成新一轮提问
+    if (pendingAsk.value) {
+        answerAskCustom(userMessage)
         inputMessage.value = ""
-        await savePersistedChat()
+        return
     }
 
-    lastFailedMessage.value = "" // 清除之前的失败消息
+    messages.value.push({
+        role: "user",
+        content: userMessage,
+    })
+    inputMessage.value = ""
+
     isLoading.value = true
 
     try {
@@ -345,83 +386,16 @@ async function sendMessage(retryMessage = "") {
             throw new Error(t("ai-chat.assistantNotInitialized"))
         }
 
-        // 流式响应
-        let assistantMessage = ""
-        let reasoningMessage = ""
-        messages.value.push({
-            role: "assistant",
-            content: "",
-            reasoning: "",
-        })
-        await savePersistedChat()
-
-        const messageIndex = messages.value.length - 1
-        let nextPrompt = createAutomationPrompt(userMessage)
-        let automationDone = false
-
-        for (let round = 1; round <= MAX_AUTOMATION_ROUNDS; round++) {
-            let roundContent = ""
-
-            if (round > 1) {
-                assistantMessage += `\n\n${t("ai-chat.automationRoundTag", { round })}\n`
-                messages.value[messageIndex].content = sanitizeAutomationTags(assistantMessage)
-            }
-
-            await agent.streamChat([{ role: "user", content: nextPrompt }], (chunk, type) => {
-                if (type === "reasoning") {
-                    // 思考过程
-                    reasoningMessage += chunk
-                    messages.value[messageIndex].reasoning = reasoningMessage
-                } else if (type === "tool") {
-                    // 工具调用过程
-                    reasoningMessage += `${chunk}\n`
-                    messages.value[messageIndex].reasoning = reasoningMessage
-                } else {
-                    // 正常回复
-                    assistantMessage += chunk
-                    roundContent += chunk
-                    messages.value[messageIndex].content = sanitizeAutomationTags(assistantMessage)
-                }
-                scrollToBottom()
-            })
-            await savePersistedChat()
-
-            const status = detectAutomationStatus(roundContent)
-            if (status === "done" || (status === "unknown" && isAutomationLikelyDone(roundContent))) {
-                automationDone = true
-                break
-            }
-
-            if (round < MAX_AUTOMATION_ROUNDS) {
-                nextPrompt = createAutomationContinuePrompt(round + 1)
-            }
-        }
-
-        messages.value[messageIndex].content = sanitizeAutomationTags(assistantMessage)
-
-        if (!automationDone) {
-            const warning = t("ai-chat.automationIncompleteWarning")
-            messages.value[messageIndex].content = messages.value[messageIndex].content
-                ? `${messages.value[messageIndex].content}\n\n${warning}`
-                : warning
-        }
-
-        // 生成完成后，默认折叠思考过程
-        if (reasoningMessage) {
-            collapseReasoning(messageIndex)
-        }
-        await savePersistedChat()
+        await runAgentTurn(agent, userMessage)
     } catch (error) {
         console.error("发送消息失败", error)
         lastFailedMessage.value = userMessage // 保存失败的消息
 
-        // 生成友好的错误消息
         let errorMessage = t("ai-chat.error.generic")
 
         if (error instanceof Error) {
             const errorMsg = error.message.toLowerCase()
 
-            // 根据错误类型提供具体的解决方案
             if (errorMsg.includes("api密钥") || errorMsg.includes("api key") || errorMsg.includes("401")) {
                 errorMessage = t("ai-chat.error.apiKey")
             } else if (
@@ -435,20 +409,13 @@ async function sendMessage(retryMessage = "") {
                 errorMessage = t("ai-chat.error.timeout")
             } else if (errorMsg.includes("rate limit") || errorMsg.includes("请求过多") || errorMsg.includes("429")) {
                 errorMessage = t("ai-chat.error.rateLimit")
-            } else if (errorMsg.includes("private member")) {
-                errorMessage = t("ai-chat.error.sdk")
             } else {
-                // 显示原始错误消息（但简化）
                 errorMessage = t("ai-chat.error.requestFailed", { message: error.message })
             }
         } else {
             errorMessage = t("ai-chat.error.unknown")
         }
 
-        // 添加重试提示
-        errorMessage += `\n\n${RETRY_TAG}`
-
-        // 更新现有的空消息或添加新错误消息
         const lastMessage = messages.value[messages.value.length - 1]
         if (lastMessage && lastMessage.role === "assistant" && lastMessage.content === "") {
             lastMessage.content = errorMessage
@@ -485,7 +452,7 @@ function toggleReasoning(index: number) {
     collapsedReasoning.value = new Set(collapsedReasoning.value)
 }
 
-// 重试发送消息
+// 重试发送消息（错误气泡上的「重试」按钮）
 async function retryMessage() {
     if (lastFailedMessage.value) {
         await sendMessage(lastFailedMessage.value)
@@ -501,12 +468,21 @@ function handleKeyPress() {
 async function clearChat() {
     messages.value = []
     collapsedReasoning.value = new Set()
+    pendingAsk.value = null
+
+    // 有挂起的 ask_user 时先把循环唤醒：否则等待中的那一轮会永远停在 await 上
+    if (pendingResolver) {
+        pendingAnswer = { requestId: pendingAnswer.requestId, answers: [], skipped: true }
+        pendingResolver()
+        pendingResolver = null
+    }
+
+    if (agent) {
+        agent.clearPending()
+    }
+
     await clearPersistedChat()
     await ensureWelcomeMessage()
-    if (agent) {
-        // 重新初始化agent以清除上下文
-        agent = null
-    }
 }
 </script>
 
@@ -571,6 +547,13 @@ async function clearChat() {
                         "
                     >
                         <div class="whitespace-pre-wrap text-sm wrap-break-word select-text!">
+                            <!-- 工具调用过程 -->
+                            <template v-if="message.traces?.length && message.role === 'assistant'">
+                                <ul class="mb-2 space-y-0.5 text-[11px] text-base-content/60 tabular-nums">
+                                    <li v-for="(trace, traceIndex) in message.traces" :key="traceIndex">· {{ trace }}</li>
+                                </ul>
+                            </template>
+
                             <!-- 显示思考过程 -->
                             <template v-if="message.reasoning && message.role === 'assistant'">
                                 <div class="mb-2">
@@ -599,29 +582,8 @@ async function clearChat() {
                                 </div>
                             </template>
 
-                            <!-- 显示错误消息和重试按钮 -->
-                            <template v-if="message.content.includes(RETRY_TAG) && message.role === 'assistant'">
-                                <div>{{ message.content.replace(RETRY_TAG, "") }}</div>
-                                <button class="btn btn-sm btn-primary mt-2" :disabled="isLoading" @click="retryMessage">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="h-4 w-4 mr-1"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                        />
-                                    </svg>
-                                    {{ $t("ai-chat.retry") }}
-                                </button>
-                            </template>
                             <!-- 普通消息 -->
-                            <template v-else>
+                            <template v-if="message.content">
                                 {{ message.content }}
                             </template>
                             <!-- 加载动画 -->
@@ -632,6 +594,27 @@ async function clearChat() {
                         </div>
                     </div>
                 </div>
+
+                <!-- 等待用户作答的提问卡片 -->
+                <div v-if="pendingAsk" class="flex justify-start">
+                    <div class="max-w-[85%] rounded-2xl rounded-bl-sm px-4 py-3 bg-base-100 border border-primary/30">
+                        <div v-if="pendingAsk.title" class="text-sm font-semibold mb-2">{{ pendingAsk.title }}</div>
+                        <div v-for="question in pendingAsk.questions" :key="question.id" class="mb-2">
+                            <div class="text-xs text-base-content/80 mb-1">{{ question.header }}</div>
+                            <div class="flex flex-wrap gap-1">
+                                <button
+                                    v-for="option in question.options"
+                                    :key="option.id"
+                                    class="btn btn-xs btn-outline"
+                                    @click="answerAskOption(question.id, option.id)"
+                                >
+                                    {{ option.label }}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-[11px] text-base-content/50">{{ $t("ai-chat.askHint") }}</div>
+                    </div>
+                </div>
             </div>
 
             <!-- 输入区域 -->
@@ -640,9 +623,9 @@ async function clearChat() {
                     <input
                         v-model="inputMessage"
                         type="text"
-                        :placeholder="$t('ai-chat.inputPlaceholder')"
+                        :placeholder="pendingAsk ? $t('ai-chat.askInputPlaceholder') : $t('ai-chat.inputPlaceholder')"
                         class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                        :disabled="isLoading"
+                        :disabled="isLoading && !pendingAsk"
                         @keyup.enter="handleKeyPress"
                     />
                     <button class="btn btn-primary btn-sm" :disabled="isLoading || !inputMessage.trim()" @click="handleKeyPress">
@@ -652,6 +635,11 @@ async function clearChat() {
                     </button>
                 </div>
                 <div class="text-xs text-base-content/60 mt-2">{{ $t("ai-chat.tip") }}</div>
+                <div v-if="lastFailedMessage" class="mt-2">
+                    <button class="btn btn-xs btn-outline" :disabled="isLoading" @click="retryMessage">
+                        {{ $t("ai-chat.retry") }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>

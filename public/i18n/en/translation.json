@@ -349,6 +349,8 @@
         "user": "User"
     },
     "ai-chat": {
+        "askHint": "Pick an option, or type your answer in the input box.",
+        "askInputPlaceholder": "Type your answer…",
         "assistantNotInitialized": "AI assistant is not initialized. Please configure AI settings first.",
         "automationContinuePrompt": "Continue the previous unfinished automation fitting workflow (round {{round}}).\nRequirements:\n1. Keep calling the necessary tools to move the workflow forward.\n2. When finished, output {{doneTag}} on its own line.\n3. If not finished, output {{continueTag}} on its own line.",
         "automationIncompleteWarning": "⚠️ The workflow was not confirmed complete within the expected rounds. You can send \"continue\" to keep going.",
@@ -3742,8 +3744,6 @@
         "aiModelName": "Model Name",
         "aiModelNameTip": "Select AI model to use",
         "aiReset": "Reset AI Settings",
-        "aiTemperature": "Temperature",
-        "aiTemperatureTip": "Control randomness of generated content (0-1)",
         "aiTestConnection": "Test Connection",
         "appearance": "Appearance",
         "backgroundBlur": "Background Blur",

@@ -25,7 +25,7 @@ import {
     type AgentTransportOptions,
     type AgentWireMessage,
     resolveMessagesEndpoint,
-} from "./agent-wire"
+} from "./wire"
 
 /** Messages 用户轮的写入块。 */
 type MessagesInputBlock =

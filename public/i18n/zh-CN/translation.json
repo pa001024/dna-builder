@@ -354,6 +354,8 @@
         "user": "用户"
     },
     "ai-chat": {
+        "askHint": "点选项作答，或在输入框里直接输入你的答案。",
+        "askInputPlaceholder": "输入你的答案…",
         "assistantNotInitialized": "AI助手未初始化，请先配置AI设置",
         "automationContinuePrompt": "继续执行上一轮未完成的自动化配装流程（第{{round}}轮）。\n要求：\n1. 继续调用必要工具推进流程。\n2. 完成时输出 {{doneTag}}。\n3. 未完成时输出 {{continueTag}}。",
         "automationIncompleteWarning": "⚠️ 未在预期轮次内确认流程完成。你可以继续发送\"继续\"让我接着跑。",
@@ -3739,8 +3741,6 @@
         "aiModelName": "模型名称",
         "aiModelNameTip": "选择要使用的AI模型",
         "aiReset": "重置AI设置",
-        "aiTemperature": "Temperature",
-        "aiTemperatureTip": "控制生成内容的随机性(0-1)",
         "aiTestConnection": "测试连接",
         "appearance": "外观设置",
         "backgroundBlur": "底图模糊度",

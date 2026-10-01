@@ -347,6 +347,8 @@
         "user": "Utilisateur"
     },
     "ai-chat": {
+        "askHint": "Choisissez une option, ou saisissez votre réponse dans le champ.",
+        "askInputPlaceholder": "Saisissez votre réponse…",
         "assistantNotInitialized": "L’assistant IA n’est pas initialisé. Veuillez d’abord configurer les paramètres IA.",
         "automationContinuePrompt": "Continuez le flux de montage automatisé inachevé de la ronde précédente (tour {{round}}).\nExigences :\n1. Continuez d’appeler les outils nécessaires pour faire avancer le flux.\n2. Une fois terminé, affichez {{doneTag}} sur une ligne séparée.\n3. Si ce n’est pas terminé, affichez {{continueTag}} sur une ligne séparée.",
         "automationIncompleteWarning": "⚠️ Le flux n’a pas été confirmé comme terminé dans les tours attendus. Vous pouvez envoyer \"continue\" pour reprendre.",
@@ -3759,8 +3761,6 @@
         "aiModelName": "Nom du modèle",
         "aiModelNameTip": "Sélectionnez le modèle IA à utiliser",
         "aiReset": "Réinitialiser les paramètres IA",
-        "aiTemperature": "Température",
-        "aiTemperatureTip": "Contrôlez le caractère aléatoire du contenu généré (0-1)",
         "aiTestConnection": "Tester la connexion",
         "appearance": "Apparence",
         "backgroundBlur": "Flou du fond",

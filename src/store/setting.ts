@@ -55,15 +55,14 @@ export const useSettingStore = defineStore("setting", {
             windowTrasnparent: useLocalStorage("setting_window_trasnparent", false),
             lang: useLocalStorage("setting_lang", navigator.language),
             // AI大模型设置
-            aiBaseUrl: useLocalStorage("ai_base_url", "https://open.bigmodel.cn/api/paas/v4/"),
-            aiApiKey: useLocalStorage("ai_api_key", ""),
-            aiModelName: useLocalStorage("ai_model_name", "glm-4.6v-flash"),
-            aiMaxTokens: useLocalStorage("ai_max_tokens", 1024),
-            aiTemperature: useLocalStorage("ai_temperature", 0.6),
+            aiBaseUrl: useLocalStorage("ai_base_url", "", { writeDefaults: false }),
+            aiApiKey: useLocalStorage("ai_api_key", "", { writeDefaults: false }),
+            aiModelName: useLocalStorage("ai_model_name", "", { writeDefaults: false }),
+            aiMaxTokens: useLocalStorage("ai_max_tokens", DEFAULT_AI_MAX_TOKENS, { writeDefaults: false }),
             // 皎皎角
-            dnaUserId: useLocalStorage("setting_user_id", 0),
-            dnaUserUID: useLocalStorage("setting_user_uid", ""),
-            showAIChat: useLocalStorage("setting_show_ai_chat", false),
+            dnaUserId: useLocalStorage("setting_user_id", 0, { writeDefaults: false }),
+            dnaUserUID: useLocalStorage("setting_user_uid", "", { writeDefaults: false }),
+            showAIChat: useLocalStorage("setting_show_ai_chat", false, { writeDefaults: false }),
             // 上次刷新时间（秒）
             lastCapInterval: useLocalStorage("last_cap_interval", 0),
             // 自动签到设置
@@ -303,7 +302,6 @@ export const useSettingStore = defineStore("setting", {
                 api_key: this.aiApiKey,
                 base_url: this.aiBaseUrl,
                 default_model: this.aiModelName,
-                default_temperature: this.aiTemperature,
                 default_max_tokens: this.aiMaxTokens,
             }
         },
@@ -319,15 +317,11 @@ export const useSettingStore = defineStore("setting", {
         setAiMaxTokens(maxTokens: number) {
             this.aiMaxTokens = maxTokens
         },
-        setAiTemperature(temperature: number) {
-            this.aiTemperature = temperature
-        },
         resetAiSettings() {
             this.aiBaseUrl = "https://open.bigmodel.cn/api/paas/v4/"
             this.aiApiKey = ""
             this.aiModelName = "glm-4.6v-flash"
             this.aiMaxTokens = DEFAULT_AI_MAX_TOKENS
-            this.aiTemperature = 0.6
         },
         async getCurrentUser() {
             const user = await db.dnaUsers.get(this.dnaUserId)

@@ -224,6 +224,8 @@ export interface BuildAgentChatMessage {
     role: "user" | "assistant"
     content: string
     reasoning?: string
+    /** 本条回复的工具调用过程（已格式化为单行文本，仅用于展示） */
+    traces?: string[]
 }
 
 export interface BuildAgentChat {

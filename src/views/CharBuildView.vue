@@ -2118,7 +2118,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         @switch-mode="buildViewMode = 'pro'"
         @use-build="applyLoadedSettings"
     />
-    <div v-else class="h-full flex flex-col relative">
+    <div v-else data-agent-scope="page" data-agent-page="char-build" class="h-full flex flex-col relative">
         <!-- 背景图 -->
         <div
             class="inset-0 absolute opacity-40"
@@ -2178,6 +2178,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         <span class="hidden sm:inline">{{ $t("char-build.simulator") }}</span>
                     </button>
                     <button
+                        data-agent="open-auto-build"
                         class="btn btn-sm btn-secondary h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
                         @click="autobuild_model_show = true"
                     >
@@ -2275,7 +2276,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
         </div>
         <div class="flex-1 flex flex-col sm:flex-row overflow-y-auto sm:overflow-hidden">
             <!-- 侧边栏 -->
-            <ScrollArea id="char-build-scroll1" class="sm:w-92 flex-none flex flex-col gap-2 p-2">
+            <ScrollArea id="char-build-scroll1" data-agent-scope="sidebar" class="sm:w-92 flex-none flex flex-col gap-2 p-2">
                 <div class="flex flex-col gap-4">
                     <div data-tour="char-tabs" class="flex m-auto gap-2 overflow-x-auto pb-2">
                         <div v-for="tab in charTabs" :key="tab.name" class="flex items-center gap-2 shrink-0">
@@ -2704,6 +2705,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         :macros="exprMacros"
                                         :placeholder="$t('char-build.damage')"
                                         data-expr-drop="target-function"
+                                        data-agent="target-function"
                                         @click="handleExprDropClick('target-function')"
                                     />
                                     <div
@@ -2742,7 +2744,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             <div v-if="charBuild.validateAST(targetFunction)" class="flex text-xs items-center text-red-500">
                                 {{ charBuild.validateAST(targetFunction) }}
                             </div>
-                            <div v-else data-tour="damage-result" class="flex justify-between items-center p-1">
+                            <div v-else data-tour="damage-result" data-agent="damage-result" class="flex justify-between items-center p-1">
                                 <div class="text-sm text-base-content/80">{{ charSettings.baseName }}</div>
                                 <DamageShow :value="charBuild.calculate()" />
                             </div>
@@ -2751,7 +2753,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 </div>
             </ScrollArea>
             <!-- 正文 -->
-            <ScrollArea id="char-build-scroll2" class="sm:flex-1 flex-none">
+            <ScrollArea id="char-build-scroll2" data-agent-scope="main" class="sm:flex-1 flex-none">
                 <div class="p-2 space-y-4">
                     <!-- 配装分享 -->
                     <CollapsibleSection

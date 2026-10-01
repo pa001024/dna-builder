@@ -20,7 +20,7 @@ import type {
     AgentTransport,
     AgentTransportOptions,
     AgentWireMessage,
-} from "./agent-wire"
+} from "./wire"
 
 /** 流式增量里工具调用的分片形态。 */
 interface ChatToolCallDelta {

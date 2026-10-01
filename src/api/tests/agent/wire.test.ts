@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { parseToolArguments, resolveAgentProtocol, resolveChatEndpoint, resolveMessagesEndpoint } from "@/api/agent-wire"
+import { parseToolArguments, resolveAgentProtocol, resolveChatEndpoint, resolveMessagesEndpoint } from "@/api/agent/wire"
 
 /**
  * 线协议选择的单元测试。

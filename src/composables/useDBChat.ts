@@ -1,11 +1,8 @@
 import i18next from "i18next"
-import { computed, ref, watch } from "vue"
+import { computed, ref } from "vue"
 import { DBAgent, type DBAgentCallbacks, type DBAgentHistoryMessage, type DBAgentRunResult, type DBAgentToolTrace } from "@/api/dbAgent"
-import type { OpenAIConfig } from "@/api/openai"
-import { env } from "@/env"
 import { type Conversation, db, type Message, type MessageReasoning, type UConversation, type UMessage } from "@/store/db"
-import { useSettingStore } from "@/store/setting"
-import { useUserStore } from "@/store/user"
+import { resolveSharedAgentUpstream, watchAgentUpstream } from "@/utils/agent-upstream"
 import { type ChatImage, MAX_CHAT_IMAGES } from "@/utils/chat-image"
 import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
 import { formatAskUserResponse, hasAskAnswer } from "@/utils/db-ask-user"
@@ -32,43 +29,13 @@ const CONVERSATION_NAME_LENGTH = 18
  */
 const MAX_IMAGE_HISTORY_TURNS = 2
 
-/** 服务端代理使用的模型（服务端也会强制覆盖成同一个，这里只是让请求体看起来一致） */
-const PROXY_MODEL = "deepseek-flash"
-
 /**
  * 资料库对话组合式函数。
  * @returns 会话状态与操作方法
  */
 export function useDBChat() {
-    const setting = useSettingStore()
-    const user = useUserStore()
-
-    /**
-     * 解析资料检索 Agent 的运行配置。
-     * 优先用设置页里用户自己的 AI 密钥；没有密钥时回退到服务端代理
-     * （`/api/v1` 按登录账号计费，每人每天 0.5 元，凭证就是登录令牌）。
-     * @returns 可用配置；既没有密钥又未登录时返回 null（此时无法发起检索）
-     */
-    function resolveAgentConfig(): Partial<OpenAIConfig> | null {
-        if (setting.aiApiKey?.trim()) {
-            return setting.getOpenAIConfig()
-        }
-
-        if (!user.jwtToken) {
-            return null
-        }
-
-        return {
-            api_key: user.jwtToken,
-            base_url: `${env.apiEndpoint}/api/v1`,
-            default_model: PROXY_MODEL,
-            default_temperature: setting.aiTemperature,
-            default_max_tokens: setting.aiMaxTokens,
-        }
-    }
-
     // 没有可用配置时也先建一个空密钥实例，真正的拦截放在 send() 里给出可操作的提示
-    const agent = new DBAgent(resolveAgentConfig() ?? { api_key: "" })
+    const agent = new DBAgent(resolveSharedAgentUpstream() ?? { api_key: "" })
 
     /** 会话列表（按更新时间倒序） */
     const conversations = ref<Conversation[]>([])
@@ -361,9 +328,9 @@ export function useDBChat() {
 
         if (result.pendingAsk) {
             // 挂起：记下提问与续跑所需的现场，界面据此展示提问卡片
-            pendingAsk.value = result.pendingAsk.request
+            pendingAsk.value = result.pendingAsk.payload
             pendingAskLive.value = true
-            assistantMessage.pendingAsk = result.pendingAsk.request
+            assistantMessage.pendingAsk = result.pendingAsk.payload
             pendingAssistant = target
 
             await persistAssistant(assistantId, assistantMessage)
@@ -467,7 +434,7 @@ export function useDBChat() {
 
         try {
             // 既没有自己的密钥又未登录时服务端代理不可用，直接给出可操作提示，不打无谓的请求
-            if (!resolveAgentConfig()) {
+            if (!resolveSharedAgentUpstream()) {
                 throw new Error(i18next.t("dbAgent.error.noConfig"))
             }
 
@@ -562,7 +529,7 @@ export function useDBChat() {
         const startedAt = Date.now()
 
         try {
-            if (!resolveAgentConfig()) {
+            if (!resolveSharedAgentUpstream()) {
                 throw new Error(i18next.t("dbAgent.error.noConfig"))
             }
 
@@ -617,13 +584,7 @@ export function useDBChat() {
     }
 
     // 设置或登录状态变化时同步 Agent 配置（换账号 / 登录 / 退出都要重新解析代理凭证）
-    watch(
-        () => [setting.aiApiKey, setting.aiBaseUrl, setting.aiModelName, setting.aiTemperature, setting.aiMaxTokens, user.jwtToken],
-        () => {
-            // 解析不出可用配置时写入空密钥，让 run() 给出「未配置」而不是继续用旧令牌
-            agent.updateConfig(resolveAgentConfig() ?? { api_key: "" })
-        }
-    )
+    watchAgentUpstream(config => agent.updateConfig(config))
 
     void loadConversations()
 

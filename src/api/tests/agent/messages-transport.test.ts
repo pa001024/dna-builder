@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import type { AgentRoundRequest } from "@/api/agent-wire"
-import { createMessagesTransport } from "@/api/messages-transport"
+import { createMessagesTransport } from "@/api/agent/messages-transport"
+import type { AgentRoundRequest } from "@/api/agent/wire"
 
 /**
  * Messages 传输的集成测试。
