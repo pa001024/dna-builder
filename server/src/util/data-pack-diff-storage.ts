@@ -1,6 +1,13 @@
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
-import { isObjectStorageConfigured, putObject } from "./object-storage"
+import {
+    getActiveBackends,
+    isObjectStorageConfigured,
+    listObjectKeys,
+    putObject,
+    putObjectToBackend,
+    readObjectBytes,
+} from "./object-storage"
 
 /**
  * 数据包差分补丁的对象存储工具（OSS + R2 双写）。
@@ -11,11 +18,14 @@ import { isObjectStorageConfigured, putObject } from "./object-storage"
  * 基址 `https://cdn.dna-builder.cn/data-pack/` → key `data-pack/diff/<name>.hdiff`
  * → 公开地址 `https://cdn.dna-builder.cn/data-pack/diff/<name>.hdiff`。
  * 配置来自环境变量（与 upload.ts / mod-storage.ts 一致）：OSS_* 与 R2_* 两套，
- * 写入时同时落两端（OSS 主、R2 从）。
+ * 写入时同时落两端（OSS 主、R2 从）；历史单端遗留由 syncDataPackDiffBackends 补齐。
  */
 
 /** 差分补丁在数据包基址下的子目录。 */
 const DIFF_DIR_NAME = "diff"
+
+/** 差分补丁的对象内容类型。 */
+const DIFF_CONTENT_TYPE = "application/octet-stream"
 
 /**
  * @description 判断对象存储是否已配置齐全，缺少凭证时镜像功能直接跳过。
@@ -60,7 +70,7 @@ export async function uploadDataPackDiffPatch(patchFile: string, patchName: stri
         throw new Error("差分内容不能为空")
     }
     const objectKey = getDataPackDiffObjectKey(packageBaseUrl, patchName)
-    await putObject(objectKey, bytes, "application/octet-stream")
+    await putObject(objectKey, bytes, DIFF_CONTENT_TYPE)
     return new URL(patchName, getDataPackDiffBaseUrl(packageBaseUrl)).href
 }
 
@@ -71,4 +81,75 @@ export async function uploadDataPackDiffPatch(patchFile: string, patchName: stri
  */
 export function getDataPackDiffRecordPath(patchFile: string): string {
     return join(`${patchFile}.upload.json`)
+}
+
+/**
+ * @description 计算需要补传的差分副本计划：对每个 key 找出缺少它的端，并从已存在的端里挑一个源。
+ * 目录占位对象（key 以 / 结尾）不是真实补丁，跳过。
+ * @param keysByBackend 各端前缀下的 key 集合（按端 label 索引）
+ * @returns 每条补传计划：key、缺失端 label 列表、读取源 label
+ */
+export function planDiffReplicaRepair(keysByBackend: Map<string, Set<string>>): { key: string; missing: string[]; source: string }[] {
+    const labels = [...keysByBackend.keys()]
+    const allKeys = new Set<string>()
+    for (const keys of keysByBackend.values()) {
+        for (const key of keys) {
+            allKeys.add(key)
+        }
+    }
+
+    const plan: { key: string; missing: string[]; source: string }[] = []
+    for (const key of allKeys) {
+        if (key.endsWith("/")) continue
+        const missing = labels.filter(label => !keysByBackend.get(label)?.has(key))
+        if (!missing.length) continue
+        const source = labels.find(label => keysByBackend.get(label)?.has(key))
+        if (!source) continue
+        plan.push({ key, missing, source })
+    }
+    return plan
+}
+
+/**
+ * @description 校验并补齐 diff/ 前缀下各存储端的缺失副本。
+ * putObject 的从端写入只记日志，历史数据也可能只用单端上传过；这里逐端列出 key，
+ * 把只存在于部分端的补丁从有的一端复制到缺失端，保证差分与数据包本体一样是双源。
+ * @param packageBaseUrl 数据包官方基址，用于推导 diff/ 前缀
+ * @returns 校验与补齐统计；只配置了单端时不做事
+ */
+export async function syncDataPackDiffBackends(packageBaseUrl: string): Promise<{ checked: number; repaired: number }> {
+    const backends = getActiveBackends()
+    // 只配了一端时本身就是单源，没有可补齐的另一端
+    if (backends.length < 2) {
+        return { checked: 0, repaired: 0 }
+    }
+
+    const prefix = `${getDataPackDiffObjectKey(packageBaseUrl, "")}/`
+    const keysByBackend = new Map<string, Set<string>>()
+    for (const backend of backends) {
+        keysByBackend.set(backend.label, await listObjectKeys(prefix, backend))
+    }
+
+    const checked = new Set([...keysByBackend.values()].flatMap(keys => [...keys])).size
+    let repaired = 0
+
+    for (const item of planDiffReplicaRepair(keysByBackend)) {
+        const source = backends.find(backend => backend.label === item.source)
+        if (!source) continue
+        try {
+            const bytes = await readObjectBytes(item.key, source)
+            for (const label of item.missing) {
+                const target = backends.find(backend => backend.label === label)
+                if (!target) continue
+                await putObjectToBackend(target, item.key, bytes, DIFF_CONTENT_TYPE)
+                console.log(`补齐差分冗余副本 - ${item.key} -> ${label}`)
+            }
+            repaired += 1
+        } catch (error) {
+            // 单个对象补传失败不阻断其余对象，留给下次启动重试
+            console.error(`补齐差分冗余副本失败 - ${item.key}`, error)
+        }
+    }
+
+    return { checked, repaired }
 }

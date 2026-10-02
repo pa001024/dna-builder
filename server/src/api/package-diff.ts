@@ -5,6 +5,7 @@ import {
     getDataPackDiffBaseUrl,
     getDataPackDiffRecordPath,
     isDataPackDiffStorageConfigured,
+    syncDataPackDiffBackends,
     uploadDataPackDiffPatch,
 } from "../util/data-pack-diff-storage"
 
@@ -69,6 +70,24 @@ export async function whenPackageDiffIdle() {
     // 任务结束后会自行出队；循环是为了兼容「任务又排入新任务」的情况。
     while (pendingBackgroundTasks.size > 0) {
         await Promise.allSettled([...pendingBackgroundTasks.values()])
+    }
+}
+
+/**
+ * 校验并补齐各存储端的缺失差分副本，进程启动时调用一次。
+ * putObject 的从端写入只记日志，历史补丁也可能只用单端上传过；这里把只存在于
+ * 部分端的补丁复制到缺失端，保证差分与数据包本体一样是双源。失败只记日志，不影响启动。
+ */
+export async function syncDataPackDiffBackendsOnce(): Promise<void> {
+    if (!isDataPackDiffStorageConfigured()) {
+        return
+    }
+    try {
+        const packageBaseUrl = await resolveDataPackageBaseUrl({})
+        const { checked, repaired } = await syncDataPackDiffBackends(packageBaseUrl)
+        console.log(`${timestamp()} 差分冗余副本校验完成 - 共校验 ${checked} 个，补传 ${repaired} 个`)
+    } catch (error) {
+        console.error(`${timestamp()} 差分冗余副本校验失败`, error)
     }
 }
 

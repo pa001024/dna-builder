@@ -19,7 +19,7 @@
 export type ObjectPayload = Uint8Array | ArrayBuffer | Blob | string
 
 /** 单个存储后端配置。 */
-type StorageBackend = {
+export type StorageBackend = {
     /** 后端标识，用于日志与客户端缓存 */
     label: "OSS" | "R2"
     /** 完整端点：OSS 为「桶名.域名」，R2 为账号级地址 */
@@ -162,6 +162,67 @@ export function getPublicObjectUrl(objectKey: string): string {
  */
 export async function objectExists(objectKey: string): Promise<boolean> {
     return getClient().file(objectKey).exists()
+}
+
+/**
+ * @description 判断对象在指定后端上是否存在。
+ * @param objectKey 对象 key
+ * @param backend 目标后端
+ * @returns 是否存在
+ */
+export async function objectExistsOn(objectKey: string, backend: StorageBackend): Promise<boolean> {
+    return getClient(backend).file(objectKey).exists()
+}
+
+/**
+ * @description 分页列出指定后端上前缀下的全部对象 key。
+ * @param prefix 对象 key 前缀
+ * @param backend 目标后端，默认主端
+ * @returns key 集合
+ */
+export async function listObjectKeys(prefix: string, backend: StorageBackend = readBackends()[0]): Promise<Set<string>> {
+    const client = getClient(backend)
+    const keys = new Set<string>()
+    let continuationToken: string | undefined
+
+    do {
+        const page = await client.list({ prefix, maxKeys: 1000, continuationToken })
+        // 前缀下没有任何对象时 contents 为 undefined，不是空数组
+        for (const item of page.contents ?? []) {
+            keys.add(item.key)
+        }
+        continuationToken = page.isTruncated ? page.nextContinuationToken : undefined
+    } while (continuationToken)
+
+    return keys
+}
+
+/**
+ * @description 读取指定后端上的对象字节。用于把只存在于一端的对象复制到缺失端。
+ * @param objectKey 对象 key
+ * @param backend 目标后端
+ * @returns 对象字节
+ * @throws 对象不存在或读取失败时抛错
+ */
+export async function readObjectBytes(objectKey: string, backend: StorageBackend): Promise<Uint8Array> {
+    return new Uint8Array(await getClient(backend).file(objectKey).arrayBuffer())
+}
+
+/**
+ * @description 上传对象到指定单个后端（对象补传脚本用）。
+ * @param backend 目标后端
+ * @param objectKey 对象 key
+ * @param data 对象内容
+ * @param contentType 内容类型，省略时由内容与扩展名推断
+ */
+export async function putObjectToBackend(
+    backend: StorageBackend,
+    objectKey: string,
+    data: ObjectPayload,
+    contentType?: string
+): Promise<void> {
+    const options = contentType ? ({ type: contentType } as const) : undefined
+    await getClient(backend).write(objectKey, data, options)
 }
 
 /**

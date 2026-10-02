@@ -13,13 +13,14 @@ import { scheduleAiLogRetention } from "./ai-log-store"
 import { apiPlugin } from "./api"
 import { aiLogPlugin } from "./api/ai-log"
 import { modApiPlugin } from "./api/mod"
+import { syncDataPackDiffBackendsOnce } from "./api/package-diff"
 import { raceLotteryPlugin } from "./api/race-lottery"
 import { ragPlugin } from "./api/rag"
-
 import { botPlugin } from "./bot"
 import { requestIndexBuild, resolveAllowedLangs, warmCurrentFingerprints } from "./rag/build"
 import { startRagProgressUi, stopRagProgressUi } from "./rag/progress-ui"
 import { warmVectorIndex } from "./rag/search"
+import { getActiveBackends } from "./util/object-storage"
 
 const app = new Elysia()
     // 不处理文件请求 由nginx处理
@@ -48,6 +49,17 @@ const port = Number(process.env.PORT ?? "") || 8887
 
 app.listen(port)
 console.log(`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`)
+
+// 双写冗余依赖 OSS 与 R2 两端；只配一端时服务端上传会静默退化为单源，这里显式告警
+const storageBackends = getActiveBackends()
+if (storageBackends.length < 2) {
+    console.warn(
+        `⚠️ 对象存储仅配置了 ${storageBackends.map(backend => backend.label).join(" / ") || "0"} 端（需同时配置 OSS_* 与 R2_*），服务端上传将退化为单源`
+    )
+}
+
+// 启动后校验并补齐差分在各存储端的缺失副本（不阻塞启动，失败只记日志）
+void syncDataPackDiffBackendsOnce()
 
 // RAG 索引构建的固定进度区域（仅交互式终端；日志照旧在区域上方滚动）
 startRagProgressUi()

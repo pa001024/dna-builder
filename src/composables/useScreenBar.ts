@@ -1,5 +1,6 @@
+import type { WebviewWindow } from "@tauri-apps/api/webviewWindow"
 import { ref } from "vue"
-import { closeScreenBarWindow, getScreenBarWindow, openScreenBarWindow } from "@/api/screen-bar-window"
+import { closeScreenBarWindow, getScreenBarWindow, openScreenBarWindow, readScreenBarTaskbarMode } from "@/api/screen-bar-window"
 import { env } from "@/env"
 import { useSettingStore } from "@/store/setting"
 
@@ -52,14 +53,17 @@ export function useScreenBar() {
     /**
      * 对齐窗口与开关状态:窗口不可持久化(应用重启即消失),但开关可能被改过,
      * 这里把窗口状态拉回与开关一致。
+     * @param knownWindow 已查到的窗口实例;看门狗刚查过就能省掉 open/close 里的重复全量查询
      */
-    async function syncWindowWithSetting() {
+    async function syncWindowWithSetting(knownWindow?: WebviewWindow | null) {
         if (!env.isApp) return
-        const exists = (await getScreenBarWindow()) !== null
+        const exists = (knownWindow === undefined ? await getScreenBarWindow() : knownWindow) !== null
         if (setting.screenBar.enabled === exists) return
         try {
             if (setting.screenBar.enabled) {
-                await openScreenBarWindow()
+                // 窗口已存在时 openScreenBarWindow 只做 show,直接复用查到的实例,避免再查一次全量窗口
+                if (knownWindow) await knownWindow.show()
+                else await openScreenBarWindow()
             } else {
                 await closeScreenBarWindow()
             }
@@ -94,16 +98,21 @@ const TASKBAR_WATCHDOG_MS = 4000
  * 启动任务栏模式的窗口看门狗(主窗口启动时调用一次)。
  *
  * 信息条嵌入任务栏后是 Shell_TrayWnd 的子窗口,explorer 重启会连带销毁它。
- * 这里只在"已启用且任务栏模式"期间低频核对"设置开 = 窗口在",丢失即按设置重建;
- * 重建出的窗口由浮窗页自己完成嵌入。顶部悬浮模式的窗口不依赖 explorer,无需看守。
+ * 这里只在"已启用、任务栏模式、且落位方式确实是嵌入"期间低频核对"设置开 = 窗口在",
+ * 丢失即按设置重建;重建出的窗口由浮窗页自己完成嵌入。
+ *
+ * 必须按**实际落位方式**而不是配置里的 inTaskbar 开关来决定是否轮询:Win11 走的是覆盖模式,
+ * 信息条始终是顶层窗口,explorer 重启并不会销毁它,看门狗无意义却每 4 秒打一次
+ * get_all_windows IPC。顶部悬浮模式同理不需要看守。
  */
 export function startScreenBarWatchdog(): void {
     if (!env.isApp) return
     const { syncWindowWithSetting } = useScreenBar()
     window.setInterval(() => {
         const setting = useSettingStore()
-        if (setting.screenBar.enabled && setting.screenBar.inTaskbar) {
-            void syncWindowWithSetting()
-        }
+        if (!setting.screenBar.enabled || !setting.screenBar.inTaskbar) return
+        // 只有 Win10 式真实嵌入才会被 explorer 拖走;覆盖模式与未落位都跳过本轮,零 IPC
+        if (readScreenBarTaskbarMode() !== "embedded") return
+        void syncWindowWithSetting()
     }, TASKBAR_WATCHDOG_MS)
 }

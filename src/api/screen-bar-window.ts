@@ -23,6 +23,43 @@ const CREATE_TIMEOUT_MS = 5000
 /** 内容与屏幕边缘之间保留的最小间隙(逻辑像素)。 */
 const SCREEN_EDGE_GAP = 8
 
+/** 信息条窗口实际生效的任务栏落位方式。 */
+export type ScreenBarTaskbarMode = "embedded" | "overlay"
+
+/**
+ * 落位方式在 localStorage 中的键:浮窗页写入、主窗口看门狗读取。
+ *
+ * 信息条与主窗口是两个独立 webview,JS 内存不互通,只有同源 localStorage 共享。
+ * 写入方是浮窗页(它才知道 embed 的真实结果),读取方是主窗口的看门狗(见 useScreenBar)。
+ */
+const TASKBAR_MODE_STORAGE_KEY = "screen_bar_taskbar_mode"
+
+/**
+ * 读取信息条最近一次落位的实际方式。
+ *
+ * 看门狗据此判断有没有存在价值:只有"embedded"(Win10 真实嵌入,窗口是任务栏子窗口)
+ * 才会被 explorer 重启连带销毁;"overlay"(Win11)与未落位都是顶层窗口,不依赖 explorer。
+ * @returns 落位方式;从未落位过或存储损坏时返回 null
+ */
+export function readScreenBarTaskbarMode(): ScreenBarTaskbarMode | null {
+    const raw = localStorage.getItem(TASKBAR_MODE_STORAGE_KEY)
+    return raw === "embedded" || raw === "overlay" ? raw : null
+}
+
+/**
+ * 记录信息条最近一次落位的实际方式(值未变化时不写,避免浮窗页每次重排都动存储)。
+ * @param mode 新的落位方式;null 表示已脱离任务栏,清除记录
+ */
+function writeScreenBarTaskbarMode(mode: ScreenBarTaskbarMode | null): void {
+    if (readScreenBarTaskbarMode() === mode) return
+    try {
+        if (mode === null) localStorage.removeItem(TASKBAR_MODE_STORAGE_KEY)
+        else localStorage.setItem(TASKBAR_MODE_STORAGE_KEY, mode)
+    } catch (cause) {
+        console.error("记录屏幕信息条任务栏落位方式失败", cause)
+    }
+}
+
 /**
  * 查询信息条窗口是否已创建。
  * @returns 已存在返回窗口实例,否则返回 null
@@ -168,7 +205,7 @@ export async function setScreenBarIgnoreCursorEvents(target: WebviewWindow, igno
 /** 任务栏嵌入落位结果(逻辑像素,由 Rust 侧按宿主 DPI 换算后返回)。 */
 export type ScreenBarTaskbarFit = {
     /** 实际生效的显示方式:"embedded" = 任务栏子窗口(Win10),"overlay" = 覆盖在任务栏上的顶层窗口(Win11) */
-    mode: "embedded" | "overlay"
+    mode: ScreenBarTaskbarMode
     /** 窗口最终逻辑宽度(超出任务栏可用区域时被截断) */
     width: number
     /** 窗口最终逻辑高度(超出任务栏高度时被截断) */
@@ -198,11 +235,14 @@ export async function embedScreenBarInTaskbar(
 ): Promise<ScreenBarTaskbarFit | null> {
     if (!env.isApp) return null
     try {
-        return await invoke<ScreenBarTaskbarFit>("screen_bar_taskbar_embed", {
+        const fit = await invoke<ScreenBarTaskbarFit>("screen_bar_taskbar_embed", {
             label: target.label,
             width: size.width,
             height: size.height,
         })
+        // 记录真实生效的落位方式:主窗口看门狗据此决定还要不要轮询(只有 embedded 会被 explorer 拖走)
+        writeScreenBarTaskbarMode(fit.mode)
+        return fit
     } catch (cause) {
         console.error("嵌入 Windows 任务栏失败", cause)
         return null
@@ -220,6 +260,8 @@ export async function detachScreenBarFromTaskbar(target: WebviewWindow): Promise
     if (!env.isApp) return
     try {
         await invoke("screen_bar_taskbar_detach", { label: target.label })
+        // 已脱离任务栏:窗口重新变回普通顶层窗口,看门狗不再需要盯着它
+        writeScreenBarTaskbarMode(null)
     } catch (cause) {
         console.error("从 Windows 任务栏分离失败", cause)
     }
