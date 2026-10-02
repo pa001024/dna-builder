@@ -669,6 +669,7 @@
         "basic_settings": "Paramètres de base",
         "bonus_attr": "Attributs bonus",
         "boss": "Boss",
+        "buff_applicable": "S'applique à",
         "buff_list": "Liste de BUFF",
         "char": "Personnage",
         "char_attributes": "Attributs du personnage",

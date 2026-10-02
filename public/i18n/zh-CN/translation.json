@@ -635,7 +635,7 @@
     "buff-editor": {
         "copy_buff": "复制BUFF",
         "paste_buff": "粘贴BUFF",
-        "search_placeholder": "搜索商店ID/名称/商品..."
+        "search_placeholder": "搜索BUFF"
     },
     "build-compare": {
         "additional_buff_list": "额外BUFF列表",
@@ -677,6 +677,7 @@
         "basic_settings": "基本设置",
         "bonus_attr": "加成属性",
         "boss": "首领",
+        "buff_applicable": "适用于",
         "buff_list": "BUFF列表",
         "char": "角色",
         "char_attributes": "角色属性",

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { CharBuild } from "../CharBuild"
 import { createBuffFromSettings, createCharBuildFromSettings } from "../CharBuildHelper"
 import { createBuildFromSnapshot, createWorkerSnapshot } from "../CharBuildSnapshot"
+import { buffMap } from "../d"
 import { LeveledModHelper, weaponData } from "../index"
 import { LeveledBuff, LeveledChar, LeveledMod, LeveledWeapon } from "../leveled"
 import { LeveledModWithCount } from "../leveled/LeveledMod"
@@ -3112,5 +3113,194 @@ describe("空武器（近战/远程不装备）", () => {
         expect(damage).toBeTypeOf("number")
         expect(Number.isFinite(damage)).toBe(true)
         expect(damage).toBeGreaterThanOrEqual(0)
+    })
+})
+
+describe("条件BUFF（filter）", () => {
+    const buffData = buffMap.get("法露茜2溯")!
+    const rockData = buffMap.get("磐石")! // 独立增伤 -0.15，制造非零全局乘法池
+
+    /**
+     * 构造法露茜构筑。
+     * @param withBuff 是否装配法露茜2溯
+     * @returns 构筑实例
+     */
+    function createFilterBuild(withBuff: boolean) {
+        return new CharBuild({
+            char: new LeveledChar("法露茜"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            buffs: [new LeveledBuff(rockData, 1), ...(withBuff ? [new LeveledBuff(buffData, 1)] : [])],
+            melee: new LeveledWeapon(10401),
+            ranged: new LeveledWeapon(20601),
+            baseName: "潜入夜色",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "E::[暗影奔袭]伤害",
+        })
+    }
+
+    it("条件BUFF不参与全局属性汇总", () => {
+        const build = createFilterBuild(true)
+        // 全局独立增伤只含磐石 -0.15，法露茜2溯的 +100% 只作用于匹配字段
+        expect(build.calculateAttributes().独立增伤).toBeCloseTo(-0.15, 6)
+    })
+
+    it("条件BUFF只作用于名称匹配的字段", () => {
+        const without = createFilterBuild(false)
+        const withBuff = createFilterBuild(true)
+        // 独立增伤 +100%：乘法池 (1-0.15)×(1+1)-1 = 0.7，倍率 1.7/0.85 = 2
+        expect(
+            withBuff.calculateTargetFunction(undefined, "E::[暗影奔袭]伤害") /
+                without.calculateTargetFunction(undefined, "E::[暗影奔袭]伤害")
+        ).toBeCloseTo(2, 6)
+        // 名称不匹配的字段不受影响
+        expect(
+            withBuff.calculateTargetFunction(undefined, "E::[暗影一刺]伤害") /
+                without.calculateTargetFunction(undefined, "E::[暗影一刺]伤害")
+        ).toBeCloseTo(1, 6)
+    })
+
+    it("条件BUFF的加/减收益对称（乘法池属性按乘法合并）", () => {
+        const enabled = createFilterBuild(true)
+        const addIncome = createFilterBuild(false).calcIncome(new LeveledBuff(buffData, 1), false)
+        const minusIncome = enabled.calcIncome(new LeveledBuff(buffData, 1), true)
+        expect(addIncome).toBeGreaterThan(0)
+        expect(addIncome).toBeCloseTo(minusIncome, 6)
+    })
+})
+
+describe("条件BUFF（filter）- 煜明2溯", () => {
+    const yuming2sData = buffMap.get("煜明2溯")!
+
+    /**
+     * 构造煜明构筑。
+     * @param withBuff 是否装配煜明2溯
+     * @returns 构筑实例
+     */
+    function createYumingBuild(withBuff: boolean) {
+        return new CharBuild({
+            char: new LeveledChar("煜明"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            buffs: withBuff ? [new LeveledBuff(yuming2sData, 1)] : [],
+            melee: new LeveledWeapon(10401),
+            ranged: new LeveledWeapon(20601),
+            baseName: "濯暗鳞",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "Q::[酣战]伤害",
+        })
+    }
+
+    it("技能倍率乘数只作用于名称匹配的字段", () => {
+        const without = createYumingBuild(false)
+        const withBuff = createYumingBuild(true)
+        // 技能倍率乘数 0.6：[酣战]伤害 ×1.6
+        expect(
+            withBuff.calculateTargetFunction(undefined, "Q::[酣战]伤害") / without.calculateTargetFunction(undefined, "Q::[酣战]伤害")
+        ).toBeCloseTo(1.6, 6)
+        // 名称不匹配的字段不受影响
+        expect(
+            withBuff.calculateTargetFunction(undefined, "E::[星河寥落]伤害") /
+                without.calculateTargetFunction(undefined, "E::[星河寥落]伤害")
+        ).toBeCloseTo(1, 6)
+        // 全局技能倍率乘数不含条件BUFF
+        expect(withBuff.calculateAttributes().技能倍率乘数).toBe(0)
+    })
+
+    it("技能倍率乘数BUFF的加/减收益对称", () => {
+        const enabled = createYumingBuild(true)
+        const addIncome = createYumingBuild(false).calcIncome(new LeveledBuff(yuming2sData, 1), false)
+        const minusIncome = enabled.calcIncome(new LeveledBuff(yuming2sData, 1), true)
+        expect(addIncome).toBeCloseTo(minusIncome, 6)
+    })
+})
+
+describe("条件BUFF（技能限定）- 妮弗尔夫人2溯", () => {
+    const nifflerData = buffMap.get("妮弗尔夫人2溯")!
+
+    /**
+     * 构造妮弗尔夫人构筑。
+     * @param withBuff 是否装配妮弗尔夫人2溯
+     * @returns 构筑实例
+     */
+    function createNifflerBuild(withBuff: boolean) {
+        return new CharBuild({
+            char: new LeveledChar("妮弗尔夫人"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            buffs: withBuff ? [new LeveledBuff(nifflerData, 1)] : [],
+            melee: new LeveledWeapon(10401),
+            ranged: new LeveledWeapon(20601),
+            baseName: "月猎",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "E::[月猎]伤害",
+        })
+    }
+
+    it("多技能模式（|）命中任一字段即生效", () => {
+        const without = createNifflerBuild(false)
+        const withBuff = createNifflerBuild(true)
+        const ratio = (expr: string) => withBuff.calculateTargetFunction(undefined, expr) / without.calculateTargetFunction(undefined, expr)
+        // 技能伤害 0.75：[月猎]伤害 与 [日食]伤害 均应 ×1.75
+        expect(ratio("E::[月猎]伤害")).toBeCloseTo(1.75, 6)
+        expect(ratio("E::[日食]伤害")).toBeCloseTo(1.75, 6)
+        // 不匹配的字段不受影响
+        expect(ratio("攻击")).toBeCloseTo(1, 6)
+    })
+})
+
+describe("条件BUFF（技能限定）- 琳恩裂伤特性（code类）", () => {
+    const linenTraitData = buffMap.get("琳恩裂伤特性")!
+
+    /**
+     * 构造琳恩构筑。
+     * @param withBuff 是否装配琳恩裂伤特性
+     * @returns 构筑实例
+     */
+    function createLinenBuild(withBuff: boolean) {
+        return new CharBuild({
+            char: new LeveledChar("琳恩"),
+            skillLevel: 10,
+            hpPercent: 0.5,
+            resonanceGain: 2,
+            buffs: withBuff ? [new LeveledBuff(linenTraitData, 1)] : [],
+            melee: new LeveledWeapon(10401),
+            ranged: new LeveledWeapon(20601),
+            baseName: "致命绽放",
+            enemyId: 130,
+            enemyLevel: 80,
+            enemyResistance: 0.5,
+            targetFunction: "E::[裂伤]基础伤害",
+        })
+    }
+
+    it("code产生的独立增伤/攻击只作用于名称匹配的字段", () => {
+        const without = createLinenBuild(false)
+        const withBuff = createLinenBuild(true)
+        // 全局属性不含条件codeBUFF的独立增伤
+        expect(withBuff.calculateAttributes().独立增伤).toBe(0)
+        // [裂伤]基础伤害吃到独立增伤（技能威力100% → ×2）与同律攻击力增量
+        const ratio =
+            withBuff.calculateTargetFunction(undefined, "E::[裂伤]基础伤害") /
+            without.calculateTargetFunction(undefined, "E::[裂伤]基础伤害")
+        expect(ratio).toBeGreaterThan(2)
+        // 不匹配的字段不受影响
+        expect(withBuff.calculateTargetFunction(undefined, "攻击") / without.calculateTargetFunction(undefined, "攻击")).toBeCloseTo(1, 6)
+    })
+
+    it("code类条件BUFF的加/减收益对称", () => {
+        const enabled = createLinenBuild(true)
+        const addIncome = createLinenBuild(false).calcIncome(new LeveledBuff(linenTraitData, 1), false)
+        const minusIncome = enabled.calcIncome(new LeveledBuff(linenTraitData, 1), true)
+        expect(addIncome).toBeCloseTo(minusIncome, 6)
     })
 })

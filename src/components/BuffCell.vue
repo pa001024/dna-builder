@@ -22,7 +22,14 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
 </script>
 <template>
     <div class="flex">
-        <ShowProps side="top" :props="buff.getProperties()" :attr="buff.attr" :code="buff.code" :title="title">
+        <ShowProps
+            side="top"
+            :props="buff.getProperties()"
+            :attr="buff.attr"
+            :code="buff.code"
+            :applicable-skill="buff.技能"
+            :title="title"
+        >
             <div
                 class="flex-1 rounded-xs border border-base-content/10 bg-base-100/70 p-3 cursor-pointer hover:border-primary/40 transition-colors duration-200"
                 :class="{

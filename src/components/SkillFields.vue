@@ -22,7 +22,8 @@ const skillFields = computed(() => {
     if (!props.skill) return []
     if (!props.charBuild) return props.skill.getFieldsWithAttr()
     return props.skill.getFieldsWithAttr(
-        props.skill?.召唤物 ? props.charBuild.calculateWeaponAttributes(props.charBuild.meleeWeapon) : props.attributes
+        props.skill?.召唤物 ? props.charBuild.calculateWeaponAttributes(props.charBuild.meleeWeapon) : props.attributes,
+        props.charBuild.getConditionalBuffPropsList()
     )
 })
 

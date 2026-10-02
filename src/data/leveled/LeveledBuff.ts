@@ -370,6 +370,7 @@ export class LeveledBuff implements Buff {
         "pt",
         "code",
         "attr",
+        "技能",
         "_ratio",
         "_coverage",
     ])

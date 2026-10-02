@@ -668,6 +668,7 @@
         "basic_settings": "기본 설정",
         "bonus_attr": "보너스 속성",
         "boss": "보스",
+        "buff_applicable": "적용 대상",
         "buff_list": "BUFF 목록",
         "char": "캐릭터",
         "char_attributes": "캐릭터 속성",

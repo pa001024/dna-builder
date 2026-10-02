@@ -9,6 +9,7 @@ import { type DynamicMonster, LeveledMonster } from "./leveled/LeveledMonster"
 import { LeveledSkill } from "./leveled/LeveledSkill"
 import { LeveledSkillWeapon } from "./leveled/LeveledSkillWeapon"
 import { LeveledWeapon } from "./leveled/LeveledWeapon"
+import { isMultiplicativeAttr } from "./leveled/minusAttr"
 
 // 本地实现base36Pad函数，避免依赖浏览器API
 function base36Pad(num: number): string {
@@ -957,6 +958,8 @@ export class CharBuild {
         }
 
         for (const buff of this.buffs) {
+            // 条件BUFF（技能限定）只对匹配字段名的字段生效，不进全局汇总表
+            if (typeof buff.技能 === "string") continue
             accumulate(table.buffs, buff as unknown as Record<string, unknown>)
         }
 
@@ -1019,11 +1022,130 @@ export class CharBuild {
 
         let product = 1
         for (const buff of this.buffs) {
+            // 条件BUFF（技能限定）只对匹配字段名的字段生效，不参与全局乘法聚合
+            if (typeof buff.技能 === "string") continue
             const value = buff[attribute]
             if (typeof value === "number") product *= 1 + value
         }
         table.buffsMul.set(attribute, product)
         return product
+    }
+
+    /**
+     * 编译条件 BUFF 的技能名匹配模式（支持 "|" 交替多技能，如 "月猎|日食"）。
+     * @param 技能 技能名模式
+     * @returns 预编译正则；非法正则时按字面量匹配
+     */
+    private compileBuffSkillPattern(技能: string): RegExp {
+        try {
+            return new RegExp(技能)
+        } catch {
+            return new RegExp(技能.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+        }
+    }
+
+    /**
+     * 差分条件codeBUFF（带 `技能` 的动态属性 BUFF）在全局属性上产生的顶层属性增量。
+     * 以当前全局属性（不含条件codeBUFF）为基线跑一遍 code，把数值差转成可合并的增量：
+     * 乘法池属性（独立增伤系列等）存乘法因子对应的净增量，其余属性存平值差。
+     * code 对武器面板等嵌套对象的修改不参与差分（沿用全局 code 的现有口径）。
+     * @returns 条件属性列表；无条件codeBUFF时为空数组
+     */
+    private getScopedCodeBuffConditionals(): { 技能: string; pattern: RegExp; props: Record<string, number> }[] {
+        const scopedBuffs = this.dynamicBuffs.filter(b => typeof b.技能 === "string")
+        if (!scopedBuffs.length) return []
+        // 命中缓存：基线有效性随作用域属性表（MOD/武器/BUFF 增删与数值版本号）失效
+        const table = this.getBonusSourceTable()
+        if (this.scopedCodeConditionalsCache?.table === table) return this.scopedCodeConditionalsCache.entries
+
+        // 基线全局属性已不含条件codeBUFF（应用点已跳过），以其为参照差分出各 code 的增量
+        const baseAttrs = this.calculateWeaponAttributes()
+        const entries = scopedBuffs.map(buff => {
+            const 技能 = buff.技能 as string
+            const snapshot = { ...baseAttrs }
+            const result = buff.applyDynamicAttr(
+                this.char,
+                snapshot,
+                this.getAllWeapons(),
+                this.getAllWeaponsAttrs(),
+                this.enemy,
+                this.getModAttrs()
+            )
+            const props: Record<string, number> = {}
+            for (const [key, value] of Object.entries(result)) {
+                if (typeof value !== "number") continue
+                const before = (snapshot as unknown as Record<string, number | undefined>)[key]
+                if (typeof before !== "number" || value === before) continue
+                if (isMultiplicativeAttr(key)) {
+                    if (Math.abs(1 + before) < Number.EPSILON) continue
+                    props[key] = (1 + value) / (1 + before) - 1
+                } else {
+                    props[key] = value - before
+                }
+            }
+            return { 技能, pattern: this.compileBuffSkillPattern(技能), props }
+        })
+        this.scopedCodeConditionalsCache = { table, entries }
+        return entries
+    }
+
+    private scopedCodeConditionalsCache?: {
+        table: BonusSourceTable
+        entries: { 技能: string; pattern: RegExp; props: Record<string, number> }[]
+    }
+
+    /**
+     * 取当前构筑全部条件 BUFF 的字段级属性增量列表（按 技能 聚合同名条件的数值）。
+     * 供 LeveledSkill.getFieldsWithAttr 在字段值计算处（如 技能倍率乘数）应用条件 BUFF。
+     * @returns 条件属性列表；无条件 BUFF 时为空数组
+     */
+    public getConditionalBuffPropsList(): { 技能: string; pattern: RegExp; props: Record<string, number> }[] {
+        const list: { 技能: string; pattern: RegExp; props: Record<string, number> }[] = []
+        for (const buff of this.buffs) {
+            const 技能 = buff.技能
+            if (typeof 技能 !== "string") continue
+            let entry = list.find(item => item.技能 === 技能)
+            if (!entry) {
+                entry = { 技能, pattern: this.compileBuffSkillPattern(技能), props: {} }
+                list.push(entry)
+            }
+            for (const prop of buff.properties) {
+                const value = buff[prop]
+                if (typeof value !== "number" || value === 0) continue
+                if (isMultiplicativeAttr(prop)) {
+                    entry.props[prop] = (1 + (entry.props[prop] || 0)) * (1 + value) - 1
+                } else {
+                    entry.props[prop] = (entry.props[prop] || 0) + value
+                }
+            }
+        }
+        return [...list, ...this.getScopedCodeBuffConditionals()]
+    }
+
+    /**
+     * 汇总字段名匹配的条件 BUFF 属性增量。
+     * 条件 BUFF（数据带 `技能` 字段，如 法露茜2溯）不参与全局属性汇总，
+     * 只在求值字段名匹配 `技能`（支持 "|" 交替多技能）时，把其数值属性叠加进该字段的属性上下文。
+     * 乘法池属性（独立增伤系列等）按 Π(1+v) 聚合后以净增量形式返回，与 minusAttr 的乘法逆元口径一致。
+     * @param fieldName 求值的字段名（如 "[暗影奔袭]伤害"）
+     * @returns 匹配条件 BUFF 的属性增量表；无匹配时返回 undefined
+     */
+    private getConditionalBuffProps(fieldName?: string): Record<string, number> | undefined {
+        if (!fieldName) return undefined
+        let result: Record<string, number> | undefined
+        for (const entry of this.getConditionalBuffPropsList()) {
+            if (!entry.pattern.test(fieldName)) continue
+            for (const [prop, value] of Object.entries(entry.props)) {
+                if (isMultiplicativeAttr(prop)) {
+                    result = result ?? {}
+                    result[prop] = (1 + (result[prop] || 0)) * (1 + value) - 1
+                } else {
+                    result = result ?? {}
+                    result[prop] = (result[prop] || 0) + value
+                }
+            }
+        }
+        return result
     }
 
     /**
@@ -1274,6 +1396,8 @@ export class CharBuild {
             const modAttrs = this.getModAttrs()
             if (this.dynamicBuffs.length > 0) {
                 for (const b of this.dynamicBuffs) {
+                    // 条件codeBUFF（技能限定）不并入全局属性，改由字段级条件合并应用
+                    if (typeof b.技能 === "string") continue
                     const { weapon, ...rest } = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all, this.enemy, modAttrs)
                     attrs = rest
                 }
@@ -1581,6 +1705,8 @@ export class CharBuild {
             const modAttrs = this.getModAttrs()
             if (this.dynamicBuffs.length > 0) {
                 for (const b of this.dynamicBuffs) {
+                    // 条件codeBUFF（技能限定）不并入全局属性，改由字段级条件合并应用
+                    if (typeof b.技能 === "string") continue
                     attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all, this.enemy, modAttrs)
                 }
             }
@@ -2009,6 +2135,8 @@ export class CharBuild {
 
         // 添加BUFF加成
         this.buffs.forEach(buff => {
+            // 条件BUFF（技能限定）只对匹配字段名的字段生效，不参与全局减伤聚合
+            if (typeof buff.技能 === "string") return
             if (typeof buff[attribute] === "number") {
                 bonus = 1 - (1 - bonus) * (1 - buff[attribute])
             }
@@ -2986,8 +3114,10 @@ export class CharBuild {
      */
     private createAstEvalContext(inputattrs?: ReturnType<typeof this.calculateWeaponAttributes>): AstEvalContext {
         const attrs = inputattrs || this.calculateWeaponAttributes()
+        // 条件BUFF字段级增量：技能倍率乘数等属性在字段值计算处应用，需在构建字段列表时传入
+        const conditionalProps = this.getConditionalBuffPropsList()
         const skillAttrs = new Map<string, ReturnType<LeveledSkill["getFieldsWithAttr"]>>(
-            this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)])
+            this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs, conditionalProps)])
         )
         skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
         skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
@@ -3027,6 +3157,8 @@ export class CharBuild {
         scope: Map<string, number>
     ): number {
         const { attrs, weaponsMap, weaponAttrs, skillAttrs, selectedWeapon } = ctx
+        // 条件BUFF属性增量缓存：同一字段名在一次求值内只汇总一次
+        const conditionalBuffCache = new Map<string, Record<string, number> | undefined>()
         /**
          * 优先使用当前已计算出的武器属性，避免动态属性在AST求值时被基础映射覆盖。
          */
@@ -3038,8 +3170,9 @@ export class CharBuild {
             return weaponAttrs.get(key)
         }
         const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
+        const conditionalProps = this.getConditionalBuffPropsList()
         const getSkillAttr = (fieldName: string, base?: string, skillContext?: LeveledSkill) =>
-            (skillContext ? skillContext.getFieldsWithAttr(attrs) : skillAttrs?.get(base || this.baseName))?.find(v =>
+            (skillContext ? skillContext.getFieldsWithAttr(attrs, conditionalProps) : skillAttrs?.get(base || this.baseName))?.find(v =>
                 v.safeName.includes(fieldName)
             )
         type TemporaryAttributes = Record<string, number>
@@ -3146,8 +3279,30 @@ export class CharBuild {
                           昂扬: attrs.昂扬 * summonRatio,
                           背水: attrs.背水 * summonRatio,
                       }
-            if (!temporaryAttributes) return currentAttrs
-            const fieldAttrs = { ...currentAttrs }
+            // 条件BUFF（filter）：字段名命中时把属性增量合并进该字段的独立属性上下文
+            if (fieldName && !conditionalBuffCache.has(fieldName)) {
+                conditionalBuffCache.set(fieldName, this.getConditionalBuffProps(fieldName))
+            }
+            const conditionalProps = fieldName ? conditionalBuffCache.get(fieldName) : undefined
+            let scopedAttrs = currentAttrs
+            if (conditionalProps) {
+                scopedAttrs = { ...currentAttrs }
+                const writableAttrs = scopedAttrs as unknown as Record<string, number>
+                for (const [attribute, value] of Object.entries(conditionalProps)) {
+                    // 乘法池属性（独立增伤系列等）在全局以 Π(1+v) 聚合，字段级合并同样按乘法叠加
+                    if (isMultiplicativeAttr(attribute)) {
+                        if (typeof writableAttrs[attribute] !== "number") continue
+                        writableAttrs[attribute] = (1 + writableAttrs[attribute]) * (1 + value) - 1
+                        continue
+                    }
+                    // 平值属性（固定攻击/固定生命等）与临时属性同口径：映射到基础属性平值加算
+                    const targetAttribute = temporaryFlatAttributeMap[attribute] || attribute
+                    if (typeof writableAttrs[targetAttribute] !== "number") continue
+                    writableAttrs[targetAttribute] += value
+                }
+            }
+            if (!temporaryAttributes) return scopedAttrs
+            const fieldAttrs = { ...scopedAttrs }
             const writableAttrs = fieldAttrs as unknown as Record<string, number>
             const temporaryWeaponAttr = getTemporaryWeaponAttr(base, fieldName, temporaryAttributes, skillContext)
             for (const [attribute, value] of Object.entries(temporaryAttributes)) {
@@ -3198,7 +3353,8 @@ export class CharBuild {
                 weapon && weaponAttr
                     ? this.calculateWeaponDamage(
                           {
-                              ...(temporaryAttributes ? skillAttrsContext : attrs),
+                              // skillAttrsContext 已含召唤物继承/字段临时属性/条件BUFF增量；无条件BUFF时与全局 attrs 等价
+                              ...skillAttrsContext,
                               weapon: {
                                   ...weaponAttr,
                                   增伤: weaponAttr.增伤 + attackTypeDamageBonus,

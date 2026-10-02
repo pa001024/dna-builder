@@ -1,5 +1,6 @@
 import type { CharAttr, WeaponAttr } from "../CharBuild"
 import type { Skill, SkillField } from "../data-types"
+import { isMultiplicativeAttr } from "./minusAttr"
 
 export interface LeveledSkillField {
     名称: string
@@ -12,6 +13,14 @@ export interface LeveledSkillField {
     safeName: string
     /** 伤害类型标签（如 ["充盈"]）：命中该标签的伤害字段按对应类型结算 */
     tag?: string[]
+}
+
+/** 条件BUFF（技能限定）的字段级属性增量：字段名匹配 技能（支持 "|" 交替多技能）时把 props 合并进该字段的求值上下文 */
+export interface BuffFieldConditional {
+    技能: string
+    /** 预编译的技能名匹配模式 */
+    pattern: RegExp
+    props: Record<string, number>
 }
 
 /**
@@ -120,7 +129,27 @@ export class LeveledSkill {
         }
     }
 
-    getFieldsWithAttr(attrs?: CharAttr & { weapon?: WeaponAttr }) {
+    /**
+     * 把条件BUFF属性增量合并进属性视图（不改原对象）。
+     * 乘法池属性（独立增伤系列等）按 Π(1+v) 乘法叠加，其余按加算。
+     * @param base 原属性视图
+     * @param props 条件BUFF属性增量
+     * @returns 合并后的新属性视图；无增量时原样返回
+     */
+    static mergeConditionalProps<T extends object>(base: T, props: Record<string, number>): T {
+        const merged = { ...base } as T
+        const writable = merged as unknown as Record<string, number | undefined>
+        for (const [prop, value] of Object.entries(props)) {
+            if (isMultiplicativeAttr(prop)) {
+                writable[prop] = (1 + (writable[prop] ?? 0)) * (1 + value) - 1
+            } else {
+                writable[prop] = (writable[prop] ?? 0) + value
+            }
+        }
+        return merged
+    }
+
+    getFieldsWithAttr(attrs?: CharAttr & { weapon?: WeaponAttr }, conditionalProps?: BuffFieldConditional[]) {
         const tt = {
             技能威力: attrs?.技能威力 || 1,
             技能耐久: attrs?.技能耐久 || 1,
@@ -128,17 +157,25 @@ export class LeveledSkill {
             技能范围: attrs?.技能范围 || 1,
         }
         const normalFields = this.字段.map(field => {
-            if (attrs?.技能倍率赋值 && field.名称.includes("伤害")) {
+            // 条件BUFF（技能限定）：字段名命中时把属性增量合并进该字段的独立求值上下文
+            let fieldAttrs = attrs
+            if (attrs && conditionalProps?.length) {
+                const matched = conditionalProps.filter(c => c.pattern.test(field.名称))
+                if (matched.length) {
+                    fieldAttrs = matched.reduce((current, c) => LeveledSkill.mergeConditionalProps(current, c.props), attrs)
+                }
+            }
+            if (fieldAttrs?.技能倍率赋值 && field.名称.includes("伤害")) {
                 return {
                     ...field,
-                    值: attrs.技能倍率赋值 * (1 + (attrs.技能倍率乘数 || 0)) + attrs.技能倍率加数,
+                    值: fieldAttrs.技能倍率赋值 * (1 + (fieldAttrs.技能倍率乘数 || 0)) + fieldAttrs.技能倍率加数,
                 }
             }
             if (field.影响) {
                 let val = field.值
                 let val2 = field.值2 || 0
                 if (field.名称.includes("伤害")) {
-                    val = val * (1 + (attrs?.技能倍率乘数 || 0)) + (attrs?.技能倍率加数 || 0)
+                    val = val * (1 + (fieldAttrs?.技能倍率乘数 || 0)) + (fieldAttrs?.技能倍率加数 || 0)
                 }
                 const propSet = new Set(field.影响.split(","))
                 if (propSet.has("技能范围")) {

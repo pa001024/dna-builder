@@ -22,6 +22,8 @@ export interface Buff {
     lx?: number
     mx?: number
     code?: string
+    /** 条件BUFF（技能限定）：只作用于名称匹配该模式的字段（支持 "|" 交替多技能，如 "月猎|日食"），不参与全局属性汇总 */
+    技能?: string
     attr?: Record<string, string>
     display?: Record<string, string>
     [key: string]: string | number | number[] | undefined | Record<string, string>

@@ -11,6 +11,8 @@ const componentProps = withDefaults(
         props: Record<string, any>
         attr?: Record<string, string>
         code?: string
+        /** 条件BUFF（技能限定）生效范围：字段名需包含该技能名（如 "暗影奔袭"），显示为「适用于 X」 */
+        applicableSkill?: string
         side?: "top" | "bottom" | "left" | "right"
         title?: string
         rarity?: string
@@ -34,9 +36,16 @@ const componentProps = withDefaults(
     }
 )
 
-const { gpt } = useGameText()
+const { gpt, gt } = useGameText()
 
-/** 当前档位下已翻译的效果文案 */
+/** 条件BUFF（技能限定）生效范围：按 "|" 拆分多技能并逐个翻译（如 "月猎|日食" → "月猎 / 日食"） */
+const applicableSkillText = computed(() =>
+    (componentProps.applicableSkill || "")
+        .split("|")
+        .map(skill => gt(skill.trim()))
+        .filter(Boolean)
+        .join(" / ")
+)/** 当前档位下已翻译的效果文案 */
 const effectText = computed(() =>
     gpt(componentProps.effdesc, componentProps.effindex, { stripFirstSentence: componentProps.effstrip })
 )
@@ -69,6 +78,10 @@ function formatDesc(): string[] {
                 </div>
                 <div v-if="desc" class="text-xs text-gray-400">
                     {{ desc }}
+                </div>
+                <div v-if="applicableSkill" class="flex justify-between items-center gap-2 text-sm">
+                    <div class="text-xs text-neutral-500 whitespace-nowrap">{{ $t("char-build.buff_applicable") }}</div>
+                    <div class="font-medium text-primary">{{ applicableSkillText }}</div>
                 </div>
                 <div
                     v-for="[prop, val] in Object.entries(props).filter(([, val]) => val)"
