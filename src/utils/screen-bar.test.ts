@@ -290,7 +290,26 @@ describe("配置归一化", () => {
         expect(config.scale).toBe(1.5)
         expect(config.ignoreCursorEvents).toBe(false)
         expect(config.offsetY).toBe(0)
+        expect(config.inTaskbar).toBe(false)
         expect(config.items).toHaveLength(1)
+    })
+
+    it("任务栏嵌入开关只接受显式 true", () => {
+        expect(normalizeScreenBarConfig({ inTaskbar: true }).inTaskbar).toBe(true)
+        expect(normalizeScreenBarConfig({ inTaskbar: "yes" }).inTaskbar).toBe(false)
+        expect(normalizeScreenBarConfig({}).inTaskbar).toBe(false)
+    })
+
+    it("默认配置的独立主题为空(跟随主应用)", () => {
+        expect(createDefaultScreenBarConfig().theme).toBe("")
+    })
+
+    it("独立主题只接受内置主题与自定义主题,其余回退跟随主应用", () => {
+        expect(normalizeScreenBarConfig({ theme: "dracula" }).theme).toBe("dracula")
+        expect(normalizeScreenBarConfig({ theme: "custom" }).theme).toBe("custom")
+        expect(normalizeScreenBarConfig({ theme: "not-a-theme" }).theme).toBe("")
+        expect(normalizeScreenBarConfig({ theme: 42 }).theme).toBe("")
+        expect(normalizeScreenBarConfig({}).theme).toBe("")
     })
 
     it("补齐条目内部的新字段(旧数据缺 missions 会让设置页整页渲染不出来)", () => {
@@ -332,6 +351,28 @@ describe("resolveScreenBarItem", () => {
         if (resolved.type !== "mihan") throw new Error("类型应为 mihan")
         expect(resolved.entries).toEqual([])
         expect(resolved.emptyReason).toBe("noSelection")
+    })
+
+    it("有任务但关注过滤后一条不剩时标为 filtered,由组件整颗隐藏而不是谎报没数据", () => {
+        const resolved = resolveScreenBarItem(
+            { id: "q", type: "mihan", types: [0], missions: ["调停"], onlyMatched: true },
+            SAMPLE,
+            mihanData
+        )
+        if (resolved.type !== "mihan") throw new Error("类型应为 mihan")
+        expect(resolved.entries).toEqual([])
+        expect(resolved.emptyReason).toBe("filtered")
+    })
+
+    it("所选类型在数据里一条任务都没有时仍算 noData", () => {
+        const resolved = resolveScreenBarItem(
+            { id: "s", type: "mihan", types: [0], missions: ["护送"], onlyMatched: true },
+            SAMPLE,
+            undefined
+        )
+        if (resolved.type !== "mihan") throw new Error("类型应为 mihan")
+        expect(resolved.entries).toEqual([])
+        expect(resolved.emptyReason).toBe("noData")
     })
 
     it("不开启过滤时展示所选类型的全部任务", () => {

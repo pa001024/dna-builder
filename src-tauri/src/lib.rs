@@ -163,6 +163,8 @@ pub fn run() {
         commands::window::float_window_disable,
         commands::window::float_window_trigger,
         commands::window::float_window_state,
+        commands::window::screen_bar_taskbar_embed,
+        commands::window::screen_bar_taskbar_detach,
         // 系统
         commands::system::app_close,
         commands::system::get_os_version,

@@ -3477,6 +3477,8 @@
         "countdownUnset": "Non défini",
         "empty": "Aucun élément",
         "enable": "Activer",
+        "inTaskbar": "Intégrer à la barre des tâches",
+        "inTaskbarTip": "Affiche la barre dans la barre des tâches Windows (superposée sous Windows 11 ; le décalage vertical est ignoré) ; désactivez pour revenir en haut de l'écran",
         "itemClock": "Horloge",
         "itemCountdown": "Compte à rebours",
         "itemMihan": "Infos missions",
@@ -3498,6 +3500,9 @@
         "remove": "Supprimer",
         "scale": "Échelle",
         "sectionTitle": "Barre d'informations",
+        "theme": "Thème de la barre",
+        "themeFollowMain": "Suivre l'application principale",
+        "themeTip": "Choisissez un thème dédié pour la barre, indépendant de l'apparence de l'application principale ; le thème personnalisé réutilise le concepteur de thème principal",
         "zhouben": "Réinit. Boss hebdo"
     },
     "script-color-tool": {

@@ -18,6 +18,7 @@ import { useUIStore } from "@/store/ui"
 import { buildCdnUrl, resolveCdnUrls } from "@/utils/cdn"
 import { cssQuoteFamily, customFontCssFamily } from "@/utils/font-storage"
 import { buildFloatWindowConfig } from "@/utils/skill-cd-overlay"
+import { DARK_THEMES, LIGHT_THEMES } from "@/utils/themes"
 
 const setting = useSettingStore()
 const ui = useUIStore()
@@ -237,29 +238,9 @@ const installedDataPackVersions = computed(() => {
     return new Set(dataPack.installedVersions)
 })
 
-const lightThemes = [
-    "light",
-    "lofi",
-    "cupcake",
-    "retro",
-    "valentine",
-    "garden",
-    "aqua",
-    "pastel",
-    "wireframe",
-    "winter",
-    "cyberpunk",
-    "corporate",
-    "bumblebee",
-    "emerald",
-    "fantasy",
-    "cmyk",
-    "autumn",
-    "acid",
-    "lemonade",
-    "ez",
-]
-const darkThemes = ["dark", "black", "synthwave", "halloween", "forest", "dracula", "business", "night", "coffee"]
+// 主题清单抽到 utils/themes 共享:主设置页与屏幕信息条的独立主题选择共用一份
+const lightThemes = LIGHT_THEMES
+const darkThemes = DARK_THEMES
 
 watch(
     () => setting.winMaterial,

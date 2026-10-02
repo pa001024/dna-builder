@@ -3439,6 +3439,8 @@
         "countdownUnset": "미설정",
         "empty": "항목이 없습니다",
         "enable": "사용",
+        "inTaskbar": "작업 표시줄에 넣기",
+        "inTaskbarTip": "막대를 Windows 작업 표시줄 안에 표시합니다(Win11에서는 위에 덮어 표시, 상단 오프셋 무시). 끄면 화면 상단 표시로 돌아갑니다",
         "itemClock": "시계",
         "itemCountdown": "사용자 카운트다운",
         "itemMihan": "의뢰 정보",
@@ -3460,6 +3462,9 @@
         "remove": "삭제",
         "scale": "배율",
         "sectionTitle": "화면 정보 바",
+        "theme": "바 테마",
+        "themeFollowMain": "메인 앱 따라가기",
+        "themeTip": "바 전용 테마를 선택합니다(메인 앱 외관과 독립). 사용자 지정 테마는 메인 테마 디자이너를 재사용합니다",
         "zhouben": "주간 보스 리셋"
     },
     "script-color-tool": {

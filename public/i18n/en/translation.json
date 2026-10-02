@@ -3460,6 +3460,8 @@
         "countdownUnset": "Not set",
         "empty": "No items yet",
         "enable": "Enable",
+        "inTaskbar": "Embed in taskbar",
+        "inTaskbarTip": "Show the bar inside the Windows taskbar (overlaid on Windows 11; top offset is ignored); turn off to float at the top of the screen",
         "itemClock": "Clock",
         "itemCountdown": "Custom countdown",
         "itemMihan": "Mission info",
@@ -3481,6 +3483,9 @@
         "remove": "Remove",
         "scale": "Scale",
         "sectionTitle": "Screen Info Bar",
+        "theme": "Bar theme",
+        "themeFollowMain": "Follow main app",
+        "themeTip": "Pick a dedicated theme for the bar, independent of the main app look; the custom theme reuses the main theme designer",
         "zhouben": "Weekly boss reset"
     },
     "script-color-tool": {

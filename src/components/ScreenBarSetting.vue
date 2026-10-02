@@ -23,6 +23,7 @@ import {
     type ScreenBarItem,
     type ScreenBarItemType,
 } from "@/utils/screen-bar"
+import { DARK_THEMES, LIGHT_THEMES } from "@/utils/themes"
 
 /**
  * 屏幕信息条的设置编辑器。
@@ -37,6 +38,15 @@ const { items: previewItems } = useScreenBarContent(config)
 
 /** 条目上限已满时禁止继续添加。 */
 const addDisabled = computed(() => config.value.items.length >= SCREEN_BAR_MAX_ITEMS)
+
+/**
+ * 主题名首字母大写,展示口径与主设置页的主题选择器一致。
+ * @param str 主题 id
+ * @returns 首字母大写后的展示名
+ */
+function capitalize(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1)
+}
 
 /**
  * 条目类型在设置页的展示名 i18n key。
@@ -188,10 +198,10 @@ function itemParams(item: ScreenBarItem) {
                 </div>
             </div>
 
-            <!-- 实时预览 -->
+            <!-- 实时预览:预览容器挂上信息条独立主题,保证"预览所见即浮窗所得" -->
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                 <div class="mb-1.5 text-[11px] font-medium text-base-content/55">{{ $t("screenBar.preview") }}</div>
-                <div class="flex min-h-8 items-center overflow-hidden">
+                <div class="flex min-h-8 items-center overflow-hidden" :data-theme="config.theme || undefined">
                     <ScreenBarContent :items="previewItems" :opacity="config.opacity" :scale="config.scale" />
                 </div>
             </div>
@@ -383,7 +393,8 @@ function itemParams(item: ScreenBarItem) {
                             :aria-label="$t('screenBar.scale')"
                         />
                     </div>
-                    <div class="flex items-center gap-2 text-xs text-base-content/75">
+                    <!-- 任务栏模式下落位由原生 API 决定,距屏幕顶部的偏移不参与 -->
+                    <div v-if="!setting.screenBar.inTaskbar" class="flex items-center gap-2 text-xs text-base-content/75">
                         {{ $t("screenBar.offsetY") }}
                         <DragNumberInput
                             v-model="setting.screenBar.offsetY"
@@ -399,6 +410,28 @@ function itemParams(item: ScreenBarItem) {
                         <input v-model="setting.screenBar.ignoreCursorEvents" type="checkbox" class="toggle toggle-xs toggle-secondary" />
                         {{ $t("screenBar.clickThrough") }}
                     </label>
+                    <label class="flex cursor-pointer items-center gap-2 text-xs text-base-content/75" :title="$t('screenBar.inTaskbarTip')">
+                        <input v-model="setting.screenBar.inTaskbar" type="checkbox" class="toggle toggle-xs toggle-secondary" />
+                        {{ $t("screenBar.inTaskbar") }}
+                    </label>
+                </div>
+                <!-- 独立主题:空值表示跟随主应用;自定义主题复用主应用的主题设计器数据 -->
+                <div class="mt-2 flex items-center gap-2 text-xs text-base-content/75" :title="$t('screenBar.themeTip')">
+                    {{ $t("screenBar.theme") }}
+                    <select
+                        v-model="setting.screenBar.theme"
+                        class="h-6 rounded-xs border border-base-content/20 bg-base-100/60 px-1 text-xs text-base-content outline-none transition-colors duration-150 focus:border-primary"
+                        :aria-label="$t('screenBar.theme')"
+                    >
+                        <option value="">{{ $t("screenBar.themeFollowMain") }}</option>
+                        <optgroup :label="$t('setting.lightTheme')">
+                            <option v-for="th in LIGHT_THEMES" :key="th" :value="th">{{ capitalize(th) }}</option>
+                        </optgroup>
+                        <optgroup :label="$t('setting.darkTheme')">
+                            <option v-for="th in DARK_THEMES" :key="th" :value="th">{{ capitalize(th) }}</option>
+                        </optgroup>
+                        <option value="custom">{{ $t("setting.customThemeOption") }}</option>
+                    </select>
                 </div>
             </div>
         </div>

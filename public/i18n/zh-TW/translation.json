@@ -3437,6 +3437,8 @@
         "countdownUnset": "未設定",
         "empty": "尚無條目",
         "enable": "啟用",
+        "inTaskbar": "嵌入工作列",
+        "inTaskbarTip": "將資訊條顯示在 Windows 工作列裡(Win11 為覆蓋其上),距螢幕頂部的偏移不生效;關閉後恢復頂部懸浮",
         "itemClock": "時鐘",
         "itemCountdown": "自訂倒數",
         "itemMihan": "委託資訊",
@@ -3458,6 +3460,9 @@
         "remove": "刪除",
         "scale": "縮放",
         "sectionTitle": "螢幕資訊條",
+        "theme": "資訊條主題",
+        "themeFollowMain": "跟隨主應用",
+        "themeTip": "為資訊條單獨選擇主題,獨立於主應用外觀;自訂主題複用主應用的主題設計器",
         "zhouben": "周本刷新"
     },
     "script-color-tool": {

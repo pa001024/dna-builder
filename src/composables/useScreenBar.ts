@@ -86,3 +86,24 @@ export async function restoreScreenBar(): Promise<void> {
         setting.screenBar.enabled = false
     }
 }
+
+/** 任务栏模式的窗口看门狗轮询间隔(毫秒)。 */
+const TASKBAR_WATCHDOG_MS = 4000
+
+/**
+ * 启动任务栏模式的窗口看门狗(主窗口启动时调用一次)。
+ *
+ * 信息条嵌入任务栏后是 Shell_TrayWnd 的子窗口,explorer 重启会连带销毁它。
+ * 这里只在"已启用且任务栏模式"期间低频核对"设置开 = 窗口在",丢失即按设置重建;
+ * 重建出的窗口由浮窗页自己完成嵌入。顶部悬浮模式的窗口不依赖 explorer,无需看守。
+ */
+export function startScreenBarWatchdog(): void {
+    if (!env.isApp) return
+    const { syncWindowWithSetting } = useScreenBar()
+    window.setInterval(() => {
+        const setting = useSettingStore()
+        if (setting.screenBar.enabled && setting.screenBar.inTaskbar) {
+            void syncWindowWithSetting()
+        }
+    }, TASKBAR_WATCHDOG_MS)
+}

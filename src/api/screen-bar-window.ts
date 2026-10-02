@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core"
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow"
 import { currentMonitor, LogicalPosition, LogicalSize, primaryMonitor } from "@tauri-apps/api/window"
 import { env } from "@/env"
@@ -7,8 +8,10 @@ import { clampBarOffsetY, SCREEN_BAR_INITIAL_SIZE, SCREEN_BAR_WINDOW_LABEL, type
  * 屏幕信息条(顶部通用浮窗)的独立窗口管理。
  *
  * 窗口由前端用 `WebviewWindow` 创建(label 见 `SCREEN_BAR_WINDOW_LABEL`),承载路由 `/screen-bar`。
- * 尺寸与位置不在这里固定:浮窗页测量出内容尺寸后调 `fitScreenBarWindow` 落位,这样条目增减时
- * 窗口能跟着变宽变高,不需要主窗口知道渲染细节。
+ * 支持两种显示模式,由配置里的 `inTaskbar` 切换:
+ * - 顶部悬浮(默认):浮窗页测量出内容尺寸后调 `fitScreenBarWindow` 居中到屏幕顶部;
+ * - 任务栏嵌入:走 Win32 原生 `SetParent` 把窗口挂进任务栏(`embedScreenBarInTaskbar`),
+ *   视觉上渲染在任务栏内部,explorer 重启丢失后由主窗口看门狗重建。
  *
  * 创建参数里的 `alwaysOnTop` / `skipTaskbar` / `focus: false` 决定"置顶、不占任务栏、不抢焦点",
  * `visible: false` 让浮窗页测量完成后再上屏,避免先在左上角闪一帧。
@@ -159,5 +162,65 @@ export async function setScreenBarIgnoreCursorEvents(target: WebviewWindow, igno
         await target.setIgnoreCursorEvents(ignore)
     } catch (cause) {
         console.error("设置屏幕信息条鼠标穿透失败", cause)
+    }
+}
+
+/** 任务栏嵌入落位结果(逻辑像素,由 Rust 侧按宿主 DPI 换算后返回)。 */
+export type ScreenBarTaskbarFit = {
+    /** 实际生效的显示方式:"embedded" = 任务栏子窗口(Win10),"overlay" = 覆盖在任务栏上的顶层窗口(Win11) */
+    mode: "embedded" | "overlay"
+    /** 窗口最终逻辑宽度(超出任务栏可用区域时被截断) */
+    width: number
+    /** 窗口最终逻辑高度(超出任务栏高度时被截断) */
+    height: number
+    /** 宿主客户区逻辑宽度 */
+    hostWidth: number
+    /** 宿主客户区逻辑高度 */
+    hostHeight: number
+    /** 宿主 DPI 缩放系数 */
+    scale: number
+}
+
+/**
+ * 把信息条窗口按任务栏模式落位(幂等,重复调用等于重新摆放,可当"重新置顶"用)。
+ *
+ * 原生逻辑在 Rust 侧完成,按任务栏类型二选一:Win10 风格任务栏 `SetParent` 进
+ * ReBarWindow32 成为其子窗口;Win11 XAML 任务栏(微软已砍掉嵌入 API,子窗口不被合成)
+ * 则保持顶层窗口、置顶并覆盖到任务栏区域内托盘时钟左侧。任务栏模式下 Tauri 的
+ * setSize/setPosition 坐标语义会变,落位必须全部走本函数。
+ * @param target 信息条窗口
+ * @param size 内容实测尺寸(逻辑像素)
+ * @returns 落位结果;非桌面环境或失败(如找不到任务栏)时返回 null,调用方应回退顶部悬浮
+ */
+export async function embedScreenBarInTaskbar(
+    target: WebviewWindow,
+    size: { width: number; height: number }
+): Promise<ScreenBarTaskbarFit | null> {
+    if (!env.isApp) return null
+    try {
+        return await invoke<ScreenBarTaskbarFit>("screen_bar_taskbar_embed", {
+            label: target.label,
+            width: size.width,
+            height: size.height,
+        })
+    } catch (cause) {
+        console.error("嵌入 Windows 任务栏失败", cause)
+        return null
+    }
+}
+
+/**
+ * 把信息条窗口从任务栏分离回顶层悬浮(幂等;未嵌入时是空操作)。
+ *
+ * 切回顶部悬浮前必须先分离:SetParent 之后再调 Tauri 的 setPosition,坐标会被解释成
+ * 任务栏客户区坐标,窗口会跑到错误的位置。
+ * @param target 信息条窗口
+ */
+export async function detachScreenBarFromTaskbar(target: WebviewWindow): Promise<void> {
+    if (!env.isApp) return
+    try {
+        await invoke("screen_bar_taskbar_detach", { label: target.label })
+    } catch (cause) {
+        console.error("从 Windows 任务栏分离失败", cause)
     }
 }

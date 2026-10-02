@@ -20,8 +20,8 @@ defineProps<{
     scale: number
 }>()
 
-/** 委托条目空状态的原因到文案 key:筛选条件造成的空与真的没数据必须说清楚。 */
-const MIHAN_EMPTY_KEYS: Record<ScreenBarMihanEmptyReason, string> = {
+/** 委托条目空状态的原因到文案 key:筛选条件造成的空与真的没数据必须说清楚;filtered 是"过滤后为空",整颗隐藏不出文案。 */
+const MIHAN_EMPTY_KEYS: Record<Exclude<ScreenBarMihanEmptyReason, "filtered">, string> = {
     noTypeSelection: "screenBar.mihanNoType",
     noSelection: "screenBar.mihanNoSelection",
     noData: "screenBar.mihanEmpty",
@@ -53,9 +53,9 @@ const MIHAN_EMPTY_KEYS: Record<ScreenBarMihanEmptyReason, string> = {
                 <span v-else class="font-mono font-semibold text-primary">{{ item.text }}</span>
             </span>
 
-            <!-- 委托信息:按类型分组,关注中的任务高亮 -->
+            <!-- 委托信息:按类型分组,关注中的任务高亮;过滤后为空时整颗隐藏,留个空胶囊反而突兀 -->
             <span
-                v-else-if="item.type === 'mihan'"
+                v-else-if="item.type === 'mihan' && item.emptyReason !== 'filtered'"
                 class="inline-flex shrink-0 items-center gap-1 rounded-xs border border-base-content/10 bg-base-200/70 px-1.5 py-1 h-5"
             >
                 <template v-for="(entry, entryIndex) in item.entries" :key="entry.typeIndex">

@@ -23,6 +23,7 @@ pub mod script_mcp;
 pub mod script_module;
 pub mod script_vision;
 pub mod setvol;
+pub mod taskbar;
 pub mod tpl;
 pub mod tpl_match;
 pub mod util;

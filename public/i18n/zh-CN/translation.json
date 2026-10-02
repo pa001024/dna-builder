@@ -3457,6 +3457,8 @@
         "countdownUnset": "未设置",
         "empty": "还没有条目",
         "enable": "启用",
+        "inTaskbar": "嵌入任务栏",
+        "inTaskbarTip": "把信息条显示在 Windows 任务栏里(Win11 为覆盖其上),距屏幕顶部的偏移不生效;关闭后恢复顶部悬浮",
         "itemClock": "时钟",
         "itemCountdown": "自定义倒计时",
         "itemMihan": "委托信息",
@@ -3478,6 +3480,9 @@
         "remove": "删除",
         "scale": "缩放",
         "sectionTitle": "屏幕信息条",
+        "theme": "信息条主题",
+        "themeFollowMain": "跟随主应用",
+        "themeTip": "为信息条单独选择主题,独立于主应用外观;自定义主题复用主应用的主题设计器",
         "zhouben": "周本刷新"
     },
     "script-color-tool": {

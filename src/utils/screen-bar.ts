@@ -1,4 +1,5 @@
 import { MIHAN_MISSIONS, MIHAN_TYPE_META } from "./mihan-meta"
+import { isKnownTheme } from "./themes"
 
 /**
  * 屏幕信息条(顶部通用浮窗)的共享类型与纯逻辑。
@@ -121,6 +122,10 @@ export type ScreenBarConfig = {
     offsetY: number
     /** 内容缩放系数 */
     scale: number
+    /** 是否嵌入 Windows 任务栏内显示;开启后顶部偏移不生效,关闭则回到顶部悬浮 */
+    inTaskbar: boolean
+    /** 信息条独立主题 id(daisyUI 内置主题或 "custom");空字符串表示跟随主应用主题 */
+    theme: string
 }
 
 /** 委托条目内单条任务。 */
@@ -148,15 +153,16 @@ export type ScreenBarCountdownStatus = "unset" | "running" | "expired"
  * 委托条目没有内容可展示的原因。
  *
  * `noTypeSelection` 是类型全被取消勾选,`noSelection` 是"只看关注"但一条任务都没选,
- * `noData` 才是真的没数据——前两种都是筛选条件造成的,必须与"暂无数据"区分开。
+ * `noData` 才是真的没数据,`filtered` 是数据里有任务却被关注过滤清空——前两种提示配置问题,
+ * `noData` 提示"暂无委托数据",`filtered` 则必须整颗隐藏,不能伪装成"暂无数据"。
  */
-export type ScreenBarMihanEmptyReason = "noData" | "noSelection" | "noTypeSelection"
+export type ScreenBarMihanEmptyReason = "noData" | "noSelection" | "noTypeSelection" | "filtered"
 
 /** 渲染就绪的条目:文本已算好,组件只负责画。 */
 export type ResolvedScreenBarItem =
     | { id: string; type: "clock"; text: string }
     | { id: string; type: "countdown"; title: string; text: string; status: ScreenBarCountdownStatus }
-    | { id: string; type: "mihan"; entries: ScreenBarMihanEntry[]; emptyReason: ScreenBarMihanEmptyReason }
+    | { id: string; type: "mihan"; entries: ScreenBarMihanEntry[] /** 仅在 entries 为空时有意义 */; emptyReason: ScreenBarMihanEmptyReason }
     | { id: string; type: ScreenBarRefreshType; text: string }
 
 const WEEKDAY_SHORT = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"] as const
@@ -405,6 +411,17 @@ function getMihanEmptyReason(item: ScreenBarMihanItem): ScreenBarMihanEmptyReaso
 }
 
 /**
+ * 判断所选类型在密函数据里是否至少有一条任务。
+ * @param typeIndexes 要展示的类型下标
+ * @param mihanData 密函数据(形状不可信)
+ * @returns 任一所选类型的分组里有任务时为真
+ */
+function hasMihanMissions(typeIndexes: number[], mihanData: string[][] | undefined): boolean {
+    const groups = Array.isArray(mihanData) ? mihanData : []
+    return typeIndexes.some(typeIndex => Array.isArray(groups[typeIndex]) && groups[typeIndex].length > 0)
+}
+
+/**
  * 把一个条目解析成渲染就绪的数据。
  *
  * 密函数据由调用方注入(本模块不依赖 Pinia),因此同一条解析逻辑可以服务于
@@ -428,13 +445,15 @@ export function resolveScreenBarItem(item: ScreenBarItem, now: Date, mihanData: 
             }
             return { id: item.id, type: "countdown", title: item.title, text: formatCountdownDays(remaining), status: "running" }
         }
-        case "mihan":
-            return {
-                id: item.id,
-                type: "mihan",
-                entries: collectMihanEntries(mihanData, item.types, item.missions, item.onlyMatched),
-                emptyReason: getMihanEmptyReason(item),
+        case "mihan": {
+            const entries = collectMihanEntries(mihanData, item.types, item.missions, item.onlyMatched)
+            const emptyReason = getMihanEmptyReason(item)
+            // 数据里明明有任务却被关注过滤清空,不算"没数据":标成 filtered 让组件整颗隐藏,而不是谎报"暂无委托数据"
+            if (emptyReason === "noData" && entries.length === 0 && hasMihanMissions(item.types, mihanData)) {
+                return { id: item.id, type: "mihan", entries, emptyReason: "filtered" }
             }
+            return { id: item.id, type: "mihan", entries, emptyReason }
+        }
         case "mihanRefresh":
             return { id: item.id, type: "mihanRefresh", text: formatCountdown(getMihanRefreshRemaining(now.getTime())) }
         case "moling":
@@ -537,6 +556,8 @@ export function createDefaultScreenBarConfig(): ScreenBarConfig {
         opacity: SCREEN_BAR_DEFAULTS.opacity,
         offsetY: SCREEN_BAR_DEFAULTS.offsetY,
         scale: SCREEN_BAR_DEFAULTS.scale,
+        inTaskbar: false,
+        theme: "",
     }
 }
 
@@ -559,7 +580,18 @@ export function normalizeScreenBarConfig(raw: unknown): ScreenBarConfig {
         opacity: clampBarOpacity(Number(record.opacity)),
         offsetY: clampBarOffsetY(Number(record.offsetY)),
         scale: clampBarScale(Number(record.scale)),
+        inTaskbar: record.inTaskbar === true,
+        theme: normalizeScreenBarTheme(record.theme),
     }
+}
+
+/**
+ * 归一化信息条独立主题字段(形状不可信)。
+ * @param raw 原始数据
+ * @returns 合法主题 id;空值或未知值返回空字符串(跟随主应用主题)
+ */
+function normalizeScreenBarTheme(raw: unknown): string {
+    return typeof raw === "string" && isKnownTheme(raw) ? raw : ""
 }
 
 /**

@@ -3438,6 +3438,8 @@
         "countdownUnset": "未設定",
         "empty": "項目がありません",
         "enable": "有効化",
+        "inTaskbar": "タスクバーに埋め込む",
+        "inTaskbarTip": "バーを Windows タスクバー内に表示します(Win11 では上に重ねて表示、上部オフセットは無効)。オフにすると画面上部の浮遊表示に戻ります",
         "itemClock": "時計",
         "itemCountdown": "カスタムカウントダウン",
         "itemMihan": "依頼情報",
@@ -3459,6 +3461,9 @@
         "remove": "削除",
         "scale": "拡大縮小",
         "sectionTitle": "スクリーン情報バー",
+        "theme": "バーのテーマ",
+        "themeFollowMain": "メインアプリに従う",
+        "themeTip": "バー専用のテーマを選択します(メインアプリの外観とは独立)。カスタムテーマはメインのテーマデザイナーを再利用します",
         "zhouben": "週替わりボスリセット"
     },
     "script-color-tool": {

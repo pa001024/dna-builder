@@ -1,8 +1,8 @@
-//! 窗口命令：系统材质（Blur/Acrylic/Mica）、Win32 窗口样式与技能 CD 倒计时浮窗。
+//! 窗口命令：系统材质（Blur/Acrylic/Mica）、Win32 窗口样式、技能 CD 倒计时浮窗与任务栏嵌入。
 
 use serde::Deserialize;
 
-use crate::submodules::{float_window, win};
+use crate::submodules::{float_window, taskbar, win};
 
 /// 窗口样式参数。
 #[derive(Debug, Clone, Deserialize)]
@@ -127,4 +127,57 @@ pub fn float_window_trigger(
 #[tauri::command]
 pub fn float_window_state() -> float_window::FloatWindowState {
     float_window::state()
+}
+
+/// 把屏幕信息条窗口嵌入 Windows 任务栏(幂等;已嵌入时按内容尺寸重新落位)。
+#[tauri::command]
+pub fn screen_bar_taskbar_embed(
+    app: tauri::AppHandle,
+    label: String,
+    width: f64,
+    height: f64,
+) -> Result<taskbar::ScreenBarTaskbarFit, String> {
+    #[cfg(target_os = "windows")]
+    {
+        use tauri::Manager;
+
+        let window = app
+            .get_webview_window(&label)
+            .ok_or_else(|| format!("未找到窗口: {label}"))?;
+        let hwnd = window
+            .hwnd()
+            .map_err(|error| format!("获取窗口句柄失败: {error}"))?;
+        // tauri 依赖图里是另一份 windows crate(0.61),HWND 与本项目(0.62)类型不互通,按裸指针重建
+        let hwnd = windows::Win32::Foundation::HWND(hwnd.0);
+        taskbar::embed(hwnd, width, height)
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = (app, label, width, height);
+        Err("当前平台不支持嵌入任务栏".to_string())
+    }
+}
+
+/// 把屏幕信息条窗口从任务栏分离回顶层悬浮(幂等;未嵌入时是空操作)。
+#[tauri::command]
+pub fn screen_bar_taskbar_detach(app: tauri::AppHandle, label: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        use tauri::Manager;
+
+        let window = app
+            .get_webview_window(&label)
+            .ok_or_else(|| format!("未找到窗口: {label}"))?;
+        let hwnd = window
+            .hwnd()
+            .map_err(|error| format!("获取窗口句柄失败: {error}"))?;
+        // tauri 依赖图里是另一份 windows crate(0.61),HWND 与本项目(0.62)类型不互通,按裸指针重建
+        let hwnd = windows::Win32::Foundation::HWND(hwnd.0);
+        taskbar::detach(hwnd)
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = (app, label);
+        Err("当前平台不支持嵌入任务栏".to_string())
+    }
 }

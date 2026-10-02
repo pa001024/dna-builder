@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import { provideClient } from "@urql/vue"
-import { onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
+import { computed, onBeforeUnmount, onMounted, watch, watchEffect } from "vue"
 import { useRoute } from "vue-router"
 import { claimDailyLaunchExperienceMutation, claimDailyOnlineExperienceMutation, gqClient } from "./api/graphql"
-import { restoreScreenBar } from "./composables/useScreenBar"
+import { restoreScreenBar, startScreenBarWatchdog } from "./composables/useScreenBar"
 import { restoreSkillCdOverlay } from "./composables/useSkillCdOverlay"
 import { dataPackBootstrapLoading, isDataPackHydrated } from "./data/data-pack-bridge"
 import { env } from "./env"
@@ -36,6 +36,14 @@ const isMainWindow = env.isApp ? getCurrentWindow().label === "main" : true
  * 也不重复拉起主程序的后台任务(密函推送轮询、技能 CD 浮窗恢复等)。
  */
 const isScreenBarWindow = env.isApp && getCurrentWindow().label === SCREEN_BAR_WINDOW_LABEL
+
+/**
+ * 当前窗口生效的主题 id。
+ *
+ * 信息条浮窗允许通过 screenBar.theme 设置独立主题(空字符串表示跟随主应用),
+ * 其余窗口一律用主应用主题;自定义主题在两处都映射到固定的 data-theme id。
+ */
+const effectiveTheme = computed(() => (isScreenBarWindow && setting.screenBar.theme ? setting.screenBar.theme : setting.theme))
 
 /**
  * 上报页面访问统计，不阻塞主流程。
@@ -156,6 +164,9 @@ function stopOnlineExperienceTimer() {
 watch(
     () => setting.theme,
     (next, prev) => {
+        // 信息条浮窗只消费主题,绝不能在这里触发"捕获当前变量":浮窗侧一触发就会用
+        // 浮窗自己的渲染状态覆盖主窗口里正在设计的自定义主题(该数据两窗口共用一份存储)
+        if (isScreenBarWindow) return
         if (next === "custom" && prev !== "custom") {
             setting.customTheme = captureCurrentThemeVars(setting.customTheme)
         }
@@ -164,7 +175,7 @@ watch(
 
 watchEffect(() => {
     // 自定义主题使用固定的 data-theme id（配套注入的 [data-theme] 样式）
-    const themeName = setting.theme === "custom" ? CUSTOM_THEME_ID : setting.theme
+    const themeName = effectiveTheme.value === "custom" ? CUSTOM_THEME_ID : effectiveTheme.value
     document.body.setAttribute("data-theme", themeName)
     // 信息条窗口是透明浮窗，body 必须保持透明，否则整条会顶着一块实色底板、看不到窗口后面的画面
     document.body.style.background = isScreenBarWindow || setting.windowTrasnparent ? "transparent" : "var(--color-base-300)"
@@ -177,7 +188,8 @@ watchEffect(() => {
  */
 let customThemeStyleEl: HTMLStyleElement | null = null
 watchEffect(() => {
-    if (setting.theme !== "custom") {
+    // 信息条浮窗选了独立"自定义"主题时同样要注入样式,否则浮窗侧没有 [data-theme] 规则可挂
+    if (effectiveTheme.value !== "custom") {
         customThemeStyleEl?.remove()
         customThemeStyleEl = null
         return
@@ -363,6 +375,8 @@ onMounted(async () => {
     void restoreSkillCdOverlay()
     // 屏幕信息条同理：窗口由主窗口按需创建
     void restoreScreenBar()
+    // 任务栏模式看门狗：explorer 重启连带销毁嵌入的信息条窗口后自动重建
+    startScreenBarWatchdog()
     ui.setLoginState(setting.dnaUserId !== 0)
     ui.startTimer()
     reportVisitorCount()
