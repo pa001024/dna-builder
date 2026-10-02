@@ -342,11 +342,12 @@ const topUpRanks = computed(() => {
             </div>
         </section>
 
-        <BackpackPuzzle v-if="event.id === 103015" :event-id="event.id" />
+        <!-- 按名称匹配：复刻活动 id 会变但名称不变（如「微茫珍藏」103015/103032），关卡数据由组件内 eventId 过滤 -->
+        <BackpackPuzzle v-if="event.name === '微茫珍藏'" :event-id="event.id" />
 
         <LimitedPrizeSimulator v-if="event.id in limitedPrizePools" :event-id="event.id" />
 
-        <WeaponVerifyEvent v-if="event.id === 103026" />
+        <WeaponVerifyEvent v-if="event.name === '且试锋芒'" />
 
         <BoxDropItem v-if="event.boxDrop" :box-drop="event.boxDrop" />
     </div>

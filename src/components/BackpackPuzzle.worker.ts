@@ -38,6 +38,7 @@ type PlacementGroup = {
     stackCount: number
     candidates: CandidatePlacement[]
     bestScore: number
+    ammoRounds: number
 }
 type AmmoGroup = {
     itemIndexes: number[]
@@ -54,7 +55,10 @@ type SearchContext = {
     placementGroups: PlacementGroup[]
     targetScore: number
     suffixBestScores: number[]
-    ammoUpperBound: number
+    maxPerRoundGain: number
+    bestScore: number
+    deadline: number
+    nodeCount: number
 }
 
 class TargetReachedSignal extends Error {
@@ -63,6 +67,12 @@ class TargetReachedSignal extends Error {
     constructor(state: SolverState) {
         super("TARGET_REACHED")
         this.state = state
+    }
+}
+
+class BudgetExhaustedSignal extends Error {
+    constructor() {
+        super("BUDGET_EXHAUSTED")
     }
 }
 
@@ -87,13 +97,15 @@ if (typeof self !== "undefined") {
  * @param items 道具
  * @param lockedPlacements 已手动锁定的摆放
  * @param excludedItemIndexes 已排除的自动结果
+ * @param timeBudgetMs 搜索时间预算（毫秒），0 表示不限制；超时后返回已找到的最优解
  * @returns 自动摆放结果
  */
 export function solveBestSolution(
     level: BackpackPuzzleLevel,
     items: BackpackPuzzleItem[],
     lockedPlacements: ManualPlacement[],
-    excludedItemIndexes: number[]
+    excludedItemIndexes: number[],
+    timeBudgetMs = 0
 ): SolverState {
     const board = level.gridDistribute.map(row =>
         row.map(cell => {
@@ -115,51 +127,49 @@ export function solveBestSolution(
     const usedItemSet = new Set([...lockedPlacements.map(placement => placement.itemIndex), ...excludedItemIndexes])
     const availableEntries = items.map((item, itemIndex) => ({ item, itemIndex })).filter(entry => !usedItemSet.has(entry.itemIndex))
     const ammoGroup = buildAmmoGroup(availableEntries)
-    const nonAmmoEntries = availableEntries.filter(entry => entry.item.type !== "Ammo")
-    const placementGroups = buildPlacementGroups(board, nonAmmoEntries, boardWidth)
+    // 弹药也参与独立摆放搜索；未被独立放置的弹药在搜索后按剩余容量装载进枪械
+    const placementGroups = buildPlacementGroups(board, availableEntries, boardWidth)
+    // 每发弹药装载收益上界 = 统一弹药基础分 × 双倍档
+    const maxPerRoundGain = ammoGroup ? ammoGroup.ammoBasePoint * 2 : 0
     const context: SearchContext = {
         items,
         placementGroups,
         targetScore,
-        suffixBestScores: buildSuffixBestScores(placementGroups),
-        ammoUpperBound: getAmmoUpperBound(ammoGroup),
+        suffixBestScores: buildSuffixBestScores(placementGroups, maxPerRoundGain),
+        maxPerRoundGain,
+        bestScore: 0,
+        deadline: timeBudgetMs > 0 ? Date.now() + timeBudgetMs : 0,
+        nodeCount: 0,
     }
     const greedyState = buildGreedyState(context, lockedMask)
-    let bestMainState: SolverState = {
-        score: greedyState.score,
-        placements: clonePlacements(greedyState.placements),
-    }
-    let bestOptimizedState = attachAmmoToPlacements(bestMainState, ammoGroup, items)
+    let bestOptimizedState = attachAmmoToPlacements(greedyState, ammoGroup, items)
+    context.bestScore = bestOptimizedState.score
     if (bestOptimizedState.score >= targetScore) {
         return bestOptimizedState
     }
 
     try {
-        search(context, 0, lockedMask, [], 0, bestMainState, nextBestState => {
-            if (
-                nextBestState.score > bestMainState.score ||
-                (nextBestState.score === bestMainState.score && nextBestState.placements.length > bestMainState.placements.length)
-            ) {
-                bestMainState = {
-                    score: nextBestState.score,
-                    placements: clonePlacements(nextBestState.placements),
-                }
-            }
+        search(context, 0, lockedMask, [], 0, 0, nextBestState => {
+            // 每个完整状态都先计算弹药装载收益再比较，
+            // 否则“优先装填腾出格子”的分支会因主分偏低被淘汰（如 10303209 的双枪装填解）
             const optimizedState = attachAmmoToPlacements(nextBestState, ammoGroup, items)
             if (
-                optimizedState.score > bestOptimizedState.score ||
-                (optimizedState.score === bestOptimizedState.score &&
-                    optimizedState.placements.length > bestOptimizedState.placements.length)
+                optimizedState.score > context.bestScore ||
+                (optimizedState.score === context.bestScore && optimizedState.placements.length > bestOptimizedState.placements.length)
             ) {
                 bestOptimizedState = optimizedState
+                context.bestScore = optimizedState.score
             }
-            if (bestOptimizedState.score >= targetScore) {
+            if (context.bestScore >= context.targetScore) {
                 throw new TargetReachedSignal(bestOptimizedState)
             }
         })
     } catch (error) {
         if (error instanceof TargetReachedSignal) {
             return error.state
+        }
+        if (error instanceof BudgetExhaustedSignal) {
+            return bestOptimizedState
         }
         throw error
     }
@@ -168,14 +178,14 @@ export function solveBestSolution(
 
 /**
  * 深搜求最优摆放。
+ * 叶子状态统一交给 updateBest 回调，由回调结合弹药装载收益比较优劣。
  * @param context 搜索上下文
+ * @param groupIndex 当前组索引
  * @param occupiedMask 当前占用
- * @param usedGroups 已使用组
- * @param remainingUpperBound 剩余理论上界
  * @param placements 当前摆放
- * @param score 当前分数
- * @param bestState 当前最优
- * @param updateBest 更新最优回调
+ * @param score 当前主分
+ * @param skippedAmmoRounds 已跳过（未独立摆放）弹药的轮数，其装载收益在下界中单独计
+ * @param updateBest 完整状态回调
  */
 function search(
     context: SearchContext,
@@ -183,19 +193,22 @@ function search(
     occupiedMask: bigint,
     placements: WorkerPlacement[],
     score: number,
-    bestState: SolverState,
+    skippedAmmoRounds: number,
     updateBest: (state: SolverState) => void
 ) {
-    const optimisticScore = score + (context.suffixBestScores[groupIndex] ?? 0) + context.ammoUpperBound
-    if (optimisticScore < bestState.score) {
+    // 上界 = 主分 + 已跳过弹药的装载收益上界 + 后续组最优收益上界（含未决弹药的装载/摆放较大值）
+    const optimisticScore = score + skippedAmmoRounds * context.maxPerRoundGain + (context.suffixBestScores[groupIndex] ?? 0)
+    if (optimisticScore < context.bestScore) {
         return
     }
 
+    // 时间预算兜底：定期检查，超时后终止搜索并返回已有最优解
+    if (context.deadline > 0 && ++context.nodeCount % 4096 === 0 && Date.now() > context.deadline) {
+        throw new BudgetExhaustedSignal()
+    }
+
     if (groupIndex >= context.placementGroups.length) {
-        const state = { score, placements: clonePlacements(placements) }
-        if (state.score > bestState.score || (state.score === bestState.score && state.placements.length > bestState.placements.length)) {
-            updateBest(state)
-        }
+        updateBest({ score, placements: clonePlacements(placements) })
         return
     }
 
@@ -204,24 +217,20 @@ function search(
         if ((candidate.bitmask & occupiedMask) !== 0n) {
             continue
         }
-        const nextOccupiedMask = occupiedMask | candidate.bitmask
         placements.push(assignPlacement(candidate, group))
-        search(context, groupIndex + 1, nextOccupiedMask, placements, score + candidate.score, bestState, nextBestState => {
-            bestState = nextBestState
-            updateBest(nextBestState)
-        })
+        search(
+            context,
+            groupIndex + 1,
+            occupiedMask | candidate.bitmask,
+            placements,
+            score + candidate.score,
+            skippedAmmoRounds,
+            updateBest
+        )
         placements.pop()
     }
 
-    search(context, groupIndex + 1, occupiedMask, placements, score, bestState, nextBestState => {
-        bestState = nextBestState
-        updateBest(nextBestState)
-    })
-
-    const state = { score, placements: clonePlacements(placements) }
-    if (state.score > bestState.score || (state.score === bestState.score && state.placements.length > bestState.placements.length)) {
-        updateBest(state)
-    }
+    search(context, groupIndex + 1, occupiedMask, placements, score, skippedAmmoRounds + group.ammoRounds, updateBest)
 }
 
 /**
@@ -253,13 +262,17 @@ function buildGreedyState(context: SearchContext, lockedMask: bigint): SolverSta
 
 /**
  * 构建后缀最优上界。
+ * 弹药组取“独立摆放收益”与“装载进枪械收益”的较大值而非两者叠加，避免上界过松导致剪枝失效。
  * @param groups 摆放组
+ * @param maxPerRoundGain 每发弹药的装载收益上界
  * @returns 后缀分数
  */
-function buildSuffixBestScores(groups: PlacementGroup[]): number[] {
+function buildSuffixBestScores(groups: PlacementGroup[], maxPerRoundGain: number): number[] {
     const suffix = Array<number>(groups.length + 1).fill(0)
     for (let index = groups.length - 1; index >= 0; index--) {
-        suffix[index] = suffix[index + 1] + groups[index].bestScore
+        const group = groups[index]
+        const attachBound = group.ammoRounds > 0 ? group.ammoRounds * maxPerRoundGain : 0
+        suffix[index] = suffix[index + 1] + Math.max(group.bestScore, attachBound)
     }
     return suffix
 }
@@ -298,7 +311,8 @@ function buildPlacementGroups(
     const groupMap = new Map<string, { item: BackpackPuzzleItem; itemIndexes: number[] }>()
 
     for (const entry of entries) {
-        const canStack = (entry.item.maxStack ?? 1) > 1
+        // 弹药不参与同格堆叠，每个弹药独立占格
+        const canStack = (entry.item.maxStack ?? 1) > 1 && entry.item.type !== "Ammo"
         const key = canStack ? `stack:${entry.item.id}` : `single:${entry.item.id}`
         const group = groupMap.get(key)
         if (group) {
@@ -313,7 +327,8 @@ function buildPlacementGroups(
 
     const result: PlacementGroup[] = []
     for (const [key, group] of groupMap.entries()) {
-        const stackLimit = Math.max(1, group.item.maxStack ?? 1)
+        // 弹药即使 maxStack 较大也按单件拆分成组，与其他道具的同格堆叠规则保持一致
+        const stackLimit = group.item.type === "Ammo" ? 1 : Math.max(1, group.item.maxStack ?? 1)
         const chunkCount = Math.ceil(group.itemIndexes.length / stackLimit)
         for (let chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++) {
             const chunkItemIndexes = group.itemIndexes.slice(chunkIndex * stackLimit, (chunkIndex + 1) * stackLimit)
@@ -335,6 +350,8 @@ function buildPlacementGroups(
                 stackCount: chunkItemIndexes.length,
                 candidates,
                 bestScore,
+                // 该组未被独立摆放时可用于装载的弹数（非弹药组为 0）
+                ammoRounds: group.item.type === "Ammo" ? chunkItemIndexes.length * Math.max(0, group.item.currentStack ?? 1) : 0,
             })
         }
     }
@@ -415,18 +432,6 @@ function attachAmmoToPlacements(state: SolverState, ammoGroup: AmmoGroup | null,
 }
 
 /**
- * 计算弹药额外得分的安全上界，避免搜索因主分上界过紧被误剪枝。
- * @param ammoGroup 弹药组
- * @returns 弹药潜在总收益上界
- */
-function getAmmoUpperBound(ammoGroup: AmmoGroup | null): number {
-    if (!ammoGroup) {
-        return 0
-    }
-    return ammoGroup.totalRounds * ammoGroup.ammoBasePoint * 2
-}
-
-/**
  * 为候选摆放绑定具体物品索引。
  * @param candidate 候选
  * @param group 分组
@@ -477,7 +482,8 @@ function buildLockedMask(
     let mask = 0n
     for (const placement of lockedPlacements) {
         const item = items[placement.itemIndex]
-        if (!item || item.type === "Ammo") {
+        // 弹药独立摆放同样需要锁定占格，避免求解结果与其重叠
+        if (!item) {
             continue
         }
         const rotation = buildRotations(item)[placement.rotationIndex]

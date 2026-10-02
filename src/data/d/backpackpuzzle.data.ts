@@ -890,7 +890,7 @@ export const backpackPuzzleSolutionPresets: Record<number, BackpackPuzzleSolutio
         ],
     },
     10301507: {
-        score: 6600,
+        score: 8600,
         placements: [
             { itemIndex: 3, x: 2, y: 4, rotationIndex: 0, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 20 },
             { itemIndex: 1, x: 2, y: 1, rotationIndex: 1, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
@@ -899,17 +899,20 @@ export const backpackPuzzleSolutionPresets: Record<number, BackpackPuzzleSolutio
         ],
     },
     10301508: {
-        score: 6200,
+        score: 8700,
         placements: [
-            { itemIndex: 0, x: 3, y: 1, rotationIndex: 0, representedItemIndexes: [0, 1], stackCount: 2, attachedAmmoCount: 0 },
-            { itemIndex: 4, x: 5, y: 1, rotationIndex: 0, representedItemIndexes: [4], stackCount: 1, attachedAmmoCount: 6 },
-            { itemIndex: 5, x: 3, y: 3, rotationIndex: 0, representedItemIndexes: [5], stackCount: 1, attachedAmmoCount: 6 },
-            { itemIndex: 3, x: 6, y: 3, rotationIndex: 1, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 0 },
-            { itemIndex: 2, x: 3, y: 5, rotationIndex: 1, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 0, x: 4, y: 1, rotationIndex: 0, representedItemIndexes: [0, 1], stackCount: 2, attachedAmmoCount: 0 },
+            { itemIndex: 4, x: 5, y: 4, rotationIndex: 0, representedItemIndexes: [4], stackCount: 1, attachedAmmoCount: 5 },
+            { itemIndex: 5, x: 3, y: 3, rotationIndex: 1, representedItemIndexes: [5], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 6, x: 3, y: 1, rotationIndex: 0, representedItemIndexes: [6], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 7, x: 7, y: 1, rotationIndex: 0, representedItemIndexes: [7], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 8, x: 5, y: 1, rotationIndex: 1, representedItemIndexes: [8], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 3, x: 5, y: 2, rotationIndex: 0, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 2, x: 2, y: 1, rotationIndex: 0, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
         ],
     },
     10301509: {
-        score: 8800,
+        score: 10800,
         placements: [
             { itemIndex: 1, x: 2, y: 1, rotationIndex: 0, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 20 },
             { itemIndex: 6, x: 2, y: 3, rotationIndex: 0, representedItemIndexes: [6], stackCount: 1, attachedAmmoCount: 0 },
@@ -922,7 +925,7 @@ export const backpackPuzzleSolutionPresets: Record<number, BackpackPuzzleSolutio
         ],
     },
     10301510: {
-        score: 9000,
+        score: 10000,
         placements: [
             { itemIndex: 0, x: 4, y: 2, rotationIndex: 0, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 0 },
             { itemIndex: 5, x: 6, y: 1, rotationIndex: 1, representedItemIndexes: [5], stackCount: 1, attachedAmmoCount: 10 },
@@ -934,21 +937,139 @@ export const backpackPuzzleSolutionPresets: Record<number, BackpackPuzzleSolutio
         ],
     },
     10301511: {
-        score: 5800,
+        score: 7800,
         placements: [
             { itemIndex: 1, x: 2, y: 0, rotationIndex: 0, representedItemIndexes: [1, 2], stackCount: 2, attachedAmmoCount: 0 },
             { itemIndex: 3, x: 2, y: 5, rotationIndex: 0, representedItemIndexes: [3, 4], stackCount: 2, attachedAmmoCount: 0 },
             { itemIndex: 0, x: 3, y: 1, rotationIndex: 2, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 5, x: 5, y: 0, rotationIndex: 0, representedItemIndexes: [5], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 6, x: 6, y: 0, rotationIndex: 0, representedItemIndexes: [6], stackCount: 1, attachedAmmoCount: 0 },
             { itemIndex: 7, x: 1, y: 0, rotationIndex: 0, representedItemIndexes: [7, 8, 9], stackCount: 3, attachedAmmoCount: 0 },
         ],
     },
     10301512: {
-        score: 5400,
+        score: 6800,
         placements: [
             { itemIndex: 2, x: 2, y: 2, rotationIndex: 1, representedItemIndexes: [2, 3], stackCount: 2, attachedAmmoCount: 0 },
-            { itemIndex: 1, x: 4, y: 1, rotationIndex: 1, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 6 },
+            { itemIndex: 1, x: 4, y: 1, rotationIndex: 1, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
             { itemIndex: 4, x: 3, y: 5, rotationIndex: 0, representedItemIndexes: [4, 5], stackCount: 2, attachedAmmoCount: 0 },
+            { itemIndex: 6, x: 6, y: 5, rotationIndex: 0, representedItemIndexes: [6], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 7, x: 4, y: 4, rotationIndex: 1, representedItemIndexes: [7], stackCount: 1, attachedAmmoCount: 0 },
             { itemIndex: 0, x: 7, y: 2, rotationIndex: 0, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303201: {
+        score: 3200,
+        placements: [
+            { itemIndex: 0, x: 3, y: 2, rotationIndex: 0, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 1, x: 3, y: 4, rotationIndex: 1, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 2, x: 3, y: 5, rotationIndex: 1, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 3, x: 5, y: 2, rotationIndex: 3, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303202: {
+        score: 3800,
+        placements: [
+            { itemIndex: 2, x: 3, y: 2, rotationIndex: 0, representedItemIndexes: [2, 3], stackCount: 2, attachedAmmoCount: 0 },
+            { itemIndex: 4, x: 5, y: 2, rotationIndex: 0, representedItemIndexes: [4], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 0, x: 3, y: 4, rotationIndex: 0, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 1, x: 6, y: 2, rotationIndex: 0, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303203: {
+        score: 3600,
+        placements: [
+            { itemIndex: 0, x: 3, y: 2, rotationIndex: 0, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 1, x: 3, y: 4, rotationIndex: 2, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 2, x: 2, y: 3, rotationIndex: 2, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303204: {
+        score: 3800,
+        placements: [
+            { itemIndex: 3, x: 3, y: 2, rotationIndex: 0, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 0, x: 3, y: 4, rotationIndex: 1, representedItemIndexes: [0, 1], stackCount: 2, attachedAmmoCount: 0 },
+            { itemIndex: 2, x: 4, y: 4, rotationIndex: 2, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303205: {
+        score: 5600,
+        placements: [
+            { itemIndex: 0, x: 4, y: 1, rotationIndex: 0, representedItemIndexes: [0, 1, 2], stackCount: 3, attachedAmmoCount: 0 },
+            { itemIndex: 4, x: 2, y: 4, rotationIndex: 3, representedItemIndexes: [4], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 3, x: 2, y: 1, rotationIndex: 3, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 5, x: 4, y: 3, rotationIndex: 1, representedItemIndexes: [5], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303206: {
+        score: 9200,
+        placements: [
+            { itemIndex: 0, x: 2, y: 1, rotationIndex: 0, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 3, x: 4, y: 1, rotationIndex: 0, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 6, x: 5, y: 4, rotationIndex: 0, representedItemIndexes: [6, 7], stackCount: 2, attachedAmmoCount: 0 },
+            { itemIndex: 4, x: 4, y: 5, rotationIndex: 0, representedItemIndexes: [4, 5], stackCount: 2, attachedAmmoCount: 0 },
+            { itemIndex: 1, x: 7, y: 3, rotationIndex: 0, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 2, x: 6, y: 6, rotationIndex: 1, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 8, x: 6, y: 3, rotationIndex: 0, representedItemIndexes: [8, 9], stackCount: 2, attachedAmmoCount: 0 },
+        ],
+    },
+    10303207: {
+        score: 5600,
+        placements: [
+            { itemIndex: 0, x: 2, y: 1, rotationIndex: 1, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 5 },
+            { itemIndex: 1, x: 4, y: 1, rotationIndex: 0, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 2, x: 6, y: 2, rotationIndex: 0, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303208: {
+        score: 9600,
+        placements: [
+            { itemIndex: 0, x: 4, y: 1, rotationIndex: 0, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 20 },
+            { itemIndex: 2, x: 5, y: 4, rotationIndex: 0, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 1, x: 4, y: 2, rotationIndex: 2, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 3, x: 3, y: 3, rotationIndex: 3, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 4, x: 3, y: 1, rotationIndex: 0, representedItemIndexes: [4], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303209: {
+        score: 8800,
+        placements: [
+            { itemIndex: 4, x: 4, y: 1, rotationIndex: 0, representedItemIndexes: [4], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 0, x: 2, y: 1, rotationIndex: 1, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 6 },
+            { itemIndex: 1, x: 6, y: 1, rotationIndex: 1, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 4 },
+            { itemIndex: 2, x: 2, y: 4, rotationIndex: 1, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 3, x: 6, y: 4, rotationIndex: 3, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303210: {
+        score: 5200,
+        placements: [
+            { itemIndex: 0, x: 2, y: 0, rotationIndex: 0, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 1, x: 2, y: 6, rotationIndex: 0, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 4, x: 2, y: 2, rotationIndex: 0, representedItemIndexes: [4], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 2, x: 6, y: 1, rotationIndex: 0, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 3, x: 6, y: 4, rotationIndex: 0, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303211: {
+        score: 5600,
+        placements: [
+            { itemIndex: 2, x: 2, y: 0, rotationIndex: 1, representedItemIndexes: [2, 3], stackCount: 2, attachedAmmoCount: 0 },
+            { itemIndex: 0, x: 7, y: 0, rotationIndex: 0, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 1, x: 2, y: 3, rotationIndex: 0, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 4, x: 4, y: 2, rotationIndex: 0, representedItemIndexes: [4], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 5, x: 5, y: 4, rotationIndex: 0, representedItemIndexes: [5], stackCount: 1, attachedAmmoCount: 0 },
+        ],
+    },
+    10303212: {
+        score: 4600,
+        placements: [
+            { itemIndex: 4, x: 2, y: 1, rotationIndex: 2, representedItemIndexes: [4], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 0, x: 5, y: 1, rotationIndex: 1, representedItemIndexes: [0], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 1, x: 4, y: 0, rotationIndex: 1, representedItemIndexes: [1], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 2, x: 7, y: 4, rotationIndex: 0, representedItemIndexes: [2], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 5, x: 2, y: 5, rotationIndex: 0, representedItemIndexes: [5], stackCount: 1, attachedAmmoCount: 0 },
+            { itemIndex: 3, x: 7, y: 7, rotationIndex: 0, representedItemIndexes: [3], stackCount: 1, attachedAmmoCount: 0 },
         ],
     },
 }

@@ -983,8 +983,8 @@ onBeforeUnmount(() => {
                 <!-- 上段：内容贴住输入框（靠下显示），超出时内部滚动 -->
                 <section class="flex min-h-0 flex-1 flex-col">
                     <!-- 输入态：本地检索结果，贴住输入框 -->
-                    <ScrollArea v-if="isComposing" class="min-h-0 flex-1">
-                        <div class="flex min-h-full flex-col justify-end">
+                    <ScrollArea v-if="isComposing" class="db-scroll-fill min-h-0 flex-1">
+                        <div class="flex flex-1 flex-col justify-end">
                             <div class="mx-auto w-full max-w-7xl px-4 pb-4 md:px-6 lg:px-8">
                                 <div class="db-ask-panel">
                                     <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-1 pb-2">
@@ -1044,8 +1044,8 @@ onBeforeUnmount(() => {
                     </ScrollArea>
 
                     <!-- 浏览态：模块分类过滤条 + 模块卡片网格（过滤条在列表顶部，实时过滤） -->
-                    <ScrollArea v-else class="min-h-0 flex-1">
-                        <div class="flex min-h-full flex-col justify-end">
+                    <ScrollArea v-else class="db-scroll-fill min-h-0 flex-1">
+                        <div class="flex flex-1 flex-col justify-end">
                             <div class="db-rise mx-auto w-full max-w-7xl px-4 pt-6 pb-4 md:px-6 lg:px-8">
                                 <!-- 模块分类过滤条：改选立刻过滤下方模块列表 -->
                                 <div class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -1120,8 +1120,8 @@ onBeforeUnmount(() => {
                 <!-- 下段：内容贴住页面底部（靠下显示） -->
                 <section class="flex min-h-0 flex-1 flex-col">
                     <!-- 浏览态：本期新增（展开时高度在段内撑开，不影响输入框位置） -->
-                    <ScrollArea v-if="showModuleFilter" class="min-h-0 flex-1">
-                        <div class="flex min-h-full flex-col justify-end">
+                    <ScrollArea v-if="showModuleFilter" class="db-scroll-fill min-h-0 flex-1">
+                        <div class="flex flex-1 flex-col justify-end">
                             <div class="db-rise mx-auto w-full max-w-7xl px-4 pb-5 pt-4 md:px-6 lg:px-8">
                                 <div
                                     class="grid gap-x-6 gap-y-5"
@@ -1150,6 +1150,16 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/*
+ * ScrollArea 沉底修正：reka 的 viewport 内层固定为 display:table，
+ * 会截断槽内容 min-h-full 的百分比高度链，导致 justify-end 失效、内容顶到上沿。
+ * 把该层改回纵向 flex，槽内容以 flex-1 撑满后再由 justify-end 沉底。
+ */
+.db-scroll-fill :deep([data-reka-scroll-area-viewport] > div) {
+    display: flex !important;
+    flex-direction: column;
+}
+
 /* 页面级一次性入场动画：轻量上浮淡入，仅播放一次，不做循环装饰 */
 /* backwards：结束后不保留动画值，避免后代 backdrop-filter 失效 */
 .db-rise {

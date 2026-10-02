@@ -1,5 +1,5 @@
 import { decode } from "@msgpack/msgpack"
-import { unzipSync } from "fflate"
+import { type Unzipped, unzip } from "fflate"
 import { tauriFetch } from "../api/app"
 import { env } from "../env"
 import { getActiveCdnBase, resolveCdnUrls } from "../utils/cdn"
@@ -133,6 +133,25 @@ const bootstrapState: BootstrapDataPackState = {
 }
 
 let installedVersionsCache: DataPackVersionInfo[] | null = null
+
+/**
+ * 异步解压 zip：fflate 把解压放到 Worker 内分片执行，主线程只等结果，
+ * 供下载/导入数据包等大包场景使用，避免同步解压把进度条动画卡住。
+ * @param bytes 压缩包字节
+ * @returns 解压后的文件映射
+ * @throws zip 损坏或解压失败时抛出 fflate 的错误
+ */
+export function unzipAsync(bytes: Uint8Array): Promise<Unzipped> {
+    return new Promise<Unzipped>((resolve, reject) => {
+        unzip(bytes, (error, entries) => {
+            if (error) {
+                reject(error)
+                return
+            }
+            resolve(entries)
+        })
+    })
+}
 
 /**
  * 获取默认数据包基址。
@@ -434,9 +453,10 @@ export function revivePackedValue(value: unknown): unknown {
  * 从 zip 中提取 manifest 与模块数据。
  * @param bytes 数据包二进制
  * @returns 清单、图片清单和模块原始字节
+ * @throws 缺少 manifest.json 或 zip 损坏时抛出
  */
-function decodePack(bytes: Uint8Array): DecodedDataPack {
-    const entries = unzipSync(bytes)
+async function decodePack(bytes: Uint8Array): Promise<DecodedDataPack> {
+    const entries = await unzipAsync(bytes)
     const manifestBytes = entries[MANIFEST_FILE]
     if (!manifestBytes) {
         throw new Error("数据包缺少 manifest.json")
@@ -995,7 +1015,7 @@ async function tryDownloadDataPackViaDiff(targetVersion: string, targetPackageFi
     }
 
     try {
-        const pack = decodePack(applied.bytes)
+        const pack = await decodePack(applied.bytes)
         if (pack.manifest.version !== targetVersion) {
             console.warn(`数据包差分版本不符: 目标 ${targetVersion}, 实际 ${pack.manifest.version}`)
             return null
@@ -1047,7 +1067,9 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
             throw lastError instanceof Error ? lastError : new Error(String(lastError))
         }
     }
-    const pack = decodePack(bytes)
+    // 差分路径没有逐块进度，这里统一把进度顶满再进入安装
+    onProgress?.(1)
+    const pack = await decodePack(bytes)
     await writePackBytes(remote.version, bytes, pack)
     await writeInstalledInfo(remote)
     await activateStoredPack(remote.version, pack.manifest, pack.imgsManifest)
@@ -1078,7 +1100,7 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
  */
 export async function importDataPackFile(file: File): Promise<DataPackInstallStatus> {
     const bytes = new Uint8Array(await file.arrayBuffer())
-    const pack = decodePack(bytes)
+    const pack = await decodePack(bytes)
     const { manifest } = pack
     await writePackBytes(manifest.version, bytes, pack)
     await writeInstalledInfo({
@@ -1206,7 +1228,7 @@ async function migrateLegacyModuleStorage(version: string): Promise<void> {
         if (!bytes) {
             return
         }
-        const pack = decodePack(bytes)
+        const pack = await decodePack(bytes)
         await writeModuleBytes(version, pack.moduleBytes)
     })()
 

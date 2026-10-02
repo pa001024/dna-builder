@@ -48,6 +48,7 @@ type ManualPlacement = {
 type ManualAmmoAssignment = {
     ammoItemIndex: number
     gunItemIndex: number
+    rounds: number
 }
 type WorkerPlacement = {
     itemIndex: number
@@ -193,14 +194,28 @@ const itemUsageState = computed(() => {
         })
     })
     const manualSet = new Set(getBoardPlacementList().flatMap(placement => placement.representedItemIndexes))
-    return normalizedItems.value.map(entry => ({
-        ...entry,
-        usedCount: entry.itemIndexes.filter(itemIndex => usageSet.has(itemIndex)).length,
-        usedByManual: entry.itemIndexes.some(itemIndex => manualSet.has(itemIndex)),
-        usedBySolver: entry.itemIndexes.some(itemIndex => usageSet.has(itemIndex) && !manualSet.has(itemIndex)),
-        available:
-            entry.itemIndexes.some(itemIndex => !usageSet.has(itemIndex)) || entry.itemIndexes.some(itemIndex => manualSet.has(itemIndex)),
-    }))
+    return normalizedItems.value.map(entry => {
+        const isAmmoEntry = entry.item.type === "Ammo"
+        const totalRounds = entry.itemIndexes.reduce((sum, itemIndex) => sum + Math.max(0, levelItems.value[itemIndex]?.currentStack ?? 1), 0)
+        const remainingRounds = Math.max(0, totalRounds - entry.itemIndexes.reduce((sum, itemIndex) => sum + getItemLoadedRounds(itemIndex), 0))
+        return {
+            ...entry,
+            usedCount: entry.itemIndexes.filter(itemIndex => usageSet.has(itemIndex)).length,
+            usedByManual: entry.itemIndexes.some(itemIndex => manualSet.has(itemIndex)),
+            usedBySolver: entry.itemIndexes.some(itemIndex => usageSet.has(itemIndex) && !manualSet.has(itemIndex)),
+            // 弹药的已用组数把已装填的物品也计入（装填与上盘互斥），与普通道具的占用显示口径一致
+            displayUsedCount: isAmmoEntry
+                ? entry.itemIndexes.filter(itemIndex => usageSet.has(itemIndex) || getItemLoadedRounds(itemIndex) > 0).length
+                : entry.itemIndexes.filter(itemIndex => usageSet.has(itemIndex)).length,
+            // 弹药按“还有剩余弹数且未被上盘”判定可用；普通道具按未被占用判定
+            available: isAmmoEntry
+                ? entry.itemIndexes.some(itemIndex => !usageSet.has(itemIndex) && getItemRemainingRounds(itemIndex) > 0)
+                : entry.itemIndexes.some(itemIndex => !usageSet.has(itemIndex)) ||
+                  entry.itemIndexes.some(itemIndex => manualSet.has(itemIndex)),
+            totalRounds,
+            remainingRounds,
+        }
+    })
 })
 
 const combinedPlacements = computed(() => {
@@ -284,6 +299,7 @@ async function solveCurrentBoard() {
             return
         }
         solverPlacements.value = result.placements
+        clampManualAmmoAssignments()
         solverScore.value = result.score
         needsSolve.value = false
     } catch (error) {
@@ -410,7 +426,8 @@ function buildWorkerPlacementsFromPreset(
                     covered: 0,
                     cellCount: 0,
                 },
-                "solver"
+                "solver",
+                []
             )
             if (!hydrated) {
                 return null
@@ -433,22 +450,14 @@ function buildWorkerPlacementsFromPreset(
 
 /**
  * 将 worker 摆放结果转换为前端摆放列表。
+ * 在空棋盘上逐个水合（解算结果本身保证互不重叠），避免上一轮摆放残留干扰弹药吸附判定。
  * @param placements worker 返回结果
  * @returns 前端摆放列表
  */
 function hydrateWorkerPlacements(placements: WorkerPlacement[]): Placement[] {
     const result: Placement[] = []
     for (const placement of placements) {
-        const representedItemIndexes = placement.representedItemIndexes.filter(itemIndex => levelItems.value[itemIndex]?.type !== "Ammo")
-        const basePlacement = hydratePlacement(
-            {
-                ...placement,
-                representedItemIndexes,
-                stackCount: representedItemIndexes.length || 1,
-                attachedAmmoCount: placement.attachedAmmoCount,
-            },
-            "solver"
-        )
+        const basePlacement = hydratePlacement({ ...placement }, "solver", [])
         if (basePlacement) {
             result.push(basePlacement)
         }
@@ -607,14 +616,8 @@ function getManualPlacementList(ignoreItemIndex?: number, basePlacements: Placem
     }
 
     const manualPlacementList: Placement[] = []
-    const regularGroups: ManualPlacement[][] = []
-
-    for (const group of orderedGroups) {
-        const item = levelItems.value[group[0]?.itemIndex ?? -1]
-        if (item?.type !== "Ammo") {
-            regularGroups.push(group)
-        }
-    }
+    // 弹药独立摆放与普通道具一样参与水合；装载进枪械的弹药不会进入 manualPlacements
+    const regularGroups: ManualPlacement[][] = orderedGroups
 
     const buildGroupedPlacement = (group: ManualPlacement[], existingPlacements: Placement[]) => {
         const [firstPlacement, ...restPlacements] = group
@@ -646,32 +649,44 @@ function getManualPlacementList(ignoreItemIndex?: number, basePlacements: Placem
 
 /**
  * 获取当前已被占用的物品索引集合。
+ * 装填不消耗弹药道具本身，因此装填记录不参与占用判定。
  * @returns 已占用索引集合
  */
 function getUsedItemIndexSet(): Set<number> {
-    return new Set([
-        ...bestSolution.value.placements.flatMap(placement => placement.representedItemIndexes),
-        ...manualAmmoAssignments.value.map(entry => entry.ammoItemIndex),
-    ])
+    return new Set(bestSolution.value.placements.flatMap(placement => placement.representedItemIndexes))
 }
 
 /**
- * 获取指定枪械的手动装弹数量。
+ * 获取指定弹药物品已装填的弹数。
+ * @param ammoItemIndex 弹药索引
+ * @returns 已装填弹数
+ */
+function getItemLoadedRounds(ammoItemIndex: number): number {
+    return manualAmmoAssignments.value.reduce((sum, entry) => (entry.ammoItemIndex === ammoItemIndex ? sum + entry.rounds : sum), 0)
+}
+
+/**
+ * 获取指定弹药物品的剩余弹数（可拆分装填到多把枪械）。
+ * @param ammoItemIndex 弹药索引
+ * @returns 剩余弹数
+ */
+function getItemRemainingRounds(ammoItemIndex: number): number {
+    const ammoItem = levelItems.value[ammoItemIndex]
+    return Math.max(0, (ammoItem?.currentStack ?? 1) - getItemLoadedRounds(ammoItemIndex))
+}
+
+/**
+ * 获取指定枪械的手动装填弹数。
  * @param gunItemIndex 枪械索引
- * @returns 已装弹数
+ * @returns 已装填弹数
  */
 function getManualAttachedAmmoCount(gunItemIndex: number): number {
-    return manualAmmoAssignments.value.reduce((sum, entry) => {
-        if (entry.gunItemIndex !== gunItemIndex) {
-            return sum
-        }
-        const ammoItem = levelItems.value[entry.ammoItemIndex]
-        return sum + Math.max(0, ammoItem?.currentStack ?? 0)
-    }, 0)
+    return manualAmmoAssignments.value.reduce((sum, entry) => (entry.gunItemIndex === gunItemIndex ? sum + entry.rounds : sum), 0)
 }
 
 /**
  * 获取指定枪械当前剩余可装弹容量。
+ * 同时扣除解算自动装载与手动装填的弹数，严格防止超过枪械容量。
  * @param gunItemIndex 枪械索引
  * @returns 剩余容量
  */
@@ -680,17 +695,27 @@ function getRemainingAmmoCapacity(gunItemIndex: number): number {
     if (!gunItem || gunItem.type !== "Gun") {
         return 0
     }
-    return Math.max(0, (gunItem.maxAmmo ?? 0) - (gunItem.currentAmmo ?? 0) - getManualAttachedAmmoCount(gunItemIndex))
+    const solverAttached = solverPlacements.value.find(placement => placement.itemIndex === gunItemIndex)?.attachedAmmoCount ?? 0
+    return Math.max(0, (gunItem.maxAmmo ?? 0) - (gunItem.currentAmmo ?? 0) - solverAttached - getManualAttachedAmmoCount(gunItemIndex))
 }
 
 /**
  * 为物品栏选择一个可新增拖拽的物品索引。
+ * 弹药优先选择未被上盘且仍有剩余弹数的物品，装填后仍可继续拖拽装填剩余部分。
  * @param itemIndexes 同组物品索引
  * @returns 可用物品索引
  */
 function getNextPoolItemIndex(itemIndexes: number[]): number | null {
     const usedSet = getUsedItemIndexSet()
-    return itemIndexes.find(itemIndex => !usedSet.has(itemIndex)) ?? null
+    return (
+        itemIndexes.find(itemIndex => {
+            if (!usedSet.has(itemIndex)) {
+                const item = levelItems.value[itemIndex]
+                return item?.type !== "Ammo" || getItemRemainingRounds(itemIndex) > 0
+            }
+            return false
+        }) ?? null
+    )
 }
 
 /**
@@ -911,12 +936,15 @@ function resolvePlacementAt(
     if (!placement) {
         return null
     }
-    if (item.type === "Ammo" && !placement.representedItemIndexes.some(index => levelItems.value[index]?.type === "Gun")) {
-        return null
-    }
     if (item.type === "Ammo") {
         const gunItemIndex = placement.representedItemIndexes.find(index => levelItems.value[index]?.type === "Gun")
-        if (gunItemIndex === undefined || getRemainingAmmoCapacity(gunItemIndex) <= 0) {
+        if (gunItemIndex !== undefined) {
+            // 装载进枪械：严格校验枪械剩余容量与弹药剩余弹数，装填时按两者较小值拆分
+            if (getRemainingAmmoCapacity(gunItemIndex) <= 0 || getItemRemainingRounds(itemIndex) <= 0) {
+                return null
+            }
+        } else if (getItemLoadedRounds(itemIndex) > 0) {
+            // 已装填过弹数的弹药不能再独立上盘，避免剩余弹数与得分口径不一致
             return null
         }
     }
@@ -1004,12 +1032,35 @@ function commitDraggingPlacement() {
         }
         const draggedItem = levelItems.value[drag.itemIndex]
         if (draggedItem?.type === "Ammo") {
-            const gunItemIndex =
-                evaluatedPlacement.representedItemIndexes.find(index => levelItems.value[index]?.type === "Gun") ??
-                evaluatedPlacement.itemIndex
-            if (levelItems.value[gunItemIndex]?.type === "Gun") {
-                manualAmmoAssignments.value = [...manualAmmoAssignments.value, { ammoItemIndex: drag.itemIndex, gunItemIndex }]
-                selectedItemIndex.value = gunItemIndex
+            const gunItemIndex = evaluatedPlacement.representedItemIndexes.find(index => levelItems.value[index]?.type === "Gun")
+            if (gunItemIndex !== undefined) {
+                // 装载进枪械：按枪械剩余容量与弹药剩余弹数中较小者拆分装填，剩余弹数留在弹药上可继续装填其他枪械
+                const rounds = Math.min(getItemRemainingRounds(drag.itemIndex), getRemainingAmmoCapacity(gunItemIndex))
+                if (rounds > 0) {
+                    const existingAssignment = manualAmmoAssignments.value.find(
+                        entry => entry.ammoItemIndex === drag.itemIndex && entry.gunItemIndex === gunItemIndex
+                    )
+                    manualAmmoAssignments.value = existingAssignment
+                        ? manualAmmoAssignments.value.map(entry =>
+                              entry === existingAssignment ? { ...entry, rounds: entry.rounds + rounds } : entry
+                          )
+                        : [...manualAmmoAssignments.value, { ammoItemIndex: drag.itemIndex, gunItemIndex, rounds }]
+                    manualPlacements.value = manualPlacements.value.filter(placement => placement.itemIndex !== drag.itemIndex)
+                    selectedItemIndex.value = gunItemIndex
+                }
+            } else {
+                // 独立摆放：与普通道具一致进入手动摆放列表
+                const nextPlacement: ManualPlacement = {
+                    itemIndex: drag.itemIndex,
+                    x: evaluatedPlacement.x,
+                    y: evaluatedPlacement.y,
+                    rotationIndex: evaluatedPlacement.rotationIndex,
+                }
+                manualPlacements.value =
+                    drag.source === "pool"
+                        ? [...manualPlacements.value, nextPlacement]
+                        : [...manualPlacements.value.filter(placement => placement.itemIndex !== drag.itemIndex), nextPlacement]
+                selectedItemIndex.value = drag.itemIndex
             }
         } else {
             const nextPlacement: ManualPlacement = {
@@ -1060,6 +1111,31 @@ function clearAllManualPlacements() {
     manualAmmoAssignments.value = []
     selectedItemIndex.value = null
     selectedPlacementKey.value = null
+}
+
+/**
+ * 求解结束后按新解算摆放裁剪手动装填记录。
+ * 解算装填数可能变化，需保证“解算装填 + 手动装填”不超过枪械容量；弹数被裁完的记录直接移除。
+ */
+function clampManualAmmoAssignments() {
+    manualAmmoAssignments.value = manualAmmoAssignments.value
+        .map(entry => {
+            const gunPlacement = solverPlacements.value.find(placement => placement.itemIndex === entry.gunItemIndex)
+            const gunItem = levelItems.value[entry.gunItemIndex]
+            if (!gunPlacement || gunPlacement.source !== "solver" || gunItem?.type !== "Gun") {
+                return entry
+            }
+            const otherManualRounds = manualAmmoAssignments.value.reduce(
+                (sum, other) => (other !== entry && other.gunItemIndex === entry.gunItemIndex ? sum + other.rounds : sum),
+                0
+            )
+            const capacity = Math.max(
+                0,
+                (gunItem.maxAmmo ?? 0) - (gunItem.currentAmmo ?? 0) - gunPlacement.attachedAmmoCount - otherManualRounds
+            )
+            return { ...entry, rounds: Math.min(entry.rounds, capacity) }
+        })
+        .filter(entry => entry.rounds > 0)
 }
 
 /**
@@ -1128,6 +1204,10 @@ function rotatePlacedItem(placement: Placement) {
     const nextRotationIndex = (placement.rotationIndex + 1) % rotations.length
     const nextPlacement = findNearestPlacement(placement.itemIndex, nextRotationIndex, placement.x, placement.y, placement.source)
     if (!nextPlacement) {
+        return
+    }
+    // 独立摆放的弹药旋转后若只能吸附进枪械（变成装载），保持原状，避免静默转成装弹
+    if (item.type === "Ammo" && nextPlacement.representedItemIndexes.some(index => levelItems.value[index]?.type === "Gun")) {
         return
     }
     manualPlacements.value = manualPlacements.value.map(entry =>
@@ -1220,6 +1300,21 @@ function isStackCountAnchorCell(placement: Placement, cell: Cell): boolean {
 }
 
 /**
+ * 获取摆放枪械的实际装填弹数。
+ * 手动摆放的装填数实时取自装填记录（水合后仍可能变化）；
+ * 解算摆放取解算装填数并叠加其后的手动补装部分，两者相加不会重复计数。
+ * @param placement 枪械摆放
+ * @returns 装填弹数
+ */
+function getPlacementAttachedRounds(placement: Placement): number {
+    const manualRounds = getManualAttachedAmmoCount(placement.itemIndex)
+    if (placement.source === "manual") {
+        return manualRounds
+    }
+    return placement.attachedAmmoCount + manualRounds
+}
+
+/**
  * 获取摆放右下角角标文本。
  * @param placement 摆放
  * @returns 文本
@@ -1230,7 +1325,7 @@ function getPlacementBadgeText(placement: Placement): string {
         parts.push(`x${placement.stackCount}`)
     }
     if (placement.item.type === "Gun" && placement.item.maxAmmo) {
-        const currentAmmo = Math.max(0, (placement.item.currentAmmo ?? 0) + placement.attachedAmmoCount)
+        const currentAmmo = Math.max(0, (placement.item.currentAmmo ?? 0) + getPlacementAttachedRounds(placement))
         parts.push(`${currentAmmo}/${placement.item.maxAmmo}`)
     }
     return parts.join(" ")
@@ -1458,6 +1553,8 @@ function evaluatePlacement(
                 existingPlacements
             )
         }
+        // 部分压在枪械上又无法完整吸附进枪械，视为无效摆放，避免出现压枪混合占格
+        return null
     }
 
     const scoreTier = getPlacementScoreTier(cells)
@@ -1553,10 +1650,7 @@ function computeBoardScore(placements: Placement[]): number {
                 ? getSingleItemBaseScore(
                       placement.item,
                       ammoBasePoint,
-                      Math.max(
-                          0,
-                          (placement.item.currentAmmo ?? 0) + placement.attachedAmmoCount + getManualAttachedAmmoCount(placement.itemIndex)
-                      )
+                      Math.max(0, (placement.item.currentAmmo ?? 0) + getPlacementAttachedRounds(placement))
                   )
                 : placement.representedItemIndexes.reduce((itemSum, itemIndex) => {
                       const representedItem = levelItems.value[itemIndex]
@@ -1706,47 +1800,62 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
 </script>
 
 <template>
-    <div v-if="selectedLevel" class="space-y-4">
-        <div class="rounded-md bg-base-200 p-3">
-            <div class="flex items-start justify-between gap-3">
-                <div>
-                    <div class="text-lg font-bold">{{ selectedLevel.name }}</div>
-                    <div class="text-sm text-base-content/70">{{ selectedLevel.desc }}</div>
-                </div>
+    <section v-if="selectedLevel" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <SectionHeader no-animate compact :title="selectedLevel.name">
+            <template #trailing>
                 <CopyID :id="selectedLevel.id" />
-            </div>
-        </div>
+            </template>
+        </SectionHeader>
+        <p v-if="selectedLevel.desc" class="mb-3 text-xs text-base-content/60">{{ selectedLevel.desc }}</p>
 
-        <div v-if="levels.length > 1" class="rounded-md bg-base-200 p-3">
-            <div class="flex flex-wrap gap-2">
-                <button
-                    v-for="level in levels"
-                    :key="level.id"
-                    class="btn btn-sm"
-                    :class="selectedLevelId === level.id ? 'btn-primary' : 'btn-ghost'"
-                    @click="selectedLevelId = level.id"
-                >
-                    {{ level.name }}
-                </button>
-            </div>
+        <div v-if="levels.length > 1" class="mb-3 flex flex-wrap gap-2">
+            <button
+                v-for="level in levels"
+                :key="level.id"
+                type="button"
+                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
+                :class="
+                    selectedLevelId === level.id
+                        ? 'border-primary bg-primary font-semibold text-primary-content'
+                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                "
+                @click="selectedLevelId = level.id"
+            >
+                {{ level.name }}
+            </button>
         </div>
 
         <div class="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
-            <div class="rounded-md bg-base-200 p-3">
+            <div>
                 <div class="mb-2 flex items-center justify-between gap-2">
-                    <div class="text-xs text-base-content/70">{{ $t('backpack-puzzle.drag_item_hint') }}</div>
+                    <span class="text-[11px] tracking-wide text-base-content/55">{{ $t('backpack-puzzle.drag_item_hint') }}</span>
                     <div class="flex items-center gap-2">
-                        <button class="btn btn-xs btn-primary" :class="{ 'btn-disabled': isSolving }" @click="solveCurrentBoard">
+                        <button
+                            type="button"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                            :class="
+                                isSolving
+                                    ? 'border-base-content/20 text-base-content/60'
+                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
+                            "
+                            :disabled="isSolving"
+                            @click="solveCurrentBoard"
+                        >
                             {{ isSolving ? "求解中" : "求解" }}
                         </button>
-                        <button v-if="manualPlacements.length" class="btn btn-xs btn-ghost" @click="clearAllManualPlacements">
+                        <button
+                            v-if="manualPlacements.length"
+                            type="button"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-error/40 px-2 py-0.5 text-[11px] text-error/80 transition-colors duration-150 hover:border-error hover:bg-error/10 hover:text-error active:scale-[0.97]"
+                            @click="clearAllManualPlacements"
+                        >
                             {{ $t('backpack-puzzle.clear_manual_placement') }}
                         </button>
                     </div>
                 </div>
                 <div
                     ref="boardRef"
-                    class="relative mx-auto w-full max-w-full overflow-hidden rounded-lg border border-base-300/80 bg-base-100/70"
+                    class="relative mx-auto w-full max-w-full overflow-hidden rounded-xs border border-base-content/15 bg-base-100/40"
                 >
                     <div
                         class="grid w-full"
@@ -1758,7 +1867,7 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                             <div
                                 v-for="(cell, x) in row"
                                 :key="`${y}-${x}`"
-                                class="aspect-square border border-base-300/60"
+                                class="aspect-square border border-base-content/10"
                                 :class="getCellClass(cell as GridPoint)"
                             />
                         </template>
@@ -1792,7 +1901,7 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                                 >
                                     <div
                                         v-if="isStackCountAnchorCell(placement, cell) && getPlacementBadgeText(placement)"
-                                        class="z-30 absolute bottom-2 right-2 translate-x-1/4 translate-y-1/4 rounded bg-neutral px-1 text-[10px] leading-4 text-neutral-content shadow"
+                                        class="z-30 absolute bottom-2 right-2 translate-x-1/4 translate-y-1/4 rounded-xs bg-neutral px-1 text-[10px] leading-4 text-neutral-content shadow"
                                     >
                                         {{ getPlacementBadgeText(placement) }}
                                     </div>
@@ -1813,13 +1922,15 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                                 class="absolute right-1 top-1 flex gap-1 pointer-events-auto"
                             >
                                 <button
-                                    class="btn btn-xs btn-circle btn-neutral/85 min-h-0 h-6 w-6"
+                                    type="button"
+                                    class="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 bg-base-100/85 text-[11px] text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
                                     @click.stop="rotatePlacedItem(placement)"
                                 >
                                     ↻
                                 </button>
                                 <button
-                                    class="btn btn-xs btn-circle btn-neutral/85 min-h-0 h-6 w-6"
+                                    type="button"
+                                    class="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 bg-base-100/85 text-[11px] text-base-content/70 transition-colors duration-150 hover:border-error hover:bg-error/10 hover:text-error active:scale-[0.97]"
                                     @click.stop="removePlacement(placement)"
                                 >
                                     ×
@@ -1830,65 +1941,94 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                 </div>
             </div>
 
-            <div class="rounded-md bg-base-200 p-3 space-y-3">
-                <div class="grid grid-cols-2 gap-2 text-sm">
-                    <div class="rounded bg-base-100 p-2">
-                        <div class="text-base-content/60">当前分数</div>
-                        <div class="text-lg font-semibold">{{ bestSolution.score }}</div>
+            <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-2">
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-[11px] tracking-wide text-base-content/55">当前分数</span>
+                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{ bestSolution.score }}</span>
                     </div>
-                    <div class="rounded bg-base-100 p-2">
-                        <div class="text-base-content/60">ID</div>
-                        <div class="text-lg font-semibold">{{ selectedLevel.id }}</div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-[11px] tracking-wide text-base-content/55">ID</span>
+                        <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ selectedLevel.id }}</span>
                     </div>
-                    <div class="rounded bg-base-100 p-2">
-                        <div class="text-base-content/60">已放置</div>
-                        <div class="text-lg font-semibold">{{ bestSolution.placements.length }}</div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-[11px] tracking-wide text-base-content/55">已放置</span>
+                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{ bestSolution.placements.length }}</span>
                     </div>
-                    <div class="rounded bg-base-100 p-2">
-                        <div class="text-base-content/60">求解状态</div>
-                        <div class="text-lg font-semibold">{{ isSolving ? "计算中" : needsSolve ? "待求解" : "已完成" }}</div>
+                    <div
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-[11px] tracking-wide text-base-content/55">求解状态</span>
+                        <span class="text-[13px] font-semibold text-primary">{{ isSolving ? "计算中" : needsSolve ? "待求解" : "已完成" }}</span>
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <div class="text-xs text-base-content/70">奖励分数</div>
-                    <div v-for="row in rewardRows" :key="row.rewardId" class="rounded bg-base-100 p-2">
-                        <div class="flex flex-col gap-2">
-                            <div class="text-sm">
-                                <div>目标 {{ row.score }}</div>
-                                <div class="text-xs text-base-content/60">ID {{ row.rewardId }}</div>
-                            </div>
-                            <RewardItem :reward="row.reward" />
+                    <div class="text-[11px] tracking-wide text-base-content/55">奖励分数</div>
+                    <div
+                        v-for="row in rewardRows"
+                        :key="row.rewardId"
+                        class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                    >
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[11px] tracking-wide text-base-content/55">目标</span>
+                            <span class="font-orbitron text-[13px] font-semibold text-primary">{{ row.score }}</span>
                         </div>
+                        <CopyID :id="row.rewardId" />
+                        <RewardItem :reward="row.reward" />
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="rounded-md bg-base-200 p-3">
-            <div class="mb-2 text-xs text-base-content/70">道具列表</div>
+        <div class="mt-3 space-y-2">
+            <div class="text-[11px] tracking-wide text-base-content/55">道具列表</div>
             <div v-if="itemUsageState.length" class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                <div class="p-2" v-for="entry in itemUsageState" :key="entry.key">
+                <div v-for="entry in itemUsageState" :key="entry.key">
                     <div
-                        class="rounded transition-colors duration-100"
-                        :class="entry.itemIndexes.includes(selectedItemIndex ?? -1) ? 'bg-primary/10 ring-1 ring-primary/50' : ''"
+                        class="rounded-xs border p-2.5 transition-colors duration-200"
+                        :class="
+                            entry.itemIndexes.includes(selectedItemIndex ?? -1)
+                                ? 'border-primary bg-primary/10'
+                                : 'border-base-content/10 bg-base-content/3 hover:border-primary/40'
+                        "
                     >
                         <div class="flex items-start justify-start gap-2">
                             <div class="text-sm font-medium">{{ entry.item.name }}</div>
-                            <div class="text-xs text-base-content/60">ID {{ entry.item.id }}</div>
-                            <div class="text-xs text-base-content/60">x{{ entry.quantity }}</div>
+                            <CopyID :id="entry.item.id" />
+                            <span class="font-mono text-[11px] tabular-nums text-base-content/45">x{{ entry.quantity }}</span>
                             <div class="flex-1"></div>
-                            <button class="btn btn-ghost btn-xs" @click.stop="rotateItemDraft(entry.itemIndexes[0])">
+                            <button
+                                type="button"
+                                class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 font-mono text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
+                                @click.stop="rotateItemDraft(entry.itemIndexes[0])"
+                            >
                                 {{ getRotationLabel(getDraftRotationIndex(entry.itemIndexes[0])) }}
                             </button>
-                            <div class="text-xs text-base-content/60">分数 {{ entry.item.basicPoint }}</div>
+                            <span class="shrink-0 text-[11px] text-base-content/55">分数</span>
+                            <span class="font-orbitron shrink-0 text-[13px] font-semibold text-primary">{{ entry.item.basicPoint }}</span>
                         </div>
-                        <div class="mt-1 flex items-center gap-2 text-xs">
-                            <span class="badge badge-ghost">{{ entry.usedCount }}/{{ entry.quantity }}</span>
+                        <div class="mt-1 flex items-center gap-2">
+                            <span class="font-mono text-[11px] tabular-nums text-base-content/50">
+                                {{ entry.displayUsedCount }}/{{ entry.quantity }}
+                            </span>
+                            <span
+                                v-if="entry.item.type === 'Ammo'"
+                                class="font-mono text-[11px] tabular-nums"
+                                :class="entry.remainingRounds < entry.totalRounds ? 'text-warning' : 'text-base-content/50'"
+                            >
+                                {{ entry.remainingRounds }}/{{ entry.totalRounds }} 发
+                            </span>
                         </div>
                         <div class="flex">
                             <div
-                                class="mt-2 overflow-hidden rounded border border-base-300/80 bg-base-200/80"
+                                class="mt-2 overflow-hidden rounded-xs border border-base-content/15 bg-base-100/50"
                                 :class="[
                                     entry.available ? 'cursor-grab active:cursor-grabbing' : 'opacity-60',
                                     entry.itemIndexes.includes(selectedItemIndex ?? -1) ? 'border-primary/70' : '',
@@ -1914,7 +2054,7 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                                         <div
                                             v-for="(cell, x) in row"
                                             :key="`${entry.item.id}-${y}-${x}`"
-                                            class="border border-base-300/50"
+                                            class="border border-base-content/10"
                                             :style="{
                                                 width: `${PREVIEW_ITEM_CELL_PX}px`,
                                                 height: `${PREVIEW_ITEM_CELL_PX}px`,
@@ -1957,7 +2097,7 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                 }"
             >
                 <div
-                    class="relative overflow-hidden rounded border bg-base-100/90 shadow-2xl"
+                    class="relative overflow-hidden rounded-xs border bg-base-100/90 shadow-2xl"
                     :class="draggingState.valid ? 'border-success/70' : 'border-error/70'"
                 >
                     <div
@@ -1974,12 +2114,12 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                             <div
                                 v-for="(cell, x) in row"
                                 :key="`drag-${draggingState.itemIndex}-${y}-${x}`"
-                                class="border border-base-300/50"
+                                class="border border-base-content/10"
                                 :style="{
                                     width: `${draggingState.previewCellSize}px`,
                                     height: `${draggingState.previewCellSize}px`,
                                 }"
-                                :class="cell ? 'bg-amber-300/40' : 'bg-base-300/10'"
+                                :class="cell ? 'bg-amber-300/40' : 'bg-base-content/10'"
                             />
                         </template>
                     </div>
@@ -1997,5 +2137,5 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                 </div>
             </div>
         </Teleport>
-    </div>
+    </section>
 </template>
