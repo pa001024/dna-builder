@@ -3,7 +3,7 @@ import i18next from "i18next"
 import { npcMap } from "@/data/d"
 import achievementData from "@/data/d/achievement.data"
 import { booksData } from "@/data/d/book.data"
-import charData from "@/data/d/char.data"
+import { default as charData } from "@/data/d/char.data"
 import { getCachedCharExtData, resolveCharExtLocaleBySetting } from "@/data/d/charext-locale"
 import { getCachedCharVoiceData, resolveCharVoiceLocaleBySetting } from "@/data/d/charvoice-locale"
 import dungeonsData from "@/data/d/dungeon.data"
@@ -23,6 +23,7 @@ import { titleData } from "@/data/d/title.data"
 import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
 import { DAMAGE_MODES, DAMAGE_TERMS } from "@/data/damage-mechanics"
+import type { SkillField } from "@/data/data-types"
 import { Faction } from "@/data/game-const"
 import { RAG_PROFILE_MODULE } from "@/data/rag/types"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
@@ -942,6 +943,29 @@ function buildDamageEntries(): DBEntrySummary[] {
     return entries
 }
 
+/**
+ * 支持 `select` 原始投影的模块：模块 id → 原始条目清单。
+ *
+ * 只收「原始结构里确实有详情字段没投影出来的东西」的模块（角色 / 武器 / 魔之楔的
+ * `升级` 成长表、`实体` 弹道参数、`buff` / `e` / `b` 原始结构等）。
+ * 其余模块的 `fields` 已经是原始值的完整投影，再开 `select` 只是重复。
+ *
+ * 必须与 {@link MODULE_ADAPTERS} 的 `list` 同源：条目摘要与原始条目按 id 一一对应，
+ * `read_entry` 才能用摘要里的 id 直接取到原始记录。
+ */
+const MODULE_RAW_LISTS: Record<string, () => unknown[]> = {
+    char: () => charData,
+    weapon: () => weaponData,
+    mod: () => modData,
+    monster: () => monsterData,
+    resource: () => resourceData,
+    pet: () => petData,
+    dungeon: () => dungeonsData,
+    walnut: () => walnutData,
+    title: () => titleData,
+    achievement: () => achievementData,
+}
+
 const MODULE_ADAPTER_MAP = new Map(MODULE_ADAPTERS.map(adapter => [adapter.id, adapter]))
 
 /**
@@ -1088,6 +1112,141 @@ export async function listModuleFilters(
     })
 
     return { module, facets }
+}
+
+/** 单个原始字段路径的 schema 描述 */
+export interface DBEntryFieldSchema {
+    /** 字段路径，点号分隔（如 `技能.字段.值`）；可直接照抄进 select */
+    path: string
+    /** 取值类型：object / array / string / number / boolean */
+    type: string
+    /** 有该字段的样本条目占比（0~1），用于判断这是通用字段还是个别条目才有 */
+    coverage: number
+}
+
+/** 推断嵌套路径的深度上限：`技能.字段.值` 这种三级已经够用，再深模型基本不会查 */
+const DB_SCHEMA_MAX_DEPTH = 3
+
+/** schema 采样条目数：字段覆盖率按这个样本统计，全量扫描没必要 */
+const DB_SCHEMA_SAMPLE_SIZE = 40
+
+/** schema 最多列出的路径数：模块字段极多，全列出来模型读不动 */
+const DB_SCHEMA_MAX_PATHS = 120
+
+/**
+ * 列出某个模块条目的原始字段路径，供 `read_entry` 的 `select` 取用。
+ *
+ * 与 {@link listModuleFilters} 的分工：那边列的是「怎么筛」，这里列的是「能选哪些字段」——
+ * 模型要先知道字段名，才写得出来 `select`。
+ *
+ * 输出用点号路径（`技能.字段.值`）而不是嵌套结构：一是与 `select` 接受的写法一致，
+ * 可以直接照抄；二是同一层级的同名键（顶层 `名称` 与 `技能.名称`）不会互相覆盖。
+ * @param moduleId 模块标识
+ * @param lang 数据语言
+ * @returns 字段路径列表；模块不支持原始投影时返回空数组
+ */
+export function listEntryFields(
+    moduleId: string,
+    lang: DBAgentLang = resolveCurrentDBAgentLang()
+): { module?: DBModuleSummary; fields: DBEntryFieldSchema[]; note?: string } {
+    const adapter = MODULE_ADAPTER_MAP.get(moduleId)
+    const rawList = MODULE_RAW_LISTS[moduleId]
+
+    if (!adapter) {
+        return { fields: [] }
+    }
+
+    const module: DBModuleSummary = {
+        id: adapter.id,
+        label: moduleLabel(adapter.labelKey, lang),
+        path: adapter.path,
+        versioned: adapter.versioned,
+        count: adapter.list(lang).length,
+    }
+
+    if (!rawList) {
+        return {
+            module,
+            fields: [],
+            note: `模块 ${moduleId} 不支持 select 原始投影，只能用 read_entry 返回的 fields。`,
+        }
+    }
+
+    const all = rawList()
+    /** 均匀抽样：只看前几条会偏（武器 / 魔之楔按类型分块排在前面） */
+    const step = Math.max(Math.floor(all.length / DB_SCHEMA_SAMPLE_SIZE), 1)
+    const samples = all.filter((_, index) => index % step === 0).slice(0, DB_SCHEMA_SAMPLE_SIZE)
+
+    /** 路径 → 出现次数；值只用来定类型，不必每条都记 */
+    const counts = new Map<string, { count: number; sample: unknown }>()
+
+    /**
+     * 递归记录字段路径。
+     * @param records 当前层的取值
+     * @param prefix 已积累的路径前缀
+     * @param depth 当前深度
+     */
+    const collect = (records: unknown[], prefix: string, depth: number) => {
+        for (const record of records) {
+            if (!record || typeof record !== "object" || Array.isArray(record)) {
+                continue
+            }
+
+            for (const [key, value] of Object.entries(record as Record<string, unknown>)) {
+                if (value === undefined || key.startsWith("@")) {
+                    continue
+                }
+
+                const path = prefix ? `${prefix}.${key}` : key
+                const existing = counts.get(path)
+
+                if (existing) {
+                    existing.count += 1
+                } else {
+                    counts.set(path, { count: 1, sample: value })
+                }
+
+                if (depth >= DB_SCHEMA_MAX_DEPTH) {
+                    continue
+                }
+
+                // 数组按元素下钻一层：技能字段的 `名称` / `值` 挂在数组元素上
+                const children = Array.isArray(value) ? value : typeof value === "object" && value !== null ? [value] : []
+
+                if (children.length) {
+                    collect(children, path, depth + 1)
+                }
+            }
+        }
+    }
+
+    collect(samples, "", 1)
+
+    const fields: DBEntryFieldSchema[] = [...counts.entries()]
+        .map(([path, { count, sample }]) => ({
+            path,
+            type: Array.isArray(sample)
+                ? "array"
+                : sample === null
+                  ? "object"
+                  : sample instanceof Map || sample instanceof Set
+                    ? "object"
+                    : (typeof sample as string),
+            coverage: Number((count / (samples.length || 1)).toFixed(2)),
+        }))
+        // 先按深度、再按覆盖面：模型通常想查的是「层级浅 + 多数条目都有」的字段
+        .sort((left, right) => {
+            const depthDiff = left.path.split(".").length - right.path.split(".").length
+
+            return depthDiff || right.coverage - left.coverage || left.path.localeCompare(right.path)
+        })
+        .slice(0, DB_SCHEMA_MAX_PATHS)
+
+    return {
+        module,
+        fields,
+        note: fields.length >= DB_SCHEMA_MAX_PATHS ? `字段过多，只列了前 ${DB_SCHEMA_MAX_PATHS} 条（按层级与覆盖面排序）。` : undefined,
+    }
 }
 
 /**
@@ -1392,6 +1551,641 @@ function formatSkillLine(skill: { 名称?: string; 类型?: string; 描述?: str
 }
 
 /**
+ * `select` 投影树：键为数据键，`true` 表示整取该字段，对象表示继续下钻。
+ *
+ * 形态与 GraphQL 的选择集一致（`{ id 名称 技能 { 名称 字段 { 值 } } }`），
+ * 差别只是用 `true` 代替叶子节点——字段值本身是任意 JSON，没有子字段可列。
+ */
+type DBSelectNode = true | DBSelectTree
+
+/** `select` 投影树 */
+export type DBSelectTree = { [key: string]: DBSelectNode }
+
+/**
+ * `select` 语法的解析结果。
+ *
+ * `fields` 非空表示按投影取值（此时 `entries` 不再重复给出全量字段）；
+ * 解析失败时 `error` 带上原文，让模型改语法而不是把工具结果当空。
+ */
+export interface DBEntrySelection {
+    /** 投影树；解析失败为 undefined */
+    tree?: DBSelectTree
+    /** 原始选择串，便于回显让模型自查 */
+    source: string
+    /** 解析错误 */
+    error?: string
+}
+
+/**
+ * 递归下降解析 `select` 选择集。
+ *
+ * 文法：`select := '{' 字段 (',' 字段)* '}'`，`字段 := 键 ('{' select '}')?`。
+ * 键允许点号路径（`技能.字段`）——等价于逐层下钻，只是写起来更短。
+ * @param source 选择串
+ * @param cursor 解析游标（递归时共享）
+ * @returns 投影树；语法错误返回 undefined
+ */
+function parseSelectNode(source: string, cursor: { index: number }): DBSelectTree | undefined {
+    const tree: DBSelectTree = {}
+
+    const skipSpace = () => {
+        while (cursor.index < source.length && /\s/.test(source[cursor.index]!)) {
+            cursor.index += 1
+        }
+    }
+
+    const readKey = (): string | undefined => {
+        skipSpace()
+        const start = cursor.index
+
+        // 键是「非空白、非分隔符」的连续字符；数据键都是中文或 ASCII 标识符
+        while (cursor.index < source.length && !/[\s,{}]/.test(source[cursor.index]!)) {
+            cursor.index += 1
+        }
+
+        return cursor.index > start ? source.slice(start, cursor.index) : undefined
+    }
+
+    const expect = (char: string): boolean => {
+        skipSpace()
+        if (source[cursor.index] !== char) {
+            return false
+        }
+        cursor.index += 1
+        return true
+    }
+
+    if (!expect("{")) {
+        return undefined
+    }
+
+    for (;;) {
+        skipSpace()
+
+        // 允许尾随逗号：`{ a, b, }`
+        if (source[cursor.index] === "}") {
+            cursor.index += 1
+            return tree
+        }
+
+        const key = readKey()
+
+        if (!key) {
+            return undefined
+        }
+
+        skipSpace()
+
+        if (source[cursor.index] === "{") {
+            const child = parseSelectNode(source, cursor)
+
+            if (!child) {
+                return undefined
+            }
+
+            // 点号路径逐层展开：`a.b` 与 `a { b }` 等价
+            const segments = key.split(".")
+            let node = tree
+
+            for (const segment of segments.slice(0, -1)) {
+                const existing = node[segment]
+
+                if (existing === undefined) {
+                    node[segment] = {}
+                } else if (existing === true) {
+                    return undefined
+                }
+
+                node = node[segment] as DBSelectTree
+            }
+
+            node[segments.at(-1)!] = child
+
+            continue
+        }
+
+        const segments = key.split(".")
+        let node = tree
+
+        for (const segment of segments.slice(0, -1)) {
+            const existing = node[segment]
+
+            if (existing === undefined) {
+                node[segment] = {}
+            } else if (existing === true) {
+                return undefined
+            }
+
+            node = node[segment] as DBSelectTree
+        }
+
+        node[segments.at(-1)!] = true
+        skipSpace()
+
+        if (source[cursor.index] === ",") {
+            cursor.index += 1
+        }
+    }
+}
+
+/**
+ * 解析 `select` 选择串。
+ *
+ * 选择串是模型自填的，语法错误不能抛异常——那会让整轮检索失败；
+ * 一律降级成「不给 select、返回全量字段」，并把错误原文带回给模型改语法。
+ * @param source 选择串；空值表示不投影
+ * @returns 解析结果
+ */
+export function parseDBSelect(source: string | undefined): DBEntrySelection | undefined {
+    const text = `${source ?? ""}`.trim()
+
+    if (!text) {
+        return undefined
+    }
+
+    // 允许模型省掉最外层花括号：`id 名称 技能 { 名称 }`
+    const body = text.startsWith("{") ? text : `{ ${text} }`
+    const cursor = { index: 0 }
+    const tree = parseSelectNode(body, cursor)
+
+    if (!tree) {
+        return {
+            source: text,
+            error: `select 语法无法解析：${text}。正确写法形如 "{ id 名称 技能 { 名称 字段 { 名称 值 } } }"（字段用空格或逗号分隔，不需要冒号）。`,
+        }
+    }
+
+    // 解析成功后必须正好走完整个串，否则尾部有一段被静默忽略
+    while (cursor.index < body.length && /\s/.test(body[cursor.index]!)) {
+        cursor.index += 1
+    }
+
+    if (cursor.index !== body.length) {
+        return {
+            source: text,
+            error: `select 语法无法解析：${text} 在「${body.slice(cursor.index)}」处有多余内容。正确写法形如 "{ id 名称 技能 { 名称 } }"。`,
+        }
+    }
+
+    return { tree, source: text }
+}
+
+/** 投影结果的节点数上限：防止模型写出全量选择把上下文撑爆 */
+const DB_SELECT_MAX_NODES = 400
+
+/** 投影结果的文本长度上限（按单条字符串计） */
+const DB_SELECT_MAX_TEXT = 1200
+
+/** 截断标记键：与游戏数据字段不同前缀，模型不会误当成真实字段 */
+const DB_SELECT_TRUNCATED_KEY = "__截断"
+
+/**
+ * 按投影树取原始数据，并在超出节点上限时显式标注。
+ *
+ * 静默截断比不给更糟：模型会把半截数据当成「字段本来就这么少」，
+ * 所以截断必须作为一个可读的键回到结果里。
+ * @param source 原始数据
+ * @param tree 投影树
+ * @param lang 数据语言
+ * @returns 投影结果；节点超限时附带截断说明
+ */
+function projectEntrySelect(source: unknown, tree: DBSelectTree, lang: DBAgentLang): unknown {
+    const budget = { nodes: 0 }
+    const projected = projectDBSelect(source, tree, lang, budget)
+
+    if (budget.nodes < DB_SELECT_MAX_NODES || !projected || typeof projected !== "object" || Array.isArray(projected)) {
+        return projected
+    }
+
+    return {
+        ...(projected as Record<string, unknown>),
+        [DB_SELECT_TRUNCATED_KEY]: `投影节点数已达上限 ${DB_SELECT_MAX_NODES}，结果被截断。请缩小 select 范围（只选真正需要的字段）后重试。`,
+    }
+}
+
+/**
+ * 按投影树取出原始数据的一个子集。
+ *
+ * 与 {@link readEntry} 的 `fields` 是**互补的两条路**：`fields` 是给模型直接引用的
+ * 可读文本（已折算百分比、拼好标签），`select` 则是不做任何加工的原始结构，
+ * 用于查那些「文本投影里没有、但数据里确实存在」的字段（`升级` 成长表、`实体` 弹道参数…）。
+ * @param source 原始数据
+ * @param tree 投影树
+ * @param lang 数据语言（字符串取值按它翻译）
+ * @param budget 节点计数预算（跨递归共享）
+ * @returns 投影结果
+ */
+function projectDBSelect(source: unknown, tree: DBSelectTree, lang: DBAgentLang, budget: { nodes: number }): unknown {
+    if (source === null || typeof source !== "object") {
+        return source
+    }
+
+    if (Array.isArray(source)) {
+        return source.map(item => projectDBSelect(item, tree, lang, budget))
+    }
+
+    const record = source as Record<string, unknown>
+    const result: Record<string, unknown> = {}
+
+    for (const [key, node] of Object.entries(tree)) {
+        if (budget.nodes >= DB_SELECT_MAX_NODES) {
+            return result
+        }
+
+        if (!(key in record)) {
+            continue
+        }
+
+        budget.nodes += 1
+        const value = record[key]
+
+        if (node === true) {
+            result[key] = sanitizeDBSelectValue(value, lang, budget)
+
+            continue
+        }
+
+        const child = projectDBSelect(value, node, lang, budget)
+
+        // 空对象说明子树里每个键在数据中都不存在，丢掉比回一个 `{}` 更不容易让模型误读成「字段是空的」
+        if (child && typeof child === "object" && !Array.isArray(child) && Object.keys(child as object).length) {
+            result[key] = child
+        } else if (Array.isArray(child) && child.length) {
+            result[key] = child
+        }
+    }
+
+    return result
+}
+
+/**
+ * 把投影出的原始取值转成可序列化、有限长的形态。
+ *
+ * 原始数据里混着 `Map` / `Set` / 函数 / 长文本，直接 `JSON.stringify` 会丢内容或抛错；
+ * 长文本按 `select` 的上限截断并标注，避免一条描述吃掉半个上下文。
+ * @param value 原始取值
+ * @param lang 数据语言
+ * @param budget 节点计数预算
+ * @returns 可序列化的取值
+ */
+function sanitizeDBSelectValue(value: unknown, lang: DBAgentLang, budget: { nodes: number }): unknown {
+    if (value === null || value === undefined) {
+        return value ?? null
+    }
+
+    if (typeof value === "string") {
+        const translated = translateDBAgentText(value, lang) ?? value
+
+        return translated.length > DB_SELECT_MAX_TEXT ? `${translated.slice(0, DB_SELECT_MAX_TEXT)}…` : translated
+    }
+
+    if (typeof value === "number" || typeof value === "boolean") {
+        return value
+    }
+
+    if (typeof value === "function") {
+        // 数据表里残留的函数（如 `熔炼` 的取值器）对模型无意义
+        return null
+    }
+
+    if (value instanceof Map) {
+        return Object.fromEntries([...value.entries()].map(([k, v]) => [`${k}`, sanitizeDBSelectValue(v, lang, budget)]))
+    }
+
+    if (value instanceof Set) {
+        return [...value.values()].map(item => sanitizeDBSelectValue(item, lang, budget))
+    }
+
+    if (Array.isArray(value)) {
+        // 数组元素逐个计节点：真正的体量来自「展开成多少个对象」，
+        // 只按键计数的话一条上千项的数组能绕过上限
+        return value.map(item => {
+            if (budget.nodes >= DB_SELECT_MAX_NODES) {
+                return null
+            }
+
+            budget.nodes += 1
+
+            return sanitizeDBSelectValue(item, lang, budget)
+        })
+    }
+
+    if (typeof value === "object") {
+        const result: Record<string, unknown> = {}
+
+        for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+            if (budget.nodes >= DB_SELECT_MAX_NODES) {
+                return result
+            }
+
+            budget.nodes += 1
+            result[key] = sanitizeDBSelectValue(item, lang, budget)
+        }
+
+        return result
+    }
+
+    return null
+}
+
+/**
+ * 技能字段里「非伤害数值」类附加键的展示名。
+ *
+ * 与前端 `SkillFields` 的 `skillFieldExtraKeys` 同口径：这几个键与倍率无关，
+ * 描述的是这一段的动作节奏（取消 / 连段）与削韧，模型算伤害时不需要，
+ * 但「这段有多长」这类问题要用，所以一并给出。
+ */
+const SKILL_FIELD_EXTRA_KEYS = ["削韧", "Boss削韧", "延迟", "卡肉", "取消", "连段", "段数"] as const
+
+/** 走「秒」单位的附加键（其余按原始数值给出） */
+const SKILL_FIELD_SECOND_KEYS = new Set<string>(["延迟", "卡肉", "取消", "连段"])
+
+/** 无 `格式` 时按绝对值呈现的字段（与前端 `formatSkillProp` 的 propRegex 同口径） */
+const SKILL_FIELD_ABSOLUTE_VALUE_PROP = /神智消耗|神智回复$/
+
+/**
+ * 技能字段数组型取值的展示档位。
+ *
+ * 数据里角色技能的字段值是 12 级数组（`值[等级 - 1]`），全量展开有 12 个数字、
+ * 且模型真正需要的是满级值与 1 级值（判断成长幅度），因此只给首尾两档。
+ */
+const SKILL_FIELD_ARRAY_HEAD_LEVELS = 2
+
+/**
+ * 读取技能字段的数值：兼容 number 与「按等级取值」的 number[]。
+ * @param value 字段原始取值
+ * @param level 取值档位（1 起）
+ * @returns 该档位的数值；取值缺失时返回 undefined
+ */
+function pickSkillFieldNumber(value: number | number[] | undefined, level = 1): number | undefined {
+    if (value === undefined) {
+        return undefined
+    }
+
+    if (!Array.isArray(value)) {
+        return Number.isFinite(value) ? value : undefined
+    }
+
+    const picked = value[Math.min(Math.max(level, 1), value.length) - 1]
+
+    return typeof picked === "number" && Number.isFinite(picked) ? picked : undefined
+}
+
+/**
+ * 把字段取值按 `格式` 表达式求值成文本。
+ *
+ * 格式里的 `{%}` / `{}` 是占位符：第一个吃 `值`、第二个吃 `值2`，
+ * 其余字面量（`最大生命`、`米`、`秒`…）原样保留——它们是这条字段的结算口径，
+ * 丢掉就只剩一个裸百分比（「373% 最大生命」才是完整语义）。
+ * @param field 技能字段
+ * @param level 取值档位（1 起）
+ * @returns 求值后的文本；取不到值时返回 undefined
+ */
+function formatSkillFieldValue(field: SkillField, level = 1): string | undefined {
+    const value = pickSkillFieldNumber(field.值, level)
+
+    if (value === undefined) {
+        return undefined
+    }
+
+    if (!field.格式) {
+        // 神智类字段是绝对值消耗而非比例，与前端 `formatSkillProp` 的 propRegex 判定同口径
+        return SKILL_FIELD_ABSOLUTE_VALUE_PROP.test(field.名称) ? `${+value.toFixed(2)}` : formatPercent(value)
+    }
+
+    const value2 = pickSkillFieldNumber(field.值2, level) ?? value
+    let placeholderIndex = 0
+
+    return field.格式.replace(/\{%?\}/g, matched => {
+        const current = placeholderIndex === 0 ? value : value2
+
+        placeholderIndex += 1
+
+        return matched.includes("%") ? formatPercent(current) : `${+current.toFixed(2)}`
+    })
+}
+
+/**
+ * 技能字段投影里自造的连接词（`dbAgent.skill.*`）的中文兜底。
+ *
+ * 检索层可能在语言包加载完成前被同步调用（`i18next.t` 会返回空串），
+ * 那样拼出来的行会带 `undefined`，因此这里给出与词条一致的中文兜底。
+ */
+const SKILL_LABEL_FALLBACK = {
+    tag: "标签",
+    bonus: "加成",
+    skillLevel: "技能等级",
+    second: "秒",
+} as const
+
+/**
+ * 取技能字段投影的连接词。
+ *
+ * 分两类：**游戏原文**走数据包 / 资源包的对照表（`属性影响`、`伤害类型`、`技能威力`…），
+ * 这里只放对照表里没有的四个——它们是投影格式自带的词，数据包里不存在。
+ * @param key 连接词对应的 i18n 键
+ * @param lang 数据语言
+ * @returns 连接词文本
+ */
+function skillLabel(key: keyof typeof SKILL_LABEL_FALLBACK, lang: DBAgentLang): string {
+    const text = i18next.t(`dbAgent.skill.${key}`, { lng: toI18nLanguage(lang), defaultValue: "" })
+
+    return typeof text === "string" && text ? text : SKILL_LABEL_FALLBACK[key]
+}
+
+/**
+ * 格式化一行技能字段：`名称 倍率（属性影响 / 标签 / 削韧 / 连段…）`。
+ * @param field 技能字段
+ * @param lang 数据语言
+ * @returns 字段行文本；字段没有可展示的取值时返回 undefined
+ */
+function formatSkillFieldLine(field: SkillField, lang: DBAgentLang): string | undefined {
+    const name = translateDBAgentText(field.名称, lang) ?? field.名称
+    const extras: string[] = []
+
+    // 数组型取值（角色技能按等级成长）给首尾两档，让模型既能取满级值也能看出成长幅度
+    if (Array.isArray(field.值) && field.值.length > SKILL_FIELD_ARRAY_HEAD_LEVELS) {
+        const head = formatSkillFieldValue(field, 1)
+        const tail = formatSkillFieldValue(field, field.值.length)
+        const span = `${head} → ${tail}（${skillLabel("skillLevel", lang)} 1 → ${field.值.length}）`
+
+        extras.push(span)
+    } else {
+        const text = formatSkillFieldValue(field)
+
+        if (text === undefined) {
+            return undefined
+        }
+
+        extras.push(text)
+    }
+
+    if (field.影响) {
+        extras.push(
+            `${translateDBAgentText("属性影响", lang) ?? "属性影响"}：${field.影响
+                .split(",")
+                .map(item => translateDBAgentText(item.trim(), lang) ?? item.trim())
+                .join("、")}`
+        )
+    }
+
+    if (field.伤害类型) {
+        extras.push(
+            `${translateDBAgentText("伤害类型", lang) ?? "伤害类型"}：${translateDBAgentText(field.伤害类型, lang) ?? field.伤害类型}`
+        )
+    }
+
+    if (field.tag?.length) {
+        extras.push(`${skillLabel("tag", lang)}：${field.tag.map(tag => translateDBAgentText(tag, lang) ?? tag).join("/")}`)
+    }
+
+    for (const key of SKILL_FIELD_EXTRA_KEYS) {
+        const raw = field[key]
+
+        if (raw === undefined) {
+            continue
+        }
+
+        const number = pickSkillFieldNumber(raw)
+
+        if (number === undefined) {
+            continue
+        }
+
+        const label = translateDBAgentText(key, lang) ?? key
+        extras.push(`${label}：${SKILL_FIELD_SECOND_KEYS.has(key) ? `${+number.toFixed(4)}${skillLabel("second", lang)}` : number}`)
+    }
+
+    return `${name} ${extras.join("；")}`
+}
+
+/**
+ * 把技能的字段数组投影成可引用文本行。
+ *
+ * 技能描述只写机制 prose（「造成 500% 灾厄伤害」），**具体倍率与逐段拆分只在 `字段` 里**：
+ * 标签（`充盈` / `远程` / `武器`）决定伤害走哪个结算模式，属性影响（`技能威力` 等）
+ * 决定它吃哪些面板。没有这一层，模型只能复述描述、给不出逐段数值。
+ * @param skill 技能（角色技能 / 武器技能 / 魔之楔技能替换）
+ * @param lang 数据语言
+ * @returns 字段行列表；没有字段时返回空数组
+ */
+function formatSkillFieldLines(skill: { 字段?: SkillField[] } | undefined, lang: DBAgentLang): string[] {
+    if (!skill?.字段?.length) {
+        return []
+    }
+
+    return skill.字段.map(field => formatSkillFieldLine(field, lang)).filter((line): line is string => line !== undefined)
+}
+
+/**
+ * 汇总一组技能的字段行，每行带上技能名以便模型归位。
+ * @param skills 技能列表
+ * @param lang 数据语言
+ * @returns 「技能名 · 字段」行列表
+ */
+function formatSkillFieldsBySkill(skills: Array<{ 名称?: string; 字段?: SkillField[] }> | undefined, lang: DBAgentLang): string[] {
+    if (!skills?.length) {
+        return []
+    }
+
+    const lines: string[] = []
+
+    for (const skill of skills) {
+        const fieldLines = formatSkillFieldLines(skill, lang)
+
+        if (!fieldLines.length) {
+            continue
+        }
+
+        const name = translateDBAgentText(skill.名称, lang) ?? skill.名称 ?? ""
+
+        for (const line of fieldLines) {
+            lines.push(name ? `${name} · ${line}` : line)
+        }
+    }
+
+    return lines
+}
+
+/**
+ * 汇总一组技能的术语解释（机制名词的官方定义）。
+ *
+ * 「处决目标」「羽化」「充盈」这类名词的判定规则只写在 `术语解释` 里，
+ * 描述正文往往只提名字不给定义，缺了这一层模型只能靠猜。
+ * @param skills 技能列表
+ * @param lang 数据语言
+ * @returns 「技能名 · 名词：定义」行列表
+ */
+function formatSkillTermLines(
+    skills: Array<{ 名称?: string; 术语解释?: Record<string, string> }> | undefined,
+    lang: DBAgentLang
+): string[] {
+    if (!skills?.length) {
+        return []
+    }
+
+    const lines: string[] = []
+
+    for (const skill of skills) {
+        const entries = Object.entries(skill.术语解释 ?? {})
+
+        if (!entries.length) {
+            continue
+        }
+
+        const skillName = translateDBAgentText(skill.名称, lang) ?? skill.名称 ?? ""
+
+        for (const [term, definition] of entries) {
+            const termName = translateDBAgentText(term, lang) ?? term
+            const text = summarizeDetailText(translateDBAgentText(definition, lang) ?? definition, DETAIL_LONG_TEXT_LIMIT)
+
+            lines.push(text ? `${skillName} · ${termName}：${text}` : `${skillName} · ${termName}`)
+        }
+    }
+
+    return lines
+}
+
+/** 灾厄熔炼（`熔炉`）的最小结构：只需要档位与该档技能，避开 data-types 的整体耦合 */
+interface ForgeStageLike {
+    lv: number
+    技能?: Array<{ 名称?: string; 描述?: string; 加成?: Record<string, number | undefined> }>
+}
+
+/**
+ * 把灾厄熔炼（`熔炉`）投影成逐档可读文本。
+ *
+ * 这一层是灾厄武器的**全部机制来源**：Lv.0 是基础潜能（不读就等于漏掉半把武器），
+ * 后续档位是逐步解锁的潜能。技能描述里的百分比（如「额外造成 500% 灾厄伤害」）
+ * 是文字倍率，字段化之后才能和面板乘区对上。
+ * @param stages 熔炼档位
+ * @param lang 数据语言
+ * @returns 「Lv.N 技能名：描述（加成 …）」行列表
+ */
+function formatForgeStageLines(stages: ForgeStageLike[] | undefined, lang: DBAgentLang): string[] {
+    if (!stages?.length) {
+        return []
+    }
+
+    const lines: string[] = []
+
+    for (const stage of stages) {
+        for (const skill of stage.技能 ?? []) {
+            const name = translateDBAgentText(skill.名称, lang) ?? skill.名称 ?? `Lv.${stage.lv}`
+            const desc = summarizeDetailText(translateDBAgentText(skill.描述, lang) ?? skill.描述, DETAIL_LONG_TEXT_LIMIT)
+            const bonus = formatBonusRecord(skill.加成)
+            const parts = [desc, bonus?.length ? `${skillLabel("bonus", lang)}：${bonus.join("、")}` : undefined].filter(
+                (part): part is string => !!part
+            )
+
+            lines.push(`Lv.${stage.lv} ${name}${parts.length ? `：${parts.join("；")}` : ""}`)
+        }
+    }
+
+    return lines
+}
+
+/**
  * 详情字段里位置清单的条数上限。
  *
  * 同名资源可能有数十个子区域（`resource.source`），全部展开会把工具结果撑爆；
@@ -1444,6 +2238,9 @@ function formatMapLocations(groups: DBMapGroup[], lang: DBAgentLang, withLabel =
 
 /**
  * 角色详情字段：档案（生日 / 出生地 / 势力 / 四国 CV 等）、面板基础值、技能与特质、突破材料。
+ *
+ * 技能除描述外还给出 `技能字段`（逐条倍率 / 标签 / 属性影响）与 `技能术语解释`：
+ * 前者是算伤害的唯一数据源，后者是机制名词的官方定义，两者都只在 `字段` / `术语解释` 里。
  * @param id 角色 id
  * @param lang 数据语言
  * @returns 字段表；角色不存在时返回 undefined
@@ -1493,6 +2290,16 @@ function readCharDetailFields(id: string, lang: DBAgentLang): DBEntryFields | un
 
     if (char.技能?.length) {
         fields.技能 = char.技能.map(skill => formatSkillLine(skill, lang))
+    }
+
+    const skillFields = formatSkillFieldsBySkill(char.技能, lang)
+    if (skillFields.length) {
+        fields.技能字段 = skillFields
+    }
+
+    const skillTerms = formatSkillTermLines(char.技能, lang)
+    if (skillTerms.length) {
+        fields.技能术语解释 = skillTerms
     }
 
     if (char.特质?.length) {
@@ -1577,6 +2384,23 @@ function readWeaponDetailFields(id: string, lang: DBAgentLang): DBEntryFields | 
         fields.技能 = weapon.技能.map(skill => formatSkillLine(skill, lang))
     }
 
+    // 武器技能的逐段倍率（子弹伤害 / 弹射伤害 / [羽化]伤害…）只在字段里，描述只写机制 prose
+    const skillFields = formatSkillFieldsBySkill(weapon.技能, lang)
+    if (skillFields.length) {
+        fields.技能字段 = skillFields
+    }
+
+    const skillTerms = formatSkillTermLines(weapon.技能, lang)
+    if (skillTerms.length) {
+        fields.技能术语解释 = skillTerms
+    }
+
+    // 灾厄武器的真正强度写在熔炉（灾厄熔炼）里：Lv.0 就是基础潜能，不读这一层会漏掉整套机制
+    const forgeLines = formatForgeStageLines(weapon.熔炉, lang)
+    if (forgeLines.length) {
+        fields.灾厄熔炼 = forgeLines
+    }
+
     const translate = (text: string) => translateDBAgentText(text, lang) ?? text
     const firstRefine = summarizeDetailText(formatParamText(weapon.熔炼, 0, translate), DETAIL_LONG_TEXT_LIMIT)
     const maxRefine = summarizeDetailText(formatParamText(weapon.熔炼, 999, translate), DETAIL_LONG_TEXT_LIMIT)
@@ -1656,7 +2480,15 @@ function readModDetailFields(id: string, lang: DBAgentLang): DBEntryFields | und
     }
 
     if (mod.技能替换) {
-        fields.技能替换 = Object.values(mod.技能替换).map(skill => translateDBAgentText(skill.名称, lang) ?? skill.名称)
+        const replaced = Object.values(mod.技能替换)
+
+        fields.技能替换 = replaced.map(skill => translateDBAgentText(skill.名称, lang) ?? skill.名称)
+
+        // 替换后的招式倍率与原招式不同，只给名字等于没给（模型会当成同名技能）
+        const replaceFields = formatSkillFieldsBySkill(replaced, lang)
+        if (replaceFields.length) {
+            fields.技能替换字段 = replaceFields
+        }
     }
 
     // 条件属性（`生效`）只在条件成立时计入面板，它的数值不包含在上面的词条属性里
@@ -2304,13 +3136,29 @@ const MODULE_DETAIL_READERS: Record<string, DBEntryDetailReader> = {
  * 名称匹配会先精确命中，再退回关键词检索：后者让其他语言的名称（译文）与只记得一半的
  * 名称也能命中，但只在唯一命中时才直接返回详情，否则给出候选列表让模型自己确认。
  * @param moduleId 模块标识，见 listModules
- * @param options 查询条件：条目 id 或名称（至少给一个）、数据语言
+ * @param options 查询条件：条目 id 或名称（至少给一个）、数据语言、原始字段投影
  * @returns 模块信息与条目详情；未命中或无法唯一确定时给出候选与提示
  */
 export function readEntry(
     moduleId: string,
-    options: { id?: string | number; name?: string; lang?: DBAgentLang } = {}
-): { module?: DBModuleSummary; entry?: DBEntryDetail; candidates?: DBEntrySummary[]; error?: string } {
+    options: { id?: string | number; name?: string; lang?: DBAgentLang; select?: string } = {}
+): {
+    module?: DBModuleSummary
+    entry?: DBEntryDetail
+    /** 按 `select` 投影出的原始数据（仅在给了 select 且该模块支持时出现） */
+    data?: unknown
+    /** `select` 的解析结果（有 error 时模型应改语法后重试） */
+    selection?: DBEntrySelection
+    /**
+     * 该条目除 `fields` 外还能用 `select` 查的字段名。
+     *
+     * 不给 select 时也随详情一起返回：模型只有先看到有哪些字段名，才写得出来选择集，
+     * 否则只能凭空猜字段或干脆不去查。
+     */
+    selectableFields?: string[]
+    candidates?: DBEntrySummary[]
+    error?: string
+} {
     const adapter = MODULE_ADAPTER_MAP.get(moduleId)
 
     if (!adapter) {
@@ -2320,6 +3168,7 @@ export function readEntry(
     const lang = options.lang ?? resolveCurrentDBAgentLang()
     const id = options.id === undefined || options.id === null ? "" : `${options.id}`.trim()
     const name = options.name?.trim() ?? ""
+    const selection = parseDBSelect(options.select)
     const all = adapter.list(lang)
     const module: DBModuleSummary = {
         id: adapter.id,
@@ -2338,11 +3187,31 @@ export function readEntry(
 
     const reader = MODULE_DETAIL_READERS[adapter.id]
 
-    /** 按条目摘要取详情：读取器取不到字段时视为该条目没有详情可给 */
-    const detailOf = (summary: DBEntrySummary): DBEntryDetail | undefined => {
-        const fields = reader?.(`${summary.id}`, lang)
+    // select 语法错误时不做任何投影：继续查条目只是白费一轮，先把错误原文还给模型改语法
+    if (selection?.error) {
+        return { module, selection, error: selection.error }
+    }
 
-        if (!fields) {
+    // 模块没有原始清单时 select 无从投影，直接说明，不要静默返回空 fields
+    if (selection?.tree && !MODULE_RAW_LISTS[adapter.id]) {
+        return {
+            module,
+            selection,
+            error: `模块 ${adapter.id} 不支持 select 原始投影，请去掉 select 改读 fields（list_entry_fields 可以列出哪些模块支持）。`,
+        }
+    }
+
+    /**
+     * 按条目摘要取详情。
+     *
+     * 给了 `select` 时以原始投影为准：`fields` 是给模型直接引用的可读文本，
+     * 而 select 查的是「数据里还有、但 fields 没投影」的字段（成长表 / 弹道参数 / buff 原始结构），
+     * 两者同时给会让同一份数据出现两套口径。
+     */
+    const detailOf = (summary: DBEntrySummary): DBEntryDetail | undefined => {
+        const fields = selection?.tree ? {} : reader?.(`${summary.id}`, lang)
+
+        if (!selection?.tree && !fields) {
             return undefined
         }
 
@@ -2354,15 +3223,85 @@ export function readEntry(
             subtitle: localized.subtitle,
             version: localized.version,
             path: localized.path,
-            fields,
+            fields: fields ?? {},
         }
     }
+
+    /**
+     * 取该条目的原始记录。
+     *
+     * 原始清单按 id 与条目摘要一一对应（见 {@link MODULE_RAW_LISTS} 的同源约束），
+     * 因此这里用摘要 id 反查原始记录，不依赖模块适配器再实现一次查找。
+     * @param summary 条目摘要
+     * @returns 原始记录；模块不支持投影或条目不在原始清单里时返回 undefined
+     */
+    const rawOf = (summary: DBEntrySummary): Record<string, unknown> | undefined => {
+        const rawList = MODULE_RAW_LISTS[adapter.id]?.() ?? []
+        const raw = rawList.find(item => `${(item as { id?: unknown }).id ?? ""}` === `${summary.id}`)
+
+        return raw && typeof raw === "object" ? (raw as Record<string, unknown>) : undefined
+    }
+
+    /**
+     * 算出「除 fields 外还能用 select 查」的字段名。
+     *
+     * 直接给全量字段名没意义——那些已经在 `fields` 里了，模型再 select 一遍是浪费。
+     * 真正有价值的是差集：`升级` 成长表、`实体` 弹道参数这类 fields 碰都没碰的原始结构。
+     * 只取顶层键（`升级` 而不是 `升级.属性.生命`），够模型知道「有这张表」，
+     * 真要往下钻再调 list_entry_fields 看点号路径。
+     * @param summary 条目摘要
+     * @param fields 已投影的可读文本字段
+     * @returns 可 select 的字段名；无剩余、模块不支持投影或已给 select 时返回 undefined
+     */
+    const selectableOf = (summary: DBEntrySummary, fields: Record<string, unknown> | undefined): string[] | undefined => {
+        // 已经 select 过就不用再提示「还能选什么」：模型自己写的选择集，比这里的差集更贴合它要的东西
+        if (selection?.tree) {
+            return undefined
+        }
+
+        const raw = rawOf(summary)
+
+        if (!raw) {
+            return undefined
+        }
+
+        // `名称` 由 entry.name 承载、`id` / `icon` 是元数据，都不算「还能查的东西」，排除免得噪音
+        const carried = new Set(["id", "icon", "iconBig", "名称"])
+        const extra = Object.keys(raw).filter(key => !carried.has(key) && !(key in (fields ?? {})))
+
+        // 差集为空说明这条数据的每一项都已经被 fields 投影过，select 没有意义
+        return extra.length ? extra : undefined
+    }
+
+    /**
+     * 按投影取原始数据。
+     * @param summary 条目摘要
+     * @returns 投影结果；未给 select、模块不支持投影或条目不在原始清单里时返回 undefined
+     */
+    const dataOf = (summary: DBEntrySummary): unknown => {
+        if (!selection?.tree) {
+            return undefined
+        }
+
+        const raw = rawOf(summary)
+
+        return raw === undefined ? undefined : projectEntrySelect(raw, selection.tree, lang)
+    }
+
+    /** 组装成功响应：带上原始投影、select 解析结果，以及还能 select 的字段名 */
+    const success = (summary: DBEntrySummary, detail: DBEntryDetail) => ({
+        module,
+        entry: detail,
+        data: dataOf(summary),
+        selection,
+        selectableFields: selectableOf(summary, detail.fields),
+    })
 
     const exact = id ? all.find(entry => `${entry.id}` === id) : all.find(entry => entry.name === name)
     const entry = exact ? detailOf(exact) : undefined
 
-    if (entry) {
-        return { module, entry }
+    if (entry && exact) {
+        return success(exact, entry)
     }
 
     // 精确没命中（或该模块没有详情读取器）时退回关键词检索：唯一命中就直接给详情，
@@ -2373,7 +3312,7 @@ export function readEntry(
         const unique = detailOf(candidates[0]!)
 
         if (unique) {
-            return { module, entry: unique }
+            return success(candidates[0]!, unique)
         }
     }
 
@@ -2383,6 +3322,7 @@ export function readEntry(
     return {
         module,
         candidates,
+        selection,
         error: candidates.length
             ? `${reason}以下为关键词命中的候选条目，请确认后再取详情。`
             : `${reason}资料库的 ${adapter.id} 模块中没有相近条目。`,

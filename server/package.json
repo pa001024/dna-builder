@@ -68,5 +68,8 @@
     "type": "module",
     "peerDependencies": {
         "typescript": "^5.9.3"
+    },
+    "overrides": {
+        "graphql-jit": "0.8.9"
     }
 }

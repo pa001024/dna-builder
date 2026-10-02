@@ -1731,6 +1731,12 @@
             "more": "另有 {{count}} 處未列出",
             "points": "共 {{count}} 處"
         },
+        "skill": {
+            "bonus": "加成",
+            "second": "秒",
+            "skillLevel": "技能等級",
+            "tag": "標籤"
+        },
         "summary": {
             "answered": "已收到回答",
             "askInvalid": "提問格式無效",
@@ -1739,6 +1745,7 @@
             "damageTerms": "{{count}} 條機制術語",
             "done": "已完成",
             "entryFields": "{{name}}：{{count}} 項欄位",
+            "entryFieldSchema": "{{prefix}}{{count}} 個可投影欄位",
             "facets": "{{prefix}}{{count}} 組篩選項",
             "modulesTotal": "共 {{count}} 個可檢索模組",
             "noFacets": "該模組無額外篩選項",

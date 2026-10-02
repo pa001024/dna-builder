@@ -1123,8 +1123,8 @@ export class CharBuild {
         let summonDamage = bonuses[characterBonusIndex.召唤物伤害]
         // 召唤物独立增伤：0起始的增量（1 + 该值 = 召唤物伤害乘区），供「伊薇4溯」等BUFF的code做乘法转化
         let summonIndependentDamage = bonuses[characterBonusIndex.召唤物独立增伤]
-        const ignoreDefense = this.getTotalBonusMul("无视防御")
-        const skillIgnoreDefense = this.getTotalBonusMul("技能无视防御")
+        const ignoreDefense = this.getTotalBonus("无视防御")
+        const skillIgnoreDefense = this.getTotalBonus("技能无视防御")
         const independentDamageIncrease = this.getTotalBonusMul("独立增伤")
         const damageReduce = this.getTotalBonusReduce("减伤")
         const skillMultiplierSet = bonuses[characterBonusIndex.技能倍率赋值]

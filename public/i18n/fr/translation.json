@@ -1770,6 +1770,12 @@
             "more": "{{count}} autre(s) non listée(s)",
             "points": "{{count}} emplacement(s)"
         },
+        "skill": {
+            "bonus": "Bonus",
+            "second": "s",
+            "skillLevel": "Niveau de compétence",
+            "tag": "Tag"
+        },
         "summary": {
             "answered": "Réponse reçue",
             "askInvalid": "Format de question invalide",
@@ -1778,6 +1784,7 @@
             "damageTerms": "{{count}} terme(s) de mécanique",
             "done": "Terminé",
             "entryFields": "{{name}} : {{count}} champ(s)",
+            "entryFieldSchema": "{{prefix}}{{count}} champ(s) projetable(s)",
             "facets": "{{prefix}}{{count}} groupe(s) de filtres",
             "modulesTotal": "{{count}} modules interrogeables au total",
             "noFacets": "Aucun filtre supplémentaire pour ce module",

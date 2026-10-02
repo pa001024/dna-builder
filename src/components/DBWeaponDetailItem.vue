@@ -103,6 +103,16 @@ function getModPropertiesText(mod: LeveledMod) {
 }
 
 /**
+ * 加成属性（weapon.加成）。
+ * 取 LeveledWeapon 上的值而非原始值，这样会随精炼等级缩放（带熔炉的武器视为 0 级熔炼，不缩放）。
+ */
+const bonusAttributes = computed<{ name: string; value: number }[]>(() => {
+    return leveledWeapon.value.baseProperties
+        .filter(prop => leveledWeapon.value[prop] !== undefined)
+        .map(prop => ({ name: prop, value: leveledWeapon.value[prop] as number }))
+})
+
+/**
  * 收集当前武器的来源信息。
  */
 const weaponSources = computed<WeaponSourceInfo[]>(() => collectWeaponSources(props.weapon))
@@ -407,6 +417,26 @@ watch(
                     <span class="text-xs text-base-content/60">{{ $t("射速") }}</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
                         formatProp("攻击", leveledWeapon.射速)
+                    }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 加成属性 -->
+        <section
+            v-if="bonusAttributes.length > 0"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
+            <SectionHeader no-animate compact kicker="BONUS" :title="$t('char-build.bonus_attr')" />
+            <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
+                <div
+                    v-for="attr in bonusAttributes"
+                    :key="attr.name"
+                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                >
+                    <span class="text-xs text-base-content/60">{{ $t(attr.name) }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                        formatProp(attr.name, attr.value)
                     }}</span>
                 </div>
             </div>

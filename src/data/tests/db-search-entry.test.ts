@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs"
 import i18next from "i18next"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
+import charData from "@/data/d/char.data"
 import { charExtData } from "@/data/d/charext.data"
 import { charExtData_en } from "@/data/d/charext.en.data"
 import { ensureDBAgentLangReady } from "@/utils/db-locale"
@@ -130,6 +132,119 @@ describe("readEntry 详情字段", () => {
 
         expect(entry?.fields.描述).toBeTruthy()
         expect(entry?.fields.奖励).toBeInstanceOf(Array)
+    })
+})
+
+describe("技能字段（倍率 / 标签 / 属性影响，算伤害的唯一数据源）", () => {
+    it("武器技能给出逐条倍率与标签，且带充盈标签", () => {
+        const { entry } = readEntry("weapon", { id: "20298" })
+        const lines = entry?.fields.技能字段 as string[]
+
+        expect(entry?.name).toBe("血染织羽")
+        expect(Array.isArray(lines)).toBe(true)
+
+        // 面板与描述都不含这两条倍率，只能靠字段拿到
+        expect(lines.some(line => line.includes("[羽化]伤害") && line.includes("500%"))).toBe(true)
+        // 标签决定结算模式（充盈 / 远程 / 武器），少一条模型就会算错乘区
+        expect(lines.some(line => line.includes("[羽化]伤害") && line.includes("标签：远程/武器/充盈"))).toBe(true)
+        // 格式后缀是结算口径的一部分，不能只给裸百分比
+        expect(lines.some(line => line.includes("[羽化]额外伤害") && line.includes("80%最大生命"))).toBe(true)
+        // 动作节奏字段（每段的取消 / 连段秒数）
+        expect(lines.some(line => line.includes("子弹伤害 47%") && line.includes("连段：0.5667秒"))).toBe(true)
+    })
+
+    it("角色技能的数组型倍率给首尾两档并标明等级区间", () => {
+        const { entry } = readEntry("char", { name: "法露茜" })
+        const lines = entry?.fields.技能字段 as string[]
+
+        // 满级值（右端）必须与游戏面板一致：坠入黑渊「伤害」373%、充盈伤害 49%
+        expect(lines.some(line => line.includes("坠入黑渊 · 伤害 109%最大生命 → 373%最大生命（技能等级 1 → 12）"))).toBe(true)
+        expect(lines.some(line => line.includes("充盈伤害 16%最大生命 → 49%最大生命"))).toBe(true)
+        // 属性影响决定这条字段吃哪个面板
+        expect(lines.some(line => line.includes("属性影响：技能威力"))).toBe(true)
+    })
+
+    it("每行都带技能名，便于模型把字段归位到具体技能", () => {
+        const { entry } = readEntry("char", { name: "煜明" })
+        const lines = entry?.fields.技能字段 as string[]
+
+        expect(lines.length).toBeGreaterThan(0)
+        expect(lines.every(line => line.includes(" · "))).toBe(true)
+    })
+
+    it("魔之楔的招式替换给出替换后招式的倍率（只给名字等于没给）", () => {
+        const { entry } = readEntry("mod", { name: "幻光闪烁" })
+        const lines = entry?.fields.技能替换字段 as string[]
+
+        expect(entry?.fields.技能替换).toBeInstanceOf(Array)
+        expect(lines.some(line => line.includes("一段伤害 195%"))).toBe(true)
+        // 带格式表达式的字段按表达式求值（165%×4），不是裸值
+        expect(lines.some(line => line.includes("三段伤害 165%×4"))).toBe(true)
+    })
+
+    it("投影里自造的连接词不残留中文（其他语言提问时会出现 undefined 或中文标签）", async () => {
+        // 真实环境会挂上 public/i18n 的语言包；这里手动挂一份，验证连接词确实被翻译
+        const enBundle = JSON.parse(readFileSync("public/i18n/en/translation.json", "utf8"))
+        i18next.addResourceBundle("en", "translation", enBundle, true, true)
+        await ensureDBAgentLangReady("en")
+
+        const { entry } = readEntry("weapon", { id: "20298", lang: "en" })
+        const lines = entry?.fields.技能字段 as string[]
+
+        expect(lines.length).toBeGreaterThan(0)
+        expect(lines.join("\n")).not.toMatch(/undefined/)
+        // 标签 / 秒 这类连接词走 dbAgent.skill.*，属性影响走语言包
+        expect(lines.some(line => line.includes("Tag："))).toBe(true)
+        expect(lines.some(line => line.includes("Toughness Damage："))).toBe(true)
+        expect(lines.some(line => /[0-9]s(；|$)/.test(line))).toBe(true)
+    })
+
+    it("语言包缺失时退回中文兜底，而不是拼出 undefined", () => {
+        // 空资源实例（单测环境）：连接词必须有中文兜底，否则行里会出现字面量 undefined
+        const { entry } = readEntry("char", { name: "法露茜" })
+        const lines = entry?.fields.技能字段 as string[]
+
+        expect(lines.join("\n")).not.toMatch(/undefined/)
+        expect(lines.some(line => line.includes("标签：") || line.includes("技能等级"))).toBe(true)
+    })
+})
+
+describe("技能术语解释（机制名词的官方定义）", () => {
+    it("给出处决目标 / 执行者 这类名词的判定规则", () => {
+        const { entry } = readEntry("char", { name: "法露茜" })
+        const lines = entry?.fields.技能术语解释 as string[]
+
+        expect(lines.some(line => line.includes("处决目标："))).toBe(true)
+        expect(lines.some(line => line.includes("执行者：") && line.includes("30%"))).toBe(true)
+    })
+
+    it("没有术语解释的角色不产出该字段（而不是给空数组）", () => {
+        const withTerms = charData.filter(char => (char.技能 ?? []).some(skill => skill.术语解释))
+        const without = charData.filter(char => !(char.技能 ?? []).some(skill => skill.术语解释))
+
+        expect(withTerms.length).toBeGreaterThan(0)
+        expect(without.length).toBeGreaterThan(0)
+        expect(readEntry("char", { name: withTerms[0]!.名称 }).entry?.fields.技能术语解释).toBeInstanceOf(Array)
+        expect(readEntry("char", { name: without[0]!.名称 }).entry?.fields.技能术语解释).toBeUndefined()
+    })
+})
+
+describe("灾厄熔炼（灾厄武器的机制来源）", () => {
+    it("逐档给出潜能效果与加成，Lv.0 是基础潜能", () => {
+        const { entry } = readEntry("weapon", { id: "20298" })
+        const lines = entry?.fields.灾厄熔炼 as string[]
+
+        expect(entry?.name).toBe("血染织羽")
+        expect(lines.some(line => line.startsWith("Lv.0 血染·蜕变：") && line.includes("500.0%灾厄伤害"))).toBe(true)
+        // 只有加成的潜能也要给出来（Lv.2 血染·触发 = 触发 +180%）
+        expect(lines.some(line => line.includes("血染·触发：加成：触发 +180%"))).toBe(true)
+        expect(lines.some(line => line.includes("织羽·剥茧") && line.includes("80.0%"))).toBe(true)
+    })
+
+    it("非灾厄武器不产出该字段", () => {
+        const { entry } = readEntry("weapon", { name: "辉珀刃" })
+
+        expect(entry?.fields.灾厄熔炼).toBeUndefined()
     })
 })
 

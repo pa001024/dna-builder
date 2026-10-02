@@ -1752,6 +1752,12 @@
             "more": "另有 {{count}} 处未列出",
             "points": "共 {{count}} 处"
         },
+        "skill": {
+            "bonus": "加成",
+            "second": "秒",
+            "skillLevel": "技能等级",
+            "tag": "标签"
+        },
         "summary": {
             "answered": "已收到回答",
             "askInvalid": "提问格式无效",
@@ -1760,6 +1766,7 @@
             "damageTerms": "{{count}} 条机制术语",
             "done": "已完成",
             "entryFields": "{{name}}：{{count}} 项字段",
+            "entryFieldSchema": "{{prefix}}{{count}} 个可投影字段",
             "facets": "{{prefix}}{{count}} 组筛选项",
             "modulesTotal": "共 {{count}} 个可检索模块",
             "noFacets": "该模块无额外筛选项",

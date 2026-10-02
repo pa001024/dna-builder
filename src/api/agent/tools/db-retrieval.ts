@@ -31,6 +31,7 @@ import {
     resolveCurrentDBAgentLang,
 } from "@/utils/db-locale"
 import {
+    listEntryFields,
     listModuleFilters,
     listModules,
     listVersionAdditions,
@@ -175,6 +176,14 @@ export function summarizeDbToolResult(name: string, payload: unknown): string {
             return facets.length
                 ? i18next.t("dbAgent.summary.facets", { prefix: data.module ? `${data.module}.` : "", count: facets.length })
                 : i18next.t("dbAgent.summary.noFacets")
+        }
+        case "list_entry_fields": {
+            const fields = (data.fields as unknown[] | undefined) ?? []
+            return i18next.t("dbAgent.summary.entryFieldSchema", {
+                defaultValue: "{{prefix}}{{count}} 个可投影字段",
+                prefix: data.module ? `${data.module}.` : "",
+                count: fields.length,
+            })
         }
         case "search_data": {
             const results = data.results as unknown[] | undefined
@@ -435,6 +444,49 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
         )
     )
 
+    tools.push(
+        defineTool<TPayload>(
+            {
+                name: "list_entry_fields",
+                description:
+                    "列出某个模块条目的原始字段结构（字段名、类型、下钻字段、覆盖面），用于写 read_entry 的 select。" +
+                    "**只在要查 fields 之外的深层字段时才用**（如角色的等级成长表 `升级`、技能的弹道参数 `实体`、魔之楔的 `buff` 原始结构）——" +
+                    "倍率、技能、面板、灾厄熔炼这些 read_entry 的 fields 已经给了，不需要 select。",
+                parameters: {
+                    type: "object",
+                    properties: {
+                        lang: LANG_SCHEMA,
+                        module: { type: "string", description: "模块 id，见 list_data_modules，例如 char / weapon / mod" },
+                    },
+                    required: ["module"],
+                },
+            },
+            async args => {
+                const lang = await resolveLang(args)
+                const moduleId = `${args.module ?? ""}`.trim()
+
+                if (!isModuleAllowed(moduleId)) {
+                    return moduleNotAllowed(moduleId, lang)
+                }
+
+                const { module, fields, note } = listEntryFields(moduleId, lang)
+
+                if (!module) {
+                    return moduleNotAllowed(moduleId, lang)
+                }
+
+                return JSON.stringify({
+                    lang,
+                    module: module.id,
+                    total: fields.length,
+                    note,
+                    fields,
+                    tip: '拿这些字段名去 read_entry 传 select，例如 "{ 名称 升级 }"；coverage 是有该字段的条目占比，coverage 低说明只有个别条目有。',
+                })
+            }
+        )
+    )
+
     if (includeRag) {
         tools.push(
             defineTool<TPayload>(
@@ -593,8 +645,15 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
             {
                 name: "read_entry",
                 description:
-                    "读取单个条目的完整字段（详情页上的档案与面板）：角色的生日 / 出生地 / 势力 / 阵营 / CV / 基础属性 / 技能 / 突破材料，武器的面板数值与技能，魔之楔的词条属性与效果，成就奖励，怪物属性，角色档案的整篇正文（module=charprofile），以及读物与资源的地图坐标（书页位置 / 宝藏位置 / 采集位置）等。" +
-                    "回答「某某的生日是什么」「谁配的音」「这把武器暴击多少」「某某的档案里讲了什么」「这件道具 / 这本书在哪」这类问题必须调用它——query_module_entries 与 search_data 只返回条目摘要，不含这些字段。" +
+                    "读取单个条目的完整字段（详情页上的档案与面板）：角色的生日 / 出生地 / 势力 / 阵营 / CV / 基础属性 / 突破材料，" +
+                    "角色与武器技能的逐条倍率（`技能字段`：伤害倍率、属性影响、标签如充盈/远程/武器、削韧、连段/取消秒数）、" +
+                    "技能术语解释（`技能术语解释`：`处决目标`、`羽化`、`充盈` 这类机制名词的官方定义）、" +
+                    "武器的灾厄熔炼（`灾厄熔炼`：逐档潜能的解锁效果与加成，面板数值、熔炼文案、突破材料），" +
+                    "魔之楔的词条属性与效果、招式替换后的倍率（`技能替换字段`），成就奖励，怪物属性，" +
+                    "角色档案的整篇正文（module=charprofile），以及读物与资源的地图坐标（书页位置 / 宝藏位置 / 采集位置）等。" +
+                    "回答「某某的生日是什么」「谁配的音」「这把武器暴击多少」「这个技能伤害倍率多少」「这把武器的灾厄熔炼有什么」" +
+                    "「处决目标是什么意思」「某某的档案里讲了什么」「这件道具 / 这本书在哪」这类问题必须调用它——" +
+                    "query_module_entries 与 search_data 只返回条目摘要，不含这些字段。" +
                     "先用 query_module_entries 或 search_data 定位条目拿到 id，再用本工具；给名称也可以，但只在唯一命中时直接返回详情，否则会返回候选列表。",
                 parameters: {
                     type: "object",
@@ -606,6 +665,15 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                         },
                         id: { type: "string", description: "条目 id（取自 query_module_entries / search_data 的返回），优先用它定位" },
                         name: { type: "string", description: "可选，条目名称；不确定 id 时可只给名称，命中唯一时直接返回详情" },
+                        select: {
+                            type: "string",
+                            description:
+                                "可选，只取原始数据里的指定字段（GraphQL 风格选择集，空格或逗号分隔、不需要冒号）：" +
+                                "`{ id 名称 技能 { 名称 字段 { 名称 值 格式 tag } } }`。" +
+                                "用于查 fields 里没有投影的深层字段——返回的 selectableFields 就是这条还能 select 的字段名。" +
+                                "数组会按元素展开；`a.b` 等价于 `a { b }`。**多数问题不需要它**——倍率、技能、面板、灾厄熔炼等已在 fields 里给成可读文本，" +
+                                "只有 selectableFields 里列出的字段才需要 select。语法错误会返回 error 与正确写法。",
+                        },
                     },
                     required: ["module"],
                 },
@@ -620,7 +688,20 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                     return moduleNotAllowed(moduleId, lang)
                 }
 
-                const { module: moduleInfo, entry, candidates, error } = readEntry(moduleId, { id, name, lang })
+                const {
+                    module: moduleInfo,
+                    entry,
+                    data,
+                    selection,
+                    selectableFields,
+                    candidates,
+                    error,
+                } = readEntry(moduleId, {
+                    id,
+                    name,
+                    lang,
+                    select: args.select ? `${args.select}` : undefined,
+                })
 
                 if (!moduleInfo) {
                     return moduleNotAllowed(moduleId, lang)
@@ -642,6 +723,9 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                               fields: entry.fields,
                           }
                         : undefined,
+                    data,
+                    selectionError: selection?.error,
+                    selectableFields,
                     candidates: candidates?.map(candidate => ({
                         id: candidate.id,
                         name: candidate.name,

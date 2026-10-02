@@ -1755,6 +1755,12 @@
             "more": "{{count}} more not listed",
             "points": "{{count}} location(s)"
         },
+        "skill": {
+            "bonus": "Bonus",
+            "second": "s",
+            "skillLevel": "Skill Level",
+            "tag": "Tag"
+        },
         "summary": {
             "answered": "Answer received",
             "askInvalid": "Invalid question format",
@@ -1763,6 +1769,7 @@
             "damageTerms": "{{count}} mechanic term(s)",
             "done": "Done",
             "entryFields": "{{name}}: {{count}} field(s)",
+            "entryFieldSchema": "{{prefix}}{{count}} projectable field(s)",
             "facets": "{{prefix}}{{count}} facet group(s)",
             "modulesTotal": "{{count}} searchable modules in total",
             "noFacets": "No extra facets for this module",

@@ -17,7 +17,7 @@
  */
 
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
-import { GraphQLScalarType } from "graphql"
+import { GraphQLScalarType, type ValueNode, valueFromASTUntyped } from "graphql"
 import { createGraphQLError } from "graphql-yoga"
 import type { Context } from "../yoga"
 import { runDataQuery } from "./gameDataQuery"
@@ -103,20 +103,36 @@ function toJsonSafe(value: unknown, ancestors: Set<object> = new Set()): unknown
 }
 
 /**
+ * JSON 标量的字面量解析。
+ *
+ * 显式提供且**只声明一个形参**：graphql-jit 用 `parseLiteral` 的形参个数判断标量是否支持
+ * 变量输入，形参 > 1 的标量在解析内联字面量时会被判定为不支持而打警告。
+ * 执行期变量用 rest 收（rest 不计入 `Function.length`），仍能交给 `valueFromASTUntyped`
+ * 替换字面量里的 `$var`，取值行为与 graphql v17 的默认实现一致。
+ * @param node 字面量 AST 节点
+ * @param rest 后续参数，首个是执行期变量（graphql v17 传 `Maybe<Record<string, unknown>>`）
+ * @returns JSON 安全值
+ */
+const parseJSONLiteral = (node: ValueNode, ...rest: unknown[]) =>
+    toJsonSafe(valueFromASTUntyped(node, rest[0] as Record<string, unknown> | null | undefined))
+
+/**
  * JSON 标量。
  *
  * 输入侧原样接受对象 / 数组 / 标量（过滤条件的 `value` 需要传字面量对象）；
  * 输出侧统一走 `toJsonSafe` 深拷贝，保证交给序列化层的是干净 JSON。
  *
- * 只给 v17 的新名（`coerceOutputValue` / `coerceInputValue`）：构造器会把它们同步到旧名
- * `serialize` / `parseValue`（graphql-jit、graphql-tools 读的是旧名），`parseLiteral`
- * 也由默认实现按 `valueFromASTUntyped` 处理字面量（含字面量里的变量替换）。
+ * 新名（`coerceOutputValue` / `coerceInputValue`）供 graphql v17 调用，构造器会同步到旧名
+ * `serialize` / `parseValue`（graphql-tools 读旧名）；`parseValue` 与 `parseLiteral` 必须成对提供，
+ * 缺一个会被 v17 的 devAssert 直接拒掉。
  */
 export const jsonScalar = new GraphQLScalarType({
     name: "JSON",
     description: "任意 JSON 值：对象 / 数组 / 字符串 / 数字 / 布尔",
     coerceOutputValue: value => toJsonSafe(value),
     coerceInputValue: value => toJsonSafe(value),
+    parseValue: value => toJsonSafe(value),
+    parseLiteral: parseJSONLiteral,
 })
 
 export const typeDefs = /* GraphQL */ `

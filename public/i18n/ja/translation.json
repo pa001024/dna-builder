@@ -1731,6 +1731,12 @@
             "more": "他 {{count}} か所は省略",
             "points": "全 {{count}} か所"
         },
+        "skill": {
+            "bonus": "ボーナス",
+            "second": "秒",
+            "skillLevel": "スキルレベル",
+            "tag": "タグ"
+        },
         "summary": {
             "answered": "回答を受け取りました",
             "askInvalid": "質問の形式を解析できません",
@@ -1739,6 +1745,7 @@
             "damageTerms": "{{count}} 件の用語",
             "done": "完了",
             "entryFields": "{{name}}：{{count}} 項目のフィールド",
+            "entryFieldSchema": "{{prefix}}投影可能フィールド {{count}} 個",
             "facets": "{{prefix}}絞り込み {{count}} 件",
             "modulesTotal": "検索可能なモジュールは全 {{count}} 件",
             "noFacets": "このモジュールには追加の絞り込み項目がありません",

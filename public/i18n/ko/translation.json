@@ -1732,6 +1732,12 @@
             "more": "{{count}}곳 더 있음",
             "points": "총 {{count}}곳"
         },
+        "skill": {
+            "bonus": "보너스",
+            "second": "초",
+            "skillLevel": "스킬 레벨",
+            "tag": "태그"
+        },
         "summary": {
             "answered": "답변을 받았습니다",
             "askInvalid": "질문 형식을 해석할 수 없습니다",
@@ -1740,6 +1746,7 @@
             "damageTerms": "용어 {{count}}개",
             "done": "완료",
             "entryFields": "{{name}}: 필드 {{count}}개",
+            "entryFieldSchema": "{{prefix}}投影 가능 필드 {{count}}개",
             "facets": "{{prefix}}필터 {{count}}개",
             "modulesTotal": "총 {{count}}개의 검색 가능한 모듈",
             "noFacets": "이 모듈에는 추가 필터가 없습니다",
