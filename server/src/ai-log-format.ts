@@ -9,7 +9,7 @@ import { beijingDayKey, computeCostMicros, createMessagesUsageAccumulator, norma
  *
  * 一次请求产生两类记录：
  * - **索引记录**（`index/<日期>.jsonl`）：一行一次请求的元数据，用于按时间 / 会话 / 状态码检索；
- * - **轮次记录**（`sessions/<会话 id>/<日期>.jsonl`）：一行一轮对话，保留完整的请求 messages 与助手回复正文。
+ * - **会话记录**（`sessions/<会话 id>/session.jsonl`）：一条会话包含多个请求轮次，messages 去除前序上下文。
  *
  * 只记对话内容与工具名，不记 `tools` 的函数 schema：schema 由客户端固定且每轮重复下发，
  * 逐轮落盘只会把日志撑大几十倍，排查价值却为零。
@@ -146,7 +146,7 @@ export interface AiLogRequestMeta {
     costMicros: number
     error: AiLogError | null
     request: AiLogRequestSummary
-    /** 对应轮次记录的位置（相对日志根目录），便于从索引跳转到全文。 */
+    /** 对应合并会话记录的位置（相对日志根目录），便于从索引跳转到全文。 */
     turnRef: string
 }
 
@@ -168,7 +168,7 @@ export interface AiLogToolCall {
     arguments: string
 }
 
-/** 轮次记录：一行一轮对话，含请求输入与响应输出全文。 */
+/** 一次代理请求的轮次记录，含本轮新增请求消息与助手回复。 */
 export interface AiLogTurnRecord {
     requestId: string
     sessionId: string
@@ -183,7 +183,7 @@ export interface AiLogTurnRecord {
     status: number
     ok: boolean
     durationMs: number
-    /** 本次发给上游的请求内容（messages 为规范化后的版本）。 */
+    /** 本次请求记录。合并会话日志时，messages 仅保留相较于此前请求新增的消息。 */
     request: {
         messages: unknown[]
         /** 是否因超过单条内容上限而被截断。 */

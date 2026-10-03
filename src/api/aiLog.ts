@@ -5,7 +5,7 @@ import { env } from "../env"
  *
  * 日志含完整对话内容，服务端只对 `admin` 角色开放，因此所有请求都带登录令牌；
  * 非管理员拿到 403、会话不存在拿到 404，这里统一抛错由调用方提示。
- * 检索走 REST 而不是 GraphQL：日志按日期分片存在 JSONL 里，与 GraphQL 的数据表无关。
+ * 检索走 REST 而不是 GraphQL：请求索引按日期分片，会话轮次合并存入 JSONL，与 GraphQL 的数据表无关。
  */
 
 /** 日志里的 token 用量（prompt / completion 为输入输出总量，cache 两档为输入拆分）。 */
@@ -73,7 +73,7 @@ export interface AiLogRequestMeta {
     costMicros: number
     error: AiLogError | null
     request: AiLogRequestSummary
-    /** 对应轮次记录的位置（相对日志根目录）。 */
+    /** 对应合并会话记录的位置（相对日志根目录）。 */
     turnRef: string
 }
 
@@ -93,7 +93,7 @@ export interface AiLogAssistantMessage {
     toolCalls: AiLogToolCall[]
 }
 
-/** 轮次记录：一轮对话的完整输入输出。 */
+/** 一次代理请求的轮次记录（会话合并后仅含新增请求消息）。 */
 export interface AiLogTurnRecord {
     requestId: string
     sessionId: string
@@ -109,6 +109,7 @@ export interface AiLogTurnRecord {
     ok: boolean
     durationMs: number
     request: {
+        /** 会话合并后仅保留本轮相较于此前请求新增的消息。 */
         messages: AiLogMessage[]
         /** 内容是否因超过服务端上限被截断。 */
         truncated: boolean
@@ -260,7 +261,7 @@ export function readAiLogStats(token: string): Promise<AiLogStats> {
  * @description 清理指定日期之前的日志（含索引与全部会话轮次）。
  * @param before 截止日期（不含该日，YYYY-MM-DD）。
  * @param token 登录令牌。
- * @returns 删除的文件数。
+ * @returns 被删除或更新的日志文件数。
  */
 export function pruneAiLogs(before: string, token: string): Promise<{ before: string; removed: number }> {
     return request("/", token, { before }, { method: "DELETE" })

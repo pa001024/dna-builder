@@ -167,7 +167,7 @@ async function handlePrune() {
     pruning.value = true
     try {
         const result = await pruneAiLogs(pruneBefore.value, user.jwtToken)
-        ui.showSuccessMessage(`已清理 ${result.before} 之前的日志（${result.removed} 个文件）`)
+        ui.showSuccessMessage(`已处理 ${result.before} 之前的日志（${result.removed} 个文件）`)
         pruneDialogOpen.value = false
         pruneBefore.value = ""
         await Promise.all([loadStats(), search()])

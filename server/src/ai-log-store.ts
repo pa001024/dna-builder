@@ -1,4 +1,5 @@
-import { appendFile, mkdir, readdir, readFile, rm } from "node:fs/promises"
+import { randomUUID } from "node:crypto"
+import { appendFile, mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import {
     type AiLogAssistantMessage,
@@ -22,13 +23,12 @@ import type { UpstreamUsage } from "./ai-pricing"
 /**
  * AI 调用日志的文件存储与检索。
  *
- * 日志按日期分片落到 `<日志根目录>/` 下，两类记录各占一侧：
- * - `index/<YYYY-MM-DD>.jsonl`：一行一次请求的元数据（时间戳、客户端、模型、tokens、耗时、状态码、错误）；
- * - `sessions/<会话 id>/<YYYY-MM-DD>.jsonl`：一行一轮对话，保留完整的请求 messages 与助手回复。
+ * 请求索引按日期分片；会话日志按会话 id 合并为单个文件：
+ * - `index/<YYYY-MM-DD>.jsonl`：一行一次请求元数据（时间戳、客户端、模型、tokens、耗时、状态码、错误）；
+ * - `sessions/<会话 id>/session.jsonl`：一行一条会话记录，保留逐请求的元数据与回复，重复上下文只记一次。
  *
- * 日期一律取北京自然日，与计费口径的日界保持一致。
- * 会话按 id 建目录（而不是按日期散开），因此「按 session 取整段对话」只需读一个目录；
- * 「按时间段检索」只读落在区间内的日期文件，且从新到旧扫描、凑满条数即停。
+ * 日期一律取北京自然日，与计费口径的日界保持一致。每轮只存相较于已有对话新增的 messages；
+ * 读取时仍展开为逐请求记录，便于保留耗时、tokens、trace id 等单次调用信息。
  */
 
 /** 索引记录子目录。 */
@@ -45,6 +45,18 @@ const MAX_QUERY_LIMIT = 2000
 
 /** 默认返回条数。 */
 const DEFAULT_QUERY_LIMIT = 200
+
+/** 合并后的会话文件结构版本。 */
+const SESSION_RECORD_VERSION = 1
+
+/** 一条会话文件包含多个请求轮次，request.messages 已去除已记录的上下文前缀。 */
+interface AiLogSessionRecord {
+    format: "ai-log-session"
+    version: number
+    sessionId: string
+    updatedAt: string
+    turns: AiLogTurnRecord[]
+}
 
 /** 已确认存在的目录（避免每次写日志都做一次 mkdir 系统调用）。 */
 const ensuredDirs = new Set<string>()
@@ -111,13 +123,22 @@ function getSessionDayFile(sessionId: string, day: string, dataDir: string): str
 }
 
 /**
- * @description 生成索引里指向轮次记录的相对路径。
- * @param sessionId 会话 id。
- * @param day 北京自然日。
- * @returns 相对日志根目录的路径，如 `sessions/fp-xxx/2026-09-20.jsonl`。
+ * @description 取合并后的会话文件路径。
+ * @param sessionId 会话 id（已校验）。
+ * @param dataDir 日志根目录。
+ * @returns 会话 JSONL 文件绝对路径。
  */
-function getTurnRef(sessionId: string, day: string): string {
-    return `${SESSIONS_DIR_NAME}/${sessionId}/${day}.jsonl`
+function getSessionFile(sessionId: string, dataDir: string): string {
+    return resolve(dataDir, SESSIONS_DIR_NAME, sessionId, "session.jsonl")
+}
+
+/**
+ * @description 生成索引里指向合并会话记录的相对路径。
+ * @param sessionId 会话 id。
+ * @returns 相对日志根目录的路径，如 `sessions/fp-xxx/session.jsonl`。
+ */
+function getTurnRef(sessionId: string): string {
+    return `${SESSIONS_DIR_NAME}/${sessionId}/session.jsonl`
 }
 
 /**
@@ -144,6 +165,20 @@ function enqueueWrite(task: () => Promise<void>): Promise<void> {
 }
 
 /**
+ * @description 把需返回结果的文件操作排进写入队列，错误仍交给调用方处理。
+ * @param task 队列任务。
+ * @returns 任务结果；失败时拒绝。
+ */
+function enqueueExclusive<T>(task: () => Promise<T>): Promise<T> {
+    const operation = writeQueue.then(task)
+    writeQueue = operation.then(
+        () => undefined,
+        () => undefined
+    )
+    return operation
+}
+
+/**
  * @description 追加一行 JSONL。
  * @param file 目标文件路径。
  * @param record 记录对象。
@@ -151,6 +186,359 @@ function enqueueWrite(task: () => Promise<void>): Promise<void> {
 async function appendJsonLine(file: string, record: unknown): Promise<void> {
     await ensureDir(dirname(file))
     await appendFile(file, `${toJsonLine(record)}\n`, "utf8")
+}
+
+/**
+ * @description 原子替换文件内容，避免进程中断时损坏原文件。
+ * @param file 目标文件。
+ * @param content 新文件内容。
+ * @returns 无返回值。
+ * @throws 临时文件写入或替换失败时抛出原始错误。
+ */
+async function replaceFileAtomically(file: string, content: string): Promise<void> {
+    await ensureDir(dirname(file))
+    const temporaryFile = `${file}.${randomUUID()}.tmp`
+    try {
+        await writeFile(temporaryFile, content, "utf8")
+        await rename(temporaryFile, file)
+    } catch (error) {
+        await rm(temporaryFile, { force: true })
+        throw error
+    }
+}
+
+/**
+ * @description 原子覆盖一条 JSONL 记录，避免进程中断时损坏原会话文件。
+ * @param file 目标文件。
+ * @param record 记录对象。
+ * @returns 无返回值。
+ * @throws 临时文件写入或替换失败时抛出原始错误。
+ */
+async function replaceJsonLine(file: string, record: unknown): Promise<void> {
+    await replaceFileAtomically(file, `${toJsonLine(record)}\n`)
+}
+
+/**
+ * @description 把未知值收敛成普通对象。
+ * @param value 待转换的值。
+ * @returns 普通对象或 null。
+ */
+function asRecord(value: unknown): Record<string, unknown> | null {
+    return typeof value === "object" && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : null
+}
+
+/**
+ * @description 判断值是否为当前版本的合并会话记录。
+ * @param value 待检查的 JSON 值。
+ * @returns 是否为可读取的会话记录。
+ */
+function isAiLogSessionRecord(value: unknown): value is AiLogSessionRecord {
+    const record = asRecord(value)
+    return (
+        record?.format === "ai-log-session" &&
+        record.version === SESSION_RECORD_VERSION &&
+        typeof record.sessionId === "string" &&
+        Array.isArray(record.turns)
+    )
+}
+
+/**
+ * @description 判断值是否为可读取的轮次记录。
+ * @param value 待检查的 JSON 值。
+ * @returns 是否为合法轮次结构。
+ */
+function isAiLogTurnRecord(value: unknown): value is AiLogTurnRecord {
+    const record = asRecord(value)
+    const request = asRecord(record?.request)
+    return (
+        typeof record?.requestId === "string" &&
+        typeof record.sessionId === "string" &&
+        typeof record.time === "string" &&
+        typeof record.day === "string" &&
+        Array.isArray(request?.messages)
+    )
+}
+
+/**
+ * @description 递归按键排序序列化，供消息去重时稳定比较对象内容。
+ * @param value 待序列化的值。
+ * @returns 稳定的 JSON 文本。
+ */
+function stableJson(value: unknown): string {
+    if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`
+    if (value && typeof value === "object") {
+        const record = value as Record<string, unknown>
+        return `{${Object.keys(record)
+            .filter(key => record[key] !== undefined)
+            .sort()
+            .map(key => `${JSON.stringify(key)}:${stableJson(record[key])}`)
+            .join(",")}}`
+    }
+    const serialized = JSON.stringify(value)
+    return serialized === undefined ? "undefined" : serialized
+}
+
+/**
+ * @description 把工具参数归一化成可比较的 JSON，兼容 Messages 对象与 Chat Completions 字符串两种形态。
+ * @param value Messages 对象或 Chat Completions JSON 字符串。
+ * @returns 稳定的参数签名。
+ */
+function normalizeToolArguments(value: unknown): string {
+    if (typeof value === "string") {
+        try {
+            return stableJson(JSON.parse(value))
+        } catch {
+            return stableJson(value)
+        }
+    }
+    return stableJson(value)
+}
+
+/**
+ * @description 生成助手消息的协议无关签名，用于识别下一次请求中回传的上一轮回复。
+ * Chat Completions 的 `tool_calls` 与 Messages 的 `tool_use` 会归一到相同形态。
+ * @param value 请求消息或日志里的助手回复。
+ * @returns 助手消息签名；非助手消息返回 null。
+ */
+function assistantMessageSignature(value: unknown): string | null {
+    const record = asRecord(value)
+    if (record?.role !== "assistant") return null
+
+    let content = ""
+    let reasoning = ""
+    const toolCalls: Array<{ id: string | null; type: string; name: string; arguments: string }> = []
+    const unknownBlocks: unknown[] = []
+
+    if (typeof record.content === "string") {
+        content = record.content
+    } else if (Array.isArray(record.content)) {
+        for (const value of record.content) {
+            const block = asRecord(value)
+            if (!block) {
+                unknownBlocks.push(value)
+                continue
+            }
+            if (block.type === "text" && typeof block.text === "string") {
+                content += block.text
+            } else if (block.type === "thinking" || block.type === "redacted_thinking") {
+                const text = typeof block.thinking === "string" ? block.thinking : typeof block.text === "string" ? block.text : ""
+                reasoning += text
+            } else if (block.type === "tool_use") {
+                toolCalls.push({
+                    id: typeof block.id === "string" ? block.id : null,
+                    type: "function",
+                    name: typeof block.name === "string" ? block.name : "",
+                    arguments: normalizeToolArguments(block.input),
+                })
+            } else {
+                unknownBlocks.push(value)
+            }
+        }
+    }
+
+    const rawReasoning = record.reasoningContent ?? record.reasoning_content ?? record.reasoning
+    if (typeof rawReasoning === "string") reasoning = rawReasoning
+
+    const rawToolCalls = Array.isArray(record.tool_calls) ? record.tool_calls : Array.isArray(record.toolCalls) ? record.toolCalls : []
+    for (const value of rawToolCalls) {
+        const call = asRecord(value)
+        if (!call) continue
+        const fn = asRecord(call.function)
+        toolCalls.push({
+            id: typeof call.id === "string" ? call.id : null,
+            type: typeof call.type === "string" ? call.type : "function",
+            name: typeof fn?.name === "string" ? fn.name : typeof call.name === "string" ? call.name : "",
+            arguments: normalizeToolArguments(fn?.arguments ?? call.arguments ?? call.input),
+        })
+    }
+
+    return stableJson({
+        role: "assistant",
+        content: toolCalls.length > 0 && content === "" ? null : content,
+        reasoning: reasoning || null,
+        toolCalls,
+        unknownBlocks,
+    })
+}
+
+/**
+ * @description 对比两条消息；助手消息会忽略两种上游协议间的字段形态差异。
+ * @param left 已记录消息或助手回复。
+ * @param right 本次请求中的消息。
+ * @returns 消息内容等价时为 true。
+ */
+function messagesMatch(left: unknown, right: unknown): boolean {
+    const leftAssistant = assistantMessageSignature(left)
+    const rightAssistant = assistantMessageSignature(right)
+    if (leftAssistant !== null || rightAssistant !== null) return leftAssistant !== null && leftAssistant === rightAssistant
+    return stableJson(left) === stableJson(right)
+}
+
+/**
+ * @description 去掉本次请求中已经存在于会话上下文末尾的前缀。
+ * @param messages 本次完整请求消息。
+ * @param history 已落盘的会话消息（请求增量与此前助手回复）。
+ * @returns 仅包含尚未落盘消息的请求片段。
+ */
+function removeRecordedPrefix(messages: readonly unknown[], history: readonly unknown[]): unknown[] {
+    let sharedPrefix = 0
+    const max = Math.min(messages.length, history.length)
+    while (sharedPrefix < max && messagesMatch(messages[sharedPrefix], history[sharedPrefix])) sharedPrefix += 1
+    return messages.slice(sharedPrefix)
+}
+
+/**
+ * @description 取轮次的助手回复，作为下一次请求历史中的已知消息。
+ * @param turn 会话轮次。
+ * @returns 可用于比对的助手回复；无回复时返回 null。
+ */
+function getTurnAssistantMessage(turn: AiLogTurnRecord): unknown | null {
+    return turn.response?.message ?? null
+}
+
+/**
+ * @description 将旧版逐行会话日志压缩成增量轮次，兼容已存在的重复上下文。
+ * @param turns 旧版逐请求记录。
+ * @returns 每条请求仅保留新增 messages 的轮次记录。
+ */
+function compactLegacyTurns(turns: readonly AiLogTurnRecord[]): AiLogTurnRecord[] {
+    const history: unknown[] = []
+    const ordered = turns
+        .map((turn, index) => ({ turn, index }))
+        .sort((left, right) => left.turn.time.localeCompare(right.turn.time) || left.index - right.index)
+
+    return ordered.map(({ turn }) => {
+        const messages = removeRecordedPrefix(turn.request.messages, history) as AiLogMessage[]
+        history.push(...messages)
+        const assistantMessage = getTurnAssistantMessage(turn)
+        if (assistantMessage) history.push(assistantMessage)
+        return { ...turn, request: { ...turn.request, messages } }
+    })
+}
+
+/**
+ * @description 把已合并轮次还原为供后续请求去重的完整消息序列。
+ * @param turns 已合并会话中的轮次。
+ * @returns 按对话顺序排列的消息。
+ */
+function buildSessionHistory(turns: readonly AiLogTurnRecord[]): unknown[] {
+    const history: unknown[] = []
+    for (const turn of turns) {
+        history.push(...turn.request.messages)
+        const assistantMessage = getTurnAssistantMessage(turn)
+        if (assistantMessage) history.push(assistantMessage)
+    }
+    return history
+}
+
+/**
+ * @description 列出旧版按日期分片的会话文件，用于读取与首次迁移。
+ * @param sessionId 会话 id。
+ * @param dataDir 日志根目录。
+ * @returns 按日期排序的旧版文件路径。
+ */
+async function listLegacySessionFiles(sessionId: string, dataDir: string): Promise<Array<{ day: string; file: string }>> {
+    const sessionDir = resolve(dataDir, SESSIONS_DIR_NAME, sessionId)
+    try {
+        const names = await readdir(sessionDir)
+        return names
+            .filter(name => name.endsWith(".jsonl"))
+            .map(name => name.slice(0, -".jsonl".length))
+            .filter(day => normalizeLogDay(day) !== null)
+            .sort()
+            .map(day => ({ day, file: getSessionDayFile(sessionId, day, dataDir) }))
+    } catch {
+        return []
+    }
+}
+
+/**
+ * @description 读取旧版逐行会话轮次，跳过坏行与非轮次记录。
+ * @param sessionId 会话 id。
+ * @param dataDir 日志根目录。
+ * @returns 按时间排序的旧版轮次。
+ */
+async function readLegacySessionTurns(sessionId: string, dataDir: string): Promise<AiLogTurnRecord[]> {
+    const turns: AiLogTurnRecord[] = []
+    for (const { file } of await listLegacySessionFiles(sessionId, dataDir)) {
+        for (const record of await readJsonLines<unknown>(file)) {
+            if (isAiLogTurnRecord(record)) turns.push(record)
+            else if (isAiLogSessionRecord(record)) turns.push(...record.turns.filter(isAiLogTurnRecord))
+        }
+    }
+    return turns
+        .map((turn, index) => ({ turn, index }))
+        .sort((left, right) => left.turn.time.localeCompare(right.turn.time) || left.index - right.index)
+        .map(({ turn }) => turn)
+}
+
+/**
+ * @description 写入时清除迁移前按日期保存的重复文件。
+ * @param sessionId 会话 id。
+ * @param dataDir 日志根目录。
+ * @returns 无返回值。
+ */
+async function removeLegacySessionFiles(sessionId: string, dataDir: string): Promise<void> {
+    for (const { file } of await listLegacySessionFiles(sessionId, dataDir)) {
+        await rm(file, { force: true })
+    }
+}
+
+/**
+ * @description 迁移旧会话文件时，将索引中的轮次引用同步到新的合并文件。
+ * @param sessionId 会话 id。
+ * @param days 旧轮次所属的日期。
+ * @param dataDir 日志根目录。
+ * @returns 无返回值。
+ */
+async function updateSessionTurnRefs(sessionId: string, days: readonly string[], dataDir: string): Promise<void> {
+    const turnRef = getTurnRef(sessionId)
+    for (const day of new Set(days)) {
+        if (!normalizeLogDay(day)) continue
+        const file = getIndexFile(day, dataDir)
+        let raw: string
+        try {
+            raw = await readFile(file, "utf8")
+        } catch {
+            continue
+        }
+
+        let changed = false
+        const lines = raw.split("\n").map(line => {
+            if (!line.trim()) return line
+            try {
+                const record = asRecord(JSON.parse(line))
+                if (record?.sessionId !== sessionId || record.turnRef === turnRef) return line
+                changed = true
+                return toJsonLine({ ...record, turnRef })
+            } catch {
+                return line
+            }
+        })
+
+        if (changed) await replaceFileAtomically(file, lines.join("\n"))
+    }
+}
+
+/**
+ * @description 在新会话记录安全落盘后更新索引引用并移除旧分片。
+ * @param sessionId 会话 id。
+ * @param legacyFiles 旧版日期分片文件。
+ * @param dataDir 日志根目录。
+ * @returns 无返回值。
+ */
+async function finalizeLegacySessionMigration(
+    sessionId: string,
+    legacyFiles: readonly { day: string; file: string }[],
+    dataDir: string
+): Promise<void> {
+    if (legacyFiles.length === 0) return
+    await updateSessionTurnRefs(
+        sessionId,
+        legacyFiles.map(({ day }) => day),
+        dataDir
+    )
+    await removeLegacySessionFiles(sessionId, dataDir)
 }
 
 /**
@@ -163,12 +551,45 @@ export function appendAiLogRequest(meta: AiLogRequestMeta, dataDir: string = get
 }
 
 /**
- * @description 写入一条轮次记录（请求输入 + 响应输出全文）。
+ * @description 合并写入一条会话轮次，重复上下文只保留一次。
  * @param turn 轮次记录。
  * @param dataDir 日志根目录。
+ * @returns 写入队列完成后的 Promise。
  */
 export function appendAiLogTurn(turn: AiLogTurnRecord, dataDir: string = getAiLogDir()): Promise<void> {
-    return enqueueWrite(() => appendJsonLine(getSessionDayFile(turn.sessionId, turn.day, dataDir), turn))
+    return enqueueWrite(async () => {
+        const sessionId = normalizeSessionId(turn.sessionId)
+        const day = normalizeLogDay(turn.day)
+        if (!sessionId || !day) throw new Error("会话 id 或日志日期无效，已跳过轮次日志")
+
+        const sessionFile = getSessionFile(sessionId, dataDir)
+        const legacyFiles = await listLegacySessionFiles(sessionId, dataDir)
+        const storedRecords = await readJsonLines<unknown>(sessionFile)
+        const storedRecord = storedRecords.find(isAiLogSessionRecord)
+        const previousTurns = storedRecord
+            ? storedRecord.turns.filter(isAiLogTurnRecord)
+            : compactLegacyTurns(await readLegacySessionTurns(sessionId, dataDir))
+
+        // 请求 id 是幂等键：即使调用方重试写入，也不会重复增加会话轮次。
+        if (previousTurns.some(previous => previous.requestId === turn.requestId)) {
+            await finalizeLegacySessionMigration(sessionId, legacyFiles, dataDir)
+            return
+        }
+
+        const history = buildSessionHistory(previousTurns)
+        const messages = removeRecordedPrefix(turn.request.messages, history) as AiLogMessage[]
+        const mergedTurn: AiLogTurnRecord = { ...turn, sessionId, request: { ...turn.request, messages } }
+        const sessionRecord: AiLogSessionRecord = {
+            format: "ai-log-session",
+            version: SESSION_RECORD_VERSION,
+            sessionId,
+            updatedAt: new Date().toISOString(),
+            turns: [...previousTurns, mergedTurn],
+        }
+
+        await replaceJsonLine(sessionFile, sessionRecord)
+        await finalizeLegacySessionMigration(sessionId, legacyFiles, dataDir)
+    })
 }
 
 /** 等待队列中所有写入完成（供测试与优雅退出使用）。 */
@@ -275,7 +696,7 @@ export async function readAiLogRequests(
 }
 
 /**
- * @description 读取某个会话的完整轮次记录，按时间正序（即对话发生的顺序）。
+ * @description 读取某个会话的逐请求轮次，按对话发生顺序返回；request.messages 仅含本轮新增消息。
  * @param sessionId 会话 id（此处再校验一次，避免调用方漏校验时拼出日志目录之外的路径）。
  * @param query 日期范围与条数限制。
  * @param dataDir 日志根目录。
@@ -290,28 +711,24 @@ export async function readAiLogTurns(
     if (!safeSessionId) return { turns: [], days: [] }
 
     const sessionDir = resolve(dataDir, SESSIONS_DIR_NAME, safeSessionId)
-    let names: string[]
     try {
-        names = await readdir(sessionDir)
+        await readdir(sessionDir)
     } catch {
         return { turns: [], days: [] }
     }
 
-    const days = names
-        .filter(name => name.endsWith(".jsonl"))
-        .map(name => name.slice(0, -".jsonl".length))
-        .filter(day => normalizeLogDay(day) !== null)
-        .filter(day => (!query.from || day >= query.from) && (!query.to || day <= query.to))
-        .sort()
-
-    const turns: AiLogTurnRecord[] = []
-    for (const day of days) {
-        turns.push(...(await readJsonLines<AiLogTurnRecord>(getSessionDayFile(safeSessionId, day, dataDir))))
-    }
-    turns.sort((left, right) => left.time.localeCompare(right.time))
+    const sessionRecords = await readJsonLines<unknown>(getSessionFile(safeSessionId, dataDir))
+    const mergedRecord = sessionRecords.find(isAiLogSessionRecord)
+    const allTurns = mergedRecord
+        ? mergedRecord.turns.filter(isAiLogTurnRecord)
+        : compactLegacyTurns(await readLegacySessionTurns(safeSessionId, dataDir))
+    const matchingTurns = allTurns
+        .filter(turn => (!query.from || turn.day >= query.from) && (!query.to || turn.day <= query.to))
+        .sort((left, right) => left.time.localeCompare(right.time))
+    const days = [...new Set(matchingTurns.map(turn => turn.day))].sort()
 
     const limit = Math.min(Math.max(1, Math.floor(query.limit ?? MAX_QUERY_LIMIT)), MAX_QUERY_LIMIT)
-    return { turns: turns.slice(-limit), days }
+    return { turns: matchingTurns.slice(-limit), days }
 }
 
 /**
@@ -336,9 +753,9 @@ export async function listAiLogSessions(dataDir: string = getAiLogDir()): Promis
  * 日期参数由调用方给出，不做默认值，避免误删。
  * @param beforeDay 截止日期（不含该日，YYYY-MM-DD）。
  * @param dataDir 日志根目录。
- * @returns 删除的文件数。
+ * @returns 被删除或更新的日志文件数。
  */
-export async function pruneAiLogs(beforeDay: string, dataDir: string = getAiLogDir()): Promise<number> {
+async function pruneAiLogsNow(beforeDay: string, dataDir: string): Promise<number> {
     const day = normalizeLogDay(beforeDay)
     if (!day) throw new Error(`日期格式无效: ${beforeDay}`)
 
@@ -352,18 +769,45 @@ export async function pruneAiLogs(beforeDay: string, dataDir: string = getAiLogD
 
     for (const sessionId of await listAiLogSessions(dataDir)) {
         const sessionDir = resolve(dataDir, SESSIONS_DIR_NAME, sessionId)
-        let names: string[]
-        try {
-            names = await readdir(sessionDir)
-        } catch {
-            continue
+        const sessionFile = getSessionFile(sessionId, dataDir)
+        const storedRecords = await readJsonLines<unknown>(sessionFile)
+        const storedRecord = storedRecords.find(isAiLogSessionRecord)
+
+        if (storedRecord) {
+            const turns = storedRecord.turns.filter(isAiLogTurnRecord)
+            const remainingTurns = turns.filter(turn => {
+                const turnDay = normalizeLogDay(turn.day)
+                return turnDay === null || turnDay >= day
+            })
+            if (remainingTurns.length !== turns.length) {
+                if (remainingTurns.length > 0) {
+                    await replaceJsonLine(sessionFile, { ...storedRecord, updatedAt: new Date().toISOString(), turns: remainingTurns })
+                } else {
+                    await rm(sessionFile, { force: true })
+                }
+                removed += 1
+            }
+
+            // 若上次进程在合并文件落盘后退出，先修正引用再清理残留旧分片。
+            const legacyFiles = await listLegacySessionFiles(sessionId, dataDir)
+            await updateSessionTurnRefs(
+                sessionId,
+                legacyFiles.map(({ day: fileDay }) => fileDay),
+                dataDir
+            )
+            for (const { file } of legacyFiles) {
+                await rm(file, { force: true })
+                removed += 1
+            }
+        } else {
+            // 兼容尚未迁移的旧版逐日 JSONL。
+            for (const { day: fileDay, file } of await listLegacySessionFiles(sessionId, dataDir)) {
+                if (fileDay >= day) continue
+                await rm(file, { force: true })
+                removed += 1
+            }
         }
-        for (const name of names) {
-            const fileDay = name.endsWith(".jsonl") ? name.slice(0, -".jsonl".length) : null
-            if (!fileDay || normalizeLogDay(fileDay) === null || fileDay >= day) continue
-            await rm(resolve(sessionDir, name), { force: true })
-            removed += 1
-        }
+
         const left = await readdir(sessionDir)
         if (left.length === 0) await rm(sessionDir, { recursive: true, force: true })
     }
@@ -371,6 +815,16 @@ export async function pruneAiLogs(beforeDay: string, dataDir: string = getAiLogD
     // 目录可能已被删掉，清空缓存以免后续写入跳过 mkdir
     ensuredDirs.clear()
     return removed
+}
+
+/**
+ * @description 串行清理指定日期之前的日志，避免与会话合并写入互相覆盖。
+ * @param beforeDay 截止日期（不含该日，YYYY-MM-DD）。
+ * @param dataDir 日志根目录。
+ * @returns 被删除或更新的日志文件数。
+ */
+export function pruneAiLogs(beforeDay: string, dataDir: string = getAiLogDir()): Promise<number> {
+    return enqueueExclusive(() => pruneAiLogsNow(beforeDay, dataDir))
 }
 
 /** 保留期检查间隔（6 小时）。 */
@@ -399,7 +853,7 @@ export function scheduleAiLogRetention(dataDir: string = getAiLogDir()): () => v
         const before = dayKeyBefore(days)
         void pruneAiLogs(before, dataDir)
             .then(removed => {
-                if (removed > 0) console.log(`[ai-log] 已清理 ${before} 之前的调用日志（${removed} 个文件）`)
+                if (removed > 0) console.log(`[ai-log] 已处理 ${before} 之前的调用日志（${removed} 个文件）`)
             })
             .catch(error => console.error("[ai-log] 清理过期调用日志失败：", error))
     }
@@ -455,13 +909,13 @@ export interface AiCallFinishParams {
 
 /** 代理请求的日志记录器。 */
 export interface AiCallLogger {
-    /** 记录本次请求的最终状态，落盘索引与轮次两条记录。 */
+    /** 记录本次请求的最终状态，写入索引并合并进会话记录。 */
     finish(params: AiCallFinishParams): void
 }
 
 /**
  * @description 创建一次代理请求的日志记录器。
- * 记录器只负责组装与投递，写入走异步队列，不阻塞请求处理；重复收尾只会落一份记录。
+ * 记录器只负责组装与投递，写入走异步队列，不阻塞请求处理；重复收尾只会处理一次。
  * @param params 请求上下文。
  * @returns 记录器实例。
  */
@@ -513,7 +967,7 @@ export function createAiCallLogger(params: AiCallLoggerParams): AiCallLogger {
                 costMicros,
                 error: finish.error ?? null,
                 request: summary,
-                turnRef: getTurnRef(params.sessionId, day),
+                turnRef: getTurnRef(params.sessionId),
             }
 
             const turn: AiLogTurnRecord = {

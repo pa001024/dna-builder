@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test"
-import { mkdtemp, readdir, rm } from "node:fs/promises"
+import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { buildClientIdentity, resolveSessionId } from "./ai-log-format"
+import { buildClientIdentity, type AiLogAssistantMessage, type AiLogTurnRecord, resolveSessionId } from "./ai-log-format"
 import {
     appendAiLogRequest,
     createAiCallLogger,
@@ -18,6 +18,7 @@ import {
 
 /** 每个用例一个独立日志目录，避免互相污染。 */
 let dataDir: string
+let requestSequence = 0
 
 /** 造一个带会话历史的请求体。 */
 function makeMessages(anchor: string, extra: Array<Record<string, unknown>> = []) {
@@ -37,14 +38,19 @@ async function runLogger(options: {
     error?: { code: string; type: string; message: string; raw: string | null } | null
     usage?: { prompt_tokens: number; completion_tokens: number } | null
     responseContent?: string
+    responseToolCalls?: AiLogAssistantMessage["toolCalls"]
+    /** 本轮发送的完整上下文；缺省使用单条 user 提问。 */
+    messages?: readonly unknown[]
+    /** 请求 id；缺省按调用顺序生成，保证同会话内每次调用唯一。 */
+    requestId?: string
     /** 上游追踪 id，缺省给一个固定值便于断言落盘。 */
     upstreamTraceId?: string | null
     /** 上游补全 id，缺省给一个固定值便于断言落盘。 */
     upstreamCompletionId?: string | null
 }): Promise<{ sessionId: string; requestId: string }> {
-    const messages = makeMessages(options.anchor)
+    const messages = options.messages ?? makeMessages(options.anchor)
     const sessionId = resolveSessionId({ userId: "u1", messages })
-    const requestId = `req-${options.anchor}`
+    const requestId = options.requestId ?? `req-${options.anchor}-${++requestSequence}`
 
     const logger = createAiCallLogger({
         requestId,
@@ -74,7 +80,12 @@ async function runLogger(options: {
         // 固定耗时，便于断言 durationMs（真实运行时以流结束时刻收尾）
         finishedAt: new Date(options.startedAt.getTime() + 500),
         assistant: {
-            message: { role: "assistant", content: options.responseContent ?? "回答", reasoningContent: null, toolCalls: [] },
+            message: {
+                role: "assistant",
+                content: options.responseContent ?? "回答",
+                reasoningContent: null,
+                toolCalls: options.responseToolCalls ?? [],
+            },
             finishReason: "stop",
         },
     })
@@ -84,6 +95,7 @@ async function runLogger(options: {
 }
 
 beforeEach(async () => {
+    requestSequence = 0
     dataDir = await mkdtemp(join(tmpdir(), "ai-log-test-"))
 })
 
@@ -113,7 +125,7 @@ describe("写入与索引检索", () => {
         expect(truncated).toBe(false)
         expect(scannedDays).toBe(1)
         expect(logs[0]).toMatchObject({
-            requestId: "req-第一问",
+            requestId: "req-第一问-1",
             sessionId,
             model: "deepseek-flash",
             ok: true,
@@ -134,7 +146,7 @@ describe("写入与索引检索", () => {
             peak: false,
             toolNames: ["search"],
         })
-        expect(logs[0].turnRef).toBe(`sessions/${sessionId}/2026-09-18.jsonl`)
+        expect(logs[0].turnRef).toBe(`sessions/${sessionId}/session.jsonl`)
         // 上游请求级标识在索引与轮次两处都落盘，用于向 DeepSeek 对账
         expect(logs[0].upstreamTraceId).toBe("trace-abc")
         expect(logs[0].upstreamCompletionId).toBe("completion-abc")
@@ -207,31 +219,144 @@ describe("写入与索引检索", () => {
         expect(scannedDays).toBe(1)
     })
 
-    it("同一会话的多轮请求归并到同一个目录，且按时间正序返回", async () => {
-        const second = await runLogger({
+    it("同一会话写入单条合并记录，重复上下文只保留一次", async () => {
+        const first = await runLogger({
             startedAt: new Date("2026-09-18T08:00:00Z"),
             anchor: "第一问",
             responseContent: "第一答",
         })
-        const third = await runLogger({
+        const second = await runLogger({
             startedAt: new Date("2026-09-18T09:00:00Z"),
             anchor: "第一问",
+            messages: [
+                { role: "system", content: "系统提示" },
+                { role: "user", content: "第一问" },
+                { role: "assistant", content: "第一答" },
+                { role: "user", content: "第二问" },
+            ],
             responseContent: "第二答",
         })
-        expect(third.sessionId).toBe(second.sessionId)
+        expect(second.sessionId).toBe(first.sessionId)
 
-        const { turns, days } = await readAiLogTurns(second.sessionId, {}, dataDir)
+        const { turns, days } = await readAiLogTurns(first.sessionId, {}, dataDir)
         expect(days).toEqual(["2026-09-18"])
         expect(turns.map(turn => turn.response.message?.content)).toEqual(["第一答", "第二答"])
+        expect(turns[1].request.messages).toEqual([{ role: "user", content: "第二问" }])
+
+        const sessionDir = join(dataDir, "sessions", first.sessionId)
+        expect(await readdir(sessionDir)).toEqual(["session.jsonl"])
+        const storedLines = (await readFile(join(sessionDir, "session.jsonl"), "utf8")).trim().split("\n")
+        expect(storedLines).toHaveLength(1)
+        const stored = JSON.parse(storedLines[0]) as { format: string; turns: unknown[] }
+        expect(stored.format).toBe("ai-log-session")
+        expect(stored.turns).toHaveLength(2)
+        expect((await readAiLogRequests({ sessionId: first.sessionId }, dataDir)).logs).toHaveLength(2)
     })
 
-    it("跨日期归档时同一会话落到两个日期文件", async () => {
+    it("合并 Messages 协议中的工具调用上下文", async () => {
+        const firstMessages = [{ role: "user", content: [{ type: "text", text: "查一条记录" }] }]
+        const first = await runLogger({
+            startedAt: new Date("2026-09-18T08:00:00Z"),
+            anchor: "查一条记录",
+            messages: firstMessages,
+            responseContent: "",
+            responseToolCalls: [{ id: "call-1", type: "function", name: "lookup", arguments: '{"query":"x"}' }],
+        })
+        await runLogger({
+            startedAt: new Date("2026-09-18T09:00:00Z"),
+            anchor: "查一条记录",
+            messages: [
+                { role: "user", content: [{ type: "text", text: "查一条记录" }] },
+                { role: "assistant", content: [{ type: "tool_use", id: "call-1", name: "lookup", input: { query: "x" } }] },
+                {
+                    role: "user",
+                    content: [{ type: "tool_result", tool_use_id: "call-1", content: [{ type: "text", text: "查询结果" }] }],
+                },
+            ],
+            responseContent: "查到了",
+        })
+
+        const { turns } = await readAiLogTurns(first.sessionId, {}, dataDir)
+        expect(turns).toHaveLength(2)
+        expect(turns[1].request.messages).toEqual([
+            {
+                role: "user",
+                content: [{ type: "tool_result", tool_use_id: "call-1", content: [{ type: "text", text: "查询结果" }] }],
+            },
+        ])
+    })
+
+    it("首次追加时迁移并压缩旧版逐轮会话日志", async () => {
+        const first = await runLogger({ startedAt: new Date("2026-09-18T08:00:00Z"), anchor: "第一问", responseContent: "第一答" })
+        await runLogger({
+            startedAt: new Date("2026-09-18T09:00:00Z"),
+            anchor: "第一问",
+            messages: [...makeMessages("第一问"), { role: "assistant", content: "第一答" }, { role: "user", content: "第二问" }],
+            responseContent: "第二答",
+        })
+
+        const sessionDir = join(dataDir, "sessions", first.sessionId)
+        const sessionFile = join(sessionDir, "session.jsonl")
+        const stored = JSON.parse(await readFile(sessionFile, "utf8")) as { turns: AiLogTurnRecord[] }
+        await rm(sessionFile)
+
+        const legacySecond: AiLogTurnRecord = {
+            ...stored.turns[1],
+            request: {
+                ...stored.turns[1].request,
+                messages: [
+                    ...stored.turns[0].request.messages,
+                    { role: "assistant", content: "第一答" },
+                    ...stored.turns[1].request.messages,
+                ],
+            },
+        }
+        const legacyFile = join(sessionDir, "2026-09-18.jsonl")
+        await writeFile(legacyFile, `${JSON.stringify(stored.turns[0])}\n${JSON.stringify(legacySecond)}\n`, "utf8")
+        const indexFile = join(dataDir, "index", "2026-09-18.jsonl")
+        const indexLines = (await readFile(indexFile, "utf8")).trim().split("\n")
+        await writeFile(
+            indexFile,
+            `${indexLines
+                .map(line => {
+                    const record = JSON.parse(line) as { turnRef: string }
+                    return JSON.stringify({ ...record, turnRef: `sessions/${first.sessionId}/2026-09-18.jsonl` })
+                })
+                .join("\n")}\n`,
+            "utf8"
+        )
+
+        await runLogger({
+            startedAt: new Date("2026-09-18T10:00:00Z"),
+            anchor: "第一问",
+            messages: [
+                ...makeMessages("第一问"),
+                { role: "assistant", content: "第一答" },
+                { role: "user", content: "第二问" },
+                { role: "assistant", content: "第二答" },
+                { role: "user", content: "第三问" },
+            ],
+            responseContent: "第三答",
+        })
+
+        const { turns } = await readAiLogTurns(first.sessionId, {}, dataDir)
+        expect(turns).toHaveLength(3)
+        expect(turns[1].request.messages).toEqual([{ role: "user", content: "第二问" }])
+        expect(turns[2].request.messages).toEqual([{ role: "user", content: "第三问" }])
+        expect(await readdir(sessionDir)).toEqual(["session.jsonl"])
+        const { logs } = await readAiLogRequests({ sessionId: first.sessionId }, dataDir)
+        expect(logs.every(log => log.turnRef === `sessions/${first.sessionId}/session.jsonl`)).toBe(true)
+    })
+
+    it("跨日期请求仍合并到同一个会话文件并保留各自归档日期", async () => {
         await runLogger({ startedAt: new Date("2026-09-18T02:00:00Z"), anchor: "跨天" })
         await runLogger({ startedAt: new Date("2026-09-19T02:00:00Z"), anchor: "跨天" })
 
         const sessionId = (await listAiLogSessions(dataDir))[0]
-        const { days } = await readAiLogTurns(sessionId, {}, dataDir)
+        const { turns, days } = await readAiLogTurns(sessionId, {}, dataDir)
         expect(days).toEqual(["2026-09-18", "2026-09-19"])
+        expect(turns).toHaveLength(2)
+        expect(await readdir(join(dataDir, "sessions", sessionId))).toEqual(["session.jsonl"])
         expect(await listAiLogDays(dataDir)).toEqual(["2026-09-18", "2026-09-19"])
     })
 
@@ -331,6 +456,32 @@ describe("保留期清理", () => {
 
         const left = await readAiLogRequests({}, dataDir)
         expect(left.logs[0].request.lastUserMessage).toBe("新会话")
+    })
+
+    it("同一会话只删除过期轮次，并保留新轮次", async () => {
+        const first = await runLogger({
+            startedAt: new Date("2026-09-15T02:00:00Z"),
+            anchor: "长期会话",
+            responseContent: "第一回复",
+        })
+        await runLogger({
+            startedAt: new Date("2026-09-19T02:00:00Z"),
+            anchor: "长期会话",
+            messages: [
+                ...makeMessages("长期会话"),
+                { role: "assistant", content: "第一回复" },
+                { role: "user", content: "第二问" },
+            ],
+            responseContent: "第二回复",
+        })
+
+        const removed = await pruneAiLogs("2026-09-18", dataDir)
+        expect(removed).toBe(2)
+        const { turns, days } = await readAiLogTurns(first.sessionId, {}, dataDir)
+        expect(days).toEqual(["2026-09-19"])
+        expect(turns).toHaveLength(1)
+        expect(turns[0].request.messages).toEqual([{ role: "user", content: "第二问" }])
+        expect(turns[0].response.message?.content).toBe("第二回复")
     })
 
     it("截止日期非法时直接报错，不做删除", async () => {

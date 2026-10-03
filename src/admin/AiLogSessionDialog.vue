@@ -6,7 +6,7 @@ import { useUserStore } from "@/store/user"
 import { formatCost, formatCount, formatDuration, formatJsonText, formatLogTime, formatMessageContent } from "@/utils/ai-log-format"
 
 /**
- * AI 会话回放弹窗：按会话 id 拉取全部轮次，展示每轮的完整请求消息与助手回复。
+ * AI 会话回放弹窗：按会话 id 拉取合并后的轮次，展示每轮新增请求消息与助手回复。
  *
  * 用自绘遮罩而不是通用 Dialog：后台既有 Dialog 宽 450px，装不下完整对话与工具参数。
  * 所有内容都是纯文本插值（不渲染 markdown/HTML），避免模型输出里的标签被执行。
@@ -187,6 +187,9 @@ watch(
                     <h3 class="text-lg font-semibold text-base-content">会话回放</h3>
                     <p class="mt-1 font-mono text-xs text-base-content/60 break-all">{{ sessionId }}</p>
                     <p class="mt-1 text-xs text-base-content/50">{{ summary }}</p>
+                    <p class="mt-1 text-xs text-base-content/50">
+                        重复上下文已合并；每轮仅展示新增请求消息，回复仍逐轮保留。
+                    </p>
                 </div>
                 <div class="flex shrink-0 items-center gap-2">
                     <button class="btn btn-sm btn-ghost" @click="copyText(sessionId, '会话 ID')">
@@ -260,11 +263,11 @@ watch(
                         </div>
 
                         <div class="divide-y divide-base-300 border-t border-base-300">
-                            <!-- 请求：本次发给上游的完整消息 -->
+                            <!-- 请求：本轮新增消息 -->
                             <section class="px-4 py-3">
                                 <h4 class="flex items-center gap-2 text-xs font-semibold tracking-wider text-base-content/60 uppercase">
                                     <Icon icon="ri:arrow-up-line" />
-                                    <span>请求（{{ turn.request.messages.length }} 条消息）</span>
+                                    <span>请求（新增 {{ turn.request.messages.length }} 条消息）</span>
                                     <span v-if="turn.request.truncated" class="badge badge-xs badge-warning">已截断</span>
                                 </h4>
 
@@ -283,7 +286,10 @@ watch(
                                     </div>
                                 </dl>
 
-                                <div class="mt-3 space-y-3">
+                                <div v-if="turn.request.messages.length === 0" class="mt-3 text-xs text-base-content/50">
+                                    （上下文已合并到前序轮次，本轮没有新增消息）
+                                </div>
+                                <div v-else class="mt-3 space-y-3">
                                     <div v-for="(message, messageIndex) in turn.request.messages" :key="messageIndex">
                                         <div class="flex flex-wrap items-center gap-2 text-xs">
                                             <span class="badge badge-xs" :class="roleBadgeClass(message.role)">

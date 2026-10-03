@@ -20,7 +20,7 @@ import { type JWTUser, jwtToken } from "../db/yoga"
  * 检索路径与存储结构一一对应：
  * - `GET /logs`：按时间段 / 会话 / 状态查请求元数据（读索引，不读全文）；
  * - `GET /logs/sessions`：列出有日志的会话；
- * - `GET /logs/sessions/:sessionId`：取某个会话的完整轮次（请求 + 响应全文），用于会话回放；
+ * - `GET /logs/sessions/:sessionId`：取某个会话的逐请求轮次（请求新增消息 + 响应全文），用于会话回放；
  * - `DELETE /logs?before=<日期>`：清理指定日期之前的日志。
  */
 
