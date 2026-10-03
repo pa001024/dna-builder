@@ -52,7 +52,8 @@ export function createReadPageTool(): AgentTool<never> {
             name: "read_page",
             description:
                 "读取配装页当前可见可操作的结构：列出按钮 / 输入框 / 下拉框 / 表达式编辑器 / 滑块等控件，每项带 ref、类型、名称与当前值，并给出伤害结果与目标函数等关键数值。\n" +
-                "开始任何操作前先调用它；每次点击或输入后再调用一次确认结果。\n" +
+                "读取配置（武器 / 魔之楔 / 魔灵 / BUFF / 等级 / 目标函数）优先用 run_code 的 build.state()，本工具用于确认界面状态与定位控件。\n" +
+                "每次点击或输入后再调用一次确认结果。\n" +
                 "ref 只在本次快照内有效——页面重绘后必须重新读取。\n" +
                 "scope 默认 auto：有弹层（自动配装 / MOD 选择等）时读弹层，否则读整页；也可用 page / sidebar / main / dialog 指定。\n" +
                 'contains 只在控件名称里筛选，用于在长页面里快速定位某类控件（例如 contains="MOD"）。',
@@ -94,7 +95,8 @@ export function createClickTool(): AgentTool<never> {
             description:
                 "点击配装页上的按钮 / 开关 / 标签页 / 选项项。用 read_page 拿到的 ref 最稳，也可用 selector（[data-agent=...] 锚点）或 label（控件名称）。\n" +
                 "同名控件有多个时用 nth 指定第几个（从 1 开始）。\n" +
-                "点开的是下拉框时会把候选项一并返回，可直接接着用 select_ui 或 read_page 操作弹层。",
+                "点开的是下拉框时会把候选项一并返回，可直接接着用 select_ui 或 read_page 操作弹层。\n" +
+                "⚠️ 顶栏（分享 / 简洁模式 / 对比 / 保存方案 / 重置）不对外开放，点击会报错：它们会切换视图或离开配装页。切角色用 run_code 的 build.char()，恢复默认用 build.reset()。",
             parameters: {
                 type: "object",
                 properties: {

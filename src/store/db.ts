@@ -220,12 +220,28 @@ export interface MessagePendingAsk {
 export type UMessage = Omit<Message, "id">
 
 // 配装助手对话持久化接口
+/**
+ * 配装助手的一条消息。
+ *
+ * 结构与资料检索 Agent 的 {@link Message} 对齐（思考分段、结构化工具痕迹、过程耗时、
+ * 挂起提问），渲染层因此能与资料库共用同一套对话流组件。
+ */
 export interface BuildAgentChatMessage {
+    /** 消息 id：会话内自增，用于渲染层的折叠态与 DOM 绑定 */
+    id: number
     role: "user" | "assistant"
     content: string
-    reasoning?: string
-    /** 本条回复的工具调用过程（已格式化为单行文本，仅用于展示） */
-    traces?: string[]
+    /** 用户提问附带的图片（配装面板截图等） */
+    images?: ChatImage[]
+    /** 该条回复过程中的工具调用（结构化，供渲染层分组折叠） */
+    toolTraces?: MessageToolTrace[]
+    /** 该条回复过程中的分段思考内容 */
+    reasonings?: MessageReasoning[]
+    /** 该条回复的执行过程总耗时（毫秒）；挂起续跑时累加，不含用户作答的等待时间 */
+    processMs?: number
+    /** 该条回复挂起时等待用户回答的提问 */
+    pendingAsk?: MessagePendingAsk
+    createdAt: number
 }
 
 export interface BuildAgentChat {

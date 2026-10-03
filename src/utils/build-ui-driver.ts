@@ -13,6 +13,11 @@
  *
  * 只面向配装页（`[data-agent-page="char-build"]`）：页面没挂载时所有操作都会直接报错，
  * 免得模型在别的路由上瞎点一通。
+ *
+ * 作用域有两条硬边界，越界的元素一律当作不存在：
+ * - `[data-agent-exclude]`：页面外壳（顶栏的分享 / 简洁模式 / 对比 / 重置等）。点到它们会切换视图
+ *   或触发路由跳转，配装页一卸载，助手的操作面就没了。区块内的 `[data-agent-allow]` 可以单独放行。
+ * - 弹层归属：teleport 到 body 的下拉与弹窗，只认由配装页内控件触发的那些，别处开的弹窗不接管。
  */
 
 import { EditorView } from "@codemirror/view"
@@ -20,6 +25,12 @@ import { nextTick } from "vue"
 
 /** 页面根容器必须是配装页（由 CharBuildView 挂载时标记）。 */
 const PAGE_SELECTOR = "[data-agent-page='char-build']"
+
+/** 不对外开放的外壳区域：整棵子树屏蔽，内部的 [data-agent-allow] 除外。 */
+const EXCLUDE_SELECTOR = "[data-agent-exclude]"
+
+/** 屏蔽区内的放行标记。 */
+const ALLOW_SELECTOR = "[data-agent-allow]"
 
 /** 可读取的作用域。 */
 export type BuildUiScope = "auto" | "page" | "sidebar" | "main" | "dialog"
@@ -132,14 +143,88 @@ function findPage(): HTMLElement | null {
 }
 
 /**
- * @description 找当前打开的弹层（含 teleport 到 body 的 Select 内容）。
- * @returns 可见的弹层元素；无则 null
+ * @description 断言配装页仍挂载在当前路由上。
+ *
+ * 页面一旦被换掉（点了顶栏的对比跳转等），继续操作旧 DOM 毫无意义，
+ * 必须让模型立刻知道操作面没了，而不是拿着失效引用反复试。
+ * @throws 页面不在当前路由时抛出
+ */
+function assertPageAlive(): void {
+    if (!findPage()) {
+        throw new Error("配装页已不在当前路由上，界面操作不可用；请结束本次改动并向用户说明")
+    }
+}
+
+/** 由配装页内控件点开的弹层：teleport 到 body 后就无法靠 DOM 包含关系判定归属，只能记住。 */
+const ownedOverlays = new WeakSet<HTMLElement>()
+
+/**
+ * @description 判断元素是否落在不对外开放的页面外壳里。
+ *
+ * 屏蔽区内部的 `[data-agent-allow]` 可以单独放行：自动配装这类安全且高频的入口值得留着，
+ * 而它旁边的分享 / 简洁模式 / 对比必须挡住——对比按钮会 `router.push` 离开配装页，
+ * 页面一卸载助手就没有可操作的界面了。
+ * @param element 待判定元素
+ * @returns 是否应被排除
+ */
+function isExcluded(element: Element): boolean {
+    const zone = element.closest(EXCLUDE_SELECTOR)
+
+    if (!zone) {
+        return false
+    }
+
+    return !element.closest(ALLOW_SELECTOR)
+}
+
+/**
+ * @description 校验目标对助手开放，越界直接抛错。
+ * @param element 待操作元素
+ * @throws 目标位于屏蔽区时抛出
+ */
+function assertReachable(element: Element): void {
+    if (isExcluded(element)) {
+        throw new Error(`该控件属于页面外壳（顶栏 / 全局操作），助手不可操作：${labelOf(element as HTMLElement) || element.tagName}`)
+    }
+}
+
+/**
+ * @description 判断弹层是否由配装页触发（teleport 到 body 后仍能认领）。
+ * @param popup 弹层元素
+ * @returns 是否归属配装页
+ */
+function isOwnedByPage(popup: HTMLElement): boolean {
+    const page = findPage()
+
+    if (!page) {
+        return false
+    }
+
+    if (page.contains(popup)) {
+        return true
+    }
+
+    if (ownedOverlays.has(popup)) {
+        return true
+    }
+
+    // reka-ui 把触发器与弹层用 aria-controls 关联起来，据此反查触发器是否在页内
+    if (popup.id && page.querySelector(`[aria-controls='${CSS.escape(popup.id)}']`)) {
+        return true
+    }
+
+    return false
+}
+
+/**
+ * @description 找当前打开的弹层（含 teleport 到 body 的 Select 内容），只认配装页触发的那些。
+ * @returns 可见且归属配装页的弹层元素；无则 null
  */
 function findOpenOverlay(): HTMLElement | null {
     const dialogs = Array.from(document.querySelectorAll<HTMLElement>("dialog.modal-open, [role='dialog'][data-state='open']"))
 
     for (const candidate of dialogs) {
-        if (candidate.getClientRects().length) {
+        if (candidate.getClientRects().length && isOwnedByPage(candidate)) {
             return candidate
         }
     }
@@ -149,12 +234,26 @@ function findOpenOverlay(): HTMLElement | null {
     )
 
     for (const candidate of popups) {
-        if (candidate.getClientRects().length) {
+        if (candidate.getClientRects().length && isOwnedByPage(candidate)) {
             return candidate
         }
     }
 
     return null
+}
+
+/**
+ * @description 在文档里找还没做归属判定的可见弹层，供点击后认领。
+ * @returns 可见的弹层元素；无则 null
+ */
+function findVisibleOverlay(): HTMLElement | null {
+    const candidates = Array.from(
+        document.querySelectorAll<HTMLElement>(
+            "dialog.modal-open, [role='dialog'][data-state='open'], [role='listbox'][data-state='open'], .select-content[data-state='open']"
+        )
+    )
+
+    return candidates.find(item => item.getClientRects().length && !isExcluded(item)) ?? null
 }
 
 /**
@@ -349,11 +448,15 @@ function collectControls(root: HTMLElement): HTMLElement[] {
             continue
         }
 
+        if (isExcluded(element)) {
+            continue
+        }
+
         if (!isVisible(element)) {
             // 藏起来的 input 交给可见的 label 代理
             const proxy = element.closest<HTMLElement>("label.tab, label.cursor-pointer")
 
-            if (proxy && root.contains(proxy) && isVisible(proxy) && !seen.has(proxy)) {
+            if (proxy && root.contains(proxy) && !isExcluded(proxy) && isVisible(proxy) && !seen.has(proxy)) {
                 seen.add(proxy)
                 result.push(proxy)
             }
@@ -409,14 +512,20 @@ function clearStaleRefs(): void {
  * @returns 摘要文本行数组
  */
 function readSummary(): string[] {
+    const page = findPage()
+
+    if (!page) {
+        return []
+    }
+
     const lines: string[] = []
-    const damageRow = document.querySelector<HTMLElement>("[data-agent='damage-result']")
+    const damageRow = page.querySelector<HTMLElement>("[data-agent='damage-result']")
 
     if (damageRow) {
         lines.push(`伤害结果: ${(damageRow.textContent ?? "").replace(/\s+/g, " ").trim()}`)
     }
 
-    const target = document.querySelector<HTMLElement>("[data-agent='target-function'] .cm-content")
+    const target = page.querySelector<HTMLElement>("[data-agent='target-function'] .cm-content")
 
     if (target) {
         lines.push(`目标函数: ${(target.textContent ?? "").trim()}`)
@@ -506,16 +615,20 @@ export function readBuildPage(input: ReadBuildPageInput = {}): string {
  * @returns 命中的元素；找不到时返回 null
  */
 function resolveTarget(target: BuildUiTarget): HTMLElement | null {
+    assertPageAlive()
+
     if (target.ref) {
         const cached = refRegistry.get(target.ref)
 
         if (cached?.isConnected) {
+            assertReachable(cached)
             return cached
         }
 
         const byAttr = document.querySelector<HTMLElement>(`[data-agent-ref='${target.ref}']`)
 
         if (byAttr) {
+            assertReachable(byAttr)
             return byAttr
         }
     }
@@ -525,6 +638,7 @@ function resolveTarget(target: BuildUiTarget): HTMLElement | null {
         const found = root.querySelector<HTMLElement>(target.selector)
 
         if (found) {
+            assertReachable(found)
             return found
         }
     }
@@ -546,6 +660,7 @@ function resolveTarget(target: BuildUiTarget): HTMLElement | null {
         const picked = pool[index - 1]
 
         if (picked) {
+            assertReachable(picked)
             assignRef(picked)
             return picked
         }
@@ -608,6 +723,13 @@ export async function clickBuildTarget(input: ClickBuildInput): Promise<string> 
     await settleFrame()
     await delay(input.settle ?? 160)
 
+    // 点出来的弹层先认领下来：teleport 到 body 之后没法靠 DOM 包含关系追溯来源
+    const opened = findVisibleOverlay()
+
+    if (opened) {
+        ownedOverlays.add(opened)
+    }
+
     const name = labelOf(element) || element.tagName.toLowerCase()
     const popup = findOptionPopup()
 
@@ -633,7 +755,7 @@ function findOptionPopup(): HTMLElement | null {
         document.querySelectorAll<HTMLElement>("[role='listbox'], [role='menu'], .select-content, [data-reka-popper-content-wrapper]")
     )
 
-    return candidates.find(item => item.getClientRects().length) ?? null
+    return candidates.find(item => item.getClientRects().length && isOwnedByPage(item)) ?? null
 }
 
 /**
@@ -737,6 +859,8 @@ export async function typeBuildText(input: TypeBuildInput): Promise<string> {
  * @returns 执行结果文本
  */
 export async function pressBuildKey(input: PressKeyInput): Promise<string> {
+    assertPageAlive()
+
     const element =
         (input.ref || input.selector || input.label ? resolveTarget(input) : null) ?? (document.activeElement as HTMLElement | null)
 

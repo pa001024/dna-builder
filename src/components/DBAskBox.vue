@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue"
+import { scopedI18nKey } from "@/utils/agent-chat"
 import { type ChatImage, type ChatSubmitPayload, chatImageDataUrl, fileToChatImage, isImageFile, MAX_CHAT_IMAGES } from "@/utils/chat-image"
 
 const props = withDefaults(
@@ -15,6 +16,10 @@ const props = withDefaults(
         ragEnabled?: boolean
         /** 锁定上下文检索增强开关（当前会话已有消息）：本轮提示词与索引状态已固定，中途改动会与运行中的对话不一致 */
         ragLocked?: boolean
+        /** 是否展示上下文检索增强开关（配装助手没有检索增强，关掉它只留发送区） */
+        showRag?: boolean
+        /** 文案键前缀（对应翻译里的命名空间，默认走资料库的一套） */
+        i18nPrefix?: string
     }>(),
     {
         placeholder: "",
@@ -23,6 +28,8 @@ const props = withDefaults(
         busy: false,
         ragEnabled: false,
         ragLocked: false,
+        showRag: true,
+        i18nPrefix: "dbAgent.ui",
     }
 )
 
@@ -42,6 +49,15 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useTranslation()
+
+/**
+ * 拼出当前 Agent 的文案键；本命名空间没有该键时回退到通用命名空间（见 scopedI18nKey）。
+ * @param key 命名空间内的键名
+ * @returns 可交给翻译函数解析的完整文案键
+ */
+function label(key: string): string {
+    return scopedI18nKey(props.i18nPrefix, key, t)
+}
 
 /** 文本域自适应高度的上限（px），约 6 行；超出后由文本域内部滚动 */
 const MAX_TEXTAREA_HEIGHT = 168
@@ -69,14 +85,14 @@ const remainingSlots = computed(() => Math.max(MAX_CHAT_IMAGES - pendingImages.v
 
 /** 「添加图片」按钮的悬浮提示：带上限说明，满额时提示已用完 */
 const attachTitle = computed(() =>
-    remainingSlots.value ? t("dbAgent.ui.attachImage", { count: MAX_CHAT_IMAGES }) : t("dbAgent.ui.attachImageFull", { count: MAX_CHAT_IMAGES })
+    remainingSlots.value ? t(label("attachImage"), { count: MAX_CHAT_IMAGES }) : t(label("attachImageFull"), { count: MAX_CHAT_IMAGES })
 )
 
 /**
  * 上下文检索增强开关的悬浮提示：
  * 锁定态（对话已开始）说明「不可更改已开始的对话」，否则提示这是实验性功能。
  */
-const ragToggleTitle = computed(() => (props.ragLocked ? t("dbAgent.ui.ragLocked") : t("dbAgent.ui.ragToggle")))
+const ragToggleTitle = computed(() => (props.ragLocked ? t(label("ragLocked")) : t(label("ragToggle"))))
 
 /**
  * 依据内容高度自适应文本域高度，超过上限后转为内部滚动。
@@ -215,10 +231,10 @@ function handleAction() {
  */
 const actionTitle = computed(() => {
     if (props.busy) {
-        return t("dbAgent.ui.stopSearch")
+        return t(label("stopSearch"))
     }
 
-    return canSubmit.value ? props.submitLabel : t("dbAgent.ui.enterChat")
+    return canSubmit.value ? props.submitLabel : t(label("enterChat"))
 })
 
 /**
@@ -284,8 +300,8 @@ defineExpose({ focus })
                 <button
                     type="button"
                     class="absolute -top-1.5 -right-1.5 grid size-4 cursor-pointer place-items-center border border-base-content/25 bg-base-100 text-base-content/60 transition-colors duration-200 hover:border-error hover:text-error focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                    :title="$t('dbAgent.ui.removeImage')"
-                    :aria-label="$t('dbAgent.ui.removeImage')"
+                    :title="$t(label('removeImage'))"
+                    :aria-label="$t(label('removeImage'))"
                     @click="removeImage(index)"
                 >
                     <Icon icon="ri:close-line" class="h-2.5 w-2.5" />
@@ -310,7 +326,8 @@ defineExpose({ focus })
 
         <!-- 工具行：左侧快捷键提示，右侧添加图片与发送 -->
         <div class="flex items-center justify-between gap-3 border-t border-base-content/10 px-3 py-2">
-            <p class="min-w-0 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-base-content/40">{{ hint }}</p>
+            <p v-if="hint" class="min-w-0 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-base-content/40">{{ hint }}</p>
+            <span v-else class="min-w-0 flex-1" />
 
             <div class="flex shrink-0 items-center gap-3">
                 <!--
@@ -320,6 +337,7 @@ defineExpose({ focus })
                   空白新对话不算「已开始」，开关仍可改。
                 -->
                 <label
+                    v-if="props.showRag"
                     class="flex shrink-0 items-center gap-1.5"
                     :class="props.ragLocked ? 'cursor-not-allowed' : 'cursor-pointer'"
                     :title="ragToggleTitle"

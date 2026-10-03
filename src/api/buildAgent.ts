@@ -4,11 +4,14 @@
  * 与资料检索 Agent 共用同一套内核（`src/api/agent/kernel.ts`）与同一套上游凭证策略，
  * 差别只在工具集与提示词：
  *
- * 1. **UI 工具**（首选）：直接读取配装页、点击控件、往输入框打字，和真人操作完全等价；
- * 2. **资料检索子集**：把资料库的角色 / 武器 / 魔之楔 / 魔灵 / 怪物 / 伤害机制检索带进来，
- *    剧情、版本新增这类与配装无关的一律不暴露；
- * 3. **直接数据 / 直接改配置工具**（兜底）：批量核对特效、跑一整套自动求解这类
- *    用界面做代价过高的动作才走这条。
+ * 1. **代码执行**（首选）：一段沙箱脚本里读写构筑、查数据、跑计算，
+ *    多步改动一次调用就完成，不必为每次改动来回一趟；
+ * 2. **UI 工具**（兜底）：读取配装页、点击控件、往输入框打字，用于接口层尚未覆盖的控件；
+ * 3. **资料检索子集**：把资料库的角色 / 武器 / 魔之楔 / 魔灵 / 怪物 / 伤害机制检索带进来，
+ *    剧情、版本新增这类与配装无关的一律不暴露。
+ *
+ * 早期版本还有一组「直接改配置」工具（setMod / setBuff / autoBuild 等），它们已全部
+ * 收进沙箱接口的 `build` 对象：同样的能力用一次 run_code 就能批量完成，工具面也更窄。
  */
 
 import i18next from "i18next"
@@ -16,7 +19,7 @@ import type { Ref } from "vue"
 import type { AgentUpstreamConfig } from "@/api/agent/config"
 import type { AgentHistoryMessage } from "@/api/agent/kernel"
 import { type AgentCallbacks, AgentKernel, type AgentRunResult } from "@/api/agent/kernel"
-import { BuildToolHost, createBuildDirectTools } from "@/api/agent/tools/build-direct"
+import { createRunCodeTool } from "@/api/agent/tools/build-code"
 import {
     createClickTool,
     createPressKeyTool,
@@ -54,23 +57,13 @@ const MAX_CONTINUATIONS = 3
 
 /** 工具展示名（界面中文标注） */
 const TOOL_LABELS: Record<string, string> = {
+    run_code: "执行代码",
     read_page: "读取配装页",
     click_ui: "点击控件",
     type_ui: "输入文本",
     select_ui: "选择选项",
     press_key: "按键",
     scroll_ui: "滚动定位",
-    setBuff: "设置BUFF",
-    setMod: "设置MOD",
-    queryCharData: "查询角色数据",
-    queryModData: "查询MOD数据",
-    queryBuffData: "查询BUFF数据",
-    queryWeaponData: "查询武器数据",
-    queryEffectConfig: "查询特效配置",
-    setEffectConfig: "设置特效配置",
-    setBaseAndTargetFunction: "设置计算方式",
-    getCurrentConfig: "读取当前配置",
-    autoBuild: "自动配装",
 }
 
 /**
@@ -87,7 +80,6 @@ function toolLabel(name: string): string {
  */
 export class BuildAgent {
     private readonly kernel: AgentKernel<AskUserRequest>
-    private readonly host: BuildToolHost
 
     /**
      * 创建配装 Agent。
@@ -102,8 +94,6 @@ export class BuildAgent {
         public selectedChar: Ref<string>,
         public inv: ReturnType<typeof useInvStore>
     ) {
-        this.host = new BuildToolHost(charSettings, selectedChar, inv)
-
         this.kernel = new AgentKernel<AskUserRequest>({
             name: "BuildAgent",
             config,
@@ -120,11 +110,12 @@ export class BuildAgent {
     /**
      * @description 组装本轮的工具集。
      *
-     * UI 工具排在最前：模型先想到「像用户一样操作界面」，而不是跳过界面直接改数据。
+     * run_code 排在最前：模型先想到「写一段代码一次做完」，而不是逐个控件去点。
      * @returns 工具列表
      */
     private buildTools() {
         return [
+            createRunCodeTool(),
             createReadPageTool(),
             createClickTool(),
             createTypeTool(),
@@ -137,7 +128,6 @@ export class BuildAgent {
                 ragEnabled: isRagEnabled(),
                 askUser: true,
             }),
-            ...createBuildDirectTools(this.host),
         ]
     }
 
@@ -157,8 +147,6 @@ export class BuildAgent {
     public updateHost(charSettings: Ref<CharSettings>, selectedChar: Ref<string>): void {
         this.charSettings = charSettings
         this.selectedChar = selectedChar
-        this.host.charSettings = charSettings
-        this.host.selectedChar = selectedChar
     }
 
     /** 中断当前流式输出。 */

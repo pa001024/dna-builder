@@ -2199,9 +2199,12 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                 backgroundPosition: 'center',
             }"
         />
-        <!-- 顶部操作栏（含合并的 header 内容：角色名 + 属性 + 等级） -->
+        <!-- 顶部操作栏（含合并的 header 内容：角色名 + 属性 + 等级）
+             data-agent-exclude：整条顶栏不对配装助手开放——简洁模式会换掉整个视图、对比会离开本页，
+             一旦点到 assistant 就失去操作面。自动配装按钮单独用 data-agent-allow 放行。 -->
         <div
             data-tour="top-actions"
+            data-agent-exclude="chrome"
             class="sticky top-0 z-1 m-1 sm:m-2 rounded-xs border border-base-content/10 bg-base-100/70 p-1.5 shadow-lg backdrop-blur-sm sm:p-3"
         >
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2">
@@ -2250,6 +2253,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     </button>
                     <button
                         data-agent="open-auto-build"
+                        data-agent-allow
                         class="btn btn-sm btn-secondary h-9 flex-1 min-w-0 px-0 sm:h-8 sm:flex-none sm:px-3"
                         @click="autobuild_model_show = true"
                     >
@@ -3250,12 +3254,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
     </div>
 
     <!-- AI对话助手 -->
-    <AIChatDialog
-        v-if="setting.showAIChat"
-        :char-build="charBuild"
-        @update:char-settings="charSettings = $event"
-        @update:selected-char="selectedChar = $event"
-    />
+    <AIChatDialog v-if="setting.showAIChat" :char-build="charBuild" />
 </template>
 
 <style>

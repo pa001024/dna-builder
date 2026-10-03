@@ -143,6 +143,7 @@ const settingNavItems = computed<{ key: string; title: string; icon: IconTypes }
         { key: "data-pack", title: t("setting.dataPackManagement"), icon: "ri:database-2-line" },
         { key: "account", title: t("setting.account"), icon: "ri:user-line" },
         { key: "story", title: t("setting.storyText"), icon: "ri:book-open-line" },
+        { key: "ai", title: t("setting.ai"), icon: "ri:robot-2-line" },
         { key: "other", title: t("setting.other"), icon: "ri:settings-4-line" },
     ]
     return env.isApp ? items : items.filter(item => item.key !== "skill-cd" && item.key !== "screen-bar")
@@ -1419,6 +1420,26 @@ onUnmounted(() => {
                                     <SelectItem value="female">{{ $t("setting.female") }}</SelectItem>
                                     <SelectItem value="male">{{ $t("setting.male") }}</SelectItem>
                                 </Select>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section data-scroll-section="ai" class="flex flex-col">
+                    <SectionHeader no-animate compact :title="$t('setting.ai')" />
+                    <div
+                        class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                        :style="{ animationDelay: '0.18s' }"
+                    >
+                        <div class="flex flex-col gap-2">
+                            <div
+                                class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                            >
+                                <span class="label-text">
+                                    {{ $t("setting.showAIChat") }}
+                                    <div class="text-xs text-base-content/50">{{ $t("setting.showAIChatTip") }}</div>
+                                </span>
+                                <input v-model="setting.showAIChat" type="checkbox" class="toggle toggle-secondary" />
                             </div>
                         </div>
                     </div>
