@@ -2051,6 +2051,7 @@
     },
     "dob-build-show": {
         "click_copy_link": "點擊複製連結",
+        "in_use": "當前",
         "most_viewed": "最多瀏覽",
         "recently_modified": "最新修改"
     },

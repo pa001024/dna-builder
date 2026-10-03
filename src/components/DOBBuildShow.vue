@@ -11,6 +11,7 @@ import {
     unlikeBuildMutation,
     updateBuildMutation,
 } from "@/api/graphql"
+import { useCharRemote } from "@/composables/useCharRemote"
 import { CharSettings, serializeCharSettings, useCharSettings } from "@/composables/useCharSettings"
 import { env } from "@/env"
 import { useAuthStore } from "@/store/auth"
@@ -51,6 +52,7 @@ const DESCRIPTION_COLLAPSE_THRESHOLD = 40
 
 // 当前角色的 charSettings
 const charSettings = useCharSettings(computed(() => props.charId))
+const remoteId = useCharRemote(computed(() => props.charId))
 
 /**
  * 判断描述是否超过折叠阈值，超长时显示展开按钮。
@@ -132,7 +134,7 @@ function handleSortSelect(value: string) {
 }
 
 const emits = defineEmits<{
-    useBuild: [loadedSettings: CharSettings]
+    useBuild: [loadedSettings: CharSettings, remoteId: string]
 }>()
 
 // 使用构筑
@@ -143,7 +145,7 @@ async function useBuild(buildId: string) {
 
         if (result?.charSettings) {
             const loadedSettings = JSON.parse(result.charSettings)
-            emits("useBuild", loadedSettings)
+            emits("useBuild", loadedSettings, buildId)
         }
     } catch (error) {
         ui.showErrorMessage("加载构筑失败:", error instanceof Error ? error.message : "未知错误")
@@ -404,6 +406,10 @@ defineExpose({
                                 {{ build.title }}
                             </a>
                             <div class="flex gap-1 ml-2">
+                                <div v-if="remoteId === build.id" class="badge badge-success badge-sm gap-1">
+                                    <Icon icon="ri:check-line" class="w-3 h-3" />
+                                    {{ $t("dob-build-show.in_use") }}
+                                </div>
                                 <div v-if="build.isRecommended" class="badge badge-warning badge-sm">
                                     <Icon icon="ri:star-fill" class="w-3 h-3" />
                                 </div>

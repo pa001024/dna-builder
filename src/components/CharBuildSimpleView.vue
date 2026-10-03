@@ -46,7 +46,7 @@ const emit = defineEmits<{
     /** 请求切回专业模式 */
     switchMode: []
     /** 从「浏览构筑分享」里选用一份他人构筑，交由父组件落盘 */
-    useBuild: [settings: CharSettings]
+    useBuild: [settings: CharSettings, remoteId: string]
 }>()
 
 const { t } = useTranslation()
@@ -824,10 +824,11 @@ const browseBuildsShow = ref(false)
  * 在浏览弹窗里选用某份构筑：直接把配置交给父组件落盘（与专业模式的配装分享同一条路径），
  * 本组件自身仍然不写任何构筑数据。
  * @param settings 选中的构筑配置
+ * @param remoteId 该分享构筑 id（父组件据此记录本地来源）
  */
-function onUseSharedBuild(settings: CharSettings) {
+function onUseSharedBuild(settings: CharSettings, remoteId: string) {
     browseBuildsShow.value = false
-    emit("useBuild", settings)
+    emit("useBuild", settings, remoteId)
 }
 //#endregion
 

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest"
-import { findFieldDeleteRange, joinExprText, resolveCharFieldExpression, resolveSkillFieldNamespace } from "./expr-field"
+import {
+    expressionReferencesIdentifier,
+    findFieldDeleteRange,
+    joinExprText,
+    resolveCharFieldExpression,
+    resolveSkillFieldNamespace,
+} from "./expr-field"
 
 /**
  * 按 findFieldDeleteRange 的返回区间执行一次删除，便于用「删除后的表达式」断言行为。
@@ -132,5 +138,37 @@ describe("findFieldDeleteRange", () => {
     it("光标位于字段起始处时回退到默认删除", () => {
         expect(deleteAt("近战::攻击!", 0)).toBeNull()
         expect(deleteAt("攻击+防御", 3)).toBeNull()
+    })
+})
+
+describe("expressionReferencesIdentifier", () => {
+    it("裸标识符算引用", () => {
+        expect(expressionReferencesIdentifier("变量A + 攻击", "变量A")).toBe(true)
+        expect(expressionReferencesIdentifier("max(变量A, 1)", "变量A")).toBe(true)
+        expect(expressionReferencesIdentifier("变量A", "变量A")).toBe(true)
+    })
+
+    it("命名空间、成员访问与强制属性后缀都不算引用", () => {
+        expect(expressionReferencesIdentifier("技能::变量A", "变量A")).toBe(false)
+        expect(expressionReferencesIdentifier("变量A::伤害", "变量A")).toBe(false)
+        expect(expressionReferencesIdentifier("攻击.变量A", "变量A")).toBe(false)
+        expect(expressionReferencesIdentifier("变量A!", "变量A")).toBe(false)
+    })
+
+    it("只按完整标识符匹配，不做子串匹配", () => {
+        expect(expressionReferencesIdentifier("变量AB", "变量A")).toBe(false)
+        expect(expressionReferencesIdentifier("变量A1 + 变量A", "变量A")).toBe(true)
+    })
+
+    it("函数定义只认调用形式", () => {
+        expect(expressionReferencesIdentifier("fn(2) * 3", "fn", true)).toBe(true)
+        expect(expressionReferencesIdentifier("fn * 3", "fn", true)).toBe(false)
+        expect(expressionReferencesIdentifier("武器::fn(2)", "fn", true)).toBe(false)
+    })
+
+    it("空表达式、空名与非法字符按未引用处理", () => {
+        expect(expressionReferencesIdentifier("", "变量A")).toBe(false)
+        expect(expressionReferencesIdentifier("变量A", "")).toBe(false)
+        expect(expressionReferencesIdentifier("变量A & 1", "变量A")).toBe(false)
     })
 })

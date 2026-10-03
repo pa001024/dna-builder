@@ -2075,6 +2075,7 @@
     },
     "dob-build-show": {
         "click_copy_link": "Click to copy the link",
+        "in_use": "In Use",
         "most_viewed": "Most Viewed",
         "recently_modified": "Recently Modified"
     },

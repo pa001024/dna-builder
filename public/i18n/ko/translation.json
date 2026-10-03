@@ -2052,6 +2052,7 @@
     },
     "dob-build-show": {
         "click_copy_link": "클릭하여 링크 복사",
+        "in_use": "사용 중",
         "most_viewed": "조회수 순",
         "recently_modified": "최근 수정"
     },

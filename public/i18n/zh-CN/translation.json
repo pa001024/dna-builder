@@ -2072,6 +2072,7 @@
     },
     "dob-build-show": {
         "click_copy_link": "点击复制链接",
+        "in_use": "当前",
         "most_viewed": "最多浏览",
         "recently_modified": "最新修改"
     },

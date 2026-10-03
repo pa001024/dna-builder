@@ -2051,6 +2051,7 @@
     },
     "dob-build-show": {
         "click_copy_link": "クリックでリンクをコピー",
+        "in_use": "使用中",
         "most_viewed": "最多閲覧",
         "recently_modified": "最新更新"
     },

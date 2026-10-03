@@ -7,6 +7,7 @@ import { cloneDeep, debounce, groupBy, isEqual } from "lodash-es"
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { buildQuery, createBuildMutation } from "@/api/graphql"
+import { useCharRemote } from "@/composables/useCharRemote"
 import {
     addModVariant,
     CharSettings,
@@ -75,7 +76,7 @@ import { useTourStore } from "@/store/tour"
 import { useUIStore } from "@/store/ui"
 import { copyText, formatBigNumber, formatProp, pasteText, roundBuffValue } from "@/util"
 import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
-import { joinExprText } from "@/utils/expr-field"
+import { expressionReferencesIdentifier, joinExprText } from "@/utils/expr-field"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 import { isModAllowedInSlot, type ModLimitContext } from "@/utils/mod-equip"
 
@@ -149,6 +150,7 @@ function getSignatureWeapon(charId: number): SignatureWeapon | null {
 }
 
 const charSettings = useCharSettings(selectedCharId, getSignatureWeapon)
+const charRemoteId = useCharRemote(selectedCharId)
 const charProjectKey = computed(() => `project.${selectedCharId.value}`)
 const charProject = useLocalStorage(charProjectKey, {
     selected: "",
@@ -804,6 +806,7 @@ const loadConfigByIndex = (index: number) => {
     }
     charProject.value.selected = project.name
     charSettings.value = normalizeCharSettings(cloneDeep(project.charSettings))
+    charRemoteId.value = ""
     targetFunction.value = charSettings.value.targetFunction
     updateCharBuild()
 }
@@ -960,7 +963,7 @@ const loadSharedBuild = async (buildId: string) => {
         if (build && build.charSettings) {
             const loadedSettings = JSON.parse(build.charSettings)
             // 将加载的设置应用到当前构筑
-            applyLoadedSettings(loadedSettings)
+            applyLoadedSettings(loadedSettings, buildId)
         }
     } catch (error) {
         ui.showErrorMessage(t("char-build.load_build_failed"), error instanceof Error ? error.message : t("char-build.unknown_error"))
@@ -970,10 +973,12 @@ const loadSharedBuild = async (buildId: string) => {
 /**
  * 应用外部载入的角色配置，并补齐当前版本缺失字段。
  * @param loadedSettings 外部载入的角色配置
+ * @param remoteId 来源分享构筑 id（空串表示非分享来源，会清空本地记录）
  * @returns void
  */
-const applyLoadedSettings = (loadedSettings: CharSettings) => {
+const applyLoadedSettings = (loadedSettings: CharSettings, remoteId = "") => {
     charSettings.value = normalizeCharSettings(loadedSettings)
+    charRemoteId.value = remoteId
     targetFunction.value = charSettings.value.targetFunction
     ui.showSuccessMessage(t("char-build.shared_build_loaded"))
 }
@@ -984,6 +989,7 @@ const applyLoadedSettings = (loadedSettings: CharSettings) => {
  */
 const resetConfig = () => {
     Object.assign(charSettings.value, createDefaultCharSettings(getSignatureWeapon(selectedCharId.value)))
+    charRemoteId.value = ""
 }
 //#endregion
 
@@ -1663,6 +1669,49 @@ watch(
         charSettings.value.targetFunction = newValue
     }, 500)
 )
+
+//#region 自定义变量引用高亮
+/** 当前聚焦的自定义变量行下标（-1 表示未聚焦任何变量名） */
+const focusedVariableIndex = ref(-1)
+
+/**
+ * 聚焦变量对应的待匹配标识符：函数定义（如 fn(x)）以函数名 + 调用形式匹配，普通变量按裸标识符匹配。
+ * 变量名输入框未聚焦、或该行为空名时返回 null（此时不做任何高亮）。
+ */
+const focusedVariableSymbol = computed(() => {
+    const name = customVariableInputs.value[focusedVariableIndex.value]?.[0]?.trim()
+    if (!name) return null
+    const definition = charBuild.value.parseCustomFunctionDefinition(name)
+    if (definition) return { identifier: definition.name, callOnly: true }
+    return { identifier: name, callOnly: false }
+})
+
+/** 引用了聚焦变量的表达式输入框 key 集合（自定义变量各行 + 目标函数） */
+const referencedExprKeys = computed(() => {
+    const symbol = focusedVariableSymbol.value
+    const keys = new Set<string>()
+    if (!symbol) return keys
+    customVariableInputs.value.forEach((variable, index) => {
+        if (expressionReferencesIdentifier(variable[1], symbol.identifier, symbol.callOnly)) {
+            keys.add(`custom-variable:${index}`)
+        }
+    })
+    if (expressionReferencesIdentifier(targetFunction.value, symbol.identifier, symbol.callOnly)) {
+        keys.add("target-function")
+    }
+    return keys
+})
+
+/**
+ * 被聚焦变量引用的表达式输入框高亮样式（与拖放 ring 同色，但二者不会同时出现：拖放时变量名输入框已失焦）。
+ * @param targetKey 表达式输入框 key
+ * @returns 需要追加的 class
+ */
+function referenceHighlightClass(targetKey: string) {
+    return referencedExprKeys.value.has(targetKey) ? "ring-1 ring-primary/60 bg-primary/5" : ""
+}
+//#endregion
+
 const charDetailExpend = ref(true)
 /** 自定义变量区域折叠状态（默认展开，折叠交互同「词条」charattr） */
 const customVariableExpend = ref(true)
@@ -2612,6 +2661,8 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                 type="text"
                                                 class="w-20 shrink-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                                 placeholder="变量名"
+                                                @focus="focusedVariableIndex = index"
+                                                @blur="focusedVariableIndex = -1"
                                             />
                                             <span class="flex-none select-none text-[11px] text-base-content/35">=</span>
                                             <FullTooltip side="top">
@@ -2635,7 +2686,10 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                                     :macros="exprMacros"
                                                     placeholder="表达式"
                                                     :data-expr-drop="`custom-variable:${index}`"
-                                                    :class="dropTargetClass(`custom-variable:${index}`)"
+                                                    :class="[
+                                                        dropTargetClass(`custom-variable:${index}`),
+                                                        referenceHighlightClass(`custom-variable:${index}`),
+                                                    ]"
                                                     @click="handleExprDropClick(`custom-variable:${index}`)"
                                                 />
                                             </FullTooltip>
@@ -2716,7 +2770,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 </div>
                                 <label
                                     class="flex items-center gap-1 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-sm transition-colors duration-150 focus-within:border-primary"
-                                    :class="dropTargetClass('target-function')"
+                                    :class="[dropTargetClass('target-function'), referenceHighlightClass('target-function')]"
                                 >
                                     <ExprInput
                                         ref="targetFunctionInputRef"

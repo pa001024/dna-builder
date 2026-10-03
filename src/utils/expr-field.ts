@@ -286,3 +286,48 @@ function hasBalancedPairs(tokens: ExprToken[]): boolean {
 }
 
 //#endregion
+
+//#region 标识符引用检测
+
+/** 前置于标识符时不构成引用的 token：命名空间前缀与成员访问点 */
+const REFERENCE_LEADING_BLOCKERS = new Set<TokenType>([TokenType.DOUBLE_COLON, TokenType.DOT])
+
+/** 后置于标识符时不构成引用的 token：命名空间用法与强制属性后缀 */
+const REFERENCE_TRAILING_BLOCKERS = new Set<TokenType>([TokenType.DOUBLE_COLON, TokenType.BANG])
+
+/**
+ * 判断表达式是否引用了指定标识符（自定义变量名或自定义函数名）。
+ * 口径与 validateAST 一致：只有未带命名空间、未带 ! 后缀的裸标识符才按自定义变量解析，
+ * 因此「技能::名字」「名字::字段」「.名字」「名字!」都不算引用；
+ * 函数定义（callOnly）只认调用形式，即标识符后紧跟左括号。
+ * 词法失败（如输入了非法字符）时按未引用处理，避免编辑中的半成品表达式产生误导性高亮。
+ * @param expression 表达式文本
+ * @param identifier 待匹配的标识符
+ * @param callOnly 是否只认函数调用形式（函数定义传 true）
+ * @returns 是否引用了该标识符
+ */
+export function expressionReferencesIdentifier(expression: string, identifier: string, callOnly = false): boolean {
+    if (!expression || !identifier) return false
+    let tokens: ExprToken[]
+    try {
+        tokens = tokenizeAST(expression)
+    } catch {
+        return false
+    }
+    for (let index = 0; index < tokens.length; index++) {
+        const token = tokens[index]
+        if (token.type !== TokenType.IDENTIFIER || token.value !== identifier) continue
+        const prev = tokens[index - 1]
+        if (prev && REFERENCE_LEADING_BLOCKERS.has(prev.type)) continue
+        const next = tokens[index + 1]
+        if (callOnly) {
+            if (next?.type === TokenType.LPAREN) return true
+            continue
+        }
+        if (next && REFERENCE_TRAILING_BLOCKERS.has(next.type)) continue
+        return true
+    }
+    return false
+}
+
+//#endregion
