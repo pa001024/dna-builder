@@ -469,7 +469,6 @@ async function submitVersion() {
     <div class="flex min-h-0 flex-col overflow-hidden">
         <!-- 工具栏 -->
         <div class="flex-none p-2 flex items-center gap-2 border-b border-base-300 flex-wrap">
-            <!-- label 必须是 flex：input 固有宽度随中文字体膨胀，行内布局下会把放大镜图标挤换行；px/py 与 chip 选择框对齐保证同行等高 -->
             <label
                 class="flex items-center gap-1 px-2 py-1.5 bg-base-content/5 hover:bg-base-content/10 backdrop-blur-xs rounded-xs border border-base-content/5 text-xs w-48"
             >

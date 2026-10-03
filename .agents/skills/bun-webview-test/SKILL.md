@@ -111,6 +111,7 @@ run()
 - **导航 URL 一律追加 `?hideUpdateInfo=1`**，否则启动期的数据包弹窗会盖住页面（详见上方「启动弹窗」）。
 - 截图与临时脚本放 `.tmp/`：框架按 `process.cwd()` 写 `screenshots/`，所以**以 `.tmp` 为工作目录运行**
   （`workdir: <repo>/.tmp`）即可让产物落在 `.tmp/screenshots/`，不要在仓库根留下 `screenshots/`。
+- **点 reka-ui `Select` 只能坐标点可见项**：打开后全部 option 都在 DOM（本项目等级选择器有 240 个，不做虚拟化，`[role=option]` 可数），但**当前选中项会对齐触发器**，序号小于当前值的 option `getBoundingClientRect().top` 为负、点不到；`view.type` + `Enter` 的 typeahead 不生效。改值的做法：先 `evaluate` 取出一个**可见**（`top > 0 && bottom < innerHeight`）且 `innerText` 不等于当前值的 option，再用 `view.click(x, y)` 点它的中心。
 - 每次变更前端后，建议把关键路由的冒烟测试纳入验证（配合 `pnpm lint` / `pnpm test`）。
 
 ## Resources

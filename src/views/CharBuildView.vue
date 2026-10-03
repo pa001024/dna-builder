@@ -42,7 +42,6 @@ import {
     LeveledWeapon,
     LeveledWeaponHelper,
     modData,
-    monsterData,
     monsterMap,
     weaponData,
 } from "@/data"
@@ -87,7 +86,7 @@ const ui = useUIStore()
 const route = useRoute()
 const tourStore = useTourStore()
 const { t } = useTranslation()
-const { gpt } = useGameText()
+const { gt, gpt } = useGameText()
 const dataPackTick = computed(() => dataPackHydrationKey.value)
 const isCharBuildReady = computed(() => {
     dataPackTick.value
@@ -349,6 +348,7 @@ const teamWeaponOptions = computed(() => [
 const hpPercentOptions = [1, ...Array.from({ length: 20 }, (_, i) => (i + 1) * 5)]
 const resonanceGainOptions = [0, 0.5, 1, 1.5, 2, 2.5, 3]
 const enemyResistanceOptions = [0, 0.5, -4]
+const enemyLevelOptions = Array.from({ length: MaxMonsterLevelLimit }, (_, i) => i + 1)
 const groupedTeam1Options = computed(() => groupBy(team1Options.value, "elm"))
 const groupedTeam2Options = computed(() => groupBy(team2Options.value, "elm"))
 const groupedTeamWeaponOptions = computed(() => groupBy(teamWeaponOptions.value, "type"))
@@ -1668,6 +1668,8 @@ const charDetailExpend = ref(true)
 const customVariableExpend = ref(true)
 const weapon_select_model_show = ref(false)
 const weaponDefaultTab = ref("近战")
+const monster_select_model_show = ref(false)
+const enemyName = computed(() => monsterMap.get(charSettings.value.enemyId)?.n || "")
 const newWeaponSelection = ref({ melee: 0, ranged: 0 })
 
 /**
@@ -1753,6 +1755,12 @@ function applyWeaponSelection() {
 function openWeaponSelectForSlot(tab: "近战" | "远程") {
     weaponDefaultTab.value = tab
     weapon_select_model_show.value = true
+}
+
+function selectEnemy(id: number) {
+    charSettings.value.enemyId = id
+    updateCharBuild()
+    monster_select_model_show.value = false
 }
 
 const ast_help_model_show = ref(false)
@@ -2003,6 +2011,20 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
             </div>
         </div>
         <div class="modal-backdrop" @click="weapon_select_model_show = false" />
+    </dialog>
+    <dialog class="modal" :class="{ 'modal-open': monster_select_model_show }">
+        <div class="modal-box bg-base-300 w-11/12 max-w-6xl p-0">
+            <MonsterListView
+                v-if="monster_select_model_show"
+                :selected-id="charSettings.enemyId"
+                :level="charSettings.enemyLevel"
+                @select="selectEnemy"
+            />
+            <div class="modal-action">
+                <button class="btn" @click="monster_select_model_show = false">{{ $t("common.close") }}</button>
+            </div>
+        </div>
+        <div class="modal-backdrop" @click="monster_select_model_show = false" />
     </dialog>
     <!-- DOT设置详情弹窗 -->
     <dialog class="modal" :class="{ 'modal-open': dot_model_show }">
@@ -2794,37 +2816,74 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         lazy
                         @toggle="toggleSection('basic')"
                     >
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-2">
-                            <!-- 其他设置 -->
-                            <div class="space-y-3">
-                                <div class="flex gap-2">
-                                    <div class="flex-1">
+                        <div class="flex flex-col gap-3 mt-2">
+                            <div class="flex flex-col gap-2.5 rounded-xs border border-base-content/10 bg-base-200/40 p-2.5">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-[13px] font-semibold text-base-content/80">
+                                        {{ $t("char-build.side_ally") }}
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap items-start gap-x-4 gap-y-2.5">
+                                    <div>
                                         <div class="px-2 text-xs text-gray-400 mb-1">
                                             {{ $t("char-build.hp_percent") }}
                                         </div>
-                                        <Select
-                                            v-model="charSettings.hpPercent"
-                                            class="flex-1 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                            @change="updateCharBuild"
-                                        >
+                                        <Select v-model="charSettings.hpPercent" variant="chip" class="w-32 min-w-0" @change="updateCharBuild">
                                             <SelectItem v-for="hp in hpPercentOptions" :key="hp" :value="hp / 100"> {{ hp }}% </SelectItem>
                                         </Select>
                                     </div>
-                                    <div class="flex-1">
+                                    <div>
                                         <div class="px-2 text-xs text-gray-400 mb-1">
                                             {{ $t("char-build.resonance_gain") }}
                                         </div>
-                                        <Select
-                                            v-model="charSettings.resonanceGain"
-                                            class="flex-1 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                            @change="updateCharBuild"
-                                        >
+                                        <Select v-model="charSettings.resonanceGain" variant="chip" class="w-32 min-w-0" @change="updateCharBuild">
                                             <SelectItem v-for="rg in resonanceGainOptions" :key="rg" :value="rg">
                                                 {{ rg * 100 }}%
                                             </SelectItem>
                                         </Select>
                                     </div>
-                                    <div class="flex-1">
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2.5 rounded-xs border border-base-content/10 bg-base-200/40 p-2.5">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-[13px] font-semibold text-base-content/80">
+                                        {{ $t("char-build.side_enemy") }}
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap items-start gap-x-4 gap-y-2.5">
+                                    <div>
+                                        <div class="px-2 text-xs text-gray-400 mb-1">
+                                            {{ $t("char-build.enemy") }}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            class="inline-flex w-32 min-w-0 cursor-pointer items-center justify-between gap-1.5 appearance-none rounded-xs border border-base-content/5 bg-base-content/5 px-2 py-1.5 text-xs backdrop-blur-xs transition-colors duration-150 hover:bg-base-content/10"
+                                            @click="monster_select_model_show = true"
+                                        >
+                                            <span class="min-w-0 truncate text-left">{{ gt(enemyName) }}</span>
+                                            <Icon icon="radix-icons:chevron-down" class="size-3.5 shrink-0 opacity-40" />
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <div class="px-2 text-xs text-gray-400 mb-1">
+                                            {{ $t("char-build.enemy_resistance") }}
+                                        </div>
+                                        <Select v-model="charSettings.enemyResistance" variant="chip" class="w-32 min-w-0" @change="updateCharBuild">
+                                            <SelectItem v-for="res in enemyResistanceOptions" :key="res" :value="res">
+                                                {{ res * 100 }}%
+                                            </SelectItem>
+                                        </Select>
+                                    </div>
+                                    <div>
+                                        <div class="px-2 text-xs text-gray-400 mb-1">
+                                            {{ $t("char-build.enemy_level") }}
+                                        </div>
+                                        <Select v-model="charSettings.enemyLevel" variant="chip" class="w-32 min-w-0" @change="updateCharBuild">
+                                            <SelectItem v-for="lv in enemyLevelOptions" :key="lv" :value="lv">{{ lv }}</SelectItem>
+                                        </Select>
+                                    </div>
+                                    <div>
                                         <div class="px-2 text-xs text-gray-400 mb-1">
                                             {{ $t("失衡") }}
                                         </div>
@@ -2833,77 +2892,25 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- 敌人设置 -->
-                            <div class="space-y-3">
-                                <div class="flex gap-2">
-                                    <div class="flex-1">
-                                        <div class="px-2 text-xs text-gray-400 mb-1">
-                                            {{ $t("char-build.enemy") }}
-                                        </div>
-                                        <Select
-                                            v-model="charSettings.enemyId"
-                                            class="flex-1 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                            @change="updateCharBuild"
-                                        >
-                                            <SelectItem v-for="enemy in monsterData" :key="enemy.id" :value="enemy.id">
-                                                {{ $t(enemy.n) }}
-                                            </SelectItem>
-                                        </Select>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="px-2 text-xs text-gray-400 mb-1">
-                                            {{ $t("char-build.enemy_resistance") }}
-                                        </div>
-                                        <Select
-                                            v-model="charSettings.enemyResistance"
-                                            class="flex-1 min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                            @change="updateCharBuild"
-                                        >
-                                            <SelectItem v-for="res in enemyResistanceOptions" :key="res" :value="res">
-                                                {{ res * 100 }}%
-                                            </SelectItem>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- 敌人等级 -->
-                            <div class="flex-1">
-                                <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">
-                                    {{ $t("char-build.enemy_level") }}
-                                </div>
-                                <LevelSlider v-model="charSettings.enemyLevel" :max="MaxMonsterLevelLimit" />
-                            </div>
-                            <!-- 敌人信息 -->
-                            <div class="space-y-3">
-                                <div class="flex gap-2">
-                                    <div class="flex-1">
-                                        <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">
-                                            {{ $t("生命") }}
-                                        </div>
-                                        <div class="text-primary font-bold text-right" :title="`${charBuild.enemy.hp}`">
+                                <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1 border-t border-base-content/10 pt-2.5">
+                                    <span class="flex items-baseline gap-1.5">
+                                        <span class="text-[11px] font-semibold text-base-content/45">{{ $t("生命") }}</span>
+                                        <span class="font-orbitron text-[11px] font-bold tabular-nums text-primary" :title="`${charBuild.enemy.hp}`">
                                             {{ formatBigNumber(charBuild.enemy.hp) }}
-                                        </div>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap">
-                                            {{ $t("防御") }}
-                                        </div>
-                                        <div class="text-primary font-bold text-right">
+                                        </span>
+                                    </span>
+                                    <span class="flex items-baseline gap-1.5">
+                                        <span class="text-[11px] font-semibold text-base-content/45">{{ $t("防御") }}</span>
+                                        <span class="font-orbitron text-[11px] font-bold tabular-nums text-primary">
                                             {{ charBuild.enemy.def }}
-                                        </div>
-                                    </div>
-                                    <div class="flex-1">
-                                        <div
-                                            class="px-2 text-xs text-gray-400 mb-1 whitespace-nowrap"
-                                            :title="`${charBuild.enemy.es || 0}`"
-                                        >
-                                            {{ $t("护盾") }}
-                                        </div>
-                                        <div class="text-primary font-bold text-right">
+                                        </span>
+                                    </span>
+                                    <span class="flex items-baseline gap-1.5">
+                                        <span class="text-[11px] font-semibold text-base-content/45">{{ $t("护盾") }}</span>
+                                        <span class="font-orbitron text-[11px] font-bold tabular-nums text-primary" :title="`${charBuild.enemy.es || 0}`">
                                             {{ formatBigNumber(charBuild.enemy.es || 0) }}
-                                        </div>
-                                    </div>
+                                        </span>
+                                    </span>
                                 </div>
                             </div>
                         </div>

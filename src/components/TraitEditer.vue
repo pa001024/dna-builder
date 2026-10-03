@@ -323,10 +323,10 @@ function handleDragOver(index: number) {
 </script>
 
 <template>
-    <div>
+    <div class="@container">
         <div class="mb-1.5 text-[13px] font-semibold text-base-content/80">{{ $t("char-build.traits") }}</div>
         <!-- 4 个魔灵潜质槽位：扁平行式（左图标 / 中名称 / 右收益），可点击更换、拖动互换、右侧移除 -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 gap-2 @xl:grid-cols-2">
             <TraitItem
                 v-for="(trait, index) in slotTraits"
                 :key="index"
