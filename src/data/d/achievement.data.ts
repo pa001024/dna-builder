@@ -1,6 +1,7 @@
+import type { Achievement } from "../data-types"
 import { applyVersionGate } from "../versionGate"
 
-const t = [
+const t: Achievement[] = [
     {
         id: 20101,
         名称: "转动命运螺旋Ⅰ",
@@ -6977,6 +6978,8 @@ const t = [
             委托密函线索: 2,
         },
     },
-] satisfies import("../data-types").Achievement[]
+]
 
-export default applyVersionGate(t)
+const achievementData: Achievement[] = applyVersionGate(t)
+
+export default achievementData

@@ -3,22 +3,36 @@
  * @file 增量 lint 驱动器 —— `pnpm lint` 的实现。
  *
  * vue-tsc 每次都把整个工程（本仓库约 600 个源文件、4000 个程序文件）重新检查一遍，
- * 单次约 120~140s，而绝大多数改动只涉及其中很小一部分。本脚本把「检查范围」缩小到
- * 改动过的文件及其受影响的下游文件，并把各文件的修改时间戳缓存到 `.tmp/lint-cache.json`，
- * 以此判断哪些文件真的变了。
+ * 单次约 120~140s，而绝大多数改动只涉及其中很小的一部分。本脚本不把 vue-tsc 当
+ * CLI 用，而是进程内自建类型检查 program（与 vue-tsc 内部同一套拼装件：
+ * @vue/language-core 的 Vue 语言插件 + @volar/typescript 的 createProgram 代理），
+ * 以此获得两类 vue-tsc CLI 给不了的控制力：
+ *
+ * 1. **诊断范围**：program 仍会顺着 import 拉进上游闭包（类型信息所需），但诊断只对
+ *    「改动文件 + 依赖它们的下游文件 + 环境声明文件」发起 —— 上游文件只编译不检查，
+ *    它们自己的错误在各自被改的那次已经查过。
+ * 2. **数据文件裁剪**：`src/data/d` 下约 103MB 的 `*.data.ts` 数据字面量，未改动的
+ *    数据文件用 `ts.transpileDeclaration` 预生成的声明（`.d.ts` 文本）替代真实源码
+ *    参与编译 —— 下游类型完整，但数据体不进 checker；被改动的数据文件保留真实源码
+ *    并作为根文件正常诊断（改它就该查它），通过后再为新内容生成声明缓存。
  *
  * 工作流程：
- * 1. 按 `tsconfig.json` 的 include/exclude 枚举工程内源文件，记录 mtime + size 指纹；
+ * 1. 按 `tsconfig.json` 的 include/exclude 枚举工程内源文件，另枚举数据文件
+ *    （tsconfig 排除了它们，但它们通过 import 参与 program，必须纳入指纹与依赖图），
+ *    记录 mtime + size 指纹；
  * 2. 与上次「检查通过」时写入 `.tmp/lint-cache.json` 的指纹比对，得到新增 / 修改 / 删除集合；
  * 3. 用缓存的 import 关系图求反向依赖闭包：改动文件 + 所有直接/间接依赖它们的文件
  *    （改动一个导出类型时，用到它的文件同样会报错，必须一起检查）；
- * 4. 再补上环境声明文件（`*.d.ts`、含 `declare global` / `declare module` 的文件），
- *    它们承载全局类型，缺失会产生假报错；
- * 5. 把上面这批根文件写进 `.tmp/lint-tsconfig.json`（extends 根 tsconfig），交给 vue-tsc
- *    做增量类型检查 —— 程序规模从约 4000 个文件降到几百个，冷跑 ~25s、热跑 ~5s；
- * 6. Biome 只处理改动过的文件；闭包过大或缓存失效时自动退回全量。
+ * 4. 再补上环境声明文件（`*.d.ts`、含 `declare global` / `declare module` 的文件）；
+ * 5. 自建 program 做类型检查：增量模式只对根集合报诊断；环境声明变更或影响面过半时
+ *    退回自研全量（对 program 全部文件诊断，数据文件仍替换）—— 日常 lint 永不触发
+ *    分钟级的 vue-tsc CLI 全量；
+ * 6. Biome 只处理改动过的文件。
  *
- * 没有任何文件改动时直接跳过，秒过。需要一份完整的、覆盖全工程的检查时用 `pnpm lint:full`。
+ * `--full` / `pnpm lint:full` 走真 vue-tsc CLI 全量（不替换数据文件），是唯一
+ * 覆盖数据体错误检查的最终真相。
+ *
+ * 没有任何文件改动时直接跳过，秒过。
  *
  * 用法（一般通过 pnpm 脚本调用）：
  *   bun tools/incremental-lint.ts [--full] [--no-biome] [--verbose] [--help]
@@ -26,35 +40,36 @@
 
 import { spawnSync } from "node:child_process"
 import { createHash } from "node:crypto"
-import { mkdir, readFile, stat, writeFile } from "node:fs/promises"
+import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises"
 import path from "node:path"
 import process from "node:process"
 import { fileURLToPath } from "node:url"
+import { proxyCreateProgram } from "@volar/typescript/lib/node/proxyCreateProgram"
+import { createParsedCommandLine, createVueLanguagePlugin } from "@vue/language-core"
 import { glob } from "glob"
+import * as ts from "typescript"
 
 /** 工程根目录：本文件位于 `<root>/tools/` 下 */
 const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-/** 临时文件目录（已被 .gitignore 忽略），缓存与自动生成的 tsconfig 都放这里 */
+/** 临时文件目录（已被 .gitignore 忽略），缓存与数据文件声明缓存都放这里 */
 const TMP_DIR = path.join(PROJECT_ROOT, ".tmp")
 /** 改动指纹缓存文件 */
 const CACHE_FILE = path.join(TMP_DIR, "lint-cache.json")
-/** 增量类型检查用的临时 tsconfig（extends 根 tsconfig，只覆盖 files/include） */
-const TEMP_TSCONFIG = path.join(TMP_DIR, "lint-tsconfig.json")
-/** 增量类型检查的 tsbuildinfo：根文件集合稳定时 vue-tsc 可据此跳过重复检查 */
-const TEMP_BUILD_INFO = path.join(TMP_DIR, "lint-tsconfig.tsbuildinfo")
+/** 数据文件声明缓存的目录，内容按「路径 + mtime + size」寻址 */
+const DATA_DECL_DIR = path.join(TMP_DIR, "lint-data-decls")
 /** 缓存结构版本：本脚本的判断语义变化时 +1，让旧缓存整体失效 */
-const CACHE_VERSION = 1
-/** 影响闭包超过工程文件总数的该比例时，退回全量类型检查（增量已无意义） */
+const CACHE_VERSION = 2
+/** 影响闭包超过工程文件总数的该比例时，退回自研全量诊断（增量已无意义） */
 const FULL_CHECK_RATIO = 0.5
 /** 单次传给 Biome 的最大文件数，避免 Windows 命令行过长 */
 const BIOME_CHUNK_SIZE = 120
 /** 文件指纹采集的并发度，避免 Windows 上开太多句柄 */
 const STAT_CONCURRENCY = 64
-/** 全量 vue-tsc 需要更大的堆，保持与旧命令一致 */
+/** 全量 vue-tsc CLI 需要更大的堆，保持与旧命令一致 */
 const NODE_OPTIONS = "--max-old-space-size=8192"
 /** 运行 vue-tsc / biome 用的 node 可执行文件（避免 .cmd / shell 包装的平台差异） */
 const NODE_BIN = process.env.DNA_LINT_NODE ?? "node"
-/** vue-tsc 入口 */
+/** vue-tsc 入口（仅 --full / lint:full 路径使用） */
 const VUE_TSC_ENTRY = path.join(PROJECT_ROOT, "node_modules", "vue-tsc", "bin", "vue-tsc.js")
 /** Biome 入口 */
 const BIOME_ENTRY = path.join(PROJECT_ROOT, "node_modules", "@biomejs", "biome", "bin", "biome")
@@ -98,6 +113,8 @@ const LINT_IGNORES = [
     "src-tauri/gen/**",
     "src-tauri/sidecar/**",
 ]
+/** 数据文件判定：与数据包改写插件同口径（tsconfig include 排除了它们） */
+const DATA_GLOBS = ["src/data/d/**/*.data.ts"]
 /** import / export ... from / require / 动态 import 的说明符抽取（宁可多抽，不可漏抽） */
 const SPECIFIER_PATTERN = /(?:\bfrom\s*|\bimport\s*|\brequire\s*\(\s*|\bimport\s*\(\s*)["']([^"']+)["']/g
 /** 环境声明判定：`.d.ts` 或源码里的 declare global / declare module */
@@ -121,6 +138,14 @@ interface GraphNode {
     ambient: boolean
 }
 
+/** 数据文件的声明缓存条目 */
+interface DataDeclEntry {
+    /** 生成声明时的源文件指纹 */
+    stamp: FileStamp
+    /** 声明缓存在 DATA_DECL_DIR 下的文件名（内容寻址）；空串表示曾生成失败（负缓存，避免每轮重试） */
+    file: string
+}
+
 /** `.tmp/lint-cache.json` 的结构 */
 interface LintCache {
     /** 缓存结构版本 */
@@ -129,10 +154,12 @@ interface LintCache {
     fingerprint: string
     /** 上次检查通过的时间（ISO），仅供参考 */
     lastRunAt: string | null
-    /** TS 工程文件的 mtime/size 指纹 */
+    /** TS 工程文件（含数据文件）的 mtime/size 指纹 */
     tsStamps: Record<string, FileStamp>
     /** TS 文件之间的依赖图 */
     tsGraph: Record<string, GraphNode>
+    /** 数据文件 → 声明缓存条目（声明文件与源内容严格对应） */
+    dataDecls: Record<string, DataDeclEntry>
     /** Biome 文件集的 mtime/size 指纹（超集，仅用于判断 Biome 是否需要重跑） */
     lintStamps: Record<string, FileStamp>
 }
@@ -154,6 +181,20 @@ interface ChangeSet {
     added: string[]
     modified: string[]
     deleted: string[]
+}
+
+/** 类型检查上下文：指纹、改动集合等由 main 阶段算好传入 */
+interface TypeCheckContext {
+    /** 工程内文件列表（工程文件 + 数据文件，相对路径） */
+    tsFiles: string[]
+    /** 本次采集的指纹 */
+    tsStamps: Record<string, FileStamp>
+    /** 本次内容变化过的数据文件（相对路径） */
+    changedData: Set<string>
+    /** 环境声明文件列表（需要始终留在 program 里，但不主动诊断） */
+    ambientFiles: string[]
+    /** 上次缓存（命中声明缓存时免生成） */
+    previous: LintCache | null
 }
 
 /**
@@ -184,14 +225,14 @@ function printHelp(): void {
     bun tools/incremental-lint.ts [选项]
 
 选项：
-    -f, --full      忽略缓存，全量检查（等价于 pnpm lint:full）
+    -f, --full      忽略缓存，走真 vue-tsc 全量检查（等价于 pnpm lint:full 的类型检查）
         --no-biome  只做类型检查，不跑 Biome
     -v, --verbose   打印检查范围等过程信息
     -h, --help      显示本帮助
 
 缓存：
-    .tmp/lint-cache.json 记录各文件的修改时间戳与依赖图；
-    删除该文件（或 .tmp 目录）即可回到首次全量检查的状态。`)
+    .tmp/lint-cache.json 记录各文件的修改时间戳、依赖图与数据文件声明缓存索引；
+    删除该文件（或 .tmp 目录）即可回到首次检查的状态。`)
 }
 
 /**
@@ -373,7 +414,7 @@ async function loadTsProject(): Promise<{ include: string[]; exclude: string[] }
 }
 
 /**
- * 枚举工程内的 TS / Vue 源文件。
+ * 枚举工程内的 TS / Vue 源文件（tsconfig include 口径，不含被 exclude 的数据文件）。
  *
  * @param include tsconfig 的 include
  * @param exclude tsconfig 的 exclude
@@ -381,6 +422,18 @@ async function loadTsProject(): Promise<{ include: string[]; exclude: string[] }
  */
 async function listTsFiles(include: string[], exclude: string[]): Promise<string[]> {
     const files = await glob(include, { cwd: PROJECT_ROOT, ignore: exclude, nodir: true, posix: true })
+    return files.sort()
+}
+
+/**
+ * 枚举数据文件（DATA_GLOBS 口径的 `*.data.ts`）。
+ * 它们被 tsconfig 排除、只通过 import 参与 program，但改动会波及引用方，
+ * 必须纳入指纹与依赖图。
+ *
+ * @returns 相对工程根的 posix 路径（已排序）
+ */
+async function listDataFiles(): Promise<string[]> {
+    const files = await glob(DATA_GLOBS, { cwd: PROJECT_ROOT, nodir: true, posix: true })
     return files.sort()
 }
 
@@ -438,6 +491,25 @@ async function loadCache(): Promise<LintCache | null> {
 async function saveCache(cache: LintCache): Promise<void> {
     await mkdir(TMP_DIR, { recursive: true })
     await writeFile(CACHE_FILE, `${JSON.stringify(cache, null, 4)}\n`, "utf8")
+}
+
+/**
+ * 回收声明缓存目录里不再被缓存索引引用的文件。
+ * 只在检查通过、即将写入新缓存时调用，失败运行不回收（旧条目可能仍被引用）。
+ *
+ * @param decls 本次要写入缓存的数据文件声明条目
+ */
+async function gcDataDeclDir(decls: Record<string, DataDeclEntry>): Promise<void> {
+    const used = new Set(Object.values(decls).map(entry => entry.file))
+    let entries: string[]
+    try {
+        entries = await readdir(DATA_DECL_DIR)
+    } catch {
+        return
+    }
+    for (const name of entries) {
+        if (!used.has(name)) await rm(path.join(DATA_DECL_DIR, name), { force: true })
+    }
 }
 
 /**
@@ -526,7 +598,7 @@ async function buildGraphNode(rel: string, known: Set<string>): Promise<GraphNod
 /**
  * 建立 / 复用工程依赖图。只有内容变过的文件才重新解析，其余直接取缓存节点。
  *
- * @param files 工程内文件列表
+ * @param files 工程内文件列表（工程文件 + 数据文件）
  * @param known 工程内文件集合
  * @param cached 上次的依赖图
  * @param rebuildAll 是否整体重建（缓存失效或有文件增删时）
@@ -582,8 +654,12 @@ function buildReverseMap(graphs: Record<string, GraphNode>[]): Map<string, Set<s
 }
 
 /**
- * 计算本次类型检查的根文件集合：
- * 改动 / 删除的文件 + 所有（直接或间接）依赖它们的文件 + 环境声明文件。
+ * 计算本次类型检查的根文件集合（诊断范围）：
+ * 改动 / 删除的文件 + 所有（直接或间接）依赖它们的文件。
+ *
+ * 注意：环境声明文件不在这里种子 —— 未改动的环境声明只需要进 program（保证全局类型可用），
+ * 不需要被诊断；把它们连传递依赖一起种子会让几乎所有编辑都膨胀成全量。
+ * 环境声明文件「自身变更」的场合由主流程整体退回全量诊断。
  *
  * @param changes 改动集合
  * @param graphs 依赖图列表（当前图在前）
@@ -607,36 +683,375 @@ function computeRoots(changes: ChangeSet, graphs: Record<string, GraphNode>[], e
         for (const dependent of reverse.get(current) ?? []) seed(dependent)
     }
 
-    // 环境声明文件承载全局类型，缺了它们会冒出「Property does not exist」之类的假报错
-    for (const [rel, node] of Object.entries(graphs[0])) {
-        if (node.ambient) seed(rel)
-    }
-
     return [...affected].filter(rel => existing.has(rel)).sort()
 }
 
 /**
- * 生成临时 tsconfig：继承根 tsconfig 的编译选项，只把根文件限制为本次要检查的集合。
- * 写盘前再确认一次文件还在（编辑器 / 其它工具可能在检查过程中删掉刚改动的文件，
- * 此时 vue-tsc 会直接报 TS6053）。
+ * 汇总需要进 program 的环境声明文件（`.d.ts`、含 declare global/module）。
+ * 它们不产生 import 边、不会被 program 自然拉入，缺失会产生假报错。
  *
- * @param roots 根文件列表（相对工程根）
- * @returns 临时 tsconfig 的绝对路径
+ * @param graph 依赖图
+ * @returns 环境声明文件列表（相对路径，已排序）
  */
-async function writeTempTsconfig(roots: string[]): Promise<string> {
-    const alive: string[] = []
-    for (const rel of roots) {
-        if (await statSafe(path.join(PROJECT_ROOT, rel))) alive.push(rel)
+function collectAmbientFiles(graph: Record<string, GraphNode>): string[] {
+    return Object.entries(graph)
+        .filter(([, node]) => node.ambient)
+        .map(([rel]) => rel)
+        .sort()
+}
+
+/**
+ * 数据文件声明缓存的文件名：按「路径 + mtime + size」内容寻址，源文件一变即换名。
+ *
+ * @param rel 数据文件相对路径
+ * @param stamp 源文件指纹
+ * @returns 缓存文件名
+ */
+function dataDeclCacheFile(rel: string, stamp: FileStamp): string {
+    const hash = createHash("sha1").update(`${rel}|${stamp.mtimeMs}|${stamp.size}`).digest("hex")
+    return `${path.posix.basename(rel, ".ts")}.${hash}.d.ts`
+}
+
+/**
+ * 规范化绝对路径：posix 分隔符 + Windows 下小写，与 TS host 的 getCanonicalFileName 口径一致。
+ *
+ * @param absPath 绝对路径
+ * @returns 规范化后的路径
+ */
+function canonicalFilePath(absPath: string): string {
+    const normalized = absPath.split(path.sep).join("/")
+    return ts.sys.useCaseSensitiveFileNames ? normalized : normalized.toLowerCase()
+}
+
+/**
+ * 生成数据文件的类型声明文本（单文件变换，不做类型检查）。
+ *
+ * @param absPath 数据文件绝对路径（posix 分隔符）
+ * @param sourceText 源文件全文
+ * @returns 声明文本；生成失败（如有声明层错误）时返回 null，调用方回退为真实源码
+ */
+function generateDataDecl(absPath: string, sourceText: string): string | null {
+    try {
+        const result = ts.transpileDeclaration(sourceText, {
+            fileName: absPath.split(path.sep).join("/"),
+            compilerOptions: {
+                declaration: true,
+                target: ts.ScriptTarget.ESNext,
+                module: ts.ModuleKind.ESNext,
+                moduleResolution: ts.ModuleResolutionKind.Bundler,
+                resolveJsonModule: true,
+                experimentalDecorators: true,
+            },
+            reportDiagnostics: true,
+        })
+        const hasErrors = (result.diagnostics ?? []).some(d => d.category === ts.DiagnosticCategory.Error)
+        if (hasErrors) return null
+        return result.outputText
+    } catch {
+        return null
     }
-    const config = {
-        // 相对路径基于本文件所在目录（.tmp/）解析
-        extends: "../tsconfig.json",
-        include: [],
-        files: alive.map(rel => `../${rel}`),
+}
+
+/**
+ * 生成数据文件的声明并写入缓存目录。
+ *
+ * @param rel 数据文件相对路径
+ * @param stamp 源文件指纹
+ * @returns 缓存条目；生成失败时返回 null
+ */
+async function writeDataDecl(rel: string, stamp: FileStamp): Promise<DataDeclEntry | null> {
+    const absPath = path.join(PROJECT_ROOT, rel)
+    const source = await readTextSafe(absPath)
+    if (source === null) return null
+    const text = generateDataDecl(absPath.split(path.sep).join("/"), source)
+    if (text === null) return null
+    const file = dataDeclCacheFile(rel, stamp)
+    await mkdir(DATA_DECL_DIR, { recursive: true })
+    await writeFile(path.join(DATA_DECL_DIR, file), text, "utf8")
+    return { stamp, file }
+}
+
+/**
+ * 读取缓存的数据文件声明文本。
+ *
+ * @param entry 缓存条目
+ * @returns 声明文本；缓存文件丢失时返回 null
+ */
+async function readDataDecl(entry: DataDeclEntry): Promise<string | null> {
+    return readTextSafe(path.join(DATA_DECL_DIR, entry.file))
+}
+
+/** unplugin-vue-components 生成文件的标记行，用于识别 components.d.ts */
+const COMPONENTS_DTS_MARKER = "Generated by unplugin-vue-components"
+/**
+ * components.d.ts 里的单条组件声明。文件里有两个形态（都要裁）：
+ * `Foo: typeof import('...')['default']`（declare module 'vue' 的 GlobalComponents 区段）
+ * `const Foo: typeof import('...')['default']`（declare global 的 JSX 支持区段）
+ */
+const COMPONENT_ENTRY_PATTERN = /^\s*(?:const\s+)?([\w$]+):\s*typeof import\(/
+
+/**
+ * 生成 components.d.ts 的裁剪版本：只保留被诊断文件引用到的全局组件条目。
+ * 每条 `typeof import(...)` 都会把该组件连同整棵依赖闭包拉进 program（550 个组件
+ * 常驻会让 program 涨到 3500+ 文件）。裁剪后未用到的组件标签退化为 any，
+ * 默认 strictTemplates=false 下不产生诊断差异。
+ *
+ * @param text components.d.ts 原文
+ * @param rootsTexts 被诊断文件的源文本列表
+ * @returns 裁剪后的文本；无需裁剪（组件全被引用或没有可裁剪条目）时返回 null
+ */
+function trimComponentsDts(text: string, rootsTexts: string[]): string | null {
+    // 标签名统一成「仅字母数字、小写」口径比对：PascalCase / kebab-case / 字符串形式都能命中
+    const normalize = (value: string): string => value.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()
+    const haystack = rootsTexts.map(rootsText => normalize(rootsText)).join("\n")
+    const allNames: string[] = []
+    const keptLines = text.split("\n").filter(line => {
+        const match = COMPONENT_ENTRY_PATTERN.exec(line)
+        if (!match) return true
+        allNames.push(match[1])
+        return haystack.includes(normalize(match[1]))
+    })
+    if (allNames.length === 0 || keptLines.length === text.split("\n").length) return null
+    return keptLines.join("\n")
+}
+
+/**
+ * 计算增量模式下 components.d.ts 的裁剪替换文本并写入替换表。
+ *
+ * @param overrideTexts 程序内文件的文本替换表
+ * @param roots 被诊断文件（相对路径）
+ * @param tsFiles 工程内文件列表
+ * @param verbose 是否打印过程信息
+ */
+async function applyComponentsDtsTrim(
+    overrideTexts: Map<string, string>,
+    roots: string[],
+    tsFiles: string[],
+    verbose: boolean
+): Promise<void> {
+    const rel = "src/components.d.ts"
+    if (!tsFiles.includes(rel)) return
+    const original = await readTextSafe(path.join(PROJECT_ROOT, rel))
+    if (original === null || !original.includes(COMPONENTS_DTS_MARKER)) return
+    const rootsTexts: string[] = []
+    for (const root of roots) {
+        // components.d.ts 自身会因「引用所有组件」的依赖边进入根集合，它的文本不能参与匹配
+        //（否则 275 个组件名全部命中，裁剪失效）
+        if (root === rel) continue
+        const text = await readTextSafe(path.join(PROJECT_ROOT, root))
+        if (text !== null) rootsTexts.push(text)
     }
-    await mkdir(TMP_DIR, { recursive: true })
-    await writeFile(TEMP_TSCONFIG, `${JSON.stringify(config, null, 4)}\n`, "utf8")
-    return TEMP_TSCONFIG
+    const trimmed = trimComponentsDts(original, rootsTexts)
+    if (trimmed !== null) {
+        overrideTexts.set(canonicalFilePath(path.join(PROJECT_ROOT, rel)), trimmed)
+        if (verbose) console.log(`[lint] components.d.ts 已按诊断范围裁剪（${original.length} → ${trimmed.length} 字节）`)
+    }
+}
+
+/**
+ * 构建自研类型检查 program：Vue 语言插件挂进真 TS program（.vue 由虚拟代码参与编译、
+ * 诊断位置自动映射回原文件），未改动的数据文件以预生成声明替代真实源码。
+ *
+ * @param rootNames 增量根文件（绝对路径）；null 表示全量（按 tsconfig 的 fileNames）
+ * @param overrideTexts 程序内文件的文本替换表（规范化绝对路径 → 替换文本）：数据文件的声明、components.d.ts 的裁剪版
+ * @param verbose 是否打印过程信息
+ * @returns program 与解析后的 tsconfig
+ */
+function createCheckerProgram(
+    rootNames: string[] | null,
+    overrideTexts: Map<string, string>,
+    verbose: boolean
+): { program: ts.Program; fileCount: number; replaced: number } {
+    const started = Date.now()
+    const configPath = path.join(PROJECT_ROOT, "tsconfig.json").split(path.sep).join("/")
+
+    // vue 的 createParsedCommandLine 会把 readDirectory 桩成空（为语言服务设计，fileNames 恒为空），
+    // 因此文件枚举与编译选项用 ts 原生解析（.vue 作为扩展输入），vue 专属选项才走 vue 的封装
+    const config = ts.readConfigFile(configPath, ts.sys.readFile)
+    const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, PROJECT_ROOT, {
+        extraFileExtensions: [{ extension: "vue", isMixedContent: true, scriptKind: ts.ScriptKind.Defer }],
+    })
+    const configErrors: ts.Diagnostic[] = config.error ? [config.error] : []
+    const vueOptions = createParsedCommandLine(ts, ts.sys, configPath).vueOptions
+
+    const originalHost = ts.createCompilerHost(parsed.options, ts.sys.useCaseSensitiveFileNames)
+
+    const host: ts.CompilerHost = {
+        ...originalHost,
+        getSourceFile(fileName, languageVersionOrOptions, onError, shouldCreateNewSourceFile) {
+            const decl = overrideTexts.get(canonicalFilePath(fileName))
+            if (decl !== undefined) {
+                return ts.createSourceFile(fileName, decl, languageVersionOrOptions, false)
+            }
+            return originalHost.getSourceFile(fileName, languageVersionOrOptions, onError, shouldCreateNewSourceFile)
+        },
+    }
+
+    const createProgram = proxyCreateProgram(ts, ts.createProgram, (tsModule, options) => ({
+        languagePlugins: [createVueLanguagePlugin(tsModule, options.options, vueOptions, id => id)],
+    }))
+    const program = createProgram({
+        rootNames: rootNames ?? parsed.fileNames,
+        // 裸 ts.createProgram 会把 .vue 根文件当「不支持的扩展名」直接丢弃
+        // （vue-tsc 靠打补丁注册扩展名，进程内等价解法是这个语言服务开关）
+        options: { ...parsed.options, allowNonTsExtensions: true },
+        host,
+        configFileParsingDiagnostics: [...configErrors, ...parsed.errors],
+    })
+
+    if (verbose) {
+        console.log(
+            `[lint] program：${program.getSourceFiles().length} 个文件，文本替换 ${overrideTexts.size} 个（构建 ${(Date.now() - started) / 1000}s）`
+        )
+    }
+    return { program, fileCount: program.getSourceFiles().length, replaced: overrideTexts.size }
+}
+
+/**
+ * 收集自研 program 的诊断，顺序与 tsc 一致：配置 / 选项 / 全局 → 逐文件（语法 → 语义）。
+ * 增量模式只对根文件发起诊断（上游只编译不检查）；全量模式对 program 全部文件发起。
+ *
+ * @param program 自建 program
+ * @param fileNames 要诊断的文件（绝对路径）
+ * @returns 诊断列表
+ */
+function collectProgramDiagnostics(program: ts.Program, fileNames: string[]): ts.Diagnostic[] {
+    const diagnostics: ts.Diagnostic[] = []
+    diagnostics.push(...program.getConfigFileParsingDiagnostics())
+    diagnostics.push(...program.getOptionsDiagnostics())
+    diagnostics.push(...program.getGlobalDiagnostics())
+
+    for (const fileName of fileNames) {
+        const sourceFile = program.getSourceFile(fileName)
+        if (!sourceFile) {
+            diagnostics.push({
+                file: undefined,
+                start: undefined,
+                length: undefined,
+                category: ts.DiagnosticCategory.Error,
+                code: 6053,
+                messageText: `增量 lint：文件未能进入编译程序：${fileName}`,
+            })
+            continue
+        }
+        diagnostics.push(...program.getSyntacticDiagnostics(sourceFile))
+        diagnostics.push(...program.getSemanticDiagnostics(sourceFile))
+    }
+    return diagnostics
+}
+
+/**
+ * 运行自研类型检查（进程内，不经过 vue-tsc CLI）。
+ *
+ * 未改动的数据文件用声明缓存替代；被改动的数据文件用真实源码参与编译并诊断，
+ * 检查通过后再为其生成声明缓存，供后续运行替换使用。
+ *
+ * @param roots 增量根文件（相对路径，已过滤存在性）；null 表示全量诊断
+ * @param context 类型检查上下文（文件列表、指纹、改动集合、上次缓存）
+ * @param verbose 是否打印过程信息
+ * @returns 退出码与本次生成的声明缓存条目（通过时并入缓存）
+ */
+async function runCustomTypeCheck(
+    roots: string[] | null,
+    context: TypeCheckContext,
+    verbose: boolean
+): Promise<{ code: number; decls: Record<string, DataDeclEntry> }> {
+    const started = Date.now()
+    const { tsFiles, tsStamps, changedData, previous } = context
+    const dataFiles = tsFiles.filter(rel => isDataFile(rel))
+
+    // 组装声明替换表：未改动的数据文件走缓存（缺失即生成）；改动的走真实源码
+    const decls: Record<string, DataDeclEntry> = {}
+    const overrideTexts = new Map<string, string>()
+    for (const rel of dataFiles) {
+        if (changedData.has(rel)) continue
+        const stamp = tsStamps[rel]
+        if (!stamp) continue
+
+        const cached = previous?.dataDecls?.[rel]
+        let text: string | null = null
+        let failedBefore = false
+        if (cached && cached.stamp.mtimeMs === stamp.mtimeMs && cached.stamp.size === stamp.size) {
+            if (cached.file === "") {
+                // 曾生成失败（不满足单文件声明推断约束）：负缓存命中，直接回退真实源码
+                failedBefore = true
+            } else {
+                text = await readDataDecl(cached)
+                if (text !== null) decls[rel] = cached
+            }
+        }
+        if (text === null && !failedBefore) {
+            const entry = await writeDataDecl(rel, stamp)
+            if (entry !== null) {
+                text = await readDataDecl(entry)
+                if (text !== null) decls[rel] = entry
+            }
+        }
+        if (text === null) {
+            // 回退真实源码参与编译（不诊断、不在缓存里记成功条目），并记录负缓存
+            decls[rel] = { stamp, file: "" }
+            if (verbose && !failedBefore) console.log(`[lint] 数据文件声明生成失败，回退真实源码参与编译：${rel}`)
+        } else {
+            overrideTexts.set(canonicalFilePath(path.join(PROJECT_ROOT, rel)), text)
+        }
+    }
+
+    // 增量模式下裁剪 components.d.ts：550 条 typeof import 会把全部组件的闭包拉进 program
+    if (roots !== null) {
+        await applyComponentsDtsTrim(overrideTexts, roots, tsFiles, verbose)
+    }
+
+    const rootNames =
+        roots === null
+            ? null
+            : [...new Set([...roots, ...context.ambientFiles])].map(rel => path.join(PROJECT_ROOT, rel).split(path.sep).join("/"))
+    const { program } = createCheckerProgram(rootNames, overrideTexts, verbose)
+
+    // 全量诊断覆盖 program 全部文件；增量只对根文件发起（环境声明只进 program 不诊断，上游只编译不诊断）
+    const fileNames =
+        roots === null
+            ? program.getSourceFiles().map(sourceFile => sourceFile.fileName)
+            : roots.map(rel => path.join(PROJECT_ROOT, rel).split(path.sep).join("/"))
+    const diagnostics = collectProgramDiagnostics(program, fileNames)
+    const hasErrors = diagnostics.some(d => d.category === ts.DiagnosticCategory.Error)
+
+    if (diagnostics.length > 0) {
+        const formatHost: ts.FormatDiagnosticsHost = {
+            getCurrentDirectory: () => PROJECT_ROOT,
+            getCanonicalFileName: f => (ts.sys.useCaseSensitiveFileNames ? f : f.toLowerCase()),
+            getNewLine: () => ts.sys.newLine,
+        }
+        console.log(ts.formatDiagnostics(diagnostics, formatHost).trimEnd())
+    }
+
+    if (verbose) {
+        console.log(`[lint] 类型检查用时 ${(Date.now() - started) / 1000}s（诊断 ${diagnostics.length} 条）`)
+    }
+
+    // 通过后再为改动的数据文件生成声明缓存：本次它们以真实源码参与编译，
+    // 下次运行（未改动状态）即可用声明替换，数据体不再进 checker
+    if (!hasErrors) {
+        for (const rel of changedData) {
+            if (decls[rel]) continue
+            const stamp = tsStamps[rel]
+            if (!stamp) continue
+            const entry = await writeDataDecl(rel, stamp)
+            // 失败也记负缓存条目：源文件再变（指纹不同）时会自动重试
+            decls[rel] = entry ?? { stamp, file: "" }
+        }
+    }
+
+    return { code: hasErrors ? 1 : 0, decls }
+}
+
+/**
+ * 判断文件是否为数据文件（src/data/d 下的 *.data.ts）。
+ *
+ * @param rel 相对工程根路径
+ * @returns 是数据文件时返回 true
+ */
+function isDataFile(rel: string): boolean {
+    return rel.startsWith("src/data/d/") && rel.endsWith(".data.ts")
 }
 
 /**
@@ -684,17 +1099,12 @@ function runBiome(files: string[] | null): number {
 }
 
 /**
- * 运行 vue-tsc。
+ * 运行真 vue-tsc CLI 全量检查（唯一覆盖数据体检查的最终真相路径）。
  *
- * @param roots 增量检查的根文件；传 null 表示按 tsconfig.json 全量检查
  * @returns 退出码
  */
-async function runVueTsc(roots: string[] | null): Promise<number> {
-    if (roots === null) return runNode(VUE_TSC_ENTRY, ["--noEmit"])
-    if (roots.length === 0) return 0
-
-    const configPath = await writeTempTsconfig(roots)
-    return runNode(VUE_TSC_ENTRY, ["-p", configPath, "--noEmit", "--incremental", "--tsBuildInfoFile", TEMP_BUILD_INFO])
+function runVueTscFull(): number {
+    return runNode(VUE_TSC_ENTRY, ["--noEmit"])
 }
 
 /**
@@ -710,7 +1120,7 @@ function log(message: string, verboseOnly: boolean, options: CliOptions): void {
 }
 
 /**
- * 主流程：算改动 → 定范围 → Biome → vue-tsc → 通过后写缓存。
+ * 主流程：算改动 → 定范围 → Biome → 类型检查 → 通过后写缓存。
  */
 async function main(): Promise<void> {
     const options = parseArgs(process.argv.slice(2))
@@ -721,7 +1131,11 @@ async function main(): Promise<void> {
 
     const started = Date.now()
     const tsProject = await loadTsProject()
-    const tsFiles = await listTsFiles(tsProject.include, tsProject.exclude)
+    const projectFiles = await listTsFiles(tsProject.include, tsProject.exclude)
+    const projectSet = new Set(projectFiles)
+    // 数据文件被 tsconfig 排除但通过 import 参与 program，必须并入指纹与依赖图口径
+    const dataFiles = (await listDataFiles()).filter(rel => !projectSet.has(rel))
+    const tsFiles = [...projectFiles, ...dataFiles].sort()
     const tsSet = new Set(tsFiles)
     const lintFiles = await listLintFiles()
     const fingerprint = await computeFingerprint()
@@ -736,7 +1150,11 @@ async function main(): Promise<void> {
     const lintChanges = diffStamps(previous?.lintStamps ?? {}, lintStamps)
     const changedSet = new Set([...tsChanges.added, ...tsChanges.modified])
 
-    log(`工程内 TS/Vue 文件 ${tsFiles.length} 个，Biome 文件集 ${lintFiles.length} 个`, true, options)
+    log(
+        `工程内 TS/Vue 文件 ${projectFiles.length} 个 + 数据文件 ${dataFiles.length} 个，Biome 文件集 ${lintFiles.length} 个`,
+        true,
+        options
+    )
 
     // 依赖图：缓存整体失效或有文件增删时重建，否则只重解析内容变过的文件
     const rebuildAll = previous === null || tsChanges.added.length > 0 || tsChanges.deleted.length > 0
@@ -748,28 +1166,38 @@ async function main(): Promise<void> {
     const biomeDirty = !cacheValid || !isClean(lintChanges)
 
     // 环境声明文件影响的是整个程序（例如 src/components.d.ts 一变，所有用到自动导入组件的
-    // 模板推断结果都会变），而模板引用不产生 import 边，闭包算不到它们，只能退回全量。
+    // 模板推断结果都会变），而模板引用不产生 import 边，闭包算不到它们，只能全量诊断
     const ambientChanged = [...tsChanges.added, ...tsChanges.modified, ...tsChanges.deleted].some(
         rel => graph[rel]?.ambient === true || previous?.tsGraph[rel]?.ambient === true
     )
 
+    const context: TypeCheckContext = {
+        tsFiles,
+        tsStamps,
+        changedData: new Set(),
+        ambientFiles: [],
+        previous,
+    }
+
     // 类型检查范围
-    let tsMode: "skip" | "full" | "incremental" = "skip"
+    let tsMode: "skip" | "full" | "custom-incremental" | "custom-full" = "skip"
     let tsReason = ""
     let roots: string[] = []
     if (tsDirty) {
         roots = computeRoots(tsChanges, [graph, previous?.tsGraph ?? {}], tsSet)
+        context.changedData = new Set([...tsChanges.added, ...tsChanges.modified].filter(rel => isDataFile(rel)))
+        context.ambientFiles = collectAmbientFiles(graph)
         if (options.full) {
             tsMode = "full"
             tsReason = "--full"
         } else if (ambientChanged) {
-            tsMode = "full"
+            tsMode = "custom-full"
             tsReason = "环境声明文件有改动"
-        } else if (roots.length >= tsFiles.length * FULL_CHECK_RATIO) {
-            tsMode = "full"
-            tsReason = `影响面过大（${roots.length}/${tsFiles.length}）`
+        } else if (roots.length >= projectFiles.length * FULL_CHECK_RATIO) {
+            tsMode = "custom-full"
+            tsReason = `影响面过大（${roots.length}/${projectFiles.length}）`
         } else {
-            tsMode = "incremental"
+            tsMode = "custom-incremental"
         }
     }
 
@@ -800,38 +1228,52 @@ async function main(): Promise<void> {
         log("按 --no-biome 跳过 Biome", false, options)
     }
 
+    let dataDecls = previous?.dataDecls ?? {}
     if (tsMode !== "skip") {
-        log(
-            tsMode === "full"
-                ? `vue-tsc：全量类型检查（${tsReason}）`
-                : `vue-tsc：增量类型检查 ${roots.length} 个文件（改动 ${tsChanges.added.length + tsChanges.modified.length} 个，其余为受影响的下游与环境声明）`,
-            false,
-            options
-        )
-        const code = await runVueTsc(tsMode === "full" ? null : roots)
-        if (code !== 0) {
-            console.error("[lint] vue-tsc 未通过（缓存不更新，下次会重新检查这些文件）")
-            process.exitCode = code
-            return
+        if (tsMode === "full") {
+            log(`vue-tsc：全量类型检查（${tsReason}，含数据体检查的最终真相）`, false, options)
+            const code = runVueTscFull()
+            if (code !== 0) {
+                console.error("[lint] vue-tsc 未通过（缓存不更新，下次会重新检查这些文件）")
+                process.exitCode = code
+                return
+            }
+        } else {
+            log(
+                tsMode === "custom-full"
+                    ? `类型检查：自研全量诊断（${tsReason}，数据文件仍裁剪）`
+                    : `类型检查：增量诊断 ${roots.length} 个文件（改动 ${tsChanges.added.length + tsChanges.modified.length} 个，其余为受影响的下游与环境声明）`,
+                false,
+                options
+            )
+            const result = await runCustomTypeCheck(tsMode === "custom-full" ? null : roots, context, options.verbose)
+            if (result.code !== 0) {
+                console.error("[lint] 类型检查未通过（缓存不更新，下次会重新检查这些文件）")
+                process.exitCode = result.code
+                return
+            }
+            dataDecls = result.decls
         }
     } else {
-        log("vue-tsc：没有改动的 TS 文件，跳过类型检查", false, options)
+        log("没有改动的 TS 文件，跳过类型检查", false, options)
     }
 
     // 只有全部通过才落盘指纹：失败时缓存保持旧值，下次会重新检查这批文件
+    await gcDataDeclDir(dataDecls)
     const nextCache: LintCache = {
         version: CACHE_VERSION,
         fingerprint,
         lastRunAt: new Date().toISOString(),
         tsStamps: await collectStamps(tsFiles),
         tsGraph: graph,
+        dataDecls,
         // --no-biome 时不动 Biome 指纹，避免下次误以为 Biome 已经检查过这些文件
         lintStamps: options.skipBiome ? (previous?.lintStamps ?? {}) : await collectStamps(lintFiles),
     }
     await saveCache(nextCache)
 
     log(`通过，用时 ${((Date.now() - started) / 1000).toFixed(1)}s`, false, options)
-    log("需要覆盖全工程的检查时用：pnpm lint:full", true, options)
+    log("需要覆盖全工程（含数据体）的检查时用：pnpm lint:full", true, options)
 }
 
 await main()

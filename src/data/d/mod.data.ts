@@ -9892,4 +9892,6 @@ const data: Mod[] = t.map((item: Mod): Mod => {
     return item
 })
 
-export default applyVersionGate(data)
+const modData: Mod[] = applyVersionGate(data)
+
+export default modData

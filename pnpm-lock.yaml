@@ -255,6 +255,12 @@ importers:
       '@vitest/coverage-v8':
         specifier: 4.0.15
         version: 4.0.15(vitest@4.1.11)
+      '@volar/typescript':
+        specifier: 2.4.28
+        version: 2.4.28
+      '@vue/language-core':
+        specifier: 3.3.11
+        version: 3.3.11
       ali-oss:
         specifier: ^6.23.0
         version: 6.23.0

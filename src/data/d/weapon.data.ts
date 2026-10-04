@@ -10258,4 +10258,6 @@ patch(
     }
 )
 
-export default applyVersionGate(t)
+const weaponData: Weapon[] = applyVersionGate(t)
+
+export default weaponData

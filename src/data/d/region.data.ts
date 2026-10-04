@@ -814,6 +814,6 @@ const regionDataWithVersion = t.map(region => ({
     版本: region2Version[region.id] || "1.0",
 }))
 
-const filteredRegionData = applyVersionGate(regionDataWithVersion)
+const filteredRegionData: (Region & { 版本: string })[] = applyVersionGate(regionDataWithVersion)
 
 export default filteredRegionData

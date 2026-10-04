@@ -51,7 +51,7 @@ export interface RaceLotteryData {
     rumorFees: RaceLotteryRumorFee[]
 }
 
-export const raceLotteryPlayersOrder = [
+export const raceLotteryPlayersOrder: number[] = [
     4033, 4163, 4133, 4073, 4043, 4013, 4143, 4113, 4083, 4053, 4023, 4153, 4931, 4923, 4913, 4093, 4123, 4063,
 ]
 

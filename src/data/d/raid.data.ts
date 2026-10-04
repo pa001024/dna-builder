@@ -44,7 +44,7 @@ export interface RaidBuffItem {
     RaidBuffParameter?: string[]
 }
 
-export const RaidBuff = [
+export const RaidBuff: Record<number, RaidBuffItem> = [
     {
         RaidBuffID: 1,
         RaidBuffDes: "风属性角色技能威力大于100%时，每超过30%，全属性穿透提高5%，最多提高50%。",

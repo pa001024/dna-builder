@@ -8,7 +8,7 @@ import type { Buff } from "../data-types"
  * 需要跨槽位生效的属性（如远程槽 MOD 提供近战增伤）用 `@` 前缀声明，剥离前缀后归属「BUFF 层」
  * （LeveledMod.buffProps），由 CharBuild 按 BUFF 口径汇总——只按属性自身作用域判定，不受 MOD 槽位限制。
  */
-export default [
+const buffs: Buff[] = [
     {
         id: 43342,
         名称: "反转",
@@ -461,4 +461,6 @@ export default [
         蓄力增伤: 0.719,
         子弹爆炸范围: 6,
     },
-] satisfies Buff[]
+]
+
+export default buffs

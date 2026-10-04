@@ -161,7 +161,7 @@ export function getCachedMapCategorizeList(): DNAMatterCategorizeList[] | null {
  * 保存地图分类列表缓存。
  * @param categorizeList 地图分类列表
  */
-export function setCachedMapCategorizeList(categorizeList: DNAMatterCategorizeList[]) {
+export function setCachedMapCategorizeList(categorizeList: DNAMatterCategorizeList[]): void {
     writeJsonCache(MAP_CATEGORIZE_CACHE_KEY, categorizeList)
 }
 
@@ -204,7 +204,7 @@ export function getCachedMapDetail(mapId: number): DNAMapDetailRes | null {
  * @param mapId 地图 ID
  * @param mapDetail 地图详情
  */
-export function setCachedMapDetail(mapId: number, mapDetail: DNAMapDetailRes) {
+export function setCachedMapDetail(mapId: number, mapDetail: DNAMapDetailRes): void {
     writeJsonCache(`${MAP_DETAIL_CACHE_KEY_PREFIX}${mapId}`, mapDetail)
 }
 

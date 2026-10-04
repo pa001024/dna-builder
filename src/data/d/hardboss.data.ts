@@ -3500,7 +3500,7 @@ export const hardBossData: HardBoss[] = [
  * @param id Boss id
  * @returns Boss 详情；不存在时返回 undefined
  */
-export const getHardBossDetail = (id: number) => {
+export const getHardBossDetail = (id: number): HardBossDetail | undefined => {
     const boss = hardBossData.find(item => item.id === id)
     if (!boss) return
     const detail: HardBossDetail = {

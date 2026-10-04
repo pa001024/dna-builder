@@ -10,6 +10,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | 主题 | 文档 |
 |---|---|
 | 构建 / 增量 lint / SSG 预渲染 / 数据包改写（动手前必读） | [build-and-ssg.md](.agents/docs/build-and-ssg.md) |
+| 增量 lint 自研类型检查驱动器（设计规格与实施记录） | [incremental-lint-checker-spec.md](.agents/docs/incremental-lint-checker-spec.md) |
 | 代码风格细则（Formatter / TS / Vue / Rust） | [code-style.md](.agents/docs/code-style.md) |
 | Dev Tools（i18n / 图标 / 称号框 / 属性 i18n / 文本包 / 数据包） | [dev-tools.md](.agents/docs/dev-tools.md) |
 | RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |

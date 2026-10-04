@@ -14738,4 +14738,6 @@ patch(
 
 patchCWeapon()
 
-export default applyVersionGate(t)
+const charData: Char[] = applyVersionGate(t)
+
+export default charData
