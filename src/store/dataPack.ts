@@ -2,6 +2,7 @@ import { defineStore } from "pinia"
 import {
     type DataPackInstallStatus,
     type DataPackSourceInfo,
+    type DataPackSourceKind,
     downloadDataPack,
     exportDataPackVersionFile,
     getDataPackInstallStatus,
@@ -99,7 +100,7 @@ export const useDataPackStore = defineStore("dataPack", {
             await setDataPackSourceBaseUrl(sourceBaseUrl)
             await this.refreshStatus(true)
         },
-        async setSourceKind(sourceKind: "official" | "custom") {
+        async setSourceKind(sourceKind: DataPackSourceKind) {
             await setDataPackSourceKind(sourceKind)
             await this.refreshStatus(true)
         },

@@ -10,6 +10,7 @@ pub mod input;
 pub mod jsdnn;
 pub mod jsmat;
 pub mod jstimer;
+pub mod lan_sync;
 pub mod logger;
 pub mod mono_depth;
 pub mod ocr;

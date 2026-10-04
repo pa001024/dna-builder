@@ -254,6 +254,13 @@ pub fn run() {
         commands::cloudgame::navigate_cloudgame_window,
         commands::cloudgame::dispatch_cloudgame_command,
         commands::cloudgame::eval_cloudgame_window,
+        // 局域网设备发现与一键登录同步
+        commands::lan_sync::lan_sync_start,
+        commands::lan_sync::lan_sync_stop,
+        commands::lan_sync::lan_sync_status,
+        commands::lan_sync::lan_sync_update_snapshot,
+        commands::lan_sync::lan_sync_remove_device,
+        commands::lan_sync::lan_sync_resolve_pair,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

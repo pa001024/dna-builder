@@ -68,6 +68,14 @@ http = "1.1.0"
 scopeguard = "1.2.0"
 regex = "1.11.1"
 md5 = "0.8.0"
+# 局域网设备发现与一键登录同步：axum 起 HTTP 服务，uuid 签发设备 token
+axum = "0.8.6"
+uuid = { version = "1", features = ["v4"] }
+# 局域网同步 HTTPS：axum-server(rustls) 提 TLS，rcgen 签发自签证书链，sha2 算 CA 指纹
+axum-server = { version = "0.7", default-features = false, features = ["tls-rustls"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+rcgen = "0.13"
+sha2 = "0.10"
 repak = { git = "https://github.com/trumank/repak", features = ["oodle"] }
 
 [profile.dev]

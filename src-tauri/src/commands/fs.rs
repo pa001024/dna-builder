@@ -21,7 +21,10 @@ lazy_static! {
 
 /// 导出二进制文件到指定路径
 #[tauri::command]
-pub async fn export_binary_file(file_path: String, binary_content: Vec<u8>) -> Result<String, String> {
+pub async fn export_binary_file(
+    file_path: String,
+    binary_content: Vec<u8>,
+) -> Result<String, String> {
     // 创建文件路径
     let path = Path::new(&file_path);
 

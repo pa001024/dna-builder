@@ -9,6 +9,7 @@ import { restoreSkillCdOverlay } from "./composables/useSkillCdOverlay"
 import { dataPackBootstrapLoading, isDataPackHydrated } from "./data/data-pack-bridge"
 import { env } from "./env"
 import { useForgeAlarm } from "./store/forgeAlarm"
+import { useLanSyncStore } from "./store/lanSync"
 import { useMihanNotify } from "./store/mihan"
 import { useScriptRuntimeStore } from "./store/scriptRuntime"
 import { useSettingStore } from "./store/setting"
@@ -23,6 +24,7 @@ const setting = useSettingStore()
 const ui = useUIStore()
 const mihanNotify = useMihanNotify()
 const forgeAlarm = useForgeAlarm()
+const lanSync = useLanSyncStore()
 const scriptRuntime = useScriptRuntimeStore()
 const route = useRoute()
 const user = useUserStore()
@@ -377,6 +379,8 @@ onMounted(async () => {
     void restoreScreenBar()
     // 任务栏模式看门狗：explorer 重启连带销毁嵌入的信息条窗口后自动重建
     startScreenBarWatchdog()
+    // 局域网设备同步：按持久化开关恢复服务（不阻塞启动）
+    void lanSync.init()
     ui.setLoginState(setting.dnaUserId !== 0)
     ui.startTimer()
     reportVisitorCount()
@@ -412,6 +416,11 @@ onBeforeUnmount(() => {
         <StartupModal />
         <!-- 全局账号弹窗：任意页面都能通过 useAuthStore().openLogin() / requireLogin() 拉起 -->
         <LoginDialog />
+        <!-- 局域网同步配对确认弹窗：手机端发起配对时在任意页面弹出（Teleport 到 body 顶层） -->
+        <LanSyncPairDialog
+            :requests="lanSync.pendingPairRequests"
+            @resolve="lanSync.resolvePairRequest"
+        />
         <ScriptRuntimeFloatingBar v-if="isMainWindow" />
         <!-- 分享 MOD 下载队列（后台串行下载 + 安装，切页面不中断） -->
         <ModDownloadPanel />

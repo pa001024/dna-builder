@@ -26,14 +26,14 @@ use std::thread;
 use std::time::Duration;
 use windows::Win32::Foundation::{HWND, POINT, RECT};
 use windows::Win32::Graphics::Gdi::{
-    ClientToScreen, GetMonitorInfoW, MONITORINFO, MONITOR_DEFAULTTONEAREST, MonitorFromWindow,
+    ClientToScreen, GetMonitorInfoW, MONITOR_DEFAULTTONEAREST, MONITORINFO, MonitorFromWindow,
 };
 use windows::Win32::UI::HiDpi::GetDpiForWindow;
 use windows::Win32::UI::WindowsAndMessaging::{
-    GA_PARENT, FindWindowExW, FindWindowW, GetAncestor, GetClassNameW, GetClientRect,
+    FindWindowExW, FindWindowW, GA_PARENT, GetAncestor, GetClassNameW, GetClientRect,
     GetDesktopWindow, GetForegroundWindow, GetWindowRect, HWND_TOP, HWND_TOPMOST, IsWindow,
-    IsWindowVisible, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, SW_HIDE,
-    SW_SHOWNOACTIVATE, SetParent, SetWindowPos, ShowWindow,
+    IsWindowVisible, SW_HIDE, SW_SHOWNOACTIVATE, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
+    SWP_SHOWWINDOW, SetParent, SetWindowPos, ShowWindow,
 };
 use windows::core::{PCWSTR, w};
 
@@ -96,8 +96,8 @@ fn find_taskbar_host() -> Option<(HWND, TaskbarHost)> {
         if tray.0.is_null() {
             return None;
         }
-        let xaml_bridge = FindWindowExW(Some(tray), None, XAML_BRIDGE_CLASS, PCWSTR::null())
-            .unwrap_or_default();
+        let xaml_bridge =
+            FindWindowExW(Some(tray), None, XAML_BRIDGE_CLASS, PCWSTR::null()).unwrap_or_default();
         if !xaml_bridge.0.is_null() {
             return Some((tray, TaskbarHost::Overlay(tray)));
         }
@@ -165,7 +165,10 @@ fn keep_top_loop(hwnd_id: isize, stop: Arc<AtomicBool>) {
             // 窗口已销毁(浮窗页关闭/应用退出):清掉会话并结束线程
             if !IsWindow(Some(hwnd)).as_bool() {
                 let mut session = KEEP_TOP.lock().unwrap();
-                if session.as_ref().is_some_and(|current| current.hwnd == hwnd_id) {
+                if session
+                    .as_ref()
+                    .is_some_and(|current| current.hwnd == hwnd_id)
+                {
                     *session = None;
                 }
                 return;
@@ -181,7 +184,15 @@ fn keep_top_loop(hwnd_id: isize, stop: Arc<AtomicBool>) {
                 if !IsWindowVisible(hwnd).as_bool() {
                     let _ = ShowWindow(hwnd, SW_SHOWNOACTIVATE);
                 }
-                let _ = SetWindowPos(hwnd, Some(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                let _ = SetWindowPos(
+                    hwnd,
+                    Some(HWND_TOPMOST),
+                    0,
+                    0,
+                    0,
+                    0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
+                );
             }
         }
     }
@@ -202,7 +213,10 @@ fn is_foreground_fullscreen(bar_hwnd: HWND) -> bool {
         let mut class_buf = [0u16; 64];
         let class_len = GetClassNameW(foreground, &mut class_buf).max(0) as usize;
         let class = String::from_utf16_lossy(&class_buf[..class_len]);
-        if matches!(class.as_str(), "Progman" | "WorkerW" | "Shell_TrayWnd" | "Shell_SecondaryTrayWnd") {
+        if matches!(
+            class.as_str(),
+            "Progman" | "WorkerW" | "Shell_TrayWnd" | "Shell_SecondaryTrayWnd"
+        ) {
             return false;
         }
         let mut rect = RECT::default();
@@ -243,7 +257,11 @@ fn stop_keep_top(hwnd: HWND) {
 /// 宽高超过宿主可用区域时按宿主截断。窗口尺寸以逻辑像素传入,按宿主窗口自己的 DPI
 /// 换算成物理像素。Win10 嵌入模式坐标是宿主客户区坐标,Win11 覆盖模式是屏幕坐标,
 /// 两条路径都在这里换算好,调用方无需感知差异。
-pub fn embed(hwnd: HWND, logical_width: f64, logical_height: f64) -> Result<ScreenBarTaskbarFit, String> {
+pub fn embed(
+    hwnd: HWND,
+    logical_width: f64,
+    logical_height: f64,
+) -> Result<ScreenBarTaskbarFit, String> {
     unsafe {
         let Some((tray, host)) = find_taskbar_host() else {
             return Err("未找到 Windows 任务栏窗口".to_string());
@@ -256,7 +274,8 @@ pub fn embed(hwnd: HWND, logical_width: f64, logical_height: f64) -> Result<Scre
 
         // 宿主客户区(屏幕物理坐标)
         let mut client = RECT::default();
-        GetClientRect(host_hwnd, &mut client).map_err(|error| format!("获取任务栏客户区失败: {error}"))?;
+        GetClientRect(host_hwnd, &mut client)
+            .map_err(|error| format!("获取任务栏客户区失败: {error}"))?;
         let mut origin = POINT { x: 0, y: 0 };
         if !ClientToScreen(host_hwnd, &mut origin).as_bool() {
             return Err("获取任务栏客户区原点失败".to_string());
@@ -279,7 +298,8 @@ pub fn embed(hwnd: HWND, logical_width: f64, logical_height: f64) -> Result<Scre
         }
 
         let width = ((logical_width.max(1.0) * scale).round() as i32).clamp(1, limit_right.max(1));
-        let height = ((logical_height.max(1.0) * scale).round() as i32).clamp(1, client_height.max(1));
+        let height =
+            ((logical_height.max(1.0) * scale).round() as i32).clamp(1, client_height.max(1));
 
         let mode = match host {
             TaskbarHost::Embed(target) => {
@@ -295,8 +315,16 @@ pub fn embed(hwnd: HWND, logical_width: f64, logical_height: f64) -> Result<Scre
                 // SetParent 之后坐标变为宿主客户区坐标;置回兄弟窗口最上层
                 let x = (limit_right - TASKBAR_RIGHT_MARGIN - width).max(0);
                 let y = ((client_height - height) / 2).max(0);
-                SetWindowPos(hwnd, Some(HWND_TOP), x, y, width, height, SWP_NOACTIVATE | SWP_SHOWWINDOW)
-                    .map_err(|error| format!("任务栏内落位失败: {error}"))?;
+                SetWindowPos(
+                    hwnd,
+                    Some(HWND_TOP),
+                    x,
+                    y,
+                    width,
+                    height,
+                    SWP_NOACTIVATE | SWP_SHOWWINDOW,
+                )
+                .map_err(|error| format!("任务栏内落位失败: {error}"))?;
                 "embedded"
             }
             TaskbarHost::Overlay(_) => {
@@ -307,8 +335,16 @@ pub fn embed(hwnd: HWND, logical_width: f64, logical_height: f64) -> Result<Scre
                 }
                 let x = origin.x + (limit_right - TASKBAR_RIGHT_MARGIN - width).max(0);
                 let y = origin.y + ((client_height - height) / 2).max(0);
-                SetWindowPos(hwnd, Some(HWND_TOPMOST), x, y, width, height, SWP_NOACTIVATE | SWP_SHOWWINDOW)
-                    .map_err(|error| format!("任务栏上方落位失败: {error}"))?;
+                SetWindowPos(
+                    hwnd,
+                    Some(HWND_TOPMOST),
+                    x,
+                    y,
+                    width,
+                    height,
+                    SWP_NOACTIVATE | SWP_SHOWWINDOW,
+                )
+                .map_err(|error| format!("任务栏上方落位失败: {error}"))?;
                 // 覆盖模式由看护线程周期性压回最上层(点击任务栏会把它抬到信息条上面),
                 // 并在前台出现全屏应用时隐藏、退出后恢复
                 start_keep_top(hwnd);
@@ -342,8 +378,16 @@ pub fn detach(hwnd: HWND) -> Result<(), String> {
             if GetAncestor(hwnd, GA_PARENT) != GetDesktopWindow() {
                 return Err("从任务栏分离失败: SetParent 未生效".to_string());
             }
-            SetWindowPos(hwnd, Some(HWND_TOPMOST), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE)
-                .map_err(|error| format!("分离后恢复置顶失败: {error}"))?;
+            SetWindowPos(
+                hwnd,
+                Some(HWND_TOPMOST),
+                0,
+                0,
+                0,
+                0,
+                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
+            )
+            .map_err(|error| format!("分离后恢复置顶失败: {error}"))?;
         }
         // 若刚从全屏隐藏状态分离,直接恢复显示,避免窗口保持不可见
         if !IsWindowVisible(hwnd).as_bool() {

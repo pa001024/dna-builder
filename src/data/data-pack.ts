@@ -52,11 +52,14 @@ export interface DataPackInstallStatus {
     versions: DataPackVersionInfo[]
 }
 
+/** 数据包来源类型：自动（测速择优 + 兜底）/ 官方源（固定 OSS 主站）/ 镜像源（固定 R2，dobapp）/ 自定义源 */
+export type DataPackSourceKind = "auto" | "official" | "mirror" | "custom"
+
 export interface DataPackSourceInfo {
     versionsUrl: string
     baseUrl: string
-    sourceKind: "official" | "custom"
-    /** 候选基址列表（有序）：官方来源为 [OSS, R2] 两个并列官方地址，自定义来源只有用户填的一个 */
+    sourceKind: DataPackSourceKind
+    /** 候选基址列表（有序）：自动为 [快源, 另一端]，官方源为 [OSS]、镜像源为 [R2]，自定义来源只有用户填的一个 */
     baseUrls: string[]
     /** 与 baseUrls 一一对应的版本列表地址 */
     versionsUrls: string[]
@@ -72,14 +75,6 @@ const CONFIG_FILE = "config.json"
 const DEV_BASE_URL = "/mock/data-pack"
 const DATA_PACK_VERSIONS_FILE = "versions.json"
 const DEFAULT_CUSTOM_BASE_URL = DEV_BASE_URL
-
-/**
- * @description 取数据包默认基址（官方来源）。按测速选定的快源动态求值，不在模块加载时固定。
- * @returns 官方数据包基址
- */
-function getReleaseBaseUrl(): string {
-    return `${getActiveCdnBase()}/data-pack`
-}
 
 type DataPackState = {
     readyVersion: string | null
@@ -109,8 +104,13 @@ type BootstrapDataPackState = {
 
 type DataPackConfig = {
     baseUrl?: string
-    sourceKind?: "official" | "custom"
+    sourceKind?: DataPackSourceKind
+    /** 来源字段口径版本：≥2 表示 official 已是「固定官方源」；缺失视为旧版口径（official = 自动测速择优） */
+    sourceKindVersion?: number
 }
+
+/** 来源字段口径的当前版本，与 sourceKindVersion 配套 */
+const SOURCE_KIND_VERSION = 2
 
 const state: DataPackState = {
     readyVersion: null,
@@ -134,6 +134,9 @@ const bootstrapState: BootstrapDataPackState = {
 
 let installedVersionsCache: DataPackVersionInfo[] | null = null
 
+/** 旧版来源迁移标记：legacy official（实为自动测速择优）首次读到时尝试改写为 auto，成功后不再写盘 */
+let legacySourceKindMigrated = false
+
 /**
  * 异步解压 zip：fflate 把解压放到 Worker 内分片执行，主线程只等结果，
  * 供下载/导入数据包等大包场景使用，避免同步解压把进度条动画卡住。
@@ -154,14 +157,6 @@ export function unzipAsync(bytes: Uint8Array): Promise<Unzipped> {
 }
 
 /**
- * 获取默认数据包基址。
- * @returns 基础地址
- */
-function getDefaultBaseUrl(): string {
-    return getReleaseBaseUrl()
-}
-
-/**
  * 读取配置。
  * @returns 配置对象
  */
@@ -173,7 +168,21 @@ async function readConfig(): Promise<DataPackConfig> {
     try {
         const root = await getPackRootDirectory()
         const raw = await readTextFile(root, CONFIG_FILE)
-        return raw ? (JSON.parse(raw) as DataPackConfig) : {}
+        const config = raw ? (JSON.parse(raw) as DataPackConfig) : {}
+        // 旧版配置（无版本戳）把「自动测速择优」记作 official；official 现语义为固定官方源，旧值统一按 auto 处理
+        if (config.sourceKind === "official" && !config.sourceKindVersion) {
+            config.sourceKind = "auto"
+            if (!legacySourceKindMigrated) {
+                legacySourceKindMigrated = true
+                try {
+                    await writeConfig(config)
+                } catch {
+                    // 迁移写盘失败不影响本次读取；存储只读等场景下每次读取都会在内存里按 auto 处理
+                    legacySourceKindMigrated = false
+                }
+            }
+        }
+        return config
     } catch {
         return {}
     }
@@ -185,7 +194,8 @@ async function readConfig(): Promise<DataPackConfig> {
  */
 async function writeConfig(config: DataPackConfig): Promise<void> {
     const root = await getPackRootDirectory()
-    await writeTextFile(root, CONFIG_FILE, JSON.stringify(config, null, 2))
+    const stamped = { ...config, sourceKindVersion: SOURCE_KIND_VERSION }
+    await writeTextFile(root, CONFIG_FILE, JSON.stringify(stamped, null, 2))
 }
 
 /**
@@ -194,11 +204,20 @@ async function writeConfig(config: DataPackConfig): Promise<void> {
  */
 async function getBaseUrl(): Promise<string> {
     const config = await readConfig()
-    if ((config.sourceKind || "official") === "custom") {
+    const sourceKind = config.sourceKind || "auto"
+    if (sourceKind === "custom") {
         return (config.baseUrl || DEFAULT_CUSTOM_BASE_URL).replace(/\/$/, "")
     }
 
-    return getDefaultBaseUrl()
+    // 官方源固定 OSS 主站，镜像源固定 R2（dobapp），自动挡沿用测速选定的快源
+    const urls = resolveCdnUrls("data-pack")
+    if (sourceKind === "official") {
+        return urls.primary
+    }
+    if (sourceKind === "mirror") {
+        return urls.backup
+    }
+    return `${getActiveCdnBase()}/data-pack`
 }
 
 /**
@@ -221,13 +240,21 @@ function resolveAbsoluteBaseUrl(baseUrl: string): string {
  */
 export async function getDataPackSourceInfo(): Promise<DataPackSourceInfo> {
     const config = await readConfig()
-    const sourceKind = config.sourceKind || "official"
+    const sourceKind = config.sourceKind || "auto"
     const baseUrl = resolveAbsoluteBaseUrl(await getBaseUrl())
-    // 官方来源是「OSS + R2」两个并列的官方地址：测速选定的快源在前，另一端作故障兜底；
-    // 自定义来源只有用户填的那一个
+    // 自动挡：测速选定的快源在前，另一端作故障兜底；官方源固定 OSS、镜像源固定 R2，
+    // 自定义来源只有用户填的那一个。候选列表保留数组形态，下载链路按序尝试
     const urls = resolveCdnUrls("data-pack")
-    const preferred = getActiveCdnBase() === urls.backup ? urls.backup : urls.primary
-    const baseUrls = sourceKind === "official" ? [preferred, preferred === urls.primary ? urls.backup : urls.primary] : [baseUrl]
+    let baseUrls: string[]
+    if (sourceKind === "custom") {
+        baseUrls = [baseUrl]
+    } else if (sourceKind === "official") {
+        baseUrls = [urls.primary]
+    } else if (sourceKind === "mirror") {
+        baseUrls = [urls.backup]
+    } else {
+        baseUrls = getActiveCdnBase() === urls.backup ? [urls.backup, urls.primary] : [urls.primary, urls.backup]
+    }
     const versionsUrls = baseUrls.map(item => new URL(DATA_PACK_VERSIONS_FILE, `${item}/`).toString())
     return {
         baseUrl,
@@ -263,7 +290,7 @@ export async function setDataPackSourceBaseUrl(baseUrl: string): Promise<void> {
  * 设置数据包来源类型。
  * @param sourceKind 来源类型
  */
-export async function setDataPackSourceKind(sourceKind: "official" | "custom"): Promise<void> {
+export async function setDataPackSourceKind(sourceKind: DataPackSourceKind): Promise<void> {
     const config = await readConfig()
     await writeConfig({
         ...config,
@@ -697,7 +724,7 @@ async function fetchRemoteDataPackVersions(forceRefresh = false): Promise<DataPa
 
 /**
  * 读取数据包版本列表：按候选源顺序依次尝试，单个源内浏览器 fetch 失败再回退 tauriFetch。
- * 官方来源的候选源是 [OSS, R2] 两个并列官方地址，因此任一站缺该文件都不影响读取。
+ * 自动挡的候选源是 [快源, 另一端] 两个内置地址，因此任一站缺该文件都不影响读取。
  * @param versionsUrls 候选源版本列表地址（有序）
  * @returns 版本列表
  * @throws 所有来源均不可用时抛出最后一个错误
@@ -1048,7 +1075,7 @@ export async function downloadDataPack(version?: string, onProgress?: (progress:
     let bytes = await tryDownloadDataPackViaDiff(remote.version, remote.packageFile)
     if (!bytes) {
         const source = await getDataPackSourceInfo()
-        // 整包同样按候选源顺序尝试（官方来源为 OSS + R2 两个官方地址）
+        // 整包同样按候选源顺序尝试（自动挡为快源 + 另一端两个内置地址）
         let lastError: unknown = null
         for (const baseUrl of source.baseUrls) {
             try {

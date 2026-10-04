@@ -22,7 +22,10 @@ pub async fn run_script_cli(
 }
 
 #[tauri::command]
-pub async fn run_script(script_path: String, app_handle: tauri::AppHandle) -> Result<String, String> {
+pub async fn run_script(
+    script_path: String,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
     use crate::submodules::script::run_script_file;
     match run_script_file(script_path, app_handle).await {
         Ok(result) => Ok(result),
@@ -119,8 +122,8 @@ pub fn get_script_runtime_info() -> Result<ScriptRuntimeInfo, String> {
 
 /// 获取脚本页 MCP 服务当前状态。
 #[tauri::command]
-pub fn get_script_mcp_server_state() -> Result<crate::submodules::script_mcp::ScriptMcpServerState, String>
-{
+pub fn get_script_mcp_server_state()
+-> Result<crate::submodules::script_mcp::ScriptMcpServerState, String> {
     Ok(crate::submodules::script_mcp::get_script_mcp_server_state())
 }
 
@@ -181,8 +184,8 @@ pub fn sync_script_hotkey_bindings(
 
 /// 获取后端当前生效的热键绑定。
 #[tauri::command]
-pub fn get_script_hotkey_bindings(
-) -> Result<Vec<crate::submodules::hotkey::ScriptHotkeyBinding>, String> {
+pub fn get_script_hotkey_bindings()
+-> Result<Vec<crate::submodules::hotkey::ScriptHotkeyBinding>, String> {
     use crate::submodules::hotkey::get_script_hotkey_bindings;
     Ok(get_script_hotkey_bindings())
 }

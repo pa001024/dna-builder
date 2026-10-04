@@ -3,16 +3,23 @@ import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
 import type { FloatWindowConfig } from "@/api/app"
 import { floatWindowDisable, floatWindowSet, floatWindowState, MATERIALS } from "@/api/app"
+import { LAN_SYNC_HTTPS_PORT } from "@/api/lanSync"
 import type { IconTypes } from "@/components/Icon.vue"
 import { useScrollSpy } from "@/composables/useScrollSpy"
 import { useSearchParam } from "@/composables/useSearchParam"
-import { clearAllDataPackStorage, getInstalledDataPackVersions, getMergedDataPackVersions } from "@/data/data-pack"
+import {
+    clearAllDataPackStorage,
+    type DataPackSourceKind,
+    getInstalledDataPackVersions,
+    getMergedDataPackVersions,
+} from "@/data/data-pack"
 import { deleteImgsCache, imgsDownloadState } from "@/data/imgs-runtime"
 import { closeSafeMode, openSafeMode } from "@/data/versionGate"
 import { env } from "@/env"
 import { i18nLanguages } from "@/i18n"
 import { useDataPackStore } from "@/store/dataPack"
 import { db } from "@/store/db"
+import { useLanSyncStore } from "@/store/lanSync"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { buildCdnUrl, resolveCdnUrls } from "@/utils/cdn"
@@ -23,17 +30,46 @@ import { DARK_THEMES, LIGHT_THEMES } from "@/utils/themes"
 const setting = useSettingStore()
 const ui = useUIStore()
 const dataPack = useDataPackStore()
+const lanSync = useLanSyncStore()
+
+/**
+ * 局域网同步开关的点击处理：未勾选可信网络确认时直接回退开关视觉状态。
+ *
+ * 开关的 :checked 绑定的是 running（响应式），而拒绝开启时不会触发任何状态变化，
+ * Vue 不会重渲染，必须手动把 DOM 回退，否则开关看起来仍是被打开的。
+ * @param event checkbox change 事件
+ */
+async function onLanSyncToggle(event: Event) {
+    const input = event.target as HTMLInputElement
+    const on = input.checked
+    if (on && !lanSync.trustedConfirmed) {
+        input.checked = false
+        ui.showErrorMessage(t("setting.lanSyncTrustedRequired"))
+        return
+    }
+    await lanSync.toggle(on)
+}
 // 目录文案随语言切换刷新，必须用 i18next-vue 的响应式 t（i18next 的裸 t 不参与依赖收集）
 const { t } = useTranslation()
 const isUpdatingLaunchAtStartup = ref(false)
 const safeModeQuizOpen = ref(false)
 const dataPackFileInput = ref<HTMLInputElement | null>(null)
 const dataPackSourceBaseUrl = ref("")
-const dataPackSourceKind = ref<"official" | "custom">("custom")
-/** 官方来源的两个并列地址（OSS / R2），读取时依次尝试，界面上只读展示 */
+const dataPackSourceKind = ref<DataPackSourceKind>("auto")
+/** 内置数据包地址：primary 为官方源（OSS 主站），backup 为镜像源（R2，dobapp） */
 const OFFICIAL_DATA_PACK_BASE_URLS = resolveCdnUrls("data-pack")
-/** 官方来源展示用的主地址（测速选定的快源） */
+/** 自动挡展示用的主地址（测速选定的快源） */
 const CDN_DATA_PACK_BASE_URL = computed(() => buildCdnUrl("data-pack"))
+/** 内置来源（自动 / 官方 / 镜像）只读展示的地址：自动挡并列展示快源与兜底两端 */
+const builtinSourceDisplay = computed(() => {
+    if (dataPackSourceKind.value === "official") {
+        return OFFICIAL_DATA_PACK_BASE_URLS.primary
+    }
+    if (dataPackSourceKind.value === "mirror") {
+        return OFFICIAL_DATA_PACK_BASE_URLS.backup
+    }
+    return `${OFFICIAL_DATA_PACK_BASE_URLS.primary} · ${OFFICIAL_DATA_PACK_BASE_URLS.backup}`
+})
 const versionDragUrls = ref<Record<string, string>>({})
 const sourceSaveTimer = ref<number | null>(null)
 const isApplyingSourceUpdate = ref(false)
@@ -259,7 +295,7 @@ watch(
 watch(
     () => dataPack.sourceInfo?.sourceKind,
     v => {
-        dataPackSourceKind.value = v || "custom"
+        dataPackSourceKind.value = v || "auto"
     },
     { immediate: true }
 )
@@ -267,9 +303,18 @@ watch(
 watch(
     () => dataPackSourceKind.value,
     kind => {
-        if (kind === "official") {
+        if (kind === "auto") {
             dataPackSourceBaseUrl.value = CDN_DATA_PACK_BASE_URL.value
-        } else if (!dataPackSourceBaseUrl.value || dataPackSourceBaseUrl.value === CDN_DATA_PACK_BASE_URL.value) {
+        } else if (kind === "official") {
+            dataPackSourceBaseUrl.value = OFFICIAL_DATA_PACK_BASE_URLS.primary
+        } else if (kind === "mirror") {
+            dataPackSourceBaseUrl.value = OFFICIAL_DATA_PACK_BASE_URLS.backup
+        } else if (
+            !dataPackSourceBaseUrl.value ||
+            dataPackSourceBaseUrl.value === CDN_DATA_PACK_BASE_URL.value ||
+            dataPackSourceBaseUrl.value === OFFICIAL_DATA_PACK_BASE_URLS.primary ||
+            dataPackSourceBaseUrl.value === OFFICIAL_DATA_PACK_BASE_URLS.backup
+        ) {
             dataPackSourceBaseUrl.value = "/mock/data-pack"
         }
     },
@@ -287,7 +332,7 @@ watch(
             window.clearTimeout(sourceSaveTimer.value)
         }
 
-        if (dataPackSourceKind.value === "official") {
+        if (dataPackSourceKind.value !== "custom") {
             return
         }
 
@@ -594,13 +639,17 @@ async function saveSourceBaseUrl() {
     }
 }
 
-async function saveSourceKind(kind: "official" | "custom") {
+async function saveSourceKind(kind: DataPackSourceKind) {
     isApplyingSourceUpdate.value = true
     dataPackSourceKind.value = kind
     try {
         await dataPack.setSourceKind(kind)
-        if (kind === "official") {
+        if (kind === "auto") {
             dataPackSourceBaseUrl.value = CDN_DATA_PACK_BASE_URL.value
+        } else if (kind === "official") {
+            dataPackSourceBaseUrl.value = OFFICIAL_DATA_PACK_BASE_URLS.primary
+        } else if (kind === "mirror") {
+            dataPackSourceBaseUrl.value = OFFICIAL_DATA_PACK_BASE_URLS.backup
         }
     } finally {
         isApplyingSourceUpdate.value = false
@@ -1166,6 +1215,116 @@ onUnmounted(() => {
                     <ScreenBarSetting />
                 </section>
 
+                <section v-if="env.isApp" data-scroll-section="lan-sync" class="flex flex-col">
+                    <SectionHeader no-animate compact :title="$t('setting.lanSync')" />
+                    <div
+                        class="animate-ef-rise motion-reduce:animate-none rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+                        :style="{ animationDelay: '0.03s' }"
+                    >
+                        <div class="flex flex-col gap-2">
+                            <!-- 主开关 -->
+                            <div
+                                class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                            >
+                                <span class="label-text">
+                                    {{ $t("setting.lanSync") }}
+                                    <div class="text-xs text-base-content/50">{{ $t("setting.lanSyncDesc") }}</div>
+                                    <div v-if="lanSync.lastError" class="mt-0.5 text-xs text-error">
+                                        {{ lanSync.lastError }}
+                                    </div>
+                                </span>
+                                <div class="flex shrink-0 items-center gap-2">
+                                    <span v-if="lanSync.busy" class="loading loading-spinner loading-xs" />
+                                    <span
+                                        v-else
+                                        class="text-xs"
+                                        :class="lanSync.running ? 'text-success' : 'text-base-content/40'"
+                                    >
+                                        {{
+                                            lanSync.running
+                                                ? $t("setting.lanSyncRunning")
+                                                : $t("setting.lanSyncStopped")
+                                        }}
+                                    </span>
+                                    <input
+                                        type="checkbox"
+                                        class="toggle toggle-secondary"
+                                        :checked="lanSync.running"
+                                        :disabled="lanSync.busy"
+                                        @change="onLanSyncToggle"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- 可信网络确认 -->
+                            <label
+                                class="flex cursor-pointer items-center gap-2.5 rounded-xs border px-2.5 py-2 transition-colors"
+                                :class="
+                                    lanSync.trustedConfirmed
+                                        ? 'border-base-content/10 bg-base-content/3'
+                                        : 'border-warning/40 bg-warning/5'
+                                "
+                            >
+                                <input
+                                    v-model="lanSync.trustedConfirmed"
+                                    type="checkbox"
+                                    class="checkbox checkbox-secondary checkbox-sm"
+                                    @change="lanSync.setTrustedConfirmed(($event.target as HTMLInputElement).checked)"
+                                />
+                                <span class="text-xs leading-relaxed text-base-content/70">
+                                    {{ $t("setting.lanSyncTrustedConfirm") }}
+                                </span>
+                            </label>
+
+                            <!-- 运行中面板：地址 / 已配对设备 -->
+                            <template v-if="lanSync.running && lanSync.status">
+                                <div
+                                    class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="label-text">{{ $t("setting.lanSyncAddress") }}</span>
+                                    <span class="font-mono text-xs text-base-content/70">
+                                        https://{{ lanSync.status.address }}:{{ lanSync.status.httpsPort || LAN_SYNC_HTTPS_PORT }}
+                                    </span>
+                                </div>
+
+                                <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                                    <div class="label-text mb-1.5">{{ $t("setting.lanSyncDevices") }}</div>
+                                    <p
+                                        v-if="lanSync.status.devices.length === 0"
+                                        class="text-xs text-base-content/50"
+                                    >
+                                        {{ $t("setting.lanSyncNoDevices") }}
+                                    </p>
+                                    <div v-else class="flex flex-col gap-1">
+                                        <div
+                                            v-for="device in lanSync.status.devices"
+                                            :key="device.token"
+                                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-100/60 px-2 py-1.5"
+                                        >
+                                            <span class="flex min-w-0 items-center gap-2 text-xs">
+                                                <Icon icon="ri:login-box-line" class="size-3.5 shrink-0 text-base-content/50" />
+                                                <span class="truncate font-medium">{{ device.deviceName }}</span>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                class="inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-xs text-error/70 transition-colors hover:bg-error/10 hover:text-error active:scale-[0.97]"
+                                                :title="$t('setting.lanSyncRemoveDevice')"
+                                                @click="lanSync.removeDevice(device.token)"
+                                            >
+                                                <Icon icon="ri:delete-bin-line" class="size-3.5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class="mt-1.5 text-xs text-base-content/50">
+                                        {{ $t("setting.lanSyncPairTip") }}
+                                        {{ $t("setting.lanSyncHint") }}
+                                    </p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </section>
+
                 <section data-scroll-section="data-pack" class="flex flex-col">
                     <SectionHeader no-animate compact :title="$t('setting.dataPackManagement')" />
                     <div
@@ -1177,9 +1336,11 @@ onUnmounted(() => {
                                 <Select
                                     v-model="dataPackSourceKind"
                                     class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
-                                    @update:model-value="saveSourceKind($event as 'official' | 'custom')"
+                                    @update:model-value="saveSourceKind($event as DataPackSourceKind)"
                                 >
+                                    <SelectItem value="auto">{{ $t("setting.autoSource") }}</SelectItem>
                                     <SelectItem value="official">{{ $t("setting.officialSource") }}</SelectItem>
+                                    <SelectItem value="mirror">{{ $t("setting.mirrorSource") }}</SelectItem>
                                     <SelectItem value="custom">{{ $t("setting.customSource") }}</SelectItem>
                                 </Select>
                                 <input
@@ -1192,12 +1353,10 @@ onUnmounted(() => {
                                 />
                                 <div
                                     v-else
-                                    class="min-w-40 flex-1 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-[13px] text-base-content/70"
-                                    :title="`${OFFICIAL_DATA_PACK_BASE_URLS.primary}\n${OFFICIAL_DATA_PACK_BASE_URLS.backup}`"
+                                    class="min-w-40 flex-1 truncate rounded-none border-b border-base-content/20 px-0.5 pb-1 text-[13px] text-base-content/70"
+                                    :title="builtinSourceDisplay"
                                 >
-                                    {{ OFFICIAL_DATA_PACK_BASE_URLS.primary }}
-                                    <span class="text-base-content/40"> · </span>
-                                    {{ OFFICIAL_DATA_PACK_BASE_URLS.backup }}
+                                    {{ builtinSourceDisplay }}
                                 </div>
                                 <button class="btn btn-sm" @click="importDataPack">{{ $t("achievement.import") }}</button>
                                 <button class="btn btn-sm btn-error" :disabled="isClearingDataPackStorage" @click="clearDataPackStorage">

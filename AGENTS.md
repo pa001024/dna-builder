@@ -4,6 +4,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 
 本文件只做**索引**：命令、约定与硬性规则留在本页，机制细节一律放独立文档，避免单文件无限膨胀。
 新增说明请写进 `.agents/docs/` 并在下方登记一行，不要往本页堆内容。
+**给外部 agent 的 Spec（协议 / 实现 spec）一律放 `.docs/` 文件夹（git 已忽略，不进版本库）。**
 
 ## 文档索引
 
@@ -17,6 +18,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
 
 - 技能：`.agents/skills/*/SKILL.md`（admin-management-page、bun-webview-test、db-style、fmodel-unpack、i18n、perf-hotspot-profiling、ue4-pak-mod）
+- Spec 文档：`.docs/`（git 已忽略，面向外部 agent 的协议 / 实现 spec）
 - 业务与设计文档：`docs/`
 
 ## Build / Lint / Test Commands
