@@ -8,6 +8,7 @@ import {
     normalizeSessionId,
     parseUpstreamError,
     resolveClientIp,
+    resolveExplicitSessionId,
     resolveLogCostMicros,
     resolveSessionId,
     stringifyErrorRaw,
@@ -74,6 +75,21 @@ describe("resolveSessionId", () => {
     it("没有 user 消息时也能得到稳定的匿名会话", () => {
         const messages = [{ role: "system", content: "只有系统提示" }]
         expect(resolveSessionId({ userId: null, messages })).toBe(resolveSessionId({ userId: null, messages }))
+    })
+})
+
+describe("resolveExplicitSessionId", () => {
+    it("采信合法的显式会话 id", () => {
+        expect(resolveExplicitSessionId(makeHeaders({ "x-ai-session-id": "s-0a1b2c3d-4e5f" }))).toBe("s-0a1b2c3d-4e5f")
+        expect(resolveExplicitSessionId(makeHeaders({ "x-ai-session-id": "  conv-1  " }))).toBe("conv-1")
+    })
+
+    it("未传或非法时返回 null（退回指纹推导）", () => {
+        expect(resolveExplicitSessionId(makeHeaders())).toBeNull()
+        expect(resolveExplicitSessionId(makeHeaders({ "x-ai-session-id": "" }))).toBeNull()
+        // 会话 id 会作为日志目录名，路径类字符必须拒绝
+        expect(resolveExplicitSessionId(makeHeaders({ "x-ai-session-id": "../evil" }))).toBeNull()
+        expect(resolveExplicitSessionId(makeHeaders({ "x-ai-session-id": "x".repeat(65) }))).toBeNull()
     })
 })
 

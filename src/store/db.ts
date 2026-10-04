@@ -114,6 +114,11 @@ export const STANDALONE_ENTITY = "独立"
 export interface Conversation {
     id: number
     name: string
+    /**
+     * AI 调用日志的显式会话 id：随请求头发给服务端代理，日志按它归会话。
+     * 首次提问时生成并随会话落库；缺省表示还没跑过 AI（服务端退回指纹推导）。
+     */
+    aiSessionId?: string
     createdAt: number
     updatedAt: number
 }
@@ -135,6 +140,8 @@ export interface MessageToolTrace {
     args: Record<string, unknown>
     /** 结果摘要 */
     summary: string
+    /** 结果原文（内核截断后保存，供界面点击展开；旧消息没有此字段） */
+    result?: string
     /** 执行状态 */
     status: "running" | "done" | "error"
 }
@@ -248,6 +255,11 @@ export interface BuildAgentChat {
     id: string
     charName: string
     messages: BuildAgentChatMessage[]
+    /**
+     * AI 调用日志的显式会话 id：随请求头发给服务端代理，日志按它归会话。
+     * 首次提问时生成并随会话落库；缺省表示还没跑过 AI（服务端退回指纹推导）。
+     */
+    aiSessionId?: string
     updatedAt: number
 }
 

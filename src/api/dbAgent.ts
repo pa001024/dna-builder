@@ -17,6 +17,7 @@ import {
     type AgentHistoryMessage,
     AgentKernel,
     type AgentReasoningSegment,
+    type AgentRunOptions,
     type AgentRunResult,
     type AgentToolTrace,
 } from "@/api/agent/kernel"
@@ -137,10 +138,15 @@ export class DBAgent {
      * 之后由 answerAsk() / skipAsk() 从断点继续同一轮问答。
      * @param history 会话历史（不含本轮回复）
      * @param callbacks 流式与工具回调
+     * @param options 运行选项（显式会话 id 等）
      * @returns 最终回复与工具调用记录；挂起时附带 pendingAsk
      */
-    public async run(history: readonly DBAgentHistoryMessage[], callbacks: DBAgentCallbacks = {}): Promise<DBAgentRunResult> {
-        return this.kernel.run(history, callbacks)
+    public async run(
+        history: readonly DBAgentHistoryMessage[],
+        callbacks: DBAgentCallbacks = {},
+        options: AgentRunOptions = {}
+    ): Promise<DBAgentRunResult> {
+        return this.kernel.run(history, callbacks, options)
     }
 
     /**

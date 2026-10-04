@@ -90,6 +90,8 @@ const expandedGroupKeys = ref<string[]>([])
 const expandedProcessIds = ref<number[]>([])
 /** 展开思考内容的键集合：`${消息 id}:${段落序号}`，每条思考各自独立折叠 */
 const expandedReasoningKeys = ref<string[]>([])
+/** 展开了详情的工具调用键集合：`${消息 id}:${trace id}`，点击工具行查看完整参数与结果 */
+const expandedToolKeys = ref<string[]>([])
 /** 刚刚复制成功的消息 id（用于把复制图标临时换成对勾做反馈） */
 const copiedId = ref(0)
 /** 复制反馈的复位定时器 */
@@ -419,6 +421,33 @@ function reasoningKey(messageId: number, index: number) {
 }
 
 /**
+ * 工具调用详情的折叠键：消息 id + trace id，保证每次调用独立展开/收起。
+ * @param messageId 消息 id
+ * @param traceId 工具调用 id
+ */
+function toolDetailKey(messageId: number, traceId: string) {
+    return `${messageId}:${traceId}`
+}
+
+/**
+ * 切换某个工具调用结果的展开状态（无结果原文的调用不可展开）。
+ * @param messageId 消息 id
+ * @param traceId 工具调用 id
+ * @param hasResult 该调用是否带结果原文
+ */
+function toggleToolDetail(messageId: number, traceId: string, hasResult: boolean) {
+    if (!hasResult) {
+        return
+    }
+
+    const key = toolDetailKey(messageId, traceId)
+
+    expandedToolKeys.value = expandedToolKeys.value.includes(key)
+        ? expandedToolKeys.value.filter(item => item !== key)
+        : [...expandedToolKeys.value, key]
+}
+
+/**
  * 切换某段思考的展开状态。
  * @param messageId 消息 id
  * @param index 段落序号
@@ -604,6 +633,15 @@ function formatToolArgs(trace: AgentChatToolTrace): string {
         .filter(([, value]) => value !== undefined && value !== null && value !== "")
         .map(([key, value]) => `${key}=${formatArgValue(value)}`)
         .join(" ")
+}
+
+/**
+ * 工具调用参数的美化 JSON（详情展开后展示完整参数，替代行内截断的摘要）。
+ * @param trace 工具调用记录
+ * @returns 缩进后的 JSON 文本；无参数时为空串
+ */
+function formatToolJson(trace: AgentChatToolTrace): string {
+    return trace.args && Object.keys(trace.args).length ? JSON.stringify(trace.args, null, 2) : ""
 }
 
 /**
@@ -835,7 +873,7 @@ onBeforeUnmount(() => {
 
                                             <p
                                                 v-if="expandedReasoningKeys.includes(reasoningKey(message.id, item.index ?? 0))"
-                                                class="border-l border-base-content/12 pl-2 text-[11px] leading-5 text-base-content/45 whitespace-pre-wrap"
+                                                class="db-selectable border-l border-base-content/12 pl-2 text-[11px] leading-5 text-base-content/45 whitespace-pre-wrap"
                                             >
                                                 {{ item.text }}
                                             </p>
@@ -895,18 +933,60 @@ onBeforeUnmount(() => {
                                                 <li
                                                     v-for="trace in itemTraces(item)"
                                                     :key="trace.id"
-                                                    class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 text-[11px] leading-5"
+                                                    class="flex flex-col"
                                                 >
-                                                    <Icon
-                                                        :icon="traceIcon(trace.status)"
-                                                        class="h-3 w-3 shrink-0 translate-y-0.5"
-                                                        :class="traceIconClass(trace.status)"
-                                                    />
-                                                    <span class="shrink-0 text-base-content/55">{{ trace.label }}</span>
-                                                    <span v-if="formatToolArgs(trace)" class="min-w-0 break-all text-base-content/35">
-                                                        / {{ formatToolArgs(trace) }}
-                                                    </span>
-                                                    <span v-if="trace.summary" class="text-base-content/30">· {{ trace.summary }}</span>
+                                                    <!--
+                                                      带结果原文（后台日志回放 / 新版落库）时整行可点击展开；
+                                                      未展开时参数单行截断，展开后看完整参数与结果原文。
+                                                      实时旧数据没有结果原文，行保持纯展示
+                                                    -->
+                                                    <component
+                                                        :is="trace.result ? 'button' : 'div'"
+                                                        :type="trace.result ? 'button' : undefined"
+                                                        class="flex w-full items-baseline gap-1.5 text-left text-[11px] leading-5"
+                                                        :class="
+                                                            trace.result
+                                                                ? 'cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+                                                                : ''
+                                                        "
+                                                        :aria-expanded="
+                                                            trace.result ? expandedToolKeys.includes(toolDetailKey(message.id, trace.id)) : undefined
+                                                        "
+                                                        @click="toggleToolDetail(message.id, trace.id, Boolean(trace.result))"
+                                                    >
+                                                        <Icon
+                                                            :icon="traceIcon(trace.status)"
+                                                            class="h-3 w-3 shrink-0 translate-y-0.5"
+                                                            :class="traceIconClass(trace.status)"
+                                                        />
+                                                        <span class="shrink-0 text-base-content/55">{{ trace.label }}</span>
+                                                        <span class="min-w-0 flex-1 truncate">
+                                                            <span v-if="formatToolArgs(trace)" class="text-base-content/35">/ {{ formatToolArgs(trace) }} </span>
+                                                            <span v-if="trace.summary" class="text-base-content/30">· {{ trace.summary }}</span>
+                                                        </span>
+                                                        <Icon
+                                                            v-if="trace.result"
+                                                            icon="ri:arrow-down-s-line"
+                                                            class="h-3 w-3 shrink-0 self-center text-base-content/30 transition-transform duration-200"
+                                                            :class="expandedToolKeys.includes(toolDetailKey(message.id, trace.id)) ? 'rotate-180' : ''"
+                                                        />
+                                                    </component>
+
+                                                    <!-- 展开后的完整参数与结果原文（无则不渲染对应段）；db-selectable 允许选中复制 -->
+                                                    <div
+                                                        v-if="trace.result && expandedToolKeys.includes(toolDetailKey(message.id, trace.id))"
+                                                        class="db-selectable mt-0.5 flex flex-col gap-1 border-l border-base-content/12 pl-2.5"
+                                                    >
+                                                        <pre
+                                                            v-if="formatToolJson(trace)"
+                                                            class="font-mono text-[11px] leading-5 whitespace-pre-wrap wrap-break-word text-base-content/60"
+                                                            >{{ formatToolJson(trace) }}</pre
+                                                        >
+                                                        <pre
+                                                            class="max-h-48 overflow-auto border-l border-primary/40 pl-2 font-mono text-[11px] leading-5 whitespace-pre-wrap wrap-break-word text-base-content/45"
+                                                            >{{ trace.result }}</pre
+                                                        >
+                                                    </div>
                                                 </li>
                                             </ul>
                                         </div>
@@ -973,6 +1053,11 @@ onBeforeUnmount(() => {
                                     <Icon :icon="copiedId === message.id ? 'ri:check-line' : 'ri:file-copy-line'" class="h-3.5 w-3.5" />
                                 </button>
                             </div>
+
+                            <!-- 元信息小字（后台日志回放用）：token 数 / 费用 / 耗时 / 失败原因，前端实时对话不渲染 -->
+                            <p v-if="message.metaNote" class="font-mono text-[10px] leading-4 text-base-content/35">
+                                {{ message.metaNote }}
+                            </p>
                         </div>
                     </li>
                 </ul>

@@ -12,6 +12,7 @@ import {
     extractToolNames,
     extractUpstreamCompletionId,
     parseUpstreamError,
+    resolveExplicitSessionId,
     resolveSessionId,
     stringifyErrorRaw,
 } from "./ai-log-format"
@@ -248,8 +249,9 @@ export const aiPlugin = () =>
                 const peak = isPeakPricing(startedAt)
                 const user = resolveUser(headers)
                 const clientMessages = (body.messages ?? []) as unknown[]
-                // 会话归并由服务端推导：上游无状态，不返回任何会话级标识
-                const sessionId = resolveSessionId({ userId: user?.id, messages: clientMessages })
+                // 会话归并：客户端显式传了合法会话 id 就直接采用，否则退回指纹推导（连续相同提问会被并进同一会话）
+                const sessionId =
+                    resolveExplicitSessionId(request.headers) ?? resolveSessionId({ userId: user?.id, messages: clientMessages })
 
                 // 调用日志：下面每个出口（含未登录、额度不足、上游错误、流被中断）都会落一条记录
                 const logger = createAiCallLogger({
@@ -512,8 +514,9 @@ export const aiPlugin = () =>
                 const peak = isPeakPricing(startedAt)
                 const user = resolveUser(headers)
                 const clientMessages = (body.messages ?? []) as unknown[]
-                // 会话归并由服务端推导：上游无状态，不返回任何会话级标识
-                const sessionId = resolveSessionId({ userId: user?.id, messages: clientMessages })
+                // 会话归并：客户端显式传了合法会话 id 就直接采用，否则退回指纹推导（连续相同提问会被并进同一会话）
+                const sessionId =
+                    resolveExplicitSessionId(request.headers) ?? resolveSessionId({ userId: user?.id, messages: clientMessages })
 
                 const logger = createAiCallLogger({
                     requestId: randomUUID(),

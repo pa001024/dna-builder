@@ -32,6 +32,8 @@ export interface AgentChatToolTrace {
     args: Record<string, unknown>
     summary: string
     status: "running" | "done" | "error"
+    /** 工具结果原文（仅后台日志回放会填，前端实时对话只落摘要） */
+    result?: string
 }
 
 /** Agent 回复中的一段思考，附带该段之后发起的工具调用 id */
@@ -68,6 +70,11 @@ export interface AgentChatMessage {
     reasonings?: AgentChatReasoning[]
     processMs?: number
     pendingAsk?: AgentChatPendingAsk
+    /**
+     * 附在消息下方的小字元信息（后台日志回放用）。
+     * 前端实时对话不填，渲染层据此决定是否多渲染一行 token 数 / 费用等。
+     */
+    metaNote?: string
     createdAt: number
     renderedContent?: string
     renderedContentSource?: string

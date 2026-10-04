@@ -14,13 +14,17 @@ import { beijingDayKey, computeCostMicros, createMessagesUsageAccumulator, norma
  * 只记对话内容与工具名，不记 `tools` 的函数 schema：schema 由客户端固定且每轮重复下发，
  * 逐轮落盘只会把日志撑大几十倍，排查价值却为零。
  *
- * 会话归并由服务端自己推导（`resolveSessionId`）：上游是无状态的，不返回任何会话级标识。
+ * 会话归并优先采用客户端显式传入的会话 id（请求头 `x-ai-session-id`，前端为每个会话生成）；
+ * 未传或非法时退回服务端推导（`resolveSessionId`）：上游是无状态的，不返回任何会话级标识。
  * 上游返回的两个 id 都是**请求级**的，只作对账用，不能拿来分会话——
  * `x-ds-trace-id` 每次请求都不同，补全 `id` 连同一请求重发也不同。
  */
 
 /** 上游追踪 id 响应头：DeepSeek 用它串联一次调用链，找客服排查时要的就是这个值。 */
 export const AI_LOG_UPSTREAM_TRACE_HEADER = "x-ds-trace-id"
+
+/** 客户端显式会话 id 的请求头：前端为每个会话生成随机 id 传来，优先于指纹推导。 */
+export const AI_LOG_SESSION_HEADER = "x-ai-session-id"
 
 /** 会话指纹 id 的前缀，用于与上游的各类 id 区分开。 */
 const FINGERPRINT_PREFIX = "fp-"
@@ -346,6 +350,20 @@ export function resolveSessionId(params: { userId?: string | null; messages: rea
         .update(`${params.userId ?? "anonymous"}\u0000${anchor}`)
         .digest("hex")
     return `${FINGERPRINT_PREFIX}${digest.slice(0, FINGERPRINT_HEX_LENGTH)}`
+}
+
+/**
+ * @description 取客户端显式传入的会话 id（请求头 `x-ai-session-id`）。
+ *
+ * 指纹推导会把「连续两次相同的提问」并进同一个会话（锚点相同），
+ * 前端因此为每个会话生成随机 id 显式传来；只在通过字符集校验时采信，
+ * 非法值一律丢弃退回指纹，避免路径注入（会话 id 会作为日志目录名）。
+ * @param headers 请求头集合。
+ * @returns 合法的显式会话 id；未传或非法时为 null。
+ */
+export function resolveExplicitSessionId(headers: { get(name: string): string | null }): string | null {
+    const raw = (headers.get(AI_LOG_SESSION_HEADER) ?? "").trim()
+    return SESSION_ID_PATTERN.test(raw) ? raw : null
 }
 
 /**

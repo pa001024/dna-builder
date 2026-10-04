@@ -40,6 +40,8 @@ export interface AgentToolTrace {
     args: Record<string, unknown>
     /** 结果摘要（界面展示用，非完整结果） */
     summary: string
+    /** 结果原文（截断保存，供界面点击展开；只进展示与落库，不参与模型回灌） */
+    result?: string
     /** 执行状态 */
     status: "running" | "done" | "error"
 }
@@ -89,6 +91,15 @@ export interface AgentPendingAsk<TPayload> {
     toolCallId: string
     /** 工具给出的挂起载荷 */
     payload: TPayload
+}
+
+/** Agent 单轮运行选项。 */
+export interface AgentRunOptions {
+    /**
+     * 显式会话 id：随请求头发给自家代理，服务端日志按它归会话。
+     * 缺省时服务端退回「账号 + 首条 user 消息」的指纹推导（连续相同提问会被并进同一会话）。
+     */
+    sessionId?: string
 }
 
 /** Agent 单轮运行结果 */
@@ -189,6 +200,18 @@ const CONTINUATION_PROMPT = "上一条回复因长度上限被截断。请紧接
 /** 轮次预算耗尽时回灌给模型的错误文案（提示词侧也有同样要求，双保险）。 */
 const TOOL_BUDGET_EXHAUSTED_HINT = "检索轮次已用尽，请基于已有结果直接作答"
 
+/** 落进工具记录的结果原文上限（字符数）：结果可能很大，全量落库会撑爆 IndexedDB。 */
+const MAX_TRACE_RESULT_CHARS = 4000
+
+/**
+ * 截断工具结果原文到可落库的长度。
+ * @param content 结果原文。
+ * @returns 截断后的文本，超限时以「…（已截断）」结尾。
+ */
+function clampTraceResult(content: string): string {
+    return content.length > MAX_TRACE_RESULT_CHARS ? `${content.slice(0, MAX_TRACE_RESULT_CHARS)}…（已截断）` : content
+}
+
 /**
  * 预算耗尽后追加的收尾提示。
  *
@@ -250,6 +273,8 @@ export class AgentKernel<TPayload> {
      * answerPending() / skipPending() 据此续跑。同一时刻最多一个。
      */
     private pending: AgentPendingState<TPayload> | null = null
+    /** 本次运行的显式会话 id：随请求头发给自家代理用于日志归会话；run() 时设置，挂起续跑沿用 */
+    private sessionId: string | null = null
 
     /**
      * 创建主循环。
@@ -286,15 +311,21 @@ export class AgentKernel<TPayload> {
      * 之后由 answerPending() / skipPending() 从断点继续同一轮问答。
      * @param history 会话历史（不含本轮回复）
      * @param callbacks 流式与工具回调
+     * @param options 运行选项（显式会话 id 等）
      * @returns 最终回复与工具调用记录；挂起时附带 pendingAsk
      */
-    public async run(history: readonly AgentHistoryMessage[], callbacks: AgentCallbacks = {}): Promise<AgentRunResult<TPayload>> {
+    public async run(
+        history: readonly AgentHistoryMessage[],
+        callbacks: AgentCallbacks = {},
+        options: AgentRunOptions = {}
+    ): Promise<AgentRunResult<TPayload>> {
         if (!this.config.api_key) {
             throw new Error(this.describe("缺少 API Key：请在设置页填写密钥，或登录以使用服务端反代"))
         }
 
         this.interrupted = false
         this.pending = null
+        this.sessionId = options.sessionId ?? null
 
         return this.runLoop(
             { messages: toWireMessages(history), reply: "", traces: [], reasonings: [], reasoningText: "", round: 0 },
@@ -498,6 +529,7 @@ export class AgentKernel<TPayload> {
                     tools: toolDefinitions,
                     temperature: this.config.default_temperature,
                     maxTokens: this.config.default_max_tokens,
+                    sessionId: this.sessionId ?? undefined,
                     handlers: {
                         onText: text => callbacks.onDelta?.(text, "content"),
                         onThinking: text => callbacks.onDelta?.(text, "reasoning"),
@@ -571,8 +603,8 @@ export class AgentKernel<TPayload> {
                 if (outOfToolRounds) {
                     const summary = TOOL_BUDGET_EXHAUSTED_HINT
 
-                    traces.push({ id: call.id, name: call.name, label, args, summary, status: "error" })
-                    callbacks.onToolTrace?.({ id: call.id, name: call.name, label, args, summary, status: "error" })
+                    traces.push({ id: call.id, name: call.name, label, args, summary, result: summary, status: "error" })
+                    callbacks.onToolTrace?.({ id: call.id, name: call.name, label, args, summary, result: summary, status: "error" })
                     toolResults.push({ toolCallId: call.id, content: JSON.stringify({ error: summary }), isError: true })
                     continue
                 }
@@ -590,6 +622,7 @@ export class AgentKernel<TPayload> {
                     const message = error instanceof Error ? error.message : String(error)
                     trace.status = "error"
                     trace.summary = message
+                    trace.result = message
                     callbacks.onToolTrace?.({ ...trace })
                     toolResults.push({ toolCallId: call.id, content: JSON.stringify({ error: message }), isError: true })
                     continue
@@ -612,12 +645,14 @@ export class AgentKernel<TPayload> {
                 if (!text) {
                     trace.status = "error"
                     trace.summary = this.summarizeTool(call.name, args, "", summaryOverride) || "工具未返回结果"
+                    trace.result = trace.summary
                     callbacks.onToolTrace?.({ ...trace })
                     toolResults.push({ toolCallId: call.id, content: JSON.stringify({ error: trace.summary }), isError: true })
                     continue
                 }
 
                 trace.summary = this.summarizeTool(call.name, args, text.content, summaryOverride)
+                trace.result = clampTraceResult(text.content)
                 trace.status = text.isError ? "error" : "done"
                 callbacks.onToolTrace?.({ ...trace })
 

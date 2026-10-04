@@ -78,18 +78,3 @@ export function formatMessageContent(content: unknown): string {
     }
     return String(content)
 }
-
-/**
- * @description 美化 JSON 文本（工具调用参数是模型生成的字符串，可能是压缩过的一行）。
- * @param raw 原始文本。
- * @returns 缩进后的 JSON；解析失败时原样返回。
- */
-export function formatJsonText(raw: string | null | undefined): string {
-    const text = (raw || "").trim()
-    if (!text) return ""
-    try {
-        return JSON.stringify(JSON.parse(text), null, 2)
-    } catch {
-        return text
-    }
-}

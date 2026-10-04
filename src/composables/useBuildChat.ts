@@ -114,6 +114,8 @@ export function useBuildChat(
     const pendingAskLive = ref(false)
     /** 上一轮失败的提问原文；非空时界面提供「重试」入口 */
     const failedPrompt = ref("")
+    /** 显式 AI 会话 id：随请求头发给服务端代理用于日志归会话；随会话落库，清空对话后重新生成 */
+    let aiSessionId = ""
 
     /** 挂起期间正在流式的那条助手消息（续跑时继续往它上面追加） */
     let pendingAssistant: BuildAgentChatMessage | null = null
@@ -143,6 +145,7 @@ export function useBuildChat(
     async function loadMessages(): Promise<void> {
         try {
             const chat = await db.buildAgentChats.get(chatId(selectedChar.value))
+            aiSessionId = chat?.aiSessionId ?? ""
             const list = Array.isArray(chat?.messages) ? chat.messages : []
             messages.value = list
                 .map((message, index) => normalizeStoredMessage(message, index))
@@ -165,6 +168,7 @@ export function useBuildChat(
             id: chatId(selectedChar.value),
             charName: selectedChar.value,
             messages: plain,
+            ...(aiSessionId ? { aiSessionId } : {}),
             updatedAt: Date.now(),
         }
 
@@ -189,12 +193,24 @@ export function useBuildChat(
     }
 
     /**
+     * 取显式 AI 会话 id：没有就生成一个（下次 persistMessages 时落库）。
+     * @returns 会话 id。
+     */
+    function ensureAiSessionId(): string {
+        if (!aiSessionId) {
+            aiSessionId = `s-${crypto.randomUUID()}`
+        }
+        return aiSessionId
+    }
+
+    /**
      * 清空当前角色的对话，并落一条空的会话记录（保证刷新后仍是空对话）。
      */
     async function clearChat(): Promise<void> {
         messages.value = []
         liveReasoning.value = ""
         failedPrompt.value = ""
+        aiSessionId = ""
         clearPendingAsk()
         await db.buildAgentChats.delete(chatId(selectedChar.value)).catch(() => undefined)
         await persistMessages()
@@ -313,7 +329,7 @@ export function useBuildChat(
                 throw new Error(i18next.t("ai-chat.error.noConfig"))
             }
 
-            const result = await agent.run(history, buildCallbacks(message, reasonings))
+            const result = await agent.run(history, buildCallbacks(message, reasonings), { sessionId: ensureAiSessionId() })
             addProcessMs(message, startedAt)
             failedPrompt.value = ""
             await consumeResult(message, result)

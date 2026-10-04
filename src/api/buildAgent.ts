@@ -17,8 +17,7 @@
 import i18next from "i18next"
 import type { Ref } from "vue"
 import type { AgentUpstreamConfig } from "@/api/agent/config"
-import type { AgentHistoryMessage } from "@/api/agent/kernel"
-import { type AgentCallbacks, AgentKernel, type AgentRunResult } from "@/api/agent/kernel"
+import { type AgentCallbacks, type AgentHistoryMessage, AgentKernel, type AgentRunOptions, type AgentRunResult } from "@/api/agent/kernel"
 import { createRunCodeTool } from "@/api/agent/tools/build-code"
 import {
     createClickTool,
@@ -158,10 +157,15 @@ export class BuildAgent {
      * 跑一轮：流式输出 + 多轮工具调用（工具可能操作配装页界面）。
      * @param history 会话历史（不含本轮回复）
      * @param callbacks 流式与工具回调
+     * @param options 运行选项（显式会话 id 等）
      * @returns 回复、工具痕迹与思考分段
      */
-    public async run(history: readonly AgentHistoryMessage[], callbacks: AgentCallbacks = {}): Promise<AgentRunResult<AskUserRequest>> {
-        return this.kernel.run(history, callbacks)
+    public async run(
+        history: readonly AgentHistoryMessage[],
+        callbacks: AgentCallbacks = {},
+        options: AgentRunOptions = {}
+    ): Promise<AgentRunResult<AskUserRequest>> {
+        return this.kernel.run(history, callbacks, options)
     }
 
     /**

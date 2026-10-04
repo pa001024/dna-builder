@@ -212,6 +212,30 @@ export function useDBChat() {
     }
 
     /**
+     * 取会话的显式 AI 会话 id：没有就生成一个并落库。
+     *
+     * 服务端日志按这个 id 归会话，替代「账号 + 首条提问」的指纹推导——
+     * 指纹会把连续两次相同的提问并进同一个会话，显式 id 没有这个问题。
+     * @param conversationId 会话 id。
+     * @returns 会话 id；会话不存在时为 undefined（服务端退回指纹推导）。
+     */
+    async function ensureAiSessionId(conversationId: number): Promise<string | undefined> {
+        const target = conversations.value.find(item => item.id === conversationId)
+        if (!target) {
+            return undefined
+        }
+
+        if (target.aiSessionId) {
+            return target.aiSessionId
+        }
+
+        const sessionId = `s-${crypto.randomUUID()}`
+        target.aiSessionId = sessionId
+        await db.conversations.update(conversationId, { aiSessionId: sessionId })
+        return sessionId
+    }
+
+    /**
      * 更新会话时间戳与名称（首条提问自动命名）。
      * @param conversationId 会话 id
      * @param name 可选的新名称
@@ -438,7 +462,9 @@ export function useDBChat() {
                 throw new Error(i18next.t("dbAgent.error.noConfig"))
             }
 
-            const result = await agent.run(history, buildCallbacks(assistantMessage, reasonings))
+            const result = await agent.run(history, buildCallbacks(assistantMessage, reasonings), {
+                sessionId: await ensureAiSessionId(conversationId),
+            })
 
             addProcessMs(assistantMessage, startedAt)
             await consumeResult(target, result)

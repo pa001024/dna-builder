@@ -24,6 +24,7 @@ import {
     type AgentTransport,
     type AgentTransportOptions,
     type AgentWireMessage,
+    AI_PROXY_SESSION_HEADER,
     resolveMessagesEndpoint,
 } from "./wire"
 
@@ -527,11 +528,17 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
      * 连接阶段与流式阶段各自设限：连接用「从发出请求到收到响应头」的超时，
      * 流式阶段换成「两块增量之间」的空闲超时，两者共用一个 AbortController。
      * @param payload 已序列化的请求体
+     * @param sessionId 显式会话 id（仅自家代理使用，直连时忽略）
      * @param handlers 流式增量回调
      * @param isInterrupted 中断判据
      * @returns 成功结果，或带重试判定的失败
      */
-    async function attemptOnce(payload: string, handlers: AgentStreamHandlers, isInterrupted: () => boolean): Promise<AttemptOutcome> {
+    async function attemptOnce(
+        payload: string,
+        sessionId: string | undefined,
+        handlers: AgentStreamHandlers,
+        isInterrupted: () => boolean
+    ): Promise<AttemptOutcome> {
         const controller = new AbortController()
         const context: StreamContext = { idleTimer: null, idleTimedOut: false }
         const connectTimer = options.timeout > 0 ? setTimeout(() => controller.abort(), options.timeout) : null
@@ -544,7 +551,13 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
                     Accept: "text/event-stream",
                     // 直连 DeepSeek 官方 Anthropic 入口用 x-api-key；
                     // 走自建代理时凭证是登录令牌，与其它接口一样放 Authorization。
-                    ...(isDirectUpstream ? { "x-api-key": options.apiKey } : { Authorization: `Bearer ${options.apiKey}` }),
+                    ...(isDirectUpstream
+                        ? { "x-api-key": options.apiKey }
+                        : {
+                              Authorization: `Bearer ${options.apiKey}`,
+                              // 自家代理带会话 id，服务端日志按它归会话；直连上游不发（无意义且会触发预检）
+                              ...(sessionId ? { [AI_PROXY_SESSION_HEADER]: sessionId } : {}),
+                          }),
                 },
                 body: payload,
                 signal: controller.signal,
@@ -619,7 +632,7 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
             let lastFailure: Error | null = null
 
             for (let attempt = 0; attempt <= maxAttempts; attempt++) {
-                const outcome = await attemptOnce(payload, handlers, isInterrupted)
+                const outcome = await attemptOnce(payload, request.sessionId, handlers, isInterrupted)
 
                 if (outcome.ok) {
                     return outcome.result

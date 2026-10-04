@@ -116,6 +116,11 @@ export interface AgentRoundRequest {
     handlers?: AgentStreamHandlers
     /** 中断判据：返回 true 时尽快停止读取流并返回已产出的内容 */
     isInterrupted?: () => boolean
+    /**
+     * 显式会话 id：随请求头发给自家代理（`/api/v1` 结尾的基址），服务端日志按它归会话。
+     * 直连上游不带这个头（无意义且会触发 CORS 预检），缺省时服务端退回指纹推导。
+     */
+    sessionId?: string
 }
 
 /** 单轮结果。 */
@@ -159,6 +164,9 @@ export interface AgentTransportOptions {
 
 /** DeepSeek 官方 Anthropic 兼容入口的路径（官方文档给定的 base_url 是 `<origin>/anthropic`）。 */
 const DEEPSEEK_ANTHROPIC_PATH = "/anthropic/v1/messages"
+
+/** 自家代理的显式会话 id 请求头：代理把它作为日志的会话归并依据。 */
+export const AI_PROXY_SESSION_HEADER = "x-ai-session-id"
 
 /** 自家代理暴露的 Messages 路径（基址以 `/api/v1` 结尾）。 */
 const PROXY_MESSAGES_PATH = "/messages"
