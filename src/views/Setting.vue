@@ -1441,6 +1441,66 @@ onUnmounted(() => {
                                 </span>
                                 <input v-model="setting.showAIChat" type="checkbox" class="toggle toggle-secondary" />
                             </div>
+                            <div
+                                class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                            >
+                                <span class="label-text">
+                                    {{ $t("setting.aiCustomModel") }}
+                                    <div class="text-xs text-base-content/50">{{ $t("setting.aiCustomModelTip") }}</div>
+                                </span>
+                                <input v-model="setting.aiCustomModel" type="checkbox" class="toggle toggle-secondary" />
+                            </div>
+                            <div
+                                v-if="setting.aiCustomModel"
+                                class="animate-ef-rise motion-reduce:animate-none flex flex-col gap-2"
+                            >
+                                <div
+                                    class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="label-text">{{ $t("setting.aiBaseUrl") }}</span>
+                                    <input
+                                        v-model="setting.aiBaseUrl"
+                                        type="text"
+                                        class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        :placeholder="$t('setting.aiBaseUrlTip')"
+                                    />
+                                </div>
+                                <div
+                                    class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="label-text">{{ $t("setting.aiApiKey") }}</span>
+                                    <input
+                                        v-model="setting.aiApiKey"
+                                        type="password"
+                                        autocomplete="off"
+                                        class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        :placeholder="$t('setting.aiApiKeyTip')"
+                                    />
+                                </div>
+                                <div
+                                    class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="label-text">{{ $t("setting.aiModelName") }}</span>
+                                    <input
+                                        v-model="setting.aiModelName"
+                                        type="text"
+                                        class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        :placeholder="$t('setting.aiModelNameTip')"
+                                    />
+                                </div>
+                                <div
+                                    class="flex items-center justify-between gap-4 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                >
+                                    <span class="label-text">{{ $t("setting.aiMaxTokens") }}</span>
+                                    <input
+                                        v-model.number="setting.aiMaxTokens"
+                                        type="number"
+                                        min="1"
+                                        class="w-64 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 font-orbitron text-[13px] tabular-nums text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        :placeholder="$t('setting.aiMaxTokensTip')"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

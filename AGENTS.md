@@ -15,7 +15,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |
 | 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
 
-- 技能：`.agents/skills/*/SKILL.md`（admin-management-page、bun-webview-test、db-style、fmodel-unpack、perf-hotspot-profiling、ue4-pak-mod）
+- 技能：`.agents/skills/*/SKILL.md`（admin-management-page、bun-webview-test、db-style、fmodel-unpack、i18n、perf-hotspot-profiling、ue4-pak-mod）
 - 业务与设计文档：`docs/`
 
 ## Build / Lint / Test Commands
@@ -32,6 +32,24 @@ pnpm test src/data/tests/foo.test.ts  # Run single test file
 pnpm coverage                         # Tests with coverage
 pnpm format                           # Format with Biome
 ```
+
+### i18n（`bun i18n` = `bun tools/i18n.ts`）
+
+```bash
+# 插入/覆盖：一次补齐 6 种语言，每种用自己的语言书写
+bun i18n add setting.generative_ai \
+  -cn "生成式AI" -tw "生成式AI" -en "Generative AI" -jp "生成AI" -kr "생성형 AI" -fr "IA générative"
+
+bun i18n get <key> [--lang cn,en]          # 读取各语言的值（默认全部 6 种）
+bun i18n rm <key>                          # 删除某键（所有语言）
+bun i18n export/import                     # 导出/导入缺失翻译（tools/i18n-diff.json）
+bun i18n check [--json] [--locale-gap]     # 扫描代码引用但翻译文件缺失的键
+```
+
+新增文案应**一次补齐 6 种语言、每种用自己的语言书写**（别 6 个参数都填中文，模型会加漏或理解错意思）；
+`add` 结束会按实际文件内容检查，缺语言时输出 `⚠ warning`（只改一门译文、文件本就齐全时不会误报）。
+
+细节与坑见 [dev-tools.md](.agents/docs/dev-tools.md) 与技能 `.agents/skills/i18n/SKILL.md`。
 
 ### Desktop App (Tauri + Rust)
 
@@ -86,7 +104,7 @@ src/
 server/              # Bun + Elysia backend
 src-tauri/           # Tauri Rust backend
 mcp_server/          # MCP server (Rust)
-tools/               # Dev tools (i18n-tool.ts, icon-tool.ts)
+tools/               # Dev tools (i18n.ts, icon-tool.ts)
 externals/dna-api/   # DNA API package
 public/i18n/         # Translation files
 .agents/docs/        # 本文件展开的细节文档

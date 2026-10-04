@@ -4,7 +4,24 @@ AGENTS.md 只列命令，这里是每个脚本的用途、输入输出与注意�
 
 ## i18n
 
-`bun tools/i18n-tool.ts export|import` — 导出缺失的翻译、导入翻译好的结果。
+统一 CLI `bun i18n`（= `bun tools/i18n.ts`，取代旧的 `tools/i18n-tool.ts` 与 `tools/i18n-check.ts`）：
+
+- `bun i18n add <key> [语言参数…]` — 插入或覆盖翻译。语言参数用短名
+  （`-cn/-en/-jp/-ja/-kr/-ko/-fr/-tw`），别名见 `bun i18n langs`；未指定的语言不写入，运行期回落 zh-CN。
+  key 含 `.` 时按嵌套命名空间写入，`--flat` 强制顶层，`--dry-run` 只预览。
+  **新增文案默认补齐 6 种语言、每种用自己的语言书写**；命令结束按实际文件内容检查，
+  缺语言时输出 `⚠ warning`（只改一门译文、文件本就齐全时不误报）。
+- `bun i18n get <key> [--lang cn,en] [--json]` — 读取某键各语言的值（默认全部 6 种）。
+- `bun i18n rm <key>` — 删除某键（所有语言）。
+- `bun i18n export|import` — 导出缺失翻译到 `tools/i18n-diff.json`、导入后删除该文件。
+- `bun i18n check [--json] [--locale-gap]` — 扫描代码中静态引用（`t("x")` 系列）但 zh-CN 未配置的键。
+
+add 的完整示例（6 种语言各用自己的语言书写，不要漏、不要 6 个都填中文）：
+
+```bash
+bun i18n add setting.generative_ai \
+  -cn "生成式AI" -tw "生成式AI" -en "Generative AI" -jp "生成AI" -kr "생성형 AI" -fr "IA générative"
+```
 
 ## 图标
 

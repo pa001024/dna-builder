@@ -69,3 +69,4 @@ tools/radix-icons/
 screenshots/
 tools/i18n-hardcoded-report.md
 outputs/
+.zcodeignore

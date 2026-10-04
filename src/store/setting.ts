@@ -59,6 +59,7 @@ export const useSettingStore = defineStore("setting", {
             aiApiKey: useLocalStorage("ai_api_key", "", { writeDefaults: false }),
             aiModelName: useLocalStorage("ai_model_name", "", { writeDefaults: false }),
             aiMaxTokens: useLocalStorage("ai_max_tokens", DEFAULT_AI_MAX_TOKENS, { writeDefaults: false }),
+            aiCustomModel: useLocalStorage("ai_custom_model", false, { writeDefaults: false }),
             // 皎皎角
             dnaUserId: useLocalStorage("setting_user_id", 0, { writeDefaults: false }),
             dnaUserUID: useLocalStorage("setting_user_uid", "", { writeDefaults: false }),

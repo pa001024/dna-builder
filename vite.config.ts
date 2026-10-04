@@ -11,6 +11,7 @@ import { defineConfig } from "vite"
 import { chunkSplitPlugin } from "vite-plugin-chunk-split"
 import { VitePWA } from "vite-plugin-pwa"
 import { dataPackRewritePlugin } from "./src/data/data-pack-rewrite-plugin"
+import { i18nHmrPlugin } from "./src/i18n-hmr-plugin"
 
 const host = process.env.TAURI_DEV_HOST
 const mockDataPackDir = resolve(__dirname, "mock/data-pack")
@@ -54,6 +55,7 @@ export default defineConfig(async () => ({
     },
     plugins: [
         ...(isAppBuild ? [stripPublicImgsPlugin()] : []),
+        i18nHmrPlugin(),
         // 仅在构建时启用数据包重写插件，dev 启动（command 为 serve）时直接使用源码数据模块
         ...(!isDisableRewrite ? [dataPackRewritePlugin()] : []),
         vue({

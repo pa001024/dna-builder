@@ -62,6 +62,7 @@ export function applyLanguageFontClass(language: string) {
 export async function initI18n(selectedLanguage: string) {
     const resolvedLanguage = resolveI18nLanguage(selectedLanguage)
     const lngCodes = i18nLanguages.map(l => l.code)
+    useI18nHmr()
     return i18next.use(Backend).init<HttpBackendOptions>({
         backend: {
             loadPath: "/i18n/{{lng}}/{{ns}}.json",
@@ -76,6 +77,21 @@ export async function initI18n(selectedLanguage: string) {
             escapeValue: false,
         },
         showSupportNotice: false,
+    })
+}
+
+function useI18nHmr(): void {
+    if (!import.meta.hot) return
+
+    import.meta.hot.on("i18n-update", ({ lng, ns }: { lng: string; ns: string }) => {
+        const backend = i18next.services.backendConnector?.backend
+        if (backend?.options) {
+            backend.options.queryStringParams = { ...backend.options.queryStringParams, _: Date.now() }
+        }
+
+        void i18next.reloadResources([lng], [ns], () => {
+            console.error(`[i18n-hmr] 重新加载 ${lng}/${ns} 失败`)
+        })
     })
 }
 
