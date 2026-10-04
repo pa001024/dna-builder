@@ -12,6 +12,7 @@ import "dotenv/config"
 import { scheduleAiLogRetention } from "./ai-log-store"
 import { apiPlugin } from "./api"
 import { aiLogPlugin } from "./api/ai-log"
+import { installPlugin } from "./api/install"
 import { modApiPlugin } from "./api/mod"
 import { syncDataPackDiffBackendsOnce } from "./api/package-diff"
 import { raceLotteryPlugin } from "./api/race-lottery"
@@ -28,6 +29,7 @@ const app = new Elysia()
     // .use(staticPlugin({ prefix: "/", assets: "../dist", indexHTML: false, alwaysStatic: true }))
     // .use(cronPlugin())
     .use(apiPlugin())
+    .use(installPlugin())
     .use(modApiPlugin())
     .use(raceLotteryPlugin())
     .use(aiPlugin())

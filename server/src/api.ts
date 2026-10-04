@@ -1,72 +1,16 @@
-import { fetch } from "bun"
 import { Elysia, t } from "elysia"
 import { getPackageDiff, type PackageDiffConfig } from "./api/package-diff"
 import { uploadImage } from "./upload"
+import { getLatestInstallerUrl } from "./util/installer"
 import { getCachedNameEffectStylesheet } from "./util/name-effect-style"
-import { getPublicObjectUrl, isObjectStorageConfigured } from "./util/object-storage"
-
-/**
- * 缓存的最新版本信息
- */
-type CachedVersion = {
-    url: string
-    expireTime: number
-}
-
-let cachedVersion: CachedVersion | null = null
 
 /**
  * 获取 MSI 下载 URL
- * 从在线的 latest.json 获取最新版本，带 5 分钟缓存
+ * 复用 installer 工具：从在线的 latest.json 获取最新版本，带 5 分钟缓存
  * @returns MSI 文件的下载地址（主端 CDN）
  */
-async function getMsiDownloadUrl(): Promise<string | null> {
-    if (!isObjectStorageConfigured()) {
-        return null
-    }
-
-    // 检查缓存（5 分钟有效期）
-    const CACHE_DURATION = 5 * 60 * 1000 // 5 分钟
-    if (cachedVersion && Date.now() < cachedVersion.expireTime) {
-        return cachedVersion.url
-    }
-
-    try {
-        // 从在线的 latest.json 获取最新版本信息
-        const latestJsonUrl = getPublicObjectUrl("latest.json")
-        const response = await fetch(latestJsonUrl)
-
-        if (!response.ok) {
-            console.error("获取 latest.json 失败:", response.status)
-            return null
-        }
-
-        const latestData = await response.json()
-
-        // 从 platforms 获取 MSI 下载地址
-        const downloadUrl = latestData.platforms?.["windows-x86_64-msi"]?.url || latestData.platforms?.["windows-x86_64"]?.url
-
-        if (!downloadUrl) {
-            console.error("latest.json 中未找到下载地址")
-            return null
-        }
-
-        // 更新缓存
-        cachedVersion = {
-            url: downloadUrl,
-            expireTime: Date.now() + CACHE_DURATION,
-        }
-
-        return downloadUrl
-    } catch (error) {
-        console.error("获取最新版本信息失败:", error)
-        // 如果有缓存但过期了，仍然返回缓存的地址
-        if (cachedVersion) {
-            console.log("使用过期的缓存 URL")
-            return cachedVersion.url
-        }
-        return null
-    }
+function getMsiDownloadUrl() {
+    return getLatestInstallerUrl()
 }
 
 /**
