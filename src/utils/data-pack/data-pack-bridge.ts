@@ -1,6 +1,6 @@
 import { ref } from "vue"
+import { applyVersionGate, type VersionedItem } from "@/data/versionGate"
 import type { DataPackModuleRecord } from "./data-pack"
-import { applyVersionGate, type VersionedItem } from "./versionGate"
 
 type DataPackFallbackKind = "array" | "object" | "map" | "undefined"
 

@@ -7,7 +7,7 @@ import {
     getPackTranslationTable,
     isPackTranslationLocale,
     registerPackTranslationInvalidation,
-} from "@/data/translations-pack"
+} from "@/utils/data-pack/translations-pack"
 
 /**
  * 资料检索 Agent 的数据语言。

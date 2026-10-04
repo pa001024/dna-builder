@@ -23,6 +23,10 @@ import {
 import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
 import { collectPetBuffs, collectTraitBuffs, getEffectivePetLevel, getPetBaseCd, resolvePetCoverage } from "@/data/petTrait"
+import { useInvStore } from "@/store/inv"
+import { useUIStore } from "@/store/ui"
+import { formatProp, formatSkillProp } from "@/util"
+import { getRaritySwatchClass } from "@/utils/rarity-utils"
 import {
     countLoadoutMods,
     createEmptyDoc,
@@ -42,11 +46,7 @@ import {
     type TimelineSlot,
     type TimelineSlotLoadout,
     type TimelineTrackKind,
-} from "@/data/timeline-doc"
-import { useInvStore } from "@/store/inv"
-import { useUIStore } from "@/store/ui"
-import { formatProp, formatSkillProp } from "@/util"
-import { getRaritySwatchClass } from "@/utils/rarity-utils"
+} from "@/utils/timeline-doc"
 
 const { t } = useTranslation()
 const ui = useUIStore()

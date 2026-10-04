@@ -1,4 +1,4 @@
-import type { Draft } from "./data-types"
+import type { Draft } from "@/data/data-types"
 import type { LevelUpCalculatorConfig, LevelUpResult, ResourceCost, TimeEstimateConfig } from "./LevelUpCalculator"
 import {
     type CharExt,

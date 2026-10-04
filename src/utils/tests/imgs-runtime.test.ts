@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { hashImgsManifest, mountImgsToVirtualPath } from "../imgs-runtime"
+import { hashImgsManifest, mountImgsToVirtualPath } from "../data-pack/imgs-runtime"
 
 afterEach(() => {
     vi.unstubAllGlobals()

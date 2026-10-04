@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { revivePackedValue } from "../data-pack"
+import { revivePackedValue } from "../data-pack/data-pack"
 
 describe("revivePackedValue", () => {
     it("原地还原普通对象和数组", () => {

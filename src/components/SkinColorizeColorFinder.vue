@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { skinColorizeSwatches } from "@/data/d/skin-colorize.data"
-import { formatSkinColorizeRgb, type SkinColorizeSwatch } from "@/data/skin-colorize"
 import { useUIStore } from "@/store/ui"
 import { deltaEOk, hexToRgb, type Rgb, rgbToHex, rgbToOklab } from "@/utils/color"
 import { extractImagePalette } from "@/utils/image-palette"
+import { formatSkinColorizeRgb, type SkinColorizeSwatch } from "@/utils/skin-colorize"
 
 const ui = useUIStore()
 

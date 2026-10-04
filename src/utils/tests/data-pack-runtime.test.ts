@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { isDataPackModule } from "../data-pack-runtime"
+import { isDataPackModule } from "../data-pack/data-pack-runtime"
 
 describe("数据包模块清单", () => {
     it("应该把剧情数据模块纳入数据包加载", () => {

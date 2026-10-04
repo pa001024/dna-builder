@@ -22,7 +22,7 @@ import {
     type TitleFrameLayer,
     type TitleFrameLayerTrack,
     type TitleFrameSampleState,
-} from "@/data/title-frame"
+} from "./title-frame"
 import {
     BIRD_FRAGMENT_SHADER,
     LAYER_VERTEX_SHADER,
@@ -31,7 +31,7 @@ import {
     type MaterialProgram,
     PLAIN_FRAGMENT_SHADER,
     programFor,
-} from "@/data/title-frame-material"
+} from "./title-frame-material"
 
 /**
  * 编译一个着色器。

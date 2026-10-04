@@ -10,8 +10,8 @@ import Component from "unplugin-vue-components/vite"
 import { defineConfig } from "vite"
 import { chunkSplitPlugin } from "vite-plugin-chunk-split"
 import { VitePWA } from "vite-plugin-pwa"
-import { dataPackRewritePlugin } from "./src/data/data-pack-rewrite-plugin"
 import { i18nHmrPlugin } from "./src/i18n-hmr-plugin"
+import { dataPackRewritePlugin } from "./src/utils/data-pack/data-pack-rewrite-plugin"
 
 const host = process.env.TAURI_DEV_HOST
 const mockDataPackDir = resolve(__dirname, "mock/data-pack")

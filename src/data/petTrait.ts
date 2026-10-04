@@ -1,7 +1,6 @@
 import type { CharBuild } from "./CharBuild"
 import { buffMap, petMap } from "./d"
 import { type PetEntry, petEntrys } from "./d/pet.data"
-import { registerDataPackHydrationCallback } from "./data-pack-bridge"
 import type { Buff } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import { PET_SKILL_LEVEL_INDEX_MAX } from "./leveled/LeveledPet"
@@ -156,11 +155,14 @@ function getPetBuffNames(): Set<string> {
     return petBuffNames
 }
 
-// 数据包换入会重建 buffMap/petMap：失效目录与名称缓存，避免用到换包前的快照
-registerDataPackHydrationCallback(() => {
+/**
+ * 数据包换入会重建 buffMap/petMap：失效目录与名称缓存，避免用到换包前的快照。
+ * 触发时机由基建侧决定（见 `utils/data-pack/data-pack-runtime.ts`），数据层不感知数据包的存在。
+ */
+export function invalidatePetTraitCaches(): void {
     traitCatalog = null
     petBuffNames = null
-})
+}
 
 /**
  * 按条目 id 读取潜质档位。

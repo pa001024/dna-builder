@@ -1,4 +1,3 @@
-import { getModDropInfo, getPackDropInfo } from "../utils/reward-utils"
 import {
     draftDungeonMap,
     draftShopSourceMap,
@@ -11,11 +10,12 @@ import {
     resourceDraftMap,
     weaponDraftMap,
     weaponShopSourceMap,
-} from "./d"
-import modData from "./d/mod.data"
-import type { Char, Mod, Weapon } from "./data-types"
+} from "@/data/d"
+import modData from "@/data/d/mod.data"
+import type { Char, Mod, Weapon } from "@/data/data-types"
 import type { MergeCalculateData, WorkerMessageData, WorkerMethod, WorkerResponse } from "./LevelUpCalculator.worker"
 import type { DungeonExt, ModExt, WeaponExt } from "./LevelUpCalculatorImpl"
+import { getModDropInfo, getPackDropInfo } from "./reward-utils"
 
 /**
  * 角色养成配置

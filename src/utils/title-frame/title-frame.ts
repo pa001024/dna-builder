@@ -2,7 +2,7 @@
  * 称号框（TitleFrame）渲染数据模型与运行时工具。
  *
  * 数据由 `tools/import-title-frame.ts` 从游戏 pak 直读生成到
- * `src/data/generated/title-frame.generated.ts`，本文件只提供类型定义与
+ * `src/utils/title-frame/title-frame.generated.ts`，本文件只提供类型定义与
  * 与 UE 对齐的采样 / 布局算法，便于单元测试。
  */
 

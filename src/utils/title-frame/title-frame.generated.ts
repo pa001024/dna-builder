@@ -8,7 +8,7 @@
  *   - 贴图：public/imgs/titleframe/*.webp
  */
 
-import type { TitleFrameDef } from "@/data/title-frame"
+import type { TitleFrameDef } from "./title-frame"
 
 /** 全部称号框数据，key 为 WBP 资源名后缀（如 "07_2"）。 */
 export const titleFrames: Record<string, TitleFrameDef> = {

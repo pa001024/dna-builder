@@ -11,7 +11,6 @@ import optRewardData from "./optreward.data"
 export { eventData } from "./event.data"
 export { weaponVerifyData } from "./weapon-verify.data"
 
-import { isDataPackHydrated, registerDataPackHydrationCallback } from "../data-pack-bridge"
 import { skinData } from "./accessory.data"
 import dynQuestData, { type DynQuest } from "./dynquest.data"
 import { type HardBoss, hardBossData } from "./hardboss.data"
@@ -158,8 +157,12 @@ export const draftShopSourceMap = new Map<number, { shop: string; cost: string; 
 
 /**
  * 重建静态索引。
+ *
+ * 派生索引（charMap / modMap / questChainMap 等）全部由原始条目表推导，
+ * 因此数据包换入后必须整体重建。触发时机由基建侧决定（见 `utils/data-pack/data-pack-runtime.ts`），
+ * 数据层不感知数据包的存在。
  */
-function rebuildStaticIndexes(): void {
+export function rebuildStaticIndexes(): void {
     charMap.clear()
     for (const char of charData) {
         charMap.set(char.名称, char as Char)
@@ -470,7 +473,5 @@ function rebuildShopSourceIndexes(): void {
     }
 }
 
-registerDataPackHydrationCallback(rebuildStaticIndexes)
-if (!isDataPackHydrated()) {
-    rebuildStaticIndexes()
-}
+// 模块首次求值即用源码内的原始条目表建好索引，之后数据包换入会由基建侧再调一次重建。
+rebuildStaticIndexes()

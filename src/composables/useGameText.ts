@@ -16,7 +16,7 @@ const GAME_TEXT_OPTIONS = { keySeparator: false, nsSeparator: false } as const
  * 把游戏数据里的原文文本翻译成当前语言。
  *
  * 数据层的名称、描述、技能文本等字段存的都是**简体中文原文**，各语言译文随数据包下发
- * （`src/data/translations-pack.ts` 注入 i18next）。组件里凡是直接输出这些字段的地方，
+ * （`src/utils/data-pack/translations-pack.ts` 注入 i18next）。组件里凡是直接输出这些字段的地方，
  * 都要过这个函数，否则界面会一直显示中文。
  *
  * 与 `$t` 的区别只在取词选项：原文含 `.` / `:` 时 `$t` 可能解析成键路径。

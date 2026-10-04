@@ -13,7 +13,7 @@ import {
     setActiveDataPackVersion,
     setDataPackSourceBaseUrl,
     setDataPackSourceKind,
-} from "@/data/data-pack"
+} from "@/utils/data-pack/data-pack"
 
 export const useDataPackStore = defineStore("dataPack", {
     state: () => {

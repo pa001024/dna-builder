@@ -4,10 +4,10 @@ import { useTranslation } from "i18next-vue"
 import { computed, onMounted, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { checkUpdate, downloadAndInstallUpdate } from "@/api/update"
-import { dataPackBootstrapLoading, getRegisteredDataPackModuleKeys } from "@/data/data-pack-bridge"
 import { env } from "@/env"
 import { useDataPackStore } from "@/store/dataPack"
 import { useUIStore } from "@/store/ui"
+import { dataPackBootstrapLoading, getRegisteredDataPackModuleKeys } from "@/utils/data-pack/data-pack-bridge"
 import pg from "../../package.json"
 
 const router = useRouter()

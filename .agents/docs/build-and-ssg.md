@@ -50,7 +50,7 @@ HTML，写成 `dist/<route>/index.html` 并注入各自的 title / description /
 
 ## 前端构建的数据包改写（动手前必读）
 
-`pnpm build` 会启用 `src/data/data-pack-rewrite-plugin.ts`，把 `src/data/d/**/*.data.ts` 的导出改写成
+`pnpm build` 会启用 `src/utils/data-pack/data-pack-rewrite-plugin.ts`，把 `src/data/d/**/*.data.ts` 的导出改写成
 **空 fallback + 运行时水合回填的活绑定**：生产环境里数据来自数据包（IndexedDB/OPFS），未安装数据包时
 这些模块是空的。由此有两条硬约束：
 
@@ -64,7 +64,7 @@ HTML，写成 `dist/<route>/index.html` 并注入各自的 title / description /
 
 - **装一次、反复用**：`new WebView({ dataStore: { directory: "./profile" } })` 传持久 profile
   （路径要绝对路径或相对 cwd 的目录对象），首次运行时在页面内
-  `const pack = await import("/src/data/data-pack.ts"); await pack.downloadDataPack()`，
+  `const pack = await import("/src/utils/data-pack/data-pack.ts"); await pack.downloadDataPack()`，
   之后重新导航即有水合后的数据；dev 的包基址是 `/mock/data-pack`，不联网也能装。
 - **页面内直接调用应用模块**：`await import("/src/utils/xxx.ts")` —— Vite 按解析后的 URL 去重模块实例，
   拿到的是应用正在用的同一份单例。**不要为了测试往产品代码里加 `window.__debug` 之类的钩子。**

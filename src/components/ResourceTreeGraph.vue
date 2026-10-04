@@ -2,7 +2,7 @@
 import type { EdgeData, NodeData } from "@antv/g6"
 import { ExtensionCategory, Graph, register, treeToGraphData } from "@antv/g6"
 import { onBeforeUnmount, onMounted, ref, watch } from "vue"
-import type { ResourceTreeNode } from "@/data/LevelUpCalculator"
+import type { ResourceTreeNode } from "@/utils/LevelUpCalculator"
 import { VueNode } from "@/utils/vue-node"
 
 // 注册 VueNode 扩展

@@ -12,9 +12,9 @@ import {
     RaidDungeon,
     RaidSeason,
 } from "@/data/d/raid.data"
-import { titleFrameIdToKey } from "@/data/generated/title-frame.generated"
 import { getDropModeText } from "@/utils/i18n-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
+import { titleFrameIdToKey } from "@/utils/title-frame/title-frame.generated"
 
 const { t } = useTranslation()
 

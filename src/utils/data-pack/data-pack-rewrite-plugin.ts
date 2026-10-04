@@ -219,8 +219,8 @@ export function rewriteDataPackModule(sourcePath: string): string | null {
     const fallbacks = collectExportFallbacks(sourcePath)
 
     const lines = [
-        `import { registerDataPackBinding } from "../data-pack-bridge"`,
-        `import { syncDataPackModuleBindings } from "../data-pack"`,
+        `import { registerDataPackBinding } from "@/utils/data-pack/data-pack-bridge"`,
+        `import { syncDataPackModuleBindings } from "@/utils/data-pack/data-pack"`,
         "",
     ]
 

@@ -1,6 +1,6 @@
 import path from "node:path"
 import { describe, expect, it } from "vitest"
-import { rewriteDataPackModule } from "../data-pack-rewrite-plugin"
+import { rewriteDataPackModule } from "../data-pack/data-pack-rewrite-plugin"
 
 describe("dataPackRewritePlugin", () => {
     it("生成等待模块随机读取完成的壳模块", () => {

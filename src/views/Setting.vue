@@ -7,13 +7,6 @@ import { LAN_SYNC_HTTPS_PORT } from "@/api/lanSync"
 import type { IconTypes } from "@/components/Icon.vue"
 import { useScrollSpy } from "@/composables/useScrollSpy"
 import { useSearchParam } from "@/composables/useSearchParam"
-import {
-    clearAllDataPackStorage,
-    type DataPackSourceKind,
-    getInstalledDataPackVersions,
-    getMergedDataPackVersions,
-} from "@/data/data-pack"
-import { deleteImgsCache, imgsDownloadState } from "@/data/imgs-runtime"
 import { closeSafeMode, openSafeMode } from "@/data/versionGate"
 import { env } from "@/env"
 import { i18nLanguages } from "@/i18n"
@@ -23,6 +16,13 @@ import { useLanSyncStore } from "@/store/lanSync"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { buildCdnUrl, resolveCdnUrls } from "@/utils/cdn"
+import {
+    clearAllDataPackStorage,
+    type DataPackSourceKind,
+    getInstalledDataPackVersions,
+    getMergedDataPackVersions,
+} from "@/utils/data-pack/data-pack"
+import { deleteImgsCache, imgsDownloadState } from "@/utils/data-pack/imgs-runtime"
 import { cssQuoteFamily, customFontCssFamily } from "@/utils/font-storage"
 import { buildFloatWindowConfig } from "@/utils/skill-cd-overlay"
 import { DARK_THEMES, LIGHT_THEMES } from "@/utils/themes"

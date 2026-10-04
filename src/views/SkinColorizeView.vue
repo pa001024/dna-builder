@@ -16,12 +16,12 @@ import { useSearchParam } from "@/composables/useSearchParam"
 import { skinData } from "@/data/d/accessory.data"
 import charData from "@/data/d/char.data"
 import { skinColorizeMaxColorParts, skinColorizeMaxHairColorParts, skinColorizeParts, skinColorizeSwatches } from "@/data/d/skin-colorize.data"
-import { decodeSkinColorizeCode, encodeSkinColorizeCode, formatSkinColorizeRgb, type SkinColorizeSwatch } from "@/data/skin-colorize"
 import { env } from "@/env"
 import { useAuthStore } from "@/store/auth"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
 import { copyText, pasteText } from "@/util"
+import { decodeSkinColorizeCode, encodeSkinColorizeCode, formatSkinColorizeRgb, type SkinColorizeSwatch } from "@/utils/skin-colorize"
 import { formatRelativeTime } from "@/utils/time"
 
 const ui = useUIStore()

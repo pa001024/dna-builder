@@ -6,8 +6,8 @@
 // 全部答对时 emit("passed")，由父组件关闭安全模式；未答对即关闭（取消）时 emit("cancelled")。
 import { t } from "i18next"
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue"
-import type { SafeModeQuestion } from "@/data/safe-mode-questions"
-import { checkSafeModeAnswers, pickSafeModeQuestions, SAFE_MODE_REQUIRED_COUNT } from "@/data/safe-mode-questions"
+import type { SafeModeQuestion } from "@/utils/safe-mode-questions"
+import { checkSafeModeAnswers, pickSafeModeQuestions, SAFE_MODE_REQUIRED_COUNT } from "@/utils/safe-mode-questions"
 
 /** 答错后的冷却时长：5 分钟 */
 const QUIZ_COOLDOWN_MS = 5 * 60 * 1000

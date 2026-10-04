@@ -36,8 +36,8 @@ lint 报「icon not found」时用它。
 
 `pnpm itf`（`bun tools/import-title-frame.ts`）— 通过 fmodel-cli 读取游戏 pak，重新生成称号框渲染数据：
 
-- 产物：`src/data/generated/title-frame.generated.ts`、
-  `src/data/generated/title-frame-textures.json`（webp 文件名 → 游戏内包路径的清单）、
+- 产物：`src/utils/title-frame/title-frame.generated.ts`、
+  `src/utils/title-frame/title-frame-textures.json`（webp 文件名 → 游戏内包路径的清单）、
   `public/imgs/titleframe/*.webp`；
 - 预览：dev server 上打开 `tools/title-frame-preview.html`（`?frames=07_1,09_1` 可缩小范围）。
 
@@ -67,7 +67,7 @@ basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单�
 `final/i18n/<locale>/translation.json`（本身就是「简体中文原文 → 译文」扁平表）压成 tc/en/jp/kr/fr
 五份对照表，随数据包下发。
 
-- 前端由 `src/data/translations-pack.ts` 在读包后注入 i18next（走 `data-pack.ts` 的激活钩子，
+- 前端由 `src/utils/data-pack/translations-pack.ts` 在读包后注入 i18next（走 `data-pack.ts` 的激活钩子，
   **禁止反向 import 以免循环依赖**）；
 - 检索层的反向索引（译文 → 原文）优先查这份表；
 - `pnpm prune-i18n`（`bun tools/prune-migrated-i18n.ts`）据此把 `public/i18n` 里已迁移的中文键条目删掉，

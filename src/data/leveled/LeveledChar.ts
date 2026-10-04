@@ -1,4 +1,3 @@
-import { buildCdnUrl } from "../../utils/cdn"
 import type { Char, CommonAttr, SkillWeapon } from "../data-types"
 import { CommonLevelUp } from "./CommonLevelUp"
 import { LeveledSkill } from "./LeveledSkill"
@@ -9,6 +8,20 @@ let leveledCharResolver: LeveledCharResolver | undefined
 
 export function setLeveledCharResolver(resolver: LeveledCharResolver) {
     leveledCharResolver = resolver
+}
+
+/** 静态资源主源（与 `env.cdn` 同值）。数据层自包含，不依赖 `env` 等前端模块。 */
+const DEFAULT_CDN_BASE = "https://cdn.dna-builder.cn"
+
+/** 资源地址拼接器，由基建侧（`utils/cdn`）注入以接入测速选源。 */
+export type CdnUrlBuilder = (path: string) => string
+
+// 未注入前退回主源，保证任何调用方（含 server / MCP 等不经过前端启动流程的场景）
+// 拿到的都是可用的绝对地址，而不是无法加载的裸路径。
+let cdnUrlBuilder: CdnUrlBuilder = path => `${DEFAULT_CDN_BASE}/${path.replace(/^\/+/, "")}`
+
+export function setCdnUrlBuilder(builder: CdnUrlBuilder) {
+    cdnUrlBuilder = builder
 }
 
 /**
@@ -178,7 +191,7 @@ export class LeveledChar {
         if (!icon) return ""
         // 角色 icon 是裸名（如 Heitao），皮肤 icon 可能已带 T_Head_ 前缀，两种都兼容
         const base = icon.startsWith("T_Head_") ? icon.slice("T_Head_".length) : icon
-        return buildCdnUrl(`img/res/T_Bust_${base}.webp`)
+        return cdnUrlBuilder(`img/res/T_Bust_${base}.webp`)
     }
 
     public clone() {

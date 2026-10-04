@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-import { titleFrameIdToKey, titleFrames } from "@/data/generated/title-frame.generated"
 import {
     computeLayerRect,
     contributesToBounds,
@@ -15,7 +14,8 @@ import {
     type TitleFrameLayer,
     unionBounds,
     wrapTime,
-} from "@/data/title-frame"
+} from "../title-frame/title-frame"
+import { titleFrameIdToKey, titleFrames } from "../title-frame/title-frame.generated"
 
 /**
  * 构造一个最小可用的图层，仅覆盖被测试字段。

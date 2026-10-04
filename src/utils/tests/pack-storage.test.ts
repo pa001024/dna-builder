@@ -9,7 +9,7 @@ import {
     type PackStorageStore,
     resetPackStorageBackendCache,
     resolvePackStorageBackend,
-} from "../pack-storage"
+} from "../data-pack/pack-storage"
 
 /**
  * 被 mock 的 Dexie 记录表：表名 → (主键 → 行)。

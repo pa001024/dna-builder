@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { beforeAll, describe, expect, it } from "vitest"
-import { applyHdiff } from "../hpatchz-wasm"
+import { applyHdiff } from "../data-pack/hpatchz-wasm"
 
 const fixturesDir = resolve(fileURLToPath(import.meta.url), "../fixtures")
 

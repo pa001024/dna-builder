@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { type CSSProperties, computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
-import { titleFrameIdToKey, titleFrames } from "@/data/generated/title-frame.generated"
 import {
     computeLayerRect,
     flipBookCellAt,
@@ -12,8 +11,9 @@ import {
     type TitleFrameDef,
     type TitleFrameLayer,
     type TitleFrameLayerTrack,
-} from "@/data/title-frame"
-import { createFrameRenderer, type FrameRenderer } from "@/data/title-frame-webgl"
+} from "@/utils/title-frame/title-frame"
+import { titleFrameIdToKey, titleFrames } from "@/utils/title-frame/title-frame.generated"
+import { createFrameRenderer, type FrameRenderer } from "@/utils/title-frame/title-frame-webgl"
 
 const props = withDefaults(
     defineProps<{

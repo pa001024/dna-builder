@@ -17,10 +17,10 @@ import {
 } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { type TitleFrame, titleFrameData } from "@/data/d/titleframe.data"
-import { titleFrameIdToKey } from "@/data/generated/title-frame.generated"
 import { getAccessoryUnlockLabelKey, getWanhuaSkinUnlock, normalizeAccessoryUnlock, resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass, getRarityName, getRaritySwatchClass } from "@/utils/rarity-utils"
+import { titleFrameIdToKey } from "@/utils/title-frame/title-frame.generated"
 
 type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head" | "titleframe"
 

@@ -1,5 +1,5 @@
 import i18next from "i18next"
-import { translationsEn, translationsFr, translationsJa, translationsKo, translationsTc } from "./d/translations.data"
+import { translationsEn, translationsFr, translationsJa, translationsKo, translationsTc } from "@/data/d/translations.data"
 import { registerDataPackHydrationCallback } from "./data-pack-bridge"
 
 /**

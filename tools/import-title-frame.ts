@@ -12,7 +12,7 @@
  *      BlendMode、贴图参数与标量参数，并挑出主贴图；
  *   4. 对所有用到的贴图调 `export-tex` 导出 PNG，再用 Bun.Image 转成 WebP
  *      落到 `public/imgs/titleframe/`；
- *   5. 产出 `src/data/generated/title-frame.generated.ts`。
+ *   5. 产出 `src/utils/title-frame/title-frame.generated.ts`。
  *
  * 前置条件（可用环境变量覆盖）：
  *   FMODEL_CLI        fmodel-cli.exe 路径
@@ -40,21 +40,21 @@ import type {
     TitleFrameLayerTrack,
     TitleFrameTextStyle,
     TitleFrameTransformCurves,
-} from "../src/data/title-frame"
-import { TITLE_FONT_LINE_RATIO, unionBounds } from "../src/data/title-frame"
+} from "../src/utils/title-frame/title-frame"
+import { TITLE_FONT_LINE_RATIO, unionBounds } from "../src/utils/title-frame/title-frame"
 
 const ROOT_DIR = path.resolve(import.meta.dir, "..")
 const CLI = process.env.FMODEL_CLI ?? "D:/dev/fmodel-mcp/Cli/bin/publish/fmodel-cli.exe"
 const TITLE_FRAME_LUA = process.env.TITLE_FRAME_LUA ?? "D:/dev/dna-unpack/lua/EM/Content/Script/Datas/TitleFrame.lua"
 const CACHE_DIR = process.env.TITLE_FRAME_CACHE ?? path.join(ROOT_DIR, ".tmp", "titleframe-cache")
-const OUTPUT_DATA = path.join(ROOT_DIR, "src", "data", "generated", "title-frame.generated.ts")
+const OUTPUT_DATA = path.join(ROOT_DIR, "src", "utils", "title-frame", "title-frame.generated.ts")
 /**
  * 贴图清单：webp 文件名 → 游戏内包路径。
  *
  * 称号框贴图遇到同名冲突会被改写成带父目录前缀的名字（如 13_T_PersonalInfo_Title_13_08.webp），
  * 靠 basename 已经反查不回源 PNG。这里把映射落盘，tools/webp-import.ts 读它来补齐这些引用。
  */
-const OUTPUT_TEXTURE_MANIFEST = path.join(ROOT_DIR, "src", "data", "generated", "title-frame-textures.json")
+const OUTPUT_TEXTURE_MANIFEST = path.join(ROOT_DIR, "src", "utils", "title-frame", "title-frame-textures.json")
 const OUTPUT_IMAGES = path.join(ROOT_DIR, "public", "imgs", "titleframe")
 
 /** 动画时间轴刻度：UMG 默认 60000 tick / 秒。 */
@@ -1298,7 +1298,7 @@ function toTsLiteral(value: unknown, depth = 0): string {
  */
 function renderGeneratedFile(frames: Record<string, TitleFrameDef>, idToKey: Record<number, string>): string {
     return `${GENERATED_HEADER}
-import type { TitleFrameDef } from "@/data/title-frame"
+import type { TitleFrameDef } from "@/utils/title-frame/title-frame"
 
 /** 全部称号框数据，key 为 WBP 资源名后缀（如 "07_2"）。 */
 export const titleFrames: Record<string, TitleFrameDef> = ${toTsLiteral(frames)}

@@ -1,6 +1,6 @@
-import { charLevelUpExpCost, weaponLevelUpExpCost } from "./d/levelup.data"
-import type { Draft, ForgeData } from "./data-types"
-import { CashToExpRate } from "./game-const"
+import { charLevelUpExpCost, weaponLevelUpExpCost } from "@/data/d/levelup.data"
+import type { Draft, ForgeData } from "@/data/data-types"
+import { CashToExpRate } from "@/data/game-const"
 import type {
     CharLevelUpConfig,
     LevelUpCalculatorConfig,

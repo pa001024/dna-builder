@@ -44,5 +44,4 @@ import achievementData from "./d/achievement.data"
 
 export * from "./d"
 export * from "./data-types"
-export { LevelUpCalculator } from "./LevelUpCalculator"
 export { achievementData }

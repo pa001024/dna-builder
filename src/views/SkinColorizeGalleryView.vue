@@ -8,9 +8,9 @@ import { LeveledChar } from "@/data"
 import { skinData } from "@/data/d/accessory.data"
 import charData from "@/data/d/char.data"
 import { skinColorizeSwatches } from "@/data/d/skin-colorize.data"
-import { formatSkinColorizeRgb } from "@/data/skin-colorize"
 import { useUIStore } from "@/store/ui"
 import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { formatSkinColorizeRgb } from "@/utils/skin-colorize"
 import { formatRelativeTime } from "@/utils/time"
 
 const router = useRouter()

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest"
-import { collectResourceQuestSources, collectResourceShopSources } from "../../utils/resource-source"
-import { weaponDraftMap } from "../d"
-import modData from "../d/mod.data"
-import resourceData from "../d/resource.data"
-import weaponData from "../d/weapon.data"
+import { weaponDraftMap } from "@/data/d"
+import modData from "@/data/d/mod.data"
+import resourceData from "@/data/d/resource.data"
+import weaponData from "@/data/d/weapon.data"
 import { LevelUpCalculator, type ResourceCost } from "../LevelUpCalculator"
 import { calculateCharLevelUp, calculateWeaponLevelUp, estimateTime, type ModExt } from "../LevelUpCalculatorImpl"
+import { collectResourceQuestSources, collectResourceShopSources } from "../resource-source"
 
 describe("LevelUpCalculator", () => {
     const mockResourceNeeds: ResourceCost = {

@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { registerDataPackBinding, registerDataPackHydrationCallback, replaceRegisteredDataPackBindings } from "../data-pack-bridge"
-import { getCurrentVersionLimit, setCurrentVersionLimit } from "../versionGate"
+import { getCurrentVersionLimit, setCurrentVersionLimit } from "@/data/versionGate"
+import {
+    registerDataPackBinding,
+    registerDataPackHydrationCallback,
+    replaceRegisteredDataPackBindings,
+} from "../data-pack/data-pack-bridge"
 
 describe("数据包绑定替换", () => {
     it("切换数据包时应该清空旧导出并再次触发初始化", () => {

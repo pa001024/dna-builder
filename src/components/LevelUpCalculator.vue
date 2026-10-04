@@ -18,7 +18,10 @@ import {
     weaponMap,
 } from "@/data"
 import { charExtraExcelWeapon } from "@/data/d/charext.data"
-import { dataPackBootstrapLoading, dataPackHydrationKey, isDataPackHydrated } from "@/data/data-pack-bridge"
+import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
+import { dataPackBootstrapLoading, dataPackHydrationKey, isDataPackHydrated } from "@/utils/data-pack/data-pack-bridge"
+import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import {
     type CharLevelUpConfig,
     LevelUpCalculator,
@@ -27,10 +30,7 @@ import {
     type ResourceCost,
     type TimeEstimateConfig,
     type WeaponLevelUpConfig,
-} from "@/data/LevelUpCalculator"
-import { useSettingStore } from "@/store/setting"
-import { useUIStore } from "@/store/ui"
-import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
+} from "@/utils/LevelUpCalculator"
 
 // 角色数据类型
 interface CharItem {

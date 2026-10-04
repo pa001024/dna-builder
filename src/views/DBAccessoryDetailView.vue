@@ -4,7 +4,7 @@ import { useRoute } from "vue-router"
 import { charAccessoryData, hairData, headFrameData, skinData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { titleFrameData } from "@/data/d/titleframe.data"
-import { titleFrameIdToKey } from "@/data/generated/title-frame.generated"
+import { titleFrameIdToKey } from "@/utils/title-frame/title-frame.generated"
 
 type AccessoryType = "char" | "weapon" | "skin" | "weaponskin" | "hair" | "headframe" | "head" | "titleframe"
 type AccessoryDetailItem =

@@ -4,7 +4,7 @@
  *
  * 前端不存储明文答案，只保存 bcrypt 哈希；答题时用 bcryptjs.compare 校验对错。
  * 因此新增/修改题目时，先运行本工具把答案哈希出来，再粘贴到
- * src/data/safe-mode-questions.ts 的 answerHash 字段。
+ * src/utils/safe-mode-questions.ts 的 answerHash 字段。
  *
  * 用法:
  *   bun tools/hash-answer.ts "42"                    # 哈希答案，默认 10 轮

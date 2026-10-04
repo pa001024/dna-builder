@@ -165,9 +165,21 @@ AST（抽象语法树）解析器和求值器。
 - `member_access`：成员访问（`伤害.N`）
 - `number`：数字字面量
 
-### pack-storage.ts（数据包存储）
+### 数据包与前端基建（已移出本目录）
 
-数据包（十几 MB 的整包 zip 与逐个模块文件）放在浏览器存储里，由本模块统一选择后端：
+数据包加载、存储、差分、图片缓存等属于前端基建，不属于数据层，现位于 `src/utils/data-pack/`：
+
+- `data-pack.ts`：包下载、安装、差分升级、卸载
+- `pack-storage.ts`：OPFS / IndexedDB 存储后端选择
+- `hpatchz-wasm.ts`：浏览器内应用 HDiffPatch 差分
+- `imgs-runtime.ts`：图片缓存挂载
+- `data-pack-bridge.ts`：静态导出绑定的注册与水合
+- `data-pack-runtime.ts`：启动装配（在此注入 CDN 拼接器、注册水合钩子）
+- `data-pack-rewrite-plugin.ts`：构建期改写插件
+- `translations-pack.ts`：文案对照表注入
+
+其中存储后端的挑选规则：数据包（十几 MB 的整包 zip 与逐个模块文件）放在浏览器存储里，
+统一由 `pack-storage.ts` 选择后端：
 
 - **优先 OPFS**，但用一次真实写入做能力探测，而不是只看 `navigator.storage.getDirectory` 是否存在：
   Safari 15.2 起就有该 API，却直到 Safari 26 才实现 `FileSystemFileHandle.createWritable()`，
@@ -181,6 +193,16 @@ AST（抽象语法树）解析器和求值器。
   同一把键也可在调试时手工改成 `opfs` / `indexeddb` 强制切换后端。
 
 图片缓存（`imgs-runtime.ts`）目前仍直接使用 OPFS，且只在桌面端启用。
+
+### 与前端基建的解耦约定
+
+数据层不 import 前端基建，需要外部能力的模块一律用「注入」而非直接依赖：
+
+- `LeveledChar` 的资源地址拼接：`setCdnUrlBuilder()` 注入，**默认值为主源绝对地址**
+  （`cdn.dna-builder.cn`），保证 server / MCP 等不经过前端启动流程的调用方也能拿到可用 URL。
+- 派生索引重建（`rebuildStaticIndexes`）与潜质缓存失效（`invalidatePetTraitCaches`）：
+  由 `data-pack-runtime.ts` 在数据包水合钩子里注册。`d/index.ts` 在模块首次求值时
+  自行建一次索引，因此单独引入数据层（不经 runtime）也能正常工作。
 
 ### d/
 
@@ -197,7 +219,6 @@ AST（抽象语法树）解析器和求值器。
 - `abyss.data.ts`：深渊副本数据
 - `dungeon.data.ts`：副本数据
 - `fish.data.ts`：钓鱼数据
-- `walnut.data.ts`：胡桃数据
 
 ### tests/
 

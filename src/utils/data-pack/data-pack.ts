@@ -1,8 +1,8 @@
 import { decode } from "@msgpack/msgpack"
 import { type Unzipped, unzip } from "fflate"
-import { tauriFetch } from "../api/app"
-import { env } from "../env"
-import { getActiveCdnBase, resolveCdnUrls } from "../utils/cdn"
+import { tauriFetch } from "@/api/app"
+import { env } from "@/env"
+import { getActiveCdnBase, resolveCdnUrls } from "../cdn"
 import {
     getRegisteredDataPackModuleKeys,
     hydrateRegisteredDataPackBindings,

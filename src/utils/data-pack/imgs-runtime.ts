@@ -1,8 +1,8 @@
 import { unzipSync } from "fflate"
 import { ref } from "vue"
-import { tauriFetch } from "../api/app"
-import { env } from "../env"
-import { buildCdnUrl, getOtherCdnBase } from "../utils/cdn"
+import { tauriFetch } from "@/api/app"
+import { env } from "@/env"
+import { buildCdnUrl, getOtherCdnBase } from "../cdn"
 
 const IMGS_CACHE_DIR = "dna-builder-imgs"
 

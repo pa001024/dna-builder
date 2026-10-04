@@ -14,8 +14,8 @@
  * 重算出来的值与「整包内容」无关。服务端自己负责按当前数据重建索引，这里只管携带与降级。
  */
 
-import { registerDataPackHydrationCallback } from "@/data/data-pack-bridge"
 import { env } from "@/env"
+import { registerDataPackHydrationCallback } from "@/utils/data-pack/data-pack-bridge"
 import type { DBAgentLang } from "@/utils/db-locale"
 import { isRagEnabled } from "@/utils/rag/enabled"
 
@@ -86,7 +86,7 @@ async function resolveFingerprints(lang: string): Promise<Record<string, string>
     }
 
     try {
-        const { getLoadedDataPackRagFingerprints } = await import("@/data/data-pack")
+        const { getLoadedDataPackRagFingerprints } = await import("@/utils/data-pack/data-pack")
         const fingerprints = getLoadedDataPackRagFingerprints(lang)
         fingerprintCache.set(lang, fingerprints)
 

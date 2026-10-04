@@ -125,7 +125,7 @@ const sourceRoot = resolveSourceRoot(getArgValue("--source") ?? process.env.WEBP
  * 称号框贴图遇到同名冲突会改写成带父目录前缀的名字，basename 与源 PNG 对不上，
  * 必须靠这份清单按“包路径”去导出目录里定位，否则会被报成 349 条缺失里的 73 条。
  */
-const TITLE_FRAME_MANIFEST = path.join(rootDir, "src", "data", "generated", "title-frame-textures.json")
+const TITLE_FRAME_MANIFEST = path.join(rootDir, "src", "utils", "title-frame", "title-frame-textures.json")
 
 /**
  * 收集指向项目根目录的所有路径别名。

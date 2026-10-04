@@ -1,3 +1,7 @@
+import { rebuildStaticIndexes } from "@/data/d"
+import { setCdnUrlBuilder } from "@/data/leveled/LeveledChar"
+import { invalidatePetTraitCaches } from "@/data/petTrait"
+import { buildCdnUrl } from "@/utils/cdn"
 import {
     bootstrapDataPack,
     getLoadedDataPackImgsCacheInfo,
@@ -6,8 +10,23 @@ import {
     loadDataPackModule,
     syncDataPackModuleBindings,
 } from "./data-pack"
+import { isDataPackHydrated, registerDataPackHydrationCallback } from "./data-pack-bridge"
 // 副作用导入：注册「数据包激活后注入文案对照表」的钩子，必须早于首次激活
 import "./translations-pack"
+
+// 数据层不依赖前端基建：资源地址拼接在这里注入以接入测速选源
+// （未注入时数据层会退回主源，因此 server / MCP 等旁路场景也可用）。
+setCdnUrlBuilder(buildCdnUrl)
+
+// 派生索引（charMap / modMap 等）与潜质目录缓存都由原始条目表推导，
+// 换包后必须整体重建。数据层不感知数据包存在，注册动作集中在这一处。
+registerDataPackHydrationCallback(() => {
+    rebuildStaticIndexes()
+    invalidatePetTraitCaches()
+})
+if (!isDataPackHydrated()) {
+    rebuildStaticIndexes()
+}
 
 const DATA_PACK_MODULES = [
     "translations.data",
