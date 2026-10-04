@@ -9,12 +9,12 @@
  * （`server` 已有直接 import 仓库 `src/data` 的先例），而它只依赖数据模块与纯函数。
  */
 
-import { DEFAULT_STORY_TEXT_CONFIG, replaceStoryPlaceholders, stripStoryTextTags } from "../../utils/story-text"
 import type { CharExt } from "../d/charext.data"
 import type { CharVoice } from "../d/charvoice.data"
 import type { Dialogue, DialogueOption, QuestItem } from "../d/quest.data"
 import type { QuestChain } from "../d/questchain.data"
 import { questChain2Version } from "../d/questchain.data"
+import { DEFAULT_STORY_TEXT_CONFIG, replaceStoryPlaceholders, stripStoryTextTags } from "../story-text"
 import {
     entryAnchor,
     profileAnchor,

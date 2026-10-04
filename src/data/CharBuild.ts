@@ -1,5 +1,4 @@
 import { groupBy } from "lodash-es"
-import type { RawTimelineData } from "../store/timeline"
 import { type ASTNode, parseAST } from "./ast"
 import type { AbstractMod, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
@@ -10,6 +9,7 @@ import { LeveledSkill } from "./leveled/LeveledSkill"
 import { LeveledSkillWeapon } from "./leveled/LeveledSkillWeapon"
 import { LeveledWeapon } from "./leveled/LeveledWeapon"
 import { isMultiplicativeAttr } from "./leveled/minusAttr"
+import type { RawTimelineData } from "./timeline-data"
 
 // 本地实现base36Pad函数，避免依赖浏览器API
 function base36Pad(num: number): string {

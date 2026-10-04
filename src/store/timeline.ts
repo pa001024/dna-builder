@@ -1,19 +1,8 @@
 import { useLocalStorage } from "@vueuse/core"
 import { computed, type Ref } from "vue"
+import type { RawTimelineData } from "@/data/timeline-data"
 
-export interface RawTimelineData {
-    name: string
-    tracks: string[]
-    items: {
-        i: number
-        n: string
-        t: number
-        d: number
-        l?: number
-    }[]
-    /** 血量曲线数据 [时间, 血量值][] */
-    hp?: [number, number][]
-}
+export type { RawTimelineData } from "@/data/timeline-data"
 
 /**
  * 基于角色名读取/写入对应的时间轴本地存储数据。

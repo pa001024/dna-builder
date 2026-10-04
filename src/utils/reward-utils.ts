@@ -1,22 +1,6 @@
-import { type Dungeon, rewardMap } from "../data"
+import { type Dungeon, type RewardItem, rewardMap } from "../data"
 
-/**
- * 奖励项类型定义，包含掉落模式
- */
-export interface RewardItem {
-    id: number
-    t: string
-    c?: number
-    d?: 1 // 是否是设计稿
-    dp?: 1 //是否是Drop类型
-    p: number
-    totalP?: number // 总和权重
-    pp?: number // 总和概率
-    times?: number // 期望次数
-    m?: string
-    n?: string
-    child?: RewardItem[]
-}
+export type { RewardItem } from "../data"
 
 /**
  * 自选奖励组的原始结构。

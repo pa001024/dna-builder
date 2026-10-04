@@ -1,6 +1,5 @@
-import type { CharSettings } from "../composables/useCharSettings"
-import { getModVariantAura, getModVariantSlots } from "../composables/useCharSettings"
 import { CharBuild, CharBuildTimeline } from "./CharBuild"
+import { type CharSettings, getModVariantAura, getModVariantSlots } from "./charSettings"
 import type { Weapon } from "./data-types"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "./effectLv"
 import { LeveledBuff } from "./leveled/LeveledBuff"

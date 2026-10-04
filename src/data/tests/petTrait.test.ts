@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { createDefaultCharSettings } from "@/composables/useCharSettings"
+import { createDefaultCharSettings } from "@/data/charSettings"
 import { createCharBuildFromSettings } from "../CharBuildHelper"
 import { buffMap } from "../d"
 import { petEntrys } from "../d/pet.data"

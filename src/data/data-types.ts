@@ -613,4 +613,20 @@ export interface OptReward {
     child: RewardChild[]
 }
 
+/** 奖励项类型定义，包含掉落模式（自选奖励组与进度奖励共用同一形状） */
+export interface RewardItem {
+    id: number
+    t: string
+    c?: number
+    d?: 1 // 是否是设计稿
+    dp?: 1 //是否是Drop类型
+    p: number
+    totalP?: number // 总和权重
+    pp?: number // 总和概率
+    times?: number // 期望次数
+    m?: string
+    n?: string
+    child?: RewardItem[]
+}
+
 export type { Dungeon } from "./d/dungeon.data"

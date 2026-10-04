@@ -204,6 +204,25 @@ AST（抽象语法树）解析器和求值器。
   由 `data-pack-runtime.ts` 在数据包水合钩子里注册。`d/index.ts` 在模块首次求值时
   自行建一次索引，因此单独引入数据层（不经 runtime）也能正常工作。
 
+**当前 `src/data` 生产代码对外零依赖**（不 import `utils` / `store` / `composables` / `api` / `env`；
+`d/map.data.ts` 的 `dna-api` 是外部 API 包声明，`tests/` 下的引用不进包）。因此凡是「数据形状 / 纯规则」
+都住在数据层，前端基建侧改为**转引**，避免实现分叉：
+
+| 数据层模块 | 原属地 | 前端侧转引位置 |
+|---|---|---|
+| `charSettings.ts`（`CharSettings` 及 MOD 变体全部纯函数） | `composables/useCharSettings.ts` | `composables/useCharSettings.ts`（只剩 localStorage + composable 本体）|
+| `timeline-data.ts`（`RawTimelineData`） | `store/timeline.ts` | `store/timeline.ts` |
+| `story-text.ts`（剧情占位符 / 标签解析） | `utils/story-text.ts` | `utils/story-text.ts` |
+| `enum-text.ts`（枚举值 → 中文展示名） | `utils/i18n-utils.ts` | `utils/i18n-utils.ts` |
+| `RewardItem`（奖励项形状） | `utils/reward-utils.ts` | `utils/reward-utils.ts` |
+| `formatPetSkillText`（魔灵技能文案） | `utils/pet-skill-text.ts` | `utils/pet-skill-text.ts` |
+| `title-frame/*`（称号框渲染） | `data/` | `utils/title-frame/*`（反向：纯前端渲染，已搬出）|
+
+判定口径：**看谁需要它**。计算内核、RAG 索引与 MCP 服务端要用的形状/规则 → 数据层；只有 UI 要的 → utils。
+同名的类型**只留一份**：`DotFrequencySettings` 直接 `export type ... from "./CharBuild"`，
+否则 `data/index.ts` 里两个 `export *` 会撞名。
+
+
 ### d/
 
 静态游戏数据文件，包含所有角色的技能、武器、MOD、怪物等数据。

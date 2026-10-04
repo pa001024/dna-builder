@@ -1,6 +1,6 @@
-import { type CharSettings, normalizeCharSettings } from "../../../composables/useCharSettings"
 import type { CharBuild } from "../../CharBuild"
 import { createCharBuildFromSettings } from "../../CharBuildHelper"
+import { type CharSettings, normalizeCharSettings } from "../../charSettings"
 import { charData } from "../../index"
 
 /**

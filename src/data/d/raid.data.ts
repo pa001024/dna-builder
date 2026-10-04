@@ -1,4 +1,4 @@
-import type { RewardItem } from "../../utils/reward-utils"
+import type { RewardItem } from "../data-types"
 
 export interface RaidCalculationItem {
     FomulaId: number

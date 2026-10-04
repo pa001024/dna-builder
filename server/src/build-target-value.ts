@@ -1,19 +1,11 @@
-/**
- * 构筑榜单目标值（targetValue）计算与内存缓存。
- *
- * 把构筑的 charSettings 交给上层真实的 CharBuild 模型算出 `calculate()` 结果，作为榜单排序依据。
- * 该值只缓存在进程内存里、不落库：数据包版本变化会让同一份 charSettings 算出不同数值，
- * 落库会留下无法判定新鲜度的脏值；改为内存缓存后由「改构筑 / 传数据包」两个入口显式清空。
- */
-
 import { createCharBuildFromSettings } from "dna-builder-data/CharBuildHelper"
-import { normalizeCharSettings } from "@/composables/useCharSettings"
+import { normalizeCharSettings } from "dna-builder-data/charSettings"
 
 /**
  * 单份构筑的目标值缓存，键为构筑 id。
  * 构筑内容被改动（updateBuild）或数据包更新后，必须显式清掉对应条目/整表，否则会返回旧值。
  */
-const cache = new Map<string, number>()
+const targetValueCache = new Map<string, number>()
 
 /** 同一构筑的并发计算去重：同一 id 的请求共享同一次计算 */
 const inflight = new Map<string, Promise<number | null>>()
@@ -44,7 +36,7 @@ export function computeBuildTargetValue(charId: number, charSettings: string): n
  * @returns 目标值；不可得时为 null
  */
 export function getBuildTargetValue(id: string, charId: number, charSettings: string): Promise<number | null> {
-    const cached = cache.get(id)
+    const cached = targetValueCache.get(id)
     if (cached !== undefined) return Promise.resolve(cached)
 
     const pending = inflight.get(id)
@@ -53,7 +45,7 @@ export function getBuildTargetValue(id: string, charId: number, charSettings: st
     const task = Promise.resolve()
         .then(() => computeBuildTargetValue(charId, charSettings))
         .then(value => {
-            if (value !== null) cache.set(id, value)
+            if (value !== null) targetValueCache.set(id, value)
             return value
         })
         .finally(() => {
@@ -88,8 +80,8 @@ export async function getBuildTargetValues(
  * @returns 被清掉的条目数
  */
 export function clearBuildTargetValueCache(): number {
-    const size = cache.size
-    cache.clear()
+    const size = targetValueCache.size
+    targetValueCache.clear()
     return size
 }
 
@@ -99,7 +91,7 @@ export function clearBuildTargetValueCache(): number {
  * @returns 是否清掉了条目
  */
 export function invalidateBuildTargetValue(id: string): boolean {
-    return cache.delete(id)
+    return targetValueCache.delete(id)
 }
 
 /**
@@ -107,5 +99,5 @@ export function invalidateBuildTargetValue(id: string): boolean {
  * @returns 缓存条目数
  */
 export function getBuildTargetValueCacheSize(): number {
-    return cache.size
+    return targetValueCache.size
 }

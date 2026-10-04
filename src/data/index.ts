@@ -1,6 +1,7 @@
 // 导出所有模块
 
 export * from "./CharBuild"
+export * from "./charSettings"
 export * from "./leveled"
 export * from "./leveled/LeveledHelpers"
 
