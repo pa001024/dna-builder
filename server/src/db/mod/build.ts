@@ -1,6 +1,7 @@
 import type { CreateMobius, Resolver } from "@pa001024/graphql-mobius"
 import { and, desc, eq, like, sql } from "drizzle-orm"
 import { createGraphQLError } from "graphql-yoga"
+import { clearBuildTargetValueCache, getBuildTargetValue, invalidateBuildTargetValue } from "../../build-target-value"
 import { db, schema } from ".."
 import type { Context } from "../yoga"
 import { getSubSelection } from "."
@@ -21,6 +22,8 @@ export const typeDefs = /* GraphQL */ `
         updateAt: Float!
         user: User
         isLiked: Boolean
+        "目标函数计算结果"
+        targetValue: Float
     }
 
     input BuildInput {
@@ -38,6 +41,7 @@ export const typeDefs = /* GraphQL */ `
         unlikeBuild(id: String!): Build
         recommendBuild(id: String!, recommended: Boolean!): Build
         pinBuild(id: String!, pinned: Boolean!): Build
+        clearBuildTargetValueCache: Int!
     }
 
     type Query {
@@ -50,6 +54,15 @@ export const typeDefs = /* GraphQL */ `
 `
 
 export const resolvers = {
+    Build: {
+        /**
+         * 目标值按需计算并缓存，不落库（数据包更新后由 clearBuildTargetValueCache 作废）。
+         * @param parent 上层返回的构筑记录
+         * @returns 目标值；配置损坏或引用已下线数据时为 null
+         */
+        targetValue: (parent: { id: string; charId: number; charSettings: string }) =>
+            getBuildTargetValue(parent.id, parent.charId, parent.charSettings),
+    },
     Query: {
         builds: async (_parent, args, context, info) => {
             const { search, charId, userId, limit = 20, offset = 0, sortBy = "latest" } = args || {}
@@ -299,6 +312,11 @@ export const resolvers = {
                 throw createGraphQLError("更新失败")
             }
 
+            // 仅当构筑内容（角色 / 配置）真的变化时才作废缓存：标题、描述等元数据改动不影响计算结果
+            if (build.charId !== input.charId || build.charSettings !== input.charSettings) {
+                invalidateBuildTargetValue(id)
+            }
+
             const result = await db.query.builds.findFirst({
                 where: eq(schema.builds.id, id),
                 with: { user: getSubSelection(info, "user") ? true : undefined },
@@ -349,7 +367,19 @@ export const resolvers = {
             }
 
             await db.delete(schema.builds).where(eq(schema.builds.id, id))
+            invalidateBuildTargetValue(id)
             return true
+        },
+        /**
+         * 清空构筑目标值缓存，并要求管理员权限。
+         * 数据包更新会改变同一份 charSettings 的计算口径，前端在导入新数据包后调用本接口使旧值作废。
+         * @returns 被清掉的缓存条目数
+         */
+        clearBuildTargetValueCache: async (_parent, _args, context) => {
+            if (!context.user?.roles?.includes("admin")) {
+                throw createGraphQLError("Unauthorized: Admin role required")
+            }
+            return clearBuildTargetValueCache()
         },
         likeBuild: async (_parent, args, context, info) => {
             if (!context.user) {

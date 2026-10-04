@@ -469,6 +469,7 @@ export interface Build {
     updateAt: number
     user?: User
     isLiked?: boolean
+    targetValue?: number
 }
 
 export interface AdminStats {

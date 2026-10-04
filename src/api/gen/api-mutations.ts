@@ -1458,6 +1458,12 @@ export const pinBuildMutation = typedMutation<Types.Build, { id: string; pinned:
     }
 `)
 
+export const clearBuildTargetValueCacheMutation = typedMutation<number>(/* GraphQL */ `
+    mutation {
+        clearBuildTargetValueCache
+    }
+`)
+
 export const createActivityMutation = typedMutation<Types.Activity, { server: string; input: Types.ActivityInput }>(/* GraphQL */ `
     mutation ($server: String!, $input: ActivityInput!) {
         createActivity(server: $server, input: $input) {

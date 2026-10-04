@@ -35,6 +35,13 @@
                后两条是为了让 externals 里的源码也用服务端这份 graphql / graphql-yoga，
                否则它会解析到仓库根目录的 graphql v16，GraphQLResolveInfo 与服务端 v17 不兼容 */
             "@pa001024/graphql-mobius": ["../externals/graphql-mobius/src/index.ts"],
+            /* 服务端直接复用仓库上层的构筑计算模型（CharBuild），避免发布 npm 包后再手动同步。
+               Bun 运行时同样读取本文件的 paths，因此服务端 import "dna-builder-data/CharBuildHelper" 可直接解析。
+               ⚠️ 不能改用 package.json 的 overrides("file:../src/data")：Windows 下 Bun 会把目录外链解成空壳目录（只建目录不落文件）。 */
+            "dna-builder-data": ["../src/data/index.ts"],
+            "dna-builder-data/*": ["../src/data/*"],
+            /* 上层 src 内部一律用 "@/*" 自引用，服务端把该模块图拉进来后必须能解析同一套别名 */
+            "@/*": ["../src/*"],
             "graphql": ["./node_modules/graphql"],
             "graphql-yoga": ["./node_modules/graphql-yoga"]
         },
