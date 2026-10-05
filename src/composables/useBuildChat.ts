@@ -1,16 +1,22 @@
 import i18next from "i18next"
 import { computed, type Ref, ref, watch } from "vue"
-import type { AgentToolTrace } from "@/api/agent/kernel"
-import { BuildAgent } from "@/api/buildAgent"
-import type { CharSettings } from "@/composables/useCharSettings"
-import { type BuildAgentChatMessage, db, type MessageReasoning, type MessageToolTrace, type UBuildAgentChat } from "@/store/db"
-import type { useInvStore } from "@/store/inv"
+import type { AgentCompactionOutcome } from "@/api/agent/compact"
+import { createBuildAgent } from "@/api/buildAgent"
+import { useAgentChatCore } from "@/composables/useAgentChatCore"
+import {
+    type BuildAgentChatMessage,
+    db,
+    type MessageCompaction,
+    type MessageReasoning,
+    type MessageTokenUsage,
+    type MessageToolTrace,
+    type UBuildAgentChat,
+} from "@/store/db"
 import type { useSettingStore } from "@/store/setting"
-import { resolveSharedAgentUpstream, watchAgentUpstream } from "@/utils/agent-upstream"
+import { lastCompactionIndex } from "@/utils/agent-chat"
+import { resolveSharedAgentUpstream } from "@/utils/agent-upstream"
 import { DEFAULT_AI_MAX_TOKENS } from "@/utils/ai-config"
 import { type ChatImage, MAX_CHAT_IMAGES } from "@/utils/chat-image"
-import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
-import { formatAskUserResponse, hasAskAnswer } from "@/utils/db-ask-user"
 
 /** 配装助手会话主键前缀（沿用历史存档格式，保证旧记录仍可读取） */
 const BUILD_AGENT_CHAT_ID_PREFIX = "build-agent-chat:"
@@ -31,7 +37,8 @@ function normalizeStoredMessage(raw: unknown, index: number): BuildAgentChatMess
     }
 
     const source = raw as Record<string, unknown>
-    const role = source.role === "user" ? "user" : "assistant"
+    // system 角色只用于上下文压缩边界；旧数据没有该角色，保持 user/assistant 的二分兜底
+    const role = source.role === "user" ? "user" : source.role === "system" ? "system" : "assistant"
     const content = typeof source.content === "string" ? source.content : String(source.content ?? "")
     const legacyReasoning = typeof source.reasoning === "string" && source.reasoning.trim() ? source.reasoning : ""
 
@@ -65,60 +72,52 @@ function normalizeStoredMessage(raw: unknown, index: number): BuildAgentChatMess
         message.pendingAsk = source.pendingAsk as BuildAgentChatMessage["pendingAsk"]
     }
 
+    if (source.tokenUsage && typeof source.tokenUsage === "object") {
+        message.tokenUsage = source.tokenUsage as MessageTokenUsage
+    }
+
+    if (source.compaction && typeof source.compaction === "object") {
+        message.compaction = source.compaction as MessageCompaction
+    }
+
     return message
 }
 
 /**
  * 配装助手对话状态：消息流 + 配装 Agent 调用。
  *
- * 与资料检索的 {@link useDBChat} 同构（结构化痕迹 / 分段思考 / 耗时累加 /
- * 挂起续跑），差别只在会话按角色一条、没有会话列表。
- * @param charSettings 当前角色的构筑设置
+ * 与资料检索的 {@link useDBChat} 共用同一个公共核（{@link useAgentChatCore}：
+ * 回调构建 / 耗时累加 / 挂起续跑 / 错误兜底），差别只在会话按角色一条存档、
+ * 没有会话列表，且失败提问可重试。
  * @param selectedChar 当前角色名
- * @param inv 库存 store
  * @param settingStore 设置 store（取 AI 输出上限）
  * @returns 对话状态与操作方法
  */
-export function useBuildChat(
-    charSettings: Ref<CharSettings>,
-    selectedChar: Ref<string>,
-    inv: ReturnType<typeof useInvStore>,
-    settingStore: ReturnType<typeof useSettingStore>
-) {
-    const agent = new BuildAgent(
-        {
-            ...(resolveSharedAgentUpstream() ?? { api_key: "" }),
-            timeout: 30000,
-            max_retries: 3,
-            default_max_tokens: settingStore.aiMaxTokens || DEFAULT_AI_MAX_TOKENS,
-        },
-        charSettings,
-        selectedChar,
-        inv
-    )
+export function useBuildChat(selectedChar: Ref<string>, settingStore: ReturnType<typeof useSettingStore>) {
+    const agent = createBuildAgent({
+        ...(resolveSharedAgentUpstream() ?? { api_key: "" }),
+        timeout: 30000,
+        max_retries: 3,
+        default_max_tokens: settingStore.aiMaxTokens || DEFAULT_AI_MAX_TOKENS,
+    })
 
     /** 当前角色的消息列表 */
     const messages = ref<BuildAgentChatMessage[]>([])
-    /** 是否正在流式输出 */
-    const isBusy = ref(false)
-    /** 流式过程中的思考内容（部分模型返回，不落库） */
-    const liveReasoning = ref("")
-    /** 当前等待用户回答的提问 */
-    const pendingAsk = ref<AskUserRequest | null>(null)
-    /**
-     * 该提问能否续跑原循环。
-     *
-     * 只有本轮刚挂起（Agent 内存上下文还在）时为 true；从历史消息恢复出来的
-     * 提问只能把回答当新一轮提问发出去，因此为 false。
-     */
-    const pendingAskLive = ref(false)
     /** 上一轮失败的提问原文；非空时界面提供「重试」入口 */
     const failedPrompt = ref("")
     /** 显式 AI 会话 id：随请求头发给服务端代理用于日志归会话；随会话落库，清空对话后重新生成 */
     let aiSessionId = ""
 
-    /** 挂起期间正在流式的那条助手消息（续跑时继续往它上面追加） */
-    let pendingAssistant: BuildAgentChatMessage | null = null
+    const core = useAgentChatCore<BuildAgentChatMessage>({
+        agent,
+        // 落库整份会话存档（消息里可能带响应式代理，persistMessages 内部会深拷贝）
+        persist: () => persistMessages(),
+        errorKeys: {
+            noConfig: "ai-chat.error.noConfig",
+            unknown: "ai-chat.error.unknown",
+            requestFailed: "ai-chat.error.requestFailed",
+        },
+    })
 
     const hasMessages = computed(() => messages.value.length > 0)
 
@@ -150,6 +149,11 @@ export function useBuildChat(
             messages.value = list
                 .map((message, index) => normalizeStoredMessage(message, index))
                 .filter((message): message is BuildAgentChatMessage => message !== null)
+
+            // 用量面板跟着会话走：先清掉上一个角色的真实用量，再从落库用量恢复命中率与锚点
+            core.resetContextUsage()
+            core.seedContextCacheFromMessages(messages.value)
+            core.refreshContextUsage(buildHistory())
         } catch (error) {
             console.error(i18next.t("ai-chat.loadChatFailed"), error)
             messages.value = []
@@ -180,19 +184,6 @@ export function useBuildChat(
     }
 
     /**
-     * 清掉挂起态（切换角色 / 清空对话时调用）。
-     *
-     * 挂起的提问只在它产生的那次运行里有意义：换角色后 Agent 上下文不在了，
-     * 留着只会让界面出现一张点了没反应的卡片。
-     */
-    function clearPendingAsk(): void {
-        pendingAsk.value = null
-        pendingAskLive.value = false
-        pendingAssistant = null
-        agent.clearPending()
-    }
-
-    /**
      * 取显式 AI 会话 id：没有就生成一个（下次 persistMessages 时落库）。
      * @returns 会话 id。
      */
@@ -208,95 +199,91 @@ export function useBuildChat(
      */
     async function clearChat(): Promise<void> {
         messages.value = []
-        liveReasoning.value = ""
+        core.liveReasoning.value = ""
         failedPrompt.value = ""
         aiSessionId = ""
-        clearPendingAsk()
+        core.clearPendingAsk()
+        core.resetContextUsage()
         await db.buildAgentChats.delete(chatId(selectedChar.value)).catch(() => undefined)
         await persistMessages()
     }
 
     /**
-     * 构造一轮运行需要的回调集合。
+     * 构建发给模型的会话历史（感知压缩边界）。
      *
-     * 与资料检索一致：`liveReasoning` 承载正在流式的那一段，只有收尾时才
-     * 固化进 `reasonings`，保证「历史段 + 实时段」在渲染层不重叠。
-     * @param message 本轮的助手消息（流式内容直接追加到它上面）
-     * @param reasonings 本轮已固化的思考分段
-     * @returns Agent 回调
+     * 最后一条压缩边界之前的消息已并入边界摘要，全部丢弃、以边界摘要作为首条用户消息替代。
+     * @param excludeId 需要排除的消息 id（发送时排除本轮占位的助手消息）
+     * @returns 回灌历史
      */
-    function buildCallbacks(message: BuildAgentChatMessage, reasonings: MessageReasoning[]) {
-        return {
-            onDelta: (chunk: string, type: "reasoning" | "content") => {
-                if (type === "reasoning") {
-                    liveReasoning.value += chunk
-                    return
-                }
+    function buildHistory(excludeId?: number) {
+        const markerIndex = lastCompactionIndex(messages.value)
+        const history: Array<{ role: "user" | "assistant"; content: string; images?: ChatImage[] }> = []
 
-                message.content += chunk
-            },
-            onToolTrace: (trace: AgentToolTrace) => {
-                const traces = message.toolTraces ?? (message.toolTraces = [])
-                const index = traces.findIndex(item => item.id === trace.id)
+        // 有压缩边界时，边界摘要作为首条用户消息回灌（替代被压缩的历史）
+        if (markerIndex >= 0) {
+            const marker = messages.value[markerIndex]
 
-                if (index >= 0) {
-                    traces[index] = trace
-                } else {
-                    traces.push(trace)
-                }
-            },
-            onReasoningEnd: (toolCallIds: string[]) => {
-                const text = liveReasoning.value
-
-                if (text.trim()) {
-                    reasonings.push({ text, toolCallIds })
-                }
-
-                liveReasoning.value = ""
-            },
+            if (marker?.content.trim()) {
+                history.push({ role: "user", content: marker.content })
+            }
         }
+
+        // 只发图没打字的那一轮也要保留，它是图片唯一的载体
+        history.push(
+            ...messages.value
+                .slice(markerIndex + 1)
+                .filter(item => item.id !== excludeId && item.role !== "system" && (item.content.trim() || item.images?.length))
+                .map(item => ({
+                    role: item.role === "assistant" ? ("assistant" as const) : ("user" as const),
+                    content: item.content,
+                    ...(item.role === "user" && item.images?.length ? { images: item.images } : {}),
+                }))
+        )
+
+        return history
     }
 
     /**
-     * 把一次运行的总耗时记到消息上。
-     *
-     * 分多次运行（ask_user 挂起后继续）时累加，且只在模型真正在工作的区间累加，
-     * 用户作答的等待时间不计入。
-     * @param message 助手消息
-     * @param startedAt 本次运行开始的毫秒时间戳
+     * 落库一条压缩边界消息（system 角色，content 为回灌给模型的摘要全文）。
+     * @param outcome 压缩结果
      */
-    function addProcessMs(message: BuildAgentChatMessage, startedAt: number) {
-        message.processMs = (message.processMs ?? 0) + (Date.now() - startedAt)
-    }
-
-    /**
-     * 处理本轮运行结果：写入回复、落库，并根据是否挂起更新提问态。
-     * @param message 本轮的助手消息
-     * @param result Agent 运行结果
-     */
-    async function consumeResult(message: BuildAgentChatMessage, result: Awaited<ReturnType<BuildAgent["run"]>>): Promise<void> {
-        message.content = result.reply || message.content
-
-        if (result.reasonings?.length) {
-            message.reasonings = result.reasonings
+    async function persistCompactionMarker(outcome: AgentCompactionOutcome): Promise<void> {
+        const compaction: MessageCompaction = {
+            preTokens: outcome.preTokens,
+            postTokens: outcome.postTokens,
+            summarizedCount: outcome.summarizedCount,
+            keptCount: outcome.keptCount,
         }
-
-        if (result.pendingAsk) {
-            pendingAsk.value = result.pendingAsk.payload
-            pendingAskLive.value = true
-            message.pendingAsk = result.pendingAsk.payload
-            pendingAssistant = message
-            liveReasoning.value = ""
-            await persistMessages()
-            return
+        const marker: BuildAgentChatMessage = {
+            id: nextMessageId(),
+            role: "system",
+            content: outcome.compactedText,
+            compaction,
+            createdAt: Date.now(),
         }
-
-        pendingAsk.value = null
-        pendingAskLive.value = false
-        pendingAssistant = null
-        message.pendingAsk = undefined
-
+        messages.value.push(marker)
         await persistMessages()
+
+        // 压缩后的上下文规模立刻反映到面板：丢弃压缩前的真实用量锚点（缓存命中率累计保留）
+        core.refreshContextUsage(buildHistory(), { dropProviderAnchor: true })
+    }
+
+    /**
+     * 发送前压缩预检：估算当前会话上下文，逼近阈值时生成摘要并落库压缩边界。
+     *
+     * 必须在写入本轮提问**之前**执行：边界要排在本轮消息之前，后续构建历史时
+     * 「边界之后的照常回灌」才包含本轮提问。
+     */
+    async function runAutoCompaction(): Promise<void> {
+        try {
+            const outcome = await core.maybeCompactHistory(buildHistory())
+
+            if (outcome) {
+                await persistCompactionMarker(outcome)
+            }
+        } catch (error) {
+            console.warn("上下文压缩预检失败:", error)
+        }
     }
 
     /**
@@ -308,46 +295,23 @@ export function useBuildChat(
      * @param prompt 本轮的提问原文（失败重试用）
      */
     async function runTurn(message: BuildAgentChatMessage, prompt: string): Promise<void> {
-        const reasonings: MessageReasoning[] = []
-        message.reasonings = reasonings
-
-        // 历史消息（不含本轮占位）：只发图没打字的那一轮也要保留，它是图片唯一的载体
-        const history = messages.value
-            .filter(item => item.id !== message.id && (item.content.trim() || item.images?.length))
-            .map(item => ({
-                role: item.role,
-                content: item.content,
-                ...(item.role === "user" && item.images?.length ? { images: item.images } : {}),
-            }))
+        // 历史消息（不含本轮占位；感知压缩边界，见 buildHistory）
+        const history = buildHistory(message.id)
 
         const startedAt = Date.now()
-        isBusy.value = true
-        liveReasoning.value = ""
 
-        try {
-            if (!resolveSharedAgentUpstream()) {
-                throw new Error(i18next.t("ai-chat.error.noConfig"))
-            }
-
-            const result = await agent.run(history, buildCallbacks(message, reasonings), { sessionId: ensureAiSessionId() })
-            addProcessMs(message, startedAt)
-            failedPrompt.value = ""
-            await consumeResult(message, result)
-        } catch (error) {
-            const reason = error instanceof Error ? error.message : i18next.t("ai-chat.error.unknown")
-            message.content = message.content || i18next.t("ai-chat.error.requestFailed", { message: reason })
-
-            addProcessMs(message, startedAt)
-            failedPrompt.value = prompt
-            await persistMessages()
-        } finally {
-            isBusy.value = false
-            liveReasoning.value = ""
-        }
+        await core.runAgentTurn(message, startedAt, callbacks => agent.run(history, callbacks, { sessionId: ensureAiSessionId() }), {
+            onSuccess: () => {
+                failedPrompt.value = ""
+            },
+            onFail: () => {
+                failedPrompt.value = prompt
+            },
+        })
     }
 
     /**
-     * 发送提问：写入用户消息 → 调用配装 Agent → 流式写入回复。
+     * 发送提问：压缩预检 → 写入用户消息 → 调用配装 Agent → 流式写入回复。
      * @param rawText 用户输入
      * @param rawImages 本次附带的图片；只取前 MAX_CHAT_IMAGES 张
      */
@@ -356,16 +320,18 @@ export function useBuildChat(
         const images = rawImages.slice(0, MAX_CHAT_IMAGES)
 
         // 只有图没有文字也是一次完整提问（「这个面板怎么改」由模型自己理解图片）
-        if ((!text && !images.length) || isBusy.value) {
+        if ((!text && !images.length) || core.isBusy.value) {
             return
         }
 
         // 挂起期间输入框的提交被路由成「用这段文字回答当前提问」
-        if (pendingAsk.value) {
-            await answerPendingAsText(text)
+        if (core.pendingAsk.value) {
+            await core.answerPendingAsText(text)
             return
         }
 
+        // 压缩预检：边界必须排在本轮消息之前，所以放在写入提问之前
+        await runAutoCompaction()
         failedPrompt.value = ""
 
         const assistantMessage: BuildAgentChatMessage = {
@@ -388,12 +354,36 @@ export function useBuildChat(
     }
 
     /**
+     * 手动触发上下文压缩（容量面板的「压缩历史」）：无视阈值直接压缩当前会话历史。
+     * @returns compacted 已压缩；noNeed 无需压缩（会话太短）；failed 压缩失败
+     */
+    async function compactNow(): Promise<"compacted" | "noNeed" | "failed"> {
+        if (!hasMessages.value || core.isBusy.value) {
+            return "noNeed"
+        }
+
+        try {
+            const outcome = await core.maybeCompactHistory(buildHistory(), { force: true })
+
+            if (!outcome) {
+                return "noNeed"
+            }
+
+            await persistCompactionMarker(outcome)
+            return "compacted"
+        } catch (error) {
+            console.warn("手动压缩失败:", error)
+            return "failed"
+        }
+    }
+
+    /**
      * 重试上一轮失败的提问：丢掉失败留下的助手消息，用原提问重跑同一轮。
      */
     async function retry() {
         const prompt = failedPrompt.value
 
-        if (!prompt || isBusy.value || pendingAsk.value) {
+        if (!prompt || core.isBusy.value || core.pendingAsk.value) {
             return
         }
 
@@ -416,148 +406,35 @@ export function useBuildChat(
         await runTurn(assistantMessage, prompt)
     }
 
-    /**
-     * 用一段自由文本回答当前挂起的提问（输入框提交时走这里）。
-     * @param text 用户输入的文本
-     */
-    async function answerPendingAsText(text: string): Promise<void> {
-        const request = pendingAsk.value
-
-        if (!request) {
-            return
-        }
-
-        const question = request.questions.find(item => item.allowCustom) ?? request.questions[0]
-
-        if (!question?.allowCustom) {
-            // 没有任何题接受自由输入：清掉挂起态，把这段文字当新一轮提问
-            pendingAsk.value = null
-            pendingAskLive.value = false
-            pendingAssistant = null
-            await send(text)
-            return
-        }
-
-        await answerAsk({ requestId: request.id, answers: [{ questionId: question.id, optionIds: [], custom: text }] })
-    }
-
-    /**
-     * 回答当前挂起的提问并继续运行。
-     * @param response 用户回答
-     */
-    async function answerAsk(response: AskUserResponse): Promise<void> {
-        const request = pendingAsk.value
-        const target = pendingAssistant
-
-        if (!request) {
-            return
-        }
-
-        // 防御：既没选也没填（界面已禁用提交，这里兜住异常输入）
-        if (!response.skipped && !hasAskAnswer(request, response)) {
-            return
-        }
-
-        if (!pendingAskLive.value || !target) {
-            // 历史恢复的提问：Agent 上下文已丢失，把回答作为新一轮提问发出
-            pendingAsk.value = null
-            pendingAskLive.value = false
-            pendingAssistant = null
-
-            if (target) {
-                target.pendingAsk = undefined
-                await persistMessages()
-            }
-
-            await send(formatAskUserResponse(request, response))
-            return
-        }
-
-        isBusy.value = true
-        liveReasoning.value = ""
-        pendingAsk.value = null
-
-        const reasonings: MessageReasoning[] = target.reasonings ?? []
-        target.reasonings = reasonings
-
-        const startedAt = Date.now()
-
-        try {
-            const result = await agent.answerAsk(response, buildCallbacks(target, reasonings))
-            addProcessMs(target, startedAt)
-            await consumeResult(target, result)
-        } catch (error) {
-            const reason = error instanceof Error ? error.message : i18next.t("ai-chat.error.unknown")
-            target.content = target.content || i18next.t("ai-chat.error.requestFailed", { message: reason })
-
-            addProcessMs(target, startedAt)
-            await persistMessages()
-        } finally {
-            isBusy.value = false
-            liveReasoning.value = ""
-        }
-    }
-
-    /**
-     * 跳过当前挂起的提问，让模型基于已有信息继续。
-     */
-    async function skipAsk(): Promise<void> {
-        const request = pendingAsk.value
-
-        if (!request) {
-            return
-        }
-
-        await answerAsk({ requestId: request.id, answers: [], skipped: true })
-    }
-
-    /**
-     * 中断当前输出。
-     *
-     * 挂起等答时中断等于放弃这次提问：清掉挂起态，避免界面上留一张点不动的卡片。
-     */
-    function interrupt() {
-        agent.interrupt()
-
-        if (pendingAsk.value) {
-            pendingAsk.value = null
-            pendingAskLive.value = false
-
-            if (pendingAssistant) {
-                pendingAssistant.pendingAsk = undefined
-                void persistMessages()
-            }
-
-            pendingAssistant = null
-        }
-    }
-
-    // 设置或登录状态变化时同步 Agent 配置（换账号 / 登录 / 退出都要重新解析代理凭证）
-    watchAgentUpstream(config => agent.updateConfig(config))
-
-    // 角色切换：换绑宿主并重新载入该角色的历史对话
+    // 角色切换：清掉挂起态并重新载入该角色的历史对话
+    // （沙箱接口里的构筑状态由 AIChatDialog 的 buildApi 直接持有，无需在此换绑）
     watch(selectedChar, async () => {
-        agent.updateHost(charSettings, selectedChar)
-        clearPendingAsk()
-        liveReasoning.value = ""
+        core.clearPendingAsk()
+        core.liveReasoning.value = ""
         failedPrompt.value = ""
         await loadMessages()
     })
 
+    // 挂起回退（把回答当新提问发出）需要能调到本入口的 send，组装完成后注入
+    core.bindSend(send)
+
     return {
         messages,
         hasMessages,
-        isBusy,
-        liveReasoning,
-        pendingAsk,
-        pendingAskLive,
+        isBusy: core.isBusy,
+        liveReasoning: core.liveReasoning,
+        pendingAsk: core.pendingAsk,
+        pendingAskLive: core.pendingAskLive,
+        isCompacting: core.isCompacting,
+        contextUsage: core.contextUsage,
         failedPrompt,
         loadMessages,
         clearChat,
         send,
         retry,
-        answerAsk,
-        skipAsk,
-        interrupt,
+        compactNow,
+        answerAsk: core.answerAsk,
+        skipAsk: core.skipAsk,
+        interrupt: core.interrupt,
     }
 }

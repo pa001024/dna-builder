@@ -116,6 +116,320 @@ type KeyEnum =
     | "launch_app1"
     | "launch_app2"
 
+/* ==========================================================================
+ * DSL 宏类型（对应 cap 模块 DslParser 的词法 / 语法）
+ *
+ * 语法（节点之间以空白分隔）：
+ *   #1 / #0.5                         等待 1 秒 / 0.5 秒
+ *   w0 / w1 / w^                      按下 / 按住 1 秒 / 弹起
+ *     普通键还支持单字符与 `_`(空格) `>`(左 Shift) `C`(左 Ctrl)
+ *   {esc} {Esc Down} {esc 1.5}        大括号按键（内容大小写不敏感）
+ *   "a" 'a'                           引号包裹的单字符键
+ *   L R M X1 X2                       鼠标点击，可接坐标与保持秒数 L(10,20) / R(1,2)0.5
+ *   (w1 w2)                           分组
+ *   +0(w1) / +2(w1)                   无限循环 / 循环 2 次
+ *
+ * 用法：DSL<S> 合法时固化为 S、非法为 never；DSL（无泛型）等价 string
+ *   const a: DSL<"w0 #1 w^"> = "w0 #1 w^"
+ *   // const b: DSL<"w #"> = "w #"        // 编译报错
+ *   play("w0 #1 w^")                      // 字面量合法，通过
+ *   // play("w #")                        // 字面量非法，编译报错
+ *   play(runtimeString)                   // 运行时字符串按 string 放行
+ * ======================================================================== */
+
+/** DSL 空白字符 */
+type DslWhitespace = " " | "\t" | "\n" | "\r"
+
+/** 十进制数字字符 */
+type DslDigit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+
+/** 引号字符 */
+type DslQuote = '"' | "'"
+
+/** 小写字母 */
+type DslLetterLower =
+    | "a"
+    | "b"
+    | "c"
+    | "d"
+    | "e"
+    | "f"
+    | "g"
+    | "h"
+    | "i"
+    | "j"
+    | "k"
+    | "l"
+    | "m"
+    | "n"
+    | "o"
+    | "p"
+    | "q"
+    | "r"
+    | "s"
+    | "t"
+    | "u"
+    | "v"
+    | "w"
+    | "x"
+    | "y"
+    | "z"
+
+/** 大写字母到小写的映射，用于大括号语法的大小写不敏感比较 */
+type DslLowerMap = {
+    A: "a"
+    B: "b"
+    C: "c"
+    D: "d"
+    E: "e"
+    F: "f"
+    G: "g"
+    H: "h"
+    I: "i"
+    J: "j"
+    K: "k"
+    L: "l"
+    M: "m"
+    N: "n"
+    O: "o"
+    P: "p"
+    Q: "q"
+    R: "r"
+    S: "s"
+    T: "t"
+    U: "u"
+    V: "v"
+    W: "w"
+    X: "x"
+    Y: "y"
+    Z: "z"
+}
+
+/** 大写字母 */
+type DslLetterUpper = keyof DslLowerMap
+
+/** 字母（含大小写） */
+type DslLetter = DslLetterLower | DslLetterUpper
+
+/** 普通按键的起始字符：字母 / 数字 / `_`(空格) / `>`(左 Shift) */
+type DslKeyStart = DslLetter | DslDigit | "_" | ">"
+
+/** 大括号内允许的键名（`{esc}`、`{num1}` 等），与 KeyEnum 一致 */
+type DslKeyNames = KeyEnum
+
+/** 去掉头部空白 */
+type DslTrimLeft<S extends string> = S extends `${DslWhitespace}${infer R}` ? DslTrimLeft<R> : S
+
+/** 去掉尾部空白 */
+type DslTrimRight<S extends string> = S extends `${infer R}${DslWhitespace}` ? DslTrimRight<R> : S
+
+/** 去掉首尾空白 */
+type DslTrim<S extends string> = DslTrimLeft<DslTrimRight<S>>
+
+/** 将字符串中的大写字母转为小写 */
+type DslLower<S extends string> = S extends `${infer C}${infer R}`
+    ? C extends DslLetterUpper
+        ? `${DslLowerMap[C]}${DslLower<R>}`
+        : `${C}${DslLower<R>}`
+    : S
+
+/**
+ * 判断 S 是否全部由数字组成
+ * @returns 空串视为 true，便于复用
+ */
+type DslIsDigits<S extends string> = S extends "" ? true : S extends `${DslDigit}${infer R}` ? DslIsDigits<R> : false
+
+/** 判断 S 是否为非空数字字面量（整数或小数） */
+type DslIsNumber<S extends string> = S extends ""
+    ? false
+    : S extends `${infer Int}.${infer Frac}`
+      ? Int extends ""
+          ? false
+          : DslIsDigits<Int> extends true
+            ? DslIsDigits<Frac>
+            : false
+      : DslIsDigits<S>
+
+/**
+ * 取 S 头部的连续数字串
+ * @returns [数字串, 剩余串]
+ */
+type DslTakeDigits<S extends string, Acc extends string = ""> = S extends `${infer D extends DslDigit}${infer R}`
+    ? DslTakeDigits<R, `${Acc}${D}`>
+    : [Acc, S]
+
+/** 消费头部数字字面量（整数，可选小数部分），返回剩余串 */
+type DslTakeNumber<S extends string> =
+    DslTakeDigits<S> extends [infer _Int extends string, infer AfterInt extends string]
+        ? AfterInt extends `.${infer Frac}`
+            ? DslTakeDigits<Frac> extends [infer _Frac extends string, infer AfterFrac extends string]
+                ? AfterFrac
+                : never
+            : AfterInt
+        : never
+
+/** 跳过空白后消费一个整数，返回剩余串；无整数时返回 never */
+type DslTakeInt<S extends string> =
+    DslSkipWs<S> extends infer T extends string
+        ? T extends `${DslDigit}${string}`
+            ? DslTakeDigits<T> extends [infer _D extends string, infer R extends string]
+                ? R
+                : never
+            : never
+        : never
+
+/** 若 S 以数字开头则消费该数字字面量，否则原样返回 */
+type DslConsumeNumber<S extends string> = S extends `${DslDigit}${string}` ? DslTakeNumber<S> : S
+
+/** 跳过开头的空白字符 */
+type DslSkipWs<S extends string> = S extends `${DslWhitespace}${infer R}` ? DslSkipWs<R> : S
+
+/** 校验大括号内容的修饰部分（down / up / 秒数）；合法返回空串 */
+type DslBraceModifier<S extends string> = S extends "down" | "up" ? "" : DslIsNumber<S> extends true ? "" : never
+
+/** 校验大括号内容中键名之后的部分（仅允许空白 + 修饰） */
+type DslBraceTail<S extends string> = S extends "" ? "" : S extends `${DslWhitespace}${string}` ? DslBraceModifier<DslTrim<S>> : never
+
+/**
+ * 校验大括号内容的键名部分
+ * @returns 命中任一合法键名且余部合法时返回空串
+ */
+type DslBraceNameMatch<S extends string, Names extends string = DslKeyNames> = Names extends string
+    ? S extends `${Names}${infer R}`
+        ? DslBraceTail<R>
+        : never
+    : never
+
+/** 解析大括号体（不含 `{`），返回 `}` 之后的剩余串 */
+type DslParseBrace<S extends string> = S extends `${infer Body}}${infer Rest}`
+    ? [DslBraceNameMatch<DslLower<DslTrim<Body>>>] extends [never]
+        ? never
+        : Rest
+    : never
+
+/** 解析引号单字符键，返回闭引号之后的剩余串 */
+type DslParseQuoted<S extends string> = S extends `${DslQuote}${infer C}${infer R}`
+    ? C extends DslLetter | DslDigit
+        ? R extends `${DslQuote}${infer Rest}`
+            ? Rest
+            : never
+        : never
+    : never
+
+/** 解析 `(x,y)` 内部（不含 `(`），返回 `)` 之后的剩余串 */
+type DslParseCoordPair<S extends string> =
+    DslTakeInt<S> extends infer A1
+        ? [A1] extends [never]
+            ? never
+            : DslSkipWs<A1 & string> extends `,${infer A2}`
+              ? DslTakeInt<A2> extends infer A3
+                  ? [A3] extends [never]
+                      ? never
+                      : DslSkipWs<A3 & string> extends `)${infer A4}`
+                        ? A4
+                        : never
+                  : never
+              : never
+        : never
+
+/** 解析鼠标节点尾部的可选保持秒数 */
+type DslMouseWait<S extends string> =
+    DslSkipWs<S> extends infer T extends string ? (T extends `${DslDigit}${string}` ? DslTakeNumber<T> : T) : never
+
+/** 解析鼠标节点尾部（可选坐标 + 可选秒数），返回剩余串 */
+type DslMouseTail<S extends string> =
+    DslSkipWs<S> extends infer T extends string
+        ? T extends `(${infer Inner}`
+            ? DslParseCoordPair<Inner> extends infer R
+                ? [R] extends [never]
+                    ? never
+                    : DslMouseWait<R & string>
+                : never
+            : DslMouseWait<T>
+        : never
+
+/** 解析鼠标节点（L / R / M / X1 / X2），返回剩余串 */
+type DslParseMouse<S extends string> = S extends `L${infer R}`
+    ? DslMouseTail<R>
+    : S extends `R${infer R}`
+      ? DslMouseTail<R>
+      : S extends `M${infer R}`
+        ? DslMouseTail<R>
+        : S extends `X1${infer R}`
+          ? DslMouseTail<R>
+          : S extends `X2${infer R}`
+            ? DslMouseTail<R>
+            : never
+
+/** 解析普通按键尾部的可选秒数或 `^`，返回剩余串 */
+type DslKeyTail<S extends string> =
+    DslSkipWs<S> extends infer T extends string ? (T extends `^${infer R}` ? R : DslConsumeNumber<T>) : never
+
+/** 解析普通按键（单字符键名），返回剩余串 */
+type DslParseKey<S extends string> = S extends `${infer C}${infer R}` ? (C extends DslKeyStart ? DslKeyTail<R> : never) : never
+
+/** 解析 `#` 等待节点，返回剩余串 */
+type DslParseWait<S extends string> =
+    DslSkipWs<S> extends infer T extends string ? (T extends `${DslDigit}${string}` ? DslTakeNumber<T> : never) : never
+
+/** 解析分组体（不含 `(`），返回 `)` 之后的剩余串 */
+type DslParseGroup<S extends string> =
+    DslParseNodes<S> extends infer R ? ([R] extends [never] ? never : R extends `)${infer Rest}` ? Rest : never) : never
+
+/** 解析 `+` 循环节点，返回剩余串 */
+type DslParseLoop<S extends string> =
+    DslTakeInt<S> extends infer A
+        ? [A] extends [never]
+            ? never
+            : DslSkipWs<A & string> extends infer T extends string
+              ? T extends ""
+                  ? never
+                  : T extends `(${infer Inner}`
+                    ? DslParseGroup<Inner>
+                    : DslParseNode<T>
+              : never
+        : never
+
+/** 解析单个节点，返回剩余串；无法解析时返回 never */
+type DslParseNode<S extends string> = S extends `#${infer R}`
+    ? DslParseWait<R>
+    : S extends `+${infer R}`
+      ? DslParseLoop<R>
+      : S extends `(${infer R}`
+        ? DslParseGroup<R>
+        : S extends `{${infer R}`
+          ? DslParseBrace<R>
+          : S extends `${DslQuote}${string}`
+            ? DslParseQuoted<S>
+            : S extends `L${string}` | `R${string}` | `M${string}` | `X${string}`
+              ? DslParseMouse<S>
+              : DslParseKey<S>
+
+/**
+ * 解析节点序列
+ * @returns 剩余串；遇到 `)` 时保留该字符返回，解析失败返回 never
+ */
+type DslParseNodes<S extends string> =
+    DslSkipWs<S> extends infer T extends string
+        ? T extends ""
+            ? ""
+            : T extends `)${string}`
+              ? T
+              : DslParseNode<T> extends never
+                ? never
+                : DslParseNodes<DslParseNode<T> & string>
+        : never
+
+/** DSL 字符串是否合法 */
+type DslIsValid<S extends string> =
+    DslParseNodes<S> extends infer R ? ([R] extends [never] ? false : DslSkipWs<R & string> extends "" ? true : false) : false
+
+/**
+ * DSL 宏类型：传入字面量时合法固化为原串、非法为 never；不传泛型时退化为宽 string（供函数参数等运行时字符串使用）
+ * @param S DSL 源码字面量，默认 string
+ */
+type DSL<S extends string = string> = [string] extends [S] ? string : DslIsValid<S> extends true ? S : never
+
 interface Mat {
     /** 矩阵行数 */
     rows(): number
@@ -443,8 +757,11 @@ declare module "cap" {
         ): boolean
         /** 等待客户区指定坐标达到颜色条件 */
         waitColor(x: number, y: number, color: number, tolerance: number, timeout?: number): Promise<boolean>
-        /** 播放 DSL 宏并返回可手动中断的 Promise */
-        play(dsl: string): StoppablePromise<void>
+        /**
+         * 播放 DSL 宏并返回可手动中断的 Promise
+         * @param dsl 允许的表达式:{esc} _ 空格 > lshift C lctrl w0按下 w^弹起 w1按下1秒 #1等待1秒 +0(w1) 无限循环 +2(w1) 2次循环 L M R 鼠标点击 L(x,y) 鼠标点击(x,y)
+         */
+        play<S extends string>(dsl: S & DSL<S>): StoppablePromise<void>
         /** 停止当前 DSL 播放 */
         stopPlay(): void
     }

@@ -7,6 +7,7 @@ import { useCharSettings } from "@/composables/useCharSettings"
 import type { CharBuild } from "@/data"
 import { useInvStore } from "@/store/inv"
 import { useSettingStore } from "@/store/setting"
+import { useUIStore } from "@/store/ui"
 import { resolveSharedAgentUpstream } from "@/utils/agent-upstream"
 import { createBuildApi, setBuildApi } from "@/utils/build-api"
 import type { ChatSubmitPayload } from "@/utils/chat-image"
@@ -25,6 +26,7 @@ const props = defineProps<{
 
 const inv = useInvStore()
 const settingStore = useSettingStore()
+const ui = useUIStore()
 const { t } = useTranslation()
 
 /** 数据包未就绪时的角色名兜底（与页面其它部分共用同一个本地键） */
@@ -60,14 +62,17 @@ const {
     liveReasoning,
     pendingAsk,
     failedPrompt,
+    isCompacting,
+    contextUsage,
     loadMessages,
     clearChat,
     send,
     retry,
+    compactNow,
     answerAsk,
     skipAsk,
     interrupt,
-} = useBuildChat(charSettings, selectedChar, inv, settingStore)
+} = useBuildChat(selectedChar, settingStore)
 
 /** 窗口是否展开 */
 const isOpen = ref(false)
@@ -143,6 +148,26 @@ function handleClear() {
 /** 重试上一轮失败的提问。 */
 function handleRetry() {
     void retry()
+}
+
+/**
+ * 手动压缩当前对话上下文（容量面板入口）：按结果给出轻量反馈。
+ * 文案直接走 dbAgent.ui.contextUsage.*：两个 Agent 共用同一套压缩反馈，不重复维护。
+ */
+async function handleCompactContext() {
+    const result = await compactNow()
+
+    if (result === "compacted") {
+        ui.showSuccessMessage(t("dbAgent.ui.contextUsage.compactDone"))
+        return
+    }
+
+    if (result === "noNeed") {
+        ui.showSuccessMessage(t("dbAgent.ui.contextUsage.compactNothing"))
+        return
+    }
+
+    ui.showErrorMessage(t("dbAgent.ui.contextUsage.compactFailed"))
 }
 
 onMounted(() => {
@@ -222,7 +247,7 @@ onBeforeUnmount(() => {
                 @skip="handleSkip"
             />
 
-            <!-- 输入区：与资料库同一个输入框组件，配装助手没有检索增强开关 -->
+            <!-- 输入区：与资料库同一个输入框组件，配装助手没有检索增强开关；容量面板入口在工具行左侧 -->
             <div class="shrink-0 border-t border-base-content/12 px-4 py-3">
                 <div v-if="failedPrompt" class="mb-2 flex items-center gap-2">
                     <button
@@ -244,6 +269,10 @@ onBeforeUnmount(() => {
                     :placeholder="placeholder"
                     :hint="hint"
                     :submit-label="t('ai-chat.send')"
+                    :context-usage="contextUsage"
+                    :compacting="isCompacting"
+                    :can-compact="hasMessages && !isBusy"
+                    @compact="handleCompactContext"
                     @submit="handleSubmit"
                     @stop="interrupt"
                 />

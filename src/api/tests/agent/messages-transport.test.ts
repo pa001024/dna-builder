@@ -91,7 +91,33 @@ describe("createMessagesTransport 序列化", () => {
         ])
         // messages 里不应再出现 role:"system"，它已经提到顶层
         expect(calls[0].body.messages).toEqual([{ role: "user", content: [{ type: "text", text: "1.6 新增了哪些成就？" }] }])
-        expect(result).toEqual({ text: "好", thinking: "", toolCalls: [], finishReason: "stop" })
+        // usage 来自 message_start（输入侧）与 message_delta（输出侧）；输入含缓存口径，缓存字段缺省按 0
+        expect(result).toEqual({
+            text: "好",
+            thinking: "",
+            toolCalls: [],
+            finishReason: "stop",
+            usage: { inputTokens: 5, outputTokens: 3, cacheReadTokens: 0 },
+        })
+    })
+
+    it("缓存字段并入 usage：inputTokens 为总量（含缓存读 / 写），cacheReadTokens 单独记录", async () => {
+        mockFetch(() =>
+            sseResponse([
+                {
+                    type: "message_start",
+                    message: { id: "msg_1", usage: { input_tokens: 100, cache_read_input_tokens: 80, cache_creation_input_tokens: 4 } },
+                },
+                { type: "message_stop" },
+            ])
+        )
+
+        const transport = createMessagesTransport(OPTIONS)
+        const result = await transport.runRound(makeRequest())
+
+        // Anthropic 口径的 input_tokens 只含未命中缓存的输入；中立层归一为「输入总量」，
+        // 命中率 = 80 / 184 落在 0-1 区间（直接用 100 当分母会出现 >100% 的荒谬值）
+        expect(result.usage).toEqual({ inputTokens: 184, outputTokens: 0, cacheReadTokens: 80 })
     })
 
     it("助手轮内 thinking 在 text 之前，用户轮内 tool_result 在 text 之前，且相邻同角色轮合并", async () => {

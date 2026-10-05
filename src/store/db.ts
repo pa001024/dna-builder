@@ -127,7 +127,7 @@ export type UConversation = Omit<Conversation, "id">
 
 /**
  * 资料检索 Agent 在单条回复中发起的工具调用记录。
- * 与 src/api/dbAgent.ts 的 DBAgentToolTrace 结构保持一致（结构化类型可直接赋值）。
+ * 与 src/api/agent/kernel.ts 的 AgentToolTrace 结构保持一致（结构化类型可直接赋值）。
  */
 export interface MessageToolTrace {
     /** 工具调用 ID */
@@ -151,13 +151,47 @@ export interface MessageToolTrace {
  *
  * 一次运行可能产生多段思考（多轮工具调用之间各一段），每段折叠展示，
  * 其后的工具调用保持可见，形成「思考 → 检索 → 思考 → 检索 → 回答」的过程流。
- * 与 src/api/dbAgent.ts 的 DBAgentReasoningSegment 结构保持一致。
+ * 与 src/api/agent/kernel.ts 的 AgentReasoningSegment 结构保持一致。
  */
 export interface MessageReasoning {
     /** 思考内容 */
     text: string
     /** 该段思考后续发起的工具调用 id（用于把工具条挂到对应思考之后） */
     toolCallIds: string[]
+}
+
+/**
+ * 单条回复的真实 token 用量（两种线协议归一化后的口径）。
+ *
+ * `input` 是**最后一次**请求的输入总量（含缓存命中部分，即该轮收尾时的上下文规模）；
+ * `output` 是本轮全部请求的输出之和（多轮工具调用累加）；`cacheRead` 是末次请求中
+ * 命中上游上下文缓存的部分（`input` 的子集）。上游未回传用量的历史消息没有此字段。
+ */
+export interface MessageTokenUsage {
+    /** 末次请求的输入 tokens（含缓存命中） */
+    input: number
+    /** 本轮累计输出 tokens */
+    output: number
+    /** 末次请求命中缓存的输入 tokens */
+    cacheRead?: number
+}
+
+/**
+ * 上下文压缩边界（仅 system 角色的消息携带）。
+ *
+ * 边界消息的 `content` 是回灌给模型的摘要全文（含包裹文案）；构建请求历史时
+ * 边界之前的消息全部丢弃、以摘要替代，之后的照常回灌。界面上边界渲染成一条分隔线，
+ * 不展示摘要正文。
+ */
+export interface MessageCompaction {
+    /** 压缩前的上下文估算（tokens） */
+    preTokens: number
+    /** 压缩后的上下文估算（tokens，含原样保留的尾部） */
+    postTokens: number
+    /** 被摘要替代的消息条数 */
+    summarizedCount: number
+    /** 原样保留的消息条数 */
+    keptCount: number
 }
 
 export interface Message {
@@ -202,6 +236,10 @@ export interface Message {
      * 无法续跑原循环——这一区别由 useDBChat 的 `pendingAskLive` 区分。
      */
     pendingAsk?: MessagePendingAsk
+    /** 该条回复的真实 token 用量（上游回传时落库；容量面板与命中率统计据此恢复） */
+    tokenUsage?: MessageTokenUsage
+    /** 上下文压缩边界（仅 system 角色消息携带；普通消息没有此字段） */
+    compaction?: MessageCompaction
     createdAt: number
 }
 
@@ -236,7 +274,8 @@ export type UMessage = Omit<Message, "id">
 export interface BuildAgentChatMessage {
     /** 消息 id：会话内自增，用于渲染层的折叠态与 DOM 绑定 */
     id: number
-    role: "user" | "assistant"
+    /** system 角色只用于上下文压缩边界（一条摘要分隔消息，不作为普通消息渲染） */
+    role: "user" | "assistant" | "system"
     content: string
     /** 用户提问附带的图片（配装面板截图等） */
     images?: ChatImage[]
@@ -248,6 +287,10 @@ export interface BuildAgentChatMessage {
     processMs?: number
     /** 该条回复挂起时等待用户回答的提问 */
     pendingAsk?: MessagePendingAsk
+    /** 该条回复的真实 token 用量（上游回传时落库） */
+    tokenUsage?: MessageTokenUsage
+    /** 上下文压缩边界（仅 system 角色消息携带） */
+    compaction?: MessageCompaction
     createdAt: number
 }
 

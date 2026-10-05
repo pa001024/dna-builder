@@ -8,8 +8,7 @@
 
 import { createChatTransport } from "./chat-transport"
 import { createMessagesTransport } from "./messages-transport"
-import type { AgentTransport } from "./wire"
-import { resolveAgentProtocol } from "./wire"
+import { AGENT_PROXY_BASE_URL_SUFFIX, type AgentTransport, resolveAgentProtocol } from "./wire"
 
 /** 单个 Agent 跑起来需要的上游参数（从 `OpenAIConfig` 里裁出与 Agent 相关的部分）。 */
 export interface AgentUpstreamConfig {
@@ -40,15 +39,15 @@ export const AGENT_MESSAGES_IDLE_TIMEOUT = 300_000
 /** 服务端反代使用的模型（服务端也会强制覆盖成同一个，这里只是让请求体看起来一致） */
 export const AGENT_PROXY_MODEL = "deepseek-flash"
 
-/** 服务端反代的基址后缀；带这个后缀的基址会走 Messages 协议（见 {@link resolveAgentProtocol}）。 */
-export const AGENT_PROXY_BASE_URL_SUFFIX = "/api/v1"
+/** 服务端反代的基址后缀；定义与协议判定同在 wire 层，这里转出口给装配方使用。 */
+export { AGENT_PROXY_BASE_URL_SUFFIX } from "./wire"
 
 /** 缺省上游参数（设置项缺失时使用）。 */
 export const DEFAULT_AGENT_UPSTREAM: Omit<AgentUpstreamConfig, "api_key"> = {
-    base_url: "https://open.bigmodel.cn/api/paas/v4/",
+    base_url: "",
     timeout: 60000,
     max_retries: 2,
-    default_model: "glm-4.6v-flash",
+    default_model: "",
     default_temperature: 0.4,
     default_max_tokens: 32768,
 }

@@ -7,6 +7,18 @@
 
 export { createChatTransport } from "./chat-transport"
 export {
+    type AgentCompactionOutcome,
+    AUTOCOMPACT_BUFFER_TOKENS,
+    AUTOCOMPACT_OUTPUT_RESERVE_TOKENS,
+    buildCompactedMessageText,
+    COMPACT_SUMMARY_MAX_OUTPUT_TOKENS,
+    compactWireMessages,
+    formatCompactSummary,
+    groupRoundStartIndexes,
+    MIN_ROUNDS_FOR_COMPACT,
+    resolveAutoCompactThreshold,
+} from "./compact"
+export {
     AGENT_MESSAGES_IDLE_TIMEOUT,
     AGENT_PROXY_BASE_URL_SUFFIX,
     AGENT_PROXY_MODEL,
@@ -15,8 +27,20 @@ export {
     createAgentTransport,
     normalizeAgentUpstreamConfig,
 } from "./config"
+export {
+    type AgentContextEstimate,
+    buildContextEstimate,
+    DEFAULT_MODEL_CONTEXT_WINDOW,
+    estimateJsonTokens,
+    estimateMessagesTokens,
+    estimateMessageTokens,
+    estimateTextTokens,
+    estimateToolTokens,
+    resolveModelContextWindow,
+} from "./context-usage"
 export type {
     AgentCallbacks,
+    AgentContextInfo,
     AgentHistoryMessage,
     AgentKernelOptions,
     AgentPendingAsk,
@@ -24,7 +48,7 @@ export type {
     AgentRunResult,
     AgentToolTrace,
 } from "./kernel"
-export { AgentKernel } from "./kernel"
+export { AgentKernel, toWireMessages } from "./kernel"
 export { createMessagesTransport } from "./messages-transport"
 export type { AgentTool, AgentToolContext, AgentToolOutput, AgentToolSuspendOutput, AgentToolTextOutput } from "./tool"
 export {
@@ -33,6 +57,7 @@ export {
     type AgentProtocol,
     type AgentRoundRequest,
     type AgentRoundResult,
+    type AgentRoundUsage,
     type AgentStreamHandlers,
     type AgentToolCall,
     type AgentToolDefinition,

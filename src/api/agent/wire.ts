@@ -98,6 +98,21 @@ export interface AgentStreamHandlers {
     onThinking?: (text: string) => void
 }
 
+/**
+ * 单轮请求的真实 token 用量（两种协议归一化）。
+ *
+ * 口径与 Anthropic / OpenAI 一致：`inputTokens` 是**包含缓存命中部分**的输入总量，
+ * `cacheReadTokens` 是其中命中上游上下文缓存的部分（是前者的子集，不再另加）。
+ */
+export interface AgentRoundUsage {
+    /** 输入 tokens（含缓存命中部分） */
+    inputTokens: number
+    /** 输出 tokens */
+    outputTokens: number
+    /** 输入中命中上游上下文缓存的 tokens（上游不支持缓存时为 0） */
+    cacheReadTokens: number
+}
+
 /** 单轮请求。 */
 export interface AgentRoundRequest {
     /** 模型 id */
@@ -133,6 +148,8 @@ export interface AgentRoundResult {
     toolCalls: AgentToolCall[]
     /** 收流原因 */
     finishReason: AgentFinishReason
+    /** 本轮真实 token 用量（上游回传时才有；估算与统计据此校准） */
+    usage?: AgentRoundUsage
 }
 
 /** 线协议名。 */
@@ -171,8 +188,13 @@ export const AI_PROXY_SESSION_HEADER = "x-ai-session-id"
 /** 自家代理暴露的 Messages 路径（基址以 `/api/v1` 结尾）。 */
 const PROXY_MESSAGES_PATH = "/messages"
 
-/** 自家代理的基址后缀，同时提供 `/chat/completions` 与 `/messages`。 */
-const PROXY_SUFFIX = "/api/v1"
+/**
+ * 自家代理的基址后缀，同时提供 `/chat/completions` 与 `/messages`。
+ *
+ * 协议判定（{@link resolveAgentProtocol}）、代理装配（`config.ts`）与直连判断
+ * （`messages-transport.ts`）共用这一个标记，不允许各自再写字面量。
+ */
+export const AGENT_PROXY_BASE_URL_SUFFIX = "/api/v1"
 
 /**
  * @description 去掉基址末尾的斜杠，避免拼接端点时出现双斜杠。
@@ -229,7 +251,7 @@ export function resolveAgentProtocol(baseUrl: string): AgentProtocol {
         return "messages"
     }
 
-    return trimTrailingSlash(url.pathname).endsWith(PROXY_SUFFIX) ? "messages" : "chat"
+    return trimTrailingSlash(url.pathname).endsWith(AGENT_PROXY_BASE_URL_SUFFIX) ? "messages" : "chat"
 }
 
 /**

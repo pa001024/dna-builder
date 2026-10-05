@@ -123,11 +123,14 @@ const {
     isBusy: chatBusy,
     liveReasoning,
     pendingAsk: chatPendingAsk,
+    isCompacting: chatCompacting,
+    contextUsage: chatContextUsage,
     startNewConversation,
     selectConversation,
     removeConversation,
     exportConversationText,
     send: sendChat,
+    compactNow: compactChatContext,
     answerAsk: answerChatAsk,
     skipAsk: skipChatAsk,
     interrupt: interruptChat,
@@ -697,6 +700,21 @@ function handleSkipAsk() {
 }
 
 /**
+ * 手动压缩当前会话上下文（容量面板入口）：按结果给出轻量反馈。
+ */
+async function handleCompactContext() {
+    const result = await compactChatContext()
+
+    if (result === "compacted") {
+        ui.showSuccessMessage(t("dbAgent.ui.contextUsage.compactDone"))
+    } else if (result === "noNeed") {
+        ui.showSuccessMessage(t("dbAgent.ui.contextUsage.compactNothing"))
+    } else {
+        ui.showErrorMessage(t("dbAgent.ui.contextUsage.compactFailed"))
+    }
+}
+
+/**
  * 进入对话模式（幂等）：同步 `chatMode` 与 URL 上的 `dbchat` 标记。
  *
  * 单独抽出来的原因是「提交提问」与「空输入点击发送按钮」都要走这一步，
@@ -960,7 +978,7 @@ onBeforeUnmount(() => {
                     </button>
                 </div>
 
-                <!-- 输入框贴底：对话态下不再位于页面正中 -->
+                <!-- 输入框贴底：对话态下不再位于页面正中；容量面板入口在输入框工具行（RAG 开关左侧） -->
                 <section class="shrink-0 px-4 pt-3 pb-5 md:px-6 lg:px-8">
                     <div class="mx-auto w-full max-w-7xl">
                         <DBAskBox
@@ -971,6 +989,10 @@ onBeforeUnmount(() => {
                             :placeholder="chatPlaceholder"
                             :hint="$t('dbAgent.ui.chatHint')"
                             :submit-label="$t('dbAgent.ui.chatSubmit')"
+                            :context-usage="chatContextUsage"
+                            :compacting="chatCompacting"
+                            :can-compact="chatHasMessages && !chatBusy"
+                            @compact="handleCompactContext"
                             @submit="handleSubmit"
                             @stop="interruptChat"
                         />
@@ -1099,7 +1121,7 @@ onBeforeUnmount(() => {
                     </ScrollArea>
                 </section>
 
-                <!-- 中段：输入框（flex-none，始终位于页面正中） -->
+                <!-- 中段：输入框（flex-none，始终位于页面正中）；容量面板入口同样在工具行 RAG 开关左侧 -->
                 <section class="shrink-0 px-4 py-5 md:px-6 lg:px-8">
                     <div class="mx-auto w-full max-w-7xl">
                         <DBAskBox
@@ -1110,6 +1132,10 @@ onBeforeUnmount(() => {
                             :placeholder="$t('dbAgent.ui.browsePlaceholder')"
                             :hint="$t('dbAgent.ui.browseHint')"
                             :submit-label="$t('dbAgent.ui.browseSubmit')"
+                            :context-usage="chatContextUsage"
+                            :compacting="chatCompacting"
+                            :can-compact="chatHasMessages && !chatBusy"
+                            @compact="handleCompactContext"
                             @submit="handleSubmit"
                             @stop="interruptChat"
                             @enter-chat="handleEnterChat"

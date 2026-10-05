@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue"
+import type { AgentContextUsageSnapshot } from "@/composables/useAgentChatCore"
 import { scopedI18nKey } from "@/utils/agent-chat"
 import { type ChatImage, type ChatSubmitPayload, chatImageDataUrl, fileToChatImage, isImageFile, MAX_CHAT_IMAGES } from "@/utils/chat-image"
 
@@ -20,6 +21,12 @@ const props = withDefaults(
         showRag?: boolean
         /** 文案键前缀（对应翻译里的命名空间，默认走资料库的一套） */
         i18nPrefix?: string
+        /** 上下文容量快照：传入时在工具行（RAG 开关左侧）展示容量面板入口；浏览态等场景可不传 */
+        contextUsage?: AgentContextUsageSnapshot | null
+        /** 是否正在生成压缩摘要（容量面板压缩按钮的进行中状态） */
+        compacting?: boolean
+        /** 是否提供手动压缩入口 */
+        canCompact?: boolean
     }>(),
     {
         placeholder: "",
@@ -30,6 +37,9 @@ const props = withDefaults(
         ragLocked: false,
         showRag: true,
         i18nPrefix: "dbAgent.ui",
+        contextUsage: null,
+        compacting: false,
+        canCompact: false,
     }
 )
 
@@ -46,6 +56,8 @@ const emit = defineEmits<{
     "enter-chat": []
     /** 切换上下文检索增强开关 */
     "update:ragEnabled": [value: boolean]
+    /** 点击容量面板的「压缩历史」：压缩编排与边界落库由宿主完成 */
+    compact: []
 }>()
 
 const { t } = useTranslation()
@@ -330,6 +342,19 @@ defineExpose({ focus })
             <span v-else class="min-w-0 flex-1" />
 
             <div class="flex shrink-0 items-center gap-3">
+                <!--
+                  上下文容量面板入口：位于 RAG 开关左侧（配装助手没有 RAG 开关时紧挨图片按钮）。
+                  面板展开时锚定在输入框上方；压缩编排与边界落库由宿主完成。
+                -->
+                <AgentContextUsage
+                    v-if="props.contextUsage"
+                    :usage="props.contextUsage"
+                    :compacting="props.compacting"
+                    :can-compact="props.canCompact"
+                    :i18n-prefix="props.i18nPrefix"
+                    @compact="emit('compact')"
+                />
+
                 <!--
                   上下文检索增强开关（实验性，默认关闭）：关闭时不构建索引、不发起服务端向量检索请求。
                   开关状态由父组件持有（持久化与「开启即建索引」都在那里）；

@@ -4,23 +4,31 @@
  * 「跑一轮 → 拿到工具调用 → 执行 → 回灌」这条循环与具体业务无关：资料检索与配装助手
  * 共用同一份实现，差异全在注入的工具集与提示词上。
  *
- * 循环内置四件事，缺一不可：
+ * 循环内置五件事，缺一不可：
  *
  * 1. **工具声明全程在场**。轮次预算用尽也不撤 `tools`——未声明工具 + 思考模式下，
  *    上游会把 `<||DSML|| calls>` 标记当正文下发给用户（对 `api.deepseek.com/anthropic/v1/messages`
  *    A/B 实测：声明 tools 时无论是否开思考都正常返回 tool_use；不声明且开思考则 100% 吐标记）。
  *    超预算的调用改成「额度已用尽」的工具结果回灌，让模型看到明确信号后收尾。
+ *    上下文压缩的摘要请求同样遵守这一条（见 `compact.ts`）。
  * 2. **思考按段切分**。每段思考记录它后续发起了哪些工具调用，界面才能按真实顺序还原
  *    「思考 → 工具 → 再思考」。
  * 3. **挂起可恢复**。工具返回 `suspend` 时整个循环状态封存，外部把用户输入喂回来继续。
  * 4. **输出上限续写**。`finishReason === "length"` 时补一段续写，避免用户看到半句话。
+ * 5. **上下文自适应**。每轮请求前估算上下文规模，逼近模型窗口时就地压缩历史
+ *    （摘要替换旧消息，最近一轮原样保留）；真实用量随每轮回传（`AgentRoundUsage`），
+ *    供容量面板与压缩阈值校准。跨轮的压缩与落库由组合式函数负责。
  */
 
+import { agentI18nText } from "@/utils/agent-chat"
+import { type AgentCompactionOutcome, COMPACT_SUMMARY_MAX_OUTPUT_TOKENS, compactWireMessages, resolveAutoCompactThreshold } from "./compact"
 import { type AgentUpstreamConfig, createAgentTransport, normalizeAgentUpstreamConfig } from "./config"
+import { estimateMessagesTokens, estimateTextTokens, estimateToolTokens, resolveModelContextWindow } from "./context-usage"
 import { type AgentTool, type AgentToolOutput, readToolSummary, readToolText } from "./tool"
 import {
     type AgentImageAttachment,
     type AgentRoundResult,
+    type AgentRoundUsage,
     type AgentToolDefinition,
     type AgentToolResult,
     type AgentTransport,
@@ -58,6 +66,13 @@ export interface AgentCallbacks {
      *   按真实顺序串联；最终回答前的最后一段思考传空数组）
      */
     onReasoningEnd?: (toolCallIds: string[]) => void
+    /** 单轮真实用量（上游回传时每次模型请求一次；容量面板与缓存命中率据此统计） */
+    onUsage?: (usage: AgentRoundUsage) => void
+    /**
+     * 运行中发生了一次就地上下文压缩（内核替换了消息现场）。
+     * 只播报运行内的压缩；跨轮压缩与落库由组合式函数编排。
+     */
+    onCompaction?: (info: { preTokens: number; postTokens: number; summarizedCount: number; keptCount: number }) => void
 }
 
 /** Agent 侧的历史消息（来自 Dexie 的会话记录） */
@@ -119,6 +134,20 @@ export interface AgentRunResult<TPayload> {
     pendingAsk?: AgentPendingAsk<TPayload>
 }
 
+/** 上下文体检信息：容量面板与压缩决策共用的装配数据 */
+export interface AgentContextInfo {
+    /** 模型 id */
+    model: string
+    /** 上下文窗口（tokens，按模型名启发式解析） */
+    contextWindow: number
+    /** 请求的输出上限（tokens） */
+    maxTokens: number
+    /** 当前系统提示词 */
+    system: string
+    /** 当前工具定义 */
+    tools: AgentToolDefinition[]
+}
+
 /** 主循环的运行态 */
 interface AgentLoopState {
     /** 完整消息序列（含助手轮的工具调用与已回灌的工具结果） */
@@ -133,6 +162,11 @@ interface AgentLoopState {
     reasoningText: string
     /** 当前轮次号 */
     round: number
+    /**
+     * 真实用量锚点：最近一次带 usage 的请求（tokens = 输入 + 输出）与它发出时的消息条数。
+     * 之后的上下文规模 = 锚点值 + 增量消息的估算；就地压缩后失效（消息序列被整体替换）。
+     */
+    usageAnchor: { tokens: number; messageCount: number } | null
 }
 
 /** 挂起态：运行态 + 待回答的提问 */
@@ -229,7 +263,7 @@ const FINAL_ANSWER_PROMPT = "工具调用额度已用尽。请基于已经拿到
  * @param history 会话历史
  * @returns 协议中立的对话消息
  */
-function toWireMessages(history: readonly AgentHistoryMessage[]): AgentWireMessage[] {
+export function toWireMessages(history: readonly AgentHistoryMessage[]): AgentWireMessage[] {
     return history.map(message =>
         message.role === "assistant"
             ? { role: "assistant" as const, text: message.content, thinking: "", toolCalls: [] }
@@ -320,7 +354,9 @@ export class AgentKernel<TPayload> {
         options: AgentRunOptions = {}
     ): Promise<AgentRunResult<TPayload>> {
         if (!this.config.api_key) {
-            throw new Error(this.describe("缺少 API Key：请在设置页填写密钥，或登录以使用服务端反代"))
+            throw new Error(
+                this.describe(agentI18nText("dbAgent.error.noApiKey", "缺少 API Key：请在设置页填写密钥，或登录以使用服务端反代"))
+            )
         }
 
         this.interrupted = false
@@ -328,7 +364,15 @@ export class AgentKernel<TPayload> {
         this.sessionId = options.sessionId ?? null
 
         return this.runLoop(
-            { messages: toWireMessages(history), reply: "", traces: [], reasonings: [], reasoningText: "", round: 0 },
+            {
+                messages: toWireMessages(history),
+                reply: "",
+                traces: [],
+                reasonings: [],
+                reasoningText: "",
+                round: 0,
+                usageAnchor: null,
+            },
             callbacks
         )
     }
@@ -373,6 +417,54 @@ export class AgentKernel<TPayload> {
     }
 
     /**
+     * @description 取当前装配的上下文体检信息（模型、窗口、系统提示词与工具定义）。
+     * @returns 体检信息
+     */
+    public getContextInfo(): AgentContextInfo {
+        return {
+            model: this.config.default_model,
+            contextWindow: resolveModelContextWindow(this.config.default_model),
+            maxTokens: this.config.default_max_tokens,
+            system: this.options.systemPrompt(),
+            tools: this.resolveTools().map(tool => tool.definition),
+        }
+    }
+
+    /**
+     * @description 估算一段历史的整体上下文规模（系统提示词 + 工具声明 + 消息）。
+     * @param history 会话历史
+     * @returns 估算 tokens
+     */
+    public estimateHistoryContextTokens(history: readonly AgentHistoryMessage[]): number {
+        const info = this.getContextInfo()
+
+        return estimateTextTokens(info.system) + estimateToolTokens(info.tools) + estimateMessagesTokens(toWireMessages(history))
+    }
+
+    /**
+     * @description 对一段历史执行上下文压缩（生成摘要并组装压缩后的消息序列）。
+     *
+     * 历史不足两轮助手消息时返回 null；摘要请求失败时抛出。落库压缩边界由调用方负责。
+     * @param history 会话历史
+     * @returns 压缩结果；无需压缩时 null
+     */
+    public async compactHistory(history: readonly AgentHistoryMessage[]): Promise<AgentCompactionOutcome | null> {
+        const info = this.getContextInfo()
+
+        return compactWireMessages({
+            transport: this.transport,
+            model: info.model,
+            system: info.system,
+            tools: info.tools,
+            temperature: this.config.default_temperature,
+            // 摘要不需要整份输出预算，压到专用上限即可
+            maxTokens: Math.min(this.config.default_max_tokens, COMPACT_SUMMARY_MAX_OUTPUT_TOKENS),
+            messages: toWireMessages(history),
+            sessionId: this.sessionId ?? undefined,
+        })
+    }
+
+    /**
      * @description 取本轮使用的工具清单。
      * @returns 工具清单
      */
@@ -397,7 +489,7 @@ export class AgentKernel<TPayload> {
         const state = this.pending
 
         if (!state) {
-            throw new Error(this.describe("当前没有等待中的提问"))
+            throw new Error(this.describe(agentI18nText("dbAgent.error.noPendingAsk", "当前没有等待中的提问")))
         }
 
         return state
@@ -443,7 +535,7 @@ export class AgentKernel<TPayload> {
 
         // 输入无效且不是主动跳过时，不推进循环，让界面继续等待
         if (!skipped && this.options.hasAnswer && !this.options.hasAnswer(payload, answer)) {
-            throw new Error(this.describe("需要先给出回答才能继续"))
+            throw new Error(this.describe(agentI18nText("dbAgent.error.needAnswer", "需要先给出回答才能继续")))
         }
 
         const formatAnswer = this.options.formatAnswer
@@ -472,6 +564,84 @@ export class AgentKernel<TPayload> {
         state.round += 1
 
         return this.runLoop(state, callbacks)
+    }
+
+    /**
+     * @description 估算当前循环现场的上下文规模。
+     *
+     * 有真实用量锚点时「锚点值 + 增量消息估算」（锚点覆盖了系统提示词、工具与此前全部消息），
+     * 否则退回全量本地估算。
+     * @param state 循环状态
+     * @param system 系统提示词
+     * @param toolDefinitions 工具定义
+     * @returns 估算 tokens
+     */
+    private estimateLoopContextTokens(state: AgentLoopState, system: string, toolDefinitions: readonly AgentToolDefinition[]): number {
+        const anchor = state.usageAnchor
+
+        if (anchor) {
+            return anchor.tokens + estimateMessagesTokens(state.messages.slice(anchor.messageCount))
+        }
+
+        return estimateTextTokens(system) + estimateToolTokens(toolDefinitions) + estimateMessagesTokens(state.messages)
+    }
+
+    /**
+     * @description 上下文逼近模型窗口时就地压缩循环现场（每轮请求前调用）。
+     *
+     * 摘要只作用于本次运行（不落库）：跨轮的压缩边界由组合式函数持久化，
+     * 这里挡的是「一次问答内多轮工具调用把上下文撑爆」的情况。
+     * 消息序列被整体替换后，真实用量锚点随之失效（下轮请求会重新锚定）。
+     * @param state 循环状态
+     * @param toolDefinitions 工具定义（摘要请求也要声明，防 DSML 泄露）
+     * @param callbacks 流式与工具回调
+     */
+    private async maybeCompactLoopContext(
+        state: AgentLoopState,
+        system: string,
+        toolDefinitions: readonly AgentToolDefinition[],
+        callbacks: AgentCallbacks
+    ): Promise<void> {
+        if (this.interrupted) {
+            return
+        }
+
+        const threshold = resolveAutoCompactThreshold(resolveModelContextWindow(this.config.default_model), this.config.default_max_tokens)
+
+        if (this.estimateLoopContextTokens(state, system, toolDefinitions) < threshold) {
+            return
+        }
+
+        try {
+            const outcome = await compactWireMessages({
+                transport: this.transport,
+                model: this.config.default_model,
+                system,
+                tools: toolDefinitions,
+                temperature: this.config.default_temperature,
+                maxTokens: Math.min(this.config.default_max_tokens, COMPACT_SUMMARY_MAX_OUTPUT_TOKENS),
+                messages: state.messages,
+                sessionId: this.sessionId ?? undefined,
+            })
+
+            if (!outcome) {
+                return
+            }
+
+            state.messages.length = 0
+            state.messages.push(...outcome.messages)
+            state.usageAnchor = null
+            callbacks.onCompaction?.({
+                preTokens: outcome.preTokens,
+                postTokens: outcome.postTokens,
+                summarizedCount: outcome.summarizedCount,
+                keptCount: outcome.keptCount,
+            })
+            console.warn(this.describe(`上下文接近窗口上限，已就地压缩（约 ${outcome.preTokens} → ${outcome.postTokens} tokens）`))
+        } catch (error) {
+            // 压缩失败不阻断正常问答：保持原上下文继续，超限的错误由上游给出
+            console.warn(this.describe(`就地压缩失败：${error instanceof Error ? error.message : String(error)}`))
+        }
     }
 
     /**
@@ -518,6 +688,12 @@ export class AgentKernel<TPayload> {
             /** 已用尽工具轮：只用来决定「拿到工具调用后怎么处理」，不影响工具声明 */
             const outOfToolRounds = round >= maxToolRounds
 
+            // 上下文逼近窗口上限时就地压缩（跨轮压缩与落库由组合式函数负责，见 compact.ts 文件头）
+            await this.maybeCompactLoopContext(state, system, toolDefinitions, callbacks)
+
+            /** 本轮请求发出时的消息条数：真实用量回来后据此计算增量估算的起点 */
+            const requestMessageCount = messages.length
+
             let result: AgentRoundResult
 
             try {
@@ -545,6 +721,15 @@ export class AgentKernel<TPayload> {
             const content = result.text
             state.reasoningText += result.thinking
             state.reply += content
+
+            // 真实用量回传：刷新锚点（下次估算从这里起算增量）并交给上层统计
+            if (result.usage) {
+                state.usageAnchor = {
+                    tokens: result.usage.inputTokens + result.usage.outputTokens,
+                    messageCount: requestMessageCount,
+                }
+                callbacks.onUsage?.(result.usage)
+            }
 
             if (this.interrupted) {
                 flushReasoning()
@@ -676,6 +861,7 @@ export class AgentKernel<TPayload> {
                     reasonings,
                     reasoningText: state.reasoningText,
                     round,
+                    usageAnchor: state.usageAnchor,
                     ask: { toolCallId: suspended.call.id, payload: suspended.payload },
                 }
 

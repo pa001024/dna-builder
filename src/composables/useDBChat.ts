@@ -1,11 +1,13 @@
 import i18next from "i18next"
 import { computed, ref } from "vue"
-import { DBAgent, type DBAgentCallbacks, type DBAgentHistoryMessage, type DBAgentRunResult, type DBAgentToolTrace } from "@/api/dbAgent"
-import { type Conversation, db, type Message, type MessageReasoning, type UConversation, type UMessage } from "@/store/db"
-import { resolveSharedAgentUpstream, watchAgentUpstream } from "@/utils/agent-upstream"
+import type { AgentCompactionOutcome } from "@/api/agent/compact"
+import type { AgentHistoryMessage } from "@/api/agent/kernel"
+import { createDbAgent } from "@/api/dbAgent"
+import { useAgentChatCore } from "@/composables/useAgentChatCore"
+import { type Conversation, db, type Message, type MessageCompaction, type UConversation, type UMessage } from "@/store/db"
+import { lastCompactionIndex } from "@/utils/agent-chat"
+import { resolveSharedAgentUpstream } from "@/utils/agent-upstream"
 import { type ChatImage, MAX_CHAT_IMAGES } from "@/utils/chat-image"
-import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
-import { formatAskUserResponse, hasAskAnswer } from "@/utils/db-ask-user"
 import { htmlToText } from "@/utils/html"
 import { isHashRouterMode, renderMarkdown } from "@/utils/markdown"
 import { parseRichComponents } from "@/utils/rich-component"
@@ -15,6 +17,8 @@ import { parseRichComponents } from "@/utils/rich-component"
  *
  * 会话与消息沿用项目既有的 Dexie 表（conversations / messages），
  * 因此历史对话与其它 AI 功能共享同一份本地数据。
+ * 对话流的公共部分（回调构建 / 耗时累加 / 挂起续跑 / 错误兜底）在
+ * {@link useAgentChatCore}，这里只保留会话管理与本入口的发送编排。
  */
 
 /** 会话名称取用户首条提问的前若干字符 */
@@ -35,7 +39,7 @@ const MAX_IMAGE_HISTORY_TURNS = 2
  */
 export function useDBChat() {
     // 没有可用配置时也先建一个空密钥实例，真正的拦截放在 send() 里给出可操作的提示
-    const agent = new DBAgent(resolveSharedAgentUpstream() ?? { api_key: "" })
+    const agent = createDbAgent(resolveSharedAgentUpstream() ?? { api_key: "" })
 
     /** 会话列表（按更新时间倒序） */
     const conversations = ref<Conversation[]>([])
@@ -45,29 +49,23 @@ export function useDBChat() {
     const activeConversationId = ref(0)
     /** 当前会话的消息列表 */
     const messages = ref<Message[]>([])
-    /** 是否正在检索（流式输出中） */
-    const isBusy = ref(false)
-    /** 流式过程中的思考内容（部分模型返回，不落库） */
-    const liveReasoning = ref("")
-    /**
-     * 当前等待用户回答的提问（由 ask_user 触发）。
-     *
-     * 非 null 时界面展示提问卡片，输入框的提交会被路由成「回答这道题」。
-     */
-    const pendingAsk = ref<AskUserRequest | null>(null)
-    /**
-     * 该提问能否续跑原循环。
-     *
-     * 只有本轮刚挂起（Agent 内存上下文还在）时为 true；从历史消息恢复出来的
-     * 提问只能把回答当新一轮提问发出去，因此为 false。
-     */
-    const pendingAskLive = ref(false)
-
-    /** 挂起期间正在流式的那条助手消息（续跑时继续往它上面追加） */
-    let pendingAssistant: { message: Message; id: number; conversationId: number } | null = null
 
     const activeConversation = computed(() => conversations.value.find(item => item.id === activeConversationId.value) ?? null)
     const hasMessages = computed(() => messages.value.length > 0)
+
+    const core = useAgentChatCore<Message>({
+        agent,
+        // 落库一条助手消息的最终状态，并刷新会话时间戳（收尾 / 挂起 / 失败兜底 / 中断清理共用）
+        persist: async message => {
+            await persistAssistant(message.id, message)
+            await touchConversation(message.conversationId)
+        },
+        errorKeys: {
+            noConfig: "dbAgent.error.noConfig",
+            unknown: "dbAgent.error.unknown",
+            requestFailed: "dbAgent.error.failed",
+        },
+    })
 
     /**
      * 加载会话列表并按更新时间倒序排序。
@@ -101,6 +99,11 @@ export function useDBChat() {
                     renderedContent: message.role === "assistant" ? undefined : renderMarkdown(message.content, isHashRouterMode()),
                     renderedContentSource: message.role === "assistant" ? undefined : message.content,
                 }))
+
+            // 用量面板跟着会话走：先清掉上一个会话的真实用量，再从落库用量恢复命中率与锚点
+            core.resetContextUsage()
+            core.seedContextCacheFromMessages(messages.value)
+            core.refreshContextUsage(buildHistory())
         } catch (error) {
             console.error("加载会话消息失败:", error)
         }
@@ -127,27 +130,15 @@ export function useDBChat() {
      * 开始一个新会话（清空当前会话视图，不删除历史）。
      */
     async function startNewConversation() {
-        if (isBusy.value) {
+        if (core.isBusy.value) {
             return
         }
 
         activeConversationId.value = 0
         messages.value = []
-        liveReasoning.value = ""
-        clearPendingAsk()
-    }
-
-    /**
-     * 清掉挂起态（切换会话 / 新建会话时调用）。
-     *
-     * 挂起的提问只在它产生的那次运行里有意义：换会话后 Agent 上下文不在了，
-     * 留着只会让界面出现一张点了没反应的卡片。
-     */
-    function clearPendingAsk(): void {
-        pendingAsk.value = null
-        pendingAskLive.value = false
-        pendingAssistant = null
-        agent.clearPending()
+        core.liveReasoning.value = ""
+        core.clearPendingAsk()
+        core.resetContextUsage()
     }
 
     /**
@@ -155,13 +146,13 @@ export function useDBChat() {
      * @param conversation 目标会话
      */
     async function selectConversation(conversation: Conversation) {
-        if (isBusy.value || conversation.id === activeConversationId.value) {
+        if (core.isBusy.value || conversation.id === activeConversationId.value) {
             return
         }
 
         activeConversationId.value = conversation.id
-        liveReasoning.value = ""
-        clearPendingAsk()
+        core.liveReasoning.value = ""
+        core.clearPendingAsk()
         await loadMessages(conversation.id)
     }
 
@@ -177,6 +168,11 @@ export function useDBChat() {
         const sections: string[] = []
 
         for (const message of list.sort((a, b) => a.id - b.id)) {
+            // 压缩边界不是真实对话内容，不进导出
+            if (message.role === "system") {
+                continue
+            }
+
             // 助手回复先剥离特殊组件标签：导出的是纯文本，不能把 `<ResourceCostItem/>` 原样带出去
             const source = message.role === "assistant" ? parseRichComponents(message.content).markdown : message.content
             const content = message.role === "assistant" ? htmlToText(renderMarkdown(source, isHashRouterMode())).trim() : source.trim()
@@ -196,7 +192,7 @@ export function useDBChat() {
      * @param conversation 目标会话
      */
     async function removeConversation(conversation: Conversation) {
-        if (isBusy.value) {
+        if (core.isBusy.value) {
             return
         }
 
@@ -259,48 +255,6 @@ export function useDBChat() {
     }
 
     /**
-     * 构造一轮运行需要的回调集合。
-     *
-     * 思考分段的约定见 send 内的注释：`liveReasoning` 承载正在流式的那一段，
-     * 只有收尾时才固化进 `reasonings`，保证渲染层「历史段 + 实时段」不重叠。
-     * @param assistantMessage 本轮的助手消息（流式内容直接追加到它上面）
-     * @param reasonings 本轮已固化的思考分段
-     * @returns Agent 回调
-     */
-    function buildCallbacks(assistantMessage: Message, reasonings: MessageReasoning[]): DBAgentCallbacks {
-        return {
-            onDelta: (chunk, type) => {
-                if (type === "reasoning") {
-                    // 实时段只更新 liveReasoning，不进 reasonings（避免与流式展示重复）
-                    liveReasoning.value += chunk
-                    return
-                }
-
-                assistantMessage.content += chunk
-            },
-            onToolTrace: (trace: DBAgentToolTrace) => {
-                const traces = assistantMessage.toolTraces ?? (assistantMessage.toolTraces = [])
-                const index = traces.findIndex(item => item.id === trace.id)
-
-                if (index >= 0) {
-                    traces[index] = trace
-                } else {
-                    traces.push(trace)
-                }
-            },
-            onReasoningEnd: toolCallIds => {
-                const text = liveReasoning.value
-
-                if (text.trim()) {
-                    reasonings.push({ text, toolCallIds })
-                }
-
-                liveReasoning.value = ""
-            },
-        }
-    }
-
-    /**
      * 落库一条助手消息的最终状态。
      * @param assistantId 消息 id
      * @param assistantMessage 消息内容
@@ -317,63 +271,102 @@ export function useDBChat() {
             reasonings: assistantMessage.reasonings,
             processMs: assistantMessage.processMs,
             pendingAsk: assistantMessage.pendingAsk,
+            tokenUsage: assistantMessage.tokenUsage,
         })
     }
 
     /**
-     * 把一个检索过程的总耗时记到消息上。
+     * 构建发给模型的会话历史（感知压缩边界）。
      *
-     * 分多次运行时累加（例如 ask_user 挂起、用户作答后继续），
-     * 且只在模型真正在工作的区间累加，用户作答的等待时间不计入。
-     * @param message 助手消息
-     * @param startedAt 本次运行开始的毫秒时间戳
+     * 最后一条压缩边界之前的消息已并入边界摘要，全部丢弃、以边界摘要作为首条用户消息替代；
+     * 边界之后的照常回灌（含图片轮数护栏）。发送前与发送后调用的是同一份逻辑，
+     * 压缩预检也用它取「当前上下文」。
+     * @param excludeId 需要排除的消息 id（发送时排除本轮占位的助手消息）
+     * @returns 回灌历史
      */
-    function addProcessMs(message: Message, startedAt: number) {
-        message.processMs = (message.processMs ?? 0) + (Date.now() - startedAt)
+    function buildHistory(excludeId?: number): AgentHistoryMessage[] {
+        const markerIndex = lastCompactionIndex(messages.value)
+        const candidates = messages.value
+            .slice(markerIndex + 1)
+            .filter(
+                message =>
+                    message.id !== excludeId &&
+                    message.role !== "system" &&
+                    (message.content.trim() || (message.role === "user" && message.images?.length))
+            )
+
+        // 只有最近若干轮带图，更早的用户提问降级为纯文本（体积护栏，见 MAX_IMAGE_HISTORY_TURNS）
+        const imageTurnIds = new Set(
+            candidates
+                .filter(message => message.role === "user" && message.images?.length)
+                .slice(-MAX_IMAGE_HISTORY_TURNS)
+                .map(message => message.id)
+        )
+
+        const history: AgentHistoryMessage[] = []
+
+        // 有压缩边界时，边界摘要作为首条用户消息回灌（替代被压缩的历史）
+        if (markerIndex >= 0) {
+            const marker = messages.value[markerIndex]
+
+            if (marker?.content.trim()) {
+                history.push({ role: "user", content: marker.content })
+            }
+        }
+
+        // 只发图没打字的那一轮也要留下来——它是图片唯一的载体，按空正文过滤会把图一起丢掉
+        history.push(
+            ...candidates.map(message => ({
+                role: message.role === "user" ? ("user" as const) : ("assistant" as const),
+                content: message.content,
+                ...(message.role === "user" && imageTurnIds.has(message.id) && message.images?.length ? { images: message.images } : {}),
+            }))
+        )
+
+        return history
     }
 
     /**
-     * 处理本轮运行结果：写入回复、落库，并根据是否挂起更新提问态。
-     * @param target 本轮的助手消息与其 id
-     * @param result Agent 运行结果
+     * 落库一条压缩边界消息（system 角色，content 为回灌给模型的摘要全文）。
+     * @param conversationId 会话 id
+     * @param outcome 压缩结果
      */
-    async function consumeResult(
-        target: { message: Message; id: number; conversationId: number },
-        result: DBAgentRunResult
-    ): Promise<void> {
-        const { message: assistantMessage, id: assistantId, conversationId } = target
-
-        assistantMessage.content = result.reply || assistantMessage.content
-        // 收尾后以 agent 返回的分段结果为准（含每段思考关联的工具调用）；
-        // agent 返回为空（异常/中断）时退回本地累积的段落，保证思考内容不丢
-        if (result.reasonings?.length) {
-            assistantMessage.reasonings = result.reasonings
+    async function persistCompactionMarker(conversationId: number, outcome: AgentCompactionOutcome): Promise<void> {
+        const compaction: MessageCompaction = {
+            preTokens: outcome.preTokens,
+            postTokens: outcome.postTokens,
+            summarizedCount: outcome.summarizedCount,
+            keptCount: outcome.keptCount,
         }
+        const record: UMessage = { conversationId, role: "system", content: outcome.compactedText, compaction, createdAt: Date.now() }
+        const id = await db.messages.add(record)
+        messages.value.push({ ...record, id })
 
-        if (result.pendingAsk) {
-            // 挂起：记下提问与续跑所需的现场，界面据此展示提问卡片
-            pendingAsk.value = result.pendingAsk.payload
-            pendingAskLive.value = true
-            assistantMessage.pendingAsk = result.pendingAsk.payload
-            pendingAssistant = target
-
-            await persistAssistant(assistantId, assistantMessage)
-            await touchConversation(conversationId)
-            liveReasoning.value = ""
-            return
-        }
-
-        pendingAsk.value = null
-        pendingAskLive.value = false
-        pendingAssistant = null
-        assistantMessage.pendingAsk = undefined
-
-        await persistAssistant(assistantId, assistantMessage)
-        await touchConversation(conversationId)
+        // 压缩后的上下文规模立刻反映到面板：丢弃压缩前的真实用量锚点（缓存命中率累计保留）
+        core.refreshContextUsage(buildHistory(), { dropProviderAnchor: true })
     }
 
     /**
-     * 发送提问：写入用户消息 → 调用资料检索 Agent → 流式写入回复。
+     * 发送前压缩预检：估算当前会话上下文，逼近阈值时生成摘要并落库压缩边界。
+     *
+     * 必须在写入本轮提问**之前**执行：边界要排在本轮消息之前，后续构建历史时
+     * 「边界之后的照常回灌」才包含本轮提问。
+     * @param conversationId 会话 id
+     */
+    async function runAutoCompaction(conversationId: number): Promise<void> {
+        try {
+            const outcome = await core.maybeCompactHistory(buildHistory())
+
+            if (outcome) {
+                await persistCompactionMarker(conversationId, outcome)
+            }
+        } catch (error) {
+            console.warn("上下文压缩预检失败:", error)
+        }
+    }
+
+    /**
+     * 发送提问：压缩预检 → 写入用户消息 → 调用资料检索 Agent → 流式写入回复。
      * @param rawText 用户输入
      * @param rawImages 本次附带的图片（截图 / 面板等）；只取前 MAX_CHAT_IMAGES 张
      */
@@ -382,14 +375,14 @@ export function useDBChat() {
         const images = rawImages.slice(0, MAX_CHAT_IMAGES)
 
         // 只有图没有文字也是一次完整提问（「这是什么」由模型自己理解图片）
-        if ((!text && !images.length) || isBusy.value) {
+        if ((!text && !images.length) || core.isBusy.value) {
             return
         }
 
         // 挂起期间输入框的提交被路由成「用这段文字回答当前提问」，
         // 这样用户既能点选项，也能直接打字作答，不必非走卡片。
-        if (pendingAsk.value) {
-            await answerPendingAsText(text)
+        if (core.pendingAsk.value) {
+            await core.answerPendingAsText(text)
             return
         }
 
@@ -397,6 +390,9 @@ export function useDBChat() {
         const nameSource = text || i18next.t("dbAgent.conversation.imageName")
         const conversationId = activeConversationId.value || (await createConversation(nameSource.slice(0, CONVERSATION_NAME_LENGTH)))
         const isFirstMessage = !messages.value.some(message => message.role === "user")
+
+        // 压缩预检：边界必须排在本轮消息之前，所以放在写入提问之前
+        await runAutoCompaction(conversationId)
 
         const userMessage: UMessage = {
             conversationId,
@@ -418,199 +414,49 @@ export function useDBChat() {
         const assistantMessage: Message = { ...assistantRecord, id: assistantId, toolTraces: [] }
         messages.value.push(assistantMessage)
 
-        isBusy.value = true
-        liveReasoning.value = ""
+        // 历史消息（不含本轮占位的助手消息；感知压缩边界，见 buildHistory）
+        const history = buildHistory(assistantId)
 
-        // 本轮的各段思考：一段思考结束后（onReasoningEnd），后续增量另起一段。
-        // 约定：**正在流式的那一段不入数组**，它只由 liveReasoning 承载；
-        // 只有收尾（onReasoningEnd / 该段后跟了工具调用）时才落进 reasonings。
-        // 这样渲染层「历史段 + 实时段」天然不重叠，不会出现两个思考块。
-        const reasonings: MessageReasoning[] = []
-        assistantMessage.reasonings = reasonings
-
-        // 历史消息（不含本轮占位的助手消息）。
-        // 只发图没打字的那一轮也要留下来——它是图片唯一的载体，按空正文过滤会把图一起丢掉。
-        const candidates = messages.value.filter(
-            message =>
-                message.id !== assistantId &&
-                message.role !== "system" &&
-                (message.content.trim() || (message.role === "user" && message.images?.length))
-        )
-
-        // 只有最近若干轮带图，更早的用户提问降级为纯文本（体积护栏，见 MAX_IMAGE_HISTORY_TURNS）
-        const imageTurnIds = new Set(
-            candidates
-                .filter(message => message.role === "user" && message.images?.length)
-                .slice(-MAX_IMAGE_HISTORY_TURNS)
-                .map(message => message.id)
-        )
-
-        const history: DBAgentHistoryMessage[] = candidates.map(message => ({
-            role: message.role === "user" ? "user" : "assistant",
-            content: message.content,
-            ...(message.role === "user" && imageTurnIds.has(message.id) && message.images?.length ? { images: message.images } : {}),
-        }))
-
-        const target = { message: assistantMessage, id: assistantId, conversationId }
-
-        // 记录本轮开始时间，用于完成后展示过程耗时（见 addProcessMs）
+        // 记录本轮开始时间，用于完成后展示过程耗时（见 core.addProcessMs）
         const startedAt = Date.now()
 
-        try {
-            // 既没有自己的密钥又未登录时服务端代理不可用，直接给出可操作提示，不打无谓的请求
-            if (!resolveSharedAgentUpstream()) {
-                throw new Error(i18next.t("dbAgent.error.noConfig"))
+        await core.runAgentTurn(
+            assistantMessage,
+            startedAt,
+            async callbacks => agent.run(history, callbacks, { sessionId: await ensureAiSessionId(conversationId) }),
+            {
+                onSettled: () =>
+                    touchConversation(conversationId, isFirstMessage ? nameSource.slice(0, CONVERSATION_NAME_LENGTH) : undefined),
             }
-
-            const result = await agent.run(history, buildCallbacks(assistantMessage, reasonings), {
-                sessionId: await ensureAiSessionId(conversationId),
-            })
-
-            addProcessMs(assistantMessage, startedAt)
-            await consumeResult(target, result)
-        } catch (error) {
-            const message = error instanceof Error ? error.message : i18next.t("dbAgent.error.unknown")
-            assistantMessage.content = assistantMessage.content || i18next.t("dbAgent.error.failed", { message })
-
-            addProcessMs(assistantMessage, startedAt)
-            await persistAssistant(assistantId, assistantMessage)
-        } finally {
-            isBusy.value = false
-            liveReasoning.value = ""
-            await touchConversation(conversationId, isFirstMessage ? nameSource.slice(0, CONVERSATION_NAME_LENGTH) : undefined)
-        }
+        )
     }
 
     /**
-     * 用一段自由文本回答当前挂起的提问（输入框提交时走这里）。
-     *
-     * 文本挂到第一道允许自由输入的题上；一道都没有时退回「当作新一轮提问发出去」，
-     * 保证输入框永远有出路，不会把用户卡死。
-     * @param text 用户输入的文本
+     * 手动触发上下文压缩（容量面板的「压缩历史」）：无视阈值直接压缩当前会话历史。
+     * @returns compacted 已压缩；noNeed 无需压缩（会话太短）；failed 压缩失败
      */
-    async function answerPendingAsText(text: string): Promise<void> {
-        const request = pendingAsk.value
-
-        if (!request) {
-            return
+    async function compactNow(): Promise<"compacted" | "noNeed" | "failed"> {
+        if (!activeConversationId.value || core.isBusy.value || !hasMessages.value) {
+            return "noNeed"
         }
-
-        const question = request.questions.find(item => item.allowCustom) ?? request.questions[0]
-
-        if (!question?.allowCustom) {
-            // 没有任何题接受自由输入：清掉挂起态，把这段文字当新一轮提问
-            pendingAsk.value = null
-            pendingAskLive.value = false
-            pendingAssistant = null
-            await send(text)
-            return
-        }
-
-        await answerAsk({ requestId: request.id, answers: [{ questionId: question.id, optionIds: [], custom: text }] })
-    }
-
-    /**
-     * 回答当前挂起的提问并继续检索。
-     *
-     * 能续跑时（本轮刚挂起）直接回到原循环继续；从历史恢复出来的提问
-     * 没有 Agent 上下文，退化为把回答拼成一句自然语言当新一轮提问发出去。
-     * @param response 用户回答
-     */
-    async function answerAsk(response: AskUserResponse): Promise<void> {
-        const request = pendingAsk.value
-        const target = pendingAssistant
-
-        if (!request) {
-            return
-        }
-
-        // 防御：既没选也没填（界面已禁用提交，这里兜住异常输入）
-        if (!response.skipped && !hasAskAnswer(request, response)) {
-            return
-        }
-
-        if (!pendingAskLive.value || !target) {
-            // 历史恢复的提问：Agent 上下文已丢失，把回答作为新一轮提问发出
-            pendingAsk.value = null
-            pendingAskLive.value = false
-            pendingAssistant = null
-
-            if (target) {
-                target.message.pendingAsk = undefined
-                await persistAssistant(target.id, target.message)
-            }
-
-            await send(formatAskUserResponse(request, response))
-            return
-        }
-
-        isBusy.value = true
-        liveReasoning.value = ""
-        pendingAsk.value = null
-
-        const reasonings: MessageReasoning[] = target.message.reasonings ?? []
-        target.message.reasonings = reasonings
-
-        // 续跑同样计时并累加到同一条消息上
-        const startedAt = Date.now()
 
         try {
-            if (!resolveSharedAgentUpstream()) {
-                throw new Error(i18next.t("dbAgent.error.noConfig"))
+            const outcome = await core.maybeCompactHistory(buildHistory(), { force: true })
+
+            if (!outcome) {
+                return "noNeed"
             }
 
-            const result = await agent.answerAsk(response, buildCallbacks(target.message, reasonings))
-
-            addProcessMs(target.message, startedAt)
-            await consumeResult(target, result)
+            await persistCompactionMarker(activeConversationId.value, outcome)
+            return "compacted"
         } catch (error) {
-            const message = error instanceof Error ? error.message : i18next.t("dbAgent.error.unknown")
-            target.message.content = target.message.content || i18next.t("dbAgent.error.failed", { message })
-
-            addProcessMs(target.message, startedAt)
-            await persistAssistant(target.id, target.message)
-        } finally {
-            isBusy.value = false
-            liveReasoning.value = ""
+            console.warn("手动压缩失败:", error)
+            return "failed"
         }
     }
 
-    /**
-     * 跳过当前挂起的提问，让模型基于已有信息继续检索。
-     */
-    async function skipAsk(): Promise<void> {
-        const request = pendingAsk.value
-
-        if (!request) {
-            return
-        }
-
-        await answerAsk({ requestId: request.id, answers: [], skipped: true })
-    }
-
-    /**
-     * 中断当前检索。
-     *
-     * 挂起等答时中断等于放弃这次提问：清掉挂起态，避免界面上留一张点不动的卡片。
-     */
-    function interrupt() {
-        agent.interrupt()
-
-        if (pendingAsk.value) {
-            pendingAsk.value = null
-            pendingAskLive.value = false
-
-            if (pendingAssistant) {
-                pendingAssistant.message.pendingAsk = undefined
-                void persistAssistant(pendingAssistant.id, pendingAssistant.message)
-            }
-
-            pendingAssistant = null
-        }
-    }
-
-    // 设置或登录状态变化时同步 Agent 配置（换账号 / 登录 / 退出都要重新解析代理凭证）
-    watchAgentUpstream(config => agent.updateConfig(config))
+    // 挂起回退（把回答当新提问发出）需要能调到本入口的 send，组装完成后注入
+    core.bindSend(send)
 
     void loadConversations()
 
@@ -621,10 +467,12 @@ export function useDBChat() {
         activeConversation,
         messages,
         hasMessages,
-        isBusy,
-        liveReasoning,
-        pendingAsk,
-        pendingAskLive,
+        isBusy: core.isBusy,
+        liveReasoning: core.liveReasoning,
+        pendingAsk: core.pendingAsk,
+        pendingAskLive: core.pendingAskLive,
+        isCompacting: core.isCompacting,
+        contextUsage: core.contextUsage,
         loadConversations,
         loadMessages,
         createConversation,
@@ -634,8 +482,9 @@ export function useDBChat() {
         exportConversationText,
         touchConversation,
         send,
-        answerAsk,
-        skipAsk,
-        interrupt,
+        compactNow,
+        answerAsk: core.answerAsk,
+        skipAsk: core.skipAsk,
+        interrupt: core.interrupt,
     }
 }

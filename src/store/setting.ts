@@ -319,9 +319,9 @@ export const useSettingStore = defineStore("setting", {
             this.aiMaxTokens = maxTokens
         },
         resetAiSettings() {
-            this.aiBaseUrl = "https://open.bigmodel.cn/api/paas/v4/"
+            this.aiBaseUrl = ""
             this.aiApiKey = ""
-            this.aiModelName = "glm-4.6v-flash"
+            this.aiModelName = ""
             this.aiMaxTokens = DEFAULT_AI_MAX_TOKENS
         },
         async getCurrentUser() {

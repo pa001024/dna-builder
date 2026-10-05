@@ -16,15 +16,18 @@
  */
 
 import {
+    AGENT_PROXY_BASE_URL_SUFFIX,
     type AgentFinishReason,
     type AgentRoundRequest,
     type AgentRoundResult,
+    type AgentRoundUsage,
     type AgentStreamHandlers,
     type AgentToolCall,
     type AgentTransport,
     type AgentTransportOptions,
     type AgentWireMessage,
     AI_PROXY_SESSION_HEADER,
+    parseToolArguments,
     resolveMessagesEndpoint,
 } from "./wire"
 
@@ -95,7 +98,7 @@ function serializeMessages(messages: readonly AgentWireMessage[]): MessagesWireM
                               type: "tool_use",
                               id: call.id,
                               name: call.name,
-                              input: toToolInput(call.arguments),
+                              input: parseToolArguments(call.arguments),
                           })
                       ),
                   ]
@@ -133,24 +136,6 @@ function serializeMessages(messages: readonly AgentWireMessage[]): MessagesWireM
     }
 
     return result
-}
-
-/**
- * @description 把工具参数的 JSON 字符串还原成 Messages 要求的对象。
- *
- * 工具**参数**在 Messages 线上是对象而不是字符串，本地上下文里存的却是字符串；
- * 解析失败时退回空对象，保留调用 id 与工具名，让模型看到「这次调用没有参数」，
- * 而不是让整轮请求因为一段历史参数被上游拒绝。
- * @param rawArguments 原始参数串
- * @returns 参数对象
- */
-function toToolInput(rawArguments: string): Record<string, unknown> {
-    try {
-        const parsed: unknown = JSON.parse(rawArguments)
-        return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {}
-    } catch {
-        return {}
-    }
 }
 
 /**
@@ -200,6 +185,37 @@ function buildRequestBody(request: AgentRoundRequest): Record<string, unknown> {
 }
 
 /**
+ * @description 从 Messages 协议的 usage 块读取输入侧用量，并归一化到线协议中立的口径。
+ *
+ * Anthropic 口径里 `input_tokens` **只含未命中缓存的输入**，缓存读 / 缓存写是独立字段；
+ * 中立层的 `inputTokens` 约定为「输入总量（含缓存部分）」，因此这里要做求和归一，
+ * 否则缓存命中率会出现 cacheRead/input > 100% 的荒谬值，上下文水位也会被低估。
+ * @param source 上游 usage 块（message_start 事件携带）
+ * @param usage 累积目标
+ */
+function readInputUsage(source: Record<string, unknown> | undefined | null, usage: AgentRoundUsage): void {
+    if (!source) {
+        return
+    }
+
+    const uncached = Number(source.input_tokens)
+    const cacheRead = Number(source.cache_read_input_tokens)
+    const cacheWrite = Number(source.cache_creation_input_tokens)
+    const total =
+        (Number.isFinite(uncached) && uncached > 0 ? uncached : 0) +
+        (Number.isFinite(cacheRead) && cacheRead > 0 ? cacheRead : 0) +
+        (Number.isFinite(cacheWrite) && cacheWrite > 0 ? cacheWrite : 0)
+
+    if (total > 0) {
+        usage.inputTokens = total
+    }
+
+    if (Number.isFinite(cacheRead) && cacheRead > 0) {
+        usage.cacheReadTokens = cacheRead
+    }
+}
+
+/**
  * @description 判断一次失败是否值得重试。
  * 只重试网络错误与上游临时性故障（429 / 5xx）；4xx（鉴权、参数、额度）重试也不会变好。
  * @param status 上游状态码；网络错误时传 null
@@ -231,9 +247,10 @@ function resolveErrorMessage(body: unknown, status: number): string {
  * 剪掉不完整工具调用的处理一致。
  * @param blocks 按索引累积的内容块
  * @param finishReason 收流原因
+ * @param usage 流式过程中累积的真实用量
  * @returns 本轮汇总
  */
-function assembleRound(blocks: Map<number, StreamingBlock>, finishReason: AgentFinishReason): AgentRoundResult {
+function assembleRound(blocks: Map<number, StreamingBlock>, finishReason: AgentFinishReason, usage: AgentRoundUsage): AgentRoundResult {
     const ordered = [...blocks.entries()].sort(([left], [right]) => left - right).map(([, block]) => block)
 
     let text = ""
@@ -272,7 +289,13 @@ function assembleRound(blocks: Map<number, StreamingBlock>, finishReason: AgentF
         toolCalls.push({ id: block.id || `call_${toolCalls.length}_${Date.now()}`, name: block.name, arguments: block.json || "{}" })
     }
 
-    return { text, thinking, toolCalls, finishReason }
+    return {
+        text,
+        thinking,
+        toolCalls,
+        finishReason,
+        ...(usage.inputTokens > 0 || usage.outputTokens > 0 ? { usage: { ...usage } } : {}),
+    }
 }
 
 /**
@@ -297,7 +320,7 @@ type AttemptOutcome = { ok: true; result: AgentRoundResult } | { ok: false; erro
 export function createMessagesTransport(options: AgentTransportOptions): AgentTransport {
     const endpoint = resolveMessagesEndpoint(options.baseUrl)
     /** 是否直连 DeepSeek 官方入口（决定鉴权头形态：官方认 `x-api-key`，自建代理认 `Authorization`）。 */
-    const isDirectUpstream = !options.baseUrl.endsWith("/api/v1")
+    const isDirectUpstream = !options.baseUrl.endsWith(AGENT_PROXY_BASE_URL_SUFFIX)
 
     /**
      * 消费一段 SSE 缓冲区，逐行取出其中的事件。
@@ -338,13 +361,21 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
      * @param event 已解析的上游事件
      * @param blocks 内容块累积表
      * @param handlers 流式增量回调
+     * @param usage 真实用量累积目标（message_start / message_delta 携带）
      * @returns 该事件是否更新了收流原因；更新时返回归一化后的原因
      */
     function applyEvent(
         event: Record<string, unknown>,
         blocks: Map<number, StreamingBlock>,
-        handlers: AgentStreamHandlers
+        handlers: AgentStreamHandlers,
+        usage: AgentRoundUsage
     ): AgentFinishReason | undefined {
+        if (event.type === "message_start") {
+            const message = event.message as { usage?: Record<string, unknown> } | undefined
+            readInputUsage(message?.usage, usage)
+            return undefined
+        }
+
         if (event.type === "content_block_start") {
             const index = Number(event.index) || 0
             const block = event.content_block as { type?: string; id?: string; name?: string; text?: string; thinking?: string } | undefined
@@ -414,6 +445,17 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
 
         if (event.type === "message_delta") {
             const delta = event.delta as { stop_reason?: unknown } | undefined
+            // 输出 tokens 在收流事件的 usage 里给出（message_start 只有输入侧）
+            const usageDelta = event.usage as { output_tokens?: unknown } | undefined
+
+            if (usageDelta) {
+                const outputTokens = Number(usageDelta.output_tokens)
+
+                if (Number.isFinite(outputTokens) && outputTokens > 0) {
+                    usage.outputTokens = outputTokens
+                }
+            }
+
             return delta?.stop_reason == null ? undefined : normalizeFinishReason(delta.stop_reason)
         }
 
@@ -447,6 +489,7 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
         const reader = body.getReader()
         const decoder = new TextDecoder()
         const blocks = new Map<number, StreamingBlock>()
+        const usage: AgentRoundUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0 }
 
         let buffer = ""
         let finishReason: AgentFinishReason = null
@@ -493,7 +536,7 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
                         return
                     }
 
-                    const next = applyEvent(event, blocks, handlers)
+                    const next = applyEvent(event, blocks, handlers, usage)
 
                     if (next !== undefined) {
                         finishReason = next
@@ -519,7 +562,7 @@ export function createMessagesTransport(options: AgentTransportOptions): AgentTr
             throw new Error(`上游 ${options.timeout} 毫秒内没有新内容，已中断本次请求`)
         }
 
-        return assembleRound(blocks, finishReason)
+        return assembleRound(blocks, finishReason, usage)
     }
 
     /**

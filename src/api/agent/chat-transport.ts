@@ -15,6 +15,7 @@ import type {
     AgentFinishReason,
     AgentRoundRequest,
     AgentRoundResult,
+    AgentRoundUsage,
     AgentStreamHandlers,
     AgentToolCall,
     AgentTransport,
@@ -34,6 +35,19 @@ interface ChatDelta {
     content?: string | null
     reasoning_content?: string | null
     tool_calls?: ChatToolCallDelta[]
+}
+
+/**
+ * 流式响应末尾的 usage 块（宽松形态）。
+ *
+ * 除了 OpenAI 标准字段外，还兼容 DeepSeek 的自定义缓存字段 `prompt_cache_hit_tokens`
+ * （与标准 `prompt_tokens_details.cached_tokens` 同义，二者取先命中者）。
+ */
+interface ChatUsage {
+    prompt_tokens?: number
+    completion_tokens?: number
+    prompt_cache_hit_tokens?: number
+    prompt_tokens_details?: { cached_tokens?: number | null }
 }
 
 /** 用户轮的多模态内容分片（图片 + 文本）。 */
@@ -182,6 +196,7 @@ export function createChatTransport(options: AgentTransportOptions): AgentTransp
         let text = ""
         let thinking = ""
         let finishReason: AgentFinishReason = null
+        const usage: AgentRoundUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0 }
 
         const stream = await client.chat.completions.create({
             model: request.model,
@@ -189,6 +204,8 @@ export function createChatTransport(options: AgentTransportOptions): AgentTransp
             temperature: request.temperature,
             max_tokens: request.maxTokens,
             stream: true,
+            // 显式要求回传用量：不传时多数网关在流式模式下不给 usage，上下文统计就没有真实值可校准
+            stream_options: { include_usage: true },
             ...(request.tools?.length
                 ? {
                       tools: request.tools.map(tool => ({
@@ -209,6 +226,15 @@ export function createChatTransport(options: AgentTransportOptions): AgentTransp
 
             if (choice?.finish_reason) {
                 finishReason = normalizeFinishReason(choice.finish_reason)
+            }
+
+            // usage 只在最后一个分片出现（include_usage 开启后）
+            const chunkUsage = chunk.usage as ChatUsage | undefined
+
+            if (chunkUsage) {
+                usage.inputTokens = chunkUsage.prompt_tokens ?? 0
+                usage.outputTokens = chunkUsage.completion_tokens ?? 0
+                usage.cacheReadTokens = chunkUsage.prompt_cache_hit_tokens ?? chunkUsage.prompt_tokens_details?.cached_tokens ?? 0
             }
 
             if (delta?.reasoning_content) {
@@ -251,7 +277,13 @@ export function createChatTransport(options: AgentTransportOptions): AgentTransp
                 arguments: slot.args || "{}",
             }))
 
-        return { text, thinking, toolCalls, finishReason }
+        return {
+            text,
+            thinking,
+            toolCalls,
+            finishReason,
+            ...(usage.inputTokens > 0 || usage.outputTokens > 0 ? { usage: { ...usage } } : {}),
+        }
     }
 
     return {

@@ -17,7 +17,9 @@
  *   - key 含 "." 时按嵌套命名空间写入（如 char-build.new_key），无点号或加 --flat 时写顶层扁平键；
  *   - 文件按既有风格重写：递归 localeCompare 排序 + 4 空格缩进 + 结尾换行（与原文件字节一致）；
  *   - 完成后按实际文件内容检查：该键若非 6 种语言齐全则输出 warning（只改一种语言的译文、
- *     但文件本就齐全时不告警）。
+ *     但文件本就齐全时不告警）；
+ *   - 文案里出现疑似单花括号占位符（如 {name}，i18next 的插值是 {{name}}）时输出 warning，
+ *     单花括号不会被替换、会原样展示给用户。
  *
  * check 细节:
  *   主检测: 代码中 t(...)/$t(...)/i18next.t(...) 静态引用、但 zh-CN 翻译文件中不存在的键；
@@ -132,6 +134,18 @@ function resolveLocale(raw: string): string {
     throw new Error(`未知语言「${raw}」；可用：${LOCALES.join(", ")}，别名如 cn/jp/kr/tw`)
 }
 
+/** 匹配「单层花括号包住的标识符」。i18next 插值是 {{name}}，{name} 不会被替换，几乎都是笔误 */
+const SINGLE_BRACE_PLACEHOLDER_RE = /(?<!\{)\{([A-Za-z0-9_][A-Za-z0-9_.]*)\}(?!\})/g
+
+/**
+ * 找出文案里疑似写错的占位符（如 {name}）。
+ * @param value 待检查的文案
+ * @returns 疑似占位符列表（原样，含花括号）；没有时为空数组
+ */
+function findSuspiciousPlaceholders(value: string): string[] {
+    return [...value.matchAll(SINGLE_BRACE_PLACEHOLDER_RE)].map(match => match[0])
+}
+
 /** 顶层精确键优先，未命中再按 "." 逐层查找 */
 function lookupKey(obj: JsonObject, key: string): any {
     if (Object.hasOwn(obj, key)) {
@@ -237,7 +251,9 @@ const HELP = `bun i18n <command> [options]
                         插入或覆盖翻译。语言参数用短名（-cn/-en/-jp/-ja/-kr/-ko/-fr/-tw），
                         未指定的语言不写入。key 含 "." 时按嵌套命名空间写入，--flat 强制顶层。
                         附加 --dry-run 只预览不落盘。
-                        完成后按实际文件内容检查：该键若非 6 种语言齐全则输出 warning。
+                        完成后按实际文件内容检查：该键若非 6 种语言齐全则输出 warning；
+                        文案含疑似单花括号占位符（如 {name}）时也会输出 warning
+                        （i18next 插值的正确写法是双花括号 {{name}}）。
   get <key> [--lang cn,en] [--json]
                         读取某键各语言下的值（默认全部 6 种）；--lang 用逗号过滤部分语言，
                         别名可用（如 --lang cn,jp）。附加 --json 输出结构化结果。
@@ -305,6 +321,16 @@ async function cmdAdd(args: string[]): Promise<void> {
     for (const change of changes) {
         const label = change.status === "added" ? "新增" : change.status === "updated" ? "覆盖" : "未变化"
         console.log(`  ${change.locale.padEnd(6)} ${label}  ${change.value}`)
+    }
+
+    // 输入侧护栏：单花括号占位符不会被 i18next 插值（正确写法是 {{name}}），只警告不阻断
+    for (const [locale, value] of values) {
+        const suspects = findSuspiciousPlaceholders(value)
+
+        if (suspects.length > 0) {
+            console.warn(`\n⚠ warning: ${locale} 文案含疑似单花括号占位符 ${suspects.join("、")}`)
+            console.warn("  i18next 插值的正确写法是双花括号（如 {{name}}）；单花括号不会被替换，会原样展示给用户。")
+        }
     }
 
     if (dryRun) {

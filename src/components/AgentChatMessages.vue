@@ -8,6 +8,7 @@ import type { IconTypes } from "@/components/Icon.vue"
 import { useUIStore } from "@/store/ui"
 import { copyText } from "@/util"
 import { type AgentChatMessage, type AgentChatReasoning, type AgentChatToolTrace, scopedI18nKey } from "@/utils/agent-chat"
+import { formatCount } from "@/utils/ai-log-format"
 import { chatImageDataUrl } from "@/utils/chat-image"
 import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
 import { isHashRouterMode, renderMarkdown } from "@/utils/markdown"
@@ -386,10 +387,13 @@ function toggleProcess(messageId: number) {
 
 /**
  * 过程耗时的人类可读格式，形如 `13m34s` / `1h2m` / `8s`。
+ *
+ * 与 `utils/ai-log-format.ts` 的 `formatDuration` 口径不同：那边是日志页的精确格式
+ * （`1.50s`），这边是对话流里粗粒度的过程耗时，按小时/分/秒取整。
  * @param ms 毫秒
  * @returns 展示文本
  */
-function formatDuration(ms: number): string {
+function formatProcessDuration(ms: number): string {
     const totalSeconds = Math.max(0, Math.round(ms / 1000))
     const hours = Math.floor(totalSeconds / 3600)
     const minutes = Math.floor((totalSeconds % 3600) / 60)
@@ -413,6 +417,25 @@ function toggleToolGroup(messageId: number, groupKey: string) {
     expandedGroupKeys.value = expandedGroupKeys.value.includes(key)
         ? expandedGroupKeys.value.filter(item => item !== key)
         : [...expandedGroupKeys.value, key]
+}
+
+/**
+ * 消息自带的 token 用量统计小字（上游回传了真实用量时才有）。
+ * 「上下文」是末次请求的输入规模（即该轮收尾时的上下文大小），「输出」是本轮累计输出。
+ * @param message 助手消息
+ * @returns 统计文案；没有真实用量时为空串
+ */
+function usageNoteOf(message: AgentChatMessage): string {
+    const usage = message.tokenUsage
+
+    if (!usage || (!usage.input && !usage.output)) {
+        return ""
+    }
+
+    return t(label("tokenNote"), {
+        context: formatCount(usage.input),
+        output: formatCount(usage.output),
+    })
 }
 
 /** 思考段落的折叠键：消息 id + 段落序号，保证每条思考独立展开/收起 */
@@ -775,8 +798,7 @@ onBeforeUnmount(() => {
                 <ul v-else class="flex flex-col gap-5">
                     <li v-for="message in props.messages" :key="message.id" class="group/msg">
                         <!-- 用户提问：右对齐，hairline 边框区分 -->
-                        <div v-if="message.role === 'user'" class="flex flex-col items-end gap-1.5">
-                            <!-- 附图排在正文之前：与发给模型的顺序一致，也符合「先看图再看问题」 -->
+                        <div v-if="message.role === 'user'" class="flex flex-col items-end gap-1.5">                            <!-- 附图排在正文之前：与发给模型的顺序一致，也符合「先看图再看问题」 -->
                             <div v-if="message.images?.length" class="flex max-w-[80%] flex-wrap justify-end gap-2">
                                 <img
                                     v-for="(image, index) in message.images"
@@ -813,6 +835,20 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
+                        <!--
+                          上下文压缩边界：一条分隔线。摘要正文不进消息流（历史还在下方滚动区里），
+                          模型侧以边界摘要替代边界之前的消息——两边看到的不是同一份内容，这条线就是分界。
+                          中文文案不用 font-mono（见 db-style 禁则）。
+                        -->
+                        <div v-else-if="message.role === 'system'" class="flex items-center gap-3 py-1">
+                            <span class="h-px min-w-0 flex-1 bg-base-content/12" />
+                            <span class="flex shrink-0 items-center gap-1.5 text-[11px] tracking-wide text-base-content/40">
+                                <Icon icon="ri:file-zip-line" class="h-3 w-3" />
+                                {{ $t(label("compactedSeparator")) }}
+                            </span>
+                            <span class="h-px min-w-0 flex-1 bg-base-content/12" />
+                        </div>
+
                         <!-- 助手回复：执行过程（思考可折叠 + 连续工具调用合并折叠）+ markdown 正文 -->
                         <div v-else class="flex flex-col items-start gap-2">
                             <div v-if="traceItems(message).length || liveReasoningOf(message)" class="flex w-full flex-col gap-1">
@@ -835,7 +871,7 @@ onBeforeUnmount(() => {
                                     <span class="text-[11px] text-base-content/45">
                                         {{
                                             message.processMs
-                                                ? $t(label("processDone"), { duration: formatDuration(message.processMs) })
+                                                ? $t(label("processDone"), { duration: formatProcessDuration(message.processMs) })
                                                 : $t(label("processDoneNoTime"))
                                         }}
                                     </span>
@@ -1036,12 +1072,16 @@ onBeforeUnmount(() => {
                                 @skip="emit('skip')"
                             />
 
-                            <!-- 时间戳 + 操作：均仅悬停该条回复时显示，左侧对齐与正文对齐 -->
+                            <!-- 时间戳 + token 用量 + 操作：均仅悬停该条回复时显示，左侧对齐与正文对齐 -->
                             <div
                                 class="flex h-4 items-center gap-1.5 opacity-0 transition-opacity duration-200 group-hover/msg:opacity-100 group-focus-within/msg:opacity-100"
                             >
                                 <span class="text-[10px] tabular-nums text-base-content/35">
                                     {{ formatMessageTime(message.createdAt) }}
+                                </span>
+                                <!-- 本条回复的真实 token 用量：与时间同行的小字（含中文，不用 font-mono） -->
+                                <span v-if="usageNoteOf(message)" class="text-[10px] tabular-nums text-base-content/35">
+                                    {{ usageNoteOf(message) }}
                                 </span>
                                 <button
                                     type="button"
