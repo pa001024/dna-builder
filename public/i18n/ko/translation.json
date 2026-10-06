@@ -3398,6 +3398,14 @@
         "no_entries": "항목 없음",
         "ranking": "순위"
     },
+    "reader": {
+        "enter": "읽기 모드",
+        "exit": "읽기 모드 종료",
+        "fontLarger": "글자 크게",
+        "fontSmaller": "글자 작게",
+        "next": "다음",
+        "prev": "이전"
+    },
     "reputation": {
         "accumulatedExp": "누적 경험치",
         "entrust": "위탁",

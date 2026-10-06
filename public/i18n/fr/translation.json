@@ -3436,6 +3436,14 @@
         "no_entries": "Aucune entrée",
         "ranking": "Classement"
     },
+    "reader": {
+        "enter": "Mode lecture",
+        "exit": "Quitter le mode lecture",
+        "fontLarger": "Agrandir la police",
+        "fontSmaller": "Réduire la police",
+        "next": "Suivant",
+        "prev": "Précédent"
+    },
     "reputation": {
         "accumulatedExp": "EXP cumulée",
         "entrust": "Commission",

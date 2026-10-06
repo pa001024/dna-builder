@@ -3416,6 +3416,14 @@
         "no_entries": "暂无条目",
         "ranking": "排名"
     },
+    "reader": {
+        "enter": "阅读模式",
+        "exit": "退出阅读模式",
+        "fontLarger": "放大字号",
+        "fontSmaller": "缩小字号",
+        "next": "下一则",
+        "prev": "上一则"
+    },
     "reputation": {
         "accumulatedExp": "累计经验",
         "entrust": "委托",

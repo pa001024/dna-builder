@@ -1,0 +1,61 @@
+{
+  "charId": 0,
+  "base": {
+    "charLevel": 80,
+    "charSkillLevel": 12,
+    "hpPercent": 0.25,
+    "resonanceGain": 3,
+    "enemyId": 300,
+    "enemyLevel": 80,
+    "enemyResistance": -4,
+    "isRouge": false,
+    "extraMastery": "",
+    "meleeWeapon": 0,
+    "meleeWeaponLevel": 80,
+    "meleeWeaponRefine": 5,
+    "rangedWeapon": 0,
+    "rangedWeaponLevel": 80,
+    "rangedWeaponRefine": 5,
+    "auraMod": 0,
+    "imbalance": false,
+    "targetFunction": "DPS",
+    "customVariables": [
+      ["循环用时", "1"],
+      ["DPS", "普通攻击::一段伤害/循环用时"]
+    ],
+    "buffs": [["自定义BUFF", 1]],
+    "customBuff": [],
+    "petId": 0,
+    "petLevel": 3,
+    "petCoverage": 0.6,
+    "petAutoCoverage": true,
+    "traits": [null, null, null, null],
+    "charMods": [null, null, null, null, null, null, null, null],
+    "meleeMods": [null, null, null, null, null, null, null, null],
+    "rangedMods": [null, null, null, null, null, null, null, null],
+    "skillWeaponMods": [null, null, null, null],
+    "dotSettings": { "skill": 0, "melee": 0, "ranged": 0, "skillweapon": 0, "forceOwnAdditionalDamage": false }
+  },
+  "assist": [
+    {
+      "axis": "队友1",
+      "options": [
+        { "label": "不带", "buffs": [] },
+        { "label": "候选甲", "buffs": [["全盛·振奋", 10]] }
+      ]
+    },
+    {
+      "axis": "队友2",
+      "options": [
+        { "label": "不带", "buffs": [] },
+        { "label": "候选乙（含光环海妖 1 件）", "buffs": [["色散成霓", 10]] }
+      ]
+    }
+  ],
+  "pets": [],
+  "required": {
+    "charMods": [],
+    "meleeMods": [],
+    "rangedMods": []
+  }
+}

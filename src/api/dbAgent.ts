@@ -17,6 +17,7 @@ import { AgentKernel } from "@/api/agent/kernel"
 import { getAgentSkillRegistry } from "@/api/agent/skills/registry"
 import type { AgentTool } from "@/api/agent/tool"
 import { createDbRetrievalTools } from "@/api/agent/tools/db-retrieval"
+import { DB_RETRIEVAL_PROFILES } from "@/api/agent/tools/retrieval-modules"
 import { createSkillTools } from "@/api/agent/tools/skill-files"
 import type { OpenAIConfig } from "@/api/openai"
 import { renderDBAgentSystemPrompt } from "@/shared/dbAgentSystemPrompt"
@@ -60,7 +61,7 @@ export function createDbAgent(config: Partial<OpenAIConfig> = {}): AgentKernel<A
         if (cachedToolsKey !== toolsKey) {
             cachedToolsKey = toolsKey
             cachedTools = [
-                ...createDbRetrievalTools<AskUserRequest>({ ragEnabled: isRagEnabled(), story: true, askUser: true }),
+                ...createDbRetrievalTools<AskUserRequest>({ ...DB_RETRIEVAL_PROFILES.db, ragEnabled: isRagEnabled() }),
                 ...(getAgentSkillRegistry().isAvailable() ? createSkillTools<AskUserRequest>() : []),
             ]
         }

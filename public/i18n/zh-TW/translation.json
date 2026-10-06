@@ -3396,6 +3396,14 @@
         "no_entries": "暫無條目",
         "ranking": "排名"
     },
+    "reader": {
+        "enter": "閱讀模式",
+        "exit": "離開閱讀模式",
+        "fontLarger": "放大字級",
+        "fontSmaller": "縮小字級",
+        "next": "下一則",
+        "prev": "上一則"
+    },
     "reputation": {
         "accumulatedExp": "累計經驗",
         "entrust": "委託",

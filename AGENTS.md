@@ -18,7 +18,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
 | Agent 技能（远端 skill 的 zip 下发 / 落盘缓存 / 虚拟文件系统工具） | [agent-skills.md](.agents/docs/agent-skills.md) |
 
-- 技能：`.agents/skills/*/SKILL.md`（admin-management-page、bun-webview-test、db-style、dob-skill-creator、fmodel-unpack、i18n、perf-hotspot-profiling、ue4-pak-mod）
+- 技能：`.agents/skills/*/SKILL.md`（admin-management-page、build-creator、bun-webview-test、db-style、dob-skill-creator、fmodel-unpack、i18n、perf-hotspot-profiling、ue4-pak-mod）
 - Spec 文档：`.docs/`（git 已忽略，面向外部 agent 的协议 / 实现 spec）
 - 业务与设计文档：`docs/`
 
@@ -81,7 +81,6 @@ cd mcp_server && cargo build --release
 - Biome 格式化：**4 空格缩进 / 双引号 / 省略分号 / 140 列 / ES5 尾逗号 / LF**
 - TypeScript `strict`，`@/*` → `./src/*`，不用 Prettier
 - Vue 一律 `<script setup lang="ts">` + 组合式 API + Pinia `defineStore()`
-- **每个函数与复杂逻辑块必须写中文注释（JSDoc：参数 / 返回值 / 异常）**；注释只写代码看不出的约束与口径
 - 命名：组件 PascalCase / 工具与组合式 camelCase / Store `use` 前缀 / 常量 UPPER_SNAKE_CASE
 - Rust：函数 snake_case、结构体 PascalCase、Tauri 命令返回 `Result<T, String>`
 

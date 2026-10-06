@@ -28,6 +28,7 @@ import {
     createTypeTool,
 } from "@/api/agent/tools/build-ui"
 import { createDbRetrievalTools } from "@/api/agent/tools/db-retrieval"
+import { DB_RETRIEVAL_PROFILES } from "@/api/agent/tools/retrieval-modules"
 import { createSkillTools } from "@/api/agent/tools/skill-files"
 import { renderBuildAgentSystemPrompt } from "@/shared/buildAgentSystemPrompt"
 import { renderSkillPromptSection } from "@/shared/skill-prompt"
@@ -35,14 +36,6 @@ import { agentToolLabel } from "@/utils/agent-chat"
 import type { AskUserRequest } from "@/utils/db-ask-user"
 import { formatAskUserResponse, hasAskAnswer } from "@/utils/db-ask-user"
 import { isRagEnabled } from "@/utils/rag/enabled"
-
-/**
- * 配装助手能检索的条目模块。
- *
- * 配装只关心「角色 + 武器 + 魔之楔 + 魔灵 + 敌人 + 伤害机制」，其余模块（剧情、读物、
- * 钓鱼、NPC 等）即便被查到也用不上，暴露出来只会让模型在检索面上铺开浪费轮次。
- */
-const BUILD_RETRIEVAL_MODULES = ["char", "weapon", "mod", "monster", "pet", "damage"] as const
 
 /**
  * 允许的最大工具轮数。
@@ -64,6 +57,9 @@ export function createBuildAgent(config: Partial<AgentUpstreamConfig> = {}): Age
     /**
      * 组装本轮的工具集：run_code 排在最前（模型先想到「写一段代码一次做完」，而不是逐个控件去点）。
      * 技能工具面跟随服务端下发的技能清单，没有技能时不声明（提示词侧同步整段省略）。
+     *
+     * 检索子集走 build profile：配装只关心「角色 + 武器 + 魔之楔 + 魔灵 + 敌人 + 伤害机制」，
+     * 其余模块（剧情、读物、钓鱼、NPC 等）即便被查到也用不上，暴露出来只会让模型在检索面上铺开浪费轮次。
      */
     function buildTools() {
         return [
@@ -75,10 +71,8 @@ export function createBuildAgent(config: Partial<AgentUpstreamConfig> = {}): Age
             createPressKeyTool(),
             createScrollTool(),
             ...createDbRetrievalTools<AskUserRequest>({
-                modules: BUILD_RETRIEVAL_MODULES,
-                story: false,
+                ...DB_RETRIEVAL_PROFILES.build,
                 ragEnabled: isRagEnabled(),
-                askUser: true,
             }),
             ...(getAgentSkillRegistry().isAvailable() ? createSkillTools<AskUserRequest>() : []),
         ]

@@ -3397,6 +3397,14 @@
         "no_entries": "項目がありません",
         "ranking": "ランキング"
     },
+    "reader": {
+        "enter": "リーディングモード",
+        "exit": "リーディングモードを終了",
+        "fontLarger": "文字を大きく",
+        "fontSmaller": "文字を小さく",
+        "next": "次へ",
+        "prev": "前へ"
+    },
     "reputation": {
         "accumulatedExp": "累計経験値",
         "entrust": "委託",

@@ -32,5 +32,5 @@ export const ExpPerReason: {
 
 export const ExtraExpInputMax = {
     任务奖励: 1000000,
-    魔之楔: 53020,
+    魔之楔: 1000000,
 }

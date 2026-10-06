@@ -3419,6 +3419,14 @@
         "no_entries": "No entries",
         "ranking": "Ranking"
     },
+    "reader": {
+        "enter": "Reading mode",
+        "exit": "Exit reading mode",
+        "fontLarger": "Increase font size",
+        "fontSmaller": "Decrease font size",
+        "next": "Next",
+        "prev": "Previous"
+    },
     "reputation": {
         "accumulatedExp": "Accumulated EXP",
         "entrust": "Commission",

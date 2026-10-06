@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
+import ReaderModeOverlay from "@/components/ReaderModeOverlay.vue"
+import StoryArticleBody from "@/components/StoryArticleBody.vue"
 import { useGameText } from "@/composables/useGameText"
+import { useReaderArticle } from "@/composables/useReaderArticle"
 import { regionMap, subRegionMap } from "@/data/d"
 import type { Book, BookResource } from "@/data/d/book.data"
 import { convertRegionMapIdToDBMapId } from "@/data/d/map.data"
-import { useSettingStore } from "@/store/setting"
-import { DEFAULT_STORY_TEXT_CONFIG, parseStoryTextSegments, type StoryTextConfig } from "@/utils/story-text"
+import { stripStoryTextTags } from "@/utils/story-text"
 
 interface BookLocationInfo {
     subRegionName: string
@@ -25,21 +27,9 @@ const props = withDefaults(
     }
 )
 
-const settingStore = useSettingStore()
 const { t } = useTranslation()
 const selectedResourceId = ref(0)
-
-/**
- * 获取当前剧情文本替换配置。
- */
-const storyTextConfig = computed<StoryTextConfig>(() => {
-    return {
-        nickname: settingStore.protagonistName1?.trim() || DEFAULT_STORY_TEXT_CONFIG.nickname,
-        nickname2: settingStore.protagonistName2?.trim() || DEFAULT_STORY_TEXT_CONFIG.nickname2,
-        gender: settingStore.protagonistGender,
-        gender2: settingStore.protagonistGender2,
-    }
-})
+const readerOpen = ref(false)
 
 /**
  * 当前选中的读物条目。
@@ -61,16 +51,6 @@ const selectedResourceLocation = computed<BookLocationInfo | null>(() => {
     }
 
     return getBookLocationInfo(selectedResource.value)
-})
-
-/**
- * 当前条目文本对应的可渲染片段。
- *
- * 先在切分前翻译整段文本：富文本标记（如 <H></>）在对照表里与文本一起作为整键收录，
- * 先切分会把标记拆散，反而查不到译文。
- */
-const selectedResourceTextSegments = computed(() => {
-    return parseBookTextSegments(gt(selectedResource.value?.text))
 })
 
 /**
@@ -148,15 +128,6 @@ function getBookLocationInfo(resource: BookResource): BookLocationInfo | null {
 }
 
 /**
- * 解析剧情文本并应用占位符替换与标记色。
- * @param text 原始文本
- * @returns 可渲染片段
- */
-function parseBookTextSegments(text: string | undefined) {
-    return parseStoryTextSegments(text || "", storyTextConfig.value)
-}
-
-/**
  * 读物条目切换标签。
  */
 const bookTabItems = computed(() =>
@@ -165,10 +136,47 @@ const bookTabItems = computed(() =>
         value: resource.id,
     }))
 )
+
+const readerTitle = computed(() => {
+    const resource = selectedResource.value
+    return resource ? t(getResourceDisplayName(resource)) : t(props.book.name)
+})
+
+const readerSubtitle = computed(() => {
+    const resource = selectedResource.value
+    if (!resource) {
+        return ""
+    }
+
+    const bookName = t(props.book.name)
+    return t(getResourceDisplayName(resource)) === bookName ? "" : bookName
+})
+
+const readerMeta = computed(() => {
+    const resource = selectedResource.value
+    if (!resource) {
+        return null
+    }
+
+    const entryName = t(getResourceDisplayName(resource))
+    const bookName = t(props.book.name)
+    return {
+        title: entryName && entryName !== bookName ? `${entryName} - ${bookName}` : bookName,
+        description:
+            gt(props.book.desc) ||
+            stripStoryTextTags(gt(resource.text))
+                .replace(/\s+/g, " ")
+                .trim()
+                .slice(0, 120),
+        url: typeof location === "undefined" ? undefined : `${location.origin}/db/book/${props.book.id}`,
+    }
+})
+
+useReaderArticle(() => readerMeta.value)
 </script>
 
 <template>
-    <div class="stagger-rise space-y-3 p-3 sm:p-4">
+    <article class="stagger-rise space-y-3 p-3 sm:p-4">
         <!-- 读物档案头：纸面 + primary 强调线 -->
         <header class="relative overflow-hidden border-b-2 border-primary pb-4">
             <!-- 引导线网格（装饰性，随主题明暗） -->
@@ -198,12 +206,14 @@ const bookTabItems = computed(() =>
                         Book File
                     </p>
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <SRouterLink
-                            :to="`/db/book/${book.id}`"
-                            class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
-                        >
-                            {{ $t(book.name) }}
-                        </SRouterLink>
+                        <h1 class="min-w-0 max-w-full">
+                            <SRouterLink
+                                :to="`/db/book/${book.id}`"
+                                class="block truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary sm:text-2xl"
+                            >
+                                {{ $t(book.name) }}
+                            </SRouterLink>
+                        </h1>
                         <CopyID :id="book.id" />
                     </div>
                     <p class="mt-2 text-xs text-base-content/55">{{ $t("book-detail.countSuffix", { count: book.res.length }) }}</p>
@@ -214,12 +224,22 @@ const bookTabItems = computed(() =>
         <!-- 简介 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="SUMMARY" :title="$t('book-detail.summary')" />
-            <div class="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word text-base-content/85">{{ gt(book.desc) }}</div>
+            <p class="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word text-base-content/85">{{ gt(book.desc) }}</p>
         </section>
 
         <!-- 条目阅读 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="ENTRIES" />
+            <SectionHeader no-animate compact kicker="ENTRIES">
+                <template #trailing>
+                    <button
+                        type="button"
+                        class="inline-flex h-7 shrink-0 items-center rounded-xs border border-base-content/15 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        @click="readerOpen = true"
+                    >
+                        {{ t("reader.enter") }}
+                    </button>
+                </template>
+            </SectionHeader>
             <AniTabs v-model="selectedResourceId" :tabs="bookTabItems" />
 
             <div v-if="selectedResource" class="mt-2 space-y-3">
@@ -291,24 +311,20 @@ const bookTabItems = computed(() =>
                 </div>
 
                 <!-- 正文 -->
-                <div
-                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-7 whitespace-pre-wrap wrap-break-word text-base-content/85"
-                >
-                    <template
-                        v-for="(segment, index) in selectedResourceTextSegments"
-                        :key="`${selectedResource.id}-${index}-${segment.tone}`"
-                    >
-                        <span
-                            :class="{
-                                'text-primary font-semibold': segment.tone === 'highlight',
-                                'text-error font-semibold': segment.tone === 'warning',
-                            }"
-                        >
-                            {{ segment.text }}
-                        </span>
-                    </template>
+                <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-7 text-base-content/85">
+                    <StoryArticleBody :text="selectedResource.text" />
                 </div>
             </div>
         </section>
-    </div>
+
+        <ReaderModeOverlay
+            v-model="readerOpen"
+            v-model:active="selectedResourceId"
+            :title="readerTitle"
+            :subtitle="readerSubtitle"
+            :items="bookTabItems"
+        >
+            <StoryArticleBody :text="selectedResource?.text" paragraph-gap="space-y-9" unwrap-lines />
+        </ReaderModeOverlay>
+    </article>
 </template>
