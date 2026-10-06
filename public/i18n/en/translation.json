@@ -4343,6 +4343,8 @@
         "title": "Weapon details"
     },
     "weapon-list": {
+        "calamityConflict": "Only one Calamity weapon can be equipped: \"{{first}}\" is already equipped, so \"{{second}}\" cannot be equipped.",
+        "calamityConflictHint": "Only one Calamity weapon per build",
         "defaultOrder": "Default order",
         "income": "Gain",
         "noResults": "No matching weapons found",

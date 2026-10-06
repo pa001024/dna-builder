@@ -4314,6 +4314,8 @@
         "title": "武器詳情"
     },
     "weapon-list": {
+        "calamityConflict": "災厄武器只能裝備一把：已裝備「{{first}}」，無法再裝備「{{second}}」。",
+        "calamityConflictHint": "同配裝只能裝備一把災厄武器",
         "defaultOrder": "預設順序",
         "income": "收益",
         "noResults": "沒有找到符合的武器",

@@ -4316,6 +4316,8 @@
         "title": "무기 세부정보"
     },
     "weapon-list": {
+        "calamityConflict": "재앙 무기는 하나만 장착할 수 있습니다: 「{{first}}」를 장착 중이므로 「{{second}}」는 장착할 수 없습니다.",
+        "calamityConflictHint": "같은 빌드에 재앙 무기는 하나만",
         "defaultOrder": "기본 순서",
         "income": "수익",
         "noResults": "일치하는 무기를 찾을 수 없습니다",

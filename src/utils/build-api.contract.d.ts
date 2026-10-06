@@ -202,6 +202,33 @@ export interface BuffView {
     coverage: number
 }
 
+/** 特效条目：特效表里挂在某个魔之楔 / 武器 id 上的特效 */
+export interface EffectEntry {
+    /** 归属：mod = 魔之楔特效，weapon = 武器特效 */
+    source: "mod" | "weapon"
+    /** 挂载对象（魔之楔 / 武器）的 id */
+    id: number
+    /** 挂载对象的名称（特效表条目本身可能同名多档，用它回查 `data.mods` / `data.weapons`） */
+    owner: string
+    名称: string
+    描述: string
+    /** 特效等级上限；写入 `effect({ level })` 时别超过它 */
+    maxLevel: number
+    /** 限定元素（多为武器特效）；undefined 表示不限 */
+    限定?: string
+}
+
+/** 一个带特效件的生效等级 */
+export interface EffectLevelView {
+    source: "mod" | "weapon"
+    id: number
+    name: string
+    /** 当前生效的特效等级；0 表示未配置或限定不符（useGlobal 口径），构筑本地口径缺省按最大档 */
+    level: number
+    /** 等级上限 */
+    maxLevel: number
+}
+
 /** 当前构筑全貌 */
 export interface BuildState {
     char: string
@@ -238,6 +265,8 @@ export interface BuildState {
     buffs: BuffView[]
     /** 自定义 BUFF：属性名 → 数值 */
     customBuff: { property: string; value: number }[]
+    /** 当前构筑里带特效的件与生效等级（口径与计算侧一致：useGlobal 走全局背包，否则走构筑本地配置；中枢不参与） */
+    effects: EffectLevelView[]
     team: { 1: TeamView; 2: TeamView }
     enemy: { id: number; name: string; level: number; resistance: number }
     /** 计算技能（baseName） */
@@ -288,6 +317,10 @@ export interface CharEntry {
 export interface BuffEntry {
     名称: string
     描述: string
+    /** 等级上限（数据里的 mx）；写入 `buff(name, level)` 时 level 别超过它 */
+    maxLevel: number
+    /** 限定：角色 id / 角色名 / 属性名；undefined 表示不限 */
+    限定?: string | number
 }
 
 /** 魔灵条目 */
@@ -316,9 +349,18 @@ export interface BuildData {
     mods(query?: { keyword?: string; type?: ModType; series?: string; limit?: number }): Promise<ModEntry[]>
     weapons(query?: { keyword?: string; type?: string; limit?: number }): Promise<WeaponEntry[]>
     chars(query?: { keyword?: string }): Promise<CharEntry[]>
-    buffs(query?: { keyword?: string; limit?: number }): Promise<BuffEntry[]>
+    /**
+     * BUFF 列表
+     *
+     * scope 缺省为 "all"（全表，查名称 / 描述用）；`scope: "available"` 只返回当前构筑
+     * 可用的条目（与配装页 BUFF 面板同口径：剔除魔灵相关、按主控与助战过滤限定），
+     * 「现在能挂哪些 BUFF」走这个口径。
+     */
+    buffs(query?: { keyword?: string; limit?: number; scope?: "all" | "available" }): Promise<BuffEntry[]>
     pets(query?: { keyword?: string }): Promise<PetEntry[]>
     traits(query?: { keyword?: string }): Promise<TraitEntry[]>
+    /** 特效表：哪些魔之楔 / 武器带特效、效果说明与等级上限；设置等级用 `effect`，当前生效等级看 `state().effects` */
+    effects(query?: { keyword?: string; source?: "mod" | "weapon"; limit?: number }): Promise<EffectEntry[]>
 }
 
 /** 界面操作：只有在写入方法覆盖不到时才用（例如某个面板上没暴露成设置项的操作） */

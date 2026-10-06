@@ -4315,6 +4315,8 @@
         "title": "武器の詳細"
     },
     "weapon-list": {
+        "calamityConflict": "災厄武器は1つしか装備できません：「{{first}}」を装備中のため「{{second}}」は装備できません。",
+        "calamityConflictHint": "同じビルドに災厄武器は1つだけ",
         "defaultOrder": "デフォルト順",
         "income": "收益",
         "noResults": "一致する武器が見つかりません",

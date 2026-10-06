@@ -17,6 +17,8 @@ import type { CharBuild, ModTypeKey } from "@/data"
 import {
     buffData,
     charData,
+    getBuffLvFromSnapshot,
+    getWBuffLvFromSnapshot,
     LeveledBuffHelper,
     LeveledCharHelper,
     LeveledModHelper,
@@ -26,10 +28,13 @@ import {
     modData,
     weaponData,
 } from "@/data"
+import { createBuffSelectContext, isBuffSelectable } from "@/data/buffFilter"
 import { createCharBuildFromSettings } from "@/data/CharBuildHelper"
-import { modMap, monsterData, monsterMap, petMap, weaponMap, weaponNameMap } from "@/data/d"
+import { charMap, modEffectMap, modMap, monsterData, monsterMap, petMap, weaponEffectMap, weaponMap, weaponNameMap } from "@/data/d"
 import petData, { petEntrys } from "@/data/d/pet.data"
-import { normalizeTraitSlots, TRAIT_MAX_LEVEL, TRAIT_SLOT_COUNT, type TraitSlot } from "@/data/petTrait"
+import type { Buff } from "@/data/data-types"
+import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
+import { isPetRelatedBuffName, normalizeTraitSlots, TRAIT_MAX_LEVEL, TRAIT_SLOT_COUNT, type TraitSlot } from "@/data/petTrait"
 import type { useInvStore } from "@/store/inv"
 import type {
     ApiResult,
@@ -39,6 +44,8 @@ import type {
     BuildState,
     CharBuildView,
     CharEntry,
+    EffectEntry,
+    EffectLevelView,
     ModEntry,
     ModSlotView,
     ModType,
@@ -121,6 +128,19 @@ function modEffectText(item: (typeof modData)[number]): string[] {
         return raw.map(entry => (typeof entry === "string" ? entry : String(entry))).slice(0, 6)
     }
     return []
+}
+
+/** 特效表条目 → 给模型看的纯数据（关键词匹配要用到的字段都在这里） */
+function toEffectEntry(source: "mod" | "weapon", id: number, item: Buff, owner: string): EffectEntry {
+    return {
+        source,
+        id,
+        owner,
+        名称: item.名称,
+        描述: item.描述 ?? "",
+        maxLevel: item.mx || 1,
+        ...(typeof item.限定 === "string" ? { 限定: item.限定 } : {}),
+    }
 }
 
 function readDamage(build: CharBuild | null | undefined): number {
@@ -254,6 +274,71 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
 
     function damage(): number {
         return readDamage(host.charBuild.value)
+    }
+
+    /** 当前主控角色 id（构筑实例还没生成时按所选角色名兜底） */
+    function currentCharId(): number {
+        return host.charBuild.value?.char?.id ?? charByName.get(host.selectedChar.value)?.id ?? 0
+    }
+
+    /** 当前主控角色属性（元素），武器特效的限定判定要用 */
+    function currentCharElm(): string {
+        return host.charBuild.value?.char?.属性 ?? charById.get(currentCharId())?.属性 ?? ""
+    }
+
+    /** 当前构筑的 BUFF 可选性上下文（与配装页 BUFF 面板同口径） */
+    function buffSelectContext() {
+        const settings = host.charSettings.value
+        return createBuffSelectContext({
+            charElm: currentCharElm(),
+            mainIds: [currentCharId(), settings.meleeWeapon, settings.rangedWeapon].filter(id => id > 0),
+            phantomIds: [
+                typeof settings.team1 === "number" ? charMap.get(settings.team1)?.id : undefined,
+                typeof settings.team2 === "number" ? charMap.get(settings.team2)?.id : undefined,
+                settings.team1Weapon,
+                settings.team2Weapon,
+            ].filter((id): id is number => typeof id === "number" && id > 0),
+        })
+    }
+
+    /** 当前构筑里带特效的件与生效等级（口径与 createCharBuildFromSettings 一致：useGlobal 走背包，否则走构筑本地配置；中枢不参与） */
+    function equippedEffectLevels(): EffectLevelView[] {
+        const settings = host.charSettings.value
+        const useGlobal = settings.useGlobal
+        const effectConfig = settings.effectConfig
+        const elm = currentCharElm()
+        const out: EffectLevelView[] = []
+        const seenMods = new Set<number>()
+        for (const type of MOD_TYPES) {
+            for (const slot of getModVariantSlots(settings, type)) {
+                const id = slot?.[0]
+                if (!id || seenMods.has(id) || !modEffectMap.has(id)) {
+                    continue
+                }
+                seenMods.add(id)
+                out.push({
+                    source: "mod",
+                    id,
+                    name: modMap.get(id)?.名称 ?? `#${id}`,
+                    level: useGlobal ? getBuffLvFromSnapshot(host.inv, id) : getModBuffLvFromSetting(effectConfig, id),
+                    maxLevel: modEffectMap.get(id)?.mx || 1,
+                })
+            }
+        }
+        for (const weaponId of [settings.meleeWeapon, settings.rangedWeapon]) {
+            const entry = weaponEffectMap.get(weaponId)
+            if (!entry) {
+                continue
+            }
+            out.push({
+                source: "weapon",
+                id: weaponId,
+                name: weaponMap.get(weaponId)?.名称 ?? `#${weaponId}`,
+                level: useGlobal ? getWBuffLvFromSnapshot(host.inv, weaponId, elm) : getWBuffLvFromSetting(effectConfig, weaponId, elm),
+                maxLevel: entry.mx || 1,
+            })
+        }
+        return out
     }
 
     function resolveMod(input: { name?: string; id?: number }): (typeof modData)[number] | null {
@@ -434,6 +519,7 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
             }),
             buffs: settings.buffs.map(([name, level, coverage]): BuffView => ({ name, level, coverage: coverage ?? 1 })),
             customBuff: settings.customBuff.map(([property, value]) => ({ property, value })),
+            effects: equippedEffectLevels(),
             team: {
                 1: readTeam(1, settings),
                 2: readTeam(2, settings),
@@ -1124,10 +1210,39 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
             },
             async buffs(query = {}) {
                 const keyword = query.keyword?.trim()
+                const availableOnly = query.scope === "available"
                 return buffData
                     .filter(item => (keyword ? item.名称.includes(keyword) || (item.描述 ?? "").includes(keyword) : true))
+                    .filter(item =>
+                        availableOnly ? !isPetRelatedBuffName(item.名称) && isBuffSelectable(item, buffSelectContext()) : true
+                    )
                     .slice(0, query.limit ?? 40)
-                    .map((item): BuffEntry => ({ 名称: item.名称, 描述: item.描述 ?? "" }))
+                    .map(
+                        (item): BuffEntry => ({
+                            名称: item.名称,
+                            描述: item.描述 ?? "",
+                            maxLevel: item.mx || 1,
+                            ...(item.限定 === undefined ? {} : { 限定: item.限定 }),
+                        })
+                    )
+            },
+            async effects(query = {}) {
+                const keyword = query.keyword?.trim()
+                const out: EffectEntry[] = []
+                const collect = (want: "mod" | "weapon", map: Map<number, Buff>, ownerOf: (id: number) => string | undefined) => {
+                    if (query.source && query.source !== want) {
+                        return
+                    }
+                    for (const [id, item] of map) {
+                        const entry = toEffectEntry(want, id, item, ownerOf(id) ?? `#${id}`)
+                        if (!keyword || entry.名称.includes(keyword) || entry.描述.includes(keyword) || entry.owner.includes(keyword)) {
+                            out.push(entry)
+                        }
+                    }
+                }
+                collect("mod", modEffectMap, id => modMap.get(id)?.名称)
+                collect("weapon", weaponEffectMap, id => weaponMap.get(id)?.名称)
+                return out.slice(0, query.limit ?? 40)
             },
             async pets(query = {}) {
                 const keyword = query.keyword?.trim()

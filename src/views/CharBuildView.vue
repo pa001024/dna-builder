@@ -2501,9 +2501,9 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 />
                             </div>
                         </div>
-                        <!-- 词条 -->
+                        <!-- 词条：collapse-content 自带 overflow: clip，会裁掉高亮行的 outline/阴影；用 overflow-clip-margin 外扩裁剪边界（负 margin 会让透明盒压住上方滑条与下方箭头的点击区） -->
                         <div class="collapse p-1" :class="{ 'collapse-open': charDetailExpend }">
-                            <div class="space-y-1 collapse-content p-0">
+                            <div class="space-y-1 collapse-content p-0 [overflow-clip-margin:12px]">
                                 <CharAttrShow :attributes="attributes" :char-build="charBuild" />
                             </div>
                         </div>

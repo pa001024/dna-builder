@@ -1,22 +1,21 @@
 <script lang="ts" setup>
 import { useLocalStorage } from "@vueuse/core"
+import { useTranslation } from "i18next-vue"
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
+import ReaderDialogueBody, { type ReaderDialogueLine } from "@/components/ReaderDialogueBody.vue"
+import ReaderModeOverlay from "@/components/ReaderModeOverlay.vue"
 import { charMap, LeveledCharHelper } from "@/data"
 import { npcMap, questChainMap, resourceMap } from "@/data/d"
 import type { PartyTopic } from "@/data/d/partytopic.data"
 import { type Dialogue, type DialogueOption, type StoryMediaMarker } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
-import { getDialogueDisplayContent } from "@/utils/dialogue"
+import { getDialogueDisplayContent, getDialogueSpeakerName } from "@/utils/dialogue"
+import { buildDialogueChain } from "@/utils/dialogue-chain"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
 import { buildQuestBgmUrl } from "@/utils/quest-bgm"
 import { getImprType, getRegionType } from "@/utils/quest-utils"
 import { getRewardDetails } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
-
-interface DialogueChainItem {
-    dialogue: Dialogue
-    selectedOption?: DialogueOption
-}
 
 interface ConsumeEntry {
     amount: number
@@ -28,6 +27,7 @@ const props = defineProps<{
     partyTopic: PartyTopic
 }>()
 
+const { t } = useTranslation()
 const settingStore = useSettingStore()
 type VoiceLocale = "zh" | "en" | "jp" | "kr"
 const selectedVoiceLocale = useLocalStorage<VoiceLocale>("partytopicvoice", "zh")
@@ -123,11 +123,11 @@ const dialogueRows = computed<Dialogue[]>(() => partyTopicDialogueRows.value.fil
 const mediaMarkerRows = computed<StoryMediaMarker[]>(() => partyTopicDialogueRows.value.filter(isMediaMarker))
 
 /**
- * 构建当前光阴集可展示的对话链。
+ * 构建当前光阴集可展示的对话链（跟随页面上选中的分支）。
  */
-const dialogueChain = computed(() => {
-    return buildDialogueChain(dialogueRows.value, getPartyTopicScopeKey(props.partyTopic.id))
-})
+const dialogueChain = computed(() =>
+    buildDialogueChain(dialogueRows.value, dialogue => getSelectedOption(getPartyTopicScopeKey(props.partyTopic.id), dialogue))
+)
 const hasPlayableDialogue = computed(() => {
     return dialogueChain.value.some(item => {
         return !!getDialogueVoiceUrl(item.dialogue)
@@ -223,109 +223,6 @@ function getSelectedOption(scopeKey: string, dialogue: Dialogue): DialogueOption
     const optionStateKey = getOptionStateKey(scopeKey, dialogue.id)
     const selectedOptionId = selectedOptionMap[optionStateKey] ?? dialogue.options[0].id
     return dialogue.options.find(option => option.id === selectedOptionId) ?? dialogue.options[0]
-}
-
-/**
- * 递归收集对话及其嵌套选项，建立可查询映射。
- * @param dialogue 当前对话节点
- * @param dialogueMap 对话映射
- * @param incomingIds 入边节点集合
- */
-function collectDialogueNode(dialogue: Dialogue, dialogueMap: Map<number, Dialogue>, incomingIds: Set<number>): void {
-    dialogueMap.set(dialogue.id, dialogue)
-
-    if (dialogue.next !== undefined) {
-        incomingIds.add(dialogue.next)
-    }
-
-    for (const option of dialogue.options ?? []) {
-        collectDialogueOption(option, dialogueMap, incomingIds)
-    }
-}
-
-/**
- * 递归收集嵌套选项节点。
- * @param option 对话选项
- * @param dialogueMap 对话映射
- * @param incomingIds 入边节点集合
- */
-function collectDialogueOption(option: DialogueOption, dialogueMap: Map<number, Dialogue>, incomingIds: Set<number>): void {
-    dialogueMap.set(option.id, option)
-    incomingIds.add(option.id)
-
-    if (option.next !== undefined) {
-        incomingIds.add(option.next)
-    }
-
-    for (const childOption of option.options ?? []) {
-        collectDialogueOption(childOption, dialogueMap, incomingIds)
-    }
-}
-
-/**
- * 从指定起点拼接对话链，并防止循环引用导致死循环。
- * @param startId 起始对话 ID
- * @param dialogueMap 对话映射
- * @param visitedIds 已访问对话集合
- * @param chain 输出链路
- * @param scopeKey 分支作用域键
- */
-function appendDialogueChain(
-    startId: number,
-    dialogueMap: Map<number, Dialogue>,
-    visitedIds: Set<number>,
-    chain: DialogueChainItem[],
-    scopeKey: string
-) {
-    let currentId: number | undefined = startId
-
-    while (currentId !== undefined && !visitedIds.has(currentId)) {
-        const dialogue = dialogueMap.get(currentId)
-        if (!dialogue) {
-            break
-        }
-
-        visitedIds.add(currentId)
-        const selectedOption = getSelectedOption(scopeKey, dialogue)
-        chain.push({ dialogue, selectedOption })
-
-        if (dialogue.options?.length) {
-            currentId = selectedOption?.next
-            continue
-        }
-
-        currentId = dialogue.next
-    }
-}
-
-/**
- * 根据当前分支选择构建可展示对话链。
- * @param dialogues 原始对话数组
- * @param scopeKey 分支作用域键
- * @returns 对话链
- */
-function buildDialogueChain(dialogues: Dialogue[], scopeKey: string): DialogueChainItem[] {
-    if (!dialogues.length) {
-        return []
-    }
-
-    const dialogueMap = new Map<number, Dialogue>()
-    const incomingIds = new Set<number>()
-
-    for (const dialogue of dialogues) {
-        collectDialogueNode(dialogue, dialogueMap, incomingIds)
-    }
-
-    const startDialogues = dialogues.filter(dialogue => !incomingIds.has(dialogue.id))
-    const startIds = (startDialogues.length > 0 ? startDialogues : [dialogues[0]]).map(dialogue => dialogue.id)
-
-    const visitedIds = new Set<number>()
-    const chain: DialogueChainItem[] = []
-    for (const startId of startIds) {
-        appendDialogueChain(startId, dialogueMap, visitedIds, chain, scopeKey)
-    }
-
-    return chain
 }
 
 /**
@@ -941,6 +838,40 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
 
 const partyTopicReward = computed(() => getRewardDetails(props.partyTopic.reward))
 
+// ==================== 阅读模式 ====================
+
+const readerOpen = ref(false)
+
+/**
+ * 阅读模式正文：当前分支的对话链展开成阅读行（说话人 + 台词）。
+ */
+const partyTopicReaderLines = computed<ReaderDialogueLine[]>(() =>
+    dialogueChain.value.flatMap(item => {
+        const content = getDialogueDisplayContent(item.dialogue)
+        if (!content) {
+            return []
+        }
+
+        return [
+            {
+                key: item.dialogue.id,
+                speaker: getDialogueSpeakerName(item.dialogue, storyTextConfig.value) || undefined,
+                content,
+            },
+        ]
+    })
+)
+
+/**
+ * 阅读模式标题：光阴集名称。
+ */
+const readerTitle = computed(() => formatStoryText(props.partyTopic.name))
+
+/**
+ * 阅读模式副标题：所属角色名。
+ */
+const readerSubtitle = computed(() => t(getCharacterName(props.partyTopic.charId)))
+
 watch(
     () => settingStore.lang,
     language => {
@@ -1138,6 +1069,14 @@ onBeforeUnmount(() => {
         <section v-if="partyTopicDialogueRows.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="DIALOGUE" :title="$t('db-party-topic.dialogue_title', { num: dialogueRows.length })">
                 <template #trailing>
+                    <button
+                        v-if="partyTopicReaderLines.length"
+                        type="button"
+                        class="mr-1 inline-flex h-7 shrink-0 items-center rounded-xs border border-base-content/15 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        @click="readerOpen = true"
+                    >
+                        {{ $t('reader.enter') }}
+                    </button>
                     <label class="flex select-none items-center gap-2 text-xs text-base-content/70">
                         <span>{{ $t('common.autoplay') }}</span>
                         <input
@@ -1319,5 +1258,10 @@ onBeforeUnmount(() => {
             />
             <audio ref="bgmAudioRef" class="hidden" preload="none" @ended="handleBgmEnded" @pause="handleBgmPause" />
         </section>
+
+        <!-- 阅读模式：光阴集剧情对话连读（跟随当前分支） -->
+        <ReaderModeOverlay v-model="readerOpen" :title="readerTitle" :subtitle="readerSubtitle">
+            <ReaderDialogueBody :lines="partyTopicReaderLines" />
+        </ReaderModeOverlay>
     </div>
 </template>

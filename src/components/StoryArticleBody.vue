@@ -10,10 +10,13 @@ const props = withDefaults(
         text?: string
         paragraphGap?: string
         unwrapLines?: boolean
+        /** 是否对文本做游戏原文取词；剧情对话数据已按语言本地化时关闭，避免二次查表 */
+        translate?: boolean
     }>(),
     {
         paragraphGap: "space-y-7",
         unwrapLines: false,
+        translate: true,
     }
 )
 
@@ -28,8 +31,8 @@ const storyTextConfig = computed<StoryTextConfig>(() => ({
 }))
 
 const paragraphs = computed<StoryTextSegment[][]>(() =>
-    splitReaderParagraphs(gt(props.text), { unwrapLines: props.unwrapLines }).map(paragraph =>
-        parseStoryTextSegments(paragraph, storyTextConfig.value)
+    splitReaderParagraphs(props.translate ? gt(props.text) : (props.text ?? ""), { unwrapLines: props.unwrapLines }).map(
+        paragraph => parseStoryTextSegments(paragraph, storyTextConfig.value)
     )
 )
 

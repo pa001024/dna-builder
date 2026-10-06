@@ -6,6 +6,7 @@ import { npcMap } from "@/data/d"
 import { type DetectiveAnswer, type DetectiveQuestion, type Dialogue, type DialogueOption, type QuestNode } from "@/data/d/quest.data"
 import { useSettingStore } from "@/store/setting"
 import { getDialogueDisplayContent } from "@/utils/dialogue"
+import { buildDialogueChain, type DialogueChainItem, orderQuestNodes } from "@/utils/dialogue-chain"
 import { buildDialogueVoiceUrl } from "@/utils/dialogue-voice"
 import { buildQuestBgmUrl } from "@/utils/quest-bgm"
 import { buildQuestVideoUrl } from "@/utils/quest-video"
@@ -16,11 +17,6 @@ import {
     type StoryTextRange,
     stripStoryTextTags,
 } from "@/utils/story-text"
-
-interface DialogueChainItem {
-    dialogue: Dialogue
-    selectedOption?: DialogueOption
-}
 
 interface QuestNodeWithChain extends QuestNode {
     chain: DialogueChainItem[]
@@ -515,175 +511,19 @@ function getSelectedOption(scopeKey: string, dialogue: Dialogue): DialogueOption
 }
 
 /**
- * 递归收集对话及其嵌套选项，建立可查询映射。
- * @param dialogue 当前对话节点
- * @param dialogueMap 对话映射
- * @param incomingIds 入边节点集合
- */
-function collectDialogueNode(dialogue: Dialogue, dialogueMap: Map<number, Dialogue>, incomingIds: Set<number>): void {
-    dialogueMap.set(dialogue.id, dialogue)
-
-    if (dialogue.next !== undefined) {
-        incomingIds.add(dialogue.next)
-    }
-
-    for (const option of dialogue.options ?? []) {
-        collectDialogueOption(option, dialogueMap, incomingIds)
-    }
-}
-
-/**
- * 递归收集嵌套选项节点。
- * @param option 对话选项
- * @param dialogueMap 对话映射
- * @param incomingIds 入边节点集合
- */
-function collectDialogueOption(option: DialogueOption, dialogueMap: Map<number, Dialogue>, incomingIds: Set<number>): void {
-    dialogueMap.set(option.id, option)
-    incomingIds.add(option.id)
-
-    if (option.next !== undefined) {
-        incomingIds.add(option.next)
-    }
-
-    for (const childOption of option.options ?? []) {
-        collectDialogueOption(childOption, dialogueMap, incomingIds)
-    }
-}
-
-/**
- * 从指定起点串接对话链，并防止循环引用导致死循环。
- * @param startId 起始对话 ID
- * @param dialogueMap 对话映射
- * @param visitedIds 已访问对话集合
- * @param chain 输出链路
- * @param scopeKey 分支作用域键
- */
-function appendDialogueChain(
-    startId: number,
-    dialogueMap: Map<number, Dialogue>,
-    visitedIds: Set<number>,
-    chain: DialogueChainItem[],
-    scopeKey: string
-) {
-    let currentId: number | undefined = startId
-
-    while (currentId !== undefined && !visitedIds.has(currentId)) {
-        const dialogue = dialogueMap.get(currentId)
-        if (!dialogue) {
-            break
-        }
-
-        visitedIds.add(currentId)
-        const selectedOption = getSelectedOption(scopeKey, dialogue)
-        chain.push({ dialogue, selectedOption })
-
-        if (dialogue.options?.length) {
-            currentId = selectedOption?.next
-            continue
-        }
-
-        currentId = dialogue.next
-    }
-}
-
-/**
- * 根据当前分支选择构建可展示对话链。
- * @param dialogues 原始对话数组
- * @param scopeKey 分支作用域键
- * @returns 对话链
- */
-function buildDialogueChain(dialogues: Dialogue[], scopeKey: string): DialogueChainItem[] {
-    if (!dialogues.length) {
-        return []
-    }
-
-    const dialogueMap = new Map<number, Dialogue>()
-    const incomingIds = new Set<number>()
-
-    for (const dialogue of dialogues) {
-        collectDialogueNode(dialogue, dialogueMap, incomingIds)
-    }
-
-    const startDialogues = dialogues.filter(dialogue => !incomingIds.has(dialogue.id))
-    const startIds = (startDialogues.length > 0 ? startDialogues : [dialogues[0]]).map(dialogue => dialogue.id)
-
-    const visitedIds = new Set<number>()
-    const chain: DialogueChainItem[] = []
-    for (const startId of startIds) {
-        appendDialogueChain(startId, dialogueMap, visitedIds, chain, scopeKey)
-    }
-
-    return chain
-}
-
-/**
- * 构建任务节点分支链。
+ * 构建任务节点分支链：节点按 next 关系排序，链路跟随页面上的分支选择。
  * @param questId 任务 ID
  * @param nodes 节点数组
  * @param startIds 起始节点 ID 列表
  * @returns 带分支链的节点
  */
 function buildQuestNodeChains(questId: number, nodes: QuestNode[], startIds?: string[]): QuestNodeWithChain[] {
-    const nodeMap = new Map<string, QuestNodeWithChain>()
-    for (const node of nodes) {
-        nodeMap.set(node.id, {
-            ...node,
-            chain: buildDialogueChain(node.dialogues ?? [], getQuestNodeScopeKey(questId, node.id)),
-        })
-    }
-
-    const incomingNodeIdSet = new Set<string>()
-    for (const node of nodeMap.values()) {
-        for (const nextNodeId of node.next ?? []) {
-            if (nodeMap.has(nextNodeId)) {
-                incomingNodeIdSet.add(nextNodeId)
-            }
-        }
-    }
-
-    const orderedNodeIds: string[] = []
-    const visitedNodeIdSet = new Set<string>()
-
-    /**
-     * 按 next 关系深度优先整理节点展示顺序，并用 visited 防止循环引用。
-     * @param nodeId 当前节点 ID
-     */
-    function visitNodeByNext(nodeId: string) {
-        if (visitedNodeIdSet.has(nodeId)) {
-            return
-        }
-
-        const currentNode = nodeMap.get(nodeId)
-        if (!currentNode) {
-            return
-        }
-
-        visitedNodeIdSet.add(nodeId)
-        orderedNodeIds.push(nodeId)
-
-        for (const nextNodeId of currentNode.next ?? []) {
-            visitNodeByNext(nextNodeId)
-        }
-    }
-
-    const explicitStartNodeIds = (startIds ?? []).filter(startId => nodeMap.has(startId))
-    const fallbackStartNodeIds = nodes.filter(node => !incomingNodeIdSet.has(node.id)).map(node => node.id)
-    const initialNodeIds = explicitStartNodeIds.length
-        ? explicitStartNodeIds
-        : fallbackStartNodeIds.length
-          ? fallbackStartNodeIds
-          : nodes.map(node => node.id)
-
-    for (const startNodeId of initialNodeIds) {
-        visitNodeByNext(startNodeId)
-    }
-
-    for (const node of nodes) {
-        visitNodeByNext(node.id)
-    }
-
-    return orderedNodeIds.map(nodeId => nodeMap.get(nodeId)).filter((node): node is QuestNodeWithChain => !!node)
+    return orderQuestNodes(nodes, startIds).map(node => ({
+        ...node,
+        chain: buildDialogueChain(node.dialogues ?? [], dialogue =>
+            getSelectedOption(getQuestNodeScopeKey(questId, node.id), dialogue)
+        ),
+    }))
 }
 
 /**

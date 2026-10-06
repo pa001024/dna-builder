@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest"
 import { ref } from "vue"
 import { createDefaultCharSettings, normalizeCharSettings } from "@/composables/useCharSettings"
+import { isPetRelatedBuffName } from "@/data/petTrait"
 import { BUILD_API_DTS } from "@/shared/buildApiContract"
 import { type BuildApiHost, createBuildApi } from "@/utils/build-api"
 
@@ -83,5 +84,44 @@ describe("createBuildApi", () => {
         const plain = await api.compute.char("法露茜", 80)
         expect(typeof plain).toBe("object")
         expect(JSON.stringify(plain)).toContain("法露茜")
+    })
+
+    it("data.effects 能枚举特效表并按来源 / 关键词过滤", async () => {
+        const all = await api.data.effects()
+        expect(all.length).toBeGreaterThan(0)
+        expect(all.every(item => (item.source === "mod" || item.source === "weapon") && item.maxLevel >= 1)).toBe(true)
+        expect(all.every(item => item.owner.length > 0)).toBe(true)
+
+        const mods = await api.data.effects({ source: "mod" })
+        expect(mods.length).toBeGreaterThan(0)
+        expect(mods.every(item => item.source === "mod")).toBe(true)
+
+        const hit = all[0]
+        const byKeyword = await api.data.effects({ keyword: hit.owner })
+        expect(byKeyword.some(item => item.source === hit.source && item.id === hit.id)).toBe(true)
+    })
+
+    it("data.buffs 的 available 口径与配装页 BUFF 面板一致", async () => {
+        const all = await api.data.buffs({ limit: 100000 })
+        const available = await api.data.buffs({ limit: 100000, scope: "available" })
+        const availableNames = new Set(available.map(item => item.名称))
+        expect(available.length).toBeLessThan(all.length)
+        expect(available.every(item => item.maxLevel >= 1)).toBe(true)
+        // 魔灵相关 BUFF 由魔灵面板接管，可用口径里不出现
+        const petRelated = all.find(item => isPetRelatedBuffName(item.名称))
+        expect(petRelated).toBeTruthy()
+        expect(availableNames.has(petRelated!.名称)).toBe(false)
+        // 限定为其他角色的 BUFF 不在可用口径里
+        const other = all.find(item => typeof item.限定 === "number" && item.限定 !== charId)
+        if (other) {
+            expect(availableNames.has(other.名称)).toBe(false)
+        }
+    })
+
+    it("state().effects 报告已装件的特效等级（未配置时按最大档生效）", async () => {
+        const target = (await api.data.effects({ source: "mod" }))[0]
+        await api.mods({ type: "角色", list: [{ id: target.id, level: 10 }] })
+        const hit = (await api.state()).effects.find(item => item.id === target.id)
+        expect(hit).toMatchObject({ source: "mod", name: target.owner, level: target.maxLevel, maxLevel: target.maxLevel })
     })
 })

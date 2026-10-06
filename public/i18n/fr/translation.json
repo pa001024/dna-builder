@@ -4360,6 +4360,8 @@
         "title": "Détails de l'arme"
     },
     "weapon-list": {
+        "calamityConflict": "Une seule arme Calamité peut être équipée : « {{first}} » est déjà équipée, « {{second}} » ne peut donc pas l'être.",
+        "calamityConflictHint": "Une seule arme Calamité par build",
         "defaultOrder": "Ordre par défaut",
         "income": "Gain",
         "noResults": "Aucune arme correspondante trouvee",

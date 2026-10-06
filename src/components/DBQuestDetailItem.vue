@@ -2,11 +2,15 @@
 import { useLocalStorage } from "@vueuse/core"
 import { t } from "i18next"
 import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, reactive, ref, watch } from "vue"
+import ReaderDialogueBody, { type ReaderDialogueLine } from "@/components/ReaderDialogueBody.vue"
+import ReaderModeOverlay from "@/components/ReaderModeOverlay.vue"
 import type { QuestItem, QuestStory } from "@/data/d/quest.data"
 import type { QuestChain } from "@/data/d/questchain.data"
 import { getLocalizedQuestDataByLanguage } from "@/data/d/story-locale"
 import { storySummaryData } from "@/data/d/storysummary.data"
 import { useSettingStore } from "@/store/setting"
+import { getDialogueDisplayContent, getDialogueSpeakerName } from "@/utils/dialogue"
+import { buildDialogueChain, orderQuestNodes } from "@/utils/dialogue-chain"
 import { getQuestTypeDisplay } from "@/utils/quest-utils"
 import { getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-utils"
 import { replaceStoryPlaceholders, type StoryTextConfig, stripStoryTextTags } from "@/utils/story-text"
@@ -559,6 +563,80 @@ const questChainTypeDisplay = computed(() => getQuestTypeDisplay(props.questChai
  * 数据来自 storysummary.data.ts（storySummary.json 导入），无摘要时返回空文本。
  */
 const questChainAiSummary = computed(() => formatStoryText(storySummaryData[props.questChain.id]))
+
+// ==================== 阅读模式 ====================
+
+const readerOpen = ref(false)
+const readerQuestId = ref(0)
+
+/**
+ * 可进入阅读模式的任务列表（至少含一条剧情对话），作为阅读模式的上一则/下一则分页。
+ */
+const questReaderItems = computed(() =>
+    questDetails.value
+        .filter(quest => (quest.details?.nodes ?? []).some(node => (node.dialogues ?? []).length > 0))
+        .map(quest => ({
+            label: stripStoryTextTags(formatStoryText(quest.details?.name)) || t("questchain-detail.unknown_quest", { id: quest.id }),
+            value: quest.id,
+        }))
+)
+
+/**
+ * 当前阅读任务按展示顺序展开的对话行。
+ * 阅读视角固定按默认分支（第一个选项）走，与页面上的分支选择互不影响。
+ */
+const readerQuestLines = computed<ReaderDialogueLine[]>(() => {
+    const quest = questDetails.value.find(item => item.id === readerQuestId.value)
+    if (!quest?.details?.nodes?.length) {
+        return []
+    }
+
+    const lines: ReaderDialogueLine[] = []
+    for (const node of orderQuestNodes(quest.details.nodes, quest.details.startIds)) {
+        for (const item of buildDialogueChain(node.dialogues ?? [])) {
+            const content = getDialogueDisplayContent(item.dialogue)
+            if (!content) {
+                continue
+            }
+
+            lines.push({
+                key: `${node.id}-${item.dialogue.id}`,
+                speaker: getDialogueSpeakerName(item.dialogue, storyTextConfig.value) || undefined,
+                content,
+            })
+        }
+    }
+
+    return lines
+})
+
+/**
+ * 阅读模式标题：当前任务名（去样式标签）。
+ */
+const readerTitle = computed(() => {
+    const quest = questDetails.value.find(item => item.id === readerQuestId.value)
+    return stripStoryTextTags(formatStoryText(quest?.details?.name)) || t("questchain-detail.unknown_quest", { id: readerQuestId.value })
+})
+
+/**
+ * 阅读模式副标题：任务链名。
+ */
+const readerSubtitle = computed(() => t(props.questChain.name))
+
+/**
+ * 进入阅读模式：默认定位到第一个含剧情对话的任务。
+ */
+function openQuestReader(): void {
+    if (!questReaderItems.value.length) {
+        return
+    }
+
+    if (!questReaderItems.value.some(item => item.value === readerQuestId.value)) {
+        readerQuestId.value = questReaderItems.value[0].value
+    }
+
+    readerOpen.value = true
+}
 </script>
 
 <template>
@@ -721,7 +799,18 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
 
         <!-- 任务列表 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="QUESTS" :title="$t('questchain-detail.quest_list')" :count="questChain.quests.length" />
+            <SectionHeader no-animate compact kicker="QUESTS" :title="$t('questchain-detail.quest_list')" :count="questChain.quests.length">
+                <template #trailing>
+                    <button
+                        v-if="questReaderItems.length"
+                        type="button"
+                        class="inline-flex h-7 shrink-0 items-center rounded-xs border border-base-content/15 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
+                        @click="openQuestReader"
+                    >
+                        {{ t("reader.enter") }}
+                    </button>
+                </template>
+            </SectionHeader>
             <div class="space-y-3">
                 <div
                     v-for="quest in questDetails"
@@ -793,5 +882,16 @@ const questChainAiSummary = computed(() => formatStoryText(storySummaryData[prop
                 </div>
             </div>
         </section>
+
+        <!-- 阅读模式：整条任务链的剧情文本按任务分页连读 -->
+        <ReaderModeOverlay
+            v-model="readerOpen"
+            v-model:active="readerQuestId"
+            :title="readerTitle"
+            :subtitle="readerSubtitle"
+            :items="questReaderItems"
+        >
+            <ReaderDialogueBody :lines="readerQuestLines" />
+        </ReaderModeOverlay>
     </div>
 </template>

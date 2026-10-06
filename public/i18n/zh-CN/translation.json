@@ -4334,6 +4334,8 @@
         "title": "武器详情"
     },
     "weapon-list": {
+        "calamityConflict": "灾厄武器只能装备一把：已装备「{{first}}」，无法再装备「{{second}}」。",
+        "calamityConflictHint": "同配装只能装备一把灾厄武器",
         "defaultOrder": "默认顺序",
         "income": "收益",
         "noResults": "没有找到匹配的武器",

@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import { useTranslation } from "i18next-vue"
 import { computed, ref } from "vue"
 import type { CharSettings } from "@/composables/useCharSettings"
 import { useGameText } from "@/composables/useGameText"
-import { CharBuild, LeveledWeapon, weaponData } from "@/data"
+import { CharBuild, LeveledWeapon, weaponData, weaponMap } from "@/data"
 import { calcWeaponReplacementIncomes } from "@/data/CharBuildHelper"
 import type { Weapon } from "@/data/data-types"
 import { getWBuffLvFromSetting } from "@/data/effectLv"
 import { useInvStore } from "@/store/inv"
+import { useUIStore } from "@/store/ui"
 import { format100, format100r } from "@/util"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
@@ -19,9 +21,11 @@ const props = defineProps<{
     charSettings?: CharSettings
 }>()
 
-const { gpt } = useGameText()
+const { gt, gpt } = useGameText()
+const { t } = useTranslation()
 
 const inv = useInvStore()
+const ui = useUIStore()
 
 /**
  * 获取武器效果等级：无配装上下文时取全局背包配置，否则取角色配装配置。
@@ -58,6 +62,32 @@ const canUnequipCurrentWeapon = computed(
         (currentSlot.value === "melee" && selectedMelee.value > 0) ||
         (currentSlot.value === "ranged" && selectedRanged.value > 0)
 )
+
+/** 灾厄武器判定依据：武器数据里的伤害类型（当前四把灾厄武器：无止无休 / 权火将熄 / 血染织羽 / 棘刺绝响） */
+const CALAMITY_DAMAGE_TYPE = "灾厄"
+
+/**
+ * 判断武器是否为灾厄武器。
+ * @param weaponId 武器 id（0 表示未装备）
+ * @returns 是否为灾厄武器
+ */
+const isCalamityWeapon = (weaponId: number) => weaponMap.get(weaponId)?.伤害类型 === CALAMITY_DAMAGE_TYPE
+
+/**
+ * 拦截并提示灾厄武器装备冲突（同一配装最多只能带一把）。
+ * 提示走 ui store 的全局提示条（z-index 高于武器弹窗，弹窗内也能看到），
+ * 与换武器后剔除魔之楔的提示保持同一交互。
+ * @param equipped 已装备的灾厄武器
+ * @param incoming 试图再装备的灾厄武器
+ */
+function warnCalamityConflict(equipped: Weapon, incoming: Weapon) {
+    ui.showErrorMessage(
+        t("weapon-list.calamityConflict", {
+            equipped: gt(equipped.名称),
+            incoming: gt(incoming.名称),
+        })
+    )
+}
 
 // 武器大类颜色映射（悬停渐变）
 const elementColors: Record<string, string> = {
@@ -147,19 +177,43 @@ function isSelected(weapon: Weapon) {
     return weapon.类型[0] === "近战" ? selectedMelee.value === weapon.id : selectedRanged.value === weapon.id
 }
 
+/**
+ * 卡片是否因灾厄唯一限制而不可选：另一槽位已装备灾厄武器，且本卡是灾厄武器本身（再次点击当前选中的灾厄武器不算冲突）。
+ * @param weapon 武器数据
+ * @returns 是否被灾厄唯一限制挡住
+ */
+function isCalamityBlocked(weapon: Weapon) {
+    if (!isCalamityWeapon(weapon.id) || isSelected(weapon)) return false
+    const otherSlotWeaponId = weapon.类型[0] === "近战" ? selectedRanged.value : selectedMelee.value
+    return isCalamityWeapon(otherSlotWeaponId)
+}
+
 const emits = defineEmits<{
     change: [melee: number, ranged: number]
 }>()
 
 /**
  * 选中武器：按大类写入对应槽位并回传。
+ *
+ * 灾厄武器全局唯一：另一槽位已装备灾厄武器时拦截本次选择并提示，
+ * 不写入槽位、也不触发 `change`（弹窗保持打开，等用户换选或先卸下另一把）。
  * @param weapon 被点击的武器
  */
 function selectWeapon(weapon: Weapon) {
-    if (weapon.类型[0] === "近战") {
+    const isMelee = weapon.类型[0] === "近战"
+    const otherWeaponId = isMelee ? selectedRanged.value : selectedMelee.value
+    const otherWeapon = weaponMap.get(otherWeaponId)
+    if (isCalamityWeapon(weapon.id) && otherWeapon && isCalamityWeapon(otherWeaponId)) {
+        warnCalamityConflict(otherWeapon, weapon)
+        return
+    }
+
+    if (isMelee) {
         selectedMelee.value = weapon.id
     } else if (weapon.类型[0] === "远程") {
         selectedRanged.value = weapon.id
+    } else {
+        return
     }
     emits("change", selectedMelee.value, selectedRanged.value)
 }
@@ -275,12 +329,17 @@ function unequipCurrentWeapon() {
                         <div
                             v-for="(weapon, index) in displayedWeapons"
                             :key="weapon.id"
-                            class="animate-ef-rise group relative flex cursor-pointer flex-col overflow-hidden border backdrop-blur-sm [transition:transform_0.3s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.3s_ease,border-color_0.2s_ease] hover:-translate-y-1 hover:[box-shadow:0_16px_40px_-16px_color-mix(in_srgb,var(--color-base-content)_22%,transparent)] active:scale-[0.985] motion-reduce:animate-none"
+                            class="animate-ef-rise group relative flex flex-col overflow-hidden border backdrop-blur-sm [transition:transform_0.3s_cubic-bezier(0.22,1,0.36,1),box-shadow_0.3s_ease,border-color_0.2s_ease] motion-reduce:animate-none"
                             :class="[
                                 isSelected(weapon) ? 'border-primary/70 bg-primary/10' : 'border-base-content/15 bg-base-100/50',
                                 isSelected(weapon) ? '' : elementHoverBorders[weapon.类型[0]] || '',
+                                // 被灾厄唯一限制挡住时整卡沉为禁用态，连悬停抬升一并撤掉，避免看起来仍可点击
+                                isCalamityBlocked(weapon as Weapon)
+                                    ? 'cursor-not-allowed opacity-60'
+                                    : 'cursor-pointer hover:-translate-y-1 hover:[box-shadow:0_16px_40px_-16px_color-mix(in_srgb,var(--color-base-content)_22%,transparent)] active:scale-[0.985]',
                             ]"
                             :style="{ animationDelay: `${getAnimationDelay(index)}ms` }"
+                            :title="isCalamityBlocked(weapon as Weapon) ? $t('weapon-list.calamityConflictHint') : undefined"
                             @click="selectWeapon(weapon as Weapon)"
                         >
                             <!-- 武器类型色条：悬停时显现 -->
@@ -315,6 +374,17 @@ function unequipCurrentWeapon() {
 
                                 <!-- 悬停遮罩 -->
                                 <div class="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/20" />
+
+                                <!-- 灾厄唯一锁：另一槽位已装备灾厄武器时，本卡不可再装备 -->
+                                <div
+                                    v-if="isCalamityBlocked(weapon as Weapon)"
+                                    class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-1 bg-base-300/70 backdrop-blur-[1px]"
+                                >
+                                    <Icon icon="ri:lock-line" class="h-5 w-5 text-error" />
+                                    <span class="px-2 text-center text-[10px] leading-tight text-base-content/70">
+                                        {{ $t("weapon-list.calamityConflictHint") }}
+                                    </span>
+                                </div>
                             </div>
 
                             <!-- 武器信息 -->
