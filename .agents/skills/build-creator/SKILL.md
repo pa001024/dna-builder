@@ -68,8 +68,8 @@ agent_created: true
   **脚本里直接 `fetch`，别 import `src/api/client.ts`**（那是 urql + Vue 的浏览器链路）。
 - ⚠️ 列表查询**不含 `charSettings`**，要按 id 逐份再查详情；`sortBy` 只认 `likes` / `views`，
   其余值（含 `createdAt`）一律落回 `updateAt` 倒序；`buildsCount(charId)` 对总数（`list` 会报告 N/M）；
-  另有 `recommendedBuilds` / `trendingBuilds` 可直接拿站方推荐与热门。
-- 挑选口径：`isRecommended` / `isPinned` 优先（站方推荐通常就是标准答案）→ 再按 likes / views；
+  另有 `recommendedBuilds` / `trendingBuilds` 可直接拿推荐与热门。
+- 挑选口径：`isRecommended` / `isPinned` 优先（推荐通常就是标准答案）→ 再按 likes / views；
   时间一律看 `updateAt`（作者最后一次修改），看 `createdAt` 会把老构筑当新货；
   `desc` 带「AI 驱动生成」的单独标注，别当人肉实测引用；
   站内直链 `https://dna-builder.cn/char/<charId>/<build.id>` 可点开对照。
