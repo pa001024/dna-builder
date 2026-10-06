@@ -39,17 +39,6 @@ description: 使用 Bun 1.4 内置的 Bun.WebView 无头浏览器对前端页面
     ```
 4. 失败用例会自动留图（见 Guidelines 的 `.tmp` 约定），通过 `screenshots/home.png` 查看首屏。
 
-### 启动弹窗：一律加 `?hideUpdateInfo=1`
-
-应用启动时会按顺序弹「应用更新 → 数据包安装/更新 → 更新日志」，无头环境里没有数据包，`安装数据包`
-弹窗会直接盖住页面，DOM 断言全部拿不到内容。**统一用 `?hideUpdateInfo=1` 打开页面**即可禁用这一整套
-启动弹窗（`src/components/StartupModal.vue`：该参数在启动时读取一次，随后应用更新、更新日志与
-`checkDataPack()` 全部跳过；仅首次完整加载生效，SPA 路由内部跳转不会重新计算）：
-
-```ts
-await view.navigate(`${baseUrl}/char/3101?hideUpdateInfo=1`)
-```
-
 注意点：
 
 - 参数必须在**首次导航**的 URL 上；先打开无参数地址再 `router.push` 加参数不会生效。

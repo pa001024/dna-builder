@@ -3995,8 +3995,7 @@ export class CharBuild {
             const build = buffs.length ? this.clone().applyBuffs(buffs) : this
             build.baseWithTarget = i.name
             const attrs = build.calculateWeaponAttributes()
-            const damage = build.calculateOneTime(attrs)
-            totalDamage += damage
+            let eventDamage = build.calculateOneTime(attrs)
             // 召唤物
             const summon = build.selectedSkill?.召唤物
             if (summon) {
@@ -4006,7 +4005,7 @@ export class CharBuild {
                 const delay = summonAttrs.find(a => a.名称 === "召唤物攻击延迟")?.值 || 0
                 const interval = summonAttrs.find(a => a.名称 === "召唤物攻击间隔")?.值 || 0
                 const attackTimes = Math.floor((duration - delay) / interval)
-                totalDamage *= attackTimes
+                eventDamage *= attackTimes
             }
 
             if (attrs.weapon && this.selectedWeapon?.射速) {
@@ -4017,13 +4016,14 @@ export class CharBuild {
                 // 攻击时间占比 = 攻击时间 / (攻击时间 + 装填时间)
                 const atPercent = attackTime / (attackTime + reloadTime)
                 const attackTimes = Math.floor(i.duration * atPercent * attackSpeed)
-                totalDamage *= attackTimes
+                eventDamage *= attackTimes
             }
+            totalDamage += eventDamage
         })
         this.hpPercent = initHpPercent
         this.baseName = initBaseName
         if (this.timelineDPS) {
-            totalDamage /= timeline.totalTime
+            totalDamage = timeline.totalTime > 0 ? totalDamage / timeline.totalTime : 0
         }
         return totalDamage
     }
@@ -4090,15 +4090,20 @@ export class CharBuild {
     }
 
     public applyBuffs(buffs: LeveledBuff[]) {
-        // 取交集 然后对已存在的BUFF进行level+1
-        const existingNames = new Set(this.buffs.map(b => b.名称))
-        const names = new Set(buffs.map(b => b.名称))
-        this.buffs.push(...buffs.filter(b => !names.has(b.名称)))
-        // 对已存在的BUFF进行level+1
+        const incomingNames = new Set(buffs.map(b => b.名称))
+        // 已在场的同名BUFF叠加层数：时间线BUFF与技能自带BUFF同名时按等级相加，而不是各算一份
         this.buffs.forEach(b => {
-            if (existingNames.has(b.名称)) {
+            if (incomingNames.has(b.名称)) {
                 b.等级++
             }
+        })
+        // 新BUFF按生效槽位入列（复合BUFF同时进普通槽位与code槽位）
+        buffs.forEach(buff => {
+            const existing = this.buffs.find(b => b.名称 === buff.名称)
+            if (existing) {
+                return
+            }
+            this.pushBuffToSlots(buff)
         })
         return this
     }

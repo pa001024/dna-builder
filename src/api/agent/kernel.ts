@@ -25,10 +25,12 @@ import { type AgentCompactionOutcome, COMPACT_SUMMARY_MAX_OUTPUT_TOKENS, compact
 import { type AgentUpstreamConfig, createAgentTransport, normalizeAgentUpstreamConfig } from "./config"
 import { estimateMessagesTokens, estimateTextTokens, estimateToolTokens, resolveModelContextWindow } from "./context-usage"
 import { type AgentTool, type AgentToolOutput, readToolSummary, readToolText } from "./tool"
+import { DEFAULT_MAX_TOOL_CONCURRENCY, scheduleToolCalls, validateToolConcurrency } from "./tool-scheduler"
 import {
     type AgentImageAttachment,
     type AgentRoundResult,
     type AgentRoundUsage,
+    type AgentToolCall,
     type AgentToolDefinition,
     type AgentToolResult,
     type AgentTransport,
@@ -144,6 +146,8 @@ export interface AgentContextInfo {
     maxTokens: number
     /** 当前系统提示词 */
     system: string
+    /** meta_user 前缀内容（未包裹 system-reminder 标签；空串表示没有） */
+    metaUser: string
     /** 当前工具定义 */
     tools: AgentToolDefinition[]
 }
@@ -175,6 +179,11 @@ interface AgentPendingState<TPayload> extends AgentLoopState {
     ask: AgentPendingAsk<TPayload>
 }
 
+/** 挂起结果按调用顺序归并，避免较快完成的调用抢占 pending。 */
+type AgentToolExecution<TPayload> =
+    | { result: AgentToolResult }
+    | { suspended: { call: AgentToolCall; payload: TPayload; summary: string }; trace: AgentToolTrace }
+
 /** 主循环的注入项。 */
 export interface AgentKernelOptions<TPayload> {
     /** Agent 名，日志前缀 */
@@ -191,12 +200,19 @@ export interface AgentKernelOptions<TPayload> {
     /** 系统提示词（每次运行取一次，允许随上下文变化） */
     systemPrompt: () => string
     /**
+     * meta_user 前缀内容（每次运行取一次；空串不下发）：内核用 `<system-reminder>` 包裹后
+     * 作为置于对话最前的 user 消息随每轮请求下发，不进系统提示词本体。
+     */
+    metaUserPrefix?: () => string
+    /**
      * 允许的最大工具轮数。
      *
      * 挂起会占用一轮（回答后从下一轮继续），保证循环必然推进，不会出现
      * 「工具一直提问、轮次永不前进」的死循环。默认 30。
      */
     maxToolRounds?: number
+    /** 安全工具每组的最大并发数，默认 10；设为 1 可完全串行执行。 */
+    maxToolConcurrency?: number
     /** 单次回答触达输出上限后允许自动续写的次数，默认 3 */
     maxContinuations?: number
     /** 传输实现覆盖项，仅供单测注入假传输；不传时按端点能力创建 */
@@ -298,6 +314,7 @@ export class AgentKernel<TPayload> {
     private transport: AgentTransport
     private config: AgentUpstreamConfig
     private readonly options: AgentKernelOptions<TPayload>
+    private readonly maxToolConcurrency: number
     /** 中断标记：置位后当前这一轮会在下一个数据块处停止 */
     private interrupted = false
     /**
@@ -315,6 +332,7 @@ export class AgentKernel<TPayload> {
      * @param options 注入的工具集、提示词与限额
      */
     constructor(options: AgentKernelOptions<TPayload>) {
+        this.maxToolConcurrency = validateToolConcurrency(options.maxToolConcurrency ?? DEFAULT_MAX_TOOL_CONCURRENCY)
         this.options = options
         this.config = normalizeAgentUpstreamConfig(options.config)
         this.transport = options.transport ?? createAgentTransport(this.config)
@@ -333,9 +351,10 @@ export class AgentKernel<TPayload> {
         }
     }
 
-    /** 中断当前流式输出。 */
+    /** 中断当前执行并丢弃待回答现场；已启动工具需配合上下文中断检查。 */
     public interrupt(): void {
         this.interrupted = true
+        this.pending = null
     }
 
     /**
@@ -417,7 +436,7 @@ export class AgentKernel<TPayload> {
     }
 
     /**
-     * @description 取当前装配的上下文体检信息（模型、窗口、系统提示词与工具定义）。
+     * @description 取当前装配的上下文体检信息（模型、窗口、系统提示词、meta_user 前缀与工具定义）。
      * @returns 体检信息
      */
     public getContextInfo(): AgentContextInfo {
@@ -426,19 +445,25 @@ export class AgentKernel<TPayload> {
             contextWindow: resolveModelContextWindow(this.config.default_model),
             maxTokens: this.config.default_max_tokens,
             system: this.options.systemPrompt(),
+            metaUser: this.options.metaUserPrefix?.().trim() ?? "",
             tools: this.resolveTools().map(tool => tool.definition),
         }
     }
 
     /**
-     * @description 估算一段历史的整体上下文规模（系统提示词 + 工具声明 + 消息）。
+     * @description 估算一段历史的整体上下文规模（系统提示词 + meta_user 前缀 + 工具声明 + 消息）。
      * @param history 会话历史
      * @returns 估算 tokens
      */
     public estimateHistoryContextTokens(history: readonly AgentHistoryMessage[]): number {
         const info = this.getContextInfo()
 
-        return estimateTextTokens(info.system) + estimateToolTokens(info.tools) + estimateMessagesTokens(toWireMessages(history))
+        return (
+            estimateTextTokens(info.system) +
+            estimateTextTokens(info.metaUser) +
+            estimateToolTokens(info.tools) +
+            estimateMessagesTokens(toWireMessages(history))
+        )
     }
 
     /**
@@ -470,6 +495,21 @@ export class AgentKernel<TPayload> {
      */
     private resolveTools(): readonly AgentTool<TPayload>[] {
         return typeof this.options.tools === "function" ? this.options.tools() : this.options.tools
+    }
+
+    /**
+     * 构造 meta_user 前缀消息（system-reminder 包裹，置于对话最前）；
+     * 正文里混入的同名标签会被剥掉，避免包裹结构被破坏。
+     */
+    private resolveMetaUserMessage(): AgentWireMessage | null {
+        const content = this.options.metaUserPrefix?.().trim() ?? ""
+        if (!content) {
+            return null
+        }
+
+        const safe = content.replace(/<\/?system-reminder>/gi, "")
+
+        return { role: "user", text: `<system-reminder>\n${safe}\n</system-reminder>` }
     }
 
     /**
@@ -644,6 +684,65 @@ export class AgentKernel<TPayload> {
         }
     }
 
+    /** 工具失败只影响当前调用；摘要与结果规范化也属于这次调用的执行边界。 */
+    private async executeToolCall(
+        call: AgentToolCall,
+        tool: AgentTool<TPayload> | undefined,
+        traces: AgentToolTrace[],
+        callbacks: AgentCallbacks,
+        outOfToolRounds: boolean
+    ): Promise<AgentToolExecution<TPayload>> {
+        const args = parseToolArguments(call.arguments)
+        const label = this.options.label ? this.options.label(call.name) : call.name
+        if (!tool) {
+            return { result: { toolCallId: call.id, content: JSON.stringify({ error: `未知工具 ${call.name}` }), isError: true } }
+        }
+
+        const trace: AgentToolTrace = { id: call.id, name: call.name, label, args, summary: "", status: "running" }
+        traces.push(trace)
+
+        if (outOfToolRounds || this.interrupted) {
+            return { result: this.failToolCall(call, trace, outOfToolRounds ? TOOL_BUDGET_EXHAUSTED_HINT : "工具调用已中断", callbacks) }
+        }
+        callbacks.onToolTrace?.({ ...trace })
+        if (this.interrupted) {
+            return { result: this.failToolCall(call, trace, "工具调用已中断", callbacks) }
+        }
+
+        let execution: AgentToolExecution<TPayload>
+        try {
+            const output = await tool.execute(args, { isInterrupted: () => this.interrupted })
+            const summaryOverride = readToolSummary(output as AgentToolOutput<never>)
+            if (output && typeof output === "object" && "suspend" in output) {
+                trace.summary = this.summarizeTool(call.name, args, "", summaryOverride)
+                execution = { suspended: { call, payload: output.suspend, summary: trace.summary }, trace }
+            } else {
+                const text = readToolText(output as AgentToolOutput<never>)
+                if (!text) {
+                    throw new Error("工具未返回结果")
+                }
+                trace.summary = this.summarizeTool(call.name, args, text.content, summaryOverride)
+                trace.result = clampTraceResult(text.content)
+                trace.status = text.isError ? "error" : "done"
+                execution = { result: { toolCallId: call.id, content: text.content, ...(text.isError ? { isError: true } : {}) } }
+            }
+        } catch (error) {
+            return { result: this.failToolCall(call, trace, error instanceof Error ? error.message : String(error), callbacks) }
+        }
+
+        callbacks.onToolTrace?.({ ...trace })
+        return execution
+    }
+
+    /** 错误结果与展示痕迹使用同一条消息，保证每次失败都有对应的工具回灌。 */
+    private failToolCall(call: AgentToolCall, trace: AgentToolTrace, message: string, callbacks: AgentCallbacks): AgentToolResult {
+        trace.status = "error"
+        trace.summary = message
+        trace.result = message
+        callbacks.onToolTrace?.({ ...trace })
+        return { toolCallId: call.id, content: JSON.stringify({ error: message }), isError: true }
+    }
+
     /**
      * 工具调用主循环：流式请求 → 解析工具调用 → 执行 → 回灌，直到模型给出最终回答或挂起。
      *
@@ -656,6 +755,8 @@ export class AgentKernel<TPayload> {
     private async runLoop(state: AgentLoopState, callbacks: AgentCallbacks = {}): Promise<AgentRunResult<TPayload>> {
         const { messages, traces, reasonings } = state
         const system = this.options.systemPrompt()
+        /** meta_user 前缀消息：整轮恒定（技能清单等），置于对话最前 */
+        const metaUserMessage = this.resolveMetaUserMessage()
         const maxToolRounds = this.options.maxToolRounds ?? 30
         const maxContinuations = this.options.maxContinuations ?? 3
         /** 本次问答声明的工具：整轮恒定（见文件头「工具声明全程在场」） */
@@ -690,6 +791,10 @@ export class AgentKernel<TPayload> {
 
             // 上下文逼近窗口上限时就地压缩（跨轮压缩与落库由组合式函数负责，见 compact.ts 文件头）
             await this.maybeCompactLoopContext(state, system, toolDefinitions, callbacks)
+            if (this.interrupted) {
+                flushReasoning()
+                return { reply: state.reply, traces, reasonings }
+            }
 
             /** 本轮请求发出时的消息条数：真实用量回来后据此计算增量估算的起点 */
             const requestMessageCount = messages.length
@@ -700,7 +805,7 @@ export class AgentKernel<TPayload> {
                 result = await this.transport.runRound({
                     model: this.config.default_model,
                     system,
-                    messages,
+                    messages: metaUserMessage ? [metaUserMessage, ...messages] : messages,
                     // tools 全程声明，绝不按轮次撤掉（撤掉会触发上游的文本工具语法泄露，见文件头说明）
                     tools: toolDefinitions,
                     temperature: this.config.default_temperature,
@@ -771,88 +876,45 @@ export class AgentKernel<TPayload> {
             const toolResults: AgentToolResult[] = []
             /** 本轮第一个挂起型调用（同一轮只允许一个：它需要独占后续的用户回合） */
             let suspended: { call: (typeof calls)[number]; payload: TPayload; summary: string } | null = null
+            const groups = scheduleToolCalls(calls, toolMap, this.maxToolConcurrency)
 
-            for (const call of calls) {
-                const args = parseToolArguments(call.arguments)
-                const tool = toolMap.get(call.name)
-
-                const label = this.options.label ? this.options.label(call.name) : call.name
-
-                if (!tool) {
-                    toolResults.push({ toolCallId: call.id, content: JSON.stringify({ error: `未知工具 ${call.name}` }), isError: true })
-                    continue
+            for (const group of groups) {
+                if (this.interrupted) {
+                    break
                 }
 
-                // 工具轮用尽后模型仍发起了调用：不执行，改成一条工具结果告诉它「额度已用尽」。
-                // 这样既保留了「工具声明始终在场」这个防泄露前提，又能让模型看到明确信号后收尾。
-                if (outOfToolRounds) {
-                    const summary = TOOL_BUDGET_EXHAUSTED_HINT
+                const executions = await Promise.all(
+                    group.map(call => this.executeToolCall(call, toolMap.get(call.name), traces, callbacks, outOfToolRounds))
+                )
 
-                    traces.push({ id: call.id, name: call.name, label, args, summary, result: summary, status: "error" })
-                    callbacks.onToolTrace?.({ id: call.id, name: call.name, label, args, summary, result: summary, status: "error" })
-                    toolResults.push({ toolCallId: call.id, content: JSON.stringify({ error: summary }), isError: true })
-                    continue
+                for (const execution of executions) {
+                    if ("suspended" in execution) {
+                        if (suspended) {
+                            const duplicate = this.failToolCall(
+                                execution.suspended.call,
+                                execution.trace,
+                                "本轮已经有一个提问，不能同时挂起多个提问",
+                                callbacks
+                            )
+                            toolResults.push(duplicate)
+                        } else {
+                            suspended = execution.suspended
+                        }
+                    } else {
+                        toolResults.push(execution.result)
+                    }
                 }
 
-                const trace: AgentToolTrace = { id: call.id, name: call.name, label, args, summary: "", status: "running" }
-
-                traces.push(trace)
-                callbacks.onToolTrace?.({ ...trace })
-
-                let output: AgentToolOutput<TPayload>
-
-                try {
-                    output = await tool.execute(args, { isInterrupted: () => this.interrupted })
-                } catch (error) {
-                    const message = error instanceof Error ? error.message : String(error)
-                    trace.status = "error"
-                    trace.summary = message
-                    trace.result = message
-                    callbacks.onToolTrace?.({ ...trace })
-                    toolResults.push({ toolCallId: call.id, content: JSON.stringify({ error: message }), isError: true })
-                    continue
+                if (this.interrupted) {
+                    break
                 }
-
-                // 工具自带的摘要覆盖项优先级最高，其次走注入的摘要器（它能看到结果正文）
-                const summaryOverride = readToolSummary(output as AgentToolOutput<never>)
-
-                if (output && typeof output === "object" && "suspend" in output) {
-                    trace.summary = this.summarizeTool(call.name, args, "", summaryOverride)
-                    // 停在 running：这一步的完成与否取决于外部输入，不取决于模型
-                    trace.status = "running"
-                    callbacks.onToolTrace?.({ ...trace })
-                    suspended = { call, payload: (output as { suspend: TPayload }).suspend, summary: trace.summary }
-                    continue
-                }
-
-                const text = readToolText(output as AgentToolOutput<never>)
-
-                if (!text) {
-                    trace.status = "error"
-                    trace.summary = this.summarizeTool(call.name, args, "", summaryOverride) || "工具未返回结果"
-                    trace.result = trace.summary
-                    callbacks.onToolTrace?.({ ...trace })
-                    toolResults.push({ toolCallId: call.id, content: JSON.stringify({ error: trace.summary }), isError: true })
-                    continue
-                }
-
-                trace.summary = this.summarizeTool(call.name, args, text.content, summaryOverride)
-                trace.result = clampTraceResult(text.content)
-                trace.status = text.isError ? "error" : "done"
-                callbacks.onToolTrace?.({ ...trace })
-
-                toolResults.push({
-                    toolCallId: call.id,
-                    content: text.content,
-                    ...(text.isError ? { isError: true } : {}),
-                })
             }
 
             if (toolResults.length) {
                 messages.push({ role: "user", text: "", toolResults })
             }
 
-            if (suspended) {
+            if (suspended && !this.interrupted) {
                 // 挂起：保存完整现场，等外部把输入喂回来
                 this.pending = {
                     messages,
@@ -870,6 +932,17 @@ export class AgentKernel<TPayload> {
                 callbacks.onReasoningEnd?.([])
 
                 return { reply: state.reply, traces, reasonings, pendingAsk: this.pending.ask }
+            }
+
+            if (this.interrupted) {
+                for (const call of calls) {
+                    const trace = traces.find(item => item.id === call.id && item.status === "running")
+                    if (trace) {
+                        this.failToolCall(call, trace, "工具调用已中断", callbacks)
+                    }
+                }
+                flushReasoning()
+                return { reply: state.reply, traces, reasonings }
             }
 
             if (outOfToolRounds) {

@@ -168,6 +168,9 @@ export default defineConfig(async () => ({
             "zod",
             "@chenglou/pretext",
             "bcryptjs",
+            "lexical",
+            "@lexical/plain-text",
+            "@lexical/history",
         ],
     },
     build: {

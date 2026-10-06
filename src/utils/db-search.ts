@@ -102,6 +102,32 @@ export interface DBEntrySummary {
      * 近战 / 单手剑）与「数值区间命中」（如品质 3 命中 `ql:3`）走同一套匹配逻辑。
      */
     facets?: Record<string, string[]>
+    /**
+     * grep 模式下命中的原始字段（仅该模式返回）。
+     *
+     * 条目标题与副信息里看不到这些字段（如魔之楔的 `技能威力` 词条），
+     * 给出命中位置是为了让模型知道「为什么这条会被搜出来」，也便于直接引用。
+     */
+    matches?: DBEntryFieldMatch[]
+}
+
+/**
+ * 条目检索模式。
+ *
+ * - `fuzzy`（默认）：对名称、副信息与隐藏检索词做包含 / 拼音匹配，适合「我知道大概叫什么」；
+ * - `grep`：下钻到条目的原始数据结构，按字段名与字段值做包含匹配，适合
+ *   「按字段找条目」（如「哪些魔之楔带技能威力」）——这是标题级检索覆盖不到的空缺。
+ */
+export type DBSearchMode = "fuzzy" | "grep"
+
+/** grep 模式下命中的一个原始字段 */
+export interface DBEntryFieldMatch {
+    /** 命中字段的路径（点号分隔，如 `技能威力` / `buff.加成.攻击`） */
+    path: string
+    /** 命中类型：命中字段名（字段存在）还是命中字段值 */
+    kind: "name" | "value"
+    /** 命中字段的取值文本（`kind` 为 value 时给出；number 原样、字符串按语言翻译） */
+    value?: string
 }
 
 /** 筛选项可选值的单项 */
@@ -1292,7 +1318,7 @@ function matchFacetFilters(entry: DBEntrySummary, filters: Record<string, string
 /**
  * 按模块查询条目明细。
  * @param moduleId 模块标识
- * @param options 查询条件：关键词、版本、筛选项、条数上限、数据语言
+ * @param options 查询条件：关键词、版本、筛选项、条数上限、检索模式、数据语言
  * @returns 命中的条目（关键词与筛选项都缺失时返回该模块前若干条）
  */
 export function queryModule(
@@ -1303,10 +1329,27 @@ export function queryModule(
         limit?: number
         /** 筛选项条件：筛选项 id → 目标取值（取值见 listModuleFilters） */
         filters?: Record<string, string | number | boolean>
+        /**
+         * 检索模式：`fuzzy`（默认）匹配名称 / 副信息 / 隐藏检索词，`grep` 下钻原始字段。
+         *
+         * grep 用于「按字段找条目」——名称与副信息里没有的字段（如魔之楔的 `技能威力`）
+         * 只有下钻原始数据才匹配得到。模块没有原始清单（见 {@link MODULE_RAW_LISTS}）时
+         * grep 退化为 fuzzy，并在返回值里说明，避免模型以为「字段级搜索没有结果」。
+         */
+        mode?: DBSearchMode
         /** 数据语言：决定条目来自哪套数据集，以及名称以哪种语言返回 */
         lang?: DBAgentLang
     } = {}
-): { module?: DBModuleSummary; entries: DBEntrySummary[]; total: number; appliedFilters?: Record<string, string | number | boolean> } {
+): {
+    module?: DBModuleSummary
+    entries: DBEntrySummary[]
+    total: number
+    /** 本次实际使用的检索模式（请求 grep 但模块不支持时会是 fuzzy） */
+    appliedMode?: DBSearchMode
+    /** grep 退化时的说明（如「该模块没有可下钻的原始字段」） */
+    note?: string
+    appliedFilters?: Record<string, string | number | boolean>
+} {
     const adapter = MODULE_ADAPTER_MAP.get(moduleId)
 
     if (!adapter) {
@@ -1318,10 +1361,36 @@ export function queryModule(
     const version = normalizeVersion(options.version)
     const limit = Math.min(Math.max(options.limit ?? 20, 1), 80)
     const filters = options.filters ?? {}
+    const requestedMode: DBSearchMode = options.mode === "grep" ? "grep" : "fuzzy"
+    // MODULE_RAW_LISTS 是 Record 索引签名，直接取值在类型上恒为函数，因此按「键是否存在」判空
+    const rawList: (() => unknown[]) | undefined = Object.hasOwn(MODULE_RAW_LISTS, adapter.id) ? MODULE_RAW_LISTS[adapter.id] : undefined
+    // grep 需要原始记录；模块没有原始清单时退回 fuzzy，并把原因带回给模型
+    const mode: DBSearchMode = requestedMode === "grep" && rawList ? "grep" : "fuzzy"
+    const modeNote =
+        requestedMode === "grep" && mode === "fuzzy" ? `模块 ${adapter.id} 没有可下钻的原始字段，已按 fuzzy 模式检索。` : undefined
 
     const all = adapter.list(lang)
     // 关键词先扩展成「提问语言写法 + 可反查到的原文写法」，其他语言提问才能命中仍是中文原文的数据
     const keywords = expandKeywords(keyword, lang)
+
+    // grep 按 id 反查原始记录：摘要与原始清单必须同源同 id（见 MODULE_RAW_LISTS 的约束）。
+    // 没有关键词时不进入字段匹配，无需建表
+    const rawById = new Map<string, Record<string, unknown>>()
+
+    if (mode === "grep" && keywords.length) {
+        for (const item of rawList!()) {
+            if (item && typeof item === "object") {
+                const id = (item as { id?: unknown }).id
+
+                if (id !== undefined) {
+                    rawById.set(`${id}`, item as Record<string, unknown>)
+                }
+            }
+        }
+    }
+
+    /** grep 模式下条目的命中字段；fuzzy 模式恒为空表 */
+    const matchesById = new Map<string, DBEntryFieldMatch[]>()
 
     const matched = all.filter(entry => {
         if (version && normalizeVersion(entry.version) !== version) {
@@ -1333,6 +1402,24 @@ export function queryModule(
         }
 
         if (!keywords.length) {
+            return true
+        }
+
+        if (mode === "grep") {
+            const raw = rawById.get(`${entry.id}`)
+
+            if (!raw) {
+                return false
+            }
+
+            const matches = grepEntryFields(raw, keywords, lang)
+
+            if (!matches.length) {
+                return false
+            }
+
+            matchesById.set(`${entry.id}`, matches)
+
             return true
         }
 
@@ -1349,8 +1436,15 @@ export function queryModule(
             versioned: adapter.versioned,
             count: all.length,
         },
-        entries: matched.slice(0, limit).map(entry => toEntrySummary(entry, lang)),
+        entries: matched.slice(0, limit).map(entry => {
+            const summary = toEntrySummary(entry, lang)
+            const matches = matchesById.get(`${entry.id}`)
+
+            return matches?.length ? { ...summary, matches } : summary
+        }),
         total: matched.length,
+        appliedMode: mode,
+        note: modeNote,
         appliedFilters: Object.keys(filters).length ? filters : undefined,
     }
 }
@@ -3345,6 +3439,113 @@ function matchKeyword(text: string, keyword: string): boolean {
     }
 
     return matchPinyin(text, keyword).match
+}
+
+/** grep 模式下单个字段最多收集的命中数：一条记录命中几百个同类字段时没有引用价值 */
+const DB_GREP_MATCH_LIMIT = 12
+
+/** grep 模式下递归展开的深度上限：防止 buff / effect 这类互相嵌套的原始结构无限下钻 */
+const DB_GREP_MAX_DEPTH = 6
+
+/**
+ * 在原始条目上做字段级搜索（grep）。
+ *
+ * 与 {@link matchKeyword} 的差别是本函数「看得见字段」：fuzzy 只能匹配名称、副信息与
+ * searchText（都是展平后的文本），而这里递归展开原始记录，字段名与字段值都参与匹配。
+ * 因此「哪些魔之楔带技能威力」这种「按字段找条目」的提问，只有 grep 能命中——
+ * 魔之楔的 `技能威力: 0.24` 既不进名称也不进副信息，fuzzy 无从匹配。
+ *
+ * 字段名命中（`kind: "name"`）与字段值命中（`kind: "value"`）分开标注：前者说明
+ * 「条目有这个词条」，后者说明「条目这个词条的取值里出现了关键词」，模型引用的口径不同。
+ * @param item 原始条目
+ * @param keywords 关键词列表（已做语言扩展）
+ * @param lang 数据语言（字符串取值按它翻译后再匹配）
+ * @returns 命中字段列表；无命中时返回空数组
+ */
+function grepEntryFields(item: object, keywords: string[], lang: DBAgentLang): DBEntryFieldMatch[] {
+    const matches: DBEntryFieldMatch[] = []
+    const seen = new Set<string>()
+
+    const push = (match: DBEntryFieldMatch) => {
+        if (matches.length >= DB_GREP_MATCH_LIMIT || seen.has(match.path)) {
+            return
+        }
+
+        seen.add(match.path)
+        matches.push(match)
+    }
+
+    const walk = (value: unknown, path: string, depth: number) => {
+        if (matches.length >= DB_GREP_MATCH_LIMIT || depth > DB_GREP_MAX_DEPTH) {
+            return
+        }
+
+        // 叶子标量：按字段值匹配
+        if (value === null || typeof value !== "object") {
+            const text = typeof value === "string" ? (translateDBAgentText(value, lang) ?? value) : value === undefined ? "" : `${value}`
+
+            if (text && keywords.some(keyword => matchKeyword(text, keyword))) {
+                push({ path, kind: "value", value: text })
+            }
+
+            return
+        }
+
+        if (Array.isArray(value)) {
+            for (const element of value) {
+                if (element === null || typeof element !== "object") {
+                    // 标量元素（技能标签 `["充盈","远程"]`）用父路径当作命中位置，
+                    // 避免 `标签.0` 这种对模型无意义的序号
+                    const text = typeof element === "string" ? (translateDBAgentText(element, lang) ?? element) : `${element}`
+
+                    if (text && keywords.some(keyword => matchKeyword(text, keyword))) {
+                        push({ path, kind: "value", value: text })
+                    }
+
+                    continue
+                }
+
+                walk(element, path, depth + 1)
+            }
+
+            return
+        }
+
+        if (value instanceof Map) {
+            for (const [key, item2] of value.entries()) {
+                walk(item2, path ? `${path}.${key}` : `${key}`, depth + 1)
+            }
+
+            return
+        }
+
+        if (value instanceof Set) {
+            for (const item2 of value.values()) {
+                walk(item2, path, depth + 1)
+            }
+
+            return
+        }
+
+        for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+            if (child === undefined) {
+                continue
+            }
+
+            const childPath = path ? `${path}.${key}` : key
+
+            // 字段名命中：说明条目「有」这个词条，是「哪些魔之楔带技能威力」的答案
+            if (keywords.some(keyword => matchKeyword(key, keyword))) {
+                push({ path: childPath, kind: "name" })
+            }
+
+            walk(child, childPath, depth + 1)
+        }
+    }
+
+    walk(item, "", 1)
+
+    return matches
 }
 
 /**

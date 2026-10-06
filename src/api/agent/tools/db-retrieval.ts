@@ -57,6 +57,19 @@ const FILTERS_DESCRIPTION =
     "取值必须来自 list_filter_options 返回的 values，不要凭记忆编造；多个条件之间是「与」的关系。布尔类筛选项传 true 表示只要具备该特征的条目。"
 
 /**
+ * mode 参数的说明文案。
+ *
+ * 与 `filters` 一样，措辞必须只在参数定义处维护一份：模型对「同义不同词」的参数说明
+ * 容易读成两种口径，从而多做一次无谓查询。
+ */
+const MODE_DESCRIPTION =
+    "检索模式。fuzzy（默认）：匹配条目名称、副信息与隐藏检索词，适合「知道大概叫什么」。 " +
+    "grep：下钻条目的原始字段，按字段名与字段值做包含匹配，适合「按字段找条目」—— " +
+    "例如「哪些魔之楔带技能威力」「哪些魔之楔的效果里提到护盾」这类名称和副信息里看不到的字段，必须用 grep 才搜得到。 " +
+    "grep 会在每条命中里返回 matches（命中的字段路径与取值），便于直接引用。 " +
+    "模块没有可下钻的原始字段时会退回 fuzzy，返回值里的 appliedMode 与 note 会说明。"
+
+/**
  * lang 参数的说明文案。
  *
  * 单独抽出来是因为它出现在除 ask_user 之外的每个工具上，措辞必须一致：
@@ -269,6 +282,7 @@ function defineTool<TPayload>(
 ): AgentTool<TPayload> {
     return {
         definition,
+        concurrentSafe: true,
         async execute(args, context) {
             const content = await execute(args, context)
 
@@ -579,7 +593,10 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
             {
                 name: "query_module_entries",
                 description:
-                    "按模块查询条目明细，支持关键词、版本与分类筛选（筛选项与资料库各列表页一致），返回名称、副信息、版本与详情路径。适合回答“某个版本新增了哪些成就”“某系列有哪些魔之楔”“三星星级的成就有多少”。" +
+                    "按模块查询条目明细，支持关键词、版本与分类筛选（筛选项与资料库各列表页一致），返回名称、副信息、版本与详情路径。" +
+                    "适合回答“某个版本新增了哪些成就”“某系列有哪些魔之楔”“三星星级的成就有多少”。" +
+                    "关键词默认走 fuzzy 模式（匹配名称、副信息与隐藏检索词）；要「按字段找条目」——例如“哪些魔之楔带技能威力”“哪些魔之楔的效果提到护盾”" +
+                    "——必须把 mode 设为 grep：fuzzy 只能看标题与描述，字段级的内容（词条属性、效果文案里的关键术语）只有 grep 下钻原始字段才匹配得到。" +
                     "返回的是条目摘要：要某个条目的完整字段（角色生日 / 出生地 / CV、武器面板、魔之楔效果等）请再用 read_entry 按 id 取详情。",
                 parameters: {
                     type: "object",
@@ -587,6 +604,7 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                         lang: LANG_SCHEMA,
                         module: { type: "string", description: "模块 id，见 list_data_modules，例如 achievement / mod / char / weapon" },
                         keyword: { type: "string", description: "可选，模块内关键词（名称、分类、描述等字段）" },
+                        mode: { type: "string", enum: ["fuzzy", "grep"], description: MODE_DESCRIPTION },
                         version: { type: "string", description: "可选，版本号，例如 1.6" },
                         filters: {
                             type: "object",
@@ -607,10 +625,12 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                 }
 
                 const filters = normalizeFilters(args.filters)
-                const { module, entries, total } = queryModule(moduleId, {
+                const mode = args.mode === "grep" ? "grep" : args.mode === "fuzzy" ? "fuzzy" : undefined
+                const { module, entries, total, appliedMode, note } = queryModule(moduleId, {
                     keyword: args.keyword ? `${args.keyword}` : undefined,
                     version: args.version ? `${args.version}` : undefined,
                     filters,
+                    mode,
                     limit: Number(args.limit) || undefined,
                     lang,
                 })
@@ -625,6 +645,8 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                     moduleLabel: module.label,
                     modulePath: module.path,
                     versioned: module.versioned,
+                    appliedMode,
+                    note,
                     appliedFilters: Object.keys(filters).length ? filters : undefined,
                     total,
                     entries: entries.map(entry => ({
@@ -633,6 +655,7 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                         subtitle: entry.subtitle,
                         version: entry.version,
                         path: entry.path,
+                        matches: entry.matches?.length ? entry.matches : undefined,
                     })),
                     tip: "这里只有条目摘要。需要某条目的完整字段（角色生日 / 出生地 / CV、武器面板、魔之楔效果等）时，用 read_entry 按 module + id 取详情。",
                 })

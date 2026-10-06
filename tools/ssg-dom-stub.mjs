@@ -449,7 +449,6 @@ export function installDomStubs() {
         CSS: { supports: () => false, escape: value => String(value) },
         performance: { now: () => Date.now(), mark: noop, measure: noop, getEntries: () => [] },
         IntersectionObserver: class IntersectionObserver {
-            constructor() {}
             observe() {}
             unobserve() {}
             disconnect() {}
@@ -458,13 +457,11 @@ export function installDomStubs() {
             }
         },
         ResizeObserver: class ResizeObserver {
-            constructor() {}
             observe() {}
             unobserve() {}
             disconnect() {}
         },
         MutationObserver: class MutationObserver {
-            constructor() {}
             observe() {}
             disconnect() {}
             takeRecords() {

@@ -35,7 +35,7 @@ const TOOL_GUIDE = `### 可用工具
 - ask_user: 需要用户在有限选项里做决定时提问，调用后会停下来等回答。`
 
 /**
- * @description 渲染 BuildAgent 系统提示词。
+ * 渲染 BuildAgent 系统提示词；技能清单不在本文件（由装配层经 `metaUserPrefix` 注入）。
  * @param options 渲染选项
  * @param options.ragEnabled 上下文检索增强是否可用
  * @returns 系统提示词

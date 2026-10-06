@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import { useLocalStorage } from "@vueuse/core"
 import Fuse, { type FuseResultMatch } from "fuse.js"
-import { computed } from "vue"
+import { useTranslation } from "i18next-vue"
+import { computed, watch } from "vue"
+import type { FilterSelectOption } from "@/components/FilterSelect.vue"
 import { useGameText } from "@/composables/useGameText"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
@@ -55,6 +56,7 @@ interface DynQuestFullTextEntry {
 }
 
 const { gt } = useGameText()
+const { t } = useTranslation()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedQuestId = useSearchParam<number>("id", 0)
@@ -63,8 +65,6 @@ const selectedSubRegion = useSearchParam<string>("srg", "")
 const selectedLevel = useSearchParam<string>("lv", "")
 const showImprIncreaseOnly = useSearchParam<boolean>("iio", false)
 const showFullTextSearch = useSearchParam<boolean>("fts", false)
-const showRegionFilter = useLocalStorage("dynquest.showRegionFilter", true)
-const showLevelFilter = useLocalStorage("dynquest.showLevelFilter", true)
 
 const normalizedDynQuestData = buildNormalizedDynQuestData(dynQuestData)
 const dynQuestFullTextEntries = buildDynQuestFullTextEntries(normalizedDynQuestData)
@@ -544,36 +544,17 @@ function hasDynQuestImprIncrease(questId: number): boolean {
 }
 
 /**
- * 切换筛选器显示状态。
- * @param filterName 筛选器名称
- * @param show 是否显示
- */
-function toggleFilter(filterName: "region" | "subRegion" | "level", show: boolean) {
-    if (show) {
-        return
-    }
-
-    if (filterName === "region") {
-        selectedRegion.value = ""
-        selectedSubRegion.value = ""
-    }
-
-    if (filterName === "subRegion") {
-        selectedSubRegion.value = ""
-    }
-
-    if (filterName === "level") {
-        selectedLevel.value = ""
-    }
-}
-
-/**
  * 获取所有区域。
  */
 const allRegions = computed(() => {
     const regions = new Set(normalizedDynQuestData.map(q => q.regionId))
     return Array.from(regions).sort((a, b) => a - b)
 })
+
+const regionFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...allRegions.value.map(regionId => ({ value: `${regionId}`, label: t(getRegionName(regionId)) })),
+])
 
 /**
  * 获取所有等级范围筛选项。
@@ -605,6 +586,11 @@ const levelRanges = computed(() => {
             label: getLevelLabelByKey(levelKey),
         }))
 })
+
+const levelFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...levelRanges.value.map(levelRange => ({ value: levelRange.key, label: levelRange.label })),
+])
 
 /**
  * 按关键词和区域筛选委托。
@@ -692,22 +678,6 @@ const filteredQuests = computed<DynQuestSearchResult[]>(() => {
 })
 
 /**
- * 切换区域筛选行显示状态；收起时清空区域与子区域筛选值，避免隐藏后筛选仍生效。
- */
-function toggleRegionFilterRow() {
-    showRegionFilter.value = !showRegionFilter.value
-    toggleFilter("region", showRegionFilter.value)
-}
-
-/**
- * 切换等级筛选行显示状态；收起时清空等级筛选值，避免隐藏后筛选仍生效。
- */
-function toggleLevelFilterRow() {
-    showLevelFilter.value = !showLevelFilter.value
-    toggleFilter("level", showLevelFilter.value)
-}
-
-/**
  * 选中委托。
  * @param quest 委托数据
  */
@@ -715,14 +685,9 @@ function selectQuest(quest: DynQuest | null) {
     selectedQuestId.value = quest?.id || 0
 }
 
-/**
- * 选择区域。
- * @param regionId 区域 ID
- */
-function selectRegion(regionId: string) {
-    selectedRegion.value = regionId
+watch(selectedRegion, () => {
     selectedSubRegion.value = ""
-}
+})
 
 useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
 </script>
@@ -760,7 +725,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                         </span>
                     </div>
 
-                    <!-- 过滤器开关方章 -->
+                    <!-- 特殊开关 + 筛选器：常驻可清除选择框 -->
                     <div class="mt-3 flex flex-wrap gap-1.5">
                         <button
                             type="button"
@@ -778,30 +743,6 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                             type="button"
                             class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
                             :class="
-                                showRegionFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleRegionFilterRow()"
-                        >
-                            {{ $t('db-dynquest-list.filter_region') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showLevelFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleLevelFilterRow()"
-                        >
-                            {{ $t('db-dynquest-list.filter_level') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
                                 showImprIncreaseOnly
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
                                     : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
@@ -810,73 +751,21 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdq-item-active" })
                         >
                             {{ $t('印象') }}
                         </button>
+                        <FilterSelect
+                            v-model="selectedRegion"
+                            :options="regionFilterOptions"
+                            :label="$t('db-dynquest-list.filter_region')"
+                            :clear-title="$t('common.clear')"
+                        />
+                        <FilterSelect
+                            v-model="selectedLevel"
+                            :options="levelFilterOptions"
+                            :label="$t('db-dynquest-list.filter_level')"
+                            :clear-title="$t('common.clear')"
+                        />
                     </div>
                 </div>
 
-                <!-- 筛选条件 -->
-                <div
-                    v-show="showRegionFilter || showLevelFilter"
-                    class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
-                    style="animation-delay: 0.05s"
-                >
-                    <!-- 区域筛选 -->
-                    <div v-show="showRegionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">REGION</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedRegion === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectRegion('')"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="regionId in allRegions.map(r => String(r))"
-                            :key="regionId"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedRegion === regionId
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectRegion(regionId)"
-                        >
-                            {{ $t(getRegionName(Number(regionId))) }}
-                        </button>
-                    </div>
-
-                    <!-- 等级筛选 -->
-                    <div v-show="showLevelFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">LEVEL</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedLevel === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedLevel = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="levelRange in levelRanges"
-                            :key="levelRange.key"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedLevel === levelRange.key
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedLevel = levelRange.key"
-                        >
-                            {{ levelRange.label }}
-                        </button>
-                    </div>
-                </div>
 
                 <!-- 委托列表 -->
                 <ScrollArea class="flex-1">

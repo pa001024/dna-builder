@@ -3,8 +3,8 @@
  *
  * 检索工具集（见 `src/api/agent/tools/db-retrieval.ts`）与循环机制
  * （见 `src/api/agent/kernel.ts`）各自独立，本文件只负责把一次运行需要的东西
- * 装配进通用内核：工具清单（随 RAG 开关缓存）、系统提示词、工具展示名（i18n）、
- * 以及 ask_user 挂起问答的格式化与校验。装配完直接交出内核，调用方
+ * 装配进通用内核：工具清单（随 RAG 开关与技能可用性缓存）、系统提示词与 meta_user 技能清单快照、
+ * 工具展示名（i18n）、以及 ask_user 挂起问答的格式化与校验。装配完直接交出内核，调用方
  * （`useDBChat`）按内核的原生方法驱动，不再包一层转发。
  *
  * 线协议由 `agent/config.ts` 的 `createAgentTransport` 按端点能力选择：
@@ -14,10 +14,13 @@
 
 import type { AgentUpstreamConfig } from "@/api/agent/config"
 import { AgentKernel } from "@/api/agent/kernel"
+import { getAgentSkillRegistry } from "@/api/agent/skills/registry"
 import type { AgentTool } from "@/api/agent/tool"
 import { createDbRetrievalTools } from "@/api/agent/tools/db-retrieval"
+import { createSkillTools } from "@/api/agent/tools/skill-files"
 import type { OpenAIConfig } from "@/api/openai"
 import { renderDBAgentSystemPrompt } from "@/shared/dbAgentSystemPrompt"
+import { renderSkillPromptSection } from "@/shared/skill-prompt"
 import { agentToolLabel } from "@/utils/agent-chat"
 import type { AskUserRequest } from "@/utils/db-ask-user"
 import { formatAskUserResponse, hasAskAnswer } from "@/utils/db-ask-user"
@@ -46,20 +49,20 @@ const MAX_CONTINUATIONS = 3
  * @returns 可直接驱动的通用 Agent 内核
  */
 export function createDbAgent(config: Partial<OpenAIConfig> = {}): AgentKernel<AskUserRequest> {
-    /** 上一次装配工具时的开关取值：开关没变就不重建，避免每轮都造一遍工具对象 */
-    let cachedRag: boolean | null = null
+    /** 上次装配工具的开关组合（RAG | 技能可用性）；没变就不重建工具对象 */
+    let cachedToolsKey: string | null = null
     let cachedTools: AgentTool<AskUserRequest>[] = []
 
-    /**
-     * @description 按当前的上下文检索增强开关取工具清单。
-     * @returns 本次运行的工具清单
-     */
+    /** 按 RAG 开关与技能可用性取工具清单；没有技能时不挂技能工具（提示词侧同步整段省略）。 */
     const resolveTools = (): AgentTool<AskUserRequest>[] => {
-        const ragEnabled = isRagEnabled()
+        const toolsKey = `${isRagEnabled()}|${getAgentSkillRegistry().isAvailable()}`
 
-        if (cachedRag !== ragEnabled) {
-            cachedRag = ragEnabled
-            cachedTools = createDbRetrievalTools<AskUserRequest>({ ragEnabled, story: true, askUser: true })
+        if (cachedToolsKey !== toolsKey) {
+            cachedToolsKey = toolsKey
+            cachedTools = [
+                ...createDbRetrievalTools<AskUserRequest>({ ragEnabled: isRagEnabled(), story: true, askUser: true }),
+                ...(getAgentSkillRegistry().isAvailable() ? createSkillTools<AskUserRequest>() : []),
+            ]
         }
 
         return cachedTools
@@ -70,6 +73,8 @@ export function createDbAgent(config: Partial<OpenAIConfig> = {}): AgentKernel<A
         config: config as Partial<AgentUpstreamConfig>,
         tools: resolveTools,
         systemPrompt: () => renderDBAgentSystemPrompt({ ragEnabled: isRagEnabled() }),
+        // 技能清单走 meta_user 前缀消息（system-reminder 包裹），不进系统提示词本体
+        metaUserPrefix: () => renderSkillPromptSection(getAgentSkillRegistry().getPromptSkills()),
         maxToolRounds: MAX_TOOL_ROUNDS,
         maxContinuations: MAX_CONTINUATIONS,
         label: agentToolLabel,

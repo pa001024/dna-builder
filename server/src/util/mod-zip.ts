@@ -211,7 +211,7 @@ export function supplementModZip(bytes: Uint8Array, manifest: GameModManifest, c
 
     // 缺失 preview.png 且提供了封面时补入
     if (!hasPreview && cover?.bytes?.length) {
-        entries["preview.png"] = cover.bytes
+        entries["preview.png"] = Uint8Array.from(cover.bytes)
     }
 
     return zipSync(entries, { level: 6 })

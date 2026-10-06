@@ -173,7 +173,7 @@ function buildStorySnippet(corpus: RagIndexedCorpus, position: number, contextLi
         const neighbor = corpus.chunks[position + offset]
 
         // 同一任务（path 相同）才纳入上下文：跨任务拼接会把不相干的台词混进来
-        if (!neighbor || neighbor.kind !== "story" || neighbor.path !== hit.path) {
+        if (neighbor?.kind !== "story" || neighbor.path !== hit.path) {
             continue
         }
 

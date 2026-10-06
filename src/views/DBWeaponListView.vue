@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { useLocalStorage } from "@vueuse/core"
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
+import type { FilterSelectOption } from "@/components/FilterSelect.vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledWeapon } from "@/data"
@@ -9,16 +10,13 @@ import { formatProp } from "@/util"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 
+const { t } = useTranslation()
+
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedWeaponId = useSearchParam<number>("id", 0)
 const selectedCategory = useSearchParam<string>("cat", "")
 const selectedDamageType = useSearchParam<string>("dt", "")
 const selectedVersion = useSearchParam<string>("ver", "")
-
-// 过滤选项显示控制
-const showCategoryFilter = useLocalStorage("weapon.showCategoryFilter", false)
-const showDamageTypeFilter = useLocalStorage("weapon.showDamageTypeFilter", false)
-const showVersionFilter = useLocalStorage("weapon.showVersionFilter", false)
 
 // 根据 ID 获取选中的武器
 const selectedWeapon = computed(() => {
@@ -56,6 +54,21 @@ const versionOptions = computed(() => {
     return Array.from(versionSet).sort()
 })
 
+const categoryFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...categories.value.map(cat => ({ value: cat, label: t(cat) })),
+])
+
+const damageTypeFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...damageTypes.value.map(type => ({ value: type, label: t(type) })),
+])
+
+const versionFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...versionOptions.value.map(version => ({ value: version, label: version })),
+])
+
 const filteredWeapons = computed(() => {
     return weaponData.filter(w => {
         const matchCategory = selectedCategory.value === "" || w.类型.includes(selectedCategory.value)
@@ -84,62 +97,6 @@ const filteredWeapons = computed(() => {
         return matchKeyword && matchCategory && matchDamageType && matchVersion
     })
 })
-
-/**
- * 切换武器分类过滤显示状态
- * @param show 是否显示武器分类过滤
- */
-function toggleCategoryFilter(show: boolean) {
-    if (!show) {
-        selectedCategory.value = ""
-    }
-}
-
-/**
- * 切换伤害类型过滤显示状态
- * @param show 是否显示伤害类型过滤
- */
-function toggleDamageTypeFilter(show: boolean) {
-    if (!show) {
-        selectedDamageType.value = ""
-    }
-}
-
-/**
- * 切换版本过滤显示状态
- * @param show 是否显示版本过滤
- */
-function toggleVersionFilter(show: boolean) {
-    if (!show) {
-        selectedVersion.value = ""
-    }
-}
-
-/**
- * 过滤器名称。
- */
-type FilterName = "category" | "damageType" | "version"
-
-/**
- * 切换过滤行显示状态；收起时清空对应筛选值，避免隐藏后筛选仍生效。
- * @param name 过滤器名称
- */
-function toggleFilterRow(name: FilterName) {
-    switch (name) {
-        case "category":
-            showCategoryFilter.value = !showCategoryFilter.value
-            toggleCategoryFilter(showCategoryFilter.value)
-            break
-        case "damageType":
-            showDamageTypeFilter.value = !showDamageTypeFilter.value
-            toggleDamageTypeFilter(showDamageTypeFilter.value)
-            break
-        case "version":
-            showVersionFilter.value = !showVersionFilter.value
-            toggleVersionFilter(showVersionFilter.value)
-            break
-    }
-}
 
 useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
 </script>
@@ -173,140 +130,26 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                         </span>
                     </div>
 
-                    <!-- 过滤器开关方章 -->
+                    <!-- 筛选器：常驻可清除选择框 -->
                     <div class="mt-3 flex flex-wrap gap-1.5">
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showCategoryFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleFilterRow('category')"
-                        >
-                            {{ $t('common.weapon_category') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showDamageTypeFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleFilterRow('damageType')"
-                        >
-                            {{ $t('伤害类型') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showVersionFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleFilterRow('version')"
-                        >
-                            {{ $t("char-build.version") }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 筛选条件 -->
-                <div
-                    v-show="showCategoryFilter || showDamageTypeFilter || showVersionFilter"
-                    class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
-                    style="animation-delay: 0.05s"
-                >
-                    <!-- 武器分类筛选 -->
-                    <div v-show="showCategoryFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.weapon_category') }}</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedCategory === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedCategory = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="cat in categories"
-                            :key="cat"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedCategory === cat
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedCategory = cat"
-                        >
-                            {{ $t(cat) }}
-                        </button>
-                    </div>
-
-                    <!-- 伤害类型筛选 -->
-                    <div v-show="showDamageTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('伤害类型') }}</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedDamageType === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedDamageType = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="type in damageTypes"
-                            :key="type"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedDamageType === type
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedDamageType = type"
-                        >
-                            {{ $t(type) }}
-                        </button>
-                    </div>
-
-                    <!-- 版本筛选 -->
-                    <div v-show="showVersionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{
-                            $t("char-build.version")
-                        }}</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedVersion === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedVersion = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="version in versionOptions"
-                            :key="version"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedVersion === version
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedVersion = version"
-                        >
-                            {{ version }}
-                        </button>
+                        <FilterSelect
+                            v-model="selectedCategory"
+                            :options="categoryFilterOptions"
+                            :label="$t('common.weapon_category')"
+                            :clear-title="$t('common.clear')"
+                        />
+                        <FilterSelect
+                            v-model="selectedDamageType"
+                            :options="damageTypeFilterOptions"
+                            :label="$t('伤害类型')"
+                            :clear-title="$t('common.clear')"
+                        />
+                        <FilterSelect
+                            v-model="selectedVersion"
+                            :options="versionFilterOptions"
+                            :label="$t('char-build.version')"
+                            :clear-title="$t('common.clear')"
+                        />
                     </div>
                 </div>
 

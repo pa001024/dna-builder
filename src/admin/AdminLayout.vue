@@ -83,6 +83,11 @@ const menuItems: {
         path: "/admin/ai-log",
         icon: "ri:robot-2-line",
     },
+    {
+        name: "Agent 技能",
+        path: "/admin/agent-skill",
+        icon: "ri:magic-line",
+    },
 ]
 
 const route = useRoute()

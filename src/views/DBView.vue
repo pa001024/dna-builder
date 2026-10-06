@@ -18,6 +18,7 @@ import { resolveCurrentDBAgentLang } from "@/utils/db-locale"
 import { type DBGlobalSearchOption, getGlobalSearchService, warmUpGlobalSearchService } from "@/utils/global-search"
 import { warmUpRagCorpus } from "@/utils/rag/corpus"
 import { isRagEnabled, setRagEnabled } from "@/utils/rag/enabled"
+import { collectSkillMentionNames } from "@/utils/skill-mention"
 
 const router = useRouter()
 const { t } = useTranslation()
@@ -72,6 +73,12 @@ function cancelSearchDebounce() {
  */
 watch(searchKeyword, value => {
     cancelSearchDebounce()
+
+    // 提及了技能就不做本地模糊检索：提及是给模型的显式点名，不参与全库检索
+    if (collectSkillMentionNames(value).length > 0) {
+        debouncedKeyword.value = ""
+        return
+    }
 
     if (value.trim().length > SEARCH_KEYWORD_MAX_LENGTH) {
         debouncedKeyword.value = ""
@@ -136,8 +143,11 @@ const {
     interrupt: interruptChat,
 } = useDBChat()
 
-/** 是否处于输入态：输入非空即进入提问/检索态 */
-const isComposing = computed(() => searchKeyword.value.trim().length > 0)
+/** 参与本地检索的关键词：提及技能时不做检索（见 watch），因此这里不会有提及语法 */
+const searchableKeyword = computed(() => debouncedKeyword.value.trim())
+
+/** 是否处于输入态：去掉技能提及后仍有内容才算提问/检索态 */
+const isComposing = computed(() => searchableKeyword.value.length > 0)
 /** 模块过滤条是否展示：仅在浏览模块列表时展示（对话态与输入态都不需要） */
 const showModuleFilter = computed(() => !chatMode.value && !isComposing.value)
 
@@ -424,15 +434,16 @@ const selectedSearchPaths = computed(() => {
 
 /**
  * 实时计算搜索候选，按融合评分返回前若干条。
- * 使用防抖后的关键词：输入过程中不触发全库模糊检索。
+ * 使用防抖后的关键词并剥离技能提及语法：输入过程中不触发全库模糊检索，
+ * 提及只用于显式点名技能、不该参与本地检索。
  * 索引尚未预热完成时返回空列表，由结果区展示占位。
  */
 const searchOptions = computed<DBGlobalSearchOption[]>(() => {
-    if (!isSearchIndexReady.value || isKeywordTooLong.value) {
+    if (!isSearchIndexReady.value || isKeywordTooLong.value || !searchableKeyword.value) {
         return []
     }
 
-    const options = getGlobalSearchService().search(debouncedKeyword.value)
+    const options = getGlobalSearchService().search(searchableKeyword.value)
 
     if (!selectedSearchPaths.value) {
         return options
@@ -457,7 +468,7 @@ const searchStatusText = computed(() => {
         : t("view.moduleCount", { count: selectedSearchSectionIds.value.length })
 
     // 索引未就绪时只标注检索范围；超长输入同理，但要单独说明「已跳过检索」
-    if (!isSearchIndexReady.value || !debouncedKeyword.value.trim()) {
+    if (!isSearchIndexReady.value || !searchableKeyword.value) {
         if (isKeywordTooLong.value) {
             return t("view.searchSkipped")
         }

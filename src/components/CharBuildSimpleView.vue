@@ -1006,7 +1006,7 @@ onBeforeUnmount(() => {
                                 <!-- 头像下方：武器精通（自带精通 + 已解锁的额外精通武器，额外项描边强调色以区分） -->
                                 <div
                                     v-if="masteryItems.length"
-                                    class="sc-core-sub mt-1 flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-1 text-[10px] leading-[1.4] tracking-[0.1em] text-(--sc-accent-soft)"
+                                    class="sc-core-sub mt-1 flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-1 text-[10px] leading-[1.4] tracking-widest text-(--sc-accent-soft)"
                                     :title="$t('武器精通')"
                                 >
                                     <template v-for="(item, index) in masteryItems" :key="item.name">

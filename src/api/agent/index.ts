@@ -50,7 +50,9 @@ export type {
 } from "./kernel"
 export { AgentKernel, toWireMessages } from "./kernel"
 export { createMessagesTransport } from "./messages-transport"
+export { ensureAgentSkillsReady, getAgentSkillRegistry } from "./skills/registry"
 export type { AgentTool, AgentToolContext, AgentToolOutput, AgentToolSuspendOutput, AgentToolTextOutput } from "./tool"
+export { createSkillTools } from "./tools/skill-files"
 export {
     type AgentFinishReason,
     type AgentImageAttachment,

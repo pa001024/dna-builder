@@ -8,11 +8,13 @@ import type { AskUserAnswer, AskUserQuestion, AskUserRequest } from "@/utils/db-
  *
  * 模型调用 ask_user 后本组件铺在消息流末尾。多道题按「一页一题」分页填写：
  * 顶部右侧是翻页器（`< 1/3 >`），单选点完自动翻到下一题，可随时翻回去修改；
- * **所有题都作答之前提交按钮不可用**——否则用户只点了一道题，半截答案就被发给模型。
+ * 单选在末页（含只有一题）点完选项即提交，多选靠「提交」按钮收尾。
  *
  * 交互约定：
- * - 只有一道题时没有下一页，选完即提交，保留单题的省事路径；
- * - 多选题在页内切换选中态，靠翻页器或「下一题」前进；
+ * - 单选：点完前进，末页点击即交。自动提交路径允许部分作答——能走到末页，
+ *   跳过的题都是用户用翻页器 / 「下一题」显式跳过的，不算误发半截答案；
+ * - 多选：页内切换选中态，末页用提交按钮，且所有题作答后才可提交；
+ * - 提交按钮只在「点击无法自然完成作答」时出现：多选题、或没有选项可点的纯输入题；
  * - 每题都提供自由输入框，模型无法用选项把用户逼死；Enter 等同「下一题 / 提交」；
  * - 整张卡片可以跳过，跳过会告诉模型「用户没给补充信息」，让它自己接着往下做。
  */
@@ -117,9 +119,14 @@ function isAnswered(question: AskUserQuestion): boolean {
 const unansweredCount = computed(() => props.request.questions.filter(question => !isAnswered(question)).length)
 /** 是否所有题都已作答 */
 const allAnswered = computed(() => unansweredCount.value === 0)
+/**
+ * 末页是否需要显式提交按钮：多选题、或没有选项可点的纯输入题。
+ * 单选题点选项本身就是提交动作，按钮只会多余。
+ */
+const showSubmit = computed(() => !!current.value && (current.value.multiple || !current.value.options.length))
 
 /**
- * 点击选项：单选选中后自动翻页，多选只切换选中态。
+ * 点击选项：单选选中后自动前进（末页则直接提交），多选只切换选中态。
  * @param question 题目
  * @param optionId 选项 id
  */
@@ -133,11 +140,11 @@ function toggleOption(question: AskUserQuestion, optionId: string) {
     if (!question.multiple) {
         selected.value = { ...selected.value, [question.id]: [optionId] }
 
-        if (total.value <= 1) {
-            // 只有一道题：没有下一页可翻，「选完」就等于「全部选完」
-            submitAll()
-        } else if (!isLast.value) {
+        if (!isLast.value) {
             page.value += 1
+        } else {
+            // 末页（含只有一题）：选完即交，不让用户再多点一次提交
+            submitAll(true)
         }
 
         return
@@ -187,10 +194,12 @@ function collectAnswers(): AskUserAnswer[] {
 }
 
 /**
- * 提交整张卡片的作答，只有全部题目都作答后才放行。
+ * 提交整张卡片的作答（跳过没有任何作答的题）。
+ * @param allowPartial 是否允许部分作答：单选点击 / Enter 的自动提交路径传 true——
+ *   跳过的题是用户显式跳过的；提交按钮路径保持门禁，避免多选题没选完就误发。
  */
-function submitAll() {
-    if (props.busy || !allAnswered.value) {
+function submitAll(allowPartial = false) {
+    if (props.busy || (!allowPartial && !allAnswered.value)) {
         return
     }
 
@@ -219,7 +228,8 @@ function handleKeydown(event: KeyboardEvent) {
     event.preventDefault()
 
     if (isLast.value) {
-        submitAll()
+        // 与单选点击同一条自动提交路径：末页回车即交，允许部分作答
+        submitAll(true)
         return
     }
 
@@ -327,7 +337,7 @@ function handleCustomInput(questionId: string, event: Event) {
             />
         </div>
 
-        <!-- 底部操作：非末页前进，末页提交（全部作答后才可用）；任何时候都能跳过 -->
+        <!-- 底部操作：非末页前进；末页只有多选 / 纯输入题才需要提交按钮，单选点选项即提交 -->
         <div class="mt-2.5 flex items-center justify-between gap-3">
             <button
                 type="button"
@@ -353,8 +363,9 @@ function handleCustomInput(questionId: string, event: Event) {
                     {{ label("askNext") }}
                 </button>
 
+                <!-- 注意必须写 submitAll()：@click 直接绑函数名会把事件对象当成 allowPartial 传进去 -->
                 <button
-                    v-else
+                    v-else-if="showSubmit"
                     type="button"
                     class="cursor-pointer border px-2 py-0.5 text-[11px] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-[0.97] disabled:cursor-not-allowed"
                     :class="
@@ -363,7 +374,7 @@ function handleCustomInput(questionId: string, event: Event) {
                             : 'border-base-content/20 text-base-content/40'
                     "
                     :disabled="props.busy || !allAnswered"
-                    @click="submitAll"
+                    @click="submitAll()"
                 >
                     {{ props.busy ? label("askSubmitting") : label("askSubmit") }}
                 </button>

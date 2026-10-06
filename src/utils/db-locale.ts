@@ -89,6 +89,8 @@ export function resolveCurrentDBAgentLang(): DBAgentLang {
 
 /** 已就绪的语言（i18n 资源与按语言切分的数据集都已加载） */
 const readyLanguages = new Set<DBAgentLang>()
+/** 同语言的并行检索必须等待同一个预热任务，不能提前读取未加载的数据。 */
+const loadingLanguages = new Map<DBAgentLang, Promise<void>>()
 
 /**
  * 加载一个 i18n 语言包，失败时只告警——检索层会退回原文，不影响流程。
@@ -119,8 +121,28 @@ export async function ensureDBAgentLangReady(lang: DBAgentLang): Promise<void> {
         return
     }
 
-    readyLanguages.add(lang)
+    const inflight = loadingLanguages.get(lang)
+    if (inflight) {
+        return inflight
+    }
 
+    const task = warmDBAgentLang(lang)
+        .then(() => {
+            if (loadingLanguages.get(lang) === task) {
+                readyLanguages.add(lang)
+            }
+        })
+        .finally(() => {
+            if (loadingLanguages.get(lang) === task) {
+                loadingLanguages.delete(lang)
+            }
+        })
+    loadingLanguages.set(lang, task)
+    return task
+}
+
+/** 只在完整预热结束后发布就绪状态；数据包失效时旧任务不能发布新版本的就绪状态。 */
+async function warmDBAgentLang(lang: DBAgentLang): Promise<void> {
     // 中文是游戏原文基准：模块名等要先取中文再翻成目标语言，因此中文包必须可用
     await ensureI18nBundle("zh-CN")
 
@@ -206,6 +228,7 @@ const reverseIndexCache = new Map<DBAgentLang, ReverseIndex>()
 registerPackTranslationInvalidation(() => {
     reverseIndexCache.clear()
     readyLanguages.clear()
+    loadingLanguages.clear()
 })
 
 /**

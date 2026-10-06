@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { useLocalStorage } from "@vueuse/core"
 import Fuse, { type FuseResultMatch } from "fuse.js"
+import { useTranslation } from "i18next-vue"
 import { computed, onBeforeUnmount, ref, watch } from "vue"
 import { execScript } from "@/api/app"
+import type { FilterSelectOption } from "@/components/FilterSelect.vue"
 import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { regionMap, subRegionMap } from "@/data/d"
@@ -27,6 +28,7 @@ interface ImprResultItem {
 }
 
 const { gt } = useGameText()
+const { t } = useTranslation()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedRegionId = useSearchParam<string>("rg", "")
@@ -35,9 +37,6 @@ const selectedValueType = useSearchParam<string>("tp", "")
 const selectedSourceType = useSearchParam<string>("st", "")
 const selectedEntryKey = useSearchParam<string>("id", "")
 const showFullTextSearch = true
-const showRegionFilter = useLocalStorage("dbimpr.showRegionFilter", true)
-const showSourceFilter = useLocalStorage("dbimpr.showSourceFilter", true)
-const showValueFilter = useLocalStorage("dbimpr.showValueFilter", true)
 const settingStore = useSettingStore()
 const imprEntries = ref<ImprEntry[]>([])
 const ocrResultText = ref("")
@@ -82,6 +81,10 @@ function getSubRegionName(subRegionId: number): string {
     return subRegionMap.get(subRegionId)?.name || `子区域${subRegionId}`
 }
 
+watch(selectedRegionId, () => {
+    selectedSubRegionId.value = ""
+})
+
 /**
  * 获取所有地区筛选项。
  */
@@ -122,6 +125,26 @@ const subRegionOptions = computed(() => {
             label: getSubRegionName(subRegionId),
         }))
 })
+
+const regionFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...regionOptions.value.map(option => ({ value: option.value, label: t(option.label) })),
+])
+
+const subRegionFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...subRegionOptions.value.map(option => ({ value: option.value, label: t(option.label) })),
+])
+
+const sourceFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...sourceTypeOptions.map(option => ({ value: option.value, label: t(option.label) })),
+])
+
+const valueFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...IMPRESSION_TYPES.map(type => ({ value: type, label: t(getImprType(type)) })),
+])
 
 /**
  * 加载当前语言的印象条目。
@@ -258,94 +281,6 @@ function splitSearchKeywords(keyword: string): string[] {
         .split(/\r?\n/)
         .map(line => line.trim())
         .filter(Boolean)
-}
-
-/**
- * 处理来源类型筛选。
- * @param value 来源类型
- */
-function selectSourceType(value: string) {
-    selectedSourceType.value = value
-}
-
-/**
- * 切换来源筛选显示状态。
- * @param enabled 是否显示
- */
-function toggleSourceFilter(enabled: boolean) {
-    if (!enabled) {
-        selectedSourceType.value = ""
-    }
-}
-
-/**
- * 处理地区筛选。
- * @param value 地区 ID
- */
-function selectRegion(value: string) {
-    selectedRegionId.value = value
-    selectedSubRegionId.value = ""
-}
-
-/**
- * 切换地区筛选显示状态。
- * @param enabled 是否显示
- */
-function toggleRegionFilter(enabled: boolean) {
-    if (!enabled) {
-        selectedRegionId.value = ""
-        selectedSubRegionId.value = ""
-    }
-}
-
-/**
- * 处理子区域筛选。
- * @param value 子区域 ID
- */
-function selectSubRegion(value: string) {
-    selectedSubRegionId.value = value
-}
-
-/**
- * 处理五维筛选。
- * @param value 五维类型
- */
-function selectValueType(value: string) {
-    selectedValueType.value = value
-}
-
-/**
- * 切换五维筛选显示状态。
- * @param enabled 是否显示
- */
-function toggleValueFilter(enabled: boolean) {
-    if (!enabled) {
-        selectedValueType.value = ""
-    }
-}
-
-/**
- * 切换地区筛选行显示状态（方章开关）。
- */
-function toggleRegionFilterRow() {
-    showRegionFilter.value = !showRegionFilter.value
-    toggleRegionFilter(showRegionFilter.value)
-}
-
-/**
- * 切换来源筛选行显示状态（方章开关）。
- */
-function toggleSourceFilterRow() {
-    showSourceFilter.value = !showSourceFilter.value
-    toggleSourceFilter(showSourceFilter.value)
-}
-
-/**
- * 切换五维筛选行显示状态（方章开关）。
- */
-function toggleValueFilterRow() {
-    showValueFilter.value = !showValueFilter.value
-    toggleValueFilter(showValueFilter.value)
 }
 
 /**
@@ -596,44 +531,33 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                             </label>
                         </div>
 
-                        <!-- 过滤器开关方章 -->
+                        <!-- 筛选器：常驻可清除选择框 -->
                         <div class="flex flex-wrap gap-1.5">
-                            <button
-                                type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                                :class="
-                                    showRegionFilter
-                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                                "
-                                @click="toggleRegionFilterRow()"
-                            >
-                                {{ $t('common.region') }}
-                            </button>
-                            <button
-                                type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                                :class="
-                                    showSourceFilter
-                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                                "
-                                @click="toggleSourceFilterRow()"
-                            >
-                                {{ $t('common.source') }}
-                            </button>
-                            <button
-                                type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                                :class="
-                                    showValueFilter
-                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                                "
-                                @click="toggleValueFilterRow()"
-                            >
-                                {{ $t('common.five_dimensions') }}
-                            </button>
+                            <FilterSelect
+                                v-model="selectedRegionId"
+                                :options="regionFilterOptions"
+                                :label="$t('common.region')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-if="selectedRegionId !== ''"
+                                v-model="selectedSubRegionId"
+                                :options="subRegionFilterOptions"
+                                :label="$t('common.sub_region')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedSourceType"
+                                :options="sourceFilterOptions"
+                                :label="$t('common.source')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedValueType"
+                                :options="valueFilterOptions"
+                                :label="$t('common.five_dimensions')"
+                                :clear-title="$t('common.clear')"
+                            />
                         </div>
 
                         <!-- OCR 识别结果 -->
@@ -642,122 +566,6 @@ const selectedEntryIndex = computed(() => filteredEntries.value.findIndex(item =
                             class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 text-xs wrap-break-word text-base-content/70"
                         >
                             {{ ocrResultText }}
-                        </div>
-
-                        <!-- 来源筛选 -->
-                        <div v-show="showSourceFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.source') }}</span>
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedSourceType === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectSourceType('')"
-                            >
-                                {{ $t("common.all") }}
-                            </button>
-                            <button
-                                v-for="option in sourceTypeOptions"
-                                :key="option.value"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedSourceType === option.value
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectSourceType(option.value)"
-                            >
-                                {{ $t(option.label) }}
-                            </button>
-                        </div>
-
-                        <!-- 地区筛选 -->
-                        <div v-show="showRegionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.region') }}</span>
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedRegionId === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectRegion('')"
-                            >
-                                {{ $t("common.all") }}
-                            </button>
-                            <button
-                                v-for="region in regionOptions"
-                                :key="region.value"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedRegionId === region.value
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectRegion(region.value)"
-                            >
-                                {{ $t(region.label) }}
-                            </button>
-                        </div>
-
-                        <!-- 子区域筛选 -->
-                        <div v-show="showRegionFilter && selectedRegionId" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.sub_region') }}</span>
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedSubRegionId === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectSubRegion('')"
-                            >
-                                {{ $t("common.all") }}
-                            </button>
-                            <button
-                                v-for="subRegion in subRegionOptions"
-                                :key="subRegion.value"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedSubRegionId === subRegion.value
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectSubRegion(subRegion.value)"
-                            >
-                                {{ $t(subRegion.label) }}
-                            </button>
-                        </div>
-
-                        <!-- 五维筛选 -->
-                        <div v-show="showValueFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.five_dimensions') }}</span>
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedValueType === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectValueType('')"
-                            >
-                                {{ $t("common.all") }}
-                            </button>
-                            <button
-                                v-for="type in IMPRESSION_TYPES"
-                                :key="type"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedValueType === type
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectValueType(type)"
-                            >
-                                {{ $t(getImprType(type)) }}
-                            </button>
                         </div>
                     </div>
 

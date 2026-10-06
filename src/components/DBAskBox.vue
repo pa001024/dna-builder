@@ -1,9 +1,21 @@
 <script lang="ts" setup>
+import { createEmptyHistoryState, registerHistory } from "@lexical/history"
+import { registerPlainText } from "@lexical/plain-text"
 import { useTranslation } from "i18next-vue"
-import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue"
+import { $getRoot, COMMAND_PRIORITY_HIGH, createEditor, type EditorState, KEY_ARROW_DOWN_COMMAND, KEY_ARROW_UP_COMMAND, KEY_ENTER_COMMAND, KEY_ESCAPE_COMMAND, type LexicalEditor } from "lexical"
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue"
 import type { AgentContextUsageSnapshot } from "@/composables/useAgentChatCore"
 import { scopedI18nKey } from "@/utils/agent-chat"
 import { type ChatImage, type ChatSubmitPayload, chatImageDataUrl, fileToChatImage, isImageFile, MAX_CHAT_IMAGES } from "@/utils/chat-image"
+import {
+    $getCurrentTextNodeSelection,
+    $getPromptMarkdown,
+    $replaceActiveTriggerWithSkillMention,
+    $replaceEditorContent,
+    registerPromptClipboard,
+    SkillMentionNode,
+} from "@/utils/prompt-lexical"
+import { type ActiveSkillTrigger, extractActiveSkillTrigger } from "@/utils/skill-mention"
 
 const props = withDefaults(
     defineProps<{
@@ -71,14 +83,26 @@ function label(key: string): string {
     return scopedI18nKey(props.i18nPrefix, key, t)
 }
 
-/** 文本域自适应高度的上限（px），约 6 行；超出后由文本域内部滚动 */
-const MAX_TEXTAREA_HEIGHT = 168
-
-const textareaRef = ref<HTMLTextAreaElement | null>(null)
+/** Lexical 编辑器的根元素（contenteditable 由 Lexical 接管） */
+const editorRootRef = ref<HTMLElement | null>(null)
+/** 编辑器实例：Lexical 对象自身有状态，保持非响应式（包进 ref 会破坏内部更新） */
+let editor: LexicalEditor | null = null
+/** 组件卸载时统一注销的 Lexical 监听 / 命令 */
+let unregisterFns: Array<() => void> = []
 /** 隐藏的图片选择器 */
 const fileInputRef = ref<HTMLInputElement | null>(null)
-/** 输入法组合输入中：此时的 Enter 用于上屏候选，不应触发提交 */
-const isImeComposing = ref(false)
+/** 编辑器当前是否为空（占位符显隐） */
+const isEditorEmpty = ref(true)
+/**
+ * 光标前正在输入的技能提及（`$名称`）。
+ *
+ * 非 null 时展示技能面板；面板的上下键 / Enter / Esc 由 Lexical 命令高优先级转发接管。
+ */
+const activeSkillTrigger = ref<ActiveSkillTrigger | null>(null)
+/** Esc 关闭面板时的触发签名：查询串未变化前不再重新唤起（对齐 ZCode 的 dismissal） */
+const dismissedSignature = ref<string | null>(null)
+/** 技能面板组件实例（键盘命令转发给它处理） */
+const skillPanelRef = ref<{ handleKeydown: (event: KeyboardEvent) => boolean } | null>(null)
 /**
  * 已附带、尚未发送的图片。
  *
@@ -107,32 +131,182 @@ const attachTitle = computed(() =>
 const ragToggleTitle = computed(() => (props.ragLocked ? t(label("ragLocked")) : t(label("ragToggle"))))
 
 /**
- * 依据内容高度自适应文本域高度，超过上限后转为内部滚动。
+ * 触发签名：面板的 dismissal 与「是否变化」判定都用它（对齐 ZCode 的 trigger signature）。
+ * @param trigger 活动触发
+ * @returns 签名（无触发时 null）
  */
-function resize() {
-    const el = textareaRef.value
-    if (!el) {
+function triggerSignature(trigger: ActiveSkillTrigger | null): string | null {
+    return trigger ? `${trigger.trigger}:${trigger.query}` : null
+}
+
+/**
+ * 编辑器状态更新（输入 / 选区变化 / 程序化重建）：
+ * 刷新占位符显隐与技能面板活动触发；除程序化重建外把 prompt markdown 回传 v-model。
+ * @param payload 更新载荷
+ */
+function handleEditorUpdate({ editorState, tags }: { editorState: EditorState; tags: Set<string> }) {
+    editorState.read(() => {
+        // chip 的展示文本是技能名，文本为空即视为空态（关闭占位符）
+        isEditorEmpty.value = $getRoot().getTextContent() === ""
+
+        const selectionState = $getCurrentTextNodeSelection()
+        const trigger = selectionState ? extractActiveSkillTrigger(selectionState.textBeforeCursor) : null
+        const signature = triggerSignature(trigger)
+
+        // Esc 关闭后保持抑制，直到触发签名变化（输入了新字符）才允许重新唤起
+        if (dismissedSignature.value && signature !== dismissedSignature.value) {
+            dismissedSignature.value = null
+        }
+
+        activeSkillTrigger.value = trigger && signature !== dismissedSignature.value ? trigger : null
+    })
+
+    // 程序化重建（外部回填）走 watch 的回声比对，这里不回传，避免回路
+    if (!tags.has("programmatic")) {
+        emit("update:modelValue", editorState.read(() => $getPromptMarkdown()))
+    }
+}
+
+/**
+ * 创建编辑器并完成全部接线（一次性，onMounted 调用）。
+ * @param root 根元素
+ */
+function setupEditor(root: HTMLElement) {
+    const lexicalEditor = createEditor({
+        namespace: "DBAskBox",
+        theme: { paragraph: "m-0" },
+        nodes: [SkillMentionNode],
+        onError: error => {
+            console.error("[DBAskBox] lexical editor error:", error)
+        },
+    })
+    editor = lexicalEditor
+    lexicalEditor.setRootElement(root)
+
+    unregisterFns = [
+        // 原生输入事件层：IME / 删除 / 纯文本粘贴 / 回车分段全部由 Lexical 接管
+        registerPlainText(lexicalEditor),
+        // 撤销栈（Ctrl+Z 对 chip 插入与普通输入同样生效）
+        registerHistory(lexicalEditor, createEmptyHistoryState(), 1000),
+        // 复制 / 剪切把选区写为 prompt markdown，相交 chip 视为整体
+        registerPromptClipboard(lexicalEditor),
+        // 图片粘贴捕获：在纯文本粘贴之前拦下（capture 阶段，对齐 ZCode 的 PasteCapturePlugin）
+        registerImagePasteCapture(lexicalEditor),
+        // 技能面板打开时接管上下键（面板消费返回 true，Lexical 不再做光标移动）
+        lexicalEditor.registerCommand(KEY_ARROW_DOWN_COMMAND, event => forwardToSkillPanel(event), COMMAND_PRIORITY_HIGH),
+        lexicalEditor.registerCommand(KEY_ARROW_UP_COMMAND, event => forwardToSkillPanel(event), COMMAND_PRIORITY_HIGH),
+        // Esc 关闭面板并记录 dismissal
+        lexicalEditor.registerCommand(
+            KEY_ESCAPE_COMMAND,
+            event => {
+                if (!event || !activeSkillTrigger.value) {
+                    return false
+                }
+
+                dismissedSignature.value = triggerSignature(activeSkillTrigger.value)
+                activeSkillTrigger.value = null
+                event.preventDefault()
+                return true
+            },
+            COMMAND_PRIORITY_HIGH
+        ),
+        // Enter：面板打开时是「采用技能」，否则提交提问；修饰键组合放行给换行
+        lexicalEditor.registerCommand(KEY_ENTER_COMMAND, handleEnterCommand, COMMAND_PRIORITY_HIGH),
+        lexicalEditor.registerUpdateListener(handleEditorUpdate),
+    ]
+
+    if (props.modelValue) {
+        lexicalEditor.update(() => $replaceEditorContent(props.modelValue), { tag: "programmatic" })
+    }
+}
+
+/**
+ * 键盘命令转发：面板打开时把按键交给面板导航，消费返回 true。
+ * @param event 键盘事件
+ * @returns 面板是否消费了该按键
+ */
+function forwardToSkillPanel(event: KeyboardEvent | null): boolean {
+    if (!event || !activeSkillTrigger.value) {
+        return false
+    }
+
+    return skillPanelRef.value?.handleKeydown(event) ?? false
+}
+
+/**
+ * Enter 命令：面板打开时「采用技能」；否则提交提问；Shift / 修饰键组合放行换行
+ * （plain-text 的默认行为：Shift + Enter 插 LineBreak，其余插新段落）。
+ * @param event 键盘事件
+ * @returns 是否消费
+ */
+function handleEnterCommand(event: KeyboardEvent | null): boolean {
+    if (event && forwardToSkillPanel(event)) {
+        return true
+    }
+
+    if (event && (event.shiftKey || event.ctrlKey || event.metaKey || event.altKey)) {
+        return false
+    }
+
+    submit()
+    return true
+}
+
+/**
+ * 图片粘贴捕获：剪贴板里带图片时在 Lexical 纯文本粘贴之前就地附上
+ * （capture 阶段监听，对齐 ZCode 的 PasteCapturePlugin）。
+ * @param target Lexical 编辑器实例
+ * @returns 注销函数
+ */
+function registerImagePasteCapture(target: LexicalEditor): () => void {
+    const handlePaste = (event: ClipboardEvent) => {
+        const files = Array.from(event.clipboardData?.files ?? [])
+
+        if (!files.some(isImageFile)) {
+            return
+        }
+
+        event.preventDefault()
+        event.stopImmediatePropagation()
+        void appendFiles(files)
+    }
+
+    return target.registerRootListener((rootElement, previousRootElement) => {
+        previousRootElement?.removeEventListener("paste", handlePaste, true)
+        rootElement?.addEventListener("paste", handlePaste, true)
+    })
+}
+
+/**
+ * 面板选中某个技能：把光标处活动的 `$查询串` 区间整体替换成 chip（token 节点）+ 尾随空格，
+ * 光标落到空格之后，随后收起面板（对齐 ZCode 的 insertMentionItem）。替换与撤销都走 Lexical。
+ * @param name 技能名
+ */
+function handleSkillSelect(name: string) {
+    const lexicalEditor = editor
+
+    if (!lexicalEditor) {
         return
     }
 
-    el.style.height = "auto"
-    el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`
-    el.style.overflowY = el.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden"
+    activeSkillTrigger.value = null
+    dismissedSignature.value = null
+
+    lexicalEditor.update(() => {
+        const selectionState = $getCurrentTextNodeSelection()
+        const trigger = selectionState ? extractActiveSkillTrigger(selectionState.textBeforeCursor) : null
+
+        if (!selectionState || !trigger) {
+            return
+        }
+
+        $replaceActiveTriggerWithSkillMention(selectionState.selection, selectionState.node, selectionState.cursorOffset, trigger.query.length, name)
+    })
 }
 
-/**
- * 聚焦文本域，供父组件在需要时主动唤起输入。
- */
-function focus() {
-    textareaRef.value?.focus()
-}
-
-/**
- * 输入内容变化时同步到父组件。
- * @param event 输入事件
- */
-function handleInput(event: Event) {
-    emit("update:modelValue", (event.target as HTMLTextAreaElement).value)
+/** 收起技能面板（失焦路径；Esc 的 dismissal 记录在命令处理里）。 */
+function closeSkillPanel() {
+    activeSkillTrigger.value = null
 }
 
 /**
@@ -154,24 +328,6 @@ async function appendFiles(files: readonly File[]) {
     if (added.length) {
         pendingImages.value = [...pendingImages.value, ...added]
     }
-}
-
-/**
- * 粘贴事件：剪贴板里带图片时就地附上，文本粘贴保持浏览器默认行为。
- *
- * 只有确认含图片才 `preventDefault`——否则会把普通文本粘贴也拦下来，
- * 破坏输入法与富文本的粘贴路径。
- * @param event 粘贴事件
- */
-function handlePaste(event: ClipboardEvent) {
-    const files = Array.from(event.clipboardData?.files ?? [])
-
-    if (!files.some(isImageFile)) {
-        return
-    }
-
-    event.preventDefault()
-    void appendFiles(files)
 }
 
 /**
@@ -265,32 +421,47 @@ function submit() {
 }
 
 /**
- * 键盘处理：Enter 提交、Shift + Enter 换行；输入法组合态下放行给输入法。
- * @param event 键盘事件
+ * 聚焦编辑器并把光标放到末尾，供父组件在需要时主动唤起输入。
  */
-function handleKeydown(event: KeyboardEvent) {
-    if (event.key !== "Enter" || event.shiftKey) {
-        return
-    }
-
-    // 组合输入中的 Enter 属于输入法上屏操作，不触发提交
-    if (isImeComposing.value || event.isComposing) {
-        return
-    }
-
-    event.preventDefault()
-    submit()
+function focus() {
+    editor?.focus()
 }
 
 watch(
     () => props.modelValue,
-    () => {
-        nextTick(resize)
+    value => {
+        const lexicalEditor = editor
+
+        if (!lexicalEditor) {
+            return
+        }
+
+        // 自己 emit 出去的回声不动编辑器，否则每次键入都会重建内容、光标跳回末尾
+        if (value === lexicalEditor.read(() => $getPromptMarkdown())) {
+            return
+        }
+
+        // 外部写入（清空 / 预填）：canonical 提及还原成 chip
+        lexicalEditor.update(() => $replaceEditorContent(value), { tag: "programmatic" })
     }
 )
 
 onMounted(() => {
-    resize()
+    const root = editorRootRef.value
+
+    if (root) {
+        setupEditor(root)
+    }
+})
+
+onBeforeUnmount(() => {
+    for (const off of unregisterFns) {
+        off()
+    }
+
+    unregisterFns = []
+    editor?.setRootElement(null)
+    editor = null
 })
 
 defineExpose({ focus })
@@ -299,7 +470,7 @@ defineExpose({ focus })
 <template>
     <!-- 输入框：无底色，仅保留 hairline 边框，让页面保持完全透明 -->
     <div
-        class="db-ask-box border border-base-content/15 transition-colors duration-200 focus-within:border-primary/55 backdrop-blur-sm"
+        class="db-ask-box relative border border-base-content/15 transition-colors duration-200 focus-within:border-primary/55 backdrop-blur-sm"
         :class="isDragOver ? 'border-primary/60' : ''"
         @dragover.prevent="isDragOver = true"
         @dragleave="isDragOver = false"
@@ -321,19 +492,39 @@ defineExpose({ focus })
             </li>
         </ul>
 
-        <!-- 多行输入：随内容增高，最多 6 行 -->
-        <textarea
-            ref="textareaRef"
-            :value="modelValue"
-            rows="1"
-            spellcheck="false"
-            :placeholder="placeholder"
-            class="db-ask-textarea block w-full resize-none border-0 bg-transparent px-4 py-3.5 text-sm leading-6 text-base-content outline-none placeholder:text-base-content/35"
-            @input="handleInput"
-            @keydown="handleKeydown"
-            @paste="handlePaste"
-            @compositionstart="isImeComposing = true"
-            @compositionend="isImeComposing = false"
+        <!--
+          多行富文本输入（Lexical，对齐 ZCode）：随内容增高，最多 6 行；技能提及以 chip
+          原子节点（token）嵌入正文，序列化直接落 canonical markdown。contenteditable 由
+          Lexical 接管，IME / 撤销 / 纯文本粘贴 / 选区映射都不在此层手工处理。
+        -->
+        <div class="relative">
+            <div
+                ref="editorRootRef"
+                contenteditable="true"
+                role="textbox"
+                aria-multiline="true"
+                :aria-placeholder="placeholder"
+                class="db-ask-editor block w-full min-h-13 max-h-42 overflow-y-auto whitespace-pre-wrap wrap-break-word bg-transparent px-4 py-3.5 text-sm leading-6 text-base-content outline-none"
+                @blur="closeSkillPanel"
+            />
+            <!-- 占位符：Lexical 空态会渲染段落节点，:empty 不成立，改为覆盖层 -->
+            <p
+                v-if="isEditorEmpty && placeholder"
+                class="pointer-events-none absolute left-4 top-3.5 select-none text-sm leading-6 text-base-content/35"
+                aria-hidden="true"
+            >
+                {{ placeholder }}
+            </p>
+        </div>
+
+        <!-- 技能显式调用面板（`$` 触发）：锚定在输入框上方；选中后由 Lexical 替换成 chip -->
+        <SkillMentionPanel
+            ref="skillPanelRef"
+            :open="!!activeSkillTrigger"
+            :query="activeSkillTrigger?.query ?? ''"
+            :i18n-prefix="props.i18nPrefix"
+            @select="handleSkillSelect"
+            @close="closeSkillPanel"
         />
 
         <!-- 工具行：左侧快捷键提示，右侧添加图片与发送 -->
@@ -417,12 +608,17 @@ defineExpose({ focus })
 </template>
 
 <style scoped>
-/* 文本域：去掉浏览器默认的滚动条留白抖动 */
-.db-ask-textarea {
-    min-height: 3.25rem;
-}
-
-.db-ask-textarea::-webkit-scrollbar {
-    width: 6px;
+/*
+ * chip 图标（ri:bard-line）走 CSS mask 装饰：TextNode 的 DOM 里不能塞图标节点
+ * （会截断 Lexical 的选区映射），mask 数据源由 SkillMentionNode 在 createDOM 里写入
+ * 的 --mention-mask 自定义属性提供（对齐 ZCode 的 promptMentionDecoration）。
+ */
+.db-ask-editor :deep(.db-skill-chip)::before {
+    content: "";
+    width: 0.75rem;
+    height: 0.75rem;
+    flex-shrink: 0;
+    background: currentColor;
+    mask: var(--mention-mask, none) center / contain no-repeat;
 }
 </style>

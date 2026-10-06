@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { useLocalStorage } from "@vueuse/core"
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
+import type { FilterSelectOption } from "@/components/FilterSelect.vue"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { formatModName, LeveledMod } from "@/data"
 import { modMap } from "@/data/d"
@@ -9,7 +10,9 @@ import modData from "@/data/d/mod.data"
 import { formatProp } from "@/util"
 import { formatModLimit } from "@/utils/mod-limit"
 import { matchPinyin } from "@/utils/pinyin-utils"
-import { getRarityGradientClass, getRaritySwatchClass } from "@/utils/rarity-utils"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
+
+const { t } = useTranslation()
 
 /**
  * 列表卡片的固定主轴尺寸（px）：虚拟滚动按它切片。
@@ -33,13 +36,6 @@ const selectedVersion = useSearchParam<string>("ver", "")
 const selectedMod = computed(() => {
     return selectedModId.value ? modMap.get(selectedModId.value) || null : null
 })
-
-// 过滤选项显示控制
-const showTypeFilter = useLocalStorage("mod.showTypeFilter", false)
-const showSeriesFilter = useLocalStorage("mod.showSeriesFilter", false)
-const showQualityFilter = useLocalStorage("mod.showQualityFilter", false)
-const showElemFilter = useLocalStorage("mod.showElemFilter", false)
-const showVersionFilter = useLocalStorage("mod.showVersionFilter", false)
 
 // 获取所有可用类型
 const types = computed(() => {
@@ -73,6 +69,31 @@ const versions = computed(() => {
 const qualities = ["白", "绿", "蓝", "紫", "金"]
 const elems = ["火", "水", "雷", "风", "暗", "光"]
 const modConvertIdSet = new Set<number>(modConvertData.flatMap(pool => pool.ModId))
+
+const typeFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...types.value.map(type => ({ value: type, label: t(type) })),
+])
+
+const seriesFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...series.value.map(s => ({ value: s, label: t(s) })),
+])
+
+const qualityFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...qualities.map(quality => ({ value: quality, label: quality, swatch: quality })),
+])
+
+const elemFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...elems.map(elem => ({ value: elem, label: t(`${elem}属性`) })),
+])
+
+const versionFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...versions.value.map(version => ({ value: version, label: version })),
+])
 
 /**
  * 判断魔之楔是否可通过同品质转换获得
@@ -117,54 +138,6 @@ const filteredMods = computed(() => {
     })
 })
 
-// 切换过滤选项显示
-function toggleFilter(filterName: string, show: boolean) {
-    if (!show) {
-        // 取消勾选时清空对应的过滤
-        if (filterName === "type") selectedType.value = ""
-        if (filterName === "series") selectedSeries.value = ""
-        if (filterName === "quality") selectedQuality.value = ""
-        if (filterName === "elem") selectedElem.value = ""
-        if (filterName === "version") selectedVersion.value = ""
-    }
-}
-
-/**
- * 过滤器名称。
- */
-type FilterName = "type" | "series" | "quality" | "elem" | "version"
-
-/**
- * 切换过滤行显示状态；收起时清空对应筛选值，避免隐藏后筛选仍生效。
- * @param name 过滤器名称
- */
-function toggleFilterRow(name: FilterName) {
-    let visible: boolean
-    switch (name) {
-        case "type":
-            showTypeFilter.value = !showTypeFilter.value
-            visible = showTypeFilter.value
-            break
-        case "series":
-            showSeriesFilter.value = !showSeriesFilter.value
-            visible = showSeriesFilter.value
-            break
-        case "quality":
-            showQualityFilter.value = !showQualityFilter.value
-            visible = showQualityFilter.value
-            break
-        case "elem":
-            showElemFilter.value = !showElemFilter.value
-            visible = showElemFilter.value
-            break
-        default:
-            showVersionFilter.value = !showVersionFilter.value
-            visible = showVersionFilter.value
-            break
-    }
-    toggleFilter(name, visible)
-}
-
 /**
  * 当前选中项在过滤结果中的下标。
  * 虚拟滚动下选中项不一定在 DOM 中，无法靠元素查询定位，改由下标驱动滚入视口。
@@ -204,231 +177,38 @@ const selectedModIndex = computed(() => {
                             </span>
                         </div>
 
-                        <!-- 过滤器开关方章 -->
+                        <!-- 筛选器：常驻可清除选择框 -->
                         <div class="mt-3 flex flex-wrap gap-1.5">
-                            <button
-                                type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                                :class="
-                                    showTypeFilter
-                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                                "
-                                @click="toggleFilterRow('type')"
-                            >
-                                {{ $t("char-build.enemy_type") }}
-                            </button>
-                            <button
-                                type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                                :class="
-                                    showSeriesFilter
-                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                                "
-                                @click="toggleFilterRow('series')"
-                            >
-                                {{ $t("char-build.series") }}
-                            </button>
-                            <button
-                                type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                                :class="
-                                    showQualityFilter
-                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                                "
-                                @click="toggleFilterRow('quality')"
-                            >
-                                {{ $t("char-build.quality") }}
-                            </button>
-                            <button
-                                type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                                :class="
-                                    showElemFilter
-                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                                "
-                                @click="toggleFilterRow('elem')"
-                            >
-                                {{ $t("char-build.elem") }}
-                            </button>
-                            <button
-                                type="button"
-                                class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                                :class="
-                                    showVersionFilter
-                                        ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                        : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                                "
-                                @click="toggleFilterRow('version')"
-                            >
-                                {{ $t("char-build.version") }}
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 筛选条件 -->
-                    <div
-                        v-show="showTypeFilter || showSeriesFilter || showQualityFilter || showElemFilter || showVersionFilter"
-                        class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
-                        style="animation-delay: 0.05s"
-                    >
-                        <!-- 类型筛选 -->
-                        <div v-show="showTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                                {{ $t("char-build.enemy_type") }}
-                            </span>
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedType === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectedType = ''"
-                            >
-                                {{ $t("common.all") }}
-                            </button>
-                            <button
-                                v-for="type in types"
-                                :key="type"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedType === type
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectedType = type"
-                            >
-                                {{ $t(type) }}
-                            </button>
-                        </div>
-
-                        <!-- 系列筛选 -->
-                        <div v-show="showSeriesFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                                {{ $t("char-build.series") }}
-                            </span>
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedSeries === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectedSeries = ''"
-                            >
-                                {{ $t("common.all") }}
-                            </button>
-                            <button
-                                v-for="s in series"
-                                :key="s"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedSeries === s
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectedSeries = s"
-                            >
-                                {{ $t(s) }}
-                            </button>
-                        </div>
-
-                        <!-- 品质筛选 -->
-                        <div v-show="showQualityFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                                {{ $t("char-build.quality") }}
-                            </span>
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedQuality === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectedQuality = ''"
-                            >
-                                {{ $t("common.all") }}
-                            </button>
-                            <button
-                                v-for="quality in qualities"
-                                :key="quality"
-                                class="inline-flex shrink-0 cursor-pointer items-center justify-center whitespace-nowrap rounded-xs border px-2 py-1 transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedQuality === quality
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                :title="quality"
-                                @click="selectedQuality = quality"
-                            >
-                                <span :class="getRaritySwatchClass(quality)" />
-                            </button>
-                        </div>
-
-                        <!-- 元素筛选 -->
-                        <div v-show="showElemFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                                {{ $t("char-build.elem") }}
-                            </span>
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedElem === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectedElem = ''"
-                            >
-                                {{ $t("common.all") }}
-                            </button>
-                            <button
-                                v-for="elem in elems"
-                                :key="elem"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedElem === elem
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectedElem = elem"
-                            >
-                                {{ $t(`${elem}属性`) }}
-                            </button>
-                        </div>
-
-                        <!-- 版本筛选 -->
-                        <div v-show="showVersionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                            <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                                {{ $t("char-build.version") }}
-                            </span>
-                            <button
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedVersion === ''
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectedVersion = ''"
-                            >
-                                {{ $t("common.all") }}
-                            </button>
-                            <button
-                                v-for="version in versions"
-                                :key="version"
-                                class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                                :class="
-                                    selectedVersion === version
-                                        ? 'border-primary bg-primary font-semibold text-primary-content'
-                                        : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                                "
-                                @click="selectedVersion = version"
-                            >
-                                {{ version }}
-                            </button>
+                            <FilterSelect
+                                v-model="selectedType"
+                                :options="typeFilterOptions"
+                                :label="$t('char-build.enemy_type')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedSeries"
+                                :options="seriesFilterOptions"
+                                :label="$t('char-build.series')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedQuality"
+                                :options="qualityFilterOptions"
+                                :label="$t('char-build.quality')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedElem"
+                                :options="elemFilterOptions"
+                                :label="$t('char-build.elem')"
+                                :clear-title="$t('common.clear')"
+                            />
+                            <FilterSelect
+                                v-model="selectedVersion"
+                                :options="versionFilterOptions"
+                                :label="$t('char-build.version')"
+                                :clear-title="$t('common.clear')"
+                            />
                         </div>
                     </div>
 

@@ -1,5 +1,4 @@
 import { Elysia, t } from "elysia"
-import jwt from "jsonwebtoken"
 import { normalizeSessionId } from "../ai-log-format"
 import {
     getAiLogDir,
@@ -11,7 +10,8 @@ import {
     readAiLogRequests,
     readAiLogTurns,
 } from "../ai-log-store"
-import { type JWTUser, jwtToken } from "../db/yoga"
+import type { JWTUser } from "../db/yoga"
+import { fail, resolveUser } from "../util/auth"
 
 /**
  * AI 调用日志的检索接口。
@@ -23,28 +23,6 @@ import { type JWTUser, jwtToken } from "../db/yoga"
  * - `GET /logs/sessions/:sessionId`：取某个会话的完整轮次（请求 + 响应全文），用于会话回放；
  * - `DELETE /logs?before=<日期>`：清理指定日期之前的日志。
  */
-
-/**
- * @description 解析请求头里的登录令牌。
- * 与 `ai.ts` 一致支持 `token` 与 `Authorization: Bearer` 两种写法。
- * @param headers 请求头。
- * @returns 登录用户；未登录或令牌无效时返回 null。
- */
-function resolveUser(headers: Headers): JWTUser | null {
-    const raw = (headers.get("token") || headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "").trim()
-    if (!raw) return null
-    try {
-        return jwt.verify(raw, jwtToken) as JWTUser
-    } catch {
-        return null
-    }
-}
-
-/** 统一的失败响应。 */
-function fail(set: { status?: number | string }, status: number, error: string) {
-    set.status = status
-    return { success: false as const, error }
-}
 
 /** 把查询参数里的布尔值解析成布尔或 null。 */
 function parseBooleanFlag(value: string | undefined): boolean | null {

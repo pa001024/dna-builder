@@ -346,8 +346,8 @@ function clampOffset(offset: number | null | undefined): number {
  * @returns 查询结果（total 为过滤后总数，items 为本页记录）
  */
 export function runDataQuery(records: QueryableRecord[], query: DataQuery): DataQueryResult {
-    const filters = (query.where ?? []).filter((item): item is DataFilter => Boolean(item && item.field))
-    const sorts = (query.sort ?? []).filter((item): item is DataSort => Boolean(item && item.field))
+    const filters = (query.where ?? []).filter((item): item is DataFilter => Boolean(item?.field))
+    const sorts = (query.sort ?? []).filter((item): item is DataSort => Boolean(item?.field))
     const fields = (query.fields ?? []).filter((item): item is string => Boolean(item))
     const keyword = (query.search ?? "").trim()
     const limit = clampLimit(query.limit)

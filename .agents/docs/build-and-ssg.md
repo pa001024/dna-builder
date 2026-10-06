@@ -14,12 +14,16 @@ AGENTS.md 的细节展开，覆盖「增量 lint」与「SSG 预渲染」两套�
   不再把 vue-tsc CLI 当壳），由此拿到 vue-tsc CLI 给不了的两个控制点：
   - **诊断范围**：只对「改动文件 + 依赖它们的下游文件」发起诊断；上游依赖只编译（供类型）不诊断，
     它们自己的错误在各自被改的那次已经查过。未改动的环境声明文件（`.d.ts` / `declare global`）
-    始终进 program（缺了会冒全局类型的假报错）但不主动诊断；环境声明文件**自身变更**时整体退回
-    自研全量诊断（约 40s），影响面过半同理；
+    始终进 program（缺了会冒全局类型的假报错）但不主动诊断；环境声明文件的**全局类型面变更**时整体退回
+    自研全量诊断（约 40s），影响面过半同理。全局类型面按哈希判定（GraphNode.ambientHash：
+    `.d.ts` 为全文哈希，普通源文件为其 `declare global/module` 块文本的 sha1）——只含 window.*
+    声明扩充的普通源文件（如 CharBuildView.vue、store/db.ts）改到声明以外的代码不算变更，仍走增量；
   - **文件体裁剪**：未改动的数据文件（`src/data/d/` 下 `*.data.ts`，约 103MB 字面量）用
     `ts.transpileDeclaration` 预生成的声明替代真实源码参与编译（缓存在 `.tmp/lint-data-decls/`，
     按 mtime+size 寻址），数据体不进 checker；被改动的数据文件保留真源码并完整诊断，通过后刷新
-    声明缓存。声明生成要求文件满足 isolatedDeclarations 约束（导出值要有显式类型注解，
+    声明缓存。**冷缓存（首跑 / 缓存版本升级 / 指纹失效）时数据文件也走声明替换**——没有改动基线
+    就把全部数据体当「改动」塞进 program 会吃到 10GB+ 内存；数据体检查交给 lint:full。
+    声明生成要求文件满足 isolatedDeclarations 约束（导出值要有显式类型注解，
     `satisfies` 不算）——数据文件均已改造达标，若有新文件违反约束会自动回退真源码并记负缓存。
     同理，`components.d.ts`（unplugin 自动生成）按诊断范围裁剪——只保留被诊断文件引用到的全局
     组件条目，否则 550 条 `typeof import` 会把 program 撑到 3500+ 文件；

@@ -24,8 +24,8 @@
  * 3. 用缓存的 import 关系图求反向依赖闭包：改动文件 + 所有直接/间接依赖它们的文件
  *    （改动一个导出类型时，用到它的文件同样会报错，必须一起检查）；
  * 4. 再补上环境声明文件（`*.d.ts`、含 `declare global` / `declare module` 的文件）；
- * 5. 自建 program 做类型检查：增量模式只对根集合报诊断；环境声明变更或影响面过半时
- *    退回自研全量（对 program 全部文件诊断，数据文件仍替换）—— 日常 lint 永不触发
+ * 5. 自建 program 做类型检查：增量模式只对根集合报诊断；环境声明的全局类型面变更或
+ *    影响面过半时退回自研全量（对 program 全部文件诊断，数据文件仍替换）—— 日常 lint 永不触发
  *    分钟级的 vue-tsc CLI 全量；
  * 6. Biome 只处理改动过的文件。
  *
@@ -58,7 +58,7 @@ const CACHE_FILE = path.join(TMP_DIR, "lint-cache.json")
 /** 数据文件声明缓存的目录，内容按「路径 + mtime + size」寻址 */
 const DATA_DECL_DIR = path.join(TMP_DIR, "lint-data-decls")
 /** 缓存结构版本：本脚本的判断语义变化时 +1，让旧缓存整体失效 */
-const CACHE_VERSION = 2
+const CACHE_VERSION = 3
 /** 影响闭包超过工程文件总数的该比例时，退回自研全量诊断（增量已无意义） */
 const FULL_CHECK_RATIO = 0.5
 /** 单次传给 Biome 的最大文件数，避免 Windows 命令行过长 */
@@ -136,6 +136,8 @@ interface GraphNode {
     imports: string[]
     /** 是否环境声明文件（`.d.ts` 或含 declare global/module），必须始终留在程序里 */
     ambient: boolean
+    /** 全局类型面哈希（`.d.ts` 全文 / 其余文件 declare 块文本的 sha1，无则为空串），判定环境声明是否真变 */
+    ambientHash: string
 }
 
 /** 数据文件的声明缓存条目 */
@@ -578,6 +580,139 @@ function isAmbientFile(rel: string, text: string): boolean {
 }
 
 /**
+ * 跳过一段空白字符。
+ *
+ * @param text 源码文本
+ * @param index 起始下标
+ * @returns 第一个非空白字符的下标（可能等于 text.length）
+ */
+function skipSpace(text: string, index: number): number {
+    while (index < text.length && /\s/.test(text[index] as string)) index += 1
+    return index
+}
+
+/**
+ * 跳过一个字符串字面量（' " ` 均支持，处理反斜杠转义）。
+ * 不处理模板字符串插值——类型声明块里不会出现；即使出现也只造成哈希抖动，
+ * 后果是多跑一次全量，方向保守。
+ *
+ * @param text 源码文本
+ * @param start 引号字符的下标
+ * @returns 结束引号之后一位的下标（未闭合时为 text.length）
+ */
+function skipString(text: string, start: number): number {
+    const quote = text[start] as string
+    let index = start + 1
+    while (index < text.length) {
+        const char = text[index] as string
+        if (char === "\\") {
+            index += 2
+            continue
+        }
+        if (char === quote) return index + 1
+        index += 1
+    }
+    return index
+}
+
+/**
+ * 从 `{` 起做括号配平扫描，返回配平 `}` 之后一位的下标；扫描中跳过注释与字符串，
+ * 避免字面量里的引号 / 大括号干扰配平。扫描到文末仍未配平（文件被截断）时返回 -1。
+ *
+ * @param text 源码文本
+ * @param openBraceIndex `{` 的下标
+ * @returns 块结束下标（闭合 `}` 的下一位）或 -1
+ */
+function scanBalancedBraces(text: string, openBraceIndex: number): number {
+    let depth = 0
+    let index = openBraceIndex
+    while (index < text.length) {
+        const char = text[index] as string
+        const next = text[index + 1]
+        if (char === "/" && next === "/") {
+            const lineEnd = text.indexOf("\n", index)
+            if (lineEnd < 0) return -1
+            index = lineEnd + 1
+            continue
+        }
+        if (char === "/" && next === "*") {
+            const blockEnd = text.indexOf("*/", index + 2)
+            if (blockEnd < 0) return -1
+            index = blockEnd + 2
+            continue
+        }
+        if (char === '"' || char === "'" || char === "`") {
+            index = skipString(text, index)
+            continue
+        }
+        if (char === "{") depth += 1
+        else if (char === "}") {
+            depth -= 1
+            if (depth === 0) return index + 1
+        }
+        index += 1
+    }
+    return -1
+}
+
+/**
+ * 抽取源码里的全局声明文本（按出现顺序拼接，参与哈希）。
+ * 有体形式（`declare global { ... }`、`declare module "x" { ... }`）取整个块；
+ * 无体形式（`declare module "x";`）取到行尾 / 分号——它同样扩充全局类型，出现与否必须参与哈希。
+ * 注释 / 字符串里偶然出现的 declare 字样最坏只造成哈希抖动（多跑一次全量），方向保守。
+ *
+ * @param scriptText 参与依赖分析的文本（.vue 已抽取 script 块）
+ * @returns 声明块文本；没有任何声明时为空串
+ */
+function extractAmbientSurface(scriptText: string): string {
+    const pieces: string[] = []
+    const pattern = /\bdeclare\s+(?:global|module)\b/g
+    pattern.lastIndex = 0
+    let match: RegExpExecArray | null
+    while ((match = pattern.exec(scriptText)) !== null) {
+        const start = match.index
+        let index = skipSpace(scriptText, start + match[0].length)
+        // declare module "名字" { 的名字串
+        const quote = scriptText[index]
+        if (quote === '"' || quote === "'" || quote === "`") {
+            index = skipSpace(scriptText, skipString(scriptText, index))
+        }
+        if (scriptText[index] === "{") {
+            const end = scanBalancedBraces(scriptText, index)
+            if (end < 0) break
+            pieces.push(scriptText.slice(start, end))
+            pattern.lastIndex = end
+        } else {
+            // 无体声明：取到分号或行尾
+            const lineEnd = scriptText.indexOf("\n", index)
+            const semi = scriptText.indexOf(";", index)
+            const stop = semi >= 0 && (lineEnd < 0 || semi < lineEnd) ? semi : lineEnd
+            if (stop < 0) {
+                pieces.push(scriptText.slice(start))
+                break
+            }
+            pieces.push(scriptText.slice(start, semi === stop ? stop + 1 : stop))
+            pattern.lastIndex = stop
+        }
+    }
+    return pieces.join("\n")
+}
+
+/**
+ * 计算文件的全局类型面哈希：`.d.ts` 用全文（整份文件都是类型面），
+ * 其余文件用 declare 块文本；没有任何全局类型面时返回空串（与「未知 / 无缓存」同口径）。
+ *
+ * @param rel 相对工程根路径（用于区分 .d.ts）
+ * @param scriptText 参与依赖分析的文本（.vue 已抽取 script 块）
+ * @returns sha1 哈希或空串
+ */
+function ambientSurfaceHash(rel: string, scriptText: string): string {
+    const surface = rel.endsWith(".d.ts") ? scriptText : extractAmbientSurface(scriptText)
+    if (surface === "") return ""
+    return createHash("sha1").update(surface).digest("hex")
+}
+
+/**
  * 解析单个 TS 文件的依赖图节点。
  *
  * @param rel 相对工程根路径
@@ -592,7 +727,7 @@ async function buildGraphNode(rel: string, known: Set<string>): Promise<GraphNod
         const resolved = resolveSpecifier(specifier, rel, known)
         if (resolved && resolved !== rel) imports.add(resolved)
     }
-    return { imports: [...imports].sort(), ambient: isAmbientFile(rel, scriptText) }
+    return { imports: [...imports].sort(), ambient: isAmbientFile(rel, scriptText), ambientHash: ambientSurfaceHash(rel, scriptText) }
 }
 
 /**
@@ -659,7 +794,7 @@ function buildReverseMap(graphs: Record<string, GraphNode>[]): Map<string, Set<s
  *
  * 注意：环境声明文件不在这里种子 —— 未改动的环境声明只需要进 program（保证全局类型可用），
  * 不需要被诊断；把它们连传递依赖一起种子会让几乎所有编辑都膨胀成全量。
- * 环境声明文件「自身变更」的场合由主流程整体退回全量诊断。
+ * 环境声明文件「全局类型面变更」的场合由主流程整体退回全量诊断。
  *
  * @param changes 改动集合
  * @param graphs 依赖图列表（当前图在前）
@@ -1166,10 +1301,15 @@ async function main(): Promise<void> {
     const biomeDirty = !cacheValid || !isClean(lintChanges)
 
     // 环境声明文件影响的是整个程序（例如 src/components.d.ts 一变，所有用到自动导入组件的
-    // 模板推断结果都会变），而模板引用不产生 import 边，闭包算不到它们，只能全量诊断
-    const ambientChanged = [...tsChanges.added, ...tsChanges.modified, ...tsChanges.deleted].some(
-        rel => graph[rel]?.ambient === true || previous?.tsGraph[rel]?.ambient === true
-    )
+    // 模板推断结果都会变），而模板引用不产生 import 边，闭包算不到它们，只能全量诊断。
+    // 但「环境声明文件被改动」≠「全局类型面变了」：普通源文件里的 window.* 声明扩充
+    // （如 CharBuildView.vue / store/db.ts）改到声明以外的代码是常事，按全局类型面哈希判定，
+    // 只有 .d.ts 全文或 declare 块文本真正增删改时才退回全量。
+    const ambientChanged = [...tsChanges.added, ...tsChanges.modified, ...tsChanges.deleted].some(rel => {
+        const before = previous?.tsGraph[rel]?.ambientHash ?? ""
+        const after = graph[rel]?.ambientHash ?? ""
+        return before !== after
+    })
 
     const context: TypeCheckContext = {
         tsFiles,
@@ -1185,7 +1325,11 @@ async function main(): Promise<void> {
     let roots: string[] = []
     if (tsDirty) {
         roots = computeRoots(tsChanges, [graph, previous?.tsGraph ?? {}], tsSet)
-        context.changedData = new Set([...tsChanges.added, ...tsChanges.modified].filter(rel => isDataFile(rel)))
+        // 冷缓存（首跑 / 缓存版本升级 / 工具链指纹变化）时没有改动基线，所有文件都算「新增」；
+        // 数据文件若照此全算「改动」，103MB 数据体将以真实源码进 program（实测内存 10GB+）。
+        // 与增量同口径处理：数据文件一律走声明替换（缺失即生成），数据体检查仍交给 lint:full。
+        context.changedData =
+            previous === null ? new Set() : new Set([...tsChanges.added, ...tsChanges.modified].filter(rel => isDataFile(rel)))
         context.ambientFiles = collectAmbientFiles(graph)
         if (options.full) {
             tsMode = "full"

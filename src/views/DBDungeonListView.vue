@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { useLocalStorage } from "@vueuse/core"
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
+import type { FilterSelectOption } from "@/components/FilterSelect.vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledChar } from "@/data"
@@ -8,13 +10,13 @@ import dungeonData from "@/data/d/dungeon.data"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
+const { t } = useTranslation()
+
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedDungeonId = useSearchParam<number>("id", 0)
 const selectedType = useSearchParam<string>("tp", "")
 const selectedLevel = useSearchParam<string>("lv", "")
 const onlyNightHandbook = useLocalStorage("dungeon.showNightHandbook", false)
-const showTypeFilter = useLocalStorage("dungeon.showTypeFilter", false)
-const showLevelFilter = useLocalStorage("dungeon.showLevelFilter", false)
 
 // 根据 ID 获取选中的副本
 const selectedDungeon = computed(() => {
@@ -32,6 +34,19 @@ const allLevels = computed(() => {
     const levels = new Set(dungeonData.map(d => d.lv))
     return Array.from(levels).sort((a, b) => a - b)
 })
+
+const typeOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...allTypes.value.map(type => {
+        const info = getDungeonType(type)
+        return { value: info.t, label: info.label, dotClass: info.color }
+    }),
+])
+
+const levelOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...allLevels.value.map(level => ({ value: `${level}`, label: `Lv.${level}` })),
+])
 
 /**
  * 按类型、等级和关键词筛选副本。
@@ -85,40 +100,6 @@ function selectDungeon(dungeon: (typeof dungeonData)[0] | null) {
     selectedDungeonId.value = dungeon?.id || 0
 }
 
-/**
- * 切换筛选项显示状态，关闭时清空对应筛选值。
- * @param filterName 筛选项名称
- * @param show 是否显示
- */
-function toggleFilter(filterName: "type" | "level", show: boolean) {
-    if (show) {
-        return
-    }
-
-    if (filterName === "type") {
-        selectedType.value = ""
-        return
-    }
-
-    selectedLevel.value = ""
-}
-
-/**
- * 切换类型筛选行的显示状态，收起时清空对应筛选值。
- */
-function toggleTypeFilterRow() {
-    showTypeFilter.value = !showTypeFilter.value
-    toggleFilter("type", showTypeFilter.value)
-}
-
-/**
- * 切换等级筛选行的显示状态，收起时清空对应筛选值。
- */
-function toggleLevelFilterRow() {
-    showLevelFilter.value = !showLevelFilter.value
-    toggleFilter("level", showLevelFilter.value)
-}
-
 useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
 </script>
 
@@ -150,7 +131,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                         </span>
                     </div>
 
-                    <!-- 过滤器开关方章 -->
+                    <!-- 过滤器开关方章 + 筛选器：常驻可清除选择框 -->
                     <div class="mt-3 flex flex-wrap gap-1.5">
                         <button
                             type="button"
@@ -164,95 +145,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbdu-item-active" })
                         >
                             {{ $t('夜航手册') }}
                         </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showTypeFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleTypeFilterRow()"
-                        >
-                            {{ $t('common.type') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showLevelFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleLevelFilterRow()"
-                        >
-                            {{ $t('common.level') }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 筛选条件 -->
-                <div
-                    v-show="showTypeFilter || showLevelFilter"
-                    class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
-                    style="animation-delay: 0.05s"
-                >
-                    <!-- 类型筛选 -->
-                    <div v-show="showTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40"> {{ $t('common.type') }} </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedType === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedType = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="type in allTypes.map(t => getDungeonType(t))"
-                            :key="type.t"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs px-2 py-0.5 text-[11px] transition-all duration-200 active:scale-[0.97]"
-                            :class="
-                                selectedType === type.t
-                                    ? type.color + ' font-semibold text-white'
-                                    : 'border border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedType = type.t"
-                        >
-                            {{ type.label }}
-                        </button>
-                    </div>
-
-                    <!-- 等级筛选 -->
-                    <div v-show="showLevelFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40"> {{ $t('common.level') }} </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedLevel === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedLevel = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="level in allLevels"
-                            :key="level"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedLevel === `${level}`
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedLevel = `${level}`"
-                        >
-                            Lv.{{ level }}
-                        </button>
+                        <FilterSelect v-model="selectedType" :options="typeOptions" :label="$t('common.type')" :clear-title="$t('common.clear')" />
+                        <FilterSelect v-model="selectedLevel" :options="levelOptions" :label="$t('common.level')" :clear-title="$t('common.clear')" />
                     </div>
                 </div>
 

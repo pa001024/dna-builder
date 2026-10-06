@@ -11,6 +11,7 @@ import { yogaPlugin } from "./db"
 import "dotenv/config"
 import { scheduleAiLogRetention } from "./ai-log-store"
 import { apiPlugin } from "./api"
+import { agentSkillPlugin } from "./api/agent-skill"
 import { aiLogPlugin } from "./api/ai-log"
 import { installPlugin } from "./api/install"
 import { modApiPlugin } from "./api/mod"
@@ -34,6 +35,7 @@ const app = new Elysia()
     .use(raceLotteryPlugin())
     .use(aiPlugin())
     .use(aiLogPlugin())
+    .use(agentSkillPlugin())
     .use(ragPlugin())
     .use(
         cors({

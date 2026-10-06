@@ -199,7 +199,7 @@ async function main(): Promise<void> {
     if (!apply) console.log("\n（预演模式，未落盘；加 --apply 实际改写）")
     if (missList.length) {
         console.log("\n=== 未命中明细 ===")
-        for (const m of missList) console.log("  " + m)
+        for (const m of missList) console.log(`  ${m}`)
     }
 }
 

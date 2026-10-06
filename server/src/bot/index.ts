@@ -83,7 +83,7 @@ async function initBot() {
             await event.reply(ret)
         }
     })
-    // 预加载HTML渲染器
+    // 预加载HTML渲染器（Bun.WebView）
     // await getRenderer()
     // 初始化机器人客户端
     try {

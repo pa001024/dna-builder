@@ -45,7 +45,7 @@ export interface AgentChatCoreMessage {
     tokenUsage?: MessageTokenUsage
 }
 
-/** 容量面板分类的 key（本项目的对话没有 MCP 工具与技能注入，分类收敛为三种） */
+/** 容量面板分类的 key（无 MCP 工具；meta_user 技能清单计入 systemPrompt 一类，分类收敛为三种） */
 export type AgentContextUsageCategoryKey = "messages" | "systemTools" | "systemPrompt"
 
 /** 容量面板的用量快照 */
@@ -521,7 +521,12 @@ export function useAgentChatCore<M extends AgentChatCoreMessage>(options: AgentC
         }
 
         const info = agent.getContextInfo()
-        const estimate = buildContextEstimate({ system: info.system, tools: info.tools, messages: toWireMessages(history) })
+        const estimate = buildContextEstimate({
+            system: info.system,
+            metaUser: info.metaUser,
+            tools: info.tools,
+            messages: toWireMessages(history),
+        })
         const categories = estimate.categories
         const total = categories.messages + categories.systemTools + categories.systemPrompt
 

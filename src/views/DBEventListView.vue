@@ -2,7 +2,9 @@
 import { useLocalStorage } from "@vueuse/core"
 import * as echarts from "echarts"
 import Fuse, { type FuseResultMatch } from "fuse.js"
+import { useTranslation } from "i18next-vue"
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue"
+import type { FilterSelectOption } from "@/components/FilterSelect.vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { eventData } from "@/data"
@@ -12,11 +14,12 @@ import { matchPinyin } from "@/utils/pinyin-utils"
 import { stripStoryTextTags } from "@/utils/story-text"
 import { formatDateTime, formatTimeRange } from "@/utils/time"
 
+const { t } = useTranslation()
+
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedEventId = useSearchParam<number>("id", 0)
 const selectedTimePointIndex = useSearchParam<number>("ti", 0)
 const showFullTextSearch = useSearchParam<boolean>("fts", false)
-const showVersionFilter = useLocalStorage("event.showVersionFilter", true)
 const showTimeFilter = useLocalStorage("event.showTimeFilter", true)
 const showTimeLine = useLocalStorage("event.showTimeline", false)
 const diffOnlyEnabled = useSearchParam("td", false)
@@ -333,6 +336,11 @@ const eventVersions = computed(() => {
     })
     return Array.from(versionSet).sort()
 })
+
+const versionFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...eventVersions.value.map(version => ({ value: version, label: version })),
+])
 
 /**
  * 清洗全文搜索片段。
@@ -682,19 +690,6 @@ watch(
     eventVersions,
     versions => {
         if (selectedVersion.value !== "" && !versions.includes(selectedVersion.value)) {
-            selectedVersion.value = ""
-        }
-    },
-    { immediate: true }
-)
-
-/**
- * 关闭版本筛选时清空版本条件。
- */
-watch(
-    showVersionFilter,
-    show => {
-        if (!show) {
             selectedVersion.value = ""
         }
     },
@@ -1245,18 +1240,6 @@ onUnmounted(() => {
                             type="button"
                             class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
                             :class="
-                                showVersionFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="showVersionFilter = !showVersionFilter"
-                        >
-                            {{ $t('common.version') }}
-                        </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
                                 showTimeFilter
                                     ? 'border-primary bg-primary/10 font-semibold text-primary'
                                     : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
@@ -1289,35 +1272,12 @@ onUnmounted(() => {
                         >
                             {{ $t('db-event-list.timeline') }}
                         </button>
-                    </div>
-
-                    <!-- 版本筛选方章 -->
-                    <div v-show="showVersionFilter" class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">{{ $t('common.version') }}</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedVersion === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedVersion = ''"
-                        >
-                            {{ $t('common.all') }}
-                        </button>
-                        <button
-                            v-for="version in eventVersions"
-                            :key="version"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedVersion === version
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedVersion = version"
-                        >
-                            {{ version }}
-                        </button>
+                        <FilterSelect
+                            v-model="selectedVersion"
+                            :options="versionFilterOptions"
+                            :label="$t('common.version')"
+                            :clear-title="$t('common.clear')"
+                        />
                     </div>
 
                     <!-- 时间点筛选面板（外层区块卡） -->

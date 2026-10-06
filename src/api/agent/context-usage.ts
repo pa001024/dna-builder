@@ -154,15 +154,17 @@ export interface AgentContextEstimate {
 
 /**
  * @description 对一次请求的完整上下文做分类估算。
- * @param params 系统提示词、工具定义与消息序列
+ * @param params 系统提示词、meta_user 前缀、工具定义与消息序列
  * @returns 分类估算结果
  */
 export function buildContextEstimate(params: {
     system: string
+    /** meta_user 前缀内容（如技能清单；语义归入系统提示词一类） */
+    metaUser?: string
     tools: readonly AgentToolDefinition[]
     messages: readonly AgentWireMessage[]
 }): AgentContextEstimate {
-    const systemPrompt = estimateTextTokens(params.system)
+    const systemPrompt = estimateTextTokens(params.system) + estimateTextTokens(params.metaUser ?? "")
     const systemTools = estimateToolTokens(params.tools)
     const messages = estimateMessagesTokens(params.messages)
 

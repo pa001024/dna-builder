@@ -16,8 +16,9 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | Dev Tools（i18n / 图标 / 称号框 / 属性 i18n / 文本包 / 数据包） | [dev-tools.md](.agents/docs/dev-tools.md) |
 | RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |
 | 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
+| Agent 技能（远端 skill 的 zip 下发 / 落盘缓存 / 虚拟文件系统工具） | [agent-skills.md](.agents/docs/agent-skills.md) |
 
-- 技能：`.agents/skills/*/SKILL.md`（admin-management-page、bun-webview-test、db-style、fmodel-unpack、i18n、perf-hotspot-profiling、ue4-pak-mod）
+- 技能：`.agents/skills/*/SKILL.md`（admin-management-page、bun-webview-test、db-style、dob-skill-creator、fmodel-unpack、i18n、perf-hotspot-profiling、ue4-pak-mod）
 - Spec 文档：`.docs/`（git 已忽略，面向外部 agent 的协议 / 实现 spec）
 - 业务与设计文档：`docs/`
 
@@ -136,16 +137,15 @@ Pre-commit hook auto-runs: version bump → `biome format` → `git add .`
 <system_rules>
 
 1. **DO NOT RUN `pnpm dev` or `pnpm build`** — view http://localhost:1420/ directly in browser
-2. **CHINESE COMMENTS**: Required for every function and complex logic block (JSDoc format). Do not overdo it. Keep the main content. Strictly prohibit writing design ideas, process descriptions, detailed implementation records, and repetitive explanations in code comments
-3. **JSDoc**: Use for function documentation including params, return values, exceptions
-4. **No shortcuts**: Never remove functions, skip processing, or use TODO placeholders instead of real code
-5. **Consistency**: Check sibling files before writing to match existing patterns
-6. **Always verify**: Run `pnpm lint` and `pnpm test` after frontend changes / `cargo check` after backend changes
-7. **Git workflow**: For complex tasks, `git add` to staging first so you can `git checkout` to revert mistakes
-8. **Prefer native APIs** over adding new library dependencies
-9. **Use `bun -e "code"`** for inline code execution
-10. Sensitive operations, such as generating migrations via `bun run gen`, must be confirmed by the user.
-11. put all temporary files in `.tmp` directory
-12. **Don't touch git**: Never use git for test, like add, stash, commit, push, pull, merge, rebase, cherry-pick, etc.
+2. **CHINESE COMMENTS**: Required for complex function (>100 lines) (JSDoc format). 1-3 line summary.
+3. **No shortcuts**: Never remove functions, skip processing, or use TODO placeholders instead of real code
+4. **Consistency**: Check sibling files before writing to match existing patterns
+5. **Always verify**: Run `pnpm lint` and `pnpm test` after frontend changes / `cargo check` after backend changes
+6. **Git workflow**: For complex tasks, `git add` to staging first so you can `git checkout` to revert mistakes
+7. **Prefer native APIs** over adding new library dependencies
+8. **Use `bun -e "code"`** for inline code execution
+9. Sensitive operations, such as generating migrations via `bun run gen`, must be confirmed by the user.
+10. put all temporary files in `.tmp` directory
+11. **Don't touch git**: Never use git for test, like add, stash, commit, push, pull, merge, rebase, cherry-pick, etc.
 
 </system_rules>

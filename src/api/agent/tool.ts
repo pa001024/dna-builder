@@ -42,6 +42,8 @@ export type AgentToolOutput<TPayload = never> = string | AgentToolTextOutput | A
 export interface AgentTool<TPayload = never> {
     /** 工具定义（模型可见的名字、说明与 JSON Schema） */
     definition: AgentToolDefinition
+    /** 仅显式声明安全的工具可并发；共享可变状态或可能挂起的工具应保持串行。 */
+    concurrentSafe?: boolean
     /**
      * 执行工具。
      * @param args 模型给出的参数（已过 `parseToolArguments`，非法 JSON 得到空对象）

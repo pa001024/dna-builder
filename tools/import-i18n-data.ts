@@ -67,6 +67,7 @@ const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     墨斯: "ExPlayerDefaultName",
     秽兽: "UI_Archive_Tab_InfectionEnemy",
     神弃者同盟: "UI_Archive_Tab_AllianceEnemy",
+    最大耐受: "UI_Mod_CostIncrease",
 }
 
 /**

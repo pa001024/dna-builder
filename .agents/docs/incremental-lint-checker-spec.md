@@ -35,6 +35,17 @@
    调用结果提为带注解的具名 const」修完（`satisfies` 与 `as` 断言都不满足
    isolatedDeclarations 检查口径——前者不被接受，后者会绕过对目标类型的成员检查，均须用
    带注解的具名 const）；现 79 个数据文件的声明产物总共仅 73KB，全部可替换。
+7. **环境声明降级判定收敛为「全局类型面哈希」**（2026-10-06 追加）：`ambientChanged` 原本按
+   「改动文件是否含 declare global/module」判定，导致只含 window.* 声明扩充的普通源文件
+   （CharBuildView.vue、StartupModal.vue、DNALogin.vue、store/db.ts、api/openai.ts）的任何改动
+   都被当成「环境声明变更」退回约 40s 自研全量——改声明以外的代码也一样，日常开发频繁误伤。
+   现 GraphNode 增加 `ambientHash`（`.d.ts` 为全文 sha1，普通源文件为其 declare 块文本的
+   sha1，无声明为空串），只有新旧哈希不同（块文本增删改、.d.ts 内容变化）才退全量；
+   声明块抽取做括号配平扫描（跳过注释与字符串），无体 `declare module "x";` 也参与哈希。
+   缓存版本 +1（v3），旧缓存整体失效一次。
+8. **冷缓存不再把数据体塞进 program**（2026-10-06 追加）：v3 冷跑曾把 79 个数据文件全部按
+   「改动」以真实源码编译（103MB 字面量），实测 bun 内存 10GB+。现冷缓存时 `changedData`
+   置空，数据文件与增量口径一致走声明替换（缺失即生成），数据体检查仍由 lint:full 兜底。
 
 ## Problem Statement
 

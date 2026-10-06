@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { useLocalStorage } from "@vueuse/core"
-import type { Ref } from "vue"
+import { useTranslation } from "i18next-vue"
 import { computed } from "vue"
+import type { FilterSelectOption } from "@/components/FilterSelect.vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { LeveledChar } from "@/data"
@@ -9,6 +9,8 @@ import { charMap } from "@/data/d"
 import charData from "@/data/d/char.data"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
+
+const { t } = useTranslation()
 
 const searchKeyword = useSearchParam<string>("kw", "")
 const selectedCharId = useSearchParam<number>("id", 0)
@@ -22,60 +24,6 @@ const selectedFaction = useSearchParam<string>("fac", "")
 const selectedChar = computed(() => {
     return selectedCharId.value ? charMap.get(selectedCharId.value) || null : null
 })
-
-// 过滤选项显示控制
-const showElemFilter = useLocalStorage("char.showElemFilter", false)
-const showVersionFilter = useLocalStorage("char.showVersionFilter", false)
-const showTagFilter = useLocalStorage("char.showTagFilter", false)
-const showProficiencyFilter = useLocalStorage("char.showProficiencyFilter", false)
-const showFactionFilter = useLocalStorage("char.showFactionFilter", false)
-
-/**
- * 过滤器名称。
- */
-type FilterName = "elem" | "version" | "tag" | "proficiency" | "faction"
-
-/** 各过滤器的显示状态注册表（localStorage 持久化）。 */
-const filterVisibility: Record<FilterName, Ref<boolean>> = {
-    elem: showElemFilter,
-    version: showVersionFilter,
-    tag: showTagFilter,
-    proficiency: showProficiencyFilter,
-    faction: showFactionFilter,
-}
-
-/** 各过滤器当前选中值的注册表（路由参数持久化）。 */
-const filterValues: Record<FilterName, Ref<string>> = {
-    elem: selectedElem,
-    version: selectedVersion,
-    tag: selectedTag,
-    proficiency: selectedProficiency,
-    faction: selectedFaction,
-}
-
-/** 过滤器开关的展示顺序与 i18n 标签键。 */
-const filterLabels: Record<FilterName, string> = {
-    elem: "char-build.elem",
-    version: "char-build.version",
-    tag: "char-build.tag",
-    proficiency: "武器精通",
-    faction: "char-build.faction",
-}
-
-/**
- * 切换过滤行显示状态；收起时清空对应筛选值，避免隐藏后筛选仍生效。
- * @param name 过滤器名称
- */
-function toggleFilterRow(name: FilterName) {
-    const visible = filterVisibility[name]
-    if (visible.value) {
-        filterValues[name].value = ""
-    }
-    visible.value = !visible.value
-}
-
-// 是否有任一过滤行处于展开状态（控制过滤区整体显隐）
-const hasVisibleFilterRow = computed(() => Object.values(filterVisibility).some(ref => ref.value))
 
 // 获取所有可用元素
 const elems = ["火", "水", "雷", "风", "暗", "光"]
@@ -123,6 +71,31 @@ const factions = computed(() => {
     })
     return Array.from(factionSet).sort()
 })
+
+const elemOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...elems.map(elem => ({ value: elem, label: t(`${elem}属性`) })),
+])
+
+const versionOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...versions.value.map(version => ({ value: version, label: version })),
+])
+
+const tagOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...tags.value.map(tag => ({ value: tag, label: t(tag) })),
+])
+
+const proficiencyOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...proficiencies.value.map(proficiency => ({ value: proficiency, label: t(proficiency) })),
+])
+
+const factionOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...factions.value.map(faction => ({ value: faction, label: t(faction) })),
+])
 
 /**
  * 关键词命中程度，数值越小越靠前。
@@ -209,184 +182,18 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbc-item-active" })
                         </span>
                     </div>
 
-                    <!-- 过滤器开关方章 -->
+                    <!-- 筛选器：常驻可清除选择框 -->
                     <div class="mt-3 flex flex-wrap gap-1.5">
-                        <button
-                            v-for="(label, name) in filterLabels"
-                            :key="name"
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                filterVisibility[name].value
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleFilterRow(name)"
-                        >
-                            {{ $t(label) }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 筛选条件 -->
-                <div
-                    v-show="hasVisibleFilterRow"
-                    class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
-                    style="animation-delay: 0.05s"
-                >
-                    <!-- 元素筛选 -->
-                    <div v-show="showElemFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            {{ $t("char-build.elem") }}
-                        </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedElem === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedElem = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="elem in elems"
-                            :key="elem"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedElem === elem
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedElem = elem"
-                        >
-                            {{ $t(`${elem}属性`) }}
-                        </button>
-                    </div>
-
-                    <!-- 版本筛选 -->
-                    <div v-show="showVersionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            {{ $t("char-build.version") }}
-                        </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedVersion === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedVersion = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="version in versions"
-                            :key="version"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedVersion === version
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedVersion = version"
-                        >
-                            {{ version }}
-                        </button>
-                    </div>
-
-                    <!-- 标签筛选 -->
-                    <div v-show="showTagFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            {{ $t("char-build.tag") }}
-                        </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedTag === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedTag = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="tag in tags"
-                            :key="tag"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedTag === tag
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedTag = tag"
-                        >
-                            {{ $t(tag) }}
-                        </button>
-                    </div>
-
-                    <!-- 武器精通筛选 -->
-                    <div v-show="showProficiencyFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            {{ $t("武器精通") }}
-                        </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedProficiency === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedProficiency = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="proficiency in proficiencies"
-                            :key="proficiency"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedProficiency === proficiency
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedProficiency = proficiency"
-                        >
-                            {{ $t(proficiency) }}
-                        </button>
-                    </div>
-
-                    <!-- 阵营筛选 -->
-                    <div v-show="showFactionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 text-[10px] text-base-content/40">
-                            {{ $t("char-build.faction") }}
-                        </span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedFaction === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedFaction = ''"
-                        >
-                            {{ $t("common.all") }}
-                        </button>
-                        <button
-                            v-for="faction in factions"
-                            :key="faction"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedFaction === faction
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedFaction = faction"
-                        >
-                            {{ $t(faction) }}
-                        </button>
+                        <FilterSelect v-model="selectedElem" :options="elemOptions" :label="$t('char-build.elem')" :clear-title="$t('common.clear')" />
+                        <FilterSelect v-model="selectedVersion" :options="versionOptions" :label="$t('char-build.version')" :clear-title="$t('common.clear')" />
+                        <FilterSelect v-model="selectedTag" :options="tagOptions" :label="$t('char-build.tag')" :clear-title="$t('common.clear')" />
+                        <FilterSelect
+                            v-model="selectedProficiency"
+                            :options="proficiencyOptions"
+                            :label="$t('武器精通')"
+                            :clear-title="$t('common.clear')"
+                        />
+                        <FilterSelect v-model="selectedFaction" :options="factionOptions" :label="$t('char-build.faction')" :clear-title="$t('common.clear')" />
                     </div>
                 </div>
 

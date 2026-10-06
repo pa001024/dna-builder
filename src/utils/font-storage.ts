@@ -98,7 +98,6 @@ export async function listCustomFonts(): Promise<CustomFontMeta[]> {
     try {
         const directory = await getFontDirectory()
         const names: string[] = []
-        // @ts-expect-error TS lib 未收录异步迭代器，运行时可用
         for await (const [name, handle] of directory.entries()) {
             if (handle.kind === "file") {
                 names.push(name)

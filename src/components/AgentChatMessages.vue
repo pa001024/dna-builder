@@ -14,6 +14,7 @@ import type { AskUserRequest, AskUserResponse } from "@/utils/db-ask-user"
 import { isHashRouterMode, renderMarkdown } from "@/utils/markdown"
 import { type ParsedRichComponent, parseRichComponents } from "@/utils/rich-component"
 import { parseSiteRoute } from "@/utils/site-link"
+import { parseSkillMentions } from "@/utils/skill-mention"
 
 /**
  * 通用 Agent 对话消息流。
@@ -314,6 +315,18 @@ function formatMessageTime(timestamp: number): string {
     const date = new Date(timestamp)
 
     return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
+}
+
+/**
+ * 把用户提问里的技能提及（`$名称`）切成文本 / 技能片段。
+ *
+ * 对齐 ZCode 的气泡呈现：`$名称` 渲染成一枚带图标的 chip，而不是把 markdown
+ * 原文（`[$名称](/名称/SKILL.md)`）暴露给用户。落库内容保持 canonical 原文不变。
+ * @param text 用户提问原文
+ * @returns 片段序列
+ */
+function userMentionParts(text: string): ReturnType<typeof parseSkillMentions> {
+    return parseSkillMentions(text)
 }
 
 /**
@@ -809,11 +822,24 @@ onBeforeUnmount(() => {
                                 />
                             </div>
 
+                            <!--
+                              用户提问：技能提及（`$名称`）渲染成一枚带图标的 chip，
+                              markdown 原文（`[$名称](/名称/SKILL.md)`）只留在落库内容与发往模型的正文里。
+                            -->
                             <p
                                 v-if="message.content"
                                 class="db-selectable max-w-[80%] border border-base-content/15 bg-base-content/5 px-3 py-2 text-sm leading-6 whitespace-pre-wrap"
                             >
-                                {{ message.content }}
+                                <template v-for="(part, index) in userMentionParts(message.content)" :key="index">
+                                    <span
+                                        v-if="part.type === 'skill'"
+                                        class="inline-flex items-center gap-1 align-top leading-6 font-medium text-primary"
+                                    >
+                                        <Icon icon="ri:magic-line" class="h-3.5 w-3.5 shrink-0" />
+                                        {{ part.name }}
+                                    </span>
+                                    <template v-else>{{ part.text }}</template>
+                                </template>
                             </p>
 
                             <!-- 时间戳 + 操作：均仅悬停该条消息时显示，右侧对齐与气泡对齐 -->

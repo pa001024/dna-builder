@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import { useLocalStorage } from "@vueuse/core"
 import Fuse, { type FuseResultMatch } from "fuse.js"
+import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
+import type { FilterSelectOption } from "@/components/FilterSelect.vue"
 import { useInitialScrollToSelectedItem } from "@/composables/useInitialScrollToSelectedItem"
 import { useSearchParam } from "@/composables/useSearchParam"
 import type { QuestItem, QuestStory } from "@/data/d/quest.data"
@@ -11,6 +12,8 @@ import { useSettingStore } from "@/store/setting"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getQuestTypeDisplay } from "@/utils/quest-utils"
 import { stripStoryTextTags } from "@/utils/story-text"
+
+const { t } = useTranslation()
 
 interface QuestChainSnippetSegment {
     text: string
@@ -55,8 +58,6 @@ const selectedVersion = useSearchParam<string>("ver", "")
 const selectedType = useSearchParam<number>("tp", 0)
 const settingStore = useSettingStore()
 const localizedQuestData = ref<QuestStory[]>([])
-const showVersionFilter = useLocalStorage("questchain.showVersionFilter", false)
-const showTypeFilter = useLocalStorage("questchain.showTypeFilter", false)
 
 interface QuestTypeFilterOption {
     value: number
@@ -321,6 +322,11 @@ const selectedTypeGroup = computed<number>({
     },
 })
 
+const typeFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: 0, label: t("common.all") },
+    ...questTypeOptions.value.map(option => ({ value: option.value, label: t(option.display.name) })),
+])
+
 /**
  * 当前语言对应的任务详情映射。
  */
@@ -428,27 +434,6 @@ function passesQuestChainSwitchFilters(questChain: QuestChain): boolean {
     }
 
     return true
-}
-
-/**
- * 处理筛选项显示开关变化。
- * @param filterName 筛选项名称
- * @param show 是否显示
- */
-function toggleFilter(filterName: "type", show: boolean) {
-    if (!show) {
-        if (filterName === "type") {
-            selectedType.value = 0
-        }
-    }
-}
-
-/**
- * 切换类型筛选行显示状态；收起时清空类型筛选值，避免隐藏后筛选仍生效。
- */
-function toggleTypeFilterRow() {
-    showTypeFilter.value = !showTypeFilter.value
-    toggleFilter("type", showTypeFilter.value)
 }
 
 /**
@@ -698,6 +683,11 @@ const versionOptions = computed(() => {
     return Array.from(versionSet).sort((a, b) => a.localeCompare(b, "zh-CN", { numeric: true }))
 })
 
+const versionFilterOptions = computed<FilterSelectOption[]>(() => [
+    { value: "", label: t("common.all") },
+    ...versionOptions.value.map(version => ({ value: version, label: version })),
+])
+
 /**
  * 选中任务链。
  * @param questChain 任务链
@@ -755,20 +745,8 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                         </span>
                     </div>
 
-                    <!-- 过滤器开关方章 -->
+                    <!-- 特殊开关 + 筛选器：常驻可清除选择框 -->
                     <div class="mt-3 flex flex-wrap gap-1.5">
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showTypeFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="toggleTypeFilterRow()"
-                        >
-                            {{ $t('common.type') }}
-                        </button>
                         <button
                             type="button"
                             class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
@@ -805,83 +783,19 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbq-item-active" })
                         >
                             {{ $t('common.full_text_search') }}
                         </button>
-                        <button
-                            type="button"
-                            class="inline-flex h-6 cursor-pointer items-center rounded-xs border px-2 text-[11px] transition-colors duration-150"
-                            :class="
-                                showVersionFilter
-                                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                                    : 'border-base-content/20 text-base-content/55 hover:border-primary/50 hover:text-primary'
-                            "
-                            @click="showVersionFilter = !showVersionFilter"
-                        >
-                            {{ $t("char-build.version") }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 筛选条件 -->
-                <div
-                    v-show="showTypeFilter || showVersionFilter"
-                    class="flex-none space-y-3 border-b border-base-content/15 px-4 py-3 stagger-rise"
-                    style="animation-delay: 0.05s"
-                >
-                    <!-- 类型筛选 -->
-                    <div v-show="showTypeFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">TYPE</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedTypeGroup === 0
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedTypeGroup = 0"
-                        >
-                            {{ $t('common.all') }}
-                        </button>
-                        <button
-                            v-for="type in questTypeOptions"
-                            :key="type.value"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedTypeGroup === type.value
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedTypeGroup = type.value"
-                        >
-                            {{ $t(type.display.name) }}
-                        </button>
-                    </div>
-
-                    <!-- 版本筛选 -->
-                    <div v-show="showVersionFilter" class="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-                        <span class="mr-1 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-base-content/40">VERSION</span>
-                        <button
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedVersion === ''
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedVersion = ''"
-                        >
-                            {{ $t('common.all') }}
-                        </button>
-                        <button
-                            v-for="version in versionOptions"
-                            :key="version"
-                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border px-2 py-0.5 font-mono text-[11px] tabular-nums transition-colors duration-150 active:scale-[0.97]"
-                            :class="
-                                selectedVersion === version
-                                    ? 'border-primary bg-primary font-semibold text-primary-content'
-                                    : 'border-base-content/20 text-base-content/60 hover:border-primary/60 hover:text-primary'
-                            "
-                            @click="selectedVersion = version"
-                        >
-                            {{ version }}
-                        </button>
+                        <FilterSelect
+                            v-model="selectedTypeGroup"
+                            :options="typeFilterOptions"
+                            :label="$t('common.type')"
+                            :clear-title="$t('common.clear')"
+                            :clear-value="0"
+                        />
+                        <FilterSelect
+                            v-model="selectedVersion"
+                            :options="versionFilterOptions"
+                            :label="$t('char-build.version')"
+                            :clear-title="$t('common.clear')"
+                        />
                     </div>
                 </div>
 

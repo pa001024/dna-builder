@@ -249,6 +249,11 @@ export const routes: readonly RouteRecordRaw[] = [
                 path: "ai-log",
                 component: () => import("./admin/AiLogManagement.vue"),
             },
+            {
+                name: "admin-agent-skill",
+                path: "agent-skill",
+                component: () => import("./admin/AgentSkillManagement.vue"),
+            },
         ],
     },
     {

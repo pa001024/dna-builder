@@ -17,6 +17,7 @@
 
 import type { AgentUpstreamConfig } from "@/api/agent/config"
 import { AgentKernel } from "@/api/agent/kernel"
+import { getAgentSkillRegistry } from "@/api/agent/skills/registry"
 import { createRunCodeTool } from "@/api/agent/tools/build-code"
 import {
     createClickTool,
@@ -27,7 +28,9 @@ import {
     createTypeTool,
 } from "@/api/agent/tools/build-ui"
 import { createDbRetrievalTools } from "@/api/agent/tools/db-retrieval"
+import { createSkillTools } from "@/api/agent/tools/skill-files"
 import { renderBuildAgentSystemPrompt } from "@/shared/buildAgentSystemPrompt"
+import { renderSkillPromptSection } from "@/shared/skill-prompt"
 import { agentToolLabel } from "@/utils/agent-chat"
 import type { AskUserRequest } from "@/utils/db-ask-user"
 import { formatAskUserResponse, hasAskAnswer } from "@/utils/db-ask-user"
@@ -59,10 +62,8 @@ const MAX_CONTINUATIONS = 3
  */
 export function createBuildAgent(config: Partial<AgentUpstreamConfig> = {}): AgentKernel<AskUserRequest> {
     /**
-     * @description 组装本轮的工具集。
-     *
-     * run_code 排在最前：模型先想到「写一段代码一次做完」，而不是逐个控件去点。
-     * @returns 工具列表
+     * 组装本轮的工具集：run_code 排在最前（模型先想到「写一段代码一次做完」，而不是逐个控件去点）。
+     * 技能工具面跟随服务端下发的技能清单，没有技能时不声明（提示词侧同步整段省略）。
      */
     function buildTools() {
         return [
@@ -79,6 +80,7 @@ export function createBuildAgent(config: Partial<AgentUpstreamConfig> = {}): Age
                 ragEnabled: isRagEnabled(),
                 askUser: true,
             }),
+            ...(getAgentSkillRegistry().isAvailable() ? createSkillTools<AskUserRequest>() : []),
         ]
     }
 
@@ -87,6 +89,8 @@ export function createBuildAgent(config: Partial<AgentUpstreamConfig> = {}): Age
         config,
         tools: buildTools,
         systemPrompt: () => renderBuildAgentSystemPrompt({ ragEnabled: isRagEnabled() }),
+        // 技能清单走 meta_user 前缀消息（system-reminder 包裹），不进系统提示词本体
+        metaUserPrefix: () => renderSkillPromptSection(getAgentSkillRegistry().getPromptSkills()),
         maxToolRounds: MAX_TOOL_ROUNDS,
         maxContinuations: MAX_CONTINUATIONS,
         label: agentToolLabel,

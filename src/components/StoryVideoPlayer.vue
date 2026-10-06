@@ -578,7 +578,7 @@ nextTick(initPlayer)
                 <Select
                     :model-value="playbackRate"
                     aria-label="播放倍速"
-                    class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[10px] text-base-content text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    class="w-14 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[10px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     @update:modelValue="(val: number) => changePlaybackRate({ target: { value: String(val) } } as unknown as Event)"
                 >
                     <SelectItem v-for="rate in [0.5, 0.75, 1, 1.25, 1.5, 2]" :key="rate" :value="rate">x{{ rate }}</SelectItem>

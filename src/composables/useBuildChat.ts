@@ -1,6 +1,7 @@
 import i18next from "i18next"
 import { computed, type Ref, ref, watch } from "vue"
 import type { AgentCompactionOutcome } from "@/api/agent/compact"
+import { ensureAgentSkillsReady } from "@/api/agent/skills/registry"
 import { createBuildAgent } from "@/api/buildAgent"
 import { useAgentChatCore } from "@/composables/useAgentChatCore"
 import {
@@ -330,6 +331,12 @@ export function useBuildChat(selectedChar: Ref<string>, settingStore: ReturnType
             return
         }
 
+        // 技能清单就绪后再装配本轮的工具面与提示词；失败静默降级为无技能
+        await ensureAgentSkillsReady()
+
+        // 输入框（Lexical 富文本）的 chip 直接序列化成 canonical markdown，这里原样落盘与发送
+        const content = text
+
         // 压缩预检：边界必须排在本轮消息之前，所以放在写入提问之前
         await runAutoCompaction()
         failedPrompt.value = ""
@@ -344,7 +351,7 @@ export function useBuildChat(selectedChar: Ref<string>, settingStore: ReturnType
         const userMessage: BuildAgentChatMessage = {
             id: assistantMessage.id - 1,
             role: "user",
-            content: text,
+            content,
             ...(images.length ? { images } : {}),
             createdAt: Date.now(),
         }

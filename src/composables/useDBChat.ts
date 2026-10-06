@@ -2,6 +2,7 @@ import i18next from "i18next"
 import { computed, ref } from "vue"
 import type { AgentCompactionOutcome } from "@/api/agent/compact"
 import type { AgentHistoryMessage } from "@/api/agent/kernel"
+import { ensureAgentSkillsReady } from "@/api/agent/skills/registry"
 import { createDbAgent } from "@/api/dbAgent"
 import { useAgentChatCore } from "@/composables/useAgentChatCore"
 import { type Conversation, db, type Message, type MessageCompaction, type UConversation, type UMessage } from "@/store/db"
@@ -11,6 +12,7 @@ import { type ChatImage, MAX_CHAT_IMAGES } from "@/utils/chat-image"
 import { htmlToText } from "@/utils/html"
 import { isHashRouterMode, renderMarkdown } from "@/utils/markdown"
 import { parseRichComponents } from "@/utils/rich-component"
+import { stripSkillMentions } from "@/utils/skill-mention"
 
 /**
  * 资料库对话状态：会话列表 + 消息流 + 资料检索 Agent 调用。
@@ -386,8 +388,15 @@ export function useDBChat() {
             return
         }
 
-        // 首次提问时按提问内容命名会话；只发图时没有文字可取名，用固定名称兜底
-        const nameSource = text || i18next.t("dbAgent.conversation.imageName")
+        // 技能清单就绪后再装配本轮的工具面与提示词；失败静默降级为无技能
+        await ensureAgentSkillsReady()
+
+        // 输入框（Lexical 富文本）的 chip 直接序列化成 canonical markdown，这里原样落盘与发送
+        const content = text
+
+        // 首次提问时按提问内容命名会话；剔除技能提及语法，避免会话名是一串 markdown 原文。
+        // 只发图时没有文字可取名，用固定名称兜底
+        const nameSource = stripSkillMentions(text).trim() || i18next.t("dbAgent.conversation.imageName")
         const conversationId = activeConversationId.value || (await createConversation(nameSource.slice(0, CONVERSATION_NAME_LENGTH)))
         const isFirstMessage = !messages.value.some(message => message.role === "user")
 
@@ -397,7 +406,7 @@ export function useDBChat() {
         const userMessage: UMessage = {
             conversationId,
             role: "user",
-            content: text,
+            content,
             ...(images.length ? { images } : {}),
             createdAt: Date.now(),
         }
@@ -405,8 +414,8 @@ export function useDBChat() {
         messages.value.push({
             ...userMessage,
             id: userId,
-            renderedContent: renderMarkdown(text, isHashRouterMode()),
-            renderedContentSource: text,
+            renderedContent: renderMarkdown(content, isHashRouterMode()),
+            renderedContentSource: content,
         })
 
         const assistantRecord: UMessage = { conversationId, role: "assistant", content: "", createdAt: Date.now() }
