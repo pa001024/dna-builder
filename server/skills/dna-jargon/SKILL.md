@@ -137,7 +137,6 @@ description: 《二重螺旋》（Duet Night Abyss / DNA）社区黑话、外号
 | 核桃 | 虚空遗物（外形像枣核 / 桃核 / 核桃） |
 | 4k mod | 堕落系列 Mod（开启需 4 把钥匙 → 4K = 4 Keys） |
 | 光环卡 | Aura Mod |
-| 深渊、肉鸽 | 二游通行叫法（溯至《崩坏3》深渊、《Rogue》） |
 
 ---
 

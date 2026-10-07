@@ -1285,6 +1285,77 @@ describe("CharBuild类测试", () => {
             expect(triggerDamage2).toBeCloseTo(triggerDamage, 0)
         })
 
+        it("箭雨的独立减伤不应影响灾厄伤害字段", () => {
+            const makeBuild = (rangedMods: (LeveledMod | null)[]) =>
+                new CharBuild({
+                    char: new LeveledChar("希尔妲"),
+                    skillLevel: 10,
+                    hpPercent: 0.5,
+                    resonanceGain: 0,
+                    charMods: [],
+                    buffs: [],
+                    melee: new LeveledWeapon(10302),
+                    ranged: new LeveledWeapon(20599),
+                    rangedMods,
+                    baseName: "寂灭",
+                    enemyId: 130,
+                    enemyLevel: 80,
+                    enemyResistance: 0.5,
+                    targetFunction: "[寂灭]伤害",
+                })
+
+            expect(makeBuild([new LeveledMod(43604)]).calculate()).toBeCloseTo(makeBuild([]).calculate(), 6)
+        })
+
+        it("箭雨的独立减伤在灾厄字段上不影响其他独立增伤来源", () => {
+            const makeBuild = (charMods: (LeveledMod | null)[], rangedMods: (LeveledMod | null)[]) =>
+                new CharBuild({
+                    char: new LeveledChar("希尔妲"),
+                    skillLevel: 10,
+                    hpPercent: 0.5,
+                    resonanceGain: 0,
+                    charMods,
+                    buffs: [],
+                    melee: new LeveledWeapon(10302),
+                    ranged: new LeveledWeapon(20599),
+                    rangedMods,
+                    baseName: "寂灭",
+                    enemyId: 130,
+                    enemyLevel: 80,
+                    enemyResistance: 0.5,
+                    targetFunction: "[寂灭]伤害",
+                })
+            const arrowRain = new LeveledMod(43604)
+            const panshi = new LeveledMod(31526)
+
+            // 豁免只剔除箭雨自身词条，磐石的 -15% 独立降伤仍按原行为作用于灾厄伤害
+            expect(makeBuild([panshi], [arrowRain]).calculate()).toBeCloseTo(makeBuild([panshi], []).calculate(), 6)
+            expect(makeBuild([panshi], [arrowRain]).calculate()).toBeCloseTo(makeBuild([], [arrowRain]).calculate() * 0.85, 4)
+        })
+
+        it("箭雨的独立减伤仍作用于武器自身攻击（射击子弹伤害）", () => {
+            const makeBuild = (rangedMods: (LeveledMod | null)[]) =>
+                new CharBuild({
+                    char: new LeveledChar("希尔妲"),
+                    skillLevel: 10,
+                    hpPercent: 0.5,
+                    resonanceGain: 0,
+                    charMods: [],
+                    buffs: [],
+                    melee: new LeveledWeapon(10302),
+                    ranged: new LeveledWeapon(20599),
+                    rangedMods,
+                    baseName: "射击",
+                    enemyId: 130,
+                    enemyLevel: 80,
+                    enemyResistance: 0.5,
+                    targetFunction: "射击::子弹伤害",
+                })
+
+            // 满级箭雨 -60%（独立），子弹伤害按 0.4 倍结算
+            expect(makeBuild([new LeveledMod(43604)]).calculate()).toBeCloseTo(makeBuild([]).calculate() * 0.4, 4)
+        })
+
         it("熔炉武器加成仅在角色精通武器类型匹配时生效", () => {
             const matchedBuild = new CharBuild({
                 char: new LeveledChar("黎瑟"),

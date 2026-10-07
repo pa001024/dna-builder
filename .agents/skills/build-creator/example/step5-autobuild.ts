@@ -25,11 +25,14 @@ const spec = loadSpec()
 const patch = withTeam(spec, chosenBuffs())
 const settings = settingsOf(spec, patch)
 
+const WIN_FILE = process.env.BUILD_WIN_FILE ?? ".tmp/build-win.json"
+
 const includeTypes: ModTypeKey[] = ["charMods", "meleeMods", "rangedMods"]
 
 function modOptions(types: ModTypeKey[]) {
     const set = new Set(types.map(t => ModTypeMap[t] as string))
-    return modData.filter((m: any) => set.has(m.类型)).map((m: any) => LeveledModHelper.withCount(m, undefined, 0, 8))
+    const exclude: number[] = (spec as any).excludeMods ?? []
+    return modData.filter((m: any) => set.has(m.类型) && !exclude.includes(m.id)).map((m: any) => LeveledModHelper.withCount(m, undefined, 0, 8))
 }
 
 console.log("=== 1) autoBuild（必带件当种子保留）===")
@@ -90,8 +93,8 @@ if (!best.state) {
     console.log(`\n最优 ${亿(wb.calculate())} 亿`)
     for (const key of includeTypes) console.log(`  ${key}  ${dumpMods(wb, key)}`)
     console.log(`  中枢 ${best.state.aura?.名称 ?? "空"}`)
-    writeFileSync(".tmp/build-win.json", JSON.stringify(stateToPatch(best.state), null, 1))
-    console.log("\n已写入 .tmp/build-win.json")
+    writeFileSync(WIN_FILE, JSON.stringify(stateToPatch(best.state), null, 1))
+    console.log(`\n已写入 ${WIN_FILE}`)
 }
 
 function 从patch取池(p: any, key: ModTypeKey, s: Spec) {

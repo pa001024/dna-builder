@@ -2174,7 +2174,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                     class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary resize-none py-1"
                     :placeholder="$t('char-build.enter_description')"
                     rows="3"
-                    maxlength="200"
+                    maxlength="2000"
                 ></textarea>
             </div>
         </div>

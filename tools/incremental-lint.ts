@@ -1399,7 +1399,7 @@ async function main(): Promise<void> {
             dataDecls = result.decls
         }
     } else {
-        log("没有改动的 TS 文件，跳过类型检查", false, options)
+        log("没有改动的 TS 文件或不在src目录下，跳过类型检查", false, options)
     }
 
     // 只有全部通过才落盘指纹：失败时缓存保持旧值，下次会重新检查这批文件

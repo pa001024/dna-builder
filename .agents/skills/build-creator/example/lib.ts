@@ -115,8 +115,10 @@ function 限定允许(spec: Spec, m: any, 类型: ModSlotType): boolean {
 export function modPool(spec: Spec, 类型: ModSlotType, opts: { aura?: boolean; exclude?: number[] } = {}): Cand[] {
     const c = charOf(spec)
     const out: Cand[] = []
+    const specExclude: (number | string)[] = (spec as any).excludeMods ?? []
     for (const [id, raw] of modMap) {
         if (opts.exclude?.includes(id)) continue
+        if (specExclude.includes(id) || specExclude.includes((raw as any).名称)) continue
         const m: any = raw
         if (m.类型 !== 类型) continue
         if (类型 === "角色") {
@@ -247,7 +249,7 @@ export function withTeam(spec: Spec, buffs: [string, number][], patch: Record<st
     return { ...patch, buffs: [...base, ...buffs] }
 }
 
-export const ASSIST_FILE = ".tmp/build-assist.json"
+export const ASSIST_FILE = process.env.BUILD_ASSIST_FILE ?? ".tmp/build-assist.json"
 
 export function saveChosenBuffs(label: string, buffs: [string, number][]) {
     writeFileSync(ASSIST_FILE, JSON.stringify({ label, buffs }, null, 1))
@@ -270,32 +272,58 @@ export function petCandidates(spec: Spec, patch: Record<string, any>, top = 5) {
 }
 
 export function traitGreedy(spec: Spec, patch: Record<string, any>) {
-    const 战斗潜质 = getPetTraits().filter(t => t.buffName)
+    // 候选 = 战斗潜质（有 buffName）**加上**「提升魔灵技能等级」类（如「老道」`petSkillLevelBonus`）。
+    // 后者 buffName 为 null、不直接进属性结算，只通过 getEffectivePetLevel 抬魔灵等级，
+    // 若按 `t.buffName` 过滤会被整类漏掉（实测该件单条边际 +4.4%，属搜索空间缺失）。
+    const 候选 = getPetTraits().filter(t => t.buffName || t.petSkillLevelBonus)
     const 池 = new Map<number, any>()
-    for (const t of 战斗潜质) {
+    for (const t of 候选) {
         const cur = 池.get(t.bid)
         if (!cur || t.level > cur.level) 池.set(t.bid, t)
     }
     const slots: (any | null)[] = [null, null, null, null]
     const toTraits = () => slots.map(s => (s ? [s.bid, s.level] : null))
-    let v = evaluate(spec, { ...patch, traits: toTraits() })
+    const score = () => evaluate(spec, { ...patch, traits: toTraits() })
+    let v = score()
+    // 单槽贪心会被「成对才强」的组合卡住（如暴击率 + 暴击伤害：单收一条边际很小，
+    // 一起收才显著）⇒ 每轮同时试「换 1 槽」与「成对换 2 槽」，取最优改进。
     for (let pass = 0; pass < 6; pass++) {
-        let improved = false
+        let bestSwap: null | { i: number; a: any; j?: number; b?: any; v: number } = null
+        const 试 = (i: number, a: any, j?: number, b?: any) => {
+            const backupI = slots[i]
+            const backupJ = j === undefined ? undefined : slots[j]
+            slots[i] = a
+            if (j !== undefined) slots[j] = b
+            const nv = score()
+            slots[i] = backupI
+            if (j !== undefined) slots[j] = backupJ!
+            if (nv > (bestSwap?.v ?? v) + 1 && (!bestSwap || nv > bestSwap.v)) bestSwap = { i, a, j, b, v: nv }
+        }
         for (let i = 0; i < 4; i++) {
             for (const cand of 池.values()) {
-                if (slots.some((s, j) => s && j !== i && s.bid === cand.bid)) continue
-                const backup = slots[i]
-                slots[i] = cand
-                const nv = evaluate(spec, { ...patch, traits: toTraits() })
-                if (nv > v + 1) {
-                    v = nv
-                    improved = true
-                } else {
-                    slots[i] = backup
+                if (slots.some((s, k) => s && k !== i && (s as any).bid === cand.bid)) continue
+                if (slots[i] && (slots[i] as any).bid === cand.bid) continue
+                试(i, cand)
+            }
+        }
+        for (let i = 0; i < 4; i++) {
+            for (let j = i + 1; j < 4; j++) {
+                for (const a of 池.values()) {
+                    for (const b of 池.values()) {
+                        if (a.bid === b.bid) continue
+                        if ((slots[i] as any)?.bid === a.bid && (slots[j] as any)?.bid === b.bid) continue
+                        const clash = slots.some((s, k) => s && k !== i && k !== j && ((s as any).bid === a.bid || (s as any).bid === b.bid))
+                        if (clash) continue
+                        试(i, a, j, b)
+                    }
                 }
             }
         }
-        if (!improved) break
+        if (!bestSwap) break
+        const sw = bestSwap as { i: number; a: any; j?: number; b?: any; v: number }
+        slots[sw.i] = sw.a
+        if (sw.j !== undefined) slots[sw.j] = sw.b
+        v = sw.v
     }
     return { traits: toTraits(), v }
 }

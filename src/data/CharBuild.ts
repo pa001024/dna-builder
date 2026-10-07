@@ -2806,7 +2806,8 @@ export class CharBuild {
                 if (!weaponAttrs.has(key)) return undefined
                 if (["[攻击]", "[防御]", "[生命]"].includes(fieldName)) return key
                 const field = getSkillAttr(fieldName, base, skillContext)
-                return field && (field.名称.endsWith("伤害") || field.名称.endsWith("伤害倍率")) ? key : undefined
+                if (!field?.名称 || !/伤害(?:倍率(?:增加)?)?/.test(fieldName)) return undefined
+                return key
             }
 
             /**
@@ -3347,6 +3348,10 @@ export class CharBuild {
             const weaponAttr = getTemporaryWeaponAttr(key, fieldName, temporaryAttributes, skillContext)
             const skillAttrsContext = getSummonAttrs(key, temporaryAttributes, fieldName, skillContext)
             const fieldDamageType = fieldName ? getSkillAttr(fieldName, base, skillContext)?.伤害类型 : undefined
+            // 箭雨的独立降伤只作用于武器自身攻击：100% 灾厄伤害字段豁免，且只剔除箭雨自身词条
+            const arrowRainPenalty =
+                weapon && fieldDamageType === "灾厄" && weapon.类型 === "远程" && this.rangedMods.some(v => v?.id === 43604) ? -0.6 : 0
+            const weaponIndependentDamageIncrease = weaponAttr ? (1 + weaponAttr.独立增伤) / (1 + arrowRainPenalty) : 1
             const attackTypeDamageBonus = getWeaponAttackTypeBonus(key, fieldName, "增伤", skillContext)
             const attackTypeIndependentDamageBonus = getWeaponAttackTypeBonus(key, fieldName, "独立增伤", skillContext)
             const damage =
@@ -3358,7 +3363,7 @@ export class CharBuild {
                               weapon: {
                                   ...weaponAttr,
                                   增伤: weaponAttr.增伤 + attackTypeDamageBonus,
-                                  独立增伤: (1 + weaponAttr.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
+                                  独立增伤: weaponIndependentDamageIncrease * (1 + attackTypeIndependentDamageBonus) - 1,
                               },
                           },
                           weapon,
