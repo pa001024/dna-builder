@@ -30,10 +30,11 @@ const SNIPPET_LIMIT = 600
 const TEXT_LIMIT = 320
 
 /**
- * 剧情 AI 总结的正文上限。
+ * 长文类正文（剧情 AI 总结 / 剧情回顾 / 游戏内百科）的正文上限。
  *
- * 总结本身就是「一段完整的梗概」（实测 139 条：中位 212 字、最长 297 字），
- * 按台词行的 320 字口径截断会把它拦腰砍断，反而失去「一次看懂整条剧情」的价值。
+ * 这类 chunk 本身就是「一段完整的梗概 / 词条正文」（总结实测 139 条：中位 212 字、最长 297 字；
+ * 剧情回顾同理是一段段剧情梗概，百科正文段亦为成段说明），按台词行的 320 字口径截断会把它拦腰砍断，
+ * 反而失去「一次看懂整段剧情 / 词条」的价值。
  */
 const SUMMARY_TEXT_LIMIT = 400
 
@@ -348,7 +349,10 @@ export function runRagQuery(
             module: chunk.module,
             entityId: chunk.entityId,
             title: chunk.title,
-            text: truncate(chunk.text, chunk.kind === "summary" ? SUMMARY_TEXT_LIMIT : TEXT_LIMIT),
+            text: truncate(
+                chunk.text,
+                chunk.kind === "summary" || chunk.kind === "review" || chunk.kind === "wiki" ? SUMMARY_TEXT_LIMIT : TEXT_LIMIT
+            ),
             snippet,
             meta: chunk.meta,
             path: chunk.path,

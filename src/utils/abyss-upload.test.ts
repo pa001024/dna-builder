@@ -1,6 +1,11 @@
 import type { DNARoleEntity } from "dna-api"
 import { describe, expect, it } from "vitest"
-import { buildAbyssUploadPayload } from "./abyss-upload"
+import {
+    buildAbyssCalamityOverrides,
+    buildAbyssUploadPayload,
+    detectMissingAbyssWeaponSlots,
+    getCalamityWeaponOptions,
+} from "./abyss-upload"
 
 const mockRoleInfo = {
     roleInfo: {
@@ -120,6 +125,132 @@ describe("buildAbyssUploadPayload", () => {
         } as DNARoleEntity)
 
         expect(payload?.rangedId).toBe(20599)
+    })
+
+    it("灾厄武器候选应各按槽位返回 2 把", () => {
+        expect(getCalamityWeaponOptions("melee").map(item => item.weaponId)).toEqual([10299, 10399])
+        expect(getCalamityWeaponOptions("ranged").map(item => item.weaponId)).toEqual([20298, 20599])
+    })
+
+    it("langRangeWeaponIcon 缺失时应判定为远程灾厄武器槽位", () => {
+        const { langRangeWeaponIcon: _omit, ...rest } = mockRoleInfo.roleInfo.abyssInfo.bestTimeVo1
+        const role = {
+            ...mockRoleInfo,
+            roleInfo: {
+                ...mockRoleInfo.roleInfo,
+                abyssInfo: {
+                    ...mockRoleInfo.roleInfo.abyssInfo,
+                    bestTimeVo1: rest,
+                },
+            },
+        } as unknown as DNARoleEntity
+
+        const missing = detectMissingAbyssWeaponSlots(role)
+        expect(missing.map(item => item.slot)).toEqual(["ranged"])
+        expect(missing[0]?.options.map(item => item.weaponId)).toEqual([20298, 20599])
+    })
+
+    it("closeWeaponIcon 缺失时应判定为近战灾厄武器槽位", () => {
+        const { closeWeaponIcon: _omit, ...rest } = mockRoleInfo.roleInfo.abyssInfo.bestTimeVo1
+        const role = {
+            ...mockRoleInfo,
+            roleInfo: {
+                ...mockRoleInfo.roleInfo,
+                abyssInfo: {
+                    ...mockRoleInfo.roleInfo.abyssInfo,
+                    bestTimeVo1: rest,
+                },
+            },
+        } as unknown as DNARoleEntity
+
+        const missing = detectMissingAbyssWeaponSlots(role)
+        expect(missing.map(item => item.slot)).toEqual(["melee"])
+        expect(missing[0]?.options.map(item => item.weaponId)).toEqual([10299, 10399])
+    })
+
+    it("图标齐全时不应判定出缺失槽位", () => {
+        expect(detectMissingAbyssWeaponSlots(mockRoleInfo)).toEqual([])
+    })
+
+    it("协战武器图标缺失时应判定为协战槽位且候选包含全部 4 把灾厄武器", () => {
+        const { phantomWeaponIcon1: _omit, ...rest } = mockRoleInfo.roleInfo.abyssInfo.bestTimeVo1
+        const role = {
+            ...mockRoleInfo,
+            roleInfo: {
+                ...mockRoleInfo.roleInfo,
+                abyssInfo: {
+                    ...mockRoleInfo.roleInfo.abyssInfo,
+                    bestTimeVo1: rest,
+                },
+            },
+        } as unknown as DNARoleEntity
+
+        const missing = detectMissingAbyssWeaponSlots(role)
+        expect(missing.map(item => item.slot)).toEqual(["support1"])
+        expect(missing[0]?.options.map(item => item.weaponId)).toEqual([10299, 10399, 20298, 20599])
+        expect(missing[0]?.options.map(item => item.weaponType)).toEqual(["melee", "melee", "ranged", "ranged"])
+    })
+
+    it("主控与两把协战武器同时缺失时按主控→协战1→协战2 顺序列出", () => {
+        const {
+            closeWeaponIcon: _melee,
+            phantomWeaponIcon1: _s1,
+            phantomWeaponIcon2: _s2,
+            ...rest
+        } = mockRoleInfo.roleInfo.abyssInfo.bestTimeVo1
+        const role = {
+            ...mockRoleInfo,
+            roleInfo: {
+                ...mockRoleInfo.roleInfo,
+                abyssInfo: {
+                    ...mockRoleInfo.roleInfo.abyssInfo,
+                    bestTimeVo1: rest,
+                },
+            },
+        } as unknown as DNARoleEntity
+
+        expect(detectMissingAbyssWeaponSlots(role).map(item => item.slot)).toEqual(["melee", "support1", "support2"])
+    })
+
+    it("协战角色本身缺失时不应要求补选其武器", () => {
+        const { phantomCharIcon2: _char, phantomWeaponIcon2: _weapon, ...rest } = mockRoleInfo.roleInfo.abyssInfo.bestTimeVo1
+        const role = {
+            ...mockRoleInfo,
+            roleInfo: {
+                ...mockRoleInfo.roleInfo,
+                abyssInfo: {
+                    ...mockRoleInfo.roleInfo.abyssInfo,
+                    bestTimeVo1: rest,
+                },
+            },
+        } as unknown as DNARoleEntity
+
+        expect(detectMissingAbyssWeaponSlots(role)).toEqual([])
+    })
+
+    it("应支持用弹窗选择结果覆盖协战武器 id", async () => {
+        const payload = await buildAbyssUploadPayload(mockRoleInfo, { supportWeapon1: 20298, supportWeapon2: 10399 })
+        expect(payload?.supportWeapon1).toBe(20298)
+        expect(payload?.supportWeapon2).toBe(10399)
+        expect(payload?.meleeId).toBe(10304)
+        expect(payload?.rangedId).toBe(20102)
+    })
+
+    it("buildAbyssCalamityOverrides 应把槽位选择映射为对应上传字段", () => {
+        expect(buildAbyssCalamityOverrides({ melee: 10299, ranged: 20298, support1: 10399, support2: 20599 })).toEqual({
+            meleeId: 10299,
+            rangedId: 20298,
+            supportWeapon1: 10399,
+            supportWeapon2: 20599,
+        })
+        expect(buildAbyssCalamityOverrides({ support2: 20599 })).toEqual({ supportWeapon2: 20599 })
+        expect(buildAbyssCalamityOverrides({})).toEqual({})
+    })
+
+    it("应支持用弹窗选择结果覆盖灾厄武器 id", async () => {
+        const payload = await buildAbyssUploadPayload(mockRoleInfo, { rangedId: 20298 })
+        expect(payload?.rangedId).toBe(20298)
+        expect(payload?.meleeId).toBe(10304)
     })
 
     it("应该拒绝低于 160 的 stars", async () => {

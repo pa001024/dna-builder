@@ -1,8 +1,11 @@
 {
     "？？？": "???",
     "暗属性攻击": "어둠 속성 공격",
+    "昂扬": "격양",
     "办事高效，可以更快完成任务。": "효율적으로 일을 처리해 더 빠르게 퀘스트를 완료할 수 있다.",
     "办事细致，更有可能成功地完成任务。": "세심하게 일을 처리해 퀘스트에 성공할 가능성이 더 높다.",
+    "暴击": "크리티컬 확률",
+    "背水": "필사",
     "编辑": "편집",
     "编辑构筑": "빌드 편집",
     "标题": "제목",
@@ -10,7 +13,10 @@
     "查看全部": "전체 보기",
     "查看详情": "상세 보기",
     "称号框": "칭호 프레임",
+    "充盈威力": "오버차지 위력",
+    "充盈转化": "오버차지 전환",
     "初始解锁": "초기 해금",
+    "触发": "발동 확률",
     "道具获取周报": "아이템 획득 주간",
     "道具流水查询": "아이템 거래 조회",
     "得心应手，有概率获得多倍的派遣奖励。": "숙련도가 높아 일정 확률로 파견 보상을 배로 획득한다.",
@@ -19,6 +25,7 @@
     "等级调整": "레벨 조정",
     "掉落物": "드롭 아이템",
     "独立": "개별",
+    "多重": "다중 사격",
     "发型": "헤어스타일",
     "房间": "방",
     "风属性攻击": "바람 속성 공격",
@@ -35,7 +42,11 @@
     "获取方式": "획득 방법",
     "基本信息": "기본 정보",
     "基础属性": "기본 속성",
+    "技能范围": "스킬 범위",
+    "技能耐久": "스킬 지속",
     "技能替换": "스킬 교체",
+    "技能威力": "스킬 위력",
+    "技能效益": "스킬 효율",
     "加载更多": "더 불러오기",
     "加载中...": "불러오는 중...",
     "见微知著": "본질의 깨우침",
@@ -76,7 +87,6 @@
     "射速": "연사 속도",
     "深境罗盘": "심층 나침반",
     "时间线": "타임라인",
-    "实体": "실체",
     "拾穗者": "수집가",
     "使用": "사용",
     "事件": "이벤트",
@@ -127,7 +137,6 @@
     "主线任务": "메인 퀘스트",
     "注重惩恶扬善，公序良俗。": "질서, 선함, 권선징악을 중요시한다.",
     "注重权衡利弊，获取收益。": "장단점을 저울질해 수익을 최대화한다.",
-    "专武": "전용 무기",
     "资源": "자원",
     "子技能": "하위 스킬",
     "左右逢源": "행운의 화신",
@@ -145,6 +154,13 @@
         "assistantDesc": "캐릭터의 자주 쓰는 조합을 확인",
         "available": "사용 가능",
         "buildUploadDataFailed": "심연 업로드 데이터 생성에 실패했습니다",
+        "calamityCancel": "취소",
+        "calamityConfirm": "업로드 확인",
+        "calamityDesc": "이 슬롯의 무기를 식별할 수 없습니다(재앙 무기는 API에서 제공되지 않습니다). 실제로 사용한 무기를 선택해 주세요.",
+        "calamitySupportHint": "협동 캐릭터는 무기를 하나만 들고 오며 근접/원거리 모두 가능합니다",
+        "calamityTitle": "재앙 무기 선택",
+        "calamityTypeMelee": "근접",
+        "calamityTypeRanged": "원거리",
         "char_usage_rate": "캐릭터 사용률",
         "createdAt": "생성 시간",
         "desc": "어비스 조합과 캐릭터/무기 통계",
@@ -189,18 +205,19 @@
         "sheetSubmission": "제출",
         "sheetWeapon": "무기 참여",
         "skillLevel": "스킬 레벨",
+        "slotMain": "메인",
         "stars": "성급",
         "submissionsFrom": "이 페이지는 {{count}}명의 플레이어 데이터로 분석되었습니다. 사용률 = 해당 캐릭터를 사용한 플레이어 수 ÷ 해당 캐릭터를 보유한 플레이어 수",
         "submitCount": "{{count}}회 제출",
         "submitId": "제출 ID",
-        "support1": "지원 1",
-        "support1Id": "지원 1 ID",
-        "support2": "지원 2",
-        "support2Id": "지원 2 ID",
-        "supportWeapon1": "지원 무기 1",
-        "supportWeapon1Id": "지원 무기 1 ID",
-        "supportWeapon2": "지원 무기 2",
-        "supportWeapon2Id": "지원 무기 2 ID",
+        "support1": "협동 1",
+        "support1Id": "협동 1 ID",
+        "support2": "협동 2",
+        "support2Id": "협동 2 ID",
+        "supportWeapon1": "협동 무기 1",
+        "supportWeapon1Id": "협동 무기 1 ID",
+        "supportWeapon2": "협동 무기 2",
+        "supportWeapon2Id": "협동 무기 2 ID",
         "team_builder": "편성 도우미",
         "title": "어비스 사용률",
         "top_deploy_team": "출전 수가 가장 많은 편성",
@@ -615,7 +632,6 @@
         "title": "서적 목록",
         "totalCount": "총 {{count}}개 읽을거리"
     },
-    "Boss削韧": "보스 경직",
     "box-drop": {
         "boxMaximum": "총 한도",
         "boxPerDay": "일일 한도",
@@ -748,6 +764,7 @@
         "melee": "근접",
         "melee_weapon": "근접 무기",
         "melee_weapon_mod_config": "근접 무기 MOD 설정",
+        "mod_count": "{{count}} MOD",
         "mod_variant": "MOD 구성",
         "mod_variant_add": "MOD 구성 추가(빌드당 최대 3개: A/B/C)",
         "mod_variant_remove": "이 MOD 구성 제거",
@@ -927,6 +944,23 @@
         "closeWindowFailed": "클라우드 게임 창을 닫지 못했습니다",
         "openWindowFailed": "클라우드 게임 창을 열지 못했습니다"
     },
+    "clue-detail": {
+        "emptyRecords": "내용 항목 없음",
+        "notFound": "단서를 찾을 수 없습니다",
+        "pageId": "페이지 ID",
+        "pageName": "조사 대상",
+        "records": "내용 항목",
+        "sourceSection": "단서 소속",
+        "tabType": "페이지 유형",
+        "triggerDialogue": "대화",
+        "triggerResource": "자원",
+        "unlockCondition": "해금 조건"
+    },
+    "clue-list": {
+        "allCategories": "전체",
+        "searchPlaceholder": "단서 이름·내용 검색(병음 지원)...",
+        "totalCount": "단서 {{count}}개"
+    },
     "comment-section": {
         "comment": "댓글",
         "comment_placeholder": "매너 있게, 이성적으로 소통해요～",
@@ -994,6 +1028,7 @@
         "season": "시즌",
         "select_level_range": "레벨 범위 선택",
         "show_diff_only": "차이만 표시",
+        "signature_weapon": "전용 무기",
         "source": "소스",
         "sub_region": "하위 지역",
         "test": "테스트",
@@ -1007,6 +1042,22 @@
         "weapon_avatar": "무기 아바타",
         "weapon_category": "무기 분류",
         "weight": "가중치"
+    },
+    "condition-item": {
+        "count_unit": "개",
+        "dialogue_read": "대화 열람",
+        "difficulty": "로그라이크 난이도",
+        "group_blessing": "축복 세트",
+        "group_treasure": "보물 세트",
+        "have": "보유",
+        "impression": "인상",
+        "manual": "수동 기록",
+        "pass_room": "통과한 층수",
+        "player_level": "레벨",
+        "pre_room": "이전 방",
+        "quest": "퀘스트 완료",
+        "quest_chain": "퀘스트 체인 완료",
+        "variable": "변수"
     },
     "copy-id": {
         "click_copy": "클릭하여 {{name}} 복사",
@@ -1107,6 +1158,8 @@
         "char_desc": "캐릭터 정보와 속성을 확인",
         "charprofile": "캐릭터 아카이브",
         "charvoice": "캐릭터 보이스",
+        "clue": "단서 보드",
+        "clue_desc": "조사 벽 단서 보드 보기",
         "damage": "대미지",
         "damage_desc": "대미지 공식을 단계별로 분해",
         "desc": "게임 데이터 쿼리",
@@ -1155,6 +1208,8 @@
         "reputation_desc": "지역 명성 레벨 및 위탁 정보를 확인",
         "resource": "자원",
         "resource_desc": "자원 정보와 아이콘 확인",
+        "review": "스토리 회고",
+        "review_desc": "스토리 회고 타임라인 보기",
         "role": "캐릭터",
         "rouge": "미궁",
         "rouge_desc": "미궁（혼자/협력）의 심지, 유물, 랜턴, 계약, 방 정보 확인",
@@ -1169,7 +1224,9 @@
         "walnut": "호두",
         "walnut_desc": "호두 확률 정보 보기 및 시뮬레이션 추첨",
         "weapon": "무기",
-        "weapon_desc": "무기 정보와 속성 확인"
+        "weapon_desc": "무기 정보와 속성 확인",
+        "wiki": "백과사전",
+        "wiki_desc": "세력·인물·풍토·문명으로 분류된 게임 내 백과사전 항목"
     },
     "db-abyss-dungeon": {
         "abyss_id": "심연 ID",
@@ -3474,6 +3531,23 @@
     "resource-list": {
         "title": "자원 목록"
     },
+    "review-detail": {
+        "branch": "구분",
+        "chainId": "열 ID",
+        "content": "회고 본문",
+        "emptyContent": "본문 없음",
+        "episode": "챕터",
+        "infoSection": "회고 정보",
+        "main": "메인",
+        "notFound": "스토리 리뷰를 찾을 수 없습니다",
+        "questChain": "퀘스트 체인",
+        "side": "서브",
+        "unlockCondition": "해금 조건"
+    },
+    "review-list": {
+        "searchPlaceholder": "회고 제목·본문 검색(병음 지원)...",
+        "totalCount": "회고 {{count}}개"
+    },
     "reward-item": {
         "capacity": "용량:{{value}}",
         "drop_item": "드롭:",
@@ -3992,6 +4066,27 @@
     "skill-cd-pos-picker": {
         "no_game_window": "게임 창이 감지되지 않아 미리보기는 현재 화면 해상도로 표시됩니다"
     },
+    "skill-creature": {
+        "box": "사각",
+        "capsule": "캡슐",
+        "circle": "원",
+        "entity": "실체",
+        "lifetime": "수명",
+        "shape": "형태",
+        "speed": "속도",
+        "unspecified": "미지정",
+        "vfxLoopInterval": "이펙트 반복 간격"
+    },
+    "skill-fields": {
+        "bossStagger": "보스 경직",
+        "seconds": "초",
+        "tags": "태그"
+    },
+    "skill-tag": {
+        "melee": "근접",
+        "ranged": "원거리",
+        "weapon": "무기"
+    },
     "skin-colorize": {
         "desc": "캐릭터 스킨 염색 미리보기 및 공유",
         "desc_placeholder": "추가 설명(선택)",
@@ -4050,6 +4145,11 @@
         "pack_update_title": "데이터 팩 업데이트 가능",
         "pack_version_missing": "사용 가능한 데이터 팩 버전을 찾을 수 없습니다",
         "release_notes": "업데이트 내용"
+    },
+    "string-board": {
+        "next": "다음",
+        "picture": "이미지",
+        "prev": "이전"
     },
     "tag": {
         "防御": "방어",
@@ -4313,7 +4413,15 @@
         "title": "호두 목록"
     },
     "weapon-detail": {
-        "title": "무기 세부정보"
+        "ascension": "돌파",
+        "crafting": "제작",
+        "moveDemonWedges": "동작 악마의 쐐기",
+        "noAscensionData": "각성 데이터 없음",
+        "relatedCharacters": "관련 캐릭터",
+        "secondaryUnlock": "2차 해금",
+        "source": "획득처",
+        "title": "무기 세부정보",
+        "unlock": "해제"
     },
     "weapon-list": {
         "calamityConflict": "재앙 무기는 하나만 장착할 수 있습니다: 「{{first}}」를 장착 중이므로 「{{second}}」는 장착할 수 없습니다.",
@@ -4340,5 +4448,22 @@
         "three_star_threshold": "3성 기준",
         "victory_goal": "승리 목표",
         "victory_mode": "승리 모드"
+    },
+    "wiki-detail": {
+        "emptyTexts": "본문 없음",
+        "mainType": "대분류",
+        "notFound": "항목을 찾을 수 없습니다",
+        "relatedSection": "관련 항목",
+        "sourceSection": "분류",
+        "subType": "소분류",
+        "textCount": "단락 수",
+        "texts": "본문",
+        "triggerDialogue": "대사"
+    },
+    "wiki-list": {
+        "allCategories": "전체",
+        "emptyResult": "조건에 맞는 항목이 없습니다",
+        "searchPlaceholder": "항목 검색",
+        "totalCount": "총 {{count}}개 항목"
     }
 }

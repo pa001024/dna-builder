@@ -56,6 +56,9 @@
 | `summary` | `storysummary.data`（**只有中文**）| 一条任务链一条，正文是整链梗概；`/db/questchain/<chainId>` |
 | `voice` | `charvoice.data` 各语言语音 | 一条语音一条；`/db/char/<charId>` |
 | `profile` | `charext.data` 各语言角色档案 | 一条档案一条，正文是整篇档案原文；`/db/char/<charId>` |
+| `clue` | `clue.data`（**只有中文**）| 一条线索内容条目一条，正文 = 该条线索记录原文；`/db/clue?id=<clueId>` |
+| `review` | `review.data`（**只有中文**）| 一条回顾条目一条，正文 = 该条剧情回顾原文；`/db/review?id=<reviewId>` |
+| `wiki` | `wiki.data`（**只有中文**）| 一条百科正文段一条，正文 = 该段词条原文；`/db/wiki?id=<entryId>` |
 | `entry` | 全库检索索引枚举出的 30 个数据源 | 一条目一条，正文 = 副信息 + 隐藏检索词；详情页路径 |
 
 - 角色档案（`profile`）与语音一样是「按语言切分的独立数据集」（六种语言齐备），标题拼成
@@ -66,6 +69,8 @@
   `search_story`（带关键词时）与 `read_story` 的返回里也带 `summary` 字段，模型无需逐行翻原文再拼结论。
 - 总结与待检索数据包的版本门限一致（只枚举通过门限的任务链），语言固定 `RAG_SUMMARY_LANG = zh`：
   其他语言提问靠跨语言关键词扩展命中它，`note` 会说明「总结只有中文原文」。
+- 线索板（`clue`）、剧情回顾（`review`）与游戏内百科（`wiki`）同属「只有简体中文一套」的派生内容（`RAG_CN_SOURCE_LANG = zh`）：
+  每个语言的语料都嵌同一份中文正文，命中即完整正文，无需再用别的工具回查；`note` 同样提示只有中文原文。
 
 ### 性能（实测，中文全量 2.8 万条 chunk / 227 万字符）
 

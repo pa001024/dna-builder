@@ -74,18 +74,31 @@ export function formatWeaponProp(prop: string, val: any): string {
     return format100(val, 2)
 }
 const propRegex = /神智消耗|神智回复$/
+/**
+ * 技能字段格式串里的占位符，匹配 `{%}`（按百分比）与 `{}`（按绝对值）。
+ * 捕获组保证 split 后占位符本身仍留在结果数组里。
+ */
+const skillPropPlaceholderRegex = /(\{%?\})/
 export function formatSkillProp(prop: string, val: LeveledSkillField) {
     const fmt = propRegex.test(prop) ? format1 : format100
     if (!val.格式) {
         return fmt(val.值)
     }
 
+    // 格式串里除占位符外的文字是展示单位（如「{%}最大生命」里的「最大生命」），需要过翻译；
+    // 用 keySeparator/nsSeparator 关闭分隔符，避免中文裸词被点号 / 冒号误拆。
+    const translateLiteral = (text: string) => (text ? i18next.t(text, { keySeparator: false, nsSeparator: false }) : text)
+
     let placeholderIndex = 0
-    return val.格式.replace(/\{%?\}/g, v => {
-        const currentValue = placeholderIndex === 0 ? val.值 : (val.值2 ?? val.值)
-        placeholderIndex += 1
-        return v.includes("%") ? format100(currentValue) : format1(currentValue)
-    })
+    return val.格式
+        .split(skillPropPlaceholderRegex)
+        .map(part => {
+            if (!skillPropPlaceholderRegex.test(part)) return translateLiteral(part)
+            const currentValue = placeholderIndex === 0 ? val.值 : (val.值2 ?? val.值)
+            placeholderIndex += 1
+            return part.includes("%") ? format100(currentValue) : format1(currentValue)
+        })
+        .join("")
 }
 
 export async function copyText(text: string) {
@@ -93,10 +106,12 @@ export async function copyText(text: string) {
         await clipboard.writeText(text)
         return
     }
-    if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text)
-        return
-    }
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text)
+            return
+        }
+    } catch {}
     const input = document.createElement("textarea")
     input.value = text
     input.style.position = "fixed"

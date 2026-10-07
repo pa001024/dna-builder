@@ -67,6 +67,35 @@ const ATTR_KEY_OVERRIDES: Record<string, string> = {
 }
 
 /**
+ * 前端自造属性（上游 AttrConfig 里没有，但构筑面板要展示名称与说明）。
+ *
+ * 必须写进这张表：属性说明在下发时是「整体替换 attrDesc 命名空间」，
+ * 上游没有来源的条目若只靠 `bun i18n add` 手工塞进去，会被下一次导入悄悄删掉
+ * （历史事故：「魔灵CD」「魔灵CD缩减」两条说明被误删）。
+ * 名称只列非简体语言（zh-CN 下键名即展示名，按既有惯例省略），且已存在的译文不覆盖。
+ */
+const FRONTEND_COINED_ATTRS: AttrEntry[] = [
+    {
+        id: "Frontend_GeniemonCD",
+        name: "魔灵CD",
+        nameTexts: { en: "Geniemon CD" },
+        descTexts: {
+            "zh-CN": "魔灵主动技的实际冷却（秒）= 原始冷却 × (1 - 魔灵CD缩减)。未选择魔灵时为 0。",
+            en: "Actual cooldown (seconds) of the selected Geniemon's active skill = base CD × (1 − CDR). 0 when no Geniemon is selected.",
+        },
+    },
+    {
+        id: "Frontend_GeniemonCDReduce",
+        name: "魔灵CD缩减",
+        nameTexts: { en: "Geniemon CD Reduction" },
+        descTexts: {
+            "zh-CN": "魔灵支援技能的冷却缩减比例，来源为魔灵潜质（如「敏锐」满档 24%）。",
+            en: "Cooldown reduction for the Geniemon support skill, granted by Geniemon Traits (e.g. 敏锐 gives 24% at max tier).",
+        },
+    },
+]
+
+/**
  * 前端可能拿来做属性名/属性说明查询的属性名集合。
  * 与 src/data/CharBuild.ts 的 CharAttr / WeaponAttr 键保持一致，
  * 外加两个组件攻击行拼出的展示名（角色元素 + 属性攻击、武器伤害类型 + 攻击）。
@@ -330,6 +359,9 @@ function collectAttrEntries(attrConfigs: Record<string, AttrConfigRow>, textMap:
             descTexts,
         })
     }
+
+    // 上游没有的属性（前端自造）必须合并进来，否则整体替换 attrDesc 命名空间时会把它们删掉
+    entries.push(...FRONTEND_COINED_ATTRS)
 
     // 同键冲突会让后写入的属性覆盖前一个，属于上游/映射表问题，直接报错
     const byName = new Map<string, string>()

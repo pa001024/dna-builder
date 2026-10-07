@@ -16,7 +16,12 @@ import { useInvStore } from "@/store/inv"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
-import { buildAbyssUploadPayload } from "@/utils/abyss-upload"
+import {
+    type AbyssMissingWeaponSlot,
+    type AbyssUploadOverrides,
+    buildAbyssUploadPayload,
+    detectMissingAbyssWeaponSlots,
+} from "@/utils/abyss-upload"
 import { imgRemoteToLocal } from "@/utils/remoteImg"
 import { formatTimeOnly } from "@/utils/time"
 
@@ -164,6 +169,7 @@ function getDraftInfo(productId: number) {
 const lastUpdateTime = useLocalStorage("dna.gameInfo.lastUpdateTime", 0)
 const abyssUploading = ref(false)
 const abyssUploadId = ref<string | null>(null)
+const abyssCalamitySlots = ref<AbyssMissingWeaponSlot[]>([])
 const canUploadAbyss = computed(() => !!roleInfo.value?.roleInfo?.abyssInfo?.bestTimeVo1 && !!roleInfo.value?.roleInfo?.roleShow?.roleId)
 const weeklyReportType = ref<1 | 2>(1)
 const weeklyReport = ref<DNAItemWeeklyReport | null>(null)
@@ -303,9 +309,33 @@ async function uploadAbyssUsage() {
         return
     }
 
+    // 主控 / 协战武器图标缺失时无法反解出武器 id（后端不下发灾厄武器），先让用户手动指定
+    const missingSlots = detectMissingAbyssWeaponSlots(role)
+    if (missingSlots.length > 0) {
+        abyssCalamitySlots.value = missingSlots
+        return
+    }
+
+    await submitAbyssUsage(role, {})
+}
+
+function cancelAbyssCalamity() {
+    abyssCalamitySlots.value = []
+}
+
+async function confirmAbyssCalamity(overrides: AbyssUploadOverrides) {
+    const role = roleInfo.value
+    abyssCalamitySlots.value = []
+    if (!role?.roleInfo?.abyssInfo?.bestTimeVo1) {
+        return
+    }
+    await submitAbyssUsage(role, overrides)
+}
+
+async function submitAbyssUsage(role: DNARoleEntity, overrides: AbyssUploadOverrides) {
     abyssUploading.value = true
     try {
-        const payload = await buildAbyssUploadPayload(role)
+        const payload = await buildAbyssUploadPayload(role, overrides)
         if (!payload) {
             throw new Error("无法生成深渊上传数据")
         }
@@ -914,7 +944,10 @@ async function generateScreenshot() {
             </section>
 
             <!-- 深渊 -->
-            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <section
+                v-if="roleInfo.roleInfo.abyssInfo"
+                class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+            >
                 <SectionHeader no-animate compact kicker="ABYSS" :title="roleInfo.roleInfo.abyssInfo.operaName">
                     <template #trailing>
                         <div class="flex items-center gap-2">
@@ -946,7 +979,7 @@ async function generateScreenshot() {
                 <div class="mt-2 space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-xs text-base-content/60">{{
-                            roleInfo.roleInfo.abyssInfo.progressName.replace(/null\s+/g, "")
+                            (roleInfo.roleInfo.abyssInfo.progressName || "").replace(/null\s+/g, "")
                         }}</span>
                         <span
                             class="inline-flex items-center gap-1 rounded-xs border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary"
@@ -1048,6 +1081,8 @@ async function generateScreenshot() {
             </div>
         </div>
     </DialogModel>
+
+    <AbyssCalamityWeaponDialog :slots="abyssCalamitySlots" @confirm="confirmAbyssCalamity" @cancel="cancelAbyssCalamity" />
 </template>
 
 <style lang="less">

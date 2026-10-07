@@ -2,10 +2,8 @@
 import { computed, nextTick, ref, watch } from "vue"
 import { useGameText } from "@/composables/useGameText"
 import { LeveledSkill } from "@/data"
-import { walnutMap } from "@/data/d"
 import { modConvertData } from "@/data/d/convert.data"
 import { modDraftMap, modDungeonMap } from "@/data/d/index"
-import shopData from "@/data/d/shop.data"
 import weaponData from "@/data/d/weapon.data"
 import type { Draft, Mod, WeaponSkill } from "@/data/data-types"
 import { formatModName, LeveledMod } from "@/data/leveled/LeveledMod"
@@ -13,7 +11,7 @@ import { formatProp } from "@/util"
 import { formatModLimit } from "@/utils/mod-limit"
 import { getParamTemplate } from "@/utils/param-text"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
-import { collectModCharBreakthroughSources, collectModPackSources, collectModQuestSources } from "@/utils/resource-source"
+import { collectModCharBreakthroughSources, collectModPackSources, collectModQuestSources, collectModShopSources } from "@/utils/resource-source"
 import { getModDropInfo } from "@/utils/reward-utils"
 import type { ShopSourceInfo } from "@/utils/weapon-source"
 
@@ -111,56 +109,6 @@ const modDungeonSources = computed(() => {
 const modQuestSources = computed(() => collectModQuestSources(props.mod.id))
 const modCharBreakthroughSources = computed(() => collectModCharBreakthroughSources(props.mod.id))
 const modPackSources = computed(() => collectModPackSources(props.mod.id))
-
-/**
- * 收集当前魔之楔的商店来源信息。
- * @param mod 魔之楔数据
- * @returns 商店来源列表
- */
-function collectModShopSources(mod: Mod): ShopSourceInfo[] {
-    const result: ShopSourceInfo[] = []
-    const sourceKeySet = new Set<string>()
-
-    shopData.forEach(shop => {
-        shop.mainTabs.forEach(mainTab => {
-            mainTab.subTabs.forEach(subTab => {
-                subTab.items.forEach(item => {
-                    const matched =
-                        (item.itemType === "Mod" && item.typeId === mod.id) ||
-                        (item.itemType === "Walnut" &&
-                            walnutMap.get(item.typeId)?.奖励?.some(reward => reward.type === "Mod" && reward.id === mod.id))
-
-                    if (!matched) {
-                        return
-                    }
-
-                    const key = `shop-${shop.id}-${mainTab.id}-${subTab.id}-${item.id}-${mod.id}`
-                    if (sourceKeySet.has(key)) {
-                        return
-                    }
-
-                    sourceKeySet.add(key)
-                    result.push({
-                        key,
-                        timeStart: item.startTime,
-                        timeEnd: item.endTime,
-                        detail: `${mainTab.name} -> ${subTab.name}`,
-                        itemId: item.id,
-                        shopId: shop.id,
-                        shopName: shop.name,
-                        subTabId: subTab.id,
-                        price: item.price,
-                        priceName: item.priceName,
-                        num: item.num,
-                        limit: item.limit,
-                    })
-                })
-            })
-        })
-    })
-
-    return result
-}
 
 /**
  * 收集当前魔之楔的商店来源信息。

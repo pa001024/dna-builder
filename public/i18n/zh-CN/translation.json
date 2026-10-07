@@ -84,7 +84,6 @@
     "失衡": "战姿失衡",
     "狮鹫": "狮鹫之",
     "时间线": "时间线",
-    "实体": "实体",
     "使用": "使用",
     "事件": "事件",
     "收起": "收起",
@@ -134,7 +133,6 @@
     "职业": "职业",
     "中庭蛇": "中庭蛇之",
     "主线任务": "主线任务",
-    "专武": "专武",
     "装填": "子弹装填速度",
     "资源": "资源",
     "子技能": "子技能",
@@ -152,6 +150,13 @@
         "assistantDesc": "查询角色常用阵容",
         "available": "可用",
         "buildUploadDataFailed": "无法生成深渊上传数据",
+        "calamityCancel": "取消",
+        "calamityConfirm": "确认上传",
+        "calamityDesc": "该槽位武器未能识别（灾厄武器不会由接口下发），请选择本场实际使用的武器",
+        "calamitySupportHint": "协战只带一把武器，近战/远程都有可能",
+        "calamityTitle": "选择灾厄武器",
+        "calamityTypeMelee": "近战",
+        "calamityTypeRanged": "远程",
         "char_usage_rate": "角色使用率",
         "createdAt": "创建时间",
         "desc": "深渊阵容与角色武器统计",
@@ -196,18 +201,19 @@
         "sheetSubmission": "提交",
         "sheetWeapon": "武器参与",
         "skillLevel": "技能等级",
+        "slotMain": "主控",
         "stars": "星级",
         "submissionsFrom": "本页面全部数据分析自 {{count}} 名玩家。使用率=上场该角色玩家数÷持有该角色玩家数",
         "submitCount": "{{count}} 次提交",
         "submitId": "提交ID",
-        "support1": "助战1",
-        "support1Id": "助战1ID",
-        "support2": "助战2",
-        "support2Id": "助战2ID",
-        "supportWeapon1": "助战武器1",
-        "supportWeapon1Id": "助战武器1ID",
-        "supportWeapon2": "助战武器2",
-        "supportWeapon2Id": "助战武器2ID",
+        "support1": "协战1",
+        "support1Id": "协战1ID",
+        "support2": "协战2",
+        "support2Id": "协战2ID",
+        "supportWeapon1": "协战武器1",
+        "supportWeapon1Id": "协战武器1ID",
+        "supportWeapon2": "协战武器2",
+        "supportWeapon2Id": "协战武器2ID",
         "team_builder": "配队助手",
         "title": "深渊使用率",
         "top_deploy_team": "出战数最高的阵容",
@@ -624,7 +630,6 @@
         "title": "读物列表",
         "totalCount": "共 {{count}} 本读物"
     },
-    "Boss削韧": "Boss削韧",
     "box-drop": {
         "boxMaximum": "总上限",
         "boxPerDay": "每日上限",
@@ -757,6 +762,7 @@
         "melee": "近战",
         "melee_weapon": "近战武器",
         "melee_weapon_mod_config": "近战武器MOD配置",
+        "mod_count": "{{count}}模块",
         "mod_variant": "MOD配置",
         "mod_variant_add": "添加一份MOD配置（同一构筑最多三份：A/B/C）",
         "mod_variant_remove": "移除该MOD配置",
@@ -949,6 +955,23 @@
         "closeWindowFailed": "关闭云游戏窗口失败",
         "openWindowFailed": "打开云游戏窗口失败"
     },
+    "clue-detail": {
+        "emptyRecords": "暂无内容条目",
+        "notFound": "未找到该线索",
+        "pageId": "页面 ID",
+        "pageName": "调查对象",
+        "records": "内容条目",
+        "sourceSection": "线索归属",
+        "tabType": "页类型",
+        "triggerDialogue": "对话",
+        "triggerResource": "资源",
+        "unlockCondition": "解锁条件"
+    },
+    "clue-list": {
+        "allCategories": "全部",
+        "searchPlaceholder": "搜索线索名称、内容（支持拼音）...",
+        "totalCount": "共 {{count}} 条线索"
+    },
     "comment-section": {
         "comment": "评论",
         "comment_placeholder": "友善评论，理性交流～",
@@ -1016,6 +1039,7 @@
         "season": "赛季",
         "select_level_range": "选择等级范围",
         "show_diff_only": "仅显示差异",
+        "signature_weapon": "专武",
         "source": "来源",
         "sub_region": "子区域",
         "test": "测试",
@@ -1029,6 +1053,22 @@
         "weapon_avatar": "武器头像",
         "weapon_category": "武器分类",
         "weight": "权重"
+    },
+    "condition-item": {
+        "count_unit": "枚",
+        "dialogue_read": "已读对话",
+        "difficulty": "肉鸽难度",
+        "group_blessing": "祝福组",
+        "group_treasure": "宝物组",
+        "have": "拥有",
+        "impression": "印象",
+        "manual": "手动记录",
+        "pass_room": "已通过层数",
+        "player_level": "等级",
+        "pre_room": "前置房间",
+        "quest": "完成任务",
+        "quest_chain": "完成任务链",
+        "variable": "变量"
     },
     "copy-id": {
         "click_copy": "点击复制{{name}}",
@@ -1129,6 +1169,8 @@
         "char_desc": "查看角色信息和属性",
         "charprofile": "角色档案",
         "charvoice": "角色语音",
+        "clue": "线索板",
+        "clue_desc": "查看调查墙线索板内容",
         "damage": "伤害",
         "damage_desc": "伤害公式分步骤拆解",
         "desc": "查询游戏中的数据",
@@ -1177,6 +1219,8 @@
         "reputation_desc": "查看区域声名等级与委托信息",
         "resource": "资源",
         "resource_desc": "查看资源信息和图标",
+        "review": "剧情回顾",
+        "review_desc": "查看剧情回顾时间轴",
         "role": "角色",
         "rouge": "迷津",
         "rouge_desc": "查看迷津信息",
@@ -1191,7 +1235,9 @@
         "walnut": "密函",
         "walnut_desc": "查看密函概率信息和模拟抽取",
         "weapon": "武器",
-        "weapon_desc": "查看武器信息和属性"
+        "weapon_desc": "查看武器信息和属性",
+        "wiki": "百科",
+        "wiki_desc": "游戏内百科词条，按势力、人物、风土、文明分类"
     },
     "db-abyss-dungeon": {
         "abyss_id": "深渊ID",
@@ -3492,6 +3538,23 @@
     "resource-list": {
         "title": "资源列表"
     },
+    "review-detail": {
+        "branch": "归属",
+        "chainId": "列 ID",
+        "content": "回顾正文",
+        "emptyContent": "暂无正文",
+        "episode": "章节",
+        "infoSection": "回顾信息",
+        "main": "主线",
+        "notFound": "未找到该剧情回顾",
+        "questChain": "任务链",
+        "side": "支线",
+        "unlockCondition": "解锁条件"
+    },
+    "review-list": {
+        "searchPlaceholder": "搜索回顾标题、正文（支持拼音）...",
+        "totalCount": "共 {{count}} 条回顾"
+    },
     "reward-item": {
         "capacity": "容量:{{value}}",
         "drop_item": "掉落物:",
@@ -4010,6 +4073,27 @@
     "skill-cd-pos-picker": {
         "no_game_window": "未检测到游戏窗口,预览按当前屏幕分辨率显示"
     },
+    "skill-creature": {
+        "box": "方",
+        "capsule": "胶囊",
+        "circle": "圆",
+        "entity": "实体",
+        "lifetime": "生命周期",
+        "shape": "形状",
+        "speed": "速度",
+        "unspecified": "未指定",
+        "vfxLoopInterval": "特效循环间隔"
+    },
+    "skill-fields": {
+        "bossStagger": "Boss削韧",
+        "seconds": "秒",
+        "tags": "标签"
+    },
+    "skill-tag": {
+        "melee": "近战",
+        "ranged": "远程",
+        "weapon": "武器"
+    },
     "skin-colorize": {
         "desc": "预览和分享角色皮肤染色",
         "desc_placeholder": "补充描述（可选）",
@@ -4068,6 +4152,11 @@
         "pack_update_title": "数据包可更新",
         "pack_version_missing": "未找到可用的数据包版本",
         "release_notes": "更新说明"
+    },
+    "string-board": {
+        "next": "下一张",
+        "picture": "配图",
+        "prev": "上一张"
     },
     "tag": {
         "防御": "防御",
@@ -4331,7 +4420,15 @@
         "title": "密函列表"
     },
     "weapon-detail": {
-        "title": "武器详情"
+        "ascension": "突破",
+        "crafting": "制造",
+        "moveDemonWedges": "招式魔之楔",
+        "noAscensionData": "暂无突破数据",
+        "relatedCharacters": "关联角色",
+        "secondaryUnlock": "二次解锁",
+        "source": "来源",
+        "title": "武器详情",
+        "unlock": "解锁"
     },
     "weapon-list": {
         "calamityConflict": "灾厄武器只能装备一把：已装备「{{first}}」，无法再装备「{{second}}」。",
@@ -4358,5 +4455,22 @@
         "three_star_threshold": "三星门槛",
         "victory_goal": "胜利目标",
         "victory_mode": "胜利模式"
+    },
+    "wiki-detail": {
+        "emptyTexts": "暂无正文",
+        "mainType": "大类",
+        "notFound": "未找到该词条",
+        "relatedSection": "关联条目",
+        "sourceSection": "归属信息",
+        "subType": "子类",
+        "textCount": "段数",
+        "texts": "正文",
+        "triggerDialogue": "对话"
+    },
+    "wiki-list": {
+        "allCategories": "全部",
+        "emptyResult": "没有符合条件的词条",
+        "searchPlaceholder": "搜索词条",
+        "totalCount": "共 {{count}} 个词条"
     }
 }

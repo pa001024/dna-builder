@@ -11,21 +11,27 @@
 
 import type { CharExt } from "../d/charext.data"
 import type { CharVoice } from "../d/charvoice.data"
+import type { ClueTabType } from "../d/clue.data"
 import type { Dialogue, DialogueOption, QuestItem } from "../d/quest.data"
 import type { QuestChain } from "../d/questchain.data"
 import { questChain2Version } from "../d/questchain.data"
+import type { Review, ReviewPage } from "../d/review.data"
+import type { WikiMainType } from "../d/wiki.data"
 import { DEFAULT_STORY_TEXT_CONFIG, replaceStoryPlaceholders, stripStoryTextTags } from "../story-text"
 import {
+    clueAnchor,
     entryAnchor,
     profileAnchor,
     RAG_PROFILE_MODULE,
     type RagChunk,
     type RagEntryInput,
     ragChunkHash,
+    reviewAnchor,
     storyDialogueAnchor,
     storyOptionAnchor,
     summaryAnchor,
     voiceAnchor,
+    wikiAnchor,
 } from "./types"
 
 /** 剧情正文的清理配置：与检索层、详情页保持一致（昵称取默认占位值） */
@@ -324,4 +330,180 @@ export function buildEntryChunks(options: { lang: string; entries: readonly RagE
             hash: ragChunkHash(`${entry.title || ""}\n${text}\n${meta}`),
         }
     })
+}
+
+/**
+ * 调查墙线索板 chunk 的伴随信息标记。
+ *
+ * 与剧情总结的 `SUMMARY_META_TAG` 同理：进了 meta 就等于进了索引（meta 权重 1.5），
+ * 「线索板上关于 X 的记录」这类提问、以及模型自己按「线索」检索时能稳定落到线索语料上。
+ */
+const CLUE_META_TAG = "线索板"
+
+/**
+ * 构建调查墙线索板 chunk：一条线索内容条目一条。
+ *
+ * 标题取「页名 · 线索名」——线索板的检索主体是“哪块板上关于谁的哪条线索”，
+ * 只写线索名会丢掉调查对象（页）这一层语境，也会让同一调查对象的多条记录被
+ * 标题多样性约束误判成「同一主体刷屏」（同名线索名在不同页下可能重复出现）。
+ * 正文只有简体中文一套（见 `RAG_CN_SOURCE_LANG`），lang 由调用方传入中文单语常量。
+ * @param options.lang 数据语言（线索正文的语言；恒为 zh）
+ * @param options.tabs 线索板页类型（含页与线索的完整树）
+ * @returns 线索 chunk 列表（正文为空的内容条目跳过）
+ */
+export function buildClueChunks(options: { lang: string; tabs: readonly ClueTabType[] }): RagChunk[] {
+    const { lang, tabs } = options
+    const chunks: RagChunk[] = []
+
+    for (const tab of tabs) {
+        for (const page of tab.pages) {
+            for (const clue of page.clues) {
+                for (const content of clue.contents) {
+                    const text = cleanStoryContent(content.text)
+
+                    if (!text) {
+                        continue
+                    }
+
+                    const title = [page.name, clue.name].filter(Boolean).join(" · ")
+                    const trigger = content.trigger ? (content.trigger.type === "Dialogue" ? "对话线索" : "资源线索") : ""
+                    const meta = [tab.name, page.name, CLUE_META_TAG, trigger].filter(Boolean).join(" ")
+
+                    chunks.push({
+                        anchor: clueAnchor(clue.id, content.id),
+                        kind: "clue",
+                        lang,
+                        title,
+                        text,
+                        meta,
+                        path: `/db/clue?id=${clue.id}`,
+                        hash: ragChunkHash(`${title}\n${text}\n${meta}`),
+                    })
+                }
+            }
+        }
+    }
+
+    return chunks
+}
+
+/**
+ * 剧情回顾 chunk 的伴随信息标记（同 `SUMMARY_META_TAG` 口径，进 meta 即进索引）。
+ */
+const REVIEW_META_TAG = "剧情回顾"
+
+/**
+ * 构建剧情回顾 chunk：一条回顾条目一条。
+ *
+ * 标题取「篇章名 · 条目标题」——回顾条目名在各篇章间可能重复，拼上篇章才能区分主体。
+ * 主线与支线同为回顾正文（内容就是一段剧情梗概），以 meta 里的「主线 / 支线」区分。
+ * 正文只有简体中文一套（见 `RAG_CN_SOURCE_LANG`），lang 由调用方传入中文单语常量。
+ * @param options.lang 数据语言（回顾正文的语言；恒为 zh）
+ * @param options.pages 回顾页（含列与主线 / 支线条目的完整树）
+ * @returns 回顾 chunk 列表（正文为空或锚点重复的条目跳过）
+ */
+export function buildReviewChunks(options: { lang: string; pages: readonly ReviewPage[] }): RagChunk[] {
+    const { lang, pages } = options
+    const chunks: RagChunk[] = []
+    /** 已产出的锚点集合：上游若把同一条目挂到多个列，锚点必须唯一（向量索引主键） */
+    const emitted = new Set<string>()
+
+    for (const page of pages) {
+        const episode = (page.episodeName ?? "").trim()
+
+        for (const chain of page.chains) {
+            /** 推入一条回顾 chunk：正文为空或锚点已出现则跳过 */
+            const push = (review: Review, side: boolean) => {
+                const anchor = reviewAnchor(review.id)
+
+                if (emitted.has(anchor)) {
+                    return
+                }
+
+                const text = cleanStoryContent(review.content)
+
+                if (!text) {
+                    return
+                }
+
+                emitted.add(anchor)
+
+                const title = [episode, review.name].filter(Boolean).join(" · ")
+                const meta = [episode, side ? "支线" : "主线", REVIEW_META_TAG].filter(Boolean).join(" ")
+
+                chunks.push({
+                    anchor,
+                    kind: "review",
+                    lang,
+                    title,
+                    text,
+                    meta,
+                    path: `/db/review?id=${review.id}`,
+                    hash: ragChunkHash(`${title}\n${text}\n${meta}`),
+                })
+            }
+
+            for (const review of chain.main) {
+                push(review, false)
+            }
+
+            for (const review of chain.side) {
+                push(review, true)
+            }
+        }
+    }
+
+    return chunks
+}
+
+/**
+ * 游戏内百科 chunk 的伴随信息标记（同 `SUMMARY_META_TAG` 口径，进 meta 即进索引）。
+ */
+const WIKI_META_TAG = "百科"
+
+/**
+ * 构建游戏内百科 chunk：一条正文段一条。
+ *
+ * 标题取条目名——百科的检索主体是「某个词条讲了什么」，子类（如「海伯利亚」）与
+ * 大类（如「势力」）作为语境放进 meta；正文段本身没有独立标题，故不拼进标题里。
+ * 一个条目可能有多段正文（按解锁进度逐段开放），各段独立成 chunk，
+ * 锚点用「条目 id : 段 id」以便同一条目的段落稳定排序与定位。
+ * 正文只有简体中文一套（见 `RAG_CN_SOURCE_LANG`），lang 由调用方传入中文单语常量。
+ * @param options.lang 数据语言（百科正文的语言；恒为 zh）
+ * @param options.mainTypes 百科大类（含子类、条目与正文段的完整树）
+ * @returns 百科 chunk 列表（正文为空的段落跳过）
+ */
+export function buildWikiChunks(options: { lang: string; mainTypes: readonly WikiMainType[] }): RagChunk[] {
+    const { lang, mainTypes } = options
+    const chunks: RagChunk[] = []
+
+    for (const mainType of mainTypes) {
+        for (const subType of mainType.subTypes) {
+            for (const entry of subType.entries) {
+                for (const wikiText of entry.texts) {
+                    const text = cleanStoryContent(wikiText.text)
+
+                    if (!text) {
+                        continue
+                    }
+
+                    const title = entry.title || ""
+                    const meta = [mainType.name, subType.name, WIKI_META_TAG].filter(Boolean).join(" ")
+
+                    chunks.push({
+                        anchor: wikiAnchor(entry.id, wikiText.id),
+                        kind: "wiki",
+                        lang,
+                        title,
+                        text,
+                        meta,
+                        path: `/db/wiki?id=${entry.id}`,
+                        hash: ragChunkHash(`${title}\n${text}\n${meta}`),
+                    })
+                }
+            }
+        }
+    }
+
+    return chunks
 }

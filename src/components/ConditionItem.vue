@@ -1,20 +1,46 @@
 <script lang="ts" setup>
 import { computed } from "vue"
 import { useGameText } from "@/composables/useGameText"
+import { questChainMap, questMap, resourceMap } from "@/data/d"
 import type { ConditionItem } from "@/data/d/condition.data"
 import { rougeLikeBlessingGroups, rougeProTreasureGroups } from "@/data/d/rouge.data"
+import { useSettingStore } from "@/store/setting"
+import { replaceStoryPlaceholders, type StoryTextConfig } from "@/utils/story-text"
 
 const props = defineProps<{
     condition: ConditionItem
+    /** 隐藏条件自身的备注：解锁条件场景下备注是内部 id（如 ex02_11020101），不宜展示 */
+    hideRemark?: boolean
 }>()
 
-/** 游戏原文取词：条件术语与备注都来自游戏数据，需按当前语言取词。 */
+/**
+ * 游戏原文取词：备注与解析出来的名称（任务/任务链/资源）都来自游戏数据，
+ * 需按当前语言取词；而条件术语（「等级」「已读对话」等）是界面文案，用 i18n 键经 `$t` 渲染。
+ */
 const { gt } = useGameText()
+const settingStore = useSettingStore()
+
+/** 剧情文本替换配置：备注里的占位符（如 `{性别2：少年|少女}`）按主角名与性别代入 */
+const storyTextConfig = computed<StoryTextConfig>(() => ({
+    nickname: settingStore.protagonistName1?.trim() || "维塔",
+    nickname2: settingStore.protagonistName2?.trim() || "墨斯",
+    gender: settingStore.protagonistGender,
+    gender2: settingStore.protagonistGender2,
+}))
+
+/**
+ * 翻译游戏原文并代入剧情占位符。
+ * @param text 游戏原文（可含 `{nickname}` / `{性别：…}` 占位符）
+ * @returns 当前语言下可展示的文本
+ */
+function formatGameText(text: string | undefined): string {
+    return replaceStoryPlaceholders(gt(text), storyTextConfig.value)
+}
 
 const condition = computed(() => props.condition)
 
-/** 片段类型：术语 / 运算符 / 数值 / 组名 / 括号 */
-type SegmentType = "term" | "op" | "value" | "group" | "paren"
+/** 片段类型：术语（i18n 键）/ 运算符 / 数值 / 组名 / 名称引用 / 括号 / 原样文本 */
+type SegmentType = "term" | "op" | "value" | "group" | "name" | "paren" | "raw"
 
 interface ConditionSegment {
     type: SegmentType
@@ -25,9 +51,10 @@ interface ConditionClause {
     segments: ConditionSegment[]
 }
 
+/** 祝福组 / 宝物组的界面文案键（类型未知时回退为原样展示类型名） */
 const groupTypeNames: Record<string, string> = {
-    Blessing: "祝福组",
-    Treasure: "宝物组",
+    Blessing: "condition-item.group_blessing",
+    Treasure: "condition-item.group_treasure",
 }
 
 /**
@@ -59,6 +86,42 @@ function formatScalar(value: unknown): string {
 }
 
 /**
+ * 解析任务 id 对应的任务名（解锁条件里的 Quest 取值是任务 id）。
+ * @param questId 任务 id
+ * @returns 任务名，查不到时回退为 id 字符串
+ */
+function getQuestItemName(questId: number): string {
+    for (const story of questMap.values()) {
+        const quest = story.quests.find(item => item.id === questId)
+        if (quest) {
+            return quest.name
+        }
+    }
+    return String(questId)
+}
+
+/**
+ * 解析任务链 id 对应的任务链名。
+ * @param chainId 任务链 id
+ * @returns 任务链名，查不到时回退为 id 字符串
+ */
+function getQuestChainName(chainId: number): string {
+    return questChainMap.get(chainId)?.name ?? String(chainId)
+}
+
+/**
+ * 解析资源 id 对应的资源名（拥有类条件「HaveResource」的取值是资源 id）。
+ * @param resourceId 资源 id
+ * @returns 资源名，查不到时回退为 #id
+ */
+function getResourceName(resourceId: unknown): string {
+    if (typeof resourceId !== "string" && typeof resourceId !== "number") {
+        return formatScalar(resourceId)
+    }
+    return resourceMap.get(resourceId)?.name ?? `#${resourceId}`
+}
+
+/**
  * 比较运算符取反。
  * @param op 原运算符
  * @returns 取反后的运算符
@@ -85,7 +148,7 @@ function formatClause(key: string, entry: unknown, negated: boolean): ConditionC
         const op = negated ? negateOp("≥") : "≥"
         return {
             segments: [
-                { type: "term", text: "已通过层数" },
+                { type: "term", text: "condition-item.pass_room" },
                 { type: "op", text: op },
                 { type: "value", text: `${entry}` },
             ],
@@ -96,7 +159,7 @@ function formatClause(key: string, entry: unknown, negated: boolean): ConditionC
         const op = negated ? negateOp("=") : "="
         return {
             segments: [
-                { type: "term", text: "肉鸽难度" },
+                { type: "term", text: "condition-item.difficulty" },
                 { type: "op", text: op },
                 { type: "value", text: `${Number(id) - 100}` },
             ],
@@ -106,15 +169,16 @@ function formatClause(key: string, entry: unknown, negated: boolean): ConditionC
         const isMin = key === "RougeLikeGroupMin"
         const [type, groupId, count] = Array.isArray(entry) ? entry : [entry]
         const op = isMin ? (negated ? "<" : "≥") : negated ? ">" : "≤"
+        const groupTypeKey = groupTypeNames[`${type}`]
         return {
             segments: [
-                { type: "term", text: `${groupTypeNames[type] ?? type}` },
+                groupTypeKey ? { type: "term", text: groupTypeKey } : { type: "raw", text: `${type}` },
                 { type: "paren", text: "(" },
-                { type: "group", text: getGroupName(type, groupId) },
+                { type: "group", text: getGroupName(`${type}`, Number(groupId)) },
                 { type: "paren", text: ")" },
                 { type: "op", text: op },
                 { type: "value", text: `${count}` },
-                { type: "term", text: "枚" },
+                { type: "term", text: "condition-item.count_unit" },
             ],
         }
     }
@@ -122,7 +186,7 @@ function formatClause(key: string, entry: unknown, negated: boolean): ConditionC
         const op = negated ? negateOp("=") : "="
         return {
             segments: [
-                { type: "term", text: "前置房间" },
+                { type: "term", text: "condition-item.pre_room" },
                 { type: "op", text: op },
                 { type: "value", text: `${entry}` },
             ],
@@ -132,7 +196,7 @@ function formatClause(key: string, entry: unknown, negated: boolean): ConditionC
         const op = negated ? negateOp("=") : "="
         return {
             segments: [
-                { type: "term", text: "手动记录" },
+                { type: "term", text: "condition-item.manual" },
                 { type: "op", text: op },
                 {
                     type: "value",
@@ -142,12 +206,95 @@ function formatClause(key: string, entry: unknown, negated: boolean): ConditionC
         }
     }
 
-    // 通用回退：直接展示键与值
+    if (key === "Quest") {
+        const ids = (Array.isArray(entry) ? entry : [entry]).map(value => Number(value))
+        const op = negated ? negateOp("=") : "="
+        return {
+            segments: [
+                { type: "term", text: "condition-item.quest" },
+                { type: "op", text: op },
+                { type: "name", text: ids.map(getQuestItemName).join(" / ") },
+            ],
+        }
+    }
+    if (key === "QuestChain") {
+        const ids = (Array.isArray(entry) ? entry : [entry]).map(value => Number(value))
+        const op = negated ? negateOp("=") : "="
+        return {
+            segments: [
+                { type: "term", text: "condition-item.quest_chain" },
+                { type: "op", text: op },
+                { type: "name", text: ids.map(getQuestChainName).join(" / ") },
+            ],
+        }
+    }
+
+    if (key === "DialogueHasRead") {
+        const ids = (Array.isArray(entry) ? entry : [entry]).map(formatScalar)
+        const op = negated ? negateOp("=") : "="
+        return {
+            segments: [
+                { type: "term", text: "condition-item.dialogue_read" },
+                { type: "op", text: op },
+                { type: "value", text: ids.join(" / ") },
+            ],
+        }
+    }
+    if (key === "PlayerLevelMin" || key === "PlayerLevelMax") {
+        const isMin = key === "PlayerLevelMin"
+        const value = Array.isArray(entry) ? entry[0] : entry
+        const op = isMin ? (negated ? "<" : "≥") : negated ? ">" : "≤"
+        return {
+            segments: [
+                { type: "term", text: "condition-item.player_level" },
+                { type: "op", text: op },
+                { type: "value", text: formatScalar(value) },
+            ],
+        }
+    }
+    if (key === "Impression") {
+        const [impressionId, level] = Array.isArray(entry) ? entry : [entry]
+        const op = negated ? negateOp("≥") : "≥"
+        return {
+            segments: [
+                { type: "term", text: "condition-item.impression" },
+                { type: "value", text: `#${formatScalar(impressionId)}` },
+                { type: "op", text: op },
+                { type: "value", text: formatScalar(level) },
+            ],
+        }
+    }
+    if (key === "HaveResource") {
+        const [resourceId, count] = Array.isArray(entry) ? entry : [entry]
+        const op = negated ? negateOp("=") : "="
+        return {
+            segments: [
+                { type: "term", text: "condition-item.have" },
+                { type: "op", text: op },
+                { type: "name", text: getResourceName(resourceId) },
+                { type: "value", text: `× ${formatScalar(count)}` },
+            ],
+        }
+    }
+    if (key === "VarEqual") {
+        const [varName, value] = Array.isArray(entry) ? entry : [entry]
+        const op = negated ? negateOp("=") : "="
+        return {
+            segments: [
+                { type: "term", text: "condition-item.variable" },
+                { type: "value", text: formatScalar(varName) },
+                { type: "op", text: op },
+                { type: "value", text: formatScalar(value) },
+            ],
+        }
+    }
+
+    // 通用回退：直接展示键与值（键本身是未收录的内部字段名，原样展示）
     const raw = Array.isArray(entry) ? (entry as unknown[]).map(formatScalar).join(", ") : formatScalar(entry)
     const op = negated ? negateOp("=") : "="
     return {
         segments: [
-            { type: "term", text: key },
+            { type: "raw", text: key },
             { type: "op", text: op },
             { type: "value", text: raw },
         ],
@@ -182,7 +329,7 @@ const joinLogic = computed<"AND" | "OR">(() => {
 <template>
     <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-3 space-y-1.5">
         <div class="flex items-center">
-            <div v-if="condition.remark" class="text-sm text-base-content/80">{{ gt(condition.remark) }}</div>
+            <div v-if="condition.remark && !hideRemark" class="text-sm text-base-content/80">{{ formatGameText(condition.remark) }}</div>
             <div class="flex-1"></div>
             <CopyID :id="condition.id" />
         </div>
@@ -196,7 +343,7 @@ const joinLogic = computed<"AND" | "OR">(() => {
                 </span>
                 <span class="rounded-xs border border-base-content/15 bg-base-content/4 px-1.5 py-0.5 text-xs text-base-content/80">
                     <template v-for="(segment, segIndex) in clause.segments" :key="segIndex">
-                        <span v-if="segment.type === 'term'" class="text-base-content/60">{{ gt(segment.text) }}</span>
+                        <span v-if="segment.type === 'term'" class="text-base-content/60">{{ $t(segment.text) }}</span>
                         <span
                             v-else-if="segment.type === 'op'"
                             class="px-0.5 font-orbitron text-[11px] font-semibold"
@@ -204,7 +351,8 @@ const joinLogic = computed<"AND" | "OR">(() => {
                         >
                             {{ segment.text }}
                         </span>
-                        <span v-else-if="segment.type === 'group'" class="text-secondary">{{ gt(segment.text) }}</span>
+                        <span v-else-if="segment.type === 'group'" class="text-secondary">{{ formatGameText(segment.text) }}</span>
+                        <span v-else-if="segment.type === 'name'" class="font-medium text-base-content/90">{{ formatGameText(segment.text) }}</span>
                         <span v-else-if="segment.type === 'value'" class="font-medium tabular-nums">{{ segment.text }}</span>
                         <span v-else>{{ segment.text }}</span>
                     </template>

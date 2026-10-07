@@ -254,9 +254,9 @@ describe("自动索引构建", () => {
         const result = await buildLanguageIndex("zh")
 
         expect(result.mode).toBe("full")
-        // 指纹按种类分别记录（story / summary / voice / profile）
+        // 指纹按种类分别记录（story / summary / voice / profile / clue / review / wiki）
         expect(result.fingerprints).toEqual(expectedFingerprints)
-        expect(Object.keys(result.fingerprints).sort()).toEqual(["profile", "story", "summary", "voice"])
+        expect(Object.keys(result.fingerprints).sort()).toEqual(["clue", "profile", "review", "story", "summary", "voice", "wiki"])
         expect(result.chunkCount).toBe(chunks.length)
         expect(result.embedded).toBe(chunks.length)
         expect(result.dims).toBe(4)

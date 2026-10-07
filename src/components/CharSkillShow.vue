@@ -154,7 +154,10 @@ watchEffect(() => {
                                 CD: {{ subSkill.cd }}s
                             </span>
                         </div>
-                        <div v-if="subSkill.实体 && subSkill.实体.length > 0" class="mt-2">
+                        <div
+                            v-if="subSkill.实体 && subSkill.实体.length > 0"
+                            class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2"
+                        >
                             <SkillCreatureCards :creatures="subSkill.实体" :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`" />
                         </div>
                     </div>
@@ -162,8 +165,10 @@ watchEffect(() => {
             </div>
 
             <div v-if="selectedSkill.skillData.实体 && selectedSkill.skillData.实体.length > 0" class="mt-3">
-                <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-base-content/45">{{ $t("实体") }}</div>
-                <SkillCreatureCards :creatures="selectedSkill.skillData.实体" />
+                <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-base-content/45">{{ $t("skill-creature.entity") }}</div>
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+                    <SkillCreatureCards :creatures="selectedSkill.skillData.实体" />
+                </div>
             </div>
         </div>
     </section>

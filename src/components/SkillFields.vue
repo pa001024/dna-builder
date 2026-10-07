@@ -35,9 +35,36 @@ const isIdentifierUsed = (fieldName: string) => {
 
 const skillFieldExtraKeys = ["标签", "削韧", "Boss削韧", "延迟", "卡肉", "取消", "连段"] as const
 
+/**
+ * 额外字段名的界面键覆盖表。
+ *
+ * 额外字段名多数是游戏数据原词，能直接命中译文表（削韧、延迟、卡肉、取消、连段…）；
+ * 但「标签」「Boss削韧」是前端自造的展示名，没有对应数据词条，属于界面文案，
+ * 落在 skill-fields.* 子集里，这里做一次映射。
+ */
+const SKILL_FIELD_LABEL_KEYS: Record<string, string> = {
+    标签: "skill-fields.tags",
+    Boss削韧: "skill-fields.bossStagger",
+}
+
+/**
+ * 标签词的界面键覆盖表。
+ *
+ * 标签值是游戏数据里的裸词（如「远程/武器/普攻」），逐个词过翻译后拼回；
+ * 绝大多数词能直接命中译文表（普攻、战技、终结技、召唤物…），
+ * 只有「近战/远程/武器」必须改写：它们在译文表里是武器类别名
+ * （Melee Weapons / Ranged Weapons / Weapons），与标签语境的单数含义同形不同义，
+ * 统一映射到 skill-tag.* 界面键。
+ */
+const SKILL_TAG_KEYS: Record<string, string> = {
+    近战: "skill-tag.melee",
+    远程: "skill-tag.ranged",
+    武器: "skill-tag.weapon",
+}
+
 interface SkillFieldExtraItem {
-    key: "削韧" | "Boss削韧" | "延迟" | "卡肉" | "取消" | "连段"
-    value: number
+    key: (typeof skillFieldExtraKeys)[number]
+    value: number | string
 }
 
 const expandedFieldKeys = ref<Record<string, boolean>>({})
@@ -71,7 +98,7 @@ function getFieldExpandKey(field: SkillField, index: number) {
  */
 function getSkillFieldExtraItems(field: SkillField): SkillFieldExtraItem[] {
     return skillFieldExtraKeys
-        .map(key => {
+        .map((key): SkillFieldExtraItem | undefined => {
             // 标签为字符串数组，需单独处理
             if (key === "标签") {
                 const tags = field.tag
@@ -89,8 +116,19 @@ function getSkillFieldExtraItems(field: SkillField): SkillFieldExtraItem[] {
  * @returns 格式化字符串
  */
 function formatSkillFieldExtra(item: SkillFieldExtraItem) {
+    // 「标签」的值是游戏数据里的裸词串（如「远程/武器/普攻」），逐个词过翻译后再拼回；
+    // 其余额外字段的值都是数值（秒数或普通数值），直接格式化。
+    if (item.key === "标签" && typeof item.value === "string") {
+        return item.value
+            .split("/")
+            .map(tag => {
+                const word = tag.trim()
+                return t(SKILL_TAG_KEYS[word] ?? word)
+            })
+            .join("/")
+    }
     if (typeof item.value === "string") return `${item.value}`
-    if (["延迟", "卡肉", "取消", "连段"].includes(item.key)) return `${+item.value.toFixed(4)}秒`
+    if (["延迟", "卡肉", "取消", "连段"].includes(item.key)) return `${+item.value.toFixed(4)}${t("skill-fields.seconds")}`
     return `${+item.value.toFixed(2)}`
 }
 
@@ -226,7 +264,7 @@ onBeforeUnmount(() => {
                 <span class="ml-auto font-medium">
                     {{
                         getSkillFieldExtraItems(field)
-                            .map(item => `${$t(item.key)}: ${formatSkillFieldExtra(item)}`)
+                            .map(item => `${$t(SKILL_FIELD_LABEL_KEYS[item.key] ?? item.key)}: ${formatSkillFieldExtra(item)}`)
                             .join(" | ")
                     }}
                 </span>

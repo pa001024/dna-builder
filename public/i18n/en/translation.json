@@ -1,8 +1,11 @@
 {
     "？？？": "???",
     "暗属性攻击": "Umbro ATK",
+    "昂扬": "Morale",
     "办事高效，可以更快完成任务。": "Handles tasks with heightened efficiency, reducing completion time.",
     "办事细致，更有可能成功地完成任务。": "Attentive to detail, increasing the chance of success.",
+    "暴击": "CRIT Chance",
+    "背水": "Resolve",
     "编辑": "Edit",
     "编辑构筑": "Edit Build",
     "标题": "Title",
@@ -10,7 +13,10 @@
     "查看全部": "View All",
     "查看详情": "View Details",
     "称号框": "Title Frame",
+    "充盈威力": "Overflow Intensity",
+    "充盈转化": "Overflow Conversion",
     "初始解锁": "Unlocked initially",
+    "触发": "Trigger Probability",
     "道具获取周报": "Item Acquisition Weekly",
     "道具流水查询": "Item Flow Query",
     "得心应手，有概率获得多倍的派遣奖励。": "Adapts quickly and may obtain bonus rewards.",
@@ -19,6 +25,7 @@
     "等级调整": "Level Adjustment",
     "掉落物": "Drop",
     "独立": "Independent",
+    "多重": "Multishot",
     "发型": "Hairstyle",
     "房间": "Room",
     "风属性攻击": "Anemo ATK",
@@ -35,7 +42,11 @@
     "获取方式": "Obtain Method",
     "基本信息": "Basic Info",
     "基础属性": "Base Attributes",
+    "技能范围": "Skill Range",
+    "技能耐久": "Skill Duration",
     "技能替换": "Skill Replacement",
+    "技能威力": "Skill Intensity",
+    "技能效益": "Skill Efficiency",
     "加载更多": "Load More",
     "加载中...": "Loading...",
     "见微知著": "Keen Insight",
@@ -78,7 +89,6 @@
     "射速": "Fire Rate",
     "深境罗盘": "Abyssal Compass",
     "时间线": "Timeline",
-    "实体": "Entity",
     "拾穗者": "Gleaner",
     "使用": "Use",
     "事件": "Event",
@@ -129,7 +139,6 @@
     "主线任务": "Main Quest",
     "注重惩恶扬善，公序良俗。": "Upholds justice and integrity.",
     "注重权衡利弊，获取收益。": "Prioritises gains and trade-offs.",
-    "专武": "Signature Weapon",
     "资源": "Resource",
     "子技能": "Sub Skill",
     "左右逢源": "Astute Mind",
@@ -147,6 +156,13 @@
         "assistantDesc": "Check common lineups for characters",
         "available": "Available",
         "buildUploadDataFailed": "Failed to build abyss upload data",
+        "calamityCancel": "Cancel",
+        "calamityConfirm": "Confirm Upload",
+        "calamityDesc": "The weapon in this slot could not be recognized (calamity weapons are not returned by the API). Please pick the one you actually used.",
+        "calamitySupportHint": "A co-op character brings only one weapon, which may be melee or ranged",
+        "calamityTitle": "Select Calamity Weapon",
+        "calamityTypeMelee": "Melee",
+        "calamityTypeRanged": "Ranged",
         "char_usage_rate": "Character usage rate",
         "createdAt": "Created At",
         "desc": "Abyss lineup and role/weapon statistics",
@@ -191,18 +207,19 @@
         "sheetSubmission": "Submission",
         "sheetWeapon": "Weapon Participation",
         "skillLevel": "Skill Level",
+        "slotMain": "Main",
         "stars": "Stars",
         "submissionsFrom": "This page is based on data from {{count}} players. Usage rate = number of players who used this character ÷ number of players who own this character",
         "submitCount": "{{count}} submissions",
         "submitId": "Submission ID",
-        "support1": "Support 1",
-        "support1Id": "Support 1 ID",
-        "support2": "Support 2",
-        "support2Id": "Support 2 ID",
-        "supportWeapon1": "Support Weapon 1",
-        "supportWeapon1Id": "Support Weapon 1 ID",
-        "supportWeapon2": "Support Weapon 2",
-        "supportWeapon2Id": "Support Weapon 2 ID",
+        "support1": "Co-op 1",
+        "support1Id": "Co-op 1 ID",
+        "support2": "Co-op 2",
+        "support2Id": "Co-op 2 ID",
+        "supportWeapon1": "Co-op Weapon 1",
+        "supportWeapon1Id": "Co-op Weapon 1 ID",
+        "supportWeapon2": "Co-op Weapon 2",
+        "supportWeapon2Id": "Co-op Weapon 2 ID",
         "team_builder": "Team Builder",
         "title": "Abyss Usage",
         "top_deploy_team": "Most-deployed team",
@@ -619,7 +636,6 @@
         "title": "Book List",
         "totalCount": "{{count}} books total"
     },
-    "Boss削韧": "Boss Stagger",
     "box-drop": {
         "boxMaximum": "Max total",
         "boxPerDay": "Daily max",
@@ -752,6 +768,7 @@
         "melee": "Melee",
         "melee_weapon": "Melee Weapon",
         "melee_weapon_mod_config": "Melee Weapon MOD Configuration",
+        "mod_count": "{{count}} MODs",
         "mod_variant": "MOD set",
         "mod_variant_add": "Add a MOD set (up to three per build: A/B/C)",
         "mod_variant_remove": "Remove this MOD set",
@@ -944,6 +961,23 @@
         "closeWindowFailed": "Failed to close cloud gaming window",
         "openWindowFailed": "Failed to open cloud gaming window"
     },
+    "clue-detail": {
+        "emptyRecords": "No records",
+        "notFound": "Clue not found",
+        "pageId": "Page ID",
+        "pageName": "Subject",
+        "records": "Records",
+        "sourceSection": "Provenance",
+        "tabType": "Category",
+        "triggerDialogue": "Dialogue",
+        "triggerResource": "Resource",
+        "unlockCondition": "Unlock Condition"
+    },
+    "clue-list": {
+        "allCategories": "All",
+        "searchPlaceholder": "Search clue name or content (pinyin supported)...",
+        "totalCount": "{{count}} clues"
+    },
     "comment-section": {
         "comment": "Comments",
         "comment_placeholder": "Be kind, discuss rationally~",
@@ -1011,6 +1045,7 @@
         "season": "Season",
         "select_level_range": "Select level range",
         "show_diff_only": "Show differences only",
+        "signature_weapon": "Signature Weapon",
         "source": "Source",
         "sub_region": "Sub-region",
         "test": "Test",
@@ -1024,6 +1059,22 @@
         "weapon_avatar": "Weapon avatar",
         "weapon_category": "Weapon Category",
         "weight": "Weight"
+    },
+    "condition-item": {
+        "count_unit": "pcs",
+        "dialogue_read": "Dialogue read",
+        "difficulty": "Roguelike difficulty",
+        "group_blessing": "Blessing set",
+        "group_treasure": "Treasure set",
+        "have": "Own",
+        "impression": "Impression",
+        "manual": "Manual record",
+        "pass_room": "Rooms cleared",
+        "player_level": "Level",
+        "pre_room": "Previous room",
+        "quest": "Complete quest",
+        "quest_chain": "Complete quest chain",
+        "variable": "Variable"
     },
     "copy-id": {
         "click_copy": "Click to copy {{name}}",
@@ -1124,6 +1175,8 @@
         "char_desc": "View character information and attributes",
         "charprofile": "Character Archive",
         "charvoice": "Character Voice",
+        "clue": "Clue Board",
+        "clue_desc": "Browse investigation wall clues",
         "damage": "Damage",
         "damage_desc": "Step-by-step breakdown of damage formulas",
         "desc": "Query game data",
@@ -1172,6 +1225,8 @@
         "reputation_desc": "View regional reputation levels and commission details",
         "resource": "Resource",
         "resource_desc": "View resource information and icons",
+        "review": "Story Recap",
+        "review_desc": "Browse the story recap timeline",
         "role": "Character",
         "rouge": "Maze",
         "rouge_desc": "Browse lampwicks, artefacts, lanterns, contracts and rooms of the Maze (Solo/Co-op)",
@@ -1186,7 +1241,9 @@
         "walnut": "Walnut",
         "walnut_desc": "View walnut probability information and simulate draws",
         "weapon": "Weapon",
-        "weapon_desc": "View weapon information and attributes"
+        "weapon_desc": "View weapon information and attributes",
+        "wiki": "Encyclopedia",
+        "wiki_desc": "In-game encyclopedia entries grouped by faction, character, culture and civilization"
     },
     "db-abyss-dungeon": {
         "abyss_id": "Abyss ID",
@@ -3495,6 +3552,23 @@
     "resource-list": {
         "title": "Resource List"
     },
+    "review-detail": {
+        "branch": "Branch",
+        "chainId": "Chain ID",
+        "content": "Text",
+        "emptyContent": "No text",
+        "episode": "Chapter",
+        "infoSection": "Info",
+        "main": "Main",
+        "notFound": "Review not found",
+        "questChain": "Quest chain",
+        "side": "Side",
+        "unlockCondition": "Unlock Condition"
+    },
+    "review-list": {
+        "searchPlaceholder": "Search recap title or text (pinyin supported)...",
+        "totalCount": "{{count}} recaps"
+    },
     "reward-item": {
         "capacity": "Capacity:{{value}}",
         "drop_item": "Drop:",
@@ -4013,6 +4087,27 @@
     "skill-cd-pos-picker": {
         "no_game_window": "No game window detected; the preview uses the current screen resolution"
     },
+    "skill-creature": {
+        "box": "Box",
+        "capsule": "Capsule",
+        "circle": "Circle",
+        "entity": "Entity",
+        "lifetime": "Lifetime",
+        "shape": "Shape",
+        "speed": "Speed",
+        "unspecified": "Unspecified",
+        "vfxLoopInterval": "VFX Loop Interval"
+    },
+    "skill-fields": {
+        "bossStagger": "Boss Stagger",
+        "seconds": "s",
+        "tags": "Tags"
+    },
+    "skill-tag": {
+        "melee": "Melee",
+        "ranged": "Ranged",
+        "weapon": "Weapon"
+    },
     "skin-colorize": {
         "desc": "Preview and share character skin dyes",
         "desc_placeholder": "Additional description (optional)",
@@ -4071,6 +4166,11 @@
         "pack_update_title": "Data Pack Update Available",
         "pack_version_missing": "No available data pack version found",
         "release_notes": "Release Notes"
+    },
+    "string-board": {
+        "next": "Next",
+        "picture": "Picture",
+        "prev": "Previous"
     },
     "tag": {
         "防御": "DEF",
@@ -4340,7 +4440,15 @@
         "title": "Walnut List"
     },
     "weapon-detail": {
-        "title": "Weapon details"
+        "ascension": "Ascension",
+        "crafting": "Crafting",
+        "moveDemonWedges": "Move Demon Wedges",
+        "noAscensionData": "No ascension data",
+        "relatedCharacters": "Related Characters",
+        "secondaryUnlock": "Secondary Unlock",
+        "source": "Source",
+        "title": "Weapon details",
+        "unlock": "Unlock"
     },
     "weapon-list": {
         "calamityConflict": "Only one Calamity weapon can be equipped: \"{{first}}\" is already equipped, so \"{{second}}\" cannot be equipped.",
@@ -4367,5 +4475,22 @@
         "three_star_threshold": "3-Star Threshold",
         "victory_goal": "Victory Goal",
         "victory_mode": "Victory Mode"
+    },
+    "wiki-detail": {
+        "emptyTexts": "No content",
+        "mainType": "Category",
+        "notFound": "Entry not found",
+        "relatedSection": "Related",
+        "sourceSection": "Category",
+        "subType": "Subcategory",
+        "textCount": "Passages",
+        "texts": "Content",
+        "triggerDialogue": "Dialogue"
+    },
+    "wiki-list": {
+        "allCategories": "All",
+        "emptyResult": "No matching entries",
+        "searchPlaceholder": "Search entries",
+        "totalCount": "{{count}} entries"
     }
 }

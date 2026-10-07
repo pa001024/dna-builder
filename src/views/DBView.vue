@@ -315,6 +315,9 @@ const databaseItems = [
     { name: "database.achievement", path: "/db/achievement", desc: "database.achievement_desc", icon: "ri:award-line" },
     { name: "database.npc", path: "/db/npc", desc: "database.npc_desc", icon: "ri:group-line" },
     { name: "database.impr", path: "/db/impr", desc: "database.impr_desc", icon: "ri:image-2-line" },
+    { name: "database.clue", path: "/db/clue", desc: "database.clue_desc", icon: "ri:node-tree" },
+    { name: "database.review", path: "/db/review", desc: "database.review_desc", icon: "ri:history-line" },
+    { name: "database.wiki", path: "/db/wiki", desc: "database.wiki_desc", icon: "ri:book-line" },
 ] as const
 
 type DatabaseItem = (typeof databaseItems)[number]
@@ -348,7 +351,10 @@ const featuredPaths = ["/db/char", "/db/weapon", "/db/mod", "/map-tool", "/db/qu
 const databaseSectionMeta = [
     { id: "build", paths: ["/db/char", "/db/weapon", "/db/mod", "/db/forge", "/db/damage", "/db/pet", "/db/draft", "/db/resource"] },
     { id: "explore", paths: ["/db/event", "/map-tool", "/db/rouge", "/db/fish", "/db/dungeon", "/db/abyss", "/db/map"] },
-    { id: "world", paths: ["/db/questchain", "/db/partytopic", "/db/shop", "/db/impr", "/db/npc", "/db/reputation", "/db/dynquest"] },
+    {
+        id: "world",
+        paths: ["/db/questchain", "/db/partytopic", "/db/shop", "/db/impr", "/db/npc", "/db/reputation", "/db/dynquest", "/db/clue", "/db/review", "/db/wiki"],
+    },
     { id: "challenge", paths: ["/db/rank", "/db/monster", "/db/hardboss", "/db/solotreasure", "/db/iron-ticket"] },
     { id: "collect", paths: ["/db/achievement", "/db/title", "/db/music", "/db/book", "/db/walnut", "/db/accessory"] },
 ] as const

@@ -32,6 +32,12 @@ export type RagChunkKind =
     | "summary"
     /** 角色档案（一条档案一条，正文为整篇档案原文，见 `charext.data`） */
     | "profile"
+    /** 调查墙线索板（一条线索内容条目一条，正文为该条记录原文，见 `clue.data`） */
+    | "clue"
+    /** 剧情回顾（一条回顾条目一条，正文为该条回顾原文，见 `review.data`） */
+    | "review"
+    /** 游戏内百科（一条正文段一条，正文为该段百科原文，见 `wiki.data`） */
+    | "wiki"
 
 /**
  * 全部语料种类。
@@ -39,7 +45,7 @@ export type RagChunkKind =
  * 同时给工具 schema 的 enum 与入参校验用：模型可能给出不存在的种类或模块，
  * 检索前一律按白名单收敛，避免脏参数把检索面清空。
  */
-export const RAG_CHUNK_KINDS: readonly RagChunkKind[] = ["story", "voice", "entry", "summary", "profile"]
+export const RAG_CHUNK_KINDS: readonly RagChunkKind[] = ["story", "voice", "entry", "summary", "profile", "clue", "review", "wiki"]
 
 /**
  * 参与服务端向量索引的语料种类（**双端契约**）。
@@ -50,7 +56,7 @@ export const RAG_CHUNK_KINDS: readonly RagChunkKind[] = ["story", "voice", "entr
  * 数据包构建（算内容指纹）与服务端建索引都用这一份清单取语料，
  * 两边的切块结果一致，指纹才对得上。
  */
-export const RAG_SERVER_KINDS: readonly RagChunkKind[] = ["story", "summary", "voice", "profile"]
+export const RAG_SERVER_KINDS: readonly RagChunkKind[] = ["story", "summary", "voice", "profile", "clue", "review", "wiki"]
 
 /** 一条可检索的语料单元 */
 export interface RagChunk {
@@ -119,6 +125,15 @@ export const RAG_SUMMARY_ANCHOR_PREFIX = "summary:"
 /** 角色档案 chunk 的锚点前缀 */
 export const RAG_PROFILE_ANCHOR_PREFIX = "profile:"
 
+/** 调查墙线索板 chunk 的锚点前缀 */
+export const RAG_CLUE_ANCHOR_PREFIX = "clue:"
+
+/** 剧情回顾 chunk 的锚点前缀 */
+export const RAG_REVIEW_ANCHOR_PREFIX = "review:"
+
+/** 游戏内百科 chunk 的锚点前缀 */
+export const RAG_WIKI_ANCHOR_PREFIX = "wiki:"
+
 /**
  * 角色档案在资料库里的模块 id（跨端契约的一部分）。
  *
@@ -128,13 +143,23 @@ export const RAG_PROFILE_ANCHOR_PREFIX = "profile:"
 export const RAG_PROFILE_MODULE = "charprofile"
 
 /**
- * 剧情 AI 总结正文的语言（跨端一致项之一）。
+ * 只有简体中文一套正文的语料语言（跨端一致项之一）。
+ *
+ * 剧情 AI 总结（storysummary.data）、调查墙线索板（clue.data）、剧情回顾（review.data）
+ * 与游戏内百科（wiki.data）来自 i18n 导出的会话文本，上游只提供简体中文一套，
+ * 因此不论语料按哪种语言装配，这批 chunk 的 `lang` 都恒为 zh；服务端建索引与客户端
+ * 装配语料取的是同一份正文，锚点与指纹才能逐位对上。查询侧靠跨语言关键词反查与向量对齐命中。
+ */
+export const RAG_CN_SOURCE_LANG = "zh"
+
+/**
+ * 剧情 AI 总结正文的语言。
  *
  * 总结来自 i18n 导出的 storySummary.json，只有简体中文一套（见 `storysummary.data.ts`），
  * 因此不论语料按哪种语言装配，这批 chunk 的 `lang` 都恒为 zh；
  * 服务端建索引与客户端装配语料取的是同一份正文，锚点与指纹才能逐位对上。
  */
-export const RAG_SUMMARY_LANG = "zh"
+export const RAG_SUMMARY_LANG = RAG_CN_SOURCE_LANG
 
 /**
  * 拼剧情对话行的锚点。
@@ -204,6 +229,45 @@ export function profileAnchor(charId: number, profileId: number): string {
  */
 export function summaryAnchor(chainId: number): string {
     return `${RAG_SUMMARY_ANCHOR_PREFIX}${chainId}`
+}
+
+/**
+ * 拼调查墙线索板内容条目的锚点。
+ *
+ * 一条线索板记录（ClueContent）在全局按内容 id 唯一，但仍把所属线索 id 一并放进锚点：
+ * 内容 id 与线索 id 各自在自己的表里唯一，拼上限定的父级可让锚点自解释，
+ * 也避免上游将来出现跨线索重号。
+ * @param clueId 线索 id
+ * @param contentId 线索内容 id
+ * @returns 锚点
+ */
+export function clueAnchor(clueId: number, contentId: number): string {
+    return `${RAG_CLUE_ANCHOR_PREFIX}${clueId}:${contentId}`
+}
+
+/**
+ * 拼剧情回顾条目的锚点。
+ *
+ * 回顾条目（Review）在全局按 id 唯一，一条条目一条 chunk，故锚点只需条目 id。
+ * @param reviewId 回顾条目 id
+ * @returns 锚点
+ */
+export function reviewAnchor(reviewId: number): string {
+    return `${RAG_REVIEW_ANCHOR_PREFIX}${reviewId}`
+}
+
+/**
+ * 拼游戏内百科正文段的锚点。
+ *
+ * 百科正文段（WikiText）按段 id 全局唯一，但仍把所属条目 id 一并放进锚点：
+ * 段 id 与条目 id 各自在自己的表里唯一，拼上限定的父级可让锚点自解释，
+ * 也避免上游将来出现跨条目重号。
+ * @param entryId 百科条目 id
+ * @param textId 正文段 id
+ * @returns 锚点
+ */
+export function wikiAnchor(entryId: number, textId: number): string {
+    return `${RAG_WIKI_ANCHOR_PREFIX}${entryId}:${textId}`
 }
 
 /**

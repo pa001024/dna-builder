@@ -37,7 +37,7 @@ function extractAbyssIconName(url?: string): string {
         return ""
     }
 
-    const match = url.match(/(?:^|\/)(?:T_)?(?:Head_)?([^/]+?)\.png(?:\?.*)?$/i)
+    const match = url.match(/(?:^|\/)(?:T_)?(?:Head_|Bust_)?([^/]+?)\.png(?:\?.*)?$/i)
     if (!match?.[1]) {
         return ""
     }

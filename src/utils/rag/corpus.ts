@@ -5,7 +5,7 @@
  * - **主线程**：读数据、按锚点切块、分批传给引擎——每片控制在十几毫秒，夹在空闲回调之间；
  * - **引擎（Worker）**：切词、倒排索引、召回与片段拼装（见 `engine.ts` / `rag.worker.ts`）。
  *
- * 语料 = 剧情对话行 + 剧情 AI 总结 + 角色语音 + 角色档案 + 全库条目，五者在同一索引里统一召回，
+ * 语料 = 剧情对话行 + 剧情 AI 总结 + 角色语音 + 角色档案 + 调查墙线索板 + 剧情回顾 + 游戏内百科 + 全库条目，八者在同一索引里统一召回，
  * 这样「一次检索跨语料」才成立（模型不必先猜该查哪个模块）。
  */
 
@@ -13,12 +13,24 @@ import { npcMap } from "@/data/d"
 import charData from "@/data/d/char.data"
 import { getLocalizedCharExtData } from "@/data/d/charext-locale"
 import { getLocalizedCharVoiceData } from "@/data/d/charvoice-locale"
+import { clueData } from "@/data/d/clue.data"
 import type { QuestItem } from "@/data/d/quest.data"
 import questChainData from "@/data/d/questchain.data"
+import { reviewData } from "@/data/d/review.data"
 import { getQuestDataByLocale } from "@/data/d/story-locale"
 import { storySummaryData } from "@/data/d/storysummary.data"
-import { buildEntryChunks, buildProfileChunks, buildStoryChunks, buildSummaryChunks, buildVoiceChunks } from "@/data/rag/chunks"
-import { RAG_SUMMARY_LANG, type RagChunk } from "@/data/rag/types"
+import { wikiData } from "@/data/d/wiki.data"
+import {
+    buildClueChunks,
+    buildEntryChunks,
+    buildProfileChunks,
+    buildReviewChunks,
+    buildStoryChunks,
+    buildSummaryChunks,
+    buildVoiceChunks,
+    buildWikiChunks,
+} from "@/data/rag/chunks"
+import { RAG_CN_SOURCE_LANG, RAG_SUMMARY_LANG, type RagChunk } from "@/data/rag/types"
 import { registerDataPackHydrationCallback } from "@/utils/data-pack/data-pack-bridge"
 import type { DBAgentLang } from "@/utils/db-locale"
 import { getGlobalSearchService, peekGlobalSearchService } from "@/utils/global-search"
@@ -142,6 +154,16 @@ async function buildCorpus(lang: DBAgentLang): Promise<RagCorpus> {
     } catch (error) {
         console.warn("[rag] 角色档案语料加载失败，已跳过该部分", { lang, error })
     }
+
+    await yieldToBrowser()
+
+    // 调查墙线索板、剧情回顾与游戏内百科：与剧情 AI 总结一样，正文只有简体中文一套
+    // （clue.data / review.data / wiki.data）。其他语言的语料同样带上它们——提问语言的关键词
+    // 会经跨语言反查扩展出游戏原文写法，因此英文/日文提问照样能命中中文正文（向量通道里也嵌同一份），
+    // 检索层会在 note 里说明语言。
+    chunks.push(...buildClueChunks({ lang: RAG_CN_SOURCE_LANG, tabs: clueData }))
+    chunks.push(...buildReviewChunks({ lang: RAG_CN_SOURCE_LANG, pages: reviewData }))
+    chunks.push(...buildWikiChunks({ lang: RAG_CN_SOURCE_LANG, mainTypes: wikiData }))
 
     await yieldToBrowser()
 

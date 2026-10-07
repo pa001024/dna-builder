@@ -2985,7 +2985,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                         number="04"
                         kicker="MODS"
                         :title="`${$t('魔之楔')} (${charBuild.getModCostMax(charTab)}/${charBuild.getModCap(charTab)})`"
-                        :badge="`${charBuild.getModCostTransfer(charTab).length}模块`"
+                        :badge="$t('char-build.mod_count', { count: charBuild.getModCostTransfer(charTab).length })"
                         :is-open="!collapsedSections.mods"
                         lazy
                         @toggle="toggleSection('mods')"

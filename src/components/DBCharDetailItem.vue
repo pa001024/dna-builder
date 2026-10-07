@@ -871,7 +871,7 @@ onBeforeUnmount(() => {
             v-if="exclusiveWeapon && leveledExclusiveWeapon"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="SIGNATURE" :title="$t('专武')">
+            <SectionHeader no-animate compact kicker="SIGNATURE" :title="$t('common.signature_weapon')">
                 <template #trailing>
                     <SRouterLink
                         :to="`/db/weapon/${exclusiveWeapon.id}`"

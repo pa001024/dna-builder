@@ -1,8 +1,11 @@
 {
     "？？？": "???",
     "暗属性攻击": "ATQ Umbro",
+    "昂扬": "Vigueur",
     "办事高效，可以更快完成任务。": "Travaille avec efficacité, réduisant la durée des expéditions.",
     "办事细致，更有可能成功地完成任务。": "Souci du détail, augmente les chances de réussite.",
+    "暴击": "Taux CRIT",
+    "背水": "Ténacité",
     "编辑": "Modifier",
     "编辑构筑": "Modifier le build",
     "标题": "Titre",
@@ -10,7 +13,10 @@
     "查看全部": "Voir tout",
     "查看详情": "Voir les détails",
     "称号框": "Cadre de titre",
+    "充盈威力": "Puissance de Surabondance",
+    "充盈转化": "Conversion de Surabondance",
     "初始解锁": "Débloqué d’emblée",
+    "触发": "Chance de déclenchement",
     "道具获取周报": "Rapport hebdomadaire des objets",
     "道具流水查询": "Consultation des flux d'objets",
     "得心应手，有概率获得多倍的派遣奖励。": "À l’aise dans toutes les situations, peut obtenir des récompenses bonus.",
@@ -19,6 +25,7 @@
     "等级调整": "Ajustement de niveau",
     "掉落物": "Butin",
     "独立": "Indépendant",
+    "多重": "Tir multiple",
     "发型": "Coiffure",
     "房间": "Salle",
     "风属性攻击": "ATQ Anémo",
@@ -35,7 +42,11 @@
     "获取方式": "Obtention",
     "基本信息": "Informations de base",
     "基础属性": "Attributs de base",
+    "技能范围": "Portée de compétence",
+    "技能耐久": "Durée de compétence",
     "技能替换": "Remplacement de compétence",
+    "技能威力": "Puissance de compétence",
+    "技能效益": "Efficacité de compétence",
     "加载更多": "Charger plus",
     "加载中...": "Chargement...",
     "见微知著": "Sens affûté",
@@ -76,7 +87,6 @@
     "射速": "Cadence de tir",
     "深境罗盘": "Compas abyssal",
     "时间线": "Chronologie",
-    "实体": "Entité",
     "拾穗者": "Collecteur",
     "使用": "Utiliser",
     "事件": "Événement",
@@ -127,7 +137,6 @@
     "主线任务": "Quête principale",
     "注重惩恶扬善，公序良俗。": "Défend la justice et les bonnes mœurs.",
     "注重权衡利弊，获取收益。": "Privilégie le gain et l’efficacité des résultats.",
-    "专武": "Arme signature",
     "资源": "Ressource",
     "子技能": "Sous-compétence",
     "左右逢源": "Opportuniste",
@@ -145,6 +154,13 @@
         "assistantDesc": "Consulter les compositions courantes des personnages",
         "available": "Disponible",
         "buildUploadDataFailed": "Échec de la génération des données d’envoi de l’Abîme",
+        "calamityCancel": "Annuler",
+        "calamityConfirm": "Confirmer l'envoi",
+        "calamityDesc": "L'arme de cet emplacement n'a pas pu être identifiée (les armes de calamité ne sont pas fournies par l'API). Veuillez choisir celle que vous avez réellement utilisée.",
+        "calamitySupportHint": "Un personnage coop n'apporte qu'une seule arme, qui peut être de mêlée ou à distance",
+        "calamityTitle": "Sélectionner l'arme de calamité",
+        "calamityTypeMelee": "Mêlée",
+        "calamityTypeRanged": "Distance",
         "char_usage_rate": "Taux d'utilisation des personnages",
         "createdAt": "Créé le",
         "desc": "Statistiques des compositions et des armes/personnages des Abysses",
@@ -189,18 +205,19 @@
         "sheetSubmission": "Soumission",
         "sheetWeapon": "Participation des armes",
         "skillLevel": "Niveau de compétence",
+        "slotMain": "Principal",
         "stars": "Étoiles",
         "submissionsFrom": "Cette page est basée sur les données de {{count}} joueurs. Taux d’utilisation = nombre de joueurs ayant utilisé ce personnage ÷ nombre de joueurs qui le possèdent",
         "submitCount": "{{count}} soumissions",
         "submitId": "ID de soumission",
-        "support1": "Support 1",
-        "support1Id": "ID du support 1",
-        "support2": "Support 2",
-        "support2Id": "ID du support 2",
-        "supportWeapon1": "Arme de support 1",
-        "supportWeapon1Id": "ID de l’arme de support 1",
-        "supportWeapon2": "Arme de support 2",
-        "supportWeapon2Id": "ID de l’arme de support 2",
+        "support1": "Coop 1",
+        "support1Id": "ID coop 1",
+        "support2": "Coop 2",
+        "support2Id": "ID coop 2",
+        "supportWeapon1": "Arme coop 1",
+        "supportWeapon1Id": "ID arme coop 1",
+        "supportWeapon2": "Arme coop 2",
+        "supportWeapon2Id": "ID arme coop 2",
         "team_builder": "Assistant d'équipe",
         "title": "Utilisation des Abysses",
         "top_deploy_team": "Équipe la plus déployée",
@@ -615,7 +632,6 @@
         "title": "Liste des livres",
         "totalCount": "{{count}} livres au total"
     },
-    "Boss削韧": "Déséquilibre de boss",
     "box-drop": {
         "boxMaximum": "Total maximal",
         "boxPerDay": "Maximum journalier",
@@ -764,6 +780,7 @@
         "melee_mod_config": "Configuration MOD de mêlée",
         "melee_weapon": "Arme de corps à corps",
         "melee_weapon_mod_config": "Configuration MOD d'arme de corps à corps",
+        "mod_count": "{{count}} MODs",
         "mod_list": "Liste de MOD",
         "mod_variant": "Config. MOD",
         "mod_variant_add": "Ajouter une config. MOD (3 max par build : A/B/C)",
@@ -959,6 +976,23 @@
         "closeWindowFailed": "Échec de la fermeture de la fenêtre de cloud gaming",
         "openWindowFailed": "Échec de l’ouverture de la fenêtre de cloud gaming"
     },
+    "clue-detail": {
+        "emptyRecords": "Aucune entrée",
+        "notFound": "Indice introuvable",
+        "pageId": "ID de page",
+        "pageName": "Sujet",
+        "records": "Entrées",
+        "sourceSection": "Provenance",
+        "tabType": "Catégorie",
+        "triggerDialogue": "Dialogue",
+        "triggerResource": "Ressource",
+        "unlockCondition": "Condition de déblocage"
+    },
+    "clue-list": {
+        "allCategories": "Tout",
+        "searchPlaceholder": "Rechercher un indice (pinyin pris en charge)...",
+        "totalCount": "{{count}} indices"
+    },
     "comment-section": {
         "comment": "Commentaires",
         "comment_placeholder": "Soyez courtois, discutez sereinement~",
@@ -1026,6 +1060,7 @@
         "season": "Saison",
         "select_level_range": "Sélectionner la plage de niveaux",
         "show_diff_only": "Afficher uniquement les différences",
+        "signature_weapon": "Arme signature",
         "source": "Source",
         "sub_region": "Sous-région",
         "test": "Test",
@@ -1039,6 +1074,22 @@
         "weapon_avatar": "Avatar d'arme",
         "weapon_category": "Catégorie d'arme",
         "weight": "Poids"
+    },
+    "condition-item": {
+        "count_unit": "pcs",
+        "dialogue_read": "Dialogue lu",
+        "difficulty": "Difficulté roguelike",
+        "group_blessing": "Ensemble de bénédictions",
+        "group_treasure": "Ensemble de trésors",
+        "have": "Posséder",
+        "impression": "Impression",
+        "manual": "Enregistrement manuel",
+        "pass_room": "Étages franchis",
+        "player_level": "Niveau",
+        "pre_room": "Salle précédente",
+        "quest": "Quête terminée",
+        "quest_chain": "Chaîne de quêtes terminée",
+        "variable": "Variable"
     },
     "copy-id": {
         "click_copy": "Cliquez pour copier {{name}}",
@@ -1139,6 +1190,8 @@
         "char_desc": "Consulter les informations et attributs des personnages",
         "charprofile": "Archives du personnage",
         "charvoice": "Voix des personnages",
+        "clue": "Tableau d'indices",
+        "clue_desc": "Parcourir les indices du mur d'enquête",
         "damage": "Dégâts",
         "damage_desc": "Décomposition étape par étape des formules de dégâts",
         "desc": "Rechercher des données de jeu",
@@ -1187,6 +1240,8 @@
         "reputation_desc": "Voir les niveaux de réputation régionale et les informations de commission",
         "resource": "Ressource",
         "resource_desc": "Voir les informations et icônes de ressource",
+        "review": "Récapitulatif",
+        "review_desc": "Parcourir la chronologie du récapitulatif",
         "role": "Personnage",
         "rouge": "Labyrinthe",
         "rouge_desc": "Consultez les mèches, artéfacts, lanternes, contrats et salles du Labyrinthe (Solo/Coop)",
@@ -1201,7 +1256,9 @@
         "walnut": "Noix",
         "walnut_desc": "Voir les informations de probabilité de noix et simuler les tirages",
         "weapon": "Arme",
-        "weapon_desc": "Voir les informations et attributs de l'arme"
+        "weapon_desc": "Voir les informations et attributs de l'arme",
+        "wiki": "Encyclopédie",
+        "wiki_desc": "Entrées de l'encyclopédie du jeu classées par faction, personnage, culture et civilisation"
     },
     "db-abyss-dungeon": {
         "abyss_id": "ID d'abîme",
@@ -3512,6 +3569,23 @@
     "resource-list": {
         "title": "Liste des ressources"
     },
+    "review-detail": {
+        "branch": "Branche",
+        "chainId": "ID de colonne",
+        "content": "Texte",
+        "emptyContent": "Aucun texte",
+        "episode": "Chapitre",
+        "infoSection": "Informations",
+        "main": "Principale",
+        "notFound": "Récapitulatif introuvable",
+        "questChain": "Chaîne de quêtes",
+        "side": "Secondaire",
+        "unlockCondition": "Condition de déblocage"
+    },
+    "review-list": {
+        "searchPlaceholder": "Rechercher un récapitulatif (pinyin pris en charge)...",
+        "totalCount": "{{count}} récapitulatifs"
+    },
     "reward-item": {
         "capacity": "Capacité : {{value}}",
         "drop_item": "Butin :",
@@ -4030,6 +4104,27 @@
     "skill-cd-pos-picker": {
         "no_game_window": "Aucune fenêtre de jeu détectée ; l'aperçu utilise la résolution d'écran actuelle"
     },
+    "skill-creature": {
+        "box": "Boîte",
+        "capsule": "Capsule",
+        "circle": "Cercle",
+        "entity": "Entité",
+        "lifetime": "Durée de vie",
+        "shape": "Forme",
+        "speed": "Vitesse",
+        "unspecified": "Non spécifié",
+        "vfxLoopInterval": "Intervalle de boucle VFX"
+    },
+    "skill-fields": {
+        "bossStagger": "Déséquilibre de boss",
+        "seconds": "s",
+        "tags": "Étiquettes"
+    },
+    "skill-tag": {
+        "melee": "Mêlée",
+        "ranged": "À distance",
+        "weapon": "Arme"
+    },
     "skin-colorize": {
         "desc": "Previsualiser et partager les teintures de skin",
         "desc_placeholder": "Description complémentaire (facultatif)",
@@ -4088,6 +4183,11 @@
         "pack_update_title": "Mise à jour du pack disponible",
         "pack_version_missing": "Aucune version de pack de données disponible",
         "release_notes": "Notes de version"
+    },
+    "string-board": {
+        "next": "Suivant",
+        "picture": "Illustration",
+        "prev": "Précédent"
     },
     "tag": {
         "防御": "DÉF",
@@ -4357,7 +4457,15 @@
         "title": "Liste des noix"
     },
     "weapon-detail": {
-        "title": "Détails de l'arme"
+        "ascension": "Ascension",
+        "crafting": "Fabrication",
+        "moveDemonWedges": "Sceaux démoniaques de mouvement",
+        "noAscensionData": "Aucune donnée d'ascension",
+        "relatedCharacters": "Personnages liés",
+        "secondaryUnlock": "Déblocage secondaire",
+        "source": "Source",
+        "title": "Détails de l'arme",
+        "unlock": "Déverrouiller"
     },
     "weapon-list": {
         "calamityConflict": "Une seule arme Calamité peut être équipée : « {{first}} » est déjà équipée, « {{second}} » ne peut donc pas l'être.",
@@ -4384,5 +4492,22 @@
         "three_star_threshold": "Seuil 3 étoiles",
         "victory_goal": "Objectif de victoire",
         "victory_mode": "Mode de victoire"
+    },
+    "wiki-detail": {
+        "emptyTexts": "Aucun contenu",
+        "mainType": "Catégorie",
+        "notFound": "Entrée introuvable",
+        "relatedSection": "Entrées liées",
+        "sourceSection": "Catégorie",
+        "subType": "Sous-catégorie",
+        "textCount": "Passages",
+        "texts": "Contenu",
+        "triggerDialogue": "Dialogue"
+    },
+    "wiki-list": {
+        "allCategories": "Tout",
+        "emptyResult": "Aucune entrée correspondante",
+        "searchPlaceholder": "Rechercher une entrée",
+        "totalCount": "{{count}} entrées"
     }
 }

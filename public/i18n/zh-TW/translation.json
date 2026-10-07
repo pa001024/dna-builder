@@ -1,7 +1,9 @@
 {
     "暗属性攻击": "暗屬性攻擊",
+    "昂扬": "昂揚",
     "办事高效，可以更快完成任务。": "辦事高效，可以更快完成任務。",
     "办事细致，更有可能成功地完成任务。": "辦事細緻，更有可能成功地完成任務。",
+    "暴击": "暴擊率",
     "编辑": "編輯",
     "编辑构筑": "編輯構築",
     "标题": "標題",
@@ -9,7 +11,9 @@
     "查看全部": "查看全部",
     "查看详情": "查看詳情",
     "称号框": "稱號框",
+    "充盈转化": "充盈轉化",
     "初始解锁": "初始解鎖",
+    "触发": "觸發機率",
     "道具获取周报": "道具取得週報",
     "道具流水查询": "道具流水查詢",
     "得心应手，有概率获得多倍的派遣奖励。": "得心應手，有機率獲得多倍的派遣獎勵。",
@@ -18,6 +22,7 @@
     "等级调整": "等級調整",
     "掉落物": "掉落物",
     "独立": "獨立",
+    "多重": "多重射擊",
     "发型": "髮型",
     "房间": "房間",
     "风属性攻击": "風屬性攻擊",
@@ -34,6 +39,7 @@
     "获取方式": "取得方式",
     "基本信息": "基本資訊",
     "基础属性": "基礎屬性",
+    "技能范围": "技能範圍",
     "技能替换": "技能替換",
     "加载更多": "載入更多",
     "加载中...": "載入中...",
@@ -75,7 +81,6 @@
     "射速": "射速",
     "深境罗盘": "深境羅盤",
     "时间线": "時間線",
-    "实体": "實體",
     "拾穗者": "拾穗者",
     "使用": "使用",
     "事件": "事件",
@@ -126,7 +131,6 @@
     "主线任务": "主線任務",
     "注重惩恶扬善，公序良俗。": "注重懲惡揚善，公序良俗。",
     "注重权衡利弊，获取收益。": "注重權衡利弊，獲取收益。",
-    "专武": "專武",
     "资源": "資源",
     "子技能": "子技能",
     "左右逢源": "左右逢源",
@@ -144,6 +148,13 @@
         "assistantDesc": "查詢角色常用陣容",
         "available": "可用",
         "buildUploadDataFailed": "無法生成深淵上傳資料",
+        "calamityCancel": "取消",
+        "calamityConfirm": "確認上傳",
+        "calamityDesc": "該槽位武器未能識別（災厄武器不會由介面下發），請選擇本場實際使用的武器",
+        "calamitySupportHint": "協戰只帶一把武器，近戰／遠程都有可能",
+        "calamityTitle": "選擇災厄武器",
+        "calamityTypeMelee": "近戰",
+        "calamityTypeRanged": "遠程",
         "char_usage_rate": "角色使用率",
         "createdAt": "建立時間",
         "desc": "深淵陣容與角色武器統計",
@@ -188,18 +199,19 @@
         "sheetSubmission": "提交",
         "sheetWeapon": "武器參與",
         "skillLevel": "技能等級",
+        "slotMain": "主控",
         "stars": "星級",
         "submissionsFrom": "本頁面所有資料分析自 {{count}} 名玩家。使用率 = 使用該角色的玩家數 ÷ 擁有該角色的玩家數",
         "submitCount": "{{count}} 次提交",
         "submitId": "提交ID",
-        "support1": "助戰1",
-        "support1Id": "助戰1ID",
-        "support2": "助戰2",
-        "support2Id": "助戰2ID",
-        "supportWeapon1": "助戰武器1",
-        "supportWeapon1Id": "助戰武器1ID",
-        "supportWeapon2": "助戰武器2",
-        "supportWeapon2Id": "助戰武器2ID",
+        "support1": "協戰1",
+        "support1Id": "協戰1ID",
+        "support2": "協戰2",
+        "support2Id": "協戰2ID",
+        "supportWeapon1": "協戰武器1",
+        "supportWeapon1Id": "協戰武器1ID",
+        "supportWeapon2": "協戰武器2",
+        "supportWeapon2Id": "協戰武器2ID",
         "team_builder": "配隊助手",
         "title": "深淵使用率",
         "top_deploy_team": "出戰數最高的陣容",
@@ -614,7 +626,6 @@
         "title": "讀物列表",
         "totalCount": "共 {{count}} 本讀物"
     },
-    "Boss削韧": "Boss削韌",
     "box-drop": {
         "boxMaximum": "總上限",
         "boxPerDay": "每日上限",
@@ -747,6 +758,7 @@
         "melee": "近戰",
         "melee_weapon": "近戰武器",
         "melee_weapon_mod_config": "近戰武器MOD配置",
+        "mod_count": "{{count}}模組",
         "mod_variant": "MOD配置",
         "mod_variant_add": "新增一份MOD配置（同一構築最多三份：A/B/C）",
         "mod_variant_remove": "移除該MOD配置",
@@ -926,6 +938,23 @@
         "closeWindowFailed": "關閉雲遊戲視窗失敗",
         "openWindowFailed": "開啟雲遊戲視窗失敗"
     },
+    "clue-detail": {
+        "emptyRecords": "暫無內容條目",
+        "notFound": "未找到該線索",
+        "pageId": "頁面 ID",
+        "pageName": "調查對象",
+        "records": "內容條目",
+        "sourceSection": "線索歸屬",
+        "tabType": "頁類型",
+        "triggerDialogue": "對話",
+        "triggerResource": "資源",
+        "unlockCondition": "解鎖條件"
+    },
+    "clue-list": {
+        "allCategories": "全部",
+        "searchPlaceholder": "搜尋線索名稱、內容（支援拼音）...",
+        "totalCount": "共 {{count}} 條線索"
+    },
     "comment-section": {
         "comment": "評論",
         "comment_placeholder": "友善評論，理性交流～",
@@ -993,6 +1022,7 @@
         "season": "賽季",
         "select_level_range": "選擇等級範圍",
         "show_diff_only": "僅顯示差異",
+        "signature_weapon": "專武",
         "source": "來源",
         "sub_region": "子區域",
         "test": "測試",
@@ -1006,6 +1036,22 @@
         "weapon_avatar": "武器頭像",
         "weapon_category": "武器分類",
         "weight": "權重"
+    },
+    "condition-item": {
+        "count_unit": "枚",
+        "dialogue_read": "已讀對話",
+        "difficulty": "肉鴿難度",
+        "group_blessing": "祝福組",
+        "group_treasure": "寶物組",
+        "have": "擁有",
+        "impression": "印象",
+        "manual": "手動記錄",
+        "pass_room": "已通過層數",
+        "player_level": "等級",
+        "pre_room": "前置房間",
+        "quest": "完成任務",
+        "quest_chain": "完成任務鏈",
+        "variable": "變數"
     },
     "copy-id": {
         "click_copy": "點擊複製 {{name}}",
@@ -1106,6 +1152,8 @@
         "char_desc": "查看角色資訊和屬性",
         "charprofile": "角色檔案",
         "charvoice": "角色語音",
+        "clue": "線索板",
+        "clue_desc": "檢視調查牆線索板內容",
         "damage": "傷害",
         "damage_desc": "傷害公式分步驟拆解",
         "desc": "查詢遊戲中的數據",
@@ -1154,6 +1202,8 @@
         "reputation_desc": "查看區域聲名等級與委託資訊",
         "resource": "資源",
         "resource_desc": "查看資源資訊和圖標",
+        "review": "劇情回顧",
+        "review_desc": "檢視劇情回顧時間軸",
         "role": "角色",
         "rouge": "迷津",
         "rouge_desc": "查看迷津資訊",
@@ -1168,7 +1218,9 @@
         "walnut": "密函",
         "walnut_desc": "查看密函機率資訊和模擬抽取",
         "weapon": "武器",
-        "weapon_desc": "查看武器資訊和屬性"
+        "weapon_desc": "查看武器資訊和屬性",
+        "wiki": "百科",
+        "wiki_desc": "遊戲內百科詞條，按勢力、人物、風土、文明分類"
     },
     "db-abyss-dungeon": {
         "abyss_id": "深淵 ID",
@@ -3472,6 +3524,23 @@
     "resource-list": {
         "title": "資源列表"
     },
+    "review-detail": {
+        "branch": "歸屬",
+        "chainId": "欄 ID",
+        "content": "回顧正文",
+        "emptyContent": "暫無正文",
+        "episode": "章節",
+        "infoSection": "回顧資訊",
+        "main": "主線",
+        "notFound": "未找到該劇情回顧",
+        "questChain": "任務鏈",
+        "side": "支線",
+        "unlockCondition": "解鎖條件"
+    },
+    "review-list": {
+        "searchPlaceholder": "搜尋回顧標題、正文（支援拼音）...",
+        "totalCount": "共 {{count}} 條回顧"
+    },
     "reward-item": {
         "capacity": "容量:{{value}}",
         "drop_item": "掉落物:",
@@ -3990,6 +4059,27 @@
     "skill-cd-pos-picker": {
         "no_game_window": "未偵測到遊戲視窗，預覽依目前螢幕解析度顯示"
     },
+    "skill-creature": {
+        "box": "方",
+        "capsule": "膠囊",
+        "circle": "圓",
+        "entity": "實體",
+        "lifetime": "生命週期",
+        "shape": "形狀",
+        "speed": "速度",
+        "unspecified": "未指定",
+        "vfxLoopInterval": "特效循環間隔"
+    },
+    "skill-fields": {
+        "bossStagger": "Boss削韌",
+        "seconds": "秒",
+        "tags": "標籤"
+    },
+    "skill-tag": {
+        "melee": "近戰",
+        "ranged": "遠程",
+        "weapon": "武器"
+    },
     "skin-colorize": {
         "desc": "預覽及分享角色皮膚染色",
         "desc_placeholder": "補充描述（選填）",
@@ -4048,6 +4138,11 @@
         "pack_update_title": "資料包可更新",
         "pack_version_missing": "找不到可用的資料包版本",
         "release_notes": "更新說明"
+    },
+    "string-board": {
+        "next": "下一張",
+        "picture": "配圖",
+        "prev": "上一張"
     },
     "tag": {
         "防御": "防禦",
@@ -4311,7 +4406,15 @@
         "title": "密函列表"
     },
     "weapon-detail": {
-        "title": "武器詳情"
+        "ascension": "突破",
+        "crafting": "製造",
+        "moveDemonWedges": "招式魔之楔",
+        "noAscensionData": "暫無突破資料",
+        "relatedCharacters": "關聯角色",
+        "secondaryUnlock": "二次解鎖",
+        "source": "來源",
+        "title": "武器詳情",
+        "unlock": "解鎖"
     },
     "weapon-list": {
         "calamityConflict": "災厄武器只能裝備一把：已裝備「{{first}}」，無法再裝備「{{second}}」。",
@@ -4338,5 +4441,22 @@
         "three_star_threshold": "三星門檻",
         "victory_goal": "勝利目標",
         "victory_mode": "勝利模式"
+    },
+    "wiki-detail": {
+        "emptyTexts": "暫無正文",
+        "mainType": "大類",
+        "notFound": "找不到該詞條",
+        "relatedSection": "關聯條目",
+        "sourceSection": "歸屬資訊",
+        "subType": "子類",
+        "textCount": "段數",
+        "texts": "正文",
+        "triggerDialogue": "對話"
+    },
+    "wiki-list": {
+        "allCategories": "全部",
+        "emptyResult": "沒有符合條件的詞條",
+        "searchPlaceholder": "搜尋詞條",
+        "totalCount": "共 {{count}} 個詞條"
     }
 }

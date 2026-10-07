@@ -14,11 +14,23 @@
 
 import type { CharExt } from "../d/charext.data"
 import type { CharVoice } from "../d/charvoice.data"
+import type { ClueTabType } from "../d/clue.data"
 import type { QuestItem } from "../d/quest.data"
 import type { QuestChain } from "../d/questchain.data"
+import type { ReviewPage } from "../d/review.data"
+import type { WikiMainType } from "../d/wiki.data"
 import { setCurrentVersionLimit } from "../versionGate"
-import { buildProfileChunks, buildStoryChunks, buildSummaryChunks, buildVoiceChunks } from "./chunks"
 import {
+    buildClueChunks,
+    buildProfileChunks,
+    buildReviewChunks,
+    buildStoryChunks,
+    buildSummaryChunks,
+    buildVoiceChunks,
+    buildWikiChunks,
+} from "./chunks"
+import {
+    RAG_CN_SOURCE_LANG,
     RAG_SERVER_KINDS,
     RAG_SUMMARY_LANG,
     type RagChunk,
@@ -129,6 +141,39 @@ async function loadStorySummaries(): Promise<Record<number, string>> {
 }
 
 /**
+ * 取调查墙线索板数据。
+ *
+ * 正文只有简体中文一套（与 `RAG_CN_SOURCE_LANG` 同源），因此**不按 lang 取**：
+ * 每个语言的语料都嵌同一份中文线索，查询侧靠跨语言能力对齐。
+ * @returns 线索板页类型树
+ */
+async function loadClueTabs(): Promise<ClueTabType[]> {
+    const { clueData } = await import("../d/clue.data")
+
+    return clueData
+}
+
+/**
+ * 取剧情回顾数据（同线索板：正文只有简体中文一套，不按 lang 取）。
+ * @returns 回顾页树
+ */
+async function loadReviewPages(): Promise<ReviewPage[]> {
+    const { reviewData } = await import("../d/review.data")
+
+    return reviewData
+}
+
+/**
+ * 取游戏内百科数据（同线索板：正文只有简体中文一套，不按 lang 取）。
+ * @returns 百科大类树
+ */
+async function loadWikiMainTypes(): Promise<WikiMainType[]> {
+    const { wikiData } = await import("../d/wiki.data")
+
+    return wikiData
+}
+
+/**
  * 构建某个语言、指定种类的语料 chunk。
  *
  * 条目语料（全库条目）**不在服务端建向量**：它的名称与字段几乎都是短文本，
@@ -165,6 +210,19 @@ export async function buildRagChunks(lang: string, kinds: readonly RagChunkKind[
         if (wanted.has("profile")) {
             chunks.push(...buildProfileChunks({ lang, profiles: await loadProfiles(lang), charNames }))
         }
+    }
+
+    // 调查墙线索板、剧情回顾与游戏内百科：正文只有简体中文一套，故 lang 恒为 RAG_CN_SOURCE_LANG
+    if (wanted.has("clue")) {
+        chunks.push(...buildClueChunks({ lang: RAG_CN_SOURCE_LANG, tabs: await loadClueTabs() }))
+    }
+
+    if (wanted.has("review")) {
+        chunks.push(...buildReviewChunks({ lang: RAG_CN_SOURCE_LANG, pages: await loadReviewPages() }))
+    }
+
+    if (wanted.has("wiki")) {
+        chunks.push(...buildWikiChunks({ lang: RAG_CN_SOURCE_LANG, mainTypes: await loadWikiMainTypes() }))
     }
 
     return chunks

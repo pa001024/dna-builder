@@ -1,5 +1,6 @@
 import type { DNARoleEntity } from "dna-api"
 import type { AbyssUsageSubmissionInput } from "@/api/gen/api-types"
+import { weaponMap } from "@/data/d"
 import { abyssDungeons } from "@/data/d/abyss.data"
 import { abyssDungeonVersionRanges, getVersionByTime } from "@/data/time.data"
 import { parseAbyssBestTimeVo1 } from "@/utils/abyss-best-time"
@@ -11,6 +12,61 @@ export interface AbyssUploadParticipantInput {
     gradeLevel: number
     weaponId: number
     skillLevel: number
+}
+
+export type AbyssWeaponType = "melee" | "ranged"
+
+export type AbyssWeaponSlotId = AbyssWeaponType | "support1" | "support2"
+
+export interface AbyssCalamityWeaponOption {
+    weaponId: number
+    name: string
+    icon: string
+    weaponType: AbyssWeaponType
+}
+
+export interface AbyssMissingWeaponSlot {
+    slot: AbyssWeaponSlotId
+    options: AbyssCalamityWeaponOption[]
+}
+
+export interface AbyssUploadOverrides {
+    meleeId?: number
+    rangedId?: number
+    supportWeapon1?: number
+    supportWeapon2?: number
+}
+
+const CALAMITY_DAMAGE_TYPE = "灾厄"
+
+export function getCalamityWeaponOptions(weaponType: AbyssWeaponType): AbyssCalamityWeaponOption[] {
+    const category = weaponType === "melee" ? "近战" : "远程"
+    return [...weaponMap.values()]
+        .filter(item => item.伤害类型 === CALAMITY_DAMAGE_TYPE && item.类型?.includes(category))
+        .map(item => ({ weaponId: item.id, name: item.名称, icon: item.icon ?? "", weaponType }))
+}
+
+/**
+ * 把弹窗里的槽位选择转换成上传覆盖项。
+ * 协战武器无近战/远程之分，故候选包含全部 4 把灾厄武器。
+ * @param selections 槽位到武器 ID 的选择结果。
+ * @returns 上传覆盖项。
+ */
+export function buildAbyssCalamityOverrides(selections: Partial<Record<AbyssWeaponSlotId, number>>): AbyssUploadOverrides {
+    const overrides: AbyssUploadOverrides = {}
+    if (selections.melee != null) {
+        overrides.meleeId = selections.melee
+    }
+    if (selections.ranged != null) {
+        overrides.rangedId = selections.ranged
+    }
+    if (selections.support1 != null) {
+        overrides.supportWeapon1 = selections.support1
+    }
+    if (selections.support2 != null) {
+        overrides.supportWeapon2 = selections.support2
+    }
+    return overrides
 }
 
 export interface AbyssUsageOwnedInput {
@@ -180,11 +236,45 @@ function parseAbyssBestTimeVo1WithOwned(roleInfo: DNARoleEntity, bestTimeVo1?: P
 }
 
 /**
+ * 检测阵容里反解失败的主控 / 协战武器槽位。
+ * 正常情况下主控 closeWeaponIcon / langRangeWeaponIcon 与协战 phantomWeaponIcon1/2 都会有值；
+ * 后端不下发灾厄武器，因此缺失即代表该槽位装备了灾厄武器，需要让用户手动指定具体是哪一把。
+ * @param roleInfo 角色信息。
+ * @returns 缺失的槽位列表（含对应灾厄武器候选）。
+ */
+export function detectMissingAbyssWeaponSlots(roleInfo: DNARoleEntity): AbyssMissingWeaponSlot[] {
+    const bestTimeVo1 = roleInfo.roleInfo?.abyssInfo?.bestTimeVo1
+    if (!bestTimeVo1) {
+        return []
+    }
+    const lineup = parseAbyssBestTimeVo1WithOwned(roleInfo, bestTimeVo1)
+    const slots: AbyssMissingWeaponSlot[] = []
+    if (lineup.meleeId == null) {
+        slots.push({ slot: "melee", options: getCalamityWeaponOptions("melee") })
+    }
+    if (lineup.rangedId == null) {
+        slots.push({ slot: "ranged", options: getCalamityWeaponOptions("ranged") })
+    }
+    const supportOptions = [...getCalamityWeaponOptions("melee"), ...getCalamityWeaponOptions("ranged")]
+    if (lineup.support1 != null && lineup.supportWeapon1 == null) {
+        slots.push({ slot: "support1", options: supportOptions })
+    }
+    if (lineup.support2 != null && lineup.supportWeapon2 == null) {
+        slots.push({ slot: "support2", options: supportOptions })
+    }
+    return slots
+}
+
+/**
  * 将角色深渊数据转换为可提交的 GraphQL payload。
  * @param roleInfo 角色信息。
+ * @param overrides 用户在缺失弹窗里手动选定的武器。
  * @returns 可提交的 payload；若无法反解则返回 `null`。
  */
-export async function buildAbyssUploadPayload(roleInfo: DNARoleEntity): Promise<AbyssUsageSubmissionInput | null> {
+export async function buildAbyssUploadPayload(
+    roleInfo: DNARoleEntity,
+    overrides: AbyssUploadOverrides = {}
+): Promise<AbyssUsageSubmissionInput | null> {
     const roleShow = roleInfo.roleInfo?.roleShow
     const bestTimeVo1 = roleInfo.roleInfo?.abyssInfo?.bestTimeVo1
     if (!roleShow || !bestTimeVo1) {
@@ -209,12 +299,12 @@ export async function buildAbyssUploadPayload(roleInfo: DNARoleEntity): Promise<
         uidSha256,
         level: roleShow.level,
         charId: lineup.charId != null ? normalizeAbyssCharId(lineup.charId) : 0,
-        meleeId: lineup.meleeId ?? 0,
-        rangedId: lineup.rangedId ?? 0,
+        meleeId: overrides.meleeId ?? lineup.meleeId ?? 0,
+        rangedId: overrides.rangedId ?? lineup.rangedId ?? 0,
         support1: lineup.support1 != null ? normalizeAbyssCharId(lineup.support1) : 0,
-        supportWeapon1: lineup.supportWeapon1 ?? 0,
+        supportWeapon1: overrides.supportWeapon1 ?? lineup.supportWeapon1 ?? 0,
         support2: lineup.support2 != null ? normalizeAbyssCharId(lineup.support2) : 0,
-        supportWeapon2: lineup.supportWeapon2 ?? 0,
+        supportWeapon2: overrides.supportWeapon2 ?? lineup.supportWeapon2 ?? 0,
         stars,
         ownedChars: owned.chars,
         ownedWeapons: owned.weapons,

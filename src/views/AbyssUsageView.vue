@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DNAAPI } from "dna-api"
+import type { DNAAPI, DNARoleEntity } from "dna-api"
 import { computed, onMounted, ref } from "vue"
 import { utils, writeFile } from "xlsx"
 import { abyssUsageBaseQuery } from "@/api/combined"
@@ -21,7 +21,13 @@ import { LeveledPet } from "@/data/leveled/LeveledPet"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { useUserStore } from "@/store/user"
-import { buildAbyssUploadPayload, getCurrentAbyssSeason } from "@/utils/abyss-upload"
+import {
+    type AbyssMissingWeaponSlot,
+    type AbyssUploadOverrides,
+    buildAbyssUploadPayload,
+    detectMissingAbyssWeaponSlots,
+    getCurrentAbyssSeason,
+} from "@/utils/abyss-upload"
 import { ABYSS_DUNGEON_ELEMENT_KEYS, getAbyssDungeonGroup } from "@/utils/dungeon-utils"
 import { formatTimeRange } from "@/utils/time"
 
@@ -69,6 +75,8 @@ let api: DNAAPI
 
 const loading = ref(false)
 const abyssUploading = ref(false)
+const abyssCalamitySlots = ref<AbyssMissingWeaponSlot[]>([])
+let abyssCalamityRole: DNARoleEntity | null = null
 const exporting = ref(false)
 const seasonInfo = ref<ReturnType<typeof getCurrentAbyssSeason>>(null)
 const DEFAULT_LEVEL_RANGE_FROM = 1
@@ -355,7 +363,38 @@ async function uploadAbyssUsage() {
             return
         }
 
-        const payload = await buildAbyssUploadPayload(role)
+        // 主控 / 协战武器图标缺失时无法反解出武器 id（后端不下发灾厄武器），先让用户手动指定
+        const missingSlots = detectMissingAbyssWeaponSlots(role)
+        if (missingSlots.length > 0) {
+            abyssCalamityRole = role
+            abyssCalamitySlots.value = missingSlots
+            return
+        }
+
+        await submitAbyssUsage(role, {})
+    } finally {
+        abyssUploading.value = false
+    }
+}
+
+function cancelAbyssCalamity() {
+    abyssCalamityRole = null
+    abyssCalamitySlots.value = []
+}
+
+async function confirmAbyssCalamity(overrides: AbyssUploadOverrides) {
+    const role = abyssCalamityRole
+    cancelAbyssCalamity()
+    if (!role) {
+        return
+    }
+    await submitAbyssUsage(role, overrides)
+}
+
+async function submitAbyssUsage(role: DNARoleEntity, overrides: AbyssUploadOverrides) {
+    abyssUploading.value = true
+    try {
+        const payload = await buildAbyssUploadPayload(role, overrides)
         if (!payload) {
             throw new Error("无法生成深渊上传数据")
         }
@@ -1265,4 +1304,6 @@ onMounted(async () => {
             </div>
         </div>
     </ScrollArea>
+
+    <AbyssCalamityWeaponDialog :slots="abyssCalamitySlots" @confirm="confirmAbyssCalamity" @cancel="cancelAbyssCalamity" />
 </template>

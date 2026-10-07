@@ -6,6 +6,7 @@ import { ref, watch } from "vue"
 import { getInstanceInfo } from "@/api/external"
 import { missionsIngameQuery } from "@/api/graphql"
 import { useSettingStore } from "@/store/setting"
+import { runDNAChannelTask, serializeTaskData } from "@/utils/dna-channel"
 import { env } from "../env"
 import { useUIStore } from "./ui"
 
@@ -16,7 +17,9 @@ export { MIHAN_MISSIONS } from "@/utils/mihan-meta"
 export const MIHAN_DATA_KEY = "mihanData"
 /** 关注任务列表在 localStorage 中的键。 */
 export const MIHAN_NOTIFY_MISSIONS_KEY = "mihanNotifyMissions"
-const MIHAN_UPDATE_DELAY_MS = 85 * 1000
+const MIHAN_UPDATE_DELAY_MS = 80 * 1000
+const MIHAN_POLL_INTERVAL_MS = 30 * 1000
+const MIHAN_MAX_SAMPLES = 8
 
 let mihanNotifySingleton: ReturnType<typeof createMihanNotify> | null = null
 
@@ -92,9 +95,10 @@ function createMihanNotify() {
     /**
      * 更新密函数据。
      * @param force 是否强制刷新
+     * @param initialDelayMs 走 DNA 通道时的首轮延迟；手动刷新传 0
      * @returns 是否成功更新到新数据
      */
-    async function updateMihanData(force = false) {
+    async function updateMihanData(force = false, initialDelayMs = 0) {
         if (mihanData.value && !isOutdated() && !force) return true
 
         /**
@@ -120,21 +124,26 @@ function createMihanNotify() {
         }
 
         const setting = useSettingStore()
-        const api = await setting.getDNAAPI()
-        if (api) {
-            try {
-                // 用户登录尝试使用DNAAPI获取密函
-                await setting.startHeartbeat()
-                const data = await api.defaultRoleForTool()
-                if (data?.data?.instanceInfo) {
-                    const missions = data.data.instanceInfo.map(v => v.instances.map(v => v.name))
-                    return applyMissions(missions, Date.now())
-                }
-            } catch (error) {
-                console.error("DNAAPI获取密函失败:", error)
-            } finally {
-                await setting.stopHeartbeat()
+        try {
+            // 用户登录：走共享 DNA 通道取样，连续两次一致才认作稳定数据，避免整点上游延迟取到上一小时
+            const channelResult = await runDNAChannelTask<string[][]>({
+                initialDelayMs,
+                pollIntervalMs: MIHAN_POLL_INTERVAL_MS,
+                maxSamples: MIHAN_MAX_SAMPLES,
+                sample: async () => {
+                    const api = await setting.getDNAAPI()
+                    if (!api) throw new Error("未登录皎皎角账号")
+                    const data = await api.defaultRoleForTool()
+                    if (!data?.data?.instanceInfo) throw new Error("DNAAPI 未返回密函数据")
+                    return data.data.instanceInfo.map(v => v.instances.map(v => v.name))
+                },
+                isSame: (a, b) => serializeTaskData(a) === serializeTaskData(b),
+            })
+            if (channelResult.confirmed) {
+                return applyMissions(channelResult.value, Date.now())
             }
+        } catch (error) {
+            console.error("DNAAPI获取密函失败:", error)
         }
 
         try {
@@ -277,19 +286,19 @@ function createMihanNotify() {
         watchTimer = setTimeout(async () => {
             watching.value = false
             watchTimer = null
-            let ok = await updateMihanData()
+            let ok = await updateMihanData(false, MIHAN_UPDATE_DELAY_MS)
             let c = 0
             while (!ok && c < 3) {
                 c++
                 console.log("update mihan data failed, retry in 3s")
-                ok = await updateMihanData()
+                ok = await updateMihanData(false, 0)
                 await sleep(3e3)
             }
             await checkNotify()
             if (shouldKeepWatch()) {
                 startWatch()
             }
-        }, duration + MIHAN_UPDATE_DELAY_MS) // 整点后延迟85秒（原25秒+新增1分钟），避免拿到上一小时旧数据
+        }, duration) // 整点触发；首轮延迟与连续取样确认由共享 DNA 通道负责
     }
 
     /**

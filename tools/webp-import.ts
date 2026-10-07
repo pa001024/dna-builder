@@ -73,6 +73,12 @@ type ConvertTask = {
 }
 
 type IconItem = { icon?: string }
+/** 带配图的条目（调查墙线索 / 剧情回顾）：pic1、pic2 都已是完整 T_StringBoard_* 贴图名 */
+type PicItem = { pic1?: string; pic2?: string }
+type ClueTabLike = { pages: { clues: PicItem[] }[] }
+type ReviewPageLike = { chains: { main: PicItem[]; side: PicItem[] }[] }
+/** 百科大类 / 条目：大类 icon 与条目 img 都已是完整 T_Tab_* / T_Encyclopedia_* 贴图名 */
+type WikiMainTypeLike = { icon?: string; subTypes: { entries: { img?: string }[] }[] }
 type CharLike = IconItem & {
     属性?: string
     技能?: IconItem[]
@@ -595,6 +601,51 @@ async function evaluateDataUrls(): Promise<Set<string>> {
         for (const task of event.photoTasks ?? []) {
             if (task.photoView) {
                 urls.add(`/imgs/webp/${task.photoView}.webp`)
+            }
+        }
+    }
+
+    // 调查墙线索板 / 剧情回顾配图: 视图（DBClueDetailItem / DBReviewDetailItem 经 DBStringBoardPlate）
+    // 按 `/imgs/webp/${pic}.webp` 直接引用（pic1/pic2 已是完整 T_StringBoard_* 贴图名）。
+    // pic1/pic2 在数据与视图里都不含 /imgs/ 前缀，文本扫描抓不到，必须在此枚举数据。
+    const { clueData } = await loadModule<{ clueData: ClueTabLike[] }>("d/clue.data.ts")
+    const { reviewData } = await loadModule<{ reviewData: ReviewPageLike[] }>("d/review.data.ts")
+    for (const tab of clueData) {
+        for (const page of tab.pages) {
+            for (const clue of page.clues) {
+                for (const pic of [clue.pic1, clue.pic2]) {
+                    if (pic) {
+                        urls.add(`/imgs/webp/${pic}.webp`)
+                    }
+                }
+            }
+        }
+    }
+    for (const page of reviewData) {
+        for (const chain of page.chains) {
+            for (const review of [...chain.main, ...chain.side]) {
+                for (const pic of [review.pic1, review.pic2]) {
+                    if (pic) {
+                        urls.add(`/imgs/webp/${pic}.webp`)
+                    }
+                }
+            }
+        }
+    }
+
+    // 游戏内百科配图与页签图标: 视图（DBWiki*）按 `/imgs/webp/${img}.webp` 直接引用
+    // （img / icon 已是完整 T_Encyclopedia_* / T_Tab_* 贴图名，数据与视图里不含 /imgs/ 前缀）。
+    const { wikiData } = await loadModule<{ wikiData: WikiMainTypeLike[] }>("d/wiki.data.ts")
+    for (const mainType of wikiData) {
+        if (mainType.icon) {
+            urls.add(`/imgs/webp/${mainType.icon}.webp`)
+        }
+
+        for (const subType of mainType.subTypes) {
+            for (const entry of subType.entries) {
+                if (entry.img) {
+                    urls.add(`/imgs/webp/${entry.img}.webp`)
+                }
             }
         }
     }

@@ -595,7 +595,7 @@ onBeforeUnmount(() => {
                 @contextmenu="onGridContextMenu"
                 @dragstart.capture.prevent
             >
-                <ContextMenu
+                <div
                     v-for="(item, index) in tileList"
                     :key="item.name"
                     class="po-tile-rise po-tile-slot"
@@ -608,82 +608,84 @@ onBeforeUnmount(() => {
                     @pointerup="onTilePointerUp"
                     @pointercancel="onTilePointerCancel"
                 >
-                    <POCard
-                        :size="item.size"
-                        :to="item.path"
-                        :icon="item.icon"
-                        :title="$t(`${item.name}.title`)"
-                        :description="$t(`${item.name}.desc`)"
-                        :gradient="item.gradient"
-                        :glow="item.glow"
-                        :image="tileImageAt(index)"
-                    />
-                    <template #menu>
-                        <!-- 切换颜色：弹出调色板子菜单 -->
-                        <ContextMenuSub>
-                            <ContextMenuSubTrigger class="po-tile-menu-item">
-                                <Icon class="size-4 mr-2" icon="ri:palette-line" />
-                                {{ $t("more.contextMenu.changeColor") }}
-                            </ContextMenuSubTrigger>
-                            <ContextMenuSubContent
-                                class="min-w-55 z-30 bg-base-100/80 outline-none rounded-lg p-2 shadow-lg will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
-                            >
-                                <ContextMenuItem
-                                    v-for="color in TILE_PALETTE"
-                                    :key="color.name"
-                                    class="po-tile-menu-item"
-                                    @click="setTileColor(item.name, color.color)"
+                    <ContextMenu class="h-full">
+                        <POCard
+                            :size="item.size"
+                            :to="item.path"
+                            :icon="item.icon"
+                            :title="$t(`${item.name}.title`)"
+                            :description="$t(`${item.name}.desc`)"
+                            :gradient="item.gradient"
+                            :glow="item.glow"
+                            :image="tileImageAt(index)"
+                        />
+                        <template #menu>
+                            <!-- 切换颜色：弹出调色板子菜单 -->
+                            <ContextMenuSub>
+                                <ContextMenuSubTrigger class="po-tile-menu-item">
+                                    <Icon class="size-4 mr-2" icon="ri:palette-line" />
+                                    {{ $t("more.contextMenu.changeColor") }}
+                                </ContextMenuSubTrigger>
+                                <ContextMenuSubContent
+                                    class="min-w-55 z-30 bg-base-100/80 outline-none rounded-lg p-2 shadow-lg will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
                                 >
-                                    <span
-                                        class="size-3 mr-2 rounded-full shrink-0"
-                                        :style="{ background: makeTileTheme(color.color).gradient }"
-                                    />
-                                    {{ $t(`more.contextMenu.color.${color.name}`) }}
-                                </ContextMenuItem>
-                                <!-- 自定义颜色：弹出取色器弹窗 -->
-                                <ContextMenuItem class="po-tile-menu-item" @click="openCustomColor(item.name)">
-                                    <span
-                                        class="size-3 mr-2 rounded-full shrink-0"
-                                        :style="{
-                                            background:
-                                                'conic-gradient(#f5576c, #f7971e, #fde047, #43e97b, #00c6ff, #7f00ff, #f83600, #f5576c)',
-                                        }"
-                                    />
-                                    {{ $t("more.contextMenu.customColor") }}
-                                </ContextMenuItem>
-                            </ContextMenuSubContent>
-                        </ContextMenuSub>
-                        <!-- 切换大小：弹出 小/宽/大 子菜单 -->
-                        <ContextMenuSub>
-                            <ContextMenuSubTrigger class="po-tile-menu-item">
-                                <Icon class="size-4 mr-2" icon="ri:grid-line" />
-                                {{ $t("more.contextMenu.changeSize") }}
-                            </ContextMenuSubTrigger>
-                            <ContextMenuSubContent
-                                class="min-w-55 z-30 bg-base-100/80 outline-none rounded-lg p-2 shadow-lg will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
-                            >
-                                <ContextMenuItem
-                                    v-for="size in SIZE_OPTIONS"
-                                    :key="size"
-                                    class="po-tile-menu-item"
-                                    @click="setTileSize(item.name, size)"
+                                    <ContextMenuItem
+                                        v-for="color in TILE_PALETTE"
+                                        :key="color.name"
+                                        class="po-tile-menu-item"
+                                        @click="setTileColor(item.name, color.color)"
+                                    >
+                                        <span
+                                            class="size-3 mr-2 rounded-full shrink-0"
+                                            :style="{ background: makeTileTheme(color.color).gradient }"
+                                        />
+                                        {{ $t(`more.contextMenu.color.${color.name}`) }}
+                                    </ContextMenuItem>
+                                    <!-- 自定义颜色：弹出取色器弹窗 -->
+                                    <ContextMenuItem class="po-tile-menu-item" @click="openCustomColor(item.name)">
+                                        <span
+                                            class="size-3 mr-2 rounded-full shrink-0"
+                                            :style="{
+                                                background:
+                                                    'conic-gradient(#f5576c, #f7971e, #fde047, #43e97b, #00c6ff, #7f00ff, #f83600, #f5576c)',
+                                            }"
+                                        />
+                                        {{ $t("more.contextMenu.customColor") }}
+                                    </ContextMenuItem>
+                                </ContextMenuSubContent>
+                            </ContextMenuSub>
+                            <!-- 切换大小：弹出 小/宽/大 子菜单 -->
+                            <ContextMenuSub>
+                                <ContextMenuSubTrigger class="po-tile-menu-item">
+                                    <Icon class="size-4 mr-2" icon="ri:grid-line" />
+                                    {{ $t("more.contextMenu.changeSize") }}
+                                </ContextMenuSubTrigger>
+                                <ContextMenuSubContent
+                                    class="min-w-55 z-30 bg-base-100/80 outline-none rounded-lg p-2 shadow-lg will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
                                 >
-                                    <span
-                                        class="mr-2 rounded-xs border border-base-content/40 shrink-0"
-                                        :style="tileSizePreviewStyle(size)"
-                                    />
-                                    {{ $t(`more.contextMenu.size.${size}`) }}
-                                    <Icon v-if="item.size === size" class="size-4 ml-auto" icon="ri:checkbox-circle-fill" />
-                                </ContextMenuItem>
-                            </ContextMenuSubContent>
-                        </ContextMenuSub>
-                        <!-- 恢复默认（仅存在自定义覆盖时显示） -->
-                        <ContextMenuItem v-if="hasOverride(item.name)" class="po-tile-menu-item" @click="resetTileOverride(item.name)">
-                            <Icon class="size-4 mr-2" icon="ri:restart-line" />
-                            {{ $t("more.contextMenu.reset") }}
-                        </ContextMenuItem>
-                    </template>
-                </ContextMenu>
+                                    <ContextMenuItem
+                                        v-for="size in SIZE_OPTIONS"
+                                        :key="size"
+                                        class="po-tile-menu-item"
+                                        @click="setTileSize(item.name, size)"
+                                    >
+                                        <span
+                                            class="mr-2 rounded-xs border border-base-content/40 shrink-0"
+                                            :style="tileSizePreviewStyle(size)"
+                                        />
+                                        {{ $t(`more.contextMenu.size.${size}`) }}
+                                        <Icon v-if="item.size === size" class="size-4 ml-auto" icon="ri:checkbox-circle-fill" />
+                                    </ContextMenuItem>
+                                </ContextMenuSubContent>
+                            </ContextMenuSub>
+                            <!-- 恢复默认（仅存在自定义覆盖时显示） -->
+                            <ContextMenuItem v-if="hasOverride(item.name)" class="po-tile-menu-item" @click="resetTileOverride(item.name)">
+                                <Icon class="size-4 mr-2" icon="ri:restart-line" />
+                                {{ $t("more.contextMenu.reset") }}
+                            </ContextMenuItem>
+                        </template>
+                    </ContextMenu>
+                </div>
             </TransitionGroup>
             <!-- Home 快捷入口风格：复用首页快捷导航样式，auto-fill 自适应列数 -->
             <HomeQuickNav v-else autofill :items="quickNavItems" />

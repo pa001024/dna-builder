@@ -667,6 +667,11 @@ const capacity = computed(() => {
     }
 })
 
+const transferCost = computed(() => {
+    if (!ready.value) return 0
+    return props.charBuild.getModCostTransfer(activeModTab.value).length
+})
+
 /** 武器槽位键 → 魔之楔页签键 */
 const SLOT_TO_MOD_TAB: Record<string, string> = { melee: "近战", ranged: "远程", skill: "同律" }
 
@@ -1142,7 +1147,10 @@ onBeforeUnmount(() => {
                 <div class="sc-panel-head flex items-baseline gap-2 border-b border-(--sc-line) pb-2">
                     <span class="sc-panel-num font-orbitron text-[11px] font-bold text-(--sc-accent)">02</span>
                     <span class="sc-panel-title text-[12px] tracking-[0.18em]">{{ $t("魔之楔") }}</span>
-                    <span class="sc-panel-tail ml-auto font-orbitron text-[11px] text-(--sc-text-dim) tabular-nums">{{ capacity.load }} / {{ capacity.cap }}</span>
+                    <span class="sc-panel-tail ml-auto flex flex-none items-baseline gap-1.5 text-[10px] text-(--sc-text-dim)">
+                        <span>{{ $t("移转模块") }}</span>
+                        <b class="font-orbitron text-[11px] text-(--sc-accent-soft) tabular-nums">{{ transferCost }}</b>
+                    </span>
                 </div>
                 <div class="sc-modtabs flex flex-wrap gap-1">
                     <button

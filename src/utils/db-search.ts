@@ -1,6 +1,6 @@
 import Fuse from "fuse.js"
 import i18next from "i18next"
-import { npcMap } from "@/data/d"
+import { modDungeonMap, npcMap } from "@/data/d"
 import achievementData from "@/data/d/achievement.data"
 import { booksData } from "@/data/d/book.data"
 import { default as charData } from "@/data/d/char.data"
@@ -16,6 +16,7 @@ import { npcData } from "@/data/d/npc.data"
 import petData from "@/data/d/pet.data"
 import type { Dialogue, QuestItem, QuestStory } from "@/data/d/quest.data"
 import questChainData, { type QuestChain, questChain2Version } from "@/data/d/questchain.data"
+import type { Resource } from "@/data/d/resource.data"
 import { resourceData } from "@/data/d/resource.data"
 import { getQuestDataByLocale } from "@/data/d/story-locale"
 import { storySummaryData } from "@/data/d/storysummary.data"
@@ -23,7 +24,7 @@ import { titleData } from "@/data/d/title.data"
 import walnutData from "@/data/d/walnut.data"
 import weaponData from "@/data/d/weapon.data"
 import { DAMAGE_MODES, DAMAGE_TERMS } from "@/data/damage-mechanics"
-import type { SkillField } from "@/data/data-types"
+import type { Mod, SkillField } from "@/data/data-types"
 import { Faction } from "@/data/game-const"
 import { RAG_PROFILE_MODULE } from "@/data/rag/types"
 import { DNA_SAFE_VERSION_LIMIT } from "@/data/versionGate"
@@ -37,6 +38,7 @@ import {
     translateDBAgentText,
 } from "@/utils/db-locale"
 import { type DBMapGroup, resolveDBMapGroups } from "@/utils/db-map-utils"
+import { collectResourceDraftSources } from "@/utils/draft-source"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import { getGlobalSearchService } from "@/utils/global-search"
 import { formatModLimit } from "@/utils/mod-limit"
@@ -46,7 +48,21 @@ import { formatParamText } from "@/utils/param-text"
 import { getPetQualityName, getPetTypeName } from "@/utils/pet-labels"
 import { matchPinyin } from "@/utils/pinyin-utils"
 import { getQuestName } from "@/utils/quest-utils"
+import {
+    collectModCharBreakthroughSources,
+    collectModPackSources,
+    collectModQuestSources,
+    collectModShopSources,
+    collectResourceDungeonSources,
+    collectResourceEventSources,
+    collectResourceHardbossSources,
+    collectResourcePackSources,
+    collectResourceQuestSources,
+    collectResourceShopSources,
+} from "@/utils/resource-source"
+import { getModDropInfo } from "@/utils/reward-utils"
 import { DEFAULT_STORY_TEXT_CONFIG, replaceStoryPlaceholders, stripStoryTextTags } from "@/utils/story-text"
+import { collectWeaponSources, formatWeaponSourceTimeRange } from "@/utils/weapon-source"
 
 /**
  * 资料库检索层。
@@ -1629,6 +1645,157 @@ function formatBreakthroughStages(stages: Array<Record<string, number>> | undefi
     )
 }
 
+const SOURCE_LINE_LIMIT = 30
+
+class SourceLineCollector {
+    private readonly lines: string[] = []
+    private readonly seen = new Set<string>()
+    private overflow = 0
+
+    add(line: string): void {
+        if (this.seen.has(line)) {
+            return
+        }
+
+        this.seen.add(line)
+        if (this.lines.length < SOURCE_LINE_LIMIT) {
+            this.lines.push(line)
+        } else {
+            this.overflow += 1
+        }
+    }
+
+    toResult(): string[] | undefined {
+        if (this.lines.length === 0) {
+            return undefined
+        }
+
+        return this.overflow > 0 ? [...this.lines, `…另有 ${this.overflow} 条来源未列出`] : [...this.lines]
+    }
+}
+
+function formatSourceTimeRange(startTime: number | undefined, endTime: number | undefined): string | undefined {
+    if (typeof startTime !== "number") {
+        return undefined
+    }
+
+    const format = (timestamp: number) =>
+        new Date(timestamp * 1000).toLocaleString("zh-CN", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+        })
+
+    return `${format(startTime)}~${endTime ? format(endTime) : "至今"}`
+}
+
+function formatDropChance(pp: number | undefined, times: number | undefined): string | undefined {
+    if (typeof pp === "number" && Number.isFinite(pp) && pp > 0) {
+        return `概率 ${Number((pp * 100).toFixed(2))}%`
+    }
+
+    if (typeof times === "number" && Number.isFinite(times)) {
+        return `期望 ${Number(times.toFixed(2))} 次`
+    }
+
+    return undefined
+}
+
+function formatModSources(mod: Mod, lang: DBAgentLang): string[] | undefined {
+    const collector = new SourceLineCollector()
+    const translate = (text: string) => translateDBAgentText(text, lang) ?? text
+
+    modDungeonMap.get(mod.id)?.forEach(dungeon => {
+        const drop = getModDropInfo(dungeon, mod.id)
+        const chance = formatDropChance(drop.pp, drop.times)
+        collector.add(`副本：${translate(dungeon.n)}${chance ? `（${chance}）` : ""}`)
+    })
+
+    collectModShopSources(mod).forEach(source => {
+        const price = `${source.priceName}×${source.price}`
+        const limit = typeof source.limit === "number" ? `，限购 ${source.limit}` : ""
+        collector.add(`商店：${source.shopName} - ${source.detail}（${price}${limit}）`)
+    })
+
+    collectModQuestSources(mod.id).forEach(source => {
+        const count = source.num && source.num > 1 ? `×${source.num}` : ""
+        collector.add(`任务链：${source.questChainName} - ${source.episode}${count}`)
+    })
+
+    collectModCharBreakthroughSources(mod.id).forEach(source => {
+        collector.add(`${source.sourceTypeLabel}：${source.charName ?? source.title}（${source.detail ?? ""}）`)
+    })
+
+    collectModPackSources(mod.id).forEach(source => {
+        const chance = formatDropChance(source.pp, source.times)
+        collector.add(`道具箱：${source.resourceName}${chance ? `（${chance}）` : ""}`)
+    })
+
+    return collector.toResult()
+}
+
+function formatWeaponSources(weaponId: string): string[] | undefined {
+    const weapon = weaponData.find(item => `${item.id}` === weaponId)
+
+    if (!weapon) {
+        return undefined
+    }
+
+    const collector = new SourceLineCollector()
+
+    collectWeaponSources(weapon).forEach(source => {
+        const range = formatWeaponSourceTimeRange(source)
+        if (source.type === "hardboss") {
+            collector.add(`梦魇残声：${source.hardbossName ?? ""} Lv.${source.hardbossLv ?? ""}（${range}）`)
+            return
+        }
+
+        collector.add(`商店：${source.shopName} - ${source.detail}（${source.priceName}×${source.price}，${range}）`)
+    })
+
+    return collector.toResult()
+}
+
+function formatResourceSources(resource: Resource): string[] | undefined {
+    const collector = new SourceLineCollector()
+
+    collectResourceDraftSources(resource).forEach(source => {
+        collector.add(`设计稿：${source.draft.n}`)
+    })
+
+    collectResourceDungeonSources(resource).forEach(source => {
+        const chance = formatDropChance(source.pp, source.times)
+        collector.add(`副本：${source.dungeonName}${source.dungeonLv ? `（Lv.${source.dungeonLv}）` : ""}${chance ? ` ${chance}` : ""}`)
+    })
+
+    collectResourceShopSources(resource).forEach(source => {
+        collector.add(`商店：${source.shopName} - ${source.detail}（${source.priceName}×${source.price}）`)
+    })
+
+    collectResourceQuestSources(resource).forEach(source => {
+        const count = source.num && source.num > 1 ? `×${source.num}` : ""
+        collector.add(`任务链：${source.questChainName} - ${source.episode}${count}`)
+    })
+
+    collectResourcePackSources(resource).forEach(source => {
+        const chance = formatDropChance(source.pp, source.times)
+        collector.add(`道具箱：${source.resourceName}${chance ? `（${chance}）` : ""}`)
+    })
+
+    collectResourceHardbossSources(resource).forEach(source => {
+        collector.add(`梦魇残声：${source.hardbossName ?? ""} Lv.${source.hardbossLv ?? ""}`)
+    })
+
+    collectResourceEventSources(resource).forEach(source => {
+        const time = formatSourceTimeRange(source.startTime, source.endTime ?? undefined)
+        collector.add(`活动：${source.eventName}${time ? `（${time}）` : ""}`)
+    })
+
+    return collector.toResult()
+}
+
 /**
  * 格式化技能行：`名称（类型）：描述`。
  * @param skill 技能（角色技能 / 武器技能 / 同律武器技能）
@@ -2507,6 +2674,11 @@ function readWeaponDetailFields(id: string, lang: DBAgentLang): DBEntryFields | 
         fields["熔炼（满精炼）"] = maxRefine
     }
 
+    const sources = formatWeaponSources(id)
+    if (sources) {
+        fields.来源 = sources
+    }
+
     return fields
 }
 
@@ -2571,6 +2743,11 @@ function readModDetailFields(id: string, lang: DBAgentLang): DBEntryFields | und
 
     if (effectMax && effectMax !== effectFirst) {
         fields["效果（满级）"] = effectMax
+    }
+
+    const sources = formatModSources(mod, lang)
+    if (sources) {
+        fields.来源 = sources
     }
 
     if (mod.技能替换) {
@@ -2878,6 +3055,11 @@ function readResourceDetailFields(id: string, lang: DBAgentLang): DBEntryFields 
 
     if (locations) {
         fields.采集位置 = locations
+    }
+
+    const sources = formatResourceSources(resource)
+    if (sources) {
+        fields.获取途径 = sources
     }
 
     return fields

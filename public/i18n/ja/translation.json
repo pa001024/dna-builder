@@ -1,7 +1,9 @@
 {
     "暗属性攻击": "闇属性攻撃",
+    "昂扬": "高揚",
     "办事高效，可以更快完成任务。": "効率重視で、任務をすばやくこなそう。",
     "办事细致，更有可能成功地完成任务。": "細部まで丁寧に取り組むと、成功率が高くなる。",
+    "暴击": "クリティカル率",
     "编辑": "編集",
     "编辑构筑": "ビルドを編集",
     "标题": "タイトル",
@@ -9,7 +11,10 @@
     "查看全部": "すべて表示",
     "查看详情": "詳細を見る",
     "称号框": "称号フレーム",
+    "充盈威力": "チャージ威力",
+    "充盈转化": "チャージ変換",
     "初始解锁": "最初から解放",
+    "触发": "発動確率",
     "道具获取周报": "アイテム入手週報",
     "道具流水查询": "アイテム流通照会",
     "得心应手，有概率获得多倍的派遣奖励。": "手慣れた仕事ぶりで、報酬を多く得ることもある。",
@@ -18,6 +23,7 @@
     "等级调整": "レベル調整",
     "掉落物": "ドロップアイテム",
     "独立": "個別",
+    "多重": "多重射撃",
     "发型": "ヘアスタイル",
     "房间": "部屋",
     "风属性攻击": "風属性攻撃",
@@ -34,7 +40,11 @@
     "获取方式": "入手方法",
     "基本信息": "基本情報",
     "基础属性": "基本属性",
+    "技能范围": "スキル範囲",
+    "技能耐久": "スキル耐久",
     "技能替换": "スキル差し替え",
+    "技能威力": "スキル威力",
+    "技能效益": "スキル効率",
     "加载更多": "もっと読み込む",
     "加载中...": "読み込み中...",
     "见微知著": "観察眼",
@@ -75,7 +85,6 @@
     "射速": "射撃速度",
     "深境罗盘": "深境コンパス",
     "时间线": "タイムライン",
-    "实体": "実体",
     "拾穗者": "収穂者",
     "使用": "使用",
     "事件": "イベント",
@@ -126,7 +135,6 @@
     "主线任务": "メインクエスト",
     "注重惩恶扬善，公序良俗。": "正義感が強く、秩序や道徳を大切にしよう。",
     "注重权衡利弊，获取收益。": "損得を冷静に見極めて、確実に利益を得よう。",
-    "专武": "専用武器",
     "资源": "資源",
     "子技能": "サブスキル",
     "左右逢源": "世渡り上手",
@@ -144,6 +152,13 @@
         "assistantDesc": "キャラクターのよく使われる編成を確認",
         "available": "利用可能",
         "buildUploadDataFailed": "深淵アップロードデータの生成に失敗しました",
+        "calamityCancel": "キャンセル",
+        "calamityConfirm": "アップロード確定",
+        "calamityDesc": "このスロットの武器を判定できませんでした（厄災武器はAPIから取得できません）。実際に使用した武器を選んでください。",
+        "calamitySupportHint": "共闘キャラは武器を1つしか持たないため、近接・遠隔のどちらもあり得ます",
+        "calamityTitle": "厄災武器を選択",
+        "calamityTypeMelee": "近接",
+        "calamityTypeRanged": "遠隔",
         "char_usage_rate": "キャラ使用率",
         "createdAt": "作成時刻",
         "desc": "アビスの編成とキャラ・武器の統計",
@@ -188,18 +203,19 @@
         "sheetSubmission": "投稿",
         "sheetWeapon": "武器参加",
         "skillLevel": "スキルレベル",
+        "slotMain": "メイン",
         "stars": "星級",
         "submissionsFrom": "このページは {{count}} 人のプレイヤーのデータに基づいています。使用率 = 該当キャラを使用したプレイヤー数 ÷ 所持しているプレイヤー数",
         "submitCount": "{{count}} 回の投稿",
         "submitId": "投稿ID",
-        "support1": "助戦1",
-        "support1Id": "助戦1ID",
-        "support2": "助戦2",
-        "support2Id": "助戦2ID",
-        "supportWeapon1": "助戦武器1",
-        "supportWeapon1Id": "助戦武器1ID",
-        "supportWeapon2": "助戦武器2",
-        "supportWeapon2Id": "助戦武器2ID",
+        "support1": "共闘1",
+        "support1Id": "共闘1ID",
+        "support2": "共闘2",
+        "support2Id": "共闘2ID",
+        "supportWeapon1": "共闘武器1",
+        "supportWeapon1Id": "共闘武器1ID",
+        "supportWeapon2": "共闘武器2",
+        "supportWeapon2Id": "共闘武器2ID",
         "team_builder": "編成アシスタント",
         "title": "アビス使用率",
         "top_deploy_team": "出撃数最多の編成",
@@ -614,7 +630,6 @@
         "title": "読物一覧",
         "totalCount": "合計 {{count}} 冊の読物"
     },
-    "Boss削韧": "ボス体幹削り",
     "box-drop": {
         "boxMaximum": "総上限",
         "boxPerDay": "1日上限",
@@ -747,6 +762,7 @@
         "melee": "近接",
         "melee_weapon": "近接武器",
         "melee_weapon_mod_config": "近接武器MOD設定",
+        "mod_count": "{{count}} MOD",
         "mod_variant": "MOD構成",
         "mod_variant_add": "MOD構成を追加（1ビルド最大3つ：A/B/C）",
         "mod_variant_remove": "このMOD構成を削除",
@@ -926,6 +942,23 @@
         "closeWindowFailed": "クラウドゲームウィンドウを閉じられませんでした",
         "openWindowFailed": "クラウドゲームウィンドウを開けませんでした"
     },
+    "clue-detail": {
+        "emptyRecords": "内容項目なし",
+        "notFound": "手がかりが見つかりません",
+        "pageId": "ページ ID",
+        "pageName": "調査対象",
+        "records": "内容項目",
+        "sourceSection": "手がかりの所属",
+        "tabType": "ページ種別",
+        "triggerDialogue": "会話",
+        "triggerResource": "資源",
+        "unlockCondition": "解放条件"
+    },
+    "clue-list": {
+        "allCategories": "すべて",
+        "searchPlaceholder": "手がかりの名称・内容を検索（ピンイン対応）...",
+        "totalCount": "手がかり {{count}} 件"
+    },
     "comment-section": {
         "comment": "コメント",
         "comment_placeholder": "マナーを守って理性的に交流しましょう～",
@@ -993,6 +1026,7 @@
         "season": "シーズン",
         "select_level_range": "レベル範囲を選択",
         "show_diff_only": "差分のみ表示",
+        "signature_weapon": "専用武器",
         "source": "ソース",
         "sub_region": "サブエリア",
         "test": "テスト",
@@ -1006,6 +1040,22 @@
         "weapon_avatar": "武器アイコン",
         "weapon_category": "武器分類",
         "weight": "重み"
+    },
+    "condition-item": {
+        "count_unit": "枚",
+        "dialogue_read": "会話閲覧済み",
+        "difficulty": "ローグライク難易度",
+        "group_blessing": "祝福セット",
+        "group_treasure": "宝物セット",
+        "have": "所持",
+        "impression": "印象",
+        "manual": "手動記録",
+        "pass_room": "突破済み層数",
+        "player_level": "レベル",
+        "pre_room": "前の部屋",
+        "quest": "クエスト達成",
+        "quest_chain": "クエストチェーン達成",
+        "variable": "変数"
     },
     "copy-id": {
         "click_copy": "クリックして {{name}} をコピー",
@@ -1106,6 +1156,8 @@
         "char_desc": "キャラクターの情報と属性を確認",
         "charprofile": "キャラクターアーカイブ",
         "charvoice": "キャラクターボイス",
+        "clue": "手がかりボード",
+        "clue_desc": "調査壁の手がかりボードを表示",
         "damage": "ダメージ",
         "damage_desc": "ダメージ計算式を段階的に分解",
         "desc": "ゲームデータのクエリ",
@@ -1154,6 +1206,8 @@
         "reputation_desc": "地域名声のレベルと委託情報を確認",
         "resource": "資源",
         "resource_desc": "資源情報とアイコンを確認",
+        "review": "ストーリー回顧",
+        "review_desc": "ストーリー回顧のタイムラインを表示",
         "role": "キャラクター",
         "rouge": "迷宮",
         "rouge_desc": "迷宮の情報を閲覧",
@@ -1168,7 +1222,9 @@
         "walnut": "クルミ",
         "walnut_desc": "クルミの確率情報を表示し、模擬抽選",
         "weapon": "武器",
-        "weapon_desc": "武器情報と属性を確認"
+        "weapon_desc": "武器情報と属性を確認",
+        "wiki": "事典",
+        "wiki_desc": "ゲーム内百科事典の項目。勢力・人物・風土・文明で分類"
     },
     "db-abyss-dungeon": {
         "abyss_id": "深淵 ID",
@@ -3473,6 +3529,23 @@
     "resource-list": {
         "title": "資源一覧"
     },
+    "review-detail": {
+        "branch": "区分",
+        "chainId": "列 ID",
+        "content": "回顧本文",
+        "emptyContent": "本文なし",
+        "episode": "チャプター",
+        "infoSection": "回顧情報",
+        "main": "メイン",
+        "notFound": "回想が見つかりません",
+        "questChain": "クエストチェーン",
+        "side": "サブ",
+        "unlockCondition": "解放条件"
+    },
+    "review-list": {
+        "searchPlaceholder": "回顧のタイトル・本文を検索（ピンイン対応）...",
+        "totalCount": "回顧 {{count}} 件"
+    },
     "reward-item": {
         "capacity": "容量:{{value}}",
         "drop_item": "ドロップ:",
@@ -3991,6 +4064,27 @@
     "skill-cd-pos-picker": {
         "no_game_window": "ゲームウィンドウを検出していないため、プレビューは現在の画面解像度で表示します"
     },
+    "skill-creature": {
+        "box": "四角",
+        "capsule": "カプセル",
+        "circle": "円",
+        "entity": "実体",
+        "lifetime": "ライフタイム",
+        "shape": "形状",
+        "speed": "速度",
+        "unspecified": "未指定",
+        "vfxLoopInterval": "エフェクトループ間隔"
+    },
+    "skill-fields": {
+        "bossStagger": "ボス体幹削り",
+        "seconds": "秒",
+        "tags": "タグ"
+    },
+    "skill-tag": {
+        "melee": "近接",
+        "ranged": "遠隔",
+        "weapon": "武器"
+    },
     "skin-colorize": {
         "desc": "キャラクタースキンの染色をプレビューして共有",
         "desc_placeholder": "補足説明（任意）",
@@ -4049,6 +4143,11 @@
         "pack_update_title": "データパックを更新できます",
         "pack_version_missing": "利用可能なデータパックのバージョンが見つかりません",
         "release_notes": "更新内容"
+    },
+    "string-board": {
+        "next": "次へ",
+        "picture": "画像",
+        "prev": "前へ"
     },
     "tag": {
         "防御": "防御",
@@ -4312,7 +4411,15 @@
         "title": "クルミリスト"
     },
     "weapon-detail": {
-        "title": "武器の詳細"
+        "ascension": "限界突破",
+        "crafting": "製造",
+        "moveDemonWedges": "招式魔の楔",
+        "noAscensionData": "突破データなし",
+        "relatedCharacters": "関連キャラクター",
+        "secondaryUnlock": "二次解放",
+        "source": "入手方法",
+        "title": "武器の詳細",
+        "unlock": "アンロック"
     },
     "weapon-list": {
         "calamityConflict": "災厄武器は1つしか装備できません：「{{first}}」を装備中のため「{{second}}」は装備できません。",
@@ -4339,5 +4446,22 @@
         "three_star_threshold": "3 星の基準",
         "victory_goal": "勝利条件",
         "victory_mode": "勝利モード"
+    },
+    "wiki-detail": {
+        "emptyTexts": "本文なし",
+        "mainType": "大分類",
+        "notFound": "項目が見つかりません",
+        "relatedSection": "関連項目",
+        "sourceSection": "分類",
+        "subType": "小分類",
+        "textCount": "段落数",
+        "texts": "本文",
+        "triggerDialogue": "会話"
+    },
+    "wiki-list": {
+        "allCategories": "すべて",
+        "emptyResult": "条件に合う項目がありません",
+        "searchPlaceholder": "項目を検索",
+        "totalCount": "全 {{count}} 項目"
     }
 }

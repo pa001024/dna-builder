@@ -135,6 +135,55 @@ describe("readEntry 详情字段", () => {
     })
 })
 
+describe("获取来源（readEntry 的 来源 / 获取途径 字段）", () => {
+    it("魔之楔给出任务链来源", () => {
+        const { entry } = readEntry("mod", { name: "统御穿刺" })
+        const lines = entry?.fields.来源 as string[]
+
+        expect(Array.isArray(lines)).toBe(true)
+        expect(lines.some(line => line.includes("任务链：生存之道"))).toBe(true)
+    })
+
+    it("魔之楔给出商店来源（含价格与限购）", () => {
+        const { entry } = readEntry("mod", { name: "刀尖把戏" })
+        const lines = entry?.fields.来源 as string[]
+
+        expect(lines.some(line => line.includes("商店："))).toBe(true)
+    })
+
+    it("武器给出商店来源", () => {
+        const { entry } = readEntry("weapon", { id: "10101" })
+        const lines = entry?.fields.来源 as string[]
+
+        expect(entry?.name).toBe("辉珀刃")
+        expect(lines.some(line => line.includes("商店："))).toBe(true)
+    })
+
+    it("资源给出获取途径（副本 / 商店 / 任务链）", () => {
+        const { entry } = readEntry("resource", { id: "15002" })
+        const lines = entry?.fields.获取途径 as string[]
+
+        expect(lines.some(line => line.startsWith("副本："))).toBe(true)
+        expect(lines.some(line => line.startsWith("商店："))).toBe(true)
+        expect(lines.some(line => line.startsWith("任务链："))).toBe(true)
+    })
+
+    it("来源极多时去重并封顶，带省略提示", () => {
+        const { entry } = readEntry("resource", { id: "101" })
+        const lines = entry?.fields.获取途径 as string[]
+
+        expect(lines.length).toBeLessThanOrEqual(31)
+        expect(lines[lines.length - 1]).toContain("另有")
+    })
+
+    it("没有来源记录的条目不产出该字段", () => {
+        const { entry } = readEntry("weapon", { id: "20298" })
+
+        expect(entry?.name).toBe("血染织羽")
+        expect(entry?.fields.来源).toBeUndefined()
+    })
+})
+
 describe("技能字段（倍率 / 标签 / 属性影响，算伤害的唯一数据源）", () => {
     it("武器技能给出逐条倍率与标签，且带充盈标签", () => {
         const { entry } = readEntry("weapon", { id: "20298" })
@@ -277,7 +326,9 @@ describe("readEntry 的位置字段（回答「XX 在哪」的唯一数据来源
         const { entry } = readEntry("resource", { id: 99 })
 
         expect(entry?.fields.采集位置).toBeUndefined()
-        expect(Object.keys(entry?.fields ?? {})).toEqual(["稀有度", "描述", "描述2"])
+        // 位置字段缺席，但「获取途径」与采集点无关，仍应由资源来源逻辑产出
+        expect(entry?.fields.获取途径).toBeInstanceOf(Array)
+        expect(Object.keys(entry?.fields ?? {})).toEqual(["稀有度", "描述", "描述2", "获取途径"])
     })
 
     it("条目摘要里不含坐标（只能靠 read_entry 拿）", () => {

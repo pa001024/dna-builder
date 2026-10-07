@@ -1,11 +1,36 @@
 #!/usr/bin/env bun
 
-import { readdir, readFile, writeFile } from "node:fs/promises"
+import { existsSync } from "node:fs"
+import { readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
+import { pathToFileURL } from "node:url"
 import * as ts from "typescript"
 
-const SOURCE_ROOT = path.resolve("..", "DuetNightAbyssData2", "final", "i18n")
-const OUT_ROOT = path.resolve("..", "DuetNightAbyssData2", "out")
+/** 同级仓库的默认上游根（与 tools/import-attr-i18n.ts 等兄弟工具一致） */
+const DEFAULT_UPSTREAM_ROOT = path.resolve("..", "DuetNightAbyssData2")
+
+/** 命令行 --upstream（最高优先级，与兄弟工具对齐） */
+const CLI_UPSTREAM = (() => {
+    const index = Bun.argv.indexOf("--upstream")
+    return index >= 0 ? Bun.argv[index + 1] : undefined
+})()
+
+/**
+ * 上游仓库根目录（Lua 数据层所在）：`--upstream` > `.env` 的 DNA_UPSTREAM > 同级 `../DuetNightAbyssData2`。
+ * Bun 会自动读取项目根 `.env` 并注入 process.env，无需额外加载。
+ */
+function resolveUpstreamRoot(): string {
+    const configured = CLI_UPSTREAM ?? process.env.DNA_UPSTREAM
+    return configured ? path.resolve(configured) : DEFAULT_UPSTREAM_ROOT
+}
+
+/** 上游仓库根目录 */
+const UPSTREAM_ROOT = resolveUpstreamRoot()
+/**
+ * 多语言数据集根目录（final/i18n）：`.env` 的 DNA_UPSTREAM_I18N > `<仓库根>/final/i18n`。
+ * 允许把 i18n 产物目录指到别处（如只拿到 final 产物的机器），优先级同「.env > 默认」。
+ */
+const SOURCE_ROOT = process.env.DNA_UPSTREAM_I18N ? path.resolve(process.env.DNA_UPSTREAM_I18N) : path.join(UPSTREAM_ROOT, "final", "i18n")
 const TARGET_DIR = path.resolve("src", "data", "d")
 const LOCALES = ["cn", "en", "fr", "jp", "kr", "tc"] as const
 type Locale = (typeof LOCALES)[number]
@@ -24,10 +49,66 @@ const TRANSLATION_VARS: Record<TranslationLocale, string> = {
 }
 
 /**
+ * 直读上游 Lua 数据层的取数器。
+ *
+ * 上游 `out/*.json` 是 `bun out export-raw` 对 `Script/Datas/*.lua` 的原样导出，属本地生成物
+ * （上游 .gitignore 忽略 `out/`），故本工具不再依赖它，改为复用上游 `src/lua` 的 LuaDataManager
+ * 直接执行 Lua 表，取回后按 deepSortJson 排序，产物与旧的 out JSON 逐键一致。
+ *
+ * 模块用绝对路径动态 import（打不开就报错），不写进本仓库依赖，也不硬编码任何上游路径。
+ */
+type LuaDataManagerLike = {
+    loadScriptValue(relativePath: string): { value?: unknown; error?: string }
+}
+
+type LuaLoader = {
+    manager: LuaDataManagerLike
+    deepSortJson: (value: unknown) => any
+}
+
+let luaLoaderPromise: Promise<LuaLoader> | null = null
+const luaTableCache = new Map<string, unknown>()
+
+async function getLuaLoader(): Promise<LuaLoader> {
+    if (!luaLoaderPromise) {
+        const managerPath = path.join(UPSTREAM_ROOT, "src", "lua", "LuaDataManager.ts")
+        const sortPath = path.join(UPSTREAM_ROOT, "src", "lua", "deepSort.ts")
+        if (!existsSync(managerPath)) {
+            throw new Error(`上游 Lua 取数模块不存在：${managerPath}（请检查 .env 的 DNA_UPSTREAM 是否指向 DuetNightAbyssData2 仓库根）`)
+        }
+        luaLoaderPromise = Promise.all([import(pathToFileURL(managerPath).href), import(pathToFileURL(sortPath).href)]).then(
+            ([managerMod, sortMod]) => ({
+                manager: new managerMod.LuaDataManager(UPSTREAM_ROOT),
+                deepSortJson: sortMod.deepSortJson,
+            })
+        )
+    }
+    return luaLoaderPromise
+}
+
+/**
+ * 读取一张 Script/Datas 下的 Lua 表，返回键深度排序后的 JS 值（与旧的 out/<name>.json 等价）。
+ * 结果按表名缓存，避免同一张表（如 TextMap_I18n、Resource）被重复执行。
+ */
+async function readLuaTable(name: string): Promise<any> {
+    if (luaTableCache.has(name)) {
+        return luaTableCache.get(name)
+    }
+    const { manager, deepSortJson } = await getLuaLoader()
+    const { value, error } = manager.loadScriptValue(path.join("Script", "Datas", `${name}.lua`))
+    if (value === undefined) {
+        throw new Error(`读取上游 Lua 表 ${name} 失败：${error ?? "未知错误"}`)
+    }
+    const sorted = deepSortJson(value)
+    luaTableCache.set(name, sorted)
+    return sorted
+}
+
+/**
  * 前端自造展示名 → 官方文本表 ID 的映射。
  *
  * 少数展示名由前端从数值生成，上游各模块数据集里没有对应文本，按位置比对拿不到译文。
- * 这类词在**官方文本表**（`out/TextMap_I18n.json`）里有权威译名，只是 ID 与模块字段不相干，
+ * 这类词在**官方文本表**（`Script/Datas/TextMap_I18n.lua`）里有权威译名，只是 ID 与模块字段不相干，
  * 因此单独按 ID 取。键是前端实际输出的中文，值是官方 TextMapId。
  */
 const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
@@ -47,7 +128,7 @@ const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     异种: "UI_Fishing_FishType_2",
     珍鳞: "UI_Fishing_FishType_3",
     珍鳞异种: "UI_Fishing_FishType_4",
-    授渔以鱼: "UI_Fishing_AutoSmallToBig",
+    授渔以鱼: "UI_Fishing_SmallToBig",
     鱼饵: "UI_Fishing_FishingLure",
     鱼竿: "UI_Fishing_FishingRod",
     // 模拟器「钓100次」按钮：上游按钓获/图鉴语境给的是同一个词，逐字取官方译名
@@ -61,7 +142,16 @@ const SUPPLEMENTAL_TEXT_MAP_IDS: Record<string, string> = {
     // 迷津合作模式 Mod 装备部位：界面显示的是「近战武器 / 远程武器」单数形式，
     // 官方文本表只有整句里出现的这些词，故按装备部位条目的 ID 取权威译名
     近战武器: "UI_BAG_Meleeweapon",
-    远程武器: "UIGUIDE_TITLE_GUN",
+    远程武器: "UI_BAG_Longrange",
+    "弓（长弓）": "WeaponType_Bow02",
+    "弓（短弓）": "WeaponType_Bow01",
+    // 远程武器的基础招式名「射击」：`weapon.data.ts` 里弓/枪类技能的 `名称` 直接用
+    // `WeaponSkillType.射击`（枚举值），官方文本表里唯一同形词条就是这条 HUD 提示，按 ID 取权威译名。
+    射击: "UI_EventHud_Shoot",
+    // 招式字段 `tag` 里的「战技 / 终结技」：上游模块数据集里没有这两个词条，
+    // 官方文本表里有独立的同形条目（引导与键位提示用的技能名），按 ID 取权威译名。
+    战技: "Guide_HighlightButton_Skill1",
+    终结技: "Guide_HighlightButton_Skill2",
     // 剧情占位符 {nickname} / {nickname2} 的主角默认名，官方分别给了独立 ID
     维塔: "PlayerDefaultName",
     墨斯: "ExPlayerDefaultName",
@@ -90,16 +180,86 @@ const TEXT_MAP_LOCALE_FIELDS: Record<TranslationLocale, string> = {
  *   官方只提供了「活力魔灵」（`Pet_BattlePet`）与「失活魔灵」（`Pet_ResourcePet`）两个分类名，
  *   译名按这两个词的构词风格补。
  *
+ * 另有「伤害类型」与「招式名」的裸词：官方文本表只有带后缀的整词，没有单独的词条，
+ * 只能照官方构词法截取（`灾厄攻击` = Calamity Attack ⇒ 灾厄 = Calamity；
+ * `普通攻击伤害` = Normal Attack DMG ⇒ 普通攻击 = Normal Attack）；
+ * 招式字段的 `tag` 里还用了缩写「普攻」（= 普通攻击），官方同样没有单独词条，一并按此补。
+ *
+ * 武器专属机制名同理：`weapon.data.ts` 里写死的技能名「羽化」与招式字段名「[羽化]伤害」「[羽化]额外伤害」
+ * 在上游模块数据集里没有独立词条，官方文本表也只有整句里的 `[羽化]`。
+ * 译名照官方整句取（en `[Eclosion]`、fr `[Éclosion]`、kr `[우화]`、jp/tc `[羽化]`）；
+ * tag 里的「充盈」按官方构词法从「充盈伤害」(Overflow Damage)、「充盈威力」(Overflow Intensity) 截取。
+ *
  * 钓鱼界面里由前端**文案模板 + 数值**拼出来的句子没有官方原文，不进这张表——
  * 它们走 `translations.data.ts` 里对应的**整句模板键**（如「额外奖励(概率:{{prob}})」），
  * 由界面直接 `$t` 取用，避免在此处按词硬拼出语法不通的译文。
  */
 const SUPPLEMENTAL_TRANSLATIONS: Record<TranslationLocale, Record<string, string>> = {
-    tc: { 铜: "銅", 银: "銀", 活动魔灵: "活動魔靈", 守护机关1: "守護機關1" },
-    en: { 铜: "Bronze", 银: "Silver", 活动魔灵: "Event Geniemon", 守护机关1: "Guard Device 1" },
-    jp: { 铜: "銅", 银: "銀", 活动魔灵: "イベントジェネモン", 守护机关1: "守護装置1" },
-    kr: { 铜: "동", 银: "은", 活动魔灵: "이벤트 마령", 守护机关1: "수호 기관 1" },
-    fr: { 铜: "Bronze", 银: "Argent", 活动魔灵: "Géniemon d'événement", 守护机关1: "Dispositif de garde 1" },
+    tc: {
+        铜: "銅",
+        银: "銀",
+        活动魔灵: "活動魔靈",
+        守护机关1: "守護機關1",
+        灾厄: "災厄",
+        普通攻击: "普通攻擊",
+        普攻: "普攻",
+        羽化: "羽化",
+        "[羽化]伤害": "[羽化]傷害",
+        "[羽化]额外伤害": "[羽化]額外傷害",
+        充盈: "充盈",
+    },
+    en: {
+        铜: "Bronze",
+        银: "Silver",
+        活动魔灵: "Event Geniemon",
+        守护机关1: "Guard Device 1",
+        灾厄: "Calamity",
+        普通攻击: "Normal Attack",
+        普攻: "Normal Attack",
+        羽化: "Eclosion",
+        "[羽化]伤害": "[Eclosion] Damage",
+        "[羽化]额外伤害": "[Eclosion] Bonus Damage",
+        充盈: "Overflow",
+    },
+    jp: {
+        铜: "銅",
+        银: "銀",
+        活动魔灵: "イベントジェネモン",
+        守护机关1: "守護装置1",
+        灾厄: "災厄",
+        普通攻击: "通常攻撃",
+        普攻: "通常攻撃",
+        羽化: "羽化",
+        "[羽化]伤害": "[羽化]ダメージ",
+        "[羽化]额外伤害": "[羽化]追加ダメージ",
+        充盈: "チャージ",
+    },
+    kr: {
+        铜: "동",
+        银: "은",
+        活动魔灵: "이벤트 마령",
+        守护机关1: "수호 기관 1",
+        灾厄: "재앙",
+        普通攻击: "기본 공격",
+        普攻: "기본 공격",
+        羽化: "우화",
+        "[羽化]伤害": "[우화] 대미지",
+        "[羽化]额外伤害": "[우화] 추가 대미지",
+        充盈: "오버차지",
+    },
+    fr: {
+        铜: "Bronze",
+        银: "Argent",
+        活动魔灵: "Géniemon d'événement",
+        守护机关1: "Dispositif de garde 1",
+        灾厄: "Calamité",
+        普通攻击: "Attaque normale",
+        普攻: "Attaque normale",
+        羽化: "Éclosion",
+        "[羽化]伤害": "[Éclosion] Dégâts",
+        "[羽化]额外伤害": "[Éclosion] Dégâts supplémentaires",
+        充盈: "Surabondance",
+    },
 }
 
 /**
@@ -118,6 +278,7 @@ const TRANSLATION_SOURCE_FILES = [
     "BookSeriesArchive.json",
     "Char.json",
     "CharAccessory.json",
+    "Clue.json",
     "Cutoff.json",
     "Dispatch.json",
     "Draft.json",
@@ -155,6 +316,7 @@ const TRANSLATION_SOURCE_FILES = [
     "RegionPoint.json",
     "RegionReputation.json",
     "Resource.json",
+    "Review.json",
     "Reward.json",
     "RewardView.json",
     "RobotEquip.json",
@@ -210,6 +372,7 @@ const TRANSLATION_SOURCE_FILES = [
     "Weapon.json",
     "WeaponAccessory.json",
     "WeaponSkin.json",
+    "Wiki.json",
     "translation.json",
 ] as const
 
@@ -267,6 +430,7 @@ const MAPPINGS: Mapping[] = [
     { source: "BookSeriesArchive", targetStem: "book", targetVar: "booksData", locales: ["cn"] },
     { source: "Char", targetStem: "char", targetVar: "t", locales: ["cn"] },
     { source: "CharAccessory", targetStem: "accessory", targetVar: "charAccessoryData", locales: ["cn"] },
+    { source: "Clue", targetStem: "clue", targetVar: "clueData", locales: ["cn"] },
     {
         source: "CharDataTarget",
         targetStem: "charext",
@@ -315,12 +479,10 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async () => {
-            const convertText = await readFile(path.join(OUT_ROOT, "ModConvertId2ModId.json"), "utf8")
-
             return [
                 {
                     targetVar: "modConvertData",
-                    value: JSON.parse(convertText),
+                    value: await readLuaTable("ModConvertId2ModId"),
                 },
             ]
         },
@@ -329,12 +491,10 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async () => {
-            const dynamicRewardText = await readFile(path.join(OUT_ROOT, "DynamicReward.json"), "utf8")
-
             return [
                 {
                     targetVar: "dynamicRewardMap",
-                    value: JSON.parse(dynamicRewardText),
+                    value: await readLuaTable("DynamicReward"),
                 },
             ]
         },
@@ -384,13 +544,11 @@ const MAPPINGS: Mapping[] = [
     { source: "PetEntry", targetStem: "pet", targetVar: "petEntrys", locales: ["cn"] },
     {
         source: async () => {
-            // 魔灵潜质抽取权重表只存在于 out 的导出表（PetToEntry），非 i18n 源，故用函数源读取
-            const petToEntryText = await readFile(path.join(OUT_ROOT, "PetToEntry.json"), "utf8")
-
+            // 魔灵潜质抽取权重表（PetToEntry），直读上游 Lua 表
             return [
                 {
                     targetVar: "petToEntey",
-                    value: JSON.parse(petToEntryText),
+                    value: await readLuaTable("PetToEntry"),
                 },
             ]
         },
@@ -420,17 +578,17 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async context => {
-            const [raidCalculationText, raidDungeonText, raidSeasonText, preRaidRankText, rewardText] = await Promise.all([
-                readFile(path.join(OUT_ROOT, "RaidCalculation.json"), "utf8"),
-                readFile(path.join(OUT_ROOT, "RaidDungeon.json"), "utf8"),
-                readFile(path.join(OUT_ROOT, "RaidSeason.json"), "utf8"),
-                readFile(path.join(OUT_ROOT, "PreRaidRank.json"), "utf8"),
-                readFile(path.join(OUT_ROOT, "Reward.json"), "utf8"),
+            const [raidCalculation, raidDungeon, raidSeason, preRaidRank, reward] = await Promise.all([
+                readLuaTable("RaidCalculation"),
+                readLuaTable("RaidDungeon"),
+                readLuaTable("RaidSeason"),
+                readLuaTable("PreRaidRank"),
+                readLuaTable("Reward"),
             ])
 
-            const preRaidRanks = JSON.parse(preRaidRankText) as PreRaidRankRow[]
-            const seasons = JSON.parse(raidSeasonText) as Record<string, { PreRaidRank?: number }>
-            const rewards = JSON.parse(rewardText) as Record<string, RewardRow>
+            const preRaidRanks = preRaidRank as PreRaidRankRow[]
+            const seasons = raidSeason as Record<string, { PreRaidRank?: number }>
+            const rewards = reward as Record<string, RewardRow>
 
             // 当前赛季：导出配置只代表当前赛季状态，取 RaidSeason 中最大赛季
             const currentSeason = Object.keys(seasons)
@@ -459,15 +617,15 @@ const MAPPINGS: Mapping[] = [
             return [
                 {
                     targetVar: "RaidCalculation",
-                    value: JSON.parse(raidCalculationText),
+                    value: raidCalculation,
                 },
                 {
                     targetVar: "RaidDungeon",
-                    value: JSON.parse(raidDungeonText),
+                    value: raidDungeon,
                 },
                 {
                     targetVar: "RaidSeason",
-                    value: JSON.parse(raidSeasonText),
+                    value: raidSeason,
                 },
                 {
                     targetVar: "PreRaidRank",
@@ -520,6 +678,7 @@ const MAPPINGS: Mapping[] = [
     { source: "RegionReputation", targetStem: "reputation", targetVar: "reputationData", locales: ["cn"] },
     { source: "Resource", targetStem: "resource", targetVar: "resourceData", locales: ["cn"] },
     { source: "Reward", targetStem: "reward", targetVar: "t", locales: ["cn"] },
+    { source: "Review", targetStem: "review", targetVar: "reviewData", locales: ["cn"] },
     { source: "RobotEquip", targetStem: "autochess", targetVar: "robotEquips", locales: ["cn"] },
     {
         source: "RougeLikeBlessing",
@@ -644,12 +803,10 @@ const MAPPINGS: Mapping[] = [
     { source: "SkinGachaCumulative", targetStem: "skingacha", targetVar: "skinGachaCumulative", locales: ["cn"] },
     {
         source: async () => {
-            const probabilityText = await readFile(path.join(OUT_ROOT, "GachaProbability.json"), "utf8")
-
             return [
                 {
                     targetVar: "gachaProbabilities",
-                    value: JSON.parse(probabilityText),
+                    value: await readLuaTable("GachaProbability"),
                 },
             ]
         },
@@ -662,13 +819,13 @@ const MAPPINGS: Mapping[] = [
     { source: "Weapon", targetStem: "weapon", targetVar: "t", locales: ["cn"] },
     { source: "WeaponAccessory", targetStem: "accessory", targetVar: "weaponAccessoryData", locales: ["cn"] },
     { source: "WeaponSkin", targetStem: "accessory", targetVar: "weaponSkinData", locales: ["cn"] },
+    { source: "Wiki", targetStem: "wiki", targetVar: "wikiData", locales: ["cn"] },
     {
         source: async () => {
-            const { seasonText, levelText } = await loadAbyssOutTables(OUT_ROOT)
-            const seasons = JSON.parse(seasonText) as Record<string, AbyssSeasonRow>
-            const levels = JSON.parse(levelText) as Record<string, AbyssLevelRow>
+            const seasons = await readLuaTable("AbyssSeason")
+            const levels = await readLuaTable("AbyssLevel")
 
-            const seasonRows = Object.values(seasons)
+            const seasonRows = Object.values(seasons as Record<string, AbyssSeasonRow>)
                 .filter(row => row.AbyssType === 3)
                 .sort((a, b) => a.AbyssStartTime - b.AbyssStartTime)
 
@@ -716,25 +873,24 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async () => {
-            const sourceRoot = OUT_ROOT
-            const [costRuleText, itemText, poolText] = await Promise.all([
-                readFile(path.join(sourceRoot, "LimitedPrizeCostRule.json"), "utf8"),
-                readFile(path.join(sourceRoot, "LimitedPrizeItem.json"), "utf8"),
-                readFile(path.join(sourceRoot, "LimitedPrizePool.json"), "utf8"),
+            const [costRules, items, pools] = await Promise.all([
+                readLuaTable("LimitedPrizeCostRule"),
+                readLuaTable("LimitedPrizeItem"),
+                readLuaTable("LimitedPrizePool"),
             ])
 
             return [
                 {
                     targetVar: "limitedPrizeCostRules",
-                    value: JSON.parse(costRuleText),
+                    value: costRules,
                 },
                 {
                     targetVar: "limitedPrizeItems",
-                    value: JSON.parse(itemText),
+                    value: items,
                 },
                 {
                     targetVar: "limitedPrizePools",
-                    value: JSON.parse(poolText),
+                    value: pools,
                 },
             ]
         },
@@ -743,8 +899,7 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async () => {
-            const conditionText = await readFile(path.join(OUT_ROOT, "Condition.json"), "utf8")
-            const rows = JSON.parse(conditionText) as Record<string, RougeConditionRow>
+            const rows = (await readLuaTable("Condition")) as Record<string, RougeConditionRow>
             const conditions = Object.values(rows).map((row): RougeRoomCondition => {
                 const { ConditionId, ConditionLogic, ConditionMap, IsNot, Remark } = row
                 return {
@@ -783,19 +938,19 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async () => {
-            const [ironSurvivalText, ironSurvivalDungeonText] = await Promise.all([
-                readFile(path.join(OUT_ROOT, "IronSurvival.json"), "utf8"),
-                readFile(path.join(OUT_ROOT, "IronSurvivalDungeon.json"), "utf8"),
+            const [ironSurvival, ironSurvivalDungeon] = await Promise.all([
+                readLuaTable("IronSurvival"),
+                readLuaTable("IronSurvivalDungeon"),
             ])
 
             return [
                 {
                     targetVar: "ironSurvivalData",
-                    value: JSON.parse(ironSurvivalText),
+                    value: ironSurvival,
                 },
                 {
                     targetVar: "ironSurvivalDungeonData",
-                    value: JSON.parse(ironSurvivalDungeonText),
+                    value: ironSurvivalDungeon,
                 },
             ]
         },
@@ -804,8 +959,7 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async () => {
-            const dropText = await readFile(path.join(OUT_ROOT, "MonsterLevelDrop.json"), "utf8")
-            const drops = JSON.parse(dropText) as Record<string, MonsterLevelDropRow>
+            const drops = (await readLuaTable("MonsterLevelDrop")) as Record<string, MonsterLevelDropRow>
             const record: Record<number, MonsterLevelDropRow> = {}
             for (const [key, row] of Object.entries(drops)) {
                 record[Number(key)] = row
@@ -823,19 +977,18 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async () => {
-            const [swatchText, specialSwatchText, textMapText, resourceText, globalConstantText] = await Promise.all([
-                readFile(path.join(OUT_ROOT, "Swatch.json"), "utf8"),
-                readFile(path.join(OUT_ROOT, "SpecialSwatch.json"), "utf8"),
-                readFile(path.join(OUT_ROOT, "TextMap_I18n.json"), "utf8"),
-                readFile(path.join(OUT_ROOT, "Resource.json"), "utf8"),
-                readFile(path.join(OUT_ROOT, "GlobalConstant.json"), "utf8"),
+            const [swatch, specialSwatch, textMap, resource, globalConstant] = await Promise.all([
+                readLuaTable("Swatch"),
+                readLuaTable("SpecialSwatch"),
+                readLuaTable("TextMap_I18n") as Promise<Record<string, { TextMapContent?: string }>>,
+                readLuaTable("Resource"),
+                readLuaTable("GlobalConstant") as Promise<Record<string, { ConstantValue?: unknown }>>,
             ])
-            const textMap = JSON.parse(textMapText) as Record<string, { TextMapContent?: string }>
-            const resources = recordValues(JSON.parse(resourceText))
+            const resources = recordValues(resource)
             const resourceNames = new Map(
                 resources.map(resource => [String(resource.ResourceId ?? resource.id), String(resource.ResourceName ?? "")])
             )
-            const swatches = recordValues(JSON.parse(swatchText))
+            const swatches = recordValues(swatch)
                 .filter(swatch => Array.isArray(swatch.ColorNumber))
                 .map(swatch => {
                     // 历史版本（如 1.1）表里没有 HairResourceID 字段，Number(undefined) 会得到 NaN；
@@ -853,7 +1006,7 @@ const MAPPINGS: Mapping[] = [
                     }
                 })
                 .sort((left, right) => left.sort - right.sort)
-            const specialSwatches = recordValues(JSON.parse(specialSwatchText))
+            const specialSwatches = recordValues(specialSwatch)
                 .map(swatch => {
                     const resourceId = Number(swatch.ResourceID) || 0
                     return {
@@ -865,7 +1018,6 @@ const MAPPINGS: Mapping[] = [
                     }
                 })
                 .sort((left, right) => left.id - right.id)
-            const globalConstant = JSON.parse(globalConstantText) as Record<string, { ConstantValue?: unknown }>
             const maxColorParts = Number(globalConstant.CharColorPart?.ConstantValue) || 0
             const defaultColorId = Number(globalConstant.CharDefaultColor?.ConstantValue) || 0
             return [
@@ -892,12 +1044,11 @@ const MAPPINGS: Mapping[] = [
     },
     {
         source: async () => {
-            const [defenceText, ironSurvivalDungeonText] = await Promise.all([
-                readFile(path.join(OUT_ROOT, "Defence.json"), "utf8"),
-                readFile(path.join(OUT_ROOT, "IronSurvivalDungeon.json"), "utf8"),
+            const [defence, ironSurvivalDungeon] = await Promise.all([
+                readLuaTable("Defence") as Promise<Record<string, Record<string, unknown>>>,
+                readLuaTable("IronSurvivalDungeon") as Promise<Record<string, unknown>>,
             ])
-            const defence = JSON.parse(defenceText) as Record<string, Record<string, unknown>>
-            const dungeonIds = new Set(Object.keys(JSON.parse(ironSurvivalDungeonText) as Record<string, unknown>))
+            const dungeonIds = new Set(Object.keys(ironSurvivalDungeon))
             const calamity: Record<number, Record<string, unknown>> = {}
             for (const [key, row] of Object.entries(defence)) {
                 if (dungeonIds.has(key)) {
@@ -1187,16 +1338,12 @@ async function buildTranslationTables(): Promise<Record<TranslationLocale, Recor
         // 但这里的键就是全局翻译键，**与游戏原文同形的词一律不能进表**：
         // 稀有度「白/绿/蓝/紫/金/红」曾按 BackpackResource_RarityN 覆盖，结果把剧情人物「白」
         // 翻成了 White——界面已改为只用色块表示稀有度（见 `src/utils/rarity-utils.ts`），不再需要译文。
-        const textMapPath = path.join(OUT_ROOT, "TextMap_I18n.json")
-        const textMapText = await readFile(textMapPath, "utf8").catch(() => null)
-        if (textMapText) {
-            const textMap = JSON.parse(textMapText) as Record<string, Record<string, string>>
-            const field = TEXT_MAP_LOCALE_FIELDS[locale]
-            for (const [key, textMapId] of Object.entries(SUPPLEMENTAL_TEXT_MAP_IDS)) {
-                const text = textMap[textMapId]?.[field]?.trim()
-                if (text) {
-                    table.set(key, text)
-                }
+        const textMap = (await readLuaTable("TextMap_I18n")) as Record<string, Record<string, string>>
+        const field = TEXT_MAP_LOCALE_FIELDS[locale]
+        for (const [key, textMapId] of Object.entries(SUPPLEMENTAL_TEXT_MAP_IDS)) {
+            const text = textMap[textMapId]?.[field]?.trim()
+            if (text) {
+                table.set(key, text)
             }
         }
 
@@ -1510,88 +1657,6 @@ type AbyssSeasonRow = {
     AbyssSeasonId: number
     AbyssStartTime: number
     AbyssType: number
-}
-
-type AbyssLevelRow = {
-    AbyssType: number
-    InitLevel: number
-    LevelAddOn?: number
-}
-
-/**
- * 从 out 目录自动识别不朽剧目赛季和等级表文件。
- * @param sourceRoot out 目录。
- * @returns 赛季表与等级表内容。
- */
-async function loadAbyssOutTables(sourceRoot: string): Promise<{ seasonText: string; levelText: string }> {
-    const entries = await readdir(sourceRoot, { withFileTypes: true })
-    let seasonText: string | null = null
-    let levelText: string | null = null
-
-    for (const entry of entries) {
-        if (!entry.isFile() || !entry.name.endsWith(".json")) {
-            continue
-        }
-
-        const fileText = await readFile(path.join(sourceRoot, entry.name), "utf8")
-        let parsed: Record<string, unknown>
-        try {
-            parsed = JSON.parse(fileText) as Record<string, unknown>
-        } catch {
-            continue
-        }
-
-        const rows = Object.values(parsed)
-        if (!seasonText && rows.some(row => isAbyssSeasonRow(row))) {
-            seasonText = fileText
-        }
-        if (!levelText && rows.some(row => isAbyssLevelRow(row))) {
-            levelText = fileText
-        }
-
-        if (seasonText && levelText) {
-            break
-        }
-    }
-
-    if (!seasonText || !levelText) {
-        throw new Error(`无法在 ${sourceRoot} 中自动识别 AbyssSeason/AbyssLevel`)
-    }
-
-    return { seasonText, levelText }
-}
-
-/**
- * 判断是否为 AbyssSeason 行。
- * @param value 待判断的值。
- * @returns 是否匹配。
- */
-function isAbyssSeasonRow(value: unknown): value is AbyssSeasonRow {
-    if (!value || typeof value !== "object") {
-        return false
-    }
-
-    const row = value as Record<string, unknown>
-    return (
-        typeof row.AbyssSeasonId === "number" &&
-        typeof row.AbyssId === "number" &&
-        typeof row.AbyssType === "number" &&
-        Array.isArray(row.AbyssLevelId)
-    )
-}
-
-/**
- * 判断是否为 AbyssLevel 行。
- * @param value 待判断的值。
- * @returns 是否匹配。
- */
-function isAbyssLevelRow(value: unknown): value is AbyssLevelRow {
-    if (!value || typeof value !== "object") {
-        return false
-    }
-
-    const row = value as Record<string, unknown>
-    return typeof row.InitLevel === "number" && typeof row.AbyssType === "number" && "LevelAddOn" in row
 }
 
 /**

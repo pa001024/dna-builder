@@ -11,7 +11,6 @@ import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
 import { formatProp } from "@/util"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
 import { collectWeaponSources, type WeaponSourceInfo } from "@/utils/weapon-source"
-import SkillCreatureCards from "./SkillCreatureCards.vue"
 
 const props = defineProps<{
     weapon: Weapon
@@ -473,22 +472,28 @@ watch(
                         v-if="singleSkillComboSummaryByName[skill.名称]"
                         class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] tabular-nums text-base-content/55"
                     >
-                        <span> {{ $t("连段总时长") }}: {{ +singleSkillComboSummaryByName[skill.名称].comboTime.toFixed(4) }}秒 </span>
+                        <span> {{ $t("连段总时长") }}: {{ +singleSkillComboSummaryByName[skill.名称].comboTime.toFixed(4) }}{{ $t("skill-fields.seconds") }} </span>
                         <span>
                             {{ $t("秒均倍率") }}: {{ +(singleSkillComboSummaryByName[skill.名称].multiplierPerSecond * 100).toFixed(1) }}%/s
                         </span>
                         <span>
                             {{ $t("总倍率") }}: {{ +(singleSkillComboSummaryByName[skill.名称].totalMultiplier * 100).toFixed(1) }}%
                         </span>
-                        <span>{{ $t("Boss削韧") }}: {{ +singleSkillComboSummaryByName[skill.名称].totalBossStagger.toFixed(2) }}</span>
+                        <span>{{ $t("skill-fields.bossStagger") }}: {{ +singleSkillComboSummaryByName[skill.名称].totalBossStagger.toFixed(2) }}</span>
                     </div>
                     <SkillFields :skill="skill" />
-                    <div v-if="skill.skillData.实体 && skill.skillData.实体.length > 0" class="mt-2">
+                    <div
+                        v-if="skill.skillData.实体 && skill.skillData.实体.length > 0"
+                        class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2"
+                    >
                         <SkillCreatureCards :creatures="skill.skillData.实体" />
                     </div>
                     <div v-if="skill.skillData.子技能 && skill.skillData.子技能.length > 0" class="mt-2 space-y-2">
                         <div v-for="subSkill in skill.skillData.子技能" :key="subSkill.名称 || subSkill.id || ''">
-                            <div v-if="subSkill.实体 && subSkill.实体.length > 0">
+                            <div
+                                v-if="subSkill.实体 && subSkill.实体.length > 0"
+                                class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2"
+                            >
                                 <SkillCreatureCards
                                     :creatures="subSkill.实体"
                                     :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`"
@@ -546,12 +551,12 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <div v-if="forge.解锁" class="mb-1 text-[11px] tracking-wide text-base-content/45">解锁</div>
+                    <div v-if="forge.解锁" class="mb-1 text-[11px] tracking-wide text-base-content/45">{{ $t("weapon-detail.unlock") }}</div>
                     <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                         <ResourceCostItem v-for="(value, name) in forge.解锁" :key="name" :name="name" :value="value" />
                     </div>
                     <template v-if="forge.技能 && forge.技能.length > 0 && forge.技能[0].解锁">
-                        <div class="mt-2 mb-1 text-[11px] tracking-wide text-base-content/45">二次解锁</div>
+                        <div class="mt-2 mb-1 text-[11px] tracking-wide text-base-content/45">{{ $t("weapon-detail.secondaryUnlock") }}</div>
                         <div v-if="forge.技能[0].解锁" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                             <ResourceCostItem v-for="(value, name) in forge.技能[0].解锁" :key="name" :name="name" :value="value" />
                         </div>
@@ -565,7 +570,7 @@ watch(
             v-if="weaponSkillReplaceGroups.length > 0"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="MOD REPLACE" title="招式魔之楔" />
+            <SectionHeader no-animate compact kicker="MOD REPLACE" :title="$t('weapon-detail.moveDemonWedges')" />
             <div class="space-y-4">
                 <div v-for="group in weaponSkillReplaceGroups" :key="group.skillId">
                     <!-- 技能分组标签行 -->
@@ -641,7 +646,10 @@ watch(
                                 {{ gpt(item.mod.效果, item.mod.等级 - 1) }}
                             </div>
                             <SkillFields :skill="item.replaceSkill" />
-                            <div v-if="item.replaceSkill.skillData.实体 && item.replaceSkill.skillData.实体.length > 0" class="mt-2">
+                            <div
+                                v-if="item.replaceSkill.skillData.实体 && item.replaceSkill.skillData.实体.length > 0"
+                                class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2"
+                            >
                                 <SkillCreatureCards :creatures="item.replaceSkill.skillData.实体" />
                             </div>
                             <div
@@ -649,7 +657,10 @@ watch(
                                 class="mt-2 space-y-2"
                             >
                                 <div v-for="subSkill in item.replaceSkill.skillData.子技能" :key="subSkill.名称 || subSkill.id || ''">
-                                    <div v-if="subSkill.实体 && subSkill.实体.length > 0">
+                                    <div
+                                        v-if="subSkill.实体 && subSkill.实体.length > 0"
+                                        class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2"
+                                    >
                                         <SkillCreatureCards
                                             :creatures="subSkill.实体"
                                             :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`"
@@ -671,8 +682,8 @@ watch(
             <AniTabs
                 v-model="weaponInfoTab"
                 :tabs="[
-                    { label: '突破', value: 'breakthrough' },
-                    { label: '制造', value: 'manufacture' },
+                    { label: $t('weapon-detail.ascension'), value: 'breakthrough' },
+                    { label: $t('weapon-detail.crafting'), value: 'manufacture' },
                 ]"
             />
 
@@ -684,14 +695,14 @@ watch(
                         class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                     >
                         <div class="mb-2 text-[11px] font-semibold tracking-wide text-primary">
-                            突破 {{ ["I", "II", "III", "IV", "V", "VI"][index] }}
+                            {{ $t("weapon-detail.ascension") }} {{ ["I", "II", "III", "IV", "V", "VI"][index] }}
                         </div>
                         <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                             <ResourceCostItem v-for="(value, key) in cost" :key="key" :name="key" :value="value" />
                         </div>
                     </div>
                 </div>
-                <div v-else class="text-sm text-base-content/60">暂无突破数据</div>
+                <div v-else class="text-sm text-base-content/60">{{ $t("weapon-detail.noAscensionData") }}</div>
             </div>
 
             <div v-else-if="weaponDraft" class="mt-2">
@@ -704,7 +715,7 @@ watch(
             v-if="exclusiveRelatedChars.length > 0"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="RELATED" title="关联角色" />
+            <SectionHeader no-animate compact kicker="RELATED" :title="$t('weapon-detail.relatedCharacters')" />
             <div class="space-y-1.5 text-sm">
                 <div
                     v-for="char in exclusiveRelatedChars"
@@ -715,7 +726,7 @@ watch(
                         {{ $t(char.名称) }}
                     </SRouterLink>
                     <span class="shrink-0 rounded-xs border border-base-content/15 px-1 text-[10px] leading-4 text-base-content/50"
-                        >专武</span
+                        >{{ $t("common.signature_weapon") }}</span
                     >
                 </div>
             </div>
@@ -723,7 +734,7 @@ watch(
 
         <!-- 来源 -->
         <section v-if="weaponSources.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="SOURCE" title="来源" />
+            <SectionHeader no-animate compact kicker="SOURCE" :title="$t('weapon-detail.source')" />
             <div class="space-y-3 text-sm">
                 <BossSource :boss-sources="hardbossSources" />
                 <ShopSource :shop-sources="shopSources" />

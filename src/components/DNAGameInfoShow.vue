@@ -155,7 +155,7 @@ function getWeaponUnlockProgress(weapons: DNAWeaponBean[]) {
             </div>
         </div>
 
-        <div class="card bg-base-100 shadow-xl">
+        <div v-if="roleInfo.abyssInfo" class="card bg-base-100 shadow-xl">
             <div class="card-body">
                 <h3 class="card-title mb-4">
                     {{ roleInfo.abyssInfo.operaName }}

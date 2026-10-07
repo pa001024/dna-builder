@@ -15,6 +15,7 @@ AGENTS.md 只列命令，这里是每个脚本的用途、输入输出与注意�
 - `bun i18n rm <key>` — 删除某键（所有语言）。
 - `bun i18n export|import` — 导出缺失翻译到 `tools/i18n-diff.json`、导入后删除该文件。
 - `bun i18n check [--json] [--locale-gap]` — 扫描代码中静态引用（`t("x")` 系列）但 zh-CN 未配置的键。
+- 不允许并发写, 如果需要添加多条 请用`&&`或`;`来分隔多条指令串行添加!!!
 
 add 的完整示例（6 种语言各用自己的语言书写，不要漏、不要 6 个都填中文）：
 
@@ -45,6 +46,14 @@ lint 报「icon not found」时用它。
 basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单，按包路径补齐这些贴图，
 因此 `bun tools/webp-import.ts` 也能覆盖它们，不会误报缺失。
 
+## 图片（webp）
+
+`bun tools/webp-import.ts` — 把 FModel 导出的纹理 PNG 转成 WebP 落到 `public/imgs/`（增量，`--force` 重转、`--dry-run` 只统计）。
+
+引用来源为两者合并：`src/{data,components,utils,views}` 里的 `/imgs/**` 字面量扫描，以及 `evaluateDataUrls()` 的数据评估。
+**数据里不含 `/imgs/` 前缀的字段（如线索板 / 剧情回顾的 `pic1` / `pic2`、百科条目的 `img` 与页签 `icon`、活动拍照 `photoView`）
+必须在 `evaluateDataUrls()` 里枚举**，否则整批贴图不会被导入，只会静默缺失。
+
 ## 属性 i18n
 
 `pnpm iattr`（`bun tools/import-attr-i18n.ts`）— 把上游 `out/AttrConfig.json` + `out/TextMap_I18n.json` 里的：
@@ -63,10 +72,20 @@ basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单�
 
 ## 游戏文本包
 
-`pnpm importdata` 会额外产出 `src/data/d/translations.data.ts` —— 把上游
+`pnpm importdata`（`bun tools/import-i18n-data.ts`）是数据层主导入脚本：把上游各模块文本表写进
+`src/data/d/<stem>.data.ts`，并额外产出 `src/data/d/translations.data.ts` —— 把上游
 `final/i18n/<locale>/translation.json`（本身就是「简体中文原文 → 译文」扁平表）压成 tc/en/jp/kr/fr
 五份对照表，随数据包下发。
 
+- **取数直读上游 Lua，不依赖上游 `out/`**：`out/*.json` 是上游 `bun out export-raw` 对
+  `Script/Datas/*.lua` 的原样导出（属上游本地生成物，被其 `.gitignore` 忽略）。本脚本改为用
+  `pathToFileURL` 动态 import 上游 `src/lua/LuaDataManager.ts` + `deepSort.ts`，直接执行 Lua 表并
+  按 `deepSortJson` 排序，产物与旧 `out/<name>.json` 逐键一致；`final/i18n/**` 一侧仍照读（它是 i18n
+  渲染产物，不是 raw 表）。
+- **上游根目录从 `.env` 读，默认同级 `../DuetNightAbyssData2`**：项目根 `.env` 可设
+  `DNA_UPSTREAM=<DuetNightAbyssData2 仓库根>`（Bun 自动加载 `.env`），也可用 `--upstream <dir>` 覆盖；
+  优先级 `--upstream` > `.env` > 同级默认。`final/i18n` 一侧默认取 `<仓库根>/final/i18n`，可用
+  `DNA_UPSTREAM_I18N=<目录>` 单独指向别处（如只拿到 final 产物的机器）。
 - 前端由 `src/utils/data-pack/translations-pack.ts` 在读包后注入 i18next（走 `data-pack.ts` 的激活钩子，
   **禁止反向 import 以免循环依赖**）；
 - 检索层的反向索引（译文 → 原文）优先查这份表；

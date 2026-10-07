@@ -1,7 +1,7 @@
 /**
  * 统一召回（RAG 检索入口）。
  *
- * 一次调用跨语料（剧情台词 / 剧情 AI 总结 / 角色语音 / 角色档案 / 全库条目）检索，返回「可直接引用的证据」：
+ * 一次调用跨语料（剧情台词 / 剧情 AI 总结 / 角色语音 / 角色档案 / 调查墙线索板 / 剧情回顾 / 游戏内百科 / 全库条目）检索，返回「可直接引用的证据」：
  * 命中行正文 + 前后几行的上下文片段 + 出处路径 + 得分与命中原因。
  * 其中剧情 AI 总结是整条任务链的梗概，回答「这条剧情讲了什么」通常一次调用就够，不必再翻台词。
  *
@@ -15,7 +15,7 @@
  */
 
 import type { RagChunkKind } from "@/data/rag/types"
-import { RAG_SUMMARY_LANG } from "@/data/rag/types"
+import { RAG_CN_SOURCE_LANG } from "@/data/rag/types"
 import { type DBAgentLang, ensureDBAgentLangReady, expandDBAgentKeyword, resolveCurrentDBAgentLang } from "@/utils/db-locale"
 import { getRagCorpus } from "./corpus"
 import { getRagEngine } from "./engine"
@@ -62,7 +62,7 @@ export async function ragSearch(query: string, options: RagSearchOptions = {}): 
         return {
             hits: [],
             total: 0,
-            note: `关键词为空。当前语料（${lang}）共 ${corpus.chunks.length} 条：剧情台词、剧情 AI 总结、角色语音、角色档案与全库条目。`,
+            note: `关键词为空。当前语料（${lang}）共 ${corpus.chunks.length} 条：剧情台词、剧情 AI 总结、角色语音、角色档案、调查墙线索板、剧情回顾、游戏内百科与全库条目。`,
         }
     }
 
@@ -92,9 +92,11 @@ export async function ragSearch(query: string, options: RagSearchOptions = {}): 
         notes.push(`已按译文反查扩展出 ${variants.length - 1} 个原文写法`)
     }
 
-    // 总结只有中文正文：其他语言提问时命中它会是中文原文，模型需要如实说明而不是当成该语言的原文
-    if (lang !== RAG_SUMMARY_LANG) {
-        notes.push(`剧情 AI 总结（kind=summary）只有中文原文（${RAG_SUMMARY_LANG}），命中时按中文引用`)
+    // 总结、线索板、剧情回顾与百科只有中文正文：其他语言提问时命中它会是中文原文，模型需要如实说明而不是当成该语言的原文
+    if (lang !== RAG_CN_SOURCE_LANG) {
+        notes.push(
+            `剧情 AI 总结（summary）、调查墙线索板（clue）、剧情回顾（review）与游戏内百科（wiki）只有中文原文（${RAG_CN_SOURCE_LANG}），命中时按中文引用`
+        )
     }
 
     if (vector.hits.length) {

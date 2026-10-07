@@ -507,9 +507,10 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                 {
                     name: "rag_search",
                     description:
-                        "统一召回：一次跨「剧情台词 / 剧情 AI 总结 / 角色语音 / 角色档案 / 全库条目」检索，返回可直接引用的证据——命中正文、前后几行的上下文片段、出处路径与得分。" +
+                        "统一召回：一次跨「剧情台词 / 剧情 AI 总结 / 角色语音 / 角色档案 / 调查墙线索板 / 剧情回顾 / 游戏内百科 / 全库条目」检索，返回可直接引用的证据——命中正文、前后几行的上下文片段、出处路径与得分。" +
                         "用于回答“谁说过什么”“哪段剧情、哪句语音、哪条角色档案、哪件道具提到过 X”“某个词在资料库里出现在哪”这类需要证据的问题；" +
                         "要「这条剧情讲了什么」这类整链梗概时，用 kinds 只查 summary（剧情 AI 总结）——一条任务链一条，一次性拿到完整脉络，比逐行台词快得多。" +
+                        "调查墙线索板（clue）、剧情回顾（review）与游戏内百科（wiki）的正文只有中文原文，命中时按中文引用。" +
                         "不确定内容属于哪个模块、或需要跨模块找线索时也先用它。返回的是片段：要某个条目的完整字段（生日、CV、面板数值）或某条档案的全文仍用 read_entry，要按分类穷举仍用 query_module_entries。",
                     parameters: {
                         type: "object",
@@ -520,7 +521,7 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                                 type: "array",
                                 items: { type: "string", enum: [...RAG_CHUNK_KINDS] },
                                 description:
-                                    "可选，限定语料种类：story 剧情台词 / summary 任务链剧情 AI 总结（整链梗概）/ voice 角色语音 / profile 角色档案（角色背景故事原文）/ entry 全库条目。不传则五者都查",
+                                    "可选，限定语料种类：story 剧情台词 / summary 任务链剧情 AI 总结（整链梗概）/ voice 角色语音 / profile 角色档案（角色背景故事原文）/ clue 调查墙线索板（线索板上的文字记录）/ review 剧情回顾（回顾页的剧情梗概）/ wiki 游戏内百科（百科词条的正文段）/ entry 全库条目。不传则八者都查",
                             },
                             modules: {
                                 type: "array",
@@ -581,7 +582,7 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                             score: hit.score,
                             matchedBy: hit.matchedBy,
                         })),
-                        tip: "snippet 是带上下文的片段（`> ` 标出命中行）。要某条目的完整字段请用 read_entry（module + id）；要按分类穷举请用 query_module_entries；kind=summary 的命中是整链剧情梗概（中文），可直接用来概括剧情，需要逐句原文再 read_story（chainId 取自路径 /db/questchain/<id>）；kind=profile 的命中是角色档案（角色背景故事原文），要整篇正文用 read_entry（module=charprofile + id）。",
+                        tip: "snippet 是带上下文的片段（`> ` 标出命中行）。要某条目的完整字段请用 read_entry（module + id）；要按分类穷举请用 query_module_entries；kind=summary 的命中是整链剧情梗概（中文），可直接用来概括剧情，需要逐句原文再 read_story（chainId 取自路径 /db/questchain/<id>）；kind=profile 的命中是角色档案（角色背景故事原文），要整篇正文用 read_entry（module=charprofile + id）；kind=clue / review / wiki 的命中是调查墙线索板、剧情回顾与游戏内百科的正文（中文），已召回完整条目正文，直接引用即可，无需再查其它工具。",
                     })
                 }
             )
@@ -673,9 +674,10 @@ export function createDbRetrievalTools<TPayload = never>(options: DbRetrievalToo
                     "技能术语解释（`技能术语解释`：`处决目标`、`羽化`、`充盈` 这类机制名词的官方定义）、" +
                     "武器的灾厄熔炼（`灾厄熔炼`：逐档潜能的解锁效果与加成，面板数值、熔炼文案、突破材料），" +
                     "魔之楔的词条属性与效果、招式替换后的倍率（`技能替换字段`），成就奖励，怪物属性，" +
+                    "魔之楔 / 武器 / 资源的获取来源（`来源` / `获取途径`：副本掉落、商店售卖、任务链、角色突破、道具箱、活动等），" +
                     "角色档案的整篇正文（module=charprofile），以及读物与资源的地图坐标（书页位置 / 宝藏位置 / 采集位置）等。" +
                     "回答「某某的生日是什么」「谁配的音」「这把武器暴击多少」「这个技能伤害倍率多少」「这把武器的灾厄熔炼有什么」" +
-                    "「处决目标是什么意思」「某某的档案里讲了什么」「这件道具 / 这本书在哪」这类问题必须调用它——" +
+                    "「处决目标是什么意思」「某某的档案里讲了什么」「这件道具 / 这本书在哪」「这个魔之楔 / 武器 / 道具怎么获得、哪来的」这类问题必须调用它——" +
                     "query_module_entries 与 search_data 只返回条目摘要，不含这些字段。" +
                     "先用 query_module_entries 或 search_data 定位条目拿到 id，再用本工具；给名称也可以，但只在唯一命中时直接返回详情，否则会返回候选列表。",
                 parameters: {

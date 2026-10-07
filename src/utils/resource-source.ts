@@ -5,6 +5,7 @@ import { getHardBossDetail } from "@/data/d/hardboss.data"
 import { questChainData } from "@/data/d/questchain.data"
 import type { Resource } from "@/data/d/resource.data"
 import shopData from "@/data/d/shop.data"
+import type { Mod } from "@/data/data-types"
 import { findInRewardTree, getRewardDetails } from "@/utils/reward-utils"
 import type { ShopSourceInfo, WeaponHardbossSourceInfo } from "@/utils/weapon-source"
 
@@ -331,6 +332,51 @@ export function collectModQuestSources(modId: number): ModQuestSourceInfo[] {
                 num: matched.num,
                 timeStart: questChain.startTime,
                 timeEnd: questChain.endTime,
+            })
+        })
+    })
+
+    return sources
+}
+
+export function collectModShopSources(mod: Mod): ShopSourceInfo[] {
+    const sources: ShopSourceInfo[] = []
+    const sourceKeySet = new Set<string>()
+
+    shopData.forEach(shop => {
+        shop.mainTabs.forEach(mainTab => {
+            mainTab.subTabs.forEach(subTab => {
+                subTab.items.forEach(item => {
+                    const matched =
+                        (item.itemType === "Mod" && item.typeId === mod.id) ||
+                        (item.itemType === "Walnut" &&
+                            walnutMap.get(item.typeId)?.奖励?.some(reward => reward.type === "Mod" && reward.id === mod.id))
+
+                    if (!matched) {
+                        return
+                    }
+
+                    const key = `shop-${shop.id}-${mainTab.id}-${subTab.id}-${item.id}-${mod.id}`
+                    if (sourceKeySet.has(key)) {
+                        return
+                    }
+
+                    sourceKeySet.add(key)
+                    sources.push({
+                        key,
+                        itemId: item.id,
+                        shopId: shop.id,
+                        subTabId: subTab.id,
+                        detail: `${mainTab.name} -> ${subTab.name}`,
+                        shopName: shop.name,
+                        price: item.price,
+                        priceName: item.priceName,
+                        num: item.num,
+                        limit: item.limit,
+                        timeStart: item.startTime,
+                        timeEnd: item.endTime,
+                    })
+                })
             })
         })
     })
