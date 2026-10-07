@@ -195,6 +195,7 @@ useInitialScrollToSelectedItem({ selectedSelector: ".dbw-item-active" })
                                         <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-base-content/55">
                                             <span>{{ weapon.类型.map(t => $t(t)).join(", ") }}</span>
                                             <span>{{ $t(weapon.伤害类型) }}</span>
+                                            <span>v{{ weapon.版本 }}</span>
                                         </div>
                                         <!-- 数值行：攻击 / 暴击 / 暴伤 / 触发 -->
                                         <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-base-content/55">
