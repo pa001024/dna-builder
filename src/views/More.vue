@@ -272,6 +272,7 @@ function applyOrder(list: TileItem[]): TileItem[] {
     return ordered
 }
 
+
 /** 当前渲染的磁贴列表：可见项/自定义覆盖变化时重建并保留用户排序。 */
 const tileList = ref<TileItem[]>([])
 watch(
@@ -490,6 +491,22 @@ function onGridContextMenu(event: MouseEvent) {
     if (pressTimer !== undefined || dragState.active || justDragged) event.preventDefault()
 }
 
+/** 入场动画基线延迟（秒）：首块等待时间。 */
+const ENTRY_BASE_DELAY = 0.1
+/** 入场动画固定窗口（秒）：全部磁贴的错峰总时长，不随个数增长。 */
+const ENTRY_STAGGER_WINDOW = 0.4
+
+/** 单块错峰步长（秒）：固定窗口按个数均摊，保证总数再多也在窗口内播完。 */
+const staggerStep = computed(() => ENTRY_STAGGER_WINDOW / Math.max(1, tileList.value.length))
+
+/**
+ * 取第 index 个磁贴的入场延迟（固定窗口均摊）。
+ * @param index 磁贴在 tileList 中的位置
+ */
+function tileDelay(index: number): string {
+    return `${(ENTRY_BASE_DELAY + index * staggerStep.value).toFixed(3)}s`
+}
+
 /** 幽灵卡片的渲染数据：当前拖拽的磁贴项。 */
 const ghostTile = computed(() => tileList.value.find(tile => tile.name === dragState.name) ?? null)
 
@@ -600,7 +617,7 @@ onBeforeUnmount(() => {
                     :key="item.name"
                     class="po-tile-rise po-tile-slot"
                     :class="[`po-tile-slot--${item.size}`, { 'po-tile-dragging': dragState.active && dragState.name === item.name }]"
-                    :style="{ animationDelay: `${0.08 + index * 0.03}s` }"
+                    :style="{ animationDelay: tileDelay(index) }"
                     :data-po-name="item.name"
                     :data-po-index="index"
                     @pointerdown="(event: PointerEvent) => onTilePointerDown(event, item.name)"

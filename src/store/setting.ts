@@ -14,7 +14,6 @@ import { executeSignFlow } from "@/api/dna-sign"
 import { isSafeModeClosed } from "@/data/versionGate"
 import { env } from "@/env"
 import { applyLanguageFontClass, changeLanguage } from "@/i18n"
-import { sleep } from "@/util"
 import { DEFAULT_AI_MAX_TOKENS, migrateLegacyAiMaxTokens } from "@/utils/ai-config"
 import type { CustomTheme } from "@/utils/customTheme"
 import { DEFAULT_CUSTOM_THEME } from "@/utils/customTheme"
@@ -26,6 +25,7 @@ import {
     removeCustomFont as removeCustomFontFromOpfs,
     saveCustomFont,
 } from "@/utils/font-storage"
+import { heartbeatFastStarted, retryAfterHeartbeatReady } from "@/utils/heartbeat"
 import { createDefaultScreenBarConfig, parseScreenBarConfig, SCREEN_BAR_STORAGE_KEY, type ScreenBarConfig } from "@/utils/screen-bar"
 import {
     createDefaultSkillCdOverlaySettings,
@@ -41,6 +41,8 @@ let apiCache: DNAAPI | null = null
 let apiCacheKey = ""
 let signInterval: number | null = null
 let apiInitPromise: Promise<DNAAPI | undefined> | null = null
+/** 最近一次心跳完整握手的 promise：快速路径超时后，后续请求失败时等它 resolve 再重试。 */
+let heartbeatReadyPromise: Promise<boolean> | null = null
 
 // 迁移必须在建立 store 之前完成：useLocalStorage 会先把存储里的旧默认值读进 state
 migrateLegacyAiMaxTokens()
@@ -79,7 +81,6 @@ export const useSettingStore = defineStore("setting", {
             protagonistGender: useLocalStorage<"male" | "female">("story_protagonist_gender", "female"),
             protagonistGender2: useLocalStorage<"male" | "female">("story_protagonist_gender_2", "female"),
             safeMode: !isSafeModeClosed(),
-            lastHeartbeatTime: 0,
             // 自定义底图（图片 data URL；空字符串表示未设置），持久化在 OPFS 中，启动时通过 initCustomWallpaper 加载
             customWallpaper: "",
             // 自定义底图透明度（0~1，1 为完全不透明），与窗口透明叠加使用，弱化为背景
@@ -387,32 +388,46 @@ export const useSettingStore = defineStore("setting", {
             return await apiInitPromise
         },
 
-        // 启动心跳计时器
+        // 启动心跳计时器（快速路径：最多等待 500ms 即返回，握手在后台继续；
+        // 若后续请求因心跳未就绪失败，由 runWithHeartbeatRetry 等完全就绪后重试）
         async startHeartbeat(userId?: string, token?: string) {
             if (!userId || !token) {
                 const user = await this.getCurrentUser()
                 if (!user) return false
                 userId = user.uid
                 token = user.token
-                if (user.server === "global") return true
+                if (user.server === "global") {
+                    heartbeatReadyPromise = Promise.resolve(true)
+                    return true
+                }
             }
             try {
-                // 调用Rust实现的心跳功能
-                const res = await startHeartbeat("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", token, userId)
-                if (this.lastHeartbeatTime + 1000 * 10 < Date.now()) {
-                    this.lastHeartbeatTime = Date.now()
-                    await sleep(1000) // 确保API有值
-                }
-                if (res.includes("成功")) {
-                    console.log("心跳已启动")
-                    return true
-                } else {
+                // 完整握手（Rust 建连，首帧即就绪；与 dob-app 一致，不再额外 sleep）在后台推进
+                const handshake = (async (): Promise<boolean> => {
+                    // 调用Rust实现的心跳功能
+                    const res = await startHeartbeat("wss://dnabbs-api.yingxiong.com:8180/ws-community-websocket", token, userId)
+                    if (res.includes("成功")) {
+                        console.log("心跳已启动")
+                        return true
+                    }
                     await stopHeartbeat()
-                }
+                    return false
+                })()
+                heartbeatReadyPromise = handshake
+                // 快速路径：握手 500ms 内没完成则乐观返回，不阻塞后续请求
+                return await heartbeatFastStarted(handshake)
             } catch (error) {
                 console.error("启动心跳失败:", error)
             }
             return false
+        },
+        /**
+         * 在心跳快速启动后执行请求；失败则等心跳完全就绪后重试一次。
+         * @param task 请求函数（应为无副作用的读操作，可安全重试）
+         * @returns 请求结果
+         */
+        async runWithHeartbeatRetry<T>(task: () => Promise<T>): Promise<T> {
+            return retryAfterHeartbeatReady(heartbeatReadyPromise, task)
         },
 
         // 停止心跳计时器

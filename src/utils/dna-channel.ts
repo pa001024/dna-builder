@@ -59,44 +59,50 @@ export interface DNAChannelResult<T> {
 
 /**
  * @description 在共享通道内按「首轮延迟 → 每隔固定间隔取样 → 连续两次相同即确认」的策略取稳定数据。
- * 所有取样都在共享串行队列内执行，并与心跳生命周期绑定，避免与其他 DNA 任务抢占。
+ * 等待发生在队列之外，只有单次取样才持有共享串行队列并绑定心跳生命周期，
+ * 避免整点稳定确认的空等时间阻塞手动查看等即时任务。
  */
 export function runDNAChannelTask<T>(options: DNAChannelOptions<T>): Promise<DNAChannelResult<T>> {
-    return enqueueDNATask(async () => {
+    return (async () => {
         const setting = useSettingStore()
         const api = await setting.getDNAAPI()
         if (!api) throw new Error("请先登录皎皎角账号")
 
-        const heartbeatStarted = await setting.startHeartbeat()
-        if (!heartbeatStarted) throw new Error("启动心跳失败")
-
-        try {
-            await wait(options.initialDelayMs)
-            let previous = await options.sample()
-            let samples = 1
-
-            if (options.isSettled?.(previous)) {
-                return { value: previous, confirmed: true, samples }
-            }
-
-            for (let i = 1; i < options.maxSamples; i++) {
-                await wait(options.pollIntervalMs)
-                const current = await options.sample()
-                samples++
-                if (options.isSame(previous, current)) {
-                    return { value: current, confirmed: true, samples }
+        // 单次取样：持有共享队列并绑定一次心跳生命周期。
+        const sampleOnce = () =>
+            enqueueDNATask(async () => {
+                const heartbeatStarted = await setting.startHeartbeat()
+                if (!heartbeatStarted) throw new Error("启动心跳失败")
+                try {
+                    return await options.sample()
+                } finally {
+                    await setting.stopHeartbeat()
                 }
-                previous = current
-                if (options.isSettled?.(current)) {
-                    return { value: current, confirmed: false, samples }
-                }
-            }
+            })
 
-            return { value: previous, confirmed: false, samples }
-        } finally {
-            await setting.stopHeartbeat()
+        await wait(options.initialDelayMs)
+        let previous = await sampleOnce()
+        let samples = 1
+
+        if (options.isSettled?.(previous)) {
+            return { value: previous, confirmed: true, samples }
         }
-    })
+
+        for (let i = 1; i < options.maxSamples; i++) {
+            await wait(options.pollIntervalMs)
+            const current = await sampleOnce()
+            samples++
+            if (options.isSame(previous, current)) {
+                return { value: current, confirmed: true, samples }
+            }
+            previous = current
+            if (options.isSettled?.(current)) {
+                return { value: current, confirmed: false, samples }
+            }
+        }
+
+        return { value: previous, confirmed: false, samples }
+    })()
 }
 
 /**

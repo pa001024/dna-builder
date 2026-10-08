@@ -30,6 +30,16 @@ const LEGACY_HOME_TAB_MAP: Record<string, string> = {
 }
 
 const mine = useLocalStorage<DNAMineBean>("dna.mine", {} as any)
+/** 本地 db（dnaUsers）里当前账号存的头像，远程 headUrl 失效时的降级源。 */
+const localPic = ref("")
+/** 已确认加载失败的远程头像，命中时直接用降级源，避免重复请求坏图。 */
+const avatarFailedUrl = ref("")
+/** 头像实际渲染地址：远程可用优先，失败或为空时降级为本地 pic。 */
+const avatarSrc = computed(() => {
+    const remote = mine.value?.headUrl?.trim() || ""
+    if (remote && avatarFailedUrl.value !== remote) return remote
+    return localPic.value || remote
+})
 const activeTab = useLocalStorage("dna.activeTab", HOME_TABS.announcement)
 let api: DNAAPI
 
@@ -52,8 +62,24 @@ onMounted(async () => {
     }
     api = t
     await initEmojiDict()
+    await loadLocalPic()
     await loadMine()
 })
+
+/** 读取本地 db 当前账号的头像，作为远程头像的降级源。 */
+async function loadLocalPic() {
+    try {
+        const user = await setting.getCurrentUser()
+        localPic.value = user?.pic || ""
+    } catch {
+        localPic.value = ""
+    }
+}
+
+/** 远程头像加载失败：记录坏图 URL，后续渲染自动降级为本地 pic。 */
+function onAvatarError() {
+    avatarFailedUrl.value = mine.value?.headUrl?.trim() || ""
+}
 
 async function loadMine() {
     const rm = await api.getMine()
@@ -166,9 +192,10 @@ function handleRefreshAll() {
                     class="group flex items-center gap-2 text-sm text-base-content/80 transition-colors duration-150 hover:text-primary"
                 >
                     <img
-                        :src="mine?.headUrl"
+                        :src="avatarSrc"
                         alt="User Head"
                         class="size-7 rounded-full border border-base-content/15 object-cover transition-colors duration-150 group-hover:border-primary/50"
+                        @error="onAvatarError"
                     />
                     <span class="max-w-24 truncate">{{ mine?.userName || "?" }}</span>
                 </SRouterLink>

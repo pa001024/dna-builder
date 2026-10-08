@@ -24,6 +24,8 @@ enum WsCommand {
 lazy_static! {
     static ref WS_TX: Mutex<Option<mpsc::UnboundedSender<WsCommand>>> = Mutex::new(None);
     static ref WS_CONFIG: Mutex<Option<(String, String)>> = Mutex::new(None); // (userId, token)
+    /// 心跳连接引用计数：同账号多处共用一条连接，最后一个持有者 stop 时才真正断开。
+    static ref WS_REFCOUNT: Mutex<u32> = Mutex::new(0);
 }
 
 /// WebSocket消息响应结构
@@ -217,6 +219,19 @@ pub async fn start_heartbeat(
     user_id: String,
     interval: u64,
 ) -> Result<String, String> {
+    // 同账号已有连接：直接复用（引用计数+1），省掉关闭 + 500ms + 重连
+    let reuse = {
+        let tx_guard = WS_TX.lock().unwrap();
+        let cfg_guard = WS_CONFIG.lock().unwrap();
+        tx_guard.is_some()
+            && matches!(&*cfg_guard, Some((uid, tok)) if uid == &user_id && tok == &token)
+    };
+    if reuse {
+        let mut count = WS_REFCOUNT.lock().unwrap();
+        *count += 1;
+        return Ok("复用已有心跳连接成功".to_string());
+    }
+
     // 检查是否已存在WebSocket客户端，如果存在则先关闭
     let need_restart = {
         let tx_guard = WS_TX.lock().unwrap();
@@ -252,6 +267,11 @@ pub async fn start_heartbeat(
 
     // 初始化全局WebSocket客户端，获取接收第一条消息的Receiver
     let first_msg_rx = init_global_ws(&url, &token, &user_id, interval);
+    // 新连接注册即持有一次引用（首条消息成败都由配对的 stop 释放）
+    {
+        let mut count = WS_REFCOUNT.lock().unwrap();
+        *count = 1;
+    }
 
     // 等待第一条消息
     match first_msg_rx.await {
@@ -266,6 +286,17 @@ pub async fn start_heartbeat(
 // 停止心跳
 #[tauri::command]
 pub async fn stop_heartbeat() -> Result<(), String> {
+    // 引用计数>0 说明还有其他持有者，只释放自己的引用，不断开连接
+    let remaining = {
+        let mut count = WS_REFCOUNT.lock().unwrap();
+        if *count > 0 {
+            *count -= 1;
+        }
+        *count
+    };
+    if remaining > 0 {
+        return Ok(());
+    }
     // 发送关闭指令
     let opt_tx = {
         let tx_guard = WS_TX.lock().unwrap();

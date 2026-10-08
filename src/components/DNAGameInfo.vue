@@ -200,7 +200,12 @@ async function loadData(force = false) {
         loading.value = true
         await setting.startHeartbeat()
 
-        const roleRes = await api.defaultRoleForTool()
+        // 三路请求共享同一个心跳窗口，并行发起；周报自带错误消化，并发失败不会抛错
+        const weeklyPromise = loadWeeklyReport(weeklyReportType.value)
+        // 心跳 500ms 快速返回后若请求失败，等完全就绪后整体重试一次
+        const [roleRes, shortNoteRes] = await setting.runWithHeartbeatRetry(() =>
+            Promise.all([api.defaultRoleForTool(), api.getShortNoteInfo()])
+        )
         if (roleRes.is_success && roleRes.data) {
             roleInfo.value = roleRes.data
         } else {
@@ -208,14 +213,13 @@ async function loadData(force = false) {
         }
 
         // 获取铸造信息
-        const shortNoteRes = await api.getShortNoteInfo()
         if (shortNoteRes.is_success && shortNoteRes.data) {
             shortNoteInfo.value = shortNoteRes.data
         } else {
             throw new Error(shortNoteRes.msg || "获取额外信息失败")
         }
 
-        await loadWeeklyReport(weeklyReportType.value)
+        await weeklyPromise
 
         lastUpdateTime.value = ui.timeNow
     } catch (e) {
@@ -266,7 +270,8 @@ async function loadWeeklyReport(weekType: 1 | 2 = weeklyReportType.value) {
     weeklyReportLoading.value = true
     weeklyReportError.value = ""
     try {
-        const weeklyReportRes = await api.getItemWeeklyReport(weekType)
+        // 与主流程并发时若心跳未就绪失败，等完全就绪后重试一次，避免幽灵报错
+        const weeklyReportRes = await setting.runWithHeartbeatRetry(() => api.getItemWeeklyReport(weekType))
         if (weeklyReportRes.is_success && weeklyReportRes.data) {
             weeklyReport.value = weeklyReportRes.data
             weeklyReportType.value = weekType

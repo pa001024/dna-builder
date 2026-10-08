@@ -228,8 +228,8 @@ onBeforeUnmount(() => {
                             />
                             <div class="flex items-center gap-3 p-3">
                                 <!-- 头像 -->
-                                <div class="size-10 shrink-0 overflow-hidden rounded-xs bg-primary/15">
-                                    <img :src="user.pic" :alt="user.name" class="h-full w-full object-cover" />
+                                <div class="size-10 shrink-0 overflow-hidden rounded-full">
+                                    <img :src="user.pic" :alt="user.name" class="h-full w-full rounded-full object-cover" />
                                 </div>
 
                                 <!-- 名称 + 元信息 -->

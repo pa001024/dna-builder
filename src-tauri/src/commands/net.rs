@@ -1,6 +1,7 @@
 //! HTTP 网络层：客户端构建、前端 fetch 代理命令与 QQ 登录探测。
 
-use std::time::Duration;
+use std::sync::{Mutex, OnceLock};
+use std::time::{Duration, Instant};
 
 use reqwest::multipart;
 use serde::{Deserialize, Serialize};
@@ -9,10 +10,47 @@ use serde::{Deserialize, Serialize};
 pub(crate) const GAME_LAUNCHER_USER_AGENT: &str =
     "EMLauncher/++UE4+Release-4.27-CL-0 Windows/10.0.26200.1.256.64bit";
 
+/// 共享 HTTP 客户端缓存的存活时间：到期后重建，运行期间开关系统代理最多延迟该时长生效。
+const SHARED_CLIENT_TTL: Duration = Duration::from_secs(5 * 60);
+
+struct SharedHttpClient {
+    client: reqwest::Client,
+    built_at: Instant,
+}
+
+static SHARED_HTTP_CLIENT: OnceLock<Mutex<Option<SharedHttpClient>>> = OnceLock::new();
+
+/// 获取共享 HTTP 客户端：复用连接池，避免每次请求重做 TCP+TLS 握手。
+///
+/// `reqwest` 只在构建客户端时读取系统代理配置；此前每次请求重建客户端
+/// （代理即时生效，但每次都重新握手）。改为缓存复用后，突发请求
+/// （验真链、深渊翻页、同窗口多接口）走热连接，代理变更最多延迟一个 TTL 生效。
+fn shared_http_client() -> Result<reqwest::Client, reqwest::Error> {
+    let slot = SHARED_HTTP_CLIENT.get_or_init(|| Mutex::new(None));
+    let mut guard = slot.lock().unwrap();
+    let now = Instant::now();
+    let expired = match &*guard {
+        Some(shared) => now.duration_since(shared.built_at) >= SHARED_CLIENT_TTL,
+        None => true,
+    };
+    if expired {
+        let client = build_http_client()?;
+        *guard = Some(SharedHttpClient {
+            client,
+            built_at: now,
+        });
+    }
+    Ok(guard
+        .as_ref()
+        .expect("共享 HTTP 客户端已初始化")
+        .client
+        .clone())
+}
+
 /// 创建带系统代理配置的 HTTP 客户端。
 ///
-/// `reqwest` 会在构建客户端时读取系统代理配置，因此 tauriFetch 需要在每次请求前重新构建客户端，
-/// 以便应用运行期间开启或关闭系统代理后立即生效。
+/// 注意：普通请求请走 [`shared_http_client`] 复用连接池；这里只保留给长生命周期的
+/// 独立用途（如下载管理器持有自己的客户端）。
 pub(crate) fn build_http_client() -> Result<reqwest::Client, reqwest::Error> {
     reqwest::Client::builder()
         // 启用keepalive，设置超时为2分钟
@@ -54,7 +92,7 @@ pub async fn fetch(
     multipart: Option<Vec<(String, FormDataValue)>>,
 ) -> Result<FetchResponse, String> {
     let client =
-        build_http_client().map_err(|error| format!("Failed to create HTTP client: {error}"))?;
+        shared_http_client().map_err(|error| format!("Failed to create HTTP client: {error}"))?;
     let mut request_builder = match method.to_uppercase().as_str() {
         "GET" => client.get(&url),
         "POST" => client.post(&url),

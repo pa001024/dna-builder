@@ -1407,11 +1407,17 @@ const collapsedSections = useLocalStorage("build-collapsed-sections", {
     preview: false,
     actions: false,
     share: false,
+    comments: false,
 })
 
 function toggleSection(section: keyof typeof collapsedSections.value) {
     collapsedSections.value[section] = !collapsedSections.value[section]
 }
+
+/** 当前角色构筑页的评论目标 ID（按角色聚合讨论）。 */
+const buildCommentTargetId = computed(() => `charbuild_${selectedCharId.value}`)
+/** 评论数（用于章节 badge 展示）。 */
+const buildCommentCount = ref(0)
 
 const charTab = ref(charBuild.value.selectedSkillType)
 
@@ -3247,6 +3253,21 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                             :char-name="selectedChar"
                             :char-settings="charSettings"
                         />
+                    </CollapsibleSection>
+
+                    <!-- 评论 -->
+                    <CollapsibleSection
+                        number="09"
+                        kicker="COMMENTS"
+                        :title="$t('comment-section.comment')"
+                        :badge="buildCommentCount"
+                        :is-open="!collapsedSections.comments"
+                        lazy
+                        @toggle="toggleSection('comments')"
+                    >
+                        <div class="mt-2">
+                            <CommentSection :target-id="buildCommentTargetId" @count="buildCommentCount = $event" />
+                        </div>
                     </CollapsibleSection>
                 </div>
             </ScrollArea>
