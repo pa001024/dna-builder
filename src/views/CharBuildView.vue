@@ -437,6 +437,38 @@ const charBuild = computed(() => {
 })
 
 /**
+ * 当前选中技能在技能等级三元组中的下标：0→E，1→Q，2 及之后→被动。
+ * 与计算侧 resolveCharSkillLevel 同口径；未选中角色技能时为 -1（滑杆与技能字段区一并隐藏）。
+ */
+const selectedSkillLevelIndex = computed(() => {
+    const index = charBuild.value.skills.findIndex(skill => skill.名称 === charSettings.value.baseName)
+    if (index === -1) return -1
+    if (index === 1) return 1
+    if (index >= 2) return 2
+    return 0
+})
+
+/**
+ * 当前选中技能的等级：随 SkillTabs 切换跟随显示与编辑，UI 保持单个滑杆不变。
+ * 写入时只替换三元组中的对应项并钳制到 1-12，其余两项不受影响。
+ */
+const currentSkillLevel = computed({
+    get: () => {
+        // 未选中角色技能时滑杆不渲染，此处仅为类型守卫（元组不允许负索引）
+        if (selectedSkillLevelIndex.value === -1) return 10
+        return charSettings.value.charSkillLevel?.[selectedSkillLevelIndex.value as 0 | 1 | 2] ?? 10
+    },
+    set: value => {
+        if (selectedSkillLevelIndex.value === -1) return
+        const current = Array.isArray(charSettings.value.charSkillLevel)
+            ? [...charSettings.value.charSkillLevel]
+            : [10, 10, 10]
+        current[selectedSkillLevelIndex.value] = Math.max(1, Math.min(12, Math.round(value)))
+        charSettings.value.charSkillLevel = current as [number, number, number]
+    },
+})
+
+/**
  * 侧边栏页签展示数据。
  * 同律页签优先使用同律伤害技能图标，并通过 mask 适配不同主题。
  * 近战/远程武器槽位为空武器（未装备）时保留页签并标记 isEmpty，用于展示未装备空态。
@@ -2527,10 +2559,10 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                 @select="charSettings.baseName = $event"
                             />
                         </div>
-                        <div class="flex items-center gap-4 text-sm p-1">
+                        <div v-if="selectedSkillLevelIndex !== -1" class="flex items-center gap-4 text-sm p-1">
                             <div class="flex-1">
                                 <input
-                                    v-model.number="charSettings.charSkillLevel"
+                                    v-model.number="currentSkillLevel"
                                     type="range"
                                     class="range range-primary range-xs w-full"
                                     min="1"
@@ -2538,7 +2570,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     step="1"
                                 />
                             </div>
-                            <div class="flex-none">Lv. {{ charSettings.charSkillLevel }}</div>
+                            <div class="flex-none">Lv. {{ currentSkillLevel }}</div>
                         </div>
                         <SkillFields
                             :skill="charBuild.selectedSkill"

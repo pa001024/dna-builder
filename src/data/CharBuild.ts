@@ -1,8 +1,11 @@
 import { groupBy } from "lodash-es"
 import { type ASTNode, parseAST } from "./ast"
+import type { CharBuildSettingsInput } from "./CharBuildHelper"
+import { type CharSkillLevels, normalizeCharSkillLevels, resolveCharSkillLevel } from "./charSettings"
 import type { AbstractMod, DmgType, HpType, Skill, WeaponSkill } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import type { LeveledChar } from "./leveled/LeveledChar"
+import type { CharBuildInvSnapshot } from "./leveled/LeveledHelpers"
 import { LeveledMod, type LeveledModWithCount } from "./leveled/LeveledMod"
 import { type DynamicMonster, LeveledMonster } from "./leveled/LeveledMonster"
 import { LeveledSkill } from "./leveled/LeveledSkill"
@@ -406,7 +409,8 @@ export interface CharBuildOptions {
     targetFunction?: string
     customVariables?: [string, string][]
     customBuff?: [string, number][]
-    skillLevel?: number
+    /** 技能等级 `[E, Q, 被动]`：兼容老格式单个数字（视为三项相同） */
+    skillLevel?: number | CharSkillLevels | readonly number[]
     timeline?: CharBuildTimeline
     timelineDPS?: boolean
     teamWeapons?: (number | string)[]
@@ -422,8 +426,8 @@ export interface CharBuildOptions {
 export class CharBuild {
     static fromCharSetting: (
         selectedChar: number,
-        charSettings: typeof import("../composables/useCharSettings").defaultCharSettings,
-        inv?: ReturnType<typeof import("../store/inv").useInvStore>,
+        charSettings: CharBuildSettingsInput,
+        inv?: CharBuildInvSnapshot,
         timeline?: CharBuildTimeline
     ) => CharBuild
 
@@ -452,8 +456,8 @@ export class CharBuild {
     }
     set char(char: LeveledChar) {
         this._char = char
-        // 从skills表中获取角色技能数组，用参数skillLevel初始化LeveledSkill后储存为属性skills数组
-        this.skills = this.char.技能.map(skill => new LeveledSkill(skill.skillData, this.skillLevel))
+        // 从skills表中获取角色技能数组，用三元组技能等级[E, Q, 被动]按索引初始化LeveledSkill后储存为属性skills数组
+        this.skills = this.char.技能.map((skill, index) => new LeveledSkill(skill.skillData, resolveCharSkillLevel(this.skillLevel, index)))
 
         // 从char中获取同率武器值，如果非空则从武器表中获取同率武器属性，储存为字段skillWeapon
         if (this.char.同律武器) {
@@ -475,7 +479,13 @@ export class CharBuild {
                     })
                 )
                 uweaponData.技能 = [uweaponSkillData]
-                this.skillWeapon = new LeveledSkillWeapon(uweaponData, this.skillLevel, this.char.等级)
+                // 同律技能等级取来源技能的最终等级（无来源时退回被动等级，与 Python SDK 口径一致）
+                const syncSourceIndex = skillIds.find(index => Number.isInteger(index) && (index as number) >= 0) ?? 2
+                this.skillWeapon = new LeveledSkillWeapon(
+                    uweaponData,
+                    resolveCharSkillLevel(this.skillLevel, syncSourceIndex),
+                    this.char.等级
+                )
             } catch (error) {
                 console.error(`同律武器 ${this.char.同律武器} 初始化失败:`, error)
             }
@@ -572,7 +582,26 @@ export class CharBuild {
     get allSkills() {
         return [...this.skills, ...this.weaponSkills]
     }
-    public skillLevel: number = 10
+    /** 技能等级 `[E, Q, 被动]`：构造与 char setter 均经归一化，兼容老格式单个数字 */
+    public skillLevel: CharSkillLevels = [10, 10, 10]
+
+    /**
+     * 按角色技能索引取对应的技能等级（0→E，1→Q，2 及之后→被动）。
+     * @param index 角色技能索引
+     * @returns 该技能的等级
+     */
+    public getSkillLevel(index: number): number {
+        return resolveCharSkillLevel(this.skillLevel, index)
+    }
+
+    /**
+     * 当前选中技能的等级：按选中技能在角色技能中的索引解析，武器技能回退被动等级。
+     * @returns 选中技能的等级
+     */
+    public get selectedSkillLevel(): number {
+        const index = this.skills.findIndex(skill => skill.名称 === this.baseName)
+        return resolveCharSkillLevel(this.skillLevel, index === -1 ? 2 : index)
+    }
     public hpPercent: number
     public resonanceGain: number
     public auraMod?: LeveledMod
@@ -678,7 +707,8 @@ export class CharBuild {
 
     constructor(options: CharBuildOptions) {
         this.extraMastery = options.extraMastery || ""
-        this.skillLevel = options.skillLevel || 10
+        // 先归一化技能等级再挂载角色：char setter 据此按索引初始化各技能等级
+        this.skillLevel = normalizeCharSkillLevels(options.skillLevel ?? 10)
         this.char = options.char
         this.hpPercent = Math.max(0, Math.min(1, options.hpPercent))
         this.resonanceGain = options.resonanceGain
@@ -4300,7 +4330,8 @@ export class CharBuild {
             enemyResistance: this.enemyResistance,
             targetFunction: this.targetFunction,
             customVariables: this.customVariables.map(variable => [...variable] as [string, string]),
-            skillLevel: this.skills[0].等级,
+            // 克隆需保留 E/Q/被动三项等级：只取首项会丢掉另外两项的分级
+            skillLevel: [this.getSkillLevel(0), this.getSkillLevel(1), this.getSkillLevel(2)] as CharSkillLevels,
             timeline: this.timeline,
             timelineDPS: this.timelineDPS,
             teamWeaponCategories: [...this.teamWeaponCategories],

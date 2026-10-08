@@ -1,5 +1,5 @@
 import { CharBuild, CharBuildTimeline } from "./CharBuild"
-import { type CharSettings, getModVariantAura, getModVariantSlots } from "./charSettings"
+import { type CharSettings, getModVariantAura, getModVariantSlots, normalizeCharSkillLevels } from "./charSettings"
 import type { Weapon } from "./data-types"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "./effectLv"
 import { LeveledBuff } from "./leveled/LeveledBuff"
@@ -22,9 +22,14 @@ import { collectPetBuffs, collectTraitBuffs, getEffectivePetLevel, getPetBaseCd,
  * @param timeline 时间线
  * @returns 构筑实例
  */
+/** 创建构筑的入参：技能等级兼容老格式单个数字（视为三项相同），运行期统一归一化 */
+export type CharBuildSettingsInput = Omit<CharSettings, "charSkillLevel"> & {
+    charSkillLevel?: CharSettings["charSkillLevel"] | number | readonly number[]
+}
+
 export function createCharBuildFromSettings(
     charId: number,
-    charSettings: CharSettings,
+    charSettings: CharBuildSettingsInput,
     inv?: CharBuildInvSnapshot,
     timeline?: CharBuildTimeline
 ) {
@@ -37,21 +42,22 @@ export function createCharBuildFromSettings(
         useGlobal ? getWBuffLvFromSnapshot(inv, weaponId, char.属性) : getWBuffLvFromSetting(effectConfig, weaponId, char.属性)
     return new CharBuild({
         char,
-        auraMod: LeveledModHelper.fromId(getModVariantAura(charSettings)),
+        auraMod: LeveledModHelper.fromId(getModVariantAura(charSettings as CharSettings)),
         // MOD 一律取当前激活的变体（A/B/C）：分享构筑时上传的多份配置各自独立
-        charMods: getModVariantSlots(charSettings, "角色")
+        charMods: getModVariantSlots(charSettings as CharSettings, "角色")
             .filter(mod => mod !== null)
             .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
-        meleeMods: getModVariantSlots(charSettings, "近战")
+        meleeMods: getModVariantSlots(charSettings as CharSettings, "近战")
             .filter(mod => mod !== null)
             .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
-        rangedMods: getModVariantSlots(charSettings, "远程")
+        rangedMods: getModVariantSlots(charSettings as CharSettings, "远程")
             .filter(mod => mod !== null)
             .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
-        skillMods: getModVariantSlots(charSettings, "同律")
+        skillMods: getModVariantSlots(charSettings as CharSettings, "同律")
             .filter(mod => mod !== null)
             .map(v => LeveledModHelper.fromId(v[0], v[1], getBuffLv(v[0]))),
-        skillLevel: charSettings.charSkillLevel,
+        // 防御性归一化：调用方可能绕过 normalizeCharSettings 直接传老格式数字
+        skillLevel: normalizeCharSkillLevels(charSettings.charSkillLevel),
         // 魔灵与魔灵潜质以 BUFF 形式附加：与 BUFF 列表共用同一套加成汇总、收益与来源展示逻辑
         buffs: [
             ...charSettings.buffs

@@ -324,7 +324,7 @@ const charBuilds = computed(() => {
                 meleeMods: [],
                 rangedMods: [],
                 skillMods: [],
-                skillLevel: 1,
+                skillLevel: [1, 1, 1],
                 buffs: [],
                 baseName: "",
                 imbalance: false,

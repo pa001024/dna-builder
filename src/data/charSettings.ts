@@ -17,6 +17,60 @@ export type ModSlot = [number, number] | null
 /** MOD 槽位类型（取值与 ModEditer 的 type 属性一致） */
 export type ModSlotType = "角色" | "近战" | "远程" | "同律"
 
+/** 技能等级：`[E, Q, 被动]`，索引 0/1/2 依次对应 */
+export type CharSkillLevels = [number, number, number]
+
+/** 技能等级下限 */
+export const CHAR_SKILL_LEVEL_MIN = 1
+/** 技能等级上限 */
+export const CHAR_SKILL_LEVEL_MAX = 12
+/** 技能等级默认值（E/Q/被动均为 10 级） */
+export const CHAR_SKILL_LEVEL_DEFAULT = 10
+
+/**
+ * 归一化技能等级为 `[E, Q, 被动]` 三元组（原地返回新数组，不修改入参）。
+ * 兼容老格式：单个数字视为三项相同（如 `12` → `[12, 12, 12]`）。
+ * 数组缺项时用首项（无首项则用默认值）补齐，各项钳制到 1-12 并取整。
+ * @param value 原始技能等级（数字 | 数组 | 其他）
+ * @returns 归一化后的三元组
+ */
+export function normalizeCharSkillLevels(value: unknown): CharSkillLevels {
+    const clamp = (level: unknown, fallback: number): number => {
+        if (!Number.isFinite(level)) return fallback
+        return Math.max(CHAR_SKILL_LEVEL_MIN, Math.min(CHAR_SKILL_LEVEL_MAX, Math.round(level as number)))
+    }
+    if (Number.isFinite(value)) {
+        const level = clamp(value, CHAR_SKILL_LEVEL_DEFAULT)
+        return [level, level, level]
+    }
+    if (Array.isArray(value)) {
+        const first = clamp((value as unknown[])[0], CHAR_SKILL_LEVEL_DEFAULT)
+        const levels = [0, 1, 2].map(index => clamp((value as unknown[])[index], index === 0 ? first : first)) as CharSkillLevels
+        // 缺项回填：缺失项沿用首项（首项本身已是合法值），保证 `[12]` → `[12, 12, 12]`
+        for (let index = 0; index < 3; index++) {
+            if (!Number.isFinite((value as unknown[])[index])) {
+                levels[index] = index === 0 ? first : levels[0]
+            }
+        }
+        return levels
+    }
+    return [CHAR_SKILL_LEVEL_DEFAULT, CHAR_SKILL_LEVEL_DEFAULT, CHAR_SKILL_LEVEL_DEFAULT]
+}
+
+/**
+ * 按角色技能索引取对应的技能等级：0→E，1→Q，2 及之后→被动。
+ * 索引越界（角色技能多于 3 个，如第二被动/协战）时沿用被动等级，保证计算不丢等级。
+ * @param levels 归一化后的技能等级三元组（兼容老格式数字）
+ * @param index 角色技能索引
+ * @returns 该技能的等级
+ */
+export function resolveCharSkillLevel(levels: CharSkillLevels | number | readonly number[] | unknown, index: number): number {
+    const normalized = normalizeCharSkillLevels(levels)
+    if (!Number.isInteger(index) || index <= 0) return normalized[0]
+    if (index === 1) return normalized[1]
+    return normalized[2]
+}
+
 /** MOD 变体字母：索引 0/1/2 依次对应配置 A/B/C */
 export const MOD_VARIANT_LETTERS = ["A", "B", "C"] as const
 
@@ -110,7 +164,8 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
         isRouge: false,
         targetFunction: "",
         customVariables: [] as [string, string][],
-        charSkillLevel: 10,
+        /** 技能等级 `[E, Q, 被动]`：老存档的单个数字载入时展开为三项相同 */
+        charSkillLevel: [10, 10, 10] as CharSkillLevels,
         /** 额外精通武器类型（如 "长柄"），空字符串表示未解锁 */
         extraMastery: "",
         meleeWeapon: signatureWeapon?.type === "近战" ? signatureWeapon.id : 10206, //"枯朽",
@@ -492,6 +547,9 @@ export function normalizeCharSettings(settings?: Partial<CharSettings> | null): 
     for (const key of ["team1BuildVariant", "team2BuildVariant"] as const) {
         normalized[key] = normalizeModVariantLetter(settings[key])
     }
+
+    // 归一化技能等级：兼容老格式单个数字（如 12 → [12, 12, 12]）
+    normalized.charSkillLevel = normalizeCharSkillLevels(settings.charSkillLevel)
 
     // 归一化 MOD 变体：补齐槽位结构，并把激活变体索引钳制到已有范围内
     normalized.modVariants = normalizeModVariants(settings.modVariants)

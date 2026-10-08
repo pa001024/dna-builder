@@ -34,7 +34,7 @@
         "format": "biome check --write --linter-enabled=false",
         "fmttw": "bun tools/canonicalize-tailwind-classes.ts && biome check --write --linter-enabled=false",
         "ver": "node .husky/update-version.js",
-        "deploy": "bun tools/deploy.ts",
+        "dpl": "bun tools/deploy.ts",
         "icon": "bun run tools/icon-tool.ts",
         "i18n": "bun tools/i18n.ts",
         "importdata": "bun run tools/import-i18n-data.ts",

@@ -10,6 +10,7 @@ import {
     type ModSlotType,
     type ModVariantLetter,
     normalizeCharSettings,
+    resolveCharSkillLevel,
     resolveModVariantLetter,
 } from "@/composables/useCharSettings"
 import { charMap, formatModName, LeveledChar, LeveledMod, LeveledModHelper, LeveledWeapon, weaponMap } from "@/data"
@@ -211,6 +212,8 @@ function createView(charId: number, settings: CharSettings, title: string, reque
         })
     }
 
+    // 协战弹窗只展示所用计算技能的那一项等级（E/Q/被动按技能名定位，找不到时用被动等级）
+    const skillIndex = char?.技能?.findIndex(skill => skill.名称 === settings.baseName) ?? -1
     return {
         title,
         charName: char?.名称 ?? "",
@@ -218,7 +221,7 @@ function createView(charId: number, settings: CharSettings, title: string, reque
         charLevel: settings.charLevel,
         element: char?.属性 ? t(`${char.属性}属性`) : "",
         skillName: settings.baseName,
-        skillLevel: settings.charSkillLevel,
+        skillLevel: resolveCharSkillLevel(settings.charSkillLevel, skillIndex === -1 ? 2 : skillIndex),
         variant,
         variantFallenBack: variant !== requestedVariant,
         groups,

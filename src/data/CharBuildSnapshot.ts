@@ -1,4 +1,5 @@
 import { CharBuild, type CharBuildOptions, type DotFrequencySettings } from "./CharBuild"
+import { type CharSkillLevels, normalizeCharSkillLevels } from "./charSettings"
 import type { Buff, Char, Mod, Weapon } from "./data-types"
 import { LeveledBuff } from "./leveled/LeveledBuff"
 import { LeveledChar } from "./leveled/LeveledChar"
@@ -28,7 +29,8 @@ export interface CharBuildWorkerSnapshot {
         data: Char
         level: number
     }
-    skillLevel: number
+    /** 技能等级 `[E, Q, 被动]`：兼容老快照的单个数字 */
+    skillLevel: CharSkillLevels | number
     hpPercent: number
     resonanceGain: number
     auraMod?: ModSnapshot
@@ -146,7 +148,7 @@ export function createBuildFromSnapshot(snapshot: CharBuildWorkerSnapshot) {
     }
     const options: CharBuildOptions = {
         char: new LeveledChar(snapshot.char.data, snapshot.char.level),
-        skillLevel: snapshot.skillLevel,
+        skillLevel: normalizeCharSkillLevels(snapshot.skillLevel),
         hpPercent: snapshot.hpPercent,
         resonanceGain: snapshot.resonanceGain,
         auraMod: createMod(snapshot.auraMod || null) || undefined,

@@ -5,6 +5,7 @@ import { createDefaultCharSettings, normalizeCharSettings, type SignatureWeapon 
 export type {
     BackgroundActions,
     CharSettings,
+    CharSkillLevels,
     DotFrequencySettings,
     InlineActions,
     ModSlot,
@@ -16,6 +17,9 @@ export type {
 } from "@/data/charSettings"
 export {
     addModVariant,
+    CHAR_SKILL_LEVEL_DEFAULT,
+    CHAR_SKILL_LEVEL_MAX,
+    CHAR_SKILL_LEVEL_MIN,
     createDefaultCharSettings,
     createEmptyModVariant,
     createModVariantFrom,
@@ -30,8 +34,10 @@ export {
     MOD_VARIANT_LETTERS,
     MOD_VARIANT_MAX_COUNT,
     normalizeCharSettings,
+    normalizeCharSkillLevels,
     normalizeModVariantLetter,
     removeLastModVariant,
+    resolveCharSkillLevel,
     resolveModVariantLetter,
     serializeCharSettings,
     setModVariantAura,

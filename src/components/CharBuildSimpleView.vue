@@ -309,8 +309,8 @@ const charAttrRows = computed<AttrRow[]>(() => {
 /** 当前选中技能名 */
 const skillName = computed(() => props.charSettings.baseName)
 
-/** 当前技能等级 */
-const skillLevel = computed(() => props.charSettings.charSkillLevel)
+/** 当前选中技能的等级：按选中技能在角色技能中的索引解析三元组（E/Q/被动） */
+const skillLevel = computed(() => props.charBuild.selectedSkillLevel ?? props.charSettings.charSkillLevel[0])
 
 /** 武器精通展示项 */
 interface MasteryItem {

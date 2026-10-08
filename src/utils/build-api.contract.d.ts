@@ -22,8 +22,8 @@ export interface CharSettings {
     targetFunction: string
     /** 自定义变量：`[变量名, 表达式]` */
     customVariables: [string, string][]
-    /** 技能等级 1-12 */
-    charSkillLevel: number
+    /** 技能等级 `[E, Q, 被动]`，每项 1-12 */
+    charSkillLevel: [number, number, number]
     /** 额外精通武器类型（如 "长柄"），空串表示未解锁 */
     extraMastery: string
     meleeWeapon: number
@@ -235,8 +235,8 @@ export interface BuildState {
     charId: number
     /** 角色等级 1-80 */
     charLevel: number
-    /** 技能等级 1-12 */
-    skillLevel: number
+    /** 技能等级 `[E, Q, 被动]`，每项 1-12 */
+    skillLevel: [number, number, number]
     /** 当前血量百分比 0-1（影响背水类收益） */
     hpPercent: number
     /** 和鸣增益 0-3 */
@@ -469,8 +469,8 @@ export interface BuildApi {
 
     /** 切换角色（按名称，需与资料库一致） */
     char(name: string): Promise<ApiResult>
-    /** 改角色等级与技能等级 */
-    level(input: { char?: number; skill?: number }): Promise<ApiResult>
+    /** 改角色等级与技能等级：skill 为数字时三项同设，为数组时按 `[E, Q, 被动]` 分设；e/q/passive 可单独覆盖对应项 */
+    level(input: { char?: number; skill?: number | [number, number, number]; e?: number; q?: number; passive?: number }): Promise<ApiResult>
     /** 改基本设置：血量百分比、和鸣增益、Rouge、额外精通、失衡、全局背包、时间轴 DPS */
     settings(input: {
         hpPercent?: number

@@ -1,7 +1,7 @@
 import type { Edge, Node } from "@vue-flow/core"
 import { nanoid } from "nanoid"
 import type { CharSettings, ModSlotType } from "@/composables/useCharSettings"
-import { getModVariantSlots } from "@/composables/useCharSettings"
+import { getModVariantSlots, normalizeCharSkillLevels } from "@/composables/useCharSettings"
 import { NodeType, useNodeEditorStore } from "@/store/nodeEditor"
 
 /**
@@ -42,7 +42,8 @@ export function importCharSettingsToNodeEditor(charName: string, settings: CharS
             hpPercent: settings.hpPercent,
             resonanceGain: settings.resonanceGain,
             isRouge: settings.isRouge,
-            charSkillLevel: settings.charSkillLevel,
+            // 三元组按值拷贝，避免节点图与构筑配置共享同一数组引用
+            charSkillLevel: [...normalizeCharSkillLevels(settings.charSkillLevel)],
         },
     }
     store.addNode(charInputNode)

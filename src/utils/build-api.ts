@@ -9,6 +9,7 @@ import {
     getModVariantSlots,
     MOD_SLOT_COUNTS,
     normalizeCharSettings,
+    normalizeCharSkillLevels,
     removeLastModVariant,
     serializeCharSettings,
     setModVariantAura,
@@ -587,8 +588,13 @@ export function createBuildApi(host: BuildApiHost): BuildApi {
             if (input.char !== undefined) {
                 settings.charLevel = clamp(Math.round(input.char), 1, 80)
             }
-            if (input.skill !== undefined) {
-                settings.charSkillLevel = clamp(Math.round(input.skill), 1, 12)
+            if (input.skill !== undefined || input.e !== undefined || input.q !== undefined || input.passive !== undefined) {
+                const current = normalizeCharSkillLevels(settings.charSkillLevel)
+                const next = normalizeCharSkillLevels(input.skill !== undefined ? input.skill : current)
+                if (input.e !== undefined) next[0] = clamp(Math.round(input.e), 1, 12)
+                if (input.q !== undefined) next[1] = clamp(Math.round(input.q), 1, 12)
+                if (input.passive !== undefined) next[2] = clamp(Math.round(input.passive), 1, 12)
+                settings.charSkillLevel = next
             }
             record(`等级设为 角色${settings.charLevel} 技能${settings.charSkillLevel}`)
             return ok(`角色等级 ${settings.charLevel}，技能等级 ${settings.charSkillLevel}`, damage())

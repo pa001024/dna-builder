@@ -7,6 +7,7 @@ import { writeTextFile } from "@/api/app"
 import { env } from "@/env"
 import { type LeveledBuff, LeveledBuffHelper, LeveledCharHelper, type LeveledMod, LeveledModHelper, LeveledWeaponHelper } from "../data"
 import { CharBuild } from "../data/CharBuild"
+import { normalizeCharSkillLevels } from "../data/charSettings"
 import type { NodeEditorGraph, UNodeEditorGraph } from "./db"
 import { db } from "./db"
 import { useUIStore } from "./ui"
@@ -966,7 +967,8 @@ export const useNodeEditorStore = defineStore("nodeEditor", () => {
                             char,
                             hpPercent: charData.hpPercent || 1,
                             resonanceGain: charData.resonanceGain || 0,
-                            skillLevel: charData.skillLevel || 12,
+                            // 编辑侧绑定变量已分离为 E/Q/被动三项：老节点数据（单个数字）在此归一化为三元组
+                            skillLevel: normalizeCharSkillLevels(charData.charSkillLevel ?? charData.skillLevel ?? 12),
                             melee: meleeWeapon,
                             ranged: rangedWeapon,
                             baseName: node.data.selectedSkill || char.技能[0].名称, // 使用保存的技能或默认第一个技能

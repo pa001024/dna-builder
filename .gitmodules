@@ -1,0 +1,8 @@
+[submodule "sdk/go"]
+	path = sdk/go
+	url = git@github.com:pa001024/dob-go-sdk.git
+	branch = master
+[submodule "sdk/python"]
+	path = sdk/python
+	url = git@github.com:pa001024/dob-python-sdk.git
+	branch = master
