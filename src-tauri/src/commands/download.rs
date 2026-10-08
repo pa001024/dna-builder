@@ -5,7 +5,10 @@ use std::{
     fs::{self, File},
     io::{Seek, SeekFrom, Write},
     path::{Component, Path, PathBuf},
-    sync::{Arc, Mutex},
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicU64, Ordering},
+    },
     time::{Duration, Instant},
 };
 
@@ -117,12 +120,14 @@ fn get_download_state_key(filename: &str) -> Result<String, String> {
         .to_lowercase())
 }
 
-/// 下载进度事件节流器。
+/// 下载进度事件节流器（保证多线程下上报单调递增，不回退）。
 struct DownloadProgressEmitter {
     app_handle: tauri::AppHandle,
     filename: String,
     total_size: u64,
     last_emit: Mutex<Instant>,
+    /// 已实际推送给前端的最大 downloaded，用于丢弃乱序到达的过期进度。
+    max_emitted: AtomicU64,
 }
 
 /// 多线程下载期间的内存进度与节流落盘状态。
@@ -189,16 +194,21 @@ impl DownloadProgressEmitter {
             filename: filename.to_string(),
             total_size,
             last_emit: Mutex::new(Instant::now() - Duration::from_millis(250)),
+            max_emitted: AtomicU64::new(0),
         }
     }
 
     fn emit(&self, downloaded: u64, force: bool) -> Result<(), String> {
         let now = Instant::now();
         let mut last_emit = self.last_emit.lock().unwrap();
+        if downloaded <= self.max_emitted.load(Ordering::Relaxed) {
+            return Ok(());
+        }
         if !force && now.duration_since(*last_emit) < Duration::from_millis(250) {
             return Ok(());
         }
         *last_emit = now;
+        self.max_emitted.store(downloaded, Ordering::Relaxed);
         let progress_percent = if self.total_size > 0 {
             (downloaded * 100) / self.total_size
         } else {
