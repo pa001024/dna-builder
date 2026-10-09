@@ -16,6 +16,7 @@ const TYPE_DEFINITION_CONFIG = {
     Dungeon: { filePath: "d/dungeon.data.ts", interfaceName: "Dungeon" },
     HardBoss: { filePath: "d/hardboss.data.ts", interfaceName: "HardBoss" },
     Jargon: { filePath: "d/jargon.data.ts", interfaceName: "Jargon" },
+    DynQuest: { filePath: "d/dynquest.data.ts", interfaceName: "DynQuest" },
     Mod: { filePath: "data-types.ts", interfaceName: "Mod" },
     NPC: { filePath: "d/npc.data.ts", interfaceName: "NPC" },
     PartyTopic: { filePath: "d/partytopic.data.ts", interfaceName: "PartyTopic" },
@@ -34,7 +35,20 @@ const TYPE_DEFINITION_CONFIG = {
  */
 function extractInterfaceDefinition(source, interfaceName) {
     const startToken = `export interface ${interfaceName}`
-    const start = source.indexOf(startToken)
+    // 全词匹配：接口名后只允许空白、`{`（定义体）或 `<`（泛型），
+    // 否则 `DynQuest` 会误命中先出现的 `DynQuestLevel`，`Char` 会误命中 `CharTrait`。
+    let start = -1
+    let from = 0
+    for (;;) {
+        const found = source.indexOf(startToken, from)
+        if (found === -1) break
+        const next = source[found + startToken.length]
+        if (next === undefined || next === "{" || next === "<" || /\s/.test(next)) {
+            start = found
+            break
+        }
+        from = found + startToken.length
+    }
     if (start === -1) return null
 
     const bodyStart = source.indexOf("{", start + startToken.length)

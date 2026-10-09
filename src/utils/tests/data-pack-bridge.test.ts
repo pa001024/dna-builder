@@ -26,6 +26,28 @@ describe("数据包绑定替换", () => {
     })
 })
 
+describe("数据可用性判定", () => {
+    it("三种形态：直读源码（无绑定）可用、改写未水合不可用、水合后可用", async () => {
+        vi.resetModules()
+        const fresh = await import("../data-pack/data-pack-bridge")
+        expect(fresh.isDataAvailable()).toBe(true)
+        expect(fresh.isDataPackHydrated()).toBe(false)
+
+        // 网页无包形态：改写已启用（有绑定）但尚未水合，数据不可用
+        let value: unknown
+        fresh.registerDataPackBinding("probe.data", "default", "array", v => {
+            value = v
+        })
+        expect(fresh.isDataAvailable()).toBe(false)
+
+        // 安装数据包后：水合完成，数据可用
+        fresh.replaceRegisteredDataPackBindings(new Map([["probe.data", { default: [1] }]]))
+        expect(value).toEqual([1])
+        expect(fresh.isDataAvailable()).toBe(true)
+        expect(fresh.isDataPackHydrated()).toBe(true)
+    })
+})
+
 describe("数据包水合版本门限", () => {
     const previousLimit = getCurrentVersionLimit()
 

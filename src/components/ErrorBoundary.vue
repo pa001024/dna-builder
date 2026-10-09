@@ -29,7 +29,7 @@
                     <div class="mb-2 text-[10px] tracking-wide text-base-content/40">
                         {{ $t("errorBoundary.messageLabel") }}
                     </div>
-                    <p class="max-h-32 overflow-y-auto wrap-break-word text-[12px] leading-6 text-error whitespace-pre-wrap">
+                    <p class="max-h-32 overflow-y-auto wrap-break-word text-[12px] leading-6 text-error whitespace-pre-wrap select-text">
                         {{ errorMessage }}
                     </p>
                 </div>

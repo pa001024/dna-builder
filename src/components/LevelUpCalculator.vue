@@ -20,7 +20,7 @@ import {
 import { charExtraExcelWeapon } from "@/data/d/charext.data"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
-import { dataPackBootstrapLoading, dataPackHydrationKey, isDataPackHydrated } from "@/utils/data-pack/data-pack-bridge"
+import { dataPackBootstrapLoading, dataPackHydrationKey, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { getDungeonName, getDungeonRewardNames, getDungeonType } from "@/utils/dungeon-utils"
 import {
     type CharLevelUpConfig,
@@ -338,7 +338,7 @@ const latestRequestId = ref(0)
 async function calculateResult() {
     if (isUnmounted || !levelUpCalculator.value || dataPackBootstrapLoading.value) return
 
-    if (!isDataPackHydrated()) {
+    if (!isDataAvailable()) {
         result.value = {
             ...LevelUpCalculator.mergeResults([]),
             timeEstimate: {

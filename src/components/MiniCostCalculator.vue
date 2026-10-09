@@ -3,7 +3,7 @@ import { useLocalStorage } from "@vueuse/core"
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue"
 import { useRouter } from "vue-router"
 import { type Dungeon, dungeonMap, LeveledChar, type LeveledMod, modMap } from "@/data"
-import { dataPackBootstrapLoading, isDataPackHydrated } from "@/utils/data-pack/data-pack-bridge"
+import { dataPackBootstrapLoading, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { getDungeonName, getDungeonType } from "@/utils/dungeon-utils"
 import { LevelUpCalculator, type LevelUpResult, type ModLevelUpConfig, type TimeEstimateConfig } from "@/utils/LevelUpCalculator"
 
@@ -146,7 +146,7 @@ function scheduleCalculate() {
  */
 async function calculate() {
     if (dataPackBootstrapLoading.value) return
-    if (!isDataPackHydrated()) {
+    if (!isDataAvailable()) {
         result.value = null
         return
     }

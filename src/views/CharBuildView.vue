@@ -75,7 +75,7 @@ import { useTourStore } from "@/store/tour"
 import { useUIStore } from "@/store/ui"
 import { copyText, formatBigNumber, formatProp, pasteText, roundBuffValue } from "@/util"
 import { formatCustomVariablesClipboardText, parseCustomVariablesClipboardText } from "@/utils/custom-variable-clipboard"
-import { dataPackHydrationKey, isDataPackHydrated } from "@/utils/data-pack/data-pack-bridge"
+import { dataPackBootstrapLoading, dataPackHydrationKey, isDataAvailable } from "@/utils/data-pack/data-pack-bridge"
 import { expressionReferencesIdentifier, joinExprText } from "@/utils/expr-field"
 import { inlineActionsToTimeline } from "@/utils/inlineActionsToTimeline"
 import { isModAllowedInSlot, type ModLimitContext } from "@/utils/mod-equip"
@@ -91,7 +91,9 @@ const { gt, gpt } = useGameText()
 const dataPackTick = computed(() => dataPackHydrationKey.value)
 const isCharBuildReady = computed(() => {
     dataPackTick.value
-    return isDataPackHydrated() && !!charMap.get(+route.params.charId)
+    // 用「数据可用」而非「水合过」做判断：DD2 形态（DISABLE_REWRITE=1）跳过水合直读源码数据，
+    // 此时同样有数据，绝不能落到占位对象上。
+    return isDataAvailable() && !!charMap.get(+route.params.charId)
 })
 
 /**
@@ -632,8 +634,10 @@ function getCharTabTooltipData(tab: (typeof charTabs.value)[number]): WeaponTool
     }
 }
 
-const charTabTooltipMap = computed<Record<string, WeaponTooltipData>>(() =>
-    charTabs.value.reduce<Record<string, WeaponTooltipData>>((map, tab) => {
+const charTabTooltipMap = computed<Record<string, WeaponTooltipData>>(() => {
+    // 流程门控：tooltip 链条会调用熔炼/武器方法，未就绪直接返回空表
+    if (!isCharBuildReady.value) return {}
+    return charTabs.value.reduce<Record<string, WeaponTooltipData>>((map, tab) => {
         map[tab.name] = getCharTabTooltipData(tab) || {
             title: tab.name,
             props: {},
@@ -642,7 +646,7 @@ const charTabTooltipMap = computed<Record<string, WeaponTooltipData>>(() =>
         }
         return map
     }, {})
-)
+})
 
 /**
  * 把 MOD 槽位类型归一化为变体支持的槽位类型。
@@ -1153,7 +1157,12 @@ watch(
 
 // 计算属性（含武器作用域）：充盈威力、召唤物攻击速度/范围/独立增伤等依赖武器转化词条，
 // 需与伤害结算一致使用 calculateWeaponAttributes，否则召唤物独立增伤等会漏算转化部分
-const attributes = computed(() => charBuild.value.calculateWeaponAttributes())
+// 流程门控：构筑 API 只能在数据就绪后调用；未就绪（真无数据形态）直接返回空属性，
+// 整页模板同样挂在 isCharBuildReady 门后，因此这里不会走到占位对象上调真方法。
+const attributes = computed(() => {
+    if (!isCharBuildReady.value) return {} as ReturnType<CharBuild["calculateWeaponAttributes"]>
+    return charBuild.value.calculateWeaponAttributes()
+})
 
 //#region 魔灵与潜质（槽位操作）
 /**
@@ -1221,15 +1230,15 @@ function handlePetChange() {
 const dot_model_show = ref(false)
 /** DOT 频率分解（技能/近战/远程），供主界面显示与弹窗配置 */
 const dotFrequencies = computed(() => {
-    // 构筑未就绪时返回空结果，避免对空构建调用计算接口
-    if (typeof charBuild.value.calculateDotFrequencies !== "function") {
+    // 流程门控：与 attributes 同理，未就绪直接返回空结果
+    if (!isCharBuildReady.value) {
         return { cap: 0, ownFreq: 0, otherFreq: 0, totalFreq: 0, sources: [] }
     }
     return charBuild.value.calculateDotFrequencies()
 })
 /** 每秒 DOT 伤害（全部来源） */
 const dotDamage = computed(() => {
-    if (typeof charBuild.value.calculateDotDamage !== "function") return 0
+    if (!isCharBuildReady.value) return 0
     return charBuild.value.calculateDotDamage()
 })
 //#endregion
@@ -1240,6 +1249,7 @@ const dotDamage = computed(() => {
  * @returns 格式化后的计算结果
  */
 function getCustomVariableResult(variable: [string, string]) {
+    if (!isCharBuildReady.value) return "-"
     if (!variable[0] || !variable[1] || charBuild.value.validateCustomVariable(variable[0], variable[1])) return "-"
 
     const value = charBuild.value.evaluateCustomVariableDefinition(variable[0], variable[1])
@@ -1700,6 +1710,8 @@ const targetFunction = ref(charSettings.value.targetFunction)
 watch(
     targetFunction,
     debounce(newValue => {
+        // 未就绪时不校验：占位对象没有可用的 AST 上下文
+        if (!isCharBuildReady.value) return
         const error = charBuild.value.validateAST(newValue)
         if (error) {
             return
@@ -1717,6 +1729,7 @@ const focusedVariableIndex = ref(-1)
  * 变量名输入框未聚焦、或该行为空名时返回 null（此时不做任何高亮）。
  */
 const focusedVariableSymbol = computed(() => {
+    if (!isCharBuildReady.value) return null
     const name = customVariableInputs.value[focusedVariableIndex.value]?.[0]?.trim()
     if (!name) return null
     const definition = charBuild.value.parseCustomFunctionDefinition(name)
@@ -2005,6 +2018,16 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 </script>
 
 <template>
+    <!-- 数据就绪前整页不求值：简洁/专业视图、全部弹窗（含常挂载的 AutoBuild）都挂在
+         isCharBuildReady 门后，所有构筑 API 消费只在门后发生。真无数据形态（未安装数据包）
+         落到 fallback；DD2 直读形态与已水合形态都有数据，不会进这里。 -->
+    <div v-if="!isCharBuildReady" class="flex h-full flex-col items-center justify-center gap-2">
+        <span class="loading loading-spinner loading-md" />
+        <span class="text-sm text-base-content/60">{{
+            dataPackBootstrapLoading ? $t("ai.loading") : $t("startup-modal.pack_install_hint")
+        }}</span>
+    </div>
+    <template v-else>
     <!-- Tour 组件 -->
     <VTour
         ref="tour"
@@ -3308,6 +3331,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
 
     <!-- AI对话助手 -->
     <AIChatDialog v-if="setting.showAIChat" :char-build="charBuild" />
+    </template>
 </template>
 
 <style>

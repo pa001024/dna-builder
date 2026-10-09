@@ -26,22 +26,42 @@ const name = ref("")
 const desc = ref("")
 const rows = ref<RankRow[]>([])
 const buildMap = ref<Record<number, { id: string; title: string }[]>>({})
+const inflightBuilds = new Map<number, Promise<void>>()
+let selectSeq = 0
 
 const activeList = computed(() => lists.value.find(item => item.id === activeId.value) || null)
 const totalItems = computed(() => rows.value.length)
 
 function addRow() {
-    rows.value.push({ charId: charData[0]?.id || 0, buildId: "" })
+    const charId = charData[0]?.id || 0
+    rows.value.push({ charId, buildId: "" })
+    void loadBuildOptions(charId)
 }
 
 function removeRow(index: number) {
     rows.value.splice(index, 1)
 }
 
-async function loadBuildOptions(charId: number) {
-    if (buildMap.value[charId]) return
-    const result = await buildsQuery({ charId, limit: 200, offset: 0 }, { requestPolicy: "network-only" }).catch(() => undefined)
-    buildMap.value[charId] = (result || []).map(build => ({ id: build.id, title: build.title }))
+async function loadBuildOptions(charId: number, force = false) {
+    if (buildMap.value[charId] && !force) return
+    const pending = inflightBuilds.get(charId)
+    if (pending) {
+        await pending
+        return
+    }
+    const task = (async () => {
+        const result = await buildsQuery({ charId, limit: 200, offset: 0 }, { requestPolicy: "network-only" }).catch(() => undefined)
+        const fetched = (result || []).map(build => ({ id: build.id, title: build.title }))
+        // 与已播种的当前选中项合并去重，避免覆盖 rankingList 自带的 build 标题
+        const merged = new Map<string, { id: string; title: string }>()
+        for (const build of buildMap.value[charId] || []) merged.set(build.id, build)
+        for (const build of fetched) merged.set(build.id, build)
+        buildMap.value[charId] = [...merged.values()]
+    })().finally(() => {
+        inflightBuilds.delete(charId)
+    })
+    inflightBuilds.set(charId, task)
+    await task
 }
 
 async function handleCharChange(index: number) {
@@ -65,14 +85,25 @@ async function loadLists() {
 }
 
 async function selectList(item: RankingList) {
+    const seq = ++selectSeq
     activeId.value = item.id
     name.value = item.name
     desc.value = item.desc || ""
     const result = await rankingListQuery({ id: item.id }, { requestPolicy: "network-only" }).catch(() => null)
-    rows.value = (result?.items || [])
-        .slice()
-        .sort((a, b) => a.sortOrder - b.sortOrder)
-        .map(item => ({ charId: item.charId, buildId: item.buildId }))
+    if (seq !== selectSeq) return
+    const items = (result?.items || []).slice().sort((a, b) => a.sortOrder - b.sortOrder)
+    // 先用 rankingList 自带的 build.{id,title} 播种下拉选项，避免等待 buildsQuery 时下拉空白
+    for (const entry of items) {
+        if (!entry.build) continue
+        const list = (buildMap.value[entry.charId] ||= [])
+        if (!list.some(build => build.id === entry.build!.id)) {
+            list.push({ id: entry.build.id, title: entry.build.title })
+        }
+    }
+    rows.value = items.map(item => ({ charId: item.charId, buildId: item.buildId }))
+    // 再并行拉取各角色全量构筑以补齐可选项（合并而非覆盖，保留已播种的当前项）
+    const charIds = [...new Set(rows.value.map(row => row.charId))]
+    await Promise.all(charIds.map(charId => loadBuildOptions(charId, true)))
 }
 
 function resetDraft() {

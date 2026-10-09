@@ -160,3 +160,14 @@ export function registerDataPackHydrationCallback(callback: () => void): void {
 export function isDataPackHydrated(): boolean {
     return hydrated
 }
+
+/**
+ * 判断游戏数据当前是否可用。
+ *
+ * 「有数据」与「水合过」是两回事：`DISABLE_REWRITE=1` 跳过数据包水合、
+ * 直接读取 `src/data/d/*.data.ts` 此时数据同样可用。
+ * @returns 数据是否可用
+ */
+export function isDataAvailable(): boolean {
+    return hydrated || bindingRegistry.size === 0
+}
