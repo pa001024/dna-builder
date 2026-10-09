@@ -44,6 +44,7 @@ const emit = defineEmits<{
     (e: "update:modelValue", value: string): void
     (e: "change", value: string): void
     (e: "cursor", position: number): void
+    (e: "save"): void
 }>()
 
 const editorContainer = ref<HTMLElement | null>(null)
@@ -170,6 +171,9 @@ const cutLineWhenNoSelection: Command = view => {
  */
 function createKeymapExtension(): Extension {
     return keymap.of([
+        // 编辑器聚焦时由 CodeMirror 直接拦截保存快捷键：document 冒泡监听偶发拦不住浏览器默认行为，
+        // 且 e.key 大小写（Shift/CapsLock）会导致外层判断漏判，这里无条件触发 save 事件。
+        { key: "Mod-s", run: () => { emit("save"); return true }, preventDefault: true },
         // AST 模式下提供整字段删除，需排在 defaultKeymap 之前才能覆盖默认的按词删除
         //（Mod 在 mac 上为 Cmd；mac 上 Alt-退格 与 Cmd-退格 都指向本命令，避免重复绑定同一按键）
         ...(props.language === "ast" && props.fieldDelete
@@ -282,6 +286,11 @@ function initEditor() {
                         fontSize: "14px",
                         outline: "none",
                     },
+                    // CodeMirror 默认基线主题在 &.cm-focused 上画了 1px dotted 虚线框，
+                    // 单 & 的 outline:none 特异性不够会被盖掉，需显式覆盖聚焦态（与 ExprInput 保持一致）。
+                    "&.cm-focused": {
+                        outline: "none",
+                    },
                     ".cm-scroller": {
                         fontFamily: 'Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace',
                         lineHeight: "1.5",
@@ -289,6 +298,7 @@ function initEditor() {
                     ".cm-content": {
                         minHeight: "100%",
                         padding: "8px 0",
+                        outline: "none",
                     },
                     ".cm-lineNumbers .cm-gutterElement": {
                         padding: "0 8px 0 12px",

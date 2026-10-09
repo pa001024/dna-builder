@@ -1166,6 +1166,9 @@ declare function captureWindow(hwnd: number, x?: number, y?: number, w?: number,
  */
 declare function captureWindowWGC(hwnd: number, x?: number, y?: number, w?: number, h?: number): Mat
 
+/** 运行计数 JSON，hwnd 为空时汇总全部服务器。 */
+declare function wgcStats(hwnd?: number): string
+
 /**
  * 获取窗口客户区位置与尺寸。
  * @param hwnd 窗口句柄

@@ -2833,7 +2833,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                         <Icon icon="ri:settings-3-line" class="size-3.5 opacity-60" />
                                     </div>
                                 </div>
-                                <label
+                                <div
                                     class="flex items-center gap-1 rounded-none border-b border-base-content/20 px-0.5 pb-1 text-sm transition-colors duration-150 focus-within:border-primary"
                                     :class="[dropTargetClass('target-function'), referenceHighlightClass('target-function')]"
                                 >
@@ -2856,7 +2856,7 @@ async function syncModFromGame(id: number, isWeapon: boolean, isConWeapon: boole
                                     >
                                         <Icon icon="codicon:chrome-close" />
                                     </div>
-                                </label>
+                                </div>
                             </div>
                             <!-- 时间线 -->
                             <template v-else>

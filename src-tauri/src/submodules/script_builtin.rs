@@ -64,6 +64,7 @@ use crate::submodules::{
     tpl_match::match_template,
     util::{
         capture_window, capture_window_roi, capture_window_wgc, capture_window_wgc_roi, check_size,
+        wgc_capture_stats_json,
     },
     win::{
         apply_window_style_expression, find_window, get_window_by_process_name, move_window,
@@ -2358,6 +2359,16 @@ fn _capture_window_wgc(
         _throw_if_script_stop_requested()?;
         Err(js_error!("capture_window_wgc failed"))
     }
+}
+
+/// 运行计数 JSON，hwnd 为空时汇总全部服务器。
+fn _wgc_stats(hwnd: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
+    let hwnd = match hwnd {
+        None => None,
+        Some(value) if value.is_undefined() || value.is_null() => None,
+        Some(value) => Some(value.to_number(ctx)? as isize),
+    };
+    Ok(JsValue::from(js_string!(wgc_capture_stats_json(hwnd))))
 }
 
 /// 从文件加载模板Mat对象函数
@@ -5656,6 +5667,9 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
     // 从窗口获取图像Mat对象（WGC优化版）
     let f = _capture_window_wgc.into_js_function_copied(context);
     context.register_global_builtin_callable(js_string!("captureWindowWGC"), 5, f)?;
+
+    let f = _wgc_stats.into_js_function_copied(context);
+    context.register_global_builtin_callable(js_string!("wgcStats"), 1, f)?;
 
     // 从文件加载模板Mat对象
     let f = _get_template.into_js_function_copied(context);

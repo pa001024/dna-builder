@@ -39,6 +39,8 @@ const viewRef = ref<EditorView>()
 const isApplyingExternal = ref(false)
 /** 换行开关：失焦时关闭自动换行，保证编辑框始终只有一行、不破坏布局 */
 const wrapCompartment = new Compartment()
+/** 点击手势进行中：聚焦瞬间若立即开换行，回流会让 mouseup 落点错位成框选，需等抬起后再开 */
+let pointerPressed = false
 
 /**
  * 判断光标左侧是否为完整的 AST 字段，是则整段删除。
@@ -72,6 +74,28 @@ function syncWrap(view: EditorView) {
 }
 
 /**
+ * 手势抬起后若编辑器仍聚焦，补开换行（聚焦瞬间为避框选而跳过了 syncWrap）。
+ * @returns void
+ */
+function onHostPointerUp() {
+    pointerPressed = false
+    window.removeEventListener("pointerup", onHostPointerUp)
+    window.removeEventListener("pointercancel", onHostPointerUp)
+    const view = viewRef.value
+    if (view?.hasFocus) syncWrap(view)
+}
+
+/**
+ * 记录指针按下并订阅抬起：聚焦换行推迟到手势结束后执行。
+ * @returns void
+ */
+function onHostPointerDown() {
+    pointerPressed = true
+    window.addEventListener("pointerup", onHostPointerUp, { once: true })
+    window.addEventListener("pointercancel", onHostPointerUp, { once: true })
+}
+
+/**
  * 创建单行表达式编辑器的主题：背景与边框由外层容器（daisyUI input / 下划线样式）提供，
  * 主题只负责把内外边距、字号行高、选中高亮对齐原来的原生输入框。
  * @returns 编辑器主题扩展
@@ -102,6 +126,8 @@ function createTheme(): ReturnType<typeof EditorView.theme> {
             fontSize,
             lineHeight,
             caretColor: "currentColor",
+            // 与原生 input 一致：文本区始终显示 I-beam，不随祖先元素（如 label）变化
+            cursor: "text",
         },
         ".cm-line": {
             padding: "0",
@@ -147,7 +173,13 @@ function initEditor() {
                 props.placeholder ? cmPlaceholder(props.placeholder) : [],
                 createTheme(),
                 EditorView.updateListener.of(update => {
-                    if (update.focusChanged) syncWrap(update.view)
+                    // 点击聚焦时延迟到手势结束再开换行：mousedown→mouseup 之间版式不变，mouseup 就不会错位拖选。
+                    // 键盘聚焦（无手势）则立即开换行。
+                    if (update.focusChanged) {
+                        if (update.view.hasFocus && pointerPressed) return
+                        pointerPressed = false
+                        syncWrap(update.view)
+                    }
                     if (update.selectionSet || update.docChanged) emit("cursor", update.state.selection.main.head)
                     if (!update.docChanged || isApplyingExternal.value) return
                     const text = update.state.doc.toString()
@@ -180,6 +212,9 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+    window.removeEventListener("pointerup", onHostPointerUp)
+    window.removeEventListener("pointercancel", onHostPointerUp)
+    pointerPressed = false
     viewRef.value?.destroy()
     viewRef.value = undefined
 })
@@ -225,7 +260,12 @@ defineExpose({
 </script>
 
 <template>
-    <div ref="hostRef" class="expr-input" :class="{ 'expr-input--underline': variant === 'underline' }" />
+    <div
+        ref="hostRef"
+        class="expr-input"
+        :class="{ 'expr-input--underline': variant === 'underline' }"
+        @pointerdown="onHostPointerDown"
+    />
 </template>
 
 <style lang="less" scoped>

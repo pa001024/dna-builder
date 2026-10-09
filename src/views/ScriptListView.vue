@@ -3224,13 +3224,18 @@ async function publishScript(fileName: string) {
 }
 
 function handleKeyDown(e: KeyboardEvent) {
-    if (e.ctrlKey && e.key === "s") {
+    // 编辑器聚焦时保存快捷键已由 CodeMirror 内键位处理（会 preventDefault），这里跳过避免重复保存。
+    if (e.defaultPrevented || e.repeat) return
+    if (!e.ctrlKey && !e.metaKey) return
+    if (e.altKey) return
+    const key = e.key.toLowerCase()
+    if (key === "s") {
         e.preventDefault()
-        saveCurrentTab()
-    } else if (e.ctrlKey && e.key === "w") {
+        void saveCurrentTab()
+    } else if (key === "w") {
         e.preventDefault()
         if (activeTabId.value) {
-            closeTab(activeTabId.value)
+            void closeTab(activeTabId.value)
         }
     }
 }
@@ -3886,6 +3891,7 @@ onUnmounted(async () => {
                                     :placeholder="$t('script-list.script_content_placeholder')"
                                     class="w-full h-full p-2 font-mono text-sm"
                                     @update:modelValue="onCodeEditorUpdate"
+                                    @save="saveCurrentTab"
                                 />
                             </ScrollArea>
                         </div>
