@@ -17,6 +17,9 @@ const monsterTag = computed(() => {
 
 <template>
     <ScrollArea class="h-full">
-        <DBMonsterTagDetailItem :monster-tag="monsterTag" />
+        <!-- 居中容器：与百科详情页一致的纸面排版宽度 -->
+        <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
+            <DBMonsterTagDetailItem :monster-tag="monsterTag" />
+        </div>
     </ScrollArea>
 </template>

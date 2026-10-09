@@ -428,7 +428,7 @@ const frame = captureWindow(
     Math.round(452 * clientW / baseW),
     TITLE_BAR_HEIGHT+ Math.round(183 * clientH / (baseH+TITLE_BAR_HEIGHT)),
 )
-ocrText(frame)
+export default await ocrText(frame)
 `
 }
 

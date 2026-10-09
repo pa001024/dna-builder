@@ -414,7 +414,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                                 </div>
                                 <CopyID :id="group.sourceSkillId" />
                             </div>
-                            <SkillFields v-if="group.sourceSkill" :skill="group.sourceSkill" />
+                            <SkillDetailBlock v-if="group.sourceSkill" :skill="group.sourceSkill" />
                         </div>
                         <div class="flex items-center justify-center text-base-content/40">
                             <Icon icon="ri:arrow-right-line" class="h-4 w-4 rotate-90 md:rotate-0" />
@@ -426,7 +426,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
                                 </div>
                                 <CopyID :id="group.replaceSkillId" />
                             </div>
-                            <SkillFields :skill="group.replaceSkill" />
+                            <SkillDetailBlock :skill="group.replaceSkill" />
                         </div>
                     </div>
                 </div>

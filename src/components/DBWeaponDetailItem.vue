@@ -4,7 +4,7 @@ import { useGameText } from "@/composables/useGameText"
 import charData from "@/data/d/char.data"
 import { weaponDraftMap } from "@/data/d/index"
 import modData from "@/data/d/mod.data"
-import type { Char, Draft, Mod, Skill, SkillField, Weapon, WeaponSkill } from "@/data/data-types"
+import type { Char, Draft, Mod, Skill, Weapon, WeaponSkill } from "@/data/data-types"
 import { formatModName, LeveledMod } from "@/data/leveled/LeveledMod"
 import { LeveledSkill } from "@/data/leveled/LeveledSkill"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
@@ -26,13 +26,6 @@ const weaponInfoTab = ref<"breakthrough" | "manufacture">("breakthrough")
 const leveledWeapon = computed(() => {
     return new LeveledWeapon(props.weapon, props.weapon.熔炉 && props.weapon.熔炉.length > 0 ? 0 : currentRefine.value, currentLevel.value)
 })
-
-interface MeleeSkillComboSummary {
-    comboTime: number
-    totalMultiplier: number
-    multiplierPerSecond: number
-    totalBossStagger: number
-}
 
 interface WeaponSkillReplaceInfo {
     mod: LeveledMod
@@ -165,90 +158,10 @@ const weaponSkillReplaceGroups = computed<WeaponSkillReplaceGroup[]>(() => {
 })
 
 /**
- * 按格式表达式计算字段倍率（支持 {%}×2、{%}×2+{%} 等）
- * @param format 格式表达式
- * @param value1 第一个值
- * @param value2 第二个值
- * @returns 计算后的倍率
+ * 熔炼效果正文（去掉首句属性摘要）。
+ * 熔炼只有一句属性摘要时去首句后为空串，此时整个区块不展示，避免空盒子。
  */
-function evaluateMultiplierByFormat(format: string, value1: number, value2: number = 0) {
-    let count = 0
-    let expr = format.replace(/\{%\}|\{\}/g, match => {
-        count++
-        const value = count % 2 === 1 ? value1 : value2
-        return match === "{%}" ? value.toString() : value.toString()
-    })
-    expr = expr.replace(/×/g, "*")
-    try {
-        const safeExpr = expr.replace(/[^0-9+\-*/.()\s]/g, "")
-        const result = new Function(`return ${safeExpr}`)()
-        return Number.isNaN(result) ? value1 : result
-    } catch {
-        return value1
-    }
-}
-
-/**
- * 兼容 number / number[] 的字段取值
- * @param value 原始字段值
- * @returns 当前展示值
- */
-function pickFieldValue(value?: number | number[]) {
-    if (value === undefined) return undefined
-    return Array.isArray(value) ? value[0] : value
-}
-
-/**
- * 计算技能字段对应的倍率贡献（优先按格式表达式）
- * @param field 技能字段
- * @returns 当前字段的倍率贡献
- */
-function getFieldMultiplier(field: SkillField) {
-    const value = pickFieldValue(field.值) || 0
-    const value2 = pickFieldValue(field.值2) || 0
-    if (typeof field.格式 === "string") {
-        return evaluateMultiplierByFormat(field.格式, value, value2)
-    }
-    return value
-}
-
-/**
- * 计算单个近战技能（如普通攻击一套）的连段时间、倍率与削韧汇总（基于取消时间）
- */
-const singleSkillComboSummaryByName = computed<Record<string, MeleeSkillComboSummary>>(() => {
-    const result: Record<string, MeleeSkillComboSummary> = {}
-    if (leveledWeapon.value.类型 !== "近战") return result
-
-    for (const skill of leveledWeapon.value.技能 || []) {
-        const fields = skill.getFieldsWithAttr()
-        if (fields.length <= 1) continue
-
-        const cancelValues = fields
-            .map(field => pickFieldValue((field as SkillField).取消))
-            .filter((value): value is number => value !== undefined)
-        if (!cancelValues.length) continue
-
-        const comboTime = cancelValues.reduce((sum, value) => sum + value, 0)
-        if (comboTime <= 0) continue
-
-        const totalMultiplier = fields.reduce((sum, field) => sum + getFieldMultiplier(field as SkillField), 0)
-        // Boss削韧 字段缺失时回退到 削韧 字段，再求和
-        const totalBossStagger = fields.reduce((sum, field) => {
-            const fieldData = field as SkillField
-            const bossStagger = pickFieldValue(fieldData.Boss削韧)
-            const value = bossStagger !== undefined ? bossStagger : (pickFieldValue(fieldData.削韧) || 0)
-            return sum + value
-        }, 0)
-        result[skill.名称] = {
-            comboTime,
-            totalMultiplier,
-            multiplierPerSecond: totalMultiplier / comboTime,
-            totalBossStagger,
-        }
-    }
-
-    return result
-})
+const refineEffectText = computed(() => gpt(props.weapon.熔炼, currentRefine.value, { stripFirstSentence: true }))
 
 watch(
     () => props.weapon,
@@ -443,12 +356,12 @@ watch(
 
         <!-- 熔炼效果 -->
         <section
-            v-if="weapon.熔炼 && (!weapon.熔炉 || weapon.熔炉.length === 0)"
+            v-if="refineEffectText && (!weapon.熔炉 || weapon.熔炉.length === 0)"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
             <SectionHeader no-animate compact kicker="REFINE" :title="$t('属性')" />
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-sm leading-relaxed text-base-content/85">
-                {{ gpt(weapon.熔炼, currentRefine, { stripFirstSentence: true }) }}
+                {{ refineEffectText }}
             </div>
         </section>
 
@@ -467,40 +380,7 @@ watch(
                     <div class="text-sm font-semibold text-primary">
                         {{ $t(skill.名称) }}
                     </div>
-                    <!-- 连段汇总：时长 / 秒均倍率 / 总倍率 / Boss削韧 -->
-                    <div
-                        v-if="singleSkillComboSummaryByName[skill.名称]"
-                        class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] tabular-nums text-base-content/55"
-                    >
-                        <span> {{ $t("连段总时长") }}: {{ +singleSkillComboSummaryByName[skill.名称].comboTime.toFixed(4) }}{{ $t("skill-fields.seconds") }} </span>
-                        <span>
-                            {{ $t("秒均倍率") }}: {{ +(singleSkillComboSummaryByName[skill.名称].multiplierPerSecond * 100).toFixed(1) }}%/s
-                        </span>
-                        <span>
-                            {{ $t("总倍率") }}: {{ +(singleSkillComboSummaryByName[skill.名称].totalMultiplier * 100).toFixed(1) }}%
-                        </span>
-                        <span>{{ $t("skill-fields.bossStagger") }}: {{ +singleSkillComboSummaryByName[skill.名称].totalBossStagger.toFixed(2) }}</span>
-                    </div>
-                    <SkillFields :skill="skill" />
-                    <div
-                        v-if="skill.skillData.实体 && skill.skillData.实体.length > 0"
-                        class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2"
-                    >
-                        <SkillCreatureCards :creatures="skill.skillData.实体" />
-                    </div>
-                    <div v-if="skill.skillData.子技能 && skill.skillData.子技能.length > 0" class="mt-2 space-y-2">
-                        <div v-for="subSkill in skill.skillData.子技能" :key="subSkill.名称 || subSkill.id || ''">
-                            <div
-                                v-if="subSkill.实体 && subSkill.实体.length > 0"
-                                class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2"
-                            >
-                                <SkillCreatureCards
-                                    :creatures="subSkill.实体"
-                                    :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`"
-                                />
-                            </div>
-                        </div>
-                    </div>
+                    <SkillDetailBlock :skill="skill" />
                 </div>
             </div>
         </section>
@@ -645,29 +525,7 @@ watch(
                             <div v-if="item.mod.效果" class="mb-2 text-xs leading-relaxed text-base-content/70">
                                 {{ gpt(item.mod.效果, item.mod.等级 - 1) }}
                             </div>
-                            <SkillFields :skill="item.replaceSkill" />
-                            <div
-                                v-if="item.replaceSkill.skillData.实体 && item.replaceSkill.skillData.实体.length > 0"
-                                class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2"
-                            >
-                                <SkillCreatureCards :creatures="item.replaceSkill.skillData.实体" />
-                            </div>
-                            <div
-                                v-if="item.replaceSkill.skillData.子技能 && item.replaceSkill.skillData.子技能.length > 0"
-                                class="mt-2 space-y-2"
-                            >
-                                <div v-for="subSkill in item.replaceSkill.skillData.子技能" :key="subSkill.名称 || subSkill.id || ''">
-                                    <div
-                                        v-if="subSkill.实体 && subSkill.实体.length > 0"
-                                        class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2"
-                                    >
-                                        <SkillCreatureCards
-                                            :creatures="subSkill.实体"
-                                            :titlePrefix="`${subSkill.名称 ? $t(subSkill.名称) : ''}->`"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                            <SkillDetailBlock :skill="item.replaceSkill" />
                         </div>
                     </div>
                 </div>

@@ -12,10 +12,11 @@ const quest = computed(() => dynQuestMap.get(questId.value))
 
 <template>
     <ScrollArea class="h-full">
-        <template v-if="quest">
+        <!-- 居中容器：与百科详情页一致的纸面排版宽度 -->
+        <div v-if="quest" class="mx-auto max-w-6xl px-4 py-4 md:px-5">
             <!-- 使用 DynQuestDetailItem 组件显示委托详情 -->
-            <DBDynQuestDetailItem :quest="quest" class="flex-1" />
-        </template>
+            <DBDynQuestDetailItem :quest="quest" />
+        </div>
 
         <div v-else class="p-4">
             <div class="text-base-content/70">未找到委托</div>

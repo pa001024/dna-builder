@@ -2924,6 +2924,7 @@ fn _init_ocr(
     local_root_dir: Option<JsValue>,
     cdn_base_url: Option<JsValue>,
     num_thread: Option<JsValue>,
+    pool_size: Option<JsValue>,
     ctx: &mut Context,
 ) -> JsResult<JsValue> {
     let local_root_dir = local_root_dir.unwrap_or_else(|| JsValue::undefined());
@@ -2955,10 +2956,18 @@ fn _init_ocr(
     };
 
     let num_thread = num_thread.to_number(ctx)? as i32;
+    let pool_size = match pool_size {
+        None => OcrInitConfig::default().pool_size,
+        Some(value) if value.is_undefined() || value.is_null() => {
+            OcrInitConfig::default().pool_size
+        }
+        Some(value) => value.to_number(ctx)? as usize,
+    };
     let config = OcrInitConfig {
         local_root_dir,
         cdn_base_url,
         num_thread,
+        pool_size,
     };
     let root_dir = ocr::init_ocr(config)
         .map_err(|e| JsNativeError::error().with_message(format!("initOcr 失败: {e}")))?;
@@ -3018,15 +3027,51 @@ fn _init_mono_depth(
     )))
 }
 
-/// OCR 文字识别：输入 Mat，返回识别文本。
-fn _ocr_text(js_img_mat: Option<JsValue>, _ctx: &mut Context) -> JsResult<JsValue> {
+/// OCR 文字识别：输入 Mat，返回 Promise<string>（阻塞识别在后台线程执行）。
+fn _ocr_text(js_img_mat: Option<JsValue>, ctx: &mut Context) -> JsResult<JsValue> {
     let js_img_mat = js_img_mat
         .unwrap_or_else(|| JsValue::undefined())
         .get_native::<JsMat>()?;
-    let mat = (*js_img_mat.borrow().data().inner).clone();
-    let text = ocr::ocr_text_from_mat(&mat)
-        .map_err(|e| JsNativeError::error().with_message(format!("ocrText 失败: {e}")))?;
-    Ok(JsValue::from(js_string!(text)))
+
+    let (promise, resolvers) = JsPromise::new_pending(ctx);
+    let img_mat = (*js_img_mat.borrow().data().inner).clone();
+    let resolvers_clone = resolvers.clone();
+
+    ctx.enqueue_job(
+        NativeAsyncJob::new(async move |context| {
+            let async_result =
+                _spawn_blocking_with_script_stop_snapshot(move || ocr::ocr_text_from_mat(&img_mat))
+                    .await;
+
+            let context = &mut context.borrow_mut();
+            match async_result {
+                Ok(Ok(text)) => resolvers_clone.resolve.call(
+                    &JsValue::undefined(),
+                    &[JsValue::from(js_string!(text))],
+                    context,
+                ),
+                Ok(Err(e)) => {
+                    let msg = format!("ocrText 失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+                Err(e) => {
+                    let msg = format!("ocrText 线程执行失败: {e}");
+                    resolvers_clone.reject.call(
+                        &JsValue::undefined(),
+                        &[JsValue::from(js_string!(msg))],
+                        context,
+                    )
+                }
+            }
+        })
+        .into(),
+    );
+
+    Ok(promise.into())
 }
 
 /// 显示图片函数 (异步)
@@ -5721,7 +5766,7 @@ pub fn register_builtin_functions(context: &mut Context) -> JsResult<()> {
 
     // OCR 初始化（自动下载资源）
     let f = _init_ocr.into_js_function_copied(context);
-    context.register_global_builtin_callable(js_string!("initOcr"), 3, f)?;
+    context.register_global_builtin_callable(js_string!("initOcr"), 4, f)?;
 
     // Lite-Mono 初始化（自动下载模型并预热运行时）
     let f = _init_mono_depth.into_js_function_copied(context);

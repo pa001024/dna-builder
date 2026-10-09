@@ -16,7 +16,7 @@ use ort::{
 use std::{
     fs,
     path::{Path, PathBuf},
-    sync::{Mutex, OnceLock},
+    sync::{Arc, Condvar, Mutex, OnceLock},
 };
 
 /// OCR 资源默认 CDN 根地址（主源，阿里云 OSS）。
@@ -64,6 +64,7 @@ pub struct OcrInitConfig {
     pub local_root_dir: Option<PathBuf>,
     pub cdn_base_url: Option<String>,
     pub num_thread: i32,
+    pub pool_size: usize,
 }
 
 impl Default for OcrInitConfig {
@@ -72,6 +73,7 @@ impl Default for OcrInitConfig {
             local_root_dir: None,
             cdn_base_url: None,
             num_thread: 2,
+            pool_size: 4,
         }
     }
 }
@@ -97,12 +99,130 @@ type TextBoxPoints = [Point; 4];
 
 unsafe impl Send for OcrRuntime {}
 
-/// OCR 全局单例。
-static OCR_RUNTIME: OnceLock<Mutex<Option<OcrRuntime>>> = OnceLock::new();
+/// 单实例构建规格（模型路径已解析、资源已下载，可重复构建相同实例）。
+#[derive(Debug, Clone, PartialEq)]
+struct OcrBuildSpec {
+    det_model_path: PathBuf,
+    rec_model_path: PathBuf,
+    cls_model_path: PathBuf,
+    dictionary: Vec<String>,
+    num_thread: i32,
+}
 
-/// 获取 OCR 全局状态容器。
-fn ocr_runtime_cell() -> &'static Mutex<Option<OcrRuntime>> {
-    OCR_RUNTIME.get_or_init(|| Mutex::new(None))
+struct OcrPoolState {
+    idle: Vec<OcrRuntime>,
+    checked_out: usize,
+    max_instances: usize,
+    generation: u64,
+    spec: Option<Arc<OcrBuildSpec>>,
+}
+
+struct OcrPool {
+    state: Mutex<OcrPoolState>,
+    cvar: Condvar,
+}
+
+/// OCR 实例池全局单例：ort 会话 `run` 需要 `&mut`，无法共享，
+/// 并发调用各自持有独立实例才能真正并行（空闲实例复用，不足时懒增长）。
+static OCR_POOL: OnceLock<OcrPool> = OnceLock::new();
+
+fn ocr_pool() -> &'static OcrPool {
+    OCR_POOL.get_or_init(|| OcrPool {
+        state: Mutex::new(OcrPoolState {
+            idle: Vec::new(),
+            checked_out: 0,
+            max_instances: 1,
+            generation: 0,
+            spec: None,
+        }),
+        cvar: Condvar::new(),
+    })
+}
+
+/// 构建单个推理实例。
+fn build_one_runtime(spec: &OcrBuildSpec) -> Result<OcrRuntime, String> {
+    let (rec_session, _rec_provider) =
+        build_session_with_auto_device(&spec.rec_model_path, "识别模型", false, spec.num_thread)?;
+    let (det_session, _det_provider) = if spec.det_model_path.exists() {
+        let (session, provider) = build_session_with_auto_device(
+            &spec.det_model_path,
+            "检测模型",
+            false,
+            spec.num_thread,
+        )?;
+        (Some(session), provider)
+    } else {
+        (None, "FallbackFullImage".to_string())
+    };
+    let (cls_session, _cls_provider) = if spec.cls_model_path.exists() {
+        let (session, provider) = build_session_with_auto_device(
+            &spec.cls_model_path,
+            "分类模型",
+            false,
+            spec.num_thread,
+        )?;
+        (Some(session), provider)
+    } else {
+        (None, "Disabled".to_string())
+    };
+    Ok(OcrRuntime {
+        det_session,
+        cls_session,
+        rec_session,
+        dictionary: spec.dictionary.clone(),
+    })
+}
+
+/// 取出一个空闲实例；无空闲且未达上限时新建，达上限则等待归还。
+/// 推理期间不持有池锁，多个调用可真正并行。
+fn checkout_ocr_runtime() -> Result<(OcrRuntime, u64), String> {
+    let pool = ocr_pool();
+    let mut state = pool
+        .state
+        .lock()
+        .map_err(|e| format!("获取 OCR 池锁失败: {e:?}"))?;
+    loop {
+        let spec = state
+            .spec
+            .clone()
+            .ok_or_else(|| "OCR 未初始化，请先调用 initOcr".to_string())?;
+        if let Some(instance) = state.idle.pop() {
+            return Ok((instance, state.generation));
+        }
+        if state.checked_out < state.max_instances {
+            state.checked_out += 1;
+            let generation = state.generation;
+            drop(state);
+            match build_one_runtime(&spec) {
+                Ok(instance) => return Ok((instance, generation)),
+                Err(e) => {
+                    let mut state = pool
+                        .state
+                        .lock()
+                        .map_err(|e| format!("获取 OCR 池锁失败: {e:?}"))?;
+                    state.checked_out = state.checked_out.saturating_sub(1);
+                    pool.cvar.notify_one();
+                    return Err(e);
+                }
+            }
+        }
+        state = pool
+            .cvar
+            .wait(state)
+            .map_err(|e| format!("等待 OCR 实例失败: {e:?}"))?;
+    }
+}
+
+/// 归还实例；池已重建（generation 不一致）则直接丢弃。
+fn checkin_ocr_runtime(instance: OcrRuntime, generation: u64) {
+    let Ok(mut state) = ocr_pool().state.lock() else {
+        return;
+    };
+    state.checked_out = state.checked_out.saturating_sub(1);
+    if generation == state.generation {
+        state.idle.push(instance);
+    }
+    ocr_pool().cvar.notify_one();
 }
 
 /// 获取 OCR 默认本地目录（优先 `%LOCALAPPDATA%`，失败回退到临时目录）。
@@ -1138,50 +1258,70 @@ pub fn init_ocr(config: OcrInitConfig) -> Result<PathBuf, String> {
         return Err(format!("未找到字典文件: {}", dictionary_path.display()));
     }
 
-    let (rec_session, _rec_provider) =
-        build_session_with_auto_device(&rec_model_path, "识别模型", false, config.num_thread)?;
-    let (det_session, _det_provider) = if det_model_path.exists() {
-        let (session, provider) =
-            build_session_with_auto_device(&det_model_path, "检测模型", false, config.num_thread)?;
-        (Some(session), provider)
-    } else {
-        (None, "FallbackFullImage".to_string())
-    };
-    let (cls_session, _cls_provider) = if cls_model_path.exists() {
-        let (session, provider) =
-            build_session_with_auto_device(&cls_model_path, "分类模型", false, config.num_thread)?;
-        (Some(session), provider)
-    } else {
-        (None, "Disabled".to_string())
-    };
-
-    let runtime = OcrRuntime {
-        det_session,
-        cls_session,
-        rec_session,
+    let spec = Arc::new(OcrBuildSpec {
+        det_model_path,
+        rec_model_path,
+        cls_model_path,
         dictionary,
-    };
-
-    let mut guard = ocr_runtime_cell()
-        .lock()
-        .map_err(|e| format!("获取 OCR 状态锁失败: {e:?}"))?;
-    *guard = Some(runtime);
+        num_thread: config.num_thread,
+    });
+    let max_instances = config.pool_size.max(1);
+    // 同配置重复初始化：保留已预热实例，直接返回。
+    {
+        let pool = ocr_pool();
+        let state = pool
+            .state
+            .lock()
+            .map_err(|e| format!("获取 OCR 池锁失败: {e:?}"))?;
+        if state.max_instances == max_instances
+            && state
+                .spec
+                .as_ref()
+                .is_some_and(|existing| existing == &spec)
+        {
+            return Ok(root_dir);
+        }
+    }
+    // 首个实例在池外构建：失败时不污染已有池。
+    let first = build_one_runtime(&spec)?;
+    {
+        let pool = ocr_pool();
+        let mut state = pool
+            .state
+            .lock()
+            .map_err(|e| format!("获取 OCR 池锁失败: {e:?}"))?;
+        if state.max_instances == max_instances
+            && state
+                .spec
+                .as_ref()
+                .is_some_and(|existing| existing == &spec)
+        {
+            // 并发初始化竞态：对方已建池，丢弃本次构建。
+            return Ok(root_dir);
+        }
+        state.generation = state.generation.wrapping_add(1);
+        state.spec = Some(spec);
+        state.max_instances = max_instances;
+        state.idle.clear();
+        state.idle.push(first);
+        pool.cvar.notify_all();
+    }
     Ok(root_dir)
 }
 
-/// 识别 Mat 中的文本。
+/// 识别 Mat 中的文本：独占一个池实例，调用间真正并行。
 pub fn ocr_text_from_mat(input: &Mat) -> Result<String, String> {
-    let mut guard = ocr_runtime_cell()
-        .lock()
-        .map_err(|e| format!("获取 OCR 状态锁失败: {e:?}"))?;
-    let runtime = guard
-        .as_mut()
-        .ok_or_else(|| "OCR 未初始化，请先调用 initOcr".to_string())?;
-
     let channels = input.channels();
     if channels != 1 && channels != 3 && channels != 4 {
         return Err(format!("OCR 仅支持 1/3/4 通道 Mat，当前通道数: {channels}"));
     }
+    let (mut instance, generation) = checkout_ocr_runtime()?;
+    let result = ocr_text_with_runtime(input, &mut instance);
+    checkin_ocr_runtime(instance, generation);
+    result
+}
+
+fn ocr_text_with_runtime(input: &Mat, runtime: &mut OcrRuntime) -> Result<String, String> {
     let normalized = normalize_input_mat(input)?;
     let size = normalized
         .size()
@@ -1374,6 +1514,7 @@ mod tests {
             local_root_dir: Some(root_dir.to_path_buf()),
             cdn_base_url: None,
             num_thread: 2,
+            pool_size: 1,
         };
         let _ = init_ocr(config)?;
         Ok(())
@@ -1422,13 +1563,12 @@ mod tests {
         assert_eq!(warmup_direct, warmup_dll, "直接推理和 DLL 首次输出不一致");
 
         {
-            let mut guard = ocr_runtime_cell().lock().expect("获取 OCR 状态锁失败");
-            let runtime = guard.as_mut().expect("OCR 未初始化");
+            let (mut runtime, generation) = checkout_ocr_runtime().expect("取出 OCR 实例失败");
             let detect_start = Instant::now();
-            let crops = detect_and_crop_text_blocks(&mat, runtime).expect("直接检测失败");
+            let crops = detect_and_crop_text_blocks(&mat, &mut runtime).expect("直接检测失败");
             let detect_elapsed = detect_start.elapsed().as_millis();
             let recognize_start = Instant::now();
-            let text = recognize_text_blocks(crops, runtime).expect("直接识别失败");
+            let text = recognize_text_blocks(crops, &mut runtime).expect("直接识别失败");
             let recognize_elapsed = recognize_start.elapsed().as_millis();
             eprintln!(
                 "direct stage detect={}ms recognize={}ms blocks={}",
@@ -1436,6 +1576,7 @@ mod tests {
                 recognize_elapsed,
                 text.lines().count()
             );
+            checkin_ocr_runtime(runtime, generation);
         }
 
         let iterations = 10usize;

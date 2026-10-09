@@ -12,10 +12,11 @@ const npc = computed(() => npcMap.get(npcId.value))
 
 <template>
     <ScrollArea class="h-full">
-        <template v-if="npc">
+        <!-- 居中容器：与百科详情页一致的纸面排版宽度 -->
+        <div v-if="npc" class="mx-auto max-w-6xl px-4 py-4 md:px-5">
             <!-- 使用 DBNpcDetailItem 组件显示 NPC 详情 -->
-            <DBNpcDetailItem :npc="npc" class="flex-1" />
-        </template>
+            <DBNpcDetailItem :npc="npc" />
+        </div>
 
         <div v-else class="p-4">
             <div class="text-base-content/70">未找到 NPC</div>

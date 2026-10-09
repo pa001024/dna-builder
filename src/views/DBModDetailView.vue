@@ -17,6 +17,9 @@ const mod = computed(() => {
 
 <template>
     <ScrollArea class="h-full">
-        <DBModDetailItem :mod="mod" />
+        <!-- 居中容器：与百科详情页一致的纸面排版宽度 -->
+        <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
+            <DBModDetailItem :mod="mod" />
+        </div>
     </ScrollArea>
 </template>

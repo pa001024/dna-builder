@@ -10,6 +10,46 @@ use std::collections::BTreeMap;
 use std::ops::DerefMut;
 use std::{cell::RefCell, collections::VecDeque, rc::Rc};
 use tokio::task;
+
+#[cfg(target_os = "windows")]
+unsafe extern "system" {
+    unsafe fn timeBeginPeriod(uPeriod: u32) -> u32;
+    unsafe fn timeEndPeriod(uPeriod: u32) -> u32;
+}
+
+/// 高精度定时器守卫：持有期间系统定时器粒度为 1ms，Drop 时恢复。
+///
+/// 执行器等待超时依赖 tokio sleep；默认约 15.6ms 粒度会给每次睡眠叠加约 8ms 误差，
+/// 短睡眠按比例劣化严重。作用域限定在单次 run_jobs 内，进出自动配对，嵌套可重入。
+struct HiResTimerGuard;
+
+#[cfg(target_os = "windows")]
+static HIRES_TIMER_REFS: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+impl HiResTimerGuard {
+    fn acquire() -> Self {
+        #[cfg(target_os = "windows")]
+        {
+            use std::sync::atomic::Ordering;
+            if HIRES_TIMER_REFS.fetch_add(1, Ordering::AcqRel) == 0 {
+                unsafe { timeBeginPeriod(1) };
+            }
+        }
+        Self
+    }
+}
+
+impl Drop for HiResTimerGuard {
+    fn drop(&mut self) {
+        #[cfg(target_os = "windows")]
+        {
+            use std::sync::atomic::Ordering;
+            if HIRES_TIMER_REFS.fetch_sub(1, Ordering::AcqRel) == 1 {
+                unsafe { timeEndPeriod(1) };
+            }
+        }
+    }
+}
 /// An event queue using tokio to drive futures to completion.
 pub(crate) struct TokioJobExecutor {
     async_jobs: RefCell<VecDeque<NativeAsyncJob>>,
@@ -99,6 +139,13 @@ impl JobExecutor for TokioJobExecutor {
     // ...the async flavor won't, which allows concurrent execution with external async tasks.
     async fn run_jobs_async(self: Rc<Self>, context: &RefCell<&mut Context>) -> JsResult<()> {
         use crate::submodules::script::should_stop_current_script;
+        use std::time::Duration;
+        // 单次休眠上限：超时前无事可做时睡满该时长即醒，空转唤醒可忽略；
+        // 同时保证停止请求最多延迟该时长生效。取 100 而非更小：
+        // 常用节拍（100ms 睡眠/间隔）一次休眠即可覆盖，避免拆片引入多次定时器粒度误差。
+        const MAX_PARK_MS: u64 = 100;
+        // 脚本执行全程保持 1ms 定时器粒度，退出时自动恢复。
+        let _hires_timer = HiResTimerGuard::acquire();
         let mut group = FutureGroup::new();
         loop {
             for job in std::mem::take(&mut *self.async_jobs.borrow_mut()) {
@@ -115,12 +162,38 @@ impl JobExecutor for TokioJobExecutor {
                 return Ok(());
             }
 
-            // We have some jobs pending on the microtask queue. Try to poll the pending
-            // tasks once to see if any of them finished, and run the pending microtasks
-            // otherwise.
-            if let Some(Err(err)) = future::poll_once(group.next()).await.flatten() {
+            // 距下一个超时到期的剩余毫秒（无超时则取封顶值）。
+            let now_ms = context.borrow().clock().now().millis_since_epoch();
+            let wait_ms = self
+                .timeout_jobs
+                .borrow()
+                .keys()
+                .next()
+                .map(|deadline| deadline.millis_since_epoch().saturating_sub(now_ms))
+                .unwrap_or(MAX_PARK_MS)
+                .min(MAX_PARK_MS);
+            let has_micro =
+                !self.promise_jobs.borrow().is_empty() || !self.generic_jobs.borrow().is_empty();
+
+            if group.is_empty() && !has_micro {
+                // 只有定时器 pending：休眠至最近到期点而非忙轮询；到期任务由下面的 drain 执行。
+                if wait_ms > 0 {
+                    tokio::time::sleep(Duration::from_millis(wait_ms)).await;
+                }
+            } else if !group.is_empty() && wait_ms > 0 {
+                // 有在飞异步任务：等其完成或等到下一个超时，先到为准，保持原有执行顺序语义。
+                if let Some(Err(err)) =
+                    tokio::time::timeout(Duration::from_millis(wait_ms), group.next())
+                        .await
+                        .ok()
+                        .flatten()
+                {
+                    eprintln!("Uncaught {err}");
+                }
+            } else if let Some(Err(err)) = future::poll_once(group.next()).await.flatten() {
+                // 有在飞任务且超时已到期，或只有微任务：立即轮询一次（原逻辑）。
                 eprintln!("Uncaught {err}");
-            };
+            }
 
             // Only one macrotask can be executed before the next drain of the microtask queue.
             self.drain_jobs(&mut context.borrow_mut());

@@ -17,7 +17,10 @@ const ticket = computed(() => {
 </script>
 
 <template>
-    <ScrollArea class="h-full flex flex-col">
-        <DBIronTicketDetailItem :ticket="ticket" class="flex-1" />
+    <ScrollArea class="h-full">
+        <!-- 居中容器：与百科详情页一致的纸面排版宽度 -->
+        <div class="mx-auto max-w-6xl px-4 py-4 md:px-5">
+            <DBIronTicketDetailItem :ticket="ticket" />
+        </div>
     </ScrollArea>
 </template>

@@ -428,7 +428,7 @@ if (region) {
     const width = Math.max(1, Math.min(${BASE_GAME_WIDTH} - x, Math.round(region.width)))
     const height = Math.max(1, Math.min(${BASE_GAME_HEIGHT} - y, Math.round(region.height)))
     const card = c.frame.roi(x, y, width, height)
-    output = { cancelled: false, region, text: ocrText(card) }
+    output = { cancelled: false, region, text: await ocrText(card) }
 }
 export default JSON.stringify(output)`
 }
