@@ -58,14 +58,20 @@ interface ScriptHotkeyConfig {
 }
 
 /**
- * 脚本控制台日志项。
+ * 脚本控制台日志项（seq 单调递增，供列表稳定 key 使用）。
  */
 export interface ScriptConsoleLog {
+    seq: number
     scope?: string
     level: string
     message: string
     timestamp: number
 }
+
+/** 控制台日志保留上限：防止长会话无界增长拖慢渲染。 */
+const MAX_CONSOLE_LOGS = 1000
+
+let consoleLogSeq = 0
 
 /**
  * 脚本状态项（文本/图片）。
@@ -754,11 +760,23 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
          */
         appendConsoleLog(level: string, message: string) {
             this.consoleLogs.push({
+                seq: ++consoleLogSeq,
                 scope: undefined,
                 level,
                 message,
                 timestamp: Date.now(),
             })
+            this.trimConsoleLogs()
+        },
+
+        /**
+         * 按上限裁剪控制台日志（保留最新）。
+         */
+        trimConsoleLogs() {
+            const overflow = this.consoleLogs.length - MAX_CONSOLE_LOGS
+            if (overflow > 0) {
+                this.consoleLogs.splice(0, overflow)
+            }
         },
 
         /**
@@ -770,11 +788,13 @@ export const useScriptRuntimeStore = defineStore("script-runtime", {
             if (!message) return
             this.touchScriptEvent()
             this.consoleLogs.push({
+                seq: ++consoleLogSeq,
                 scope: normalizeScriptEventScope(payload.scope),
                 level: String(payload.level ?? "info"),
                 message,
                 timestamp: Date.now(),
             })
+            this.trimConsoleLogs()
         },
 
         /**

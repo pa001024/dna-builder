@@ -3937,7 +3937,7 @@ onUnmounted(async () => {
                                 {{ $t("script-list.no_output") }}
                             </div>
                             <div v-else class="space-y-1">
-                                <div v-for="(log, index) in consoleLogs" :key="index" class="flex gap-2">
+                                <div v-for="log in consoleLogs" :key="log.seq" class="flex gap-2">
                                     <span class="text-base-content/40 shrink-0">{{ formatTimeOnly(log.timestamp) }}</span>
                                     <span :class="getLogLevelClass(log.level)" class="break-all">{{ log.message }}</span>
                                 </div>
