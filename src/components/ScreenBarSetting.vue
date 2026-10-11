@@ -225,7 +225,9 @@ function itemParams(item: ScreenBarItem) {
                     >
                         <!-- 条目头部:类型 + 排序 + 删除 -->
                         <div class="flex items-center gap-2">
-                            <span class="inline-flex h-5 items-center rounded-xs bg-secondary/15 px-1.5 text-[10px] font-semibold text-secondary">
+                            <span
+                                class="inline-flex h-5 items-center rounded-xs bg-secondary/15 px-1.5 text-[10px] font-semibold text-secondary"
+                            >
                                 {{ $t(itemTypeKey(item.type)) }}
                             </span>
                             <div class="ml-auto flex items-center gap-0.5">
@@ -410,7 +412,10 @@ function itemParams(item: ScreenBarItem) {
                         <input v-model="setting.screenBar.ignoreCursorEvents" type="checkbox" class="toggle toggle-xs toggle-secondary" />
                         {{ $t("screenBar.clickThrough") }}
                     </label>
-                    <label class="flex cursor-pointer items-center gap-2 text-xs text-base-content/75" :title="$t('screenBar.inTaskbarTip')">
+                    <label
+                        class="flex cursor-pointer items-center gap-2 text-xs text-base-content/75"
+                        :title="$t('screenBar.inTaskbarTip')"
+                    >
                         <input v-model="setting.screenBar.inTaskbar" type="checkbox" class="toggle toggle-xs toggle-secondary" />
                         {{ $t("screenBar.inTaskbar") }}
                     </label>

@@ -169,15 +169,11 @@ const totalLevelExp = computed(() => {
             <div class="mt-2 grid grid-cols-1 gap-1.5 text-sm md:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("reputation.weeklyExpLimit") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        reputation.weekLimit
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ reputation.weekLimit }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("reputation.totalLevel") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        reputation.levels.length
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ reputation.levels.length }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("reputation.totalExp") }}</span>
@@ -185,9 +181,7 @@ const totalLevelExp = computed(() => {
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("reputation.entrustCount") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        reputation.entrusts.length
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ reputation.entrusts.length }}</span>
                 </div>
             </div>
 
@@ -195,7 +189,7 @@ const totalLevelExp = computed(() => {
                 <div class="text-[11px] tracking-wide text-base-content/55">{{ $t("reputation.refreshCost") }}</div>
                 <div class="flex flex-wrap gap-1.5">
                     <div
-                        v-for="[name, value] in refreshCostEntries"
+                        v-for="[ name, value ] in refreshCostEntries"
                         :key="name"
                         class="inline-flex items-center gap-1.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1 text-sm"
                     >
@@ -272,9 +266,7 @@ const totalLevelExp = computed(() => {
                             >
                                 EXP +{{ entrust.exp }}
                             </div>
-                            <div class="mt-1 tabular-nums text-base-content/50">
-                                {{ $t("reputation.weight") }}: {{ entrust.weight }}
-                            </div>
+                            <div class="mt-1 tabular-nums text-base-content/50">{{ $t("reputation.weight") }}: {{ entrust.weight }}</div>
                         </div>
                     </div>
 

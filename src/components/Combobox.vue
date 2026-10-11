@@ -40,7 +40,10 @@ const filteredOptions = computed(() => {
 
 <template>
     <ComboboxRoot v-model="model" class="relative" ignore-filter @update:open="open => open && emit('open')">
-        <ComboboxAnchor v-bind="$attrs" class="flex items-center gap-1.5 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 focus-within:border-primary">
+        <ComboboxAnchor
+            v-bind="$attrs"
+            class="flex items-center gap-1.5 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 focus-within:border-primary"
+        >
             <ComboboxInput as-child class="h-full min-w-0 grow bg-transparent! outline-none" :placeholder="placeholder">
                 <input v-model="model" type="text" />
             </ComboboxInput>

@@ -2,7 +2,7 @@
 import type { DNAMapMatterCategorizeOption, DNAMapSiteDetailRes } from "dna-api"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { getMapAPI } from "@/api/app"
-import type { DBMapMarker } from "@/data/d/map.data"
+import type { DBMapMarker } from "@/data/d/onlinemapcache.data"
 import { db, type UserMapMarker } from "@/store/db"
 import Select from "./select/Select.vue"
 import SelectItem from "./select/SelectItem.vue"
@@ -426,7 +426,7 @@ onUnmounted(() => {
         >
             <div class="map-content absolute" :style="[transformStyle, { width: mapWidth + 'px', height: mapHeight + 'px' }]">
                 <div
-                    v-for="[key, tile] in visibleTiles"
+                    v-for="[ key, tile ] in visibleTiles"
                     :key="key"
                     class="map-tile absolute"
                     :style="{
@@ -545,7 +545,11 @@ onUnmounted(() => {
             <div class="space-y-2">
                 <div>
                     <label class="text-xs text-base-content/70 mb-1">名称</label>
-                    <input v-model="pendingMarker.name" type="text" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
+                    <input
+                        v-model="pendingMarker.name"
+                        type="text"
+                        class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    />
                 </div>
                 <div>
                     <label class="text-xs text-base-content/70 mb-1">分类</label>

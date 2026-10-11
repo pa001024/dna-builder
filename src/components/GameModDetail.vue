@@ -288,7 +288,7 @@ watch(
 
                     <!-- 预览图轮播（左右按钮切换） -->
                     <div class="space-y-2">
-                        <div class="text-xs text-base-content/80">{{ $t('game-mod-detail.preview_image') }}</div>
+                        <div class="text-xs text-base-content/80">{{ $t("game-mod-detail.preview_image") }}</div>
                         <ImageCarousel v-if="(mod.images?.length ?? 0) > 0" :images="mod.images || []" :alt="mod.name" />
                     </div>
 
@@ -309,23 +309,19 @@ watch(
                                     <span class="text-sm font-medium">{{ version.version }}</span>
                                     <span v-if="index === 0" class="badge badge-xs badge-primary">{{ $t("game-launcher.latest") }}</span>
                                     <!-- 本地安装状态：该版本即本地已安装版本，或本地安装版本落后于最新版 -->
-                                    <span
-                                        v-if="isVersionInstalled(installedRecord, version.id)"
-                                        class="badge badge-xs badge-success gap-1"
-                                    >
+                                    <span v-if="isVersionInstalled(installedRecord, version.id)" class="badge badge-xs badge-success gap-1">
                                         <Icon icon="ri:check-line" class="size-3" />
                                         {{ $t("game-launcher.installed") }}
                                     </span>
-                                    <span
-                                        v-else-if="index === 0 && installState === 'outdated'"
-                                        class="badge badge-xs badge-warning gap-1"
-                                    >
+                                    <span v-else-if="index === 0 && installState === 'outdated'" class="badge badge-xs badge-warning gap-1">
                                         <Icon icon="ri:refresh-line" class="size-3" />
                                         {{ $t("game-launcher.updateAvailable") }}
                                     </span>
                                     <span class="text-[11px] opacity-50">
-                                        {{ new Date(version.createdAt).toLocaleString() }} ·
-                                        {{ (version.fileSize / 1024 / 1024).toFixed(2) }} MB · {{ version.downloads }} 下载
+                                        {{ new Date(version.createdAt).toLocaleString() }}
+                                        ·
+                                        {{ (version.fileSize / 1024 / 1024).toFixed(2) }}
+                                        MB · {{ version.downloads }} 下载
                                     </span>
                                 </div>
                                 <div v-if="version.changelog" class="text-xs opacity-70 line-clamp-2">{{ version.changelog }}</div>
@@ -364,12 +360,7 @@ watch(
                                 </button>
                             </template>
                             <!-- 未登录：单个版本也给出登录入口，点击就地登录 -->
-                            <LoginButton
-                                v-else-if="isApp"
-                                variant="ghost"
-                                :label="$t('game-launcher.loginToDownload')"
-                                :icon="false"
-                            />
+                            <LoginButton v-else-if="isApp" variant="ghost" :label="$t('game-launcher.loginToDownload')" :icon="false" />
                         </div>
                     </div>
 

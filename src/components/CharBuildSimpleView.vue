@@ -617,7 +617,8 @@ const modTabs = computed<ModTab[]>(() => {
     if (skillWeapon) {
         const inheritedSlot = skillWeapon.inherit === "melee" ? "近战" : skillWeapon.inherit === "ranged" ? "远程" : ""
         // 非继承型用同律自身槽位；继承型跟随被继承的武器槽位
-        const available = inheritedSlot === "近战" ? !build.meleeWeapon.isEmpty : inheritedSlot === "远程" ? !build.rangedWeapon.isEmpty : true
+        const available =
+            inheritedSlot === "近战" ? !build.meleeWeapon.isEmpty : inheritedSlot === "远程" ? !build.rangedWeapon.isEmpty : true
         tabs.push({
             key: "同律",
             label: t("char-build.skill"),
@@ -637,7 +638,8 @@ const activeModTab = computed(() => {
 
 /** 当前页签的元信息（恒定有值，未就绪时为角色页签占位） */
 const currentModTab = computed<ModTab>(
-    () => modTabs.value.find(tab => tab.key === activeModTab.value) ?? { key: "角色", label: t("char-build.char"), available: true, count: 0 }
+    () =>
+        modTabs.value.find(tab => tab.key === activeModTab.value) ?? { key: "角色", label: t("char-build.char"), available: true, count: 0 }
 )
 
 /** 当前页签的普通槽位（角色页签的最后一格是中枢魔之楔，单独一行展示） */
@@ -688,7 +690,6 @@ function focusWeaponSlot(key: string) {
 }
 //#endregion
 
-
 /**
  * 武器卡的三种态（选中 / 空槽 / 普通）× 互斥工具类。
  *
@@ -732,7 +733,9 @@ function modTabClass(key: string): string {
  * @returns class 绑定
  */
 function mobileTabClass(key: string): string {
-    return activeSection.value === key ? "is-on border-t-(--sc-accent) text-(--sc-accent-soft)" : "border-t-transparent text-(--sc-text-dim)"
+    return activeSection.value === key
+        ? "is-on border-t-(--sc-accent) text-(--sc-accent-soft)"
+        : "border-t-transparent text-(--sc-text-dim)"
 }
 
 /**
@@ -974,12 +977,7 @@ onBeforeUnmount(() => {
                     <Icon icon="ri:file-list-line" class="size-4 shrink-0 text-primary" />
                     <h3 class="text-base font-bold">{{ $t("char-build.share_build") }}</h3>
                 </div>
-                <DOBBuildShow
-                    v-if="browseBuildsShow"
-                    :char-id="charBuild.char.id"
-                    class="min-h-0 flex-1"
-                    @use-build="onUseSharedBuild"
-                />
+                <DOBBuildShow v-if="browseBuildsShow" :char-id="charBuild.char.id" class="min-h-0 flex-1" @use-build="onUseSharedBuild" />
             </div>
             <template #action>
                 <button type="button" class="btn btn-sm" @click="browseBuildsShow = false">
@@ -990,20 +988,44 @@ onBeforeUnmount(() => {
 
         <!-- 数据未就绪：保持同样的场景，只把主体换成载入提示 -->
         <div v-if="!ready" class="sc-boot relative z-2 flex flex-1 flex-col items-center justify-center gap-4.5">
-            <span class="sc-boot-ring size-11.5 animate-spin rounded-full border-2 border-(--sc-line) border-t-(--sc-accent) [animation-duration:1.1s] motion-reduce:animate-none" />
-            <span class="sc-boot-text text-[11px] tracking-[0.3em] text-(--sc-text-dim) uppercase">{{ $t("char-build.simple_loading") }}</span>
+            <span
+                class="sc-boot-ring size-11.5 animate-spin rounded-full border-2 border-(--sc-line) border-t-(--sc-accent) [animation-duration:1.1s] motion-reduce:animate-none"
+            />
+            <span class="sc-boot-text text-[11px] tracking-[0.3em] text-(--sc-text-dim) uppercase">{{
+                $t("char-build.simple_loading")
+            }}</span>
         </div>
 
-        <div v-else ref="bodyEl" class="sc-body relative z-2 grid min-h-0 flex-1 content-start gap-2.5 overflow-y-auto overscroll-contain px-3.5 pt-2.5 pb-24 grid-cols-[minmax(0,1fr)] [grid-template-areas:'stage'_'identity'_'mods'_'stats'_'output'] auto-rows-min lg:grid-cols-[minmax(230px,0.86fr)_minmax(0,1.7fr)_minmax(280px,1fr)] lg:content-stretch lg:gap-3.5 lg:px-4 lg:pt-3.5 lg:pb-4 lg:auto-rows-auto lg:[grid-template-areas:'identity_stage_mods'_'stats_stage_mods'_'output_output_mods']" @scroll.passive="onBodyScroll">
+        <div
+            v-else
+            ref="bodyEl"
+            class="sc-body relative z-2 grid min-h-0 flex-1 content-start gap-2.5 overflow-y-auto overscroll-contain px-3.5 pt-2.5 pb-24 grid-cols-[minmax(0,1fr)] [grid-template-areas:'stage'_'identity'_'mods'_'stats'_'output'] auto-rows-min lg:grid-cols-[minmax(230px,0.86fr)_minmax(0,1.7fr)_minmax(280px,1fr)] lg:content-stretch lg:gap-3.5 lg:px-4 lg:pt-3.5 lg:pb-4 lg:auto-rows-auto lg:[grid-template-areas:'identity_stage_mods'_'stats_stage_mods'_'output_output_mods']"
+            @scroll.passive="onBodyScroll"
+        >
             <!-- 装配舞台 -->
-            <section class="sc-stage relative flex min-h-85 flex-col overflow-hidden border border-(--sc-line) bg-[radial-gradient(78%_58%_at_50%_42%,var(--sc-accent-14),transparent_70%),linear-gradient(180deg,rgba(10,16,30,0.62),rgba(4,6,12,0.34))] backdrop-blur-sm [clip-path:polygon(14px_0,100%_0,100%_calc(100%-14px),calc(100%-14px)_100%,0_100%,0_14px)] [grid-area:stage] lg:min-h-110" data-section="stage">
-                <div class="sc-deck grid flex-[1_1_auto] place-items-center px-1.5 pt-13.5 pb-5 perspective-distant lg:px-2.5 lg:pt-16 lg:pb-6.5">
-                    <div class="sc-deck-inner flex w-full rotate-x-[calc(var(--sc-py,0)*-6deg)] rotate-y-[calc(var(--sc-px,0)*7deg)] flex-col items-center gap-6 transform-3d will-change-transform motion-reduce:transform-none lg:gap-8.5">
+            <section
+                class="sc-stage relative flex min-h-85 flex-col overflow-hidden border border-(--sc-line) bg-[radial-gradient(78%_58%_at_50%_42%,var(--sc-accent-14),transparent_70%),linear-gradient(180deg,rgba(10,16,30,0.62),rgba(4,6,12,0.34))] backdrop-blur-sm [clip-path:polygon(14px_0,100%_0,100%_calc(100%-14px),calc(100%-14px)_100%,0_100%,0_14px)] [grid-area:stage] lg:min-h-110"
+                data-section="stage"
+            >
+                <div
+                    class="sc-deck grid flex-[1_1_auto] place-items-center px-1.5 pt-13.5 pb-5 perspective-distant lg:px-2.5 lg:pt-16 lg:pb-6.5"
+                >
+                    <div
+                        class="sc-deck-inner flex w-full rotate-x-[calc(var(--sc-py,0)*-6deg)] rotate-y-[calc(var(--sc-px,0)*7deg)] flex-col items-center gap-6 transform-3d will-change-transform motion-reduce:transform-none lg:gap-8.5"
+                    >
                         <div class="sc-core relative flex translate-z-16 flex-col items-center gap-2.5">
-                            <span class="sc-ring sc-ring--a absolute top-12 left-1/2 size-34 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border border-dashed border-(--sc-accent-46) [animation-duration:26s] motion-reduce:animate-none" />
-                            <span class="sc-ring sc-ring--b absolute top-12 left-1/2 size-42 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border border-(--sc-accent-34) [animation-direction:reverse] [animation-duration:40s] motion-reduce:animate-none" />
-                            <span class="sc-ring sc-ring--c absolute top-12 left-1/2 size-50 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border border-dotted border-(--sc-accent-18) [animation-duration:58s] motion-reduce:animate-none" />
-                            <div class="sc-avatar relative size-24 overflow-hidden rounded-full border border-(--sc-accent-62) shadow-[0_0_0_6px_rgba(4,6,12,0.72),0_0_34px_var(--sc-accent-52)]">
+                            <span
+                                class="sc-ring sc-ring--a absolute top-12 left-1/2 size-34 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border border-dashed border-(--sc-accent-46) [animation-duration:26s] motion-reduce:animate-none"
+                            />
+                            <span
+                                class="sc-ring sc-ring--b absolute top-12 left-1/2 size-42 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border border-(--sc-accent-34) [animation-direction:reverse] [animation-duration:40s] motion-reduce:animate-none"
+                            />
+                            <span
+                                class="sc-ring sc-ring--c absolute top-12 left-1/2 size-50 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border border-dotted border-(--sc-accent-18) [animation-duration:58s] motion-reduce:animate-none"
+                            />
+                            <div
+                                class="sc-avatar relative size-24 overflow-hidden rounded-full border border-(--sc-accent-62) shadow-[0_0_0_6px_rgba(4,6,12,0.72),0_0_34px_var(--sc-accent-52)]"
+                            >
                                 <img :src="charBuild.char.url" :alt="$t(charName)" class="size-full object-cover object-top" />
                             </div>
                             <div class="sc-core-meta relative z-1 text-center">
@@ -1020,7 +1042,9 @@ onBeforeUnmount(() => {
                                             v-if="item.extra"
                                             class="border border-(--sc-accent-45) bg-(--sc-accent-12) px-1 text-(--sc-accent)"
                                             :title="$t('UI_Armory_ExtraExcelWeponTitle')"
-                                            >{{ $t(item.name) }}</span
+                                            >{{
+                                                $t(item.name)
+                                            }}</span
                                         >
                                         <span v-else>{{ $t(item.name) }}</span>
                                     </template>
@@ -1028,7 +1052,9 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
-                        <div class="sc-weapons relative z-1 grid w-full translate-z-6 grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2 px-3">
+                        <div
+                            class="sc-weapons relative z-1 grid w-full translate-z-6 grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-2 px-3"
+                        >
                             <article
                                 v-for="slot in stageWeapons"
                                 :key="slot.key"
@@ -1043,11 +1069,19 @@ onBeforeUnmount(() => {
                                 @keydown.space.prevent="focusWeaponSlot(slot.key)"
                             >
                                 <div class="sc-weapon-head flex items-center justify-between gap-1.5">
-                                    <span class="sc-weapon-slot text-[10px] tracking-[0.24em] text-(--sc-accent-soft) uppercase">{{ slot.label }}</span>
-                                    <span v-if="slot.weapon" class="sc-weapon-lv font-orbitron text-[10px] text-(--sc-text-dim) tabular-nums">Lv.{{ slot.weapon.等级 }}</span>
+                                    <span class="sc-weapon-slot text-[10px] tracking-[0.24em] text-(--sc-accent-soft) uppercase">{{
+                                        slot.label
+                                    }}</span>
+                                    <span
+                                        v-if="slot.weapon"
+                                        class="sc-weapon-lv font-orbitron text-[10px] text-(--sc-text-dim) tabular-nums"
+                                        >Lv.{{ slot.weapon.等级 }}</span
+                                    >
                                 </div>
                                 <div class="sc-weapon-body flex min-w-0 items-center gap-2">
-                                    <span class="sc-weapon-icon grid size-10 flex-none place-items-center overflow-hidden border border-(--sc-line) bg-black/40 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]">
+                                    <span
+                                        class="sc-weapon-icon grid size-10 flex-none place-items-center overflow-hidden border border-(--sc-line) bg-black/40 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]"
+                                    >
                                         <!-- 特殊同律武器没有真实图标，用技能图标做遮罩并按强调色着色（与专业模式同规则） -->
                                         <span
                                             v-if="slot.maskUrl"
@@ -1066,7 +1100,10 @@ onBeforeUnmount(() => {
                                         }}</span>
                                     </span>
                                 </div>
-                                <div v-if="slot.weapon" class="sc-weapon-foot flex gap-2.5 font-orbitron text-[10px] tracking-[0.12em] text-(--sc-text-dim) tabular-nums">
+                                <div
+                                    v-if="slot.weapon"
+                                    class="sc-weapon-foot flex gap-2.5 font-orbitron text-[10px] tracking-[0.12em] text-(--sc-text-dim) tabular-nums"
+                                >
                                     <span v-if="weaponRefine(slot.weapon) !== null">
                                         {{ $t("char-build.refine") }} {{ weaponRefine(slot.weapon) }}
                                     </span>
@@ -1081,30 +1118,46 @@ onBeforeUnmount(() => {
             </section>
 
             <!-- 角色身份 -->
-            <section class="sc-panel sc-identity flex flex-col gap-2.5 border border-(--sc-line) bg-[rgba(6,10,20,0.6)] bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 backdrop-blur-sm [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:identity]" data-section="identity">
+            <section
+                class="sc-panel sc-identity flex flex-col gap-2.5 border border-(--sc-line) bg-[rgba(6,10,20,0.6)] bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 backdrop-blur-sm [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:identity]"
+                data-section="identity"
+            >
                 <div class="sc-panel-head flex items-baseline gap-2 border-b border-(--sc-line) pb-2">
                     <span class="sc-panel-num font-orbitron text-[11px] font-bold text-(--sc-accent)">01</span>
                     <span class="sc-panel-title text-[12px] tracking-[0.18em]">{{ $t("char-build.char_info") }}</span>
                 </div>
                 <div class="sc-ident flex gap-3">
-                    <div class="sc-ident-portrait relative h-24 w-19.5 flex-none overflow-hidden border border-(--sc-line-strong) [clip-path:polygon(10px_0,100%_0,100%_calc(100%-10px),calc(100%-10px)_100%,0_100%,0_10px)]">
+                    <div
+                        class="sc-ident-portrait relative h-24 w-19.5 flex-none overflow-hidden border border-(--sc-line-strong) [clip-path:polygon(10px_0,100%_0,100%_calc(100%-10px),calc(100%-10px)_100%,0_100%,0_10px)]"
+                    >
                         <img :src="charBuild.char.url" :alt="$t(charName)" class="size-full object-cover object-top" />
-                        <span class="sc-ident-lv absolute right-0 bottom-0 bg-[linear-gradient(180deg,var(--sc-accent-soft),var(--sc-accent))] px-1.5 py-0.5 font-orbitron text-[10px] font-bold text-[#05070d] tabular-nums">LV.{{ charBuild.char.等级 }}</span>
+                        <span
+                            class="sc-ident-lv absolute right-0 bottom-0 bg-[linear-gradient(180deg,var(--sc-accent-soft),var(--sc-accent))] px-1.5 py-0.5 font-orbitron text-[10px] font-bold text-[#05070d] tabular-nums"
+                            >LV.{{ charBuild.char.等级 }}</span
+                        >
                     </div>
                     <div class="sc-ident-rows flex min-w-0 flex-1 flex-col justify-center gap-1.5">
-                        <div class="sc-row flex items-baseline justify-between gap-2 border-b border-dashed border-white/8 pb-1 text-[11px]">
+                        <div
+                            class="sc-row flex items-baseline justify-between gap-2 border-b border-dashed border-white/8 pb-1 text-[11px]"
+                        >
                             <span>{{ $t("char-build.elem") }}</span>
                             <b>{{ elementLabel || "—" }}</b>
                         </div>
-                        <div class="sc-row flex items-baseline justify-between gap-2 border-b border-dashed border-white/8 pb-1 text-[11px]">
+                        <div
+                            class="sc-row flex items-baseline justify-between gap-2 border-b border-dashed border-white/8 pb-1 text-[11px]"
+                        >
                             <span>{{ $t("char-build.simple_skill") }}</span>
                             <b>{{ skillName ? $t(skillName) : "—" }}</b>
                         </div>
-                        <div class="sc-row flex items-baseline justify-between gap-2 border-b border-dashed border-white/8 pb-1 text-[11px]">
+                        <div
+                            class="sc-row flex items-baseline justify-between gap-2 border-b border-dashed border-white/8 pb-1 text-[11px]"
+                        >
                             <span>{{ $t("char-build.skill_level") }}</span>
                             <b>Lv.{{ skillLevel }}</b>
                         </div>
-                        <div class="sc-row flex items-baseline justify-between gap-2 border-b border-dashed border-white/8 pb-1 text-[11px]">
+                        <div
+                            class="sc-row flex items-baseline justify-between gap-2 border-b border-dashed border-white/8 pb-1 text-[11px]"
+                        >
                             <span>{{ $t("char-build.resonance_gain") }}</span>
                             <b>{{ resonanceText }}</b>
                         </div>
@@ -1118,24 +1171,54 @@ onBeforeUnmount(() => {
                         <span class="sc-subhead-line h-px flex-1 bg-[linear-gradient(90deg,var(--sc-accent-45),transparent)]" />
                     </div>
                     <div class="sc-team flex flex-col gap-1.5">
-                        <div v-for="member in teamMembers" :key="member.slot" class="sc-team-slot grid grid-cols-[28px_minmax(0,1fr)_28px_minmax(0,1fr)] items-center gap-1.5">
+                        <div
+                            v-for="member in teamMembers"
+                            :key="member.slot"
+                            class="sc-team-slot grid grid-cols-[28px_minmax(0,1fr)_28px_minmax(0,1fr)] items-center gap-1.5"
+                        >
                             <!-- 队友头像/名字：关联过构筑时点击弹窗查看其魔之楔（未关联则保持原样） -->
-                            <span class="sc-team-avatar grid size-7 place-items-center overflow-hidden border border-(--sc-line-strong) bg-black/38 data-[empty=1]:border-dashed data-[empty=1]:opacity-62" :data-empty="member.charName ? '' : '1'" v-bind="teamBuildAttrs(member, 'char')">
-                                <img v-if="member.charIcon" :src="member.charIcon" :alt="$t(member.charName)" class="size-full object-cover object-top" />
+                            <span
+                                class="sc-team-avatar grid size-7 place-items-center overflow-hidden border border-(--sc-line-strong) bg-black/38 data-[empty=1]:border-dashed data-[empty=1]:opacity-62"
+                                :data-empty="member.charName ? '' : '1'"
+                                v-bind="teamBuildAttrs(member, 'char')"
+                            >
+                                <img
+                                    v-if="member.charIcon"
+                                    :src="member.charIcon"
+                                    :alt="$t(member.charName)"
+                                    class="size-full object-cover object-top"
+                                />
                                 <Icon v-else icon="ri:user-line" class="sc-team-placeholder size-3.5 text-(--sc-text-dim)" />
                             </span>
                             <span class="sc-team-text flex min-w-0 flex-col" v-bind="teamBuildAttrs(member, 'char')">
-                                <span class="sc-team-name truncate text-[11px] font-semibold">{{ member.charName ? $t(member.charName) : "—" }}</span>
-                                <span v-if="member.element" class="sc-team-elem truncate text-[9px] text-(--sc-text-dim)">{{ $t(`${member.element}属性`) }}</span>
+                                <span class="sc-team-name truncate text-[11px] font-semibold">{{
+                                    member.charName ? $t(member.charName) : "—"
+                                }}</span>
+                                <span v-if="member.element" class="sc-team-elem truncate text-[9px] text-(--sc-text-dim)">{{
+                                    $t(`${member.element}属性`)
+                                }}</span>
                             </span>
                             <!-- 队友武器：同一份关联构筑，点击后定位到武器魔之楔 -->
-                            <span class="sc-team-weapon grid size-7 place-items-center overflow-hidden border border-(--sc-line-strong) bg-black/38 border-dashed data-[empty=1]:opacity-62" :data-empty="member.weaponName ? '' : '1'" v-bind="teamBuildAttrs(member, 'weapon')">
-                                <img v-if="member.weaponIcon" :src="member.weaponIcon" :alt="$t(member.weaponName)" class="size-full object-cover object-top" />
+                            <span
+                                class="sc-team-weapon grid size-7 place-items-center overflow-hidden border border-(--sc-line-strong) bg-black/38 border-dashed data-[empty=1]:opacity-62"
+                                :data-empty="member.weaponName ? '' : '1'"
+                                v-bind="teamBuildAttrs(member, 'weapon')"
+                            >
+                                <img
+                                    v-if="member.weaponIcon"
+                                    :src="member.weaponIcon"
+                                    :alt="$t(member.weaponName)"
+                                    class="size-full object-cover object-top"
+                                />
                                 <Icon v-else icon="ri:sword-line" class="sc-team-placeholder size-3.5 text-(--sc-text-dim)" />
                             </span>
                             <span class="sc-team-weapon-text flex min-w-0 flex-col" v-bind="teamBuildAttrs(member, 'weapon')">
-                                <span class="sc-team-name truncate text-[11px] font-semibold">{{ member.weaponName ? $t(member.weaponName) : "—" }}</span>
-                                <span v-if="member.weaponType" class="sc-team-elem truncate text-[9px] text-(--sc-text-dim)">{{ $t(member.weaponType) }}</span>
+                                <span class="sc-team-name truncate text-[11px] font-semibold">{{
+                                    member.weaponName ? $t(member.weaponName) : "—"
+                                }}</span>
+                                <span v-if="member.weaponType" class="sc-team-elem truncate text-[9px] text-(--sc-text-dim)">{{
+                                    $t(member.weaponType)
+                                }}</span>
                             </span>
                         </div>
                     </div>
@@ -1143,7 +1226,10 @@ onBeforeUnmount(() => {
             </section>
 
             <!-- 魔之楔装配 -->
-            <section class="sc-panel sc-mods flex flex-col gap-2.5 border border-(--sc-line) bg-[rgba(6,10,20,0.6)] bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 backdrop-blur-sm [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:mods]" data-section="mods">
+            <section
+                class="sc-panel sc-mods flex flex-col gap-2.5 border border-(--sc-line) bg-[rgba(6,10,20,0.6)] bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 backdrop-blur-sm [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:mods]"
+                data-section="mods"
+            >
                 <div class="sc-panel-head flex items-baseline gap-2 border-b border-(--sc-line) pb-2">
                     <span class="sc-panel-num font-orbitron text-[11px] font-bold text-(--sc-accent)">02</span>
                     <span class="sc-panel-title text-[12px] tracking-[0.18em]">{{ $t("魔之楔") }}</span>
@@ -1162,35 +1248,67 @@ onBeforeUnmount(() => {
                         @click="modTab = tab.key"
                     >
                         {{ tab.label }}
-                        <span v-if="tab.count" class="sc-modtab-count font-orbitron text-[9px] text-(--sc-accent-soft) tabular-nums">{{ tab.count }}</span>
+                        <span v-if="tab.count" class="sc-modtab-count font-orbitron text-[9px] text-(--sc-accent-soft) tabular-nums">{{
+                            tab.count
+                        }}</span>
                     </button>
                 </div>
                 <template v-if="currentModTab.available">
                     <!-- 每个槽位都带名称，仅凭图标无法区分同系列魔之楔 -->
                     <div class="sc-modgrid grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-1.5">
-                        <div v-for="(mod, index) in activeModSlots" :key="index" class="sc-mod flex items-center gap-1.75 border border-l-2 border-(--sc-line) border-l-(--sc-quality) px-1.75 py-1.25 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]" :style="qualityStyle(mod?.品质)">
-                            <span class="sc-mod-icon grid size-7.5 flex-none place-items-center overflow-hidden border border-(--sc-line) bg-black/42">
+                        <div
+                            v-for="(mod, index) in activeModSlots"
+                            :key="index"
+                            class="sc-mod flex items-center gap-1.75 border border-l-2 border-(--sc-line) border-l-(--sc-quality) px-1.75 py-1.25 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]"
+                            :style="qualityStyle(mod?.品质)"
+                        >
+                            <span
+                                class="sc-mod-icon grid size-7.5 flex-none place-items-center overflow-hidden border border-(--sc-line) bg-black/42"
+                            >
                                 <img v-if="mod" :src="mod.url" :alt="$t(mod.名称)" class="size-full object-cover" />
                                 <span v-else class="sc-mod-index font-orbitron text-[11px] text-base-content/25">{{ index + 1 }}</span>
                             </span>
                             <span class="sc-mod-text flex min-w-0 flex-1 flex-col">
-                                <span class="sc-mod-name truncate text-[12px] font-semibold">{{ mod ? $t(mod.名称) : $t("char-build.simple_empty_slot") }}</span>
+                                <span class="sc-mod-name truncate text-[12px] font-semibold">{{
+                                    mod ? $t(mod.名称) : $t("char-build.simple_empty_slot")
+                                }}</span>
                                 <span v-if="mod" class="sc-mod-sub truncate text-[9px] text-(--sc-text-dim)">{{ $t(mod.系列) }}</span>
                             </span>
-                            <span v-if="mod" class="sc-mod-lv flex-none font-orbitron text-[11px] font-bold text-(--sc-text-dim) tabular-nums">+{{ mod.等级 }}</span>
+                            <span
+                                v-if="mod"
+                                class="sc-mod-lv flex-none font-orbitron text-[11px] font-bold text-(--sc-text-dim) tabular-nums"
+                                >+{{ mod.等级 }}</span
+                            >
                         </div>
                     </div>
-                    <div v-if="activeModTab === '角色'" class="sc-mod flex items-center gap-1.75 border border-l-2 border-(--sc-line) border-l-(--sc-quality) px-1.75 py-1.25 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]" :style="qualityStyle(auraMod?.品质)">
-                        <span class="sc-mod-icon grid size-7.5 flex-none place-items-center overflow-hidden border border-(--sc-line) bg-black/42">
+                    <div
+                        v-if="activeModTab === '角色'"
+                        class="sc-mod flex items-center gap-1.75 border border-l-2 border-(--sc-line) border-l-(--sc-quality) px-1.75 py-1.25 [clip-path:polygon(8px_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%,0_8px)]"
+                        :style="qualityStyle(auraMod?.品质)"
+                    >
+                        <span
+                            class="sc-mod-icon grid size-7.5 flex-none place-items-center overflow-hidden border border-(--sc-line) bg-black/42"
+                        >
                             <img v-if="auraMod" :src="auraMod.url" :alt="$t(auraMod.名称)" class="size-full object-cover" />
                             <Icon v-else icon="ri:add-line" class="sc-weapon-placeholder size-4 text-(--sc-text-dim)" />
                         </span>
                         <span class="sc-mod-text flex min-w-0 flex-1 flex-col">
-                            <span class="sc-mod-name truncate text-[12px] font-semibold">{{ auraMod ? $t(auraMod.名称) : $t("char-build.simple_empty_slot") }}</span>
+                            <span class="sc-mod-name truncate text-[12px] font-semibold">{{
+                                auraMod ? $t(auraMod.名称) : $t("char-build.simple_empty_slot")
+                            }}</span>
                             <span v-if="auraMod" class="sc-mod-sub truncate text-[9px] text-(--sc-text-dim)">{{ $t(auraMod.系列) }}</span>
                         </span>
-                        <span v-if="auraMod" class="sc-mod-lv flex-none font-orbitron text-[11px] font-bold text-(--sc-text-dim) tabular-nums">+{{ auraMod.等级 }}</span>
-                        <span class="sc-mod-tag ml-auto flex-none border border-(--sc-accent-45) px-1.5 py-0.5 text-[9px] tracking-[0.2em] text-(--sc-accent-soft)">{{ $t("char-build.simple_aura") }}</span>
+                        <span
+                            v-if="auraMod"
+                            class="sc-mod-lv flex-none font-orbitron text-[11px] font-bold text-(--sc-text-dim) tabular-nums"
+                            >+{{ auraMod.等级 }}</span
+                        >
+                        <span
+                            class="sc-mod-tag ml-auto flex-none border border-(--sc-accent-45) px-1.5 py-0.5 text-[9px] tracking-[0.2em] text-(--sc-accent-soft)"
+                            >{{
+                                $t("char-build.simple_aura")
+                            }}</span
+                        >
                     </div>
                     <div class="sc-cap flex flex-col gap-1.25">
                         <div class="sc-cap-track relative h-1.5 overflow-hidden border border-(--sc-line) bg-black/50">
@@ -1202,7 +1320,10 @@ onBeforeUnmount(() => {
                         </div>
                         <div class="sc-cap-meta flex items-baseline justify-between text-[10px] text-(--sc-text-dim)">
                             <span>{{ $t("char-build.simple_capacity") }}</span>
-                            <b class="font-orbitron text-[11px] tabular-nums" :class="capacityValueClass()">{{ capacity.load }} / {{ capacity.cap }}</b>
+                            <b class="font-orbitron text-[11px] tabular-nums" :class="capacityValueClass()"
+                                >{{ capacity.load }}
+                                / {{ capacity.cap }}</b
+                            >
                         </div>
                         <!-- 社区代码：当前页签这套魔之楔的短代码，右侧方形按钮一键复制 -->
                         <div class="sc-code-row flex items-stretch gap-1.5">
@@ -1210,8 +1331,15 @@ onBeforeUnmount(() => {
                                 class="sc-code flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden border border-(--sc-line) bg-black/30 px-1.5 py-1"
                                 :title="modCode"
                             >
-                                <span class="flex-none text-[9px] tracking-[0.12em] text-(--sc-text-dim)">{{ $t("char-build.simple_community_code") }}</span>
-                                <b class="sc-code-value truncate font-orbitron text-[10px] font-normal text-(--sc-text) tracking-[0.06em]">{{ modCode }}</b>
+                                <span class="flex-none text-[9px] tracking-[0.12em] text-(--sc-text-dim)">{{
+                                    $t("char-build.simple_community_code")
+                                }}</span>
+                                <b
+                                    class="sc-code-value truncate font-orbitron text-[10px] font-normal text-(--sc-text) tracking-[0.06em]"
+                                    >{{
+                                        modCode
+                                    }}</b
+                                >
                             </span>
                             <button
                                 type="button"
@@ -1225,17 +1353,26 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
                 </template>
-                <p v-else class="sc-note m-0 text-[11px] leading-[1.6] text-(--sc-text-dim)">{{ $t("char-build.mods_need_weapon", { slot: currentModTab.label }) }}</p>
+                <p v-else class="sc-note m-0 text-[11px] leading-[1.6] text-(--sc-text-dim)">
+                    {{ $t("char-build.mods_need_weapon", { slot: currentModTab.label }) }}
+                </p>
             </section>
 
             <!-- 核心属性 -->
-            <section class="sc-panel sc-stats flex flex-col gap-2.5 border border-(--sc-line) bg-[rgba(6,10,20,0.6)] bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 backdrop-blur-sm [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:stats]" data-section="stats">
+            <section
+                class="sc-panel sc-stats flex flex-col gap-2.5 border border-(--sc-line) bg-[rgba(6,10,20,0.6)] bg-[linear-gradient(165deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] p-3 backdrop-blur-sm [clip-path:polygon(12px_0,100%_0,100%_calc(100%-12px),calc(100%-12px)_100%,0_100%,0_12px)] [grid-area:stats]"
+                data-section="stats"
+            >
                 <div class="sc-panel-head flex items-baseline gap-2 border-b border-(--sc-line) pb-2">
                     <span class="sc-panel-num font-orbitron text-[11px] font-bold text-(--sc-accent)">03</span>
                     <span class="sc-panel-title text-[12px] tracking-[0.18em]">{{ $t("char-build.simple_key_stats") }}</span>
                 </div>
                 <div v-if="charAttrRows.length" class="sc-statgrid grid grid-cols-[repeat(auto-fill,minmax(92px,1fr))] gap-1.5">
-                    <div v-for="row in charAttrRows" :key="row.key" class="sc-stat flex flex-col gap-0.5 border border-(--sc-line) bg-white/3 px-2 py-1.5 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)]">
+                    <div
+                        v-for="row in charAttrRows"
+                        :key="row.key"
+                        class="sc-stat flex flex-col gap-0.5 border border-(--sc-line) bg-white/3 px-2 py-1.5 [clip-path:polygon(7px_0,100%_0,100%_calc(100%-7px),calc(100%-7px)_100%,0_100%,0_7px)]"
+                    >
                         <span class="sc-stat-label truncate text-[10px] text-(--sc-text-dim)">{{ $t(row.label) }}</span>
                         <b class="sc-stat-value font-orbitron text-sm tabular-nums">{{ row.value }}</b>
                     </div>
@@ -1244,7 +1381,10 @@ onBeforeUnmount(() => {
             </section>
 
             <!-- 伤害输出：标题取目标函数、数值取整按千分位，与榜单页面保持一致 -->
-            <section class="sc-output flex flex-wrap items-center gap-3.5 border border-(--sc-accent-34) bg-[rgba(6,10,20,0.6)] bg-[radial-gradient(90%_160%_at_6%_50%,var(--sc-accent-18),transparent_70%),linear-gradient(120deg,rgba(255,255,255,0.05),rgba(255,255,255,0.01))] backdrop-blur-sm px-3.5 py-3 [clip-path:polygon(16px_0,100%_0,100%_calc(100%-16px),calc(100%-16px)_100%,0_100%,0_16px)] [grid-area:output]" data-section="output">
+            <section
+                class="sc-output flex flex-wrap items-center gap-3.5 border border-(--sc-accent-34) bg-[rgba(6,10,20,0.6)] bg-[radial-gradient(90%_160%_at_6%_50%,var(--sc-accent-18),transparent_70%),linear-gradient(120deg,rgba(255,255,255,0.05),rgba(255,255,255,0.01))] backdrop-blur-sm px-3.5 py-3 [clip-path:polygon(16px_0,100%_0,100%_calc(100%-16px),calc(100%-16px)_100%,0_100%,0_16px)] [grid-area:output]"
+                data-section="output"
+            >
                 <div class="sc-output-main min-w-40 flex-[1_1_200px]">
                     <div
                         class="sc-output-label text-[10px] tracking-[0.28em] text-(--sc-text-dim) uppercase"
@@ -1252,7 +1392,11 @@ onBeforeUnmount(() => {
                     >
                         {{ damageTitle || $t("char-build.simple_output") }}
                     </div>
-                    <div class="sc-output-value font-orbitron text-[clamp(30px,6vw,46px)] leading-[1.05] font-bold text-(--sc-accent-soft) tabular-nums text-shadow-[0_0_30px_var(--sc-accent-62)]">{{ damageText }}</div>
+                    <div
+                        class="sc-output-value font-orbitron text-[clamp(30px,6vw,46px)] leading-[1.05] font-bold text-(--sc-accent-soft) tabular-nums text-shadow-[0_0_30px_var(--sc-accent-62)]"
+                    >
+                        {{ damageText }}
+                    </div>
                     <div class="sc-output-sub truncate text-[11px] text-(--sc-text-dim)">
                         {{ skillName ? $t(skillName) : "—" }}
                         <template v-if="summonName">· {{ $t(summonName) }}</template>
@@ -1262,7 +1406,10 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 移动端底部页签 -->
-        <nav v-if="ready" class="sc-tabs absolute right-0 bottom-0 left-0 z-4 flex border-t border-(--sc-line) bg-[linear-gradient(0deg,rgba(4,6,12,0.86),rgba(4,6,12,0.6))] px-2 pt-1.5 backdrop-blur-md pb-[calc(6px+env(safe-area-inset-bottom,0px))] lg:hidden">
+        <nav
+            v-if="ready"
+            class="sc-tabs absolute right-0 bottom-0 left-0 z-4 flex border-t border-(--sc-line) bg-[linear-gradient(0deg,rgba(4,6,12,0.86),rgba(4,6,12,0.6))] px-2 pt-1.5 backdrop-blur-md pb-[calc(6px+env(safe-area-inset-bottom,0px))] lg:hidden"
+        >
             <button
                 v-for="tab in mobileTabs"
                 :key="tab.key"
@@ -1275,8 +1422,6 @@ onBeforeUnmount(() => {
                 <span class="sc-tab-label w-full truncate text-center text-[9px] leading-[1.2]">{{ tab.label }}</span>
             </button>
         </nav>
-
-
 
         <!-- 协战构筑弹窗：展示该协战角色关联构筑的魔之楔（teleport 到 body，渲染位置不影响版面） -->
         <TeamBuildDialog

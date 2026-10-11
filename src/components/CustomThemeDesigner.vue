@@ -95,19 +95,9 @@ async function resetTheme() {
         </div>
 
         <!-- 颜色色板（分组：基础色 / 品牌色 / 状态色） -->
-        <div
-            v-for="(group, groupIndex) in CUSTOM_THEME_COLOR_GROUPS"
-            :key="groupIndex"
-            class="flex flex-col gap-1.5"
-        >
+        <div v-for="(group, groupIndex) in CUSTOM_THEME_COLOR_GROUPS" :key="groupIndex" class="flex flex-col gap-1.5">
             <div class="text-xs font-semibold text-base-content/70">
-                {{
-                    groupIndex === 0
-                        ? t("setting.baseColors")
-                        : groupIndex === 1
-                          ? t("setting.brandColors")
-                          : t("setting.stateColors")
-                }}
+                {{ groupIndex === 0 ? t("setting.baseColors") : groupIndex === 1 ? t("setting.brandColors") : t("setting.stateColors") }}
             </div>
             <div class="grid grid-cols-4 gap-2 sm:grid-cols-8">
                 <div v-for="{ key } in group" :key="key" class="flex min-w-0 flex-col gap-1">
@@ -255,7 +245,11 @@ async function resetTheme() {
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label class="form-control w-full">
                         <span class="label-text pb-1 text-xs">Input</span>
-                        <input type="text" placeholder="Placeholder" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
+                        <input
+                            type="text"
+                            placeholder="Placeholder"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        />
                     </label>
                     <label class="form-control w-full">
                         <span class="label-text pb-1 text-xs">Select</span>

@@ -175,7 +175,7 @@ const isSignFinished = computed(() => {
                 class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
                 @click="loadData(true)"
             >
-                {{ $t('common.retry') }}
+                {{ $t("common.retry") }}
             </button>
         </div>
 
@@ -185,17 +185,17 @@ const isSignFinished = computed(() => {
                 <SectionHeader no-animate compact kicker="SIGN-IN" :title="$t('签到日历')" />
                 <div v-if="calendarData?.period" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                     <div class="flex items-center gap-2 text-xs text-base-content/55">
-                        <span>{{ $t('dna-sign-calendar.period') }}</span>
+                        <span>{{ $t("dna-sign-calendar.period") }}</span>
                         <span class="font-orbitron text-[13px] font-semibold text-primary">{{ calendarData.period.name }}</span>
                     </div>
                     <div class="flex items-center gap-2 text-xs text-base-content/55">
-                        <span>{{ $t('dna-sign-calendar.signed_in') }}</span>
+                        <span>{{ $t("dna-sign-calendar.signed_in") }}</span>
                         <span class="font-orbitron text-[13px] font-semibold text-primary">{{ signedDaysCount }} 天</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <!-- 自动签到开关 -->
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-base-content/60">{{ $t('dna-sign-calendar.auto_sign_in') }}</span>
+                            <span class="text-xs text-base-content/60">{{ $t("dna-sign-calendar.auto_sign_in") }}</span>
                             <input
                                 type="checkbox"
                                 class="toggle toggle-primary toggle-sm"
@@ -213,12 +213,14 @@ const isSignFinished = computed(() => {
                         >
                             <Icon v-if="signing" icon="ri:refresh-line" class="size-4 animate-spin" />
                             <Icon v-else icon="ri:checkbox-circle-fill" class="size-4" />
-                            {{ $t('dna-sign-calendar.sign_in') }}
+                            {{ $t("dna-sign-calendar.sign_in") }}
                         </button>
                         <span
                             v-else-if="calendarData.todaySignin"
                             class="rounded-xs border border-primary/40 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary"
-                            >{{ $t('dna-sign-calendar.signed_in_today') }}</span
+                            >{{
+                                $t("dna-sign-calendar.signed_in_today")
+                            }}</span
                         >
                     </div>
                 </div>
@@ -227,7 +229,11 @@ const isSignFinished = computed(() => {
                     <!-- 角色信息行 -->
                     <div class="flex items-center justify-between gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                         <div class="flex items-center gap-2.5">
-                            <img :src="calendarData.roleInfo.headUrl" :alt="$t('common.char_avatar')" class="h-10 w-10 rounded-full border border-base-content/15 object-cover" />
+                            <img
+                                :src="calendarData.roleInfo.headUrl"
+                                :alt="$t('common.char_avatar')"
+                                class="h-10 w-10 rounded-full border border-base-content/15 object-cover"
+                            />
                             <div>
                                 <div class="text-sm font-semibold">
                                     {{ calendarData.roleInfo.roleName }}
@@ -236,7 +242,7 @@ const isSignFinished = computed(() => {
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-xs text-base-content/55">{{ $t('dna-sign-calendar.coins') }}</div>
+                            <div class="text-xs text-base-content/55">{{ $t("dna-sign-calendar.coins") }}</div>
                             <div class="font-orbitron text-lg font-semibold text-primary">
                                 {{ calendarData.userGoldNum }}
                             </div>
@@ -277,14 +283,20 @@ const isSignFinished = computed(() => {
                 <SectionHeader no-animate compact kicker="TASKS" :title="$t('任务进度')" />
 
                 <div v-if="taskProcess && taskProcess.dailyTask.length > 0" class="mt-2 space-y-2">
-                    <div v-for="(task, index) in taskProcess.dailyTask" :key="index" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+                    <div
+                        v-for="(task, index) in taskProcess.dailyTask"
+                        :key="index"
+                        class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                    >
                         <div class="flex items-center justify-between gap-2">
                             <div class="truncate text-sm font-medium">
                                 {{ task.remark }}
                             </div>
                             <div class="shrink-0 text-xs text-base-content/55">
-                                <span>{{ $t('dna-sign-calendar.progress') }}</span>
-                                <span class="font-orbitron text-[13px] font-semibold text-primary">{{ task.completeTimes }}/{{ task.times }}</span>
+                                <span>{{ $t("dna-sign-calendar.progress") }}</span>
+                                <span class="font-orbitron text-[13px] font-semibold text-primary"
+                                    >{{ task.completeTimes }}/{{ task.times }}</span
+                                >
                             </div>
                         </div>
 
@@ -310,7 +322,7 @@ const isSignFinished = computed(() => {
                 </div>
 
                 <div v-else class="flex flex-col items-center justify-center py-8">
-                    <p class="text-base-content/55">{{ $t('dna-sign-calendar.no_tasks') }}</p>
+                    <p class="text-base-content/55">{{ $t("dna-sign-calendar.no_tasks") }}</p>
                 </div>
             </section>
         </div>

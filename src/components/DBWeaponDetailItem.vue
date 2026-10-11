@@ -5,6 +5,7 @@ import charData from "@/data/d/char.data"
 import { weaponDraftMap } from "@/data/d/index"
 import modData from "@/data/d/mod.data"
 import type { Char, Draft, Mod, Skill, Weapon, WeaponSkill } from "@/data/data-types"
+import { LeveledChar } from "@/data/leveled/LeveledChar"
 import { formatModName, LeveledMod } from "@/data/leveled/LeveledMod"
 import { LeveledSkill } from "@/data/leveled/LeveledSkill"
 import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
@@ -21,7 +22,7 @@ const { gt, gpt } = useGameText()
 const currentLevel = ref(80)
 const currentRefine = ref(5)
 const replaceModLevels = ref<Record<number, number>>({})
-const weaponInfoTab = ref<"breakthrough" | "manufacture">("breakthrough")
+const weaponInfoTab = ref<"applicable" | "breakthrough" | "manufacture">("breakthrough")
 
 const leveledWeapon = computed(() => {
     return new LeveledWeapon(props.weapon, props.weapon.熔炉 && props.weapon.熔炉.length > 0 ? 0 : currentRefine.value, currentLevel.value)
@@ -110,6 +111,66 @@ const bonusAttributes = computed<{ name: string; value: number }[]>(() => {
 const weaponSources = computed<WeaponSourceInfo[]>(() => collectWeaponSources(props.weapon))
 
 /**
+ * 是否为灾厄武器（带熔炉）。只有灾厄武器才展示「适用角色」页签。
+ */
+const isCalamityWeapon = computed(() => (props.weapon.熔炉?.length ?? 0) > 0)
+
+/**
+ * 武器类型归一化：弓的长短弓变体统一视为「弓」，其余原样返回。
+ * @param type 武器类型原文
+ * @returns 归一化后的武器类型
+ */
+function normalizeWeaponType(type: string) {
+    if (type.startsWith("弓")) return "弓"
+    return type
+}
+
+/**
+ * 当前武器的可用类型（去掉近战 / 远程，只留单手剑、长柄等具体类型）。
+ */
+const weaponCategories = computed(() =>
+    (props.weapon.类型 || []).filter(type => type !== "近战" && type !== "远程").map(normalizeWeaponType)
+)
+
+/**
+ * 精通该武器的角色：精通包含武器类型，或精通为全部类型。
+ */
+const masteryChars = computed<Char[]>(() => {
+    const categories = weaponCategories.value
+    if (categories.length === 0) return []
+    return charData.filter(
+        char => char.精通.includes("全部类型") || char.精通.map(normalizeWeaponType).some(type => categories.includes(type))
+    )
+})
+
+/**
+ * 额外精通该武器的角色：不在精通组，且额外精通包含武器类型。
+ */
+const extraMasteryChars = computed<Char[]>(() => {
+    const categories = weaponCategories.value
+    if (categories.length === 0) return []
+    const masteryIds = new Set(masteryChars.value.map(char => char.id))
+    return charData.filter(
+        char =>
+            !masteryIds.has(char.id) &&
+            (char.额外精通 || []).map(normalizeWeaponType).some(type => categories.includes(type))
+    )
+})
+
+/**
+ * 该角色命中当前武器类型的精通说明：精通含全部类型时返回全部类型，否则返回命中的类型原文。
+ * @param char 角色数据
+ * @param group 分组：mastery 取精通，extra 取额外精通
+ * @returns 命中的精通类型原文列表（模板内逐项 $t 翻译）
+ */
+function matchedProficiencyTypes(char: Char, group: "mastery" | "extra"): string[] {
+    if (group === "mastery" && char.精通.includes("全部类型")) return ["全部类型"]
+    const list = group === "mastery" ? char.精通 : (char.额外精通 || [])
+    const categories = weaponCategories.value
+    return list.filter(type => categories.includes(normalizeWeaponType(type)))
+}
+
+/**
  * 收集将当前武器作为专武的角色。
  */
 const exclusiveRelatedChars = computed<Char[]>(() => charData.filter(char => char.专武 === props.weapon.id))
@@ -168,7 +229,7 @@ watch(
     () => {
         currentLevel.value = 80
         currentRefine.value = props.weapon.熔炉 && props.weapon.熔炉.length > 0 ? 0 : 5
-        weaponInfoTab.value = "breakthrough"
+        weaponInfoTab.value = props.weapon.熔炉 && props.weapon.熔炉.length > 0 ? "applicable" : "breakthrough"
         ensureReplaceModLevels()
     },
     { immediate: true }
@@ -233,13 +294,13 @@ watch(
 
         <!-- 描述 -->
         <section v-if="weapon.描述" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="DESCRIPTION" />
+            <SectionHeader no-animate compact kicker="DESCRIPTION" :title="$t('common.description')" />
             <div class="text-sm leading-relaxed text-base-content/85">{{ $t(weapon.描述) }}</div>
         </section>
 
         <!-- 等级调整 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="LEVEL" />
+            <SectionHeader no-animate compact kicker="LEVEL" :title="$t('等级调整')" />
             <LevelSlider v-model="currentLevel" />
             <WeaponRefineTabs v-if="!weapon.熔炉 || weapon.熔炉.length === 0" v-model="currentRefine" />
         </section>
@@ -250,9 +311,7 @@ watch(
             <div class="grid grid-cols-2 gap-1.5 md:grid-cols-4">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("攻击") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        leveledWeapon.基础攻击
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ leveledWeapon.基础攻击 }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">{{ $t("暴击") }}</span>
@@ -335,10 +394,7 @@ watch(
         </section>
 
         <!-- 加成属性 -->
-        <section
-            v-if="bonusAttributes.length > 0"
-            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
-        >
+        <section v-if="bonusAttributes.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="BONUS" :title="$t('char-build.bonus_attr')" />
             <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
                 <div
@@ -431,12 +487,16 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <div v-if="forge.解锁" class="mb-1 text-[11px] tracking-wide text-base-content/45">{{ $t("weapon-detail.unlock") }}</div>
+                    <div v-if="forge.解锁" class="mb-1 text-[11px] tracking-wide text-base-content/45">
+                        {{ $t("weapon-detail.unlock") }}
+                    </div>
                     <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                         <ResourceCostItem v-for="(value, name) in forge.解锁" :key="name" :name="name" :value="value" />
                     </div>
                     <template v-if="forge.技能 && forge.技能.length > 0 && forge.技能[0].解锁">
-                        <div class="mt-2 mb-1 text-[11px] tracking-wide text-base-content/45">{{ $t("weapon-detail.secondaryUnlock") }}</div>
+                        <div class="mt-2 mb-1 text-[11px] tracking-wide text-base-content/45">
+                            {{ $t("weapon-detail.secondaryUnlock") }}
+                        </div>
                         <div v-if="forge.技能[0].解锁" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
                             <ResourceCostItem v-for="(value, name) in forge.技能[0].解锁" :key="name" :name="name" :value="value" />
                         </div>
@@ -532,20 +592,81 @@ watch(
             </div>
         </section>
 
-        <!-- 突破 / 制造 -->
+        <!-- 突破 / 制造（灾厄武器首位加「适用角色」）：无 SectionHeader，靠注解进滚动目录 -->
         <section
             v-if="(weapon.突破 && weapon.突破.length > 0) || weaponDraft"
+            data-scroll-section="craft"
+            :data-scroll-title="`${$t('weapon-detail.ascension')} / ${$t('weapon-detail.crafting')}`"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
             <AniTabs
                 v-model="weaponInfoTab"
-                :tabs="[
-                    { label: $t('weapon-detail.ascension'), value: 'breakthrough' },
-                    { label: $t('weapon-detail.crafting'), value: 'manufacture' },
-                ]"
+                :tabs="
+                    isCalamityWeapon
+                        ? [
+                              { label: $t('weapon-detail.applicable'), value: 'applicable' },
+                              { label: $t('weapon-detail.ascension'), value: 'breakthrough' },
+                              { label: $t('weapon-detail.crafting'), value: 'manufacture' },
+                          ]
+                        : [
+                              { label: $t('weapon-detail.ascension'), value: 'breakthrough' },
+                              { label: $t('weapon-detail.crafting'), value: 'manufacture' },
+                          ]
+                "
             />
 
-            <div v-if="weaponInfoTab === 'breakthrough'" class="mt-2">
+            <div v-if="weaponInfoTab === 'applicable' && isCalamityWeapon" class="mt-2">
+                <div class="mb-1 text-[11px] tracking-wide text-base-content/45">{{ $t("weapon-detail.mastery") }}</div>
+                <div v-if="masteryChars.length > 0" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
+                    <SRouterLink
+                        v-for="char in masteryChars"
+                        :key="char.id"
+                        :to="`/db/char/${char.id}`"
+                        class="flex min-w-0 items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40"
+                    >
+                        <img
+                            :src="LeveledChar.url(char.icon)"
+                            :alt="char.名称"
+                            class="size-8 shrink-0 rounded-xs bg-base-200 object-cover object-top"
+                        />
+                        <span class="min-w-0 flex-1 truncate transition-colors duration-150 hover:text-primary">{{
+                            $t(char.名称)
+                        }}</span>
+                        <span class="shrink-0 text-xs whitespace-nowrap text-primary">{{
+                            matchedProficiencyTypes(char, "mastery")
+                                .map(type => $t(type))
+                                .join("、")
+                        }}</span>
+                    </SRouterLink>
+                </div>
+                <div v-else class="text-sm text-base-content/60">-</div>
+                <div class="mt-2 mb-1 text-[11px] tracking-wide text-base-content/45">{{ $t("weapon-detail.extraMastery") }}</div>
+                <div v-if="extraMasteryChars.length > 0" class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-2 text-sm">
+                    <SRouterLink
+                        v-for="char in extraMasteryChars"
+                        :key="char.id"
+                        :to="`/db/char/${char.id}`"
+                        class="flex min-w-0 items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40"
+                    >
+                        <img
+                            :src="LeveledChar.url(char.icon)"
+                            :alt="char.名称"
+                            class="size-8 shrink-0 rounded-xs bg-base-200 object-cover object-top"
+                        />
+                        <span class="min-w-0 flex-1 truncate transition-colors duration-150 hover:text-primary">{{
+                            $t(char.名称)
+                        }}</span>
+                        <span class="shrink-0 text-xs whitespace-nowrap text-primary">{{
+                            matchedProficiencyTypes(char, "extra")
+                                .map(type => $t(type))
+                                .join("、")
+                        }}</span>
+                    </SRouterLink>
+                </div>
+                <div v-else class="text-sm text-base-content/60">-</div>
+            </div>
+
+            <div v-else-if="weaponInfoTab === 'breakthrough'" class="mt-2">
                 <div v-if="weapon.突破 && weapon.突破.length > 0" class="space-y-3">
                     <div
                         v-for="(cost, index) in weapon.突破"
@@ -583,9 +704,9 @@ watch(
                     <SRouterLink :to="`/db/char/${char.id}`" class="min-w-0 truncate transition-colors duration-150 hover:text-primary">
                         {{ $t(char.名称) }}
                     </SRouterLink>
-                    <span class="shrink-0 rounded-xs border border-base-content/15 px-1 text-[10px] leading-4 text-base-content/50"
-                        >{{ $t("common.signature_weapon") }}</span
-                    >
+                    <span class="shrink-0 rounded-xs border border-base-content/15 px-1 text-[10px] leading-4 text-base-content/50">{{
+                        $t("common.signature_weapon")
+                    }}</span>
                 </div>
             </div>
         </section>

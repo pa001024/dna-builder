@@ -227,66 +227,103 @@ const handleResetPassword = async () => {
                     <!-- 登录 -->
                     <form v-if="auth.dialogTab === 'login'" class="space-y-4" @submit.prevent="handleLogin">
                         <div class="text-center mb-6">
-                            <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
+                            <div
+                                class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4"
+                            >
                                 <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
                             </div>
-                            <span class="text-lg font-bold">{{ $t('login-dialog.title') }}</span>
+                            <span class="text-lg font-bold">{{ $t("login-dialog.title") }}</span>
                         </div>
                         <!-- 由「需要登录」的功能拉起时，说明当前操作为何需要登录 -->
-                        <div v-if="auth.dialogHint" class="rounded-xs border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-base-content/70">
+                        <div
+                            v-if="auth.dialogHint"
+                            class="rounded-xs border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-base-content/70"
+                        >
                             {{ auth.dialogHint }}
                         </div>
                         <label class="flex items-center gap-2 w-full">
                             <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="loginForm.email" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" :placeholder="$t('login-dialog.email_placeholder')" />
+                            <input
+                                v-model="loginForm.email"
+                                type="text"
+                                class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                :placeholder="$t('login-dialog.email_placeholder')"
+                            />
                         </label>
                         <label class="flex items-center gap-2 w-full">
                             <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="loginForm.password" type="password" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" :placeholder="$t('login-dialog.password_placeholder')" />
+                            <input
+                                v-model="loginForm.password"
+                                type="password"
+                                class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                :placeholder="$t('login-dialog.password_placeholder')"
+                            />
                         </label>
                         <button type="submit" class="btn btn-primary w-full" :disabled="loading">
                             <span v-if="loading" class="loading loading-spinner loading-xs" />
-                            <span>{{ loading ? $t('dob-account.logging_in') : $t('dob-account.login') }}</span>
+                            <span>{{ loading ? $t("dob-account.logging_in") : $t("dob-account.login") }}</span>
                         </button>
                         <div class="flex items-center justify-between gap-2 text-sm">
                             <button type="button" class="link link-primary transition-colors duration-200" @click="openResetPassword">
-                                {{ $t('login-dialog.forgot_password') }}
+                                {{ $t("login-dialog.forgot_password") }}
                             </button>
                             <span class="text-base-content/60">
-                                {{ $t('login-dialog.switch_to_register') }}
+                                {{ $t("login-dialog.switch_to_register") }}
                                 <button type="button" class="link link-primary transition-colors duration-200" @click="auth.openRegister()">
-                                    {{ $t('login-dialog.switch_to_register_action') }}
+                                    {{ $t("login-dialog.switch_to_register_action") }}
                                 </button>
                             </span>
                         </div>
                         <div class="text-center text-sm text-base-content/60">
-                            <p>{{ $t('login-dialog.login_hint') }}</p>
+                            <p>{{ $t("login-dialog.login_hint") }}</p>
                         </div>
                     </form>
 
                     <!-- 注册 -->
                     <form v-else-if="auth.dialogTab === 'register'" class="space-y-4" @submit.prevent="handleRegister">
                         <div class="text-center mb-6">
-                            <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
+                            <div
+                                class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4"
+                            >
                                 <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
                             </div>
-                            <span class="text-lg font-bold">{{ $t('login-dialog.register_title') }}</span>
+                            <span class="text-lg font-bold">{{ $t("login-dialog.register_title") }}</span>
                         </div>
                         <label class="flex items-center gap-2 w-full">
                             <Icon icon="ri:user-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="registerForm.name" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" :placeholder="$t('login-dialog.nickname_placeholder')" />
+                            <input
+                                v-model="registerForm.name"
+                                type="text"
+                                class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                :placeholder="$t('login-dialog.nickname_placeholder')"
+                            />
                         </label>
                         <label class="flex items-center gap-2 w-full">
                             <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="registerForm.email" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" :placeholder="$t('login-dialog.email_placeholder')" />
+                            <input
+                                v-model="registerForm.email"
+                                type="text"
+                                class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                :placeholder="$t('login-dialog.email_placeholder')"
+                            />
                         </label>
                         <label class="flex items-center gap-2 w-full">
                             <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="registerForm.password" type="password" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" :placeholder="$t('login-dialog.password_placeholder')" />
+                            <input
+                                v-model="registerForm.password"
+                                type="password"
+                                class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                :placeholder="$t('login-dialog.password_placeholder')"
+                            />
                         </label>
                         <label class="flex items-center gap-2 w-full">
                             <Icon icon="ri:qq-line" class="w-4 h-4 opacity-70" />
-                            <input v-model="registerForm.qq" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" :placeholder="$t('login-dialog.qq_placeholder')" />
+                            <input
+                                v-model="registerForm.qq"
+                                type="text"
+                                class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                :placeholder="$t('login-dialog.qq_placeholder')"
+                            />
                         </label>
                         <LocalQQ
                             @select="
@@ -298,19 +335,19 @@ const handleResetPassword = async () => {
                         />
                         <button type="submit" class="btn btn-primary w-full" :disabled="loading">
                             <span v-if="loading" class="loading loading-spinner loading-xs" />
-                            <span>{{ loading ? $t('dob-account.registering') : $t('dob-account.register') }}</span>
+                            <span>{{ loading ? $t("dob-account.registering") : $t("dob-account.register") }}</span>
                         </button>
                         <div class="text-center text-sm text-base-content/60">
                             <span>
-                                {{ $t('login-dialog.switch_to_login') }}
+                                {{ $t("login-dialog.switch_to_login") }}
                                 <button type="button" class="link link-primary transition-colors duration-200" @click="auth.openLogin()">
-                                    {{ $t('login-dialog.switch_to_login_action') }}
+                                    {{ $t("login-dialog.switch_to_login_action") }}
                                 </button>
                             </span>
                         </div>
                         <div class="text-center text-sm text-base-content/60">
                             <label class="label cursor-pointer">
-                                <span>{{ $t('dob-account.qq_hint') }}</span>
+                                <span>{{ $t("dob-account.qq_hint") }}</span>
                             </label>
                         </div>
                     </form>
@@ -318,31 +355,38 @@ const handleResetPassword = async () => {
                     <!-- 密码重置 -->
                     <div v-else class="space-y-4">
                         <div class="text-center mb-6">
-                            <div class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4">
+                            <div
+                                class="w-16 h-16 rounded-xs border border-base-content/10 bg-base-content/3 flex items-center justify-center mx-auto mb-4"
+                            >
                                 <img src="/app-icon.png" alt="DNA Builder" class="w-12 h-12" />
                             </div>
-                            <span class="text-lg font-bold">{{ $t('login-dialog.reset_title') }}</span>
+                            <span class="text-lg font-bold">{{ $t("login-dialog.reset_title") }}</span>
                         </div>
 
                         <!-- 步骤1: 输入邮箱 -->
                         <template v-if="resetPasswordForm.step === 1">
                             <div>
-                                <p class="text-sm text-base-content/60 mb-2">{{ $t('login-dialog.reset_intro') }}</p>
+                                <p class="text-sm text-base-content/60 mb-2">{{ $t("login-dialog.reset_intro") }}</p>
                                 <label class="flex items-center gap-2 w-full">
                                     <Icon icon="ri:mail-line" class="w-4 h-4 opacity-70" />
-                                    <input v-model="resetPasswordForm.email" type="text" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" :placeholder="$t('login-dialog.email_placeholder')" />
+                                    <input
+                                        v-model="resetPasswordForm.email"
+                                        type="text"
+                                        class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        :placeholder="$t('login-dialog.email_placeholder')"
+                                    />
                                 </label>
                             </div>
                             <button type="button" class="btn btn-primary w-full" :disabled="loading" @click="sendResetCode">
                                 <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                <span>{{ loading ? $t('dob-account.sending') : $t('dob-account.send_code') }}</span>
+                                <span>{{ loading ? $t("dob-account.sending") : $t("dob-account.send_code") }}</span>
                             </button>
                         </template>
 
                         <!-- 步骤2: 输入验证码和新密码 -->
                         <template v-else>
                             <div>
-                                <p class="text-sm text-base-content/60 mb-2">{{ $t('dob-account.enter_code') }}</p>
+                                <p class="text-sm text-base-content/60 mb-2">{{ $t("dob-account.enter_code") }}</p>
                                 <label class="flex items-center gap-2 w-full">
                                     <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
                                     <input
@@ -356,27 +400,36 @@ const handleResetPassword = async () => {
                             </div>
 
                             <div>
-                                <p class="text-sm text-base-content/60 mb-2">{{ $t('login-dialog.reset_new_password') }}</p>
+                                <p class="text-sm text-base-content/60 mb-2">{{ $t("login-dialog.reset_new_password") }}</p>
                                 <label class="flex items-center gap-2 w-full">
                                     <Icon icon="ri:lock-line" class="w-4 h-4 opacity-70" />
-                                    <input v-model="resetPasswordForm.newPassword" type="password" class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" :placeholder="$t('login-dialog.reset_new_password_placeholder')" />
+                                    <input
+                                        v-model="resetPasswordForm.newPassword"
+                                        type="password"
+                                        class="grow rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                        :placeholder="$t('login-dialog.reset_new_password_placeholder')"
+                                    />
                                 </label>
                             </div>
 
                             <div class="flex gap-2">
                                 <button type="button" class="btn w-1/3" @click="resetPasswordForm.step = 1">
-                                    {{ $t('login-dialog.prev_step') }}
+                                    {{ $t("login-dialog.prev_step") }}
                                 </button>
                                 <button type="button" class="btn btn-primary flex-1" :disabled="loading" @click="handleResetPassword">
                                     <span v-if="loading" class="loading loading-spinner loading-xs" />
-                                    <span>{{ loading ? $t('dob-account.resetting') : $t('dob-account.reset_password') }}</span>
+                                    <span>{{ loading ? $t("dob-account.resetting") : $t("dob-account.reset_password") }}</span>
                                 </button>
                             </div>
                         </template>
 
                         <div class="text-center">
-                            <button type="button" class="text-sm text-base-content/60 hover:text-base-content transition-colors duration-200" @click="auth.openLogin()">
-                                {{ $t('login-dialog.back_to_login') }}
+                            <button
+                                type="button"
+                                class="text-sm text-base-content/60 hover:text-base-content transition-colors duration-200"
+                                @click="auth.openLogin()"
+                            >
+                                {{ $t("login-dialog.back_to_login") }}
                             </button>
                         </div>
                     </div>

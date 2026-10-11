@@ -222,13 +222,17 @@ const topUpRanks = computed(() => {
                         </div>
                         <div class="min-w-0 grow space-y-1.5">
                             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("event.photo_task_unlock") }}</span>
+                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{
+                                    $t("event.photo_task_unlock")
+                                }}</span>
                                 <span class="text-[13px] tabular-nums text-base-content/85">
                                     {{ formatDateTime(task.startTime) }}
                                 </span>
                             </div>
                             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("event.photo_task_location") }}</span>
+                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{
+                                    $t("event.photo_task_location")
+                                }}</span>
                                 <span class="text-[13px] text-base-content/85">{{ $t(task.locationName) }}</span>
                                 <MapPosLink
                                     :sub-region-id="task.subRegionId"
@@ -238,16 +242,16 @@ const topUpRanks = computed(() => {
                                 />
                             </div>
                             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("event.photo_task_region") }}</span>
+                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{
+                                    $t("event.photo_task_region")
+                                }}</span>
                                 <SubRegionLink :sub-region-id="task.subRegionId" />
                             </div>
                             <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("event.photo_task_quest") }}</span>
-                                <SRouterLink
-                                    v-if="task.questChainName"
-                                    :to="`/db/questchain/${task.questChain}`"
-                                    class="link link-primary"
-                                >
+                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{
+                                    $t("event.photo_task_quest")
+                                }}</span>
+                                <SRouterLink v-if="task.questChainName" :to="`/db/questchain/${task.questChain}`" class="link link-primary">
                                     {{ task.questChainName }}
                                 </SRouterLink>
                                 <span v-else class="font-orbitron text-[13px] tabular-nums text-base-content/60">
@@ -255,7 +259,9 @@ const topUpRanks = computed(() => {
                                 </span>
                             </div>
                             <div v-if="task.reward" class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{ $t("event.photo_task_reward") }}</span>
+                                <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">{{
+                                    $t("event.photo_task_reward")
+                                }}</span>
                                 <RewardItem :reward="task.reward" />
                             </div>
                         </div>
@@ -280,12 +286,14 @@ const topUpRanks = computed(() => {
                     :class="entry.big ? 'border-primary/40 bg-primary/5' : ''"
                 >
                     <div class="mb-1.5 flex items-center justify-between gap-2">
-                        <span class="text-[11px] tracking-wide text-base-content/55">{{ $t('event.sign_in_day', { day: entry.day }) }}</span>
+                        <span class="text-[11px] tracking-wide text-base-content/55">{{
+                            $t("event.sign_in_day", { day: entry.day })
+                        }}</span>
                         <span
                             v-if="entry.big"
                             class="rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
                         >
-                            {{ $t('event.sign_in_big') }}
+                            {{ $t("event.sign_in_big") }}
                         </span>
                     </div>
                     <RewardItem v-if="entry.reward" :reward="entry.reward" />
@@ -304,7 +312,9 @@ const topUpRanks = computed(() => {
                     class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                 >
                     <div class="mb-1.5 flex items-center justify-between gap-2">
-                        <span class="text-[11px] tracking-wide text-base-content/55">{{ $t('event.online_time_target', { target: entry.target }) }}</span>
+                        <span class="text-[11px] tracking-wide text-base-content/55">{{
+                            $t("event.online_time_target", { target: entry.target })
+                        }}</span>
                         <Icon icon="ri:time-line" class="size-3.5 shrink-0 text-base-content/40" />
                     </div>
                     <RewardItem v-if="entry.reward" :reward="entry.reward" />
@@ -316,10 +326,7 @@ const topUpRanks = computed(() => {
         <!-- 累充返利 -->
         <section v-if="event.topUpDetail" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="TOP-UP" :title="$t(event.topUpDetail.eventDes)" />
-            <div
-                v-if="event.topUpDetail.eventRule"
-                class="text-sm leading-relaxed whitespace-pre-wrap break-all text-base-content/85"
-            >
+            <div v-if="event.topUpDetail.eventRule" class="text-sm leading-relaxed whitespace-pre-wrap break-all text-base-content/85">
                 <template
                     v-for="(segment, index) in parseEventText(event.topUpDetail.eventRule)"
                     :key="`topup-rule-${index}-${segment.tone}`"
@@ -344,6 +351,8 @@ const topUpRanks = computed(() => {
 
         <!-- 按名称匹配：复刻活动 id 会变但名称不变（如「微茫珍藏」103015/103032），关卡数据由组件内 eventId 过滤 -->
         <BackpackPuzzle v-if="event.name === '微茫珍藏'" :event-id="event.id" />
+
+        <HardBossEventItem v-if="event.hardBossEvent" :event="event" />
 
         <LimitedPrizeSimulator v-if="event.id in limitedPrizePools" :event-id="event.id" />
 

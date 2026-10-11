@@ -167,6 +167,7 @@ const attributeGroups: { key: string; title: string; items: string[] }[] = [
             "独立增伤",
             "武器伤害",
             "技能伤害",
+            "技能追伤",
             "属性穿透",
             "无视防御",
             "技能无视防御",

@@ -122,7 +122,13 @@ onMounted(loadSkills)
             <div class="flex flex-col gap-4 md:flex-row md:items-end md:flex-wrap">
                 <div class="w-full md:w-64">
                     <label class="mb-1 block text-xs text-base-content/60">关键词（名称 / 描述）</label>
-                    <input v-model="filters.keyword" type="text" placeholder="如 build / 伤害" class="input input-bordered w-full" @input="page = 1" />
+                    <input
+                        v-model="filters.keyword"
+                        type="text"
+                        placeholder="如 build / 伤害"
+                        class="input input-bordered w-full"
+                        @input="page = 1"
+                    />
                 </div>
                 <button class="btn btn-ghost" @click="resetFilters">重置</button>
             </div>
@@ -142,8 +148,12 @@ onMounted(loadSkills)
                             <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">技能名</th>
                             <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">描述</th>
                             <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">状态</th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">包（大小 / 文件 / sha）</th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">目录更新时间</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">
+                                包（大小 / 文件 / sha）
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">
+                                目录更新时间
+                            </th>
                         </tr>
                     </thead>
                     <tbody>

@@ -182,7 +182,9 @@ onMounted(loadLists)
                             </div>
                             <div class="rounded-2xl border border-base-300 bg-base-200/50 p-4">
                                 <div class="text-xs uppercase tracking-[0.24em] text-base-content/50">状态</div>
-                                <div class="mt-2 text-2xl font-bold text-base-content">{{ saving ? "保存中" : loading ? "加载中" : "就绪" }}</div>
+                                <div class="mt-2 text-2xl font-bold text-base-content">
+                                    {{ saving ? "保存中" : loading ? "加载中" : "就绪" }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -199,100 +201,110 @@ onMounted(loadLists)
                             <span class="rounded-full bg-base-200 px-3 py-1 text-xs text-base-content/70">{{ lists.length }}</span>
                         </div>
 
-                    <div v-if="loading" class="mt-4 space-y-3">
-                        <div v-for="index in 4" :key="index" class="h-20 animate-pulse rounded-2xl border border-base-300 bg-base-200/40"></div>
-                    </div>
+                        <div v-if="loading" class="mt-4 space-y-3">
+                            <div
+                                v-for="index in 4"
+                                :key="index"
+                                class="h-20 animate-pulse rounded-2xl border border-base-300 bg-base-200/40"
+                            ></div>
+                        </div>
 
-                    <div v-else class="mt-4 space-y-3">
-                        <button
-                            v-for="item in lists"
-                            :key="item.id"
-                            class="group w-full rounded-2xl border border-base-300 bg-base-100 p-4 text-left transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
-                            :class="activeId === item.id ? 'border-primary bg-primary/10' : ''"
-                            @click="selectList(item)"
-                        >
-                            <div class="flex items-start justify-between gap-4">
-                                <div class="min-w-0">
-                                    <div class="truncate text-base font-medium text-base-content">{{ item.name }}</div>
-                                    <div class="mt-2 line-clamp-2 text-sm leading-6 text-base-content/60">{{ item.desc || "无描述" }}</div>
+                        <div v-else class="mt-4 space-y-3">
+                            <button
+                                v-for="item in lists"
+                                :key="item.id"
+                                class="group w-full rounded-2xl border border-base-300 bg-base-100 p-4 text-left transition-all duration-200 hover:border-primary/30 hover:bg-primary/5"
+                                :class="activeId === item.id ? 'border-primary bg-primary/10' : ''"
+                                @click="selectList(item)"
+                            >
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="min-w-0">
+                                        <div class="truncate text-base font-medium text-base-content">{{ item.name }}</div>
+                                        <div class="mt-2 line-clamp-2 text-sm leading-6 text-base-content/60">
+                                            {{ item.desc || "无描述" }}
+                                        </div>
+                                    </div>
+                                    <span class="shrink-0 rounded-full bg-base-200 px-2.5 py-1 text-xs text-base-content/70">
+                                        {{ activeId === item.id ? "已选" : "切换" }}
+                                    </span>
                                 </div>
-                                <span class="shrink-0 rounded-full bg-base-200 px-2.5 py-1 text-xs text-base-content/70">
-                                    {{ activeId === item.id ? "已选" : "切换" }}
-                                </span>
-                            </div>
-                        </button>
-                    </div>
+                            </button>
+                        </div>
                     </div>
                 </aside>
 
                 <section class="card border border-base-300 bg-base-100 shadow-sm">
                     <div class="card-body p-4 sm:p-6">
-                    <div class="grid gap-4 lg:grid-cols-2">
-                        <label class="form-control">
-                            <div class="label">
-                                <span class="label-text text-base-content">榜单名称</span>
-                            </div>
-                            <input v-model="name" class="input input-bordered w-full" placeholder="请输入榜单名称" />
-                        </label>
-                        <label class="form-control">
-                            <div class="label">
-                                <span class="label-text text-base-content">描述</span>
-                            </div>
-                            <input v-model="desc" class="input input-bordered w-full" placeholder="请输入描述" />
-                        </label>
-                    </div>
-
-                    <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <h2 class="text-lg font-bold text-base-content">条目</h2>
-                        </div>
-                        <button class="btn btn-outline" @click="addRow">
-                            添加条目
-                        </button>
-                    </div>
-
-                    <div class="mt-4 space-y-3">
-                        <div
-                            v-for="(row, index) in rows"
-                            :key="`${row.charId}-${index}`"
-                            class="grid gap-3 rounded-2xl border border-base-300 bg-base-100 p-4 lg:grid-cols-[1.1fr_1.1fr_auto]"
-                        >
+                        <div class="grid gap-4 lg:grid-cols-2">
                             <label class="form-control">
                                 <div class="label">
-                                    <span class="label-text text-base-content/70">角色</span>
+                                    <span class="label-text text-base-content">榜单名称</span>
                                 </div>
-                                <select v-model.number="row.charId" class="select select-bordered w-full" @change="handleCharChange(index)">
-                                    <option v-for="char in charData" :key="char.id" :value="char.id">{{ char.名称 }}</option>
-                                </select>
+                                <input v-model="name" class="input input-bordered w-full" placeholder="请输入榜单名称" />
                             </label>
                             <label class="form-control">
                                 <div class="label">
-                                    <span class="label-text text-base-content/70">构筑</span>
+                                    <span class="label-text text-base-content">描述</span>
                                 </div>
-                                <select v-model="row.buildId" class="select select-bordered w-full" @focus="loadBuildOptions(row.charId)">
-                                    <option value="">请选择构筑</option>
-                                    <option v-for="build in buildMap[row.charId] || []" :key="build.id" :value="build.id">{{ build.title }}</option>
-                                </select>
+                                <input v-model="desc" class="input input-bordered w-full" placeholder="请输入描述" />
                             </label>
-                            <div class="flex items-end">
-                                <button class="btn btn-error btn-outline" @click="removeRow(index)">删除</button>
+                        </div>
+
+                        <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <h2 class="text-lg font-bold text-base-content">条目</h2>
+                            </div>
+                            <button class="btn btn-outline" @click="addRow">添加条目</button>
+                        </div>
+
+                        <div class="mt-4 space-y-3">
+                            <div
+                                v-for="(row, index) in rows"
+                                :key="`${row.charId}-${index}`"
+                                class="grid gap-3 rounded-2xl border border-base-300 bg-base-100 p-4 lg:grid-cols-[1.1fr_1.1fr_auto]"
+                            >
+                                <label class="form-control">
+                                    <div class="label">
+                                        <span class="label-text text-base-content/70">角色</span>
+                                    </div>
+                                    <select
+                                        v-model.number="row.charId"
+                                        class="select select-bordered w-full"
+                                        @change="handleCharChange(index)"
+                                    >
+                                        <option v-for="char in charData" :key="char.id" :value="char.id">{{ char.名称 }}</option>
+                                    </select>
+                                </label>
+                                <label class="form-control">
+                                    <div class="label">
+                                        <span class="label-text text-base-content/70">构筑</span>
+                                    </div>
+                                    <select
+                                        v-model="row.buildId"
+                                        class="select select-bordered w-full"
+                                        @focus="loadBuildOptions(row.charId)"
+                                    >
+                                        <option value="">请选择构筑</option>
+                                        <option v-for="build in buildMap[row.charId] || []" :key="build.id" :value="build.id">
+                                            {{ build.title }}
+                                        </option>
+                                    </select>
+                                </label>
+                                <div class="flex items-end">
+                                    <button class="btn btn-error btn-outline" @click="removeRow(index)">删除</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mt-6 flex flex-wrap justify-between gap-3">
-                        <div class="flex flex-wrap gap-2">
-                            <button v-if="activeId" class="btn btn-error btn-outline" @click="removeList(activeList!)">
-                                删除当前榜单
-                            </button>
-                            <button class="btn btn-outline" @click="resetDraft">
-                                新建榜单
-                            </button>
+                        <div class="mt-6 flex flex-wrap justify-between gap-3">
+                            <div class="flex flex-wrap gap-2">
+                                <button v-if="activeId" class="btn btn-error btn-outline" @click="removeList(activeList!)">
+                                    删除当前榜单
+                                </button>
+                                <button class="btn btn-outline" @click="resetDraft">新建榜单</button>
+                            </div>
+                            <button class="btn btn-primary" @click="saveList">保存榜单</button>
                         </div>
-                        <button class="btn btn-primary" @click="saveList">
-                            保存榜单
-                        </button>
-                    </div>
                     </div>
                 </section>
             </div>

@@ -89,7 +89,7 @@ const { mihan, moling, zhouben } = useGameTimer()
                                 <div v-if="section.nextRotationTime" class="text-xs text-base-content/50">
                                     下次轮换：{{ new Date(section.nextRotationTime * 1000).toLocaleString("zh-CN") }}
                                 </div>
-                                <div v-else class="text-xs text-base-content/45">{{ $t('resizeable-window-timers.no_rotation_time') }}</div>
+                                <div v-else class="text-xs text-base-content/45">{{ $t("resizeable-window-timers.no_rotation_time") }}</div>
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2">
@@ -124,7 +124,7 @@ const { mihan, moling, zhouben } = useGameTimer()
                 v-if="!weeklyCurrentSections.length"
                 class="rounded-xs border border-dashed border-base-content/15 p-6 text-center text-sm text-base-content/45"
             >
-                {{ $t('common.no_data') }}
+                {{ $t("common.no_data") }}
             </div>
         </div>
     </DialogModel>

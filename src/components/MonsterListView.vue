@@ -140,10 +140,7 @@ function selectMonster(monster: Monster) {
                 </section>
 
                 <main class="flex-1 py-6 md:py-8">
-                    <div
-                        v-if="filteredMonsters.length === 0"
-                        class="flex flex-col items-center justify-center py-24 text-base-content/50"
-                    >
+                    <div v-if="filteredMonsters.length === 0" class="flex flex-col items-center justify-center py-24 text-base-content/50">
                         <Icon icon="ri:emotion-sad-line" class="mb-5 h-14 w-14 opacity-40" />
                         <p class="text-base">{{ $t("common.no_data") }}</p>
                     </div>
@@ -188,7 +185,9 @@ function selectMonster(monster: Monster) {
                             </div>
 
                             <div class="flex flex-1 flex-col gap-1.5 p-2">
-                                <h3 class="truncate text-xs font-semibold text-base-content transition-colors duration-200 group-hover:text-primary">
+                                <h3
+                                    class="truncate text-xs font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
+                                >
                                     {{ gt(monster.n) }}
                                 </h3>
                                 <div class="mt-auto grid grid-cols-3 gap-1 border-t border-base-content/10 pt-1.5">

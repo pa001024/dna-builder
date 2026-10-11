@@ -336,311 +336,331 @@ function clearHistory() {
 
 <template>
     <div class="h-full flex flex-col">
-        <SplitView
-            :desktop-ratio="1 / 2"
-            :detail-open="Boolean(selectedFish)"
-            @collapse="selectedFish = null"
-        >
+        <SplitView :desktop-ratio="1 / 2" :detail-open="Boolean(selectedFish)" @collapse="selectedFish = null">
             <template #master>
-            <!-- 左侧：池子信息 + 鱼列表 -->
-            <div class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0" :class="{ 'sm:border-r border-base-content/10': selectedFish }">
-                <ScrollArea class="flex-1">
-                    <div class="stagger-rise space-y-3 p-3 sm:p-4">
-                        <!-- 池子信息 -->
-                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                            <SectionHeader no-animate compact kicker="SPOT INFO" />
-                            <!-- 池子名片 -->
-                            <div class="mb-2.5 flex items-center gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                                <div class="size-12 shrink-0 overflow-hidden rounded-xs">
-                                    <img :src="spotIcon" class="h-full w-full object-cover" />
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                        <SRouterLink
-                                            :to="`/db/fishspot/${spot.id}`"
-                                            class="truncate text-lg font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
-                                        >
-                                            {{ $t(spot.name) }}
-                                        </SRouterLink>
-                                        <CopyID :id="spot.id" />
+                <!-- 左侧：池子信息 + 鱼列表 -->
+                <div
+                    class="flex-1 flex min-h-0 flex-col overflow-hidden min-w-0"
+                    :class="{ 'sm:border-r border-base-content/10': selectedFish }"
+                >
+                    <ScrollArea class="flex-1">
+                        <div class="stagger-rise space-y-3 p-3 sm:p-4">
+                            <!-- 池子信息 -->
+                            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                                <SectionHeader no-animate compact kicker="SPOT INFO" :title="$t('db-fish-spot.spot_info')" />
+                                <!-- 池子名片 -->
+                                <div
+                                    class="mb-2.5 flex items-center gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+                                >
+                                    <div class="size-12 shrink-0 overflow-hidden rounded-xs">
+                                        <img :src="spotIcon" class="h-full w-full object-cover" />
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                            <SRouterLink
+                                                :to="`/db/fishspot/${spot.id}`"
+                                                class="truncate text-lg font-bold leading-tight tracking-tight text-base-content transition-colors duration-150 hover:text-primary"
+                                            >
+                                                {{ $t(spot.name) }}
+                                            </SRouterLink>
+                                            <CopyID :id="spot.id" />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="space-y-2">
-                                <!-- 额外奖励 -->
-                                <div v-if="extraRewardDetail" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                                    <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">
-                                        {{
-                                            $t("db-fish-spot.extra_reward", {
-                                                prob: spot.extraRewardProb !== undefined ? `${(spot.extraRewardProb * 100).toFixed(2)}%` : "-",
-                                            })
-                                        }}
-                                    </div>
-                                    <RewardItem :reward="extraRewardDetail" />
-
-                                    <!-- 魔灵奖励 -->
-                                    <div v-if="spotPet" class="mt-2">
+                                <div class="space-y-2">
+                                    <!-- 额外奖励 -->
+                                    <div v-if="extraRewardDetail" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                                         <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">
                                             {{
-                                                $t("db-fish-spot.pet_reward", {
-                                                    prob: spot.petProb !== undefined ? `${(spot.petProb * 100).toFixed(2)}%` : "-",
+                                                $t("db-fish-spot.extra_reward", {
+                                                    prob:
+                                                        spot.extraRewardProb !== undefined
+                                                            ? `${(spot.extraRewardProb * 100).toFixed(2)}%`
+                                                            : "-",
                                                 })
                                             }}
                                         </div>
-                                        <RewardItem :reward="spotPetReward" />
+                                        <RewardItem :reward="extraRewardDetail" />
+
+                                        <!-- 魔灵奖励 -->
+                                        <div v-if="spotPet" class="mt-2">
+                                            <div class="mb-1.5 text-[11px] tracking-wide text-base-content/55">
+                                                {{
+                                                    $t("db-fish-spot.pet_reward", {
+                                                        prob: spot.petProb !== undefined ? `${(spot.petProb * 100).toFixed(2)}%` : "-",
+                                                    })
+                                                }}
+                                            </div>
+                                            <RewardItem :reward="spotPetReward" />
+                                        </div>
+                                    </div>
+                                    <div
+                                        v-else-if="spot.extraReward !== undefined"
+                                        class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-xs text-warning"
+                                    >
+                                        {{ $t("db-fish-spot.no_extra_reward") }}
+                                    </div>
+
+                                    <div
+                                        v-else-if="spot.petId !== undefined"
+                                        class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-xs text-warning"
+                                    >
+                                        {{ $t("db-fish-spot.no_pet_data") }}
                                     </div>
                                 </div>
-                                <div
-                                    v-else-if="spot.extraReward !== undefined"
-                                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-xs text-warning"
-                                >
-                                    {{ $t('db-fish-spot.no_extra_reward') }}
-                                </div>
+                            </section>
 
-                                <div
-                                    v-else-if="spot.petId !== undefined"
-                                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 text-xs text-warning"
-                                >
-                                    {{ $t('db-fish-spot.no_pet_data') }}
+                            <!-- 期望值 -->
+                            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                                <SectionHeader no-animate compact kicker="EXPECTED" :title="$t('db-fish-spot.expected')" />
+                                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">
+                                    {{
+                                        $t("db-fish-spot.expected_hint", {
+                                            lure: getLureName(lure),
+                                            mode: s2bCompare ? $t("db-fish-spot.skip_low_value") : $t("db-fish-spot.always_s2b"),
+                                        })
+                                    }}
                                 </div>
-                            </div>
-                        </section>
-
-                        <!-- 期望值 -->
-                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                            <SectionHeader no-animate compact kicker="EXPECTED" />
-                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">
-                                {{
-                                    $t("db-fish-spot.expected_hint", {
-                                        lure: getLureName(lure),
-                                        mode: s2bCompare ? $t("db-fish-spot.skip_low_value") : $t("db-fish-spot.always_s2b"),
-                                    })
-                                }}
-                            </div>
-                            <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
-                                <div
-                                    v-for="timeExpected in expectedValueByTime"
-                                    :key="timeExpected.time"
-                                    class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
-                                >
-                                    <div class="text-xs text-base-content/60">{{ gt(getAppearName(timeExpected.time)) }}</div>
-                                    <div class="font-orbitron text-lg font-bold text-primary">
-                                        {{ (timeExpected.value * 100).toFixed(2) }}
-                                    </div>
-                                    <div class="text-[11px] tabular-nums text-base-content/50">
-                                        {{ $t("db-fish-spot.per_fish_expected", { value: timeExpected.value.toFixed(2) }) }}
+                                <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+                                    <div
+                                        v-for="timeExpected in expectedValueByTime"
+                                        :key="timeExpected.time"
+                                        class="rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                    >
+                                        <div class="text-xs text-base-content/60">{{ gt(getAppearName(timeExpected.time)) }}</div>
+                                        <div class="font-orbitron text-lg font-bold text-primary">
+                                            {{ (timeExpected.value * 100).toFixed(2) }}
+                                        </div>
+                                        <div class="text-[11px] tabular-nums text-base-content/50">
+                                            {{ $t("db-fish-spot.per_fish_expected", { value: timeExpected.value.toFixed(2) }) }}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </section>
+                            </section>
 
-                        <!-- 鱼列表 -->
-                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                            <SectionHeader no-animate compact kicker="SPECIES" :title="$t('db-fish-spot.fish_list')" :count="spotFish.length" />
-                            <div class="space-y-2">
-                                <div
-                                    v-for="(fish, index) in spotFish"
-                                    :key="fish.id"
-                                    class="group cursor-pointer rounded-xs border p-2.5 transition-all duration-200 hover:-translate-y-0.5"
-                                    :class="
+                            <!-- 鱼列表 -->
+                            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                                <SectionHeader
+                                    no-animate
+                                    compact
+                                    kicker="SPECIES"
+                                    :title="$t('db-fish-spot.fish_list')"
+                                    :count="spotFish.length"
+                                />
+                                <div class="space-y-2">
+                                    <div
+                                        v-for="(fish, index) in spotFish"
+                                        :key="fish.id"
+                                        class="group cursor-pointer rounded-xs border p-2.5 transition-all duration-200 hover:-translate-y-0.5"
+                                        :class="
                                         selectedFish?.id === fish.id
                                             ? 'dbfs-item-active border-primary/70 bg-primary/10'
                                             : 'border-base-content/10 bg-base-content/3 hover:border-primary/40'
                                     "
-                                    @click="selectedFish = fish"
-                                >
-                                    <div class="flex items-center gap-2.5">
-                                        <img
-                                            :src="getFishIcon(fish)"
-                                            class="size-8 shrink-0 rounded-xs bg-linear-15 object-cover"
-                                            :class="getRarityGradientClass(fish.rarity)"
-                                        />
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                                <span
-                                                    class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
-                                                    :class="{ 'text-primary': selectedFish?.id === fish.id }"
-                                                >
-                                                    {{ $t(fish.name) }}
-                                                </span>
-                                                <CopyID :id="fish.id" />
-                                            </div>
-                                            <!-- 属性行 -->
-                                            <div
-                                                class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] leading-4 text-base-content/55"
-                                            >
-                                                <span class="rounded-xs border border-base-content/15 px-1 tabular-nums"
-                                                    >Lv.{{ fish.level }}</span
-                                                >
-                                                <span
-                                                    v-if="calculateFishPrice(fish, 1).length !== calculateFishPrice(fish, 10000).length"
-                                                    class="rounded-xs border border-base-content/15 px-1 tabular-nums"
-                                                >
-                                                    {{ $t("db-fish-detail.length") }}:
-                                                    {{ calculateFishPrice(fish, 1).length }}~{{ calculateFishPrice(fish, 10000).length }}
-                                                </span>
-                                                <span v-else class="rounded-xs border border-base-content/15 px-1 tabular-nums">
-                                                    {{ $t("db-fish-detail.length") }}: {{ calculateFishPrice(fish, 10000).length }}
-                                                </span>
-                                                <span
-                                                    v-if="calculateFishPrice(fish, 1).price !== calculateFishPrice(fish, 10000).price"
-                                                    class="rounded-xs border border-base-content/15 px-1 tabular-nums"
-                                                >
-                                                    {{ $t("common.price") }}:
-                                                    {{ calculateFishPrice(fish, 1).price }}~{{ calculateFishPrice(fish, 10000).price }}
-                                                </span>
-                                                <span v-else class="rounded-xs border border-base-content/15 px-1 tabular-nums">
-                                                    {{ $t("common.price") }}: {{ calculateFishPrice(fish, 10000).price }}
-                                                </span>
-                                                <span
-                                                    v-if="spot.weights[index]"
-                                                    class="rounded-xs border border-base-content/15 px-1 tabular-nums"
-                                                >
-                                                    {{ $t("db-fish-spot.weight") }}: {{ spot.weights[index] }}
-                                                </span>
-                                                <span class="rounded-xs border border-base-content/15 px-1"
-                                                    >{{ $t("db-fish-detail.appearance_time") }}: {{ gt(getAppearNames(fish.appear)) }}</span
-                                                >
-                                                <span
-                                                    v-if="fish.varProb"
-                                                    class="rounded-xs border border-base-content/15 px-1 tabular-nums"
-                                                >
-                                                    {{ $t("db-fish-spot.variant") }}: {{ +(fish.varProb * 100).toFixed(2) }}%
-                                                </span>
-                                                <span v-if="fish.s2b" class="rounded-xs border border-base-content/15 px-1">
-                                                    {{ $t("db-fish-spot.s2b") }}: {{ $t(fishMap.get(fish.s2b)!.name) }}({{
-                                                        calculateFishPrice(fishMap.get(fish.s2b)!, 10000).price
-                                                    }})
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-
-                        <!-- 钓鱼模拟 -->
-                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                            <SectionHeader no-animate compact kicker="SIMULATOR" :title="$t('db-fish-spot.fishing_sim')" />
-                            <div class="space-y-1">
-                                <div
-                                    class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
-                                >
-                                    <span class="w-16 shrink-0 text-xs text-base-content/55">{{ $t('db-fish-spot.fishing_time') }}</span>
-                                    <label v-for="time in [1, 2, 3]" :key="time" class="cursor-pointer text-xs text-base-content/70">
-                                        <input v-model="selectTime" type="radio" :value="time" class="radio radio-sm" />
-                                        {{ gt(getAppearName(time)) }}
-                                    </label>
-                                </div>
-                                <div
-                                    class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
-                                >
-                                    <span class="w-16 shrink-0 text-xs text-base-content/55">{{ $t('db-fish-spot.other') }}</span>
-                                    <label class="cursor-pointer text-xs text-base-content/70">
-                                        <input v-model="s2bCompare" type="checkbox" class="toggle toggle-sm" />
-                                        {{ $t('db-fish-spot.skip_low_value') }}
-                                    </label>
-                                </div>
-                                <div
-                                    class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
-                                >
-                                    <span class="w-16 shrink-0 text-xs text-base-content/55">{{ $t('db-fish-spot.bait_type') }}</span>
-                                    <label
-                                        v-for="lureType in [0, 1, 2]"
-                                        :key="lureType"
-                                        class="cursor-pointer text-xs text-base-content/70"
+                                        @click="selectedFish = fish"
                                     >
-                                        <input v-model="lure" type="radio" :value="lureType" class="radio radio-sm" />
-                                        {{ getLureName(lureType) }}
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="mt-2 grid grid-cols-3 gap-2">
-                                <button
-                                    type="button"
-                                    class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-primary bg-primary px-2 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
-                                    @click="fishOnce"
-                                >
-                                    {{ $t('db-fish-spot.fish_once') }}
-                                </button>
-                                <button
-                                    type="button"
-                                    class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-primary/50 px-2 text-[11px] text-primary transition-colors duration-150 hover:bg-primary/10 active:scale-[0.97]"
-                                    @click="fishMultiple(100)"
-                                >
-                                    {{ $t('db-fish-spot.fish_100') }}
-                                </button>
-                                <button
-                                    type="button"
-                                    class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error active:scale-[0.97]"
-                                    @click="clearHistory"
-                                >
-                                    {{ $t('db-fish-spot.clear_records') }}
-                                </button>
-                            </div>
-                        </section>
-
-                        <!-- 钓鱼记录 -->
-                        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-                            <SectionHeader no-animate compact kicker="RECORDS" :title="$t('db-fish-spot.fishing_records')" :count="catchCount" />
-                            <div class="mb-2 text-[11px] tracking-wide text-base-content/55">
-                                {{ $t('db-fish-spot.total_value') }}
-                                <b class="font-orbitron text-sm font-semibold text-primary">{{
-                                    +reducedCatchHistory.reduce((acc, cur) => acc + cur.price * cur.count, 0).toFixed(2)
-                                }}</b>
-                            </div>
-                            <div class="space-y-2">
-                                <div
-                                    v-for="(record, index) in reducedCatchHistory"
-                                    :key="index"
-                                    class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40"
-                                >
-                                    <div class="flex items-center gap-2.5">
-                                        <img
-                                            :src="getFishIcon(record.finalFish)"
-                                            class="size-8 shrink-0 rounded-xs bg-linear-15 object-cover"
-                                            :class="getRarityGradientClass(record.finalFish.rarity)"
-                                        />
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                                <span class="truncate text-sm font-semibold">{{ $t(record.finalFish.name) }}</span>
-                                                <span
-                                                    class="shrink-0 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] leading-4 tabular-nums text-base-content/60"
+                                        <div class="flex items-center gap-2.5">
+                                            <img
+                                                :src="getFishIcon(fish)"
+                                                class="size-8 shrink-0 rounded-xs bg-linear-15 object-cover"
+                                                :class="getRarityGradientClass(fish.rarity)"
+                                            />
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                    <span
+                                                        class="truncate text-sm font-semibold transition-colors duration-200 group-hover:text-primary"
+                                                        :class="{ 'text-primary': selectedFish?.id === fish.id }"
+                                                    >
+                                                        {{ $t(fish.name) }}
+                                                    </span>
+                                                    <CopyID :id="fish.id" />
+                                                </div>
+                                                <!-- 属性行 -->
+                                                <div
+                                                    class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] leading-4 text-base-content/55"
                                                 >
-                                                    x{{ record.count }}
-                                                </span>
-                                            </div>
-                                            <div class="mt-1 text-[11px] tabular-nums text-base-content/55">
-                                                {{ $t("common.price") }}:
-                                                {{ record.originPrice ? `${record.originPrice} -> ${record.price}` : record.price }}
-                                                <span v-if="record.mutated" class="ml-1 font-medium text-success">{{
-                                                    $t("db-fish-spot.mutation")
-                                                }}</span>
-                                                <span v-if="record.originFish" class="ml-1 font-medium text-info"
-                                                    >{{ $t("db-fish-spot.s2b") }} ({{ $t(record.originFish.name) }})</span
-                                                >
-                                                <span class="ml-1">{{ +record.length.toFixed(2) }}cm</span>
+                                                    <span class="rounded-xs border border-base-content/15 px-1 tabular-nums"
+                                                        >Lv.{{ fish.level }}</span
+                                                    >
+                                                    <span
+                                                        v-if="calculateFishPrice(fish, 1).length !== calculateFishPrice(fish, 10000).length"
+                                                        class="rounded-xs border border-base-content/15 px-1 tabular-nums"
+                                                    >
+                                                        {{ $t("db-fish-detail.length") }}:
+                                                        {{ calculateFishPrice(fish, 1).length }}~{{
+                                                            calculateFishPrice(fish, 10000).length
+                                                        }}
+                                                    </span>
+                                                    <span v-else class="rounded-xs border border-base-content/15 px-1 tabular-nums">
+                                                        {{ $t("db-fish-detail.length") }}: {{ calculateFishPrice(fish, 10000).length }}
+                                                    </span>
+                                                    <span
+                                                        v-if="calculateFishPrice(fish, 1).price !== calculateFishPrice(fish, 10000).price"
+                                                        class="rounded-xs border border-base-content/15 px-1 tabular-nums"
+                                                    >
+                                                        {{ $t("common.price") }}:
+                                                        {{ calculateFishPrice(fish, 1).price }}~{{ calculateFishPrice(fish, 10000).price }}
+                                                    </span>
+                                                    <span v-else class="rounded-xs border border-base-content/15 px-1 tabular-nums">
+                                                        {{ $t("common.price") }}: {{ calculateFishPrice(fish, 10000).price }}
+                                                    </span>
+                                                    <span
+                                                        v-if="spot.weights[index]"
+                                                        class="rounded-xs border border-base-content/15 px-1 tabular-nums"
+                                                    >
+                                                        {{ $t("db-fish-spot.weight") }}: {{ spot.weights[index] }}
+                                                    </span>
+                                                    <span class="rounded-xs border border-base-content/15 px-1"
+                                                        >{{ $t("db-fish-detail.appearance_time") }}:
+                                                        {{ gt(getAppearNames(fish.appear)) }}</span
+                                                    >
+                                                    <span
+                                                        v-if="fish.varProb"
+                                                        class="rounded-xs border border-base-content/15 px-1 tabular-nums"
+                                                    >
+                                                        {{ $t("db-fish-spot.variant") }}: {{ +(fish.varProb * 100).toFixed(2) }}%
+                                                    </span>
+                                                    <span v-if="fish.s2b" class="rounded-xs border border-base-content/15 px-1">
+                                                        {{ $t("db-fish-spot.s2b") }}: {{ $t(fishMap.get(fish.s2b)!.name) }}({{
+                                                            calculateFishPrice(fishMap.get(fish.s2b)!, 10000).price
+                                                        }})
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div v-if="reducedCatchHistory.length === 0" class="py-6 text-center text-sm text-base-content/45">
-                                    {{ $t('db-fish-spot.no_records') }}
-                                </div>
-                            </div>
-                        </section>
-                    </div>
-                </ScrollArea>
-            </div>
+                            </section>
 
+                            <!-- 钓鱼模拟 -->
+                            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                                <SectionHeader no-animate compact kicker="SIMULATOR" :title="$t('db-fish-spot.fishing_sim')" />
+                                <div class="space-y-1">
+                                    <div
+                                        class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                    >
+                                        <span class="w-16 shrink-0 text-xs text-base-content/55">{{
+                                            $t("db-fish-spot.fishing_time")
+                                        }}</span>
+                                        <label v-for="time in [1, 2, 3]" :key="time" class="cursor-pointer text-xs text-base-content/70">
+                                            <input v-model="selectTime" type="radio" :value="time" class="radio radio-sm" />
+                                            {{ gt(getAppearName(time)) }}
+                                        </label>
+                                    </div>
+                                    <div
+                                        class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                    >
+                                        <span class="w-16 shrink-0 text-xs text-base-content/55">{{ $t("db-fish-spot.other") }}</span>
+                                        <label class="cursor-pointer text-xs text-base-content/70">
+                                            <input v-model="s2bCompare" type="checkbox" class="toggle toggle-sm" />
+                                            {{ $t("db-fish-spot.skip_low_value") }}
+                                        </label>
+                                    </div>
+                                    <div
+                                        class="flex flex-wrap items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                                    >
+                                        <span class="w-16 shrink-0 text-xs text-base-content/55">{{ $t("db-fish-spot.bait_type") }}</span>
+                                        <label
+                                            v-for="lureType in [0, 1, 2]"
+                                            :key="lureType"
+                                            class="cursor-pointer text-xs text-base-content/70"
+                                        >
+                                            <input v-model="lure" type="radio" :value="lureType" class="radio radio-sm" />
+                                            {{ getLureName(lureType) }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mt-2 grid grid-cols-3 gap-2">
+                                    <button
+                                        type="button"
+                                        class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-primary bg-primary px-2 text-[11px] font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
+                                        @click="fishOnce"
+                                    >
+                                        {{ $t("db-fish-spot.fish_once") }}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-primary/50 px-2 text-[11px] text-primary transition-colors duration-150 hover:bg-primary/10 active:scale-[0.97]"
+                                        @click="fishMultiple(100)"
+                                    >
+                                        {{ $t("db-fish-spot.fish_100") }}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="inline-flex h-6 cursor-pointer items-center justify-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-error/60 hover:text-error active:scale-[0.97]"
+                                        @click="clearHistory"
+                                    >
+                                        {{ $t("db-fish-spot.clear_records") }}
+                                    </button>
+                                </div>
+                            </section>
+
+                            <!-- 钓鱼记录 -->
+                            <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+                                <SectionHeader
+                                    no-animate
+                                    compact
+                                    kicker="RECORDS"
+                                    :title="$t('db-fish-spot.fishing_records')"
+                                    :count="catchCount"
+                                />
+                                <div class="mb-2 text-[11px] tracking-wide text-base-content/55">
+                                    {{ $t("db-fish-spot.total_value") }}
+                                    <b class="font-orbitron text-sm font-semibold text-primary">{{
+                                        +reducedCatchHistory.reduce((acc, cur) => acc + cur.price * cur.count, 0).toFixed(2)
+                                    }}</b>
+                                </div>
+                                <div class="space-y-2">
+                                    <div
+                                        v-for="(record, index) in reducedCatchHistory"
+                                        :key="index"
+                                        class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40"
+                                    >
+                                        <div class="flex items-center gap-2.5">
+                                            <img
+                                                :src="getFishIcon(record.finalFish)"
+                                                class="size-8 shrink-0 rounded-xs bg-linear-15 object-cover"
+                                                :class="getRarityGradientClass(record.finalFish.rarity)"
+                                            />
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                    <span class="truncate text-sm font-semibold">{{ $t(record.finalFish.name) }}</span>
+                                                    <span
+                                                        class="shrink-0 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] leading-4 tabular-nums text-base-content/60"
+                                                    >
+                                                        x{{ record.count }}
+                                                    </span>
+                                                </div>
+                                                <div class="mt-1 text-[11px] tabular-nums text-base-content/55">
+                                                    {{ $t("common.price") }}:
+                                                    {{ record.originPrice ? `${record.originPrice} -> ${record.price}` : record.price }}
+                                                    <span v-if="record.mutated" class="ml-1 font-medium text-success">{{
+                                                        $t("db-fish-spot.mutation")
+                                                    }}</span>
+                                                    <span v-if="record.originFish" class="ml-1 font-medium text-info"
+                                                        >{{ $t("db-fish-spot.s2b") }}
+                                                        ({{ $t(record.originFish.name) }})</span
+                                                    >
+                                                    <span class="ml-1">{{ +record.length.toFixed(2) }}cm</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-if="reducedCatchHistory.length === 0" class="py-6 text-center text-sm text-base-content/45">
+                                        {{ $t("db-fish-spot.no_records") }}
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </ScrollArea>
+                </div>
             </template>
             <template #detail>
-
-            <!-- 右侧：鱼详情 -->
-            <ScrollArea v-if="selectedFish" class="min-h-0 min-w-0 flex-1">
-                <DBFishDetailItem :fish="selectedFish" />
-            </ScrollArea>
+                <!-- 右侧：鱼详情 -->
+                <ScrollArea v-if="selectedFish" class="min-h-0 min-w-0 flex-1">
+                    <DBFishDetailItem :fish="selectedFish" />
+                </ScrollArea>
             </template>
         </SplitView>
     </div>

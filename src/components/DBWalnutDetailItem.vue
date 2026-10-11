@@ -3,6 +3,10 @@ import { useTranslation } from "i18next-vue"
 import { computed, ref, watch } from "vue"
 import { formatModName, LeveledMod, LeveledWeaponHelper, modDraftMap, modMap, resourceMap, weaponDraftMap, weaponMap } from "@/data"
 import { Walnut } from "@/data/d/walnut.data"
+import { formatProp } from "@/util"
+import { formatModLimit } from "@/utils/mod-limit"
+import { getRarityGradientClass } from "@/utils/rarity-utils"
+import { getWalnutProduct, getWalnutProductName, getWalnutRewardName } from "@/utils/walnut-product"
 import { WalnutSequenceSimulator } from "@/utils/walnut-utils"
 
 const props = defineProps<{
@@ -55,6 +59,11 @@ const draft = computed(() => {
     return getDraftByReward(props.walnut.奖励[0]) ?? null
 })
 
+/**
+ * 密函成品（首个奖励对应的角色 / 武器 / 魔之楔），图标底色与属性展示都取它。
+ */
+const product = computed(() => getWalnutProduct(props.walnut))
+
 // 模拟开函相关状态
 const simulator = new WalnutSequenceSimulator()
 const openResults = ref<number[][]>([])
@@ -63,23 +72,20 @@ const autoOpenTimer = ref<number | null>(null)
 const totalOpens = ref(0)
 const goldCount = ref(0)
 
-// 奖励数量统计
-const rewardCounts = ref<Record<string, number>>({})
+// 奖励数量统计：键为 `图纸标记 + 展示名`，同名同类合并、成品与图纸分开
+const rewardCounts = ref<Record<string, { name: string; d: number; count: number }>>({})
 
 // 武器部件数量统计
 const weaponPartCounts = ref<Record<string, number>>({})
 
 // 按稀有度排序的奖励统计
 const sortedRewardCounts = computed(() => {
-    // 直接使用索引访问奖励，索引越小，稀有度越高
-    return Object.entries(rewardCounts.value)
-        .map(([name, count]) => {
-            // 查找奖励在数组中的索引，索引越小稀有度越高
-            const index = props.walnut.奖励.findIndex(r => r.name === name)
+    // 同组取最早出现的索引定稀有度，索引越小越稀有
+    return Object.values(rewardCounts.value)
+        .map(entry => {
+            const index = props.walnut.奖励.findIndex(r => getWalnutRewardName(r) === entry.name && (r.d || 0) === entry.d)
             return {
-                d: props.walnut.奖励[index]?.d || 0,
-                name: props.walnut.奖励[index]?.name || name,
-                count,
+                ...entry,
                 rarity: index + 1, // 索引+1作为稀有度，1最高
             }
         })
@@ -94,8 +100,39 @@ const rewardLinkItems = computed(() =>
         reward,
         links: getRewardLinks(reward),
         icon: getRewardIcon(reward),
+        bg: getRewardBg(reward),
+        name: getWalnutRewardName(reward),
     }))
 )
+
+/**
+ * 奖励图标底色：成品品质对应的稀有度渐变（设计稿奖励看其产物，武器统一金底）。
+ * @param reward 奖励项
+ * @returns 渐变类名
+ */
+function getRewardBg(reward: Walnut["奖励"][number]): string {
+    if (reward.d) {
+        const rewardDraft = getDraftByReward(reward)
+        if (rewardDraft?.t === "Mod") {
+            return getRarityGradientClass(modMap.get(rewardDraft.p)?.品质 ?? 1)
+        }
+        return getRarityGradientClass(5)
+    }
+
+    if (reward.type === "Mod") {
+        return getRarityGradientClass(modMap.get(reward.id)?.品质 ?? 1)
+    }
+
+    if (reward.type === "Weapon") {
+        return getRarityGradientClass(5)
+    }
+
+    if (reward.type === "Resource") {
+        return getRarityGradientClass(resourceMap.get(reward.id)?.rarity ?? 1)
+    }
+
+    return getRarityGradientClass(1)
+}
 
 /**
  * 获取奖励对应的图标地址。
@@ -250,7 +287,7 @@ function sortRewards(rewards: number[]): number[] {
         const reward = props.walnut.奖励[index]
         return {
             index,
-            name: reward?.name || $t("db-walnut-detail.unknown"),
+            name: reward ? getWalnutRewardName(reward) : $t("db-walnut-detail.unknown"),
             isGold: index === 0, // 索引0为金奖
             rarity: index + 1, // 索引+1作为稀有度，1最高
             count: reward?.count || 1,
@@ -306,17 +343,21 @@ function openOnce() {
     // 对奖励进行排序
     result = sortRewards(result)
 
-    // 只统计第一个奖励
+    // 只统计第一个奖励（同名同类合并，成品与图纸分开）
     const index = result[0]
     const reward = props.walnut.奖励[index]
     if (!reward) return
+    const rewardName = getWalnutRewardName(reward)
+    const statKey = `${reward.d ? "d:" : ""}${rewardName}`
 
     // 更新奖励统计，乘以奖励数量
-    rewardCounts.value[reward.name] = (rewardCounts.value[reward.name] || 0) + reward.count
+    const stat = rewardCounts.value[statKey] ?? { name: rewardName, d: reward.d || 0, count: 0 }
+    stat.count += reward.count
+    rewardCounts.value[statKey] = stat
 
     // 如果是武器部件，单独统计，乘以奖励数量
-    if (isWeaponPart(reward.name)) {
-        weaponPartCounts.value[reward.name] = (weaponPartCounts.value[reward.name] || 0) + reward.count
+    if (isWeaponPart(rewardName)) {
+        weaponPartCounts.value[rewardName] = (weaponPartCounts.value[rewardName] || 0) + reward.count
     }
 
     openResults.value.unshift(result)
@@ -385,10 +426,28 @@ function getRewardInfo(index: number) {
     const reward = props.walnut.奖励[index]
     return {
         index,
-        name: reward?.name || $t("db-walnut-detail.unknown"),
+        name: reward ? getWalnutRewardName(reward) : $t("db-walnut-detail.unknown"),
         count: reward?.count || 1,
         d: reward?.d || 0,
         links: reward ? getRewardLinks(reward) : [],
+    }
+}
+
+/**
+ * 奖励档位色点类名（金 / 大银 / 小银 / 铜，无文字），配色与档位文字色一致。
+ * @param index 奖励在数组中的索引，0 为金奖
+ * @returns 背景色类名
+ */
+function getRewardTierDot(index: number): string {
+    switch (index) {
+        case 0: // 金
+            return "bg-yellow-500"
+        case 1: // 大银
+            return "bg-blue-400"
+        case 2: // 小银
+            return "bg-cyan-400"
+        default: // 铜
+            return "bg-gray-500"
     }
 }
 
@@ -430,25 +489,37 @@ function getRewardTypeColor(index: number): string {
                 class="pointer-events-none absolute top-0 right-0 h-8 w-8 bg-primary [clip-path:polygon(100%_0,100%_100%,0_0)]"
                 aria-hidden="true"
             />
-            <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
-                <span class="h-px w-6 bg-primary" aria-hidden="true" />
-                Walnut File
-            </p>
-            <div class="relative flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content sm:text-2xl">{{ $t(walnut.名称) }}</span>
-                <CopyID :id="walnut.id" />
-            </div>
-            <!-- 元信息行：稀有度 / 类型 / 模式 -->
-            <div class="relative mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
-                <span class="font-orbitron text-[13px] font-semibold text-primary">{{
-                    $t("db-walnut-detail.rarity_stars", { count: walnut.稀有度 })
-                }}</span>
-                <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                <span>{{ $t(getWalnutTypeName(walnut.类型)) }}</span>
-                <template v-if="walnut.模式">
-                    <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                    <span>{{ $t(walnut.模式) }}</span>
-                </template>
+            <div class="relative flex items-start gap-3.5">
+                <!-- 成品图标（成品品质渐变底，同魔之楔详情） -->
+                <div
+                    class="size-20 shrink-0 overflow-hidden rounded-xs bg-linear-15 sm:size-24"
+                    :class="product.bg"
+                >
+                    <img
+                        :src="product.icon"
+                        :alt="$t(walnut.名称)"
+                        class="h-full w-full object-cover"
+                        :class="{ 'object-top': product.kind === 'Char' }"
+                    />
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="mb-2 inline-flex items-center gap-2 text-[10px] font-semibold tracking-[0.32em] text-primary uppercase">
+                        <span class="h-px w-6 bg-primary" aria-hidden="true" />
+                        Walnut File
+                    </p>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span class="truncate font-orbitron text-xl font-bold leading-tight tracking-tight text-base-content sm:text-2xl">{{ $t(walnut.名称) }}</span>
+                        <CopyID :id="walnut.id" />
+                    </div>
+                    <!-- 元信息行：类型 / 模式 -->
+                    <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
+                        <span>{{ $t(getWalnutTypeName(walnut.类型)) }}</span>
+                        <template v-if="walnut.模式">
+                            <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
+                            <span>{{ $t(walnut.模式) }}</span>
+                        </template>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -464,6 +535,154 @@ function getRewardTypeColor(index: number): string {
                     {{ $t(way) }}
                 </span>
             </div>
+        </section>
+
+        <!-- 成品属性：首个奖励对应的角色 / 武器 / 魔之楔，同魔之楔详情的属性格 -->
+        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="PRODUCT" title="成品属性" />
+            <!-- 魔之楔成品 -->
+            <template v-if="product.mod">
+                <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <SRouterLink
+                        :to="`/db/mod/${product.mod.id}`"
+                        class="text-sm font-semibold text-primary transition-colors duration-150 hover:underline"
+                    >
+                        {{ formatModName(product.mod.系列, product.mod.名称, $t) }}
+                    </SRouterLink>
+                    <CopyID :id="product.mod.id" />
+                    <span class="text-[11px] text-base-content/55">{{ $t(product.mod.类型) }}</span>
+                    <span v-if="product.mod.属性" class="text-[11px] text-base-content/55">{{ $t(`${product.mod.属性}属性`) }}</span>
+                    <span v-if="product.mod.限定" class="text-[11px] text-base-content/55">{{ $t(formatModLimit(product.mod.限定)) }}</span>
+                    <span v-if="product.mod.版本" class="font-mono text-[11px] tabular-nums text-base-content/55">v{{ product.mod.版本 }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
+                    <div
+                        v-for="[key, attr] in Object.entries(new LeveledMod(product.mod).getProperties()).filter(([_, v]) => v)"
+                        :key="key"
+                        class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                    >
+                        <span class="text-xs text-base-content/60">{{ $t(key) }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                            formatProp(key, attr)
+                        }}</span>
+                    </div>
+                </div>
+                <template v-if="product.mod.生效">
+                    <div class="mt-2 mb-1.5 text-[11px] tracking-wide text-base-content/55">条件属性</div>
+                    <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
+                        <div
+                            v-for="[key, attr] in Object.entries(product.mod.生效).filter(([k, v]) => k !== '条件' && v)"
+                            :key="key"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t(key) }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                                formatProp(key, attr)
+                            }}</span>
+                        </div>
+                    </div>
+                </template>
+            </template>
+            <!-- 武器成品 -->
+            <template v-else-if="product.weapon">
+                <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <SRouterLink
+                        :to="`/db/weapon/${product.weapon.id}`"
+                        class="text-sm font-semibold text-primary transition-colors duration-150 hover:underline"
+                    >
+                        {{ $t(product.weapon.名称) }}
+                    </SRouterLink>
+                    <CopyID :id="product.weapon.id" />
+                    <span class="text-[11px] text-base-content/55">{{ product.weapon.类型.map(t => $t(t)).join(", ") }}</span>
+                    <span class="text-[11px] text-base-content/55">{{ $t(product.weapon.伤害类型) }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5 md:grid-cols-4">
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-xs text-base-content/60">{{ $t("攻击") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                            formatProp("基础攻击", product.weapon.攻击)
+                        }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-xs text-base-content/60">{{ $t("暴击") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                            formatProp("基础暴击", product.weapon.暴击)
+                        }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-xs text-base-content/60">{{ $t("暴伤") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                            formatProp("基础暴伤", product.weapon.暴伤)
+                        }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-xs text-base-content/60">{{ $t("触发") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                            formatProp("基础触发", product.weapon.触发)
+                        }}</span>
+                    </div>
+                </div>
+                <template v-if="product.weapon.加成">
+                    <div class="mt-2 mb-1.5 text-[11px] tracking-wide text-base-content/55">{{ $t("char-build.bonus_attr") }}</div>
+                    <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
+                        <div
+                            v-for="[key, attr] in Object.entries(product.weapon.加成)"
+                            :key="key"
+                            class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+                        >
+                            <span class="text-xs text-base-content/60">{{ $t(key) }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
+                                formatProp(key, attr)
+                            }}</span>
+                        </div>
+                    </div>
+                </template>
+            </template>
+            <!-- 角色成品 -->
+            <template v-else-if="product.char">
+                <div class="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <SRouterLink
+                        :to="`/db/char/${product.char.id}`"
+                        class="text-sm font-semibold text-primary transition-colors duration-150 hover:underline"
+                    >
+                        {{ $t(product.char.名称) }}
+                    </SRouterLink>
+                    <CopyID :id="product.char.id" />
+                    <span class="text-[11px] text-base-content/55">{{ $t(`${product.char.属性}属性`) }}</span>
+                    <span v-if="product.char.阵营" class="text-[11px] text-base-content/55">{{ $t(product.char.阵营) }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5 md:grid-cols-3">
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-xs text-base-content/60">{{ $t("攻击") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ product.char.基础攻击 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-xs text-base-content/60">{{ $t("生命") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ product.char.基础生命 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-xs text-base-content/60">{{ $t("防御") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ product.char.基础防御 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-xs text-base-content/60">{{ $t("护盾") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ product.char.基础护盾 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
+                        <span class="text-xs text-base-content/60">{{ $t("最大神智") }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ product.char.基础神智 }}</span>
+                    </div>
+                </div>
+            </template>
+            <!-- 资源兜底 -->
+            <template v-else-if="product.resource && product.link">
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <SRouterLink :to="product.link" class="text-sm font-semibold text-primary transition-colors duration-150 hover:underline">
+                        {{ getWalnutProductName(product, $t) }}
+                    </SRouterLink>
+                    <CopyID :id="product.resource.id" />
+                </div>
+            </template>
         </section>
 
         <!-- 奖励列表 -->
@@ -490,7 +709,13 @@ function getRewardTypeColor(index: number): string {
                             <td class="px-3 py-2 font-mono text-xs tabular-nums text-base-content/45">{{ item.reward.id }}</td>
                             <td class="px-3 py-2 text-sm">
                                 <div class="flex items-center gap-2">
-                                    <img :src="item.icon" :alt="item.reward.name" class="size-6 shrink-0 rounded-xs object-cover" />
+                                    <span class="size-2.5 shrink-0 rounded-xs" :class="getRewardTierDot(index)" aria-hidden="true" />
+                                    <img
+                                        :src="item.icon"
+                                        :alt="item.name"
+                                        class="size-6 shrink-0 rounded-xs bg-linear-15 object-cover"
+                                        :class="item.bg"
+                                    />
                                     <template v-if="item.links.length > 0">
                                         <span v-for="(link, linkIndex) in item.links" :key="link.to" class="inline-flex items-center gap-1">
                                             <SRouterLink
@@ -502,7 +727,7 @@ function getRewardTypeColor(index: number): string {
                                             <span v-if="linkIndex < item.links.length - 1" class="mx-1 text-base-content/50">/</span>
                                         </span>
                                     </template>
-                                    <span v-else>{{ item.reward.d ? `${$t("UI_FORGING_BLUEPRINT")}${$t(item.reward.name)}` : $t(item.reward.name) }}</span>
+                                    <span v-else>{{ item.reward.d ? `${$t("UI_FORGING_BLUEPRINT")}${$t(item.name)}` : $t(item.name) }}</span>
                                 </div>
                             </td>
                             <td class="px-3 py-2">
@@ -650,12 +875,12 @@ function getRewardTypeColor(index: number): string {
                     <div v-else class="grid grid-cols-2 gap-2">
                         <div
                             v-for="reward in sortedRewardCounts"
-                            :key="reward.name"
+                            :key="`${reward.d}:${reward.name}`"
                             class="flex items-center justify-between rounded-xs p-2 text-xs transition-colors duration-150 hover:bg-base-content/4"
                         >
                             <div>
                                 <span :class="getRewardColor(reward.rarity)">
-                                    <span>{{ $t(reward.name) }}</span></span
+                                    <span>{{ reward.d ? `${$t("UI_FORGING_BLUEPRINT")}${$t(reward.name)}` : $t(reward.name) }}</span></span
                                 >
                             </div>
                             <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary"

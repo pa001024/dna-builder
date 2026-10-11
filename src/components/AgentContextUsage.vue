@@ -181,9 +181,7 @@ function handleCompact() {
                 <!-- 头部：标题 + 已用/窗口（含「万」等本地化单位，不用 font-mono） -->
                 <div class="flex items-baseline justify-between gap-3">
                     <p class="shrink-0 text-xs font-medium text-base-content/85">{{ $t(label("contextUsage.title")) }}</p>
-                    <p class="min-w-0 truncate text-[11px] tabular-nums text-base-content/55">
-                        {{ usageLabel }}（{{ percentLabel }}）
-                    </p>
+                    <p class="min-w-0 truncate text-[11px] tabular-nums text-base-content/55">{{ usageLabel }}（{{ percentLabel }}）</p>
                 </div>
 
                 <!-- 总量进度条（线性）：接近上限时逐级告警 -->
@@ -206,10 +204,7 @@ function handleCompact() {
                 </ul>
 
                 <!-- 平均缓存命中率：上游回传了缓存数据且命中率可信时才展示 -->
-                <div
-                    v-if="showCacheHitRate"
-                    class="mt-1 flex items-center justify-between gap-3 border-t border-base-content/10 pt-2.5"
-                >
+                <div v-if="showCacheHitRate" class="mt-1 flex items-center justify-between gap-3 border-t border-base-content/10 pt-2.5">
                     <span class="text-xs text-base-content/60">{{ $t(label("contextUsage.cacheHitRate")) }}</span>
                     <span class="font-mono text-[10px] tabular-nums text-base-content/75">{{ cacheHitRateLabel }}</span>
                 </div>
@@ -227,11 +222,7 @@ function handleCompact() {
                         :disabled="props.compacting"
                         @click="handleCompact"
                     >
-                        <Icon
-                            icon="ri:file-zip-line"
-                            class="h-3.5 w-3.5"
-                            :class="props.compacting ? 'animate-spin' : ''"
-                        />
+                        <Icon icon="ri:file-zip-line" class="h-3.5 w-3.5" :class="props.compacting ? 'animate-spin' : ''" />
                         {{ props.compacting ? $t(label("contextUsage.compacting")) : $t(label("contextUsage.compact")) }}
                     </button>
                 </div>

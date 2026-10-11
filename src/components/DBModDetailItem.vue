@@ -316,7 +316,7 @@ const skillReplaceCompareGroups = computed<SkillReplaceCompareGroup[]>(() => {
 
         <!-- 等级调整 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="LEVEL" />
+            <SectionHeader no-animate compact kicker="LEVEL" :title="$t('等级调整')" />
             <LevelSlider v-model="currentLevel" :step="1" :min="0" :max="leveledMod.maxLevel" />
         </section>
 

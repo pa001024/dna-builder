@@ -543,21 +543,21 @@ function formatShopTimeShort(timestamp: number): string {
         >
             <SectionHeader no-animate compact kicker="FILTER" :title="$t('db-shop-detail.time_filter')" />
             <div class="flex flex-wrap items-start justify-between gap-3">
-                <div class="text-xs leading-relaxed text-base-content/55">{{ $t('db-shop-detail.timeline_desc') }}</div>
+                <div class="text-xs leading-relaxed text-base-content/55">{{ $t("db-shop-detail.timeline_desc") }}</div>
                 <div class="flex flex-wrap items-center gap-4">
                     <button
                         type="button"
                         class="inline-flex h-6 shrink-0 cursor-pointer items-center rounded-xs border border-base-content/20 px-2 text-[11px] text-base-content/60 transition-colors duration-150 hover:border-primary/60 hover:text-primary active:scale-[0.97]"
                         @click="resetToCurrentTimePoint"
                     >
-                        {{ $t('common.reset_to_current') }}
+                        {{ $t("common.reset_to_current") }}
                     </button>
                     <label class="label cursor-pointer gap-2 p-0">
-                        <span class="text-sm">{{ $t('db-shop-detail.current_only') }}</span>
+                        <span class="text-sm">{{ $t("db-shop-detail.current_only") }}</span>
                         <input v-model="timeFilterEnabled" type="checkbox" class="toggle toggle-primary toggle-sm" />
                     </label>
                     <label class="label cursor-pointer gap-2 p-0">
-                        <span class="text-sm">{{ $t('common.show_diff_only') }}</span>
+                        <span class="text-sm">{{ $t("common.show_diff_only") }}</span>
                         <input
                             v-model="diffOnlyEnabled"
                             type="checkbox"
@@ -570,22 +570,22 @@ function formatShopTimeShort(timestamp: number): string {
 
             <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60">
                 <span class="rounded-xs border border-base-content/15 bg-base-content/3 px-1.5 py-0.5 tabular-nums">
-                    {{ $t('db-shop-detail.time_point_count', { count: shopTimePoints.length }) }}
+                    {{ $t("db-shop-detail.time_point_count", { count: shopTimePoints.length }) }}
                 </span>
                 <span v-if="selectedTimePoint" class="tabular-nums">{{
-                    $t('db-shop-detail.current_time_point', { label: selectedTimePoint.label })
+                    $t("db-shop-detail.current_time_point", { label: selectedTimePoint.label })
                 }}</span>
                 <span v-if="selectedTimePoint" class="tabular-nums">{{
-                    $t('db-shop-detail.purchasable_count', { count: selectedTimePoint.activeItemCount })
+                    $t("db-shop-detail.purchasable_count", { count: selectedTimePoint.activeItemCount })
                 }}</span>
                 <span v-if="diffOnlyEnabled && previousSelectedTimePoint" class="tabular-nums">{{
-                    $t('db-shop-detail.compare_previous', { label: previousSelectedTimePoint.label })
+                    $t("db-shop-detail.compare_previous", { label: previousSelectedTimePoint.label })
                 }}</span>
                 <span
                     v-if="selectedTimePoint?.isCurrent"
                     class="rounded-xs bg-base-content px-1.5 py-0.5 text-[10px] font-semibold text-base-100"
                 >
-                    {{ $t('db-shop-detail.current') }}
+                    {{ $t("db-shop-detail.current") }}
                 </span>
             </div>
 
@@ -607,10 +607,11 @@ function formatShopTimeShort(timestamp: number): string {
 
         <!-- 商店主标签 -->
         <div v-for="mainTab in filteredMainTabs.filter(t => t.name === selectedShop)" :key="mainTab.id" class="space-y-3">
-            <!-- 商店子标签 -->
+            <!-- 商店子标签：v-for 批量重复组，退出滚动目录 -->
             <section
                 v-for="subTab in mainTab.subTabs"
                 :key="subTab.id"
+                data-scroll-nav-ignore
                 class="rounded-xs border p-3 backdrop-blur-sm"
                 :class="isRouteSubTab(subTab.id) ? 'border-primary/70 bg-primary/6' : 'border-base-content/10 bg-base-100/60'"
             >
@@ -622,7 +623,7 @@ function formatShopTimeShort(timestamp: number): string {
                     >
                         <template v-if="diffOnlyEnabled">
                             {{
-                                $t('db-shop-detail.changed_with_deps', {
+                                $t("db-shop-detail.changed_with_deps", {
                                     changed: subTab.changedItemCount,
                                     deps: subTab.visibleItems.length - subTab.changedItemCount,
                                 })
@@ -630,7 +631,7 @@ function formatShopTimeShort(timestamp: number): string {
                         </template>
                         <template v-else>
                             {{
-                                $t('db-shop-detail.available_with_deps', {
+                                $t("db-shop-detail.available_with_deps", {
                                     count: subTab.activeVisibleItemCount,
                                     deps: subTab.visibleItems.length - subTab.activeVisibleItemCount,
                                 })
@@ -651,7 +652,7 @@ function formatShopTimeShort(timestamp: number): string {
                     v-else
                     class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-6 text-center text-sm text-base-content/45"
                 >
-                    {{ diffOnlyEnabled ? $t('db-shop-detail.no_diff_items') : $t('db-shop-detail.no_available_items') }}
+                    {{ diffOnlyEnabled ? $t("db-shop-detail.no_diff_items") : $t("db-shop-detail.no_available_items") }}
                 </div>
             </section>
         </div>

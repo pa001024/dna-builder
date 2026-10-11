@@ -179,33 +179,33 @@ const questTypeIconUrl = computed(() => `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[pro
             <SectionHeader no-animate compact kicker="INFO" :title="$t('db-dynquest-detail.quest_info')" />
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t('common.area') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.area") }}</span>
                     <span class="text-sm">{{ $t(getRegionInfo(quest.regionId).name) }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t('common.sub_region') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.sub_region") }}</span>
                     <SubRegionLink :sub-region-id="quest.subRegionId" />
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t('common.cooldown') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.cooldown") }}</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ quest.cd }}m</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t('common.player_count') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.player_count") }}</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ quest.person }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t('common.rarity') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.rarity") }}</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ quest.rarity }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t('common.weight') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.weight") }}</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ quest.weight }}</span>
                 </div>
                 <div
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2 sm:col-span-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t('common.coordinate') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.coordinate") }}</span>
                     <MapPosLink
                         :sub-region-id="quest.subRegionId"
                         :point="quest.pos"
@@ -218,7 +218,13 @@ const questTypeIconUrl = computed(() => `/imgs/res/${DYN_QUEST_TYPE_ICON_MAP[pro
 
         <!-- 等级档位 -->
         <section v-if="questLevelGroups.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="LEVELS" :title="$t('db-dynquest-detail.level_tiers')" :count="questLevelGroups.length" />
+            <SectionHeader
+                no-animate
+                compact
+                kicker="LEVELS"
+                :title="$t('db-dynquest-detail.level_tiers')"
+                :count="questLevelGroups.length"
+            />
             <AniTabs v-model="activeQuestLevelGroupKey" :tabs="questLevelGroupTabs" />
             <div v-if="activeQuestLevelGroup" class="mt-2 space-y-3">
                 <div

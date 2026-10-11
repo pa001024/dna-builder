@@ -417,10 +417,7 @@ onBeforeUnmount(() => {
         <!-- 全局账号弹窗：任意页面都能通过 useAuthStore().openLogin() / requireLogin() 拉起 -->
         <LoginDialog />
         <!-- 局域网同步配对确认弹窗：手机端发起配对时在任意页面弹出（Teleport 到 body 顶层） -->
-        <LanSyncPairDialog
-            :requests="lanSync.pendingPairRequests"
-            @resolve="lanSync.resolvePairRequest"
-        />
+        <LanSyncPairDialog :requests="lanSync.pendingPairRequests" @resolve="lanSync.resolvePairRequest" />
         <ScriptRuntimeFloatingBar v-if="isMainWindow" />
         <!-- 分享 MOD 下载队列（后台串行下载 + 安装，切页面不中断） -->
         <ModDownloadPanel />

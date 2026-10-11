@@ -113,7 +113,7 @@ onMounted(() => {
     <div class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
             <div class="text-sm font-medium">
-                {{ $t('comment-section.comment') }} <span class="opacity-60">({{ comments.length }})</span>
+                {{ $t("comment-section.comment") }} <span class="opacity-60">({{ comments.length }})</span>
             </div>
             <button class="btn btn-ghost btn-xs" type="button" @click="loadComments">
                 <Icon icon="ri:refresh-line" />
@@ -123,7 +123,7 @@ onMounted(() => {
         <!-- 未登录：评论需要账号，直接给出登录入口 -->
         <div v-if="!user.id" class="flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-2">
             <Icon icon="ri:lock-line" class="size-4 shrink-0 text-base-content/40" />
-            <span class="text-xs text-base-content/60">{{ $t('login-dialog.need_login_hint') }}</span>
+            <span class="text-xs text-base-content/60">{{ $t("login-dialog.need_login_hint") }}</span>
             <LoginButton class="ml-auto shrink-0" size="xs" variant="outline" />
         </div>
         <div v-else class="flex items-center gap-2">
@@ -140,8 +140,8 @@ onMounted(() => {
             </button>
         </div>
 
-        <div v-if="loading" class="py-2 text-xs opacity-60">{{ $t('common.loading') }}</div>
-        <div v-else-if="!comments.length" class="py-2 text-xs opacity-60">{{ $t('comment-section.no_comments') }}</div>
+        <div v-if="loading" class="py-2 text-xs opacity-60">{{ $t("common.loading") }}</div>
+        <div v-else-if="!comments.length" class="py-2 text-xs opacity-60">{{ $t("comment-section.no_comments") }}</div>
         <div v-else class="space-y-3">
             <div v-for="comment in comments" :key="comment.id" class="flex gap-2.5">
                 <QQAvatar class="w-8" :qq="comment.user?.qq" />

@@ -3,8 +3,6 @@ import { computed } from "vue"
 import type { RouteLocationRaw } from "vue-router"
 import { regionMap, subRegionMap } from "@/data/d"
 
-
-
 const props = defineProps<{
     subRegionId: number
     point: [number, number] | null | undefined
@@ -56,6 +54,6 @@ const displayPointText = computed(() => {
         <span class="text-right wrap-break-word">
             <slot>{{ displayPointText }}</slot>
         </span>
-        <SRouterLink v-if="mapLocalLink" :to="mapLocalLink" class="link link-primary"> {{ $t('map-pos-link.jump') }} </SRouterLink>
+        <SRouterLink v-if="mapLocalLink" :to="mapLocalLink" class="link link-primary"> {{ $t("map-pos-link.jump") }} </SRouterLink>
     </span>
 </template>

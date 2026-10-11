@@ -526,7 +526,10 @@ const accessoryUnlock = computed(() => {
             称号框预览：按游戏内 WBP 数据实时渲染（图层位置、材质、动画都来自 pak）。
             组件以设计画布 236×34 为基准缩放，给任意宽度都能保持实机比例。
         -->
-        <section v-if="isTitleFrameAccessory(accessory)" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <section
+            v-if="isTitleFrameAccessory(accessory)"
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+        >
             <SectionHeader no-animate compact kicker="TITLE FRAME" :title="$t('accessory.titleFramePreview')" />
             <div class="mt-3 flex justify-center overflow-hidden rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-6">
                 <TitleFrameRender class="w-full max-w-90" :frame="accessory.frame" :title="$t(accessoryName)" />

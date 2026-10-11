@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-
 import { hardBossMap } from "@/data/d"
 import { formatWeaponSourceTimeRange, type WeaponHardbossSourceInfo } from "@/utils/weapon-source"
 

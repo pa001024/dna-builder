@@ -379,7 +379,13 @@ const roomConditions = computed(() => {
             v-if="'activateNeed' in item && item.activateNeed.length"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="ACTIVATION" :title="$t('db-rouge-detail.section_activation')" :count="item.activateNeed.length" />
+            <SectionHeader
+                no-animate
+                compact
+                kicker="ACTIVATION"
+                :title="$t('db-rouge-detail.section_activation')"
+                :count="item.activateNeed.length"
+            />
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <DBRougeTreasureItem v-for="treasureId in item.activateNeed" :key="treasureId" :id="treasureId" />
             </div>
@@ -423,7 +429,13 @@ const roomConditions = computed(() => {
         </section>
 
         <section v-if="roomConditions.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="CONDITIONS" :title="$t('db-rouge-detail.section_conditions')" :count="roomConditions.length" />
+            <SectionHeader
+                no-animate
+                compact
+                kicker="CONDITIONS"
+                :title="$t('db-rouge-detail.section_conditions')"
+                :count="roomConditions.length"
+            />
             <div class="space-y-2">
                 <ConditionItem v-for="condition in roomConditions" :key="condition.id" :condition="condition" />
             </div>
@@ -458,9 +470,7 @@ const roomConditions = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.shop_price") }}</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.shopPrices
-                    }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{ item.shopPrices }}</span>
                 </div>
                 <div
                     v-if="'endPoints' in item && (item.endPoints as number[]).length"
@@ -483,9 +493,7 @@ const roomConditions = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.equip_slot") }}</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.modEquip
-                    }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{ item.modEquip }}</span>
                 </div>
                 <div
                     v-if="'mod' in item"
@@ -499,9 +507,7 @@ const roomConditions = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.global_passive") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.globalPassiveId
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.globalPassiveId }}</span>
                 </div>
                 <div
                     v-if="'rlArchiveId' in item"
@@ -524,18 +530,14 @@ const roomConditions = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.blessing_award") }}</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.blessingAward
-                    }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{ item.blessingAward }}</span>
                 </div>
                 <div
                     v-if="'tokenAward' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.token_award") }}</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.tokenAward
-                    }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{ item.tokenAward }}</span>
                 </div>
                 <div
                     v-if="'endPointsBase' in item"
@@ -549,9 +551,7 @@ const roomConditions = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.extra_points") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.endPointsExtras
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.endPointsExtras }}</span>
                 </div>
                 <div
                     v-if="'unlock' in item && (item.unlock as number[]).length"
@@ -567,9 +567,7 @@ const roomConditions = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.event_phase") }}</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.moment
-                    }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{ item.moment }}</span>
                 </div>
                 <div
                     v-if="'minRoom' in item"
@@ -583,9 +581,7 @@ const roomConditions = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.event_chance") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.probability.join(" / ")
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.probability.join(" / ") }}</span>
                 </div>
                 <div
                     v-if="'cutOffEvent' in item"

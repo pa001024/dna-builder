@@ -211,7 +211,9 @@ onBeforeUnmount(() => {
                 <div class="mb-2 flex items-center gap-2">
                     <span class="shrink-0 text-[11px] tracking-wide text-base-content/55">色差上限 ΔE</span>
                     <input v-model.number="threshold" type="range" min="2" max="60" step="1" class="range range-primary range-xs flex-1" />
-                    <span class="w-7 shrink-0 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{ threshold }}</span>
+                    <span class="w-7 shrink-0 text-right font-orbitron text-[13px] font-semibold tabular-nums text-primary">{{
+                        threshold
+                    }}</span>
                 </div>
 
                 <div v-if="results.length" class="flex max-h-80 flex-col gap-1.5 overflow-y-auto pr-0.5">
@@ -250,9 +252,7 @@ onBeforeUnmount(() => {
                         </span>
                     </button>
                 </div>
-                <div v-else class="py-3 text-center text-xs text-base-content/45">
-                    没有 ΔE 不超过 {{ threshold }} 的色板，试试放宽上限
-                </div>
+                <div v-else class="py-3 text-center text-xs text-base-content/45">没有 ΔE 不超过 {{ threshold }} 的色板，试试放宽上限</div>
             </section>
         </div>
     </SourceDetailDialog>

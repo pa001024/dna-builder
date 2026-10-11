@@ -63,7 +63,7 @@ function formatCutoffTime(timestamp: number) {
 
 <template>
     <div v-if="displayShopSources.length > 0" class="space-y-2">
-        <div class="text-[11px] tracking-wide text-base-content/55">{{ $t('shop-source.shop_purchase') }}</div>
+        <div class="text-[11px] tracking-wide text-base-content/55">{{ $t("shop-source.shop_purchase") }}</div>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
             <div
                 v-for="source in displayShopSources"
@@ -148,8 +148,10 @@ function formatCutoffTime(timestamp: number) {
                             SHOP
                         </span>
                         <span class="truncate"
-                            >{{ $t(source.shopName) }} · {{ $t("shop-source.limit") }} {{ source.limit || "∞" }}
-                            {{ $t("shop-source.quantity") }} x{{ source.num }}</span
+                            >{{ $t(source.shopName) }}
+                            · {{ $t("shop-source.limit") }} {{ source.limit || "∞" }}
+                            {{ $t("shop-source.quantity") }}
+                            x{{ source.num }}</span
                         >
                     </div>
                     <div class="mt-0.5 truncate text-[10px] text-base-content/45">

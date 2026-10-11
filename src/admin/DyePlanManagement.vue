@@ -110,8 +110,7 @@ const config: AdminCrudConfig<DyePlan> = {
     ],
     rowKey: item => item.id,
     async fetchList(params) {
-        const hasHair =
-            params.filters.hasHair === "1" ? true : params.filters.hasHair === "0" ? false : undefined
+        const hasHair = params.filters.hasHair === "1" ? true : params.filters.hasHair === "0" ? false : undefined
         const common = {
             search: params.search,
             type: String(params.filters.type || ""),

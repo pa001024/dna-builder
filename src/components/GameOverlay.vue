@@ -77,7 +77,7 @@ const currentMonster = computed(() => {
                     v-if="playerStats.currentSanity < 50"
                     class="bg-purple-900/40 border border-purple-500 text-purple-300 px-3 py-1 rounded-full text-xs font-bold"
                 >
-                    {{ $t('game-overlay.low_sanity') }}
+                    {{ $t("game-overlay.low_sanity") }}
                 </div>
             </div>
 
@@ -126,7 +126,7 @@ const currentMonster = computed(() => {
         <!-- --- HUD: Top Right DPS --- -->
         <div class="absolute top-4 right-4 bg-black/40 backdrop-blur-sm p-4 rounded-xl border border-white/10 text-right">
             <div class="flex items-center justify-end gap-2 text-slate-300 text-xs font-bold uppercase tracking-wider mb-1">
-                <Icon icon="ri:line-chart-line" /> {{ $t('game-overlay.statistics') }}
+                <Icon icon="ri:line-chart-line" /> {{ $t("game-overlay.statistics") }}
             </div>
             <div class="text-2xl font-black font-mono text-white">
                 {{ dps.current.toLocaleString() }} <span class="text-sm text-slate-400">DPS</span>
@@ -211,7 +211,8 @@ const currentMonster = computed(() => {
         <dialog v-if="isSettingsOpen" class="modal modal-open pointer-events-auto">
             <div class="bg-slate-800 border border-slate-700 p-8 rounded-3xl w-full max-w-md shadow-2xl">
                 <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                    <Icon icon="ri:settings-3-line" class="text-indigo-400" /> 设置
+                    <Icon icon="ri:settings-3-line" class="text-indigo-400" />
+                    设置
                 </h2>
 
                 <div class="space-y-6">
@@ -227,15 +228,9 @@ const currentMonster = computed(() => {
                             </SelectItem>
                         </Select>
                         <div class="text-right text-xs text-slate-500">
-                            <span>
-                                HP: <span class="text-primary">{{ currentMonster?.hp }}</span>
-                            </span>
-                            <span v-if="currentMonster?.es">
-                                Shld: <span class="text-primary">{{ currentMonster?.es }}</span>
-                            </span>
-                            <span>
-                                Def: <span class="text-primary">{{ currentMonster?.def }}</span>
-                            </span>
+                            <span> HP: <span class="text-primary">{{ currentMonster?.hp }}</span> </span>
+                            <span v-if="currentMonster?.es"> Shld: <span class="text-primary">{{ currentMonster?.es }}</span> </span>
+                            <span> Def: <span class="text-primary">{{ currentMonster?.def }}</span> </span>
                         </div>
                     </div>
 
@@ -286,7 +281,8 @@ const currentMonster = computed(() => {
 
                     <div>
                         <label class="block text-sm font-bold text-slate-400 mb-2">
-                            神智回复 (+{{ localSettings.sanityRegenAmount }} / {{ localSettings.sanityRegenInterval }}s)
+                            神智回复 (+{{ localSettings.sanityRegenAmount }}
+                            / {{ localSettings.sanityRegenInterval }}s)
                         </label>
                         <div class="flex gap-2">
                             <input

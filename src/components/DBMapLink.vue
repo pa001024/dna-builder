@@ -19,7 +19,7 @@ import { buildDBMapRoute, type DBMapGroup, resolveDBMapGroups } from "@/utils/db
  * 哪个名字没对上，页面上也不会留下一串没人认识的标签文本。
  */
 const props = defineProps<{
-    /** 条目类型：book / npc / resource（也接受「读物 / NPC / 资源 / 道具」这类写法） */
+    /** 条目类型：book / npc / resource / pan（也接受「读物 / NPC / 资源 / 道具 / 潘神」这类写法） */
     kind?: string
     /** 条目 id（优先用它定位，取自工具返回结果） */
     id?: number | string

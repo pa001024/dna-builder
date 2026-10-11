@@ -203,9 +203,7 @@ function getResourceIconUrl(icon: string): string {
                     <div class="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-base-content/60">
                         <span v-if="sourceCounts" class="inline-flex items-center gap-1.5">
                             {{ $t("resource.source") }}
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                                sourceCounts
-                            }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ sourceCounts }}</span>
                         </span>
                         <template v-if="resource.source?.length">
                             <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
@@ -307,10 +305,11 @@ function getResourceIconUrl(icon: string): string {
             </div>
         </section>
 
-        <!-- 获取途径 -->
+        <!-- 获取途径：官方 access 摘要卡片 + 各类详细来源，样式与来源卡片统一 -->
         <section
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
             v-if="
+                resource.access?.length ||
                 draftSources.length ||
                 dungeonSources.length ||
                 hardbossSources.length ||
@@ -323,6 +322,34 @@ function getResourceIconUrl(icon: string): string {
         >
             <SectionHeader no-animate compact kicker="SOURCE" :title="$t('resource.source')" />
             <div class="space-y-3">
+                <div v-if="resource.access?.length" class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-2">
+                    <div
+                        v-for="item in resource.access"
+                        :key="item"
+                        class="group flex w-full items-center gap-2.5 rounded-xs border border-base-content/15 bg-base-content/4 p-2 transition-colors duration-200 hover:border-primary/50 hover:bg-base-content/6"
+                    >
+                        <div class="relative size-11 shrink-0 overflow-hidden rounded-xs bg-linear-to-b from-sky-500/25 to-sky-100/10">
+                            <Icon
+                                icon="ri:compass-3-line"
+                                class="absolute inset-0 m-auto size-5 text-base-content/50 transition-transform duration-300 ease-out group-hover:scale-110"
+                            />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4
+                                class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
+                            >
+                                {{ gt(item) }}
+                            </h4>
+                            <div class="mt-0.5 flex items-center gap-1.5 text-[10px] text-base-content/45">
+                                <span
+                                    class="shrink-0 rounded-xs bg-sky-500/15 px-1 py-px font-mono text-[8px] font-semibold tracking-[0.15em] uppercase text-sky-400"
+                                >
+                                    ACCESS
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <DraftSource :draft-sources="draftSources" />
                 <DungeonSource :dungeon-sources="dungeonSources" />
                 <BossSource :boss-sources="hardbossSources" />

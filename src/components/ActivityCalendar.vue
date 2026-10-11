@@ -733,7 +733,10 @@ onMounted(() => {
                                     <div>
                                         <!-- 状态标签 -->
                                         <div class="flex items-center gap-2 mb-2">
-                                            <span class="px-1.5 py-0.5 rounded-xs text-[10px] font-semibold whitespace-nowrap" :class="statusBadgeClass(item.activity)">
+                                            <span
+                                                class="px-1.5 py-0.5 rounded-xs text-[10px] font-semibold whitespace-nowrap"
+                                                :class="statusBadgeClass(item.activity)"
+                                            >
                                                 {{
                                                     item.activity.isMoling && isMolingCompleted
                                                         ? $t("activity-calendar.moling_completed")
@@ -854,7 +857,10 @@ onMounted(() => {
                                     <div>
                                         <!-- 状态标签 -->
                                         <div class="flex items-center gap-2 mb-2">
-                                            <span class="px-1.5 py-0.5 rounded-xs text-[10px] font-semibold whitespace-nowrap" :class="statusBadgeClass(item.activity)">
+                                            <span
+                                                class="px-1.5 py-0.5 rounded-xs text-[10px] font-semibold whitespace-nowrap"
+                                                :class="statusBadgeClass(item.activity)"
+                                            >
                                                 {{
                                                     item.activity.isMoling && isMolingCompleted
                                                         ? $t("activity-calendar.moling_completed")

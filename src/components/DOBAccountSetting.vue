@@ -209,9 +209,9 @@ async function startNameEdit() {
                     </div>
                     <div class="ml-auto flex items-center gap-2">
                         <button v-if="user.roles.includes('admin')" class="btn btn-sm btn-outline" @click="$router.push('/admin')">
-                            {{ $t('dob-account.manage') }}
+                            {{ $t("dob-account.manage") }}
                         </button>
-                        <button class="btn btn-sm btn-outline btn-error" @click="handleLogout">{{ $t('dob-account.logout') }}</button>
+                        <button class="btn btn-sm btn-outline btn-error" @click="handleLogout">{{ $t("dob-account.logout") }}</button>
                     </div>
                 </div>
                 <!-- 用户详细信息 -->
@@ -220,7 +220,7 @@ async function startNameEdit() {
                         <div class="flex items-center justify-between text-sm">
                             <span class="font-medium inline-flex items-center gap-1.5">
                                 <span
-                                    >{{ $t('common.level') }}
+                                    >{{ $t("common.level") }}
                                     <b class="font-orbitron text-[13px] font-semibold text-primary">Lv.{{ user.level }}</b></span
                                 >
                                 <FullTooltip side="bottom">
@@ -229,10 +229,10 @@ async function startNameEdit() {
                                     </button>
                                     <template #tooltip>
                                         <div class="w-72 space-y-2 text-xs leading-5 text-base-content">
-                                            <div class="font-semibold">{{ $t('dob-account.daily_exp_progress') }}</div>
+                                            <div class="font-semibold">{{ $t("dob-account.daily_exp_progress") }}</div>
                                             <div v-if="dailyExperienceStatus" class="space-y-2">
                                                 <div class="flex items-center justify-between gap-3">
-                                                    <span>{{ $t('dob-account.earned_today') }}</span>
+                                                    <span>{{ $t("dob-account.earned_today") }}</span>
                                                     <span class="tabular-nums">
                                                         {{ dailyExperienceStatus.todayAwardedExp }}/{{
                                                             dailyExperienceStatus.totalAvailableExp
@@ -247,7 +247,7 @@ async function startNameEdit() {
                                                 <div class="border-t border-base-content/10 pt-2 space-y-2">
                                                     <div class="space-y-1">
                                                         <div class="flex items-center justify-between gap-3">
-                                                            <span>{{ $t('dob-account.task_open_app') }}</span>
+                                                            <span>{{ $t("dob-account.task_open_app") }}</span>
                                                             <span class="tabular-nums">
                                                                 {{
                                                                     clampProgress(
@@ -270,7 +270,7 @@ async function startNameEdit() {
                                                     </div>
                                                     <div class="space-y-1">
                                                         <div class="flex items-center justify-between gap-3">
-                                                            <span>{{ $t('dob-account.task_online_1h') }}</span>
+                                                            <span>{{ $t("dob-account.task_online_1h") }}</span>
                                                             <span class="tabular-nums">
                                                                 {{
                                                                     clampProgress(
@@ -315,7 +315,7 @@ async function startNameEdit() {
                                                     </div>
                                                     <div class="space-y-1">
                                                         <div class="flex items-center justify-between gap-3">
-                                                            <span>{{ $t('dob-account.task_first_chat') }}</span>
+                                                            <span>{{ $t("dob-account.task_first_chat") }}</span>
                                                             <span class="tabular-nums">
                                                                 {{
                                                                     clampProgress(
@@ -338,10 +338,10 @@ async function startNameEdit() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div v-else class="text-base-content/60">{{ $t('dob-account.progress_unavailable') }}</div>
+                                            <div v-else class="text-base-content/60">{{ $t("dob-account.progress_unavailable") }}</div>
                                             <div class="border-t border-base-content/10 pt-2 space-y-2">
                                                 <div class="flex items-center justify-between gap-3">
-                                                    <span>{{ $t('dob-account.task_abyss_upload') }}</span>
+                                                    <span>{{ $t("dob-account.task_abyss_upload") }}</span>
                                                     <span class="tabular-nums">
                                                         {{ abyssUsageUploadStatus?.uploadedThisSeason ? "1/1" : "0/1" }}
                                                     </span>
@@ -357,7 +357,8 @@ async function startNameEdit() {
                                 </FullTooltip>
                             </span>
                             <span class="text-base-content/60"
-                                ><b class="font-orbitron text-[13px] font-semibold text-primary">{{ user.experience }}</b> {{ $t('dob-account.total_exp') }}</span
+                                ><b class="font-orbitron text-[13px] font-semibold text-primary">{{ user.experience }}</b>
+                                {{ $t("dob-account.total_exp") }}</span
                             >
                         </div>
                         <progress
@@ -366,22 +367,28 @@ async function startNameEdit() {
                             :max="levelProgress.requiredExp"
                         />
                         <div class="text-xs text-base-content/60 mt-1 flex justify-between">
-                            <span>{{ $t('dob-account.level_exp', { current: levelProgress.currentLevelExp, required: levelProgress.requiredExp }) }}</span>
-                            <span>{{ $t('dob-account.exp_to_level_up', { value: levelProgress.requiredExp - levelProgress.currentLevelExp }) }}</span>
+                            <span>{{
+                                $t("dob-account.level_exp", { current: levelProgress.currentLevelExp, required: levelProgress.requiredExp })
+                            }}</span>
+                            <span>{{
+                                $t("dob-account.exp_to_level_up", { value: levelProgress.requiredExp - levelProgress.currentLevelExp })
+                            }}</span>
                         </div>
                     </div>
                     <div v-if="user.qq" class="flex justify-between">
-                        <span class="text-base-content/60">{{ $t('dob-account.qq') }}</span>
+                        <span class="text-base-content/60">{{ $t("dob-account.qq") }}</span>
                         <span>{{ user.qq }}</span>
                     </div>
                     <div v-if="user.roles && user.roles.length" class="flex justify-between items-center">
-                        <span class="text-base-content/60">{{ $t('dob-account.roles') }}</span>
+                        <span class="text-base-content/60">{{ $t("dob-account.roles") }}</span>
                         <span class="flex flex-wrap justify-end gap-1">
                             <span
                                 v-for="role in user.roles"
                                 :key="role"
                                 class="rounded-xs border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary"
-                                >{{ role }}</span
+                                >{{
+                                    role
+                                }}</span
                             >
                         </span>
                     </div>
@@ -402,38 +409,39 @@ async function startNameEdit() {
                             <div class="text-xs text-base-content/50 mt-1">用于兑换称号、名字特效等装扮</div>
                         </div>
                         <div class="rounded-xs border border-base-content/10 bg-base-content/3 p-3">
-                            <div class="text-xs text-base-content/60">{{ $t('dob-account.current_appearance') }}</div>
+                            <div class="text-xs text-base-content/60">{{ $t("dob-account.current_appearance") }}</div>
                             <div class="mt-1 text-sm space-y-1">
                                 <div class="flex justify-between gap-2">
-                                    <span class="text-base-content/60">{{ $t('title-frame-label.title') }}</span>
+                                    <span class="text-base-content/60">{{ $t("title-frame-label.title") }}</span>
                                     <span class="truncate">
-                                        {{ shopSummary?.selectedTitleAsset?.rewardName || $t('common.default') }}
+                                        {{ shopSummary?.selectedTitleAsset?.rewardName || $t("common.default") }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between gap-2">
-                                    <span class="text-base-content/60">{{ $t('points-mall.rewardType.nameCard') }}</span>
+                                    <span class="text-base-content/60">{{ $t("points-mall.rewardType.nameCard") }}</span>
                                     <span class="truncate">
-                                        {{ shopSummary?.selectedNameCardAsset?.rewardName || $t('common.default') }}
+                                        {{ shopSummary?.selectedNameCardAsset?.rewardName || $t("common.default") }}
                                     </span>
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-primary w-full mt-2" @click="$router.push('/points-mall')">{{ $t('dob-account.go_points_mall') }}</button>
+                            <button class="btn btn-sm btn-primary w-full mt-2" @click="$router.push('/points-mall')">
+                                {{ $t("dob-account.go_points_mall") }}
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- 未登录状态 -->
             <div v-else class="rounded-xs border border-base-content/10 bg-base-content/3 px-3 py-5 text-center">
-                <div class="text-base-content/60 mb-3">{{ $t('dob-account.not_logged_in') }}</div>
-                <button class="btn btn-primary px-12 mx-2" @click="auth.openLogin()">{{ $t('dob-account.login') }}</button>
-                <button class="btn btn-primary px-12 mx-2" @click="auth.openRegister()">{{ $t('dob-account.register') }}</button>
+                <div class="text-base-content/60 mb-3">{{ $t("dob-account.not_logged_in") }}</div>
+                <button class="btn btn-primary px-12 mx-2" @click="auth.openLogin()">{{ $t("dob-account.login") }}</button>
+                <button class="btn btn-primary px-12 mx-2" @click="auth.openRegister()">{{ $t("dob-account.register") }}</button>
             </div>
         </div>
 
         <!-- 功能说明 -->
         <div class="border-t border-base-content/10 pt-2.5 text-xs text-base-content/45">
-            <p>{{ $t('dob-account.account_desc') }}</p>
+            <p>{{ $t("dob-account.account_desc") }}</p>
         </div>
-
     </div>
 </template>

@@ -245,6 +245,37 @@ function collectPetShopSources(pet: Pet): PetShopSource[] {
  */
 const petShopSources = computed<PetShopSource[]>(() => collectPetShopSources(props.pet))
 
+interface PetReleaseReward {
+    id: number
+    count: number
+    name: string
+    icon: string
+    rarity: number
+}
+
+/**
+ * 当前魔灵放生可获得的资源列表（放生字段为资源 id → 数量的映射）。
+ */
+const petReleaseRewards = computed<PetReleaseReward[]>(() => {
+    if (!props.pet.放生) {
+        return []
+    }
+
+    return Object.entries(props.pet.放生)
+        .map(([idText, count]) => {
+            const id = Number(idText)
+            const resource = resourceMap.get(id)
+            return {
+                id,
+                count,
+                name: resource?.name ?? idText,
+                icon: resource?.icon ? `/imgs/res/${resource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp",
+                rarity: resource?.rarity ?? 1,
+            }
+        })
+        .sort((a, b) => a.id - b.id)
+})
+
 /**
  * 收集当前失活魔灵对应的魔灵潜质来源。
  */
@@ -400,7 +431,7 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
 
         <!-- 等级调整 -->
         <section v-if="pet.最大等级 > 1" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="LEVEL" />
+            <SectionHeader no-animate compact kicker="LEVEL" :title="$t('等级调整')" />
             <LevelSlider v-model="currentLevel" :max="5" :step="1" />
         </section>
 
@@ -463,9 +494,8 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                                 },
                             }"
                         >
-                            {{ $t("pet_detail.rc_label") }} {{ rcWeight.rcId }}: {{ rcWeight.petWeight }}/{{ rcWeight.totalWeight }} ({{
-                                formatPercent(rcWeight.ratio)
-                            }})
+                            {{ $t("pet_detail.rc_label") }} {{ rcWeight.rcId }}: {{ rcWeight.petWeight }}/{{ rcWeight.totalWeight }}
+                            ({{ formatPercent(rcWeight.ratio) }})
                         </SRouterLink>
                     </div>
                 </div>
@@ -488,7 +518,8 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                                 :to="`/db/shop/${source.shopId}/${source.subTabId}`"
                                 class="min-w-0 truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
                             >
-                                {{ gt(source.mainTabName) }} / {{ gt(source.subTabName) }}
+                                {{ gt(source.mainTabName) }}
+                                / {{ gt(source.subTabName) }}
                             </SRouterLink>
                             <span class="shrink-0 text-[11px] text-base-content/55">({{ gt(source.shopName) }})</span>
                         </div>
@@ -501,6 +532,34 @@ const groupedPetToEnteySources = computed<PetSourceGroup[]>(() => {
                     <div v-if="source.timeStart" class="text-[11px] tabular-nums text-base-content/50">
                         {{ formatTimeRange(source.timeStart, source.timeEnd) }}
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 放生获得 -->
+        <section v-if="petReleaseRewards.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+            <SectionHeader no-animate compact kicker="RELEASE" :title="gt('放生获得')" />
+            <div class="mt-2 space-y-2">
+                <div
+                    v-for="reward in petReleaseRewards"
+                    :key="reward.id"
+                    class="flex items-center gap-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5 transition-colors duration-200 hover:border-primary/40 hover:bg-base-content/5"
+                >
+                    <img
+                        :src="reward.icon"
+                        :alt="gt(reward.name)"
+                        class="size-8 shrink-0 rounded-xs bg-linear-15 object-cover"
+                        :class="getRarityGradientClass(reward.rarity)"
+                    />
+                    <SRouterLink
+                        :to="`/db/resource/${reward.id}`"
+                        class="min-w-0 truncate text-sm font-medium transition-colors duration-150 hover:text-primary"
+                    >
+                        {{ gt(reward.name) }}
+                    </SRouterLink>
+                    <span class="ml-auto shrink-0 pl-2 font-orbitron text-[13px] font-semibold tabular-nums text-primary">
+                        x{{ reward.count }}
+                    </span>
                 </div>
             </div>
         </section>

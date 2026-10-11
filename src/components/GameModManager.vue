@@ -679,7 +679,10 @@ onMounted(() => {
                                             />
                                         </p>
                                         <p class="py-4">
-                                            <Select v-model="customEntityIcon" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
+                                            <Select
+                                                v-model="customEntityIcon"
+                                                class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                            >
                                                 <SelectItem v-for="icon in customEntityIconsOptions" :key="icon" :value="icon">
                                                     <Icon :icon="icon" class="size-8 rounded-box" />
                                                 </SelectItem>
@@ -882,13 +885,7 @@ onMounted(() => {
                 v-if="detailMod"
                 class="bg-base-100 border border-base-300 rounded-xl shadow-xl w-184 max-w-[92vw] flex flex-col h-[88vh] overflow-hidden row-start-1 col-start-1"
             >
-                <GameModDetail
-                    :mod-id="detailMod.id"
-                    :initial-mod="detailMod"
-                    closable
-                    class="flex-1 min-h-0"
-                    @close="detailMod = null"
-                />
+                <GameModDetail :mod-id="detailMod.id" :initial-mod="detailMod" closable class="flex-1 min-h-0" @close="detailMod = null" />
             </div>
             <div class="modal-backdrop" @click="detailMod = null" />
         </dialog>

@@ -31,11 +31,11 @@ const { t } = useTranslation()
 
 /**
  * 构造皮肤立绘大图的 CDN 地址（按测速选定的快源）。
- * @param icon 皮肤图标名，形如 T_Head_XXX
+ * @param bust 皮肤立绘基名（SkinItem.bust，如 T_Bust_Saiqi01），无该字段的皮肤没有立绘
  * @returns 立绘地址
  */
-function buildBustUrl(icon: string): string {
-    return buildCdnUrl(`img/res/${icon.replace("_Head", "_Bust")}.webp`)
+function buildBustUrl(bust: string): string {
+    return buildCdnUrl(`img/res/${bust}.webp`)
 }
 
 // 当前角色等级
@@ -265,6 +265,15 @@ const charTraits = computed<TraitView[]>(() =>
  */
 function getTraitIconUrl(icon: string): string {
     return `/imgs/webp/${icon}.webp`
+}
+
+/**
+ * 特质详情页路径（特质名含中文与全角标点，路由参数需编码）。
+ * @param name 特质名
+ * @returns 详情页路径
+ */
+function getTraitDetailPath(name: string): string {
+    return `/db/trait/${encodeURIComponent(name)}`
 }
 
 /**
@@ -753,7 +762,7 @@ onBeforeUnmount(() => {
 
         <!-- 等级调整 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="LEVEL" />
+            <SectionHeader no-animate compact kicker="LEVEL" :title="$t('等级调整')" />
             <LevelSlider v-model="currentLevel" />
         </section>
 
@@ -838,7 +847,12 @@ onBeforeUnmount(() => {
                     </div>
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
-                            <span class="truncate text-sm font-semibold">{{ $t(trait.名称) }}</span>
+                            <SRouterLink
+                                :to="getTraitDetailPath(trait.名称)"
+                                class="truncate text-sm font-semibold transition-colors duration-150 hover:text-primary"
+                            >
+                                {{ $t(trait.名称) }}
+                            </SRouterLink>
                             <span
                                 class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-orbitron text-[11px] font-semibold text-primary"
                             >
@@ -979,9 +993,7 @@ onBeforeUnmount(() => {
                                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                             >
                                 <span class="text-xs text-base-content/60">{{ $t(attr.name) }}</span>
-                                <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                                    attr.value
-                                }}</span>
+                                <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ attr.value }}</span>
                             </div>
                         </div>
                     </template>
@@ -991,7 +1003,12 @@ onBeforeUnmount(() => {
 
         <CharExtraExcelWeaponUnlock :char="char" />
 
-        <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
+        <!-- 皮肤 / 档案 / 语音 / 获取方式：无 SectionHeader，靠注解进滚动目录 -->
+        <section
+            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
+            data-scroll-section="extra"
+            :data-scroll-title="`${$t('皮肤')} / ${$t('档案')} / ${$t('语音')}`"
+        >
             <AniTabs
                 v-model="activeBottomTab"
                 :tabs="[
@@ -1045,12 +1062,9 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
 
-                        <div v-if="skin.icon.startsWith('T_Head_') && skin.icon !== 'T_Head_Nvzhu'" class="space-y-2">
+                        <div v-if="skin.bust" class="space-y-2">
                             <div class="mb-2 text-[11px] tracking-wide text-base-content/55">立绘</div>
-                            <ImagePreview
-                                :thumb-url="`/imgs/bust/${skin.icon.replace('_Head', '_Bust')}.webp`"
-                                :full-url="buildBustUrl(skin.icon)"
-                            />
+                            <ImagePreview :thumb-url="`/imgs/bust/${skin.bust}.webp`" :full-url="buildBustUrl(skin.bust)" />
                         </div>
 
                         <div v-if="skin.defaultItem && Object.keys(skin.defaultItem).length > 0" class="space-y-2">

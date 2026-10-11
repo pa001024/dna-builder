@@ -192,10 +192,7 @@ function onThumbKeydown(event: KeyboardEvent, which: "start" | "end"): void {
         <!-- 轨道（复刻 daisyUI range 轨道：currentColor 10% 混合） -->
         <div class="dual-range-track"></div>
         <!-- 已选区间高亮（复刻 daisyUI range 进度填充：currentColor 整条高度） -->
-        <div
-            class="dual-range-fill"
-            :style="{ left: `${startPercent}%`, width: `${Math.max(0, endPercent - startPercent)}%` }"
-        ></div>
+        <div class="dual-range-fill" :style="{ left: `${startPercent}%`, width: `${Math.max(0, endPercent - startPercent)}%` }"></div>
         <!-- 起始端滑块头 -->
         <div
             role="slider"

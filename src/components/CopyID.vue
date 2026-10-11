@@ -5,7 +5,7 @@ import { copyText } from "@/util"
 defineProps<{
     id: string | number
     name?: string
-    /** 紧凑模式：仅显示 ID 数字，配合父级 group 在 hover 时展开 */
+    /** 紧凑模式：小尺寸 ID 方章；空间足够时完整显示，空间不足时自动截断 */
     compact?: boolean
 }>()
 
@@ -17,7 +17,7 @@ const setting = useSettingStore()
         <button
             v-if="compact"
             type="button"
-            class="truncate flex h-5 max-w-8 cursor-pointer items-center gap-0.5 overflow-hidden whitespace-nowrap rounded-xs border border-base-content/15 bg-base-content/4 px-1 font-mono text-[10px] leading-none tabular-nums text-base-content/45 opacity-80 transition-all duration-200 hover:border-primary/50 hover:text-primary hover:opacity-100 group-hover:max-w-24 group-hover:border-primary/40 group-hover:opacity-100"
+            class="truncate flex h-5 cursor-pointer items-center gap-0.5 whitespace-nowrap rounded-xs border border-base-content/15 bg-base-content/4 px-1 font-mono text-[10px] leading-none tabular-nums text-base-content/45 opacity-80 transition-all duration-200 hover:border-primary/50 hover:text-primary hover:opacity-100"
             :title="$t('copy-id.click_copy_id')"
             @click.stop="copyText(`${id}`)"
         >

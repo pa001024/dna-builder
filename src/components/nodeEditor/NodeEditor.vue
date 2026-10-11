@@ -484,11 +484,13 @@ function handleTransfer(charName: string) {
     <div class="flex h-full w-full" style="touch-action: manipulation">
         <DialogModel v-model="transferDialogShow">
             <div class="flex flex-col gap-2">
-                <div>{{ $t('node-editor.import_from_build') }}</div>
+                <div>{{ $t("node-editor.import_from_build") }}</div>
                 <CharSelect v-model="selectedCharName" />
             </div>
             <template #action>
-                <button class="btn btn-sm btn-primary" :disabled="!selectedCharName" @click="handleTransfer(selectedCharName)">{{ $t('node-editor.migrate') }}</button>
+                <button class="btn btn-sm btn-primary" :disabled="!selectedCharName" @click="handleTransfer(selectedCharName)">
+                    {{ $t("node-editor.migrate") }}
+                </button>
             </template>
         </DialogModel>
         <!-- 调色板侧边栏 -->
@@ -573,7 +575,7 @@ function handleTransfer(charName: string) {
                 <div class="flex items-center gap-2">
                     <button class="btn btn-sm btn-outline" @click="transferDialogShow = true">
                         <Icon icon="ri:file-transfer-line" class="mr-1" />
-                        {{ $t('node-editor.migrate') }}
+                        {{ $t("node-editor.migrate") }}
                     </button>
                     <button class="btn btn-sm btn-outline" @click="handleImport">
                         <Icon icon="ri:upload-2-line" class="mr-1" />

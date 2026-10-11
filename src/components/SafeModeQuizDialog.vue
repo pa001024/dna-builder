@@ -193,7 +193,8 @@ function handleCancel() {
                         <SectionHeader no-animate compact kicker="SAFE MODE" :title="$t('setting.safeModeQuizTitle')">
                             <template #trailing>
                                 <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
-                                    {{ answeredCount }} / {{ SAFE_MODE_REQUIRED_COUNT }}
+                                    {{ answeredCount }}
+                                    / {{ SAFE_MODE_REQUIRED_COUNT }}
                                 </span>
                             </template>
                         </SectionHeader>

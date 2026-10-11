@@ -34,11 +34,20 @@ const validationError = computed(() => {
 </script>
 
 <template>
-    <BaseNode v-bind="{ id, data, type, selected }" :title="$t('node-editor.astExpression.title')" :description="$t('node-editor.astExpression.description')">
+    <BaseNode
+        v-bind="{ id, data, type, selected }"
+        :title="$t('node-editor.astExpression.title')"
+        :description="$t('node-editor.astExpression.description')"
+    >
         <div class="space-y-2 text-sm">
             <div>
                 <label class="text-xs text-base-content/60 block mb-1">{{ $t("node-editor.astExpression.expression") }}</label>
-                <input v-model="expression" type="text" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" :placeholder="$t('伤害')" />
+                <input
+                    v-model="expression"
+                    type="text"
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    :placeholder="$t('伤害')"
+                />
             </div>
 
             <div v-if="validationError" class="text-xs text-error">

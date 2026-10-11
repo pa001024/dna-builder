@@ -31,8 +31,8 @@ const storyTextConfig = computed<StoryTextConfig>(() => ({
 }))
 
 const paragraphs = computed<StoryTextSegment[][]>(() =>
-    splitReaderParagraphs(props.translate ? gt(props.text) : (props.text ?? ""), { unwrapLines: props.unwrapLines }).map(
-        paragraph => parseStoryTextSegments(paragraph, storyTextConfig.value)
+    splitReaderParagraphs(props.translate ? gt(props.text) : (props.text ?? ""), { unwrapLines: props.unwrapLines }).map(paragraph =>
+        parseStoryTextSegments(paragraph, storyTextConfig.value)
     )
 )
 

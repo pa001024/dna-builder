@@ -99,12 +99,24 @@ function buffDesc(buffName: string) {
 </script>
 
 <template>
-    <BaseNode :id="id" :data="data" :type="type" :selected="selected" :title="$t('node-editor.buffInput.title')" :description="$t('node-editor.buffInput.description')">
+    <BaseNode
+        :id="id"
+        :data="data"
+        :type="type"
+        :selected="selected"
+        :title="$t('node-editor.buffInput.title')"
+        :description="$t('node-editor.buffInput.description')"
+    >
         <div class="space-y-3">
             <!-- Buff类型筛选 -->
             <div>
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("node-editor.buffInput.search") }}</label>
-                <input v-model="buffType" type="text" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" :placeholder="$t('node-editor.buffInput.searchPlaceholder')" />
+                <input
+                    v-model="buffType"
+                    type="text"
+                    class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    :placeholder="$t('node-editor.buffInput.searchPlaceholder')"
+                />
             </div>
 
             <!-- Buff选择列表 -->

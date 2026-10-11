@@ -83,7 +83,8 @@ const sourceIconUrl = computed(() => {
                             QUEST
                         </span>
                         <span class="truncate"
-                            >{{ source.d ? `${$t("UI_FORGING_BLUEPRINT")} · ` : "" }}{{ source.chapterName }} - {{ source.episode }}</span
+                            >{{ source.d ? `${$t("UI_FORGING_BLUEPRINT")} · ` : "" }}{{ source.chapterName }}
+                            - {{ source.episode }}</span
                         >
                     </div>
                     <div class="mt-0.5 truncate text-[10px] text-base-content/45">
@@ -93,7 +94,7 @@ const sourceIconUrl = computed(() => {
             </div>
         </div>
         <div class="flex items-center justify-end gap-3">
-            <div class="text-xs text-base-content/60">{{ $t('quest-source.sum') }}</div>
+            <div class="text-xs text-base-content/60">{{ $t("quest-source.sum") }}</div>
             <div class="flex items-center gap-1 shrink-0">
                 <img :src="sourceIconUrl" class="h-4 w-4 rounded-xs object-cover" :alt="sourceName" />
                 <span class="text-xs text-base-content/70">{{ sourceName }}</span>

@@ -218,57 +218,59 @@ onBeforeUnmount(() => {
 
 <template>
     <div v-if="skill && skillFields.length > 0" class="text-sm mt-2">
-        <div
-            v-for="(field, index) in skillFields"
-            :key="index"
-            class="flex flex-col group cursor-grab active:cursor-grabbing select-none hover:bg-base-200/40 rounded-xs p-2"
-            :title="$t('char-build.drag_field_hint')"
-            :class="{
-                'shadow-md shadow-primary/50 outline-2 outline-primary/60': isIdentifierUsed(field.名称),
-            }"
-            @pointerdown="startFieldDrag(field, $event)"
-            @dblclick="handleFieldDblClick(field)"
-            @touchstart="handleFieldTouchStart(field, index)"
-        >
-            <div class="flex justify-between items-center gap-4">
-                <div>{{ $t(field.名称) }}</div>
-                <div class="font-medium text-primary">
-                    {{ formatSkillProp(field.名称, field) }}
+        <FullTooltip v-for="(field, index) in skillFields" :key="index" side="top">
+            <template #tooltip>
+                <div class="text-xs text-base-content/70">{{ $t("char-build.drag_field_hint") }}</div>
+            </template>
+            <div
+                class="flex flex-col group cursor-grab active:cursor-grabbing select-none hover:bg-base-200/40 rounded-xs p-2"
+                :class="{
+                    'shadow-md shadow-primary/50 outline-2 outline-primary/60': isIdentifierUsed(field.名称),
+                }"
+                @pointerdown="startFieldDrag(field, $event)"
+                @dblclick="handleFieldDblClick(field)"
+                @touchstart="handleFieldTouchStart(field, index)"
+            >
+                <div class="flex justify-between items-center gap-4">
+                    <div>{{ $t(field.名称) }}</div>
+                    <div class="font-medium text-primary">
+                        {{ formatSkillProp(field.名称, field) }}
+                    </div>
+                </div>
+                <div
+                    v-if="field.影响"
+                    class="justify-between items-center gap-4 flex overflow-hidden transition-all duration-300"
+                    :class="
+                        isFieldExpanded(field, index) ? 'opacity-80 max-h-32' : 'opacity-0 max-h-0 group-hover:opacity-80 group-hover:max-h-32'
+                    "
+                >
+                    <div>{{ $t("属性影响") }}</div>
+                    <div class="ml-auto font-medium">
+                        {{
+                            field.影响
+                                .split(",")
+                                .map(item => $t(item))
+                                .join(",")
+                        }}
+                    </div>
+                </div>
+                <div
+                    v-if="getSkillFieldExtraItems(field).length"
+                    class="justify-between items-center gap-4 flex overflow-hidden transition-all duration-300 text-xs"
+                    :class="
+                        isFieldExpanded(field, index) ? 'opacity-80 max-h-32' : 'opacity-0 max-h-0 group-hover:opacity-80 group-hover:max-h-32'
+                    "
+                >
+                    <span>{{ $t("额外字段") }}</span>
+                    <span class="ml-auto font-medium">
+                        {{
+                            getSkillFieldExtraItems(field)
+                                .map(item => `${$t(SKILL_FIELD_LABEL_KEYS[item.key] ?? item.key)}: ${formatSkillFieldExtra(item)}`)
+                                .join(" | ")
+                        }}
+                    </span>
                 </div>
             </div>
-            <div
-                v-if="field.影响"
-                class="justify-between items-center gap-4 flex overflow-hidden transition-all duration-300"
-                :class="
-                    isFieldExpanded(field, index) ? 'opacity-80 max-h-32' : 'opacity-0 max-h-0 group-hover:opacity-80 group-hover:max-h-32'
-                "
-            >
-                <div>{{ $t("属性影响") }}</div>
-                <div class="ml-auto font-medium">
-                    {{
-                        field.影响
-                            .split(",")
-                            .map(item => $t(item))
-                            .join(",")
-                    }}
-                </div>
-            </div>
-            <div
-                v-if="getSkillFieldExtraItems(field).length"
-                class="justify-between items-center gap-4 flex overflow-hidden transition-all duration-300 text-xs"
-                :class="
-                    isFieldExpanded(field, index) ? 'opacity-80 max-h-32' : 'opacity-0 max-h-0 group-hover:opacity-80 group-hover:max-h-32'
-                "
-            >
-                <span>{{ $t("额外字段") }}</span>
-                <span class="ml-auto font-medium">
-                    {{
-                        getSkillFieldExtraItems(field)
-                            .map(item => `${$t(SKILL_FIELD_LABEL_KEYS[item.key] ?? item.key)}: ${formatSkillFieldExtra(item)}`)
-                            .join(" | ")
-                    }}
-                </span>
-            </div>
-        </div>
+        </FullTooltip>
     </div>
 </template>

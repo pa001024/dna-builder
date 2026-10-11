@@ -69,7 +69,7 @@ function getResourceName(id: number): string {
             <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t("UI_Armory_ExtraExcelResource") }}</div>
             <div class="grid gap-1.5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
                 <ResourceCostItem
-                    v-for="[resourceId, count] in Object.entries(selectedItem.消耗)"
+                    v-for="[ resourceId, count ] in Object.entries(selectedItem.消耗)"
                     :key="resourceId"
                     :name="getResourceName(Number(resourceId))"
                     :value="count"

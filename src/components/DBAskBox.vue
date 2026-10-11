@@ -2,7 +2,17 @@
 import { createEmptyHistoryState, registerHistory } from "@lexical/history"
 import { registerPlainText } from "@lexical/plain-text"
 import { useTranslation } from "i18next-vue"
-import { $getRoot, COMMAND_PRIORITY_HIGH, createEditor, type EditorState, KEY_ARROW_DOWN_COMMAND, KEY_ARROW_UP_COMMAND, KEY_ENTER_COMMAND, KEY_ESCAPE_COMMAND, type LexicalEditor } from "lexical"
+import {
+    $getRoot,
+    COMMAND_PRIORITY_HIGH,
+    createEditor,
+    type EditorState,
+    KEY_ARROW_DOWN_COMMAND,
+    KEY_ARROW_UP_COMMAND,
+    KEY_ENTER_COMMAND,
+    KEY_ESCAPE_COMMAND,
+    type LexicalEditor,
+} from "lexical"
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue"
 import type { AgentContextUsageSnapshot } from "@/composables/useAgentChatCore"
 import { scopedI18nKey } from "@/utils/agent-chat"
@@ -163,7 +173,10 @@ function handleEditorUpdate({ editorState, tags }: { editorState: EditorState; t
 
     // 程序化重建（外部回填）走 watch 的回声比对，这里不回传，避免回路
     if (!tags.has("programmatic")) {
-        emit("update:modelValue", editorState.read(() => $getPromptMarkdown()))
+        emit(
+            "update:modelValue",
+            editorState.read(() => $getPromptMarkdown())
+        )
     }
 }
 
@@ -300,7 +313,13 @@ function handleSkillSelect(name: string) {
             return
         }
 
-        $replaceActiveTriggerWithSkillMention(selectionState.selection, selectionState.node, selectionState.cursorOffset, trigger.query.length, name)
+        $replaceActiveTriggerWithSkillMention(
+            selectionState.selection,
+            selectionState.node,
+            selectionState.cursorOffset,
+            trigger.query.length,
+            name
+        )
     })
 }
 

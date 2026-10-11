@@ -196,8 +196,14 @@ const itemUsageState = computed(() => {
     const manualSet = new Set(getBoardPlacementList().flatMap(placement => placement.representedItemIndexes))
     return normalizedItems.value.map(entry => {
         const isAmmoEntry = entry.item.type === "Ammo"
-        const totalRounds = entry.itemIndexes.reduce((sum, itemIndex) => sum + Math.max(0, levelItems.value[itemIndex]?.currentStack ?? 1), 0)
-        const remainingRounds = Math.max(0, totalRounds - entry.itemIndexes.reduce((sum, itemIndex) => sum + getItemLoadedRounds(itemIndex), 0))
+        const totalRounds = entry.itemIndexes.reduce(
+            (sum, itemIndex) => sum + Math.max(0, levelItems.value[itemIndex]?.currentStack ?? 1),
+            0
+        )
+        const remainingRounds = Math.max(
+            0,
+            totalRounds - entry.itemIndexes.reduce((sum, itemIndex) => sum + getItemLoadedRounds(itemIndex), 0)
+        )
         return {
             ...entry,
             usedCount: entry.itemIndexes.filter(itemIndex => usageSet.has(itemIndex)).length,
@@ -1828,7 +1834,7 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
         <div class="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
             <div>
                 <div class="mb-2 flex items-center justify-between gap-2">
-                    <span class="text-[11px] tracking-wide text-base-content/55">{{ $t('backpack-puzzle.drag_item_hint') }}</span>
+                    <span class="text-[11px] tracking-wide text-base-content/55">{{ $t("backpack-puzzle.drag_item_hint") }}</span>
                     <div class="flex items-center gap-2">
                         <button
                             type="button"
@@ -1849,7 +1855,7 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                             class="shrink-0 cursor-pointer whitespace-nowrap rounded-xs border border-error/40 px-2 py-0.5 text-[11px] text-error/80 transition-colors duration-150 hover:border-error hover:bg-error/10 hover:text-error active:scale-[0.97]"
                             @click="clearAllManualPlacements"
                         >
-                            {{ $t('backpack-puzzle.clear_manual_placement') }}
+                            {{ $t("backpack-puzzle.clear_manual_placement") }}
                         </button>
                     </div>
                 </div>
@@ -1965,7 +1971,9 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="text-[11px] tracking-wide text-base-content/55">求解状态</span>
-                        <span class="text-[13px] font-semibold text-primary">{{ isSolving ? "计算中" : needsSolve ? "待求解" : "已完成" }}</span>
+                        <span class="text-[13px] font-semibold text-primary">{{
+                            isSolving ? "计算中" : needsSolve ? "待求解" : "已完成"
+                        }}</span>
                     </div>
                 </div>
 
@@ -2023,7 +2031,8 @@ function getItemRotation(item: BackpackPuzzleItem, rotationIndex: number): numbe
                                 class="font-mono text-[11px] tabular-nums"
                                 :class="entry.remainingRounds < entry.totalRounds ? 'text-warning' : 'text-base-content/50'"
                             >
-                                {{ entry.remainingRounds }}/{{ entry.totalRounds }} 发
+                                {{ entry.remainingRounds }}/{{ entry.totalRounds }}
+                                发
                             </span>
                         </div>
                         <div class="flex">

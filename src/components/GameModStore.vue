@@ -538,10 +538,7 @@ async function submitVersion() {
                         <div v-else class="w-full aspect-video rounded-sm bg-base-300 flex justify-center items-center opacity-60">
                             <Icon icon="ri:image-line" class="size-10" />
                         </div>
-                        <span
-                            v-if="!mod.source"
-                            class="absolute bottom-4 left-4 badge badge-sm gap-1 bg-primary/85 border-0 text-base-100"
-                        >
+                        <span v-if="!mod.source" class="absolute bottom-4 left-4 badge badge-sm gap-1 bg-primary/85 border-0 text-base-100">
                             <Icon icon="ri:pencil-fill" class="size-3" />
                             {{ $t("game-launcher.isOriginal") }}
                         </span>
@@ -630,11 +627,7 @@ async function submitVersion() {
 
                         <!-- 操作按钮 -->
                         <div class="card-actions mt-2 flex gap-2">
-                            <button
-                                v-if="routeMode"
-                                class="btn btn-primary btn-sm flex-1"
-                                @click.stop="$router.push(`/mods/${mod.id}`)"
-                            >
+                            <button v-if="routeMode" class="btn btn-primary btn-sm flex-1" @click.stop="$router.push(`/mods/${mod.id}`)">
                                 <Icon icon="ri:eye-line" class="size-4" />
                                 {{ $t("mods-list.viewDetail") }}
                             </button>
@@ -674,11 +667,7 @@ async function submitVersion() {
                                         <Icon icon="ri:close-line" class="size-3.5" />
                                     </button>
                                 </div>
-                                <progress
-                                    class="progress progress-primary h-1.5 w-full"
-                                    :value="cardTask(mod)?.progress ?? 0"
-                                    max="100"
-                                />
+                                <progress class="progress progress-primary h-1.5 w-full" :value="cardTask(mod)?.progress ?? 0" max="100" />
                             </div>
                             <template v-else>
                                 <!-- 已下载：与远端最新版本一致，点击可重新下载 -->
@@ -842,7 +831,10 @@ async function submitVersion() {
                         <span class="absolute right-2 bottom-1.5 text-[10px] opacity-50 flex items-center gap-1"> Markdown </span>
                     </div>
                     <div class="flex gap-2">
-                        <Select v-model="uploadCategory" class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
+                        <Select
+                            v-model="uploadCategory"
+                            class="w-40 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        >
                             <SelectItem v-for="opt in shareCategoryOptions.slice(1)" :key="opt.value" :value="opt.value">
                                 {{ opt.label }}
                             </SelectItem>

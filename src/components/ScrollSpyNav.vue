@@ -2,21 +2,25 @@
 import { nextTick, ref, watch } from "vue"
 import type { IconTypes } from "@/components/Icon.vue"
 
-/** 目录项：key 同时是内容区区块的 data-scroll-section 值 */
-interface NavItem {
+/** 滚动目录项：key 同时是内容区区块的 data-scroll-section 值 */
+export interface ScrollSpyNavItem {
     /** 区块键名 */
     key: string
     /** 目录文案，与对应区块的标题保持一致 */
     title: string
-    /** remixicon 图标名 */
-    icon: IconTypes
+    /** remixicon 图标名，缺省时只显示文字 */
+    icon?: IconTypes
 }
 
 const props = defineProps<{
     /** 目录项，顺序需与内容区区块顺序一致 */
-    items: NavItem[]
+    items: ScrollSpyNavItem[]
     /** 当前高亮的区块键名 */
     activeKey: string
+    /** 目录顶部的大写英文小标，如 "SETTINGS"；缺省时不渲染头部区 */
+    kicker?: string
+    /** 小标下的说明文字；缺省时不渲染 */
+    description?: string
 }>()
 
 const emit = defineEmits<{
@@ -32,7 +36,8 @@ const navRef = ref<HTMLElement | null>(null)
  */
 async function revealActive() {
     await nextTick()
-    const el = navRef.value?.querySelector<HTMLElement>(`[data-nav-key="${props.activeKey}"]`)
+    // key 可能含中文 / 空格等特殊字符，拼属性选择器前先转义
+    const el = navRef.value?.querySelector<HTMLElement>(`[data-nav-key="${CSS.escape(props.activeKey)}"]`)
     el?.scrollIntoView({ inline: "nearest", block: "nearest", behavior: "smooth" })
 }
 
@@ -45,9 +50,9 @@ watch(() => props.activeKey, revealActive)
         ref="navRef"
         class="scrollbar-hide flex shrink-0 gap-1 overflow-x-auto bg-base-300/50 backdrop-blur-sm border-b border-base-content/10 p-2 md:h-full md:w-56 md:flex-col md:gap-0.5 md:overflow-x-hidden md:overflow-y-auto md:border-r md:border-b-0 md:p-3"
     >
-        <div class="hidden px-1.5 pb-2 md:block">
-            <div class="text-[11px] font-semibold tracking-[0.3em] text-base-content/45 uppercase">SETTINGS</div>
-            <div class="mt-1 text-xs text-base-content/50">{{ $t("setting.desc") }}</div>
+        <div v-if="kicker || description" class="hidden px-1.5 pb-2 md:block">
+            <div v-if="kicker" class="text-[11px] font-semibold tracking-[0.3em] text-base-content/45 uppercase">{{ kicker }}</div>
+            <div v-if="description" class="mt-1 text-xs text-base-content/50">{{ description }}</div>
         </div>
         <button
             v-for="item in items"
@@ -68,7 +73,7 @@ watch(() => props.activeKey, revealActive)
                 v-if="item.key === activeKey"
                 class="absolute top-1/2 left-0 hidden h-4 w-0.5 -translate-y-1/2 rounded-xs bg-primary md:block"
             />
-            <Icon :icon="item.icon" class="size-3.5 shrink-0 md:size-4" />
+            <Icon v-if="item.icon" :icon="item.icon" class="size-3.5 shrink-0 md:size-4" />
             <span class="truncate">{{ item.title }}</span>
         </button>
     </nav>

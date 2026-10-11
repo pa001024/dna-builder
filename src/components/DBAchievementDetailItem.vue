@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useGameText } from "@/composables/useGameText"
 
-type AchievementItem = (typeof import("@/data/d/achievement.data").default)[number]
+type AchievementItem = typeof import("@/data/d/achievement.data").default[number]
 
 const props = defineProps<{
     achievement: AchievementItem

@@ -131,7 +131,9 @@ const equippedCdReduce = computed(() => getTraitCdReduce(props.traits))
 
 /** 是否存在需要按「主动技覆盖率」求收益的潜质（如「敏锐」：只给冷却缩减） */
 const needsCoverageIncome = computed(() =>
-    [...slotTraits.value, ...(pickerShow.value ? visibleTraits.value : [])].some(trait => trait && getTraitProperties(trait)["魔灵CD缩减"] > 0)
+    [...slotTraits.value, ...(pickerShow.value ? visibleTraits.value : [])].some(
+        trait => trait && getTraitProperties(trait)["魔灵CD缩减"] > 0
+    )
 )
 
 /**
@@ -149,13 +151,7 @@ const coverageIncomes = computed<Record<string, number>>(() => {
             const traitReduce = getTraitProperties(trait)["魔灵CD缩减"]
             const equippedInSlot = slotTraits.value.some(slot => slot?.bid === trait.bid)
             const otherReduce = equippedCdReduce.value - (equippedInSlot ? traitReduce : 0)
-            const fromCoverage = getCoverageFromCdReduce(
-                props.petId,
-                props.petLevel,
-                otherReduce,
-                props.petCoverage,
-                props.petAutoCoverage
-            )
+            const fromCoverage = getCoverageFromCdReduce(props.petId, props.petLevel, otherReduce, props.petCoverage, props.petAutoCoverage)
             const toCoverage = getCoverageFromCdReduce(
                 props.petId,
                 props.petLevel,

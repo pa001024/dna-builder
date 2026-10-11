@@ -5,7 +5,6 @@ import { useGameText } from "@/composables/useGameText"
 import { regionMap, subRegionMap } from "@/data/d"
 import type { Resource } from "@/data/d/resource.data"
 
-
 interface ResourceSourceGroup {
     srId: number
     regionId: number

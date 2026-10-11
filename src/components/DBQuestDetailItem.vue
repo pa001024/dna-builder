@@ -506,7 +506,9 @@ const matchedQuestTargets = computed<QuestSearchMatch[]>(() => {
     const seenKeys = new Set<string>()
     const merged: QuestSearchMatch[] = []
     for (const match of [...exactMatches, ...fuseMatches]) {
-        const optionKey = match.target ? `${match.target.nodeId}-${match.target.dialogueId}-${match.target.optionId ?? ""}` : `quest-${match.questId}`
+        const optionKey = match.target
+            ? `${match.target.nodeId}-${match.target.dialogueId}-${match.target.optionId ?? ""}`
+            : `quest-${match.questId}`
         const key = `${match.questId}|${optionKey}`
         if (seenKeys.has(key)) {
             continue
@@ -724,12 +726,12 @@ function openQuestReader(): void {
                         class="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-base-content/50"
                     >
                         <template v-if="questChain.startTime">
-                            <span>{{ $t('questchain-detail.start_time') }}</span>
+                            <span>{{ $t("questchain-detail.start_time") }}</span>
                             <span class="font-mono tabular-nums">{{ new Date(questChain.startTime * 1000).toLocaleString() }}</span>
                         </template>
                         <template v-if="questChain.endTime">
                             <span class="h-3 w-px bg-base-content/20" aria-hidden="true" />
-                            <span>{{ $t('questchain-detail.end_time') }}</span>
+                            <span>{{ $t("questchain-detail.end_time") }}</span>
                             <span class="font-mono tabular-nums">{{ new Date(questChain.endTime * 1000).toLocaleString() }}</span>
                         </template>
                     </div>
@@ -751,7 +753,7 @@ function openQuestReader(): void {
                         class="absolute right-0 top-full z-1000 mt-2 w-56 rounded-xs border border-base-content/15 bg-base-100/85 p-3 shadow-lg backdrop-blur-md"
                     >
                         <div class="space-y-2">
-                            <div class="text-xs font-medium text-base-content/70">{{ $t('questchain-detail.voice_language') }}</div>
+                            <div class="text-xs font-medium text-base-content/70">{{ $t("questchain-detail.voice_language") }}</div>
                             <Select
                                 v-model="selectedVoiceLocale"
                                 class="w-full rounded-xs border border-base-content/20 bg-base-content/5 px-3 py-2 text-sm"
@@ -769,13 +771,10 @@ function openQuestReader(): void {
         </header>
 
         <!-- 任务链 AI 剧情总结（数据由 storySummary.json 导入，无摘要时隐藏） -->
-        <section
-            v-if="questChainAiSummary"
-            class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
-        >
+        <section v-if="questChainAiSummary" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <SectionHeader no-animate compact kicker="AI" :title="$t('questchain-detail.ai_summary')">
                 <template #trailing>
-                    <span class="text-[10px] tracking-wide text-base-content/45">{{ $t('questchain-detail.ai_summary_note') }}</span>
+                    <span class="text-[10px] tracking-wide text-base-content/45">{{ $t("questchain-detail.ai_summary_note") }}</span>
                 </template>
             </SectionHeader>
             <p class="text-sm leading-relaxed whitespace-pre-line text-base-content/75">{{ questChainAiSummary }}</p>
@@ -821,7 +820,7 @@ function openQuestReader(): void {
                     :class="{ 'border-primary ring-4 ring-primary/10': highlightedQuestMap[quest.id] }"
                 >
                     <div class="flex items-center gap-2 text-sm">
-                        {{ $t('questchain-detail.quest_label') }}
+                        {{ $t("questchain-detail.quest_label") }}
                         <HighlightStoryText
                             :text="quest.details?.name || '?'"
                             :keyword="normalizedSearchKeyword"
@@ -830,21 +829,17 @@ function openQuestReader(): void {
                         <CopyID :id="quest.id" />
                         <div class="flex-1"></div>
                         <span v-if="quest.sr" class="ml-2 inline-flex items-center gap-1 text-xs text-base-content/70">
-                            <span>{{ $t('common.sub_region') }}:</span>
+                            <span>{{ $t("common.sub_region") }}:</span>
                             <SubRegionLink :sub-region-id="quest.sr" />
                         </span>
                     </div>
 
                     <div v-if="quest.details?.desc" class="text-sm leading-relaxed text-base-content/70">
-                        <HighlightStoryText
-                            :text="quest.details.desc"
-                            :keyword="normalizedSearchKeyword"
-                            :story-config="storyTextConfig"
-                        />
+                        <HighlightStoryText :text="quest.details.desc" :keyword="normalizedSearchKeyword" :story-config="storyTextConfig" />
                     </div>
 
                     <div v-if="shouldShowQuestNextOptions(quest)" class="flex flex-wrap items-center gap-1.5 text-xs">
-                        <span class="text-base-content/60">{{ $t('questchain-detail.quest_jump') }}</span>
+                        <span class="text-base-content/60">{{ $t("questchain-detail.quest_jump") }}</span>
                         <template
                             v-for="nextOption in quest.nextOptions"
                             :key="`${quest.id}-next-${nextOption.condition}-${nextOption.targetId}`"
@@ -876,7 +871,7 @@ function openQuestReader(): void {
 
                     <!-- 任务奖励 -->
                     <div v-if="quest.reward" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                        <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t('questchain-detail.quest_reward') }}</div>
+                        <div class="mb-1 text-[11px] tracking-wide text-base-content/55">{{ $t("questchain-detail.quest_reward") }}</div>
                         <RewardItem :reward="quest.reward as RewardItemType" />
                     </div>
                 </div>

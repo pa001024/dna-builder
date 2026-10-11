@@ -345,12 +345,7 @@ function getPriceIcon(name: string) {
                     <h4
                         class="order-first w-full min-w-0 shrink-0 truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary sm:order-0 sm:w-auto sm:flex-1 sm:shrink"
                     >
-                        <SRouterLink
-                            v-if="itemDetail?.link"
-                            :to="itemDetail?.link"
-                            class="hover:underline"
-                            :title="$t(itemDisplayName)"
-                        >
+                        <SRouterLink v-if="itemDetail?.link" :to="itemDetail?.link" class="hover:underline" :title="$t(itemDisplayName)">
                             {{ $t(itemDisplayName) }}
                         </SRouterLink>
                         <span v-else>{{ $t(itemDisplayName) }}</span>
@@ -363,7 +358,7 @@ function getPriceIcon(name: string) {
                     <FullTooltip v-if="payInfo" side="top">
                         <template #tooltip>
                             <div class="flex flex-col gap-2 min-w-28">
-                                <div class="text-sm font-bold">{{ $t('shop-item.real_currency') }}</div>
+                                <div class="text-sm font-bold">{{ $t("shop-item.real_currency") }}</div>
                                 <div
                                     v-for="currency in payInfo.currencies"
                                     :key="currency.code"

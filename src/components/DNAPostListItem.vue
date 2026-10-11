@@ -38,11 +38,17 @@ onUnmounted(() => {
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-2">
                         <span class="truncate text-sm font-medium text-base-content">{{ post.userName }}</span>
-                        <span v-if="post.isOfficial === 1" class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                            {{ $t('common.official') }}
+                        <span
+                            v-if="post.isOfficial === 1"
+                            class="shrink-0 rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                        >
+                            {{ $t("common.official") }}
                         </span>
-                        <span v-if="post.isElite === 1" class="shrink-0 rounded-xs border border-secondary/40 bg-secondary/10 px-1.5 py-0.5 text-[10px] font-medium text-secondary">
-                            {{ $t('dna-post-list-item.featured') }}
+                        <span
+                            v-if="post.isElite === 1"
+                            class="shrink-0 rounded-xs border border-secondary/40 bg-secondary/10 px-1.5 py-0.5 text-[10px] font-medium text-secondary"
+                        >
+                            {{ $t("dna-post-list-item.featured") }}
                         </span>
                     </div>
                     <div class="mt-0.5 text-xs text-base-content/50">
@@ -80,7 +86,11 @@ onUnmounted(() => {
             <div class="mt-2.5 flex items-center gap-4 text-xs text-base-content/60">
                 <!-- 话题标签 -->
                 <div v-if="post.topics && post.topics.length > 0" class="flex flex-wrap gap-1.5">
-                    <span v-for="topic in post.topics" :key="topic.topicId" class="inline-flex items-center gap-0.5 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] text-base-content/60">
+                    <span
+                        v-for="topic in post.topics"
+                        :key="topic.topicId"
+                        class="inline-flex items-center gap-0.5 rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] text-base-content/60"
+                    >
                         <Icon icon="ri:hashtag" class="size-3 text-base-content/60" />
                         {{ topic.topicName }}
                     </span>

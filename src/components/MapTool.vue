@@ -5,8 +5,10 @@ import { useRoute, useRouter } from "vue-router"
 import { useGameText } from "@/composables/useGameText"
 import { useSearchParam } from "@/composables/useSearchParam"
 import { petMap, regionMap, resourceMap } from "@/data/d"
+import { panData } from "@/data/d/pan.data"
 import regionData, { mapOffsets, mapWallMap, type Region } from "@/data/d/region.data"
 import { resourceData } from "@/data/d/resource.data"
+import { getPanLocalizedName } from "@/data/d/story-locale"
 import { type SubRegion, subRegionData, type TeleportPoint } from "@/data/d/subregion.data"
 import { LeveledPet } from "@/data/leveled/LeveledPet"
 import { useSettingStore } from "@/store/setting"
@@ -220,6 +222,9 @@ function resolveMapPointIconUrl(icon: string | null): string {
     return icon.startsWith("T_Gp_") ? `/imgs/tp/${icon}.webp` : `/imgs/res/${icon}.webp`
 }
 
+/** 魔灵潘神点位图标：取自 map.data.ts「潘神魔灵」官方图标（1749562536811567798.png，转 WebP 限高 128 落盘）。 */
+const PAN_ICON_URL = "/imgs/res/T_Map_IconPan.webp"
+
 interface RegionProjectionRuntimeConfig {
     center: [number, number]
     mapRotationDeg: number
@@ -260,6 +265,27 @@ interface ResourceMapPointInfo {
     worldY: number
     mapX: number
     mapY: number
+}
+
+/** 魔灵潘神地图点位：坐标取自中文表（各语言坐标一致），名称按当前语言异步本地化。 */
+interface PanMapPointInfo {
+    panId: number
+    panName: string
+    groupId: number
+    srId: number
+    subRegionId: number
+    subRegionName: string
+    regionName: string
+    worldX: number
+    worldY: number
+    mapX: number
+    mapY: number
+}
+
+interface PanFilterOption {
+    id: number
+    name: string
+    count: number
 }
 
 /**
@@ -370,6 +396,18 @@ const selectedTeleportIcons = ref<Set<string>>(new Set())
 const showPetPoints = ref(true)
 /** 资源显示开关：控制地图资源点位是否绘制。 */
 const showResourcePoints = ref(true)
+/** 潘神显示开关：控制魔灵潘神固定点位是否绘制。 */
+const showPanPoints = ref(true)
+/** 潘神点位 id → 当前语言名称（Quest 式按 id 查各语言大表，无译文时回退中文原文）。 */
+const panNameById = computed(() => {
+    const map = new Map<number, string>()
+    for (const pan of panData) {
+        map.set(pan.id, getPanLocalizedName(pan.id, settingStore.lang))
+    }
+    return map
+})
+/** 当前区域的潘神投影点位（随区域切换重建）。 */
+const panMapPoints = ref<PanMapPointInfo[]>([])
 /** 魔灵筛选：已选中的筛选项 id 集合（pet-<id> 或 quality-<品质>），空集合 = 不过滤。 */
 const selectedPetFilterIds = ref<Set<string>>(new Set())
 const isSidebarCollapsed = ref(false)
@@ -401,7 +439,9 @@ const currentMapPointInfo = computed<MapPointInfo | null>(() => routeMapPoint.va
 const navTeleportPoints = computed<TraversalTeleportPoint[]>(() =>
     projectedSubRegions.value.flatMap(subRegion =>
         subRegion.tpPoints
-            .filter(tpPoint => isTeleportPointVisible({ ...tpPoint, subRegionId: subRegion.id, worldX: tpPoint.worldX, worldY: tpPoint.worldY }))
+            .filter(tpPoint =>
+                isTeleportPointVisible({ ...tpPoint, subRegionId: subRegion.id, worldX: tpPoint.worldX, worldY: tpPoint.worldY })
+            )
             .map(tpPoint => ({
                 ...tpPoint,
                 subRegionId: subRegion.id,
@@ -1156,6 +1196,27 @@ const resourceOptions = computed<ResourceFilterOption[]>(() => {
 })
 const selectedResourceIds = ref<Set<number>>(new Set())
 const isResourceSectionCollapsed = ref(true)
+const isPanSectionCollapsed = ref(true)
+
+/**
+ * 当前区域的潘神选项：名称取异步加载的本地化名，未就绪时回退中文原文。
+ * 一个区域最多只有一个潘神（10 个潘神分属 10 个区域），选项只用于展示计数。
+ */
+const panOptions = computed<PanFilterOption[]>(() => {
+    const regionId = currentProfile.value.regionId
+    return panData
+        .filter(pan =>
+            (pan.groups || []).some(group => subRegionData.some(subRegion => subRegion.id === group.srId && subRegion.rid === regionId))
+        )
+        .map(pan => ({
+            id: pan.id,
+            name: panNameById.value.get(pan.id) ?? pan.name,
+            count: (pan.groups || []).filter(group =>
+                subRegionData.some(subRegion => subRegion.id === group.srId && subRegion.rid === regionId)
+            ).length,
+        }))
+        .sort((a, b) => a.id - b.id)
+})
 const isTeleportSectionCollapsed = ref(false)
 const isLayerSectionCollapsed = ref(false)
 const isPetSectionCollapsed = ref(false)
@@ -2137,11 +2198,7 @@ function applyFitView(animate: boolean) {
         return
     }
 
-    if (
-        Math.abs(fitPanX - panOffset.value.x) < 0.5 &&
-        Math.abs(fitPanY - panOffset.value.y) < 0.5 &&
-        Math.abs(fitZoom - zoom.value) < 1e-4
-    )
+    if (Math.abs(fitPanX - panOffset.value.x) < 0.5 && Math.abs(fitPanY - panOffset.value.y) < 0.5 && Math.abs(fitZoom - zoom.value) < 1e-4)
         return
 
     startViewTween({
@@ -2284,6 +2341,46 @@ function syncResourceMapPoints() {
     }
 
     resourceMapPoints.value = points
+    requestDraw()
+}
+
+/**
+ * 基于潘神表重建当前区域的潘神点位列表。
+ *
+ * 坐标系与资源点一致：`groups[].pos` 是世界坐标，经 `projectWorldToMap` 投影到地图坐标。
+ * 点位只与区域有关（全表 60 处固定点位），名称本地化走另一路异步加载，
+ * 因此这里只存中文原文，绘制时再按 `panNameById` 换本地化名。
+ */
+function syncPanMapPoints() {
+    const regionId = currentProfile.value.regionId
+    const points: PanMapPointInfo[] = []
+
+    for (const pan of panData) {
+        for (const group of pan.groups || []) {
+            const subRegion = subRegionData.find(item => item.id === group.srId)
+            if (!subRegion || subRegion.rid !== regionId) continue
+            const region = regionMap.get(subRegion.rid)
+            if (!region) continue
+            const normalized = normalizeCoordinatePair(group.pos)
+            if (!normalized) continue
+            const mapped = projectWorldToMap(normalized[0], normalized[1])
+            points.push({
+                panId: pan.id,
+                panName: pan.name,
+                groupId: group.id,
+                srId: group.srId,
+                subRegionId: subRegion.id,
+                subRegionName: subRegion.name,
+                regionName: region.name,
+                worldX: normalized[0],
+                worldY: normalized[1],
+                mapX: mapped.x,
+                mapY: mapped.y,
+            })
+        }
+    }
+
+    panMapPoints.value = points
     requestDraw()
 }
 
@@ -2589,7 +2686,11 @@ function drawSelectedRcTraversalPath(ctx: CanvasRenderingContext2D) {
 
     for (const leg of legs) {
         const legDistance = measureLegWorldDistance(leg)
-        const strokeColor = leg.unreachable ? "rgba(255, 96, 96, 0.95)" : leg.isDashed ? "rgba(90, 220, 255, 0.95)" : "rgba(255, 214, 102, 0.95)"
+        const strokeColor = leg.unreachable
+            ? "rgba(255, 96, 96, 0.95)"
+            : leg.isDashed
+              ? "rgba(90, 220, 255, 0.95)"
+              : "rgba(255, 214, 102, 0.95)"
 
         ctx.save()
         ctx.setLineDash(leg.isDashed || leg.unreachable ? [8 / zoom.value, 6 / zoom.value] : [])
@@ -2950,6 +3051,50 @@ function drawSubRegionPoints(ctx: CanvasRenderingContext2D) {
                 ctx.clip()
                 ctx.drawImage(iconImage, point.mapX - iconSize / 2, point.mapY - iconSize / 2, iconSize, iconSize)
                 ctx.restore()
+            }
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.66)"
+            ctx.fillRect(labelX - 3 / zoom.value, labelY - 1 / zoom.value, textWidth + 6 / zoom.value, 16 / zoom.value)
+            ctx.fillStyle = "rgba(255, 255, 255, 0.98)"
+            ctx.fillText(text, labelX, labelY + 1 / zoom.value)
+        }
+        ctx.restore()
+    }
+
+    // 潘神固定点位：紫罗兰色光环 + 潘神图标 + 本地化名标签（名称走 Quest 式异步加载，未就绪时为中文原文）。
+    if (showPanPoints.value && panMapPoints.value.length) {
+        ctx.save()
+        const radius = 6 / zoom.value
+        const iconSize = 24 / zoom.value
+        ctx.font = `${12 / zoom.value}px sans-serif`
+        ctx.textBaseline = "top"
+        const panIconImage = ensureMapPointIconImageLoaded(PAN_ICON_URL)
+
+        for (const point of panMapPoints.value) {
+            const text = formatSubRegionLabel(panNameById.value.get(point.panId) ?? point.panName)
+            const textWidth = ctx.measureText(text).width
+            const labelX = point.mapX + radius + 4 / zoom.value
+            const labelY = point.mapY - radius - 2 / zoom.value
+            ctx.beginPath()
+            ctx.arc(point.mapX, point.mapY, 10 / zoom.value, 0, Math.PI * 2)
+            ctx.fillStyle = "rgba(192, 132, 252, 0.18)"
+            ctx.fill()
+            ctx.lineWidth = 2 / zoom.value
+            ctx.strokeStyle = "rgba(192, 132, 252, 0.95)"
+            ctx.stroke()
+
+            if (panIconImage) {
+                ctx.save()
+                ctx.beginPath()
+                ctx.arc(point.mapX, point.mapY, iconSize / 2, 0, Math.PI * 2)
+                ctx.clip()
+                ctx.drawImage(panIconImage, point.mapX - iconSize / 2, point.mapY - iconSize / 2, iconSize, iconSize)
+                ctx.restore()
+            } else {
+                ctx.beginPath()
+                ctx.arc(point.mapX, point.mapY, 3.5 / zoom.value, 0, Math.PI * 2)
+                ctx.fillStyle = "rgba(192, 132, 252, 0.95)"
+                ctx.fill()
             }
 
             ctx.fillStyle = "rgba(0, 0, 0, 0.66)"
@@ -3442,6 +3587,7 @@ watch(
         resetRegionSelectionState()
         await loadCurrentProfileImages()
         syncResourceMapPoints()
+        syncPanMapPoints()
         syncResourcePanelState()
         await nextTick()
         applyFitView(false)
@@ -3470,6 +3616,9 @@ watch(
         navTeleportPoints.value.length,
         showPetPoints.value ? 1 : 0,
         showResourcePoints.value ? 1 : 0,
+        showPanPoints.value ? 1 : 0,
+        panMapPoints.value.map(point => `${point.panId}:${point.groupId}:${point.worldX}:${point.worldY}`).join("|"),
+        panNameById.value.size,
         [...selectedTeleportIcons.value].sort().join("|"),
         [...selectedPetFilterIds.value].sort().join("|"),
         resourceMapPoints.value.map(point => `${point.resourceId}:${point.srId}:${point.worldX}:${point.worldY}`).join("|"),
@@ -3539,14 +3688,14 @@ onUnmounted(() => {
                             class="rounded-xs border border-base-content/15 bg-base-100 p-2.5 text-xs space-y-1.5"
                         >
                             <div class="flex items-center justify-between gap-2">
-                                <div class="font-medium text-base-content">{{ $t('map-tool.current_marker') }}</div>
+                                <div class="font-medium text-base-content">{{ $t("map-tool.current_marker") }}</div>
                                 <button
                                     class="inline-flex h-6 cursor-pointer items-center gap-1 rounded-xs border border-base-content/15 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                                     type="button"
                                     @click="clearRouteMapPoint"
                                 >
                                     <Icon icon="ri:close-line" class="size-3" />
-                                    {{ $t('common.clear') }}
+                                    {{ $t("common.clear") }}
                                 </button>
                             </div>
                             <div class="flex items-center gap-2">
@@ -3559,7 +3708,7 @@ onUnmounted(() => {
                                 <span class="truncate">{{ mapPointLabel(currentMapPointInfo.name) }}</span>
                             </div>
                             <div class="font-mono text-[11px] opacity-60">
-                                {{ $t('map-tool.world_coordinate') }}: {{ currentMapPointInfo.worldX.toFixed(2) }},
+                                {{ $t("map-tool.world_coordinate") }}: {{ currentMapPointInfo.worldX.toFixed(2) }},
                                 {{ currentMapPointInfo.worldY.toFixed(2) }}
                             </div>
                         </div>
@@ -3567,7 +3716,9 @@ onUnmounted(() => {
                         <!-- 区域 -->
                         <div class="space-y-1.5">
                             <div class="flex items-center gap-2">
-                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">{{ $t('common.area') }}</span>
+                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">{{
+                                    $t("common.area")
+                                }}</span>
                                 <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
                             </div>
                             <Select
@@ -3576,7 +3727,8 @@ onUnmounted(() => {
                                 @update:modelValue="(val: number) => handleRegionChange({ target: { value: String(val) } } as unknown as Event)"
                             >
                                 <SelectItem v-for="region in regionOptions" :key="region.id" :value="region.id">
-                                    {{ region.id }} - {{ gt(region.name) }}
+                                    {{ region.id }}
+                                    - {{ gt(region.name) }}
                                 </SelectItem>
                             </Select>
                         </div>
@@ -3589,7 +3741,9 @@ onUnmounted(() => {
                                 :aria-expanded="!isLayerSectionCollapsed"
                                 @click="isLayerSectionCollapsed = !isLayerSectionCollapsed"
                             >
-                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">{{ $t('map-tool.layer') }}</span>
+                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">{{
+                                    $t("map-tool.layer")
+                                }}</span>
                                 <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
                                 <Icon
                                     :icon="isLayerSectionCollapsed ? 'ri:arrow-down-s-line' : 'ri:arrow-up-s-line'"
@@ -3664,7 +3818,7 @@ onUnmounted(() => {
                                     <span class="truncate">{{ gt(option.label) }}</span>
                                 </button>
                                 <div v-if="petFilterOptions.length === 0" class="px-1 py-0.5 text-xs opacity-60">
-                                    {{ $t('map-tool.no_geniemon_filter') }}
+                                    {{ $t("map-tool.no_geniemon_filter") }}
                                 </div>
                             </div>
                         </MapFilterCard>
@@ -3734,6 +3888,34 @@ onUnmounted(() => {
                             </div>
                         </MapFilterCard>
 
+                        <!-- 潘神点位（通用筛选卡片：整行折叠 + 显示开关；一个区域最多一个潘神，只做显隐） -->
+                        <MapFilterCard
+                            v-if="panOptions.length > 0"
+                            :title="panOptions[0]?.name ?? gt('魔灵潘神')"
+                            :collapsed="isPanSectionCollapsed"
+                            :visible="showPanPoints"
+                            @toggle-collapse="isPanSectionCollapsed = !isPanSectionCollapsed"
+                            @toggle-visibility="showPanPoints = !showPanPoints"
+                        >
+                            <div class="grid max-h-36 grid-cols-1 gap-1 overflow-y-auto">
+                                <div
+                                    v-for="option in panOptions"
+                                    :key="option.id"
+                                    class="inline-flex min-w-0 items-center gap-1.5 rounded-xs border border-transparent px-2 py-1 text-xs leading-tight whitespace-nowrap text-base-content/70 justify-start"
+                                    :title="option.name"
+                                >
+                                    <img
+                                        src="/imgs/res/T_Map_IconPan.webp"
+                                        :alt="option.name"
+                                        class="size-5 shrink-0 object-contain"
+                                        aria-hidden="true"
+                                    />
+                                    <span class="truncate">{{ option.name }}</span>
+                                    <span class="ml-auto shrink-0 font-mono text-[10px] tabular-nums opacity-60">{{ option.count }}</span>
+                                </div>
+                            </div>
+                        </MapFilterCard>
+
                         <!-- 子区域（可折叠） -->
                         <div class="space-y-1.5">
                             <button
@@ -3742,7 +3924,9 @@ onUnmounted(() => {
                                 :aria-expanded="!isSubRegionSectionCollapsed"
                                 @click="isSubRegionSectionCollapsed = !isSubRegionSectionCollapsed"
                             >
-                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">{{ $t('common.sub_region') }}</span>
+                                <span class="text-[11px] font-semibold tracking-[0.25em] text-base-content/50 uppercase">{{
+                                    $t("common.sub_region")
+                                }}</span>
                                 <span class="h-px min-w-4 flex-1 bg-base-content/10" aria-hidden="true" />
                                 <Icon
                                     :icon="isSubRegionSectionCollapsed ? 'ri:arrow-down-s-line' : 'ri:arrow-up-s-line'"
@@ -3761,7 +3945,7 @@ onUnmounted(() => {
                                                 class="checkbox checkbox-xs"
                                                 @change="handleSubRegionAllChange(($event.target as HTMLInputElement).checked)"
                                             />
-                                            <span>{{ $t('common.all') }}</span>
+                                            <span>{{ $t("common.all") }}</span>
                                         </label>
                                         <label
                                             class="flex cursor-pointer items-center gap-2"
@@ -3774,7 +3958,7 @@ onUnmounted(() => {
                                                 class="checkbox checkbox-xs"
                                                 @change="showRcShortestTraversal = ($event.target as HTMLInputElement).checked"
                                             />
-                                            <span>{{ $t('map-tool.shortest_traversal') }}</span>
+                                            <span>{{ $t("map-tool.shortest_traversal") }}</span>
                                         </label>
                                     </div>
                                     <button
@@ -3792,7 +3976,7 @@ onUnmounted(() => {
                                         <div class="font-medium">{{ gt(point.name) }}</div>
                                     </button>
                                     <div v-if="projectedSubRegions.length === 0" class="p-3 text-sm opacity-60">
-                                        {{ $t('map-tool.no_subregion_point') }}
+                                        {{ $t("map-tool.no_subregion_point") }}
                                     </div>
                                 </div>
                             </template>
@@ -3807,7 +3991,7 @@ onUnmounted(() => {
 
                             <div class="mt-2 border-t border-base-content/10 pt-2">
                                 <div class="mb-1 text-[11px] font-semibold text-base-content/45 uppercase">
-                                    {{ $t('map-tool.rc_list_hint') }}
+                                    {{ $t("map-tool.rc_list_hint") }}
                                 </div>
                                 <div class="flex max-h-28 flex-wrap gap-1 overflow-y-auto">
                                     <button
@@ -3825,7 +4009,7 @@ onUnmounted(() => {
                                         RC {{ rcInfo.rcId }}
                                     </button>
                                     <div v-if="selectedSubRegion.rcInfos.length === 0" class="w-full text-xs opacity-60">
-                                        {{ $t('map-tool.no_rc_config') }}
+                                        {{ $t("map-tool.no_rc_config") }}
                                     </div>
                                 </div>
                             </div>
@@ -3834,10 +4018,10 @@ onUnmounted(() => {
                                 v-if="selectedRcInfo"
                                 class="mt-2 space-y-1 rounded-xs border border-base-content/15 bg-base-100/85 p-2 text-xs"
                             >
-                                <div class="font-medium"><CopyID :id="selectedRcInfo.rcId" />{{ $t('map-tool.rc_detail') }}</div>
+                                <div class="font-medium"><CopyID :id="selectedRcInfo.rcId" />{{ $t("map-tool.rc_detail") }}</div>
                                 <div class="opacity-70">
                                     {{
-                                        $t('map-tool.rc_points', {
+                                        $t("map-tool.rc_points", {
                                             refresh: selectedRcInfo.count,
                                             points: selectedRcInfo.points.length,
                                         })
@@ -3845,13 +4029,13 @@ onUnmounted(() => {
                                 </div>
                                 <div v-if="selectedRcInfo.rarestPet" class="opacity-70">
                                     {{
-                                        $t('map-tool.rarest_geniemon', {
+                                        $t("map-tool.rarest_geniemon", {
                                             name: gt(selectedRcInfo.rarestPet.petName),
                                             ratio: (selectedRcInfo.rarestPet.ratio * 100).toFixed(2),
                                         })
                                     }}
                                 </div>
-                                <div class="pt-1 opacity-70">{{ $t('map-tool.geniemon_probability') }}</div>
+                                <div class="pt-1 opacity-70">{{ $t("map-tool.geniemon_probability") }}</div>
                                 <div class="space-y-1.5">
                                     <!-- 每行：魔灵图标 + 名称 + 概率（虚线下划线提示 tooltip），底部为按比例填充的矩形条 -->
                                     <FullTooltip
@@ -3890,24 +4074,24 @@ onUnmounted(() => {
                                                 </div>
                                                 <div class="opacity-75">
                                                     {{
-                                                        $t('map-tool.weight_ratio', {
+                                                        $t("map-tool.weight_ratio", {
                                                             weight: petRate.weight,
                                                             total: petRate.totalWeight,
                                                         })
                                                     }}
                                                 </div>
                                                 <div class="opacity-75">
-                                                    {{ $t('map-tool.probability', { ratio: (petRate.ratio * 100).toFixed(2) }) }}
+                                                    {{ $t("map-tool.probability", { ratio: (petRate.ratio * 100).toFixed(2) }) }}
                                                 </div>
                                             </div>
                                         </template>
                                     </FullTooltip>
                                     <div v-if="selectedRcInfo.petRates.length === 0" class="opacity-70">
-                                        {{ $t('map-tool.no_geniemon_data') }}
+                                        {{ $t("map-tool.no_geniemon_data") }}
                                     </div>
                                 </div>
                                 <div v-if="selectedRcInfo.unknownRates.length > 0" class="pt-1">
-                                    <div class="opacity-70">{{ $t('map-tool.unknown_entity') }}</div>
+                                    <div class="opacity-70">{{ $t("map-tool.unknown_entity") }}</div>
                                     <div
                                         v-for="unknownRate in selectedRcInfo.unknownRates"
                                         :key="`${selectedRcInfo.rcId}-${unknownRate.entityId}`"
@@ -3924,7 +4108,7 @@ onUnmounted(() => {
                                 v-if="selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint)).length > 0"
                                 class="mt-2 space-y-1 rounded-xs border border-base-content/15 bg-base-100/85 p-2 text-xs"
                             >
-                                <div class="font-medium">{{ $t('map-tool.tp_points') }}</div>
+                                <div class="font-medium">{{ $t("map-tool.tp_points") }}</div>
                                 <div class="grid gap-1">
                                     <div
                                         v-for="tpPoint in selectedSubRegion.tpPoints.filter(tpPoint => isTeleportPointVisible(tpPoint))"
@@ -4024,7 +4208,7 @@ onUnmounted(() => {
             <!-- 加载中 -->
             <div v-if="isImageLoading" class="absolute inset-0 z-20 grid place-items-center bg-base-100/45 backdrop-blur-[1px]">
                 <div class="flex items-center gap-2 rounded-xs border border-base-content/15 bg-base-100 px-4 py-2 text-sm shadow-sm">
-                    <span class="loading loading-spinner loading-sm" />{{ $t('map-tool.loading_layers') }}
+                    <span class="loading loading-spinner loading-sm" />{{ $t("map-tool.loading_layers") }}
                 </div>
             </div>
 

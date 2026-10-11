@@ -145,7 +145,7 @@ async function pickRegionFeature(apply: (selection: RoiSelection) => void, optio
         const script = `import { Cap } from "cap"
 const hwnd = getWindowByProcessName(${JSON.stringify(processName)})
 if (!hwnd) throw new Error("未找到目标窗口")
-const c = new Cap(hwnd${store.doc.frameless ? ', { resize: false, yOffset: 0 }' : ""})
+const c = new Cap(hwnd${store.doc.frameless ? ", { resize: false, yOffset: 0 }" : ""})
 const frame = c.cap()
 const selected = await selectroi("AutoScript ROI", frame)
 let output = ""
@@ -439,9 +439,9 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
             <!-- 标题栏 -->
             <div class="flex items-center gap-2 px-4 py-2 border-b border-base-300">
                 <Icon icon="ri:node-tree" class="w-5 h-5 text-primary" />
-                <span class="font-bold">{{ $t('auto-script.editor_title') }}</span>
+                <span class="font-bold">{{ $t("auto-script.editor_title") }}</span>
                 <div class="flex items-center gap-2 ml-4 text-xs">
-                    <span class="text-base-content/60">{{ $t('auto-script.target_process') }}</span>
+                    <span class="text-base-content/60">{{ $t("auto-script.target_process") }}</span>
                     <input
                         v-model="store.doc.processName"
                         class="w-48 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -449,7 +449,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                     />
                     <label class="flex items-center gap-1 cursor-pointer">
                         <input type="checkbox" class="checkbox checkbox-xs" v-model="store.doc.frameless" />
-                        <span>{{ $t('auto-script.frameless_mode') }}</span>
+                        <span>{{ $t("auto-script.frameless_mode") }}</span>
                     </label>
                 </div>
                 <div class="flex-1" />
@@ -462,9 +462,9 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                     <Icon :icon="recorderSnapshot.recording ? 'ri:stop-circle-line' : 'ri:record-circle-line'" class="w-3.5 h-3.5" />
                     {{ recorderSnapshot.recording ? `完成录制 (${recorderSnapshot.actionCount})` : "录制" }}
                 </button>
-                <span v-if="pickArmed" class="badge badge-warning badge-sm">{{ $t('auto-script.capture_coord_hint') }}</span>
+                <span v-if="pickArmed" class="badge badge-warning badge-sm">{{ $t("auto-script.capture_coord_hint") }}</span>
                 <button class="btn btn-xs btn-primary" :title="$t('auto-script.export_to_tab')" @click="exportToTab">
-                    <Icon icon="ri:save-line" class="w-3.5 h-3.5" />{{ $t('auto-script.export_code') }}
+                    <Icon icon="ri:save-line" class="w-3.5 h-3.5" />{{ $t("auto-script.export_code") }}
                 </button>
                 <button class="btn btn-sm btn-ghost btn-square" :title="$t('auto-script.close')" @click="close">
                     <Icon icon="ri:close-line" class="w-4 h-4" />
@@ -475,7 +475,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                 <!-- 调色板 -->
                 <div class="w-44 border-r border-base-300 flex flex-col min-h-0">
                     <ScrollArea class="flex-1 p-2">
-                        <div class="text-xs font-bold text-base-content/60 mb-1">{{ $t('auto-script.flow_control') }}</div>
+                        <div class="text-xs font-bold text-base-content/60 mb-1">{{ $t("auto-script.flow_control") }}</div>
                         <div
                             v-for="entry in controlPalette"
                             :key="entry.kind"
@@ -487,7 +487,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                             <Icon :icon="entry.icon" class="w-3.5 h-3.5 text-secondary" />
                             {{ entry.label }}
                         </div>
-                        <div class="text-xs font-bold text-base-content/60 mt-3 mb-1">{{ $t('auto-script.actions') }}</div>
+                        <div class="text-xs font-bold text-base-content/60 mt-3 mb-1">{{ $t("auto-script.actions") }}</div>
                         <div
                             v-for="entry in actionPalette"
                             :key="entry.kind"
@@ -501,7 +501,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                         </div>
                     </ScrollArea>
                     <div class="p-2 border-t border-base-300 text-[10px] text-base-content/50 leading-4">
-                        {{ $t('auto-script.drag_node_hint') }}<br />{{ $t('auto-script.hotkey_hint') }}
+                        {{ $t("auto-script.drag_node_hint") }}<br />{{ $t("auto-script.hotkey_hint") }}
                     </div>
                 </div>
 
@@ -515,14 +515,22 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                 <!-- 右侧面板 -->
                 <div class="w-96 flex flex-col min-h-0">
                     <div class="tabs tabs-border px-2 pt-1">
-                        <a class="tab tab-sm" :class="{ 'tab-active': rightTab === 'props' }" @click="rightTab = 'props'">{{ $t('auto-script.properties') }}</a>
-                        <a class="tab tab-sm" :class="{ 'tab-active': rightTab === 'preview' }" @click="rightTab = 'preview'">{{ $t('auto-script.code_preview') }}</a>
-                        <a class="tab tab-sm" :class="{ 'tab-active': rightTab === 'config' }" @click="rightTab = 'config'">{{ $t('auto-script.config_variables') }}</a>
+                        <a class="tab tab-sm" :class="{ 'tab-active': rightTab === 'props' }" @click="rightTab = 'props'">{{
+                            $t("auto-script.properties")
+                        }}</a>
+                        <a class="tab tab-sm" :class="{ 'tab-active': rightTab === 'preview' }" @click="rightTab = 'preview'">{{
+                            $t("auto-script.code_preview")
+                        }}</a>
+                        <a class="tab tab-sm" :class="{ 'tab-active': rightTab === 'config' }" @click="rightTab = 'config'">{{
+                            $t("auto-script.config_variables")
+                        }}</a>
                     </div>
 
                     <!-- 属性面板 -->
                     <ScrollArea v-if="rightTab === 'props'" class="flex-1 p-3">
-                        <div v-if="!selectedNode" class="text-sm text-base-content/50 text-center mt-8">{{ $t('auto-script.click_node_hint') }}</div>
+                        <div v-if="!selectedNode" class="text-sm text-base-content/50 text-center mt-8">
+                            {{ $t("auto-script.click_node_hint") }}
+                        </div>
                         <template v-else>
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="badge badge-primary badge-sm">{{ selectedNode.kind }}</span>
@@ -543,15 +551,18 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                 "
                             >
                                 <div class="flex items-center gap-1 mb-1">
-                                    <span class="text-xs w-12">{{ $t('auto-script.key') }}</span>
-                                    <Select v-model="selectedNode.button" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
+                                    <span class="text-xs w-12">{{ $t("auto-script.key") }}</span>
+                                    <Select
+                                        v-model="selectedNode.button"
+                                        class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    >
                                         <SelectItem v-for="button in MOUSE_BUTTONS" :key="button.value" :value="button.value">
                                             {{ button.label }}
                                         </SelectItem>
                                     </Select>
                                 </div>
                                 <div class="flex items-center gap-1 mb-1">
-                                    <span class="text-xs w-12">{{ $t('auto-script.coordinate') }}</span>
+                                    <span class="text-xs w-12">{{ $t("auto-script.coordinate") }}</span>
                                     <input
                                         type="number"
                                         class="w-20 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
@@ -570,7 +581,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                         <Icon icon="ri:crosshair-2-line" class="w-3.5 h-3.5" />
                                     </button>
                                 </div>
-                                <div class="text-[10px] text-base-content/40 mb-2">{{ $t('auto-script.empty_click_hint') }}</div>
+                                <div class="text-[10px] text-base-content/40 mb-2">{{ $t("auto-script.empty_click_hint") }}</div>
                             </template>
 
                             <!-- 键盘动作 -->
@@ -580,7 +591,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                 "
                             >
                                 <div class="flex items-center gap-1 mb-1">
-                                    <span class="text-xs w-12">{{ $t('auto-script.key') }}</span>
+                                    <span class="text-xs w-12">{{ $t("auto-script.key") }}</span>
                                     <input
                                         v-model="selectedNode.key"
                                         class="w-24 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -615,7 +626,7 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                             <!-- 等待颜色 -->
                             <template v-else-if="selectedNode.kind === 'waitColor'">
                                 <div class="flex items-center gap-1 mb-1">
-                                    <span class="text-xs w-12">{{ $t('auto-script.coordinate') }}</span>
+                                    <span class="text-xs w-12">{{ $t("auto-script.coordinate") }}</span>
                                     <input
                                         type="number"
                                         v-model.number="selectedNode.x"
@@ -707,7 +718,11 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                         {{ configVar.name }}
                                     </SelectItem>
                                 </Select>
-                                <input v-model="selectedNode.value" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="写入的值" />
+                                <input
+                                    v-model="selectedNode.value"
+                                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    placeholder="写入的值"
+                                />
                             </template>
                             <template v-else-if="selectedNode.kind === 'code'">
                                 <textarea
@@ -871,7 +886,11 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                             class="border border-base-300 rounded p-2 mb-2"
                         >
                             <div class="flex items-center gap-1 mb-1">
-                                <input v-model="configVar.name" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="配置名" />
+                                <input
+                                    v-model="configVar.name"
+                                    class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    placeholder="配置名"
+                                />
                                 <input
                                     v-model="configVar.varName"
                                     class="w-20 font-mono rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary tabular-nums"
@@ -886,9 +905,15 @@ const controlPalette = computed(() => PALETTE.filter(entry => entry.category ===
                                     v-model="configVar.kind"
                                     class="rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                                 >
-                                    <SelectItem v-for="kind in CONFIG_KINDS" :key="kind.value" :value="kind.value">{{ kind.label }}</SelectItem>
+                                    <SelectItem v-for="kind in CONFIG_KINDS" :key="kind.value" :value="kind.value">{{
+                                        kind.label
+                                    }}</SelectItem>
                                 </Select>
-                                <input v-model="configVar.desc" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" placeholder="描述" />
+                                <input
+                                    v-model="configVar.desc"
+                                    class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-xs text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                                    placeholder="描述"
+                                />
                             </div>
                             <div class="flex items-center gap-1">
                                 <template v-if="configVar.kind === 'select' || configVar.kind === 'multi-select'">

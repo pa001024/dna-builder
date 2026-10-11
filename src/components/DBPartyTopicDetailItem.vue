@@ -978,7 +978,7 @@ onBeforeUnmount(() => {
                         class="absolute right-0 top-full z-1000 mt-2 w-56 rounded-xs border border-base-content/15 bg-base-100/85 p-3 shadow-lg backdrop-blur-md"
                     >
                         <div class="space-y-2">
-                            <div class="text-[11px] tracking-wide text-base-content/45">{{ $t('db-party-topic.voice_language') }}</div>
+                            <div class="text-[11px] tracking-wide text-base-content/45">{{ $t("db-party-topic.voice_language") }}</div>
                             <Select
                                 v-model="selectedVoiceLocale"
                                 class="w-full rounded-none border-b border-base-content/25 bg-transparent px-3 py-2 text-sm outline-none transition-colors duration-150 focus:border-primary"
@@ -1001,7 +1001,7 @@ onBeforeUnmount(() => {
 
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="shrink-0 text-xs text-base-content/60">{{ $t('角色') }}</span>
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t("角色") }}</span>
                     <SRouterLink
                         :to="`/db/char/${partyTopic.charId}`"
                         class="truncate text-right text-xs font-medium text-primary transition-colors duration-150 hover:text-primary/80"
@@ -1014,7 +1014,7 @@ onBeforeUnmount(() => {
                     v-if="partyTopic.conditionId"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="shrink-0 text-xs text-base-content/60">{{ $t('db-party-topic.prerequisite_quest_chain') }}</span>
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t("db-party-topic.prerequisite_quest_chain") }}</span>
                     <SRouterLink
                         :to="`/db/questchain/${partyTopic.conditionId}`"
                         class="truncate text-right text-xs font-medium text-primary transition-colors duration-150 hover:text-primary/80"
@@ -1028,19 +1028,19 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="shrink-0 text-xs text-base-content/60">{{ $t('db-party-topic.reward_id') }}</span>
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t("db-party-topic.reward_id") }}</span>
                     <span class="font-orbitron text-[13px] font-semibold text-primary">{{ partyTopic.reward }}</span>
                 </div>
             </div>
 
             <div v-if="partyTopic.desc" class="mt-2.5 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                <div class="mb-1 text-[11px] tracking-wide text-base-content/45">{{ $t('common.description') }}</div>
+                <div class="mb-1 text-[11px] tracking-wide text-base-content/45">{{ $t("common.description") }}</div>
                 <div class="text-sm leading-relaxed text-base-content/85">{{ formatStoryText(partyTopic.desc) }}</div>
             </div>
 
             <div v-if="partyTopic.memoryDesc" class="mt-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                 <div class="mb-1 text-[11px] tracking-wide text-base-content/45">
-                    {{ partyTopic.memoryName ? formatStoryText(partyTopic.memoryName) : $t('common.none') }}
+                    {{ partyTopic.memoryName ? formatStoryText(partyTopic.memoryName) : $t("common.none") }}
                 </div>
                 <div class="text-sm leading-relaxed text-base-content/85">{{ formatStoryText(partyTopic.memoryDesc) }}</div>
             </div>
@@ -1075,10 +1075,10 @@ onBeforeUnmount(() => {
                         class="mr-1 inline-flex h-7 shrink-0 items-center rounded-xs border border-base-content/15 px-2 text-[11px] font-medium text-base-content/60 transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                         @click="readerOpen = true"
                     >
-                        {{ $t('reader.enter') }}
+                        {{ $t("reader.enter") }}
                     </button>
                     <label class="flex select-none items-center gap-2 text-xs text-base-content/70">
-                        <span>{{ $t('common.autoplay') }}</span>
+                        <span>{{ $t("common.autoplay") }}</span>
                         <input
                             v-model="autoPlayEnabled"
                             type="checkbox"
@@ -1195,7 +1195,7 @@ onBeforeUnmount(() => {
                                     :key="`${option.id}-${impressionCheck.regionId}-${impressionCheck.typeLabel}-impr-check`"
                                     class="rounded-xs border border-info/40 bg-info/10 px-1.5 py-0.5 text-[10px] leading-none tabular-nums text-info"
                                 >
-                                    {{ $t('common.impression_check') }} {{ $t(getRegionType(impressionCheck.regionId)) }}·{{
+                                    {{ $t("common.impression_check") }} {{ $t(getRegionType(impressionCheck.regionId)) }}·{{
                                         $t(impressionCheck.typeLabel)
                                     }}
                                     ≥ {{ impressionCheck.threshold }}
@@ -1207,12 +1207,12 @@ onBeforeUnmount(() => {
             </TransitionGroup>
 
             <div v-if="!dialogueChain.length" class="text-sm text-base-content/60">
-                {{ dialogueRows.length ? $t('db-party-topic.dialogue_chain_empty') : $t('db-party-topic.dialogue_empty') }}
+                {{ dialogueRows.length ? $t("db-party-topic.dialogue_chain_empty") : $t("db-party-topic.dialogue_empty") }}
             </div>
 
             <!-- 剧情媒体标记：BGM 试听 -->
             <div v-if="mediaMarkerRows.length" class="mt-2 space-y-2">
-                <div class="text-[11px] font-semibold tracking-wide text-accent">{{ $t('db-party-topic.bgm_media_section') }}</div>
+                <div class="text-[11px] font-semibold tracking-wide text-accent">{{ $t("db-party-topic.bgm_media_section") }}</div>
                 <div
                     v-for="marker in mediaMarkerRows"
                     :key="marker.id"
@@ -1228,7 +1228,7 @@ onBeforeUnmount(() => {
                         >
                             {{ marker.resource }}
                         </code>
-                        <span v-if="isMarkerBgmMute(marker)" class="text-base-content/40">{{ $t('db-party-topic.bgm_mute_hint') }}</span>
+                        <span v-if="isMarkerBgmMute(marker)" class="text-base-content/40">{{ $t("db-party-topic.bgm_mute_hint") }}</span>
                         <button
                             v-else-if="getMarkerBgmUrl(marker)"
                             type="button"
@@ -1240,9 +1240,13 @@ onBeforeUnmount(() => {
                             "
                             @click="toggleMarkerBgm(marker)"
                         >
-                            {{ currentBgmMarkerId === marker.id && isBgmPlaying ? $t('db-party-topic.bgm_preview_stop') : $t('db-party-topic.bgm_preview') }}
+                            {{
+                                currentBgmMarkerId === marker.id && isBgmPlaying
+                                    ? $t("db-party-topic.bgm_preview_stop")
+                                    : $t("db-party-topic.bgm_preview")
+                            }}
                         </button>
-                        <span v-else class="text-base-content/40">{{ $t('db-party-topic.bgm_no_cdn') }}</span>
+                        <span v-else class="text-base-content/40">{{ $t("db-party-topic.bgm_no_cdn") }}</span>
                     </div>
                 </div>
             </div>

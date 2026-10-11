@@ -48,7 +48,7 @@ const props = withDefaults(
         /** 进入页面时已选中的条目下标；只用于首次滚入视口，之后不再跟随。 */
         activeIndex?: number | null
     }>(),
-    { gap: 8, padding: 12, columns: 1, minColumnWidth: 120, activeIndex: null },
+    { gap: 8, padding: 12, columns: 1, minColumnWidth: 120, activeIndex: null }
 )
 
 defineSlots<{
@@ -270,7 +270,7 @@ function onViewportRef(el: HTMLElement): void {
 
 watch(
     () => props.items,
-    () => void nextTick(measureRowHeight),
+    () => void nextTick(measureRowHeight)
 )
 
 watch(
@@ -278,12 +278,12 @@ watch(
     () => {
         // 估值变化意味着列表形态换了（例如切到另一种卡片高度），旧实测值不再适用
         void remeasureRowHeight()
-    },
+    }
 )
 
 watch(
     () => props.activeIndex,
-    () => void nextTick(scrollToActiveIndex),
+    () => void nextTick(scrollToActiveIndex)
 )
 
 onMounted(() => {
@@ -308,11 +308,7 @@ defineExpose({ scrollToIndex })
             高度承载层：撑出与完整列表一致的滚动高度。
             内边距写在这里，且 height 需按 border-box 连同内边距一起算进去。
         -->
-        <div
-            ref="sizer"
-            class="relative"
-            :style="{ height: `${contentHeight + padding * 2}px`, padding: `${padding}px` }"
-        >
+        <div ref="sizer" class="relative" :style="{ height: `${contentHeight + padding * 2}px`, padding: `${padding}px` }">
             <div :class="columns > 1 ? 'grid' : 'flex flex-col'" :style="windowStyle">
                 <template v-for="entry in windowEntries" :key="entry.key">
                     <slot :item="entry.item" :index="entry.index" :animate="entry.animate" :row-height="rowHeight" />

@@ -276,7 +276,13 @@ onMounted(async () => {
                 </div>
                 <div class="w-full md:w-52">
                     <label class="mb-1 block text-xs text-base-content/60">会话 ID</label>
-                    <input v-model="filters.sessionId" type="text" placeholder="session id" class="input input-bordered w-full" @keyup.enter="search()" />
+                    <input
+                        v-model="filters.sessionId"
+                        type="text"
+                        placeholder="session id"
+                        class="input input-bordered w-full"
+                        @keyup.enter="search()"
+                    />
                 </div>
                 <div class="w-full md:w-32">
                     <label class="mb-1 block text-xs text-base-content/60">结果</label>
@@ -288,7 +294,13 @@ onMounted(async () => {
                 </div>
                 <div class="w-full md:w-28">
                     <label class="mb-1 block text-xs text-base-content/60">状态码</label>
-                    <input v-model="filters.status" type="number" placeholder="如 502" class="input input-bordered w-full" @keyup.enter="search()" />
+                    <input
+                        v-model="filters.status"
+                        type="number"
+                        placeholder="如 502"
+                        class="input input-bordered w-full"
+                        @keyup.enter="search()"
+                    />
                 </div>
                 <div class="w-full md:w-32">
                     <label class="mb-1 block text-xs text-base-content/60">拉取条数</label>
@@ -327,9 +339,13 @@ onMounted(async () => {
                             <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">状态</th>
                             <th class="px-4 py-4 text-right text-xs font-semibold tracking-wider text-base-content/70 uppercase">耗时</th>
                             <th class="px-4 py-4 text-right text-xs font-semibold tracking-wider text-base-content/70 uppercase">首字</th>
-                            <th class="px-4 py-4 text-right text-xs font-semibold tracking-wider text-base-content/70 uppercase">输入 / 输出</th>
+                            <th class="px-4 py-4 text-right text-xs font-semibold tracking-wider text-base-content/70 uppercase">
+                                输入 / 输出
+                            </th>
                             <th class="px-4 py-4 text-right text-xs font-semibold tracking-wider text-base-content/70 uppercase">费用</th>
-                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">上游 trace</th>
+                            <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">
+                                上游 trace
+                            </th>
                             <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">错误</th>
                             <th class="px-4 py-4 text-left text-xs font-semibold tracking-wider text-base-content/70 uppercase">操作</th>
                         </tr>
@@ -345,7 +361,9 @@ onMounted(async () => {
                                 {{ formatLogTime(log.time) }}
                             </td>
                             <td class="px-4 py-4 text-xs whitespace-nowrap">
-                                <span class="font-mono text-base-content/85" :title="log.sessionId">{{ shortSessionId(log.sessionId) }}</span>
+                                <span class="font-mono text-base-content/85" :title="log.sessionId">{{
+                                    shortSessionId(log.sessionId)
+                                }}</span>
                             </td>
                             <td class="px-4 py-4 text-xs whitespace-nowrap">
                                 <div class="text-base-content/85">{{ clientLabel(log) }}</div>
@@ -353,7 +371,10 @@ onMounted(async () => {
                             </td>
                             <td class="px-4 py-4 text-xs whitespace-nowrap">
                                 <span class="badge badge-sm" :class="log.ok ? 'badge-success' : 'badge-error'">{{ log.status }}</span>
-                                <span v-if="log.upstreamStatus && log.upstreamStatus !== log.status" class="ml-1 font-mono text-base-content/50">
+                                <span
+                                    v-if="log.upstreamStatus && log.upstreamStatus !== log.status"
+                                    class="ml-1 font-mono text-base-content/50"
+                                >
                                     ↑{{ log.upstreamStatus }}
                                 </span>
                             </td>
@@ -365,7 +386,8 @@ onMounted(async () => {
                             </td>
                             <td class="px-4 py-4 text-right font-mono text-xs whitespace-nowrap text-base-content/85">
                                 <template v-if="log.usage">
-                                    {{ formatCount(log.usage.prompt) }} / {{ formatCount(log.usage.completion) }}
+                                    {{ formatCount(log.usage.prompt) }}
+                                    / {{ formatCount(log.usage.completion) }}
                                 </template>
                                 <template v-else>-</template>
                             </td>
@@ -392,15 +414,24 @@ onMounted(async () => {
                             </td>
                             <td class="px-4 py-4 text-xs whitespace-nowrap">
                                 <div class="flex items-center gap-3">
-                                    <button class="flex items-center gap-1.5 font-medium text-primary hover:underline" @click="openSession(log.sessionId)">
+                                    <button
+                                        class="flex items-center gap-1.5 font-medium text-primary hover:underline"
+                                        @click="openSession(log.sessionId)"
+                                    >
                                         <Icon icon="ri:chat-thread-line" />
                                         <span>查看会话</span>
                                     </button>
-                                    <button class="flex items-center gap-1.5 font-medium text-base-content/70 hover:underline" @click="filterBySession(log.sessionId)">
+                                    <button
+                                        class="flex items-center gap-1.5 font-medium text-base-content/70 hover:underline"
+                                        @click="filterBySession(log.sessionId)"
+                                    >
                                         <Icon icon="ri:filter-line" />
                                         <span>筛选</span>
                                     </button>
-                                    <button class="flex items-center gap-1.5 font-medium text-base-content/70 hover:underline" @click="copyText(log.sessionId, '会话 ID')">
+                                    <button
+                                        class="flex items-center gap-1.5 font-medium text-base-content/70 hover:underline"
+                                        @click="copyText(log.sessionId, '会话 ID')"
+                                    >
                                         <Icon icon="ri:file-copy-line" />
                                         <span>复制</span>
                                     </button>
@@ -425,9 +456,14 @@ onMounted(async () => {
                 @update:page="value => (page = value)"
             />
 
-            <div v-if="canLoadMore || truncated" class="flex flex-wrap items-center justify-between gap-2 border-t border-base-300 px-4 py-3">
+            <div
+                v-if="canLoadMore || truncated"
+                class="flex flex-wrap items-center justify-between gap-2 border-t border-base-300 px-4 py-3"
+            >
                 <p class="text-xs text-base-content/60">
-                    已加载最新 {{ logs.length }} 条，扫描 {{ scannedDays }} 个日期文件<template v-if="truncated">；可能还有更早的记录</template>
+                    已加载最新 {{ logs.length }} 条，扫描 {{ scannedDays }} 个日期文件<template v-if="truncated"
+                        >；可能还有更早的记录</template
+                    >
                 </p>
                 <button v-if="canLoadMore" class="btn btn-xs btn-outline" :disabled="loading" @click="loadMore">
                     <span v-if="loading" class="loading loading-spinner loading-xs"></span>
@@ -442,7 +478,12 @@ onMounted(async () => {
 
         <AiLogSessionDialog v-model:open="sessionDialogOpen" :session-id="activeSessionId" />
 
-        <Dialog v-if="pruneDialogOpen" v-model:open="pruneDialogOpen" title="清理旧日志" :description="`将删除该日期（不含当天）之前的索引与全部会话轮次，操作不可撤销。`">
+        <Dialog
+            v-if="pruneDialogOpen"
+            v-model:open="pruneDialogOpen"
+            title="清理旧日志"
+            :description="`将删除该日期（不含当天）之前的索引与全部会话轮次，操作不可撤销。`"
+        >
             <template #content>
                 <div class="space-y-2 py-4">
                     <label class="text-sm font-medium text-base-content">保留该日期及之后的日志</label>

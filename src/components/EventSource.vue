@@ -3,6 +3,7 @@ import { t } from "i18next"
 import { computed } from "vue"
 import type { ResourceEventSourceInfo } from "@/utils/resource-source"
 import { formatTimeRange } from "@/utils/time"
+import type { IconTypes } from "./Icon.vue"
 
 const props = defineProps<{
     eventSources: ResourceEventSourceInfo[]
@@ -16,7 +17,12 @@ const KIND_ICONS = {
     "box-drop": "ri:gift-line",
     "box-coin": "ri:copper-coin-line",
     "top-up": "ri:trophy-line",
-} as const satisfies Record<ResourceEventSourceInfo["kind"], string>
+    hardboss: "ri:skull-line",
+    puzzle: "ri:puzzle-line",
+    verify: "ri:sword-line",
+    prize: "ri:coupon-line",
+    "prize-extra": "ri:medal-line",
+} as const satisfies Record<ResourceEventSourceInfo["kind"], IconTypes>
 
 /** 来源类型 → 中间行描述文本 */
 const kindDescriptions = computed(() =>
@@ -27,14 +33,24 @@ const kindDescriptions = computed(() =>
             source.kind === "photo-task"
                 ? `${t("event.photo_task_index")} ${source.index}`
                 : source.kind === "sign-in"
-                    ? t("event.sign_in_day", { day: source.index })
-                    : source.kind === "online-time"
-                        ? t("event.online_time_target", { target: source.target ?? source.index })
-                        : source.kind === "box-drop"
-                            ? t("event.box_drop_index", { index: source.index })
-                            : source.kind === "box-coin"
-                                ? t("event.box_coin")
-                                : t("event.top_up_score", { score: source.index }),
+                  ? t("event.sign_in_day", { day: source.index })
+                  : source.kind === "online-time"
+                    ? t("event.online_time_target", { target: source.target ?? source.index })
+                    : source.kind === "box-drop"
+                      ? t("event.box_drop_index", { index: source.index })
+                      : source.kind === "box-coin"
+                        ? t("event.box_coin")
+                        : source.kind === "top-up"
+                          ? t("event.top_up_score", { score: source.index })
+                          : source.kind === "hardboss"
+                            ? `${t(source.title ?? "")} · ${source.mode === "challenge" ? t("event.hard_boss_challenge") : t("event.hard_boss_eternal")} · ${source.first ? t("event.hard_boss_first") : t("event.hard_boss_fixed")}`
+                            : source.kind === "puzzle"
+                              ? t("event.puzzle_level", { name: source.title ?? "" })
+                              : source.kind === "verify"
+                                ? t("event.verify_star", { stars: source.index })
+                                : source.kind === "prize"
+                                  ? t("event.prize_pool", { pool: source.poolId ?? "", index: source.index })
+                                  : t("event.prize_extra", { index: source.index }),
     }))
 )
 </script>
@@ -53,7 +69,9 @@ const kindDescriptions = computed(() =>
                 </div>
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-1.5">
-                        <h4 class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary">
+                        <h4
+                            class="truncate text-sm font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
+                        >
                             <SRouterLink :to="`/db/event/${source.eventId}`" class="hover:underline">
                                 {{ $t(source.eventName) }}
                             </SRouterLink>

@@ -165,7 +165,9 @@ onBeforeUnmount(() => {
                             >
                                 A−
                             </button>
-                            <span class="w-10 text-center font-orbitron text-[11px] tabular-nums text-base-content/55">{{ fontPercent }}</span>
+                            <span class="w-10 text-center font-orbitron text-[11px] tabular-nums text-base-content/55">{{
+                                fontPercent
+                            }}</span>
                             <button
                                 type="button"
                                 class="inline-flex h-7 w-7 items-center justify-center rounded-xs border border-base-content/15 text-[11px] font-semibold text-base-content/60 transition-colors duration-150 hover:border-base-content/30 hover:text-base-content disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-base-content/15 disabled:hover:text-base-content/60"
@@ -201,7 +203,8 @@ onBeforeUnmount(() => {
                             {{ t("reader.prev") }}
                         </button>
                         <span class="font-orbitron text-[11px] tabular-nums text-base-content/45">
-                            {{ activeIndex + 1 }} / {{ items.length }}
+                            {{ activeIndex + 1 }}
+                            / {{ items.length }}
                         </span>
                         <button
                             type="button"

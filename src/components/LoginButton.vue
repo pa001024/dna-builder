@@ -27,6 +27,6 @@ const visible = computed(() => !user.jwtToken)
 <template>
     <button v-if="visible" type="button" class="btn" :class="[`btn-${props.variant}`, `btn-${props.size}`]" @click="auth.openLogin()">
         <Icon v-if="icon" icon="ri:login-box-line" :class="size === 'xs' ? 'size-3.5' : 'size-4'" />
-        {{ label || $t('dob-account.login') }}
+        {{ label || $t("dob-account.login") }}
     </button>
 </template>

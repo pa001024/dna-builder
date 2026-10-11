@@ -538,32 +538,28 @@ const textStyle = computed(() => {
         <canvas v-if="props.renderer !== 'dom'" v-show="useWebGL" ref="canvasRef" class="title-frame__canvas" />
         <div class="title-frame__stage" :style="stageStyle">
             <template v-if="!useWebGL">
-            <div
-                v-for="(layer, index) in frame.layers"
-                :key="layer.key"
-                class="title-frame__layer"
-                :style="{ ...layerStyle(layer), zIndex: index + 1 }"
-            >
-                <!-- 序列帧图集：只裁出当前那一格，整张贴图铺进去会变成一片重复的小图 -->
                 <div
-                    v-if="isFlipBook(layer)"
-                    class="title-frame__image"
-                    :style="layerFlipBookStyle(layer)"
-                />
-                <img
-                    v-else-if="layerTint(layer).plain"
-                    class="title-frame__image"
-                    :src="layer.src"
-                    :style="layerMaskStyle(layer, false)"
-                    alt=""
-                    draggable="false"
-                />
-                <span
-                    v-else
-                    class="title-frame__mask"
-                    :style="{ backgroundColor: layerTint(layer).color, ...layerMaskStyle(layer, true) }"
-                />
-            </div>
+                    v-for="(layer, index) in frame.layers"
+                    :key="layer.key"
+                    class="title-frame__layer"
+                    :style="{ ...layerStyle(layer), zIndex: index + 1 }"
+                >
+                    <!-- 序列帧图集：只裁出当前那一格，整张贴图铺进去会变成一片重复的小图 -->
+                    <div v-if="isFlipBook(layer)" class="title-frame__image" :style="layerFlipBookStyle(layer)" />
+                    <img
+                        v-else-if="layerTint(layer).plain"
+                        class="title-frame__image"
+                        :src="layer.src"
+                        :style="layerMaskStyle(layer, false)"
+                        alt=""
+                        draggable="false"
+                    />
+                    <span
+                        v-else
+                        class="title-frame__mask"
+                        :style="{ backgroundColor: layerTint(layer).color, ...layerMaskStyle(layer, true) }"
+                    />
+                </div>
             </template>
             <div v-if="textStyle" class="title-frame__text" :style="textStyle">
                 <span ref="textInnerRef" class="title-frame__text-inner" :style="{ transform: `scale(${textScale})` }">

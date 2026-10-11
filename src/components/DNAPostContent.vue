@@ -28,7 +28,7 @@ defineProps<{
                 controls
                 class="max-w-full rounded-lg object-cover shadow-md"
             >
-                {{ $t('dna-post-content.video_unsupported') }}
+                {{ $t("dna-post-content.video_unsupported") }}
             </video>
             <img
                 v-else-if="(content as DNAPostContentBean).contentVideo?.coverUrl"

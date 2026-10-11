@@ -260,12 +260,7 @@ defineExpose({
 </script>
 
 <template>
-    <div
-        ref="hostRef"
-        class="expr-input"
-        :class="{ 'expr-input--underline': variant === 'underline' }"
-        @pointerdown="onHostPointerDown"
-    />
+    <div ref="hostRef" class="expr-input" :class="{ 'expr-input--underline': variant === 'underline' }" @pointerdown="onHostPointerDown" />
 </template>
 
 <style lang="less" scoped>

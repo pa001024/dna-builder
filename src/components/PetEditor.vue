@@ -312,7 +312,7 @@ function setPetCoverage(coverage: number) {
                             </div>
                             <ul class="space-y-1">
                                 <li
-                                    v-for="[prop, value] in Object.entries(activeBuff?.getProperties() ?? {})"
+                                    v-for="[ prop, value ] in Object.entries(activeBuff?.getProperties() ?? {})"
                                     :key="prop"
                                     class="flex justify-between gap-8 text-sm text-primary"
                                 >
@@ -322,7 +322,9 @@ function setPetCoverage(coverage: number) {
                             </ul>
                         </div>
                     </template>
-                    <p class="text-xs whitespace-pre-line text-base-content/70">{{ petSkillText(selectedPet.主动模板, selectedPet.主动值) }}</p>
+                    <p class="text-xs whitespace-pre-line text-base-content/70">
+                        {{ petSkillText(selectedPet.主动模板, selectedPet.主动值) }}
+                    </p>
                 </FullTooltip>
             </div>
             <div v-if="selectedPet.被动" class="flex flex-col gap-0.5">
@@ -349,7 +351,7 @@ function setPetCoverage(coverage: number) {
                             </div>
                             <ul class="space-y-1">
                                 <li
-                                    v-for="[prop, value] in Object.entries(passiveBuff?.getProperties() ?? {})"
+                                    v-for="[ prop, value ] in Object.entries(passiveBuff?.getProperties() ?? {})"
                                     :key="prop"
                                     class="flex justify-between gap-8 text-sm text-primary"
                                 >
@@ -359,7 +361,9 @@ function setPetCoverage(coverage: number) {
                             </ul>
                         </div>
                     </template>
-                    <p class="text-xs whitespace-pre-line text-base-content/70">{{ petSkillText(selectedPet.被动模板, selectedPet.被动值) }}</p>
+                    <p class="text-xs whitespace-pre-line text-base-content/70">
+                        {{ petSkillText(selectedPet.被动模板, selectedPet.被动值) }}
+                    </p>
                 </FullTooltip>
             </div>
         </div>

@@ -18,11 +18,13 @@ import { getRewardDetails, RewardItem as RewardItemType } from "@/utils/reward-u
 
 const props = defineProps<{
     dungeon: Dungeon
+    /** 初始展示等级（默认取 dungeon.lv；爬塔楼层等场景按楼层怪物等级传入） */
+    initialLevel?: number
 }>()
 
 const { gt } = useGameText()
 
-const currentLevel = ref(props.dungeon.lv)
+const currentLevel = ref(props.initialLevel ?? props.dungeon.lv)
 const ENDLESS_MAX_WAVE = 99
 const ENDLESS_LEVEL_STEP = 5
 const IRON_SURVIVAL_MONSTER_HP_MULTIPLIER = 8
@@ -563,9 +565,9 @@ const mergedDungeonRewards = computed(() => {
 })
 
 watch(
-    () => props.dungeon.id,
+    () => [props.dungeon.id, props.initialLevel] as const,
     () => {
-        currentLevel.value = props.dungeon.lv
+        currentLevel.value = props.initialLevel ?? props.dungeon.lv
         endlessStartWave.value = 1
         endlessEndWave.value = 2
         ironStartLevel.value = props.dungeon.lv
@@ -624,13 +626,13 @@ watch(
                             class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
                             :title="$t('db-dungeon-detail.waves_per_stage')"
                         >
-                            {{ $t('common.count_waves', { count: dungeon.waves }) }}
+                            {{ $t("common.count_waves", { count: dungeon.waves }) }}
                         </span>
                         <span
                             v-if="dungeon.mod != null"
                             class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-[10px] tracking-wide text-base-content/55"
                         >
-                            {{ $t('db-dungeon-detail.level_requirement', { level: dungeon.mod }) }}
+                            {{ $t("db-dungeon-detail.level_requirement", { level: dungeon.mod }) }}
                         </span>
                         <span
                             class="rounded-xs px-1.5 py-0.5 text-[10px] tracking-wide"
@@ -664,9 +666,11 @@ watch(
             <SectionHeader no-animate compact kicker="ENDLESS" :title="$t('db-dungeon-detail.endless_dungeon_settings')" />
             <template v-if="isIronSurvivalDungeon">
                 <div class="mb-1 mt-2 flex items-center justify-between text-sm">
-                    <span>{{ $t('db-dungeon-detail.monster_level_range') }}</span>
+                    <span>{{ $t("db-dungeon-detail.monster_level_range") }}</span>
                     <span class="font-orbitron text-[13px] font-semibold text-primary">
-                        Lv.{{ selectedIronStartLevel }} ~ Lv.{{ selectedIronEndLevel }} / Lv.{{ maxMonsterLevel }}
+                        Lv.{{ selectedIronStartLevel }}
+                        ~ Lv.{{ selectedIronEndLevel }}
+                        / Lv.{{ maxMonsterLevel }}
                     </span>
                 </div>
                 <DualRangeSlider
@@ -680,14 +684,20 @@ watch(
                     :end-label="$t('db-dungeon-detail.end_level')"
                 />
                 <div class="mt-1 text-xs text-base-content/70">
-                    {{ $t('db-dungeon-detail.range_cover_level', { start: endlessStartLevelBase, end: endlessLevelBase }) }}
+                    {{ $t("db-dungeon-detail.range_cover_level", { start: endlessStartLevelBase, end: endlessLevelBase }) }}
                 </div>
             </template>
             <template v-else>
                 <div class="mb-1 mt-2 flex items-center justify-between text-sm">
-                    <span>{{ $t('db-dungeon-detail.endless_waves') }}</span>
+                    <span>{{ $t("db-dungeon-detail.endless_waves") }}</span>
                     <span class="font-orbitron text-[13px] font-semibold text-primary">
-                        {{ $t('db-dungeon-detail.wave_range_over_max', { start: selectedEndlessStartWave, end: selectedEndlessWave - 1, max: endlessMaxWave - 1 }) }}
+                        {{
+                            $t("db-dungeon-detail.wave_range_over_max", {
+                                start: selectedEndlessStartWave,
+                                end: selectedEndlessWave - 1,
+                                max: endlessMaxWave - 1,
+                            })
+                        }}
                     </span>
                 </div>
                 <DualRangeSlider
@@ -701,7 +711,16 @@ watch(
                     :end-label="$t('db-dungeon-detail.end_wave')"
                 />
                 <div class="mt-1 text-xs text-base-content/70">
-                    {{ $t('db-dungeon-detail.range_cover_wave_level', { start: displayStartWave, end: displayEndWave, lvStart: endlessStartLevelBase, lvEnd: endlessLevelBase, step: ENDLESS_LEVEL_STEP, max: maxMonsterLevel }) }}
+                    {{
+                        $t("db-dungeon-detail.range_cover_wave_level", {
+                            start: displayStartWave,
+                            end: displayEndWave,
+                            lvStart: endlessStartLevelBase,
+                            lvEnd: endlessLevelBase,
+                            step: ENDLESS_LEVEL_STEP,
+                            max: maxMonsterLevel,
+                        })
+                    }}
                 </div>
             </template>
         </section>
@@ -711,14 +730,14 @@ watch(
             <section v-if="dungeon.m?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                 <SectionHeader no-animate compact kicker="MONSTERS" :title="$t('db-dungeon-detail.normal_monsters')">
                     <template #trailing>
-                        <span class="text-[11px] tabular-nums text-base-content/40">{{ $t('common.count_kinds', { count: dungeon.m.length }) }}</span>
+                        <span class="text-[11px] tabular-nums text-base-content/40">{{
+                            $t("common.count_kinds", { count: dungeon.m.length })
+                        }}</span>
                     </template>
                 </SectionHeader>
                 <!-- 等级控制 -->
                 <div class="mt-2 flex items-center gap-4 mb-3">
-                    <span class="min-w-12 shrink-0 font-orbitron text-[13px] font-semibold text-primary"
-                        >Lv. {{ monsterTabLevel }}</span
-                    >
+                    <span class="min-w-12 shrink-0 font-orbitron text-[13px] font-semibold text-primary">Lv. {{ monsterTabLevel }}</span>
                     <input
                         v-if="!isEndlessDungeon"
                         v-model.number="currentLevel"
@@ -728,7 +747,7 @@ watch(
                         :max="MonsterLevelUpperLimit"
                         step="1"
                     />
-                    <span v-else class="text-xs text-base-content/70">{{ $t('db-dungeon-detail.endless_level_hint') }}</span>
+                    <span v-else class="text-xs text-base-content/70">{{ $t("db-dungeon-detail.endless_level_hint") }}</span>
                 </div>
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                     <DBMonsterCompactCard
@@ -743,7 +762,9 @@ watch(
             <section v-if="dungeon.sm?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                 <SectionHeader no-animate compact kicker="ELITE" :title="$t('db-dungeon-detail.elite_monsters')">
                     <template #trailing>
-                        <span class="text-[11px] tabular-nums text-base-content/40">{{ $t('common.count_kinds', { count: dungeon.sm.length }) }}</span>
+                        <span class="text-[11px] tabular-nums text-base-content/40">{{
+                            $t("common.count_kinds", { count: dungeon.sm.length })
+                        }}</span>
                     </template>
                 </SectionHeader>
                 <div class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
@@ -759,7 +780,7 @@ watch(
                 v-if="!dungeon.m?.length && !dungeon.sm?.length"
                 class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm text-sm text-base-content/70"
             >
-                {{ $t('db-dungeon-detail.no_monster_data') }}
+                {{ $t("db-dungeon-detail.no_monster_data") }}
             </div>
         </template>
 
@@ -774,20 +795,24 @@ watch(
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                     <SectionHeader no-animate compact kicker="SPAWN" :title="$t('db-dungeon-detail.spawn_range_title')" />
                     <div class="mt-2 flex items-center justify-between">
-                        <span class="text-sm">{{ $t('db-dungeon-detail.spawn_range_title') }}</span>
+                        <span class="text-sm">{{ $t("db-dungeon-detail.spawn_range_title") }}</span>
                         <label class="label cursor-pointer gap-2 p-0">
-                            <span class="text-xs text-base-content/70">{{ $t('db-dungeon-detail.mobile') }}</span>
+                            <span class="text-xs text-base-content/70">{{ $t("db-dungeon-detail.mobile") }}</span>
                             <input v-model="useMobileSpawnRadius" type="checkbox" class="checkbox checkbox-xs" />
                         </label>
                     </div>
-                    <div class="mt-1 text-xs text-base-content/70">{{ $t('db-dungeon-detail.current_platform', { platform: getSpawnRadiusPlatformText() }) }}</div>
+                    <div class="mt-1 text-xs text-base-content/70">
+                        {{ $t("db-dungeon-detail.current_platform", { platform: getSpawnRadiusPlatformText() }) }}
+                    </div>
                 </section>
 
                 <!-- 怪物波次 -->
                 <section v-if="dungeon.spawn?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                     <SectionHeader no-animate compact kicker="WAVES" :title="$t('db-dungeon-detail.monster_waves')">
                         <template #trailing>
-                            <span class="text-[11px] tabular-nums text-base-content/40">{{ $t('common.count_waves', { count: dungeon.spawn.length }) }}</span>
+                            <span class="text-[11px] tabular-nums text-base-content/40">{{
+                                $t("common.count_waves", { count: dungeon.spawn.length })
+                            }}</span>
                         </template>
                     </SectionHeader>
                     <div class="mt-2 space-y-3">
@@ -797,7 +822,7 @@ watch(
                             class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
                         >
                             <div class="mb-2 flex items-center justify-between gap-2">
-                                <span class="text-sm font-medium">{{ $t('db-dungeon-detail.wave_n', { n: waveIndex + 1 }) }}</span>
+                                <span class="text-sm font-medium">{{ $t("db-dungeon-detail.wave_n", { n: waveIndex + 1 }) }}</span>
                                 <span class="text-[11px] tabular-nums text-base-content/55">{{ getSpawnWaveSummaryText(wave) }}</span>
                             </div>
 
@@ -811,7 +836,7 @@ watch(
                                         <div
                                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                         >
-                                            <span>{{ $t('db-dungeon-detail.generator_id') }}</span>
+                                            <span>{{ $t("db-dungeon-detail.generator_id") }}</span>
                                             <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
                                                 spawnGenerator.id
                                             }}</span>
@@ -819,7 +844,7 @@ watch(
                                         <div
                                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                         >
-                                            <span>{{ $t('db-dungeon-detail.check_time') }}</span>
+                                            <span>{{ $t("db-dungeon-detail.check_time") }}</span>
                                             <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
                                                 spawnGenerator.time ? `${spawnGenerator.time}s` : "-"
                                             }}</span>
@@ -827,7 +852,7 @@ watch(
                                         <div
                                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                         >
-                                            <span>{{ $t('db-dungeon-detail.spawn_interval') }}</span>
+                                            <span>{{ $t("db-dungeon-detail.spawn_interval") }}</span>
                                             <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
                                                 spawnGenerator.th ? `${spawnGenerator.th}s` : "-"
                                             }}</span>
@@ -835,7 +860,9 @@ watch(
                                         <div
                                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                         >
-                                            <span>{{ $t('db-dungeon-detail.spawn_radius', { platform: getSpawnRadiusPlatformText() }) }}</span>
+                                            <span>{{
+                                                $t("db-dungeon-detail.spawn_radius", { platform: getSpawnRadiusPlatformText() })
+                                            }}</span>
                                             <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
                                                 formatSpawnRadius(spawnGenerator.radius)
                                             }}</span>
@@ -844,7 +871,11 @@ watch(
 
                                     <div v-if="getSpawnGeneratorMonsters(spawnGenerator).length" class="mb-2">
                                         <div class="text-xs text-base-content/55 mb-2">
-                                            {{ $t('db-dungeon-detail.normal_monsters_count', { count: getSpawnGeneratorMonsters(spawnGenerator).length }) }}
+                                            {{
+                                                $t("db-dungeon-detail.normal_monsters_count", {
+                                                    count: getSpawnGeneratorMonsters(spawnGenerator).length,
+                                                })
+                                            }}
                                         </div>
                                         <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                                             <div
@@ -865,7 +896,7 @@ watch(
                                                 <div
                                                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs"
                                                 >
-                                                    <span>{{ $t('db-dungeon-detail.quantity') }}</span>
+                                                    <span>{{ $t("db-dungeon-detail.quantity") }}</span>
                                                     <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
                                                         >x{{ getSpawnMonsterCountText(spawnMonster) }}</span
                                                     >
@@ -876,7 +907,11 @@ watch(
 
                                     <div v-if="getSpawnGeneratorGroups(spawnGenerator).length" class="mb-2">
                                         <div class="text-xs text-base-content/55 mb-2">
-                                            {{ $t('db-dungeon-detail.group_spawns_count', { count: getSpawnGeneratorGroups(spawnGenerator).length }) }}
+                                            {{
+                                                $t("db-dungeon-detail.group_spawns_count", {
+                                                    count: getSpawnGeneratorGroups(spawnGenerator).length,
+                                                })
+                                            }}
                                         </div>
                                         <div class="space-y-2">
                                             <div
@@ -888,107 +923,101 @@ watch(
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.group_id') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ spawnGroup.id }}</span
-                                                        >
+                                                        <span>{{ $t("db-dungeon-detail.group_id") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
+                                                            spawnGroup.id
+                                                        }}</span>
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.quantity') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ getSpawnGroupCountText(spawnGroup) }}</span
-                                                        >
+                                                        <span>{{ $t("db-dungeon-detail.quantity") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
+                                                            getSpawnGroupCountText(spawnGroup)
+                                                        }}</span>
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.weight') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ getSpawnGroupWeightText(spawnGroup) }}</span
-                                                        >
+                                                        <span>{{ $t("db-dungeon-detail.weight") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
+                                                            getSpawnGroupWeightText(spawnGroup)
+                                                        }}</span>
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.detect_time') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ spawnGroup.gt ? `${spawnGroup.gt}s` : "-" }}</span
-                                                        >
+                                                        <span>{{ $t("db-dungeon-detail.detect_time") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
+                                                            spawnGroup.gt ? `${spawnGroup.gt}s` : "-"
+                                                        }}</span>
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.detect_delay') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ spawnGroup.gdt ? `${spawnGroup.gdt}s` : "-" }}</span
-                                                        >
+                                                        <span>{{ $t("db-dungeon-detail.detect_delay") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
+                                                            spawnGroup.gdt ? `${spawnGroup.gdt}s` : "-"
+                                                        }}</span>
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.refill_interval') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ spawnGroup.gri ? `${spawnGroup.gri}s` : "-" }}</span
-                                                        >
+                                                        <span>{{ $t("db-dungeon-detail.refill_interval") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
+                                                            spawnGroup.gri ? `${spawnGroup.gri}s` : "-"
+                                                        }}</span>
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.threshold') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ spawnGroup.gth || "-" }}</span
-                                                        >
+                                                        <span>{{ $t("db-dungeon-detail.threshold") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
+                                                            spawnGroup.gth || "-"
+                                                        }}</span>
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.group_limit') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ spawnGroup.gl || "-" }}</span
-                                                        >
+                                                        <span>{{ $t("db-dungeon-detail.group_limit") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
+                                                            spawnGroup.gl || "-"
+                                                        }}</span>
                                                     </div>
                                                     <div
                                                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.group_radius_z') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ spawnGroup.gar || "-" }} / {{ spawnGroup.gz || "-" }}</span
+                                                        <span>{{ $t("db-dungeon-detail.group_radius_z") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
+                                                            >{{ spawnGroup.gar || "-" }}
+                                                            / {{ spawnGroup.gz || "-" }}</span
                                                         >
                                                     </div>
                                                     <div
                                                         class="col-span-full flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 md:col-span-3"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.initial_center_range') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ formatSpawnRadius(spawnGroup.gir) }}</span
-                                                        >
+                                                        <span>{{ $t("db-dungeon-detail.initial_center_range") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
+                                                            formatSpawnRadius(spawnGroup.gir)
+                                                        }}</span>
                                                     </div>
                                                     <div
                                                         class="col-span-full flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 md:col-span-3"
                                                     >
-                                                        <span>{{ $t('db-dungeon-detail.spawn_center_range') }}</span>
-                                                        <span
-                                                            class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                            >{{ formatSpawnRadius(spawnGroup.gr) }}</span
-                                                        >
+                                                        <span>{{ $t("db-dungeon-detail.spawn_center_range") }}</span>
+                                                        <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">{{
+                                                            formatSpawnRadius(spawnGroup.gr)
+                                                        }}</span>
                                                     </div>
                                                 </div>
 
                                                 <div v-if="getSpawnGroupMembers(spawnGroup).length">
                                                     <div class="text-xs text-base-content/55 mb-2">
-                                                        {{ $t('db-dungeon-detail.group_members_count', { count: getSpawnGroupMembers(spawnGroup).length }) }}
+                                                        {{
+                                                            $t("db-dungeon-detail.group_members_count", {
+                                                                count: getSpawnGroupMembers(spawnGroup).length,
+                                                            })
+                                                        }}
                                                     </div>
                                                     <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                                                         <div
@@ -1009,10 +1038,8 @@ watch(
                                                             <div
                                                                 class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs"
                                                             >
-                                                                <span>{{ $t('db-dungeon-detail.probability') }}</span>
-                                                                <span
-                                                                    class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                                >
+                                                                <span>{{ $t("db-dungeon-detail.probability") }}</span>
+                                                                <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">
                                                                     {{ groupMonster.p ? `${Math.round(groupMonster.p * 100)}%` : "100%" }}
                                                                 </span>
                                                             </div>
@@ -1027,10 +1054,12 @@ watch(
                                         <div
                                             class="mb-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-medium text-base-content/70"
                                         >
-                                            <span>{{ $t('db-dungeon-detail.commander_count', { count: spawnGenerator.sm.length }) }}</span>
-                                            <span class="font-normal tabular-nums text-base-content/55"
-                                                >{{ $t('db-dungeon-detail.spawn_num_pool', { value: formatSpawnCommanderNumText(spawnGenerator.smnum) }) }}</span
-                                            >
+                                            <span>{{ $t("db-dungeon-detail.commander_count", { count: spawnGenerator.sm.length }) }}</span>
+                                            <span class="font-normal tabular-nums text-base-content/55">{{
+                                                $t("db-dungeon-detail.spawn_num_pool", {
+                                                    value: formatSpawnCommanderNumText(spawnGenerator.smnum),
+                                                })
+                                            }}</span>
                                         </div>
                                         <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">
                                             <div
@@ -1051,13 +1080,10 @@ watch(
                                                 <div
                                                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-1.5 text-xs"
                                                 >
-                                                    <span>{{ $t('db-dungeon-detail.weight') }}</span>
-                                                    <span
-                                                        class="shrink-0 font-orbitron text-[11px] font-semibold text-primary"
-                                                    >
-                                                        {{ spawnTagMonster.w }} ({{
-                                                            getSpawnTagMonsterWeightPercentText(spawnGenerator, spawnTagMonster)
-                                                        }}%)
+                                                    <span>{{ $t("db-dungeon-detail.weight") }}</span>
+                                                    <span class="shrink-0 font-orbitron text-[11px] font-semibold text-primary">
+                                                        {{ spawnTagMonster.w }}
+                                                        ({{ getSpawnTagMonsterWeightPercentText(spawnGenerator, spawnTagMonster) }}%)
                                                     </span>
                                                 </div>
                                             </div>
@@ -1073,7 +1099,7 @@ watch(
                     v-else
                     class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm text-sm text-base-content/70"
                 >
-                    {{ $t('db-dungeon-detail.no_wave_data') }}
+                    {{ $t("db-dungeon-detail.no_wave_data") }}
                 </div>
             </template>
         </template>
@@ -1093,7 +1119,7 @@ watch(
                     <SectionHeader no-animate compact kicker="CUMULATIVE" :title="`波数累计奖励 (${displayStartWave}~${displayEndWave}波)`">
                         <template #trailing>
                             <label class="label cursor-pointer gap-2 p-0 text-xs">
-                                <span>{{ $t('db-dungeon-detail.hello_box') }}</span>
+                                <span>{{ $t("db-dungeon-detail.hello_box") }}</span>
                                 <input v-model="useNihaoBoxBonus" type="checkbox" class="checkbox checkbox-xs" />
                             </label>
                         </template>
@@ -1101,7 +1127,7 @@ watch(
                     <div v-if="cumulativeWaveRewards.length" class="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
                         <ResourceCostItem v-for="item in cumulativeWaveRewards" :key="item.key" :name="item.name" :value="item.value" />
                     </div>
-                    <div v-else class="mt-2 text-sm text-base-content/70">{{ $t('db-dungeon-detail.no_cumulative_reward') }}</div>
+                    <div v-else class="mt-2 text-sm text-base-content/70">{{ $t("db-dungeon-detail.no_cumulative_reward") }}</div>
                 </section>
                 <!-- 深境探险奖励表 -->
                 <DBIronSurvivalDetailItem
@@ -1130,7 +1156,9 @@ watch(
                 <section v-if="dungeon.sr?.length" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                     <SectionHeader no-animate compact kicker="SPECIAL" :title="$t('db-dungeon-detail.special_reward')">
                         <template #trailing>
-                            <span class="text-[11px] tabular-nums text-base-content/40">{{ $t('common.count_groups', { count: dungeon.sr.length }) }}</span>
+                            <span class="text-[11px] tabular-nums text-base-content/40">{{
+                                $t("common.count_groups", { count: dungeon.sr.length })
+                            }}</span>
                         </template>
                     </SectionHeader>
                     <div class="mt-2 space-y-3">
@@ -1149,7 +1177,7 @@ watch(
                     v-if="!dungeon.r?.length && !dungeon.sr?.length"
                     class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm text-sm text-base-content/70"
                 >
-                    {{ $t('db-dungeon-detail.no_reward_data') }}
+                    {{ $t("db-dungeon-detail.no_reward_data") }}
                 </div>
             </template>
         </template>

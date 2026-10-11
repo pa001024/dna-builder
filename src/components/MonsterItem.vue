@@ -113,7 +113,7 @@ const effectiveHealth = computed(() => {
             </div>
         </div>
 
-        <div class="mt-2 grid grid-cols-3 gap-1.5 sm:grid-cols-6">
+        <div class="mt-2 grid grid-cols-3 gap-1.5">
             <div
                 class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
                 :title="$t('攻击')"

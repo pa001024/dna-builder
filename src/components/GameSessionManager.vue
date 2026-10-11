@@ -233,7 +233,9 @@ async function removeAccount(account: GameAccount) {
                             <span
                                 class="truncate font-semibold"
                                 :class="account.id === Number(currentAccountId) ? 'text-primary' : 'text-base-content/85'"
-                                >{{ account.name }}</span
+                                >{{
+                                    account.name
+                                }}</span
                             >
                             <span
                                 v-if="account.id === Number(currentAccountId)"

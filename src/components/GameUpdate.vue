@@ -872,12 +872,7 @@ async function checkForUpdates() {
             needUpdate.value = String(localVersion) !== fullPackageInfo.value.latestVersion
             // 本地版本符合 min_supported_version 时优先走差分包；远端未提供差分包时回退完整包
             diffPackageInfo.value = needUpdate.value
-                ? await getDiffPackageInfo(
-                      gameUpdateStore.selectedCDN,
-                      activeChannel,
-                      fullPackageInfo.value,
-                      localVersion ?? 0
-                  )
+                ? await getDiffPackageInfo(gameUpdateStore.selectedCDN, activeChannel, fullPackageInfo.value, localVersion ?? 0)
                 : null
             updateSize.value = needUpdate.value ? (diffPackageInfo.value?.size ?? fullPackageInfo.value.size) : 0
             await checkPreDownloadStatus()
@@ -1696,7 +1691,9 @@ const launchGame = async () => {
                                 <SelectItem v-for="channel in channels" :key="channel.value" :value="channel.value" xs>
                                     {{ channel.name }}
                                 </SelectItem>
-                                <SelectItem v-if="!setting.safeMode" :value="gameUpdateStore.CUSTOM_CHANNEL_VALUE" xs>{{ $t('game-update.custom') }}</SelectItem>
+                                <SelectItem v-if="!setting.safeMode" :value="gameUpdateStore.CUSTOM_CHANNEL_VALUE" xs>{{
+                                    $t("game-update.custom")
+                                }}</SelectItem>
                             </Select>
                         </div>
                     </div>
@@ -1732,7 +1729,7 @@ const launchGame = async () => {
                         class="group relative flex items-center gap-2 bg-base-content/3 px-3 py-1.5 rounded-xs border border-base-content/15 transition-colors duration-200 hover:border-primary/40 cursor-pointer"
                     >
                         <input v-model="showOptionalVoicePacks" type="checkbox" class="checkbox checkbox-xs" />
-                        <span class="text-sm">{{ $t('game-update.voicePack') }}</span>
+                        <span class="text-sm">{{ $t("game-update.voicePack") }}</span>
                     </label>
                 </div>
             </header>
@@ -1813,7 +1810,8 @@ const launchGame = async () => {
                             class="mt-1 truncate text-[11px] text-primary/80"
                             :title="`差分更新 v${diffPackageInfo.fromVersion} → v${diffPackageInfo.toVersion}`"
                         >
-                            差分 v{{ diffPackageInfo.fromVersion }} → v{{ diffPackageInfo.toVersion }}
+                            差分 v{{ diffPackageInfo.fromVersion }}
+                            → v{{ diffPackageInfo.toVersion }}
                         </span>
                     </div>
                 </div>
@@ -1856,8 +1854,8 @@ const launchGame = async () => {
                     style="animation-delay: 280ms"
                 >
                     <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-semibold text-base-content/45">{{ $t('game-update.voicePack') }}</span>
-                        <span class="text-xs text-base-content/50">{{ $t('game-update.localCache') }}</span>
+                        <span class="text-[11px] font-semibold text-base-content/45">{{ $t("game-update.voicePack") }}</span>
+                        <span class="text-xs text-base-content/50">{{ $t("game-update.localCache") }}</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div
@@ -1883,7 +1881,7 @@ const launchGame = async () => {
                                           : "下载"
                                 }}
                             </button>
-                            <span v-else class="text-xs text-success">{{ $t('game-update.downloaded') }}</span>
+                            <span v-else class="text-xs text-success">{{ $t("game-update.downloaded") }}</span>
                         </div>
                     </div>
                 </div>
@@ -1922,7 +1920,7 @@ const launchGame = async () => {
                             <div class="text-xs font-mono text-primary tabular-nums" v-if="isDownloading">
                                 {{ downloadSpeed }}
                             </div>
-                            <div class="text-xs text-warning" v-else-if="isDownloadPaused">{{ $t('game-update.paused') }}</div>
+                            <div class="text-xs text-warning" v-else-if="isDownloadPaused">{{ $t("game-update.paused") }}</div>
                         </div>
                     </div>
 
@@ -1974,7 +1972,8 @@ const launchGame = async () => {
                             }}
                         </span>
                         <span v-if="isDownloading || isDownloadPaused">
-                            {{ currentFileDownloaded }} / {{ currentFileTotal }} ({{ t("game-update.current_file") }})
+                            {{ currentFileDownloaded }}
+                            / {{ currentFileTotal }} ({{ t("game-update.current_file") }})
                         </span>
                     </div>
                 </div>
@@ -2028,7 +2027,7 @@ const launchGame = async () => {
     <dialog class="modal" :class="{ 'modal-open': hotUpdateDetailOpen }" @click="hotUpdateDetailOpen = false">
         <div class="modal-box bg-base-100 w-[80%] min-w-72 max-w-160" @click.stop>
             <div class="text-center">
-                <h3 class="text-xl font-bold">{{ $t('game-update.hotUpdateDetail') }}</h3>
+                <h3 class="text-xl font-bold">{{ $t("game-update.hotUpdateDetail") }}</h3>
             </div>
             <div class="max-h-96 overflow-y-auto py-4">
                 <div v-if="hotUpdateDetailEntries.length" class="space-y-4">
@@ -2049,10 +2048,10 @@ const launchGame = async () => {
                         </div>
                     </div>
                 </div>
-                <div v-else class="text-center text-base-content/45">{{ $t('game-update.noHotUpdate') }}</div>
+                <div v-else class="text-center text-base-content/45">{{ $t("game-update.noHotUpdate") }}</div>
             </div>
             <div class="modal-action justify-center">
-                <button class="btn btn-primary" @click="hotUpdateDetailOpen = false">{{ $t('game-update.close') }}</button>
+                <button class="btn btn-primary" @click="hotUpdateDetailOpen = false">{{ $t("game-update.close") }}</button>
             </div>
         </div>
         <div class="modal-backdrop" @click="hotUpdateDetailOpen = false" />

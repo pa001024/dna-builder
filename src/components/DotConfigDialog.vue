@@ -116,22 +116,29 @@ function startSourceDrag(namespace: string, event: PointerEvent) {
             </button>
         </div>
         <p class="mt-1 text-[11px] tracking-wide text-base-content/55">
-            {{ $t('dot-config.formula_desc') }}
+            {{ $t("dot-config.formula_desc") }}
         </p>
 
         <!-- 各来源频率配置（无触发来源整块隐藏，不占位） -->
         <div class="mt-3 space-y-2">
-            <div v-for="source in visibleSources" :key="source.type" class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
+            <div
+                v-for="source in visibleSources"
+                :key="source.type"
+                class="rounded-xs border border-base-content/10 bg-base-content/3 p-2.5"
+            >
                 <div class="flex items-baseline justify-between gap-2">
                     <span class="text-sm font-semibold">
                         {{ sourceName(source.type) }}
                         <span v-if="source.type !== 'skill'" class="ml-1 font-normal text-base-content/55">{{ source.label }}</span>
                     </span>
                     <span class="text-[11px] tracking-wide text-base-content/55">
-                        {{ $t('dot-config.trigger') }}
-                        <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatTrigger(source.trigger) }}</span>
-                        {{ $t('dot-config.upper_limit') }}
-                        <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatFreq(source.cap) }}</span> {{ $t('dot-config.per_second') }}
+                        {{ $t("dot-config.trigger") }}
+                        <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{
+                            formatTrigger(source.trigger)
+                        }}</span>
+                        {{ $t("dot-config.upper_limit") }}
+                        <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatFreq(source.cap) }}</span>
+                        {{ $t("dot-config.per_second") }}
                     </span>
                 </div>
                 <div class="mt-2.5 flex items-center gap-3">
@@ -152,25 +159,34 @@ function startSourceDrag(namespace: string, event: PointerEvent) {
                         />
                         <div class="mt-0.5 flex justify-between text-[10px] text-base-content/40">
                             <span>0</span>
-                            <span class="font-orbitron tabular-nums text-primary">{{ formatFreq(source.freq) }} / {{ formatFreq(source.cap) }}</span>
+                            <span class="font-orbitron tabular-nums text-primary"
+                                >{{ formatFreq(source.freq) }}
+                                / {{ formatFreq(source.cap) }}</span
+                            >
                         </div>
                     </div>
                 </div>
                 <div class="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-[11px] text-base-content/55">
                     <span v-if="source.type !== 'skill' && source.otherElementCount > 0">
-                        {{ $t('dot-config.other_elements') }} <span class="font-orbitron tabular-nums text-primary">{{ source.otherElementCount }}</span> {{ $t('dot-config.kinds') }}
+                        {{ $t("dot-config.other_elements") }}
+                        <span class="font-orbitron tabular-nums text-primary">{{ source.otherElementCount }}</span>
+                        {{ $t("dot-config.kinds") }}
                     </span>
                     <span v-if="source.hasAdditionalDamage" class="text-primary">
-                        {{ $t('dot-config.self_elem_bonus_cond') }}
+                        {{ $t("dot-config.self_elem_bonus_cond") }}
                     </span>
                     <span v-if="source.doubled" class="text-secondary">
-                        {{ $t('dot-config.frequency_doubled') }} <span class="font-orbitron tabular-nums">{{ formatFreq(source.effectiveFreq) }}</span> {{ $t('dot-config.per_second') }}
+                        {{ $t("dot-config.frequency_doubled") }}
+                        <span class="font-orbitron tabular-nums">{{ formatFreq(source.effectiveFreq) }}</span>
+                        {{ $t("dot-config.per_second") }}
                     </span>
                     <span v-if="source.otherFreq > 0">
-                        {{ $t('dot-config.other_elements') }} <span class="font-orbitron tabular-nums">{{ formatFreq(source.otherFreq) }}</span> {{ $t('dot-config.per_second') }}
+                        {{ $t("dot-config.other_elements") }}
+                        <span class="font-orbitron tabular-nums">{{ formatFreq(source.otherFreq) }}</span> {{ $t("dot-config.per_second") }}
                     </span>
                     <span v-if="source.ownFreq > 0">
-                        {{ $t('dot-config.char_own_element') }} <span class="font-orbitron tabular-nums">{{ formatFreq(source.ownFreq) }}</span> {{ $t('dot-config.per_second') }}
+                        {{ $t("dot-config.char_own_element") }}
+                        <span class="font-orbitron tabular-nums">{{ formatFreq(source.ownFreq) }}</span> {{ $t("dot-config.per_second") }}
                     </span>
                 </div>
             </div>
@@ -178,22 +194,33 @@ function startSourceDrag(namespace: string, event: PointerEvent) {
 
         <label class="mt-3 flex items-center gap-2 text-[11px] text-base-content/65">
             <input v-model="dotSettings.forceOwnAdditionalDamage" type="checkbox" class="checkbox checkbox-xs checkbox-primary" />
-            <span>{{ $t('dot-config.manual_self_elem_note') }}</span>
+            <span>{{ $t("dot-config.manual_self_elem_note") }}</span>
         </label>
 
         <!-- 频率分解汇总 -->
         <div class="mt-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
             <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <span class="text-[11px] tracking-wide text-base-content/60">{{ $t('dot-config.char_self_dot_freq') }}</span>
-                <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatFreq(dotFrequencies.ownFreq) }} 次/秒</span>
+                <span class="text-[11px] tracking-wide text-base-content/60">{{ $t("dot-config.char_self_dot_freq") }}</span>
+                <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums"
+                    >{{ formatFreq(dotFrequencies.ownFreq) }}
+                    次/秒</span
+                >
             </div>
-            <div class="mt-2 flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                <span class="text-[11px] tracking-wide text-base-content/60">{{ $t('dot-config.other_elem_dot_freq') }}</span>
-                <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatFreq(dotFrequencies.otherFreq) }} 次/秒</span>
+            <div
+                class="mt-2 flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
+            >
+                <span class="text-[11px] tracking-wide text-base-content/60">{{ $t("dot-config.other_elem_dot_freq") }}</span>
+                <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums"
+                    >{{ formatFreq(dotFrequencies.otherFreq) }}
+                    次/秒</span
+                >
             </div>
             <div class="mt-2 flex items-center justify-between gap-2 rounded-xs border border-primary/30 bg-primary/5 px-2.5 py-2">
-                <span class="text-[11px] font-semibold tracking-wide text-base-content/80">{{ $t('dot-config.total_frequency') }}</span>
-                <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums">{{ formatFreq(dotFrequencies.totalFreq) }} 次/秒</span>
+                <span class="text-[11px] font-semibold tracking-wide text-base-content/80">{{ $t("dot-config.total_frequency") }}</span>
+                <span class="font-orbitron text-[13px] font-semibold text-primary tabular-nums"
+                    >{{ formatFreq(dotFrequencies.totalFreq) }}
+                    次/秒</span
+                >
             </div>
         </div>
 
@@ -205,7 +232,7 @@ function startSourceDrag(namespace: string, event: PointerEvent) {
                 :title="$t('dot-config.drag_hint')"
                 @pointerdown="startSourceDrag('', $event)"
             >
-                <span class="text-[11px] tracking-wide text-base-content/60">{{ $t('dot-config.all_sources') }}</span>
+                <span class="text-[11px] tracking-wide text-base-content/60">{{ $t("dot-config.all_sources") }}</span>
                 <DamageShow :value="charBuild.calculateDotDamage()" />
             </div>
             <div
@@ -221,7 +248,7 @@ function startSourceDrag(namespace: string, event: PointerEvent) {
         </div>
 
         <div class="mt-3 flex justify-end">
-            <button class="btn btn-sm btn-ghost" @click="$emit('close')">{{ $t('dot-config.close') }}</button>
+            <button class="btn btn-sm btn-ghost" @click="$emit('close')">{{ $t("dot-config.close") }}</button>
         </div>
     </div>
 </template>

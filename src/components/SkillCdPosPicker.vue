@@ -160,11 +160,8 @@ function applyPointer(event: PointerEvent) {
             >
         </div>
         <!-- 未检测到游戏窗口提示 -->
-        <div
-            v-if="!gameFound"
-            class="pointer-events-none absolute inset-x-0 bottom-0 bg-warning/15 px-2 py-0.5 text-[11px] text-warning"
-        >
-            {{ $t('skill-cd-pos-picker.no_game_window') }}
+        <div v-if="!gameFound" class="pointer-events-none absolute inset-x-0 bottom-0 bg-warning/15 px-2 py-0.5 text-[11px] text-warning">
+            {{ $t("skill-cd-pos-picker.no_game_window") }}
         </div>
     </div>
     <div class="mt-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-base-content/50">

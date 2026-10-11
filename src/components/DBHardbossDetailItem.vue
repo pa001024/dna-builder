@@ -400,7 +400,7 @@ function getWalnutRewardInfo(walnut: Walnut): WalnutRewardInfo | null {
     }
 
     if (walnut.类型 === 1) {
-        const charName = reward.name.replace(/^思绪片段·/, "")
+        const charName = (reward.name ?? "").replace(/^思绪片段·/, "")
         const char = charMap.get(charName)
         if (!char) {
             return null
@@ -530,7 +530,7 @@ function getHardbossIcon(boss: HardBoss): string {
             <SectionHeader no-animate compact kicker="MONSTERS" :title="$t('db-hardboss-detail.monster_info')">
                 <template #trailing>
                     <label class="flex items-center gap-1.5 text-xs text-base-content/60">
-                        {{ $t('common.level') }}
+                        {{ $t("common.level") }}
                         <Select
                             v-if="monsterLevels.length"
                             v-model.number="selectedMonsterLevel"
@@ -670,10 +670,11 @@ function getHardbossIcon(boss: HardBoss): string {
             </div>
         </section>
 
-        <!-- 等级奖励列表 -->
+        <!-- 等级奖励列表：v-for 按难度批量重复，退出滚动目录 -->
         <section
             v-for="diff in filteredDiffs"
             :key="diff.id"
+            data-scroll-nav-ignore
             class="overflow-hidden rounded-xs border border-base-content/10 bg-base-100/60 backdrop-blur-sm"
         >
             <div class="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-base-content/10 px-3 py-2.5">

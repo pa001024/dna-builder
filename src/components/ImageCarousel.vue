@@ -113,7 +113,8 @@ function openPreview(image: string) {
             v-if="images.length > 1"
             class="absolute right-2 top-2 rounded-xs bg-base-100/80 px-1.5 py-0.5 font-orbitron text-[11px] tabular-nums text-base-content/70 backdrop-blur-sm"
         >
-            {{ current + 1 }} / {{ images.length }}
+            {{ current + 1 }}
+            / {{ images.length }}
         </span>
 
         <!-- 指示点 -->

@@ -39,10 +39,22 @@ function step(delta: number): void {
     <figure class="mx-auto w-full max-w-120 space-y-3">
         <!-- 画框：外层框体 + 内层衬边 + 四角饰件 -->
         <div class="relative rounded-xs border border-base-content/15 bg-base-100/60 p-2 backdrop-blur-sm sm:p-2.5">
-            <span class="pointer-events-none absolute top-0.5 left-0.5 h-3 w-3 border-t-2 border-l-2 border-primary/45" aria-hidden="true" />
-            <span class="pointer-events-none absolute top-0.5 right-0.5 h-3 w-3 border-t-2 border-r-2 border-primary/45" aria-hidden="true" />
-            <span class="pointer-events-none absolute bottom-0.5 left-0.5 h-3 w-3 border-b-2 border-l-2 border-primary/45" aria-hidden="true" />
-            <span class="pointer-events-none absolute bottom-0.5 right-0.5 h-3 w-3 border-b-2 border-r-2 border-primary/45" aria-hidden="true" />
+            <span
+                class="pointer-events-none absolute top-0.5 left-0.5 h-3 w-3 border-t-2 border-l-2 border-primary/45"
+                aria-hidden="true"
+            />
+            <span
+                class="pointer-events-none absolute top-0.5 right-0.5 h-3 w-3 border-t-2 border-r-2 border-primary/45"
+                aria-hidden="true"
+            />
+            <span
+                class="pointer-events-none absolute bottom-0.5 left-0.5 h-3 w-3 border-b-2 border-l-2 border-primary/45"
+                aria-hidden="true"
+            />
+            <span
+                class="pointer-events-none absolute bottom-0.5 right-0.5 h-3 w-3 border-b-2 border-r-2 border-primary/45"
+                aria-hidden="true"
+            />
 
             <div class="relative rounded-xs border border-primary/25 bg-base-content/5 p-1">
                 <!--

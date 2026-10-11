@@ -45,10 +45,8 @@ const applicableSkillText = computed(() =>
         .map(skill => gt(skill.trim()))
         .filter(Boolean)
         .join(" / ")
-)/** 当前档位下已翻译的效果文案 */
-const effectText = computed(() =>
-    gpt(componentProps.effdesc, componentProps.effindex, { stripFirstSentence: componentProps.effstrip })
-)
+) /** 当前档位下已翻译的效果文案 */
+const effectText = computed(() => gpt(componentProps.effdesc, componentProps.effindex, { stripFirstSentence: componentProps.effstrip }))
 
 /** 原文模板里的极性字母（译文里的标记形态各语言不同，只能用原文判） */
 const polarityMarker = computed(() => getParamTemplate(componentProps.effdesc).match(/([DVOA])趋向/)?.[1])
@@ -60,8 +58,8 @@ const polarityMarker = computed(() => getParamTemplate(componentProps.effdesc).m
 function formatDesc(): string[] {
     return polarityMarker.value ? splitByPolarity(effectText.value, polarityMarker.value) : [effectText.value]
 }
-
-</script><template>
+</script>
+<template>
     <FullTooltip :side="side">
         <template #tooltip>
             <div class="flex flex-col gap-2 max-w-75 min-w-28">
@@ -84,7 +82,7 @@ function formatDesc(): string[] {
                     <div class="font-medium text-primary">{{ applicableSkillText }}</div>
                 </div>
                 <div
-                    v-for="[prop, val] in Object.entries(props).filter(([, val]) => val)"
+                    v-for="[ prop, val ] in Object.entries(props).filter(([, val]) => val)"
                     :key="prop"
                     class="flex justify-between items-center gap-2 text-sm"
                 >
@@ -101,7 +99,7 @@ function formatDesc(): string[] {
                     </div>
                 </div>
                 <div
-                    v-for="[prop, val] in Object.entries(eff?.props || {}).filter(([prop, val]) => val && !props[prop])"
+                    v-for="[ prop, val ] in Object.entries(eff?.props || {}).filter(([prop, val]) => val && !props[prop])"
                     :key="prop"
                     class="flex justify-between items-center gap-2 text-sm"
                     :class="{ 'line-through': !eff?.isEffective }"

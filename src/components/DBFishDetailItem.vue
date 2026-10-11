@@ -119,20 +119,20 @@ const fishSpots = computed(() => {
 
         <!-- 基础信息 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="STATS" />
+            <SectionHeader no-animate compact kicker="STATS" :title="$t('common.basic_info')" />
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
                     <span class="text-xs text-base-content/60">Lv.</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ fish.level }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t('db-fish-detail.length') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-fish-detail.length") }}</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ fish.length[0] }}-{{ fish.length[1] }}
                     </span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t('common.price') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.price") }}</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ fish.price[0] }}</span>
                 </div>
             </div>
@@ -152,17 +152,17 @@ const fishSpots = computed(() => {
 
         <!-- 出现时间 / 变异概率 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="APPEARANCE" />
+            <SectionHeader no-animate compact kicker="APPEARANCE" :title="$t('db-fish-detail.appearance_info')" />
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t('db-fish-detail.appearance_time') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-fish-detail.appearance_time") }}</span>
                     <span class="text-sm text-base-content/90">{{ gt(getAppearName(fish.appear)) }}</span>
                 </div>
                 <div
                     v-if="fish.var && fish.varProb && fish.var.length > 0 && fish.varProb > 0"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t('db-fish-detail.mutation_rate') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-fish-detail.mutation_rate") }}</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">
                         {{ (fish.varProb * 100).toFixed(0) }}%
                     </span>
@@ -172,7 +172,7 @@ const fishSpots = computed(() => {
 
         <!-- 授渔以鱼 -->
         <section v-if="s2bFish" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="TRANSFORM" />
+            <SectionHeader no-animate compact kicker="TRANSFORM" :title="$t('db-fish-spot.s2b')" />
             <div class="flex items-center gap-3 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                 <img :src="`/imgs/res/T_Fish_${s2bFish.icon}.webp`" class="size-10 shrink-0 rounded-xs object-cover" />
                 <SRouterLink
@@ -189,14 +189,17 @@ const fishSpots = computed(() => {
 
         <!-- 出现鱼池及权重 -->
         <section v-if="fishSpots.length > 0" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="SPOTS" />
+            <SectionHeader no-animate compact kicker="SPOTS" :title="$t('db-fish-detail.appearing_spots')" />
             <div class="space-y-1.5">
                 <div
                     v-for="spot in fishSpots"
                     :key="spot.spotId"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <SRouterLink :to="`/db/fishspot/${spot.spotId}`" class="truncate text-sm transition-colors duration-150 hover:text-primary">
+                    <SRouterLink
+                        :to="`/db/fishspot/${spot.spotId}`"
+                        class="truncate text-sm transition-colors duration-150 hover:text-primary"
+                    >
                         {{ $t(spot.spotName) }}
                     </SRouterLink>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ spot.weight }}</span>

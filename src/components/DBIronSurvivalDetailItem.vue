@@ -248,13 +248,16 @@ const rewardRowDetails = computed(() => {
             <SectionHeader no-animate compact kicker="CUMULATIVE" :title="$t('db-iron-survival-detail.cumulative_rewards')">
                 <template #trailing>
                     <div class="flex items-center gap-2">
-                        <span v-if="useCompoundReward" class="text-xs text-base-content/70">{{ $t('db-iron-survival-detail.with_compound') }}</span>
+                        <span v-if="useCompoundReward" class="text-xs text-base-content/70">{{
+                            $t("db-iron-survival-detail.with_compound")
+                        }}</span>
                         <label class="label cursor-pointer gap-1 p-0">
-                            <span class="text-xs text-base-content/70">{{ $t('db-iron-survival-detail.compound') }}</span>
+                            <span class="text-xs text-base-content/70">{{ $t("db-iron-survival-detail.compound") }}</span>
                             <input v-model="useCompoundReward" type="checkbox" class="checkbox checkbox-xs" />
                         </label>
                         <span class="font-mono text-[11px] tabular-nums text-base-content/55">
-                            Lv.{{ ironSurvivalStartMonsterLevel }} ~ Lv.{{ ironSurvivalEndMonsterLevel }}
+                            Lv.{{ ironSurvivalStartMonsterLevel }}
+                            ~ Lv.{{ ironSurvivalEndMonsterLevel }}
                         </span>
                     </div>
                 </template>

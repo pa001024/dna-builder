@@ -90,7 +90,9 @@ onMounted(fetchRecentBuilds)
 
                 <!-- 名称 + 描述 + 作者信息 -->
                 <span class="flex min-w-0 flex-1 flex-col gap-1">
-                    <span class="truncate text-[13px] font-semibold text-base-content transition-colors duration-200 group-hover:text-primary">
+                    <span
+                        class="truncate text-[13px] font-semibold text-base-content transition-colors duration-200 group-hover:text-primary"
+                    >
                         {{ build.title }}
                     </span>
                     <span v-if="build.desc" class="line-clamp-1 text-xs text-base-content/60">{{ build.desc }}</span>
@@ -110,7 +112,10 @@ onMounted(fetchRecentBuilds)
                     </span>
                 </span>
 
-                <Icon icon="ri:arrow-right-line" class="h-4 w-4 shrink-0 text-base-content/30 transition-colors duration-200 group-hover:text-primary" />
+                <Icon
+                    icon="ri:arrow-right-line"
+                    class="h-4 w-4 shrink-0 text-base-content/30 transition-colors duration-200 group-hover:text-primary"
+                />
             </button>
         </div>
     </section>

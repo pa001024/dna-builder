@@ -58,9 +58,7 @@ const currentSlot = computed<"melee" | "ranged" | undefined>(() => {
 
 /** 当前浏览槽位是否已装备武器（仅已装备时提供卸下按钮） */
 const canUnequipCurrentWeapon = computed(
-    () =>
-        (currentSlot.value === "melee" && selectedMelee.value > 0) ||
-        (currentSlot.value === "ranged" && selectedRanged.value > 0)
+    () => (currentSlot.value === "melee" && selectedMelee.value > 0) || (currentSlot.value === "ranged" && selectedRanged.value > 0)
 )
 
 /** 灾厄武器判定依据：武器数据里的伤害类型（当前四把灾厄武器：无止无休 / 权火将熄 / 血染织羽 / 棘刺绝响） */
@@ -154,9 +152,7 @@ const displayedWeapons = computed(() => {
         return filteredWeapons.value
     }
 
-    return [...filteredWeapons.value].sort(
-        (a, b) => (weaponIncomes.value.get(b.id) || 0) - (weaponIncomes.value.get(a.id) || 0)
-    )
+    return [...filteredWeapons.value].sort((a, b) => (weaponIncomes.value.get(b.id) || 0) - (weaponIncomes.value.get(a.id) || 0))
 })
 
 /**

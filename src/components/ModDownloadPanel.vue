@@ -69,7 +69,9 @@ function statusIcon(task: ModDownloadTask) {
         <button class="flex w-full items-center gap-2 bg-base-200/70 px-3 py-2 text-sm" @click="collapsed = !collapsed">
             <Icon :icon="download.busy ? 'ri:download-cloud-2-line' : 'ri:download-2-line'" class="size-4 text-primary" />
             <span class="font-medium">{{ $t("game-launcher.downloadQueue") }}</span>
-            <span class="badge badge-xs badge-ghost">{{ $t("game-launcher.queueSummary", { done: doneCount, total: download.tasks.length }) }}</span>
+            <span class="badge badge-xs badge-ghost">{{
+                $t("game-launcher.queueSummary", { done: doneCount, total: download.tasks.length })
+            }}</span>
             <Icon :icon="collapsed ? 'ri:arrow-up-line' : 'ri:arrow-down-line'" class="ml-auto size-4 opacity-60" />
         </button>
 

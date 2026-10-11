@@ -378,11 +378,11 @@ const weaponAttrDescMap = computed<Record<string, string>>(() => {
                                 }}
                             </li>
                         </ul>
+                        <div class="text-xs text-base-content/50">{{ $t("char-build.drag_field_hint") }}</div>
                     </div>
                 </template>
                 <div
                     class="cursor-grab active:cursor-grabbing flex justify-between items-center p-1 px-2 transition-all duration-200 select-none hover:bg-base-100 hover:shadow-md rounded-md"
-                    :title="$t('char-build.drag_field_hint')"
                     @pointerdown="startWeaponAttrDrag(key, $event)"
                     @dblclick="handleWeaponAttrDblClick(key)"
                 >

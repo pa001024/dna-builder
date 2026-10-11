@@ -244,9 +244,7 @@ function scrollToSearchTarget(target: DialogueSearchTarget): void {
             // 模糊命中（Fuse 区间）时在对应文字上做与列表一致的原位高亮
             if (target.matchRange) {
                 const matchedOption =
-                    target.optionId === undefined
-                        ? undefined
-                        : dialogueItem.dialogue.options?.find(option => option.id === target.optionId)
+                    target.optionId === undefined ? undefined : dialogueItem.dialogue.options?.find(option => option.id === target.optionId)
                 const rawContent = matchedOption?.content ?? dialogueItem.dialogue.content ?? ""
                 const textRoot = targetElement.querySelector<HTMLElement>(".whitespace-pre-wrap")
                 const renderedRange = mapRenderedRangeFromRaw(rawContent, target.matchRange)
@@ -520,9 +518,7 @@ function getSelectedOption(scopeKey: string, dialogue: Dialogue): DialogueOption
 function buildQuestNodeChains(questId: number, nodes: QuestNode[], startIds?: string[]): QuestNodeWithChain[] {
     return orderQuestNodes(nodes, startIds).map(node => ({
         ...node,
-        chain: buildDialogueChain(node.dialogues ?? [], dialogue =>
-            getSelectedOption(getQuestNodeScopeKey(questId, node.id), dialogue)
-        ),
+        chain: buildDialogueChain(node.dialogues ?? [], dialogue => getSelectedOption(getQuestNodeScopeKey(questId, node.id), dialogue)),
     }))
 }
 
@@ -1092,7 +1088,7 @@ watch(flattenedDialogueChain, () => {
                 "
                 @click="toggleAutoPlay()"
             >
-                {{ $t('common.autoplay') }}
+                {{ $t("common.autoplay") }}
             </button>
         </div>
 
@@ -1127,7 +1123,7 @@ watch(flattenedDialogueChain, () => {
             <div v-if="node.resource || node.video" class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
                 <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-base-content/70">
                     <span class="min-w-0 truncate font-medium text-base-content/85">
-                        {{ formatStoryText(node.name) || $t('db-quest-story-nodes.unnamed_media_node') }}
+                        {{ formatStoryText(node.name) || $t("db-quest-story-nodes.unnamed_media_node") }}
                     </span>
                     <span class="text-base-content/45">·</span>
                     <span class="truncate text-[11px] text-accent">{{ node.type }}</span>
@@ -1137,7 +1133,7 @@ watch(flattenedDialogueChain, () => {
                     <div class="flex flex-wrap items-center gap-1.5 text-xs">
                         <span class="inline-flex items-center gap-1 text-accent">
                             <Icon icon="ri:music-2-line" />
-                            <span>{{ $t('db-quest-story-nodes.bgm_resource') }}</span>
+                            <span>{{ $t("db-quest-story-nodes.bgm_resource") }}</span>
                         </span>
                         <code
                             class="rounded-xs border border-base-content/15 bg-base-100/60 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-base-content/80"
@@ -1145,10 +1141,10 @@ watch(flattenedDialogueChain, () => {
                             {{ node.resource }}
                         </code>
                         <span v-if="isBgmNodeMute(node.resource)" class="text-base-content/40">
-                            {{ $t('db-quest-story-nodes.silent_node_note') }}
+                            {{ $t("db-quest-story-nodes.silent_node_note") }}
                         </span>
                         <span v-else-if="!getNodeBgmUrl(node)" class="text-base-content/40">
-                            {{ $t('db-quest-story-nodes.no_cdn_audio') }}
+                            {{ $t("db-quest-story-nodes.no_cdn_audio") }}
                         </span>
                     </div>
 
@@ -1191,7 +1187,7 @@ watch(flattenedDialogueChain, () => {
 
             <!-- 侦探问答 -->
             <div v-if="node.questions?.length" class="space-y-2 rounded-xs border border-base-content/10 bg-base-content/3 p-2.5">
-                <div class="text-[11px] font-semibold tracking-wide text-accent">{{ $t('db-quest-story-nodes.detective_quiz') }}</div>
+                <div class="text-[11px] font-semibold tracking-wide text-accent">{{ $t("db-quest-story-nodes.detective_quiz") }}</div>
 
                 <div
                     v-for="question in node.questions"
@@ -1200,7 +1196,7 @@ watch(flattenedDialogueChain, () => {
                 >
                     <div class="text-sm font-medium">Q{{ question.id }} · {{ question.name }}</div>
                     <div v-if="question.tips" class="text-xs text-base-content/70">
-                        {{ $t('db-quest-story-nodes.quiz_tips') }}{{ question.tips }}
+                        {{ $t("db-quest-story-nodes.quiz_tips") }}{{ question.tips }}
                     </div>
 
                     <div class="space-y-1">
@@ -1230,7 +1226,7 @@ watch(flattenedDialogueChain, () => {
 
             <!-- 节点跳转 -->
             <div v-if="node.next?.length" class="flex flex-wrap items-center gap-1.5 text-xs">
-                <span class="text-base-content/60">{{ $t('db-quest-story-nodes.node_jump') }}</span>
+                <span class="text-base-content/60">{{ $t("db-quest-story-nodes.node_jump") }}</span>
                 <template v-for="nextId in node.next" :key="`${node.id}-next-${nextId}`">
                     <span class="text-primary">→</span>
                     <button
@@ -1244,7 +1240,7 @@ watch(flattenedDialogueChain, () => {
             </div>
 
             <div v-if="!node.chain.length && !node.questions?.length && !node.resource && !node.video" class="text-base-content/70">
-                {{ $t('db-quest-story-nodes.empty_node') }}
+                {{ $t("db-quest-story-nodes.empty_node") }}
             </div>
         </div>
         <audio

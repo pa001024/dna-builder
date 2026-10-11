@@ -238,7 +238,7 @@ function buildTitle(slot: TeamSlot) {
     const buildId = teamBuild(slot)
     if (buildId === EMPTY_VALUE) return ""
     const charId = teamChar(slot)
-    const options = typeof charId === "number" ? buildOptions.value[charId] ?? [] : []
+    const options = typeof charId === "number" ? (buildOptions.value[charId] ?? []) : []
     return options.find(option => option.id === buildId)?.title ?? buildId
 }
 
@@ -510,7 +510,9 @@ watch(
                     <!-- 协战构筑：列表选择 -->
                     <template v-if="picker?.kind === 'build'">
                         <!-- MOD 配置变体：查看该构筑的哪一份 MOD 配置（A/B/C）；目标构筑没有所选配置时降级为 A -->
-                        <div class="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-xs border border-base-content/12 bg-base-content/5 px-2.5 py-2">
+                        <div
+                            class="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-xs border border-base-content/12 bg-base-content/5 px-2.5 py-2"
+                        >
                             <span class="flex items-center gap-1">
                                 <button
                                     v-for="letter in MOD_VARIANT_LETTERS"
@@ -528,7 +530,9 @@ watch(
                             </span>
                             <span class="text-[11px] text-base-content/45">{{ $t("char-build.team_build_variant_hint") }}</span>
                         </div>
-                        <p v-if="pickerBuildsLoading" class="py-4 text-sm text-base-content/60">{{ $t("char-build.team_build_loading") }}</p>
+                        <p v-if="pickerBuildsLoading" class="py-4 text-sm text-base-content/60">
+                            {{ $t("char-build.team_build_loading") }}
+                        </p>
                         <div v-else class="flex flex-col gap-1.5">
                             <button
                                 type="button"

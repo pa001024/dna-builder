@@ -55,10 +55,7 @@ const emit = defineEmits<{
             >
                 <Icon :icon="visible ? 'ri:eye-line' : 'ri:eye-off-line'" class="size-3.5" />
             </button>
-            <Icon
-                :icon="collapsed ? 'ri:arrow-down-s-line' : 'ri:arrow-up-s-line'"
-                class="size-3.5 shrink-0 text-base-content/40"
-            />
+            <Icon :icon="collapsed ? 'ri:arrow-down-s-line' : 'ri:arrow-up-s-line'" class="size-3.5 shrink-0 text-base-content/40" />
         </div>
         <template v-if="!collapsed">
             <slot />

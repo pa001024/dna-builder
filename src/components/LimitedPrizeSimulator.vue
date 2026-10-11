@@ -6,8 +6,8 @@ import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData }
 import { headSculptureData } from "@/data/d/headsculpture.data"
 import { charMap } from "@/data/d/index"
 import { limitedPrizeCostRules, limitedPrizeItems, limitedPrizePools } from "@/data/d/limitedprize.data"
-import { LeveledChar } from "@/data/leveled/LeveledChar"
-import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { getRewardIconUrl } from "@/utils/reward-icon"
+import { getRewardDetailLink } from "@/utils/reward-link"
 import type { RewardItem } from "@/utils/reward-utils"
 
 type LimitedPrizeType =
@@ -234,44 +234,22 @@ function getPrizeName(type: LimitedPrizeType, id: number): string {
 }
 
 /**
- * 获取奖品图标。
+ * 获取奖品的资料库详情链接（复用 ResourceCostItem 收敛后的公共规则）。
+ * @param prize 奖品项
+ * @returns 详情页路由；无对应页面时返回空串
+ */
+function getPrizeLink(prize: LimitedPrizeEntry): string {
+    return getRewardDetailLink(prize.type, prize.displayId)
+}
+
+/**
+ * 获取奖品图标（收敛到公共 util，见 reward-icon.ts）。
  * @param type 物品类型
  * @param id 物品 ID
  * @returns 图标路径
  */
 function getPrizeIcon(type: LimitedPrizeType, id: number): string {
-    if (type === "Char") {
-        return LeveledChar.url(charMap.get(id)?.icon)
-    }
-    if (type === "Weapon") {
-        return LeveledWeaponHelper.idToUrl(id)
-    }
-    if (type === "Skin") {
-        const icon = skinMap.get(id)?.icon
-        return icon ? resolveSkinIconUrl(icon) : "/imgs/webp/T_Head_Empty.webp"
-    }
-    if (type === "WeaponSkin") {
-        const icon = weaponSkinData.find(item => item.id === id)?.icon
-        return icon ? resolveSkinIconUrl(icon) : "/imgs/webp/T_Head_Empty.webp"
-    }
-    if (type === "CharAccessory") {
-        const icon = charAccessoryData.find(item => item.id === id)?.icon
-        return icon ? resolveSkinIconUrl(icon) : "/imgs/webp/T_Head_Empty.webp"
-    }
-    if (type === "WeaponAccessory") {
-        const icon = weaponAccessoryData.find(item => item.id === id)?.icon
-        return icon ? resolveSkinIconUrl(icon) : "/imgs/webp/T_Head_Empty.webp"
-    }
-    if (type === "HeadFrame") {
-        const icon = headFrameData.find(item => item.id === id)?.icon
-        return icon ? `/imgs/headframe/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-    }
-    if (type === "HeadSculpture") {
-        const icon = headSculptureData.find(item => item.id === id)?.icon
-        return icon ? `/imgs/webp/${icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-    }
-    const resource = resourceMap.get(id)
-    return resource?.icon ? `/imgs/res/${resource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
+    return getRewardIconUrl(type, id)
 }
 
 /**
@@ -484,7 +462,14 @@ watch(
                     >
                         <img :src="prize.icon" class="size-10 shrink-0 rounded-xs object-cover" :alt="prize.name" />
                         <div class="min-w-0 flex-1">
-                            <div class="truncate text-sm font-medium text-base-content">{{ prize.name }}</div>
+                            <SRouterLink
+                                v-if="getPrizeLink(prize)"
+                                :to="getPrizeLink(prize)"
+                                class="block truncate text-sm font-medium text-base-content hover:text-primary hover:underline"
+                            >
+                                {{ prize.name }}
+                            </SRouterLink>
+                            <div v-else class="truncate text-sm font-medium text-base-content">{{ prize.name }}</div>
                             <div class="flex items-center gap-1 text-[11px] text-base-content/55">
                                 <span>概率</span>
                                 <span class="font-orbitron text-[13px] font-semibold text-primary"
@@ -515,9 +500,7 @@ watch(
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="text-[11px] tracking-wide text-base-content/55">出货统计</span>
-                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{
-                            Object.keys(drawStats).length
-                        }}</span>
+                        <span class="font-orbitron text-[13px] font-semibold text-primary">{{ Object.keys(drawStats).length }}</span>
                     </div>
                 </div>
             </div>

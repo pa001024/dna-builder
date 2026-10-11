@@ -162,12 +162,21 @@ defineExpose({ handleKeydown })
                     @mousedown.prevent
                     @click="emit('select', skill.name)"
                 >
-                    <Icon icon="ri:bard-line" class="h-3.5 w-3.5 shrink-0" :class="index === activeIndex ? 'text-primary' : 'text-base-content/40'" />
+                    <Icon
+                        icon="ri:bard-line"
+                        class="h-3.5 w-3.5 shrink-0"
+                        :class="index === activeIndex ? 'text-primary' : 'text-base-content/40'"
+                    />
                     <span class="min-w-0 flex-1">
-                        <span class="block truncate font-mono text-xs" :class="index === activeIndex ? 'text-primary' : 'text-base-content/85'">
+                        <span
+                            class="block truncate font-mono text-xs"
+                            :class="index === activeIndex ? 'text-primary' : 'text-base-content/85'"
+                        >
                             ${{ skill.name }}
                         </span>
-                        <span v-if="describe(skill)" class="mt-0.5 block truncate text-[11px] text-base-content/45">{{ describe(skill) }}</span>
+                        <span v-if="describe(skill)" class="mt-0.5 block truncate text-[11px] text-base-content/45">{{
+                            describe(skill)
+                        }}</span>
                     </span>
                 </button>
             </li>

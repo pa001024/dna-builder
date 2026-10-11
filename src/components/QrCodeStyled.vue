@@ -81,19 +81,9 @@ const maskId = `${uid}-mask`
                 </mask>
             </defs>
             <rect :x="-QUIET_ZONE" :y="-QUIET_ZONE" :width="extent" :height="extent" rx="1.6" :fill="background" />
-            <rect
-                :x="-QUIET_ZONE"
-                :y="-QUIET_ZONE"
-                :width="extent"
-                :height="extent"
-                :fill="`url(#${fillId})`"
-                :mask="`url(#${maskId})`"
-            />
+            <rect :x="-QUIET_ZONE" :y="-QUIET_ZONE" :width="extent" :height="extent" :fill="`url(#${fillId})`" :mask="`url(#${maskId})`" />
         </svg>
-        <span
-            v-if="caption"
-            class="text-[11px] font-semibold tracking-[0.3em] text-primary [writing-mode:vertical-rl] select-none"
-        >
+        <span v-if="caption" class="text-[11px] font-semibold tracking-[0.3em] text-primary [writing-mode:vertical-rl] select-none">
             {{ caption }}
         </span>
     </div>

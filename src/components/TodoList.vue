@@ -379,10 +379,7 @@ onBeforeUnmount(() => {
                     >
                         <Icon v-if="isWeeklyDone(item.id)" icon="radix-icons:check" class="h-3.5 w-3.5" />
                     </span>
-                    <span
-                        class="flex-1 text-[13px] text-base-content"
-                        :class="{ 'line-through': isWeeklyDone(item.id) }"
-                    >
+                    <span class="flex-1 text-[13px] text-base-content" :class="{ 'line-through': isWeeklyDone(item.id) }">
                         {{ $t(item.titleKey) }}
                     </span>
                 </button>

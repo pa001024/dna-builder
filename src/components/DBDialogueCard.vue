@@ -193,7 +193,9 @@ function getImpressionCheckEntries(option: DialogueOption): Array<{ regionId: nu
                             :key="`${option.id}-${impressionCheck.regionId}-${impressionCheck.typeLabel}-impr-check`"
                             class="rounded-xs border border-info/40 bg-info/10 px-1.5 py-0.5 text-xs leading-none tabular-nums text-info"
                         >
-                            {{ $t('common.impression_check') }} {{ $t(getRegionType(impressionCheck.regionId)) }}·{{ $t(impressionCheck.typeLabel) }}
+                            {{ $t("common.impression_check") }} {{ $t(getRegionType(impressionCheck.regionId)) }}·{{
+                                $t(impressionCheck.typeLabel)
+                            }}
                             ≥
                             {{ impressionCheck.threshold }}
                         </span>

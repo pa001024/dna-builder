@@ -195,7 +195,7 @@ function formatBonusValue(value: number): string {
             <SectionHeader no-animate compact kicker="PARAMS" :title="$t('monster-tag-detail.params')" />
             <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-1.5">
                 <div
-                    v-for="[key, value] in baseVars"
+                    v-for="[ key, value ] in baseVars"
                     :key="key"
                     class="flex items-start justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
@@ -212,7 +212,7 @@ function formatBonusValue(value: number): string {
                 </div>
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-1.5">
                     <div
-                        v-for="[name, value] in bonusVars"
+                        v-for="[ name, value ] in bonusVars"
                         :key="name"
                         class="flex items-start justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >

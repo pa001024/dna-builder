@@ -352,7 +352,9 @@ const joinLogic = computed<"AND" | "OR">(() => {
                             {{ segment.text }}
                         </span>
                         <span v-else-if="segment.type === 'group'" class="text-secondary">{{ formatGameText(segment.text) }}</span>
-                        <span v-else-if="segment.type === 'name'" class="font-medium text-base-content/90">{{ formatGameText(segment.text) }}</span>
+                        <span v-else-if="segment.type === 'name'" class="font-medium text-base-content/90">{{
+                            formatGameText(segment.text)
+                        }}</span>
                         <span v-else-if="segment.type === 'value'" class="font-medium tabular-nums">{{ segment.text }}</span>
                         <span v-else>{{ segment.text }}</span>
                     </template>

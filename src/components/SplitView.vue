@@ -20,7 +20,7 @@ const props = withDefaults(
         /** 桌面端（横排）默认的列表面板占比（0~1）；移动端固定为 列表:详情 = 1:2。 */
         desktopRatio?: number
     }>(),
-    { desktopRatio: 0.5 },
+    { desktopRatio: 0.5 }
 )
 
 const emit = defineEmits<{
@@ -103,7 +103,7 @@ watch(
             applyShareToPx()
         }
     },
-    { immediate: true },
+    { immediate: true }
 )
 
 /** 列表面板主轴样式：展开且占比已落位时固定 px（内容不影响分隔位置），否则占满整个容器。 */

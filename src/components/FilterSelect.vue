@@ -89,11 +89,7 @@ function menuLabel(option: FilterSelectOption) {
                     @click="select(option.value)"
                 >
                     <span v-if="option.swatch" :class="getRaritySwatchClass(option.swatch)" />
-                    <span
-                        v-else-if="option.dotClass"
-                        class="inline-block size-2.5 shrink-0 rounded-xs border"
-                        :class="option.dotClass"
-                    />
+                    <span v-else-if="option.dotClass" class="inline-block size-2.5 shrink-0 rounded-xs border" :class="option.dotClass" />
                     <span class="min-w-0 flex-1 truncate">{{ menuLabel(option) }}</span>
                     <Icon v-if="option.value === modelValue" icon="radix-icons:check" class="size-3.5 shrink-0 text-primary" />
                 </button>

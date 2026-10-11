@@ -11,7 +11,9 @@ const props = defineProps<{
 }>()
 
 /** 回顾配图：pic2 是每条的详情图所以排在前，部分条目另有 pic1 排在后，去重后进画框轮播 */
-const platePics = computed(() => [...new Set([props.entry.review.pic2, props.entry.review.pic1].filter((pic): pic is string => Boolean(pic)))])
+const platePics = computed(() => [
+    ...new Set([props.entry.review.pic2, props.entry.review.pic1].filter((pic): pic is string => Boolean(pic))),
+])
 
 /** 解锁条件：review.unlock 存的是 Condition 表 id，取表里对应条目交给 ConditionItem 呈现 */
 const unlockCondition = computed(() => (props.entry.review.unlock ? conditionsMap[props.entry.review.unlock] : undefined))

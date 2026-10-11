@@ -10,7 +10,14 @@ const { t } = useTranslation()
 </script>
 
 <template>
-    <BaseNode :id="id" :data="data" :type="type" :selected="selected" :title="t('node-editor.multiplyCalc.title')" :description="t('node-editor.multiplyCalc.description')">
+    <BaseNode
+        :id="id"
+        :data="data"
+        :type="type"
+        :selected="selected"
+        :title="t('node-editor.multiplyCalc.title')"
+        :description="t('node-editor.multiplyCalc.description')"
+    >
         <!-- 节点内容 -->
         <div class="space-y-2">
             <!-- 计算结果预览 -->

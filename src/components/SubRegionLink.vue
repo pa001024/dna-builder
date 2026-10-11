@@ -5,8 +5,6 @@ import type { RouteLocationRaw } from "vue-router"
 import { useGameText } from "@/composables/useGameText"
 import { regionMap, subRegionMap } from "@/data/d"
 
-
-
 const props = defineProps<{
     subRegionId: number
 }>()

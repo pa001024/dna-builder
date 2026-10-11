@@ -109,14 +109,25 @@ const assistantBodies = new Map<number, HTMLElement>()
  * 渲染体挂载后再按 `<!--rich:N-->` 占位符把组件逐个插入对应位置。
  */
 const richComponents = new Map<number, ParsedRichComponent[]>()
-/** 已由本组件插入的组件宿主元素，卸载时需要清理 */
-const richMounts: HTMLElement[] = []
+/**
+ * 单条消息已挂载富组件的记录（消息 id → 按挂载顺序排列）。
+ *
+ * 只记宿主元素不够：`v-html` 刷新会整体替换 innerHTML，被换掉的宿主早已脱离文档，
+ * 但它们的应用实例还活着（异步组件 resolve 后会往 detached 节点里渲染，白白浪费一次）。
+ * 每次重挂前按这份记录统一卸载，才能把流式过程中的实例数封在常数级。
+ */
+interface RichMountRecord {
+    /** 宿主元素 */
+    host: HTMLElement
+    /** 对应应用的卸载函数；挂载失败（退化成占位文本）时为 null */
+    unmount: (() => void) | null
+    /** 组件指纹（名 + 属性），用于判断同值重解析时能否沿用已有的宿主 */
+    signature: string | null
+}
+const richMountRecords = new Map<number, RichMountRecord[]>()
 
 /** 当前是否为 hash 路由模式（决定 markdown 里站内链接的 href 形态） */
 const hashMode = isHashRouterMode()
-
-/** 已挂载组件的 Vue 应用实例（卸载时需要一并销毁，避免内存泄漏） */
-const richApps: Array<{ unmount: () => void }> = []
 
 /** 需要在 DOM 更新后挂载特殊组件的消息 id */
 const pendingRichMounts = new Set<number>()
@@ -158,24 +169,55 @@ function renderAssistant(message: AgentChatMessage): string {
  * @param messageId 消息 id
  * @param element 渲染体元素
  */
-function mountRichComponents(messageId: number, element: HTMLElement) {
-    const components = richComponents.get(messageId)
+/**
+ * 组件指纹：组件名 + 属性的 JSON，用于判断两次解析是否等价。
+ * @param component 解析出的组件
+ * @returns 指纹；属性不可序列化时返回 null（调用方按“不一致”处理，保证重挂）
+ */
+function richSignature(component: ParsedRichComponent): string | null {
+    try {
+        return `${component.name}:${JSON.stringify(component.props)}`
+    } catch {
+        return null
+    }
+}
 
-    if (!components?.length) {
+/**
+ * 卸载并移除某条消息名下所有的富组件宿主（含早已脱离文档的，只卸载不留痕）。
+ * @param messageId 消息 id
+ */
+function dropRichMounts(messageId: number) {
+    const records = richMountRecords.get(messageId)
+
+    if (!records) {
         return
     }
 
-    // 只取注释节点里的占位符，避免误伤代码块等元素节点
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_COMMENT)
-    const placeholders: Comment[] = []
+    richMountRecords.delete(messageId)
 
-    while (walker.nextNode()) {
-        const node = walker.currentNode as Comment
-
-        if (node.data.startsWith("rich:")) {
-            placeholders.push(node)
+    for (const record of records) {
+        if (record.unmount) {
+            try {
+                record.unmount()
+            } catch {
+                // 卸载失败不影响后续清理
+            }
         }
+
+        record.host.remove()
     }
+}
+
+/**
+ * 把解析出的特殊组件挂进一批占位符（注释 → 宿主 `<span>` → 独立应用实例）。
+ *
+ * 挂载记录按消息 id 存档，供下一次 flush 做“沿用 / 原位更新”判定。
+ * @param messageId 消息 id
+ * @param placeholders 占位符注释（文档顺序）
+ * @param components 待挂载的组件（与占位符序号对应）
+ */
+function mountRichAtPlaceholders(messageId: number, placeholders: Comment[], components: ParsedRichComponent[]) {
+    const records: RichMountRecord[] = []
 
     for (const placeholder of placeholders) {
         const index = Number(placeholder.data.slice("rich:".length))
@@ -190,20 +232,126 @@ function mountRichComponents(messageId: number, element: HTMLElement) {
 
         placeholder.parentNode?.replaceChild(host, placeholder)
 
+        const signature = richSignature(component)
+
         try {
             const app = createApp({
                 render: () => h(component.component, component.props),
             })
             app.use(createPinia()).use(I18NextVue, { i18next }).use(router)
             app.mount(host)
-            richApps.push(app)
-            richMounts.push(host)
+            records.push({ host, unmount: () => app.unmount(), signature })
         } catch (error) {
             // 单个组件渲染失败不应影响整条回复：退化为一段可读的占位文本
             console.error("特殊组件渲染失败:", component.name, error)
             host.textContent = `[${component.name} 渲染失败]`
-            richMounts.push(host)
+            records.push({ host, unmount: null, signature })
         }
+    }
+
+    if (records.length) {
+        richMountRecords.set(messageId, [...(richMountRecords.get(messageId) ?? []), ...records])
+    }
+}
+
+/**
+ * 把解析出的特殊组件插入渲染体的占位符位置。
+ *
+ * 做法是把 `<!--rich:N-->` 注释替换成一个宿主 `<span>`，
+ * 再用 `createApp().mount()` 把真实组件渲染进这个宿主。
+ * 之所以不用 `v-html` 直接渲染组件：Vue 不会在 v-html 内容里实例化组件，
+ * 所以只能采用「占位符 + 手动挂载」的方案。
+ * @param messageId 消息 id
+ * @param element 渲染体元素
+ */
+function mountRichComponents(messageId: number, element: HTMLElement) {
+    const components = richComponents.get(messageId)
+
+    if (!components?.length) {
+        return
+    }
+
+    mountRichAtPlaceholders(messageId, collectRichPlaceholders(element), components)
+}
+
+/**
+ * 收集渲染体内的占位符注释。
+ *
+ * 只取注释节点里的占位符，避免误伤代码块等元素节点。
+ * @param element 渲染体元素
+ * @returns 文档顺序的占位符注释
+ */
+function collectRichPlaceholders(element: HTMLElement): Comment[] {
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_COMMENT)
+    const placeholders: Comment[] = []
+
+    while (walker.nextNode()) {
+        const node = walker.currentNode as Comment
+
+        if (node.data.startsWith("rich:")) {
+            placeholders.push(node)
+        }
+    }
+
+    return placeholders
+}
+
+/**
+ * 在占位符缺失（innerHTML 没被刷新）但结构一致时，原位逐个重挂组件。
+ *
+ * 触发场景：新内容与旧内容渲染出的 HTML 逐字相同、但组件参数变了
+ * （参数藏在标签里，剥离后不留痕迹，例如模型把 `name="A"` 改成了 `name="B"`）。
+ * 旧宿主的位置就是新组件的位置，直接替换即可，不需要占位符。
+ * @param messageId 消息 id
+ * @param hosts 文档顺序的现存宿主（都在文档内）
+ * @param components 待挂载的组件（与宿主位置对应）
+ */
+function remountRichInPlace(messageId: number, hosts: HTMLElement[], components: ParsedRichComponent[]) {
+    // 先卸掉旧应用（宿主暂时留着占位），再逐个替换，避免中途出现空洞
+    const previous = richMountRecords.get(messageId) ?? []
+    richMountRecords.delete(messageId)
+
+    for (const record of previous) {
+        if (record.unmount) {
+            try {
+                record.unmount()
+            } catch {
+                // 卸载失败不影响后续清理
+            }
+        }
+    }
+
+    const records: RichMountRecord[] = []
+
+    hosts.forEach((oldHost, position) => {
+        const component = components[position]
+
+        if (!component) {
+            return
+        }
+
+        const host = document.createElement("span")
+        host.className = "db-rich-inline"
+        oldHost.replaceWith(host)
+
+        const signature = richSignature(component)
+
+        try {
+            const app = createApp({
+                render: () => h(component.component, component.props),
+            })
+            app.use(createPinia()).use(I18NextVue, { i18next }).use(router)
+            app.mount(host)
+            records.push({ host, unmount: () => app.unmount(), signature })
+        } catch (error) {
+            console.error("特殊组件渲染失败:", component.name, error)
+            host.textContent = `[${component.name} 渲染失败]`
+            records.push({ host, unmount: null, signature })
+        }
+    })
+
+    if (records.length) {
+        richMountRecords.set(messageId, records)
     }
 }
 
@@ -212,6 +360,22 @@ function mountRichComponents(messageId: number, element: HTMLElement) {
  *
  * 流式输出期间每次内容变化都会触发一次；已处理过的消息会被移出待办集合，
  * 不会重复插入。
+ */
+/**
+ * 在 DOM 更新后挂载所有待处理的特殊组件。
+ *
+ * 流式输出期间每次内容变化都会触发一次；已处理过的消息会被移出待办集合，
+ * 不会重复插入。
+ *
+ * 注意：有占位符才清旧宿主。`renderAssistant` 在内容不变的重渲染里会返回
+ * 缓存的 HTML（例如落库时只清了 `renderedContent` 缓存标记），此时 Vue 因
+ * 新旧字符串逐字相同而跳过 `innerHTML` 更新，DOM 里根本没有新鲜占位符——
+ * 若照旧先清空，就会把活着的组件删掉却无处重挂（刷新前页面上只剩空白，
+ * 这正是之前“流中不渲染、刷新后才有”的根因）。所以先看有没有占位符：
+ * - 有：常规路径，清旧宿主后挂载；
+ * - 没有但宿主活着且组件一致：同值重解析，什么都不做；
+ * - 没有但组件参数变了：原位逐个重挂；
+ * - 宿主与组件对不上：用缓存的 HTML 恢复占位符再挂载。
  */
 async function flushRichMounts() {
     if (!pendingRichMounts.size) {
@@ -226,20 +390,52 @@ async function flushRichMounts() {
         if (!element) {
             continue
         }
-        // 重新渲染会整体替换 v-html 内容，先清掉该消息上一次挂载的宿主
-        clearRichMountsFor(element)
-        mountRichComponents(messageId, element)
-        pendingRichMounts.delete(messageId)
-    }
-}
 
-/**
- * 清理某个渲染体内已挂载的特殊组件。
- * @param element 渲染体元素
- */
-function clearRichMountsFor(element: HTMLElement) {
-    for (const host of element.querySelectorAll(".db-rich-inline")) {
-        host.remove()
+        const components = richComponents.get(messageId)
+
+        if (!components?.length) {
+            pendingRichMounts.delete(messageId)
+            continue
+        }
+
+        const placeholders = collectRichPlaceholders(element)
+
+        if (placeholders.length) {
+            // v-html 刚刷出新鲜占位符：卸掉旧实例后挂载
+            dropRichMounts(messageId)
+            mountRichAtPlaceholders(messageId, placeholders, components)
+            pendingRichMounts.delete(messageId)
+            continue
+        }
+
+        const hosts = [...element.querySelectorAll(".db-rich-inline")].filter((host): host is HTMLElement => host instanceof HTMLElement)
+        const recordByHost = new Map((richMountRecords.get(messageId) ?? []).map(record => [record.host, record]))
+        const liveSignatures = hosts.map(host => recordByHost.get(host)?.signature)
+        const freshSignatures = components.map(richSignature)
+        const verifiable = liveSignatures.every(signature => signature !== null && signature !== undefined)
+
+        if (hosts.length === components.length && hosts.length > 0 && verifiable) {
+            const unchanged = freshSignatures.every((signature, index) => signature !== null && signature === liveSignatures[index])
+
+            if (!unchanged && freshSignatures.every(signature => signature !== null)) {
+                remountRichInPlace(messageId, hosts, components)
+            }
+
+            pendingRichMounts.delete(messageId)
+            continue
+        }
+
+        // 宿主与组件对不上（旧宿主被提前清掉、占位符也没了）：
+        // 用缓存的 HTML 把占位符恢复出来再挂载，避免永久空白。
+        const cached = props.messages.find(message => message.id === messageId)?.renderedContent
+
+        if (cached && cached.includes("<!--rich:")) {
+            dropRichMounts(messageId)
+            element.innerHTML = cached
+            mountRichComponents(messageId, element)
+            pendingRichMounts.delete(messageId)
+        }
+        // 否则保持 pending，等下一次渲染/挂载时机重试
     }
 }
 
@@ -247,16 +443,10 @@ function clearRichMountsFor(element: HTMLElement) {
  * 清理所有由本组件挂载的特殊组件宿主与应用实例。
  */
 function unmountRichComponents() {
-    for (const app of richApps) {
-        try {
-            app.unmount()
-        } catch {
-            // 卸载失败不影响后续清理
-        }
+    for (const messageId of [...richMountRecords.keys()]) {
+        dropRichMounts(messageId)
     }
 
-    richApps.length = 0
-    richMounts.length = 0
     richComponents.clear()
     pendingRichMounts.clear()
 }
@@ -565,8 +755,7 @@ function traceItems(message: AgentChatMessage): TraceItem[] {
     const reasonings: AgentChatReasoning[] = message.reasonings ?? []
     const pending = new Map<string, AgentChatToolTrace>((message.toolTraces ?? []).map(trace => [trace.id, trace]))
     // 先按时间顺序拍平，再在第二步把连续的工具调用收成一组
-    const flat: Array<{ kind: "reasoning"; key: string; text: string; index: number } | { kind: "tool"; trace: AgentChatToolTrace }> =
-        []
+    const flat: Array<{ kind: "reasoning"; key: string; text: string; index: number } | { kind: "tool"; trace: AgentChatToolTrace }> = []
 
     reasonings.forEach((reasoning, index) => {
         if (!reasoning.text.trim()) {
@@ -811,7 +1000,12 @@ onBeforeUnmount(() => {
                 <ul v-else class="flex flex-col gap-5">
                     <li v-for="message in props.messages" :key="message.id" class="group/msg">
                         <!-- 用户提问：右对齐，hairline 边框区分 -->
-                        <div v-if="message.role === 'user'" class="flex flex-col items-end gap-1.5">                            <!-- 附图排在正文之前：与发给模型的顺序一致，也符合「先看图再看问题」 -->
+                        <div
+                            v-if="message.role === 'user'"
+                            class="flex flex-col items-end gap-1.5"
+                        ><!-- 附图排在正文之前：与发给模型的顺序一致，也符合「先看图再看问题」 -->
+                            <!-- 附图排在正文之前：与发给模型的顺序一致，也符合「先看图再看问题」 -->
+                            <!-- 附图排在正文之前：与发给模型的顺序一致，也符合「先看图再看问题」 -->
                             <div v-if="message.images?.length" class="flex max-w-[80%] flex-wrap justify-end gap-2">
                                 <img
                                     v-for="(image, index) in message.images"
@@ -992,11 +1186,7 @@ onBeforeUnmount(() => {
                                                     itemTraces(item).length > 1 ? 'ml-1.5 border-l border-base-content/12 pl-2.5' : ''
                                                 "
                                             >
-                                                <li
-                                                    v-for="trace in itemTraces(item)"
-                                                    :key="trace.id"
-                                                    class="flex flex-col"
-                                                >
+                                                <li v-for="trace in itemTraces(item)" :key="trace.id" class="flex flex-col">
                                                     <!--
                                                       带结果原文（后台日志回放 / 新版落库）时整行可点击展开；
                                                       未展开时参数单行截断，展开后看完整参数与结果原文。
@@ -1023,8 +1213,12 @@ onBeforeUnmount(() => {
                                                         />
                                                         <span class="shrink-0 text-base-content/55">{{ trace.label }}</span>
                                                         <span class="min-w-0 flex-1 truncate">
-                                                            <span v-if="formatToolArgs(trace)" class="text-base-content/35">/ {{ formatToolArgs(trace) }} </span>
-                                                            <span v-if="trace.summary" class="text-base-content/30">· {{ trace.summary }}</span>
+                                                            <span v-if="formatToolArgs(trace)" class="text-base-content/35"
+                                                                >/ {{ formatToolArgs(trace) }}
+                                                            </span>
+                                                            <span v-if="trace.summary" class="text-base-content/30"
+                                                                >· {{ trace.summary }}</span
+                                                            >
                                                         </span>
                                                         <Icon
                                                             v-if="trace.result"
@@ -1042,12 +1236,10 @@ onBeforeUnmount(() => {
                                                         <pre
                                                             v-if="formatToolJson(trace)"
                                                             class="font-mono text-[11px] leading-5 whitespace-pre-wrap wrap-break-word text-base-content/60"
-                                                            >{{ formatToolJson(trace) }}</pre
-                                                        >
+                                                        >{{ formatToolJson(trace) }}</pre>
                                                         <pre
                                                             class="max-h-48 overflow-auto border-l border-primary/40 pl-2 font-mono text-[11px] leading-5 whitespace-pre-wrap wrap-break-word text-base-content/45"
-                                                            >{{ trace.result }}</pre
-                                                        >
+                                                        >{{ trace.result }}</pre>
                                                     </div>
                                                 </li>
                                             </ul>

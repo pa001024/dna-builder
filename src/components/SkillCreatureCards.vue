@@ -76,7 +76,9 @@ const creatureCards = computed(() =>
     >
         <div class="flex w-20 shrink-0 flex-col items-center justify-between gap-2">
             <div class="flex flex-col items-center gap-1.5 h-full">
-                <div class="w-full flex-1 flex gap-1.5 justify-center items-center text-center text-[11px] wrap-break-word text-base-content/55">
+                <div
+                    class="w-full flex-1 flex gap-1.5 justify-center items-center text-center text-[11px] wrap-break-word text-base-content/55"
+                >
                     <Icon icon="ri:box-1-line" class="size-4 text-primary/70" />
                     <span>{{ titlePrefix ? `${titlePrefix}${$t("skill-creature.entity")}` : $t("skill-creature.entity") }}</span>
                 </div>
@@ -86,7 +88,9 @@ const creatureCards = computed(() =>
         <div class="flex min-w-0 flex-1 flex-col justify-center gap-1">
             <div v-for="field in card.fields" :key="field.key" class="flex items-baseline justify-between gap-3 text-xs">
                 <span class="truncate text-base-content/55">{{ $t(field.key) }}</span>
-                <span class="shrink-0 font-semibold text-primary">{{ field.shapeKey ? `${$t(field.shapeKey)}${field.value}` : field.value }}</span>
+                <span class="shrink-0 font-semibold text-primary">{{
+                    field.shapeKey ? `${$t(field.shapeKey)}${field.value}` : field.value
+                }}</span>
             </div>
         </div>
     </div>

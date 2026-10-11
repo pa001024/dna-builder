@@ -7,7 +7,7 @@ import { useGameText } from "@/composables/useGameText"
 import { useReaderArticle } from "@/composables/useReaderArticle"
 import { regionMap, subRegionMap } from "@/data/d"
 import type { Book, BookResource } from "@/data/d/book.data"
-import { convertRegionMapIdToDBMapId } from "@/data/d/map.data"
+import { convertRegionMapIdToDBMapId } from "@/data/d/onlinemapcache.data"
 import { stripStoryTextTags } from "@/utils/story-text"
 
 interface BookLocationInfo {
@@ -162,12 +162,7 @@ const readerMeta = computed(() => {
     const bookName = t(props.book.name)
     return {
         title: entryName && entryName !== bookName ? `${entryName} - ${bookName}` : bookName,
-        description:
-            gt(props.book.desc) ||
-            stripStoryTextTags(gt(resource.text))
-                .replace(/\s+/g, " ")
-                .trim()
-                .slice(0, 120),
+        description: gt(props.book.desc) || stripStoryTextTags(gt(resource.text)).replace(/\s+/g, " ").trim().slice(0, 120),
         url: typeof location === "undefined" ? undefined : `${location.origin}/db/book/${props.book.id}`,
     }
 })
@@ -229,7 +224,7 @@ useReaderArticle(() => readerMeta.value)
 
         <!-- 条目阅读 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader no-animate compact kicker="ENTRIES">
+            <SectionHeader no-animate compact kicker="ENTRIES" :title="$t('book-detail.entries')">
                 <template #trailing>
                     <button
                         type="button"
@@ -278,9 +273,7 @@ useReaderArticle(() => readerMeta.value)
                         class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                     >
                         <span class="text-xs text-base-content/60">{{ $t("book-detail.mechanismId") }}</span>
-                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                            selectedResource.mId
-                        }}</span>
+                        <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ selectedResource.mId }}</span>
                     </div>
 
                     <div

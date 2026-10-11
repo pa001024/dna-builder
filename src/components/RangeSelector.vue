@@ -107,13 +107,7 @@ const handleMaxInput = (event: Event) => {
 </script>
 
 <template>
-    <button
-        type="button"
-        @click="open = !open"
-        :disabled="disabled"
-        :class="rootClass"
-        v-bind="otherAttrs"
-    >
+    <button type="button" @click="open = !open" :disabled="disabled" :class="rootClass" v-bind="otherAttrs">
         <span class="flex items-center gap-2">
             <span class="font-orbitron tabular-nums">{{ fromValue }}</span>
             <span class="text-base-content/55">-</span>
@@ -133,7 +127,7 @@ const handleMaxInput = (event: Event) => {
                 >
                     <div class="p-4">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold">{{ $t('common.select_level_range') }}</h3>
+                            <h3 class="text-lg font-semibold">{{ $t("common.select_level_range") }}</h3>
                             <button type="button" @click="open = false" class="text-base-content/70 hover:text-base-content">
                                 <Icon icon="radix-icons:cross2" class="w-5 h-5" />
                             </button>
@@ -169,14 +163,14 @@ const handleMaxInput = (event: Event) => {
                                 @click="cancelSelection"
                                 class="flex-1 rounded-xs border border-base-content/20 px-3 py-1.5 text-[13px] text-base-content/70 transition-colors duration-150 hover:border-primary/60 hover:text-primary"
                             >
-                                {{ $t('取消') }}
+                                {{ $t("取消") }}
                             </button>
                             <button
                                 type="button"
                                 @click="confirmSelection"
                                 class="flex-1 rounded-xs border border-primary bg-primary px-3 py-1.5 text-[13px] font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90"
                             >
-                                {{ $t('common.confirm') }}
+                                {{ $t("common.confirm") }}
                             </button>
                         </div>
                     </div>
@@ -188,7 +182,7 @@ const handleMaxInput = (event: Event) => {
                 >
                     <div class="p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold">{{ $t('common.select_level_range') }}</h3>
+                            <h3 class="text-lg font-semibold">{{ $t("common.select_level_range") }}</h3>
                             <button type="button" @click="open = false" class="text-base-content/70 hover:text-base-content">
                                 <Icon icon="radix-icons:cross2" class="w-6 h-6" />
                             </button>
@@ -223,7 +217,7 @@ const handleMaxInput = (event: Event) => {
                             @click="confirmSelection"
                             class="w-full rounded-xs border border-primary bg-primary px-3 py-3 text-[13px] font-semibold text-primary-content transition-colors duration-150 hover:bg-primary/90"
                         >
-                            {{ $t('common.confirm') }}
+                            {{ $t("common.confirm") }}
                         </button>
                     </div>
                 </div>

@@ -846,7 +846,7 @@ defineExpose({
                             @click="exportToExcel"
                         >
                             <Icon icon="ri:file-excel-2-line" class="size-3.5" />
-                            {{ $t('dna-prop-flow.export_excel') }}
+                            {{ $t("dna-prop-flow.export_excel") }}
                         </button>
                     </template>
                 </SectionHeader>
@@ -858,7 +858,10 @@ defineExpose({
                             <span class="label-text text-xs font-medium">角色</span>
                         </label>
                         <div class="relative">
-                            <Select v-model="selectedRole" class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
+                            <Select
+                                v-model="selectedRole"
+                                class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                            >
                                 <SelectItem v-for="role in roles" :key="role.role_id" :value="role.role_id">
                                     {{ role.role_name }}
                                     <span v-if="role.is_verified === 1" class="text-success">(已验证)</span>
@@ -881,7 +884,11 @@ defineExpose({
                         <label class="label">
                             <span class="label-text text-xs font-medium">查询日期</span>
                         </label>
-                        <input v-model="queryDate" type="date" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
+                        <input
+                            v-model="queryDate"
+                            type="date"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        />
                     </div>
 
                     <!-- 时间范围 -->
@@ -889,7 +896,10 @@ defineExpose({
                         <label class="label">
                             <span class="label-text text-xs font-medium">时间范围</span>
                         </label>
-                        <Select v-model="selectedTimeRange" class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
+                        <Select
+                            v-model="selectedTimeRange"
+                            class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        >
                             <SelectItem v-for="option in timeRangeOptions" :key="option.value" :value="option.value">
                                 {{ option.label }}
                             </SelectItem>
@@ -917,7 +927,10 @@ defineExpose({
                         <label class="label">
                             <span class="label-text text-xs font-medium">道具分类</span>
                         </label>
-                        <Select v-model="selectedPropCategory" class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary">
+                        <Select
+                            v-model="selectedPropCategory"
+                            class="w-full min-w-0 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                        >
                             <SelectItem v-for="category in propCategories" :key="category.id" :value="category.id">
                                 {{ category.name }}
                             </SelectItem>
@@ -960,8 +973,15 @@ defineExpose({
                             <span class="label-text text-xs font-medium">进度显示</span>
                         </label>
                         <div class="flex items-center h-full text-xs text-base-content/70">
-                            已查询 <span class="font-orbitron text-[13px] font-semibold text-primary mx-1">{{ batchQueryProgress.currentDate }}</span> 日 共
-                            <span class="font-orbitron text-[13px] font-semibold text-primary mx-1">{{ batchQueryProgress.totalRecords }}</span> 条记录
+                            已查询
+                            <span class="font-orbitron text-[13px] font-semibold text-primary mx-1">{{
+                                batchQueryProgress.currentDate
+                            }}</span>
+                            日 共
+                            <span class="font-orbitron text-[13px] font-semibold text-primary mx-1">{{
+                                batchQueryProgress.totalRecords
+                            }}</span>
+                            条记录
                         </div>
                     </div>
                 </div>
@@ -1004,10 +1024,7 @@ defineExpose({
                                 <td class="tabular-nums text-base-content/70">{{ new Date(item.time * 1000).toLocaleString() }}</td>
                                 <td class="font-medium text-base-content/90">{{ item.prop_name }}</td>
                                 <td class="text-base-content/70">{{ item.category_name }}</td>
-                                <td
-                                    class="font-medium tabular-nums"
-                                    :class="item.change > 0 ? 'text-success' : 'text-error'"
-                                >
+                                <td class="font-medium tabular-nums" :class="item.change > 0 ? 'text-success' : 'text-error'">
                                     {{ item.change > 0 ? "+" : "" }}{{ item.change }}
                                 </td>
                                 <td class="text-sm text-base-content/50">{{ item.remark }}</td>
@@ -1030,7 +1047,12 @@ defineExpose({
                     <span class="label-text">验证码</span>
                 </label>
                 <div class="flex gap-2">
-                    <input v-model="mailCode" type="text" placeholder="请输入验证码" class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" />
+                    <input
+                        v-model="mailCode"
+                        type="text"
+                        placeholder="请输入验证码"
+                        class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    />
                     <button @click="sendGameMail" class="btn btn-secondary">发送验证码</button>
                 </div>
             </div>
@@ -1052,7 +1074,13 @@ defineExpose({
                 <label class="label">
                     <span class="label-text">手机号</span>
                 </label>
-                <input v-model="phoneNumber" type="tel" placeholder="请输入手机号" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary" maxlength="11" />
+                <input
+                    v-model="phoneNumber"
+                    type="tel"
+                    placeholder="请输入手机号"
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
+                    maxlength="11"
+                />
             </div>
 
             <!-- 验证码图片 -->

@@ -111,13 +111,13 @@ defineExpose({
 
         <div v-else class="flex justify-center items-center h-full py-12">
             <div class="text-center">
-                <p class="text-sm text-base-content/60 mb-4">{{ $t('dna-forum.load_failed') }}</p>
+                <p class="text-sm text-base-content/60 mb-4">{{ $t("dna-forum.load_failed") }}</p>
                 <button
                     type="button"
                     class="cursor-pointer rounded-xs border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-content transition-colors duration-150 active:scale-[0.97]"
                     @click="loadData(true)"
                 >
-                    {{ $t('common.retry') }}
+                    {{ $t("common.retry") }}
                 </button>
             </div>
         </div>

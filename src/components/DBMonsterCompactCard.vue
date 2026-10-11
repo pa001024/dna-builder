@@ -285,47 +285,47 @@ function handleClickMonsterCard(): void {
             </div>
         </div>
 
-        <div class="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+        <div class="mt-2 grid grid-cols-2 gap-1.5">
             <div
-                class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
-                :title="gt('生命')"
+                class="flex min-w-0 flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
+                :title="`${gt('生命')}: ${formatBigNumber(displayMonster.hp, 0)}`"
             >
                 <div class="text-[10px] text-base-content/55">{{ gt("生命") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold text-error">
+                <div class="truncate font-orbitron text-[13px] font-semibold tabular-nums text-error">
                     {{ formatBigNumber(displayMonster.hp, 0) }}
                 </div>
             </div>
             <div
-                class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
-                :title="gt('护盾')"
+                class="flex min-w-0 flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
+                :title="`${gt('护盾')}: ${formatBigNumber(displayMonster.es || 0, 0)}`"
             >
                 <div class="text-[10px] text-base-content/55">{{ gt("护盾") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold text-info">
+                <div class="truncate font-orbitron text-[13px] font-semibold tabular-nums text-info">
                     {{ formatBigNumber(displayMonster.es || 0, 0) }}
                 </div>
             </div>
             <div
-                class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
-                :title="gt('防御')"
+                class="flex min-w-0 flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
+                :title="`${gt('防御')}: ${formatBigNumber(displayMonster.def)}`"
             >
                 <div class="text-[10px] text-base-content/55">{{ gt("防御") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold text-success">
+                <div class="truncate font-orbitron text-[13px] font-semibold tabular-nums text-success">
                     {{ formatBigNumber(displayMonster.def) }}
                 </div>
             </div>
             <div
-                class="flex flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
-                :title="gt('有效生命')"
+                class="flex min-w-0 flex-col justify-between gap-0.5 rounded-xs border border-base-content/10 bg-base-content/3 px-2 py-1.5"
+                :title="`${gt('有效生命')}: ${formatBigNumber(effectiveHealth, 0)}`"
             >
                 <div class="text-[10px] text-base-content/55">{{ gt("有效生命") }}</div>
-                <div class="font-orbitron text-[13px] font-semibold text-accent">
+                <div class="truncate font-orbitron text-[13px] font-semibold tabular-nums text-accent">
                     {{ formatBigNumber(effectiveHealth, 0) }}
                 </div>
             </div>
         </div>
 
         <div v-if="dropMechanisms.length" class="mt-2 space-y-1.5">
-            <span class="text-[10px] text-base-content/40">{{ $t('db-monster-compact-card.drops') }}</span>
+            <span class="text-[10px] text-base-content/40">{{ $t("db-monster-compact-card.drops") }}</span>
             <div class="rounded-xs border border-base-content/10 bg-base-content/3 px-1.5 py-1">
                 <DBSoloTreasureMechanismItem v-for="mechanism in dropMechanisms" :key="mechanism.id" :mechanism="mechanism" />
             </div>

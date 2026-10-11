@@ -94,11 +94,29 @@ const imageUrl = computed(() => (props.entry.entry.img ? `/imgs/webp/${props.ent
         <!-- 条目配图：游戏内的宽幅横幅（4:1），锁幅居中、避免拉伸失真 -->
         <figure v-if="imageUrl" class="mx-auto w-full max-w-160">
             <div class="relative overflow-hidden rounded-xs border border-base-content/15 bg-base-100/60 p-1.5 backdrop-blur-sm">
-                <span class="pointer-events-none absolute top-0.5 left-0.5 h-3 w-3 border-t-2 border-l-2 border-primary/45" aria-hidden="true" />
-                <span class="pointer-events-none absolute top-0.5 right-0.5 h-3 w-3 border-t-2 border-r-2 border-primary/45" aria-hidden="true" />
-                <span class="pointer-events-none absolute bottom-0.5 left-0.5 h-3 w-3 border-b-2 border-l-2 border-primary/45" aria-hidden="true" />
-                <span class="pointer-events-none absolute bottom-0.5 right-0.5 h-3 w-3 border-b-2 border-r-2 border-primary/45" aria-hidden="true" />
-                <img :src="imageUrl" :alt="formatText(entry.entry.title)" loading="lazy" decoding="async" class="block w-full rounded-xs border border-primary/25" />
+                <span
+                    class="pointer-events-none absolute top-0.5 left-0.5 h-3 w-3 border-t-2 border-l-2 border-primary/45"
+                    aria-hidden="true"
+                />
+                <span
+                    class="pointer-events-none absolute top-0.5 right-0.5 h-3 w-3 border-t-2 border-r-2 border-primary/45"
+                    aria-hidden="true"
+                />
+                <span
+                    class="pointer-events-none absolute bottom-0.5 left-0.5 h-3 w-3 border-b-2 border-l-2 border-primary/45"
+                    aria-hidden="true"
+                />
+                <span
+                    class="pointer-events-none absolute bottom-0.5 right-0.5 h-3 w-3 border-b-2 border-r-2 border-primary/45"
+                    aria-hidden="true"
+                />
+                <img
+                    :src="imageUrl"
+                    :alt="formatText(entry.entry.title)"
+                    loading="lazy"
+                    decoding="async"
+                    class="block w-full rounded-xs border border-primary/25"
+                />
             </div>
         </figure>
 

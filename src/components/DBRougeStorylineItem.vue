@@ -290,9 +290,9 @@ const nodeChains = computed<Array<{ node: RougeStoryNode; chain: DialogueChainIt
                 />
             </TransitionGroup>
 
-            <div v-if="!chain.length" class="px-1 text-sm text-base-content/70">{{ $t('db-rouge-storyline.no_content') }}</div>
+            <div v-if="!chain.length" class="px-1 text-sm text-base-content/70">{{ $t("db-rouge-storyline.no_content") }}</div>
         </div>
 
-        <div v-if="!nodeChains.length" class="text-sm text-base-content/70">{{ $t('db-rouge-storyline.no_dialogue') }}</div>
+        <div v-if="!nodeChains.length" class="text-sm text-base-content/70">{{ $t("db-rouge-storyline.no_dialogue") }}</div>
     </div>
 </template>

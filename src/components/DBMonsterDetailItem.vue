@@ -250,12 +250,7 @@ const levelTrendChartOption = computed<echarts.EChartsOption>(() => {
         },
         legend: {
             top: 6,
-            data: [
-                t("生命"),
-                t("护盾"),
-                t("有效生命"),
-                t("monster-detail.levelDamageReductionRate"),
-            ],
+            data: [t("生命"), t("护盾"), t("有效生命"), t("monster-detail.levelDamageReductionRate")],
         },
         grid: {
             left: 16,
@@ -620,36 +615,28 @@ function getFactionName(faction: number | undefined): string {
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="text-xs text-base-content/60">{{ $t("monster-detail.dropMonsterTag") }}</span>
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                                entry.MonsterTag
-                            }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ entry.MonsterTag }}</span>
                         </div>
                         <div
                             v-if="entry.DropMechanismId !== undefined"
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="text-xs text-base-content/60">{{ $t("monster-detail.dropMechanismId") }}</span>
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                                entry.DropMechanismId
-                            }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ entry.DropMechanismId }}</span>
                         </div>
                         <div
                             v-if="entry.BoxDropRate !== undefined"
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="text-xs text-base-content/60">{{ $t("monster-detail.dropRate") }}</span>
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                                entry.BoxDropRate
-                            }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ entry.BoxDropRate }}</span>
                         </div>
                         <div
                             v-if="entry.KillScore !== undefined"
                             class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                         >
                             <span class="text-xs text-base-content/60">{{ $t("monster-detail.killScore") }}</span>
-                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                                entry.KillScore
-                            }}</span>
+                            <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ entry.KillScore }}</span>
                         </div>
                     </div>
                 </div>

@@ -122,9 +122,7 @@ const focusKey = computed(() => {
  * @returns 该槽位类型的魔之楔数组
  */
 function readMods(settings: CharSettings, type: ModSlotType, variantIndex: number): (LeveledMod | null)[] {
-    return getModVariantSlots(settings, type, variantIndex).map(slot =>
-        slot ? LeveledModHelper.optionalFromId(slot[0], slot[1]) : null
-    )
+    return getModVariantSlots(settings, type, variantIndex).map(slot => (slot ? LeveledModHelper.optionalFromId(slot[0], slot[1]) : null))
 }
 
 /**

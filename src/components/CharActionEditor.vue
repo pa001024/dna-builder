@@ -2,6 +2,7 @@
 import { groupBy } from "lodash-es"
 import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import { useCharSettings } from "@/composables/useCharSettings"
+import { createDefaultInlineActions } from "@/data/charSettings"
 import { buffData, buffMap, CharBuild, LeveledBuff } from "@/data"
 
 // 动作序列项接口
@@ -73,14 +74,18 @@ const buffOptions = computed(() =>
         )
 )
 
+// 内联动作为空时（旧序列化省略了该字段）回退为空配置，保证编辑器可直接读写
+const ensureActions = () => (charSettings.value.actions ??= createDefaultInlineActions())
+ensureActions()
+
 // BUFF组状态
-const buffGroups = ref<[string, number][][]>(charSettings.value.actions.bgs || [])
+const buffGroups = ref<[string, number][][]>(charSettings.value.actions?.bgs ?? [])
 
 // 监听BUFF组变化，保存到charSettings
 watch(
     buffGroups,
     value => {
-        charSettings.value.actions.bgs = value
+        ensureActions().bgs = value
     },
     { deep: true }
 )
@@ -229,7 +234,7 @@ onMounted(() => {
 })
 
 const actions = ref<ActionItem[]>(
-    charSettings.value.actions.i.map((action, index) => ({
+    (charSettings.value.actions?.i ?? []).map((action, index) => ({
         skill: action.s,
         duration: action.d,
         times: action.t,
@@ -240,7 +245,7 @@ const actions = ref<ActionItem[]>(
 watch(
     actions,
     value => {
-        charSettings.value.actions.i = value.map(action => ({
+        ensureActions().i = value.map(action => ({
             s: action.skill,
             d: action.duration,
             t: action.times,
@@ -251,7 +256,7 @@ watch(
 )
 
 const backgroundActions = ref<BackgroundActionItem[]>(
-    charSettings.value.actions.b.map((action, index) => ({
+    (charSettings.value.actions?.b ?? []).map((action, index) => ({
         skill: action.s,
         interval: action.i,
         times: action.t,
@@ -263,7 +268,7 @@ const backgroundActions = ref<BackgroundActionItem[]>(
 watch(
     backgroundActions,
     value => {
-        charSettings.value.actions.b = value.map(action => ({
+        ensureActions().b = value.map(action => ({
             s: action.skill,
             i: action.interval,
             t: action.times,
@@ -275,7 +280,7 @@ watch(
 )
 
 const healthPoints = ref<HealthPoint[]>(
-    charSettings.value.actions.hp.map(([time, value], index) => ({
+    (charSettings.value.actions?.hp ?? []).map(([time, value], index) => ({
         time,
         value,
         id: `health-${index}`,
@@ -284,7 +289,7 @@ const healthPoints = ref<HealthPoint[]>(
 watch(
     healthPoints,
     value => {
-        charSettings.value.actions.hp = value.sort((a, b) => a.time - b.time).map(point => [point.time, point.value] as [number, number])
+        ensureActions().hp = value.sort((a, b) => a.time - b.time).map(point => [point.time, point.value] as [number, number])
     },
     { deep: true }
 )

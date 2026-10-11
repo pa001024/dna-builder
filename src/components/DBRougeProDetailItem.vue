@@ -271,7 +271,7 @@ const talentBranch = computed(() => {
                             v-if="'unique' in item && item.unique"
                             class="rounded-xs border border-primary/40 bg-primary/10 px-1.5 py-0.5 font-semibold text-primary"
                         >
-                            {{ $t('db-rouge-pro-detail.unique') }}
+                            {{ $t("db-rouge-pro-detail.unique") }}
                         </span>
                         <span v-if="'eventType' in item" class="rounded-xs border border-base-content/15 px-1.5 py-0.5">
                             {{ getEventTypeName(item.eventType) }}
@@ -279,7 +279,9 @@ const talentBranch = computed(() => {
                         <span
                             v-if="'seasonStartTime' in item"
                             class="rounded-xs border border-base-content/15 px-1.5 py-0.5 text-base-content/60"
-                            >{{ $t('common.season') }}</span
+                            >{{
+                                $t("common.season")
+                            }}</span
                         >
                     </div>
                 </div>
@@ -327,7 +329,13 @@ const talentBranch = computed(() => {
             v-if="'activateNeed' in item && item.activateNeed.length"
             class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
         >
-            <SectionHeader no-animate compact kicker="ACTIVATION" :title="$t('db-rouge-detail.section_activation')" :count="item.activateNeed.length" />
+            <SectionHeader
+                no-animate
+                compact
+                kicker="ACTIVATION"
+                :title="$t('db-rouge-detail.section_activation')"
+                :count="item.activateNeed.length"
+            />
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <DBRougeTreasureItem v-for="treasureId in item.activateNeed" :key="treasureId" :id="treasureId" />
             </div>
@@ -385,7 +393,13 @@ const talentBranch = computed(() => {
                 v-if="kind === 'class' && bondEffects.length"
                 class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm"
             >
-                <SectionHeader no-animate compact kicker="CONTRACT" :title="$t('db-rouge-detail.section_contract')" :count="bondEffects.length" />
+                <SectionHeader
+                    no-animate
+                    compact
+                    kicker="CONTRACT"
+                    :title="$t('db-rouge-detail.section_contract')"
+                    :count="bondEffects.length"
+                />
                 <div class="space-y-2">
                     <RougeProEffectItem
                         v-for="effect in bondEffects"
@@ -411,7 +425,9 @@ const talentBranch = computed(() => {
                     v-if="'weight' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t(kind === "room" ? "db-rouge-detail.room_weight" : "common.weight") }}</span>
+                    <span class="text-xs text-base-content/60">{{
+                        $t(kind === "room" ? "db-rouge-detail.room_weight" : "common.weight")
+                    }}</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.weight }}</span>
                 </div>
                 <div
@@ -435,7 +451,9 @@ const talentBranch = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.equip_slot") }}</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{ getModEquipName(item.modEquip) }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
+                        getModEquipName(item.modEquip)
+                    }}</span>
                 </div>
                 <div
                     v-if="'mod' in item"
@@ -449,9 +467,7 @@ const talentBranch = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.global_passive") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.globalPassiveId
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.globalPassiveId }}</span>
                 </div>
                 <div
                     v-if="'startHeat' in item"
@@ -515,9 +531,7 @@ const talentBranch = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.recommend_level") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.recommendLevel
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.recommendLevel }}</span>
                 </div>
                 <div
                     v-if="'level' in item && (item.level as number[]).length"
@@ -554,27 +568,21 @@ const talentBranch = computed(() => {
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.token_transform") }}</span>
-                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.tokenTransform
-                    }}</span>
+                    <span class="shrink-0 truncate font-orbitron text-[13px] font-semibold text-primary">{{ item.tokenTransform }}</span>
                 </div>
                 <div
                     v-if="'outerShopTokenId' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.outer_shop_token") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.outerShopTokenId
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.outerShopTokenId }}</span>
                 </div>
                 <div
                     v-if="'seasonStartTime' in item"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
                     <span class="text-xs text-base-content/60">{{ $t("db-rouge-detail.season_start") }}</span>
-                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{
-                        item.seasonStartTime
-                    }}</span>
+                    <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ item.seasonStartTime }}</span>
                 </div>
                 <div
                     v-if="'seasonEndTime' in item"

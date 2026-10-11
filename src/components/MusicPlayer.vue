@@ -180,7 +180,9 @@ function handleTrackKeydown(event: KeyboardEvent): void {
                 @pointerup="handleTrackPointerUp"
             >
                 <!-- 轨道底线 -->
-                <div class="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden bg-base-content/15 transition-colors duration-200 group-hover/track:bg-base-content/25">
+                <div
+                    class="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden bg-base-content/15 transition-colors duration-200 group-hover/track:bg-base-content/25"
+                >
                     <!-- 百分比填充：宽度即播放进度 -->
                     <div
                         class="relative h-full overflow-hidden bg-primary transition-[width] duration-100 ease-linear"
@@ -194,8 +196,12 @@ function handleTrackKeydown(event: KeyboardEvent): void {
                             class="pointer-events-none absolute inset-0 animate-track-glint motion-reduce:hidden"
                             aria-hidden="true"
                         >
-                            <span class="absolute inset-y-0 left-0 w-9 -skew-x-30 bg-linear-to-r from-transparent from-40% via-primary-content/70 via-50% to-transparent to-60%" />
-                            <span class="absolute inset-y-0 -left-full w-9 -skew-x-30 bg-linear-to-r from-transparent from-40% via-primary-content/70 via-50% to-transparent to-60%" />
+                            <span
+                                class="absolute inset-y-0 left-0 w-9 -skew-x-30 bg-linear-to-r from-transparent from-40% via-primary-content/70 via-50% to-transparent to-60%"
+                            />
+                            <span
+                                class="absolute inset-y-0 -left-full w-9 -skew-x-30 bg-linear-to-r from-transparent from-40% via-primary-content/70 via-50% to-transparent to-60%"
+                            />
                         </span>
                     </div>
                 </div>
@@ -229,9 +235,9 @@ function handleTrackKeydown(event: KeyboardEvent): void {
             </button>
         </div>
 
-        <p v-if="isLoading" class="text-[11px] text-base-content/50">{{ $t('music-player.loading_audio') }}</p>
+        <p v-if="isLoading" class="text-[11px] text-base-content/50">{{ $t("music-player.loading_audio") }}</p>
         <p v-else-if="error" class="text-[11px] text-error">
-            {{ $t(error === 'play-failed' ? 'music-player.play_failed' : 'music-player.load_failed') }}
+            {{ $t(error === "play-failed" ? "music-player.play_failed" : "music-player.load_failed") }}
         </p>
 
         <audio

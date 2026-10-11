@@ -56,7 +56,9 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                 >
                     <div class="flex items-center justify-between gap-2 mb-2">
                         <div class="text-sm font-medium">第 {{ index + 1 }} 组</div>
-                        <span class="rounded-xs bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{{ $t('db-iron-survival-spawn.monster_id_group') }}</span>
+                        <span class="rounded-xs bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{{
+                            $t("db-iron-survival-spawn.monster_id_group")
+                        }}</span>
                     </div>
                     <div class="space-y-2">
                         <div
@@ -65,7 +67,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                             class="rounded-xs border border-base-content/10 bg-base-content/3 p-2"
                         >
                             <div class="mb-2 flex items-center justify-between text-xs text-base-content/70">
-                                <span>{{ $t('common.generator') }}</span>
+                                <span>{{ $t("common.generator") }}</span>
                                 <CopyID :id="spawnId" />
                             </div>
                             <p class="mb-2 text-xs text-base-content/55">{{ strongKillCount }} 小怪后生成 1 个精英</p>
@@ -103,7 +105,9 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                 >
                     <div class="flex items-center justify-between gap-2 mb-2">
                         <div class="text-sm font-medium">阶段 {{ index + 1 }}</div>
-                        <span class="rounded-xs bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{{ $t('db-iron-survival-spawn.elite_id_group') }}</span>
+                        <span class="rounded-xs bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{{
+                            $t("db-iron-survival-spawn.elite_id_group")
+                        }}</span>
                     </div>
                     <div class="space-y-2">
                         <div
@@ -112,7 +116,7 @@ function getSpawnMonsterIds(spawnId: number): number[] {
                             class="rounded-xs border border-base-content/10 bg-base-content/3 p-2"
                         >
                             <div class="mb-2 flex items-center justify-between text-xs text-base-content/70">
-                                <span>{{ $t('common.generator') }}</span>
+                                <span>{{ $t("common.generator") }}</span>
                                 <CopyID :id="spawnId" />
                             </div>
                             <div class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">

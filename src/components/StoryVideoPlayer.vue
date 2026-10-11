@@ -552,7 +552,8 @@ nextTick(initPlayer)
                 />
 
                 <span class="shrink-0 font-mono text-[10px] tabular-nums text-white/85">
-                    {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+                    {{ formatTime(currentTime) }}
+                    / {{ formatTime(duration) }}
                 </span>
 
                 <button

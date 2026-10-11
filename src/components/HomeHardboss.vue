@@ -113,7 +113,11 @@ onUnmounted(() => {
         <!-- Boss 奖励卡片：当前奖励 → 下次轮换新增 -->
         <div v-for="section in sections" :key="section.key" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3">
             <div class="flex items-center gap-2.5">
-                <img :src="getHardbossIcon(section.bossIcon)" :alt="section.bossName" class="size-9 shrink-0 rounded-xs bg-base-200 object-cover" />
+                <img
+                    :src="getHardbossIcon(section.bossIcon)"
+                    :alt="section.bossName"
+                    class="size-9 shrink-0 rounded-xs bg-base-200 object-cover"
+                />
                 <div class="min-w-0 flex-1">
                     <SRouterLink
                         :to="`/db/hardboss/${section.bossId}`"
@@ -132,17 +136,8 @@ onUnmounted(() => {
 
             <div class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-2.5">
                 <!-- 当前生效奖励 -->
-                <div
-                    v-for="slot in section.slots"
-                    :key="`current-${slot.key}`"
-                    class="flex w-11 shrink-0 flex-col items-center gap-0.5"
-                >
-                    <SRouterLink
-                        v-if="slot.currentItem"
-                        :to="rewardLink(slot.currentItem)"
-                        :title="slot.currentItem.name"
-                        class="block"
-                    >
+                <div v-for="slot in section.slots" :key="`current-${slot.key}`" class="flex w-11 shrink-0 flex-col items-center gap-0.5">
+                    <SRouterLink v-if="slot.currentItem" :to="rewardLink(slot.currentItem)" :title="slot.currentItem.name" class="block">
                         <img
                             :src="rewardIcon(slot.currentItem)"
                             :alt="slot.currentItem.name"

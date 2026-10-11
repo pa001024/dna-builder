@@ -225,12 +225,7 @@ const foilStyle = computed(() => ({
                 <!-- 中心内框：留边距 rounded-sm p-3，承载内容与全息特效（非全卡） -->
                 <span class="po-card__panel">
                     <!-- 底图层：半透明背景图，透出下层渐变底色 -->
-                    <span
-                        v-if="image"
-                        class="po-card__img"
-                        :style="{ backgroundImage: `url('${image}')` }"
-                        aria-hidden="true"
-                    />
+                    <span v-if="image" class="po-card__img" :style="{ backgroundImage: `url('${image}')` }" aria-hidden="true" />
                     <span class="po-card__holo" :style="holoStyle" aria-hidden="true" />
                     <span v-if="size === 'large'" class="po-card__foil" :style="foilStyle" aria-hidden="true" />
                     <span class="po-card__panel-content">

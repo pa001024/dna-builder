@@ -140,49 +140,49 @@ function handleSelectOption(dialogueId: number, optionId: number) {
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ npc.id }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="text-xs text-base-content/60">{{ $t('db-npc-detail.name') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-npc-detail.name") }}</span>
                     <span class="truncate text-sm font-semibold text-base-content">{{ $t(formatStoryText(npc.name || "未知")) }}</span>
                 </div>
                 <div
                     v-if="npc.camp"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t('db-npc-detail.faction') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-npc-detail.faction") }}</span>
                     <span class="truncate text-sm text-base-content/85">{{ npc.camp }}</span>
                 </div>
                 <div
                     v-if="npc.type"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t('common.type') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.type") }}</span>
                     <span class="truncate text-sm text-base-content/85">{{ npc.type }}</span>
                 </div>
                 <div
                     v-if="npc.charId"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t('db-npc-detail.char_id') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-npc-detail.char_id") }}</span>
                     <span class="shrink-0 font-orbitron text-[13px] font-semibold text-primary">{{ npc.charId }}</span>
                 </div>
                 <div
                     v-if="npc.icon"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t('db-npc-detail.icon') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("db-npc-detail.icon") }}</span>
                     <span class="truncate font-mono text-[11px] tracking-wide text-base-content/70">{{ npc.icon }}</span>
                 </div>
                 <div
                     v-if="npc.srId"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t('common.sub_region') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.sub_region") }}</span>
                     <SubRegionLink :sub-region-id="npc.srId" />
                 </div>
                 <div
                     v-if="npc.srId && npc.pos"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="text-xs text-base-content/60">{{ $t('common.coordinate') }}</span>
+                    <span class="text-xs text-base-content/60">{{ $t("common.coordinate") }}</span>
                     <MapPosLink
                         :sub-region-id="npc.srId"
                         :point="npc.pos"
@@ -215,7 +215,7 @@ function handleSelectOption(dialogueId: number, optionId: number) {
         </section>
 
         <section v-else class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 text-sm text-base-content/60 backdrop-blur-sm">
-            {{ $t('db-npc-detail.no_dialogue') }}
+            {{ $t("db-npc-detail.no_dialogue") }}
         </section>
     </div>
 </template>

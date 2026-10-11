@@ -76,22 +76,22 @@ function getImprRoute(): string {
             <SectionHeader no-animate compact kicker="IMPRESSION" :title="$t('db-impr-detail.impr_info')" />
             <div class="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="shrink-0 text-xs text-base-content/60">{{ $t('common.source') }}</span>
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t("common.source") }}</span>
                     <span class="text-right text-xs font-medium">{{ $t(`database.${props.entry.sourceType}`) }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="shrink-0 text-xs text-base-content/60">{{ $t('common.region') }}</span>
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t("common.region") }}</span>
                     <span class="text-right text-xs font-medium">{{ props.entry.regionLabel }}</span>
                 </div>
                 <div
                     v-if="props.entry.sourceSubRegionId"
                     class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2"
                 >
-                    <span class="shrink-0 text-xs text-base-content/60">{{ $t('common.sub_region') }}</span>
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t("common.sub_region") }}</span>
                     <SubRegionLink :sub-region-id="props.entry.sourceSubRegionId" />
                 </div>
                 <div class="flex items-center justify-between gap-2 rounded-xs border border-base-content/10 bg-base-content/3 px-2.5 py-2">
-                    <span class="shrink-0 text-xs text-base-content/60">{{ $t('印象') }}</span>
+                    <span class="shrink-0 text-xs text-base-content/60">{{ $t("印象") }}</span>
                     <span class="text-right text-xs font-medium">
                         {{ $t(getImprType(props.entry.valueType)) }}
                         <b class="font-orbitron text-[13px] font-semibold text-primary">

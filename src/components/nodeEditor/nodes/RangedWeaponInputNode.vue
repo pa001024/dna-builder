@@ -62,7 +62,9 @@ function updateWeaponLevel(value: number) {
 
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="text-xs text-base-content/60 block mb-1">{{ $t("node-editor.rangedWeaponInput.refineLevel") }}</label>
+                            <label class="text-xs text-base-content/60 block mb-1">{{
+                                $t("node-editor.rangedWeaponInput.refineLevel")
+                            }}</label>
                             <Select
                                 v-model="refineLevel"
                                 class="flex-1 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
@@ -75,7 +77,9 @@ function updateWeaponLevel(value: number) {
                             </Select>
                         </div>
                         <div>
-                            <label class="text-xs text-base-content/60 block mb-1">{{ $t("node-editor.rangedWeaponInput.weaponLevel") }}</label>
+                            <label class="text-xs text-base-content/60 block mb-1">{{
+                                $t("node-editor.rangedWeaponInput.weaponLevel")
+                            }}</label>
                             <input
                                 v-model.number="weaponLevel"
                                 type="number"

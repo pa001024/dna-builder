@@ -70,7 +70,12 @@ const resonanceGain = computed({
 
             <div>
                 <label class="text-sm text-base-content/60 block mb-1">{{ $t("char-build.level") }}</label>
-                <input v-model.number="charLevel" type="number" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums" placeholder="80" />
+                <input
+                    v-model.number="charLevel"
+                    type="number"
+                    class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
+                    placeholder="80"
+                />
             </div>
 
             <div>
@@ -78,15 +83,36 @@ const resonanceGain = computed({
                 <div class="grid grid-cols-3 gap-2">
                     <label class="block">
                         <span class="text-xs text-base-content/50">E</span>
-                        <input v-model.number="skillE" type="number" min="1" max="12" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums" placeholder="12" />
+                        <input
+                            v-model.number="skillE"
+                            type="number"
+                            min="1"
+                            max="12"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
+                            placeholder="12"
+                        />
                     </label>
                     <label class="block">
                         <span class="text-xs text-base-content/50">Q</span>
-                        <input v-model.number="skillQ" type="number" min="1" max="12" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums" placeholder="12" />
+                        <input
+                            v-model.number="skillQ"
+                            type="number"
+                            min="1"
+                            max="12"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
+                            placeholder="12"
+                        />
                     </label>
                     <label class="block">
                         <span class="text-xs text-base-content/50">{{ $t("被动") }}</span>
-                        <input v-model.number="skillPassive" type="number" min="1" max="12" class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums" placeholder="12" />
+                        <input
+                            v-model.number="skillPassive"
+                            type="number"
+                            min="1"
+                            max="12"
+                            class="w-full rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary font-mono tabular-nums"
+                            placeholder="12"
+                        />
                     </label>
                 </div>
             </div>

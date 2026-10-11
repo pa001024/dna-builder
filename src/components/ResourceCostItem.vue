@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { computed } from "vue"
-import { formatModName, LeveledChar, LeveledCharHelper, LeveledMod, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "@/data"
-import { charMap, draftMap, iconticketMap, modMap, skinMap, walnutMap, weaponMap } from "@/data/d"
-import { charAccessoryData, hairData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
+import { formatModName, LeveledCharHelper, LeveledModHelper, LeveledWeaponHelper, resourceMap } from "@/data"
+import { charMap, draftMap, iconticketMap, skinMap, walnutMap } from "@/data/d"
+import { charAccessoryData, weaponAccessoryData } from "@/data/d/accessory.data"
 import type { Draft } from "@/data/d/draft.data"
-import { headSculptureData } from "@/data/d/headsculpture.data"
 import { titleData } from "@/data/d/title.data"
-import { LeveledWeapon } from "@/data/leveled/LeveledWeapon"
-import { resolveSkinIconUrl } from "@/utils/accessory-utils"
 import { getRarityGradientClass } from "@/utils/rarity-utils"
+import { getRewardIconBackground, getRewardIconUrl } from "@/utils/reward-icon"
+import { getRewardDetailLink } from "@/utils/reward-link"
 
 /** 称号 id → 称号数据 */
 const titleMap = new Map(titleData.map(title => [title.id, title]))
@@ -68,12 +67,7 @@ const emit = defineEmits<{
 }>()
 
 function getIcon(name: string) {
-    const fragmentIcon = getCharacterFragmentIcon(name)
-    if (fragmentIcon) {
-        return fragmentIcon
-    }
-    const res = resourceMap.get(name)
-    return res?.icon ? `/imgs/res/${res?.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`
+    return getRewardIconUrl("Resource", name)
 }
 
 /**
@@ -101,8 +95,7 @@ function getRarityColor(name: string): string {
  * @returns 图标路径
  */
 function getResourceIconById(resourceId: number | string) {
-    const resource = getResourceById(resourceId)
-    return resource?.icon ? `/imgs/res/${resource.icon}.webp` : `/imgs/webp/T_Head_Empty.webp`
+    return getRewardIconUrl("Resource", resourceId)
 }
 
 /**
@@ -111,8 +104,7 @@ function getResourceIconById(resourceId: number | string) {
  * @returns 背景色类名
  */
 function getResourceBackgroundById(resourceId: number | string) {
-    const resource = getResourceById(resourceId)
-    return getRarityGradientClass(resource?.rarity || 1)
+    return getRewardIconBackground("Resource", resourceId)
 }
 
 /**
@@ -121,17 +113,7 @@ function getResourceBackgroundById(resourceId: number | string) {
  * @returns 图标路径
  */
 function getIronTicketIcon(ticketId: number | string): string {
-    const ticket = iconticketMap.get(Number(ticketId))
-    return ticket?.icon ? `/imgs/res/${ticket.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 获取深境罗盘稀有度。
- * @param ticketId 深境罗盘ID
- * @returns 稀有度
- */
-function getIronTicketRarity(ticketId: number | string): number {
-    return iconticketMap.get(Number(ticketId))?.rarity || 1
+    return getRewardIconUrl("IronTicket", ticketId)
 }
 
 /**
@@ -140,7 +122,7 @@ function getIronTicketRarity(ticketId: number | string): number {
  * @returns 背景色类名
  */
 function getIronTicketBackgroundById(ticketId: number | string): string {
-    return getRarityGradientClass(getIronTicketRarity(ticketId))
+    return getRewardIconBackground("IronTicket", ticketId)
 }
 
 /**
@@ -149,15 +131,7 @@ function getIronTicketBackgroundById(ticketId: number | string): string {
  * @returns 图标路径
  */
 function getDraftIcon(draftId: number | string) {
-    const draft = getDraftByIdOrProductId(draftId)
-    if (!draft) return `/imgs/webp/T_Head_Empty.webp`
-    if (draft.t === "Mod") {
-        return LeveledMod.url(modMap.get(draft.p)?.icon)
-    }
-    if (draft.t === "Weapon") {
-        return LeveledWeapon.url(weaponMap.get(draft.p)?.icon)
-    }
-    return getIcon(draft.n)
+    return getRewardIconUrl("Draft", draftId)
 }
 
 /**
@@ -166,27 +140,7 @@ function getDraftIcon(draftId: number | string) {
  * @returns 背景色类名
  */
 function getDraftBackgroundColor(draftId: number | string): string {
-    const draft = getDraftByIdOrProductId(draftId)
-    if (!draft) return getRarityGradientClass(1)
-    if (draft.t === "Mod") {
-        return getRarityGradientClass(modMap.get(draft.p)?.品质 || draft.r)
-    }
-    return getRarityGradientClass(draft.r)
-}
-
-/**
- * 获取角色碎片资源对应的角色头像。
- * @param name 资源名
- * @returns 角色头像路径
- */
-function getCharacterFragmentIcon(name: string): string {
-    const prefix = "思绪片段·"
-    if (!name.startsWith(prefix)) {
-        return ""
-    }
-
-    const char = charMap.get(name.slice(prefix.length))
-    return char?.icon ? LeveledChar.url(char.icon) : ""
+    return getRewardIconBackground("Draft", draftId)
 }
 
 /**
@@ -205,18 +159,7 @@ function getWalnutReward(walnutId: number | string) {
  * @returns 图标路径
  */
 function getWalnutIcon(walnutId: number | string): string {
-    const { reward } = getWalnutReward(walnutId)
-    if (!reward) return "/imgs/webp/T_Head_Empty.webp"
-    if (reward.type === "Mod") {
-        return LeveledMod.url(modMap.get(reward.id)?.icon)
-    }
-    if (reward.type === "Weapon") {
-        return LeveledWeapon.url(weaponMap.get(reward.id)?.icon)
-    }
-    if (reward.type === "Resource") {
-        return getCharacterFragmentIcon(reward.name) || getIcon(reward.name)
-    }
-    return "/imgs/webp/T_Head_Empty.webp"
+    return getRewardIconUrl("Walnut", walnutId)
 }
 
 /**
@@ -224,8 +167,8 @@ function getWalnutIcon(walnutId: number | string): string {
  * @param walnutId 密函ID
  * @returns 背景色类名
  */
-function getWalnutBackgroundColor(_walnutId: number | string): string {
-    return getRarityGradientClass(5)
+function getWalnutBackgroundColor(walnutId: number | string): string {
+    return getRewardIconBackground("Walnut", walnutId)
 }
 
 /**
@@ -241,70 +184,7 @@ function getDraftByIdOrProductId(draftId: number | string): Draft | undefined {
     return draftMap.get(normalizedId) ?? [...draftMap.values()].find(draft => draft.p === normalizedId)
 }
 
-type FashionCostType =
-    | "CharAccessory"
-    | "WeaponAccessory"
-    | "WeaponSkin"
-    | "Skin"
-    | "HeadSculpture"
-    | "HeadFrame"
-    | "Hair"
-    | "TitleFrame"
-
-interface FashionCostMeta {
-    icon: string
-    rarity: number
-}
-
-/**
- * 通过类型和ID查找时装条目。
- * @param type 时装类型
- * @param id 条目ID
- * @returns 时装元数据
- */
-function getFashionMeta(type: FashionCostType, id: number | string): FashionCostMeta | null {
-    const normalizedId = Number(id)
-    if (!Number.isFinite(normalizedId)) {
-        return null
-    }
-
-    if (type === "CharAccessory") {
-        const item = charAccessoryData.find(entry => entry.id === normalizedId)
-        return item ? { icon: item.icon, rarity: item.rarity } : null
-    }
-
-    if (type === "WeaponAccessory") {
-        const item = weaponAccessoryData.find(entry => entry.id === normalizedId)
-        return item ? { icon: item.icon, rarity: item.rarity } : null
-    }
-
-    if (type === "WeaponSkin") {
-        const item = weaponSkinData.find(entry => entry.id === normalizedId)
-        return item ? { icon: item.icon, rarity: item.rarity } : null
-    }
-
-    if (type === "Skin") {
-        const item = skinMap.get(normalizedId)
-        return item ? { icon: item.icon, rarity: item.rarity } : null
-    }
-
-    if (type === "HeadSculpture") {
-        const item = headSculptureData.find(entry => entry.id === normalizedId)
-        return item ? { icon: item.icon, rarity: 5 } : null
-    }
-
-    if (type === "HeadFrame") {
-        const item = headFrameData.find(entry => entry.id === normalizedId)
-        return item ? { icon: item.icon, rarity: 4 } : null
-    }
-
-    if (type === "Hair") {
-        const item = hairData.find(entry => entry.id === normalizedId)
-        return item ? { icon: item.icon, rarity: item.rarity } : null
-    }
-
-    return null
-}
+type FashionCostType = "CharAccessory" | "WeaponAccessory" | "WeaponSkin" | "Skin" | "HeadSculpture" | "HeadFrame" | "Hair" | "TitleFrame"
 
 /**
  * 获取皮肤条目的展示名称。
@@ -349,26 +229,7 @@ function isAccessoryCostType(type: string): type is "CharAccessory" | "WeaponAcc
  * @returns 图标路径
  */
 function getFashionIcon(type: FashionCostType, id: number | string) {
-    const meta = getFashionMeta(type, id)
-    if (!meta?.icon) {
-        return "/imgs/webp/T_Head_Empty.webp"
-    }
-
-    if (type === "HeadSculpture" || type === "HeadFrame") {
-        return type === "HeadFrame" ? `/imgs/headframe/${meta.icon}.webp` : `/imgs/webp/${meta.icon}.webp`
-    }
-
-    return resolveSkinIconUrl(meta.icon)
-}
-
-/**
- * 获取时装类条目的稀有度。
- * @param type 时装类型
- * @param id 条目ID
- * @returns 稀有度
- */
-function getFashionRarity(type: FashionCostType, id: number | string): number {
-    return getFashionMeta(type, id)?.rarity || 1
+    return getRewardIconUrl(type, id)
 }
 
 /**
@@ -378,41 +239,7 @@ function getFashionRarity(type: FashionCostType, id: number | string): number {
  * @returns 背景色类名
  */
 function getFashionBackgroundColor(type: FashionCostType, id: number | string): string {
-    return getRarityGradientClass(getFashionRarity(type, id))
-}
-
-/**
- * 获取时装类条目的详情链接。
- * @param type 时装类型
- * @param id 条目ID
- * @returns 详情页链接
- */
-function getFashionLink(type: FashionCostType, id: number | string): string {
-    const normalizedId = Number(id)
-    if (!Number.isFinite(normalizedId)) {
-        return ""
-    }
-
-    if (type === "Skin") {
-        return `/db/accessory/skin/${normalizedId}`
-    }
-    if (type === "HeadSculpture") {
-        return `/db/accessory/head/${normalizedId}`
-    }
-    if (type === "HeadFrame") {
-        return `/db/accessory/headframe/${normalizedId}`
-    }
-    if (type === "Hair") {
-        return `/db/accessory/hair/${normalizedId}`
-    }
-    if (type === "WeaponSkin") {
-        return `/db/accessory/weaponskin/${normalizedId}`
-    }
-    if (type === "TitleFrame") {
-        return `/db/accessory/titleframe/${normalizedId}`
-    }
-
-    return ""
+    return getRewardIconBackground(type, id)
 }
 
 /**
@@ -487,7 +314,7 @@ function handleCardClick() {
         :type="`${$t(mod.类型)}${mod.属性 ? `,${$t(mod.属性 + '属性')}` : ''}${mod.限定 ? `,${$t(mod.限定)}` : ''}`"
         :effdesc="mod.效果"
         :effindex="mod.等级 - 1"
-        :link="`/db/mod/${mod.id}`"
+        :link="getRewardDetailLink('Mod', mod.id)"
     >
         <div
             v-bind="$attrs"
@@ -505,7 +332,7 @@ function handleCardClick() {
                     class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
                     :class="getRarityGradientClass(mod.品质)"
                 />
-                <SRouterLink v-if="!mini" :to="`/db/mod/${mod.id}`" stop class="hover:underline">
+                <SRouterLink v-if="!mini" :to="getRewardDetailLink('Mod', mod.id)" stop class="hover:underline">
                     {{ value[2] === "Mod" ? $t(mod.名称) : `${$t("UI_FORGING_BLUEPRINT")}${mod.名称}` }}
                 </SRouterLink>
             </span>
@@ -522,7 +349,7 @@ function handleCardClick() {
         :effdesc="weapon.效果"
         :effindex="weapon.精炼"
         :effstrip="true"
-        :link="`/db/weapon/${weapon.id}`"
+        :link="getRewardDetailLink('Weapon', weapon.id)"
     >
         <div
             v-bind="$attrs"
@@ -540,7 +367,7 @@ function handleCardClick() {
                     class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
                     :class="getRarityGradientClass(5)"
                 />
-                <SRouterLink v-if="!mini" :to="`/db/weapon/${weapon.id}`" stop class="hover:underline">
+                <SRouterLink v-if="!mini" :to="getRewardDetailLink('Weapon', weapon.id)" stop class="hover:underline">
                     {{ $t(weapon.名称) }}
                 </SRouterLink>
             </span>
@@ -553,7 +380,7 @@ function handleCardClick() {
         :key="char.id"
         :props="char.getProperties()"
         :title="$t(char.名称)"
-        :link="`/db/char/${char.id}`"
+        :link="getRewardDetailLink('Char', char.id)"
     >
         <div
             v-bind="$attrs"
@@ -571,7 +398,7 @@ function handleCardClick() {
                     class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
                     :class="getRarityGradientClass(5)"
                 />
-                <SRouterLink v-if="!mini" :to="`/db/char/${char.id}`" stop class="hover:underline">
+                <SRouterLink v-if="!mini" :to="getRewardDetailLink('Char', char.id)" stop class="hover:underline">
                     {{ $t(char.名称) }}
                 </SRouterLink>
             </span>
@@ -595,7 +422,7 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
                 :class="getDraftBackgroundColor(value[1])"
             />
-            <SRouterLink v-if="!mini" :to="`/db/draft/${getDraftByIdOrProductId(value[1])!.id}`" stop class="hover:underline">
+            <SRouterLink v-if="!mini" :to="getRewardDetailLink('Draft', value[1])" stop class="hover:underline">
                 {{ `设计稿: ${Array.isArray(name) ? name.join(" / ") : getDraftByIdOrProductId(value[1])!.n}` }}
             </SRouterLink>
         </span>
@@ -618,7 +445,7 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 rounded-xs bg-linear-45"
                 :class="getWalnutBackgroundColor(value[1])"
             />
-            <SRouterLink v-if="!mini" :to="`/db/walnut/${Number(value[1])}`" stop class="hover:underline">
+            <SRouterLink v-if="!mini" :to="getRewardDetailLink('Walnut', value[1])" stop class="hover:underline">
                 {{ getWalnutReward(value[1]).walnut?.名称 || value[1] }}
             </SRouterLink>
         </span>
@@ -643,7 +470,7 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
                 :class="getResourceBackgroundById(value[1])"
             />
-            <SRouterLink v-if="!mini" :to="`/db/resource/${getResourceById(value[1])!.id}`" stop class="hover:underline">
+            <SRouterLink v-if="!mini" :to="getRewardDetailLink('Resource', value[1])" stop class="hover:underline">
                 {{ getResourceById(value[1])!.name }}
             </SRouterLink>
         </span>
@@ -670,7 +497,7 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
                 :class="getIronTicketBackgroundById(value[1])"
             />
-            <SRouterLink v-if="!mini" :to="`/db/iron-ticket/${value[1]}`" stop class="hover:underline">
+            <SRouterLink v-if="!mini" :to="getRewardDetailLink('IronTicket', value[1])" stop class="hover:underline">
                 {{ iconticketMap.get(Number(value[1]))?.name || name }}
             </SRouterLink>
         </span>
@@ -693,7 +520,7 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
                 :class="getRarityGradientClass(4)"
             />
-            <SRouterLink v-if="!mini" :to="`/db/title/${value[1]}`" stop class="hover:underline">
+            <SRouterLink v-if="!mini" :to="getRewardDetailLink('Title', value[1])" stop class="hover:underline">
                 {{ getTitleById(value[1])?.name }}
             </SRouterLink>
             <span v-else>{{ getTitleById(value[1])?.name }}</span>
@@ -718,8 +545,8 @@ function handleCardClick() {
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
             <SRouterLink
-                v-if="!mini && getFashionLink(value[2], value[1])"
-                :to="getFashionLink(value[2], value[1])"
+                v-if="!mini && getRewardDetailLink(value[2], value[1])"
+                :to="getRewardDetailLink(value[2], value[1])"
                 stop
                 class="hover:underline"
             >
@@ -746,12 +573,7 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
                 :class="getFashionBackgroundColor(value[2], value[1])"
             />
-            <SRouterLink
-                v-if="!mini"
-                :to="`/db/accessory/${value[2] === 'CharAccessory' ? 'char' : 'weapon'}/${value[1]}`"
-                stop
-                class="hover:underline"
-            >
+            <SRouterLink v-if="!mini" :to="getRewardDetailLink(value[2], value[1])" stop class="hover:underline">
                 {{ getAccessoryByType(value[2], value[1])?.name || name }}
             </SRouterLink>
         </span>
@@ -774,7 +596,7 @@ function handleCardClick() {
                 class="size-8 inline-block mr-2 rounded-xs bg-linear-15"
                 :class="getRarityColor(nameString)"
             />
-            <SRouterLink v-if="!mini" :to="`/db/resource/${resourceMap.get(nameString)?.id}`" stop class="hover:underline">
+            <SRouterLink v-if="!mini" :to="getRewardDetailLink('Resource', nameString)" stop class="hover:underline">
                 {{ $t(nameString) }}
             </SRouterLink>
         </span>

@@ -364,8 +364,8 @@ defineExpose({
                     class="w-36 rounded-none border-b border-base-content/20 bg-transparent px-0.5 pb-1 text-[13px] text-base-content outline-none transition-colors duration-150 placeholder:text-base-content/30 focus:border-primary"
                     @update:model-value="handleSortSelect"
                 >
-                    <SelectItem value="latest">{{ $t('dob-build-show.recently_modified') }}</SelectItem>
-                    <SelectItem value="views">{{ $t('dob-build-show.most_viewed') }}</SelectItem>
+                    <SelectItem value="latest">{{ $t("dob-build-show.recently_modified") }}</SelectItem>
+                    <SelectItem value="views">{{ $t("dob-build-show.most_viewed") }}</SelectItem>
                 </Select>
                 <button class="btn btn-primary btn-sm" @click="handleSearch">
                     <Icon icon="ri:search-line" class="w-4 h-4" />
@@ -543,7 +543,10 @@ defineExpose({
                 ></textarea>
             </div>
             <!-- 推荐状态（仅管理员可见） -->
-            <div v-if="userStore.isAdmin" class="flex items-center justify-between gap-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3">
+            <div
+                v-if="userStore.isAdmin"
+                class="flex items-center justify-between gap-3 rounded-xs border border-base-content/10 bg-base-100/60 p-3"
+            >
                 <div class="flex min-w-0 items-center gap-2">
                     <Icon
                         :icon="editingBuild?.isRecommended ? 'ri:star-fill' : 'ri:star-line'"

@@ -108,11 +108,7 @@ onUnmounted(() => {
 
         <!-- 三种密函类型卡片 -->
         <div v-else class="grid gap-2 md:grid-cols-3">
-            <div
-                v-for="(list, typeIndex) in missions"
-                :key="typeIndex"
-                class="rounded-xs border border-base-content/10 bg-base-100/60 p-3"
-            >
+            <div v-for="(list, typeIndex) in missions" :key="typeIndex" class="rounded-xs border border-base-content/10 bg-base-100/60 p-3">
                 <div class="mb-2 flex items-center gap-2">
                     <img class="size-6 shrink-0" :src="MIHAN_TYPE_META[typeIndex].icon" :alt="`${$t(MIHAN_TYPES[typeIndex])}密函`" />
                     <span class="text-[13px] font-semibold" :style="{ color: MIHAN_TYPE_META[typeIndex].color }">
@@ -203,7 +199,7 @@ onUnmounted(() => {
                     @click="mihanNotify.showMihanNotification()"
                 >
                     <Icon icon="ri:notification-3-line" class="h-3 w-3" />
-                    {{ $t('common.test') }}
+                    {{ $t("common.test") }}
                 </button>
             </div>
 
@@ -216,7 +212,13 @@ onUnmounted(() => {
                             :key="type"
                             class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 px-2 py-1 text-[11px] text-base-content/75 transition-colors has-checked:border-primary/50 has-checked:bg-primary/10 has-checked:text-primary"
                         >
-                            <input v-model="mihanNotifyTypes" :value="val" name="mihanTypes" type="checkbox" class="checkbox checkbox-xs rounded-xs" />
+                            <input
+                                v-model="mihanNotifyTypes"
+                                :value="val"
+                                name="mihanTypes"
+                                type="checkbox"
+                                class="checkbox checkbox-xs rounded-xs"
+                            />
                             {{ $t(type) }}
                         </label>
                     </div>
@@ -229,7 +231,13 @@ onUnmounted(() => {
                             :key="mission"
                             class="inline-flex cursor-pointer items-center gap-1.5 rounded-xs border border-base-content/15 px-2 py-1 text-[11px] text-base-content/75 transition-colors has-checked:border-secondary/40 has-checked:bg-secondary/10 has-checked:text-secondary"
                         >
-                            <input v-model="mihanNotifyMissions" :value="mission" name="mihanMissions" type="checkbox" class="checkbox checkbox-xs rounded-xs" />
+                            <input
+                                v-model="mihanNotifyMissions"
+                                :value="mission"
+                                name="mihanMissions"
+                                type="checkbox"
+                                class="checkbox checkbox-xs rounded-xs"
+                            />
                             {{ $t(mission) }}
                         </label>
                     </div>

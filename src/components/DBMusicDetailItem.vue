@@ -53,7 +53,10 @@ const musicAudioUrl = computed(() => buildMusicAudioUrl(props.music.music))
             />
             <div class="relative flex items-start gap-3.5">
                 <!-- 专辑封面：横向唱片套 -->
-                <div v-if="score" class="h-16 w-28 shrink-0 overflow-hidden rounded-xs border border-base-content/15 bg-base-content/3 sm:h-20 sm:w-36">
+                <div
+                    v-if="score"
+                    class="h-16 w-28 shrink-0 overflow-hidden rounded-xs border border-base-content/15 bg-base-content/3 sm:h-20 sm:w-36"
+                >
                     <img :src="`/imgs/music/${score.icon}.webp`" :alt="$t(score.name)" class="h-full w-full object-cover" />
                 </div>
                 <div class="min-w-0 flex-1">
@@ -115,13 +118,7 @@ const musicAudioUrl = computed(() => buildMusicAudioUrl(props.music.music))
 
         <!-- 试听 -->
         <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
-            <SectionHeader
-                no-animate
-                compact
-                kicker="PLAYBACK"
-                :title="$t('db-music-list.playback')"
-                :count="positionText"
-            />
+            <SectionHeader no-animate compact kicker="PLAYBACK" :title="$t('db-music-list.playback')" :count="positionText" />
             <MusicPlayer :src="musicAudioUrl" />
         </section>
 

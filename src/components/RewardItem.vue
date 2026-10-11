@@ -1,12 +1,10 @@
 <script lang="ts" setup>
 import { useTranslation } from "i18next-vue"
-import { draftMap, LeveledChar, LeveledCharHelper, LeveledModHelper, LeveledPetHelper, LeveledWeaponHelper, resourceMap } from "@/data"
-import { charMap, iconticketMap, modMap, petMap, skinMap, walnutMap } from "@/data/d"
-import { charAccessoryData, headFrameData, weaponAccessoryData, weaponSkinData } from "@/data/d/accessory.data"
-import { headSculptureData } from "@/data/d/headsculpture.data"
-import { resolveSkinIconUrl } from "@/utils/accessory-utils"
+import { charMap, draftMap, iconticketMap, skinMap, walnutMap } from "@/data/d"
+import { titleData } from "@/data/d/title.data"
 import { getDropModeText, getRewardTypeText } from "@/utils/i18n-utils"
-import { getRarityGradientClass } from "@/utils/rarity-utils"
+import { getRewardIconBackground, getRewardIconUrl } from "@/utils/reward-icon"
+import { getRewardDetailLink } from "@/utils/reward-link"
 import { RewardItem as RewardItemType } from "@/utils/reward-utils"
 
 // 递归
@@ -15,6 +13,9 @@ defineOptions({
 })
 
 const { t } = useTranslation()
+
+/** 称号 id → 称号数据（RewardItem 内复用 ResourceCostItem 的解析口径） */
+const titleMap = new Map(titleData.map(title => [title.id, title]))
 
 // 定义组件接收的Props
 interface Props {
@@ -26,294 +27,30 @@ interface Props {
 const props = defineProps<Props>()
 
 /**
- * 获取资源图标路径。
- * @param id 资源ID
- * @returns 图标路径
- */
-function getResourceIcon(id?: number | string) {
-    const resource = resourceMap.get(id ?? "")
-    if (!resource) {
-        return "/imgs/webp/T_Head_Empty.webp"
-    }
-
-    const fragmentIcon = getCharacterFragmentIcon(resource.name)
-    if (fragmentIcon) {
-        return fragmentIcon
-    }
-    return resource.icon ? `/imgs/res/${resource.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 获取设计稿展示图标。
- * @param id 设计稿ID
- * @returns 图标路径
- */
-function getDraftIcon(id: number) {
-    const draft = draftMap.get(id)
-    if (!draft) {
-        return "/imgs/webp/T_Head_Empty.webp"
-    }
-
-    if (draft.t === "Mod") {
-        return LeveledModHelper.getUrl(draft.p)
-    }
-
-    if (draft.t === "Weapon") {
-        return LeveledWeaponHelper.idToUrl(draft.p)
-    }
-
-    return "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 根据名称查找角色饰品图标。
- * @param name 名称
- * @returns 图标路径
- */
-function getAccessoryIconById(type: "CharAccessory" | "WeaponAccessory" | "WeaponSkin", id: number | string): string {
-    const normalizedId = Number(id)
-    if (!Number.isFinite(normalizedId)) {
-        return "/imgs/webp/T_Head_Empty.webp"
-    }
-
-    const accessory =
-        type === "CharAccessory"
-            ? charAccessoryData.find(item => item.id === normalizedId)
-            : type === "WeaponAccessory"
-              ? weaponAccessoryData.find(item => item.id === normalizedId)
-              : weaponSkinData.find(item => item.id === normalizedId)
-    return accessory?.icon ? resolveSkinIconUrl(accessory.icon) : "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 根据ID查找皮肤图标。
- * @param id 皮肤ID
- * @returns 图标路径
- */
-function getSkinIconById(id: number | string): string {
-    const normalizedId = Number(id)
-    if (!Number.isFinite(normalizedId)) {
-        return "/imgs/webp/T_Head_Empty.webp"
-    }
-
-    const skin = skinMap.get(normalizedId)
-    return skin?.icon ? resolveSkinIconUrl(skin.icon) : "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 根据ID查找头像框图标。
- * @param id 头像框ID
- * @returns 图标路径
- */
-function getHeadFrameIconById(id: number | string): string {
-    const normalizedId = Number(id)
-    if (!Number.isFinite(normalizedId)) {
-        return "/imgs/webp/T_Head_Empty.webp"
-    }
-
-    const headFrame = headFrameData.find(item => item.id === normalizedId)
-    return headFrame?.icon ? `/imgs/headframe/${headFrame.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 根据ID查找头像图标。
- * @param id 头像ID
- * @returns 图标路径
- */
-function getHeadSculptureIconById(id: number | string): string {
-    const normalizedId = Number(id)
-    if (!Number.isFinite(normalizedId)) {
-        return "/imgs/webp/T_Head_Empty.webp"
-    }
-
-    const head = headSculptureData.find(item => item.id === normalizedId)
-    return head?.icon ? `/imgs/webp/${head.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-}
-
-/**
- * 获取奖励项的链接地址。
+ * 获取奖励项的链接地址（收敛到公共 util，见 reward-link.ts）。
  * @param item 奖励项
- * @returns 路由地址
+ * @returns 路由地址；无对应页面时返回空串
  */
 function getRewardLink(item: RewardItemType) {
-    if (item.t === "Mod") {
-        return `/db/mod/${item.id}`
-    }
-    if (item.t === "Weapon") {
-        return `/db/weapon/${item.id}`
-    }
-    if (item.t === "Char") {
-        return `/db/char/${item.id}`
-    }
-    if (item.t === "Draft") {
-        const draft = draftMap.get(item.id)
-        return draft ? `/db/draft/${draft.id}` : ""
-    }
-    if (item.t === "Resource") {
-        const resource = resourceMap.get(item.id)
-        return resource ? `/db/resource/${resource.id}` : ""
-    }
-    if (item.t === "Skin") {
-        return `/db/accessory/skin/${item.id}`
-    }
-    if (["CharAccessory", "WeaponAccessory"].includes(item.t)) {
-        return `/db/accessory/${item.t === "CharAccessory" ? "char" : "weapon"}/${item.id}`
-    }
-    if (item.t === "TitleFrame") {
-        return `/db/accessory/titleframe/${item.id}`
-    }
-    if (item.t === "Walnut") {
-        return `/db/walnut/${item.id}`
-    }
-    if (item.t === "IronTicket") {
-        return `/db/iron-ticket/${item.id}`
-    }
-    if (item.t === "Pet") {
-        return `/db/pet/${item.id}`
-    }
-
-    return ""
+    return getRewardDetailLink(item.t, item.id)
 }
 
 /**
- * 判断奖励类型是否为饰品类。
- * @param type 奖励类型
- * @returns 是否为饰品类
- */
-function isAccessoryRewardType(type: string): type is "CharAccessory" | "WeaponAccessory" | "WeaponSkin" {
-    return ["CharAccessory", "WeaponAccessory", "WeaponSkin"].includes(type)
-}
-
-/**
- * 获取奖励项的展示图标。
+ * 获取奖励项的展示图标（收敛到公共 util，见 reward-icon.ts）。
  * @param item 奖励项
  * @returns 图标路径
  */
 function getRewardIcon(item: RewardItemType) {
-    if (item.t === "Mod") {
-        return LeveledModHelper.getUrl(item.id)
-    }
-    if (item.t === "Weapon") {
-        return LeveledWeaponHelper.idToUrl(item.id)
-    }
-    if (item.t === "Char") {
-        return LeveledCharHelper.idToUrl(item.id)
-    }
-    if (item.t === "Skin") {
-        return getSkinIconById(item.id)
-    }
-    if (item.t === "HeadSculpture") {
-        return getHeadSculptureIconById(item.id)
-    }
-    if (item.t === "HeadFrame") {
-        return getHeadFrameIconById(item.id)
-    }
-    if (item.t === "TitleFrame") {
-        return "/imgs/webp/T_Icon_Random_TitleFrame.webp"
-    }
-    if (isAccessoryRewardType(item.t)) {
-        return getAccessoryIconById(item.t, item.id)
-    }
-    if (item.t === "Draft") {
-        return getDraftIcon(item.id)
-    }
-    if (item.t === "Pet") {
-        return LeveledPetHelper.idToUrl(item.id)
-    }
-    if (item.t === "Resource") {
-        const resource = resourceMap.get(item.id)
-        if (!resource) {
-            return "/imgs/webp/T_Head_Empty.webp"
-        }
-        const fragmentIcon = getCharacterFragmentIcon(resource.name)
-        return fragmentIcon || getResourceIcon(resource.id)
-    }
-    if (item.t === "Walnut") {
-        const walnut = walnutMap.get(item.id)
-        const reward = walnut?.奖励?.[0]
-        if (!reward) return "/imgs/webp/T_Head_Empty.webp"
-        if (reward.type === "Mod") {
-            return LeveledModHelper.getUrl(reward.id)
-        }
-        if (reward.type === "Weapon") {
-            return LeveledWeaponHelper.idToUrl(reward.id)
-        }
-        if (reward.type === "Resource") {
-            const resource = resourceMap.get(reward.id)
-            if (!resource) {
-                return "/imgs/webp/T_Head_Empty.webp"
-            }
-            return getCharacterFragmentIcon(resource.name) || getResourceIcon(resource.id)
-        }
-        if (reward.type === "Skin") {
-            return getSkinIconById(reward.id)
-        }
-        if (reward.type === "HeadSculpture") {
-            return getHeadSculptureIconById(reward.id)
-        }
-        if (reward.type === "HeadFrame") {
-            return getHeadFrameIconById(reward.id)
-        }
-        if (isAccessoryRewardType(reward.type)) {
-            return getAccessoryIconById(reward.type, reward.id)
-        }
-        return "/imgs/webp/T_Head_Empty.webp"
-    }
-    if (item.t === "IronTicket") {
-        const ticket = iconticketMap.get(item.id)
-        return ticket?.icon ? `/imgs/res/${ticket.icon}.webp` : "/imgs/webp/T_Head_Empty.webp"
-    }
-    return "/imgs/webp/T_Head_Empty.webp"
+    return getRewardIconUrl(item.t, item.id)
 }
 
 /**
- * 获取奖励图标的背景色。
+ * 获取奖励图标的背景色（收敛到公共 util，见 reward-icon.ts）。
  * @param item 奖励项
  * @returns 背景色类名
  */
 function getRewardBackgroundColor(item: RewardItemType) {
-    if (item.t === "Resource") {
-        const resource = resourceMap.get(item.id)
-        return getRarityGradientClass(resource?.rarity || 1)
-    }
-    if (item.t === "IronTicket") {
-        const ticket = iconticketMap.get(item.id)
-        return getRarityGradientClass(ticket?.rarity || 1)
-    }
-    if (["Skin", "HeadSculpture", "HeadFrame", "CharAccessory", "WeaponAccessory", "WeaponSkin"].includes(item.t)) {
-        return getRarityGradientClass(
-            item.t === "Skin"
-                ? skinMap.get(item.id)?.rarity || 1
-                : item.t === "WeaponSkin"
-                  ? weaponSkinData.find(entry => entry.id === item.id)?.rarity || 1
-                  : item.t === "CharAccessory"
-                    ? charAccessoryData.find(entry => entry.id === item.id)?.rarity || 1
-                    : item.t === "WeaponAccessory"
-                      ? weaponAccessoryData.find(entry => entry.id === item.id)?.rarity || 1
-                      : item.t === "HeadFrame"
-                        ? 4
-                        : 5
-        )
-    }
-    if (item.t === "Mod") {
-        return getRarityGradientClass(modMap.get(item.id)?.品质 ?? "金")
-    }
-    if (item.t === "Pet") {
-        return getRarityGradientClass(petMap.get(item.id)?.品质 ?? "金")
-    }
-    if (item.t === "Weapon") {
-        return getRarityGradientClass(5)
-    }
-    if (item.t === "Char") {
-        return getRarityGradientClass(5)
-    }
-    if (item.t === "Draft") {
-        return "from-yellow-900/80 to-yellow-100/80"
-    }
-    if (item.t === "Walnut") {
-        return getRarityGradientClass(5)
-    }
-    return "from-gray-900/80 to-gray-100/80"
+    return getRewardIconBackground(item.t, item.id)
 }
 
 /**
@@ -366,6 +103,9 @@ function getRewardDisplayName(item: RewardItemType) {
         const ticket = iconticketMap.get(item.id)
         return ticket?.name || t(getRewardTypeText("IronTicket"))
     }
+    if (item.t === "Title") {
+        return titleMap.get(item.id)?.name || item.n || `ID: ${item.id}`
+    }
     return (item.n && t(item.n)) || (item.t === "Reward" ? t("reward-item.reward_group_id", { id: item.id }) : `ID: ${item.id}`)
 }
 
@@ -413,29 +153,13 @@ function shouldRenderRewardNode(item: RewardItemType | null): boolean {
 
     return shouldShowRewardItem(item) && getRenderableRewardChildren(item).length > 0
 }
-
-/**
- * 获取角色碎片资源对应的角色头像。
- * @param name 资源名
- * @returns 角色头像路径
- */
-function getCharacterFragmentIcon(name?: string): string {
-    const fragmentPrefix = "思绪片段·"
-    if (!name || !name.startsWith(fragmentPrefix)) {
-        return ""
-    }
-
-    const charName = name.slice(fragmentPrefix.length)
-    const char = charMap.get(charName)
-    return char?.icon ? LeveledChar.url(char.icon) : ""
-}
 </script>
 
 <template>
     <div class="space-y-1">
         <div class="flex items-center gap-2 mb-1" v-if="reward && header">
             <span class="text-xs font-medium"
-                >{{ typeof header === "string" ? header : $t('reward-item.reward_group') }} <CopyID :id="reward.id" /></span
+                >{{ typeof header === "string" ? header : $t("reward-item.reward_group") }} <CopyID :id="reward.id" /></span
             >
             <slot></slot>
             <span
@@ -443,7 +167,7 @@ function getCharacterFragmentIcon(name?: string): string {
                 :class="reward.m === 'Independent' ? 'bg-success text-success-content' : 'bg-warning text-warning-content'"
             >
                 {{ $t(getDropModeText(reward.m || "")) }}
-                <span v-if="reward.totalP">{{ $t('reward-item.total_capacity', { count: reward.totalP }) }}</span>
+                <span v-if="reward.totalP">{{ $t("reward-item.total_capacity", { count: reward.totalP }) }}</span>
             </span>
         </div>
         <!-- 递归奖励显示 -->
@@ -461,34 +185,34 @@ function getCharacterFragmentIcon(name?: string): string {
                                     :class="getRewardBackgroundColor(item)"
                                 />
                                 <SRouterLink v-if="hasRewardLink(item)" :to="getRewardLink(item)" class="min-w-0 truncate hover:underline">
-                                    {{ item.dp ? `${$t('reward-item.drop_item')} ` : "" }}
+                                    {{ item.dp ? `${$t("reward-item.drop_item")} ` : "" }}
                                     {{ item.d ? $t("UI_FORGING_BLUEPRINT") : "" }}
                                     {{ getRewardDisplayName(item) }}
                                 </SRouterLink>
                                 <span v-else>
-                                    {{ item.dp ? `${$t('reward-item.drop_item')} ` : "" }}
+                                    {{ item.dp ? `${$t("reward-item.drop_item")} ` : "" }}
                                     {{ item.d ? $t("UI_FORGING_BLUEPRINT") : "" }}
                                     {{ getRewardDisplayName(item) }}
                                 </span>
                                 <span class="text-xs text-base-content/50">({{ $t(getRewardTypeText(item.t)) }})</span>
                             </span>
                             <span v-if="item.c !== undefined" class="text-base-content/70">x{{ item.c }}</span>
-                            <span v-if="item.t === 'Reward' && item.c === undefined && item.m === 'Fixed'" class="text-base-content/70"
-                                >{{ $t('reward-item.fixed') }}</span
-                            >
+                            <span v-if="item.t === 'Reward' && item.c === undefined && item.m === 'Fixed'" class="text-base-content/70">{{
+                                $t("reward-item.fixed")
+                            }}</span>
                             <span v-else-if="item.t !== 'Reward' && item.p && item.m !== 'Independent'" class="text-base-content/70">
                                 ({{
                                     item.m === "Sequence"
-                                        ? $t('reward-item.capacity', { value: item.p })
-                                        : $t('reward-item.weight_ratio', { value: item.p })
+                                        ? $t("reward-item.capacity", { value: item.p })
+                                        : $t("reward-item.weight_ratio", { value: item.p })
                                 }}
-                                {{ item.pp ? $t('reward-item.ratio', { value: +(item.pp * 100).toFixed(2) }) : "" }}
-                                {{ item.times ? $t('reward-item.expect_times', { value: +item.times.toFixed(2) }) : "" }}
+                                {{ item.pp ? $t("reward-item.ratio", { value: +(item.pp * 100).toFixed(2) }) : "" }}
+                                {{ item.times ? $t("reward-item.expect_times", { value: +item.times.toFixed(2) }) : "" }}
                                 )
                             </span>
                             <span v-if="item.t !== 'Reward' && item.m === 'Independent'"
-                                >{{ $t('reward-item.independent_drop') }}
-                                {{ $t('reward-item.probability', { value: +(item.p / 100).toFixed(2) }) }}</span
+                                >{{ $t("reward-item.independent_drop") }}
+                                {{ $t("reward-item.probability", { value: +(item.p / 100).toFixed(2) }) }}</span
                             >
                             <!-- 显示掉落模式 -->
                             <span
@@ -501,7 +225,7 @@ function getCharacterFragmentIcon(name?: string): string {
                                 "
                             >
                                 {{ $t(getDropModeText(item.m || "")) }}
-                                <span v-if="item.totalP">{{ $t('reward-item.total_capacity', { count: item.totalP }) }}</span>
+                                <span v-if="item.totalP">{{ $t("reward-item.total_capacity", { count: item.totalP }) }}</span>
                             </span>
                         </div>
                         <!-- 递归显示子奖励 -->

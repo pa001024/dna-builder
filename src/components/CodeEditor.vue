@@ -173,14 +173,21 @@ function createKeymapExtension(): Extension {
     return keymap.of([
         // 编辑器聚焦时由 CodeMirror 直接拦截保存快捷键：document 冒泡监听偶发拦不住浏览器默认行为，
         // 且 e.key 大小写（Shift/CapsLock）会导致外层判断漏判，这里无条件触发 save 事件。
-        { key: "Mod-s", run: () => { emit("save"); return true }, preventDefault: true },
+        {
+            key: "Mod-s",
+            run: () => {
+                emit("save")
+                return true
+            },
+            preventDefault: true,
+        },
         // AST 模式下提供整字段删除，需排在 defaultKeymap 之前才能覆盖默认的按词删除
         //（Mod 在 mac 上为 Cmd；mac 上 Alt-退格 与 Cmd-退格 都指向本命令，避免重复绑定同一按键）
         ...(props.language === "ast" && props.fieldDelete
             ? [
-                    { key: "Mod-Backspace", mac: "Alt-Backspace", run: fieldDeleteCommand, preventDefault: true },
-                    { mac: "Mod-Backspace", run: fieldDeleteCommand, preventDefault: true },
-                ]
+                  { key: "Mod-Backspace", mac: "Alt-Backspace", run: fieldDeleteCommand, preventDefault: true },
+                  { mac: "Mod-Backspace", run: fieldDeleteCommand, preventDefault: true },
+              ]
             : []),
         { key: "Ctrl-/", mac: "Cmd-/", run: toggleComment },
         { key: "Ctrl-x", mac: "Cmd-x", run: cutLineWhenNoSelection },

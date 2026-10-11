@@ -63,7 +63,10 @@ function getTicketIconUrl(icon: string): string {
                 aria-hidden="true"
             />
             <div class="relative flex items-start gap-3.5">
-                <div class="size-20 shrink-0 overflow-hidden rounded-xs bg-linear-15 sm:size-24" :class="getRarityGradientClass(ticket.rarity)">
+                <div
+                    class="size-20 shrink-0 overflow-hidden rounded-xs bg-linear-15 sm:size-24"
+                    :class="getRarityGradientClass(ticket.rarity)"
+                >
                     <ImageFallback :src="getTicketIconUrl(ticket.icon)" :alt="ticket.name" class="w-full h-full object-cover">
                         <img src="/imgs/webp/T_Head_Empty.webp" :alt="ticket.name" class="w-full h-full object-cover" />
                     </ImageFallback>
