@@ -12,6 +12,7 @@ AGENTS.md 只列命令，这里是每个脚本的用途、输入输出与注意�
   **新增文案默认补齐 6 种语言、每种用自己的语言书写**；命令结束按实际文件内容检查，
   缺语言时输出 `⚠ warning`（只改一门译文、文件本就齐全时不误报）。
 - `bun i18n get <key> [--lang cn,en] [--json]` — 读取某键各语言的值（默认全部 6 种）。
+- `bun i18n find <文本> [--lang cn,en] [--exact] [--limit N] [--json]`（`search` 同义）— 按译文反查 key，默认 6 语言大小写不敏感子串匹配。
 - `bun i18n rm <key>` — 删除某键（所有语言）。
 - `bun i18n export|import` — 导出缺失翻译到 `tools/i18n-diff.json`、导入后删除该文件。
 - `bun i18n check [--json] [--locale-gap]` — 扫描代码中静态引用（`t("x")` 系列）但 zh-CN 未配置的键。
@@ -45,6 +46,20 @@ lint 报「icon not found」时用它。
 贴图同名冲突：遇到冲突会改写成带父目录前缀的名字（如 `13_T_PersonalInfo_Title_13_08.webp`），
 basename 与源 PNG 对不上。`tools/webp-import.ts` 会读上面那份清单，按包路径补齐这些贴图，
 因此 `bun tools/webp-import.ts` 也能覆盖它们，不会误报缺失。
+
+新客户端资源滞后（补充包）：`TitleFrame.lua` 先行、本地游戏 pak 还没有对应 WBP（如 15_x）时：
+
+1. 用 FModel 把缺的资产导出到 `D:/dev/dna-unpack/Fmodel/Output/Exports/`；
+2. 收集 `.uasset/.uexp`（及 `.ubulk`）按 `EM/Content/...` 原结构打补充包：
+   `repak pack <暂存目录> -q` 后改名 `*_P.pak` 放进 `D:/dev/dna-unpack/SupplementPaks/`
+   （如 `Title15_P.pak`；fmodel-cli 配置的 `PatchPaksDirs` 已含该目录）；
+3. 直接跑全量 `pnpm itf`（**不要用 `--frames`，它会按选中子集重写生成文件并删掉其余贴图**）。
+
+脚本侧对新客户端做了两处兼容（`tools/import-title-frame.ts`）：
+
+- 引用路径归一：新资产内部用 `/Game/` 挂载前缀，`objectPathToPackage` 统一改写回 `EM/Content/`；
+- 烘焙 PNG 兜底：某贴图缺 `.uasset`、只有 FModel 烘焙 PNG 时，`exportTexture` 改用
+  `status.outputDir` 下同名 PNG（宽高从 IHDR 头读取），不再直接抛错中断。
 
 ## 图片（webp）
 

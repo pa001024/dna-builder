@@ -17,6 +17,7 @@ Guidelines for agentic coding assistants working on the dna-builder codebase.
 | RAG 检索层与向量索引（`rag_search`、Worker 索引、服务端索引库） | [rag.md](.agents/docs/rag.md) |
 | 游戏数据 GraphQL 接口（`gameData*` 查询、数据集 id 口径、查询语义） | [game-data-api.md](.agents/docs/game-data-api.md) |
 | Agent 技能（远端 skill 的 zip 下发 / 落盘缓存 / 虚拟文件系统工具） | [agent-skills.md](.agents/docs/agent-skills.md) |
+| 在线地图→MapTool 坐标换算（`onlinemap-transform` 标定方法 / 置信度 / 坑） | [online-map-transform.md](.agents/docs/online-map-transform.md) |
 
 - 技能：`.agents/skills/*/SKILL.md`（admin-management-page、build-creator、bun-webview-test、db-style、dob-skill-creator、fmodel-unpack、i18n、perf-hotspot-profiling、ue4-pak-mod）
 - Spec 文档：`.docs/`（git 已忽略，面向外部 agent 的协议 / 实现 spec）

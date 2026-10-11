@@ -55,6 +55,8 @@ query {
 ## 数据集 id 口径
 
 - 模块 id = 文件名去掉 `.data`（`char`、`charext.en`），语言后缀 `en / fr / jp / kr / tc` 用于识别本地化变体；
+  唯一例外是 `map`：文件已改名为 `onlinemapcache.data.ts`（在线地图缓存，含函数导出，不进数据包改写），
+  模块 id 沿用 `map` 以保持查询兼容；
 - 数据集 id 优先取模块 id：模块有 `default` 导出就用它，没有 `default` 但只有一个可查询导出时该导出占用模块 id；
 - 其余导出用 `模块 id:导出名`（`pet:petEntrys`、`abyss:abyssDungeons`、`translations:translationsEn`）；
 - 与主导出**引用相同**的具名导出不单独登记（`resource.data.ts` 的 `resourceData` 与 `default` 同源），

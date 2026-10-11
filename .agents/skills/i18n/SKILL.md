@@ -1,6 +1,6 @@
 ---
 name: i18n
-description: 管理 dna-builder 的翻译文件（public/i18n/<locale>/translation.json）。当需要新增/覆盖/删除某条界面文案的翻译、按语言批量插键、查询某个 i18n 键在各语言下的值、导出与导入缺失翻译、或扫描代码里引用了但翻译文件缺失的键时使用本技能。触发场景：新增界面文案要补多语言、报「键名泄漏/界面还是中文」、i18n 检查、语言包漏翻、给某个 key 加 jp/kr/fr 译文。
+description: 管理 dna-builder 的翻译文件（public/i18n/<locale>/translation.json）。当需要新增/覆盖/删除某条界面文案的翻译、按语言批量插键、查询某个 i18n 键在各语言下的值、按译文反查 key、导出与导入缺失翻译、或扫描代码里引用了但翻译文件缺失的键时使用本技能。触发场景：新增界面文案要补多语言、报「键名泄漏/界面还是中文」、i18n 检查、语言包漏翻、给某个 key 加 jp/kr/fr 译文、看到一句文案想找到它对应的 key。
 ---
 
 # dna-builder i18n 工具
@@ -17,6 +17,7 @@ description: 管理 dna-builder 的翻译文件（public/i18n/<locale>/translati
 
 - 新增界面文案，需要为多个语言补译文 / 覆盖已有译文（**默认补齐全部 6 语言、各语言书写**）。
 - 查询某个 i18n 键在 6 种语言下现有值（确认是否已翻、值是否对）；可用 `--lang cn,en` 只看部分。
+- 按译文反查 key（看到界面上一句文案，想找到它对应的键再改）：`bun i18n find <文本>`。
 - 删除某个废弃键。
 - 导出缺失翻译表格交给翻译、翻好后导回。
 - 排查「代码里 `t("x")` 引用了但文件里没有」的漏配键。
@@ -50,6 +51,9 @@ bun i18n add setting.generative_ai \
 ```bash
 bun i18n get <key> [--lang cn,en] [--json]
                                  # 打印该键的值，默认全部 6 种语言；--lang 逗号过滤（别名可用）
+bun i18n find <文本> [--lang cn,en] [--exact] [--limit N] [--json]
+                                 # 按译文反查 key（find/search 同义）：默认 6 语言大小写不敏感子串匹配；
+                                 # --lang 限定语言，--exact 全字相等，--limit 最多展示数（默认 20）
 bun i18n rm <key>                # 从所有语言删除该键（会清理因此变空的父命名空间）
 bun i18n langs                   # 列出语言目录与全部别名
 bun i18n export                  # 导出「zh-CN 有值、其它语言缺值」的键 → tools/i18n-diff.json
@@ -131,4 +135,13 @@ bun i18n import                      # 写回并删除 diff 文件
 
 ```bash
 bun i18n check --locale-gap          # 主检测缺失键 + 各语言相对 zh-CN 的缺失计数
+```
+
+**按译文反查 key**（先找键，再 `add` 改 / `get` 确认）
+
+```bash
+bun i18n find "生成式AI"              # 6 语言子串匹配，命中键 + 各语言值一起打出
+bun i18n find "生成式AI" --exact      # 全字相等（子串命中太多时收窄）
+bun i18n find "Generator" --lang en   # 只在英文里查（看到英文文案找键时用）
+bun i18n find "生成" --limit 5 --json  # 命中多时只看前 5 个 / 输出结构化结果
 ```
