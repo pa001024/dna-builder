@@ -1,4 +1,6 @@
-const optRewardData: import("../data-types").OptReward[] = [
+import type { OptReward } from "./reward.data"
+
+const optRewardData: OptReward[] = [
     {
         id: 1001,
         child: [
@@ -642,6 +644,41 @@ const optRewardData: import("../data-types").OptReward[] = [
                 t: "Pet",
                 c: 1,
                 n: "灿烂摇摇冻·老道",
+            },
+        ],
+    },
+    {
+        id: 4010,
+        child: [
+            {
+                id: 15034,
+                t: "Resource",
+                c: 1,
+                n: "雷之晶块",
+            },
+            {
+                id: 15032,
+                t: "Resource",
+                c: 1,
+                n: "火之晶块",
+            },
+            {
+                id: 15035,
+                t: "Resource",
+                c: 1,
+                n: "光之晶块",
+            },
+            {
+                id: 15031,
+                t: "Resource",
+                c: 1,
+                n: "水之晶块",
+            },
+            {
+                id: 15036,
+                t: "Resource",
+                c: 1,
+                n: "暗之晶块",
             },
         ],
     },
@@ -1517,6 +1554,59 @@ const optRewardData: import("../data-types").OptReward[] = [
             },
             {
                 id: 54010161,
+                t: "Skin",
+                c: 1,
+                n: "城市守则",
+            },
+        ],
+    },
+    {
+        id: 5011,
+        child: [
+            {
+                id: 11010161,
+                t: "Skin",
+                c: 1,
+                n: "城市守则",
+            },
+            {
+                id: 11020161,
+                t: "Skin",
+                c: 1,
+                n: "城市守则",
+            },
+            {
+                id: 21010161,
+                t: "Skin",
+                c: 1,
+                n: "城市守则",
+            },
+            {
+                id: 31020161,
+                t: "Skin",
+                c: 1,
+                n: "城市守则",
+            },
+            {
+                id: 31040161,
+                t: "Skin",
+                c: 1,
+                n: "城市守则",
+            },
+            {
+                id: 32010161,
+                t: "Skin",
+                c: 1,
+                n: "城市守则",
+            },
+            {
+                id: 41020161,
+                t: "Skin",
+                c: 1,
+                n: "城市守则",
+            },
+            {
+                id: 53010161,
                 t: "Skin",
                 c: 1,
                 n: "城市守则",

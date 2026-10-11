@@ -1,6 +1,312 @@
 import type { CharAttr, WeaponAttr } from "../CharBuild"
-import type { Skill, SkillField } from "../data-types"
 import { isMultiplicativeAttr } from "./minusAttr"
+
+export enum SkillType {
+    伤害 = "伤害",
+    召唤 = "召唤",
+    增益 = "增益",
+    治疗 = "治疗",
+    被动 = "被动",
+    防御 = "防御",
+}
+
+export enum WeaponSkillType {
+    普通攻击 = "普通攻击",
+    蓄力攻击 = "蓄力攻击",
+    下落攻击 = "下落攻击",
+    滑行攻击 = "滑行攻击",
+    射击 = "射击",
+}
+
+export enum HpType {
+    生命 = "生命",
+    护盾 = "护盾",
+    战姿 = "战姿",
+}
+
+export enum DmgType {
+    切割 = "切割",
+    贯穿 = "贯穿",
+    震荡 = "震荡",
+    灾厄 = "灾厄",
+}
+
+export enum BulletType {
+    弹道 = "弹道",
+    非弹道 = "非弹道",
+}
+
+export interface SkillField {
+    名称: string
+    影响?: string
+    伤害类型?: keyof typeof DmgType
+    值: number[] | number
+    格式?: string
+    值2?: number[] | number
+    削韧?: number[] | number
+    Boss削韧?: number[] | number
+    延迟?: number[] | number
+    卡肉?: number[] | number
+    取消?: number[] | number
+    连段?: number[] | number
+    段数?: number
+    /** 伤害类型标签（如 ["充盈"]）：命中该标签的伤害字段按对应类型结算 */
+    tag?: string[]
+}
+
+export interface SkillSummon {
+    名称: string
+    攻击延迟: number
+    攻击间隔: number
+}
+
+export interface SkillCreatureShape {
+    类型?: "Sphere" | "Box" | "Capsule"
+    BoxHeight?: number
+    BoxLength?: number
+    BoxWidth?: number
+    SphereRadius?: number
+    CapsuleRadius?: number
+    CapsuleHeight?: number
+    Radius?: number
+}
+
+export interface SkillCreature {
+    id?: number
+    形状?: SkillCreatureShape
+    时长?: number
+    速度?: number
+    射击间隔?: number
+    特效循环间隔?: number
+    Vars?: Record<string, number | string | boolean>
+    标签?: string[]
+}
+
+export interface ShapeInfo {
+    st: "Sphere" | "Box" | "Capsule"
+    r?: number // 半径 Sphere
+    h?: number // 高度 Box
+    l?: number // 长度 Box
+    w?: number // 宽度 Box
+    cr?: number // 胶囊体半径
+    ch?: number // 胶囊体高度
+}
+
+export interface WeaponSkill {
+    id?: number
+    名称: string
+    类型: string
+    武器?: string
+    描述?: string
+    字段?: SkillField[]
+    削韧?: number[]
+    延迟?: number[]
+    卡肉?: number[]
+    实体?: SkillCreature[]
+}
+
+export interface SkillWeapon {
+    id: number
+    名称: string
+    icon?: string
+    类型: string[]
+    伤害类型?: keyof typeof DmgType
+    攻击?: number
+    暴击?: number
+    暴伤?: number
+    触发?: number
+    攻速?: number
+    技能?: Skill[]
+    skill?: number[]
+    filter?: string
+    inherit?: "melee" | "ranged"
+    atk?: "melee" | "ranged" | "all"
+    视为?: string
+}
+
+export interface BuffAttr {
+    k: string
+    v: number[] | number
+    t?: string
+    z?: string
+}
+
+export interface BuffDot {
+    d?: number // DotDelay
+    it: number // Interval
+    t: string
+    v?: number // Value
+    asi?: 1 // AllowSkillIntensity
+    dg?: string[] // DamageTag
+    dt?: string // DamageType
+    im?: number // Immediately
+    r?: number[] | number // Rate
+    c?: number // Condition
+    h?: number
+    EffectId?: number
+    PlaySe?: number
+    Stackable?: 1
+}
+
+export interface BuffAura {
+    id: number
+    t: BuffBody
+    range: number
+    camp: string
+}
+
+export interface BuffBody {
+    fn: string
+    dot?: BuffDot[]
+    t?: BuffAttr[]
+    aura?: BuffAura[]
+}
+
+export interface SkillBuff {
+    id: number
+    t: BuffBody[]
+}
+
+export interface SkillPassive {
+    id: number
+    v?: Record<string, number | number[]>
+}
+
+export interface AttrRates {
+    EnmityValue: number
+    StrongValue: number
+    ATK?: number
+    DEF?: number
+    MaxHp?: number | string
+    SkillEfficiency?: number
+    SkillIntensity?: number
+    SkillRange?: number
+    SkillSustain?: number
+    ES?: number
+    MaxES?: number
+}
+
+export interface PassiveEffect {
+    Grade1MspOnHit?: number
+    Grade4ExtraRate?: number
+    MarkAddMsp?: number
+    MarkAddSp?: number
+    MarkDamageRate?: number[]
+    MspOnHit?: number
+    Skill1Msp1?: number
+    Skill1Msp2?: number
+    Skill2Msp?: number
+    Skill2SpCost?: number
+    Grade1BuffNum?: number
+    Grade6CritRate?: number
+    PassiveLastTime?: number
+    Skill1BuffNum?: number
+    Skill01MaxTarget?: number
+    Skill02Time?: number
+    SkillIntensityRate?: number[]
+    DropEnergyLayer?: number
+    Grade1PropReturn?: number
+    Grade6DamageRate?: number
+    Grade6LastTime?: number
+    Level1Layer?: number
+    Level2Layer?: number
+    Level3Layer?: number
+    Skill01AddRate?: number
+    Skill01Num?: number
+    DemageAddRate?: number | number[]
+    Grade1LastTime?: number
+    Grade2Rate?: number
+    Skill02BuffTime?: number
+    Skill02BuffTimeMax?: number
+    Skill02BuffTimePerNum?: number
+    Skill02HpValue?: number
+    Skill03CD?: number
+}
+
+export interface EffectAttr {
+    ba?: string
+    fn?: string
+    r?: number[] | number // Rate
+    v?: number[] | number // Value
+    co?: number // Condition
+    Dilation?: number
+    Duration?: number
+    t?: BuffAttr[]
+    cid?: number // CreatureId
+    si?: ShapeInfo // CreateSkillCreature
+    sp?: number // Speed
+    tg?: string[] // Tags
+    pe?: PassiveEffect
+    Delay?: number
+    dt?: string
+    tp?: number | string // TriggerProbability
+    ai?: number // AllowSkillIntensity
+    as?: number // AllowSkillSustain
+    bc?: string
+    os?: number
+    BuffType?: number
+    IsExpand?: boolean
+    LastTimeValue?: number
+    FixLocation?: boolean
+    FormationId?: number
+    LifeTime?: number
+    MaxSummonCount?: number
+    SingleSummonCount?: number
+    UnitId?: number
+    UnitType?: string
+    RefreshRule?: string
+    Key?: string
+    AttrRates?: AttrRates // CreateUnit
+    aura?: BuffAura[]
+    AutoAttach?: number
+    cr?: boolean
+    Camp?: string
+    dot?: BuffDot[]
+}
+
+export interface SkillEffect {
+    id: number
+    t: EffectAttr[]
+}
+
+export interface Skill {
+    id?: number
+    名称?: string
+    类型: string
+    武器?: string
+    升级?: Record<string, number>[]
+    描述?: string
+    icon?: string
+    字段?: SkillField[]
+    术语解释?: Record<string, string>
+    召唤物?: SkillSummon
+    实体?: SkillCreature[]
+    cd?: number
+    e?: SkillEffect[]
+    b?: SkillBuff[]
+    p?: SkillPassive[]
+    子技能?: SubSkill[]
+    行为?: string
+}
+
+export interface SubSkill {
+    id?: number
+    名称?: string
+    类型: string
+    武器?: string
+    升级?: Record<string, number>[]
+    描述?: string
+    icon?: string
+    字段?: SkillField[]
+    术语解释?: Record<string, string>
+    召唤物?: SkillSummon
+    实体?: SkillCreature[]
+    cd?: number
+    e?: SkillEffect[]
+    b?: SkillBuff[]
+    p?: SkillPassive[]
+    行为?: string
+}
 
 export interface LeveledSkillField {
     名称: string
@@ -149,12 +455,18 @@ export class LeveledSkill {
         return merged
     }
 
-    getFieldsWithAttr(attrs?: CharAttr & { weapon?: WeaponAttr }, conditionalProps?: BuffFieldConditional[]) {
+    getFieldsWithAttr(
+        attrs?: CharAttr & { weapon?: WeaponAttr; rangedWeapon?: WeaponAttr },
+        conditionalProps?: BuffFieldConditional[],
+        rangedMulti?: number
+    ) {
         const tt = {
             技能威力: attrs?.技能威力 || 1,
             技能耐久: attrs?.技能耐久 || 1,
             技能效益: attrs?.技能效益 || 1,
             技能范围: attrs?.技能范围 || 1,
+            // 多重（远程武器多重射击，1 开始）：显式参数优先，其次读远程武器面板，最后回退到当前武器面板（兼容无 CharBuild 参与的单机调用）
+            多重: rangedMulti ?? attrs?.rangedWeapon?.多重 ?? attrs?.weapon?.多重 ?? 1,
         }
         const normalFields = this.字段.map(field => {
             // 条件BUFF（技能限定）：字段名命中时把属性增量合并进该字段的独立求值上下文
@@ -199,6 +511,11 @@ export class LeveledSkill {
                     } else {
                         val = field.值 * (2 - tt.技能效益)
                     }
+                }
+                if (propSet.has("多重")) {
+                    // 多重影响：读取远程武器多重射击属性（1 开始，无远程武器时为 1，即无加成）
+                    val = val * tt.多重
+                    val2 = val2 * tt.多重
                 }
                 if (field.名称.includes("神智消耗")) {
                     val = Math.ceil(val)

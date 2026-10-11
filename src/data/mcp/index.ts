@@ -9,15 +9,9 @@ import * as autochessModule from "../d/autochess.data"
 import * as buffModule from "../d/buff.data"
 import * as charModule from "../d/char.data"
 import * as charextModule from "../d/charext.data"
-import * as charextEnModule from "../d/charext.en.data"
-import * as charextFrModule from "../d/charext.fr.data"
-import * as charextJpModule from "../d/charext.jp.data"
-import * as charextKrModule from "../d/charext.kr.data"
-import * as charextTcModule from "../d/charext.tc.data"
+import { loadCharExtDataByLocale } from "../d/charext-locale"
 import * as charvoiceModule from "../d/charvoice.data"
-import * as charvoiceEnModule from "../d/charvoice.en.data"
-import * as charvoiceJpModule from "../d/charvoice.jp.data"
-import * as charvoiceKrModule from "../d/charvoice.kr.data"
+import { loadCharVoiceDataByLocale } from "../d/charvoice-locale"
 import * as convertModule from "../d/convert.data"
 import * as draftModule from "../d/draft.data"
 import * as dungeonModule from "../d/dungeon.data"
@@ -28,26 +22,17 @@ import * as hardbossModule from "../d/hardboss.data"
 import * as headsculptureModule from "../d/headsculpture.data"
 import * as jargonModule from "../d/jargon.data"
 import * as levelupModule from "../d/levelup.data"
-import * as mapModule from "../d/map.data"
 import * as modModule from "../d/mod.data"
 import * as monsterModule from "../d/monster.data"
 import * as monstertagModule from "../d/monstertag.data"
 import * as mountModule from "../d/mount.data"
 import * as npcModule from "../d/npc.data"
+import * as mapModule from "../d/onlinemapcache.data"
+import * as panModule from "../d/pan.data"
 import * as partytopicModule from "../d/partytopic.data"
-import * as partytopicEnModule from "../d/partytopic.en.data"
-import * as partytopicFrModule from "../d/partytopic.fr.data"
-import * as partytopicJpModule from "../d/partytopic.jp.data"
-import * as partytopicKrModule from "../d/partytopic.kr.data"
-import * as partytopicTcModule from "../d/partytopic.tc.data"
 import * as petModule from "../d/pet.data"
 import * as playerModule from "../d/player.data"
 import * as questModule from "../d/quest.data"
-import * as questEnModule from "../d/quest.en.data"
-import * as questFrModule from "../d/quest.fr.data"
-import * as questJpModule from "../d/quest.jp.data"
-import * as questKrModule from "../d/quest.kr.data"
-import * as questTcModule from "../d/quest.tc.data"
 import * as questchainModule from "../d/questchain.data"
 import * as raidModule from "../d/raid.data"
 import * as regionModule from "../d/region.data"
@@ -81,6 +66,7 @@ const DATA_TYPE_ENUM_VALUES = [
     "DynQuest",
     "Mod",
     "NPC",
+    "Pan",
     "PartyTopic",
     "Pet",
     "QuestStory",
@@ -107,6 +93,7 @@ const WHAT_IS_THIS_ALIAS_LIBRARY = {
     光阴集: { moduleIds: ["/local/partytopic"], typeNames: ["PartyTopic"] },
     npc: { moduleIds: ["/local/npc"], typeNames: ["NPC"] },
     地图: { moduleIds: ["/local/map"], typeNames: ["DBMap"] },
+    潘神: { moduleIds: ["/local/pan"], typeNames: ["Pan"] },
     魔灵: { moduleIds: ["/local/pet"], typeNames: ["Pet"] },
     奖励: { moduleIds: ["/local/reward"], typeNames: ["Reward"] },
     buff: { moduleIds: ["/local/buff"], typeNames: ["Buff"] },
@@ -245,15 +232,17 @@ const LOCAL_DATASETS = {
     buff: fromArrayExport(buffModule.default, "buff.default"),
     char: fromArrayExport(charModule.default, "char.default"),
     charext: fromArrayExport(charextModule.charExtData, "charext.charExtData"),
-    charext_en: fromArrayExport(charextEnModule.charExtData_en, "charext.en"),
-    charext_fr: fromArrayExport(charextFrModule.charExtData_fr, "charext.fr"),
-    charext_jp: fromArrayExport(charextJpModule.charExtData_jp, "charext.jp"),
-    charext_kr: fromArrayExport(charextKrModule.charExtData_kr, "charext.kr"),
-    charext_tc: fromArrayExport(charextTcModule.charExtData_tc, "charext.tc"),
+    charext_en: fromArrayExport(loadCharExtDataByLocale("en"), "charext.en"),
+    charext_fr: fromArrayExport(loadCharExtDataByLocale("fr"), "charext.fr"),
+    charext_jp: fromArrayExport(loadCharExtDataByLocale("jp"), "charext.jp"),
+    charext_kr: fromArrayExport(loadCharExtDataByLocale("kr"), "charext.kr"),
+    charext_tc: fromArrayExport(loadCharExtDataByLocale("tc"), "charext.tc"),
     charvoice: fromArrayExport(charvoiceModule.charVoiceData, "charvoice.charVoiceData"),
-    charvoice_en: fromArrayExport(charvoiceEnModule.charVoiceData_en, "charvoice.en"),
-    charvoice_jp: fromArrayExport(charvoiceJpModule.charVoiceData_jp, "charvoice.jp"),
-    charvoice_kr: fromArrayExport(charvoiceKrModule.charVoiceData_kr, "charvoice.kr"),
+    charvoice_en: fromArrayExport(loadCharVoiceDataByLocale("en"), "charvoice.en"),
+    charvoice_jp: fromArrayExport(loadCharVoiceDataByLocale("jp"), "charvoice.jp"),
+    charvoice_kr: fromArrayExport(loadCharVoiceDataByLocale("kr"), "charvoice.kr"),
+    charvoice_tc: fromArrayExport(loadCharVoiceDataByLocale("tc"), "charvoice.tc"),
+    charvoice_fr: fromArrayExport(loadCharVoiceDataByLocale("fr"), "charvoice.fr"),
     convert: fromArrayExport(convertModule.modConvertData, "convert.modConvertData"),
     draft: fromArrayExport(draftModule.default, "draft.default"),
     dungeon: fromArrayExport(dungeonModule.default, "dungeon.default"),
@@ -272,18 +261,22 @@ const LOCAL_DATASETS = {
         ...fromArrayExport(levelupModule.charLevelUpExpCost, "levelup.charLevelUpExpCost"),
         { __sourceTag: "levelup.CashToExpRate", value: levelupModule.CashToExpRate },
     ],
-    map: [...fromArrayExport(mapModule.mapLocalData, "map.mapLocalData"), ...fromObjectExport(mapModule.mapCache, "map.mapCache")],
+    map: [
+        ...fromArrayExport(mapModule.offlineMapCatalog, "map.offlineMapCatalog"),
+        ...fromObjectExport(mapModule.onlineMapCache, "map.onlineMapCache"),
+    ],
     mod: fromArrayExport(modModule.default, "mod.default"),
     monster: fromArrayExport(monsterModule.default, "monster.default"),
     monstertag: fromArrayExport(monstertagModule.monsterTagData, "monstertag.monsterTagData"),
     mount: fromArrayExport(mountModule.mountData, "mount.mountData"),
     npc: fromArrayExport(npcModule.npcData, "npc.npcData"),
+    pan: fromArrayExport(panModule.panData, "pan.panData"),
     partytopic: fromArrayExport(partytopicModule.partyTopicData, "partytopic.partyTopicData"),
-    partytopic_en: fromArrayExport(partytopicEnModule.partyTopicData_en, "partytopic.en"),
-    partytopic_fr: fromArrayExport(partytopicFrModule.partyTopicData_fr, "partytopic.fr"),
-    partytopic_jp: fromArrayExport(partytopicJpModule.partyTopicData_jp, "partytopic.jp"),
-    partytopic_kr: fromArrayExport(partytopicKrModule.partyTopicData_kr, "partytopic.kr"),
-    partytopic_tc: fromArrayExport(partytopicTcModule.partyTopicData_tc, "partytopic.tc"),
+    partytopic_en: fromArrayExport(storyLocaleModule.getPartyTopicDataByLocale("en"), "partytopic.en"),
+    partytopic_fr: fromArrayExport(storyLocaleModule.getPartyTopicDataByLocale("fr"), "partytopic.fr"),
+    partytopic_jp: fromArrayExport(storyLocaleModule.getPartyTopicDataByLocale("jp"), "partytopic.jp"),
+    partytopic_kr: fromArrayExport(storyLocaleModule.getPartyTopicDataByLocale("kr"), "partytopic.kr"),
+    partytopic_tc: fromArrayExport(storyLocaleModule.getPartyTopicDataByLocale("tc"), "partytopic.tc"),
     pet: [...fromArrayExport(petModule.default, "pet.default"), ...fromArrayExport(petModule.petEntrys, "pet.petEntrys")],
     player: [
         ...fromArrayExport(playerModule.PlayerLevelMaxExp, "player.PlayerLevelMaxExp"),
@@ -291,11 +284,11 @@ const LOCAL_DATASETS = {
         ...fromObjectExport(playerModule.ExtraExpInputMax, "player.ExtraExpInputMax"),
     ],
     quest: fromArrayExport(questModule.questData, "quest.questData"),
-    quest_en: fromArrayExport(questEnModule.questData_en, "quest.en"),
-    quest_fr: fromArrayExport(questFrModule.questData_fr, "quest.fr"),
-    quest_jp: fromArrayExport(questJpModule.questData_jp, "quest.jp"),
-    quest_kr: fromArrayExport(questKrModule.questData_kr, "quest.kr"),
-    quest_tc: fromArrayExport(questTcModule.questData_tc, "quest.tc"),
+    quest_en: fromArrayExport(storyLocaleModule.getQuestDataByLocale("en"), "quest.en"),
+    quest_fr: fromArrayExport(storyLocaleModule.getQuestDataByLocale("fr"), "quest.fr"),
+    quest_jp: fromArrayExport(storyLocaleModule.getQuestDataByLocale("jp"), "quest.jp"),
+    quest_kr: fromArrayExport(storyLocaleModule.getQuestDataByLocale("kr"), "quest.kr"),
+    quest_tc: fromArrayExport(storyLocaleModule.getQuestDataByLocale("tc"), "quest.tc"),
     questchain: fromArrayExport(questchainModule.questChainData, "questchain.questChainData"),
     raid: [
         ...fromArrayExport(raidModule.RaidCalculation, "raid.RaidCalculation"),
@@ -459,13 +452,13 @@ const DATA_TYPE_DEFINITION_META: Record<DataTypeName, DataTypeDefinitionMeta> = 
         description: "深渊副本结构定义",
     },
     Buff: {
-        filePath: "src/data/data-types.ts",
+        filePath: "src/data/d/buff.data.ts",
         interfaceName: "Buff",
         moduleIds: ["/local/buff"],
         description: "Buff 数据结构定义",
     },
     Char: {
-        filePath: "src/data/data-types.ts",
+        filePath: "src/data/d/char.data.ts",
         interfaceName: "Char",
         moduleIds: ["/local/char"],
         description: "角色基础数据结构定义",
@@ -486,14 +479,21 @@ const DATA_TYPE_DEFINITION_META: Record<DataTypeName, DataTypeDefinitionMeta> = 
     CharVoice: {
         filePath: "src/data/d/charvoice.data.ts",
         interfaceName: "CharVoice",
-        moduleIds: ["/local/charvoice", "/local/charvoice_en", "/local/charvoice_jp", "/local/charvoice_kr"],
+        moduleIds: [
+            "/local/charvoice",
+            "/local/charvoice_en",
+            "/local/charvoice_jp",
+            "/local/charvoice_kr",
+            "/local/charvoice_tc",
+            "/local/charvoice_fr",
+        ],
         description: "角色语音数据结构定义",
     },
     DBMap: {
-        filePath: "src/data/d/map.data.ts",
+        filePath: "src/data/d/onlinemapcache.data.ts",
         interfaceName: "DBMap",
         moduleIds: ["/local/map"],
-        description: "地图结构定义",
+        description: "在线地图结构定义",
     },
     Draft: {
         filePath: "src/data/d/draft.data.ts",
@@ -520,7 +520,7 @@ const DATA_TYPE_DEFINITION_META: Record<DataTypeName, DataTypeDefinitionMeta> = 
         description: "术语词条结构定义",
     },
     Mod: {
-        filePath: "src/data/data-types.ts",
+        filePath: "src/data/d/mod.data.ts",
         interfaceName: "Mod",
         moduleIds: ["/local/mod"],
         description: "魔之楔数据结构定义",
@@ -550,6 +550,12 @@ const DATA_TYPE_DEFINITION_META: Record<DataTypeName, DataTypeDefinitionMeta> = 
         moduleIds: ["/local/pet"],
         description: "魔灵数据结构定义",
     },
+    Pan: {
+        filePath: "src/data/d/pan.data.ts",
+        interfaceName: "Pan",
+        moduleIds: ["/local/pan"],
+        description: "魔灵潘神数据结构定义",
+    },
     QuestStory: {
         filePath: "src/data/d/quest.data.ts",
         interfaceName: "QuestStory",
@@ -563,7 +569,7 @@ const DATA_TYPE_DEFINITION_META: Record<DataTypeName, DataTypeDefinitionMeta> = 
         description: "动态委托数据结构定义",
     },
     Reward: {
-        filePath: "src/data/data-types.ts",
+        filePath: "src/data/d/reward.data.ts",
         interfaceName: "Reward",
         moduleIds: ["/local/reward"],
         description: "奖励组结构定义",
@@ -575,7 +581,7 @@ const DATA_TYPE_DEFINITION_META: Record<DataTypeName, DataTypeDefinitionMeta> = 
         description: "子区域结构定义",
     },
     Weapon: {
-        filePath: "src/data/data-types.ts",
+        filePath: "src/data/d/weapon.data.ts",
         interfaceName: "Weapon",
         moduleIds: ["/local/weapon"],
         description: "武器结构定义",

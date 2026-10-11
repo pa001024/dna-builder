@@ -9,7 +9,8 @@ export const abyssDungeonVersionRanges = [
     { startTime: 1775527200, endTime: 1780304400, version: "1.3" },
     { startTime: 1780304400, endTime: 1785204000, version: "1.4" },
     { startTime: 1785204000, endTime: 1788746400, version: "1.5" },
-    { startTime: 1788746400, endTime: Number.POSITIVE_INFINITY, version: "1.6" },
+    { startTime: 1788746400, endTime: 1792375200, version: "1.6" },
+    { startTime: 1792375200, endTime: Number.POSITIVE_INFINITY, version: "1.7" },
 ] as const
 
 /**

@@ -1,10 +1,13 @@
 import i18next, { t as translate } from "i18next"
 import type { CharAttr } from "../CharBuild"
-import { type Buff, type Mod, Quality, type WeaponSkill } from "../data-types"
+import type { Buff, Mod, WeaponSkill } from "../data-types"
 import { LeveledBuff } from "./LeveledBuff"
 import { getMinusAttrValue } from "./minusAttr"
 
 export type LeveledModResolver = (id: number) => { mod: Mod; effect?: Buff } | undefined
+
+/** MOD 词条加成值：满级数值，或各等级绝对值数组（单元素为定值，越界取边界值）。 */
+export type ModBonusValue = number | number[]
 
 /**
  * 系列名必须排在名称之后（限定语后置）的语言。
@@ -74,13 +77,13 @@ export class LeveledMod implements Mod {
         return isSeriesPostposed() ? `${name} ${series}` : `${series}之${name}`
     }
 
-    // MOD品质对应的等级上限
+    // MOD品质对应的等级上限（键为品质原文，与 d/mod.data.ts 的 Quality 枚举同值）
     static modQualityMaxLevel: Record<string, number> = {
-        [Quality.金]: 10,
-        [Quality.紫]: 5,
-        [Quality.蓝]: 5,
-        [Quality.绿]: 3,
-        [Quality.白]: 3,
+        金: 10,
+        紫: 5,
+        蓝: 5,
+        绿: 3,
+        白: 3,
     }
     // 基础Mod属性
     id: number
@@ -106,8 +109,10 @@ export class LeveledMod implements Mod {
     private _originalModData: Mod
     // 等级上限
     maxLevel: number
-    /** 上一次 updateProperties 由特效写入 MOD 层的属性键：重算前先清除，避免重复调用时数值自我累加 */
-    private _effectAppliedKeys: string[] = []
+    /** 原始词条键（`加成` 表的键，特效/条件属性不计入）：构造时从原始数据物化，避免热路径重复枚举 */
+    private _baseAttrKeys: string[] = []
+    /** 当前实例持有的 MOD 层属性键：重算前按此表清除，不再枚举实例自有键 */
+    private _attrKeys = new Set<string>()
     /**
      * MOD 数值属性的版本号（全实例共享的单调计数）。
      *
@@ -166,6 +171,9 @@ export class LeveledMod implements Mod {
         // 获取该品质MOD的等级上限
         this.maxLevel = LeveledMod.modQualityMaxLevel[this.品质] || 1
 
+        // 词条数值只从原始数据的加成读取
+        this._baseAttrKeys = Object.keys(modData.加成 ?? {})
+
         // 设置等级（如果提供），否则设为等级上限
         this._等级 = modLv !== undefined ? Math.max(0, Math.min(this.maxLevel, modLv)) : this.maxLevel
 
@@ -213,11 +221,11 @@ export class LeveledMod implements Mod {
     private updateProperties(): void {
         // 属性被改写：推进版本号，让上层的属性汇总表知道自己的快照已过期
         LeveledMod.propertiesRevision++
-        // 先清除上一次特效写入的属性：等级变更等场景会重复调用本方法，
-        // 特效属性是在既有值上叠加的，不清理会与上一次的结果自我累加。
-        this._effectAppliedKeys.forEach(key => delete this[key])
-        this._effectAppliedKeys = []
-        // 属性值 = 满级属性/(等级上限+1)*(等级+1)
+        // 按显式属性键表清除上一轮写入的数值：等级变更等场景会重复调用本方法，
+        // 不清理会与上一次的结果自我累加。
+        this._attrKeys.forEach(key => delete this[key])
+        this._attrKeys.clear()
+        // 数值属性：数组按等级取各档绝对值（越界取边界值），数值按线性缩放
         // 架势MOD属性耐受等级越高越低
         // 效果文案保持上游的「模板 + 各档取值」原样：档位求值要「先翻译模板再代入数值」，
         // 这一步必须发生在能拿到响应式翻译函数的展示层，数据层不预先求值。
@@ -226,49 +234,47 @@ export class LeveledMod implements Mod {
         } else {
             this.耐受 = this._originalModData.耐受 - this.maxLevel + this._等级
         }
-        const lv = this._等级
 
         if (this._originalModData.技能替换) {
             const ratio = this.getSkillReplaceScaleRatio()
             this.技能替换 = this.scaleSkillReplaceByRatio(this._originalModData.技能替换, ratio)
         }
 
+        // 条件属性：按与词条相同的等级倍率缩放到 `生效` 对象上（不直接写入实例属性，
+        // 是否计入面板由 checkCondition / applyCondition 按条件判定）。
+        // 此处属性键表刚清空：同名旧值若有残留一并清除，键登记同步移除。
         if (this._originalModData.生效) {
-            const maxValue = this._originalModData.生效
-            const keys = Object.keys(maxValue).filter(v => v !== "条件")
-            this.生效 = keys.reduce(
-                (acc, key) => {
-                    delete this[key]
-                    const mv = maxValue[key] as number | number[]
-                    if (Array.isArray(mv)) {
-                        const mv1 = mv[0]
-                        const mv2 = mv[1]
-                        const currentValue1 = (mv1 / (this.maxLevel + 1)) * (lv + 1)
-                        const currentValue2 = (mv2 / (this.maxLevel + 1)) * (lv + 1)
-                        acc[key] = [currentValue1, currentValue2]
-                    } else {
-                        let currentValue = (mv / (this.maxLevel + 1)) * (lv + 1)
-                        if (key === "神智回复" || key === "最大耐受") currentValue = Math.ceil(currentValue)
-                        acc[key] = currentValue
-                    }
-                    return acc
-                },
-                {
-                    条件: maxValue.条件,
-                } as Record<string, any>
-            )
+            const source = this._originalModData.生效
+            const scaled: Record<string, unknown> = { 条件: source.条件 }
+            for (const key of Object.keys(source)) {
+                if (key === "条件") continue
+                delete this[key]
+                this._attrKeys.delete(key)
+                const mv = source[key]
+                if (typeof mv === "number") {
+                    let value = (mv / (this.maxLevel + 1)) * (this._等级 + 1)
+                    if (key === "神智回复" || key === "最大耐受") value = Math.ceil(value)
+                    scaled[key] = value
+                } else if (Array.isArray(mv) && mv.every((v): v is number => typeof v === "number")) {
+                    scaled[key] = mv.map(v => (v / (this.maxLevel + 1)) * (this._等级 + 1))
+                }
+            }
+            this.生效 = scaled
         }
-        this.baseProperties.forEach(prop => {
+
+        const bonus = this._originalModData.加成 ?? {}
+        for (const prop of this._baseAttrKeys) {
             let lv = this._等级
             if ((this.系列 === "换生灵" || this.系列 === "海妖") && prop === "减伤") lv = this.maxLevel
             // 架势MOD属性不受等级变化
             if ((this.id > 100000 && this.id < 150000) || (this.id > 200000 && this.id < 250000)) lv = this.maxLevel
-            const maxValue = this._originalModData[prop] || 0
-            if (maxValue) {
-                const currentValue = this.calculateBasePropertyValue(prop, maxValue, lv)
-                this[prop] = currentValue
-            }
-        })
+            const maxValue: ModBonusValue | undefined = bonus[prop]
+            if (maxValue === undefined) continue
+            const currentValue = this.calculateBonusValue(prop, maxValue, lv)
+            if (currentValue === undefined) continue
+            this[prop] = currentValue
+            this._attrKeys.add(prop)
+        }
         // 效果层属性与词条基础属性使用相同的等级倍率。
         // 带 `@` 前缀的属性归属 BUFF 层：物化属性时已剥离前缀，这里经 isBuffLayerProperty 判定后写入 buffProps，
         // 由 CharBuild 按 BUFF 口径汇总（不受 MOD 槽位作用域限制）；其余属性仍归一化到 MOD 自身，即 MOD 层。
@@ -285,12 +291,7 @@ export class LeveledMod implements Mod {
                 const modProperty = this.resolveEffectProperty(prop)
                 if (!modProperty) return
                 this[modProperty] = this[modProperty] ? this[modProperty] + currentValue : currentValue
-                this._effectAppliedKeys.push(modProperty)
-            }
-            if (buff.描述.includes(`{%}`)) {
-                const stackCount = buff.等级 > 0 ? buff.等级 : 1
-                const perStackValue = currentValue / stackCount
-                buff.描述 = buff._originalBuffData.描述.replace(`{%}`, `${(perStackValue * 100).toFixed(1)}%`)
+                this._attrKeys.add(modProperty)
             }
         })
         this.buffProps = buffProps
@@ -309,17 +310,20 @@ export class LeveledMod implements Mod {
     }
 
     /**
-     * 计算普通属性在当前等级下的值
-     * 数组属性按等级取对应项，超出长度时取最后一项
+     * 计算词条属性在当前等级下的值。
+     *
+     * 数组按等级取各档绝对值（单元素为定值，越界取边界值）；数值按线性缩放。
      * @param prop 属性名
-     * @param maxValue 原始属性值
+     * @param maxValue 加成表中的满级值或各档数组
      * @param lv 当前参与计算的等级
-     * @returns 当前属性值
+     * @returns 当前属性值；空数组时返回 undefined（跳过该属性）
      */
-    private calculateBasePropertyValue(prop: string, maxValue: number | number[], lv: number) {
+    private calculateBonusValue(prop: string, maxValue: ModBonusValue, lv: number): number | undefined {
         if (Array.isArray(maxValue)) {
-            return maxValue[Math.min(lv + 1, maxValue.length) - 1]
+            if (maxValue.length === 0) return undefined
+            return maxValue[Math.min(Math.max(lv, 0), maxValue.length - 1)]
         }
+        if (!maxValue) return maxValue
         return this.scaleBaseNumberProperty(prop, maxValue, lv)
     }
 
@@ -450,6 +454,7 @@ export class LeveledMod implements Mod {
             属性攻击: 0,
             武器伤害: 0,
             技能伤害: 0,
+            技能追伤: 0,
             独立增伤: 0,
             属性穿透: 0,
             无视防御: 0,
@@ -511,14 +516,17 @@ export class LeveledMod implements Mod {
                     const finalValue = Math.min(baseValue * v1, v2)
                     if (this[key] !== finalValue) {
                         this[key] = finalValue
+                        this._attrKeys.add(key)
                         changed = true
                     }
                 } else if (this[key] !== condition.props[key]) {
                     this[key] = condition.props[key]
+                    this._attrKeys.add(key)
                     changed = true
                 }
             } else if (this[key]) {
                 delete this[key]
+                this._attrKeys.delete(key)
                 changed = true
             }
         })
@@ -527,11 +535,10 @@ export class LeveledMod implements Mod {
     }
 
     /**
-     * 获取MOD的属性信息
+     * 获取MOD的属性信息：MOD 层数值与效果层（BUFF 层）数值的合并视图。
      */
-
-    getProperties(): Partial<Mod> {
-        const properties: Partial<Mod> = {}
+    getProperties(): Record<string, number> {
+        const properties: Record<string, number> = {}
         this.properties.forEach(prop => {
             properties[prop] = this[prop]
         })
@@ -542,38 +549,16 @@ export class LeveledMod implements Mod {
         }
         return properties
     }
-    static _exclude_properties = new Set([
-        "id",
-        "系列",
-        "品质",
-        "耐受",
-        "类型",
-        "名称",
-        "描述",
-        "限定",
-        "极性",
-        "属性",
-        "消耗",
-        "技能替换",
-        "_等级",
-        "_originalModData",
-        "buff",
-        "buffLv",
-        "maxLevel",
-        "生效",
-        "效果",
-        "code",
-        "count",
-        "icon",
-        "版本",
-        "buffProps",
-        "_effectAppliedKeys",
-    ])
+    /**
+     * MOD 层数值属性键：`加成` 物化的词条、特效归一化的 MOD 层属性与条件属性。
+     * 不再枚举实例自有键，元信息键（id/名称/系列等）天然不在表内。
+     */
     get properties(): string[] {
-        return Object.keys(this).filter(prop => !LeveledMod._exclude_properties.has(prop))
+        return [...this._attrKeys]
     }
+    /** 原始词条键：`加成`表的键（含兼容折叠的遗留直挂数值）。 */
     get baseProperties(): string[] {
-        return Object.keys(this._originalModData).filter(prop => !LeveledMod._exclude_properties.has(prop))
+        return [...this._baseAttrKeys]
     }
 
     get url() {
@@ -592,6 +577,7 @@ export class LeveledMod implements Mod {
         const mod = new LeveledMod(this._originalModData, this._等级, this.buffLv, this.buff?._originalBuffData)
         this.properties.forEach(prop => {
             mod[prop] = this[prop]
+            mod._attrKeys.add(prop)
         })
         return mod
     }
@@ -613,14 +599,13 @@ export class LeveledMod implements Mod {
     /**
      * 读取单个 MOD 层属性的数值，语义等价于 `addAttr[attribute]`。
      *
-     * `addAttr` 每次访问都会枚举全部自有键并重建整张属性表（`Object.keys` + `filter` + 对象分配），
-     * 而 CharBuild 的属性汇总会在一次计算中对同一 MOD 反复取同一个词条，累计分配量极大。
-     * 本方法按同样的判定规则（自有属性且不在排除表内、值为数值）直接读取单键，避免构造整表。
+     * `addAttr` 每次访问都会枚举属性键表并重建整张属性表，而 CharBuild 的属性汇总会在一次计算中
+     * 对同一 MOD 反复取同一个词条，累计分配量极大。本方法按显式属性键表直接读取单键，避免构造整表。
      * @param attribute 属性名
      * @returns 属性数值；该属性不属于 MOD 层或值不是数值时返回 undefined
      */
     public getAddAttrValue(attribute: string): number | undefined {
-        if (LeveledMod._exclude_properties.has(attribute) || !Object.hasOwn(this, attribute)) return undefined
+        if (!this._attrKeys.has(attribute)) return undefined
         const value = this[attribute]
         return typeof value === "number" ? value : undefined
     }

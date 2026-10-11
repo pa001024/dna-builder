@@ -40,6 +40,8 @@ export interface CharAttr {
     属性攻击: number
     武器伤害: number
     技能伤害: number
+    /** 技能追伤 0开始：作用于技能伤害的独立乘区，效果与武器的追加伤害类似 */
+    技能追伤: number
     独立增伤: number
     属性穿透: number
     无视防御: number
@@ -50,16 +52,15 @@ export interface CharAttr {
     技能倍率乘数: number
     技能倍率赋值: number
     召唤物属性继承比例: number
-    // 召唤物攻击速度/召唤物范围（角色属性，0起始增量）：= 角色直接加成（BUFF/角色MOD等）
-    // + 由 calculateWeaponAttributes 按武器作用域召唤物转化词条汇总（仿充盈威力范式）
+    /** 召唤物攻击速度/召唤物范围（角色属性，0起始增量）：= 角色直接加成（BUFF/角色MOD等）*/
     召唤物攻击速度: number
     召唤物范围: number
     召唤物伤害: number
     召唤物独立增伤: number
     减伤: number
     有效生命: number
-    // 转xx 系列属性：转物理类型（切割/贯穿/震荡/灾厄）按对应类型触发规则结算；
-    // 转属克/转属逆 把物理+元素按比例转为属克/属逆元素，并按翻转抗性结算敌人抗性（总比例钳制到 100% 内）
+    /** 转xx 系列属性：转物理类型（切割/贯穿/震荡/灾厄）按对应类型触发规则结算；
+     * 转属克/转属逆 把物理+元素按比例转为属克/属逆元素，并按翻转抗性结算敌人抗性（总比例钳制到 100% 内） */
     转切割?: number
     转贯穿?: number
     转震荡?: number
@@ -67,7 +68,7 @@ export interface CharAttr {
     转充盈?: number
     转属克?: number
     转属逆?: number
-    // 充盈威力（角色属性）：Σ 各武器触发率溢出 100% 的部分 × 该武器充盈转化（由 calculateWeaponAttributes 汇总）
+    /** 充盈威力（角色属性）：Σ 各武器触发率溢出 100% 的部分 × 该武器充盈转化（由 calculateWeaponAttributes 汇总） */
     充盈威力: number
     /** 技能触发（角色属性，0 起始）：技能伤害 DOT 的触发值，由 MOD 词条提供（如 充盈·巧力） */
     技能触发: number
@@ -235,6 +236,7 @@ const characterBonusAttributes = [
     "物理增伤",
     "武器伤害",
     "技能伤害",
+    "技能追伤",
     "技能速度",
     "属性穿透",
     "失衡易伤",
@@ -305,6 +307,8 @@ interface AstEvalContext {
     weaponAttrs: ReturnType<CharBuild["getAllWeaponSkillsAttrs"]>
     /** 当前选中的武器（用于判断面板是否已被动态属性覆盖） */
     selectedWeapon: CharBuild["selectedWeapon"]
+    /** 远程武器多重射击（1 开始）：供技能字段 影响:"多重" 读取，无远程武器时为 1 */
+    rangedMulti: number
     /** 技能名（含 E/Q/P 与大小写别名）到结算后字段列表 */
     skillAttrs: Map<string, ReturnType<LeveledSkill["getFieldsWithAttr"]>>
     /** 合法的自定义变量：变量名 → 表达式 */
@@ -565,6 +569,16 @@ export class CharBuild {
             return this.skillWeapon
         }
         return undefined
+    }
+
+    /**
+     * 取远程武器多重射击（1 开始）：供技能字段 影响:"多重" 读取。
+     * 直接读已算好的武器面板时传该面板，避免重复汇总；缺省时按当前构筑现算（nochar 口径，只取面板）。
+     * @param rangedPanel 已算好的远程武器面板（可选）
+     * @returns 远程武器多重，无远程武器时为 1
+     */
+    public getRangedMulti(rangedPanel?: WeaponAttr): number {
+        return rangedPanel?.多重 ?? this.calculateWeaponAttributes(this.rangedWeapon, true, true).weapon?.多重 ?? 1
     }
 
     get meleeWeaponSkills() {
@@ -971,7 +985,7 @@ export class CharBuild {
         accumulate(table.weaponBuffProps, this.rangedWeapon.buffProps)
 
         for (const mod of mods) {
-            // 词条属性：`properties` 与 `getAddAttrValue` 的有效键判定一致（同为自有可枚举键去掉非属性键）
+            // 词条属性：`properties` 与 `getAddAttrValue` 同源（显式属性键表，均只含 MOD 层数值属性）
             const properties = mod.properties
             accumulate(table.modsAll, mod as unknown as Record<string, unknown>, properties)
             let scopeBucket = table.modsByScope.get(mod.attrType)
@@ -1265,6 +1279,8 @@ export class CharBuild {
         let physicalDamageIncrease = bonuses[characterBonusIndex.物理增伤]
         let weaponDamage = bonuses[characterBonusIndex.武器伤害]
         let skillDamage = bonuses[characterBonusIndex.技能伤害]
+        // 技能追伤（0 起始）：技能伤害的独立乘区，效果与武器的追加伤害类似
+        let skillAdditionalDamage = bonuses[characterBonusIndex.技能追伤]
         let skillSpeed = bonuses[characterBonusIndex.技能速度]
         let penetration = bonuses[characterBonusIndex.属性穿透]
         let imbalanceDamageBonus = bonuses[characterBonusIndex.失衡易伤]
@@ -1321,6 +1337,7 @@ export class CharBuild {
             physicalDamageIncrease += modAttributeBonus * this.getModsBonus(modsBySeries, "物理增伤")
             weaponDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "武器伤害")
             skillDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "技能伤害")
+            skillAdditionalDamage += modAttributeBonus * this.getModsBonus(modsBySeries, "技能追伤")
             skillSpeed += modAttributeBonus * this.getModsBonus(modsBySeries, "技能速度")
             penetration += modAttributeBonus * this.getModsBonus(modsBySeries, "属性穿透")
             imbalanceDamageBonus += modAttributeBonus * this.getModsBonus(modsBySeries, "失衡易伤")
@@ -1374,6 +1391,7 @@ export class CharBuild {
             属性攻击: elemDamageBonus,
             武器伤害: weaponDamage,
             技能伤害: skillDamage,
+            技能追伤: skillAdditionalDamage,
             独立增伤: independentDamageIncrease,
             属性穿透: penetration,
             无视防御: ignoreDefense,
@@ -2265,6 +2283,8 @@ export class CharBuild {
         const elementDamageIncrease = attrs.元素增伤 || 0
         const physicalDamageIncrease = attrs.物理增伤 || 0
         const independentDamageIncrease = 1 + attrs.独立增伤
+        // 技能追伤乘区（0起始增量）：与武器追加伤害类似的独立乘区，仅技能伤害结算生效
+        const skillAdditionalDamage = 1 + (attrs.技能追伤 || 0)
         // 召唤物独立增伤乘区（0起始增量，1 + 该值 = 仅召唤物伤害结算的倍率）：如「伊薇4溯」将召唤物攻击速度超额部分按比例转化为该乘区
         const summonIndependentDamageMultiplier = isSummonDamage ? 1 + attrs.召唤物独立增伤 : 1
         const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
@@ -2272,7 +2292,11 @@ export class CharBuild {
         const hpMore = boostMultiplier * desperateMultiplier
         // 属性穿透对所有结算类型整体生效（与武器伤害结算一致）
         const otherMore =
-            independentDamageIncrease * summonIndependentDamageMultiplier * imbalanceDamageMultiplier * Math.max(0, 1 + attrs.属性穿透)
+            independentDamageIncrease *
+            skillAdditionalDamage *
+            summonIndependentDamageMultiplier *
+            imbalanceDamageMultiplier *
+            Math.max(0, 1 + attrs.属性穿透)
         // per-part 有效增伤：元素分量取元素池（元素增伤），转物理 分量取物理池（物理增伤），均与 增伤/技能伤害 同池加算
         const partDamageIncrease = (p: { settlesElement: boolean }) =>
             p.settlesElement ? damageIncreaseBase + elementDamageIncrease : damageIncreaseBase + physicalDamageIncrease
@@ -2802,7 +2826,8 @@ export class CharBuild {
             const attrs = this.calculateWeaponAttributes()
 
             const weaponAttrs = this.getAllWeaponSkillsAttrs()
-            const skillAttrs = new Map(this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs)]))
+            const rangedMulti = this.getRangedMulti(weaponAttrs.get("远程"))
+            const skillAttrs = new Map(this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs, undefined, rangedMulti)]))
             skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
             skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
             skillAttrs.set("P", skillAttrs.get(this.skills[2].safeName)!)
@@ -2817,9 +2842,10 @@ export class CharBuild {
             const getWeaponAttr = (fieldName: string, base?: string) =>
                 weaponAttrs?.get(base || this.baseName)?.[fieldName as keyof WeaponAttr] || 0
             const getSkillAttr = (fieldName: string, base?: string, skillContext?: LeveledSkill) =>
-                (skillContext ? skillContext.getFieldsWithAttr(attrs) : skillAttrs?.get(base || this.baseName))?.find(v =>
-                    v.safeName.includes(fieldName)
-                )
+                (skillContext
+                    ? skillContext.getFieldsWithAttr(attrs, undefined, rangedMulti)
+                    : skillAttrs?.get(base || this.baseName)
+                )?.find(v => v.safeName.includes(fieldName))
 
             this.bindAstSkillContexts(ast)
 
@@ -3147,8 +3173,12 @@ export class CharBuild {
         const attrs = inputattrs || this.calculateWeaponAttributes()
         // 条件BUFF字段级增量：技能倍率乘数等属性在字段值计算处应用，需在构建字段列表时传入
         const conditionalProps = this.getConditionalBuffPropsList()
+        const weaponsMap = this.getAllWeaponsByBase()
+        const weaponAttrs = this.getAllWeaponSkillsAttrs()
+        // 远程武器多重：技能字段 影响:"多重" 读取该值（先读已算好的面板，避免重复汇总）
+        const rangedMulti = this.getRangedMulti(weaponAttrs.get("远程"))
         const skillAttrs = new Map<string, ReturnType<LeveledSkill["getFieldsWithAttr"]>>(
-            this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs, conditionalProps)])
+            this.allSkills.map(v => [v.safeName, v.getFieldsWithAttr(attrs, conditionalProps, rangedMulti)])
         )
         skillAttrs.set("E", skillAttrs.get(this.skills[0].safeName)!)
         skillAttrs.set("Q", skillAttrs.get(this.skills[1].safeName)!)
@@ -3159,9 +3189,10 @@ export class CharBuild {
         skillAttrs.set("p", skillAttrs.get(this.skills[2].safeName)!)
         return {
             attrs,
-            weaponsMap: this.getAllWeaponsByBase(),
-            weaponAttrs: this.getAllWeaponSkillsAttrs(),
+            weaponsMap,
+            weaponAttrs,
             selectedWeapon: this.selectedWeapon,
+            rangedMulti,
             skillAttrs,
             customVariableExpressions: new Map(this.getValidCustomVariables()),
             customFunctionDefinitions: this.getValidCustomFunctions(),
@@ -3187,7 +3218,7 @@ export class CharBuild {
         customVariableValueCache: Map<string, number>,
         scope: Map<string, number>
     ): number {
-        const { attrs, weaponsMap, weaponAttrs, skillAttrs, selectedWeapon } = ctx
+        const { attrs, weaponsMap, weaponAttrs, skillAttrs, selectedWeapon, rangedMulti } = ctx
         // 条件BUFF属性增量缓存：同一字段名在一次求值内只汇总一次
         const conditionalBuffCache = new Map<string, Record<string, number> | undefined>()
         /**
@@ -3203,9 +3234,10 @@ export class CharBuild {
         const getWeaponAttr = (fieldName: string, base?: string) => getCalculatedWeaponAttr(base)?.[fieldName as keyof WeaponAttr] || 0
         const conditionalProps = this.getConditionalBuffPropsList()
         const getSkillAttr = (fieldName: string, base?: string, skillContext?: LeveledSkill) =>
-            (skillContext ? skillContext.getFieldsWithAttr(attrs, conditionalProps) : skillAttrs?.get(base || this.baseName))?.find(v =>
-                v.safeName.includes(fieldName)
-            )
+            (skillContext
+                ? skillContext.getFieldsWithAttr(attrs, conditionalProps, rangedMulti)
+                : skillAttrs?.get(base || this.baseName)
+            )?.find(v => v.safeName.includes(fieldName))
         type TemporaryAttributes = Record<string, number>
         /**
          * 获取武器伤害关键词对应的装备类型。
@@ -4035,7 +4067,7 @@ export class CharBuild {
             const summon = build.selectedSkill?.召唤物
             if (summon) {
                 const newAttr = build.calculateWeaponAttributes(build.meleeWeapon)
-                const summonAttrs = build.selectedSkill.getFieldsWithAttr(newAttr)
+                const summonAttrs = build.selectedSkill.getFieldsWithAttr(newAttr, undefined, build.getRangedMulti())
                 const duration = Math.min(summonAttrs.find(a => a.名称 === "召唤物持续时间")?.值 || 0, i.duration)
                 const delay = summonAttrs.find(a => a.名称 === "召唤物攻击延迟")?.值 || 0
                 const interval = summonAttrs.find(a => a.名称 === "召唤物攻击间隔")?.值 || 0
@@ -4960,7 +4992,6 @@ export class CharBuild {
          */
         function countModProperties(mod: LeveledMod) {
             return mod.baseProperties.filter(prop => {
-                if (prop === "id") return false
                 const value = mod[prop]
                 return typeof value === "number" && value !== 0
             }).length

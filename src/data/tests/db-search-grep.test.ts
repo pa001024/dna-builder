@@ -37,9 +37,11 @@ beforeEach(() => {
 })
 
 /** 数据里确实存在该数值词条的条目 id 集合，作为字段级命中的期望值 */
-const skillPowerIds = new Set(
-    modData.filter(item => typeof (item as unknown as Record<string, unknown>).技能威力 === "number").map(item => `${item.id}`)
-)
+const hasBonusValue = (item: (typeof modData)[number], key: string): boolean => {
+    const value = item.加成?.[key]
+    return typeof value === "number" || (Array.isArray(value) && value.length > 0 && value.every(v => typeof v === "number"))
+}
+const skillPowerIds = new Set(modData.filter(item => hasBonusValue(item, "技能威力")).map(item => `${item.id}`))
 
 describe("queryModule 的检索模式开关", () => {
     it("默认模式是 fuzzy，返回值回显 appliedMode", () => {
@@ -79,10 +81,10 @@ describe("grep：按字段名找条目（fuzzy 的空缺）", () => {
         // fuzzy 只看标题与描述：这个词只存在于数据字段里，命中为 0
         expect(fuzzy.total).toBe(0)
 
-        // 顶层字段 `技能威力` 的命中都落在数据里带该数值词条的条目集合内
-        // （另有少量条目是在嵌套结构 `生效.技能威力` 或 `生效.条件` 的字面量里出现，属 grep 的正确行为；
+        // 词条字段 `加成.技能威力` 的命中都落在数据里带该数值词条的条目集合内
+        // （另有少量条目是在嵌套结构 `效果` 文案或其它路径的字面量里出现，属 grep 的正确行为；
         //   limit 上限 80 会让尾部条目被截断，因此这里断言子集而非全等）
-        const byTopField = grep.entries.filter(entry => entry.matches?.some(match => match.path === "技能威力"))
+        const byTopField = grep.entries.filter(entry => entry.matches?.some(match => match.path === "加成.技能威力"))
 
         expect(byTopField.length).toBeGreaterThan(0)
         expect(byTopField.every(entry => skillPowerIds.has(`${entry.id}`))).toBe(true)
@@ -96,15 +98,13 @@ describe("grep：按字段名找条目（fuzzy 的空缺）", () => {
         const first = entries[0]!
 
         expect(first.matches?.length).toBeGreaterThan(0)
-        expect(first.matches![0]!.path).toBe("技能威力")
+        expect(first.matches![0]!.path).toBe("加成.技能威力")
         // 命中字段名（词条存在）而非字段值
         expect(first.matches![0]!.kind).toBe("name")
     })
 
     it("数值型词条（护盾）同样按字段名命中", () => {
-        const shieldIds = new Set(
-            modData.filter(item => typeof (item as unknown as Record<string, unknown>).护盾 === "number").map(item => `${item.id}`)
-        )
+        const shieldIds = new Set(modData.filter(item => hasBonusValue(item, "护盾")).map(item => `${item.id}`))
         const result = queryModule("mod", { keyword: "护盾", mode: "grep", limit: 80 })
 
         expect(shieldIds.size).toBeGreaterThan(0)

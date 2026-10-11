@@ -3,7 +3,7 @@ import i18next from "i18next"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 import charData from "@/data/d/char.data"
 import { charExtData } from "@/data/d/charext.data"
-import { charExtData_en } from "@/data/d/charext.en.data"
+import { loadCharExtDataByLocale } from "@/data/d/charext-locale"
 import { ensureDBAgentLangReady } from "@/utils/db-locale"
 import { listModuleFilters, queryModule, readEntry, searchAll } from "@/utils/db-search"
 
@@ -464,7 +464,9 @@ describe("角色档案模块（charprofile）", () => {
         expect(entries.length).toBeGreaterThan(0)
         expect(entries[0]?.name).toMatch(/[A-Za-z]/)
 
-        const longest = charExtData_en.filter(item => item.charId === 1101).sort((left, right) => right.text.length - left.text.length)[0]!
+        const longest = loadCharExtDataByLocale("en")
+            .filter(item => item.charId === 1101)
+            .sort((left, right) => right.text.length - left.text.length)[0]!
         const { entry } = readEntry("charprofile", { id: longest.id, lang: "en" })
 
         const text = `${entry?.fields.正文 ?? ""}`

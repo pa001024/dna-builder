@@ -239,7 +239,7 @@ export const wikiData: WikiMainType[] = [
     {
         id: 2,
         name: "人物",
-        count: 54,
+        count: 55,
         subTypes: [
             {
                 id: 201,
@@ -464,6 +464,11 @@ export const wikiData: WikiMainType[] = [
                                 text: "因在卡戎狩猎一案中的出色表现被授予“桂冠卡戎”奖章，却因失去了重要的亲人和奋斗的目标而陷入迷茫，辞去了卫戍部队的职务。",
                                 unlock: 20101106,
                             },
+                            {
+                                id: 20101107,
+                                text: "为帮助{nickname}寻找家人的下落前往迪斯玛尼亚，然而她获取的情报阴差阳错导致{nickname}卷入火车劫案，下落不明。在得知消息后，黎瑟无奈只得返回冰湖城。\n在秘密基地整理布鲁斯遗物时，黎瑟意外发现昔日第六军团的录取名单，由此踏上了探访受害者家属的旅途，见识了形形色色的人们。在这个过程中，她遇到了与自己境遇相似的少女蕾伊，阻止了后者冲动之下的复仇行为。以此为契机，黎瑟自己也直面了过去的伤痛，决心不再逃避，而是积极生活，去寻找新的人生方向。",
+                                unlock: 20101107,
+                            },
                         ],
                     },
                     {
@@ -623,7 +628,7 @@ export const wikiData: WikiMainType[] = [
                             },
                             {
                                 id: 20101604,
-                                text: "法露茜是{nickname2}在皇家军事学院的同学，曾与{nickname}短暂地并肩作战过。",
+                                text: "法露茜是{nickname2}在皇家军事学院的同学，曾与{nickname2}短暂地并肩作战过。",
                                 dialogues: [11111043],
                                 unlock: 20101604,
                             },
@@ -936,6 +941,7 @@ export const wikiData: WikiMainType[] = [
                     {
                         id: 201035,
                         title: "「女祭司」艾达",
+                        img: "T_Encyclopedia_83",
                         related: [408024, 405023],
                         texts: [
                             {
@@ -991,6 +997,18 @@ export const wikiData: WikiMainType[] = [
                                 text: "艾达用最后的力量帮助{nickname2}等人逃离了正在化为火海的阿尔卡诺镇废墟，随后和镇长一起走入火焰，消失在众人的视线之中。",
                                 dialogues: [11120815],
                                 unlock: 20103604,
+                            },
+                        ],
+                    },
+                    {
+                        id: 201037,
+                        title: "蕾伊",
+                        related: [201011],
+                        texts: [
+                            {
+                                id: 20103701,
+                                text: "蕾伊·斯洛安，其姐姐达西是第六军团秘密实验的受害者之一。蕾伊拥有能够在梦中窥见姐姐记忆的特殊魔法能力，因此发现了姐姐被害的部分真相。悲愤交加的她为了向军团报仇，将曾在征兵现场负责维持秩序的约翰森中校视作目标，在暗中谋划刺杀行动。\n机缘巧合之下，她的计划被黎瑟发现并阻止。最终在黎瑟的开导下，她放弃了莽撞的复仇，决定带着和姐姐之间珍贵的回忆好好活下去。",
+                                unlock: 20103701,
                             },
                         ],
                     },
@@ -3424,6 +3442,7 @@ export const wikiData: WikiMainType[] = [
                     {
                         id: 408023,
                         title: "阿尔卡诺山",
+                        img: "T_Encyclopedia_82",
                         related: [408024],
                         texts: [
                             {
@@ -3443,6 +3462,7 @@ export const wikiData: WikiMainType[] = [
                     {
                         id: 408024,
                         title: "阿尔卡诺镇",
+                        img: "T_Encyclopedia_84",
                         related: [408023, 405023],
                         texts: [
                             {

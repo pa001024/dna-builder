@@ -8,7 +8,7 @@ import { listModuleFilters, listModules, queryModule, searchStory } from "@/util
  * - queryModule：按模块 facet 过滤（枚举 / 数值区间 / 多值命中）；
  * - searchStory：按剧情列表页口径过滤（任务类型分组、篇章、印象标记），含无关键词的纯筛选列举。
  *
- * 剧情正文索引依赖 `getLocalizedQuestDataByLanguage` 异步取数据，测试里把它打桩成
+ * 剧情正文索引依赖 `getLocalizedQuestDataByLanguage` 取数据，测试里把它打桩成
  * 「直接返回中文原始数据」，避免依赖本地存储的语言设置与数据包加载。
  */
 

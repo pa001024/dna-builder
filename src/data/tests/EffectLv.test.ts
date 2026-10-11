@@ -120,11 +120,11 @@ describe("武器特效元素限定", () => {
     /** 10107 囚鸟的刺羽：暗属性角色造成伤害时叠层，最多 120 层，每层增伤 0.4% */
     const 暗限定武器 = 10107
 
-    it("描述中声明「X属性角色」的武器特效必须带对应 限定", () => {
+    it("武器特效的 限定（如有）必须为六元素之一", () => {
+        const valid = new Set(["火", "水", "雷", "风", "光", "暗"])
         const mismatched = [...weaponEffectMap.values()]
-            .map(effect => ({ effect, element: effect.描述?.match(/(火|水|雷|风|光|暗)属性角色/)?.[1] }))
-            .filter(({ effect, element }) => element !== effect.限定)
-            .map(({ effect, element }) => `${effect.id} ${effect.名称} 描述=${element ?? "-"} 限定=${String(effect.限定 ?? "-")}`)
+            .filter(effect => effect.限定 !== undefined && !valid.has(String(effect.限定)))
+            .map(effect => `${effect.id} ${effect.名称} 限定=${String(effect.限定)}`)
         expect(mismatched).toEqual([])
     })
 

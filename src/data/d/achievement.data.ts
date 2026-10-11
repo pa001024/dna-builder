@@ -1,5 +1,14 @@
-import type { Achievement } from "../data-types"
 import { applyVersionGate } from "../versionGate"
+
+export interface Achievement {
+    id: number
+    名称: string
+    分类: string
+    品质: number
+    描述: string
+    版本: string
+    奖励: Record<string, number>
+}
 
 const t: Achievement[] = [
     {

@@ -691,6 +691,41 @@ export const titleData: Title[] = [
         src: "成就「我是谁」",
     },
     {
+        id: 10121,
+        name: "创造奇迹的",
+        suf: false,
+    },
+    {
+        id: 10122,
+        name: "璀璨夺目的",
+        suf: false,
+    },
+    {
+        id: 10123,
+        name: "赫赫威名的",
+        suf: false,
+    },
+    {
+        id: 10124,
+        name: "一周年的",
+        suf: false,
+    },
+    {
+        id: 10125,
+        name: "乘风破浪的",
+        suf: false,
+    },
+    {
+        id: 10126,
+        name: "第十三军团的",
+        suf: false,
+    },
+    {
+        id: 10127,
+        name: "炼火的",
+        suf: false,
+    },
+    {
         id: 20001,
         name: "力量",
         suf: true,
@@ -1277,6 +1312,31 @@ export const titleData: Title[] = [
         name: "乐园",
         suf: true,
         src: "成就「乐园之下」",
+    },
+    {
+        id: 20104,
+        name: "一周年",
+        suf: true,
+    },
+    {
+        id: 20105,
+        name: "入梦之人",
+        suf: true,
+    },
+    {
+        id: 20106,
+        name: "风暴",
+        suf: true,
+    },
+    {
+        id: 20107,
+        name: "怪物",
+        suf: true,
+    },
+    {
+        id: 20108,
+        name: "复制品",
+        suf: true,
     },
 ]
 

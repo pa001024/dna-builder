@@ -5734,6 +5734,46 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "test",
     },
+    "28001": {
+        id: 28001,
+        logic: "AND",
+        map: {
+            DungeonComplete: [[28001, 1, 1]],
+        },
+        remark: "完成1.7梦魇活动高难",
+    },
+    "28003": {
+        id: 28003,
+        logic: "AND",
+        map: {
+            DungeonComplete: [[28003, 1, 1]],
+        },
+        remark: "完成1.7梦魇活动高难",
+    },
+    "28005": {
+        id: 28005,
+        logic: "AND",
+        map: {
+            DungeonComplete: [[28005, 1, 1]],
+        },
+        remark: "完成1.7梦魇活动高难",
+    },
+    "28007": {
+        id: 28007,
+        logic: "AND",
+        map: {
+            DungeonComplete: [[28007, 1, 1]],
+        },
+        remark: "完成1.7梦魇活动高难",
+    },
+    "28009": {
+        id: 28009,
+        logic: "AND",
+        map: {
+            DungeonComplete: [[28009, 1, 1]],
+        },
+        remark: "完成1.7梦魇活动高难",
+    },
     "70000": {
         id: 70000,
         logic: "AND",
@@ -8180,6 +8220,22 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "预热签到1.6完成",
     },
+    "101020": {
+        id: 101020,
+        logic: "AND",
+        map: {
+            LoginEventFinish: [101020],
+        },
+        remark: "签到活动（1.7Sp黎瑟）完成",
+    },
+    "101021": {
+        id: 101021,
+        logic: "AND",
+        map: {
+            LoginEventFinish: [101021],
+        },
+        remark: "预热签到1.7完成",
+    },
     "101103": {
         id: 101103,
         logic: "AND",
@@ -8645,6 +8701,54 @@ export const conditionsMap: Record<number, ConditionItem> = {
             QuestChain: [120308],
         },
         remark: "奉香大典任务8完成",
+    },
+    "120701": {
+        id: 120701,
+        logic: "AND",
+        map: {
+            QuestChain: [120701],
+        },
+        remark: "黎瑟活动2-完成活动1",
+    },
+    "120702": {
+        id: 120702,
+        logic: "AND",
+        map: {
+            QuestChain: [120702],
+        },
+        remark: "黎瑟活动3-完成活动2",
+    },
+    "120703": {
+        id: 120703,
+        logic: "AND",
+        map: {
+            QuestChain: [120703],
+        },
+        remark: "黎瑟活动4-完成活动3",
+    },
+    "120704": {
+        id: 120704,
+        logic: "AND",
+        map: {
+            QuestChain: [120704],
+        },
+        remark: "黎瑟活动5-完成活动4",
+    },
+    "120705": {
+        id: 120705,
+        logic: "AND",
+        map: {
+            QuestChain: [120705],
+        },
+        remark: "黎瑟活动6-完成活动5",
+    },
+    "120801": {
+        id: 120801,
+        logic: "AND",
+        map: {
+            QuestChain: [100405],
+        },
+        remark: "卡嘉活动-完成第三章",
     },
     "150180": {
         id: 150180,
@@ -10123,7 +10227,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             GachaCount: [[9008, 60]],
         },
-        remark: "伊薇池抽卡60次",
+        remark: "法露茜抽卡60次",
     },
     "4030047": {
         id: 4030047,
@@ -10131,7 +10235,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             GachaCount: [[9008, 120]],
         },
-        remark: "伊薇池抽卡120次",
+        remark: "法露茜抽卡120次",
     },
     "4030048": {
         id: 4030048,
@@ -10139,7 +10243,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         map: {
             GachaCount: [[9008, 180]],
         },
-        remark: "伊薇池抽卡180次",
+        remark: "法露茜抽卡180次",
     },
     "4030049": {
         id: 4030049,
@@ -10163,6 +10267,114 @@ export const conditionsMap: Record<number, ConditionItem> = {
             ],
         },
         remark: "获得1.6所有呐喊武器皮肤",
+    },
+    "4030051": {
+        id: 4030051,
+        logic: "AND",
+        map: {
+            HaveItem: [["Resource", 41072, 1]],
+        },
+        remark: "获得月梢捕梦·黛蓝",
+    },
+    "4030052": {
+        id: 4030052,
+        logic: "AND",
+        map: {
+            HaveItem: [["Resource", 41073, 1]],
+        },
+        remark: "获得月梢捕梦·锈红",
+    },
+    "4030053": {
+        id: 4030053,
+        logic: "AND",
+        map: {
+            HaveItem: [["Resource", 41074, 1]],
+        },
+        remark: "获得月梢捕梦·墨玉",
+    },
+    "4030054": {
+        id: 4030054,
+        logic: "OR",
+        map: {
+            HaveItem: [
+                ["Resource", 41072, 1],
+                ["Resource", 41073, 1],
+                ["Resource", 41074, 1],
+            ],
+        },
+        remark: "获得任意月梢捕梦展示动作",
+    },
+    "4030055": {
+        id: 4030055,
+        logic: "AND",
+        map: {
+            GachaCount: [[9009, 60]],
+        },
+        remark: "sp黎瑟抽卡60次",
+    },
+    "4030056": {
+        id: 4030056,
+        logic: "AND",
+        map: {
+            GachaCount: [[9009, 120]],
+        },
+        remark: "sp黎瑟抽卡120次",
+    },
+    "4030057": {
+        id: 4030057,
+        logic: "AND",
+        map: {
+            GachaCount: [[9009, 180]],
+        },
+        remark: "sp黎瑟抽卡180次",
+    },
+    "4040001": {
+        id: 4040001,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1007, 2, 1]],
+        },
+        remark: "1.7公会战层数条件-1",
+    },
+    "4040002": {
+        id: 4040002,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1007, 2, 5]],
+        },
+        remark: "1.7公会战层数条件-2",
+    },
+    "4040003": {
+        id: 4040003,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1007, 2, 10]],
+        },
+        remark: "1.7公会战层数条件-3",
+    },
+    "4040004": {
+        id: 4040004,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1007, 2, 15]],
+        },
+        remark: "1.7公会战层数条件-4",
+    },
+    "4040005": {
+        id: 4040005,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1007, 2, 30]],
+        },
+        remark: "1.7公会战层数条件-5",
+    },
+    "4040006": {
+        id: 4040006,
+        logic: "AND",
+        map: {
+            RaidFloorMin: [[1007, 2, 60]],
+        },
+        remark: "1.7公会战层数条件-6",
     },
     "7072038": {
         id: 7072038,
@@ -10331,7 +10543,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
             Quest: [11020101],
             QuestChain: [100405],
         },
-        remark: "ex02_完成第三章任务或者完成新任务的第一个任务",
+        remark: "ex02_完成第三章任务或者完成第一个任务",
     },
     "10100101": {
         id: 10100101,
@@ -10752,6 +10964,30 @@ export const conditionsMap: Record<number, ConditionItem> = {
             DialogueHasRead: [10042205],
         },
         remark: "伊瑟尔自由邦",
+    },
+    "10700400": {
+        id: 10700400,
+        logic: "AND",
+        map: {
+            ConditionalRewardEventEnd: [107004],
+        },
+        remark: "倒计时活动1.7 完成条件",
+    },
+    "10700401": {
+        id: 10700401,
+        logic: "AND",
+        map: {
+            TimeArrived: ["2025-10-27 10:00:00"],
+        },
+        remark: "倒计时活动1.7 奖励1领取条件",
+    },
+    "10700402": {
+        id: 10700402,
+        logic: "AND",
+        map: {
+            TimeArrived: ["2026-10-28 10:00:00"],
+        },
+        remark: "倒计时活动1.7 奖励2领取条件",
     },
     "11010103": {
         id: 11010103,
@@ -11764,6 +12000,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "黎瑟（追加5）",
     },
+    "20101107": {
+        id: 20101107,
+        logic: "OR",
+        map: {
+            QuestChain: [120706],
+        },
+        remark: "黎瑟（追加6）",
+    },
     "20101201": {
         id: 20101201,
         logic: "OR",
@@ -12237,6 +12481,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "“兔妈妈”（追加3）",
     },
+    "20103701": {
+        id: 20103701,
+        logic: "OR",
+        map: {
+            QuestChain: [120706],
+        },
+        remark: "蕾伊",
+    },
     "20300101": {
         id: 20300101,
         logic: "OR",
@@ -12324,6 +12576,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         logic: "OR",
         map: {
             DialogueHasRead: [12045618],
+            QuestChain: [120206],
         },
         remark: "飏（追加1）",
     },
@@ -12445,6 +12698,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         logic: "OR",
         map: {
             DialogueHasRead: [12045617],
+            QuestChain: [120206],
         },
         remark: "矩",
     },
@@ -12908,6 +13162,7 @@ export const conditionsMap: Record<number, ConditionItem> = {
         logic: "OR",
         map: {
             DialogueHasRead: [12045622],
+            QuestChain: [120206],
         },
         remark: "大风九章（追加3）",
     },
@@ -14318,6 +14573,17 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "有限奖池活动4的结束条件",
     },
+    "103021005": {
+        id: 103021005,
+        logic: "AND",
+        map: {
+            HaveItem: [
+                ["Skin", 510102, 1],
+                ["Skin", 150101, 1],
+            ],
+        },
+        remark: "有限奖池活动1.7的结束条件",
+    },
     "105101018": {
         id: 105101018,
         logic: "AND",
@@ -14366,6 +14632,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
         },
         remark: "角色试玩活动（1.6法露）完成",
     },
+    "105101024": {
+        id: 105101024,
+        logic: "AND",
+        map: {
+            TrialEventFinish: [105101024],
+        },
+        remark: "角色试玩活动（1.7Splise）完成",
+    },
     "105102016": {
         id: 105102016,
         logic: "AND",
@@ -14405,6 +14679,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             TrialEventFinish: [105102025],
         },
         remark: "法露皮肤试玩完成",
+    },
+    "105102026": {
+        id: 105102026,
+        logic: "AND",
+        map: {
+            TrialEventFinish: [105102026],
+        },
+        remark: "Sp黎瑟皮肤试玩完成",
     },
     "110201024": {
         id: 110201024,
@@ -14525,6 +14807,14 @@ export const conditionsMap: Record<number, ConditionItem> = {
             HaveResource: [[3000018, 1]],
         },
         remark: "【第三章】拥有颜料",
+    },
+    "1004051207": {
+        id: 1004051207,
+        logic: "AND",
+        map: {
+            QuestChain: [100405],
+        },
+        remark: "黎瑟活动1-完成第三章",
     },
     "1101051101": {
         id: 1101051101,

@@ -236,19 +236,10 @@ export class LeveledWeapon {
         // 这一步要发生在能拿到响应式翻译函数的展示层。
         this.效果 = this._originalWeaponData.熔炼
         if (this.buff) {
-            const buff = this.buff
             this.buff.ratio = (refineLevel + 5) / 10
             const props = this.buff.getProperties()
             this._effectiveBuffProps = props
             this.buffProps = this.forgeEffective ? props : {}
-            if (buff._originalBuffData.描述.includes(`{%}`)) {
-                const vals: number[] = Object.values(props)
-                let i = 0
-                buff.描述 = buff._originalBuffData.描述.replace(
-                    /\{%\}/g,
-                    () => `${((vals[i++] * 100) / (this.buff?._等级 || 1)).toFixed(1)}%`
-                )
-            }
         }
     }
 

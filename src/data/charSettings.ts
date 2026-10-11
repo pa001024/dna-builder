@@ -143,6 +143,72 @@ export interface InlineActions {
     bgs: [string, number][][]
 }
 
+/**
+ * 创建一份新的内联动作默认值（未配置状态：未启用且各列表均为空）。
+ * @returns 新的默认内联动作（每次调用返回全新对象，避免多构筑共享引用）
+ */
+export function createDefaultInlineActions(): InlineActions {
+    return {
+        enable: false,
+        i: [],
+        b: [],
+        hp: [],
+        bgs: [],
+    }
+}
+
+/**
+ * 判断内联动作是否为「未配置」状态（未启用且各列表均为空）。
+ * 序列化时命中该状态的 actions 会被直接省略，以简化配置文件大小。
+ * @param value 待判断的内联动作（缺失/null 视为未配置）
+ * @returns 是否未配置
+ */
+export function isEmptyInlineActions(value: InlineActions | null | undefined): boolean {
+    if (!value || typeof value !== "object") {
+        return true
+    }
+    return (
+        value.enable !== true &&
+        (value.i?.length ?? 0) === 0 &&
+        (value.b?.length ?? 0) === 0 &&
+        (value.hp?.length ?? 0) === 0 &&
+        (value.bgs?.length ?? 0) === 0
+    )
+}
+
+/**
+ * 归一化内联动作：缺失/null/形状非法时回退为默认值，保证运行时永远拿到可用结构。
+ * @param value 原始内联动作（允许缺失或 null，即「为空」）
+ * @returns 结构完整的内联动作
+ */
+export function normalizeInlineActions(value: unknown): InlineActions {
+    const normalized = createDefaultInlineActions()
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return normalized
+    }
+    const raw = value as Partial<InlineActions>
+    normalized.enable = raw.enable === true
+    if (Array.isArray(raw.i)) {
+        normalized.i = raw.i.filter(
+            item => item && typeof item === "object" && typeof (item as NormalActions).s === "string" && Number.isFinite((item as NormalActions).d)
+        ) as NormalActions[]
+    }
+    if (Array.isArray(raw.b)) {
+        normalized.b = raw.b.filter(
+            item => item && typeof item === "object" && typeof (item as BackgroundActions).s === "string" && Number.isFinite((item as BackgroundActions).i)
+        ) as BackgroundActions[]
+    }
+    if (Array.isArray(raw.hp)) {
+        normalized.hp = raw.hp.filter(
+            (item): item is [number, number] => Array.isArray(item) && Number.isFinite(item[0]) && Number.isFinite(item[1])
+        )
+    }
+    if (Array.isArray(raw.bgs)) {
+        normalized.bgs = raw.bgs.filter((group): group is [string, number][][][number] => Array.isArray(group)) as [string, number][][]
+    }
+    return normalized
+}
+
 /** DOT 频率设置：直接复用 CharBuild 的定义，避免同一形状两处维护 */
 export type { DotFrequencySettings } from "./CharBuild"
 
@@ -224,19 +290,21 @@ export function createDefaultCharSettings(signatureWeapon?: SignatureWeapon | nu
             skillweapon: 0,
             forceOwnAdditionalDamage: false,
         } as DotFrequencySettings,
-        actions: {
-            enable: false,
-            i: [],
-            b: [],
-            hp: [],
-            bgs: [],
-        } as InlineActions,
+        actions: createDefaultInlineActions(),
     }
 }
 
 export const defaultCharSettings = createDefaultCharSettings()
 
 export type CharSettings = ReturnType<typeof createDefaultCharSettings>
+
+/**
+ * 角色配置输入形状：`actions` 支持为空（缺失/null/局部），载入时由 `normalizeCharSettings` 补齐。
+ * 序列化时未配置的 actions 会被直接省略，以简化配置文件大小。
+ */
+export type CharSettingsInput = Omit<Partial<CharSettings>, "actions"> & {
+    actions?: Partial<InlineActions> | null
+}
 
 /**
  * 创建一份空 MOD 变体（各槽位类型均为空槽，中枢未设置）。
@@ -446,7 +514,7 @@ function normalizeModVariants(value: unknown): ModVariant[] {
  * @param settings 待补齐的角色配置
  * @returns 结构完整的角色配置
  */
-export function normalizeCharSettings(settings?: Partial<CharSettings> | null): CharSettings {
+export function normalizeCharSettings(settings?: CharSettingsInput | null): CharSettings {
     const normalized = createDefaultCharSettings()
     if (!settings || typeof settings !== "object") {
         return normalized
@@ -454,7 +522,8 @@ export function normalizeCharSettings(settings?: Partial<CharSettings> | null): 
 
     const entries = Object.entries(settings) as [keyof CharSettings, unknown][]
     entries.forEach(([key, value]) => {
-        if (!(key in normalized) || value === undefined) {
+        // actions 支持为空：缺失/null/局部形状由 normalizeInlineActions 统一处理，这里跳过通用合并
+        if (key === "actions" || !(key in normalized) || value === undefined) {
             return
         }
         const defaultValue = normalized[key]
@@ -548,6 +617,9 @@ export function normalizeCharSettings(settings?: Partial<CharSettings> | null): 
         normalized[key] = normalizeModVariantLetter(settings[key])
     }
 
+    // 归一化内联动作：支持为空（缺失/null/局部），运行时永远补齐为可用结构
+    normalized.actions = normalizeInlineActions((settings as CharSettingsInput).actions)
+
     // 归一化技能等级：兼容老格式单个数字（如 12 → [12, 12, 12]）
     normalized.charSkillLevel = normalizeCharSkillLevels(settings.charSkillLevel)
 
@@ -625,9 +697,15 @@ function migrateLegacyPetBuffs(settings: CharSettings): void {
 
 /**
  * 将角色配置标准化后序列化，确保覆盖率和自定义 BUFF 数值使用稳定格式。
- * @param settings 待序列化的角色配置
+ * 未配置的 actions（未启用且各列表均为空，含缺失/null）会被直接省略，以简化配置文件大小。
+ * @param settings 待序列化的角色配置（actions 支持为空）
  * @returns JSON 文本
  */
-export function serializeCharSettings(settings: Partial<CharSettings> | null | undefined): string {
-    return JSON.stringify(normalizeCharSettings(settings))
+export function serializeCharSettings(settings: CharSettingsInput | null | undefined): string {
+    const normalized = normalizeCharSettings(settings)
+    if (isEmptyInlineActions(normalized.actions)) {
+        const { actions: _omitted, ...rest } = normalized
+        return JSON.stringify(rest)
+    }
+    return JSON.stringify(normalized)
 }

@@ -111,7 +111,7 @@ export class LeveledBuff implements Buff {
 
         // 复制基础属性
         this.名称 = buffData.名称
-        this.描述 = buffData.描述
+        this.描述 = buffData.描述 ?? ""
         if (buffData.a !== undefined && buffData.a !== 1) this.a = buffData.a
         if (buffData.b !== undefined && buffData.b !== 1) this.b = buffData.b
         if (buffData.lx !== undefined) {

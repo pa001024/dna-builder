@@ -332,6 +332,36 @@ export const titleFrameData: TitleFrame[] = [
         icon: "T_Icon_Random_TitleFrame",
     },
     {
+        id: 10055,
+        name: "SSS级狩月人·7",
+        desc: "可在称号样式中佩戴",
+        icon: "T_Icon_Random_TitleFrame",
+    },
+    {
+        id: 10056,
+        name: "SS级狩月人·7",
+        desc: "可在称号样式中佩戴",
+        icon: "T_Icon_Random_TitleFrame",
+    },
+    {
+        id: 10057,
+        name: "S级狩月人·7",
+        desc: "可在称号样式中佩戴",
+        icon: "T_Icon_Random_TitleFrame",
+    },
+    {
+        id: 10058,
+        name: "A级狩月人·7",
+        desc: "可在称号样式中佩戴",
+        icon: "T_Icon_Random_TitleFrame",
+    },
+    {
+        id: 10059,
+        name: "B级狩月人·7",
+        desc: "可在称号样式中佩戴",
+        icon: "T_Icon_Random_TitleFrame",
+    },
+    {
         id: 20001,
         name: "华彩殿堂·7",
         desc: "可在称号样式中佩戴",

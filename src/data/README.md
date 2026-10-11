@@ -16,7 +16,7 @@ data/
 │   ├── dungeon.data.ts   # 副本数据
 │   ├── effect.data.ts    # 效果数据
 │   ├── fish.data.ts      # 钓鱼数据
-│   ├── map.data.ts       # 地图数据
+│   ├── onlinemapcache.data.ts # 在线地图缓存（线上真相源，工具刷新，禁手改）
 │   ├── mod.data.ts       # MOD 数据
 │   ├── monster.data.ts   # 怪物数据
 │   ├── pet.data.ts       # 宠物数据
@@ -205,7 +205,7 @@ AST（抽象语法树）解析器和求值器。
   自行建一次索引，因此单独引入数据层（不经 runtime）也能正常工作。
 
 **当前 `src/data` 生产代码对外零依赖**（不 import `utils` / `store` / `composables` / `api` / `env`；
-`d/map.data.ts` 的 `dna-api` 是外部 API 包声明，`tests/` 下的引用不进包）。因此凡是「数据形状 / 纯规则」
+`d/onlinemapcache.data.ts` 的 `dna-api` 是外部 API 包声明，`tests/` 下的引用不进包）。因此凡是「数据形状 / 纯规则」
 都住在数据层，前端基建侧改为**转引**，避免实现分叉：
 
 | 数据层模块 | 原属地 | 前端侧转引位置 |

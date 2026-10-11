@@ -250,8 +250,8 @@ export const skinGachaData: SkinGacha[] = [
         displayType: 1,
         historyType: 2,
         hideCountdown: null,
-        startTime: 1775440800,
-        endTime: 1780304400,
+        startTime: 1792375200,
+        endTime: 1796029200,
         cost: {
             res: [1004, 1003],
             num10: 10,
@@ -322,6 +322,35 @@ export const skinGachaData: SkinGacha[] = [
         star5ItemId: 99921,
     },
     {
+        id: 9009,
+        name: "牵丝织故梦",
+        desc: "每<highlight>10</>次寻觅必定获取紫色或紫色以上品质道具，至多<highlight>90</>次寻觅必定获取金色品质道具。",
+        warning:
+            "<Title>必定获取金色品质道具</>\n正在进行的寻觅 <highlight>%d</>/90\n\n<Title>活动限定万华概率说明</>\n经由寻觅获取金色品质道具的基础概率为<highlight>0.3%%</>，综合概率（含保底）为<highlight>1.42%%</>，至多<highlight>90</>次寻觅必定获取金色品质道具，其中各道具概率如下：\n结丝夜行：<highlight>0.641%%</>\n虹色棱镜*25：<highlight>0.641%%</>\n虹色棱镜*50：<highlight>0.142%%</>\n经由寻觅获取紫色品质道具的基础概率为<highlight>5.1%%</>，综合概率（含保底）为<highlight>12.46%%</>，至多<highlight>10</>次寻觅必定获取紫色品质道具；\n通过保底获取紫色品质道具的概率为<highlight>99.7%%</>，获取金色品质道具的概率为<highlight>0.3%%</>。\n当触发概率提升、保底等情况时的概率，请以具体规则为准。\n\n<Title>重复获取说明</>\n如果重复获取金色品质形象结丝夜行，将转化为虹色棱镜*<highlight>25</>。\n如果重复获取其余已拥有的外观，将转化为水色棱镜；重复紫色品质外观将转化为水色棱镜*<highlight>4</>，重复蓝色品质外观将转化为水色棱镜*<highlight>1</>。\n\n<Title>万华继承说明</>\n在<highlight>牵丝织故梦</>中的寻觅次数将独立计算，不与其他活动万华合并计算。",
+        coreDes: "流光形象",
+        coreDesColor: 5,
+        type: "活动限定",
+        subTabId: 1401,
+        tabId: 9,
+        sequence: 9,
+        gachaTimes: 1,
+        displayType: 1,
+        historyType: 2,
+        hideCountdown: null,
+        startTime: 1792375200,
+        endTime: 1796029200,
+        cost: {
+            res: [1004, 1003],
+            num10: 10,
+            displayRes: [99, 1004, 1003],
+        },
+        probabilityId: 1001,
+        conditionId: 4041,
+        star3ItemId: 99913,
+        star4ItemId: 99912,
+        star5ItemId: 99911,
+    },
+    {
         id: 90021,
         name: "宽赦这良夜",
         desc: "每<highlight>10</>次寻觅必定获取紫色或紫色以上品质道具，至多<highlight>90</>次寻觅必定获取金色品质道具。",
@@ -353,6 +382,245 @@ export const skinGachaData: SkinGacha[] = [
 ]
 
 export const skinGachaItems: SkinGachaItemPool[] = [
+    {
+        id: 99911,
+        rewards: [
+            {
+                id: 410301,
+                t: "Skin",
+                p: 4500,
+                c: 1,
+                n: "结丝夜行",
+            },
+            {
+                id: 111,
+                t: "Resource",
+                p: 4500,
+                c: 25,
+                n: "虹色棱镜",
+            },
+            {
+                id: 111,
+                t: "Resource",
+                p: 1000,
+                c: 50,
+                n: "虹色棱镜",
+            },
+        ],
+    },
+    {
+        id: 99912,
+        rewards: [
+            {
+                id: 10001,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "小鸡啾啾·本色",
+            },
+            {
+                id: 10002,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "小鸡啾啾·涅白",
+            },
+            {
+                id: 10003,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "小鸡啾啾·焦糖",
+            },
+            {
+                id: 10004,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "小鸡啾啾·黛蓝",
+            },
+            {
+                id: 10023,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "天穗覆面",
+            },
+            {
+                id: 10022,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "开天英魂·铅灰",
+            },
+            {
+                id: 10021,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "开天英魂·鎏金",
+            },
+            {
+                id: 10032,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "长尾蝴蝶结",
+            },
+            {
+                id: 20012,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "雾蝶·本色",
+            },
+            {
+                id: 20013,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "雾蝶·薄荷",
+            },
+            {
+                id: 20014,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "雾蝶·锈红",
+            },
+            {
+                id: 20015,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "雾蝶·铅灰",
+            },
+            {
+                id: 20008,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "弧光蝶·本色",
+            },
+            {
+                id: 20009,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "弧光蝶·晴蓝",
+            },
+            {
+                id: 20010,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "弧光蝶·白樱",
+            },
+            {
+                id: 20011,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "弧光蝶·铅灰",
+            },
+            {
+                id: 20002,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "圆框眼镜·锈红",
+            },
+            {
+                id: 20003,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "圆框眼镜·铅灰",
+            },
+            {
+                id: 20004,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "圆框眼镜·焦糖",
+            },
+            {
+                id: 20024,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "铁匠皎皎的胡须",
+            },
+            {
+                id: 20023,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "正位魔术花·涅白",
+            },
+            {
+                id: 20022,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "逆位魔术花·锈红",
+            },
+            {
+                id: 20021,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "眺望飞羽",
+            },
+            {
+                id: 20035,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "眺望飞羽·涅白",
+            },
+        ],
+    },
+    {
+        id: 99913,
+        rewards: [
+            {
+                id: 30004,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "罐装月髓液",
+            },
+            {
+                id: 10005,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "荫荫草苗·本色",
+            },
+            {
+                id: 10006,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "荫荫草苗·鎏金",
+            },
+            {
+                id: 10007,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "荫荫草苗·晴蓝",
+            },
+            {
+                id: 10008,
+                t: "CharAccessory",
+                p: -1,
+                c: 1,
+                n: "荫荫草苗·锈红",
+            },
+        ],
+    },
     {
         id: 99921,
         rewards: [
@@ -2340,10 +2608,10 @@ export const skinGachaTabs: SkinGachaTab[] = [
     },
     {
         tabId: 5,
-        name: "活动限定",
+        name: "限时复刻",
         icon: "T_Gacha_PoolBanner_Suyi01",
-        reddotNode: "Gacha_Special_4",
-        sequence: 1,
+        reddotNode: "Gacha_ReSpecial_4",
+        sequence: 2,
         gachaIds: [9005],
     },
     {
@@ -2369,6 +2637,14 @@ export const skinGachaTabs: SkinGachaTab[] = [
         reddotNode: "Gacha_Special_7",
         sequence: 1,
         gachaIds: [9008],
+    },
+    {
+        tabId: 9,
+        name: "活动限定",
+        icon: "T_Gacha_PoolBanner_SpLise01",
+        reddotNode: "Gacha_Special_8",
+        sequence: 1,
+        gachaIds: [9009],
     },
 ]
 
@@ -2411,6 +2687,16 @@ export const skinGachaTypes: SkinGachaType[] = [
     {
         type: "GACHA_SKIN_TYPE_SPECIAL_7",
         name: "活动限定",
+        subTabId: 1401,
+    },
+    {
+        type: "GACHA_SKIN_TYPE_SPECIAL_8",
+        name: "活动限定",
+        subTabId: 1401,
+    },
+    {
+        type: "GACHA_SKIN_TYPE_SPECIAL_9",
+        name: "限时复刻",
         subTabId: 1401,
     },
 ]
@@ -2768,6 +3054,146 @@ export const skinGachaCumulative: SkinGachaCumulative[] = [
     },
     {
         gachaId: 9008,
+        rewards: [
+            {
+                rewardId: 7601,
+                target: 20,
+                items: [
+                    {
+                        id: 1004,
+                        t: "Resource",
+                        c: 5,
+                        n: "华彩沙漏·限时",
+                    },
+                ],
+                mode: "Fixed",
+            },
+            {
+                rewardId: 7602,
+                target: 40,
+                items: [
+                    {
+                        id: 1004,
+                        t: "Resource",
+                        c: 5,
+                        n: "华彩沙漏·限时",
+                    },
+                ],
+                mode: "Fixed",
+            },
+            {
+                rewardId: 7603,
+                target: 60,
+                items: [
+                    {
+                        id: 1004,
+                        t: "Resource",
+                        c: 5,
+                        n: "华彩沙漏·限时",
+                    },
+                ],
+                mode: "Fixed",
+            },
+            {
+                rewardId: 7604,
+                target: 80,
+                items: [
+                    {
+                        id: 1004,
+                        t: "Resource",
+                        c: 5,
+                        n: "华彩沙漏·限时",
+                    },
+                ],
+                mode: "Fixed",
+            },
+            {
+                rewardId: 7605,
+                target: 100,
+                items: [
+                    {
+                        id: 1004,
+                        t: "Resource",
+                        c: 10,
+                        n: "华彩沙漏·限时",
+                    },
+                ],
+                mode: "Fixed",
+            },
+        ],
+    },
+    {
+        gachaId: 9009,
+        rewards: [
+            {
+                rewardId: 7601,
+                target: 20,
+                items: [
+                    {
+                        id: 1004,
+                        t: "Resource",
+                        c: 5,
+                        n: "华彩沙漏·限时",
+                    },
+                ],
+                mode: "Fixed",
+            },
+            {
+                rewardId: 7602,
+                target: 40,
+                items: [
+                    {
+                        id: 1004,
+                        t: "Resource",
+                        c: 5,
+                        n: "华彩沙漏·限时",
+                    },
+                ],
+                mode: "Fixed",
+            },
+            {
+                rewardId: 7603,
+                target: 60,
+                items: [
+                    {
+                        id: 1004,
+                        t: "Resource",
+                        c: 5,
+                        n: "华彩沙漏·限时",
+                    },
+                ],
+                mode: "Fixed",
+            },
+            {
+                rewardId: 7604,
+                target: 80,
+                items: [
+                    {
+                        id: 1004,
+                        t: "Resource",
+                        c: 5,
+                        n: "华彩沙漏·限时",
+                    },
+                ],
+                mode: "Fixed",
+            },
+            {
+                rewardId: 7605,
+                target: 100,
+                items: [
+                    {
+                        id: 1004,
+                        t: "Resource",
+                        c: 10,
+                        n: "华彩沙漏·限时",
+                    },
+                ],
+                mode: "Fixed",
+            },
+        ],
+    },
+    {
+        gachaId: 9010,
         rewards: [
             {
                 rewardId: 7601,

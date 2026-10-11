@@ -1,5 +1,18 @@
 import type { DNAMapCategorizeListRes, DNAMapDetailRes, DNAMatterCategorizeList, TimeBasicResponse } from "dna-api"
 
+/**
+ * 在线地图缓存（Online Map Cache）。
+ *
+ * 线上（DNAAPI 地图接口）是唯一真相源，本地只有两级只读兜底：
+ * 1. localStorage（`dna-builder-map-*`，在线成功后写入）；
+ * 2. 本文件底部的静态快照（`offlineMapCatalog` / `onlineMapCache`）。
+ *
+ * 静态快照一律由 `bun tools/update-map-cache.ts` 从线上重拉生成，禁止手改——
+ * 手改点位不会生效（在线优先覆盖），还会与下次生成的快照产生无意义 diff。
+ * 文件尾的在线像素→世界坐标换算表（`ONLINE_MAP_TRANSFORMS`）同样由该工具一并重算生成。
+ * 魔灵潘神这类游戏内固定点位不走这里：它们来自 `pan.data.ts`（MapTool 绘制），
+ * 与线上标点是两套坐标系，不要混到一份快照里。
+ */
 export interface DBMap {
     id: number
     n: string
@@ -98,7 +111,11 @@ export function buildDBMapMarkers(mapId: number, mapDetail: DNAMapDetailRes): DB
     return markers
 }
 
-export const mapLocalData: DNAMatterCategorizeList[] = [
+/**
+ * 离线地图目录：在线分类列表的静态快照（在线不可用且无 localStorage 缓存时兜底）。
+ * 由 `bun tools/update-map-cache.ts` 与详情快照一起刷新，禁止手改。
+ */
+export const offlineMapCatalog: DNAMatterCategorizeList[] = [
     { id: 2, maps: [{ id: 5, name: "净界岛", pid: 2 }], name: "净界岛" },
     {
         id: 3,
@@ -107,6 +124,8 @@ export const mapLocalData: DNAMatterCategorizeList[] = [
             { id: 7, name: "冰湖城下水道", pid: 3 },
             { id: 8, name: "格雷姆废矿", pid: 3 },
             { id: 9, name: "盖雷亚剧院", pid: 3 },
+            { id: 17, name: "百花车站", pid: 3 },
+            { id: 18, name: "锻铁厂", pid: 3 },
         ],
         name: "冰湖城周边",
     },
@@ -122,11 +141,19 @@ export const mapLocalData: DNAMatterCategorizeList[] = [
         ],
         name: "皓京",
     },
+    {
+        id: 19,
+        maps: [
+            { id: 20, name: "阿尔卡诺山", pid: 19 },
+            { id: 21, name: "阿尔卡诺镇旧址", pid: 19 },
+            { id: 22, name: "山谷裂隙", pid: 19 },
+        ],
+        name: "阿尔卡诺山",
+    },
 ]
 
 const MAP_CATEGORIZE_CACHE_KEY = "dna-builder-map-categorize-list-v1"
 const MAP_DETAIL_CACHE_KEY_PREFIX = "dna-builder-map-detail-v1:"
-const MAP_ID_SET = new Set(mapLocalData.flatMap(category => category.maps.map(map => map.id)))
 
 function readJsonCache<T>(key: string): T | null {
     if (typeof window === "undefined") return null
@@ -187,7 +214,7 @@ export async function loadMapCategorizeListWithCache(
         }
     }
 
-    return getCachedMapCategorizeList() ?? mapLocalData
+    return getCachedMapCategorizeList() ?? offlineMapCatalog
 }
 
 /**
@@ -232,10 +259,14 @@ export async function loadMapDetailWithCache(
         }
     }
 
-    return getCachedMapDetail(mapId) ?? mapCache[mapId] ?? null
+    return getCachedMapDetail(mapId) ?? onlineMapCache[mapId] ?? null
 }
 
-export const mapCache: Record<number, DNAMapDetailRes> = {
+/**
+ * 在线地图详情快照：以地图 id 为键的线上详情全量缓存（静态兜底层）。
+ * 由 `bun tools/update-map-cache.ts` 从线上重拉生成，禁止手改（见文件头契约）。
+ */
+export const onlineMapCache: Record<number, DNAMapDetailRes> = {
     "4": {
         floors: [
             {
@@ -25193,6 +25224,9 @@ const REGION_MAP_ID_TO_DB_MAP_ID: Record<number, number> = {
     503: 11, // 华胥地区
 }
 
+/** 离线目录里的全部地图 id 集合（`convertRegionMapIdToDBMapId` 的“恰好一致” fast path 用） */
+const OFFLINE_MAP_ID_SET = new Set(offlineMapCatalog.flatMap(category => category.maps.map(map => map.id)))
+
 /**
  * 将区域表 `mapId` 转换为资料库地图 `id`。
  * @param regionMapId 区域表中的地图编号
@@ -25204,9 +25238,285 @@ export function convertRegionMapIdToDBMapId(regionMapId: number | null | undefin
     }
 
     // 兼容少量“恰好一致”的场景
-    if (MAP_ID_SET.has(regionMapId)) {
+    if (OFFLINE_MAP_ID_SET.has(regionMapId)) {
         return regionMapId
     }
 
     return REGION_MAP_ID_TO_DB_MAP_ID[regionMapId] ?? null
+}
+
+// ================= 在线像素 → MapTool 世界坐标换算 =================
+// 本节由 `bun tools/update-map-cache.ts` 重拉快照时一并重算生成，禁止手改。
+//
+// 线上地图详情里的标点坐标（`site.x / site.y`）是该楼层底图图片上的像素坐标，
+// 与 MapTool 本地地图用的游戏世界坐标（UE 单位，100 单位 = 1 米）是两套坐标系。
+// 下表给出每张在线地图一张相似变换，把在线像素坐标换算成世界坐标，
+// 再喂给 `MapTool.vue` 的 `projectWorldToMap` 即可落在本地地图画布上。
+//
+// 模型（逐地图一套参数，同地图各楼层共用一套）：`world = s * R(θ) * online + t`，
+// θ 只取正交整数角 {0, 90, 180, 270}。镜像不可能出现：16 张图拟合时镜像候选
+// 从未赢过，模型里直接没有这一项。
+// 标定锚点与拟合程序见 `tools/update-map-cache.ts`，方法细节见
+// .agents/docs/online-map-transform.md。
+export interface OnlineMapTransform {
+    /** 在线地图 id（`onlineMapCache` 的键） */
+    mapId: number
+    /** 对应的 MapTool region id */
+    regionId: number
+    regionName: string
+    /** 世界单位 / 在线像素 */
+    scale: number
+    /** 逆时针旋转角（度，只取正交整数角）。规律：θ = -region.mapRotation（太虚陵 map15 例外，见标定记录） */
+    rotationDeg: number
+    translateX: number
+    translateY: number
+    /** 参与拟合的共识点对数 */
+    samples: number
+    /** 拟合残差（米）。low 外推记 -1 */
+    rmseMeters: number
+    confidence: "high" | "medium" | "low"
+}
+
+/** MapTool 世界坐标系单位换算：100 世界单位 = 1 米（与 MapTool 路径长度标注一致） */
+export const ONLINE_WORLD_UNITS_PER_METER = 100
+
+export const ONLINE_MAP_TRANSFORMS: Record<number, OnlineMapTransform> = {
+    4: {
+        mapId: 4,
+        regionId: 1021,
+        regionName: "龙莎要塞",
+        scale: 29.9386,
+        rotationDeg: 0,
+        translateX: -55831.6,
+        translateY: -76317.9,
+        samples: 6,
+        rmseMeters: 1.28,
+        confidence: "high",
+    },
+    5: {
+        mapId: 5,
+        regionId: 1001,
+        regionName: "净界岛",
+        scale: 15.108,
+        rotationDeg: 90,
+        translateX: 44758.2,
+        translateY: -16209.2,
+        samples: 3,
+        rmseMeters: 3.41,
+        confidence: "high",
+    },
+    6: {
+        mapId: 6,
+        regionId: 1011,
+        regionName: "冰湖城东区",
+        scale: 30.1989,
+        rotationDeg: 180,
+        translateX: 43550.7,
+        translateY: 77730.6,
+        samples: 9,
+        rmseMeters: 3.66,
+        confidence: "high",
+    },
+    7: {
+        mapId: 7,
+        regionId: 1017,
+        regionName: "冰湖城下水道",
+        scale: 14.5689,
+        rotationDeg: 0,
+        translateX: -50048.2,
+        translateY: -37092.8,
+        samples: 4,
+        rmseMeters: 1.54,
+        confidence: "high",
+    },
+    8: {
+        mapId: 8,
+        regionId: 1013,
+        regionName: "格雷姆废矿",
+        scale: 14.9548,
+        rotationDeg: 90,
+        translateX: 39801.4,
+        translateY: -16020.9,
+        samples: 2,
+        rmseMeters: 0.86,
+        confidence: "medium",
+    },
+    9: {
+        mapId: 9,
+        regionId: 1019,
+        regionName: "盖雷亚剧院",
+        scale: 14.9586,
+        rotationDeg: 0,
+        translateX: -11200.6,
+        translateY: -43380.1,
+        samples: 1,
+        rmseMeters: -1,
+        confidence: "low",
+    },
+    11: {
+        mapId: 11,
+        regionId: 1041,
+        regionName: "烟津渡",
+        scale: 59.7523,
+        rotationDeg: 0,
+        translateX: -122223.7,
+        translateY: -122425.5,
+        samples: 13,
+        rmseMeters: 2.94,
+        confidence: "high",
+    },
+    13: {
+        mapId: 13,
+        regionId: 1045,
+        regionName: "皓京",
+        scale: 59.9649,
+        rotationDeg: 0,
+        translateX: -101998.2,
+        translateY: -172971.5,
+        samples: 15,
+        rmseMeters: 1.4,
+        confidence: "high",
+    },
+    14: {
+        mapId: 14,
+        regionId: 1052,
+        regionName: "山外山",
+        scale: 30.1885,
+        rotationDeg: 0,
+        translateX: -55778.6,
+        translateY: -70031.4,
+        samples: 3,
+        rmseMeters: 1.11,
+        confidence: "high",
+    },
+    15: {
+        mapId: 15,
+        regionId: 1053,
+        regionName: "太虚陵",
+        scale: 25.6866,
+        rotationDeg: 0,
+        translateX: -32895.1,
+        translateY: -29433.4,
+        samples: 2,
+        rmseMeters: 0.39,
+        confidence: "medium",
+    },
+    16: {
+        mapId: 16,
+        regionId: 1055,
+        regionName: "由来巷",
+        scale: 15.2001,
+        rotationDeg: 0,
+        translateX: -15228.9,
+        translateY: -29058.4,
+        samples: 3,
+        rmseMeters: 0.81,
+        confidence: "high",
+    },
+    17: {
+        mapId: 17,
+        regionId: 1060,
+        regionName: "百花车站",
+        scale: 59.9319,
+        rotationDeg: 0,
+        translateX: -167338.7,
+        translateY: -117455.8,
+        samples: 8,
+        rmseMeters: 3.05,
+        confidence: "high",
+    },
+    18: {
+        mapId: 18,
+        regionId: 1063,
+        regionName: "锻铁厂",
+        scale: 60.9272,
+        rotationDeg: 0,
+        translateX: -169609.3,
+        translateY: -119347.5,
+        samples: 6,
+        rmseMeters: 4.17,
+        confidence: "high",
+    },
+    20: {
+        mapId: 20,
+        regionId: 1070,
+        regionName: "阿尔卡诺山",
+        scale: 60.0562,
+        rotationDeg: 0,
+        translateX: -133683.1,
+        translateY: -168377.7,
+        samples: 3,
+        rmseMeters: 0.9,
+        confidence: "high",
+    },
+    21: {
+        mapId: 21,
+        regionId: 1071,
+        regionName: "阿尔卡诺镇旧址",
+        scale: 59.9234,
+        rotationDeg: 0,
+        translateX: -167950.1,
+        translateY: -156136.8,
+        samples: 3,
+        rmseMeters: 0.67,
+        confidence: "high",
+    },
+    22: {
+        mapId: 22,
+        regionId: 1072,
+        regionName: "山谷裂隙",
+        scale: 60.0378,
+        rotationDeg: 0,
+        translateX: -110949.9,
+        translateY: -150409,
+        samples: 3,
+        rmseMeters: 1.1,
+        confidence: "high",
+    },
+}
+
+/**
+ * 取某在线地图的换算参数。
+ * @param mapId 在线地图 id
+ * @returns 换算参数，未标定返回 null
+ */
+export function getOnlineMapTransform(mapId: number): OnlineMapTransform | null {
+    return ONLINE_MAP_TRANSFORMS[mapId] ?? null
+}
+
+/**
+ * 在线像素坐标 → MapTool 世界坐标。
+ * @param mapId 在线地图 id
+ * @param x 在线楼层底图上的像素 x（`site.x`）
+ * @param y 在线楼层底图上的像素 y（`site.y`）
+ * @returns 世界坐标（UE 单位），未标定返回 null
+ */
+export function onlineToWorld(mapId: number, x: number, y: number): { x: number; y: number } | null {
+    const transform = ONLINE_MAP_TRANSFORMS[mapId]
+    if (!transform) return null
+    const radians = (transform.rotationDeg * Math.PI) / 180
+    const cos = Math.cos(radians)
+    const sin = Math.sin(radians)
+    return {
+        x: transform.scale * (cos * x - sin * y) + transform.translateX,
+        y: transform.scale * (sin * x + cos * y) + transform.translateY,
+    }
+}
+
+/**
+ * MapTool 世界坐标 → 在线像素坐标（`onlineToWorld` 的逆变换，用于把本地点位画回在线底图）。
+ * @param mapId 在线地图 id
+ * @param x 世界坐标 x
+ * @param y 世界坐标 y
+ * @returns 在线像素坐标，未标定返回 null
+ */
+export function worldToOnline(mapId: number, x: number, y: number): { x: number; y: number } | null {
+    const transform = ONLINE_MAP_TRANSFORMS[mapId]
+    if (!transform) return null
+    const radians = (transform.rotationDeg * Math.PI) / 180
+    const cos = Math.cos(radians) / transform.scale
+    const sin = Math.sin(radians) / transform.scale
+    const deltaX = x - transform.translateX
+    const deltaY = y - transform.translateY
+    return { x: cos * deltaX + sin * deltaY, y: -sin * deltaX + cos * deltaY }
 }

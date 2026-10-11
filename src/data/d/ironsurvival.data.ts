@@ -332,7 +332,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
             "200": 313124,
         },
         IronTicketId: [1002],
-        MonsterLevelDrop: [13, 14],
+        MonsterLevelDrop: [13, 14, 15],
     },
     "91702": {
         AvaliableTicketLevel: [235],
@@ -354,7 +354,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
             "200": 313224,
         },
         IronTicketId: [1002],
-        MonsterLevelDrop: [13, 14],
+        MonsterLevelDrop: [13, 14, 15],
     },
     "91703": {
         AvaliableTicketLevel: [235],
@@ -376,7 +376,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
             "200": 313424,
         },
         IronTicketId: [1002],
-        MonsterLevelDrop: [13, 14],
+        MonsterLevelDrop: [13, 14, 15],
     },
     "91704": {
         AvaliableTicketLevel: [235],
@@ -398,7 +398,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
             "200": 313324,
         },
         IronTicketId: [1002],
-        MonsterLevelDrop: [13, 14],
+        MonsterLevelDrop: [13, 14, 15],
     },
     "91705": {
         AvaliableTicketLevel: [235],
@@ -420,7 +420,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
             "200": 313624,
         },
         IronTicketId: [1002],
-        MonsterLevelDrop: [13, 14],
+        MonsterLevelDrop: [13, 14, 15],
     },
     "91706": {
         AvaliableTicketLevel: [235],
@@ -442,7 +442,7 @@ export const ironSurvivalDungeonData: Record<number, IronSurvivalDungeon> = {
             "200": 313524,
         },
         IronTicketId: [1002],
-        MonsterLevelDrop: [13, 14],
+        MonsterLevelDrop: [13, 14, 15],
     },
 }
 
@@ -1218,5 +1218,15 @@ export const monsterLevelDropData: Record<number, MonsterLevelDrop> = {
         ProbabilityUp: [0, 1, 2, 2, 5, 5, 10, 10, 0],
         RewardId: [313001, 313001, 313001, 313001, 313001, 313001, 313001, 313001, 313001],
         StartTime: 1790647200,
+    },
+    "15": {
+        BaseProbability: [25, 50, 100, 150, 200, 250, 300, 400, 500],
+        EndTime: 2524622400,
+        MonsterLevel: [80, 100, 120, 140, 160, 170, 180, 190, 200],
+        MonsterLevelDropId: 15,
+        MonsterLevelDropView: 15005,
+        ProbabilityUp: [0, 1, 2, 2, 5, 5, 10, 10, 0],
+        RewardId: [313002, 313002, 313002, 313002, 313002, 313002, 313002, 313002, 313002],
+        StartTime: 1794276000,
     },
 }

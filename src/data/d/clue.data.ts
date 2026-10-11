@@ -906,7 +906,7 @@ export const clueData: ClueTabType[] = [
             },
             {
                 id: "Ex02_Character_1203",
-                name: "阿尔卡诺镇的镇民·其二",
+                name: "阿尔卡诺镇的镇民·其一",
                 clues: [
                     {
                         id: 120208,
@@ -1080,7 +1080,7 @@ export const clueData: ClueTabType[] = [
             },
             {
                 id: "Ex02_Character_1204",
-                name: "阿尔卡诺镇的镇民·其三",
+                name: "阿尔卡诺镇的镇民·其一",
                 clues: [
                     {
                         id: 120215,

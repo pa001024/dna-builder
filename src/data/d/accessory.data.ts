@@ -38,6 +38,13 @@ export interface SkinItem {
     charId: number
     tag?: string
     release?: string
+    /**
+     * 立绘贴图基名（如 `T_Bust_Saiqi01`），仅当该皮肤确有立绘资源时存在。
+     * 由上游 Skin 模块输出（BigIcon / 基础皮肤派生），本仓库导入时仅过滤未落盘项
+     * （`public/imgs/bust/<bust>.webp`），见 tools/import-i18n-data.ts 的 Skin 映射；
+     * 月石皮（如发条旋舞）、染色/TP 系列等无立绘的皮肤没有该字段，展示时不得再按 `T_Head_` 前缀臆测。
+     */
+    bust?: string
     defaultItem?: Record<string, SkinDefaultItemEntry[]>
     upgrade?: SkinUpgradeCost[]
 }
@@ -803,6 +810,14 @@ export const charAccessoryData: Accessory[] = [
         unlock: "通过活动获得",
     },
     {
+        id: 10101,
+        name: "噤言诡灵·绛紫",
+        desc: "我们究竟是在祭天，还是在祭人？",
+        icon: "T_Fashion_Head57_04",
+        rarity: 5,
+        unlock: "",
+    },
+    {
         id: 10102,
         name: "汪汪发饰·涅白",
         desc: "灵动、可爱、活泼、美丽……世上一切对美好的形容词在狗耳朵的面前都会显得黯淡无光，这就是狗耳朵那让人无法拒绝的魔力……这台词总感觉在哪里说过，应该是错觉吧。",
@@ -1319,6 +1334,14 @@ export const charAccessoryData: Accessory[] = [
         name: "狱火狂燃",
         desc: "熊熊燃烧，直至一切化为灰烬。",
         icon: "T_Fashion_Fx40",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 11010,
+        name: "骨冢爆破·黛蓝",
+        desc: "于亡骸中绽放。",
+        icon: "T_Fashion_Fx50",
         rarity: 5,
         unlock: "通过棱镜兑换获得",
     },
@@ -2787,6 +2810,62 @@ export const charAccessoryData: Accessory[] = [
         unlock: "通过商店获得",
     },
     {
+        id: 20106,
+        name: "骨冢花·涅白",
+        desc: "生生不息。",
+        icon: "T_Fashion_Face31_03",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 20107,
+        name: "骨冢花·绛紫",
+        desc: "生生不息。",
+        icon: "T_Fashion_Face31_01",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 20108,
+        name: "骨冢花·鎏金",
+        desc: "生生不息。",
+        icon: "T_Fashion_Face31_02",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 20109,
+        name: "骨冢花·锈红",
+        desc: "生生不息。",
+        icon: "T_Fashion_Face31_04",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 20110,
+        name: "瘟疫行者·铅灰",
+        desc: "穿行于死亡的时代。",
+        icon: "T_Fashion_Face32_03",
+        rarity: 5,
+        unlock: "通过活动获得",
+    },
+    {
+        id: 20111,
+        name: "瘟疫行者·墨玉",
+        desc: "穿行于死亡的时代。",
+        icon: "T_Fashion_Face32_01",
+        rarity: 5,
+        unlock: "通过活动获得",
+    },
+    {
+        id: 20112,
+        name: "瘟疫行者·涅白",
+        desc: "穿行于死亡的时代。",
+        icon: "T_Fashion_Face32_02",
+        rarity: 5,
+        unlock: "通过活动获得",
+    },
+    {
         id: 21001,
         name: "UI_Accessory_Name_21001",
         desc: "UI_Accessory_Desc_21001",
@@ -2879,6 +2958,46 @@ export const charAccessoryData: Accessory[] = [
         name: "幽燃热浪",
         desc: "扭曲的热浪，如同烈火在空中划出的涟漪。",
         icon: "T_Fashion_Fx39",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 21016,
+        name: "猫猫幽灵·涅白",
+        desc: "一只白色的猫猫幽灵，游荡在阿特拉西亚。",
+        icon: "T_Fashion_Fx52",
+        rarity: 5,
+        unlock: "通过活动获得",
+    },
+    {
+        id: 21017,
+        name: "捣蛋幽灵·鎏金",
+        desc: "猫猫、南瓜、蝙蝠，到处都是幽灵！",
+        icon: "T_Fashion_Fx53",
+        rarity: 5,
+        unlock: "通过活动获得",
+    },
+    {
+        id: 21018,
+        name: "南瓜幽灵·鎏金",
+        desc: "一个金色的南瓜幽灵，游荡在阿特拉西亚。",
+        icon: "T_Fashion_Fx54",
+        rarity: 5,
+        unlock: "通过活动获得",
+    },
+    {
+        id: 21019,
+        name: "诡道符箓·绛紫",
+        desc: "符随念动，诡道相随。",
+        icon: "T_Fashion_Fx51",
+        rarity: 5,
+        unlock: "通过活动获得",
+    },
+    {
+        id: 21020,
+        name: "悬丝曳影·黛蓝",
+        desc: "蛛丝在空中摇曳，勾勒出猎手的轮廓。",
+        icon: "T_Fashion_Fx49",
         rarity: 5,
         unlock: "通过棱镜兑换获得",
     },
@@ -3412,7 +3531,7 @@ export const charAccessoryData: Accessory[] = [
     },
     {
         id: 31007,
-        name: "胜利·地狱咆哮",
+        name: "胜利·初雪小夜曲",
         desc: "可变更胜利动作。",
         icon: "T_Fashion_SettlementAction_07",
         rarity: 5,
@@ -3673,6 +3792,14 @@ export const charAccessoryData: Accessory[] = [
         icon: "T_Fashion_Back39_02",
         rarity: 5,
         unlock: "通过活动获得",
+    },
+    {
+        id: 40037,
+        name: "诡道陈兵·绛紫",
+        desc: "真言驱诡，养魂饲灵。",
+        icon: "T_Fashion_Back39_04",
+        rarity: 5,
+        unlock: "",
     },
     {
         id: 40038,
@@ -4043,6 +4170,62 @@ export const charAccessoryData: Accessory[] = [
         unlock: "通过活动获得",
     },
     {
+        id: 40090,
+        name: "星落悬丝·绛紫",
+        desc: "纤细的蛛丝，捕获了坠落的星辰。",
+        icon: "T_Fashion_Waist37_04",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 40091,
+        name: "星落悬丝·涅白",
+        desc: "纤细的蛛丝，捕获了坠落的星辰。",
+        icon: "T_Fashion_Waist37_01",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 40092,
+        name: "星落悬丝·鎏金",
+        desc: "纤细的蛛丝，捕获了坠落的星辰。",
+        icon: "T_Fashion_Waist37_02",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 40093,
+        name: "星落悬丝·锈红",
+        desc: "纤细的蛛丝，捕获了坠落的星辰。",
+        icon: "T_Fashion_Waist37_03",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 40094,
+        name: "捣蛋笑魇·鎏金",
+        desc: "不要回头，就在你身后。",
+        icon: "T_Fashion_Waist38_02",
+        rarity: 5,
+        unlock: "通过活动获得",
+    },
+    {
+        id: 40095,
+        name: "捣蛋笑魇·锈红",
+        desc: "不要回头，就在你身后。",
+        icon: "T_Fashion_Waist38_03",
+        rarity: 5,
+        unlock: "通过活动获得",
+    },
+    {
+        id: 40096,
+        name: "捣蛋笑魇·涅白",
+        desc: "不要回头，就在你身后。",
+        icon: "T_Fashion_Waist38_01",
+        rarity: 5,
+        unlock: "通过活动获得",
+    },
+    {
         id: 50001,
         name: "",
         desc: "",
@@ -4355,6 +4538,38 @@ export const charAccessoryData: Accessory[] = [
         unlock: "通过棱镜兑换获得",
     },
     {
+        id: 70084,
+        name: "花影悬丝·绛紫",
+        desc: "丝线编织的花朵，引渡着迷失在夜色中的亡灵。",
+        icon: "T_Fashion_Fx48_04",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 70085,
+        name: "花影悬丝·涅白",
+        desc: "丝线编织的花朵，引渡着迷失在夜色中的亡灵。",
+        icon: "T_Fashion_Fx48_03",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 70086,
+        name: "花影悬丝·鎏金",
+        desc: "丝线编织的花朵，引渡着迷失在夜色中的亡灵。",
+        icon: "T_Fashion_Fx48_02",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 70087,
+        name: "花影悬丝·锈红",
+        desc: "丝线编织的花朵，引渡着迷失在夜色中的亡灵。",
+        icon: "T_Fashion_Fx48_01",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
         id: 80001,
         name: "夏夜邀约",
         desc: "蝴蝶衔着三色堇，等待着主人翁的到来，奏响舞会的序章。",
@@ -4601,6 +4816,38 @@ export const charAccessoryData: Accessory[] = [
         icon: "T_Fashion_Fx45_02",
         rarity: 5,
         unlock: "通过活动获得",
+    },
+    {
+        id: 80070,
+        name: "骨冢蝶·涅白",
+        desc: "即使化为白骨，也请不要忘记飞翔。",
+        icon: "T_Fashion_Fx47_03",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 80071,
+        name: "骨冢蝶·绛紫",
+        desc: "即使化为白骨，也请不要忘记飞翔。",
+        icon: "T_Fashion_Fx47_04",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 80072,
+        name: "骨冢蝶·鎏金",
+        desc: "即使化为白骨，也请不要忘记飞翔。",
+        icon: "T_Fashion_Fx47_02",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
+        id: 80073,
+        name: "骨冢蝶·锈红",
+        desc: "即使化为白骨，也请不要忘记飞翔。",
+        icon: "T_Fashion_Fx47_01",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
     },
 ]
 
@@ -5110,6 +5357,14 @@ export const weaponAccessoryData: Accessory[] = [
         unlock: "通过棱镜兑换获得",
     },
     {
+        id: 20005,
+        name: "手里剑（待包装）",
+        desc: "手里剑描述（待包装）",
+        icon: "T_Fashion_Fx55",
+        rarity: 5,
+        unlock: "通过棱镜兑换获得",
+    },
+    {
         id: 30001,
         name: "腾龙诀",
         desc: "适用于招式魔之楔穿引共鸣。",
@@ -5459,6 +5714,27 @@ export const headFrameData: HeadFrameItem[] = [
         icon: "T_Head_Frame44",
         access: "通过月度订单获得",
     },
+    {
+        id: 10051,
+        name: "冰湖灯火",
+        desc: "适用于头像框。",
+        icon: "T_Head_Frame47",
+        access: "通过月度订单获得",
+    },
+    {
+        id: 10052,
+        name: "糖霜满屋·鎏金",
+        desc: "适用于头像框。",
+        icon: "T_Head_Frame48",
+        access: "通过活动获得",
+    },
+    {
+        id: 10053,
+        name: "糖霜满屋·墨玉",
+        desc: "适用于头像框。",
+        icon: "T_Head_Frame49",
+        access: "通过活动获得",
+    },
 ]
 
 export const skinData: SkinItem[] = [
@@ -5468,6 +5744,7 @@ export const skinData: SkinItem[] = [
         desc: "黑色是夜晚的颜色，它为大地罩起宁静而安心的面纱；黑色是影子的颜色，它能形影不离地守在至亲之人的身旁。贝蕾妮卡喜欢这个颜色。",
         icon: "T_Head_Heitao",
         rarity: 5,
+        bust: "T_Bust_Heitao",
         charId: 1101,
         release: "1.0",
         defaultItem: {
@@ -5493,6 +5770,7 @@ export const skinData: SkinItem[] = [
         desc: "无论她走到何处，海伯利亚那巨大的阴影仿佛都投射在她的身上，化作无形的漆黑囚笼。",
         icon: "T_Head_Fuluo",
         rarity: 5,
+        bust: "T_Bust_Fuluo",
         charId: 1102,
         release: "1.0",
         defaultItem: {
@@ -5518,6 +5796,7 @@ export const skinData: SkinItem[] = [
         desc: "一个行走的影子，一个舞台上拙劣的伶人，一个愚人讲述的故事。",
         icon: "T_Head_Tuosi",
         rarity: 5,
+        bust: "T_Bust_Tuosi",
         charId: 1103,
         release: "1.0",
         defaultItem: {
@@ -5543,6 +5822,7 @@ export const skinData: SkinItem[] = [
         desc: "一人，一剑，一袭白衣。跨过汪洋与寒夜，只为在黎明的尽头相逢。",
         icon: "T_Head_Nvzhu02",
         rarity: 5,
+        bust: "T_Bust_Nvzhu02",
         charId: 1201,
         release: "1.4",
     },
@@ -5552,6 +5832,7 @@ export const skinData: SkinItem[] = [
         desc: "传颂会的铭文不仅是镶嵌在服装，更是铭刻在灵魂中的印记。它见证着少女从愤怒一次次蜕变成真正的坚忍。",
         icon: "T_Head_Baonu",
         rarity: 5,
+        bust: "T_Bust_Baonu",
         charId: 1501,
         release: "1.0",
         defaultItem: {
@@ -5577,6 +5858,7 @@ export const skinData: SkinItem[] = [
         desc: "薄暮与极光织就的纱幔引导着灵魂跨过溢满泪水的河流，去向万物新生的雾海。",
         icon: "T_Head_Nifu",
         rarity: 5,
+        bust: "T_Bust_Nifu",
         charId: 1502,
         release: "1.0",
         defaultItem: {
@@ -5602,6 +5884,7 @@ export const skinData: SkinItem[] = [
         desc: "飘零的风雨顺着衣摆滑落，停滞于剑尖，洒落在江湖。",
         icon: "T_Head_Kezhou",
         rarity: 5,
+        bust: "T_Bust_Kezhou",
         charId: 1503,
         release: "1.1",
         defaultItem: {
@@ -5627,6 +5910,7 @@ export const skinData: SkinItem[] = [
         desc: "裁取三分青色，熔铸七分机巧，最后再借着晨风一缕，放飞少女的梦想与骄傲。",
         icon: "T_Head_Suyi",
         rarity: 5,
+        bust: "T_Bust_Suyi",
         charId: 1504,
         release: "1.3",
         defaultItem: {
@@ -5670,6 +5954,7 @@ export const skinData: SkinItem[] = [
         desc: "夜莺为她编织的故事插上白羽，让小小的羽翼载着她的梦飞向云间。",
         icon: "T_Head_Feina",
         rarity: 5,
+        bust: "T_Bust_Feina",
         charId: 1801,
         release: "1.0",
         defaultItem: {
@@ -5695,6 +5980,7 @@ export const skinData: SkinItem[] = [
         desc: "水母的触须垂入深海，宛若游弋的裙摆，在夜色中扰动着恋人的心弦。",
         icon: "T_Head_Shuimu",
         rarity: 5,
+        bust: "T_Bust_Shuimu",
         charId: 2101,
         release: "1.0",
         defaultItem: {
@@ -5720,6 +6006,7 @@ export const skinData: SkinItem[] = [
         desc: "蓝色的裙褶如同水中层叠的涟漪，倒映着少女眼中多彩的世界。",
         icon: "T_Head_Eve",
         rarity: 5,
+        bust: "T_Bust_Eve",
         charId: 2102,
         release: "1.5",
         defaultItem: {
@@ -5754,6 +6041,7 @@ export const skinData: SkinItem[] = [
         desc: "那在黑暗中蠕动着的是什么？阴谋？混沌？犯罪？全都不对，是触手！",
         icon: "T_Head_Zhangyu",
         rarity: 5,
+        bust: "T_Bust_Zhangyu",
         charId: 2301,
         release: "1.0",
         defaultItem: {
@@ -5779,6 +6067,7 @@ export const skinData: SkinItem[] = [
         desc: "药味作丝，在素白袖间诉说着枯草回春的轻语。",
         icon: "T_Head_Baiheng",
         rarity: 5,
+        bust: "T_Bust_Baiheng",
         charId: 2401,
         release: "1.1",
         defaultItem: {
@@ -5804,6 +6093,7 @@ export const skinData: SkinItem[] = [
         desc: "哑光制服上的火药余温，在热血的鼓动下久久无法消散。",
         icon: "T_Head_Linen",
         rarity: 5,
+        bust: "T_Bust_Linen",
         charId: 3101,
         release: "1.0",
         defaultItem: {
@@ -5829,6 +6119,7 @@ export const skinData: SkinItem[] = [
         desc: "裙摆之上，捧着精心裁剪的花束；裙摆之下，藏着危险致命的枪火。一如裙摆的黑白两色，在光与影之间，写下一位女仆忙碌的一日。",
         icon: "T_Head_Xier",
         rarity: 5,
+        bust: "T_Bust_Xier",
         charId: 3102,
         release: "1.4",
         defaultItem: {
@@ -5854,6 +6145,7 @@ export const skinData: SkinItem[] = [
         desc: "燃烧的红与白，深锁了一位疯子的爆炸狂想，缝合出一位少年的无瑕梦乡。",
         icon: "T_Head_Yeer",
         rarity: 5,
+        bust: "T_Bust_Yeer",
         charId: 3103,
         release: "1.0",
         defaultItem: {
@@ -5879,6 +6171,7 @@ export const skinData: SkinItem[] = [
         desc: "被谎言与背叛撕扯的褴褛衣装，囚禁着心中熊熊燃烧的复仇之火。",
         icon: "T_Head_Falu",
         rarity: 5,
+        bust: "T_Bust_Falu",
         charId: 3104,
         release: "1.0",
         defaultItem: {
@@ -5904,6 +6197,7 @@ export const skinData: SkinItem[] = [
         desc: "身负的锁链与棘刺不仅是对罪恶的惩戒，同时也是对心中正义之火的约束。",
         icon: "T_Head_Haier",
         rarity: 5,
+        bust: "T_Bust_Haier",
         charId: 3201,
         release: "1.0",
         defaultItem: {
@@ -5929,6 +6223,7 @@ export const skinData: SkinItem[] = [
         desc: "瑰丽的光泽勾勒出令人屏息的曲线，举手投足，尽是酒香与夜色交融的氤氲吐息。",
         icon: "T_Head_Kami",
         rarity: 5,
+        bust: "T_Bust_Kami",
         charId: 3202,
         release: "1.3",
         defaultItem: {
@@ -5954,6 +6249,7 @@ export const skinData: SkinItem[] = [
         desc: "由一口锅子制成的多功能头盔，是拾荒少女坚硬的甲胄。",
         icon: "T_Head_Maer",
         rarity: 5,
+        bust: "T_Bust_Maer",
         charId: 3301,
         release: "1.0",
         defaultItem: {
@@ -5979,6 +6275,7 @@ export const skinData: SkinItem[] = [
         desc: "跃动在制服上的星点蓝芒是守护的意志，亦是对未来的仰望。",
         icon: "T_Head_Lise",
         rarity: 5,
+        bust: "T_Bust_Lise",
         charId: 4101,
         release: "1.0",
         defaultItem: {
@@ -6004,6 +6301,7 @@ export const skinData: SkinItem[] = [
         desc: "初阳融化了金箔，倾倒在瑰丽的锦缎上，连同变革的意志一起，燃烧在金黄的瞳孔中。",
         icon: "T_Head_Zhiliu",
         rarity: 5,
+        bust: "T_Bust_Zhiliu",
         charId: 4102,
         release: "1.2",
         defaultItem: {
@@ -6025,10 +6323,11 @@ export const skinData: SkinItem[] = [
     },
     {
         id: 4103,
-        name: "UI_Skin_Name_4103",
-        desc: "UI_Skin_Des_4103",
+        name: "黎瑟・浴火的衣饰",
+        desc: "她披着一身干练的红色衣装，如暖阳、如火焰、如灯火般闪耀在寒冷的大地上。",
         icon: "T_Head_SpLise",
         rarity: 5,
+        bust: "T_Bust_SPLise",
         charId: 4103,
         release: "1.7",
         defaultItem: {
@@ -6054,6 +6353,7 @@ export const skinData: SkinItem[] = [
         desc: "应天之雷，流淌周身。贯彻大风的意旨，罪孽无处可逃，他亦无处可逃。",
         icon: "T_Head_Yuming",
         rarity: 5,
+        bust: "T_Bust_Yuming",
         charId: 4201,
         release: "1.2",
         defaultItem: {
@@ -6079,6 +6379,7 @@ export const skinData: SkinItem[] = [
         desc: "勋章之上是一个天才的灵魂，军装之下是一颗庸人的凡心。",
         icon: "T_Head_Landi",
         rarity: 5,
+        bust: "T_Bust_Landi",
         charId: 4202,
         release: "1.0",
         defaultItem: {
@@ -6104,6 +6405,7 @@ export const skinData: SkinItem[] = [
         desc: "孤高之人无需甲胄与冠冕，其存在本身即是威压的轰鸣。",
         icon: "T_Head_Xibi",
         rarity: 5,
+        bust: "T_Bust_Xibi",
         charId: 4301,
         release: "1.0",
         defaultItem: {
@@ -6129,6 +6431,7 @@ export const skinData: SkinItem[] = [
         desc: "在地面晃动的白色羽饰，载着麦芽芬芳，乘着万家炊火，飞向每一个饥饿之人的心房。",
         icon: "T_Head_Songlu",
         rarity: 5,
+        bust: "T_Bust_Songlu",
         charId: 5101,
         release: "1.0",
         defaultItem: {
@@ -6154,6 +6457,7 @@ export const skinData: SkinItem[] = [
         desc: "质朴的衣装无法隔绝暗巷猩红的呜咽，却足以在荒蛮中护住一小片星光。",
         icon: "T_Head_Aote",
         rarity: 5,
+        bust: "T_Bust_Aote",
         charId: 5102,
         release: "1.0",
         defaultItem: {
@@ -6179,6 +6483,7 @@ export const skinData: SkinItem[] = [
         desc: "栖息在少女臂弯的蝴蝶，捎来无数个跨越寒冬的梦。",
         icon: "T_Head_Saiqi",
         rarity: 5,
+        bust: "T_Bust_Saiqi",
         charId: 5301,
         release: "1.0",
         defaultItem: {
@@ -6204,6 +6509,7 @@ export const skinData: SkinItem[] = [
         desc: "自硝烟尘灰下生长的翠绿，如野草般轻，如野草般不息。",
         icon: "T_Head_Dafu",
         rarity: 5,
+        bust: "T_Bust_Dafu",
         charId: 5401,
         release: "1.0",
         defaultItem: {
@@ -6229,6 +6535,7 @@ export const skinData: SkinItem[] = [
         desc: "UI_Skin_Des_5402",
         icon: "T_Head_Dafu",
         rarity: 5,
+        bust: "T_Bust_Dafu",
         charId: 5402,
         release: "2.0",
         defaultItem: {
@@ -6263,6 +6570,7 @@ export const skinData: SkinItem[] = [
         desc: "高洁的天使执起裁决的剑，她必将那有罪者审判，她必将那无罪者宽恕。",
         icon: "T_Head_Fuluo01",
         rarity: 5,
+        bust: "T_Bust_Fuluo01",
         charId: 1102,
         tag: "Fuluo01",
         release: "1.4",
@@ -6303,8 +6611,18 @@ export const skinData: SkinItem[] = [
         desc: "一人，一剑，一袭白衣。跨过汪洋与寒夜，只为在黎明的尽头相逢。",
         icon: "T_Head_Nanzhu02",
         rarity: 5,
+        bust: "T_Bust_Nanzhu02",
         charId: 120101,
         release: "1.4",
+    },
+    {
+        id: 150101,
+        name: "糖霜满屋·莉兹贝尔",
+        desc: "坩埚、魔药、扫把……还有一只黑猫？！这些全都不需要啦，我们要的只有糖果、糖果！",
+        icon: "T_Head_Baonu01",
+        rarity: 5,
+        charId: 1501,
+        release: "1.7",
     },
     {
         id: 150201,
@@ -6322,6 +6640,7 @@ export const skinData: SkinItem[] = [
         desc: "青羽铸就云中客，一念乘风。",
         icon: "T_Head_Suyi01",
         rarity: 5,
+        bust: "T_Bust_Suyi01",
         charId: 1504,
         tag: "Suyi01",
         release: "1.3",
@@ -6406,6 +6725,7 @@ export const skinData: SkinItem[] = [
         desc: "海浪打湿白纱的裙摆，捎来她的低语——“只有死亡可以将你我分离。”",
         icon: "T_Head_Shuimu02",
         rarity: 5,
+        bust: "T_Bust_Shuimu02",
         charId: 2101,
         tag: "Shuimu02",
         release: "1.4",
@@ -6446,6 +6766,7 @@ export const skinData: SkinItem[] = [
         desc: "重重纱幕之下，以轻语诉说爱意，用死亡触碰永恒。",
         icon: "T_Head_Shuimu01",
         rarity: 5,
+        bust: "T_Bust_Shuimu01",
         charId: 2101,
         tag: "Shuimu01",
         release: "1.0",
@@ -6472,6 +6793,7 @@ export const skinData: SkinItem[] = [
         desc: "少女捧起手中的雪花，聆听着它们从远方捎来的童话。",
         icon: "T_Head_Eve01",
         rarity: 5,
+        bust: "T_Bust_Eve01",
         charId: 2102,
         tag: "Eve01",
         release: "1.5",
@@ -6521,6 +6843,7 @@ export const skinData: SkinItem[] = [
         desc: "易水涤尘，白浪静心。",
         icon: "T_Head_Baiheng01",
         rarity: 5,
+        bust: "T_Bust_Baiheng01",
         charId: 2401,
         tag: "Baiheng01",
         release: "1.1",
@@ -6566,6 +6889,7 @@ export const skinData: SkinItem[] = [
         desc: "露出獠牙的那一刻便不再有回头的余地，等在前方的，唯有死斗。",
         icon: "T_Head_Falu01",
         rarity: 5,
+        bust: "T_Bust_Falu01",
         charId: 3104,
         tag: "Falu01",
         release: "1.6",
@@ -6641,6 +6965,7 @@ export const skinData: SkinItem[] = [
         desc: "觥筹交错的夜宴，流淌着一场又一场无声的杀伐。",
         icon: "T_Head_Zhiliu01",
         rarity: 5,
+        bust: "T_Bust_Zhiliu01",
         charId: 4102,
         tag: "Zhiliu01",
         release: "1.2",
@@ -6663,10 +6988,11 @@ export const skinData: SkinItem[] = [
     },
     {
         id: 410301,
-        name: "UI_Skin_Name_410301",
-        desc: "UI_Skin_Des_410301",
-        icon: "T_Head_Lise01",
+        name: "结丝夜行",
+        desc: "灯火将黑夜中的城市织成闪烁的网，而她是最优秀的猎手。",
+        icon: "T_Head_SPLise01",
         rarity: 5,
+        bust: "T_Bust_SPLise01",
         charId: 4103,
         tag: "SpLise01",
         release: "1.7",
@@ -6674,14 +7000,14 @@ export const skinData: SkinItem[] = [
             Hair: [
                 {
                     id: 410392,
-                    name: "UI_Skin_Name_410301",
+                    name: "结丝夜行",
                     num: 1,
                 },
             ],
             HeadSculpture: [
                 {
-                    id: 10016,
-                    name: "逐灯者的肖像",
+                    id: 30191,
+                    name: "逐灯者的肖像·夜行",
                     num: 1,
                 },
             ],
@@ -6693,6 +7019,20 @@ export const skinData: SkinItem[] = [
                 },
             ],
         },
+        upgrade: [
+            {
+                step: 2,
+                amount: 54,
+                currencyId: 1010,
+                currency: "流光织针",
+            },
+            {
+                step: 3,
+                amount: 72,
+                currencyId: 1010,
+                currency: "流光织针",
+            },
+        ],
     },
     {
         id: 510101,
@@ -6700,6 +7040,7 @@ export const skinData: SkinItem[] = [
         desc: "暖暖阳光，细细研磨，满满挥洒！",
         icon: "T_Head_Songlu01",
         rarity: 5,
+        bust: "T_Bust_Songlu01",
         charId: 5101,
         tag: "Songlu01",
         release: "1.0",
@@ -6721,11 +7062,21 @@ export const skinData: SkinItem[] = [
         },
     },
     {
+        id: 510102,
+        name: "糖霜满屋·松露与榛子",
+        desc: "坩埚、魔药、扫把……还有一只黑猫？！这些全都不需要啦，我们要的只有糖果、糖果！",
+        icon: "T_Head_Songlu02",
+        rarity: 5,
+        charId: 5101,
+        release: "1.7",
+    },
+    {
         id: 530101,
         name: "梦中的舞会",
         desc: "仲夏夜，星斗下的森林，三色堇与蝶翼交织的小步舞曲——那是她不曾见过的光景。",
         icon: "T_Head_Saiqi01",
         rarity: 5,
+        bust: "T_Bust_Saiqi01",
         charId: 5301,
         tag: "Saiqi01",
         release: "1.0",
@@ -6770,6 +7121,15 @@ export const skinData: SkinItem[] = [
         rarity: 5,
         charId: 5402,
         release: "2.0",
+        defaultItem: {
+            Hair: [
+                {
+                    id: 540292,
+                    name: "",
+                    num: 1,
+                },
+            ],
+        },
     },
     {
         id: 11010010,
@@ -8797,7 +9157,7 @@ export const weaponSkinData: Accessory[] = [
     {
         id: 3010111,
         name: "夜烬雪舞·重剑",
-        desc: "UI_WeaponSkin_Des_3010111",
+        desc: "只有寂静的白雪记得，被焚成灰烬的那个长夜。",
         icon: "T_Head_Claymore_Yejin",
         rarity: 5,
         unlock: "通过商店获得",
@@ -8872,6 +9232,14 @@ export const weaponSkinData: Accessory[] = [
         desc: "嘎啊——————————",
         icon: "T_Head_Sword_Nahan",
         rarity: 4,
+        unlock: "通过商店获得",
+    },
+    {
+        id: 3010210,
+        name: "寰宇邀约·单手剑",
+        desc: "聆听自群星传来的亘古邀约。",
+        icon: "T_Head_Sword_Huanyu",
+        rarity: 5,
         unlock: "通过商店获得",
     },
     {
@@ -9267,6 +9635,14 @@ export const weaponSkinData: Accessory[] = [
         unlock: "通过商店获得",
     },
     {
+        id: 3010905,
+        name: "枯骨生花",
+        desc: "承载死亡的枯骨，亦能绽放出坚强的生命。",
+        icon: "T_Head_Cannon_Kugu",
+        rarity: 5,
+        unlock: "通过商店获得",
+    },
+    {
         id: 3011001,
         name: "电橘他二号",
         desc: "喵呜♪喵喵喵♪喵喵♪♪",
@@ -9301,8 +9677,8 @@ export const weaponSkinData: Accessory[] = [
     {
         id: 3011005,
         name: "UI_WeaponSkin_Name_3011005",
-        desc: "UI_WeaponSkin_Des_3010111",
-        icon: "",
+        desc: "只有寂静的白雪记得，被焚成灰烬的那个长夜。",
+        icon: "T_Head_Shotgun_Nahan",
         rarity: 5,
         unlock: "通过商店获得",
     },
@@ -9465,6 +9841,34 @@ export const hairData: HairItem[] = [
         rarity: 4,
     },
     {
+        id: 10135,
+        name: "捣蛋南瓜·杏黄",
+        desc: "仅用装饰，不可食用。",
+        icon: "T_Fashion_Hat29_03",
+        rarity: 4,
+    },
+    {
+        id: 10136,
+        name: "捣蛋南瓜·锈红",
+        desc: "仅用装饰，不可食用。",
+        icon: "T_Fashion_Hat29_04",
+        rarity: 4,
+    },
+    {
+        id: 10137,
+        name: "捣蛋南瓜·鎏金",
+        desc: "仅用装饰，不可食用。",
+        icon: "T_Fashion_Hat29_02",
+        rarity: 4,
+    },
+    {
+        id: 10138,
+        name: "捣蛋南瓜·薄荷",
+        desc: "仅用装饰，不可食用。",
+        icon: "T_Fashion_Hat29_01",
+        rarity: 4,
+    },
+    {
         id: 110292,
         name: "赦罪者",
         icon: "T_Fashion_Fuluo_01",
@@ -9515,8 +9919,8 @@ export const hairData: HairItem[] = [
     },
     {
         id: 410392,
-        name: "UI_Skin_Name_410301",
-        icon: "T_Fashion_Zhiliu_01",
+        name: "结丝夜行",
+        icon: "T_Fashion_SPLise_01",
         rarity: 5,
         charId: 4103,
     },

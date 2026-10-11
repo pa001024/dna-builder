@@ -347,7 +347,7 @@ describe("DOT计算", () => {
                 极性: "A",
                 耐受: 15,
                 类型: "角色",
-                追加伤害: 0.5,
+                加成: { 追加伤害: 0.5 },
                 效果: "测试追加伤害",
             })
             const build = createDotBuild({ char, charMods: [mod], dotSettings: { skill: 0, melee: 1, ranged: 0 } })

@@ -81,6 +81,7 @@ export const questChain2VersionRanges: QuestChainVersionRange[] = [
     [110220, 110222, "1.6"],
     [110231, 110233, "1.6"],
     [400130, 400136, "1.6"],
+    [120701, 120706, "1.7"],
 ]
 
 export const questChain2Version: Record<number, string> = buildQuestChainVersionMap(questChain2VersionRanges)
@@ -5208,6 +5209,207 @@ const questChainDataRaw: QuestChain[] = [
             {
                 id: 12030801,
                 sr: 104108,
+            },
+        ],
+    },
+    {
+        id: 120701,
+        name: "行于破晓",
+        chapterName: "世界纪游",
+        chapterNumber: "海伯利亚",
+        episode: "行于破晓",
+        type: 6,
+        reward: [50665],
+        startTime: 1776909600,
+        quests: [
+            {
+                id: 12070101,
+                sr: 101107,
+                next: {
+                    Success: 12070102,
+                },
+            },
+            {
+                id: 12070102,
+                sr: 101107,
+                next: {
+                    Success: 12070103,
+                },
+            },
+            {
+                id: 12070103,
+                sr: 101108,
+            },
+        ],
+    },
+    {
+        id: 120702,
+        name: "行于破晓",
+        chapterName: "世界纪游",
+        chapterNumber: "海伯利亚",
+        episode: "行于破晓",
+        type: 6,
+        reward: [50666],
+        startTime: 1776909600,
+        quests: [
+            {
+                id: 12070201,
+                sr: 101101,
+                next: {
+                    Success: 12070202,
+                },
+            },
+            {
+                id: 12070202,
+                sr: 106001,
+                next: {
+                    Success: 12070203,
+                },
+            },
+            {
+                id: 12070203,
+                sr: 106301,
+                next: {
+                    Success: 12070204,
+                },
+            },
+            {
+                id: 12070204,
+                sr: 101101,
+            },
+        ],
+    },
+    {
+        id: 120703,
+        name: "行于破晓",
+        chapterName: "世界纪游",
+        chapterNumber: "海伯利亚",
+        episode: "行于破晓",
+        type: 6,
+        reward: [50667],
+        startTime: 1776909600,
+        quests: [
+            {
+                id: 12070301,
+                sr: 101107,
+                next: {
+                    Success: 12070311,
+                },
+            },
+            {
+                id: 12070311,
+                sr: 101101,
+                next: {
+                    Success: 12070321,
+                },
+            },
+            {
+                id: 12070321,
+                sr: 101103,
+                next: {
+                    Success: 12070331,
+                },
+            },
+            {
+                id: 12070331,
+                sr: 101101,
+                next: {
+                    Success: 12070302,
+                },
+            },
+            {
+                id: 12070302,
+                sr: 106001,
+                next: {
+                    Success: 12070303,
+                },
+            },
+            {
+                id: 12070303,
+                sr: 101101,
+            },
+        ],
+    },
+    {
+        id: 120704,
+        name: "行于破晓",
+        chapterName: "世界纪游",
+        chapterNumber: "海伯利亚",
+        episode: "行于破晓",
+        type: 6,
+        reward: [50668],
+        startTime: 1776909600,
+        quests: [
+            {
+                id: 12070401,
+                sr: 101107,
+                next: {
+                    Success: 12070411,
+                },
+            },
+            {
+                id: 12070411,
+                sr: 101101,
+                next: {
+                    Success: 12070402,
+                },
+            },
+            {
+                id: 12070402,
+                sr: 101701,
+            },
+        ],
+    },
+    {
+        id: 120705,
+        name: "行于破晓",
+        chapterName: "世界纪游",
+        chapterNumber: "海伯利亚",
+        episode: "行于破晓",
+        type: 6,
+        reward: [50669],
+        startTime: 1776909600,
+        quests: [
+            {
+                id: 12070501,
+                sr: 101901,
+                next: {
+                    Success: 12070502,
+                },
+            },
+            {
+                id: 12070502,
+                sr: 101703,
+                next: {
+                    Success: 12070503,
+                },
+            },
+            {
+                id: 12070503,
+                sr: 101101,
+            },
+        ],
+    },
+    {
+        id: 120706,
+        name: "行于破晓",
+        chapterName: "世界纪游",
+        chapterNumber: "海伯利亚",
+        episode: "行于破晓",
+        type: 6,
+        reward: [50670],
+        startTime: 1776909600,
+        quests: [
+            {
+                id: 12070601,
+                sr: 101901,
+                next: {
+                    Success: 12070602,
+                },
+            },
+            {
+                id: 12070602,
+                sr: 101101,
             },
         ],
     },

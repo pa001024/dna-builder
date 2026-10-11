@@ -34,9 +34,12 @@ describe("normalizeDBMapKind / normalizeDBMapPart", () => {
         expect(normalizeDBMapKind(" 读物 ")).toBe("book")
         expect(normalizeDBMapKind("Resource")).toBe("resource")
         expect(normalizeDBMapKind("道具")).toBe("resource")
+        expect(normalizeDBMapKind("潘神")).toBe("pan")
+        expect(normalizeDBMapKind("潘神魔灵")).toBe("pan")
         expect(normalizeDBMapPart("treasure")).toBe("treasure")
         expect(normalizeDBMapPart("藏宝点")).toBe("treasure")
         expect(normalizeDBMapPart("page")).toBe("page")
+        expect(normalizeDBMapPart("潘神点位")).toBe("pan")
     })
 
     it("无法识别时返回 undefined", () => {
@@ -102,6 +105,58 @@ describe("资源位置", () => {
 
     it("没有采集点数据的资源返回空数组（不是抛错）", () => {
         expect(resolveDBMapGroups({ kind: "resource", id: 99 })).toEqual([])
+    })
+})
+
+describe("潘神位置", () => {
+    it("按 id 展开全部固定点位（一个点位一行）", () => {
+        const groups = resolveDBMapGroups({ kind: "pan", id: 1011 })
+
+        expect(groups).toHaveLength(14)
+        expect(groups.every(group => group.pointType === "pan")).toBe(true)
+        expect(groups.every(group => group.entryId === 1011 && group.entryName === "魔灵潘神")).toBe(true)
+        expect(groups.every(group => group.points.length === 1)).toBe(true)
+        expect(groups[0]).toMatchObject({
+            regionId: 1011,
+            regionName: "冰湖城东区",
+            subRegionId: 101101,
+            subRegionName: "冰湖城外围",
+            points: [[-6800, 14207]],
+        })
+        // 潘神表本身不带图标，用兜底图标
+        expect(groups.every(group => group.icon === "T_Head_Empty")).toBe(true)
+        expect(groups.every(group => group.jumpable)).toBe(true)
+    })
+
+    it("按名称定位时同名潘神全部列出（中文类型写法也认）", () => {
+        const groups = resolveDBMapGroups({ kind: "潘神魔灵", name: "魔灵潘神" })
+
+        // 10 个区域的潘神同名，共 60 处固定点位
+        expect(groups).toHaveLength(60)
+        expect(new Set(groups.map(group => group.entryId)).size).toBe(10)
+    })
+
+    it("part 是严格筛选：只要书页时潘神点位一条不混入", () => {
+        expect(resolveDBMapGroups({ kind: "pan", id: 1011, part: "page" })).toEqual([])
+        expect(resolveDBMapGroups({ kind: "pan", id: 1011, part: "潘神点位" })).toHaveLength(14)
+    })
+
+    it("跳转路由带坐标，且不携带资源筛选", () => {
+        const route = buildDBMapRoute(resolveDBMapGroups({ kind: "pan", id: 1011 })[0]!) as {
+            name: string
+            query: Record<string, string>
+        }
+
+        expect(route.name).toBe("map-tool")
+        expect(route.query.regionId).toBe("1011")
+        expect(route.query.subRegionId).toBe("101101")
+        expect(route.query.pointX).toBe("-6800")
+        expect(route.query.pointY).toBe("14207")
+        expect(route.query.rid).toBeUndefined()
+    })
+
+    it("查不到的潘神 id 返回空数组", () => {
+        expect(resolveDBMapGroups({ kind: "pan", id: 999999 })).toEqual([])
     })
 })
 

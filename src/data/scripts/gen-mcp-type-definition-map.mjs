@@ -7,24 +7,25 @@ import { resolve } from "node:path"
  */
 const TYPE_DEFINITION_CONFIG = {
     AbyssDungeon: { filePath: "d/abyss.data.ts", interfaceName: "AbyssDungeon" },
-    Buff: { filePath: "data-types.ts", interfaceName: "Buff" },
-    Char: { filePath: "data-types.ts", interfaceName: "Char" },
+    Buff: { filePath: "d/buff.data.ts", interfaceName: "Buff" },
+    Char: { filePath: "d/char.data.ts", interfaceName: "Char" },
     CharExt: { filePath: "d/charext.data.ts", interfaceName: "CharExt" },
     CharVoice: { filePath: "d/charvoice.data.ts", interfaceName: "CharVoice" },
-    DBMap: { filePath: "d/map.data.ts", interfaceName: "DBMap" },
+    DBMap: { filePath: "d/onlinemapcache.data.ts", interfaceName: "DBMap" },
     Draft: { filePath: "d/draft.data.ts", interfaceName: "Draft" },
     Dungeon: { filePath: "d/dungeon.data.ts", interfaceName: "Dungeon" },
     HardBoss: { filePath: "d/hardboss.data.ts", interfaceName: "HardBoss" },
     Jargon: { filePath: "d/jargon.data.ts", interfaceName: "Jargon" },
     DynQuest: { filePath: "d/dynquest.data.ts", interfaceName: "DynQuest" },
-    Mod: { filePath: "data-types.ts", interfaceName: "Mod" },
+    Mod: { filePath: "d/mod.data.ts", interfaceName: "Mod" },
     NPC: { filePath: "d/npc.data.ts", interfaceName: "NPC" },
+    Pan: { filePath: "d/pan.data.ts", interfaceName: "Pan" },
     PartyTopic: { filePath: "d/partytopic.data.ts", interfaceName: "PartyTopic" },
     Pet: { filePath: "d/pet.data.ts", interfaceName: "Pet" },
     QuestStory: { filePath: "d/quest.data.ts", interfaceName: "QuestStory" },
-    Reward: { filePath: "data-types.ts", interfaceName: "Reward" },
+    Reward: { filePath: "d/reward.data.ts", interfaceName: "Reward" },
     SubRegion: { filePath: "d/subregion.data.ts", interfaceName: "SubRegion" },
-    Weapon: { filePath: "data-types.ts", interfaceName: "Weapon" },
+    Weapon: { filePath: "d/weapon.data.ts", interfaceName: "Weapon" },
 }
 
 /**
