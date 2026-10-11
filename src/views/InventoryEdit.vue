@@ -3,16 +3,19 @@ import type { DNAAPI, DNAModesBean, DNARoleShowBean } from "dna-api"
 import { useTranslation } from "i18next-vue"
 // 引入必要的依赖
 import { computed, ref } from "vue"
+import { useGameText } from "@/composables/useGameText"
 import { LeveledMod, LeveledModHelper, LeveledWeapon, LeveledWeaponHelper, modData, weaponData } from "@/data"
 import { useInvStore } from "@/store/inv"
 import { useSettingStore } from "@/store/setting"
 import { useUIStore } from "@/store/ui"
 import { copyText, pasteText } from "@/util"
+import { describeEffectItem } from "@/utils/effect-description"
 import { matchPinyin } from "@/utils/pinyin-utils"
 
 const inv = useInvStore()
 const ui = useUIStore()
 const { t } = useTranslation()
+const { gpt } = useGameText()
 const syncing = ref(false)
 // 同步模式选择弹窗是否可见
 const showSyncModeDialog = ref(false)
@@ -221,8 +224,7 @@ async function startSync(mode: SyncMode) {
     showSyncModeDialog.value = false
     // 同步魔之楔需要扫描所有角色(及武器)已装备的魔之楔, 耗时较长, 先确认
     if (mode === "weapons_and_mods" || mode === "weapons_and_all_mods") {
-        const message =
-            mode === "weapons_and_mods" ? t("inventory.sync_mods_confirm") : t("inventory.sync_all_mods_confirm")
+        const message = mode === "weapons_and_mods" ? t("inventory.sync_mods_confirm") : t("inventory.sync_all_mods_confirm")
         const confirmed = await ui.showDialog(t("inventory.sync_mods_confirm_title"), message)
         if (!confirmed) return
     }
@@ -387,7 +389,7 @@ const buffOptions = computed(() => {
                 label: buff.名称 || "",
                 value: buff,
                 lv: lv <= 0 ? buff.等级 : lv,
-                description: buff.描述 || "",
+                description: describeEffectItem(item, gpt),
             }
         })
 })
@@ -433,7 +435,7 @@ const showExpCalculator = ref(false)
                         class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                         @click="showExpCalculator = true"
                     >
-                        {{ $t('inventory-edit.exp_calc') }}
+                        {{ $t("inventory-edit.exp_calc") }}
                     </button>
                     <button
                         type="button"
@@ -448,14 +450,14 @@ const showExpCalculator = ref(false)
                         class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                         @click="handleImport"
                     >
-                        {{ $t('inventory-edit.import_json') }}
+                        {{ $t("inventory-edit.import_json") }}
                     </button>
                     <button
                         type="button"
                         class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                         @click="handleExport"
                     >
-                        {{ $t('inventory-edit.copy_json') }}
+                        {{ $t("inventory-edit.copy_json") }}
                     </button>
                 </div>
 
@@ -488,17 +490,15 @@ const showExpCalculator = ref(false)
                                     @click="handleSelectAllWeapons"
                                 >
                                     {{
-                                        filteredWeapons.length && Object.keys(inv.weapons).length === filteredWeapons.length
-                                            ? "取消全选"
-                                            : "全选"
+                                        filteredWeapons.length && Object.keys(inv.weapons).length === filteredWeapons.length ? "取消全选" : "全选"
                                     }}
                                 </button>
                                 <label class="flex cursor-pointer items-center gap-1.5 text-xs text-base-content/60">
-                                    {{ $t('近战') }}
+                                    {{ $t("近战") }}
                                     <input v-model="inv.enableWeapons.近战" type="checkbox" class="toggle toggle-secondary toggle-sm" />
                                 </label>
                                 <label class="flex cursor-pointer items-center gap-1.5 text-xs text-base-content/60">
-                                    {{ $t('远程') }}
+                                    {{ $t("远程") }}
                                     <input v-model="inv.enableWeapons.远程" type="checkbox" class="toggle toggle-secondary toggle-sm" />
                                 </label>
                             </div>
@@ -559,7 +559,7 @@ const showExpCalculator = ref(false)
                                     {{ filteredMods.length && filteredSelectedMods.length === filteredMods.length ? "取消全选" : "全选" }}
                                 </button>
                                 <label
-                                    v-for="color in ['金', '紫', '蓝', '绿', '白'] as const"
+                                    v-for="color in ['金', '紫', '蓝', '绿', '白']"
                                     :key="color"
                                     class="flex cursor-pointer items-center gap-1.5 text-xs text-base-content/60"
                                 >
@@ -671,14 +671,14 @@ const showExpCalculator = ref(false)
                             class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                             @click="handleImport"
                         >
-                            {{ $t('inventory-edit.import_json') }}
+                            {{ $t("inventory-edit.import_json") }}
                         </button>
                         <button
                             type="button"
                             class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xs border border-base-content/15 bg-base-100/60 px-4 text-sm font-medium text-base-content/80 backdrop-blur-sm transition-colors duration-150 hover:border-primary/50 hover:text-primary"
                             @click="handleExport"
                         >
-                            {{ $t('inventory-edit.copy_json') }}
+                            {{ $t("inventory-edit.copy_json") }}
                         </button>
                     </div>
                     <PlayerExpCalculator />

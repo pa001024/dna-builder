@@ -251,6 +251,7 @@ function getDisplayBuff(buff: LeveledBuff) {
                     :title="buff.label"
                     :buff="getDisplayBuff(buff.value)"
                     :lv="buff.lv"
+                    :description="buff.description"
                     selected
                     :income="buff.income"
                     :coverage="buff.coverage"
@@ -265,6 +266,7 @@ function getDisplayBuff(buff: LeveledBuff) {
                     :title="buff.label"
                     :buff="getDisplayBuff(buff.value)"
                     :lv="buff.lv"
+                    :description="buff.description"
                     :income="buff.income"
                     @set-buff-lv="setBuffLv"
                     @click="toggleBuff(buff.value)"

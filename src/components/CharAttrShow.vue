@@ -115,6 +115,92 @@ const dynamicAttrSourceMap = computed<Record<string, DynamicAttrSource[]>>(() =>
 })
 
 /**
+ * 特效 code 对角色属性的实际数值贡献：dynamicAttrSourceMap 只覆盖用户勾选的动态 BUFF。
+ * 装备特效自带的 code 按目标逐个关闭后重算，差值即该特效的贡献，静态特效属性另有专属行。
+ */
+const effectCodeSourceMap = computed<Record<string, DynamicAttrSource[]>>(() => {
+    const sourceMap: Record<string, DynamicAttrSource[]> = {}
+    const epsilon = 1e-10
+
+    collectEffectCodeTargets(props.charBuild).forEach(target => {
+        const buildWithoutEffect = props.charBuild.clone()
+        target.disable(buildWithoutEffect)
+        // 与 attributes 保持同一武器作用域计算，避免上下文差异产生虚假差值
+        const attrsWithoutEffect = buildWithoutEffect.calculateWeaponAttributes()
+
+        Object.entries(props.attributes).forEach(([attrKey, attrValue]) => {
+            const withoutValue = attrsWithoutEffect[attrKey as keyof CharAttr]
+            if (typeof attrValue !== "number" || typeof withoutValue !== "number") return
+
+            const delta = attrValue - withoutValue
+            if (Math.abs(delta) < epsilon) return
+
+            sourceMap[attrKey] ||= []
+            sourceMap[attrKey].push({
+                sourceName: target.label,
+                value: delta,
+            })
+        })
+    })
+
+    return sourceMap
+})
+
+/**
+ * 特效 code 的关闭目标：在克隆构筑上逐个关闭后重算，差值即该特效 code 的实际数值贡献。
+ * 只置空 code 字符串，特效的静态数值属性不受影响（另有专属行展示），与 CharBuild.getEffectCodeBuffs 同口径。
+ */
+interface EffectCodeTarget {
+    label: string
+    disable: (build: CharBuild) => void
+}
+
+/**
+ * 收集当前生效的特效 code 目标（动态 BUFF 之外、挂在 MOD/武器实例上的 effect.data code）。
+ * @param charBuild 当前构筑
+ * @returns 各特效的展示名与关闭函数
+ */
+function collectEffectCodeTargets(charBuild: CharBuild): EffectCodeTarget[] {
+    const targets: EffectCodeTarget[] = []
+    const slots = [charBuild.charMods, charBuild.meleeMods, charBuild.rangedMods, charBuild.skillMods]
+    const slotsOf = (build: CharBuild) => [build.charMods, build.meleeMods, build.rangedMods, build.skillMods]
+    slots.forEach((slot, slotIndex) => {
+        slot.forEach((mod, modIndex) => {
+            const buff = mod?.buff
+            if (!buff?.code || buff.等级 <= 0) return
+            targets.push({
+                label: buff.名称,
+                disable: target => {
+                    const targetBuff = slotsOf(target)[slotIndex][modIndex]?.buff
+                    if (targetBuff) targetBuff.code = ""
+                },
+            })
+        })
+    })
+    const auraBuff = charBuild.auraMod?.buff
+    if (auraBuff?.code && auraBuff.等级 > 0) {
+        targets.push({
+            label: auraBuff.名称,
+            disable: target => {
+                if (target.auraMod?.buff) target.auraMod.buff.code = ""
+            },
+        })
+    }
+    const weapons = [charBuild.meleeWeapon, charBuild.rangedWeapon] as const
+    weapons.forEach((weapon, weaponIndex) => {
+        const buff = weapon?.buff
+        if (!buff?.code || buff.等级 <= 0 || !weapon.forgeEffective) return
+        targets.push({
+            label: buff.名称,
+            disable: target => {
+                const targetWeapon = weaponIndex === 0 ? target.meleeWeapon : target.rangedWeapon
+                if (targetWeapon?.buff) targetWeapon.buff.code = ""
+            },
+        })
+    })
+    return targets
+}
+/**
  * 各武器对角色充盈威力的武器转化来源（武器转化充盈威力），用于充盈威力来源明细。
  * 与 CharBuild.calculateWeaponAttributes 的汇总逻辑保持一致，仅保留非零贡献的武器。
  */
@@ -298,6 +384,14 @@ function formatExtraSource(key: string, sourceField: string, value: number): str
                     >
                         <div class="text-base-content/80">{{ dynamicSource.sourceName }}</div>
                         {{ formatDynamicSource(key, dynamicSource.value) }}
+                    </li>
+                    <li
+                        v-for="(effectSource, index) in effectCodeSourceMap[key] || []"
+                        :key="`effect-${effectSource.sourceName}-${index}`"
+                        class="flex justify-between gap-8 text-sm text-primary"
+                    >
+                        <div class="text-base-content/80">{{ effectSource.sourceName }}</div>
+                        {{ formatDynamicSource(key, effectSource.value) }}
                     </li>
                     <li
                         v-for="(source, index) in key === '充盈威力' ? fullnessWeaponSources : []"

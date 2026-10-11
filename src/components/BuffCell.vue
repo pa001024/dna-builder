@@ -10,6 +10,8 @@ const props = defineProps<{
     title?: string
     /** 覆盖率（0-1，仅选中且父级提供时显示覆盖率控件） */
     coverage?: number
+    /** 显式描述（特效行传入的国际化熔炼/效果文案，仅在 buff 无自带手写描述时展示） */
+    description?: string
 }>()
 const emit = defineEmits<{
     setBuffLv: [buff: LeveledBuff, level: number]
@@ -57,7 +59,7 @@ const setBuffLv = (buff: LeveledBuff, lv: number) => {
                     </div>
                 </div>
                 <div class="text-xs text-base-content/60 mb-2">
-                    {{ $t(buff.描述) }}
+                    {{ buff.描述 ? $t(buff.描述) : description }}
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="text-xs text-base-content/40" v-if="income">

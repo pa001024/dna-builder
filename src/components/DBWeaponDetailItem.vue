@@ -151,9 +151,7 @@ const extraMasteryChars = computed<Char[]>(() => {
     if (categories.length === 0) return []
     const masteryIds = new Set(masteryChars.value.map(char => char.id))
     return charData.filter(
-        char =>
-            !masteryIds.has(char.id) &&
-            (char.额外精通 || []).map(normalizeWeaponType).some(type => categories.includes(type))
+        char => !masteryIds.has(char.id) && (char.额外精通 || []).map(normalizeWeaponType).some(type => categories.includes(type))
     )
 })
 
@@ -165,7 +163,7 @@ const extraMasteryChars = computed<Char[]>(() => {
  */
 function matchedProficiencyTypes(char: Char, group: "mastery" | "extra"): string[] {
     if (group === "mastery" && char.精通.includes("全部类型")) return ["全部类型"]
-    const list = group === "mastery" ? char.精通 : (char.额外精通 || [])
+    const list = group === "mastery" ? char.精通 : char.额外精通 || []
     const categories = weaponCategories.value
     return list.filter(type => categories.includes(normalizeWeaponType(type)))
 }
@@ -629,9 +627,7 @@ watch(
                             :alt="char.名称"
                             class="size-8 shrink-0 rounded-xs bg-base-200 object-cover object-top"
                         />
-                        <span class="min-w-0 flex-1 truncate transition-colors duration-150 hover:text-primary">{{
-                            $t(char.名称)
-                        }}</span>
+                        <span class="min-w-0 flex-1 truncate transition-colors duration-150 hover:text-primary">{{ $t(char.名称) }}</span>
                         <span class="shrink-0 text-xs whitespace-nowrap text-primary">{{
                             matchedProficiencyTypes(char, "mastery")
                                 .map(type => $t(type))
@@ -653,9 +649,7 @@ watch(
                             :alt="char.名称"
                             class="size-8 shrink-0 rounded-xs bg-base-200 object-cover object-top"
                         />
-                        <span class="min-w-0 flex-1 truncate transition-colors duration-150 hover:text-primary">{{
-                            $t(char.名称)
-                        }}</span>
+                        <span class="min-w-0 flex-1 truncate transition-colors duration-150 hover:text-primary">{{ $t(char.名称) }}</span>
                         <span class="shrink-0 text-xs whitespace-nowrap text-primary">{{
                             matchedProficiencyTypes(char, "extra")
                                 .map(type => $t(type))

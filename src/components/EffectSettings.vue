@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed } from "vue"
 import type { CharSettings } from "@/composables/useCharSettings"
+import { useGameText } from "@/composables/useGameText"
 import { CharBuild, LeveledBuff, LeveledMod, LeveledWeapon } from "@/data"
 import { getModBuffLvFromSetting, getWBuffLvFromSetting } from "@/data/effectLv"
 import { useInvStore } from "@/store/inv"
+import { describeEffectItem } from "@/utils/effect-description"
 
 const inv = useInvStore()
+const { gpt } = useGameText()
 const props = defineProps<{
     mods: (LeveledMod | LeveledWeapon)[]
     charBuild: CharBuild
@@ -47,7 +50,7 @@ const buffOptions = computed(() => {
                 label: buff.名称 || "",
                 value: lv <= 0 ? buff.clone().setLv(buff.mx || 1) : buff,
                 lv: lv <= 0 ? buff.等级 : lv,
-                description: buff.描述 || "",
+                description: describeEffectItem(mod, gpt),
             }
         })
 })

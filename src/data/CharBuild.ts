@@ -43,6 +43,8 @@ export interface CharAttr {
     /** 技能追伤 0开始：作用于技能伤害的独立乘区，效果与武器的追加伤害类似 */
     技能追伤: number
     独立增伤: number
+    /** 技能独立增伤 0开始：只作用于技能伤害池的独立乘区（武器伤害池不吃） */
+    技能独立增伤: number
     属性穿透: number
     无视防御: number
     技能无视防御: number
@@ -1089,6 +1091,27 @@ export class CharBuild {
     }
 
     /**
+     * 已装备 MOD / 武器的特效 code 列表（effect.data 条目可带 `code` 做条件结算，如「无解谜题」）。
+     *
+     * 用户勾选 BUFF 的 code 走 `dynamicBuffs`；特效 code 挂在装备实例上，随装备更换与特效等级
+     * （含武器熔炼生效状态）动态变化，因此每次计算时现取，不另设缓存：遍历量仅与槽位数成正比。
+     * 只收已生效（特效等级 > 0，武器还需熔炼生效）的条目；`技能` 限定的改由字段级条件合并应用。
+     * @returns 本次计算需执行的特效 code buff
+     */
+    private getEffectCodeBuffs(): LeveledBuff[] {
+        const out: LeveledBuff[] = []
+        for (const mod of this.mods) {
+            const buff = mod.buff
+            if (buff?.code && buff.等级 > 0) out.push(buff)
+        }
+        for (const weapon of [this.meleeWeapon, this.rangedWeapon]) {
+            const buff = weapon?.buff
+            if (buff?.code && buff.等级 > 0 && weapon.forgeEffective) out.push(buff)
+        }
+        return out
+    }
+
+    /**
      * 差分条件codeBUFF（带 `技能` 的动态属性 BUFF）在全局属性上产生的顶层属性增量。
      * 以当前全局属性（不含条件codeBUFF）为基线跑一遍 code，把数值差转成可合并的增量：
      * 乘法池属性（独立增伤系列等）存乘法因子对应的净增量，其余属性存平值差。
@@ -1096,42 +1119,53 @@ export class CharBuild {
      * @returns 条件属性列表；无条件codeBUFF时为空数组
      */
     private getScopedCodeBuffConditionals(): { 技能: string; pattern: RegExp; props: Record<string, number> }[] {
-        const scopedBuffs = this.dynamicBuffs.filter(b => typeof b.技能 === "string")
+        const scopedBuffs = [...this.dynamicBuffs, ...this.getEffectCodeBuffs()].filter(b => typeof b.技能 === "string")
         if (!scopedBuffs.length) return []
         // 命中缓存：基线有效性随作用域属性表（MOD/武器/BUFF 增删与数值版本号）失效
         const table = this.getBonusSourceTable()
         if (this.scopedCodeConditionalsCache?.table === table) return this.scopedCodeConditionalsCache.entries
-
-        // 基线全局属性已不含条件codeBUFF（应用点已跳过），以其为参照差分出各 code 的增量
-        const baseAttrs = this.calculateWeaponAttributes()
-        const entries = scopedBuffs.map(buff => {
-            const 技能 = buff.技能 as string
-            const snapshot = { ...baseAttrs }
-            const result = buff.applyDynamicAttr(
-                this.char,
-                snapshot,
-                this.getAllWeapons(),
-                this.getAllWeaponsAttrs(),
-                this.enemy,
-                this.getModAttrs()
-            )
-            const props: Record<string, number> = {}
-            for (const [key, value] of Object.entries(result)) {
-                if (typeof value !== "number") continue
-                const before = (snapshot as unknown as Record<string, number | undefined>)[key]
-                if (typeof before !== "number" || value === before) continue
-                if (isMultiplicativeAttr(key)) {
-                    if (Math.abs(1 + before) < Number.EPSILON) continue
-                    props[key] = (1 + value) / (1 + before) - 1
-                } else {
-                    props[key] = value - before
+        // 可重入保护：基线计算（calculateWeaponAttributes）内部经 attr 型 BUFF 的表达式求值会再次进入本函数
+        // （applyBuffAttr → evaluateAST → 本函数），此时外层基线尚未算出、缓存仍是冷的，直接返回空。
+        // 基线本就不含条件 code，空列表正是正确的基线口径，还能掐断无限递归。
+        if (this.scopedCodeComputing) return []
+        this.scopedCodeComputing = true
+        try {
+            // 基线全局属性已不含条件codeBUFF（应用点已跳过），以其为参照差分出各 code 的增量
+            const baseAttrs = this.calculateWeaponAttributes()
+            const entries = scopedBuffs.map(buff => {
+                const 技能 = buff.技能 as string
+                const snapshot = { ...baseAttrs }
+                const result = buff.applyDynamicAttr(
+                    this.char,
+                    snapshot,
+                    this.getAllWeapons(),
+                    this.getAllWeaponsAttrs(),
+                    this.enemy,
+                    this.getModAttrs()
+                )
+                const props: Record<string, number> = {}
+                for (const [key, value] of Object.entries(result)) {
+                    if (typeof value !== "number") continue
+                    const before = (snapshot as unknown as Record<string, number | undefined>)[key]
+                    if (typeof before !== "number" || value === before) continue
+                    if (isMultiplicativeAttr(key)) {
+                        if (Math.abs(1 + before) < Number.EPSILON) continue
+                        props[key] = (1 + value) / (1 + before) - 1
+                    } else {
+                        props[key] = value - before
+                    }
                 }
-            }
-            return { 技能, pattern: this.compileBuffSkillPattern(技能), props }
-        })
-        this.scopedCodeConditionalsCache = { table, entries }
-        return entries
+                return { 技能, pattern: this.compileBuffSkillPattern(技能), props }
+            })
+            this.scopedCodeConditionalsCache = { table, entries }
+            return entries
+        } finally {
+            this.scopedCodeComputing = false
+        }
     }
+
+    /** 条件 code 差分基线是否正在计算中（重入保护标志，见 getScopedCodeBuffConditionals） */
+    private scopedCodeComputing = false
 
     private scopedCodeConditionalsCache?: {
         table: BonusSourceTable
@@ -1294,6 +1328,7 @@ export class CharBuild {
         const ignoreDefense = this.getTotalBonus("无视防御")
         const skillIgnoreDefense = this.getTotalBonus("技能无视防御")
         const independentDamageIncrease = this.getTotalBonusMul("独立增伤")
+        const skillIndependentDamageIncrease = this.getTotalBonusMul("技能独立增伤")
         const damageReduce = this.getTotalBonusReduce("减伤")
         const skillMultiplierSet = bonuses[characterBonusIndex.技能倍率赋值]
         const skillMultiplier = this.getTotalBonusMul("技能倍率乘数")
@@ -1393,6 +1428,7 @@ export class CharBuild {
             技能伤害: skillDamage,
             技能追伤: skillAdditionalDamage,
             独立增伤: independentDamageIncrease,
+            技能独立增伤: skillIndependentDamageIncrease,
             属性穿透: penetration,
             无视防御: ignoreDefense,
             技能无视防御: skillIgnoreDefense,
@@ -1438,17 +1474,16 @@ export class CharBuild {
         }
         // 应用MOD条件
         if (nocode) return attrs
-        if (this.dynamicBuffs.length > 0) {
+        const effectCodeBuffs = this.getEffectCodeBuffs()
+        if (this.dynamicBuffs.length > 0 || effectCodeBuffs.length > 0) {
             const all = this.getAllWeaponsAttrs()
             // 惰性 MOD 原始属性：仅当 BUFF code 实际访问对应槽位时才汇总
             const modAttrs = this.getModAttrs()
-            if (this.dynamicBuffs.length > 0) {
-                for (const b of this.dynamicBuffs) {
-                    // 条件codeBUFF（技能限定）不并入全局属性，改由字段级条件合并应用
-                    if (typeof b.技能 === "string") continue
-                    const { weapon, ...rest } = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all, this.enemy, modAttrs)
-                    attrs = rest
-                }
+            for (const b of [...this.dynamicBuffs, ...effectCodeBuffs]) {
+                // 条件codeBUFF（技能限定）不并入全局属性，改由字段级条件合并应用
+                if (typeof b.技能 === "string") continue
+                const { weapon, ...rest } = b.applyDynamicAttr(char, attrs, this.getAllWeapons(), all, this.enemy, modAttrs)
+                attrs = rest
             }
         }
         return attrs
@@ -1746,17 +1781,16 @@ export class CharBuild {
         }
         if (nocode) return attrs
 
-        if (this.dynamicBuffs.length > 0) {
+        const effectCodeBuffs = this.getEffectCodeBuffs()
+        if (this.dynamicBuffs.length > 0 || effectCodeBuffs.length > 0) {
             // TODO: 没做其他武器属性的code计算, 可能有问题 不过递归太多次也很麻烦
             const all = this.getAllWeaponsAttrs(weapon, attrs.weapon)
             // 惰性 MOD 原始属性：仅当 BUFF code 实际访问对应槽位时才汇总
             const modAttrs = this.getModAttrs()
-            if (this.dynamicBuffs.length > 0) {
-                for (const b of this.dynamicBuffs) {
-                    // 条件codeBUFF（技能限定）不并入全局属性，改由字段级条件合并应用
-                    if (typeof b.技能 === "string") continue
-                    attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all, this.enemy, modAttrs)
-                }
+            for (const b of [...this.dynamicBuffs, ...effectCodeBuffs]) {
+                // 条件codeBUFF（技能限定）不并入全局属性，改由字段级条件合并应用
+                if (typeof b.技能 === "string") continue
+                attrs = b.applyDynamicAttr(char, attrs, this.getAllWeapons(weapon), all, this.enemy, modAttrs)
             }
         }
         return attrs
@@ -2264,52 +2298,79 @@ export class CharBuild {
         return (1 - convert) * factor(r) + convert * factor(-4)
     }
 
-    // 计算技能伤害
-    public calculateSkillDamage(
-        attrs: ReturnType<typeof this.calculateAttributes>,
-        baseName = this.baseName,
-        fieldName?: string,
-        skillContext?: LeveledSkill
+    // 统一伤害结算：合并原 calculateWeaponDamage / calculateSkillDamage。
+    // - 双爆（暴击/触发期望）按伤害来源（字段归属）结算：有武器面板走武器双爆，无武器（角色技能）不结算双爆；
+    // - 乘区与分量按字段 tag 结算：tag 含「技能」用技能伤害池 + 技能追伤 + 纯元素分量，
+    //   tag 含「武器」用武器伤害池（角色增伤 + 武器增伤 + 武器伤害）+ 武器追加伤害 + 武器攻分量；
+    //   无 tag 时按归属回退（有武器→武器池，无武器→技能池）。
+    // 调用方按实际语义传参，禁止在外层重写 attrs / weaponAttr 的触发与增伤区（原 getDamage 的 hack 位，
+    // 把武器增伤/武器独立增伤乘进技能池、把武器追加伤害清零（丢了技能追伤）、把武器攻分量套在技能分量上，导致计算错误）。
+    public calculateDamage(
+        attrs: ReturnType<typeof this.calculateWeaponAttributes>,
+        weapon?: LeveledWeapon | LeveledSkillWeapon | null,
+        weaponAttr?: WeaponAttr,
+        options?: DamageCalcOptions
     ): DamageResult {
+        const panel = weaponAttr ?? attrs.weapon
+        // 归属：有武器实例 + 武器面板才结算双爆（暴击/触发期望）
+        const hasWeapon = !!weapon && !!panel
+        const tag = options?.fieldTag
+        // 乘区、分量口径：显式参数优先，其次按 tag（技能/武器互斥），无 tag 按归属回退
+        let isSkillPool = options?.isSkillPool
+        if (isSkillPool === undefined) {
+            if (tag?.includes("技能")) isSkillPool = true
+            else if (tag?.includes("武器")) isSkillPool = false
+            else isSkillPool = !hasWeapon
+        }
+        const isSummon = options?.isSummon ?? !!tag?.includes("召唤物")
+        const damageType = options?.damageType ?? weapon?.伤害类型
+        const attackTypeDamageBonus = options?.attackTypeDamageBonus ?? 0
+        const attackTypeIndependentBonus = options?.attackTypeIndependentBonus ?? 0
+        const weaponIndependentPenalty = options?.weaponIndependentPenalty ?? 0
+        // 技能池 + 有武器：覆盖率直接作为触发率参与期望（bonus 模型，调用方按 min(1, 技能触发 + 武器触发) 传入）
+        const skillTriggerCoverage = options?.skillTriggerCoverage ?? 1
+
         const boostMultiplier = this.calculateBoostMultiplier(attrs)
         const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
-        // 召唤物伤害按字段 tag 判断：字段 tag 含「召唤物」（如「[召唤物·战车]技能伤害」）即视为召唤物伤害，不再依赖字段名或技能声明
-        const skill = skillContext || this.allSkills.find(s => s.名称 === baseName)
-        const field = fieldName ? skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName)) : undefined
-        const isSummonDamage = !!field?.tag?.includes("召唤物")
-        // 技能伤害默认按纯元素结算（无物理基座），元素分量吃 元素增伤；
-        // 经 转物理（转切割/转贯穿/转震荡/转灾厄）转换出的分量按对应物理子类结算（吃 物理增伤，不受敌人元素抗性影响）
-        const damageIncreaseBase = 1 + attrs.增伤 + attrs.技能伤害 + (isSummonDamage ? attrs.召唤物伤害 : 0)
+        const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
+        const hpMore = boostMultiplier * desperateMultiplier
+        // 属性穿透对所有结算类型整体生效（与原两条路径一致）
+        const resistancePenetration = Math.max(0, 1 + attrs.属性穿透)
+
+        // 增伤池（tag）：技能池吃技能伤害，武器池吃武器增伤 + 武器伤害；召唤物伤害按 tag 含召唤物叠进基座
+        const damageIncreaseBase =
+            (isSkillPool
+                ? 1 + attrs.增伤 + attrs.技能伤害 + (isSummon ? attrs.召唤物伤害 : 0)
+                : 1 + attrs.增伤 + (panel?.增伤 ?? 0) + attrs.武器伤害) + attackTypeDamageBonus
         const elementDamageIncrease = attrs.元素增伤 || 0
         const physicalDamageIncrease = attrs.物理增伤 || 0
-        const independentDamageIncrease = 1 + attrs.独立增伤
-        // 技能追伤乘区（0起始增量）：与武器追加伤害类似的独立乘区，仅技能伤害结算生效
-        const skillAdditionalDamage = 1 + (attrs.技能追伤 || 0)
-        // 召唤物独立增伤乘区（0起始增量，1 + 该值 = 仅召唤物伤害结算的倍率）：如「伊薇4溯」将召唤物攻击速度超额部分按比例转化为该乘区
-        const summonIndependentDamageMultiplier = isSummonDamage ? 1 + attrs.召唤物独立增伤 : 1
-        const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
-
-        const hpMore = boostMultiplier * desperateMultiplier
-        // 属性穿透对所有结算类型整体生效（与武器伤害结算一致）
+        // 独立增伤：技能池吃角色侧 × 技能独立增伤；武器池为角色侧 × 武器侧（除惩罚因子，如箭雨降伤只作用于武器自身攻击）
+        const independentDamageIncrease =
+            (isSkillPool
+                ? (1 + attrs.独立增伤) * (1 + attrs.技能独立增伤)
+                : ((1 + attrs.独立增伤) * (1 + (panel?.独立增伤 ?? 0))) / (1 + weaponIndependentPenalty)) *
+            (1 + attackTypeIndependentBonus)
+        // 追加伤害（tag）：技能池吃技能追伤，武器池吃武器追加伤害
+        const additionalDamage = isSkillPool ? 1 + (attrs.技能追伤 || 0) : 1 + (panel?.追加伤害 ?? 0)
+        // 召唤物独立增伤：字段 tag 含召唤物时生效
+        const summonIndependentDamageMultiplier = isSummon ? 1 + attrs.召唤物独立增伤 : 1
         const otherMore =
             independentDamageIncrease *
-            skillAdditionalDamage *
+            additionalDamage *
             summonIndependentDamageMultiplier *
             imbalanceDamageMultiplier *
-            Math.max(0, 1 + attrs.属性穿透)
-        // per-part 有效增伤：元素分量取元素池（元素增伤），转物理 分量取物理池（物理增伤），均与 增伤/技能伤害 同池加算
+            resistancePenetration
+        const commonMore = hpMore * otherMore
+        // per-part 有效增伤：元素分量取元素池，物理分量取物理池，均与增伤基座同池加算
         const partDamageIncrease = (p: { settlesElement: boolean }) =>
             p.settlesElement ? damageIncreaseBase + elementDamageIncrease : damageIncreaseBase + physicalDamageIncrease
 
+        // 转物理（转切割/转贯穿/转震荡/转灾厄）与转属克/转属逆共享同一转换比例池（原两条路径一致）：
+        // 合计超过 100% 等比重压缩，不足时剩余按原始分量结算
         const enemyResistance = this.enemyResistance
-        // 元素抗性因子：元素伤害按 max(0, 1 - 敌人抗性) 结算；物理伤害不受敌人元素抗性影响（因子恒 1）
-        const factor = (r: number) => Math.max(0, 1 - r)
-        // 转属克/转属逆 翻转后的抗性：负抗（弱抗，如 -4）翻转为 0.5、正抗（强抗，如 0.5）翻转为 -4
+        const resistanceFactorOf = (r: number) => Math.max(0, 1 - r)
         const flippedResistance = enemyResistance > 0 ? -4 : 0.5
         const flippedFactor = Math.max(0, 1 - flippedResistance)
-        // 转物理（转切割/转贯穿/转震荡/转灾厄）与 转属克/转属逆（按敌人抗性方向取其一）共享同一转换比例池：
-        // 转属克/转属逆 把元素按比例转为属克/属逆元素（按翻转抗性结算）；转物理 把元素按比例转为对应物理子类（不受抗性影响）。
-        // 合计转换比例超过 100% 时等比重压缩（convertScale），不足 100% 时剩余部分按原始元素结算。
         const activeElementKey: "转属克" | "转属逆" | undefined =
             enemyResistance > 0 ? "转属克" : enemyResistance < 0 ? "转属逆" : undefined
         const rawElementConvert = activeElementKey ? Math.max(0, attrs[activeElementKey] || 0) : 0
@@ -2317,62 +2378,29 @@ export class CharBuild {
         const poolTotal = rawElementConvert + rawPhysicalConvert
         const convertScale = poolTotal > 1 ? 1 / poolTotal : 1
         const unconverted = Math.max(0, 1 - Math.min(1, poolTotal))
-        // parts 记录每个伤害分量的比例、抗性因子与最终结算类型（技能纯元素基座比例 = 1）：
-        // 未转换部分按原始敌人抗性结算；转属克/转属逆 部分按翻转抗性结算；转物理 部分按物理子类结算（抗性因子 1）
-        type SkillPart = { ratio: number; resistanceFactor: number; settlesElement: boolean }
-        const parts: SkillPart[] = []
-        if (unconverted > 0) parts.push({ ratio: unconverted, resistanceFactor: factor(enemyResistance), settlesElement: true })
-        if (activeElementKey) {
-            const ratio = Math.max(0, attrs[activeElementKey] || 0) * convertScale
-            if (ratio > 0) parts.push({ ratio, resistanceFactor: flippedFactor, settlesElement: true })
-        }
-        for (const key of physicalConvertKeywords) {
-            const ratio = Math.max(0, attrs[key] || 0) * convertScale
-            if (ratio <= 0) continue
-            parts.push({ ratio, resistanceFactor: 1, settlesElement: false })
+
+        // 双爆（归属）：仅有武器面板时结算暴击档位与触发率；
+        // 技能池的触发按 bonus 模型结算：未触发部分按 1 倍，触发部分按 (1 + bonus)，
+        // 期望 = base × (1 + bonus × 覆盖率)，覆盖率 = min(1, 技能触发 + 武器触发)，不再重写面板触发区
+        let critRate = 0
+        let critDamage = 1
+        let lowerCritDamage = 1
+        let higherCritDamage = 1
+        let critExpectedDamage = 1
+        let triggerRate = 0
+        if (hasWeapon) {
+            const critPanel = panel!
+            critRate = critPanel.暴击
+            critDamage = critPanel.暴伤
+            lowerCritDamage = (critPanel.暴伤 - 1) * Math.floor(critPanel.暴击) + 1
+            higherCritDamage = (critPanel.暴伤 - 1) * Math.ceil(critPanel.暴击) + 1
+            critExpectedDamage = 1 + critRate * (critDamage - 1)
+            // 触发率数值允许溢出但触发效果按 100% 封顶；负值钳制为 0，避免触发期望溢出为负导致伤害归零；
+            // 技能池的触发率即调用方传入的覆盖率（武器面板触发 + 技能触发后封顶），按 bonus 模型进入期望
+            triggerRate = isSkillPool ? skillTriggerCoverage : Math.min(1, Math.max(0, critPanel.触发))
         }
 
-        // 汇总各分量：ratio × 抗性因子 × 该分量有效增伤（物理/元素 访问器按结算类型拆分）
-        const physicalPart = parts
-            .filter(p => !p.settlesElement)
-            .reduce((sum, p) => sum + p.ratio * p.resistanceFactor * partDamageIncrease(p), 0)
-        const elementPart = parts
-            .filter(p => p.settlesElement)
-            .reduce((sum, p) => sum + p.ratio * p.resistanceFactor * partDamageIncrease(p), 0)
-        const allPart = physicalPart + elementPart
-        return {
-            expectedDamage: allPart * otherMore * hpMore,
-            noHpDamage: allPart * otherMore,
-            physicalDamage: physicalPart * otherMore * hpMore,
-            elementDamage: elementPart * otherMore * hpMore,
-        }
-    }
-
-    // 计算武器伤害
-    public calculateWeaponDamage(
-        attrs: ReturnType<typeof this.calculateWeaponAttributes>,
-        weapon: LeveledWeapon | LeveledSkillWeapon,
-        damageType = weapon.伤害类型
-    ): DamageResult {
-        const weaponAttrs = attrs.weapon!
-        // 计算武器基础伤害
-        const weaponAttackMultiplier = 1 // 倍率 这里设为1 使用动态计算
-        const totalWeaponDamage = attrs.攻击 + weaponAttrs.攻击
-        const inheritAllSkillWeapon = weapon instanceof LeveledSkillWeapon && !!weapon.inherit && weapon.atk === "all"
-        // inherit + atk=all 的同律武器保持纯元素结算，不能被继承的灾厄类型转为物理分量。
-        const convertElementalToPhysical = damageType === "灾厄" && !inheritAllSkillWeapon
-        const weaponDamagePhysical = convertElementalToPhysical
-            ? 1
-            : inheritAllSkillWeapon
-              ? 0
-              : (weaponAttackMultiplier * weaponAttrs.攻击) / totalWeaponDamage
-        const weaponDamageElemental = convertElementalToPhysical
-            ? 0
-            : inheritAllSkillWeapon
-              ? 1
-              : (weaponAttackMultiplier * attrs.攻击) / totalWeaponDamage
-
-        // 触发倍率：物理伤害类型按敌方当前血量类型结算，灾厄类型需敌方存在抗性才可触发。
+        // 触发倍率：物理伤害类型按敌方当前血量类型结算，灾厄类型需敌方存在抗性才可触发
         const getTriggerMultiplier = (type: string): number => {
             if (type === "灾厄") {
                 return this.enemyResistance !== 0 ? 1 + this.getTotalBonus("触发倍率") : 0
@@ -2381,140 +2409,166 @@ export class CharBuild {
                 ? this.hpTypeCoefficients[this.enemy.currentHPType] + this.getTotalBonus("触发倍率")
                 : 0
         }
-        // 触发效果按 100% 封顶：触发率数值允许溢出（>100%），但溢出部分不重复计入触发期望，
-        // 而是由 calculateWeaponAttributes 按该武器作用域的充盈转化转为角色的充盈威力；负值同样钳制为 0，
-        // 避免触发期望溢出为负导致伤害输出归零（如 [近战]{触发:-9}）。
-        const triggerRate = Math.min(1, Math.max(0, weaponAttrs.触发))
 
-        // 计算暴击伤害期望
-        // 暴击率允许超过 100% 溢出为更高暴击档位（见下方 floor/ceil 逻辑），因此不做上限钳制。
-        const critRate = weaponAttrs.暴击
-        const critDamage = weaponAttrs.暴伤
-        const lowerCritDamage = (weaponAttrs.暴伤 - 1) * Math.floor(weaponAttrs.暴击) + 1
-        const higherCritDamage = (weaponAttrs.暴伤 - 1) * Math.ceil(weaponAttrs.暴击) + 1
-        const critExpectedDamage = 1 + critRate * (critDamage - 1)
-
-        // 计算各种乘区（转属克/转属逆 按压缩后的有效比例经下方 resistance 翻转元素分量的抗性因子；
-        // 物理分量原本不受抗性影响，但 转属克/转属逆 会按比例将物理分量转为属克/属逆元素，同样享受翻转抗性）
-        const enemyResistance = this.enemyResistance
-        // 翻转抗性因子：转属克/转属逆 将物理分量转为属克/属逆元素时按翻转后的抗性结算（元素分量本身已由下方 resistance 翻转）
-        const flippedResistance = enemyResistance > 0 ? -4 : 0.5
-        const flippedFactor = Math.max(0, 1 - flippedResistance)
-        const resistancePenetration = Math.max(0, 1 + attrs.属性穿透)
-        const boostMultiplier = this.calculateBoostMultiplier(attrs)
-        const desperateMultiplier = this.calculateDesperateMultiplier(attrs)
-        // 增伤按结算类型分分量加算：元素分量吃 元素增伤，物理分量吃 物理增伤，二者均与 增伤/武器增伤/武器伤害 同池加算
-        const damageIncreaseBase = 1 + attrs.增伤 + weaponAttrs.增伤 + attrs.武器伤害
-        const elementDamageIncrease = attrs.元素增伤 || 0
-        const physicalDamageIncrease = attrs.物理增伤 || 0
-        const independentDamageIncrease = (1 + attrs.独立增伤) * (1 + weaponAttrs.独立增伤)
-        const additionalDamage = 1 + weaponAttrs.追加伤害
-        const imbalanceDamageMultiplier = this.imbalance ? attrs.失衡易伤 + 1.5 : 1
-        const hpMore = boostMultiplier * desperateMultiplier
-        const otherMore = independentDamageIncrease * additionalDamage * imbalanceDamageMultiplier * resistancePenetration
-        const commonMore = hpMore * otherMore
-        // per-part 有效增伤：元素 part 取元素池，物理 part 取物理池（与 增伤 加算，非独立乘区）
-        const partDamageIncrease = (p: { settlesElement: boolean }) =>
-            p.settlesElement ? damageIncreaseBase + elementDamageIncrease : damageIncreaseBase + physicalDamageIncrease
-
-        // 计算最终伤害（支持 转xx 系列属性）
-        // 转属克/转属逆（按敌人抗性方向取其一）与 转切割/转贯穿/转震荡/转灾厄 共享同一转换比例池：
-        // 转属克/转属逆 把物理+元素按比例转为属克/属逆元素（翻转抗性）；转物理类型把物理+元素按比例转为对应物理子类（按触发规则结算）。
-        // 合计转换比例超过 100% 时等比重压缩（convertScale），不足 100% 时剩余 (1 - total) 按原始物理/元素比例结算。
-        const activeElementKey: "转属克" | "转属逆" | undefined =
-            enemyResistance > 0 ? "转属克" : enemyResistance < 0 ? "转属逆" : undefined
-        const rawElementConvert = activeElementKey ? Math.max(0, attrs[activeElementKey] || 0) : 0
-        const rawPhysicalConvert = physicalConvertKeywords.reduce((sum, k) => sum + Math.max(0, attrs[k] || 0), 0)
-        const poolTotal = rawElementConvert + rawPhysicalConvert
-        const convertScale = poolTotal > 1 ? 1 / poolTotal : 1
-        const unconverted = Math.max(0, 1 - Math.min(1, poolTotal))
-        // 元素转换的有效比例（经统一池压缩后）决定属克/属逆元素的抗性翻转程度，保证压缩前后抗性一致
-        const elementConvertRatio = Math.min(1, rawElementConvert) * convertScale
-        const resistance = (() => {
-            const f = (r: number) => Math.max(0, 1 - r)
-            const r = enemyResistance
-            if (r === 0) return f(0)
-            if (r < 0) return (1 - elementConvertRatio) * f(r) + elementConvertRatio * f(0.5)
-            return (1 - elementConvertRatio) * f(r) + elementConvertRatio * f(-4)
-        })()
-
-        type ConvertEntry = { key: string; ratio: number; kind: "element" | "physical" }
-        const conversionEntries: ConvertEntry[] = []
-        if (activeElementKey) conversionEntries.push({ key: activeElementKey, ratio: rawElementConvert, kind: "element" })
-        for (const key of physicalConvertKeywords) {
-            conversionEntries.push({ key, ratio: Math.max(0, attrs[key] || 0), kind: "physical" })
-        }
-
-        const elementalPart = weaponDamageElemental * resistance
-        const physicalBase = weaponDamagePhysical
-        // parts 记录每个伤害分量：ratio 为结算前系数，triggerAdd 为触发加成，settlesElement 标记最终结算类型
-        const parts: { ratio: number; triggerAdd: number; settlesElement: boolean }[] = []
-        if (inheritAllSkillWeapon) {
-            // 同律 inherit+atk=all：纯元素伤害，无物理分量、不吃触发加成（触发倍率仅按物理伤害类型结算）
-            if (unconverted > 0) parts.push({ ratio: elementalPart * unconverted, triggerAdd: 0, settlesElement: true })
-        } else {
-            // 未转换的物理部分（原物理类型，按原始伤害类型触发）；未转换的元素部分（原元素类型，无触发）
-            if (physicalBase > 0 && unconverted > 0)
-                parts.push({ ratio: physicalBase * unconverted, triggerAdd: getTriggerMultiplier(damageType), settlesElement: false })
-            if (unconverted > 0) parts.push({ ratio: elementalPart * unconverted, triggerAdd: 0, settlesElement: true })
-        }
-        // 转换部分：遍历统一转换池，按 convertScale 压缩后的比例把对应比例的物理+元素分量转为目标类型
-        for (const e of conversionEntries) {
-            const ratio = e.ratio * convertScale
-            if (ratio <= 0) continue
-            if (e.kind === "element") {
-                // 转属克/转属逆：物理→属克/属逆元素（翻转抗性结算、无触发）；元素分量已实现翻转（见 getResistanceFactor），直接计入元素
-                if (physicalBase > 0) parts.push({ ratio: physicalBase * ratio * flippedFactor, triggerAdd: 0, settlesElement: true })
-                parts.push({ ratio: elementalPart * ratio, triggerAdd: 0, settlesElement: true })
+        // 分量（tag）：武器池 + 有面板走武器攻分量（角色攻击/武器攻击占比）；其余（技能池、无面板回退）走纯元素基座；
+        // 灾厄转化（原武器路径口径，武器归属时生效）：转为纯物理分量，不吃抗性，按物理类型触发规则结算；
+        // inherit + atk=all 的同律武器保持纯元素结算；无武器归属（角色技能）沿用原技能路径的纯元素结算。
+        const inheritAllSkillWeapon = weapon instanceof LeveledSkillWeapon && !!weapon.inherit && weapon.atk === "all"
+        const calamityPhysical = hasWeapon && damageType === "灾厄" && !inheritAllSkillWeapon
+        type DamagePart = { ratio: number; resistanceFactor: number; triggerAdd: number; settlesElement: boolean }
+        const parts: DamagePart[] = []
+        const useWeaponSplit = !isSkillPool && hasWeapon
+        if (useWeaponSplit) {
+            const splitPanel = panel!
+            const totalAttack = attrs.攻击 + splitPanel.攻击
+            // inherit + atk=all 的同律武器保持纯元素结算，不能被继承的灾厄类型转为物理分量
+            const convertElementalToPhysical = damageType === "灾厄" && !inheritAllSkillWeapon
+            const weaponDamagePhysical = convertElementalToPhysical ? 1 : inheritAllSkillWeapon ? 0 : splitPanel.攻击 / totalAttack
+            const weaponDamageElemental = convertElementalToPhysical ? 0 : inheritAllSkillWeapon ? 1 : attrs.攻击 / totalAttack
+            // 元素转换的有效比例（经统一池压缩后）决定属克/属逆元素的抗性翻转程度，保证压缩前后抗性一致
+            const elementConvertRatio = Math.min(1, rawElementConvert) * convertScale
+            const resistance = (() => {
+                const r = enemyResistance
+                if (r === 0) return resistanceFactorOf(0)
+                if (r < 0) return (1 - elementConvertRatio) * resistanceFactorOf(r) + elementConvertRatio * resistanceFactorOf(0.5)
+                return (1 - elementConvertRatio) * resistanceFactorOf(r) + elementConvertRatio * resistanceFactorOf(-4)
+            })()
+            const elementalPart = weaponDamageElemental * resistance
+            const physicalBase = weaponDamagePhysical
+            if (inheritAllSkillWeapon) {
+                // 同律 inherit+atk=all：纯元素伤害，无物理分量、不吃触发加成（触发倍率仅按物理伤害类型结算）
+                if (unconverted > 0)
+                    parts.push({ ratio: elementalPart * unconverted, resistanceFactor: 1, triggerAdd: 0, settlesElement: true })
             } else {
-                // 转切割/转贯穿/转震荡/转灾厄：物理+元素一并转为对应物理子类，按物理类型触发规则结算（settlesElement: false）
-                const triggerAdd = getTriggerMultiplier(e.key.slice(1))
-                if (inheritAllSkillWeapon) {
-                    parts.push({ ratio: elementalPart * ratio, triggerAdd, settlesElement: false })
-                } else {
-                    if (physicalBase > 0) parts.push({ ratio: physicalBase * ratio, triggerAdd, settlesElement: false })
-                    parts.push({ ratio: elementalPart * ratio, triggerAdd, settlesElement: false })
+                // 未转换的物理部分（原物理类型，按原始伤害类型触发）；未转换的元素部分（原元素类型，无触发）
+                if (physicalBase > 0 && unconverted > 0)
+                    parts.push({
+                        ratio: physicalBase * unconverted,
+                        resistanceFactor: 1,
+                        triggerAdd: getTriggerMultiplier(damageType!),
+                        settlesElement: false,
+                    })
+                if (unconverted > 0)
+                    parts.push({ ratio: elementalPart * unconverted, resistanceFactor: 1, triggerAdd: 0, settlesElement: true })
+            }
+            if (activeElementKey) {
+                const ratio = rawElementConvert * convertScale
+                if (ratio > 0) {
+                    // 转属克/转属逆：物理→属克/属逆元素（翻转抗性结算、无触发）；元素分量已实现翻转，直接计入元素
+                    if (!inheritAllSkillWeapon && physicalBase > 0)
+                        parts.push({ ratio: physicalBase * ratio, resistanceFactor: flippedFactor, triggerAdd: 0, settlesElement: true })
+                    parts.push({ ratio: elementalPart * ratio, resistanceFactor: 1, triggerAdd: 0, settlesElement: true })
                 }
             }
+            for (const key of physicalConvertKeywords) {
+                const ratio = Math.max(0, attrs[key] || 0) * convertScale
+                if (ratio <= 0) continue
+                // 转切割/转贯穿/转震荡/转灾厄：物理 + 元素一并转为对应物理子类，按物理类型触发规则结算
+                const triggerAdd = getTriggerMultiplier(key.slice(1))
+                if (inheritAllSkillWeapon) {
+                    parts.push({ ratio: elementalPart * ratio, resistanceFactor: 1, triggerAdd, settlesElement: false })
+                } else {
+                    if (physicalBase > 0)
+                        parts.push({ ratio: physicalBase * ratio, resistanceFactor: 1, triggerAdd, settlesElement: false })
+                    parts.push({ ratio: elementalPart * ratio, resistanceFactor: 1, triggerAdd, settlesElement: false })
+                }
+            }
+        } else {
+            // 技能分量：纯元素基座（技能伤害默认按纯元素结算，元素分量吃元素增伤）；
+            // 经转物理转换出的分量按对应物理子类结算（吃物理增伤，不受敌人元素抗性影响）。
+            // 触发（归属）：有武器面板时按武器规则结算触发 bonus（如灾厄伤害抗性存在时全额触发），
+            // rate = 1 全额结算后再由 skillTriggerCoverage 显式折算；无武器归属（角色技能）不结算触发。
+            const skillTriggerAdd = hasWeapon ? getTriggerMultiplier(damageType ?? "") : 0
+            if (calamityPhysical) {
+                // 灾厄转化：纯物理基座，不吃抗性（原武器路径口径）；转属克/转属逆部分按翻转抗性计入元素
+                if (unconverted > 0)
+                    parts.push({ ratio: unconverted, resistanceFactor: 1, triggerAdd: skillTriggerAdd, settlesElement: false })
+                if (activeElementKey) {
+                    const ratio = rawElementConvert * convertScale
+                    if (ratio > 0) parts.push({ ratio, resistanceFactor: flippedFactor, triggerAdd: 0, settlesElement: true })
+                }
+            } else {
+                if (unconverted > 0)
+                    parts.push({
+                        ratio: unconverted,
+                        resistanceFactor: resistanceFactorOf(enemyResistance),
+                        triggerAdd: skillTriggerAdd,
+                        settlesElement: true,
+                    })
+                if (activeElementKey) {
+                    const ratio = Math.max(0, attrs[activeElementKey] || 0) * convertScale
+                    if (ratio > 0) parts.push({ ratio, resistanceFactor: flippedFactor, triggerAdd: skillTriggerAdd, settlesElement: true })
+                }
+            }
+            for (const key of physicalConvertKeywords) {
+                const ratio = Math.max(0, attrs[key] || 0) * convertScale
+                if (ratio <= 0) continue
+                parts.push({
+                    ratio,
+                    resistanceFactor: 1,
+                    triggerAdd: hasWeapon ? getTriggerMultiplier(key.slice(1)) : 0,
+                    settlesElement: false,
+                })
+            }
         }
-        const allPart = parts.reduce((sum, p) => sum + p.ratio * partDamageIncrease(p), 0)
-        const triggerAllPart = parts.reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd) * partDamageIncrease(p), 0)
-        const expectedTriggerAllPart = parts.reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate) * partDamageIncrease(p), 0)
-        // 按结算类型拆分期望伤害（物理/元素），用于 物理/元素 属性访问器
-        const physicalExpectedTriggerAllPart = parts
+
+        const noTriggerPart = parts.reduce((sum, p) => sum + p.ratio * p.resistanceFactor * partDamageIncrease(p), 0)
+        const expectedTriggerPart = parts.reduce(
+            (sum, p) => sum + p.ratio * p.resistanceFactor * (1 + p.triggerAdd * triggerRate) * partDamageIncrease(p),
+            0
+        )
+        const fullTriggerPart = parts.reduce((sum, p) => sum + p.ratio * p.resistanceFactor * (1 + p.triggerAdd) * partDamageIncrease(p), 0)
+        // 按结算类型拆分期望伤害（物理/元素），用于物理/元素属性访问器
+        const physicalExpectedPart = parts
             .filter(p => !p.settlesElement)
-            .reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate) * partDamageIncrease(p), 0)
-        const elementExpectedTriggerAllPart = parts
+            .reduce((sum, p) => sum + p.ratio * p.resistanceFactor * (1 + p.triggerAdd * triggerRate) * partDamageIncrease(p), 0)
+        const elementExpectedPart = parts
             .filter(p => p.settlesElement)
-            .reduce((sum, p) => sum + p.ratio * (1 + p.triggerAdd * triggerRate) * partDamageIncrease(p), 0)
-        const lowerCritNoTriggerBase = lowerCritDamage * commonMore
-        const higherCritNoTriggerBase = higherCritDamage * commonMore
+            .reduce((sum, p) => sum + p.ratio * p.resistanceFactor * (1 + p.triggerAdd * triggerRate) * partDamageIncrease(p), 0)
+
         const expectedCritNoTriggerBase = critExpectedDamage * commonMore
-        const lowerCritNoTrigger = allPart * lowerCritNoTriggerBase
-        const higherCritNoTrigger = allPart * higherCritNoTriggerBase
-        const expectedCritNoTrigger = allPart * expectedCritNoTriggerBase
-        const lowerCritTrigger = triggerAllPart * lowerCritNoTriggerBase
-        const higherCritTrigger = triggerAllPart * higherCritNoTriggerBase
-        const lowerCritExpectedTrigger = expectedTriggerAllPart * lowerCritNoTriggerBase
-        const higherCritExpectedTrigger = expectedTriggerAllPart * higherCritNoTriggerBase
-        const expectedCritTrigger = expectedTriggerAllPart * expectedCritNoTriggerBase
-        const expectedDamage = expectedTriggerAllPart * expectedCritNoTriggerBase
-        const noHpDamage = expectedTriggerAllPart * critExpectedDamage * otherMore
-        return {
-            lowerCritNoTrigger,
-            higherCritNoTrigger,
-            lowerCritTrigger,
-            higherCritTrigger,
-            lowerCritExpectedTrigger,
-            higherCritExpectedTrigger,
-            expectedCritTrigger,
-            expectedCritNoTrigger,
-            expectedDamage,
-            noHpDamage,
-            // 物理/元素 分量期望伤害（按结算类型拆分；转属克/转属逆 转换到元素的部分计入元素）
-            physicalDamage: physicalExpectedTriggerAllPart * expectedCritNoTriggerBase,
-            elementDamage: elementExpectedTriggerAllPart * expectedCritNoTriggerBase,
+        const damage: DamageResult = {
+            lowerCritNoTrigger: noTriggerPart * lowerCritDamage * commonMore,
+            higherCritNoTrigger: noTriggerPart * higherCritDamage * commonMore,
+            lowerCritTrigger: fullTriggerPart * lowerCritDamage * commonMore,
+            higherCritTrigger: fullTriggerPart * higherCritDamage * commonMore,
+            lowerCritExpectedTrigger: expectedTriggerPart * lowerCritDamage * commonMore,
+            higherCritExpectedTrigger: expectedTriggerPart * higherCritDamage * commonMore,
+            expectedCritTrigger: expectedTriggerPart * expectedCritNoTriggerBase,
+            expectedCritNoTrigger: noTriggerPart * expectedCritNoTriggerBase,
+            expectedDamage: expectedTriggerPart * expectedCritNoTriggerBase,
+            noHpDamage: expectedTriggerPart * critExpectedDamage * otherMore,
+            // 物理/元素分量期望伤害（按结算类型拆分；转属克/转属逆转换到元素的部分计入元素）
+            physicalDamage: physicalExpectedPart * expectedCritNoTriggerBase,
+            elementDamage: elementExpectedPart * expectedCritNoTriggerBase,
         }
+        // 技能池的覆盖率已作为触发率进入期望（bonus 模型），此处不再整体折乘
+        return damage
+    }
+
+    // 计算技能伤害（统一结算的角色技能口径：无武器归属，乘区/分量按字段 tag 回退为技能池）
+    public calculateSkillDamage(
+        attrs: ReturnType<typeof this.calculateAttributes>,
+        baseName = this.baseName,
+        fieldName?: string,
+        skillContext?: LeveledSkill
+    ): DamageResult {
+        // 召唤物伤害按字段 tag 判断：字段 tag 含「召唤物」即视为召唤物伤害，不再依赖字段名或技能声明
+        const skill = skillContext || this.allSkills.find(s => s.名称 === baseName)
+        const field = fieldName ? skill?.字段.find(f => f.safeName.includes(fieldName) || f.名称.includes(fieldName)) : undefined
+        return this.calculateDamage(attrs, undefined, undefined, {
+            fieldTag: field?.tag,
+            isSummon: !!field?.tag?.includes("召唤物"),
+        })
+    }
+
+    // 计算武器伤害（统一结算的武器口径：武器归属双爆，武器池乘区分量）
+    public calculateWeaponDamage(
+        attrs: ReturnType<typeof this.calculateWeaponAttributes>,
+        weapon: LeveledWeapon | LeveledSkillWeapon,
+        damageType = weapon.伤害类型
+    ): DamageResult {
+        return this.calculateDamage(attrs, weapon, attrs.weapon, { damageType, isSkillPool: false, isSummon: false })
     }
 
     /**
@@ -3409,44 +3463,41 @@ export class CharBuild {
             const weapon = weaponsMap.get(key)
             const weaponAttr = getTemporaryWeaponAttr(key, fieldName, temporaryAttributes, skillContext)
             const skillAttrsContext = getSummonAttrs(key, temporaryAttributes, fieldName, skillContext)
-            const fieldDamageType = fieldName ? getSkillAttr(fieldName, base, skillContext)?.伤害类型 : undefined
+            const field = fieldName ? getSkillAttr(fieldName, base, skillContext) : undefined
+            const fieldDamageType = field?.伤害类型
+            const fieldTag = field?.tag
+            // 乘区与分量按字段 tag 结算：tag 含「技能」走技能池（技能伤害 + 技能追伤 + 纯元素分量），
+            // 含「武器」走武器池；无 tag 按归属回退（有武器面板→武器池，否则→技能池）。
+            // 双爆（暴击/触发）按归属结算，见 calculateDamage。
+            const isSkillPool = fieldTag ? fieldTag.includes("技能") : !weapon
             // 箭雨的独立降伤只作用于武器自身攻击：100% 灾厄伤害字段豁免，且只剔除箭雨自身词条
             const arrowRainPenalty =
                 weapon && fieldDamageType === "灾厄" && weapon.类型 === "远程" && this.rangedMods.some(v => v?.id === 43604) ? -0.6 : 0
-            const weaponIndependentDamageIncrease = weaponAttr ? (1 + weaponAttr.独立增伤) / (1 + arrowRainPenalty) : 1
             const attackTypeDamageBonus = getWeaponAttackTypeBonus(key, fieldName, "增伤", skillContext)
             const attackTypeIndependentDamageBonus = getWeaponAttackTypeBonus(key, fieldName, "独立增伤", skillContext)
-            const damage =
-                weapon && weaponAttr
-                    ? this.calculateWeaponDamage(
-                          {
-                              // skillAttrsContext 已含召唤物继承/字段临时属性/条件BUFF增量；无条件BUFF时与全局 attrs 等价
-                              ...skillAttrsContext,
-                              weapon: {
-                                  ...weaponAttr,
-                                  增伤: weaponAttr.增伤 + attackTypeDamageBonus,
-                                  独立增伤: weaponIndependentDamageIncrease * (1 + attackTypeIndependentDamageBonus) - 1,
-                              },
-                          },
-                          weapon,
-                          fieldDamageType
-                      )
-                    : this.calculateSkillDamage(
-                          {
-                              ...skillAttrsContext,
-                              增伤: skillAttrsContext.增伤 + attackTypeDamageBonus,
-                              独立增伤: (1 + skillAttrsContext.独立增伤) * (1 + attackTypeIndependentDamageBonus) - 1,
-                          },
-                          base,
-                          fieldName,
-                          skillContext
-                      )
+            // 技能池 + 有武器面板：触发期望按「武器面板触发 + 技能触发」封顶后的覆盖率结算（未触发 1 倍）。
+            // 不再重写面板触发区与属性增伤区：原写法把武器增伤/武器独立增伤乘进技能池、把武器追加伤害清零
+            // （丢了技能追伤）、把武器攻分量套在技能分量上，导致计算错误；现全部改为显式参数传入。
+            const skillTriggerCoverage =
+                isSkillPool && weapon && weaponAttr
+                    ? Math.min(1, Math.max(0, (skillAttrsContext.技能触发 || 0) + (weaponAttr.触发 ?? 0)))
+                    : 1
+            const damage = this.calculateDamage(skillAttrsContext, weapon, weaponAttr, {
+                damageType: fieldDamageType,
+                fieldTag,
+                isSkillPool,
+                isSummon: !!fieldTag?.includes("召唤物"),
+                skillTriggerCoverage,
+                attackTypeDamageBonus,
+                attackTypeIndependentBonus: attackTypeIndependentDamageBonus,
+                weaponIndependentPenalty: arrowRainPenalty,
+            })
             // 充盈乘区（独立额外乘区，统一在字段层结算，覆盖武器伤害与技能伤害）：
             // 1) 字段带 tag ["充盈"] 时，伤害整体 × (1 + 充盈威力)（充盈威力为角色属性：角色 MOD 加成 + 武器溢出触发 × 充盈转化汇总）。
             // 2) 否则按 转充盈 属性：转充盈: X 把 X 比例伤害视为充盈伤害并享受充盈威力加成，等价于整体 × (1 + X × 充盈威力)。
             // 3) 两者互斥：字段已是充盈类型时 转充盈 不再重复计乘。
             // 用字段上下文属性（skillAttrsContext 已汇总字段临时属性，如 {转充盈:1,充盈威力:1}）。
-            const fullnessField = fieldName ? getSkillAttr(fieldName, base, skillContext) : undefined
+            const fullnessField = field
             let fullnessMultiplier = 1
             if (fullnessField?.tag?.includes("充盈")) {
                 fullnessMultiplier = 1 + (skillAttrsContext.充盈威力 || 0)
@@ -3468,7 +3519,9 @@ export class CharBuild {
         const defCache = new Map<boolean, number>()
         const getDef = (base?: string, fieldName?: string, temporaryAttributes?: TemporaryAttributes, skillContext?: LeveledSkill) => {
             const key = base || this.baseName
-            const isWeapon = !!(weaponsMap.get(key) && getCalculatedWeaponAttr(base))
+            // 技能伤害字段视为技能伤害：防御按技能口径结算，吃技能无视防御
+            const isSkillField = fieldName ? (getSkillAttr(fieldName, base, skillContext)?.tag?.includes("技能") ?? false) : false
+            const isWeapon = !isSkillField && !!(weaponsMap.get(key) && getCalculatedWeaponAttr(base))
             if (!temporaryAttributes && defCache.has(isWeapon)) return defCache.get(isWeapon)!
             const def = this.calculateDefenseMultiplier(
                 temporaryAttributes ? getSummonAttrs(key, temporaryAttributes, fieldName, skillContext) : attrs,
@@ -4235,6 +4288,8 @@ export class CharBuild {
                 mval = this.calculate()
                 this.tempMod = null
             }
+            // 移除后总伤害为 0（如移除技能触发唯一的来源使触发条件伤害归零）：相对收益无定义，按 0 处理
+            if (Math.abs(mval) < Number.EPSILON) return 0
             return this.calculate() / mval - 1
         } else {
             let mval = 0
@@ -4276,7 +4331,10 @@ export class CharBuild {
                 mval = this.calculate()
                 this.tempMod = null
             }
-            return mval / this.calculate() - 1
+            // 当前总伤害为 0（如尚无任何触发来源）：相对收益无定义，按 0 处理
+            const base = this.calculate()
+            if (Math.abs(base) < Number.EPSILON) return 0
+            return mval / base - 1
         }
     }
 
@@ -5340,6 +5398,26 @@ export const ModTypeMaxSlot: Record<ModTypeKey, number> = {
     meleeMods: 8,
     rangedMods: 8,
     skillMods: 4,
+}
+
+/** 统一伤害结算选项：归属（有无武器面板）决定双爆，tag 决定乘区与分量 */
+export interface DamageCalcOptions {
+    /** 伤害类型；缺省取 weapon.伤害类型，无武器时忽略（纯元素结算） */
+    damageType?: string
+    /** 字段 tag（用于判定技能/武器乘区与分量）；缺省时按归属回退 */
+    fieldTag?: string[]
+    /** 是否按技能乘区结算（增伤池用技能伤害、追加用技能追伤、分量用纯元素）；缺省按 tag/归属判定 */
+    isSkillPool?: boolean
+    /** 是否召唤物伤害；缺省按 tag 含召唤物判定 */
+    isSummon?: boolean
+    /** 技能触发覆盖率（仅技能池 + 有武器时）：直接作为触发率参与期望（bonus 模型：期望 = base × (1 + bonus × 覆盖率)）；缺省 1 */
+    skillTriggerCoverage?: number
+    /** 攻击细分增伤加成（普攻/蓄力/下落/滑行），调用方经 getWeaponAttackTypeBonus 算好传入 */
+    attackTypeDamageBonus?: number
+    /** 攻击细分独立增伤加成，调用方经 getWeaponAttackTypeBonus 算好传入 */
+    attackTypeIndependentBonus?: number
+    /** 武器独立增伤惩罚因子（仅武器池，如箭雨 -0.6）；缺省 0 */
+    weaponIndependentPenalty?: number
 }
 
 export interface DamageResult {

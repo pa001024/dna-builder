@@ -5,6 +5,8 @@ import { matchPinyin } from "./pinyin-utils"
 export interface BuffEditorOption {
     label: string
     value: LeveledBuff
+    /** 展示用描述（特效行传国际化后的熔炼/效果文案；缺省时用 value.描述匹配） */
+    description?: string
 }
 
 export interface ParsedBuffEntry {
@@ -203,8 +205,10 @@ export function matchBuffOptionQuery(option: BuffEditorOption, query: string): b
     const normalizedQuery = query.trim()
     if (!normalizedQuery) return true
     if (option.label.includes(normalizedQuery)) return true
+    if (option.description?.includes(normalizedQuery)) return true
     if (option.value.描述?.includes(normalizedQuery)) return true
     if (matchPinyin(option.label, normalizedQuery).match) return true
+    if (option.description && matchPinyin(option.description, normalizedQuery).match) return true
     if (option.value.描述 && matchPinyin(option.value.描述, normalizedQuery).match) return true
     return false
 }

@@ -145,7 +145,8 @@ function toEffectEntry(source: "mod" | "weapon", id: number, item: Buff, owner: 
         id,
         owner,
         名称: item.名称,
-        描述,
+        // 已有手写描述优先采用，只在缺失时回退到武器 `熔炼` / MOD `效果` 模板
+        描述: item.描述 || 描述,
         maxLevel: item.mx || 1,
         ...(typeof item.限定 === "string" ? { 限定: item.限定 } : {}),
     }

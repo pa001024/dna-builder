@@ -190,12 +190,20 @@ export function normalizeInlineActions(value: unknown): InlineActions {
     normalized.enable = raw.enable === true
     if (Array.isArray(raw.i)) {
         normalized.i = raw.i.filter(
-            item => item && typeof item === "object" && typeof (item as NormalActions).s === "string" && Number.isFinite((item as NormalActions).d)
+            item =>
+                item &&
+                typeof item === "object" &&
+                typeof (item as NormalActions).s === "string" &&
+                Number.isFinite((item as NormalActions).d)
         ) as NormalActions[]
     }
     if (Array.isArray(raw.b)) {
         normalized.b = raw.b.filter(
-            item => item && typeof item === "object" && typeof (item as BackgroundActions).s === "string" && Number.isFinite((item as BackgroundActions).i)
+            item =>
+                item &&
+                typeof item === "object" &&
+                typeof (item as BackgroundActions).s === "string" &&
+                Number.isFinite((item as BackgroundActions).i)
         ) as BackgroundActions[]
     }
     if (Array.isArray(raw.hp)) {

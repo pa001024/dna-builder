@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue"
-import { useScrollSpy } from "@/composables/useScrollSpy"
 import type { ScrollSpyNavItem } from "@/components/ScrollSpyNav.vue"
+import { useScrollSpy } from "@/composables/useScrollSpy"
 
 const props = withDefaults(
     defineProps<{

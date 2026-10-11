@@ -72,7 +72,7 @@
     },
     "html": {
         "formatter": {
-            "enabled": true,
+            "enabled": false,
             "indentScriptAndStyle": false,
             "selfCloseVoidElements": "always"
         },

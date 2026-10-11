@@ -456,6 +456,7 @@ export class LeveledMod implements Mod {
             技能伤害: 0,
             技能追伤: 0,
             独立增伤: 0,
+            技能独立增伤: 0,
             属性穿透: 0,
             无视防御: 0,
             技能无视防御: 0,

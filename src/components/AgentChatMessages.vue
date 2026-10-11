@@ -1003,8 +1003,7 @@ onBeforeUnmount(() => {
                         <div
                             v-if="message.role === 'user'"
                             class="flex flex-col items-end gap-1.5"
-                        ><!-- 附图排在正文之前：与发给模型的顺序一致，也符合「先看图再看问题」 -->
-                            <!-- 附图排在正文之前：与发给模型的顺序一致，也符合「先看图再看问题」 -->
+                        >
                             <!-- 附图排在正文之前：与发给模型的顺序一致，也符合「先看图再看问题」 -->
                             <div v-if="message.images?.length" class="flex max-w-[80%] flex-wrap justify-end gap-2">
                                 <img

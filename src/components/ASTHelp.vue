@@ -152,6 +152,8 @@ const functionInserts: Record<string, string> = {
     "hp(x)": "hp(",
 }
 
+const syntaxItems = ["number", "property", "special", "skill", "namespace", "operator", "function", "member", "temporary", "force"]
+
 // 属性修改区：可插入的临时属性，按用途分组。展示原始属性名（即表达式中实际输入的写法）。
 const attributeGroups: { key: string; title: string; items: string[] }[] = [
     {
@@ -165,6 +167,7 @@ const attributeGroups: { key: string; title: string; items: string[] }[] = [
         items: [
             "增伤",
             "独立增伤",
+            "技能独立增伤",
             "武器伤害",
             "技能伤害",
             "技能追伤",
@@ -617,22 +620,7 @@ const badgeColors: Record<string, string> = {
                 <section class="rounded-xs border border-base-content/10 bg-base-100/60 p-3 backdrop-blur-sm">
                     <SectionHeader no-animate compact kicker="SYNTAX" :title="$t('ast-help.syntaxTitle')" />
                     <div class="space-y-1.5 text-[13px] leading-relaxed text-base-content/70">
-                        <p
-                            v-for="itemKey in [
-                                'number',
-                                'property',
-                                'special',
-                                'skill',
-                                'namespace',
-                                'operator',
-                                'function',
-                                'member',
-                                'temporary',
-                                'force',
-                            ]"
-                            :key="itemKey"
-                            class="flex items-start gap-2"
-                        >
+                        <p v-for="itemKey in syntaxItems" :key="itemKey" class="flex items-start gap-2">
                             <span class="mt-0.5 inline-flex h-1.5 w-1.5 shrink-0 rounded-full" :class="syntaxDotColors[itemKey]" />
                             <span>
                                 <strong class="font-semibold text-base-content/90">

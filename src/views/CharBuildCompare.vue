@@ -505,6 +505,7 @@ const allColumns: { key: ColumnKey; label: string }[] = [
     { key: "技能伤害", label: "技能伤害" },
     { key: "技能追伤", label: "技能追伤" },
     { key: "独立增伤", label: "独立增伤" },
+    { key: "技能独立增伤", label: "技能独立增伤" },
     { key: "属性穿透", label: "属性穿透" },
     { key: "无视防御", label: "无视防御" },
     { key: "技能速度", label: "技能速度" },
